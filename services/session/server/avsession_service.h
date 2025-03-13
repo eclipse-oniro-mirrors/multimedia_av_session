@@ -233,6 +233,12 @@ public:
     void SuperLauncher(std::string deviceId, std::string serviceName,
         std::string extraInfo, const std::string& state);
 
+    void ReleaseSuperLauncher(std::string serviceName);
+
+    void ConnectSuperLauncher(std::string deviceId, std::string serviceName);
+
+    void SucceedSuperLauncher(std::string deviceId, std::string extraInfo);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void ReleaseCastSession() override;
 
@@ -317,6 +323,9 @@ private:
 
     void AddInnerSessionListener(SessionListener* listener);
     void RemoveInnerSessionListener(SessionListener* listener);
+
+    void AddHistoricalRecordListener(HistoricalRecordListener* listener);
+    void RemoveHistoricalRecordListener(HistoricalRecordListener* listener);
 
     sptr<AVSessionItem> SelectSessionByUid(const AudioStandard::AudioRendererChangeInfo& info);
 
@@ -531,6 +540,8 @@ private:
 
     bool NotifyFlowControl();
 
+    void NotifyHistoricalRecordChange(const std::string& bundleName, int32_t userId);
+
     bool IsCapsuleNeeded();
 
     std::atomic<uint32_t> sessionSeqNum_ {};
@@ -542,6 +553,7 @@ private:
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
     std::map<pid_t, sptr<ClientDeathRecipient>> clientDeathRecipients_;
     std::list<SessionListener*> innerSessionListeners_;
+    std::list<HistoricalRecordListener*> historicalRecordListeners_;
     std::map<std::string, std::shared_ptr<AbilityManagerAdapter>> abilityManager_;
     FocusSessionStrategy focusSessionStrategy_;
     BackgroundAudioController backgroundAudioController_;
@@ -584,6 +596,8 @@ private:
     std::recursive_mutex outputDeviceIdLock_;
 
     std::recursive_mutex castAudioSessionMapLock_;
+
+    std::recursive_mutex historicalRecordListenersLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::map<std::string, std::string> castServiceNameMapState_;

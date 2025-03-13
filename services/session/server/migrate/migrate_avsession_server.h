@@ -37,9 +37,11 @@ constexpr size_t DEFAULT_QUALITY = 100;
 constexpr int64_t DELAY_TIME = 2000;
 constexpr int64_t DELAY_PLAY_COM_TIME = 500;
 constexpr int32_t MAX_SESSION_NUMS = 2;
+constexpr int32_t MAX_HISTORY_SESSION_NUMS = 6;
 const std::string ANCO_AUDIO_BUNDLE_NAME = "anco_audio";
 
 class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServer,
+    public HistoricalRecordListener,
     public std::enable_shared_from_this<MigrateAVSessionServer> {
 public:
     explicit MigrateAVSessionServer(int32_t migrateMode = 0);
@@ -57,11 +59,18 @@ public:
     void OnTopSessionChange(const AVSessionDescriptor &descriptor) override;
     void OnAudioSessionChecked(const int32_t uid) override {}
 
+    void OnHistoricalRecordChange() override;
+
     void OnMetaDataChange(const std::string &playerId, const AVMetaData &data);
     void OnPlaybackStateChanged(const std::string &playerId, const AVPlaybackState &state);
     void StopObserveControllerChanged(const std::string &deviceId);
     void SendRemoteControllerList(const std::string &deviceId);
     void SendRemoteControllerInfo(const std::string &deviceId, std::string msg);
+    void SendRemoteHistorySessionList(const std::string &deviceId);
+    void ClearRemoteControllerList(const std::string &deviceId);
+    void ClearRemoteHistorySessionList(const std::string &deviceId);
+
+    void ResetSupportCrossMediaPlay(const std::string &extraInfo);
 
     void LocalFrontSessionArrive(std::string &sessionId);
     void LocalFrontSessionChange(std::string &sessionId);
@@ -99,6 +108,8 @@ private:
 
     Json::Value ConvertMetadataToJson(const AVMetaData &metadata);
 
+    Json::Value ConvertMetadataToJson(const AVMetaData &metadata, bool includeImage);
+
     std::string ConvertMetadataInfoToStr(const std::string playerId, int32_t controlCommand,
         const AVMetaData &metadata);
 
@@ -131,13 +142,23 @@ private:
     AudioDeviceDescriptorsCallbackFunc GetAvailableDeviceChangeCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc GetPreferredDeviceChangeCallbackFunc();
 
+    std::string ConvertHistorySessionListToStr(std::vector<AVSessionDescriptor> sessionDescriptors,
+        std::vector<AVSessionDescriptor> hisSessionDescriptors);
+    void StartConfigHistorySession(const std::string &data);
+    std::string GenerateClearAVSessionMsg();
+    std::string GenerateClearHistorySessionMsg();
+
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
     std::string deviceId_;
     std::string topSessionId_;
     std::string lastSessionId_;
+    std::string releaseSessionId_;
+    std::string releaseSessionBundleName_;
+    bool supportCrossMediaPlay_ = false;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;
+    std::recursive_mutex historySessionLock_;
     std::recursive_mutex migrateDeviceChangeLock_;
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
     std::string curAssetId_;

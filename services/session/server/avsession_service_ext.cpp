@@ -24,19 +24,14 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
 {
     SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s", serviceName.c_str(), state.c_str());
 
-    if (state == "IDLE" && serviceName == "SuperLauncher-Dual") {
-        MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
-        if (migrateAVSession_ != nullptr) {
-            RemoveInnerSessionListener(migrateAVSession_.get());
+    if (serviceName == "SuperLauncher-Dual") {
+        if (state == "IDLE") {
+            ReleaseSuperLauncher(serviceName);
+        } else if (state == "CONNECTING") {
+            ConnectSuperLauncher(deviceId, serviceName);
+        } else if (state == "CONNECT_SUCC") {
+            SucceedSuperLauncher(deviceId, extraInfo);
         }
-    } else if (state == "CONNECTING" && serviceName == "SuperLauncher-Dual") {
-        if (migrateAVSession_ == nullptr) {
-            migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
-        }
-        migrateAVSession_->Init(this);
-        MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
-        AddInnerSessionListener(migrateAVSession_.get());
-        AudioDeviceManager::GetInstance().InitAudioStateCallback(migrateAVSession_, deviceId);
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") &&
@@ -67,6 +62,36 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         }
     }
 #endif
+}
+
+void AVSessionService::ReleaseSuperLauncher(std::string serviceName)
+{
+    MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
+    if (migrateAVSession_ != nullptr) {
+        RemoveInnerSessionListener(migrateAVSession_.get());
+        RemoveHistoricalRecordListener(migrateAVSession_.get());
+    }
+}
+
+void AVSessionService::ConnectSuperLauncher(std::string deviceId, std::string serviceName)
+{
+    if (migrateAVSession_ == nullptr) {
+        migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+    }
+    migrateAVSession_->Init(this);
+    MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
+    AddInnerSessionListener(migrateAVSession_.get());
+    AddHistoricalRecordListener(migrateAVSession_.get());
+    AudioDeviceManager::GetInstance().InitAudioStateCallback(migrateAVSession_, deviceId);
+}
+
+void AVSessionService::SucceedSuperLauncher(std::string deviceId, std::string extraInfo)
+{
+    if (migrateAVSession_ == nullptr) {
+        migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+    }
+    migrateAVSession_->ResetSupportCrossMediaPlay(extraInfo);
+    migrateAVSession_->SendRemoteHistorySessionList(deviceId);
 }
 
 void AVSessionService::NotifyMigrateStop(const std::string &deviceId)
@@ -119,6 +144,35 @@ void AVSessionService::RemoveInnerSessionListener(SessionListener *listener)
             it = innerSessionListeners_.erase(it);
         } else {
             it++;
+        }
+    }
+}
+
+void AVSessionService::AddHistoricalRecordListener(HistoricalRecordListener *listener)
+{
+    std::lock_guard lockGuard(historicalRecordListenersLock_);
+    historicalRecordListeners_.push_back(listener);
+}
+
+void AVSessionService::RemoveHistoricalRecordListener(HistoricalRecordListener *listener)
+{
+    std::lock_guard lockGuard(historicalRecordListenersLock_);
+    for (auto it = historicalRecordListeners_.begin(); it != historicalRecordListeners_.end();) {
+        if (*it == listener) {
+            SLOGI("RemoveHistoricalRecordListener");
+            it = historicalRecordListeners_.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
+
+void AVSessionService::NotifyHistoricalRecordChange(const std::string& bundleName, int32_t userId)
+{
+    std::lock_guard lockGuard(historicalRecordListenersLock_);
+    for (const auto& listener : historicalRecordListeners_) {
+        if (listener != nullptr) {
+            listener->OnHistoricalRecordChange();
         }
     }
 }

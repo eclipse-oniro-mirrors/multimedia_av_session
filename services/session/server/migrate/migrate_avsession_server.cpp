@@ -50,6 +50,7 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
     }
     ObserveControllerChanged(deviceId);
     SendSpecialKeepaliveData();
+    SendRemoteHistorySessionList(deviceId);
     SendRemoteControllerList(deviceId);
 }
 
@@ -218,7 +219,7 @@ void MigrateAVSessionServer::OnBytesReceived(const std::string &deviceId, const 
     if (data[1] == SYNC_COMMAND) {
         ProcControlCommand(data);
     } else if (data[1] == COLD_START) {
-        SLOGW("COLD_START not support");
+        StartConfigHistorySession(data);
     }
 }
 // LCOV_EXCL_STOP
@@ -268,6 +269,25 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
     }
 }
 
+void MigrateAVSessionServer::StartConfigHistorySession(const std::string &data)
+{
+    std::string jsonStr = data.substr(MSG_HEAD_LENGTH);
+    SLOGI("StartConfigHistorySession: %{public}s", jsonStr.c_str());
+    Json::Reader reader;
+    Json::Value jsonData;
+    if (!reader.parse(jsonStr, jsonData)) {
+        SLOGE("StartConfigHistorySession: parse json failed");
+        return;
+    }
+    if (!jsonData.isMember(PLAYER_ID)) {
+        SLOGE("StartConfigHistorySession: json parse with error member");
+        return;
+    }
+    std::string playerId = jsonData[PLAYER_ID].isString() ? jsonData[PLAYER_ID].asString() : "ERROR_PLAYER_ID";
+    int32_t ret = servicePtr_->StartAVPlayback(playerId, "");
+    SLOGI("StartConfigHistorySession StartAVPlayback %{public}s, ret=%{public}d", playerId.c_str(), ret);
+}
+
 // LCOV_EXCL_START
 int32_t MigrateAVSessionServer::GetControllerById(const std::string &sessionId, sptr<AVControllerItem> &controller)
 {
@@ -291,7 +311,20 @@ int32_t MigrateAVSessionServer::GetControllerById(const std::string &sessionId, 
 int32_t MigrateAVSessionServer::GetAllControllers(std::vector<sptr<AVControllerItem>> &controller)
 {
     std::lock_guard lockGuard(migrateControllerLock_);
-    for (auto it = playerIdToControllerMap_.begin(); it != playerIdToControllerMap_.end(); it++) {
+    std::vector<AVSessionDescriptor> descriptors;
+    auto res = servicePtr_->GetAllSessionDescriptors(descriptors);
+    if (res != AVSESSION_SUCCESS) {
+        SLOGW("GetAllSessionDescriptors failed");
+        return AVSESSION_ERROR;
+    }
+    for (auto iter = descriptors.begin(); iter != descriptors.end(); iter++) {
+        if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
+            iter->elementName_.GetBundleName().empty() ||
+            iter->elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            releaseSessionId_.compare(iter->sessionId_) == 0) {
+            continue;
+        }
+        auto it = playerIdToControllerMap_.find(iter->sessionId_);
         controller.push_back(it->second);
     }
     return AVSESSION_SUCCESS;
@@ -301,6 +334,22 @@ int32_t MigrateAVSessionServer::GetAllControllers(std::vector<sptr<AVControllerI
 void MigrateAVSessionServer::Init(AVSessionService *ptr)
 {
     servicePtr_ = ptr;
+    supportCrossMediaPlay_ = false;
+}
+
+void MigrateAVSessionServer::ResetSupportCrossMediaPlay(const std::string &extraInfo)
+{
+    Json::Reader reader;
+    Json::Value jsonData;
+    if (!reader.parse(extraInfo, jsonData)) {
+        SLOGE("json parse fail");
+        return;
+    }
+    bool isSupportSingleFrameMediaPlay = jsonData[IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY].isBool() ?
+                                        jsonData[IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY].asBool() :
+                                        false;
+    SLOGI("SuperLauncher: isSupportSingleFrameMediaPlay=%{public}d", isSupportSingleFrameMediaPlay);
+    supportCrossMediaPlay_ = isSupportSingleFrameMediaPlay;
 }
 
 // LCOV_EXCL_START
@@ -337,11 +386,11 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
         return;
     }
     SLOGI("OnSessionRelease : %{public}s", sessionId.c_str());
-    if (sessionId.compare(topSessionId_) == 0) {
-        std::string msg = AudioDeviceManager::GetInstance().GenerateEmptySession();
-        AudioDeviceManager::GetInstance().SendRemoteAudioMsg(deviceId_, msg);
-    }
     ClearCacheBySessionId(sessionId);
+    releaseSessionId_ = sessionId;
+    releaseSessionBundleName_ = descriptor.elementName_.GetBundleName();
+    SendRemoteHistorySessionList(deviceId_);
+    SendRemoteControllerList(deviceId_);
 }
 
 void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descriptor)
@@ -368,6 +417,7 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
             CreateController(descriptor.sessionId_);
         }
     }
+    SendRemoteHistorySessionList(deviceId_);
     SendRemoteControllerList(deviceId_);
 }
 
@@ -400,6 +450,7 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
     }
     if (avcontroller.empty()) {
         SLOGE("SendRemoteControllerList avcontroller is null");
+        ClearRemoteControllerList(deviceId);
         return;
     }
     std::string msg = ConvertControllersToStr(avcontroller);
@@ -414,11 +465,85 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
         }, "DelaySendMetaData", DELAY_TIME);
 }
 
-void MigrateAVSessionServer::SendRemoteControllerInfo(const std::string &deviceId, std::string msg)
+void MigrateAVSessionServer::SendRemoteHistorySessionList(const std::string &deviceId)
 {
+    if (!supportCrossMediaPlay_) {
+        SLOGI("SendRemoteHistorySessionList, Remote does not support cross media play");
+        return;
+    }
+
+    std::vector<AVSessionDescriptor> descriptors;
+    auto res = servicePtr_->GetAllSessionDescriptors(descriptors);
+    if (res != AVSESSION_SUCCESS) {
+        SLOGW("GetAllSessionDescriptors fail");
+        return;
+    }
+
+    std::vector<AVSessionDescriptor> hisDescriptors;
+    auto hisRes = servicePtr_->GetHistoricalSessionDescriptors(MAX_HISTORY_SESSION_NUMS, hisDescriptors);
+    if (hisRes != AVSESSION_SUCCESS) {
+        SLOGW("GetHistoricalSessionDescriptors fail");
+        return;
+    }
+
+    std::string msg = ConvertHistorySessionListToStr(descriptors, hisDescriptors);
     if (!deviceId.empty()) {
         SendByte(deviceId, msg);
+    } else {
+        SendByteToAll(msg);
     }
+}
+
+std::string MigrateAVSessionServer::ConvertHistorySessionListToStr(std::vector<AVSessionDescriptor> sessionDescriptors,
+    std::vector<AVSessionDescriptor> hisSessionDescriptors)
+{
+    Json::Value jsonArray(Json::arrayValue);
+    int32_t descriptorNums = 0;
+    if (!releaseSessionId_.empty()) {
+        Json::Value releaseData;
+        std::string supportModule;
+        std::string profile;
+        if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(releaseSessionBundleName_, supportModule, profile)) {
+            releaseData[PLAYER_ID] = releaseSessionId_;
+            releaseData[PACKAGE_NAME] = releaseSessionBundleName_;
+            jsonArray[descriptorNums] = releaseData;
+            descriptorNums++;
+        }
+    }
+    for (auto iter = sessionDescriptors.begin(); iter != sessionDescriptors.end(); iter++) {
+        if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
+            iter->elementName_.GetBundleName().empty() ||
+            iter->elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            releaseSessionId_.compare(iter->sessionId_) == 0) {
+            continue;
+        }
+        Json::Value jsonData;
+        jsonData[PLAYER_ID] = iter->sessionId_;
+        jsonData[PACKAGE_NAME] = iter->elementName_.GetBundleName();
+        jsonArray[descriptorNums] = jsonData;
+        descriptorNums++;
+    }
+    for (auto iter = hisSessionDescriptors.begin(); iter != hisSessionDescriptors.end(); iter++) {
+        if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
+            iter->elementName_.GetBundleName().empty() ||
+            iter->elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            releaseSessionId_.compare(iter->sessionId_) == 0) {
+            continue;
+        }
+        Json::Value jsonData;
+        jsonData[PLAYER_ID] = iter->sessionId_;
+        jsonData[PACKAGE_NAME] = iter->elementName_.GetBundleName();
+        jsonArray[descriptorNums] = jsonData;
+        descriptorNums++;
+    }
+    Json::Value jsonData;
+    jsonData[HISTORY_MEDIA_PLAYER_INFO] = jsonArray;
+    
+    Json::FastWriter writer;
+    std::string jsonStr = writer.write(jsonData);
+    char header[] = {MSG_HEAD_MODE, GET_HISTORY_MEDIA_INFO, '\0'};
+    std::string msg = std::string(header) + jsonStr;
+    return msg;
 }
 
 void MigrateAVSessionServer::DelaySendMetaData()
@@ -446,6 +571,53 @@ void MigrateAVSessionServer::DelaySendMetaData()
     }
 }
 
+std::string MigrateAVSessionServer::GenerateClearAVSessionMsg()
+{
+    Json::Value jsonArray(Json::arrayValue);
+    Json::Value jsonData;
+    jsonData[MEDIA_CONTROLLER_LIST] = jsonArray;
+    Json::FastWriter writer;
+    std::string jsonStr = writer.write(jsonData);
+    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST, '\0'};
+    std::string msg = std::string(header) + jsonStr;
+    return msg;
+}
+
+std::string MigrateAVSessionServer::GenerateClearHistorySessionMsg()
+{
+    SLOGI("GenerateClearHistorySessionMsg");
+    Json::Value jsonArray(Json::arrayValue);
+    Json::Value jsonData;
+    jsonData[HISTORY_MEDIA_PLAYER_INFO] = jsonArray;
+    Json::FastWriter writer;
+    std::string jsonStr = writer.write(jsonData);
+    char header[] = {MSG_HEAD_MODE, GET_HISTORY_MEDIA_INFO, '\0'};
+    std::string msg = std::string(header) + jsonStr;
+    return msg;
+}
+
+void MigrateAVSessionServer::ClearRemoteControllerList(const std::string &deviceId)
+{
+    std::lock_guard lockGuard(migrateControllerLock_);
+    std::string msg = GenerateClearAVSessionMsg();
+    if (!deviceId.empty()) {
+        SendByte(deviceId, msg);
+    }
+}
+
+void MigrateAVSessionServer::ClearRemoteHistorySessionList(const std::string &deviceId)
+{
+    if (!supportCrossMediaPlay_) {
+        SLOGI("ClearRemoteHistorySessionList, Remote does not support cross media play");
+        return;
+    }
+    std::lock_guard lockGuard(historySessionLock_);
+    std::string msg = GenerateClearHistorySessionMsg();
+    if (!deviceId.empty()) {
+        SendByte(deviceId, msg);
+    }
+}
+
 std::string MigrateAVSessionServer::ConvertControllersToStr(
     std::vector<sptr<AVControllerItem>> avcontrollers)
 {
@@ -462,15 +634,8 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
         std::string playerId = controller->GetSessionId();
         Json::Value jsonObject = ConvertControllerToJson(controller);
         jsonObject[PLAYER_ID] = playerId;
-        if (playerId.compare(topSessionId_) == 0) {
-            jsonArray[0] = jsonObject;
-            sessionNums++;
-        } else if (playerId.compare(lastSessionId_) == 0) {
-            jsonArray[1] = jsonObject;
-            sessionNums++;
-        } else {
-            SLOGD("session not deal");
-        }
+        jsonArray[sessionNums] = jsonObject;
+        sessionNums++;
     }
     Json::Value jsonData;
     jsonData[MEDIA_CONTROLLER_LIST] = jsonArray;
@@ -488,9 +653,9 @@ Json::Value MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerIte
     SLOGI("ConvertControllerToJson");
     Json::Value metadata;
     AVMetaData data;
-    if (AVSESSION_SUCCESS == avcontroller->GetAVMetaData(data)) {
-        metadata = ConvertMetadataToJson(data);
-    }
+    data.Reset();
+    avcontroller->GetAVMetaData(data);
+    metadata = ConvertMetadataToJson(data, false);
 
     AVPlaybackState state;
     if (AVSESSION_SUCCESS == avcontroller->GetAVPlaybackState(state)) {
@@ -572,16 +737,23 @@ std::string MigrateAVSessionServer::RebuildPlayState(const AVPlaybackState &play
 
 Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata)
 {
+    return ConvertMetadataToJson(metadata, true);
+}
+
+Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata, bool includeImage)
+{
     Json::Value result;
     if (metadata.IsValid()) {
         SLOGI("ConvertMetadataToJson without img");
         result[METADATA_TITLE] = metadata.GetTitle();
         result[METADATA_ARTIST] = metadata.GetArtist();
-        std::string mediaImage = "";
-        std::vector<uint8_t> outputData(BUFFER_MAX_SIZE);
-        int32_t ret = CompressToJPEG(metadata, outputData);
-        mediaImage = ((ret == true) && (!outputData.empty())) ? Base64Utils::Base64Encode(outputData) : "";
-        result[METADATA_IMAGE] = mediaImage;
+        if (includeImage) {
+            std::string mediaImage = "";
+            std::vector<uint8_t> outputData(BUFFER_MAX_SIZE);
+            int32_t ret = CompressToJPEG(metadata, outputData);
+            mediaImage = ((ret == true) && (!outputData.empty())) ? Base64Utils::Base64Encode(outputData) : "";
+            result[METADATA_IMAGE] = mediaImage;
+        }
     } else {
         result[METADATA_TITLE] = "";
         result[METADATA_ARTIST] = "";
@@ -733,6 +905,11 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
             SLOGI("mediaCommand is not support: %{public}s", command.c_str());
             break;
     }
+}
+
+void MigrateAVSessionServer::OnHistoricalRecordChange()
+{
+    SendRemoteHistorySessionList(deviceId_);
 }
 
 void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, const AVMetaData &data)

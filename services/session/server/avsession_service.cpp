@@ -868,6 +868,7 @@ void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)
             SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
             DeleteAVQueueInfoRecord(bundleName, userId);
             DeleteHistoricalRecord(bundleName, userId);
+            NotifyHistoricalRecordChange(bundleName, userId);
         };
         for (auto value : values) {
             CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("bundleName"));
@@ -1438,6 +1439,7 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& sessionId, const
                 SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
                 DeleteAVQueueInfoRecord(bundleName, userId);
                 DeleteHistoricalRecord(bundleName, userId);
+                NotifyHistoricalRecordChange(bundleName, userId);
             };
             if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(elementName.GetBundleName(),
                 callback, GetUsersManager().GetCurrentUserId())) {

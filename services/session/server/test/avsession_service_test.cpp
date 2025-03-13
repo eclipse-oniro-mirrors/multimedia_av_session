@@ -2404,3 +2404,59 @@ static HWTEST_F(AVSessionServiceTest, NotifyRemoteDistributedSessionControllersC
     EXPECT_TRUE(avservice_ != nullptr);
     SLOGD("NotifyRemoteDistributedSessionControllersChanged001 end!");
 }
+
+/**
+ * @tc.name: SuperLauncher001
+ * @tc.desc: Verifying SuperLauncher with init state
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, SuperLauncher001, TestSize.Level1)
+{
+    SLOGD("SuperLauncher001 begin!");
+    avservice_->SuperLauncher("adcdef", "SuperLauncher-Dual", "", "CONNECT_SUCC");
+    EXPECT_EQ(avservice_->migrateAVSession_->supportCrossMediaPlay_, false);
+    SLOGD("SuperLauncher001 end!");
+}
+
+/**
+ * @tc.name: ReleaseSuperLauncher001
+ * @tc.desc: Verifying ReleaseSuperLauncher with SupportCrossMediaPlay state
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, ReleaseSuperLauncher001, TestSize.Level1)
+{
+    SLOGD("ReleaseSuperLauncher001 begin!");
+    avservice_->ReleaseSuperLauncher("SuperLauncher-Dual");
+    EXPECT_EQ(avservice_->migrateAVSession_->supportCrossMediaPlay_, false);
+    SLOGD("ReleaseSuperLauncher001 end!");
+}
+
+/**
+ * @tc.name: ConnectSuperLauncher001
+ * @tc.desc: Verifying ConnectSuperLauncher001 with init state
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, ConnectSuperLauncher001, TestSize.Level1)
+{
+    SLOGD("ConnectSuperLauncher001 begin!");
+    avservice_->ConnectSuperLauncher("adcdef", "SuperLauncher-Dual");
+    EXPECT_NE(avservice_->migrateAVSession_->servicePtr_, nullptr);
+    SLOGD("ConnectSuperLauncher001 end!");
+}
+
+/**
+ * @tc.name: SucceedSuperLauncher001
+ * @tc.desc: Verifying SucceedSuperLauncher001 with init state
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, SucceedSuperLauncher001, TestSize.Level1)
+{
+    SLOGD("SucceedSuperLauncher001 begin!");
+    avservice_->SucceedSuperLauncher("adcdef", "SuperLauncher-Dual");
+    EXPECT_EQ(avservice_->migrateAVSession_->supportCrossMediaPlay_, false);
+    SLOGD("SucceedSuperLauncher001 end!");
+}
