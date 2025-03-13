@@ -205,7 +205,6 @@ void TestMigrateSendByte(OHOS::sptr<AVSessionItem> avsession_, std::shared_ptr<M
     int32_t ret = server_->GetControllerById(descriptor.sessionId_, controller);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 
-
     server_->ResetSupportCrossMediaPlay("{\"mIsSupportSingleFrameMediaPlay\": true}");
     EXPECT_EQ(server_->supportCrossMediaPlay_, true);
 
