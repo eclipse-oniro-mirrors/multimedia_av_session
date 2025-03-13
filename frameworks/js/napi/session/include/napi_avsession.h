@@ -145,7 +145,9 @@ private:
     std::shared_ptr<NapiAVSessionCallback> callback_;
     std::chrono::system_clock::time_point latestMetadataTs_;
     std::string latestMetadataUri_;
+    std::string latestMetadataAssetId_;
     std::string latestDownloadedUri_;
+    std::string latestDownloadedAssetId_;
     AVMetaData metaData_;
 
     static std::mutex syncMutex_;

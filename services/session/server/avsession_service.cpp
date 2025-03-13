@@ -322,7 +322,7 @@ void AVSessionService::HandleRemoveMediaCardEvent()
             castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
             topSession_->SendControlCommandToCast(castCmd);
         }
-    } else if (topSession_->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+    } else if (AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid())) {
         AVControlCommand cmd;
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
         topSession_->ExecuteControllerCommand(cmd);
@@ -335,24 +335,26 @@ bool AVSessionService::IsTopSessionPlaying()
     if (!topSession_) {
         return false;
     }
-    int32_t state = topSession_->IsCasting() ? topSession_->GetCastAVPlaybackState().GetState() :
-        topSession_->GetPlaybackState().GetState();
-    return state == AVPlaybackState::PLAYBACK_STATE_PLAY;
+    bool isPlaying = topSession_->IsCasting() ?
+        (topSession_->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) :
+        AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid());
+    return isPlaying;
 }
 
 void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
 {
     if (isAppear == "APPEAR") {
         isMediaCardOpen_ = true;
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckCardStateChangeStop");
     } else if (isAppear == "DISAPPEAR") {
         isMediaCardOpen_ = false;
-        if (IsTopSessionPlaying() || hasRemoveEvent_) {
+        if (IsTopSessionPlaying() || hasRemoveEvent_.load()) {
             SLOGI("HandleMediaCardState hasRemoveEvent_:%{public}d ", hasRemoveEvent_.load());
             return;
         }
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this]() {
-                if (IsTopSessionPlaying() || hasRemoveEvent_) {
+                if (IsTopSessionPlaying() || hasRemoveEvent_.load()) {
                     return;
                 }
                 {
@@ -617,7 +619,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         SLOGI(" HandleFocusSession focusSession is current topSession.");
         if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
             topSession_->GetUid() != ancoUid) {
-            if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_)) {
+            if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_.load())) {
                 SLOGI("isPlaying:%{public}d isCardOpen_:%{public}d hasRemoveEvent_:%{public}d ",
                     isPlaying, isMediaCardOpen_.load(), hasRemoveEvent_.load());
                 return;
@@ -1160,7 +1162,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         if (topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
             SLOGI("MediaCapsule topSession is castSession %{public}s isPlaying %{public}d isMediaChange %{public}d",
                 topSession_->GetBundleName().c_str(), isPlaying, isChange);
-            if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_)) {
+            if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_.load())) {
                 SLOGI("MediaCapsule casttopsession not playing isCardOpen_:%{public}d hasRemoveEvent_:%{public}d",
                     isMediaCardOpen_.load(), hasRemoveEvent_.load());
                 return;
@@ -1412,7 +1414,7 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
 bool AVSessionService::IsCapsuleNeeded()
 {
     if (topSession_ != nullptr) {
-        return topSession_->GetSessionType() == "audio";
+        return topSession_->GetSessionType() == "audio" || topSession_->IsCasting();
     }
     return false;
 }
