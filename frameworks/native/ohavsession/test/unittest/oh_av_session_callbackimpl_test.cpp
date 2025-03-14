@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "native_avsession.h"
+#include "OHAVSession.h"
 #include "OHAVSessionCallbackImpl.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
@@ -397,4 +398,154 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback001, TestSiz
     SLOGI("RegisterToggleFavoriteCallback001 End");
 }
 
+/**
+ * @tc.name: RegisterForwardCallback002
+ * @tc.desc: have registered RegisterForwardCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterForwardCallback002, TestSize.Level1)
+{
+    SLOGI("RegisterForwardCallback002 Begin");
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    EXPECT_TRUE(oh_avsession != nullptr);
+
+    OH_AVSessionCallback_OnFastForward callback = [](OH_AVSession* oh_avsession, uint32_t seekTime,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterForwardCallback(oh_avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+
+    auto it = std::find_if (g_ohAVSessionCallbackImpl.forwardCallbacks_.begin(),
+        g_ohAVSessionCallbackImpl.forwardCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnFastForward, void*> &element) {
+            return element.first == callback; });
+    EXPECT_TRUE (it != g_ohAVSessionCallbackImpl.forwardCallbacks_.end());
+    SLOGI("RegisterForwardCallback002 End");
 }
+
+/**
+ * @tc.name: RegisterRewindCallback002
+ * @tc.desc: have registered RegisterRewindCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterRewindCallback002, TestSize.Level1)
+{
+    SLOGI("RegisterRewindCallback002 Begin");
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    EXPECT_TRUE(oh_avsession != nullptr);
+
+    OH_AVSessionCallback_OnRewind callback = [](OH_AVSession* oh_avsession, uint32_t seekTime,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterRewindCallback(oh_avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+
+    auto it = std::find_if (g_ohAVSessionCallbackImpl.rewindCallbacks_.begin(),
+        g_ohAVSessionCallbackImpl.rewindCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnRewind, void*> &element) {
+            return element.first == callback; });
+    EXPECT_TRUE (it != g_ohAVSessionCallbackImpl.rewindCallbacks_.end());
+    SLOGI("RegisterRewindCallback002 End");
+}
+
+/**
+ * @tc.name: RegisterSeekCallback002
+ * @tc.desc: have registered RegisterSeekCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterSeekCallback002, TestSize.Level1)
+{
+    SLOGI("RegisterSeekCallback002 Begin");
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    EXPECT_TRUE(oh_avsession != nullptr);
+
+    OH_AVSessionCallback_OnSeek callback = [](OH_AVSession* oh_avsession, uint64_t seekTime,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterSeekCallback(oh_avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+
+    auto it = std::find_if (g_ohAVSessionCallbackImpl.seekCallbacks_.begin(),
+        g_ohAVSessionCallbackImpl.seekCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnSeek, void*> &element) {
+            return element.first == callback; });
+    EXPECT_TRUE (it != g_ohAVSessionCallbackImpl.seekCallbacks_.end());
+    SLOGI("RegisterSeekCallback002 End");
+}
+
+/**
+ * @tc.name: RegisterSetLoopModeCallback002
+ * @tc.desc: have registered RegisterSetLoopModeCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterSetLoopModeCallback002, TestSize.Level1)
+{
+    SLOGI("RegisterSetLoopModeCallback002 Begin");
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    EXPECT_TRUE(oh_avsession != nullptr);
+
+    OH_AVSessionCallback_OnSetLoopMode callback = [](OH_AVSession* session,
+        AVSession_LoopMode curLoopMode, void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterSetLoopModeCallback(oh_avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+
+    auto it = std::find_if (g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.begin(),
+        g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnSetLoopMode, void*> &element) {
+            return element.first == callback; });
+    EXPECT_TRUE (it != g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end());
+    SLOGI("RegisterSetLoopModeCallback002 End");
+}
+
+/**
+ * @tc.name: RegisterToggleFavoriteCallback002
+ * @tc.desc: have registered RegisterToggleFavoriteCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback002, TestSize.Level1)
+{
+    SLOGI("RegisterToggleFavoriteCallback002 Begin");
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    EXPECT_TRUE(oh_avsession != nullptr);
+
+    OH_AVSessionCallback_OnToggleFavorite callback = [](OH_AVSession* session,
+        const char* assetId, void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterToggleFavoriteCallback(oh_avsession, callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+
+    auto it = std::find_if (g_ohAVSessionCallbackImpl.toggleFavoriteCallbacks_.begin(),
+        g_ohAVSessionCallbackImpl.toggleFavoriteCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnToggleFavorite, void*> &element) {
+            return element.first == callback; });
+    EXPECT_TRUE (it != g_ohAVSessionCallbackImpl.toggleFavoriteCallbacks_.end());
+    SLOGI("RegisterToggleFavoriteCallback002 End");
+}
+
+} //OHOS::AVSession

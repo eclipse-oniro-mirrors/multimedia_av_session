@@ -204,6 +204,8 @@ ohos_unittest("AVMetaDataTest") {
 
   sources = [ "avmeta_data_test.cpp" ]
 
+  cflags_cc = [ "-fno-access-control" ]
+
   configs = [ ":module_private_config" ]
 
   deps = common_deps
