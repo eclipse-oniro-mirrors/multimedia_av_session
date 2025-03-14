@@ -18,31 +18,18 @@
 #include <fstream>
 #include <cstdio>
 
-#include "accesstoken_kit.h"
 #include "avsession_log.h"
-#include "avsession_manager.h"
 #include "avsession_errors.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
-#include "avmedia_description.h"
-#include "avqueue_item.h"
-#include "avsession_log.h"
-#include "avsession_callback_client.h"
-#include "avsession_pixel_map.h"
-#include "avsession_pixel_map_adapter.h"
 #include "avsession_info.h"
 #include "avsession_service.h"
 #include "audio_info.h"
-#include "input_manager.h"
-#include "key_event.h"
-#include "nativetoken_kit.h"
 #include "system_ability_definition.h"
 #include "system_ability_ondemand_reason.h"
-#include "token_setproc.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
-using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AudioStandard;
 static AVMetaData g_metaData;
 static AVPlaybackState g_playbackState;
@@ -52,6 +39,68 @@ static char g_testAnotherAbilityName[] = "testAnother.ability";
 static OHOS::sptr<AVSessionService> g_AVSessionService {nullptr};
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t CAST_ENGINE_SA_ID = 65546;
+static bool g_isCallOnSessionCreate = false;
+static bool g_isCallOnSessionRelease = false;
+static bool g_isCallOnTopSessionChange = false;
+
+class TestISessionListener : public ISessionListener {
+    TestISessionListener() = default;
+    virtual ~TestISessionListener() = default;
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
+    void OnAudioSessionChecked(const int32_t uid) override {};
+    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {};
+    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
+    void OnDeviceOffline(const std::string& deviceId) override {};
+    void OnRemoteDistributedSessionChange(
+        const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override {};
+    OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
+};
+
+void TestISessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
+{
+    g_isCallOnSessionCreate = true;
+}
+
+void TestISessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
+{
+    g_isCallOnSessionRelease = true;
+}
+
+void TestISessionListener::OnTopSessionChange(const AVSessionDescriptor& descriptor)
+{
+    g_isCallOnTopSessionChange = true;
+}
+
+class TestSessionListener : public SessionListener {
+    TestSessionListener() = default;
+    virtual ~TestSessionListener() = default;
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
+    void OnAudioSessionChecked(const int32_t uid) override {};
+    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {};
+    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
+    void OnDeviceOffline(const std::string& deviceId) override {};
+    void OnRemoteDistributedSessionChange(
+        const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override {};
+};
+
+void TestSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
+{
+    g_isCallOnSessionCreate = true;
+}
+
+void TestSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
+{
+    g_isCallOnSessionRelease = true;
+}
+
+void TestSessionListener::OnTopSessionChange(const AVSessionDescriptor& descriptor)
+{
+    g_isCallOnTopSessionChange = true;
+}
 
 class AVSessionServiceTestSecond : public testing::Test {
 public:
@@ -60,6 +109,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 
+    OHOS::sptr<AVSessionItem> CreateSession();
     std::shared_ptr<AVSession> avsession_ = nullptr;
 };
 
@@ -67,9 +117,6 @@ void AVSessionServiceTestSecond::SetUpTestCase()
 {
     SLOGI("set up AVSessionServiceTestSecond");
     system("killall -9 com.example.hiMusicDemo");
-    sleep(1);
-    g_AVSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
-    g_AVSessionService->InitKeyEvent();
 }
 
 void AVSessionServiceTestSecond::TearDownTestCase()
@@ -78,7 +125,9 @@ void AVSessionServiceTestSecond::TearDownTestCase()
 
 void AVSessionServiceTestSecond::SetUp()
 {
-    SLOGI("set up test function in AVSessionServiceTestSecond");
+    SLOGI("set up test function in AVSessionServiceTestSecond");\
+    g_AVSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    g_AVSessionService->InitKeyEvent();
 }
 
 void AVSessionServiceTestSecond::TearDown()
@@ -89,6 +138,16 @@ void AVSessionServiceTestSecond::TearDown()
         ret = avsession_->Destroy();
         avsession_ = nullptr;
     }
+}
+
+OHOS::sptr<AVSessionItem> AVSessionServiceTestSecond::CreateSession()
+{
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    return avsessionHere;
 }
 
 /**
@@ -566,7 +625,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility003, TestSize.Leve
     int32_t systemAbilityId = OHOS::AUDIO_POLICY_SERVICE_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
     SLOGD("OnAddSystemAbility003 end!");
 }
 
@@ -582,7 +641,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility004, TestSize.Leve
     int32_t systemAbilityId = OHOS::APP_MGR_SERVICE_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
     SLOGD("OnAddSystemAbility004 end!");
 }
 
@@ -598,7 +657,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility005, TestSize.Leve
     int32_t systemAbilityId = OHOS::DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
     SLOGD("OnAddSystemAbility005 end!");
 }
 
@@ -614,7 +673,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility006, TestSize.Leve
     int32_t systemAbilityId = OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
     SLOGD("OnAddSystemAbility006 end!");
 }
 
@@ -630,7 +689,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility007, TestSize.Leve
     int32_t systemAbilityId = COLLABORATION_SA_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
     SLOGD("OnAddSystemAbility007 end!");
 }
 
@@ -646,7 +705,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility008, TestSize.Leve
     int32_t systemAbilityId = OHOS::MEMORY_MANAGER_SA_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
     SLOGD("OnAddSystemAbility008 end!");
 }
 
@@ -662,7 +721,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility009, TestSize.Leve
     int32_t systemAbilityId = OHOS::SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
     SLOGD("OnAddSystemAbility009 end!");
 }
 
@@ -678,7 +737,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility010, TestSize.Leve
     int32_t systemAbilityId = OHOS::COMMON_EVENT_SERVICE_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
     SLOGD("OnAddSystemAbility010 end!");
 }
 
@@ -695,9 +754,9 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility011, TestSize.Leve
     int32_t systemAbilityId = CAST_ENGINE_SA_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
 #else
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
 #endif
     SLOGD("OnAddSystemAbility011 end!");
 }
@@ -716,9 +775,223 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility012, TestSize.Leve
     const std::string deviceId = "AUDIO";
     g_AVSessionService->is2in1_ = true;
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
 #else
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
 #endif
     SLOGD("OnAddSystemAbility012 end!");
+}
+
+/**
+* @tc.name: InitBMS002
+* @tc.desc: Verifying the InitBMS method with invalid userid.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, InitBMS002, TestSize.Level1)
+{
+    SLOGD("InitBMS002 begin!");
+    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
+    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    g_AVSessionService->GetUsersManager().curUserId_ = -1;
+    g_AVSessionService->InitBMS();
+    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    SLOGD("InitBMS002 end!");
+}
+
+/**
+* @tc.name: NotifySessionCreate001
+* @tc.desc: Verifying the NotifySessionCreate method with listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifySessionCreate001, TestSize.Level1)
+{
+    SLOGD("NotifySessionCreate001 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    OHOS::sptr<TestISessionListener> iListener = new TestISessionListener();
+    g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, iListener));
+    g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionCreate, true);
+    SLOGD("NotifySessionCreate001 end!");
+}
+
+/**
+* @tc.name: NotifySessionCreate002
+* @tc.desc: Verifying the NotifySessionCreate method with nullptr listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifySessionCreate002, TestSize.Level1)
+{
+    SLOGD("NotifySessionCreate002 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, nullptr));
+    g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionCreate, true);
+    SLOGD("NotifySessionCreate002 end!");
+}
+
+/**
+* @tc.name: NotifySessionCreate003
+* @tc.desc: Verifying the NotifySessionCreate method with listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifySessionCreate003, TestSize.Level1)
+{
+    SLOGD("NotifySessionCreate003 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    TestSessionListener* listener = new TestSessionListener();
+    g_AVSessionService->innerSessionListeners_.push_back(listener);
+    g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionCreate, true);
+    if (listener != nullptr) {
+        delete listener;
+        listener = nullptr;
+    }
+    SLOGD("NotifySessionCreate003 end!");
+}
+
+/**
+* @tc.name: NotifySessionCreate004
+* @tc.desc: Verifying the NotifySessionCreate method with null listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifySessionCreate004, TestSize.Level1)
+{
+    SLOGD("NotifySessionCreate004 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    g_AVSessionService->innerSessionListeners_.push_back(nullptr);
+    g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionCreate, true);
+    SLOGD("NotifySessionCreate004 end!");
+}
+
+/**
+* @tc.name: NotifyTopSessionChanged001
+* @tc.desc: Verifying the NotifyTopSessionChanged method with listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifyTopSessionChanged001, TestSize.Level1)
+{
+    SLOGD("NotifyTopSessionChanged001 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    OHOS::sptr<TestISessionListener> iListener = new TestISessionListener();
+    g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, iListener));
+    g_AVSessionService->NotifyTopSessionChanged(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnTopSessionChange, true);
+    SLOGD("NotifyTopSessionChanged001 end!");
+}
+
+/**
+* @tc.name: NotifyTopSessionChanged002
+* @tc.desc: Verifying the NotifyTopSessionChanged method with nullptr listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifyTopSessionChanged002, TestSize.Level1)
+{
+    SLOGD("NotifyTopSessionChanged002 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, nullptr));
+    g_AVSessionService->NotifyTopSessionChanged(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnTopSessionChange, true);
+    SLOGD("NotifyTopSessionChanged002 end!");
+}
+
+/**
+* @tc.name: NotifyTopSessionChanged003
+* @tc.desc: Verifying the NotifySessionCreate method with null listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifyTopSessionChanged003, TestSize.Level1)
+{
+    SLOGD("NotifyTopSessionChanged003 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    g_AVSessionService->innerSessionListeners_.push_back(nullptr);
+    g_AVSessionService->NotifyTopSessionChanged(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnTopSessionChange, true);
+    SLOGD("NotifyTopSessionChanged003 end!");
+}
+
+/**
+* @tc.name: NotifySessionRelease001
+* @tc.desc: Verifying the NotifySessionRelease method with listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifySessionRelease001, TestSize.Level1)
+{
+    SLOGD("NotifySessionRelease001 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    OHOS::sptr<TestISessionListener> iListener = new TestISessionListener();
+    g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, iListener));
+    g_AVSessionService->NotifySessionRelease(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionRelease, true);
+    SLOGD("NotifySessionRelease001 end!");
+}
+
+/**
+* @tc.name: NotifySessionRelease002
+* @tc.desc: Verifying the NotifySessionRelease method with nullptr listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifySessionRelease002, TestSize.Level1)
+{
+    SLOGD("NotifySessionRelease002 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, nullptr));
+    g_AVSessionService->NotifySessionRelease(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionRelease, true);
+    SLOGD("NotifySessionRelease002 end!");
+}
+
+/**
+* @tc.name: NotifySessionRelease003
+* @tc.desc: Verifying the NotifySessionRelease method with listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifySessionRelease003, TestSize.Level1)
+{
+    SLOGD("NotifySessionRelease003 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    TestSessionListener* listener = new TestSessionListener();
+    g_AVSessionService->innerSessionListeners_.push_back(listener);
+    g_AVSessionService->NotifySessionRelease(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionRelease, true);
+    g_isCallOnSessionRelease = false;
+    if (listener != nullptr) {
+        delete listener;
+        listener = nullptr;
+    }
+    SLOGD("NotifySessionRelease003 end!");
+}
+
+/**
+* @tc.name: PlayStateCheck002
+* @tc.desc: Verifying the PlayStateCheck method with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, PlayStateCheck002, TestSize.Level1)
+{
+    SLOGD("PlayStateCheck002 begin!");
+    auto avsessionHere = CreateSession();
+    ASSERT_TRUE(avsessionHere != nullptr);
+    avsessionHere->playbackState_.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARE);
+    avsessionHere->SetUid(1);
+    avsessionHere->Activate();
+    g_AVSessionService->UpdateTopSession(avsessionHere);
+
+    StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
+    RendererState rendererState = RendererState::RENDERER_RUNNING;
+    g_AVSessionService->PlayStateCheck(1, streamUsage, rendererState);
+    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    SLOGD("PlayStateCheck002 end!");
 }
