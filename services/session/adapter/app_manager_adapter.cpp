@@ -129,8 +129,8 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
     {
         std::lock_guard lockGuard(uidLock_);
         for (const auto& appData : appProcessData.appDatas) {
-            SLOGI("bundleName=%{public}s uid=%{public}d pid=%{public}d state=%{public}d",
-                appData.appName.c_str(), appData.uid, appProcessData.pid, appProcessData.appState);
+            SLOGI("uid=%{public}d|pid=%{public}d|state=%{public}d",
+                appData.uid, appProcessData.pid, appProcessData.appState);
             auto it = observedAppUIDs_.find(appData.uid);
             if (it == observedAppUIDs_.end()) {
                 continue;
