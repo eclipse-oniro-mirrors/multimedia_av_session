@@ -44,6 +44,7 @@ std::map<std::string, NapiMediaDescription::GetterType> NapiMediaDescription::ge
     { "creditsPosition", GetCreditsPosition },
     { "appName", GetAppName },
     { "drmScheme", GetDrmScheme },
+    { "dataSrc", GetDataSrc },
 };
 
 std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setterMap_ = {
@@ -68,6 +69,7 @@ std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setter
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_CREDITS_POSITION, SetCreditsPosition },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_APP_NAME, SetAppName },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DRM_SCHEME, SetDrmScheme },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DATA_SRC, SetDataSrc },
 };
 
 napi_status NapiMediaDescription::GetValue(napi_env env, napi_value in, AVMediaDescription& out)
@@ -628,6 +630,31 @@ napi_status NapiMediaDescription::SetDrmScheme(napi_env env, const AVMediaDescri
     auto status = NapiUtils::SetValue(env, in.GetDrmScheme(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "drmScheme", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetDataSrc(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    SLOGD("Start get data src from napi_value");
+    AVDataSrcDescriptor property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "dataSrc", property);
+    if (status == napi_ok) {
+        out.SetDataSrc(property);
+    } else {
+        SLOGI("GetDataSrc no datasrc");
+    }
+
+    return napi_ok;
+}
+
+napi_status NapiMediaDescription::SetDataSrc(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    SLOGD("Start set data src from napi_value");
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetDataSrc(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "dataSrc", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

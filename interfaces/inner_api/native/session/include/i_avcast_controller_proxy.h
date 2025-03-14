@@ -125,6 +125,43 @@ public:
     virtual int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) = 0;
 
     /**
+     * @brief Obtain the decoderTypes of the current media.
+     *
+     * @param { std::vector<std::string>& } decoderTypes - decoder Type list of media.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 18
+    */
+    virtual int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) = 0;
+
+    /**
+     * @brief Recommended ResolutionLevel of the current media.
+     *
+     * @param { std::string& } decoderType - decoderType of media.
+     * * @param { ResolutionLevel } resolutionLevel - resolutionLevel of media.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 18
+    */
+    virtual int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) = 0;
+
+    /**
+     * @brief Obtain the hdrFormats of the current media.
+     *
+     * @param { std::vector<HDRFormat>& } hdrFormats - hdrFormats of media.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 18
+    */
+    virtual int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) = 0;
+
+    /**
+     * @brief Obtain the playSpeeds of the current media.
+     *
+     * @param { std::vector<float>& } playSpeeds - playSpeeds of media.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 18
+    */
+    virtual int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) = 0;
+
+    /**
      * @brief Set valid ability list for current cast session.
      *
      * @param { std::vector<int32_t> } validAbilityList - valid ability list for set.

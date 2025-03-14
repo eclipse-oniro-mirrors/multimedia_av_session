@@ -110,6 +110,7 @@ std::condition_variable NapiAVSession::syncCond_;
 std::condition_variable NapiAVSession::syncAsyncCond_;
 std::recursive_mutex registerEventLock_;
 int32_t NapiAVSession::playBackStateRet_ = AVSESSION_ERROR;
+std::shared_ptr<NapiAVSession> NapiAVSession::napiAVSession_ = nullptr;
 
 NapiAVSession::NapiAVSession()
 {
@@ -214,20 +215,19 @@ void NapiAVSession::SetSessionElement(AppExecFwk::ElementName elementName)
     elementName_ = elementName;
 }
 
-napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<NapiAVSession>& napiSession,
-    std::shared_ptr<AVSession> nativeSession)
+napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<AVSession> nativeSession)
 {
-    if (napiSession == nullptr || nativeSession == nullptr) {
+    if (napiAVSession_ == nullptr || nativeSession == nullptr) {
         return napi_generic_failure;
     }
-    SLOGI("sessionId=%{public}s", napiSession->sessionId_.c_str());
-    napiSession->session_ = std::move(nativeSession);
-    napiSession->sessionId_ = napiSession->session_->GetSessionId();
-    napiSession->sessionType_ = napiSession->session_->GetSessionType();
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    SLOGI("sessionId=%{public}s", napiAVSession_->sessionId_.c_str());
+    napiAVSession_->session_ = std::move(nativeSession);
+    napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
+    napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
+    if (napiAVSession_->callback_ == nullptr) {
+        napiAVSession_->callback_ = std::make_shared<NapiAVSessionCallback>();
     }
-    int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+    int32_t ret = napiAVSession_->session_->RegisterCallback(napiAVSession_->callback_);
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("RegisterCallback fail, ret=%{public}d", ret);
     }
@@ -235,7 +235,7 @@ napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<NapiAVSession>& napi
     {
         std::lock_guard lockGuard(registerEventLock_);
         for (int32_t event : registerEventList_) {
-            int32_t res = napiSession->session_->AddSupportCommand(event);
+            int32_t res = napiAVSession_->session_->AddSupportCommand(event);
             if (res != AVSESSION_SUCCESS) {
                 SLOGE("AddSupportCommand fail, ret=%{public}d", res);
                 continue;
@@ -243,7 +243,7 @@ napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<NapiAVSession>& napi
         }
     }
 
-    napiSession->session_->Activate();
+    napiAVSession_->session_->Activate();
     return napi_ok;
 }
 
@@ -254,24 +254,24 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVSessionConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
-    std::shared_ptr<NapiAVSession> napiAvSession = std::make_shared<NapiAVSession>();
-    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiAvSession)), napi_generic_failure);
-    napiAvSession->session_ = std::move(nativeSession);
-    napiAvSession->sessionId_ = napiAvSession->session_->GetSessionId();
-    napiAvSession->sessionType_ = napiAvSession->session_->GetSessionType();
-    SLOGI("sessionId=%{public}s, sessionType:%{public}s", napiAvSession->sessionId_.c_str(),
-        napiAvSession->sessionType_.c_str());
+    napiAVSession_ = std::make_shared<NapiAVSession>();
+    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiAVSession_)), napi_generic_failure);
+    napiAVSession_->session_ = std::move(nativeSession);
+    napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
+    napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
+    SLOGI("sessionId=%{public}s, sessionType:%{public}s", napiAVSession_->sessionId_.c_str(),
+        napiAVSession_->sessionType_.c_str());
 
     napi_value property {};
-    auto status = NapiUtils::SetValue(env, napiAvSession->sessionId_, property);
+    auto status = NapiUtils::SetValue(env, napiAVSession_->sessionId_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionId", property), napi_generic_failure);
 
-    status = NapiUtils::SetValue(env, napiAvSession->sessionType_, property);
+    status = NapiUtils::SetValue(env, napiAVSession_->sessionType_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionType", property), napi_generic_failure);
     out = instance;
-    napiSession = napiAvSession;
+    napiSession = napiAVSession_;
     return napi_ok;
 }
 
@@ -610,20 +610,24 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     }
     napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
-    if (napiAvSession->latestMetadataUri_ != napiAvSession->metaData_.GetMediaImageUri() ||
+    if (napiAvSession->latestMetadataAssetId_ != napiAvSession->metaData_.GetAssetId() ||
+        napiAvSession->latestMetadataUri_ != napiAvSession->metaData_.GetMediaImageUri() ||
         !napiAvSession->metaData_.GetMediaImageUri().empty() || napiAvSession->metaData_.GetMediaImage() != nullptr) {
         context->metadataTs = std::chrono::system_clock::now();
         napiAvSession->latestMetadataUri_ = napiAvSession->metaData_.GetMediaImageUri();
+        napiAvSession->latestMetadataAssetId_ = napiAvSession->metaData_.GetAssetId();
         reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
     }
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        bool isRepeatDownload = napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
+        bool isRepeatDownload = napiSession->latestDownloadedAssetId_ == napiSession->latestMetadataAssetId_ &&
+            napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
         bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData, isRepeatDownload);
         bool timeAvailable = context->metadataTs >= napiSession->latestMetadataTs_;
         SLOGI("doMetaDataSet res:%{public}d, time:%{public}d", static_cast<int>(res), static_cast<int>(timeAvailable));
         if (res && timeAvailable && napiSession->session_ != nullptr) {
             napiSession->latestDownloadedUri_ = context->metaData.GetMediaImageUri();
+            napiSession->latestDownloadedAssetId_ = context->metaData.GetAssetId();
             napiSession->session_->SetAVMetaData(context->metaData);
         }
         context->metaData.Reset();
@@ -1099,9 +1103,9 @@ napi_value NapiAVSession::GetOutputDeviceSync(napi_env env, napi_callback_info i
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiSession->session_ == nullptr) {
-        context->status = napi_generic_failure;
-        context->errMessage = "GetOutputDeviceSync failed : session is nullptr";
-        context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+        SLOGE("NapiAVSession GetOutputDeviceSync fail:session nullptr");
+        NapiUtils::ThrowError(env, "NapiAVSession GetOutputDeviceSync failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -1219,6 +1223,7 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
         if (ret == AVSESSION_SUCCESS) {
             napiSession->session_ = nullptr;
             napiSession->callback_ = nullptr;
+            napiAVSession_ = nullptr;
         } else if (ret == ERR_SESSION_NOT_EXIST) {
             context->status = napi_generic_failure;
             context->errMessage = "Destroy session failed : native session not exist";

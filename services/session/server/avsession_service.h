@@ -322,6 +322,8 @@ private:
 
     void OutputDeviceChangeListener(const AudioRendererChangeInfos& infos);
 
+    std::function<bool(int32_t, int32_t)> GetAllowedPlaybackCallbackFunc();
+
     sptr<AVSessionItem> CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                            const AppExecFwk::ElementName& elementName);
 
@@ -529,6 +531,8 @@ private:
 
     bool NotifyFlowControl();
 
+    bool IsCapsuleNeeded();
+
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;
@@ -551,6 +555,7 @@ private:
     bool isScreenOn_ = false;
     bool isScreenLocked_ = true;
     std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
+    std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex sessionServiceLock_;
@@ -610,9 +615,7 @@ private:
 
     int32_t pressCount_ {};
     int32_t maxHistoryNums_ = 10;
-    int uidForAppStateChange_ = 0;
     bool isFirstPress_ = true;
-    bool isSourceInCast_ = false;
     bool isInCast_ = false;
     bool is2in1_ = false;
 
@@ -650,6 +653,7 @@ private:
     const uint32_t MAX_NOTIFICATION_NUM = 3;
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
     const int32_t cancelTimeout = 5000;
+    const uint8_t doRemoteLoadRetryTime = 5;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

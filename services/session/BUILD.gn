@@ -241,6 +241,7 @@ if (castplus_cast_engine_enable) {
       "server/avcast_provider_manager.cpp",
       "server/avrouter.cpp",
       "server/avrouter_impl.cpp",
+      "server/hw_cast_data_source_descriptor.cpp",
       "server/hw_cast_provider.cpp",
       "server/hw_cast_provider_session.cpp",
       "server/hw_cast_stream_player.cpp",

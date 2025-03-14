@@ -505,8 +505,15 @@ public:
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
     void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
+    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos) override;
 
     bool IsCallbacksEmpty(int32_t event);
+
+    napi_status saveDataSrc(napi_env env, napi_value avQueueItem);
+    int32_t readDataSrc(napi_env env, std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos);
+
+    napi_env env_;
+    napi_ref dataSrcRef_ {};
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
@@ -530,10 +537,25 @@ private:
 
     void HandleErrorEvent(int32_t event, const int32_t errorCode, const std::string& errorMsg);
 
+    static void threadSafeReadDataSrcCb(napi_env env, napi_value js_cb, void* context, void* data);
+
+    struct DataContextForThreadSafe {
+        napi_ref& callback;
+        std::uint8_t* buffer;
+        uint32_t length;
+        int64_t pos;
+        int32_t* result;
+        std::condition_variable& dataSrcSyncCond;
+    };
+
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_CAST_TYPE_MAX] {};
     std::shared_ptr<bool> isValid_;
+
+    std::mutex dataSrcSyncLock_;
+    std::condition_variable dataSrcSyncCond_;
+    napi_threadsafe_function threadSafeReadDataSrcFunc_ = nullptr;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVCAST_CONTROLLER_CALLBACK_H

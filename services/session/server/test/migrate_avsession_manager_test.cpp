@@ -54,7 +54,6 @@ void MigrateAVSessionManagerTest::SetUpTestCase()
 void MigrateAVSessionManagerTest::TearDownTestCase()
 {
     SLOGI("MigrateAVSessionManagerTest TearDownTestCase");
-    g_AVSessionService = nullptr;
 }
 
 void MigrateAVSessionManagerTest::SetUp()

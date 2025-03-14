@@ -48,6 +48,10 @@ private:
     static napi_value Prepare(napi_env env, napi_callback_info info);
     static napi_value GetDuration(napi_env env, napi_callback_info info);
     static napi_value GetCastAVPlaybackState(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedDecoders(napi_env env, napi_callback_info info);
+    static napi_value GetRecommendedResolutionLevel(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedHdrCapabilities(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedPlaySpeeds(napi_env env, napi_callback_info info);
     static napi_value GetCurrentItem(napi_env env, napi_callback_info info);
     static napi_value GetValidCommands(napi_env env, napi_callback_info info);
     static napi_value Release(napi_env env, napi_callback_info info);
@@ -133,6 +137,10 @@ private:
     static void CheckSendCtrlCmdReportRadar(bool condition, int32_t error);
     static void CheckStartReportRadar(bool condition, int32_t error);
     static int32_t DownloadCastImg(std::shared_ptr<AVMediaDescription> description, const std::string& uri);
+
+    static napi_status getDataSrc(napi_env env, napi_value avQueueItem,
+        std::shared_ptr<NapiAVCastControllerCallback> controllerCallback);
+    static napi_value readDataSrc(napi_env env, napi_value fileSize, napi_ref callback);
 
     napi_ref wrapperRef_ {};
     std::shared_ptr<AVCastController> castController_;

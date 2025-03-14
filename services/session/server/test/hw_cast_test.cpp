@@ -764,6 +764,11 @@ public:
         return 0;
     };
 
+    int GetMediaCapabilities(std::string &jsonCapabilities) override
+    {
+        return 0;
+    };
+
     int GetPlaySpeed(OHOS::CastEngine::PlaybackSpeed &speed) override
     {
         return 0;

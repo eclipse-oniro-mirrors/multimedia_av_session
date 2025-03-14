@@ -127,9 +127,8 @@ void AVSessionService::RemoveInnerSessionListener(SessionListener *listener)
 void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    SLOGD("uidForAppStateChange_ = %{public}d, uid = %{public}d, state = %{public}d",
-        uidForAppStateChange_, uid, state);
-    if (uidForAppStateChange_ == uid) {
+    SLOGD("uid = %{public}d, state = %{public}d", uid, state);
+    if (topSession_ != nullptr && topSession_->GetUid() == uid) {
         if (state == appState) {
             return;
         }
@@ -203,12 +202,8 @@ void AVSessionService::ReleaseCastSession()
 void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 {
     SLOGI("AVSessionService CreateSessionByCast in");
-    if (isSourceInCast_) {
-        AVSessionRadarInfo info("AVSessionService::CreateSessionByCast");
-        AVSessionRadar::GetInstance().StartConnect(info);
-        SLOGI("Create Cast in source, return");
-        return;
-    }
+    AVSessionRadarInfo info("AVSessionService::CreateSessionByCast");
+    AVSessionRadar::GetInstance().StartConnect(info);
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName("castBundleName");
     elementName.SetAbilityName("castAbilityName");
@@ -320,7 +315,6 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     ReportStartCastEnd("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_, ret);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGD("StartCast set isSourceInCast");
-    isSourceInCast_ = true;
 
     SLOGI("no set continuous task in service");
     HISYSEVENT_BEHAVIOR("SESSION_CAST",
@@ -351,7 +345,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 void AVSessionService::NotifyMirrorToStreamCast()
 {
     for (auto& session : GetContainer().GetAllSessions()) {
-        if (session != nullptr && session->GetUid() == uidForAppStateChange_ && isSupportMirrorToStream_ &&
+        if (session && topSession_ && (session.GetRefPtr() == topSession_.GetRefPtr()) && isSupportMirrorToStream_ &&
             !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
             MirrorToStreamCast(session);
         }
@@ -493,15 +487,30 @@ bool AVSessionService::ProcessTargetMigrate(bool isOnline, const OHOS::Distribut
 
 void AVSessionService::DoRemoteAVSessionLoad(std::string remoteDeviceId)
 {
-    SLOGI("DoRemoteAVSessionLoad with deviceId:%{public}s", remoteDeviceId.c_str());
-    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (mgr == nullptr) {
-        SLOGE("DoRemoteAVSessionLoad get SystemAbilityManager fail");
-        return;
-    }
-    abilityLoadCallback_ = new AVSessionSystemAbilityLoadCallback(this);
-    int32_t ret = mgr->LoadSystemAbility(AVSESSION_SERVICE_ID, remoteDeviceId, abilityLoadCallback_);
-    SLOGI("DoRemoteAVSessionLoad LoadSystemAbility with ret:%{public}d", ret);
+    SLOGI("DoRemoteAVSessionLoad async with deviceId:%{public}s", remoteDeviceId.c_str());
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this, remoteDeviceId]() {
+        auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (mgr == nullptr) {
+            SLOGE("DoRemoteAVSessionLoad get SystemAbilityManager fail");
+            return;
+        }
+        abilityLoadCallback_ = new AVSessionSystemAbilityLoadCallback(this);
+        sptr<IRemoteObject> remoteObject = nullptr;
+        uint8_t outOfTime = doRemoteLoadRetryTime;
+        while (remoteObject == nullptr && outOfTime > 0) {
+            outOfTime--;
+            std::this_thread::sleep_for(std::chrono::milliseconds(CLICK_TIMEOUT));
+            remoteObject = mgr->CheckSystemAbility(AVSESSION_SERVICE_ID, remoteDeviceId);
+            if (remoteObject != nullptr) {
+                SLOGI("DoRemoteAVSessionLoad done with remoteObject get");
+                return;
+            } else {
+                SLOGI("DoRemoteAVSessionLoad get null, retryLeftTime:%{public}u", outOfTime);
+            }
+        }
+        },
+        "DoRemoteAVSessionLoad");
 }
 
 void AVSessionService::DoConnectProcessWithMigrate(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)

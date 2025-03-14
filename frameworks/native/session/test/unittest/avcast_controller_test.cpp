@@ -31,6 +31,9 @@
 #include "avsession_log.h"
 #include "hw_cast_stream_player.h"
 #include "iavcast_controller.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+
 #define private public
 #include "hw_cast_provider.h"
 #undef private
@@ -49,6 +52,7 @@ static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
 static uint64_t g_selfTokenId = 0;
 static std::string g_errLog;
+sptr<AVCastControllerCallbackProxy> g_AVCastControllerCallbackProxy {nullptr};
 
 void MyLogCallback(const LogType type, const LogLevel level,
     const unsigned int domain, const char *tag, const char *msg)
@@ -111,6 +115,19 @@ void AVCastControllerTest::SetUpTestCase()
     AccessTokenKit::AllocHapToken(g_info, g_policy);
     AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(g_info.userID, g_info.bundleName, g_info.instIndex);
     SetSelfTokenID(tokenID.tokenIDEx);
+
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (mgr == nullptr) {
+        SLOGI("failed to get sa mgr");
+        return;
+    }
+    auto object = mgr->GetSystemAbility(OHOS::AVSESSION_SERVICE_ID);
+    if (object == nullptr) {
+        SLOGI("failed to get service");
+        return;
+    }
+    g_AVCastControllerCallbackProxy = iface_cast<AVCastControllerCallbackProxy>(object);
+    ASSERT_TRUE(g_AVCastControllerCallbackProxy != nullptr);
 }
 
 void AVCastControllerTest::TearDownTestCase()
@@ -230,6 +247,29 @@ void AVCastControllerCallbackImpl::OnPlayerError(const int32_t errorCode, const 
 void AVCastControllerCallbackImpl::OnCastValidCommandChanged(const std::vector<int32_t> &cmds)
 {
 }
+
+class AVCastControllerProxyMock : public IAVCastControllerProxy {
+public:
+    void Release() {};
+    int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>
+        iAVCastControllerProxyListener) {return 0;}
+    int32_t UnRegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>
+        iAVCastControllerProxyListener) {return 0;}
+    AVQueueItem GetCurrentItem() {return AVQueueItem();}
+    int32_t Start(const AVQueueItem& avQueueItem) {return 0;}
+    int32_t Prepare(const AVQueueItem& avQueueItem) {return 0;}
+    void SendControlCommand(const AVCastControlCommand cmd) {}
+    int32_t GetDuration(int32_t& duration) {return 0;}
+    int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) {return 0;}
+    int32_t SetValidAbility(const std::vector<int32_t>& validAbilityList) {return 0;}
+    int32_t GetValidAbility(std::vector<int32_t> &validAbilityList) {return 0;}
+    int32_t SetDisplaySurface(std::string& surfaceId) {return 0;}
+    int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) {return 0;}
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) {return 0;}
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) {return 0;}
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) {return 0;}
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
+};
 
 /**
 * @tc.name: SendControlCommand001
@@ -844,5 +884,273 @@ HWTEST_F(AVCastControllerTest, UnRegisterCastSessionStateListener001, TestSize.L
 
     EXPECT_EQ(hwCastProvider.UnRegisterCastSessionStateListener(2, nullptr), false);
 }
+
+/**
+* @tc.name: OnCastPlaybackStateChange002
+* @tc.desc: OnCastPlaybackStateChange, no callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARE);
+    castController_->OnCastPlaybackStateChange(state);
+    EXPECT_TRUE(state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY);
+}
+
+/**
+* @tc.name: OnCastPlaybackStateChange003
+* @tc.desc: OnCastPlaybackStateChange, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange003, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
+    
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    castController_->OnCastPlaybackStateChange(state);
+    EXPECT_TRUE(state.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY);
+}
+
+/**
+* @tc.name: OnCastPlaybackStateChange003
+* @tc.desc: OnCastPlaybackStateChange, have reigstered callback and session callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange004, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
+    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool)->void {};
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    castController_->OnCastPlaybackStateChange(state);
+    EXPECT_TRUE(state.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY);
+}
+
+/**
+* @tc.name: OnMediaItemChange002
+* @tc.desc: OnMediaItemChange, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnMediaItemChange002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    AVQueueItem avQueueItem;
+    castController_->OnMediaItemChange(avQueueItem);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: OnPlayNext002
+* @tc.desc: OnPlayNext, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnPlayNext002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    castController_->OnPlayNext();
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: OnPlayPrevious002
+* @tc.desc: OnPlayPrevious, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnPlayPrevious002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    castController_->OnPlayPrevious();
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: OnSeekDone002
+* @tc.desc: OnSeekDone, no callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnSeekDone002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    int32_t seekNumber = 0;
+    castController_->OnSeekDone(seekNumber);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: OnVideoSizeChange002
+* @tc.desc: OnVideoSizeChange, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnVideoSizeChange002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    int32_t width = 0;
+    int32_t height = 0;
+    castController_->OnVideoSizeChange(width, height);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: OnPlayerError002
+* @tc.desc: OnPlayerError, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnPlayerError002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    int32_t errorCode = 0;
+    std::string errorMsg = "errorMsg";
+    castController_->OnPlayerError(errorCode, errorMsg);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: OnEndOfStream001
+* @tc.desc: OnEndOfStream, no callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnEndOfStream001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = nullptr;
+    int32_t isLooping = true;
+    castController_->OnEndOfStream(isLooping);
+    EXPECT_TRUE(castController_->callback_ == nullptr);
+}
+
+/**
+* @tc.name: OnEndOfStream002
+* @tc.desc: OnEndOfStream, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnEndOfStream002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    int32_t isLooping = true;
+    castController_->OnEndOfStream(isLooping);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: OnPlayRequest001
+* @tc.desc: OnPlayRequest, no callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnPlayRequest001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = nullptr;
+    AVQueueItem avQueueItem;
+    castController_->OnPlayRequest(avQueueItem);
+    EXPECT_TRUE(castController_->callback_ == nullptr);
+}
+
+/**
+* @tc.name: OnPlayRequest002
+* @tc.desc: OnPlayRequest, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnPlayRequest002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    AVQueueItem avQueueItem;
+    castController_->OnPlayRequest(avQueueItem);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: OnKeyRequest001
+* @tc.desc: OnKeyRequest, no callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnKeyRequest001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = nullptr;
+    std::string assetId = "test";
+    std::vector<uint8_t> keyRequestData {};
+    castController_->OnKeyRequest(assetId, keyRequestData);
+    EXPECT_TRUE(castController_->callback_ == nullptr);
+}
+
+/**
+* @tc.name: OnKeyRequest002
+* @tc.desc: OnKeyRequest, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnKeyRequest002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    std::string assetId = "test";
+    std::vector<uint8_t> keyRequestData {};
+    castController_->OnKeyRequest(assetId, keyRequestData);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
+* @tc.name: onDataSrcRead001
+* @tc.desc: onDataSrcRead, no callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, onDataSrcRead001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = nullptr;
+    std::shared_ptr<AVSharedMemory> mem = nullptr;
+    uint32_t length = 0;
+    int64_t pos = 0;
+    castController_->onDataSrcRead(mem, length, pos);
+    EXPECT_TRUE(castController_->callback_ == nullptr);
+}
+
+/**
+* @tc.name: onDataSrcRead002
+* @tc.desc: onDataSrcRead, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, onDataSrcRead002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    std::shared_ptr<AVSharedMemory> mem = nullptr;
+    uint32_t length = 0;
+    int64_t pos = 0;
+    castController_->onDataSrcRead(mem, length, pos);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
 } // namespace AVSession
 } // namespace OHOS

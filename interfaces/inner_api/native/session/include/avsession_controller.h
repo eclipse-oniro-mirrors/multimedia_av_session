@@ -85,7 +85,19 @@ public:
      * @since 9
     */
     virtual int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability) = 0;
-
+    
+    /**
+     * Get the WantAgent object saved by the application in the session.
+     *
+     * @param ability Objects saved in setLaunchAbility.
+     * @return int32_t Successfully obtained.
+     * @since 9
+    */
+    virtual int32_t GetLaunchAbilityInner(AbilityRuntime::WantAgent::WantAgent*& ability)
+    {
+        return 0;
+    };
+    
     /**
      * Get valid commands supported by the session.
      *

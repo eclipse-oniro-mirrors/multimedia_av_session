@@ -38,7 +38,9 @@ static std::string g_errLog;
 static void MyLogCallback(const LogType type, const LogLevel level,
     const unsigned int domain, const char *tag, const char *msg)
 {
-    g_errLog = msg;
+    if (msg != nullptr) {
+        g_errLog.assign(g_errLog, 0, strlen(msg));
+    }
 }
 
 static HapInfoParams g_info = {

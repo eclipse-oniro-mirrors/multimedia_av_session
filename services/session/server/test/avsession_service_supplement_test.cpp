@@ -342,7 +342,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, Dump001, TestSize.Level1)
 {
     SLOGI("Dump001 with OnStartProcess begin!");
     std::vector<std::u16string> argsList;
-    g_AVSessionService->OnStartProcess();
+    g_AVSessionService->dumpHelper_ = std::make_unique<AVSessionDumper>();
     int32_t ret = g_AVSessionService->Dump(1, argsList);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("Dump001 end!");
@@ -359,7 +359,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, Dump002, TestSize.Level1)
     std::vector<std::u16string> argsList;
     std::u16string str(5, 'a');
     argsList.emplace_back(str);
-    g_AVSessionService->OnStartProcess();
+    g_AVSessionService->dumpHelper_ = std::make_unique<AVSessionDumper>();
     int32_t ret = g_AVSessionService->Dump(1, argsList);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("Dump002 end!");

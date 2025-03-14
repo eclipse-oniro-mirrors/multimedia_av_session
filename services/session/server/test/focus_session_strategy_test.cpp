@@ -200,7 +200,7 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestS
     audioRendererChangeInfo.sessionId = 2;
     audioRendererChangeInfo.rendererState = RendererState::RENDERER_RELEASED;
     bool ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo.clientUID);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     SLOGD("IsFocusSession001 end!");
 }
 

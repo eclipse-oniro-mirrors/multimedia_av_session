@@ -146,6 +146,12 @@ void AVCastControllerCallbackClient::OnCastValidCommandChanged(const std::vector
     SLOGI("OnCastValidCommandChanged end");
 }
 
+int32_t AVCastControllerCallbackClient::onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos)
+{
+    auto callback = callback_;
+    return callback->onDataSrcRead(mem, length, pos);
+}
+
 void AVCastControllerCallbackClient::AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>&
     listener)
 {

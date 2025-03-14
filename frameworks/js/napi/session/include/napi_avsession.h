@@ -39,8 +39,7 @@ public:
     static napi_value Init(napi_env env, napi_value exports);
     static napi_status NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out,
         std::shared_ptr<NapiAVSession>& napiSession);
-    static napi_status ReCreateInstance(std::shared_ptr<NapiAVSession>& napiSession,
-        std::shared_ptr<AVSession> nativeSession);
+    static napi_status ReCreateInstance(std::shared_ptr<AVSession> nativeSession);
 
     NapiAVSession();
     ~NapiAVSession();
@@ -146,7 +145,9 @@ private:
     std::shared_ptr<NapiAVSessionCallback> callback_;
     std::chrono::system_clock::time_point latestMetadataTs_;
     std::string latestMetadataUri_;
+    std::string latestMetadataAssetId_;
     std::string latestDownloadedUri_;
+    std::string latestDownloadedAssetId_;
     AVMetaData metaData_;
 
     static std::mutex syncMutex_;
@@ -154,6 +155,7 @@ private:
     static std::condition_variable syncCond_;
     static std::condition_variable syncAsyncCond_;
     static int32_t playBackStateRet_;
+    static std::shared_ptr<NapiAVSession> napiAVSession_;
 
     static std::map<std::string, OnEventHandlerType> onEventHandlers_;
     static std::map<std::string, OffEventHandlerType> offEventHandlers_;

@@ -493,6 +493,7 @@ void CJAVSessionCallback::OnCommonCommand(
         ret = ConvertNativeToCJStruct(commandArgs, cArgs);
         if (ret != CJNO_ERROR) {
             SLOGD("AAFwk::WantParams convert to C Type failed");
+            free(ccommand);
             return ;
         }
         commonCommand(ccommand, cArgs);

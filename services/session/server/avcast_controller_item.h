@@ -20,6 +20,7 @@
 #include "avcast_controller_callback_proxy.h"
 #include "avcast_controller_stub.h"
 #include "avcast_control_command.h"
+#include "av_shared_memory_base.h"
 
 namespace OHOS::AVSession {
 class AVCastControllerItem : public AVCastControllerStub, public IAVCastControllerProxyListener,
@@ -55,6 +56,8 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
 
+    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos) override;
+
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
     int32_t Start(const AVQueueItem& avQueueItem) override;
@@ -64,6 +67,14 @@ public:
     int32_t GetDuration(int32_t& duration) override;
 
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
+
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override;
+
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) override;
+
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override;
+
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override;
 
     int32_t GetCurrentItem(AVQueueItem& currentItem) override;
 
@@ -92,6 +103,8 @@ public:
     int32_t Destroy() override;
 
     void SetSessionCallbackForCastCap(const std::function<void(std::string, bool, bool)>& callback);
+
+    void SetQueueItemDataSrc(const AVQueueItem& avQueueItem);
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;

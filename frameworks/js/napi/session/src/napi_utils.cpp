@@ -524,6 +524,16 @@ napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAge
     return status;
 }
 
+napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent* in, napi_value& out)
+{
+    auto status = napi_create_object(env, &out);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    auto finalizecb = [](napi_env env, void* data, void* hint) {};
+    status = napi_wrap(env, out, static_cast<void*>(in), finalizecb, nullptr, nullptr);
+    CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
+    return status;
+}
+
 /* napi_value <-> AAFwk::WantParams */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, AAFwk::WantParams& out)
 {
@@ -1042,6 +1052,54 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<AVQueueInfo>& in
     return status;
 }
 
+/* napi_value <-> std::vector<ResolutionLevel> */
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<ResolutionLevel>& in, napi_value& out)
+{
+    SLOGD("napi_value <- std::vector<ResolutionLevel>  %{public}d", static_cast<int>(in.size()));
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN((status == napi_ok), "create_array failed!", status);
+    int index = 0;
+    for (const auto& item : in) {
+        napi_value entry = nullptr;
+        SetValue(env, item, entry);
+        status = napi_set_element(env, out, index++, entry);
+        CHECK_RETURN(status == napi_ok, "napi_set_element failed", status);
+    }
+    return status;
+}
+
+/* napi_value <-> std::vector<HDRFormat> */
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<HDRFormat>& in, napi_value& out)
+{
+    SLOGD("napi_value <- std::vector<HDRFormat>  %{public}d", static_cast<int>(in.size()));
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN((status == napi_ok), "create_array failed!", status);
+    int index = 0;
+    for (const auto& item : in) {
+        napi_value entry = nullptr;
+        SetValue(env, item, entry);
+        status = napi_set_element(env, out, index++, entry);
+        CHECK_RETURN(status == napi_ok, "napi_set_element failed", status);
+    }
+    return status;
+}
+
+/* napi_value <-> std::vector<float> */
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<float>& in, napi_value& out)
+{
+    SLOGD("napi_value <- std::vector<float>  %{public}d", static_cast<int>(in.size()));
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN((status == napi_ok), "create_array failed!", status);
+    int index = 0;
+    for (const auto& item : in) {
+        napi_value entry = nullptr;
+        SetValue(env, item, entry);
+        status = napi_set_element(env, out, index++, entry);
+        CHECK_RETURN(status == napi_ok, "napi_set_element failed", status);
+    }
+    return status;
+}
+
 /* napi_value <-> DeviceInfo */
 napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& out)
 {
@@ -1081,6 +1139,11 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     status = SetValue(env, in.ipAddress_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "ipAddress", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.networkId_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "networkId", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
     status = SetValue(env, in.providerId_, property);
@@ -1531,6 +1594,10 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
     CHECK_RETURN(GetOptionalString(env, in, out) == napi_ok, "get DeviceInfo ip address value failed", status);
+    status = napi_get_named_property(env, in, "networkId", &value);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo networkId_ failed", status);
+    status = GetValue(env, value, out.networkId_);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo networkId_ value failed", status);
  
     bool hasKey = false;
     napi_has_named_property(env, in, "providerId", &hasKey);
@@ -1799,6 +1866,41 @@ napi_status NapiUtils::SetValue(
         napi_set_element(env, out, index++, entry);
     }
     return status;
+}
+
+/* napi_value -> AVDataSrcDescriptor */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVDataSrcDescriptor& out)
+{
+    napi_value value {};
+    auto status = napi_ok;
+    bool hasFileSize = false;
+    status = napi_has_named_property(env, in, "fileSize", &hasFileSize);
+    CHECK_RETURN(status == napi_ok && hasFileSize, "get fileSize failed!", status);
+    status = napi_get_named_property(env, in, "fileSize", &value);
+    CHECK_RETURN(status == napi_ok, "get fileSize failed", status);
+    status = GetValue(env, value, out.fileSize);
+    CHECK_RETURN(status == napi_ok, "get fileSize value failed", status);
+
+    bool hasCallback = false;
+    status = napi_has_named_property(env, in, "callback", &hasCallback);
+    CHECK_RETURN(status == napi_ok && hasCallback, "get callback failed!", status);
+    out.hasCallback = hasCallback;
+
+    return napi_ok;
+}
+
+/* napi_value <- AVDataSrcDescriptor */
+napi_status NapiUtils::SetValue(napi_env env, const AVDataSrcDescriptor& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+
+    napi_value property = nullptr;
+    status = SetValue(env, in.fileSize, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "fileSize", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    return napi_ok;
 }
 
 napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)

@@ -102,7 +102,7 @@ public:
         OHOS::sptr<IRemoteObject> &session) override { return 0; };
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor> &descriptors) override { return 0; };
     int32_t GetSessionDescriptorsBySessionId(const std::string &sessionId,
-        AVSessionDescriptor &descriptor) override { return isSuccess ? AVSESSION_SUCCESS : 0; };
+        AVSessionDescriptor &descriptor) override { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; };
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor> &descriptors) override
     {
         return 0;
@@ -116,7 +116,7 @@ public:
     int32_t StartAVPlayback(const std::string &bundleName, const std::string &assetId) override { return 0; };
     int32_t CreateControllerInner(const std::string &sessionId, OHOS::sptr<IRemoteObject> &object) override
     {
-        return isSuccess ? AVSESSION_SUCCESS : 0;
+        return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR;
     };
     int32_t RegisterSessionListener(const OHOS::sptr<ISessionListener> &listener) override { return 0; };
     int32_t RegisterSessionListenerForAllUsers(const OHOS::sptr<ISessionListener> &listener) override { return 0; };
@@ -130,7 +130,7 @@ public:
         return 0;
     };
     int32_t ProcessCastAudioCommand(const RemoteServiceCommand command, const std::string &input,
-        std::string &output) override { return isSuccess ? AVSESSION_SUCCESS : 0; };
+        std::string &output) override { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; };
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t GetAVCastControllerInner(const std::string &sessionId, OHOS::sptr<IRemoteObject> &object) override
     {
@@ -617,4 +617,155 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest023, TestSize.Level1)
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest023 end!");
+}
+
+/**
+ * @tc.name: OnRemoteRequest024
+ * @tc.desc: Test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest024, TestSize.Level1)
+{
+    SLOGI("OnRemoteRequest024 begin!");
+    uint32_t code = static_cast<uint32_t>(OHOS::AVSession::AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST);
+    AVSessionServiceStubPerDemo avsessionservicestub;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionService::GetDescriptor());
+    data.WriteString("test");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnRemoteRequest024 end!");
+}
+
+/**
+ * @tc.name: HandleCreateSessionInner_001
+ * @tc.desc: Test HandleCreateSessionInner with CreateSessionInner returning AVSESSION_SUCCESS.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleCreateSessionInner_001, TestSize.Level1)
+{
+    SLOGD("HandleCreateSessionInner_001 begin!");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    std::string sessionTag = "TestSessionTag";
+    int32_t sessionType = 1;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("TestBundleName");
+    std::u16string interfaceToken = u"AVSessionService";
+    data.WriteInterfaceToken(interfaceToken);
+    data.WriteString(sessionTag);
+    data.WriteInt32(sessionType);
+    data.WriteParcelable(&elementName);
+    AVSessionServiceStubPerDemo stub;
+    int32_t result = stub.HandleCreateSessionInner(data, reply);
+    EXPECT_EQ(result, OHOS::ERR_NONE);
+    SLOGD("HandleCreateSessionInner_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceStub_HandleStartCast_001
+ * @tc.desc: Test HandleStartCast with deviceInfoSize over RECEIVE_DEVICE_NUM_MAX.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStartCast_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceStub_HandleStartCast_001 begin!");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("TestSessionId");
+    data.WriteInt32(1234);
+    data.WriteInt32(5678);
+    data.WriteInt32(AVSessionServiceStubPerDemo::RECEIVE_DEVICE_NUM_MAX + 1);
+    AVSessionServiceStubPerDemo stub;
+    int32_t result = stub.HandleStartCast(data, reply);
+    EXPECT_EQ(result, OHOS::ERR_NONE);
+    EXPECT_EQ(reply.ReadInt32(), ERR_NO_PERMISSION);
+    SLOGD("AVSessionServiceStub_HandleStartCast_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceStub_HandleStartCast_002
+ * @tc.desc: Test HandleStartCast with CheckBeforeHandleStartCast returning false.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStartCast_002, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceStub_HandleStartCast_002 begin!");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("TestSessionId");
+    data.WriteInt32(1234);
+    data.WriteInt32(5678);
+    data.WriteInt32(1);
+    AVSessionServiceStubPerDemo stub;
+    stub.isSuccess = false;
+    int32_t result = stub.HandleStartCast(data, reply);
+    EXPECT_EQ(result, OHOS::ERR_NONE);
+    EXPECT_EQ(reply.ReadInt32(), ERR_NO_PERMISSION);
+    SLOGD("AVSessionServiceStub_HandleStartCast_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceStub_HandleStartCast_003
+ * @tc.desc: Test HandleStartCast with CheckBeforeHandleStartCast returning true.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStartCast_003, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceStub_HandleStartCast_003 begin!");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("TestSessionId");
+    data.WriteInt32(1234);
+    data.WriteInt32(5678);
+    data.WriteInt32(1);
+    AVSessionServiceStubPerDemo stub;
+    stub.isSuccess = true;
+    int32_t result = stub.HandleStartCast(data, reply);
+    EXPECT_EQ(result, OHOS::ERR_NONE);
+    EXPECT_EQ(reply.ReadInt32(), ERR_NO_PERMISSION);
+    SLOGD("AVSessionServiceStub_HandleStartCast_003 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceStub_HandleStopCast_001
+ * @tc.desc: Test HandleStopCast with CheckPermission returning non-ERR_NONE.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopCast_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceStub_HandleStopCast_001 begin!");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("TestSessionId");
+    data.WriteInt32(1234);
+    data.WriteInt32(5678);
+    AVSessionServiceStubPerDemo stub;
+    int32_t result = stub.HandleStopCast(data, reply);
+    EXPECT_EQ(result, OHOS::ERR_NONE);
+    SLOGD("AVSessionServiceStub_HandleStopCast_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceStub_HandleStopDeviceLogging_001
+ * @tc.desc: Test HandleStopDeviceLogging with CheckPermission returning non-ERR_NONE.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopDeviceLogging_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceStub_HandleStopDeviceLogging_001 begin!");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    AVSessionServiceStubPerDemo stub;
+    int32_t result = stub.HandleStopDeviceLogging(data, reply);
+    EXPECT_EQ(result, OHOS::ERR_NONE);
+    SLOGD("AVSessionServiceStub_HandleStopDeviceLogging_001 end!");
 }

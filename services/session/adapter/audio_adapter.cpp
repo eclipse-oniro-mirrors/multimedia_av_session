@@ -60,12 +60,6 @@ void AudioAdapter::Init()
     volumeMax_ = AudioStandard::AudioSystemManager::GetInstance()->GetMaxVolume(streamType);
     volumeMin_ = AudioStandard::AudioSystemManager::GetInstance()->GetMinVolume(streamType);
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-
-    queryAllowedPlaybackCallbackFunc_ = GetAllowedPlaybackCallbackFunc();
-    ret = RegisterAllowedPlaybackCallback(queryAllowedPlaybackCallbackFunc_);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("register query allowed playback callback failed!");
-    }
 }
 
 void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
@@ -369,23 +363,5 @@ int32_t AudioAdapter::SelectOutputDevice(const AudioDeviceDescriptorWithSptr& de
     auto ret = AudioStandard::AudioSystemManager::GetInstance()->SelectOutputDevice(deviceDescriptorVector);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SelectOutputDevice failed");
     return AVSESSION_SUCCESS;
-}
-
-std::function<bool(int32_t, int32_t)> AudioAdapter::GetAllowedPlaybackCallbackFunc()
-{
-    return [](int32_t uid, int32_t pid) -> bool {
-        auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-        CHECK_AND_RETURN_RET_LOG(mgr != nullptr, true, "SystemAbilityManager is null");
-        auto object = mgr->CheckSystemAbility(APP_MGR_SERVICE_ID);
-        CHECK_AND_RETURN_RET_LOG(object != nullptr, true, "APP_MAGR_SERVICE is null");
-        static AVSessionUsersManager usersManager;
-        bool hasSession = usersManager.GetContainer().UidHasSession(uid);
-        bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
-        bool isSystem = PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid);
-        auto ret = hasSession || isSystem || !isBack;
-        SLOGI("avsession uid=%{public}d pid=%{public}d hasSession=%{public}d isBack=%{public}d isSystem=%{public}d",
-            uid, pid, hasSession, isBack, isSystem);
-        return ret;
-    };
 }
 }

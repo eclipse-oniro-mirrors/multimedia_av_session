@@ -141,7 +141,7 @@ bool FocusSessionStrategy::CheckFocusSessionStop(const int32_t uid)
     bool isFocusStop = false;
     auto it = lastStates_.find(uid);
     if (it == lastStates_.end()) {
-        isFocusStop = true;
+        isFocusStop = false;
     } else {
         isFocusStop = it->second == runningState;
     }

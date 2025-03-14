@@ -14,6 +14,9 @@
  */
 
 #include "napi_queue_item.h"
+#include "napi/native_api.h"
+#include "napi/native_common.h"
+#include "napi/native_node_api.h"
 #include "avsession_log.h"
 #include "avsession_pixel_map_adapter.h"
 #include "napi_utils.h"
@@ -102,5 +105,40 @@ napi_status NapiQueueItem::SetDescription(napi_env env, const AVQueueItem& in, n
     status = napi_set_named_property(env, out, "description", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
+}
+
+napi_status NapiQueueItem::GetDataSrc(napi_env env, const napi_value in, napi_value* fileSize, napi_value* callback)
+{
+    bool hasDescription = false;
+    napi_status status = napi_has_named_property(env, in, "description", &hasDescription);
+    CHECK_RETURN((status == napi_ok) && hasDescription, "has description failed", status);
+    napi_value descriptor = nullptr;
+    status = napi_get_named_property(env, in, "description", &descriptor);
+    CHECK_RETURN((status == napi_ok) && (descriptor != nullptr), "get description failed", status);
+
+    bool hasDataSrc = false;
+    status = napi_has_named_property(env, descriptor, "dataSrc", &hasDataSrc);
+    CHECK_RETURN((status == napi_ok) && hasDataSrc, "has dataSrc failed", status);
+    napi_value dataSrc = nullptr;
+    status = napi_get_named_property(env, descriptor, "dataSrc", &dataSrc);
+    CHECK_RETURN((status == napi_ok) && (dataSrc != nullptr), "get dataSrc failed", status);
+
+    bool hasFileSize = false;
+    status = napi_has_named_property(env, dataSrc, "fileSize", &hasFileSize);
+    CHECK_RETURN((status == napi_ok) && hasFileSize, "no file size", status);
+    status = napi_get_named_property(env, dataSrc, "fileSize", fileSize);
+    CHECK_RETURN(status == napi_ok, "get fileSize failed", status);
+
+    int64_t fSize;
+    napi_get_value_int64(env, *fileSize, &fSize);
+    CHECK_RETURN(status == napi_ok, "get fileSize value failed", status);
+
+    bool hasCallback = false;
+    status = napi_has_named_property(env, dataSrc, "callback", &hasCallback);
+    CHECK_RETURN((status == napi_ok) && hasCallback, "no callback", status);
+
+    status = napi_get_named_property(env, dataSrc, "callback", callback);
+    CHECK_RETURN(status == napi_ok, "get callback failed", status);
+    return napi_ok;
 }
 }

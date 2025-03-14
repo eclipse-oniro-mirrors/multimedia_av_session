@@ -37,6 +37,7 @@
 #include "av_file_descriptor.h"
 #include "avqueue_info.h"
 #include "avsession_controller.h"
+#include "av_data_src_descriptor.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -124,6 +125,7 @@ public:
     /* napi_value <-> AbilityRuntime::WantAgent::WantAgent */
     static napi_status GetValue(napi_env env, napi_value in, AbilityRuntime::WantAgent::WantAgent*& out);
     static napi_status SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent& in, napi_value& out);
+    static napi_status SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent* in, napi_value& out);
 
     /* napi_value <-> AAFwk::WantParams */
     static napi_status GetValue(napi_env env, napi_value in, AAFwk::WantParams& out);
@@ -194,6 +196,15 @@ public:
     /* napi_value <-> std::vector<AVQueueInfo> */
     static napi_status SetValue(napi_env env, const std::vector<AVQueueInfo>& in, napi_value& out);
 
+    /* napi_value <-> std::vector<ResolutionLevel> */
+    static napi_status SetValue(napi_env env, const std::vector<ResolutionLevel>& in, napi_value& out);
+
+    /* napi_value <-> std::vector<HDRFormat> */
+    static napi_status SetValue(napi_env env, const std::vector<HDRFormat>& in, napi_value& out);
+
+    /* napi_value <-> std::vector<float> */
+    static napi_status SetValue(napi_env env, const std::vector<float>& in, napi_value& out);
+
     /* OutputDeviceInfo <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, OutputDeviceInfo& out);
     static napi_status SetValue(napi_env env, const OutputDeviceInfo& in, napi_value& out);
@@ -225,6 +236,10 @@ public:
     
     /* napi_value <-> NapiAVCastPickerOptions */
     static napi_status GetValue(napi_env env, napi_value in, NapiAVCastPickerOptions& out);
+
+    /* napi_value <-> AVDataSrcDescriptor */
+    static napi_status GetValue(napi_env env, napi_value in, AVDataSrcDescriptor& out);
+    static napi_status SetValue(napi_env env, const AVDataSrcDescriptor& in, napi_value& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>

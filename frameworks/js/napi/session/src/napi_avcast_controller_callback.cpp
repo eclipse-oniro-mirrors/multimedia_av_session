@@ -32,6 +32,11 @@ NapiAVCastControllerCallback::NapiAVCastControllerCallback()
 
 NapiAVCastControllerCallback::~NapiAVCastControllerCallback()
 {
+    if (dataSrcRef_ != nullptr) {
+        napi_ref ref = dataSrcRef_;
+        dataSrcRef_ = nullptr;
+        napi_delete_reference(env_, ref);
+    }
     SLOGI("destroy");
 }
 
@@ -312,6 +317,103 @@ void NapiAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<i
     SLOGI("Start handle OnValidCommandChanged event. cmd size:%{public}zd", cmds.size());
     std::vector<std::string> stringCmds = NapiCastControlCommand::ConvertCommands(cmds);
     HandleEvent(EVENT_CAST_VALID_COMMAND_CHANGED, stringCmds);
+}
+
+int32_t NapiAVCastControllerCallback::onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos)
+{
+    SLOGI("napi onDataSrcRead length %{public}d", length);
+    return readDataSrc(env_, mem, length, pos);
+}
+
+napi_status NapiAVCastControllerCallback::saveDataSrc(napi_env env, napi_value avQueueItem)
+{
+    napi_value fileSize;
+    napi_value callback {};
+    napi_status status = NapiQueueItem::GetDataSrc(env, avQueueItem, &fileSize, &callback);
+    CHECK_RETURN(status == napi_ok, "GetDataSrc value failed", status);
+    if (status != napi_ok) {
+        SLOGI("no saveDataSrc, reset");
+        return status;
+    }
+
+    napi_env preEnv = env_;
+    env_ = env;
+    if (dataSrcRef_ != nullptr) {
+        napi_ref ref = dataSrcRef_;
+        dataSrcRef_ = nullptr;
+        napi_delete_reference(preEnv, ref);
+    }
+    status = napi_create_reference(env, callback, 1, &dataSrcRef_);
+    CHECK_RETURN(status == napi_ok, "napi_create_reference failed", status);
+
+    if (threadSafeReadDataSrcFunc_ == nullptr) {
+        napi_value resourceName = nullptr;
+        napi_create_string_utf8(env, "ThreadSafeFunction in NapiAVCastControllerCallback",
+            NAPI_AUTO_LENGTH, &resourceName);
+        napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
+            nullptr, threadSafeReadDataSrcCb, &threadSafeReadDataSrcFunc_);
+    }
+    return napi_ok;
+}
+
+void NapiAVCastControllerCallback::threadSafeReadDataSrcCb(napi_env env, napi_value js_cb, void* context, void* data)
+{
+    std::shared_ptr<DataContextForThreadSafe> appData(static_cast<DataContextForThreadSafe*>(data),
+        [](DataContextForThreadSafe* ptr) {
+        delete ptr;
+        ptr = nullptr;
+    });
+
+    napi_status status;
+    napi_value global {};
+    napi_get_global(env, &global);
+
+    napi_value callback {};
+    napi_get_reference_value(env, appData->callback, &callback);
+
+    napi_value argv[3] = { nullptr };
+
+    status = napi_create_external_arraybuffer(env, appData->buffer, appData->length,
+        [](napi_env env, void *data, void *hint) {}, nullptr, &argv[NapiUtils::ARGV_FIRST]);
+    CHECK_RETURN_VOID(status == napi_ok, "get napi_create_external_arraybuffer value failed");
+
+    status = napi_create_uint32(env, appData->length, &argv[NapiUtils::ARGV_SECOND]);
+    CHECK_RETURN_VOID(status == napi_ok, "get napi_create_uint32 value failed");
+
+    status = napi_create_int64(env, appData->pos, &argv[NapiUtils::ARGV_THIRD]);
+    CHECK_RETURN_VOID(status == napi_ok, "get napi_create_int64 value failed");
+
+    napi_value result;
+    status = napi_call_function(env, global, callback, NapiUtils::ARGC_THREE, argv, &result);
+    if (status != napi_ok) {
+        SLOGE("call function failed status=%{public}d.", status);
+    }
+    napi_get_value_int32(env, result, appData->result);
+
+    appData->dataSrcSyncCond.notify_one();
+    return;
+}
+
+int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, std::shared_ptr<AVSharedMemory> mem,
+    uint32_t length, int64_t pos)
+{
+    if (dataSrcRef_ == nullptr) {
+        SLOGE("dataSrcRef_ nullptr");
+        return 0;
+    }
+    int32_t result;
+    DataContextForThreadSafe* data =
+        new DataContextForThreadSafe { dataSrcRef_, mem->GetBase(), length, pos, &result, dataSrcSyncCond_ };
+    napi_status status = napi_call_threadsafe_function(threadSafeReadDataSrcFunc_, data, napi_tsfn_blocking);
+    CHECK_RETURN(status == napi_ok, "get callback value failed", 0);
+
+    std::unique_lock<std::mutex> lock(dataSrcSyncLock_);
+    auto waitStatus = dataSrcSyncCond_.wait_for(lock, std::chrono::milliseconds(500));
+    if (waitStatus == std::cv_status::timeout) {
+        SLOGE("readDataSrc dataSrcSyncCond_ timeout");
+    }
+    SLOGI("readDataSrc result %{public}d", result);
+    return result;
 }
 
 napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
