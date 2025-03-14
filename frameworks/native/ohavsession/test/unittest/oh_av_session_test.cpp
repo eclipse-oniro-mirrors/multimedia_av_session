@@ -1183,4 +1183,111 @@ HWTEST(OHAVSessionTest, UnregisterToggleFavoriteCallback_001, TestSize.Level1)
     AVSession_ErrCode result = oHAVSession->UnregisterToggleFavoriteCallback(callback);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
+
+/**
+ * @tc.name: OHAVSession_GetSessionId_002
+ * @tc.desc: Test GetSessionId when sessionId_ is empty
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_GetSessionId_002, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+
+    oHAVSession->sessionId_ = "";
+
+    const std::string& sessionId = oHAVSession->GetSessionId();
+    EXPECT_TRUE(sessionId != "");
+}
+
+/**
+ * @tc.name: RegisterCommandCallback_003
+ * @tc.desc: send invalid command
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, RegisterCommandCallback_003, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = static_cast<AVSession_ControlCommand>(100);
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->RegisterCommandCallback(command, callback, (void *)(&userData));
+    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
+}
+
+/**
+ * @tc.name: RegisterCommandCallback_004
+ * @tc.desc: send invalid command
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, RegisterCommandCallback_004, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    AVSession_ControlCommand command = CONTROL_CMD_INVALID;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->RegisterCommandCallback(command, callback, (void *)(&userData));
+    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
+}
+
+/**
+ * @tc.name: CheckAndRegister_001
+ * @tc.desc: have not registered callback
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, CheckAndRegister_001, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    oHAVSession->ohAVSessionCallbackImpl_ = nullptr;
+    AVSession_ErrCode result = oHAVSession->CheckAndRegister();
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: CheckAndRegister_002
+ * @tc.desc: have registered callback
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, CheckAndRegister_002, TestSize.Level1)
+{
+    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
+    const char* sessionTag = "1";
+    const char* bundleName = "2";
+    const char* abilityName = "3";
+    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
+    oHAVSession->ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+    AVSession_ErrCode result = oHAVSession->CheckAndRegister();
+    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
 }
