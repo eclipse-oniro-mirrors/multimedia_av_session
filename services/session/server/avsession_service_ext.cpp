@@ -66,6 +66,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
 
 void AVSessionService::ReleaseSuperLauncher(std::string serviceName)
 {
+    AudioDeviceManager::GetInstance().UnInitAudioStateCallback();
     MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
     if (migrateAVSession_ != nullptr) {
         RemoveInnerSessionListener(migrateAVSession_.get());
@@ -102,7 +103,6 @@ void AVSessionService::NotifyMigrateStop(const std::string &deviceId)
     }
     std::lock_guard lockGuard(sessionServiceLock_);
     migrateAVSession_->StopObserveControllerChanged(deviceId);
-    AudioDeviceManager::GetInstance().UnInitAudioStateCallback();
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
