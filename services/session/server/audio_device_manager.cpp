@@ -108,20 +108,6 @@ void AudioDeviceManager::RegisterPreferedOutputDeviceChangeCallback()
     rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
     audioRoutingManager->SetPreferredOutputDeviceChangeCallback(rendererInfo,
         audioPreferedOutputDeviceChangeCallback_);
-    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> desc;
-    audioRoutingManager->GetPreferredOutputDeviceForRendererInfo(rendererInfo, desc);
-    if (desc.empty()) {
-        SLOGE("no available device");
-        return;
-    }
-    std::shared_ptr<AudioStandard::AudioDeviceDescriptor> device = desc[0];
-    if (device != nullptr) {
-        if (AudioStandard::LOCAL_NETWORK_ID == device->networkId_) {
-            outputDevice_ = AUDIO_OUTPUT_SOURCE;
-        } else {
-            outputDevice_ = AUDIO_OUTPUT_SINK;
-        }
-    }
 }
 
 void AudioDeviceManager::UnRegisterPreferedOutputDeviceChangeCallback()
@@ -139,35 +125,18 @@ void AudioDeviceManager::SendRemoteAvSessionInfo(const std::string &deviceId)
 {
     if (migrateSession_ != nullptr) {
         migrateSession_->SendRemoteControllerList(deviceId);
+        migrateSession_->SendRemoteHistorySessionList(deviceId);
     }
 }
 
-void AudioDeviceManager::SendRemoteAudioMsg(const std::string &deviceId, std::string msg)
+void AudioDeviceManager::ClearRemoteAvSessionInfo(const std::string &deviceId)
 {
     if (migrateSession_ != nullptr) {
-        migrateSession_->SendRemoteControllerInfo(deviceId, msg);
+        migrateSession_->ClearRemoteControllerList(deviceId);
+        migrateSession_->ClearRemoteHistorySessionList(deviceId);
     }
 }
 
-std::string AudioDeviceManager::GenerateEmptySession()
-{
-    Json::Value jsonArray(Json::arrayValue);
-    Json::Value result;
-    result[SESSION_INFO] =
-        "OAAAAEJOREwBAAAAEwAAAEMAbwBuAHQAcgBvAGwAbABlAHIAVwBoAGkAdABlAEwAaQBzAHQAAAAU\nAAAAAQAAAA==\n";
-    result[VOLUME_INFO] = "";
-    result[PACKAGE_NAME] = "";
-    result[PLAYER_ID] = "";
-    jsonArray[0] = result;
-    Json::Value jsonData;
-    jsonData[MEDIA_CONTROLLER_LIST] = jsonArray;
-    Json::FastWriter writer;
-    std::string jsonStr = writer.write(jsonData);
-    char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST, '\0'};
-    std::string msg = std::string(header) + jsonStr;
-    return msg;
-}
- 
 std::string AudioDeviceManager::GetDeviceId()
 {
     return deviceId_;
@@ -222,15 +191,21 @@ void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
         SLOGE("device is null");
         return;
     }
+    std::lock_guard lockGuard(lock_);
     std::string deviceId = AudioDeviceManager::GetInstance().GetDeviceId();
     if (AudioStandard::LOCAL_NETWORK_ID == deviceDesc->networkId_) {
-        std::string msg = AudioDeviceManager::GetInstance().GenerateEmptySession();
-        AudioDeviceManager::GetInstance().SendRemoteAudioMsg(deviceId, msg);
+        if (AUDIO_OUTPUT_SOURCE == AudioDeviceManager::GetInstance().GetAudioState()) {
+            return;
+        }
+        AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
         AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SOURCE);
     } else {
-        AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(
-            AudioDeviceManager::GetInstance().GetDeviceId());
+        if (AUDIO_OUTPUT_SINK == AudioDeviceManager::GetInstance().GetAudioState()) {
+            return;
+        }
+        SLOGI("receive OnPreferedOutputDeviceUpdated send remote session");
         AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SINK);
+        AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(deviceId);
     }
 }
 }

@@ -114,13 +114,12 @@ static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo002, TestSize.Level
  * @tc.desc: migrateAVSession have created
  * @tc.type: FUNC
  */
-static HWTEST(AudioDeviceManagerTest, SendRemoteAudioMsg001, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Level1)
 {
-    SLOGI("SendRemoteAudioMsg001 begin!");
+    SLOGI("ClearRemoteAvSessionInfo001 begin!");
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession = std::make_shared<MigrateAVSessionServer>();
     AudioDeviceManager::GetInstance().migrateSession_ = migrateAVSession;
     std::string deviceId = "test";
-    std::string msg = "test";
-    AudioDeviceManager::GetInstance().SendRemoteAudioMsg(deviceId, msg);
+    AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
     EXPECT_TRUE(AudioDeviceManager::GetInstance().migrateSession_ != nullptr);
 }

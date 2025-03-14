@@ -36,10 +36,9 @@ public:
         std::string deviceId);
     void UnInitAudioStateCallback();
     void SendRemoteAvSessionInfo(const std::string &deviceId);
-    void SendRemoteAudioMsg(const std::string &deviceId, std::string msg);
+    void ClearRemoteAvSessionInfo(const std::string &deviceId);
     void SetAudioState(int32_t state);
     int32_t GetAudioState();
-    std::string GenerateEmptySession();
     std::string GetDeviceId();
  
 private:
@@ -64,6 +63,8 @@ class OutputDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDev
 public:
     void OnPreferredOutputDeviceUpdated(
         const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc) override;
+private:
+    std::recursive_mutex lock_;
 };
 }
 #endif

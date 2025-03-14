@@ -505,6 +505,14 @@ public:
     virtual ~IAVRouterListener() = default;
 };
 
+class HistoricalRecordListener {
+public:
+    /**
+     * @brief Listen to the change of historical record.
+     */
+    virtual void OnHistoricalRecordChange() = 0;
+};
+
 struct SessionToken {
     std::string sessionId;
     pid_t pid;

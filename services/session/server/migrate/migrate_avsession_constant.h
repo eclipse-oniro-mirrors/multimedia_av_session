@@ -144,6 +144,8 @@ const char* CALLBACK_INFO = "CallbackInfo";
 
 const char* VOLUME_INFO = "VolumeInfo";
 
+const char* IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY = "mIsSupportSingleFrameMediaPlay";
+
 const char* METADATA_MASK_ALL = "11111111111111111";
 const char* METADATA_MASK_NULL = "00000000000000000";
 const char* PLAYBACK_MASK_ALL = "111111111";

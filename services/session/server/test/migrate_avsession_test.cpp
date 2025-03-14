@@ -115,6 +115,20 @@ static HWTEST_F(MigrateAVSessionTest, GetCharacteristic001, TestSize.Level1)
     SLOGI("GetCharacteristic001 end");
 }
 
+/**
+ * @tc.name: ResetSupportCrossMediaPlay001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionTest, ResetSupportCrossMediaPlay001, TestSize.Level1)
+{
+    SLOGI("ResetSupportCrossMediaPlay001 begin");
+    server_->ResetSupportCrossMediaPlay("");
+    EXPECT_EQ(server_->supportCrossMediaPlay_, false);
+    SLOGI("ResetSupportCrossMediaPlay001 end");
+}
+
 void SetMetaDataAndPlaybackState(OHOS::sptr<AVSessionItem> avsession_)
 {
     SLOGI("MigrateTest001 SetMetaDataAndPlaybackState");
@@ -191,8 +205,14 @@ void TestMigrateSendByte(OHOS::sptr<AVSessionItem> avsession_, std::shared_ptr<M
     int32_t ret = server_->GetControllerById(descriptor.sessionId_, controller);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 
+    server_->ResetSupportCrossMediaPlay("{\"mIsSupportSingleFrameMediaPlay\": true}");
+    EXPECT_EQ(server_->supportCrossMediaPlay_, true);
+
     server_->SendSpecialKeepaliveData();
     server_->SendRemoteControllerList(deviceId);
+    server_->SendRemoteHistorySessionList(deviceId);
+    server_->ClearRemoteControllerList(deviceId);
+    server_->ClearRemoteHistorySessionList(deviceId);
 
     char header[] = {MSG_HEAD_MODE, SYNC_COMMAND};
     const int commandList[] = {18, 30, 31, 36, 37, 38, 39, 41, 42, 43, 46, 48, 50};
