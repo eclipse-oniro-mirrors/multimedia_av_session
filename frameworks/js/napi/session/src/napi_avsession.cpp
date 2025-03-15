@@ -447,10 +447,19 @@ void processErrMsg(std::shared_ptr<ContextBase> context, int32_t ret)
     context->errCode = NapiAVSessionManager::errcode_[ret];
 }
 
-bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVSession> sessionPtr, AVMetaData& data)
+bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVSession> sessionPtr, AVMetaData& data,
+    bool isRepeatDownload)
 {
-    SLOGI("do metadata set with check uri alive:%{public}d, pixel alive:%{public}d",
-        static_cast<int>(!data.GetMediaImageUri().empty()), static_cast<int>(data.GetMediaImage() != nullptr));
+    SLOGI("do metadata set with check uri alive:%{public}d, pixel alive:%{public}d, session alive:%{public}d",
+        static_cast<int>(!data.GetMediaImageUri().empty()),
+        static_cast<int>(data.GetMediaImage() != nullptr),
+        static_cast<int>(sessionPtr != nullptr));
+    if (sessionPtr == nullptr) {
+        context->status = napi_generic_failure;
+        context->errMessage = "SetAVMetaData failed : session is nullptr";
+        context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+        return false;
+    }
     auto uri = data.GetMediaImageUri();
     int32_t ret = sessionPtr->SetAVMetaData(data);
     if (ret != AVSESSION_SUCCESS) {
@@ -458,9 +467,11 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
         processErrMsg(context, ret);
     } else if (data.GetMediaImageUri().empty()) {
         SLOGE("do metadata set with img uri empty");
+    } else if (isRepeatDownload) {
+        SLOGE("do metadata set with repeat uriSize:%{public}d.", static_cast<int>(uri.size()));
     } else if (data.GetMediaImage() == nullptr) {
         ret = DoDownload(data, uri);
-        SLOGI("DoDownload complete with ret %{public}d", ret);
+        SLOGI("DoDownload uriSize%{public}d complete with ret %{public}d", static_cast<int>(uri.size()), ret);
         CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, false, "doMetaDataSet without session");
         if (ret != AVSESSION_SUCCESS) {
             SLOGE("DoDownload failed but not repeat setmetadata again");
@@ -497,25 +508,20 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     }
     napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
-    if (napiAvSession->latestMetadataAssetId_ != napiAvSession->metaData_.GetAssetId() ||
+    if (napiAvSession->latestMetadataUri_ != napiAvSession->metaData_.GetMediaImageUri() ||
         !napiAvSession->metaData_.GetMediaImageUri().empty() || napiAvSession->metaData_.GetMediaImage() != nullptr) {
         context->metadataTs = std::chrono::system_clock::now();
-        napiAvSession->latestMetadataAssetId_ = napiAvSession->metaData_.GetAssetId();
+        napiAvSession->latestMetadataUri_ = napiAvSession->metaData_.GetMediaImageUri();
         reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
     }
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
-            context->status = napi_generic_failure;
-            context->errMessage = "SetAVMetaData failed : session is nullptr";
-            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
-            context->metaData.Reset();
-            return;
-        }
-        bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData);
+        bool isRepeatDownload = napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
+        bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData, isRepeatDownload);
         bool timeAvailable = context->metadataTs >= napiSession->latestMetadataTs_;
         SLOGI("doMetaDataSet res:%{public}d, time:%{public}d", static_cast<int>(res), static_cast<int>(timeAvailable));
         if (res && timeAvailable && napiSession->session_ != nullptr) {
+            napiSession->latestDownloadedUri_ = context->metaData.GetMediaImageUri();
             napiSession->session_->SetAVMetaData(context->metaData);
         }
         context->metaData.Reset();
