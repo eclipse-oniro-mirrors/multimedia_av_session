@@ -399,7 +399,8 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 void AVSessionService::NotifyMirrorToStreamCast()
 {
     for (auto& session : GetContainer().GetAllSessions()) {
-        if (session && topSession_ && (session.GetRefPtr() == topSession_.GetRefPtr()) && isSupportMirrorToStream_ &&
+        if (session && topSession_ && (session.GetRefPtr() == topSession_.GetRefPtr()) &&
+            session->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_VIDEO && isSupportMirrorToStream_ &&
             !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
             MirrorToStreamCast(session);
         }
