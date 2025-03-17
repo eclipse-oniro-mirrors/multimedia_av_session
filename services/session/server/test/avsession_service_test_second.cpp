@@ -39,6 +39,9 @@ static char g_testAnotherAbilityName[] = "testAnother.ability";
 static OHOS::sptr<AVSessionService> g_AVSessionService {nullptr};
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t CAST_ENGINE_SA_ID = 65546;
+static const int32_t AVSESSION_CONTINUE = 1;
+const int32_t KEYCODE_CLEAR = 5;
+const int32_t KEYCODE_HEADSETHOOK = 6;
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnTopSessionChange = false;
@@ -100,6 +103,29 @@ void TestSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor
 void TestSessionListener::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
     g_isCallOnTopSessionChange = true;
+}
+
+
+class TestIClientDeath : public IClientDeath {
+    TestIClientDeath() = default;
+    virtual ~TestIClientDeath() = default;
+    OHOS::sptr<IRemoteObject> AsObject() override
+    {
+        OHOS::AppExecFwk::ElementName elementName;
+        elementName.SetBundleName(g_testAnotherBundleName);
+        elementName.SetAbilityName(g_testAnotherAbilityName);
+        OHOS::sptr<AVSessionItem> avsessionHere_ = g_AVSessionService->CreateSessionInner(
+            g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+        std::string sessionId = avsessionHere_->GetSessionId();
+        OHOS::sptr<IRemoteObject> object = nullptr;
+        g_AVSessionService->CreateControllerInner(sessionId, object);
+        return object;
+    }
+};
+
+void OnClientDied(pid_t pid)
+{
+    SLOGI("OnClientDied pid = %{public}d", pid);
 }
 
 class AVSessionServiceTestSecond : public testing::Test {
@@ -994,4 +1020,84 @@ static HWTEST_F(AVSessionServiceTestSecond, PlayStateCheck002, TestSize.Level1)
     g_AVSessionService->PlayStateCheck(1, streamUsage, rendererState);
     EXPECT_NE(g_AVSessionService->topSession_, nullptr);
     SLOGD("PlayStateCheck002 end!");
+}
+
+/**
+* @tc.name: HandleKeyEvent001
+* @tc.desc: Verifying the HandleKeyEvent method with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, HandleKeyEvent001, TestSize.Level1)
+{
+    SLOGD("HandleKeyEvent001 begin!");
+    auto keyEvent = OHOS::MMI::KeyEvent(KEYCODE_CLEAR);
+    keyEvent.SetKeyCode(KEYCODE_CLEAR);
+    auto ret = g_AVSessionService->HandleKeyEvent(keyEvent);
+    EXPECT_EQ(ret, AVSESSION_CONTINUE);
+    SLOGD("HandleKeyEvent001 end!");
+}
+
+/**
+* @tc.name: SendSystemAVKeyEvent010
+* @tc.desc: Verifying the SendSystemAVKeyEvent method with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SendSystemAVKeyEvent010, TestSize.Level1)
+{
+    SLOGD("SendSystemAVKeyEvent010 begin!");
+    OHOS::AAFwk::Want bluetoothWant;
+    std::string activeAddress = "00:00:00:00:00:00";
+    bluetoothWant.SetParam("deviceId", activeAddress);
+    auto keyEvent = OHOS::MMI::KeyEvent(KEYCODE_HEADSETHOOK);
+    keyEvent.SetKeyCode(KEYCODE_HEADSETHOOK);
+    auto ret = g_AVSessionService->SendSystemAVKeyEvent(keyEvent, bluetoothWant);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("SendSystemAVKeyEvent010 end!");
+}
+
+/**
+* @tc.name: ConvertKeyCodeToCommand001
+* @tc.desc: Verifying the ConvertKeyCodeToCommand method with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, ConvertKeyCodeToCommand001, TestSize.Level1)
+{
+    SLOGD("ConvertKeyCodeToCommand001 begin!");
+    auto ret = g_AVSessionService->ConvertKeyCodeToCommand(OHOS::MMI::KeyEvent::KEYCODE_MEDIA_PAUSE);
+    EXPECT_EQ(ret, AVControlCommand::SESSION_CMD_PAUSE);
+    SLOGD("ConvertKeyCodeToCommand001 end!");
+}
+
+/**
+* @tc.name: NotifyRemoteDistributedSessionControllersChanged002
+* @tc.desc: Verifying NotifyRemoteDistributedSessionControllersChanged with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifyRemoteDistributedSessionControllersChanged002, TestSize.Level1)
+{
+    SLOGD("NotifyRemoteDistributedSessionControllersChanged002 begin!");
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    OHOS::sptr<TestISessionListener> iListener = new TestISessionListener();
+    g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, iListener));
+    g_AVSessionService->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
+    SLOGD("NotifyRemoteDistributedSessionControllersChanged002 end!");
+}
+
+/**
+* @tc.name: NotifyRemoteDistributedSessionControllersChanged003
+* @tc.desc: Verifying NotifyRemoteDistributedSessionControllersChanged with null listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifyRemoteDistributedSessionControllersChanged003, TestSize.Level1)
+{
+    SLOGD("NotifyRemoteDistributedSessionControllersChanged003 begin!");
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, nullptr));
+    g_AVSessionService->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
+    SLOGD("NotifyRemoteDistributedSessionControllersChanged003 end!");
 }
