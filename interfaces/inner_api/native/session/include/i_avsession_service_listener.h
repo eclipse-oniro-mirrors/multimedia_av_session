@@ -75,6 +75,14 @@ public:
      * @since 14
     */
     virtual void setInCast(bool isInCast) = 0;
+
+    /**
+     * Set is support mirror to stream state at castservice state changed.
+     *
+     * @param { bool } isSupportMirrorToStream - cast state.
+     * @since 18
+    */
+    virtual void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) = 0;
 #endif
 };
 } // namespace OHOS::AVSession

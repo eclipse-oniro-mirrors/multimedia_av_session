@@ -120,8 +120,8 @@ private:
     int32_t cacheCastDeviceCapability_ = -1;
     std::vector<std::string> cacheDrmSchemes_;
     std::shared_ptr<CastSessionListener> castSessionListener_;
-    int32_t castConnectStateForDisconnect_ = 5;
-    int32_t castConnectStateForConnected_ = 6;
+    int32_t disconnectStateFromCast_ = 5;
+    int32_t connectStateFromCast_ = 6;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

@@ -1209,10 +1209,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "Session not exist");
-        if (isSupportMirrorToStream_ &&
-            !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
-            MirrorToStreamCast(session);
-        }
+        MirrorToStreamCast(session);
     });
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 }
