@@ -683,7 +683,7 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStartCast_001, Tes
     AVSessionServiceStubPerDemo stub;
     int32_t result = stub.HandleStartCast(data, reply);
     EXPECT_EQ(result, OHOS::ERR_NONE);
-    EXPECT_EQ(reply.ReadInt32(), ERR_NO_PERMISSION);
+    EXPECT_EQ(reply.ReadInt32(), ERR_PERMISSION_DENIED);
     SLOGD("AVSessionServiceStub_HandleStartCast_001 end!");
 }
 
@@ -706,7 +706,7 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStartCast_002, Tes
     stub.isSuccess = false;
     int32_t result = stub.HandleStartCast(data, reply);
     EXPECT_EQ(result, OHOS::ERR_NONE);
-    EXPECT_EQ(reply.ReadInt32(), ERR_NO_PERMISSION);
+    EXPECT_EQ(reply.ReadInt32(), ERR_PERMISSION_DENIED);
     SLOGD("AVSessionServiceStub_HandleStartCast_002 end!");
 }
 
@@ -729,7 +729,7 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStartCast_003, Tes
     stub.isSuccess = true;
     int32_t result = stub.HandleStartCast(data, reply);
     EXPECT_EQ(result, OHOS::ERR_NONE);
-    EXPECT_EQ(reply.ReadInt32(), ERR_NO_PERMISSION);
+    EXPECT_EQ(reply.ReadInt32(), ERR_PERMISSION_DENIED);
     SLOGD("AVSessionServiceStub_HandleStartCast_003 end!");
 }
 
