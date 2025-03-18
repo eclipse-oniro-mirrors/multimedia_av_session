@@ -897,7 +897,7 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange002, TestSize.Level1)
     AVPlaybackState state;
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARE);
     castController_->OnCastPlaybackStateChange(state);
-    EXPECT_TRUE(state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY);
+    EXPECT_EQ(castController_->isPlayingState_, false);
 }
 
 /**
@@ -915,7 +915,7 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange003, TestSize.Level1)
     AVPlaybackState state;
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     castController_->OnCastPlaybackStateChange(state);
-    EXPECT_TRUE(state.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY);
+    EXPECT_EQ(castController_->isPlayingState_, true);
 }
 
 /**
@@ -933,7 +933,7 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange004, TestSize.Level1)
     AVPlaybackState state;
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     castController_->OnCastPlaybackStateChange(state);
-    EXPECT_TRUE(state.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY);
+    EXPECT_EQ(castController_->isPlayingState_, true);
 }
 
 /**

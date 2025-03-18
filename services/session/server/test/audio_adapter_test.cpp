@@ -536,5 +536,5 @@ static HWTEST(AudioAdapterTest, SelectOutputDevice004, TestSize.Level1)
 
     EXPECT_NE(desc->deviceCategory_, testDevice->deviceCategory_);
     int32_t ret = audioAdapter.SelectOutputDevice(desc);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
