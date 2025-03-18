@@ -78,6 +78,7 @@ public:
         void NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) {}
         void NotifyDeviceOffline(const std::string& deviceId) {}
         void setInCast(bool isInCast) {}
+        void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) {}
 #endif
     virtual ~AVSessionServiceListenerMock() {}
 };
@@ -371,7 +372,7 @@ static HWTEST_F(AVRouterImplTest, SetServiceAllConnectState002, TestSize.Level1)
 
 /**
 * @tc.name: OnCastStateChange001
-* @tc.desc: set castState is castConnectStateForDisconnect_
+* @tc.desc: set castState is disconnectStateFromCast_
 * @tc.type: FUNC
 * @tc.require: NA
 */
@@ -389,7 +390,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange001, TestSize.Level1)
     castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
-    int32_t castState = g_AVRouterImpl->castConnectStateForDisconnect_;
+    int32_t castState = g_AVRouterImpl->disconnectStateFromCast_;
     g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
 
     EXPECT_TRUE(castHandleInfo.avRouterListener_ != nullptr);
@@ -398,7 +399,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange001, TestSize.Level1)
 
 /**
 * @tc.name: OnCastStateChange002
-* @tc.desc: set castState is castConnectStateForConnected_
+* @tc.desc: set castState is connectStateFromCast_
 * @tc.type: FUNC
 * @tc.require: NA
 */
@@ -416,7 +417,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange002, TestSize.Level1)
     castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
-    int32_t castState = g_AVRouterImpl->castConnectStateForConnected_;
+    int32_t castState = g_AVRouterImpl->connectStateFromCast_;
     g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
 
     EXPECT_TRUE(castHandleInfo.avRouterListener_ != nullptr);
@@ -442,7 +443,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange003, TestSize.Level1)
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
-    int32_t castState = g_AVRouterImpl->castConnectStateForConnected_;
+    int32_t castState = g_AVRouterImpl->connectStateFromCast_;
     g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
 
     EXPECT_TRUE(castHandleInfo.avRouterListener_ == nullptr);

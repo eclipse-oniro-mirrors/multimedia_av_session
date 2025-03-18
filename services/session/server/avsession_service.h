@@ -207,12 +207,6 @@ public:
 
     void HandleCallStartEvent();
 
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    __attribute__((no_sanitize("cfi"))) int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
-
-    void SplitExtraInfo(std::string info);
-#endif
-
     void HandleControllerRelease(AVControllerItem& controller);
 
     std::int32_t Dump(std::int32_t fd, const std::vector<std::u16string>& args) override;
@@ -251,6 +245,14 @@ public:
     void NotifyDeviceOffline(const std::string& deviceId) override;
 
     void NotifyMirrorToStreamCast();
+
+    bool IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session);
+
+    __attribute__((no_sanitize("cfi"))) int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
+
+    void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) override;
+
+    void SplitExtraInfo(std::string info);
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
@@ -605,7 +607,7 @@ private:
     const std::string deviceStateDisconnection = "IDLE";
     const std::string seperator = ",";
     int appState = -1;
-    bool isSupportMirrorToStream_ = false;
+    std::atomic<bool> isSupportMirrorToStream_ = false;
     std::string castDeviceId_ = "0";
     std::string castDeviceName_ = " ";
     int32_t castDeviceType_ = 0;

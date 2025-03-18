@@ -403,8 +403,8 @@ private:
     bool isMediaKeySupport = false;
     bool isMediaChange_ = true;
 
-    int32_t castConnectStateForDisconnect_ = 5;
-    int32_t castConnectStateForConnected_ = 6;
+    int32_t disconnectStateFromCast_ = 5;
+    int32_t connectStateFromCast_ = 6;
     int32_t castDisconnectStateInAVSession_ = 6;
     int32_t removeCmdStep_ = 1000;
 
