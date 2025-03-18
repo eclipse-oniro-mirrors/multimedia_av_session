@@ -1244,10 +1244,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "Session not exist");
-        if (isSupportMirrorToStream_ &&
-            !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid())) {
-            MirrorToStreamCast(session);
-        }
+        MirrorToStreamCast(session);
     });
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 }
@@ -2784,7 +2781,6 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
         }
     }
 
-    SLOGI("isAllSessionCast_ %{public}d, outputDeviceId_ is %{public}s", isAllSessionCast_, outputDeviceId_.c_str());
     return AVSESSION_SUCCESS;
 }
 

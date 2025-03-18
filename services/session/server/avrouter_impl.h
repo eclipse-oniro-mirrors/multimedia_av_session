@@ -74,7 +74,7 @@ public:
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandle) override;
 
     int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
-        std::map<std::string, std::string>& serviceNameMapState, std::string sessionId) override;
+        std::pair<std::string, std::string>& serviceNameStatePair, std::string sessionId) override;
 
     int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) override;
 
@@ -107,7 +107,7 @@ private:
     IAVSessionServiceListener *servicePtr_ = nullptr;
     std::recursive_mutex providerManagerLock_;
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
-    std::map<std::string, std::string> castServiceNameMapState_;
+    std::pair<std::string, std::string> castserviceNameStatePair_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const int64_t noMirrorCastHandle_ = -1;
     int32_t providerNumber_ = 0;
@@ -121,8 +121,8 @@ private:
     int32_t cacheCastDeviceCapability_ = -1;
     std::vector<std::string> cacheDrmSchemes_;
     std::shared_ptr<CastSessionListener> castSessionListener_;
-    int32_t castConnectStateForDisconnect_ = 5;
-    int32_t castConnectStateForConnected_ = 6;
+    int32_t disconnectStateFromCast_ = 5;
+    int32_t connectStateFromCast_ = 6;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H
