@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 
-module_output_path = "multimedia_av_session/session"
+module_output_path = "av_session/av_session_session"
 
 ohos_benchmarktest("ControllerTest") {
   module_out_path = module_output_path
