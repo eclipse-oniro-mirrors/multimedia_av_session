@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../../config.gni")
 
-module_output_path = "multimedia_av_session/ndk"
+module_output_path = "av_session/av_session_ndk"
 
 common_deps = [
   "../../../ohavsession:ohavsession",
