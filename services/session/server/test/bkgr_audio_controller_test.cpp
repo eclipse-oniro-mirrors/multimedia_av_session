@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 #include "background_audio_controller.h"
 #include "avsession_log.h"
 #include "audio_info.h"
@@ -21,6 +22,8 @@
 #include "app_manager_adapter.h"
 #include "bundle_mgr_client.h"
 #include "avsession_descriptor.h"
+#include "system_ability_definition.h"
+#include "avsession_service.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -260,4 +263,71 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease005, TestSize.Level1)
     bkgraudiocontroller.OnSessionRelease(descriptor);
     EXPECT_TRUE(!bkgraudiocontroller.sessionUIDs_.empty());
     SLOGI("OnSessionRelease05 end!");
+}
+
+/**
+* @tc.name: OnSessionCreate001
+* @tc.desc: test OnSessionCreate
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, OnSessionCreate001, TestSize.Level1)
+{
+    SLOGI("OnSessionCreate001 begin!");
+    AVSessionDescriptor descriptor;
+    BackgroundAudioController bkgraudiocontroller;
+    bkgraudiocontroller.OnSessionCreate(descriptor);
+    auto it = bkgraudiocontroller.sessionUIDs_.find(descriptor.uid_);
+    EXPECT_NE(it, bkgraudiocontroller.sessionUIDs_.end());
+    SLOGI("OnSessionCreate001 end!");
+}
+
+/**
+* @tc.name: OnSessionCreate002
+* @tc.desc: test OnSessionCreate
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, OnSessionCreate002, TestSize.Level1)
+{
+    SLOGI("OnSessionCreate002 begin!");
+    AVSessionDescriptor descriptor;
+    BackgroundAudioController bkgraudiocontroller;
+    bkgraudiocontroller.sessionUIDs_.insert(std::make_pair(descriptor.uid_, std::set<int32_t>()));
+    bkgraudiocontroller.OnSessionCreate(descriptor);
+    auto it = bkgraudiocontroller.sessionUIDs_.find(descriptor.uid_);
+    EXPECT_NE(it, bkgraudiocontroller.sessionUIDs_.end());
+    SLOGI("OnSessionCreate002 end!");
+}
+
+/**
+* @tc.name: RendererChangeReport001
+* @tc.desc: test RendererChangeReport
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, RendererChangeReport001, TestSize.Level1)
+{
+    SLOGI("RendererChangeReport001 begin!");
+    BackgroundAudioController bkgraudiocontroller;
+    AVSessionService *service = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    ASSERT_TRUE(service != nullptr);
+    bkgraudiocontroller.Init(service);
+    OHOS::AudioStandard::AudioRendererChangeInfo info;
+    info.rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
+    bkgraudiocontroller.RendererChangeReport(info);
+
+    info.rendererState = OHOS::AudioStandard::RENDERER_PAUSED;
+    bkgraudiocontroller.RendererChangeReport(info);
+
+    info.rendererState = OHOS::AudioStandard::RENDERER_STOPPED;
+    bkgraudiocontroller.RendererChangeReport(info);
+
+    info.rendererState = OHOS::AudioStandard::RENDERER_NEW;
+    bkgraudiocontroller.RendererChangeReport(info);
+
+    EXPECT_NE(bkgraudiocontroller.ptr_, nullptr);
+    delete service;
+    service = nullptr;
+    SLOGI("RendererChangeReport001 end!");
 }
