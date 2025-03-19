@@ -45,7 +45,7 @@ class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServ
     public std::enable_shared_from_this<MigrateAVSessionServer> {
 public:
     explicit MigrateAVSessionServer(int32_t migrateMode = 0);
-    ~MigrateAVSessionServer() {}
+    ~MigrateAVSessionServer();
 
     void OnConnectProxy(const std::string &deviceId) override;
     void OnDisconnectProxy(const std::string &deviceId) override;
@@ -83,6 +83,9 @@ public:
     void DoPlaybackStateSyncToRemote(const AVPlaybackState& state);
     void DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands);
     void DoBundleInfoSyncToRemote(sptr<AVControllerItem> controller);
+    void DoPostTasksClear();
+    bool MigratePostTask(const AppExecFwk::EventHandler::Callback &callback, const std::string &name,
+        int64_t delayTime = 0);
 
     static Json::Value ConvertAudioDeviceDescriptorToJson(const AudioDeviceDescriptorWithSptr& device);
     static Json::Value ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptorsWithSptr& devices);
@@ -178,6 +181,7 @@ public:
     ~AVControllerObserver() {};
 
     void Init(std::weak_ptr<MigrateAVSessionServer> migrateServer, int32_t migrateMode = MIGRATE_MODE_CROSS);
+    void Release();
 
     void OnSessionDestroy() override;
     void OnPlaybackStateChange(const AVPlaybackState &state) override;

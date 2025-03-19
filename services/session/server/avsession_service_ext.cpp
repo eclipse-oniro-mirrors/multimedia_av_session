@@ -622,10 +622,15 @@ void AVSessionService::DoDisconnectProcessWithMigrate(const OHOS::DistributedHar
 
 void AVSessionService::DoDisconnectProcessWithMigrateServer(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    SLOGI("DoDisconnectProcessWithMigrateServer with deviceType:%{public}d", deviceInfo.deviceTypeId);
+    SLOGI("DoDisconnectMigrateServer with deviceType:%{public}d", deviceInfo.deviceTypeId);
     std::string networkId = std::string(deviceInfo.networkId);
     MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(MigrateAVSessionManager::migrateSceneNext);
     if (migrateAVSessionServerMap_.find(networkId) != migrateAVSessionServerMap_.end()) {
+        std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer =
+            migrateAVSessionServerMap_[networkId];
+        if (migrateAVSessionServer != nullptr) {
+            migrateAVSessionServer->DoPostTasksClear();
+        }
         migrateAVSessionServerMap_.erase(networkId);
     } else {
         SLOGE("DoDisconnectProcessWithMigrateServer find networkId not exist");

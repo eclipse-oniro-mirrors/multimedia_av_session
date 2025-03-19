@@ -165,6 +165,21 @@ AVQueueItem HwCastStreamPlayer::GetCurrentItem()
     return currentAVQueueItem_;
 }
 
+AVQueueItem HwCastStreamPlayer::RefreshCurrentItemDuration()
+{
+    SLOGD("RefreshCurrentItemDuration in");
+    int32_t duration;
+    GetDuration(duration);
+    // do not place streamPlayerLock_ in side of curItemLock_
+    std::lock_guard lockGuard(curItemLock_);
+    std::shared_ptr<AVMediaDescription> mediaDes = currentAVQueueItem_.GetDescription();
+    CHECK_AND_RETURN_RET_LOG(mediaDes != nullptr, currentAVQueueItem_, "AVMediaDescription get null!");
+    mediaDes->SetDuration(duration);
+    currentAVQueueItem_.SetDescription(mediaDes);
+    SLOGI("refresh duration:%{public}d", duration);
+    return currentAVQueueItem_;
+}
+
 int32_t HwCastStreamPlayer::RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem)
 {
     std::lock_guard lockGuard(curItemLock_);
@@ -603,6 +618,7 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
         SLOGD("On state changed, get state %{public}d", castPlusStateToString_[playbackState]);
         avCastPlaybackState.SetState(castPlusStateToString_[playbackState]);
     }
+    RefreshCurrentItemDuration();
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
@@ -610,7 +626,7 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
-    SLOGI("on cast state change done");
+    SLOGI("onCastStateChange with duration");
 }
 
 void HwCastStreamPlayer::OnPositionChanged(int position, int bufferPosition, int duration)

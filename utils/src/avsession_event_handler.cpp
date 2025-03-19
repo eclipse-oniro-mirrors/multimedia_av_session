@@ -30,7 +30,9 @@ AVSessionEventHandler::AVSessionEventHandler()
 
 AVSessionEventHandler::~AVSessionEventHandler()
 {
-    SLOGI("destroy");
+    SLOGI("destroy handlerClear");
+    std::lock_guard<std::mutex> lockGuard(handlerLock_);
+    handler_ = nullptr;
 }
 
 bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const std::string &name, int64_t delayTime)
