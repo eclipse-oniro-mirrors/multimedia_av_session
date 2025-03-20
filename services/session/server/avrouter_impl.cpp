@@ -296,9 +296,8 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
     return providerManagerMap_[providerNumber]->provider_->GetRemoteController(castId);
 }
 
-bool IsSameDeviceCastChange()
+bool AVRouterImpl::IsSameDeviceCastChange()
 {
-    SLOGI("sameDeviceCastchange is %{public}d", sameDeviceCastchange_);
     return sameDeviceCastchange_;
 }
 
