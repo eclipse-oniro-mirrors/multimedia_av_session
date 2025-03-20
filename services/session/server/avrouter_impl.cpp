@@ -296,6 +296,12 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
     return providerManagerMap_[providerNumber]->provider_->GetRemoteController(castId);
 }
 
+bool IsSameDeviceCastChange()
+{
+    SLOGI("sameDeviceCastchange is %{public}d", sameDeviceCastchange_);
+    return sameDeviceCastchange_;
+}
+
 int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     std::map<std::string, std::string>& serviceNameMapState, std::string sessionId)
 {
@@ -311,8 +317,11 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         if (castHandleInfo.sessionId_ != sessionId && castHandleInfo.outputDeviceInfo_.deviceInfos_.size() > 0 &&
             castHandleInfo.outputDeviceInfo_.deviceInfos_[0].deviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
             castHandleToInfoMap_[number].sessionId_ = sessionId;
+            SLOGI("sameDeviceCastchange_ set true");
+            sameDeviceCastchange_ = true;
             return number;
         }
+        sameDeviceCastchange_ = false;
     }
     int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].
         providerId_]->provider_->StartCastSession();

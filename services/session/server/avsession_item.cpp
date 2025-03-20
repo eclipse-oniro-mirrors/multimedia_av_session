@@ -1298,7 +1298,8 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     } else {
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
-    if (castState == connectStateFromCast_) { // 6 is connected status (stream)
+    bool isSameDeviceCastChange = AVRouter::GetInstance().IsSameDeviceCastChange();
+    if (castState == connectStateFromCast_ && !isSameDeviceCastChange) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         ReportConnectFinish("AVSessionItem::OnCastStateChange", deviceInfo);
@@ -1307,7 +1308,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             callStartCallback_(*this);
         }
     }
-    if (castState == disconnectStateFromCast_) { // 5 is disconnected status
+    if (castState == disconnectStateFromCast_ && !isSameDeviceCastChange) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
         DealDisconnect(deviceInfo, isNeedRemove);
     }
