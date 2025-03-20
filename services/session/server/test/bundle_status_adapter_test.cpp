@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,20 @@
  */
 
 #include <gtest/gtest.h>
+
+#include "accesstoken_kit.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
-#include "insight_intent_execute_param.h"
+#include "bundle_mgr_proxy.h"
 #define private public
 #define protected public
 #include "bundle_status_adapter.h"
 #undef protected
 #undef private
-
-#include "accesstoken_kit.h"
+#include "iservice_registry.h"
+#include "insight_intent_execute_param.h"
 #include "nativetoken_kit.h"
+#include "system_ability_definition.h"
 #include "token_setproc.h"
 
 using namespace testing::ext;
@@ -407,5 +410,106 @@ static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged002, testing::ext::
     bundleStatusCallbackImpl->OnBundleStateChanged(0, 0, "test2", "");
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: GetBundleIcon001
+ * @tc.desc: fail to get icon
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon001, testing::ext::TestSize.Level1)
+{
+    BundleStatusAdapter::GetInstance().bundleMgrProxy = nullptr;
+    BundleStatusAdapter::GetInstance().bundleResourceProxy = nullptr;
+    std::string bundleName = "test";
+    std::string icon = "test";
+    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, icon);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetBundleIcon002
+ * @tc.desc: fail to get icon
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon002, testing::ext::TestSize.Level1)
+{
+    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    BundleStatusAdapter::GetInstance().bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    BundleStatusAdapter::GetInstance().bundleResourceProxy = nullptr;
+    std::string bundleName = "test";
+    std::string icon = "test";
+    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, icon);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetBundleIcon002
+ * @tc.desc: fail to get icon
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon003, testing::ext::TestSize.Level1)
+{
+    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    auto proxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    BundleStatusAdapter::GetInstance().bundleMgrProxy = proxy;
+    BundleStatusAdapter::GetInstance().bundleResourceProxy = proxy->GetBundleResourceProxy();
+    std::string bundleName = "test";
+    std::string icon = "test";
+    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, icon);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CheckBundleSupport005
+ * @tc.desc: set intentName to PlayMusicList
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport005, testing::ext::TestSize.Level1)
+{
+    SLOGI("CheckBundleSupport005 start");
+    BundleStatusAdapter::GetInstance().Init();
+    std::string profile = R"({
+        "insightIntents": [
+            {
+                "intentName": "PlayMusicList",
+                "uiAbility": {
+                    "executeMode": ["background"]
+                }
+            }
+        ]
+    })";
+    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
+    EXPECT_EQ(ret, true);
+    SLOGI("CheckBundleSupport005 end");
+}
+
+/**
+ * @tc.name: CheckBundleSupport006
+ * @tc.desc: set intentName to PlayAudio
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport006, testing::ext::TestSize.Level1)
+{
+    SLOGI("CheckBundleSupport006 start");
+    BundleStatusAdapter::GetInstance().Init();
+    std::string profile = R"({
+        "insightIntents": [
+            {
+                "intentName": "PlayAudio",
+                "uiAbility": {
+                    "executeMode": ["background"]
+                }
+            }
+        ]
+    })";
+    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
+    EXPECT_EQ(ret, true);
+    SLOGI("CheckBundleSupport006 end");
+}
+
 } // namespace AVSession
 } // namespace OHOS
