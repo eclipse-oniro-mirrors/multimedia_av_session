@@ -896,6 +896,12 @@ inline std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionService::GetCurS
     return GetUsersManager().GetCurSessionListForFront(userId);
 }
 
+
+inline std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionService::GetCurKeyEventSessionList(int32_t userId)
+{
+    return GetUsersManager().GetCurSessionListForKeyEvent(userId);
+}
+
 std::string AVSessionService::AllocSessionId()
 {
     auto curNum = sessionSeqNum_++;
@@ -1174,6 +1180,30 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 }
 
+void AVSessionService::AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionItem)
+{
+    sessionItem->SetServiceCallbackForKeyEvent([this](std::string sessionId) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+        CHECK_AND_RETURN_LOG(err == AVSESSION_SUCCESS, "Add KeyEventSession, CheckPermission failed!");
+        std::lock_guard lockGuard(sessionServiceLock_);
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for KeyEvent");
+        {
+            std::lock_guard lockGuard(keyEventListLock_);
+            int userId = session->GetUserId();
+            std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList(userId);
+            CHECK_AND_RETURN_LOG(keyEventList != nullptr, "keyEventList ptr nullptr!");
+            auto it = std::find(keyEventList->begin(), keyEventList->end(), session);
+            if (it == keyEventList->end()) {
+                SLOGI("keyEventList add=%{public}s", session->GetBundleName().c_str());
+                keyEventList->push_front(session);
+                return;
+            }
+        }
+    });
+}
+
 void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 {
     if (sessionItem == nullptr) {
@@ -1196,6 +1226,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         UpdateFrontSession(session, isAdd);
     });
     AddCapsuleServiceCallback(sessionItem);
+    AddKeyEventServiceCallback(sessionItem);
     sessionItem->SetServiceCallbackForUpdateExtras([this](std::string sessionId) {
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
@@ -2059,6 +2090,15 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
         return AVSESSION_SUCCESS;
     }
     {
+        std::lock_guard lockGuard(keyEventListLock_);
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
+        CHECK_AND_RETURN_RET_LOG(keyEventList != nullptr, AVSESSION_ERROR, "keyEventList ptr nullptr!");
+        for (const auto& session : *keyEventList) {
+            session->HandleMediaKeyEvent(keyEvent);
+            return AVSESSION_SUCCESS;
+        }
+    }
+    {
         std::lock_guard lockGuard(sessionServiceLock_);
         if (topSession_ && !(topSession_->GetBundleName() == "anco_audio" && !topSession_->IsActive())) {
             topSession_->HandleMediaKeyEvent(keyEvent);
@@ -2343,6 +2383,16 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
             sessionItem->GetDescriptor().sessionType_, false);
         GetUsersManager().RemoveSessionForAllUser(sessionItem->GetPid(), sessionItem->GetAbilityName());
         UpdateFrontSession(sessionItem, false);
+        {
+            std::lock_guard lockGuard(keyEventListLock_);
+            std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
+            CHECK_AND_RETURN_LOG(keyEventList != nullptr, "keyEventList ptr nullptr!");
+            auto it = std::find(keyEventList->begin(), keyEventList->end(), sessionItem);
+            if (it != keyEventList->end()) {
+                SLOGI("keyEventList remove %{public}s", sessionItem->GetBundleName().c_str());
+                keyEventList->erase(it);
+            }
+        }
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0 ||
