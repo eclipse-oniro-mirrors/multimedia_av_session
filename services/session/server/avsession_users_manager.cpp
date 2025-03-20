@@ -65,6 +65,10 @@ void AVSessionUsersManager::HandleUserRemoved(int32_t userId)
     if (iterForFrontList != frontSessionListMapByUserId_.end()) {
         frontSessionListMapByUserId_.erase(iterForFrontList);
     }
+    auto iter = keyEventListMapByUserId_.find(userId);
+    if (iter != keyEventListMapByUserId_.end()) {
+        keyEventListMapByUserId_.erase(iter);
+    }
     auto iterForListenerMap = sessionListenersMapByUserId_.find(userId);
     if (iterForListenerMap != sessionListenersMapByUserId_.end()) {
         sessionListenersMapByUserId_.erase(iterForListenerMap);
@@ -126,6 +130,24 @@ std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionUsersManager::GetCurSes
         frontSessionListMapByUserId_[userId] = sessionListForFront;
     }
     return sessionListForFront;
+}
+
+std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionUsersManager::GetCurSessionListForKeyEvent(int32_t userId)
+{
+    std::lock_guard lockGuard(userLock_);
+    if (userId <= 0) {
+        userId = curUserId_;
+    }
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventSessionList = nullptr;
+    auto it = keyEventListMapByUserId_.find(userId);
+    if (it != keyEventListMapByUserId_.end()) {
+        keyEventSessionList = it->second;
+    } else {
+        SLOGI("GetCurSessionListForKeyEvent without targetUser: %{public}d, create new", userId);
+        keyEventSessionList = std::make_shared<std::list<sptr<AVSessionItem>>>();
+        keyEventListMapByUserId_[userId] = keyEventSessionList;
+    }
+    return keyEventSessionList;
 }
 
 int32_t AVSessionUsersManager::GetCurrentUserId()
