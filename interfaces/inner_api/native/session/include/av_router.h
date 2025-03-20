@@ -283,6 +283,14 @@ public:
     */
     virtual void DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo) = 0;
 
+    /**
+     * @brief judge same device cast change.
+     * 
+     * @return { bool } Whether same device cast change.
+     * @since 18
+    */
+    virtual bool IsSameDeviceCastChange() = 0;
+
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
     std::string sessionId_ = "-1";
