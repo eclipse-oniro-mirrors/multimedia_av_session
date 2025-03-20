@@ -457,8 +457,12 @@ private:
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront(int32_t userId = 0);
 
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurKeyEventSessionList(int32_t userId = 0);
+
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
+
+    void AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
@@ -512,6 +516,8 @@ private:
     std::shared_ptr<DetectBluetoothHostObserver> bluetoothObserver;
 #endif
 
+    std::recursive_mutex keyEventListLock_;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::map<std::string, std::string> castServiceNameMapState_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
@@ -559,7 +565,7 @@ private:
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
     const int32_t saType = 1;
-    const int32_t MAX_NOTIFICATION_NUM = 3;
+    const uint32_t MAX_NOTIFICATION_NUM = 3;
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
 };
 } // namespace OHOS::AVSession
