@@ -1152,5 +1152,216 @@ HWTEST_F(AVCastControllerTest, onDataSrcRead002, TestSize.Level1)
     EXPECT_TRUE(castController_->callback_ != nullptr);
 }
 
+/**
+* @tc.name: OnCastPlaybackStateChange005
+* @tc.desc: success to copy and no registrered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange005, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::string bits = std::string(14ULL, '1');
+    castController_->castPlaybackMask_ = std::bitset<14ULL>(bits);
+    castController_->callback_ = nullptr;
+    castController_->currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    castController_->OnCastPlaybackStateChange(state);
+    EXPECT_TRUE(state.GetState() != AVPlaybackState::PLAYBACK_STATE_PLAY);
+}
+
+/**
+* @tc.name: OnCastPlaybackStateChange006
+* @tc.desc: have no reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange006, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::string bits = std::string(14ULL, '1');
+    castController_->castPlaybackMask_ = std::bitset<14ULL>(bits);
+    castController_->callback_ = nullptr;
+    castController_->currentState_ = AVPlaybackState::PLAYBACK_STATE_INITIAL;
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    castController_->OnCastPlaybackStateChange(state);
+    EXPECT_TRUE(castController_->isPlayingState_);
+    EXPECT_TRUE(state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY);
+}
+
+/**
+* @tc.name: OnCastPlaybackStateChange007
+* @tc.desc: success to CopyToByMask and have no reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange007, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::string bits = std::string(14ULL, '1');
+    castController_->castPlaybackMask_ = std::bitset<14ULL>(bits);
+    castController_->callback_ = nullptr;
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    castController_->currentState_ = state.GetState();
+    castController_->OnCastPlaybackStateChange(state);
+    AVPlaybackState stateOut;
+    EXPECT_TRUE(state.CopyToByMask(castController_->castPlaybackMask_, stateOut));
+}
+
+
+/**
+* @tc.name: OnCastPlaybackStateChange008
+* @tc.desc: success to CopyToByMask and have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange008, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::string bits = std::string(14ULL, '1');
+    castController_->castPlaybackMask_ = std::bitset<14ULL>(bits);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    castController_->currentState_ = state.GetState();
+    castController_->OnCastPlaybackStateChange(state);
+    AVPlaybackState stateOut;
+    EXPECT_TRUE(state.CopyToByMask(castController_->castPlaybackMask_, stateOut));
+}
+/**
+* @tc.name: Prepare002
+* @tc.desc: GetIcon is not nullptr but GetIconUri is failed
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, Prepare002, TestSize.Level1)
+{
+    AVQueueItem avQueueItem;
+    std::shared_ptr<AVSessionPixelMap> icon = std::make_shared<AVSessionPixelMap>();
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    description->SetSubtitle("Subtitle");
+    description->SetDescription("This is music description");
+    description->SetIcon(icon);
+    description->SetIconUri("test");
+    description->SetExtras(nullptr);
+    description->SetMediaUri("Media url");
+    avQueueItem.SetDescription(description);
+    EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: Prepare003
+* @tc.desc: GetIcon is not nullptr and GetIconUri is successed
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, Prepare003, TestSize.Level1)
+{
+    AVQueueItem avQueueItem;
+    std::shared_ptr<AVSessionPixelMap> icon = std::make_shared<AVSessionPixelMap>();
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    description->SetSubtitle("Subtitle");
+    description->SetDescription("This is music description");
+    description->SetIcon(icon);
+    description->SetIconUri("URI_CACHE");
+    description->SetExtras(nullptr);
+    description->SetMediaUri("Media url");
+    avQueueItem.SetDescription(description);
+    EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: Prepare004
+* @tc.desc: callback is registered and isPlayingState is false
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, Prepare004, TestSize.Level1)
+{
+    AVQueueItem avQueueItem;
+    std::shared_ptr<AVSessionPixelMap> icon = std::make_shared<AVSessionPixelMap>();
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    description->SetSubtitle("Subtitle");
+    description->SetDescription("This is music description");
+    description->SetIcon(icon);
+    description->SetIconUri("URI_CACHE");
+    description->SetExtras(nullptr);
+    description->SetMediaUri("Media url");
+    avQueueItem.SetDescription(description);
+    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
+    castController_->isPlayingState_ = false;
+    EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: Prepare005
+* @tc.desc: callback is registered and isPlayingState is true
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, Prepare005, TestSize.Level1)
+{
+    AVQueueItem avQueueItem;
+    std::shared_ptr<AVSessionPixelMap> icon = std::make_shared<AVSessionPixelMap>();
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    description->SetSubtitle("Subtitle");
+    description->SetDescription("This is music description");
+    description->SetIcon(icon);
+    description->SetIconUri("URI_CACHE");
+    description->SetExtras(nullptr);
+    description->SetMediaUri("Media url");
+    avQueueItem.SetDescription(description);
+    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
+    castController_->isPlayingState_ = true;
+    EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: SetQueueItemDataSrc001
+* @tc.desc: callback is registered and isPlayingState is true
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, SetQueueItemDataSrc001, TestSize.Level1)
+{
+    AVDataSrcDescriptor dataSrc;
+    dataSrc.hasCallback = true;
+    dataSrc.callback_ = [](void*, uint32_t, int64_t) -> int32_t { return 0; };
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetDataSrc(dataSrc);
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
+    castController_->isPlayingState_ = true;
+    castController_->SetQueueItemDataSrc(avQueueItem);
+    EXPECT_EQ(avQueueItem.GetDescription()->GetDataSrc().hasCallback, true);
+}
+
+/**
+* @tc.name: CheckIfCancelCastCapsule001
+* @tc.desc: state is avaiable
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, CheckIfCancelCastCapsule001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->currentState_ =  AVPlaybackState::PLAYBACK_STATE_PAUSE;
+    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
+    castController_->CheckIfCancelCastCapsule();
+    EXPECT_EQ(castController_->IsStopState(castController_->currentState_), true);
+}
+
 } // namespace AVSession
 } // namespace OHOS

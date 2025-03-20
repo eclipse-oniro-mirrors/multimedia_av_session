@@ -1022,9 +1022,253 @@ static HWTEST_F(AVRouterImplTest, StopCastSession001, TestSize.Level1)
     g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
     g_AVRouterImpl->castHandleToInfoMap_[providerNumber + 100] = castHandleInfo;
 
-    auto ret = g_AVRouterImpl->StopCast(castHandle);
+    auto ret = g_AVRouterImpl->StopCastSession(castHandle);
     EXPECT_TRUE(ret == AVSESSION_SUCCESS);
     SLOGI("StopCastSession001 end");
+}
+
+/**
+* @tc.name: GetRemoteController005
+* @tc.desc: find controller in castHandleToInfoMap_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, GetRemoteController005, TestSize.Level1)
+{
+    SLOGI("GetRemoteController005 begin");
+    int32_t providerNumber = 1;
+    int32_t castId = 1;
+    g_AVRouterImpl->providerNumber_ = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12345";
+    castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
+    AVRouter::CastHandleInfo castHandleInfo2;
+    castHandleInfo2.sessionId_ = "12346";
+    castHandleInfo2.avRouterListener_ = nullptr;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle + 1] = castHandleInfo2;
+
+    auto controller = g_AVRouterImpl->GetRemoteController(castHandle);
+    EXPECT_TRUE(controller == nullptr);
+    SLOGI("GetRemoteController005 end");
+}
+
+/**
+* @tc.name: GetRemoteController006
+* @tc.desc: find controller in providerManagerMap_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, GetRemoteController006, TestSize.Level1)
+{
+    SLOGI("GetRemoteController005 begin");
+    int32_t providerNumber = 1;
+    int32_t castId = 1;
+    g_AVRouterImpl->providerNumber_ = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12345";
+    castHandleInfo.avRouterListener_ = nullptr;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    auto controller = g_AVRouterImpl->GetRemoteController(castHandle);
+    EXPECT_TRUE(controller == nullptr);
+    SLOGI("GetRemoteController006 end");
+}
+
+/**
+* @tc.name: RegisterCallback001
+* @tc.desc: have no provider in castHandleToInfoMap_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, RegisterCallback001, TestSize.Level1)
+{
+    SLOGI("RegisterCallback001 begin");
+    int32_t providerNumber = 20;
+    int32_t castId = 20;
+    g_AVRouterImpl->providerNumber_ = providerNumber;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    std::shared_ptr<IAVRouterListener> callback = std::make_shared<AVRouterListenerMock>();
+    std::string sessionId = "12345";
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+
+    auto ret = g_AVRouterImpl->RegisterCallback(castHandle, callback, sessionId, deviceInfo);
+    EXPECT_TRUE(AVSESSION_SUCCESS == ret);
+    SLOGI("RegisterCallback001 end");
+}
+
+/**
+* @tc.name: RegisterCallback002
+* @tc.desc: find controller in providerManagerMap_ but avRouterListener_ is null
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, RegisterCallback002, TestSize.Level1)
+{
+    SLOGI("RegisterCallback002 begin");
+    int32_t providerNumber = 21;
+    int32_t castId = 21;
+    g_AVRouterImpl->providerNumber_ = providerNumber;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12345";
+    castHandleInfo.avRouterListener_ = nullptr;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    std::shared_ptr<IAVRouterListener> callback = std::make_shared<AVRouterListenerMock>();
+    std::string sessionId = "12345";
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+
+    auto ret = g_AVRouterImpl->RegisterCallback(castHandle, callback, sessionId, deviceInfo);
+    EXPECT_TRUE(AVSESSION_SUCCESS == ret);
+    SLOGI("RegisterCallback002 end");
+}
+
+/**
+* @tc.name: RegisterCallback003
+* @tc.desc: find controller in providerManagerMap_ and avRouterListener_ is not null
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, RegisterCallback003, TestSize.Level1)
+{
+    SLOGI("RegisterCallback003 begin");
+    int32_t providerNumber = 22;
+    int32_t castId = 22;
+    g_AVRouterImpl->providerNumber_ = providerNumber;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12345";
+    castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    std::shared_ptr<IAVRouterListener> callback = std::make_shared<AVRouterListenerMock>();
+    std::string sessionId = "12345";
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+
+    auto ret = g_AVRouterImpl->RegisterCallback(castHandle, callback, sessionId, deviceInfo);
+    EXPECT_TRUE(AVSESSION_SUCCESS == ret);
+    SLOGI("RegisterCallback003 end");
+}
+
+/**
+* @tc.name: UnRegisterCallback001
+* @tc.desc: find controller in providerManagerMap_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, UnRegisterCallback001, TestSize.Level1)
+{
+    SLOGI("UnRegisterCallback001 begin");
+    int32_t providerNumber = 30;
+    int32_t castId = 30;
+    g_AVRouterImpl->providerNumber_ = providerNumber;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    std::string sessionId = "12345";
+    auto listener = std::make_shared<AVRouterListenerMock>();
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = sessionId;
+    castHandleInfo.avRouterListener_ = listener;
+    
+    AVRouter::CastHandleInfo castHandleInfo2;
+    castHandleInfo2.sessionId_ = "12346";
+    castHandleInfo2.avRouterListener_ = listener;
+
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle + 1] = castHandleInfo2;
+    g_AVRouterImpl->mirrorSessionMap_[sessionId] = listener;
+
+    std::shared_ptr<IAVRouterListener> callback = std::make_shared<AVRouterListenerMock>();
+    auto ret = g_AVRouterImpl->UnRegisterCallback(castHandle, callback, sessionId);
+    EXPECT_TRUE(AVSESSION_SUCCESS == ret);
+    SLOGI("UnRegisterCallback001 end");
+}
+
+/**
+* @tc.name: UnRegisterCallback002
+* @tc.desc: find controller in providerManagerMap_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, UnRegisterCallback002, TestSize.Level1)
+{
+    SLOGI("UnRegisterCallback002 begin");
+    int32_t providerNumber = 31;
+    int32_t castId = 31;
+    g_AVRouterImpl->providerNumber_ = providerNumber;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    std::string sessionId = "12345";
+    auto listener = std::make_shared<AVRouterListenerMock>();
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12346";
+    castHandleInfo.avRouterListener_ = listener;
+
+    AVRouter::CastHandleInfo castHandleInfo2;
+    castHandleInfo2.sessionId_ = "12345";
+    castHandleInfo2.avRouterListener_ = listener;
+    
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle + 1] = castHandleInfo2;
+    g_AVRouterImpl->mirrorSessionMap_[sessionId] = listener;
+
+    std::shared_ptr<IAVRouterListener> callback = std::make_shared<AVRouterListenerMock>();
+    auto ret = g_AVRouterImpl->UnRegisterCallback(castHandle, callback, sessionId);
+    EXPECT_TRUE(AVSESSION_SUCCESS == ret);
+    SLOGI("UnRegisterCallback002 end");
 }
 
 } //AVSession
