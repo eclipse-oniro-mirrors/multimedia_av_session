@@ -237,7 +237,7 @@ public:
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
 
-    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+    int32_t RegisterListenerStreamToCast(const std::pair<std::string, std::string>& serviceNameStatePair,
         DeviceInfo deviceInfo);
 
     int32_t AddSupportCastCommand(int32_t cmd);
@@ -436,7 +436,7 @@ private:
     const int32_t streamStateConnection = 6;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     int32_t newCastState = -1;
-    std::map<std::string, std::string> castServiceNameMapState_;
+    std::pair<std::string, std::string> castServiceNameStatePair_;
 
     bool collaborationRejectFlag_ = false;
     bool applyUserResultFlag_ = false;

@@ -164,13 +164,13 @@ public:
      * @brief Start cast process.
      *
      * @param { OutputDeviceInfo } outputDeviceInfo - Output device ready for use.
-     * @param { std::map<std::string, std::string>& } serviceNameMapState - serviceName state.
+     * @param { std::pair<std::string, std::string>& } serviceNameStatePair - serviceName state.
      * @param { std::string } sessionId - avsession id.
      * @return { int64_t } ID returned after successful start of cast.
      * @since 10
     */
     virtual int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
-        std::map<std::string, std::string>& serviceNameMapState, std::string sessionId) = 0;
+        std::pair<std::string, std::string>& serviceNameStatePair, std::string sessionId) = 0;
     
     /**
      * @brief Notify CastEngine to add (connect) remote devices.
