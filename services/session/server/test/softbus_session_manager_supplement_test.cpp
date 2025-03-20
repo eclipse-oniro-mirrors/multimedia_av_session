@@ -127,7 +127,118 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy005, TestSize.Le
 {
     std::string peerNetworkId = "0.0.0.0";
     std::string packageName = "packageName";
+    std::map<int32_t, std::shared_ptr<SoftbusSessionProxy>> proxyMap;
+    proxyMap.insert({0, g_MigrateAVSessionProxy});
+    g_SoftbusDistributedDataManager->mDeviceToProxyMap_.insert({peerNetworkId, proxyMap});
     g_SoftbusDistributedDataManager->mProxySocketMap_.insert({peerNetworkId, 0});
     bool ret = g_SoftbusDistributedDataManager->CreateProxy(g_MigrateAVSessionProxy, peerNetworkId, packageName);
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CreateProxy006
+ * @tc.desc: have proxy in map
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy006, TestSize.Level1)
+{
+    std::string peerNetworkId = "0.0.0.0";
+    std::string packageName = "packageName";
+    int32_t socketId = 100;
+    std::map<int32_t, std::shared_ptr<SoftbusSessionProxy>> proxyMap;
+    proxyMap.insert({socketId, g_MigrateAVSessionProxy});
+    g_SoftbusDistributedDataManager->mDeviceToProxyMap_.insert({peerNetworkId, proxyMap});
+    g_SoftbusDistributedDataManager->mProxySocketMap_.insert({peerNetworkId, socketId});
+    bool ret = g_SoftbusDistributedDataManager->CreateProxy(g_MigrateAVSessionProxy, peerNetworkId, packageName);
+    EXPECT_EQ(ret, false);
+}
+
+
+/**
+ * @tc.name: ReleaseProxy001
+ * @tc.desc: proxy is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy001, TestSize.Level1)
+{
+    std::string peerNetworkId = "0.0.0.0";
+    bool ret = g_SoftbusDistributedDataManager->ReleaseProxy(nullptr, peerNetworkId);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: ReleaseProxy002
+ * @tc.desc: fail to release proxy
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy002, TestSize.Level1)
+{
+    std::string peerNetworkId = "";
+    bool ret = g_SoftbusDistributedDataManager->ReleaseProxy(g_MigrateAVSessionProxy, peerNetworkId);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ReleaseProxy003
+ * @tc.desc: ReleaseProxy fail fo proxyMap is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy003, TestSize.Level1)
+{
+    std::string peerNetworkId = "0.0.0.0";
+    bool ret = g_SoftbusDistributedDataManager->ReleaseProxy(g_MigrateAVSessionProxy, peerNetworkId);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ReleaseProxy004
+ * @tc.desc: fail to release proxy
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy004, TestSize.Level1)
+{
+    std::string peerNetworkId = "0.0.0.0";
+    int32_t socketId = 1;
+    std::map<int32_t, std::shared_ptr<SoftbusSessionProxy>> proxyMap;
+    proxyMap.insert({socketId, g_MigrateAVSessionProxy});
+    g_SoftbusDistributedDataManager->mDeviceToProxyMap_.insert({peerNetworkId, proxyMap});
+    bool ret = g_SoftbusDistributedDataManager->ReleaseProxy(g_MigrateAVSessionProxy, peerNetworkId);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ReleaseProxy005
+ * @tc.desc: success to release proxy
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy005, TestSize.Level1)
+{
+    std::string peerNetworkId = "0.0.0.0";
+    int32_t characteristic = g_MigrateAVSessionProxy->GetCharacteristic();
+    std::map<int32_t, std::shared_ptr<SoftbusSessionProxy>> proxyMap;
+    proxyMap.insert({characteristic, g_MigrateAVSessionProxy});
+    g_SoftbusDistributedDataManager->mDeviceToProxyMap_.insert({peerNetworkId, proxyMap});
+    bool ret = g_SoftbusDistributedDataManager->ReleaseProxy(g_MigrateAVSessionProxy, peerNetworkId);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: BytesReceived001
+ * @tc.desc: proxy to received
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(SoftbusSessionManagerSupplementTest, BytesReceived001, TestSize.Level1)
+{
+    int32_t socket = 1;
+    std::string data = "test";
+    g_SoftbusDistributedDataManager->isServer_ = false;
+    g_SoftbusDistributedDataManager->BytesReceived(socket, data);
+    EXPECT_EQ(g_SoftbusDistributedDataManager->isServer_, false);
 }

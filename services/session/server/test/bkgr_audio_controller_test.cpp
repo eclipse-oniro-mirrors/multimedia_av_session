@@ -219,3 +219,45 @@ static HWTEST(BkGrAudioControllerTest, HasAVSession002, TestSize.Level1)
     bool ret = backgroundaudiocontroller.HasAVSession(uid);
     EXPECT_EQ(ret, true);
 }
+
+/**
+* @tc.name: OnSessionRelease004
+* @tc.desc: sessionUIDs_ only contain descriptor.uid_
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, OnSessionRelease004, TestSize.Level1)
+{
+    SLOGI("OnSessionRelease004 begin!");
+    AVSessionDescriptor descriptor;
+    descriptor.isThirdPartyApp_ = true;
+    descriptor.uid_ = 100;
+    BackgroundAudioController bkgraudiocontroller;
+    std::map<int32_t, std::set<int32_t>> sessionUID;
+    sessionUID.insert({descriptor.uid_, {descriptor.uid_}});
+    bkgraudiocontroller.sessionUIDs_ = sessionUID;
+    bkgraudiocontroller.OnSessionRelease(descriptor);
+    EXPECT_TRUE(!bkgraudiocontroller.sessionUIDs_.empty());
+    SLOGI("OnSessionRelease04 end!");
+}
+
+/**
+* @tc.name: OnSessionRelease005
+* @tc.desc: sessionUIDs_ not only contain descriptor.uid_
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, OnSessionRelease005, TestSize.Level1)
+{
+    SLOGI("OnSessionRelease005 begin!");
+    AVSessionDescriptor descriptor;
+    descriptor.isThirdPartyApp_ = true;
+    descriptor.uid_ = 100;
+    BackgroundAudioController bkgraudiocontroller;
+    std::map<int32_t, std::set<int32_t>> sessionUID;
+    sessionUID.insert({descriptor.uid_, {descriptor.uid_, 0, 1, 2}});
+    bkgraudiocontroller.sessionUIDs_ = sessionUID;
+    bkgraudiocontroller.OnSessionRelease(descriptor);
+    EXPECT_TRUE(!bkgraudiocontroller.sessionUIDs_.empty());
+    SLOGI("OnSessionRelease05 end!");
+}
