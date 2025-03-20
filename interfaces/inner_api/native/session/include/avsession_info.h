@@ -857,6 +857,39 @@ enum HDRFormat {
     IMAGE_HDR_ISO_SINGLE = 7,
 };
 
+/**
+ * The defination of decoder type.
+ * @enum { string }
+ * @syscap SystemCapability.Multimedia.AVSession.AVCast
+ * @atomicservice
+ * @since 18
+ */
+struct DecoderType {
+    /**
+     * Defination of avc codec type.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    static constexpr const char *OH_AVCODEC_MIMETYPE_VIDEO_AVC = "video/avc",
+
+    /**
+     * Defination of hevc codec type.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    static constexpr const char *OH_AVCODEC_MIMETYPE_VIDEO_HEVC = "video/hevc",
+
+    /**
+     * Defination of audio vivid codec type.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 18
+     */
+    static constexpr const char *OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a",
+};
+
 enum CastEngineConnectState {
     CONNECTING = 0,
     CONNECTED = 1,

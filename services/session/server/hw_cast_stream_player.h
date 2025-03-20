@@ -31,7 +31,7 @@ struct JsonCapabilities {
     std::vector<std::string> decoderTypes_;
     std::vector<HDRFormat> hdrFormats_;
     std::vector<float> playSpeeds_;
-    std::vector<std::map<std::string, ResolutionLevel>> decoderSupportResolutions_;
+    std::vector<std::map<std::string, std::vector<ResolutionLevel>>> decoderSupportResolutions_;
 };
 
 class HwCastStreamPlayer : public IAVCastControllerProxy, public CastEngine::IStreamPlayerListener,
@@ -88,15 +88,16 @@ private:
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem);
     bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
     int32_t GetMediaCapabilities();
+    void ClearJsonCapabilities();
     void GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue);
     void GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue);
 
     std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();
     const std::string videoStr_ = "video";
     const std::string audioStr_ = "audio";
-    const std::string decodeTypeStr_ = "decodeType";
+    const std::string decodeTypeStr_ = "decoderType";
     const std::string hdrFormatStr_ = "HDRFormat";
-    const std::string decodeSupportResolutionStr_ = "decodeSupportResolution";
+    const std::string decodeSupportResolutionStr_ = "decoderSupportResolution";
     const std::string decodeOfVideoHevcStr_ = "video/hevc";
     const std::string decodeOfVideoAvcStr_ = "video/avc";
     const std::string decodeOfAudioStr_ = "audio/av3a";

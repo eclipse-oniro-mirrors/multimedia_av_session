@@ -38,6 +38,33 @@ static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::st
     return status;
 }
 
+static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, std::string& value)
+{
+    napi_value property = nullptr;
+    napi_status status = napi_create_string_utf8(env, value.c_str(), value.size(), &property);
+    if (status != napi_ok) {
+        return status;
+    }
+    status = napi_set_named_property(env, obj, name.c_str(), property);
+    if (status != napi_ok) {
+        return status;
+    }
+    return status;
+}
+
+static napi_value ExportDecoderType(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_VIDEO_AVC", static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_VIDEO_AVC));
+    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_VIDEO_HEVC", static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_VIDEO_HEVC));
+    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_AUDIO_VIVID", static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_AUDIO_VIVID));
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 static napi_value ExportLoopMode(napi_env env)
 {
     napi_value result = nullptr;
@@ -389,6 +416,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("CastDisplayState", ExportCastDisplayState(env)),
         DECLARE_NAPI_PROPERTY("DeviceLogEventCode", ExportDeviceLogEventCode(env)),
         DECLARE_NAPI_PROPERTY("DistributedSessionType", ExportDistributedSessionType(env)),
+        DECLARE_NAPI_PROPERTY("DecoderType", ExportDecoderType(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
