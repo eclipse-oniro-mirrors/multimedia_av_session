@@ -3244,6 +3244,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         if (topSession_->IsNotShowNotification()) {
             std::shared_ptr<AAFwk::WantParams> want = std::make_shared<AAFwk::WantParams>();
             want->SetParam("hw_live_view_hidden_when_keyguard", OHOS::AAFwk::Boolean::Box(true));
+            SLOGI("PublishNotification with hw_live_view_hidden_when_keyguard uid: %{public}d", uid);
             request.SetAdditionalData(want);
         }
     }
