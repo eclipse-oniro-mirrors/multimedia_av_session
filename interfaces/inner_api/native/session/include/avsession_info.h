@@ -871,7 +871,7 @@ struct DecoderType {
      * @atomicservice
      * @since 18
      */
-    static constexpr const char *OH_AVCODEC_MIMETYPE_VIDEO_AVC = "video/avc",
+    static constexpr const char *OH_AVCODEC_MIMETYPE_VIDEO_AVC = "video/avc";
 
     /**
      * Defination of hevc codec type.
@@ -879,7 +879,7 @@ struct DecoderType {
      * @atomicservice
      * @since 18
      */
-    static constexpr const char *OH_AVCODEC_MIMETYPE_VIDEO_HEVC = "video/hevc",
+    static constexpr const char *OH_AVCODEC_MIMETYPE_VIDEO_HEVC = "video/hevc";
 
     /**
      * Defination of audio vivid codec type.
@@ -887,7 +887,7 @@ struct DecoderType {
      * @atomicservice
      * @since 18
      */
-    static constexpr const char *OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a",
+    static constexpr const char *OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a";
 };
 
 enum CastEngineConnectState {

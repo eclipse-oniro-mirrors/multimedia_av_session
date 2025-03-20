@@ -430,6 +430,7 @@ void HwCastStreamPlayer::GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue)
 
 void HwCastStreamPlayer::ClearJsonCapabilities()
 {
+    SLOGI("enter ClearJsonCapabilities");
     jsonCapabilitiesSptr_->decoderTypes_.clear();
     jsonCapabilitiesSptr_->hdrFormats_.clear();
     jsonCapabilitiesSptr_->playSpeeds_.clear();
@@ -455,9 +456,9 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
     if (value.contains(speedStr_)) {
         for (auto speed : value[speedStr_]) {
             CHECK_AND_CONTINUE(speed.is_number());
-            float num = speed;
-            SLOGI("support play speed is %{public}f", num);
-            jsonCapabilitiesSptr_->playSpeeds_.emplace_back(speed);
+            int num = speed;
+            SLOGI("support play speed is %{public}f", castMapToSpeed_[num]);
+            jsonCapabilitiesSptr_->playSpeeds_.emplace_back(castMapToSpeed_[num]);
         }
     }
     return AVSESSION_SUCCESS;

@@ -166,7 +166,7 @@ int32_t AVCastControllerProxy::GetSupportedDecoders(std::vector<std::string>& de
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_RETURN_RET_LOG(reply.ReadStringVector(&decoderTypes), ERR_UNMARSHALLING, "read string failed");
+        CHECK_AND_RETURN_RET_LOG(reply.ReadStringVector(&decoderTypes), ERR_UNMARSHALLING, "read StringVector failed");
     }
     return ret;
 }

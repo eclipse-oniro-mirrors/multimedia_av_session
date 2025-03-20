@@ -38,7 +38,7 @@ static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::st
     return status;
 }
 
-static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, std::string& value)
+static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, const std::string& value)
 {
     napi_value property = nullptr;
     napi_status status = napi_create_string_utf8(env, value.c_str(), value.size(), &property);
