@@ -68,6 +68,21 @@ static napi_value ExportDecoderType(napi_env env)
     return result;
 }
 
+static napi_value ExportResolutionLevel(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "RESOLUTION_480P", ResolutionLevel::RESOLUTION_480P);
+    (void)SetNamedProperty(env, result, "RESOLUTION_720P", ResolutionLevel::RESOLUTION_720P);
+    (void)SetNamedProperty(env, result, "RESOLUTION_1080P", ResolutionLevel::RESOLUTION_1080P);
+    (void)SetNamedProperty(env, result, "RESOLUTION_2K", ResolutionLevel::RESOLUTION_2K);
+    (void)SetNamedProperty(env, result, "RESOLUTION_4K", ResolutionLevel::RESOLUTION_4K);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 static napi_value ExportLoopMode(napi_env env)
 {
     napi_value result = nullptr;
@@ -420,6 +435,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DeviceLogEventCode", ExportDeviceLogEventCode(env)),
         DECLARE_NAPI_PROPERTY("DistributedSessionType", ExportDistributedSessionType(env)),
         DECLARE_NAPI_PROPERTY("DecoderType", ExportDecoderType(env)),
+        DECLARE_NAPI_PROPERTY("ResolutionLevel", ExportResolutionLevel(env)),
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);
