@@ -1228,8 +1228,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
         SLOGI("cast not add to collaboration when mirror to stream cast");
         return;
     }
-    bool isSameDeviceCastChange = AVRouter::GetInstance().IsSameDeviceCastChange();
-    if (castState == connectStateFromCast_ && !isSameDeviceCastChange) { // 6 is connected status (stream)
+    if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
             castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {
@@ -1239,7 +1238,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     }
-    if (castState == disconnectStateFromCast_ && !isSameDeviceCastChange) { // 5 is disconnected status
+    if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s", deviceInfo.deviceId_.c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;

@@ -99,8 +99,6 @@ public:
 
     void DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo) override;
 
-    bool IsSameDeviceCastChange() override;
-
 protected:
 
 private:
@@ -124,7 +122,6 @@ private:
     std::shared_ptr<CastSessionListener> castSessionListener_;
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
-    bool sameDeviceCastchange_ = false;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H
