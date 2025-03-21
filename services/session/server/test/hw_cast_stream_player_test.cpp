@@ -739,9 +739,14 @@ HWTEST_F(HwCastStreamPlayerTest, CheckCastTime001, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, RepeatPrepare001, TestSize.Level1)
 {
     SLOGI("RepeatPrepare001 begin!");
-    OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 0, 0, 0, 1};
+    mediaPixelMap->SetInnerImgBuffer(imgBuffer);
+
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->RefreshCurrentAVQueueItem(avQueueItem);
     description->SetIconUri("URI_CACHE");
     description->SetIcon(mediaPixelMap);
     auto ret = hwCastStreamPlayer->RepeatPrepare(description);
