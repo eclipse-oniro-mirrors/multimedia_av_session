@@ -180,8 +180,8 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     };
     migrateManager_->softBusDistributedDataMgr_->SessionOpened(sessionId, info);
     migrateManager_->softBusDistributedDataMgr_->OnSessionServerOpened();
-    migrateManager_->softBusDistributedDataMgr_->MessageReceived(sessionId, "");
-    migrateManager_->softBusDistributedDataMgr_->OnMessageHandleReceived(sessionId, "");
+    migrateManager_->softBusDistributedDataMgr_->MessageReceived(sessionId, "default");
+    migrateManager_->softBusDistributedDataMgr_->OnMessageHandleReceived(sessionId, "default");
     server_->ConnectProxy(sessionId);
     server_->OnConnectSession(sessionId);
     server_->OnConnectProxy(deviceId);
