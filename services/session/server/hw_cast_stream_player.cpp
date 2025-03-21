@@ -381,14 +381,26 @@ void HwCastStreamPlayer::GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue)
         }
     }
     if (videoValue.contains(decodeSupportResolutionStr_)) {
+        std::vector<ResolutionLevel> resolutionLevels;
+        std::map<std::string, std::vector<ResolutionLevel>> decodeToResolution;
+        int num;
         if (videoValue[decodeSupportResolutionStr_].contains(decodeOfVideoHevcStr_)) {
-            ResolutionLevel resolutionLevel = videoValue[decodeSupportResolutionStr_][decodeOfVideoHevcStr_];
-            std::map<std::string, ResolutionLevel> decodeToResolution = {{decodeOfVideoHevcStr_, resolutionLevel}};
+            for (auto value : videoValue[decodeSupportResolutionStr_][decodeOfVideoHevcStr_]) {
+                num = value;
+                SLOGI("decodeSupportResolution's video/hevc is %{public}d", num);
+                resolutionLevels.emplace_back(value);
+            }
+            decodeToResolution[decodeOfVideoHevcStr_] = resolutionLevels;
             jsonCapabilitiesSptr_->decoderSupportResolutions_.emplace_back(decodeToResolution);
         }
+        resolutionLevels.clear();
         if (videoValue[decodeSupportResolutionStr_].contains(decodeOfVideoAvcStr_)) {
-            ResolutionLevel resolutionLevel = videoValue[decodeSupportResolutionStr_][decodeOfVideoAvcStr_];
-            std::map<std::string, ResolutionLevel> decodeToResolution = {{decodeOfVideoAvcStr_, resolutionLevel}};
+            for (auto value : videoValue[decodeSupportResolutionStr_][decodeOfVideoAvcStr_]) {
+                num = value;
+                SLOGI("decodeSupportResolution's video/avc is %{public}d", num);
+                resolutionLevels.emplace_back(value);
+            }
+            decodeToResolution[decodeOfVideoAvcStr_] = resolutionLevels;
             jsonCapabilitiesSptr_->decoderSupportResolutions_.emplace_back(decodeToResolution);
         }
     } else {
@@ -416,6 +428,15 @@ void HwCastStreamPlayer::GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue)
     }
 }
 
+void HwCastStreamPlayer::ClearJsonCapabilities()
+{
+    SLOGI("enter ClearJsonCapabilities");
+    jsonCapabilitiesSptr_->decoderTypes_.clear();
+    jsonCapabilitiesSptr_->hdrFormats_.clear();
+    jsonCapabilitiesSptr_->playSpeeds_.clear();
+    jsonCapabilitiesSptr_->decoderSupportResolutions_.clear();
+}
+
 int32_t HwCastStreamPlayer::GetMediaCapabilities()
 {
     SLOGI("GetMediaCapabilities begin");
@@ -423,6 +444,7 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
     CHECK_AND_RETURN_RET_LOG(streamPlayer_, AVSESSION_ERROR, "streamPlayer_ is nullptr");
     CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     std::string supportCapabilities;
+    ClearJsonCapabilities();
     streamPlayer_->GetMediaCapabilities(supportCapabilities);
     nlohmann::json value = nlohmann::json::parse(supportCapabilities);
     CHECK_AND_RETURN_RET_LOG(!value.is_null() && !value.is_discarded(), AVSESSION_ERROR, "GetMediaCapabilities fail");
@@ -434,9 +456,9 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
     if (value.contains(speedStr_)) {
         for (auto speed : value[speedStr_]) {
             CHECK_AND_CONTINUE(speed.is_number());
-            float num = speed;
-            SLOGI("support play speed is %{public}f", num);
-            jsonCapabilitiesSptr_->playSpeeds_.emplace_back(speed);
+            int num = speed;
+            SLOGI("support play speed is %{public}f", castMapToSpeed_[num]);
+            jsonCapabilitiesSptr_->playSpeeds_.emplace_back(castMapToSpeed_[num]);
         }
     }
     return AVSESSION_SUCCESS;
@@ -465,8 +487,10 @@ int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderTy
     for (auto& map: jsonCapabilitiesSptr_->decoderSupportResolutions_) {
         auto it = map.find(decoderType);
         if (it != map.end()) {
-            SLOGI("find %{public}s map to %{public}d", decoderType.c_str(), static_cast<int32_t>(it->second));
-            resolutionLevel = it->second;
+            std::vector<ResolutionLevel> resolutionLevels = map[decoderType];
+            auto maxResolutionLevel = *std::max_element(resolutionLevels.begin(), resolutionLevels.end());
+            SLOGI("find %{public}s map to %{public}d", decoderType.c_str(), maxResolutionLevel);
+            resolutionLevel = static_cast<ResolutionLevel>(maxResolutionLevel);
         } else {
             SLOGI("no find %{public}s map to resolutionLevel", decoderType.c_str());
             return  AVSESSION_ERROR;
@@ -489,7 +513,7 @@ int32_t HwCastStreamPlayer::GetSupportedHdrCapabilities(std::vector<HDRFormat>& 
 
 int32_t HwCastStreamPlayer::GetSupportedPlaySpeeds(std::vector<float>& playSpeeds)
 {
-    SLOGI("enter GetSupportedDecoders");
+    SLOGI("enter GetSupportedPlaySpeeds");
     std::lock_guard lockGuard(streamPlayerLock_);
     CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     if (jsonCapabilitiesSptr_->playSpeeds_.empty()) {

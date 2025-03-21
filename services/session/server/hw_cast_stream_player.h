@@ -31,7 +31,7 @@ struct JsonCapabilities {
     std::vector<std::string> decoderTypes_;
     std::vector<HDRFormat> hdrFormats_;
     std::vector<float> playSpeeds_;
-    std::vector<std::map<std::string, ResolutionLevel>> decoderSupportResolutions_;
+    std::vector<std::map<std::string, std::vector<ResolutionLevel>>> decoderSupportResolutions_;
 };
 
 class HwCastStreamPlayer : public IAVCastControllerProxy, public CastEngine::IStreamPlayerListener,
@@ -88,15 +88,16 @@ private:
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem);
     bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
     int32_t GetMediaCapabilities();
+    void ClearJsonCapabilities();
     void GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue);
     void GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue);
 
     std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();
     const std::string videoStr_ = "video";
     const std::string audioStr_ = "audio";
-    const std::string decodeTypeStr_ = "decodeType";
+    const std::string decodeTypeStr_ = "decoderType";
     const std::string hdrFormatStr_ = "HDRFormat";
-    const std::string decodeSupportResolutionStr_ = "decodeSupportResolution";
+    const std::string decodeSupportResolutionStr_ = "decoderSupportResolution";
     const std::string decodeOfVideoHevcStr_ = "video/hevc";
     const std::string decodeOfVideoAvcStr_ = "video/avc";
     const std::string decodeOfAudioStr_ = "audio/av3a";
@@ -131,6 +132,16 @@ private:
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_2_00_X, 2.00},
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_50_X, 0.50},
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_50_X, 1.50}
+    };
+    std::map<int, float> castMapToSpeed_ = {
+        {0, 0.75},
+        {1, 1.00},
+        {2, 1.25},
+        {3, 1.75},
+        {4, 2.00},
+        {5, 0.50},
+        {6, 1.50},
+        {7, 3.00}
     };
     std::map<CastEngine::LoopMode, int32_t> castPlusLoopModeToInt_ = {
         {CastEngine::LoopMode::LOOP_MODE_SEQUENCE, AVPlaybackState::LOOP_MODE_SEQUENCE},
