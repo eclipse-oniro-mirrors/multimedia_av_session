@@ -36,7 +36,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") &&
         (state == "IDLE" || state == "CONNECT_SUCC")) {
-        castServiceNameMapState_[serviceName] = state;
+        castServiceNameStatePair_ = std::make_pair(serviceName, state);
         isSupportMirrorToStream_ = false;
         castDeviceId_ = "0";
         castDeviceName_ = " ";
@@ -218,8 +218,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
             (GetContainer().GetAllSessions().size() == 1 && !CheckAncoAudio())) && !is2in1_),
             AVSESSION_SUCCESS, "can not release cast with session alive");
-        CHECK_AND_RETURN_RET_LOG(!(castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
-            castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection),
+        CHECK_AND_RETURN_RET_LOG(castServiceNameStatePair_.second == deviceStateDisconnection,
             AVSESSION_SUCCESS, "can not release cast with casting");
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
@@ -403,8 +402,7 @@ void AVSessionService::NotifyMirrorToStreamCast()
             MirrorToStreamCast(session);
         }
     }
-    if (castServiceNameMapState_["HuaweiCast"] == deviceStateDisconnection ||
-        castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateDisconnection) {
+    if (castServiceNameStatePair_.second == deviceStateDisconnection) {
         DeviceInfo localDeviceInfo;
         AVRouter::GetInstance().SetServiceAllConnectState(-1, localDeviceInfo);
     }
@@ -416,8 +414,7 @@ bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
                       session->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_VIDEO &&
                       !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid());
 
-    bool connectCond = (castServiceNameMapState_["HuaweiCast"] == deviceStateConnection ||
-                       castServiceNameMapState_["HuaweiCast-Dual"] == deviceStateConnection) && !is2in1_;
+    bool connectCond = !is2in1_ && (castServiceNameStatePair_.second == deviceStateConnection);
 
     return deviceCond && connectCond;
 }
@@ -436,7 +433,7 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
     deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
     deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
     deviceInfo.providerId_ = 1;
-    return session->RegisterListenerStreamToCast(castServiceNameMapState_, deviceInfo);
+    return session->RegisterListenerStreamToCast(castServiceNameStatePair_, deviceInfo);
 }
 
 void AVSessionService::SetIsSupportMirrorToStream(bool isSupportMirrorToStream)

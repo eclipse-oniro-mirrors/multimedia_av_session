@@ -297,10 +297,10 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
 }
 
 int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
-    std::map<std::string, std::string>& serviceNameMapState, std::string sessionId)
+    std::pair<std::string, std::string>& serviceNameStatePair, std::string sessionId)
 {
     SLOGI("AVRouterImpl start cast process");
-    castServiceNameMapState_ = serviceNameMapState;
+    castServiceNameStatePair_ = serviceNameStatePair;
     int64_t castHandle = -1;
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(outputDeviceInfo.deviceInfos_[0].providerId_) !=
         providerManagerMap_.end(), castHandle, "Can not find corresponding provider");

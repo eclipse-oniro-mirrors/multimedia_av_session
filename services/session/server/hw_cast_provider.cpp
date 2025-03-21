@@ -294,7 +294,7 @@ bool HwCastProvider::SetStreamState(int64_t castHandle, DeviceInfo deviceInfo)
 {
     int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     mirrorCastHandle = castHandle;
-    SLOGI("mirrorCastHandle is %" PRId64 "", mirrorCastHandle);
+    SLOGI("mirrorCastHandle is %{public}lld", static_cast<long long>(mirrorCastHandle));
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("SetStreamState failed for the castSession corresponding to castId is not exit");
         return false;

@@ -891,7 +891,7 @@ std::string AVSessionItem::GetAnonymousDeviceId(std::string deviceId)
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string, std::string>& serviceNameStatePair,
     DeviceInfo deviceInfo)
 {
     if (castHandle_ > 0) {
@@ -902,11 +902,11 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
         mirrorToStreamFlag_ = true;
     }
     std::lock_guard lockGuard(castHandleLock_);
-    castServiceNameMapState_ = serviceNameMapState;
+    castServiceNameStatePair_ = serviceNameStatePair;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     if (AVRouter::GetInstance().GetMirrorCastHandle() == -1) {
-        castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_, GetSessionId());
+        castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameStatePair_, GetSessionId());
         CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId(), deviceInfo);
         AVRouter::GetInstance().SetServiceAllConnectState(castHandle_, deviceInfo);
@@ -1159,7 +1159,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
         DoContinuousTaskRegister();
-        SLOGI("RegisterListenerStreamToCast check handle set to %" PRId64 "", castHandle_);
+        SLOGI("RegisterListenerStreamToCast check handle set to %{public}lld", (long long)castHandle_);
         return AVSESSION_SUCCESS;
     }
 
@@ -1169,7 +1169,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             SLOGI("repeat startcast %{public}lld", (long long)castHandle_);
             return AVSESSION_ERROR;
         } else {
-            SLOGI("cast check with pre cast alive %" PRId64 ", unregister callback", castHandle_);
+            SLOGI("cast check with pre cast alive %{public}lld, unregister callback", (long long)castHandle_);
             isSwitchNewDevice_ = true;
             newOutputDeviceInfo_ = outputDeviceInfo;
             StopCast();
@@ -1186,7 +1186,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 
 int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
-    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_, GetSessionId());
+    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameStatePair_, GetSessionId());
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     castHandle_ = castHandle;
@@ -1405,7 +1405,7 @@ int32_t AVSessionItem::StopCast(bool continuePlay)
     }
     {
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0 && castHandle_ != -1, AVSESSION_SUCCESS, "Not cast session, return");
-        SLOGI("Stop cast process %" PRId64 "", castHandle_);
+        SLOGI("Stop cast process %{public}lld", (long long)castHandle_);
         if (castHandle_ == AVRouter::GetInstance().GetMirrorCastHandle()) {
             if (castControllerProxy_ != nullptr) {
                 AVCastControlCommand cmd;

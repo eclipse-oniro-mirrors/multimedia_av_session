@@ -131,7 +131,7 @@ static HWTEST_F(AVRouterImplTest, StartCast001, TestSize.Level1)
     DeviceInfo deviceInfo;
     deviceInfo.providerId_ = g_AVRouterImpl->providerNumber_;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     std::string sessionId = "1000";
 
     int32_t number = 10;
@@ -140,7 +140,7 @@ static HWTEST_F(AVRouterImplTest, StartCast001, TestSize.Level1)
     castHandleInfo.sessionId_ = sessionId;
     g_AVRouterImpl->castHandleToInfoMap_.insert({number, castHandleInfo});
 
-    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameMapState, sessionId);
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameStatePair, sessionId);
     EXPECT_TRUE(ret == AVSESSION_ERROR);
     SLOGI("StartCast001 end");
 }
@@ -158,7 +158,7 @@ static HWTEST_F(AVRouterImplTest, StartCast002, TestSize.Level1)
     DeviceInfo deviceInfo;
     deviceInfo.providerId_ = g_AVRouterImpl->providerNumber_;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     std::string sessionId = "1000";
     
     AVRouter::CastHandleInfo castHandleInfo;
@@ -166,7 +166,7 @@ static HWTEST_F(AVRouterImplTest, StartCast002, TestSize.Level1)
     int32_t number = 11;
     g_AVRouterImpl->castHandleToInfoMap_.insert({number, castHandleInfo});
 
-    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameMapState, sessionId);
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameStatePair, sessionId);
     EXPECT_TRUE(ret == AVSESSION_ERROR);
     SLOGI("StartCast002 end");
 }
@@ -184,7 +184,7 @@ static HWTEST_F(AVRouterImplTest, StartCast003, TestSize.Level1)
     DeviceInfo deviceInfo;
     deviceInfo.providerId_ = g_AVRouterImpl->providerNumber_;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     std::string sessionId = "1000";
 
     AVRouter::CastHandleInfo castHandleInfo;
@@ -193,7 +193,7 @@ static HWTEST_F(AVRouterImplTest, StartCast003, TestSize.Level1)
     int32_t number = 11;
     g_AVRouterImpl->castHandleToInfoMap_.insert({number, castHandleInfo});
 
-    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameMapState, sessionId);
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameStatePair, sessionId);
     EXPECT_TRUE(ret == AVSESSION_ERROR);
     SLOGI("StartCast003 end");
 }
@@ -810,14 +810,14 @@ static HWTEST_F(AVRouterImplTest, StartCast004, TestSize.Level1)
     avCastProviderManager->Init(providerNumber, hwCastProvider);
     g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
     
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     std::string sessionId = "1000";
     AVRouter::CastHandleInfo castHandleInfo;
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
     castHandleInfo.sessionId_ = sessionId;
     g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
 
-    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameMapState, "1001");
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameStatePair, "1001");
     EXPECT_TRUE(ret != AVSESSION_ERROR);
     SLOGI("StartCast004 end");
 }
@@ -844,7 +844,7 @@ static HWTEST_F(AVRouterImplTest, StartCast005, TestSize.Level1)
     avCastProviderManager->Init(providerNumber, hwCastProvider);
     g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
     
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     std::string sessionId = "1000";
     AVRouter::CastHandleInfo castHandleInfo;
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
@@ -856,7 +856,7 @@ static HWTEST_F(AVRouterImplTest, StartCast005, TestSize.Level1)
     deviceInfo2.providerId_ = providerNumber + 100;
     outputDeviceInfo2.deviceInfos_.push_back(deviceInfo2);
 
-    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo2, serviceNameMapState, sessionId);
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo2, serviceNameStatePair, sessionId);
     EXPECT_TRUE(ret == AVSESSION_ERROR);
     SLOGI("StartCast005 end");
 }
@@ -883,14 +883,14 @@ static HWTEST_F(AVRouterImplTest, StartCast006, TestSize.Level1)
     avCastProviderManager->Init(providerNumber, hwCastProvider);
     g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
     
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     std::string sessionId = "1000";
     AVRouter::CastHandleInfo castHandleInfo;
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
     castHandleInfo.sessionId_ = sessionId;
     g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
 
-    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameMapState, sessionId);
+    auto ret = g_AVRouterImpl->StartCast(outputDeviceInfo, serviceNameStatePair, sessionId);
     EXPECT_TRUE(ret == AVSESSION_ERROR);
     SLOGI("StartCast006 end");
 }

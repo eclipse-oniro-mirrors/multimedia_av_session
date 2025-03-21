@@ -73,7 +73,7 @@ public:
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandle) override;
 
     int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
-        std::map<std::string, std::string>& serviceNameMapState, std::string sessionId) override;
+        std::pair<std::string, std::string>& serviceNameStatePair, std::string sessionId) override;
 
     int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) override;
 
@@ -106,7 +106,7 @@ private:
     IAVSessionServiceListener *servicePtr_ = nullptr;
     std::recursive_mutex providerManagerLock_;
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
-    std::map<std::string, std::string> castServiceNameMapState_;
+    std::pair<std::string, std::string> castServiceNameStatePair_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const int64_t noMirrorCastHandle = -1;
     int32_t providerNumber_ = 0;

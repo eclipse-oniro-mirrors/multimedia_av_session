@@ -608,7 +608,7 @@ private:
     std::recursive_mutex keyEventListLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::map<std::string, std::string> castServiceNameMapState_;
+    std::pair<std::string, std::string> castServiceNameStatePair_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const std::string deviceStateDisconnection = "IDLE";
     const std::string seperator = ",";
