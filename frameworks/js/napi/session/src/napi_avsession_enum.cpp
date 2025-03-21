@@ -57,9 +57,12 @@ static napi_value ExportDecoderType(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
 
-    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_VIDEO_AVC", static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_VIDEO_AVC));
-    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_VIDEO_HEVC", static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_VIDEO_HEVC));
-    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_AUDIO_VIVID", static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_AUDIO_VIVID));
+    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_VIDEO_AVC",
+        static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_VIDEO_AVC));
+    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_VIDEO_HEVC",
+        static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_VIDEO_HEVC));
+    (void)SetNamedProperty(env, result, "OH_AVCODEC_MIMETYPE_AUDIO_VIVID",
+        static_cast<std::string>(DecoderType::OH_AVCODEC_MIMETYPE_AUDIO_VIVID));
 
     napi_object_freeze(env, result);
     return result;
