@@ -37,6 +37,19 @@ MigrateAVSessionServer::MigrateAVSessionServer(int32_t migrateMode)
     migrateMode_ = migrateMode;
 }
 
+MigrateAVSessionServer::~MigrateAVSessionServer()
+{
+    {
+        std::lock_guard lockGuard(migrateControllerLock_);
+        for (auto& pair : playerIdToControllerCallbackMap_) {
+            std::shared_ptr<AVControllerObserver> controllerObserver = pair.second;
+            CHECK_AND_CONTINUE(controllerObserver != nullptr);
+            controllerObserver->Release();
+        }
+    }
+    SLOGI("MigrateAVSessionServer quit");
+}
+
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
 {
     SLOGI("OnConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
@@ -974,11 +987,16 @@ void AVControllerObserver::OnValidCommandChange(const std::vector<int32_t> &cmds
     }
 }
 
-
 void AVControllerObserver::Init(std::weak_ptr<MigrateAVSessionServer> migrateServer, int32_t migrateMode)
 {
     migrateServer_ = migrateServer;
     migrateMode_ = migrateMode;
+}
+
+void AVControllerObserver::Release()
+{
+    migrateServer_.reset();
+    migrateMode_ = 0;
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

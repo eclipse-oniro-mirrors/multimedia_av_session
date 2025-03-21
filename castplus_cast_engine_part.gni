@@ -12,7 +12,8 @@
 # limitations under the License.
 
 if (!defined(global_parts_info) ||
-    defined(global_parts_info.castplus_cast_engine)) {
+    defined(global_parts_info.castplus_cast_engine) ||
+    defined(global_parts_info.castplus_cast_engine_override)) {
   castplus_cast_engine_enable = true
 } else {
   castplus_cast_engine_enable = false

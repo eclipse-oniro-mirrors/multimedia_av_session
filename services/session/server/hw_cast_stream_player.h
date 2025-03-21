@@ -91,6 +91,7 @@ private:
     void ClearJsonCapabilities();
     void GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue);
     void GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue);
+    AVQueueItem RefreshCurrentItemDuration();
 
     std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();
     const std::string videoStr_ = "video";
