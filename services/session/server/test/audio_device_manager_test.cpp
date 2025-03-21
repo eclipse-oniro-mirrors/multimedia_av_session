@@ -103,10 +103,10 @@ static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo002, TestSize.Level
 {
     SLOGI("SendRemoteAvSessionInfo002 begin!");
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession = std::make_shared<MigrateAVSessionServer>();
-    AudioDeviceManager::GetInstance().migrateSession_ = migrateAVSession;
     std::string deviceId = "test";
+    AudioDeviceManager::GetInstance().InitAudioStateCallback(migrateAVSession, deviceId);
     AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(deviceId);
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().migrateSession_ != nullptr);
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().migrateSession_ == nullptr);
 }
 
 /**
@@ -122,4 +122,17 @@ static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Leve
     std::string deviceId = "test";
     AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
     EXPECT_TRUE(AudioDeviceManager::GetInstance().migrateSession_ != nullptr);
+}
+
+/**
+* @tc.name: RegisterAudioDeviceChangeCallback002
+* @tc.desc: audioDeviceChangeCallback_ have registered with nullptr
+* @tc.type: FUNC
+*/
+static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, TestSize.Level1)
+{
+    SLOGI("RegisterAudioDeviceChangeCallback001 begin!");
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = nullptr;
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
 }

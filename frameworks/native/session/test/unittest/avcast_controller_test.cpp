@@ -1231,6 +1231,7 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange008, TestSize.Level1)
     AVPlaybackState stateOut;
     EXPECT_TRUE(state.CopyToByMask(castController_->castPlaybackMask_, stateOut));
 }
+
 /**
 * @tc.name: Prepare002
 * @tc.desc: GetIcon is not nullptr but GetIconUri is failed
@@ -1361,6 +1362,67 @@ HWTEST_F(AVCastControllerTest, CheckIfCancelCastCapsule001, TestSize.Level1)
     castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
     castController_->CheckIfCancelCastCapsule();
     EXPECT_EQ(castController_->IsStopState(castController_->currentState_), true);
+}
+
+/**
+* @tc.name: AddAvailableCommand002
+* @tc.desc: AddAvailableCommand with not null supportedCastCmds
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, AddAvailableCommand002, TestSize.Level1)
+{
+    std::shared_ptr<AVCastControllerItem> castController = std::make_shared<AVCastControllerItem>();
+    ASSERT_TRUE(castController != nullptr);
+    std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(nullptr);
+    ASSERT_TRUE(hwCastStreamPlayer != nullptr);
+    auto validCallback = [](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
+        SLOGI("add cast valid command %{public}d", cmd);
+        supportedCastCmds = { AVCastControlCommand::CAST_CONTROL_CMD_PLAY };
+        return;
+    };
+    auto preparecallback = []() {
+        SLOGI("prepare callback");
+    };
+    castController->Init(hwCastStreamPlayer, validCallback, preparecallback);
+    EXPECT_EQ(castController->AddAvailableCommand(0), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: RemoveAvailableCommand002
+* @tc.desc: RemoveAvailableCommand with not null supportedCastCmds
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, RemoveAvailableCommand002, TestSize.Level1)
+{
+    std::shared_ptr<AVCastControllerItem> castController = std::make_shared<AVCastControllerItem>();
+    ASSERT_TRUE(castController != nullptr);
+    std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(nullptr);
+    ASSERT_TRUE(hwCastStreamPlayer != nullptr);
+    auto validCallback = [](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
+        SLOGI("add cast valid command %{public}d", cmd);
+        supportedCastCmds = { AVCastControlCommand::CAST_CONTROL_CMD_PLAY };
+        return;
+    };
+    auto preparecallback = []() {
+        SLOGI("prepare callback");
+    };
+    castController->Init(hwCastStreamPlayer, validCallback, preparecallback);
+    EXPECT_EQ(castController->RemoveAvailableCommand(0), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: Destroy002
+* @tc.desc: Destroy with not null callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, Destroy002, TestSize.Level1)
+{
+    ASSERT_TRUE(castController_ != nullptr);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    EXPECT_EQ(castController_->Destroy(), AVSESSION_SUCCESS);
 }
 
 } // namespace AVSession

@@ -131,6 +131,68 @@ common_external_deps_with_third_party = [
   "window_manager:libdm_lite",
 ]
 
+ohos_unittest("AVSessionUsersManagerTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_users_manager_test.cpp" ]
+
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "../../ipc/base/",
+    "../../ipc/proxy/",
+    "../../ipc/stub/",
+    "../../server/",
+    "../../server/migrate/",
+    "../../server/softbus/",
+    "../../server/remote/",
+    "../../../../interfaces/inner_api/native/session/include/",
+    "../../../../frameworks/native/session/include",
+    "../../adapter/",
+    "../../../../utils/include/",
+    "../",
+    "../remote",
+  ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = [
+    "../../../../frameworks/common:avsession_common",
+    "../../../../frameworks/native/session:avsession_client_static",
+    "../../../../utils:avsession_utils",
+    "../../../session:avsession_item_static",
+    "../../../session:avsession_service_static",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "audio_framework:audio_client",
+    "background_task_mgr:bgtaskmgr_innerkits",
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
+    "openssl:libcrypto_shared",
+    "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
+  ]
+}
+
 ohos_unittest("AVSharedMemoryBaseTest") {
   module_out_path = module_output_path
 
@@ -398,6 +460,86 @@ ohos_unittest("AVSessionItemTest") {
   module_out_path = module_output_path
 
   sources = [ "avsession_item_test.cpp" ]
+
+  visibility = [ ":*" ]
+
+  defines = [ "CASTPLUS_CAST_ENGINE_ENABLE" ]
+
+  include_dirs = [
+    "../../ipc/base/",
+    "../../ipc/proxy/",
+    "../../ipc/stub/",
+    "../../server/",
+    "../../server/migrate/",
+    "../../server/softbus/",
+    "../../server/remote/",
+    "../../../../interfaces/inner_api/native/session/include/",
+    "../../../../frameworks/native/session/include",
+    "../../adapter/",
+    "../../../../utils/include/",
+    "../",
+    "../remote",
+  ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = [
+    "../../../../frameworks/common:avsession_common",
+    "../../../../frameworks/native/session:avsession_client_static",
+    "../../../../utils:avsession_utils",
+    "../../../session:avsession_item_static",
+    "../../../session:avsession_service_static",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "audio_framework:audio_client",
+    "audio_framework:audio_foundation",
+    "background_task_mgr:bgtaskmgr_innerkits",
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
+    "openssl:libcrypto_shared",
+    "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
+  ]
+
+  if (castplus_cast_engine_enable) {
+    cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
+    ]
+    external_deps += [ "cast_engine:cast_engine_client" ]
+  }
+
+  if (bluetooth_part_enable) {
+    cflags_cc += [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
+}
+
+ohos_unittest("AVControllerItemTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcontroller_item_test.cpp" ]
 
   visibility = [ ":*" ]
 
@@ -1642,6 +1784,7 @@ ohos_unittest("BkGrAudioControllerTest") {
     "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "device_manager:devicemanagersdk",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
@@ -2167,6 +2310,7 @@ group("av_session_server_unittest") {
   deps = [
     ":AVControllerCallbackProxyTest",
     ":AVControllerCallbackStubTest",
+    ":AVControllerItemTest",
     ":AVRouterImplTest",
     ":AVRouterTest",
     ":AVSessionCallbackProxyTest",
