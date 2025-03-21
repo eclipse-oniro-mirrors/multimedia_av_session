@@ -285,7 +285,7 @@ public:
 
     /**
      * @brief judge same device cast change.
-     * 
+     *
      * @return { bool } Whether same device cast change.
      * @since 18
     */
