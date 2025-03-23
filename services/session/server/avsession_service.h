@@ -550,6 +550,8 @@ private:
 
     void AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionItem);
 
+    std::string GetLocalTitle();
+
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;
