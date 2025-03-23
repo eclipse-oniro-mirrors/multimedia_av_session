@@ -3190,6 +3190,24 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateNf
     return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
 }
 
+std::string AVSessionService::GetLocalTitle()
+{
+    AVMetaData meta = topSession_->GetMetaData();
+    bool isTitleLyric = (topSession_->GetBundleName() == DEFAULT_BUNDLE_NAME) && !meta.GetDescription().empty();
+    std::string songName;
+    if (isTitleLyric) {
+        std::string description = meta.GetDescription();
+        size_t pos = description.find(";");
+        if (pos != std::string::npos) {
+            songName = description.substr(0, pos);
+        }
+        SLOGI("GetLocalTitle description:%{public}s, title:%{public}s", description.c_str(), songName.c_str());
+    }
+    std::string localTitle = isTitleLyric ? songName : meta.GetTitle();
+    SLOGI("GetLocalTitle localTitle:%{public}s", localTitle.c_str());
+    return localTitle;
+}
+
 // LCOV_EXCL_START
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession,
     bool addCapsule, bool isCapsuleUpdate)
@@ -3223,8 +3241,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         AVSessionUtils::ReadImageFromFile(iPixelMap, fileDir, fileName);
         AVQueueItem item;
         topSession_->GetCurrentCastItem(item);
-        std::string notifyText = item.GetDescription() ? item.GetDescription()->GetTitle() :
-            topSession_->GetMetaDataWithoutImg().GetTitle();
+        std::string notifyText = item.GetDescription() ? item.GetDescription()->GetTitle() : GetLocalTitle();
         AddCapsule(notifyText, isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
     }
 

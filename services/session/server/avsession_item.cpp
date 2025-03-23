@@ -314,13 +314,21 @@ void AVSessionItem::ReportSetAVMetaDataInfo(const AVMetaData& meta)
         "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
 }
 
+bool AVSessionItem::CheckTitleChange(const AVMetaData& meta)
+{
+    bool isTitleLyric = (GetBundleName() == defaultBundleName) && !meta.GetDescription().empty();
+    bool isTitleChange = metaData_.GetTitle() != meta.GetTitle();
+    SLOGI("CheckTitleChange isTitleLyric:%{public}d isTitleChange:%{public}d", isTitleLyric, isTitleChange);
+    return isTitleChange && !isTitleLyric;
+}
+
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     {
         std::lock_guard lockGuard(avsessionItemLock_);
         SessionXCollie sessionXCollie("avsession::SetAVMetaData");
         ReportSetAVMetaDataInfo(meta);
-        if ((metaData_.GetAssetId() != meta.GetAssetId()) || (metaData_.GetTitle() != meta.GetTitle())) {
+        if ((metaData_.GetAssetId() != meta.GetAssetId()) || CheckTitleChange(meta)) {
             isMediaChange_ = true;
         }
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
