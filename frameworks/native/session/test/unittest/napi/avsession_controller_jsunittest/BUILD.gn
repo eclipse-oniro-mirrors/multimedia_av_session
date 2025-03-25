@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 
-module_output_path = "av_session/av_session_session"
+module_output_path = "av_session/av_session/session"
 
 ohos_js_unittest("AVSessionControllerJsTest") {
   module_out_path = module_output_path

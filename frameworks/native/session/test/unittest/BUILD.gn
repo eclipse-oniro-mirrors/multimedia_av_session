@@ -16,7 +16,7 @@ import("../../../../../castplus_cast_engine_part.gni")
 import("../../../../../config.gni")
 import("../../../../../efficiency_manager_part.gni")
 
-module_output_path = "av_session/av_session_session"
+module_output_path = "av_session/av_session/session"
 
 ###############################################################################
 config("module_private_config") {
