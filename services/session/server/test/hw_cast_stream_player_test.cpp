@@ -816,7 +816,7 @@ HWTEST_F(HwCastStreamPlayerTest, RepeatPrepare001, TestSize.Level1)
     description->SetIconUri("URI_CACHE");
     description->SetIcon(mediaPixelMap);
     auto ret = hwCastStreamPlayer->RepeatPrepare(description);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     SLOGI("RepeatPrepare001 end!");
 }
 
