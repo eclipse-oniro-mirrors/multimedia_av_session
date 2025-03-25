@@ -61,9 +61,6 @@ NapiAVSessionController::NapiAVSessionController()
 NapiAVSessionController::~NapiAVSessionController()
 {
     SLOGI("destroy");
-    if (controller_ != nullptr) {
-        controller_->Destroy();
-    }
 }
 
 napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
