@@ -97,6 +97,13 @@
               "header_base": "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include"
             },
             "name": "//foundation/multimedia/av_session/frameworks/native/session:avsession_client"
+          },
+          {
+            "header": {
+              "header_files": [],
+              "header_base": "//foundation/multimedia/av_session/frameworks/cj/include"
+            },
+            "name": "//foundation/multimedia/av_session/frameworks/cj:cj_multimedia_avsession_ffi"
           }
         ],
         "test": [
