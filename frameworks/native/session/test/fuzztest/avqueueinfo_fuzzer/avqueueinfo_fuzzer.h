@@ -23,7 +23,7 @@ class AVQueueInfoFuzzer {
 public:
     AVQueueInfoFuzzer() = default;
     ~AVQueueInfoFuzzer() = default;
-    void AVQueueInfoFuzzTest(uint8_t* data, size_t size);
+    void AVQueueInfoFuzzTest();
 };
 }
 
