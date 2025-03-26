@@ -406,7 +406,6 @@ void HwCastStreamPlayer::GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue)
                 resolutionLevels.emplace_back(value);
             }
             decodeToResolution[decodeOfVideoHevcStr_] = resolutionLevels;
-            jsonCapabilitiesSptr_->decoderSupportResolutions_.emplace_back(decodeToResolution);
         }
         resolutionLevels.clear();
         if (videoValue[decodeSupportResolutionStr_].contains(decodeOfVideoAvcStr_)) {
@@ -416,8 +415,8 @@ void HwCastStreamPlayer::GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue)
                 resolutionLevels.emplace_back(value);
             }
             decodeToResolution[decodeOfVideoAvcStr_] = resolutionLevels;
-            jsonCapabilitiesSptr_->decoderSupportResolutions_.emplace_back(decodeToResolution);
         }
+        jsonCapabilitiesSptr_->decoderSupportResolutions_ = decodeToResolution;
     } else {
         SLOGI("%{public}s of %{public}s no contains", videoStr_.c_str(), decodeSupportResolutionStr_.c_str());
     }
@@ -499,17 +498,15 @@ int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderTy
     if (jsonCapabilitiesSptr_->decoderSupportResolutions_.empty()) {
         GetMediaCapabilities();
     }
-    for (auto& map: jsonCapabilitiesSptr_->decoderSupportResolutions_) {
-        auto it = map.find(decoderType);
-        if (it != map.end()) {
-            std::vector<ResolutionLevel> resolutionLevels = map[decoderType];
-            auto maxResolutionLevel = *std::max_element(resolutionLevels.begin(), resolutionLevels.end());
-            SLOGI("find %{public}s map to %{public}d", decoderType.c_str(), maxResolutionLevel);
-            resolutionLevel = static_cast<ResolutionLevel>(maxResolutionLevel);
-        } else {
-            SLOGI("no find %{public}s map to resolutionLevel", decoderType.c_str());
-            return  AVSESSION_ERROR;
-        }
+    auto it = jsonCapabilitiesSptr_->decoderSupportResolutions_.find(decoderType);
+    if (it != jsonCapabilitiesSptr_->decoderSupportResolutions_.end()) {
+        std::vector<ResolutionLevel> resolutionLevels = jsonCapabilitiesSptr_->decoderSupportResolutions_[decoderType];
+        auto maxResolutionLevel = *std::max_element(resolutionLevels.begin(), resolutionLevels.end());
+        SLOGI("find %{public}s map to %{public}d", decoderType.c_str(), maxResolutionLevel);
+        resolutionLevel = static_cast<ResolutionLevel>(maxResolutionLevel);
+    } else {
+        SLOGI("no find %{public}s map to resolutionLevel", decoderType.c_str());
+        return  AVSESSION_ERROR;
     }
     return AVSESSION_SUCCESS;
 }

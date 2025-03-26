@@ -31,7 +31,7 @@ struct JsonCapabilities {
     std::vector<std::string> decoderTypes_;
     std::vector<HDRFormat> hdrFormats_;
     std::vector<float> playSpeeds_;
-    std::vector<std::map<std::string, std::vector<ResolutionLevel>>> decoderSupportResolutions_;
+    std::map<std::string, std::vector<ResolutionLevel>> decoderSupportResolutions_;
 };
 
 class HwCastStreamPlayer : public IAVCastControllerProxy, public CastEngine::IStreamPlayerListener,
