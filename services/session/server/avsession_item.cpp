@@ -37,6 +37,7 @@
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
+#include "avsession_hianalytics_report.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -129,6 +130,14 @@ int32_t AVSessionItem::Destroy()
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::DelRecommend()
+{
+    if (GetBundleName() != "CastBundleName" && isRecommend_) {
+        AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), "", "", "", -1);
+        isRecommend_ = false;
+    }
+}
+
 int32_t AVSessionItem::DestroyTask(bool continuePlay)
 {
     {
@@ -143,6 +152,7 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
     std::string sessionId = descriptor_.sessionId_;
     std::string fileName = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileName);
+    DelRecommend();
     std::list<sptr<AVControllerItem>> controllerList;
     {
         std::lock_guard controllerLockGuard(controllersLock_);
@@ -267,6 +277,10 @@ void AVSessionItem::HandleFrontSession()
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
+            if (GetBundleName() != "CastBundleName" && isRecommend_) {
+                AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(), GetSessionType(),
+                    metaData_.GetAssetId(), -1);
+            }
         }
     } else {
         if (isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
@@ -328,24 +342,8 @@ bool AVSessionItem::CheckTitleChange(const AVMetaData& meta)
     return isTitleChange && !isTitleLyric;
 }
 
-int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
+void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
 {
-    {
-        std::lock_guard lockGuard(avsessionItemLock_);
-        SessionXCollie sessionXCollie("avsession::SetAVMetaData");
-        ReportSetAVMetaDataInfo(meta);
-        if ((metaData_.GetAssetId() != meta.GetAssetId()) || CheckTitleChange(meta)) {
-            isMediaChange_ = true;
-        }
-        CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
-        std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
-        if (innerPixelMap != nullptr) {
-            std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-            AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, GetSessionId() + AVSessionUtils::GetFileSuffix());
-            innerPixelMap->Clear();
-            metaData_.SetMediaImage(innerPixelMap);
-        }
-    }
     bool hasPixelMap = (meta.GetMediaImage() != nullptr);
     SLOGI("MediaCapsule addLocalCapsule hasImage_:%{public}d isMediaChange_:%{public}d", hasPixelMap, isMediaChange_);
     if (serviceCallbackForNtf_ && hasPixelMap && isMediaChange_) {
@@ -356,6 +354,40 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
+
+    SLOGI("PublishRecommendInfo assetChange_:%{public}d supportCast:%{public}d filter:%{public}d duration:%{public}d",
+        isAssetChange_, extras_.HasParam("requireAbilityList"), meta.GetFilter(),
+        static_cast<int>(meta.GetDuration()));
+    if (isAssetChange_ && extras_.HasParam("requireAbilityList") && meta.GetFilter() !=0 && meta.GetDuration() != 0) {
+        isAssetChange_ = false;
+        isRecommend_ = true;
+        AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(),
+            GetSessionType(), meta.GetAssetId(), meta.GetDuration());
+    }
+}
+
+int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
+{
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        SessionXCollie sessionXCollie("avsession::SetAVMetaData");
+        ReportSetAVMetaDataInfo(meta);
+        if ((metaData_.GetAssetId() != meta.GetAssetId()) || CheckTitleChange(meta)) {
+            isMediaChange_ = true;
+        }
+        if (metaData_.GetAssetId() != meta.GetAssetId()) {
+            isAssetChange_ = true;
+        }
+        CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
+        std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+        if (innerPixelMap != nullptr) {
+            std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+            AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, GetSessionId() + AVSessionUtils::GetFileSuffix());
+            innerPixelMap->Clear();
+            metaData_.SetMediaImage(innerPixelMap);
+        }
+    }
+    CheckUseAVMetaData(meta);
     SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d, isAlive:%{public}d",
         meta.GetTitle().c_str(), static_cast<int>(GetPid()), (isAlivePtr_ == nullptr) ? -1 : *isAlivePtr_);
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_]() {
@@ -1308,6 +1340,23 @@ void AVSessionItem::ListenCollaborationOnStop()
     });
 }
 
+void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
+{
+    if (GetBundleName() == "CastBundleName") {
+        SLOGI("Remote CastConnectStateChange, return");
+        return;
+    }
+
+    if (castState == connectStateFromCast_) {
+        AVSessionHiAnalyticsReport::PublishCastEvent(GetBundleName(), connectStateFromCast_,
+            castDeviceInfoMap_[deviceInfo.deviceId_]);
+    } else {
+        AVSessionHiAnalyticsReport::PublishCastEvent(GetBundleName(), disconnectStateFromCast_,
+            castDeviceInfoMap_[deviceInfo.deviceId_]);
+        AVSessionHiAnalyticsReport::PublishCastRecord(GetBundleName(), castDeviceInfoMap_[deviceInfo.deviceId_]);
+    }
+}
+
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
@@ -1321,6 +1370,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     } else {
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
+    PublishAVCastHa(castState, deviceInfo);
     if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
