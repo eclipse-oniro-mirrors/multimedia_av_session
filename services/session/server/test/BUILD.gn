@@ -104,6 +104,7 @@ common_external_deps = [
   "input:libmmi-client",
   "ipc:ipc_single",
   "jsoncpp:jsoncpp",
+  "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
 ]
@@ -127,6 +128,7 @@ common_external_deps_with_third_party = [
   "ipc:ipc_single",
   "jsoncpp:jsoncpp",
   "openssl:libcrypto_shared",
+  "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
 ]
@@ -188,6 +190,7 @@ ohos_unittest("AVSessionUsersManagerTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -250,6 +253,7 @@ ohos_unittest("AVSharedMemoryBaseTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -312,6 +316,7 @@ ohos_unittest("AVSharedMemoryHelperTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -374,6 +379,7 @@ ohos_unittest("AVSessionServiceAddedTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -451,6 +457,7 @@ ohos_unittest("AudioDeviceManagerTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -516,6 +523,7 @@ ohos_unittest("AVSessionItemTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -596,6 +604,7 @@ ohos_unittest("AVControllerItemTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -673,6 +682,7 @@ ohos_unittest("MigrateAVSessionProxyTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -750,6 +760,7 @@ ohos_unittest("MigrateAVSessionManagerTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -827,6 +838,7 @@ ohos_unittest("SoftbusSessionManagerSupplementTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -905,6 +917,7 @@ ohos_unittest("MigrateAVSessionServerForNextTest") {
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -1543,6 +1556,7 @@ ohos_unittest("MigrateAVSessionTest") {
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
@@ -1613,6 +1627,7 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "jsoncpp:jsoncpp",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]

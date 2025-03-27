@@ -559,7 +559,6 @@ void AVSessionService::DoRemoteAVSessionLoad(std::string remoteDeviceId)
             SLOGE("DoRemoteAVSessionLoad get SystemAbilityManager fail");
             return;
         }
-        abilityLoadCallback_ = new AVSessionSystemAbilityLoadCallback(this);
         sptr<IRemoteObject> remoteObject = nullptr;
         uint8_t outOfTime = doRemoteLoadRetryTime;
         while (remoteObject == nullptr && outOfTime > 0) {
