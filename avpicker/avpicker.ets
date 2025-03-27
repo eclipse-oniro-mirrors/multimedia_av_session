@@ -452,6 +452,7 @@ export struct AVCastPicker {
       })
     }
     .backgroundColor('#00000000')
+    .stateEffect(false)
     .size({ width: '100%', height: '100%' })
     .accessibilityLevel('yes')
     .accessibilityText(this.accessibilityAudioControlStr)
