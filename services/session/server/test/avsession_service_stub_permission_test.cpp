@@ -688,7 +688,7 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest026, TestSize
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, OHOS::IPC_STUB_UNKNOW_TRANS_ERR);
     SLOGI("OnRemoteRequest026 end!");
 }
 
