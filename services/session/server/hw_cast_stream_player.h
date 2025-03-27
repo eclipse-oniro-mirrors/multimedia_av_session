@@ -133,9 +133,7 @@ private:
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_2_00_X, 2.00},
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_50_X, 0.50},
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_50_X, 1.50},
-        {CastEngine::PlaybackSpeed::SPEED_FORWARD_3_00_X, 3.00},
-        {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_25_X, 0.25},
-        {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_125_X, 0.125}
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_3_00_X, 3.00}
     };
     std::map<CastEngine::LoopMode, int32_t> castPlusLoopModeToInt_ = {
         {CastEngine::LoopMode::LOOP_MODE_SEQUENCE, AVPlaybackState::LOOP_MODE_SEQUENCE},
