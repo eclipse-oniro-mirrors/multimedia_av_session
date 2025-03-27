@@ -1101,3 +1101,227 @@ static HWTEST_F(AVSessionServiceTestSecond, NotifyRemoteDistributedSessionContro
     g_AVSessionService->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
     SLOGD("NotifyRemoteDistributedSessionControllersChanged003 end!");
 }
+
+/**
+ * @tc.name: DoConnectProcessWithMigrateProxy001
+ * @tc.desc: have found networkId in migrateAVSessionProxyMap_
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, DoConnectProcessWithMigrateProxy001, TestSize.Level1)
+{
+    SLOGD("DoConnectProcessWithMigrateProxy001 begin!");
+    OHOS::DistributedHardware::DmDeviceInfo localeDevice;
+    memset_s(&localeDevice, sizeof(localeDevice), 0, sizeof(localeDevice));
+    strcpy_s(localeDevice.deviceId, sizeof(localeDevice.deviceId) - 1, "<localeDeviceId>");
+    strcpy_s(localeDevice.deviceName, sizeof(localeDevice.deviceName) - 1, "<localeDeviceName>");
+
+    std::string networkId = std::string(localeDevice.networkId);
+    g_AVSessionService->migrateAVSessionProxyMap_.insert({networkId, nullptr});
+    g_AVSessionService->DoConnectProcessWithMigrateProxy(localeDevice);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("DoConnectProcessWithMigrateProxy001 end!");
+}
+
+/**
+ * @tc.name: DoDisconnectProcessWithMigrate001
+ * @tc.desc: have found networkId in migrateAVSessionProxyMap_
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, DoDisconnectProcessWithMigrate001, TestSize.Level1)
+{
+    SLOGD("DoDisconnectProcessWithMigrate001 begin!");
+    OHOS::DistributedHardware::DmDeviceInfo localeDevice;
+    memset_s(&localeDevice, sizeof(localeDevice), 0, sizeof(localeDevice));
+    strcpy_s(localeDevice.deviceId, sizeof(localeDevice.deviceId) - 1, "<localeDeviceId>");
+    strcpy_s(localeDevice.deviceName, sizeof(localeDevice.deviceName) - 1, "<localeDeviceName>");
+    localeDevice.deviceTypeId = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+
+    g_AVSessionService->localDeviceType_ = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+    g_AVSessionService->DoDisconnectProcessWithMigrate(localeDevice);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    g_AVSessionService->localDeviceType_ = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE;
+    SLOGD("DoDisconnectProcessWithMigrate001 end!");
+}
+
+/**
+ * @tc.name: DoDisconnectProcessWithMigrateServer001
+ * @tc.desc: have found networkId in migrateAVSessionProxyMap_ but it is nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, DoDisconnectProcessWithMigrateServer001, TestSize.Level1)
+{
+    SLOGD("DoDisconnectProcessWithMigrateServer001 begin!");
+    OHOS::DistributedHardware::DmDeviceInfo localeDevice;
+    memset_s(&localeDevice, sizeof(localeDevice), 0, sizeof(localeDevice));
+    strcpy_s(localeDevice.deviceId, sizeof(localeDevice.deviceId) - 1, "<localeDeviceId>");
+    strcpy_s(localeDevice.deviceName, sizeof(localeDevice.deviceName) - 1, "<localeDeviceName>");
+    localeDevice.deviceTypeId = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+
+    std::string networkId = std::string(localeDevice.networkId);
+    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, nullptr});
+    g_AVSessionService->DoDisconnectProcessWithMigrateServer(localeDevice);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("DoDisconnectProcessWithMigrateServer001 end!");
+}
+
+/**
+ * @tc.name: DoDisconnectProcessWithMigrateServer002
+ * @tc.desc: have not found networkId in migrateAVSessionProxyMap_
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, DoDisconnectProcessWithMigrateServer002, TestSize.Level1)
+{
+    SLOGD("DoDisconnectProcessWithMigrateServer002 begin!");
+    OHOS::DistributedHardware::DmDeviceInfo localeDevice;
+    memset_s(&localeDevice, sizeof(localeDevice), 0, sizeof(localeDevice));
+    strcpy_s(localeDevice.deviceId, sizeof(localeDevice.deviceId) - 1, "<localeDeviceId>");
+    strcpy_s(localeDevice.deviceName, sizeof(localeDevice.deviceName) - 1, "<localeDeviceName>");
+    localeDevice.deviceTypeId = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+    g_AVSessionService->DoDisconnectProcessWithMigrateServer(localeDevice);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("DoDisconnectProcessWithMigrateServer002 end!");
+}
+
+/**
+ * @tc.name: DoDisconnectProcessWithMigrateProxy001
+ * @tc.desc: have not found networkId in migrateAVSessionProxyMap_
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, DoDisconnectProcessWithMigrateProxy001, TestSize.Level1)
+{
+    SLOGD("DoDisconnectProcessWithMigrateProxy001 begin!");
+    OHOS::DistributedHardware::DmDeviceInfo localeDevice;
+    memset_s(&localeDevice, sizeof(localeDevice), 0, sizeof(localeDevice));
+    strcpy_s(localeDevice.deviceId, sizeof(localeDevice.deviceId) - 1, "<localeDeviceId>");
+    strcpy_s(localeDevice.deviceName, sizeof(localeDevice.deviceName) - 1, "<localeDeviceName>");
+    localeDevice.deviceTypeId = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+    g_AVSessionService->DoDisconnectProcessWithMigrateProxy(localeDevice);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("DoDisconnectProcessWithMigrateProxy001 end!");
+}
+
+/**
+ * @tc.name: DoDisconnectProcessWithMigrateProxy002
+ * @tc.desc: have found networkId in migrateAVSessionProxyMap_
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, DoDisconnectProcessWithMigrateProxy002, TestSize.Level1)
+{
+    SLOGD("DoDisconnectProcessWithMigrateProxy002 begin!");
+    OHOS::DistributedHardware::DmDeviceInfo localeDevice;
+    memset_s(&localeDevice, sizeof(localeDevice), 0, sizeof(localeDevice));
+    strcpy_s(localeDevice.deviceId, sizeof(localeDevice.deviceId) - 1, "<localeDeviceId>");
+    strcpy_s(localeDevice.deviceName, sizeof(localeDevice.deviceName) - 1, "<localeDeviceName>");
+    localeDevice.deviceTypeId = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+
+    std::string networkId = std::string(localeDevice.networkId);
+    g_AVSessionService->migrateAVSessionProxyMap_.insert({networkId, nullptr});
+    g_AVSessionService->DoDisconnectProcessWithMigrateProxy(localeDevice);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("DoDisconnectProcessWithMigrateProxy002 end!");
+}
+
+/**
+ * @tc.name: NotifyLocalFrontSessionChangeForMigrate001
+ * @tc.desc: find server is nullptr in migrateAVSessionProxyMap_
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate001, TestSize.Level1)
+{
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate001 begin!");
+    std::string networkId = "test";
+    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, nullptr});
+
+    std::string localFrontSessionIdUpdate = "test";
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate001 end!");
+}
+
+/**
+ * @tc.name: NotifyLocalFrontSessionChangeForMigrate002
+ * @tc.desc: localFrontSessionId_.empty() && localFrontSessionIdUpdate.length() > 0
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate002, TestSize.Level1)
+{
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate002 begin!");
+    std::string networkId = "test1";
+    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
+    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, migrateAVSession});
+    
+    g_AVSessionService->localFrontSessionId_ = "";
+    std::string localFrontSessionIdUpdate = "test";
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate002 end!");
+}
+
+/**
+ * @tc.name: NotifyLocalFrontSessionChangeForMigrate003
+ * @tc.desc: !localFrontSessionId_.empty() && localFrontSessionIdUpdate.length() > 0
+            && localFrontSessionId_ != localFrontSessionIdUpdate
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate003, TestSize.Level1)
+{
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate003 begin!");
+    std::string networkId = "test2";
+    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
+    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, migrateAVSession});
+    
+    g_AVSessionService->localFrontSessionId_ = "localFrontSessionId";
+    std::string localFrontSessionIdUpdate = "localFrontSessionIdUpdate";
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate003 end!");
+}
+
+/**
+ * @tc.name: NotifyLocalFrontSessionChangeForMigrate004
+ * @tc.desc: !localFrontSessionId_.empty() && localFrontSessionIdUpdate.empty()
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate004, TestSize.Level1)
+{
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate004 begin!");
+    std::string networkId = "test3";
+    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
+    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, migrateAVSession});
+    
+    g_AVSessionService->localFrontSessionId_ = "localFrontSessionId";
+    std::string localFrontSessionIdUpdate = "";
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate004 end!");
+}
+
+/**
+ * @tc.name: NotifyLocalFrontSessionChangeForMigrate005
+ * @tc.desc: localFrontSessionId_.empty() && localFrontSessionIdUpdate.empty()
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate005, TestSize.Level1)
+{
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate005 begin!");
+    std::string networkId = "test4";
+    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
+    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, migrateAVSession});
+    
+    g_AVSessionService->localFrontSessionId_ = "";
+    std::string localFrontSessionIdUpdate = "";
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("NotifyLocalFrontSessionChangeForMigrate005 end!");
+}
