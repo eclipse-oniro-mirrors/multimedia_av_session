@@ -329,6 +329,9 @@ private:
     void ReportAVCastControllerInfo();
     void InitAVCastControllerProxy();
     bool CheckTitleChange(const AVMetaData& meta);
+    void CheckUseAVMetaData(const AVMetaData& meta);
+    void PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo);
+    void DelRecommend();
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -408,6 +411,8 @@ private:
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
     bool isMediaChange_ = true;
+    bool isAssetChange_ = false;
+    bool isRecommend_ = false;
 
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;

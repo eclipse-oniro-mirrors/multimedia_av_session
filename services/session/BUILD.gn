@@ -427,6 +427,7 @@ av_session_ohos_library("avsession_item") {
   ]
 
   adapter_sources = [
+    "adapter/avsession_hianalytics_report.cpp",
     "adapter/bundle_status_adapter.cpp",
     "adapter/collaboration_manager.cpp",
     "adapter/command_send_limit.cpp",
