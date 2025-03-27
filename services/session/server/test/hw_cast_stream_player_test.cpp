@@ -58,6 +58,41 @@ public:
     }
 };
 
+class StreamPlayerIMock : public OHOS::CastEngine::IStreamPlayer {
+public:
+    int GetPosition(int32_t& currentPosition) override { return 0; }
+    int Seek(int32_t position) override { return 0; }
+    int SetSpeed(const OHOS::CastEngine::PlaybackSpeed speed) override { return 0; }
+    int FastForward(const int32_t delta) override { return 0; }
+    int FastRewind(const int32_t delta) override { return 0; }
+    int SetVolume(const int32_t volume) override { return 0; }
+    int SetMute(bool mute) override { return 0; }
+    int ProvideKeyResponse(const std::string &mediaId, const std::vector<uint8_t> &response) override { return 0; }
+    int SetLoopMode(const OHOS::CastEngine::LoopMode loopMode) override { return 0; }
+    int RegisterListener(std::shared_ptr<OHOS::CastEngine::IStreamPlayerListener> listener) override { return 0; }
+    int UnregisterListener() override { return 0; }
+    int SetSurface(const std::string &surfaceInfo) override { return 0; }
+    int Load(const OHOS::CastEngine::MediaInfo &media) override { return 0; }
+    int Play() override { return 0; }
+    int Play(const OHOS::CastEngine::MediaInfo &media) override { return 0; }
+    int Play(int index) override { return 0; }
+    int Pause() override { return 0; }
+    int Stop() override { return 0; }
+    int Next() override { return 0; }
+    int Previous() override { return 0; }
+    int GetPlayerStatus(OHOS::CastEngine::PlayerStates &status) override { return 0; }
+    int GetDuration(int &duration) override { return 0; }
+    int GetVolume(int32_t &volume, int32_t &maxVolume) override { return 0; }
+    int GetMute(bool &mute) override { return 0; }
+    int GetLoopMode(OHOS::CastEngine::LoopMode &loopMode) override { return 0; }
+    int GetMediaCapabilities(std::string &jsonCapabilities) override { return 0; }
+    int GetPlaySpeed(OHOS::CastEngine::PlaybackSpeed &speed) override { return 0; }
+    int GetMediaInfoHolder(OHOS::CastEngine::MediaInfoHolder &hold) override { return 0; }
+    int SetAvailableCapability(const OHOS::CastEngine::StreamCapability &streamCapability) override { return 0; }
+    int GetAvailableCapability(OHOS::CastEngine::StreamCapability &streamCapability) override { return 0; }
+    int Release() override { return 0; }
+};
+
 std::shared_ptr<ICastSession> CreateSession()
 {
     std::shared_ptr<ICastSession> session;
@@ -117,6 +152,7 @@ void HwCastStreamPlayerTest::SetUp()
     hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);
     if (hwCastStreamPlayer) {
         hwCastStreamPlayer->Init();
+        hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>();
     }
 }
 
@@ -739,9 +775,13 @@ HWTEST_F(HwCastStreamPlayerTest, CheckCastTime001, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, RepeatPrepare001, TestSize.Level1)
 {
     SLOGI("RepeatPrepare001 begin!");
-    OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 0, 0, 0, 1};
+    mediaPixelMap->SetInnerImgBuffer(imgBuffer);
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->RefreshCurrentAVQueueItem(avQueueItem);
     description->SetIconUri("URI_CACHE");
     description->SetIcon(mediaPixelMap);
     auto ret = hwCastStreamPlayer->RepeatPrepare(description);

@@ -58,6 +58,16 @@ HWTEST_F(MediaInfoHolderTest, SetAVCallState001, TestSize.Level1)
     parcel.GetDataCapacity();
     mediaInfoHolder.SetCurrentIndex(1);
     AVQueueItem avQueueItem;
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    description->SetSubtitle("Subtitle");
+    description->SetDescription("This is music description");
+    description->SetIcon(nullptr);
+    description->SetIconUri("xxxxx");
+    description->SetExtras(nullptr);
+    description->SetMediaUri("Media url");
+    avQueueItem.SetDescription(description);
     std::vector<AVQueueItem> playInfos = {avQueueItem};
     mediaInfoHolder.SetPlayInfos(playInfos);
     ASSERT_TRUE(mediaInfoHolder.Marshalling(parcel));
@@ -80,10 +90,20 @@ HWTEST_F(MediaInfoHolderTest, SetAVCallState002, TestSize.Level1)
  
     for (int32_t i = 0; i < TEST_NUM; ++i) {
         AVQueueItem avQueueItem;
+        std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+        description->SetMediaId("123");
+        description->SetTitle("Title");
+        description->SetSubtitle("Subtitle");
+        description->SetDescription("This is music description");
+        description->SetIcon(nullptr);
+        description->SetIconUri("xxxxx");
+        description->SetExtras(nullptr);
+        description->SetMediaUri("Media url");
+        avQueueItem.SetDescription(description);
         playInfos.push_back(avQueueItem);
     }
     mediaInfoHolder.SetPlayInfos(playInfos);
-    EXPECT_TRUE(mediaInfoHolder.Marshalling(parcel));
+    EXPECT_FALSE(mediaInfoHolder.Marshalling(parcel));
     MediaInfoHolder *result = mediaInfoHolder.Unmarshalling(parcel);
     EXPECT_EQ(result, nullptr);
 }

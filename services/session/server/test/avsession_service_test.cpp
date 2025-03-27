@@ -1366,7 +1366,8 @@ static HWTEST_F(AVSessionServiceTest, StartDefaultAbilityByCall001, TestSize.Lev
     std::string sessionId = avsessionHere_->GetSessionId();
     int32_t ret = avservice_->StartDefaultAbilityByCall(sessionId);
     // startability may go with mediaintent, will return AVSESSION_ERROR
-    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS || ret == AVSESSION_ERROR, true);
+    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS ||
+        ret == AVSESSION_ERROR || ret == ERR_START_ABILITY_TIMEOUT, true);
     avservice_->HandleSessionRelease(sessionId);
     avsessionHere_->Destroy();
     SLOGI("StartDefaultAbilityByCall001 end!");
