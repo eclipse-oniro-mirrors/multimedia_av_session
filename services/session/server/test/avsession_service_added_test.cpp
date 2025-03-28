@@ -46,6 +46,9 @@ using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AudioStandard;
 
+static char g_testSessionTag[] = "test";
+static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
+static char g_testAnotherAbilityName[] = "testAnother.ability";
 static std::shared_ptr<AVSessionService> g_AVSessionService {nullptr};
 
 class AVSessionServiceAddedTest : public testing::Test {
@@ -56,23 +59,33 @@ public:
     void TearDown() override;
 };
 
-void AVSessionServiceAddedTest::SetUpTestCase()
+void AVSessionServiceAddedTest::SetUpTestCase() {}
+
+void AVSessionServiceAddedTest::TearDownTestCase() {}
+
+void AVSessionServiceAddedTest::SetUp()
 {
-    SLOGI("set up AVSessionServiceAddedTest");
-    system("killall -9 com.example.hiMusicDemo");
-    sleep(1);
     g_AVSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
     g_AVSessionService->InitKeyEvent();
 }
 
-void AVSessionServiceAddedTest::TearDownTestCase()
+void AVSessionServiceAddedTest::TearDown()
 {
-    g_AVSessionService->Close();
+    if (g_AVSessionService != nullptr) {
+        g_AVSessionService->Close();
+    }
 }
 
-void AVSessionServiceAddedTest::SetUp() {}
-
-void AVSessionServiceAddedTest::TearDown() {}
+class AVSessionListenerMock : public SessionListener {
+public:
+    void OnSessionCreate(const AVSessionDescriptor& descriptor) override {}
+    void OnSessionRelease(const AVSessionDescriptor& descriptor) override {}
+    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override {}
+    void OnAudioSessionChecked(const int32_t uid) override {}
+    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {}
+    void OnDeviceOffline(const std::string& deviceId) override {}
+    ~AVSessionListenerMock() override {}
+};
 
 /**
  * @tc.name: SuperLauncher001
@@ -522,4 +535,491 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DoConnectPr
     g_AVSessionService->DoConnectProcessWithMigrate(deviceInfo);
     ASSERT_TRUE(g_AVSessionService != nullptr);
     SLOGD("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleUserEvent_001
+ * @tc.desc: set type to accountEventSwitched
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleUserEvent_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleUserEvent_001 begin!");
+    std::string type = "SWITCHED";
+    int userId = 1;
+    g_AVSessionService->HandleUserEvent(type, userId);
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("AVSessionServiceAddedTest_HandleUserEvent_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleUserEvent_002
+ * @tc.desc: set type to accountEventRemoved
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleUserEvent_002, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleUserEvent_002 begin!");
+    std::string type = "REMOVED";
+    int userId = 1;
+    g_AVSessionService->HandleUserEvent(type, userId);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGD("AVSessionServiceAddedTest_HandleUserEvent_002 end!");
+}
+
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_GetPresentController_001
+ * @tc.desc: success to read data from file
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_GetPresentController_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_GetPresentController_001 begin!");
+    pid_t pid = 2220;
+    std::string sessionId = "1234567890";
+    std::list<OHOS::sptr<AVControllerItem>> itemList;
+    itemList.push_back(nullptr);
+    g_AVSessionService->controllers_.insert({pid, itemList});
+    auto ret = g_AVSessionService->GetPresentController(pid, sessionId);
+    EXPECT_TRUE(ret == nullptr);
+    SLOGD("AVSessionServiceAddedTest_GetPresentController_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_NotifySessionRelease_001
+ * @tc.desc: success to read data from file
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_NotifySessionRelease_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_NotifySessionRelease_001 begin!");
+    AVSessionDescriptor descriptor;
+    descriptor.userId_ = 1001;
+    descriptor.pid_ = 2001;
+    
+    std::map<pid_t, OHOS::sptr<ISessionListener>> listenerMap =
+        g_AVSessionService->GetUsersManager().GetSessionListener(descriptor.userId_);
+    listenerMap.insert({descriptor.pid_, nullptr});
+
+    std::map<pid_t, OHOS::sptr<ISessionListener>> listenerMapForAll =
+        g_AVSessionService->GetUsersManager().GetSessionListenerForAllUsers();
+    listenerMapForAll.insert({descriptor.pid_, nullptr});
+    
+    g_AVSessionService->innerSessionListeners_.push_back(nullptr);
+    g_AVSessionService->NotifySessionRelease(descriptor);
+    EXPECT_TRUE(g_AVSessionService->innerSessionListeners_.size() > 0);
+    SLOGD("AVSessionServiceAddedTest_NotifySessionRelease_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_NotifyTopSessionChanged_001
+ * @tc.desc: success to read data from file
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_NotifyTopSessionChanged_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_NotifyTopSessionChanged_001 begin!");
+    AVSessionDescriptor descriptor;
+    descriptor.userId_ = 1002;
+    descriptor.pid_ = 2002;
+    
+    std::map<pid_t, OHOS::sptr<ISessionListener>> listenerMap =
+        g_AVSessionService->GetUsersManager().GetSessionListener(descriptor.userId_);
+    listenerMap.insert({descriptor.pid_, nullptr});
+
+    std::map<pid_t, OHOS::sptr<ISessionListener>> listenerMapForAll =
+        g_AVSessionService->GetUsersManager().GetSessionListenerForAllUsers();
+    listenerMapForAll.insert({descriptor.pid_, nullptr});
+    
+    auto listener = std::make_shared<AVSessionListenerMock>();
+    g_AVSessionService->innerSessionListeners_.push_back(listener.get());
+    g_AVSessionService->innerSessionListeners_.push_back(nullptr);
+    g_AVSessionService->NotifyTopSessionChanged(descriptor);
+    EXPECT_TRUE(g_AVSessionService->innerSessionListeners_.size() > 0);
+    SLOGD("AVSessionServiceAddedTest_NotifyTopSessionChanged_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_001
+ * @tc.desc: set IsCasting to true
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionItem->descriptor_.sessionTag_ = "test";
+    avsessionItem->castHandle_ = 1;
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    bool ret = g_AVSessionService->topSession_->IsCasting();
+    EXPECT_EQ(ret, false);
+    g_AVSessionService->HandleRemoveMediaCardEvent();
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleChangeTopSession_001
+ * @tc.desc: topSession_->GetUid() != ancoUid
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChangeTopSession_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem = g_AVSessionService->CreateSessionInner(g_testSessionTag,
+        AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    int32_t infoUid = 0;
+    int32_t userId = 0;
+    g_AVSessionService->HandleChangeTopSession(infoUid, userId);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleChangeTopSession_002
+ * @tc.desc: able to pass the fisrt judgement
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChangeTopSession_002, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+
+    int32_t infoUid = 0;
+    avsessionItem->SetUid(infoUid);
+    bool check = avsessionItem->GetUid() == infoUid && avsessionItem->GetSessionType() != "voice_call"
+        && avsessionItem->GetSessionType() != "video_call";
+    EXPECT_EQ(check, true);
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    
+    int32_t userId = 0;
+    g_AVSessionService->HandleChangeTopSession(infoUid, userId);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleChangeTopSession_003
+ * @tc.desc: avsessionItem->GetSessionType() == "voice_call"
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChangeTopSession_003, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem = g_AVSessionService->CreateSessionInner(g_testSessionTag,
+        AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+    
+    int32_t infoUid = 0;
+    avsessionItem->SetUid(infoUid);
+    bool check = avsessionItem->GetUid() == infoUid && avsessionItem->GetSessionType() != "voice_call"
+        && avsessionItem->GetSessionType() != "video_call";
+    EXPECT_EQ(check, false);
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    
+    int32_t userId = 0;
+    g_AVSessionService->HandleChangeTopSession(infoUid, userId);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_003 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleChangeTopSession_004
+ * @tc.desc: avsessionItem->GetSessionType() == "video_call"
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChangeTopSession_004, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_004 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem = g_AVSessionService->CreateSessionInner(g_testSessionTag,
+        AVSession::SESSION_TYPE_VIDEO_CALL, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+    
+    int32_t infoUid = 0;
+    avsessionItem->SetUid(infoUid);
+    bool check = avsessionItem->GetUid() == infoUid && avsessionItem->GetSessionType() != "voice_call"
+        && avsessionItem->GetSessionType() != "video_call";
+    EXPECT_EQ(check, false);
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    
+    int32_t userId = 0;
+    g_AVSessionService->HandleChangeTopSession(infoUid, userId);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_004 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleChangeTopSession_005
+ * @tc.desc: set infoUid qual to ancoUid
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChangeTopSession_005, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_005 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem = g_AVSessionService->CreateSessionInner(g_testSessionTag,
+        AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+    
+    int32_t ancoUid = 1041;
+    avsessionItem->SetUid(ancoUid);
+    bool check = avsessionItem->GetUid() == ancoUid && avsessionItem->GetSessionType() != "voice_call"
+        && avsessionItem->GetSessionType() != "video_call";
+    EXPECT_EQ(check, true);
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    
+    int32_t userId = 0;
+    g_AVSessionService->HandleChangeTopSession(ancoUid, userId);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_005 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_RegisterBundleDeleteEventForHistory_001
+ * @tc.desc: success to read data from file
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, RegisterBundleDeleteEventForHistory_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_RegisterBundleDeleteEventForHistory_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem = g_AVSessionService->CreateSessionInner(g_testSessionTag,
+        AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+
+    int32_t ancoUid = 1041;
+    avsessionItem->SetUid(ancoUid);
+    std::string filePath = g_AVSessionService->GetAVSortDir(ancoUid);
+    std::ofstream ofs;
+    ofs.open(filePath, std::ios::out);
+    std::string jsonStr = R"(
+        {"bundleName", "test"}
+    )";
+    ofs << jsonStr;
+    ofs.close();
+
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_RegisterBundleDeleteEventForHistory_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_LowQualityCheck_001
+ * @tc.desc: (hasTitle || hasImage) is true
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_LowQualityCheck_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_LowQualityCheck_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+
+    pid_t uid = avsessionItem->GetUid();
+    pid_t pid = avsessionItem->GetPid();
+    AVMetaData meta;
+    meta.SetTitle("test");
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
+    mediaImage->SetInnerImgBuffer(imgBuffer);
+    meta.SetMediaImage(mediaImage);
+    meta.SetMediaImageUri("test");
+    avsessionItem->SetAVMetaData(meta);
+
+    OHOS::AudioStandard::StreamUsage streamUsage = OHOS::AudioStandard::StreamUsage::STREAM_USAGE_MEDIA;
+    OHOS::AudioStandard::RendererState rendererState = OHOS::AudioStandard::RendererState::RENDERER_PAUSED;
+    g_AVSessionService->LowQualityCheck(uid, pid, streamUsage, rendererState);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_LowQualityCheck_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_LowQualityCheck_002
+ * @tc.desc: title is empty
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_LowQualityCheck_002, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_LowQualityCheck_002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+
+    pid_t uid = avsessionItem->GetUid();
+    pid_t pid = avsessionItem->GetPid();
+    AVMetaData meta;
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
+    mediaImage->SetInnerImgBuffer(imgBuffer);
+    meta.SetMediaImage(mediaImage);
+    meta.SetMediaImageUri("test");
+    avsessionItem->SetAVMetaData(meta);
+
+    OHOS::AudioStandard::StreamUsage streamUsage = OHOS::AudioStandard::StreamUsage::STREAM_USAGE_MEDIA;
+    OHOS::AudioStandard::RendererState rendererState = OHOS::AudioStandard::RendererState::RENDERER_PAUSED;
+    g_AVSessionService->LowQualityCheck(uid, pid, streamUsage, rendererState);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_LowQualityCheck_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_LowQualityCheck_003
+ * @tc.desc: MediaImage is empty
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_LowQualityCheck_003, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_LowQualityCheck_003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+
+    pid_t uid = avsessionItem->GetUid();
+    pid_t pid = avsessionItem->GetPid();
+    AVMetaData meta;
+    meta.SetTitle("test");
+
+    OHOS::AudioStandard::StreamUsage streamUsage = OHOS::AudioStandard::StreamUsage::STREAM_USAGE_MEDIA;
+    OHOS::AudioStandard::RendererState rendererState = OHOS::AudioStandard::RendererState::RENDERER_PAUSED;
+    g_AVSessionService->LowQualityCheck(uid, pid, streamUsage, rendererState);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_LowQualityCheck_003 end!");
+}
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+/**
+ * @tc.name: AVSessionServiceAddedTest_AddCapsuleServiceCallback_001
+ * @tc.desc: MediaImage is empty
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_AddCapsuleServiceCallback_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_AddCapsuleServiceCallback_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+
+    g_AVSessionService->AddCapsuleServiceCallback(avsessionItem);
+    auto callback = avsessionItem->serviceCallbackForCastNtf_;
+    std::string sessionId = "test";
+    bool isPlaying = true;
+    bool isChange = true;
+    callback(sessionId, isPlaying, isChange);
+
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_AddCapsuleServiceCallback_001 end!");
+}
+#endif // CASTPLUS_CAST_ENGINE_ENABLE
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_AddKeyEventServiceCallback_001
+ * @tc.desc: MediaImage is empty
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_AddKeyEventServiceCallback_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_AddKeyEventServiceCallback_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+
+    g_AVSessionService->AddKeyEventServiceCallback(avsessionItem);
+    auto callback = avsessionItem->serviceCallbackForKeyEvent_;
+    std::string sessionId = "test";
+    callback(sessionId);
+
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_AddKeyEventServiceCallback_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_IsCapsuleNeeded_001
+ * @tc.desc: MediaImage is empty
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_IsCapsuleNeeded_001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_IsCapsuleNeeded_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+
+    bool ret = g_AVSessionService->IsCapsuleNeeded();
+    EXPECT_EQ(ret, false);
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_IsCapsuleNeeded_001 end!");
 }
