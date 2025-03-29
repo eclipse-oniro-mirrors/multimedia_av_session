@@ -646,7 +646,6 @@ private:
     void *migrateStubFuncHandle_ = nullptr;
 
     std::shared_ptr<AVSessionDeviceStateCallback> deviceStateCallback_ = nullptr;
-    sptr<AVSessionSystemAbilityLoadCallback> abilityLoadCallback_ = nullptr;
     int32_t localDeviceType_ = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE;
     int32_t targetDeviceType_ = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
     const std::string serviceName = "av_session";
