@@ -1594,10 +1594,6 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
     CHECK_RETURN(GetOptionalString(env, in, out) == napi_ok, "get DeviceInfo ip address value failed", status);
-    status = napi_get_named_property(env, in, "networkId", &value);
-    CHECK_RETURN(status == napi_ok, "get DeviceInfo networkId_ failed", status);
-    status = GetValue(env, value, out.networkId_);
-    CHECK_RETURN(status == napi_ok, "get DeviceInfo networkId_ value failed", status);
  
     bool hasKey = false;
     napi_has_named_property(env, in, "providerId", &hasKey);
