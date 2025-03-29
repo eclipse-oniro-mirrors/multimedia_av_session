@@ -1350,7 +1350,7 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
     if (castState == connectStateFromCast_) {
         AVSessionHiAnalyticsReport::PublishCastEvent(GetBundleName(), connectStateFromCast_,
             castDeviceInfoMap_[deviceInfo.deviceId_]);
-    } else {
+    } else if (castState == disconnectStateFromCast_) {
         AVSessionHiAnalyticsReport::PublishCastEvent(GetBundleName(), disconnectStateFromCast_,
             castDeviceInfoMap_[deviceInfo.deviceId_]);
         AVSessionHiAnalyticsReport::PublishCastRecord(GetBundleName(), castDeviceInfoMap_[deviceInfo.deviceId_]);
