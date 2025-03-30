@@ -160,9 +160,9 @@ AVSessionCallbackImpl::~AVSessionCallbackImpl()
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level0)
 {
-    SLOGI("SendSystemAVKeyEvent001 begin!");
+    SLOGI("SendSystemAVKeyEvent001 with level0 begin!");
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
