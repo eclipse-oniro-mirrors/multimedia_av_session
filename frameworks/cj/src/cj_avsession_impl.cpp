@@ -138,7 +138,15 @@ int32_t CJAVSessionImpl::GetController()
     if (controller->Exists()) {
         return CJNO_ERROR;
     } else {
-        return CJ_AVSESSION_MANAGER_IMPL->CreateController(sessionId_);
+        auto nativeController = session_->GetController();
+        if (nativeController == nullptr) {
+            return AVSESSION_ERROR;
+        }
+        auto ret = CJAVSessionControllerImpl::NewInstance(nativeController);
+        if (ret) {
+            return AVSESSION_SUCCESS;
+        }
+        return AVSESSION_ERROR;
     }
 }
 

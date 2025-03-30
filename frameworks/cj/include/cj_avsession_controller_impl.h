@@ -65,11 +65,11 @@ class CJAVSessionControllerImpl : public CJAVSessionControllerBase {
     friend class CJAVSessionManagerImpl;
 private:
     CJAVSessionControllerImpl(std::shared_ptr<AVSessionController>& nativeController);
-    static std::shared_ptr<CJAVSessionControllerImpl>
-        NewInstance(std::shared_ptr<AVSessionController>& nativeController);
 public:
     ~CJAVSessionControllerImpl();
     static std::shared_ptr<CJAVSessionControllerBase> GetInstance(const std::string &sessionId);
+    static std::shared_ptr<CJAVSessionControllerImpl>
+        NewInstance(std::shared_ptr<AVSessionController>& nativeController);
     int32_t Destroy();
     int32_t GetAVCallState(CAVCallState& avCallState);
     int32_t GetAVCallMetaData(CAVCallMetaData& avCallMetadata);
