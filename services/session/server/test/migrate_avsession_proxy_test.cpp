@@ -293,6 +293,38 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand002, TestS
 }
 
 /**
+ * @tc.name: ProcessAvailableDevices001
+ * @tc.desc: test the member of ProcessAvailableDevices
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.Level1)
+{
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+
+    auto devices = AudioAdapter::GetInstance().GetAvailableDevices();
+    Json::Value jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
+    g_MigrateAVSessionProxy->ProcessAvailableDevices(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessPreferredOutputDevice001
+ * @tc.desc: test the member of ProcessPreferredOutputDevice
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessPreferredOutputDevice001, TestSize.Level1)
+{
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+
+    auto devices = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
+    Json::Value jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
+    g_MigrateAVSessionProxy->ProcessPreferredOutputDevice(jsonValue);
+}
+
+/**
  * @tc.name: ProcessBundleImg001
  * @tc.desc: test the member of ProcessBundleImg
  * @tc.type: FUNC
