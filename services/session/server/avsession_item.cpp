@@ -132,7 +132,7 @@ int32_t AVSessionItem::Destroy()
 
 void AVSessionItem::DelRecommend()
 {
-    if (GetBundleName() != "CastBundleName" && isRecommend_) {
+    if (descriptor_.sessionTag_ != "RemoteCast" && isRecommend_) {
         AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), "", "", "", -1);
         isRecommend_ = false;
     }
@@ -277,7 +277,7 @@ void AVSessionItem::HandleFrontSession()
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
-            if (GetBundleName() != "CastBundleName" && isRecommend_) {
+            if (descriptor_.sessionTag_ != "RemoteCast" && isRecommend_) {
                 AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(), GetSessionType(),
                     metaData_.GetAssetId(), -1);
             }
@@ -1344,7 +1344,7 @@ void AVSessionItem::ListenCollaborationOnStop()
 
 void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 {
-    if (GetBundleName() == "CastBundleName") {
+    if (descriptor_.sessionTag_ == "RemoteCast") {
         SLOGI("Remote CastConnectStateChange, return");
         return;
     }
