@@ -706,6 +706,16 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetIconUri(mediaInfo.appIconUrl);
     mediaDescription->SetAppName(mediaInfo.appName);
     mediaDescription->SetDrmScheme(mediaInfo.drmType);
+    std::shared_ptr<AVMediaDescription> originMediaDescription = nullptr;
+    {
+        std::lock_guard lockGuard(curItemLock_);
+        originMediaDescription = currentAVQueueItem_.GetDescription();
+    }
+    if (originMediaDescription != nullptr && originMediaDescription->GetIcon() != nullptr
+        && mediaInfo.mediaId == originMediaDescription->GetMediaId()) {
+        SLOGI("cacheMedia:%{public}s", originMediaDescription->GetMediaId().c_str());
+        mediaDescription->SetIcon(originMediaDescription->GetIcon());
+    }
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);
     {
