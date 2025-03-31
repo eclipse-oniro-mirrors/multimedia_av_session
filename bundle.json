@@ -16,7 +16,8 @@
           "SystemCapability.Multimedia.AVSession.AVCast",
           "SystemCapability.Multimedia.AVSession.Core",
           "SystemCapability.Multimedia.AVSession.ExtendedDisplayCast",
-          "SystemCapability.Multimedia.AVSession.Manager"
+          "SystemCapability.Multimedia.AVSession.Manager",
+          "SystemCapability.Multimedia.AVSession.AVInputCast = false"
       ],
       "features": [ "av_session_enable_start_stop_on_demand" ],
       "adapted_system_type": [ "standard" ],
@@ -57,10 +58,12 @@
           "background_task_mgr",
           "bluetooth",
           "os_account",
-          "hicollie",
-          "jsoncpp"
+          "hicollie"
         ],
-        "third_party": [ "openssl" ]
+        "third_party": [
+          "openssl",
+          "jsoncpp"
+        ]
       },
       "build": {
         "group_type": {

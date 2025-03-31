@@ -521,7 +521,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession001, TestSize.Level1)
     std::shared_ptr<IAVRouterListener> listener = std::make_shared<AVRouterListenerMock>();
     g_AVRouterImpl->mirrorSessionMap_.insert({sessionId, listener});
 
-    g_AVRouterImpl->DisconnetOtherSession(sessionId, deviceInfo);
+    g_AVRouterImpl->DisconnectOtherSession(sessionId, deviceInfo);
     EXPECT_TRUE(listener != nullptr);
     SLOGI("DisconnectOtherSession001 end");
 }
@@ -542,7 +542,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession002, TestSize.Level1)
     std::shared_ptr<IAVRouterListener> listener = nullptr;
     g_AVRouterImpl->mirrorSessionMap_.insert({"12344", listener});
 
-    g_AVRouterImpl->DisconnetOtherSession(sessionId, deviceInfo);
+    g_AVRouterImpl->DisconnectOtherSession(sessionId, deviceInfo);
     EXPECT_TRUE(listener == nullptr);
     SLOGI("DisconnectOtherSession002 end");
 }
@@ -569,7 +569,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession003, TestSize.Level1)
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
     std::string sessionId = "12345";
-    g_AVRouterImpl->DisconnetOtherSession(sessionId, deviceInfo);
+    g_AVRouterImpl->DisconnectOtherSession(sessionId, deviceInfo);
     EXPECT_TRUE(castHandleInfo.avRouterListener_ != nullptr);
     SLOGI("DisconnectOtherSession003 end");
 }
@@ -596,7 +596,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession004, TestSize.Level1)
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
     std::string sessionId = "12340";
-    g_AVRouterImpl->DisconnetOtherSession(sessionId, deviceInfo);
+    g_AVRouterImpl->DisconnectOtherSession(sessionId, deviceInfo);
     EXPECT_TRUE(castHandleInfo.avRouterListener_ != nullptr);
     SLOGI("DisconnectOtherSession004 end");
 }
@@ -623,7 +623,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession005, TestSize.Level1)
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
     std::string sessionId = "12340";
-    g_AVRouterImpl->DisconnetOtherSession(sessionId, deviceInfo);
+    g_AVRouterImpl->DisconnectOtherSession(sessionId, deviceInfo);
     EXPECT_TRUE(castHandleInfo.avRouterListener_ == nullptr);
     SLOGI("DisconnectOtherSession005 end");
 }

@@ -440,6 +440,26 @@ void AVSessionService::SetIsSupportMirrorToStream(bool isSupportMirrorToStream)
 {
     isSupportMirrorToStream_ = isSupportMirrorToStream;
 }
+
+void AVSessionService::ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid)
+{
+    AVSessionRadarInfo info(func);
+    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    AVSessionRadar::GetInstance().StartCastBegin(outputDeviceInfo, info);
+}
+
+void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceInfo& outputDeviceInfo,
+    int32_t uid, int ret)
+{
+    AVSessionRadarInfo info(func);
+    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    if (ret == AVSESSION_SUCCESS) {
+        AVSessionRadar::GetInstance().StartCastEnd(outputDeviceInfo, info);
+    } else {
+        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
+        AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
+    }
+}
 #endif
 
 AVSessionSystemAbilityLoadCallback::AVSessionSystemAbilityLoadCallback(AVSessionService *ptr)
@@ -707,7 +727,7 @@ void AVSessionService::NotifyLocalFrontSessionChangeForMigrate(std::string local
             migrateAVSessionServer->LocalFrontSessionChange(localFrontSessionIdUpdate);
         } else if (!localFrontSessionId_.empty() && localFrontSessionIdUpdate.empty()) {
             DoRemoteAVSessionLoad(deviceIdForMigrate_);
-            migrateAVSessionServer->LocalFrontSessionArrive(localFrontSessionId_);
+            migrateAVSessionServer->LocalFrontSessionLeave(localFrontSessionId_);
         }
     }
     localFrontSessionId_ = localFrontSessionIdUpdate;

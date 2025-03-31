@@ -80,8 +80,6 @@
 namespace OHOS::AVSession {
 class AVSessionDumper;
 
-extern bool g_isCapsuleLive2;
-
 class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
     explicit ClientDeathRecipient(const std::function<void()>& callback);
@@ -510,6 +508,16 @@ private:
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurKeyEventSessionList(int32_t userId = 0);
 
+    void AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
+
+    bool VerifyNotification();
+
+    void HandleChangeTopSession(int32_t infoUid, int32_t userId);
+
+    bool IsTopSessionPlaying();
+
+    bool NotifyFlowControl();
+
     int32_t GetLocalDeviceType();
 
     void DoTargetDevListenWithDM();
@@ -533,16 +541,6 @@ private:
     void NotifyLocalFrontSessionChangeForMigrate(std::string localFrontSessionIdUpdate);
 
     bool CheckWhetherTargetDevIsNext(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
-
-    void AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
-
-    bool VerifyNotification();
-
-    void HandleChangeTopSession(int32_t infoUid, int32_t userId);
-
-    bool IsTopSessionPlaying();
-
-    bool NotifyFlowControl();
 
     void NotifyHistoricalRecordChange(const std::string& bundleName, int32_t userId);
 

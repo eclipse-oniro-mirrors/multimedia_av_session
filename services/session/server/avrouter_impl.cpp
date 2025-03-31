@@ -20,7 +20,6 @@
 #include "avsession_trace.h"
 #include "permission_checker.h"
 #include "avcast_provider_manager.h"
-#include "hw_cast_provider.h"
 #include "avsession_sysevent.h"
 
 static std::shared_ptr<OHOS::AVSession::HwCastProvider> hwProvider_;
@@ -418,7 +417,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
 
 int32_t AVRouterImpl::SetServiceAllConnectState(int64_t castHandle, DeviceInfo deviceInfo)
 {
-    int64_t realCastHandle = castHandle == noMirrorCastHandle ? GetMirrorCastHandle() : castHandle;
+    int64_t realCastHandle = castHandle == noMirrorCastHandle_ ? GetMirrorCastHandle() : castHandle;
     if (castHandleToInfoMap_.find(realCastHandle) != castHandleToInfoMap_.end()) {
         OutputDeviceInfo device;
         device.deviceInfos_.emplace_back(deviceInfo);
@@ -457,7 +456,7 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
         AVSESSION_ERROR, "Can not find corresponding provider");
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
-    if (GetMirrorCastHandle() == noMirrorCastHandle) {
+    if (GetMirrorCastHandle() == noMirrorCastHandle_) {
         for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
             if (number == castHandle && castHandleInfo.outputDeviceInfo_.deviceInfos_.size() > 0 &&
                 castHandleInfo.avRouterListener_ != nullptr) {
@@ -564,11 +563,10 @@ void AVRouterImpl::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     }
 }
 
-void AVRouterImpl::DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo)
+void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo)
 {
     for (const auto& [string, avRouterListener] : mirrorSessionMap_) {
         if (string != sessionId && avRouterListener != nullptr) {
-            std::shared_ptr<IAVRouterListener> listener = avRouterListener;
             avRouterListener->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false);
         }
     }

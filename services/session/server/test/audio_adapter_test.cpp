@@ -419,7 +419,7 @@ static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
     SLOGD("PauseAudioStream001 begin!");
     bool ret = false;
     AudioAdapter::GetInstance().AddDeviceChangeListener(
-        [&ret] (const AudioDeviceDescriptorsWithSptr &desc) {
+        [&ret] (const AudioDeviceDescriptors &desc) {
         ret = desc.empty();
     });
     AudioAdapter::GetInstance().AddDeviceChangeListener(nullptr);
@@ -443,12 +443,12 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceUpdated001, TestSize.Leve
     SLOGD("OnPreferredOutputDeviceUpdated001 begin!");
     bool ret = false;
     AudioAdapter::GetInstance().AddDeviceChangeListener(
-        [&ret] (const AudioDeviceDescriptorsWithSptr &desc) {
+        [&ret] (const AudioDeviceDescriptors &desc) {
         ret = desc.empty();
     });
     AudioAdapter::GetInstance().Init();
     auto& audioAdapter = AudioAdapter::GetInstance();
-    AudioDeviceDescriptorsWithSptr desc = audioAdapter.GetAvailableDevices();
+    AudioDeviceDescriptors desc = audioAdapter.GetAvailableDevices();
     audioAdapter.deviceChangeListeners_ =
         std::vector<OHOS::AVSession::AudioAdapter::PreferOutputDeviceChangeListener>();
     audioAdapter.OnPreferredOutputDeviceUpdated(desc);
@@ -482,7 +482,7 @@ static HWTEST(AudioAdapterTest, SelectOutputDevice002, TestSize.Level1)
     SLOGD("SelectOutputDevice002 begin!");
     AudioAdapter::GetInstance().Init();
     auto& audioAdapter = AudioAdapter::GetInstance();
-    AudioDeviceDescriptorsWithSptr availableDevices = audioAdapter.GetAvailableDevices();
+    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
 
     CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
     auto testDevice = availableDevices[0];
@@ -504,7 +504,7 @@ static HWTEST(AudioAdapterTest, SelectOutputDevice003, TestSize.Level1)
     SLOGD("SelectOutputDevice003 begin!");
     AudioAdapter::GetInstance().Init();
     auto& audioAdapter = AudioAdapter::GetInstance();
-    AudioDeviceDescriptorsWithSptr availableDevices = audioAdapter.GetAvailableDevices();
+    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
 
     CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
     auto testDevice = availableDevices[0];
@@ -526,7 +526,7 @@ static HWTEST(AudioAdapterTest, SelectOutputDevice004, TestSize.Level1)
     SLOGD("SelectOutputDevice004 begin!");
     AudioAdapter::GetInstance().Init();
     auto& audioAdapter = AudioAdapter::GetInstance();
-    AudioDeviceDescriptorsWithSptr availableDevices = audioAdapter.GetAvailableDevices();
+    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
 
     CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
     auto testDevice = availableDevices[0];

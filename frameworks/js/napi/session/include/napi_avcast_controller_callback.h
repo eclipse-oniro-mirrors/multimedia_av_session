@@ -67,7 +67,7 @@ public:
         MSERR_EXT_API9_UNSUPPORT_FORMAT = 5400106,      // unsupport format.
     };
 
-    // cast api12 error code
+    // cast api13 error code
     enum CastExtErrCodeAPI13 : ErrCode {
         // Generic error
         CAST_GENERICERR_EXT_API13_UNSPECIFIED = 6611000,

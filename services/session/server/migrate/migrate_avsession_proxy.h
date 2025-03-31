@@ -100,8 +100,8 @@ private:
     AppExecFwk::ElementName elementName_;
 
     int32_t volumeNum_ = 0;
-    AudioDeviceDescriptorsWithSptr availableDevices_;
-    AudioDeviceDescriptorsWithSptr preferredOutputDevice_;
+    AudioDeviceDescriptors availableDevices_;
+    AudioDeviceDescriptors preferredOutputDevice_;
     MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback_;
 };
 

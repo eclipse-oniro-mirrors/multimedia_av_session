@@ -323,8 +323,8 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
         avQueueItem.GetDescription()->GetIconUri() == "URI_CACHE")) {
         SLOGI("MediaCapsule prepare icon, isPlayingState_ %{public}d", isPlayingState_);
         std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-        AVSessionUtils::WriteImageToFile(avQueueItem.GetDescription()->GetIcon(), fileDir,
-            sessionId_ + AVSessionUtils::GetFileSuffix());
+        AVSessionUtils::WriteImageToFile(avQueueItem.GetDescription()->GetIcon(),
+            fileDir, sessionId_ + AVSessionUtils::GetFileSuffix());
         if (sessionCallbackForCastNtf_ && isPlayingState_) {
             sessionCallbackForCastNtf_(sessionId_, true, true);
         }
@@ -554,7 +554,7 @@ int32_t AVCastControllerItem::HandleCastValidCommandChange(const std::vector<int
     return AVSESSION_SUCCESS;
 }
 
-void AVCastControllerItem::SetSessionTag(const std::string tag)
+void AVCastControllerItem::SetSessionTag(const std::string& tag)
 {
     sessionTag_ = tag;
 }
