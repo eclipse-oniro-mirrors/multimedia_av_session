@@ -281,7 +281,7 @@ public:
      * @param { DeviceInfo } deviceinfo - The deviceinfo to the castprovider.
      * @since 13
     */
-    virtual void DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo) = 0;
+    virtual void DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo) = 0;
 
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;

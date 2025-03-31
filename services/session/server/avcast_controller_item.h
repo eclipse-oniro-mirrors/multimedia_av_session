@@ -94,7 +94,7 @@ public:
 
     int32_t HandleCastValidCommandChange(const std::vector<int32_t> &cmds);
 
-    void SetSessionTag(const std::string tag);
+    void SetSessionTag(const std::string& tag);
 
     void SetSessionId(const std::string id);
 

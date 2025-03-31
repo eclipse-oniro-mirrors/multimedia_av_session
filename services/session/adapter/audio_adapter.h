@@ -21,16 +21,16 @@
 #include <mutex>
 #include "audio_stream_manager.h"
 #include "audio_routing_manager.h"
+#include "audio_info.h"
 
 namespace OHOS::AVSession {
 using AudioRendererChangeInfos = std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>>;
 using AudioDeviceDescriptors = std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>;
 using AudioDeviceDescriptorWithSptr = std::shared_ptr<AudioStandard::AudioDeviceDescriptor>;
-using AudioDeviceDescriptorsWithSptr = std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>>;
 using DeviceChangeAction = AudioStandard::DeviceChangeAction;
 using AudioDeviceDescriptor = AudioStandard::AudioDeviceDescriptor;
 
-using AudioDeviceDescriptorsCallbackFunc = std::function<void(const AudioDeviceDescriptorsWithSptr&)>;
+using AudioDeviceDescriptorsCallbackFunc = std::function<void(const AudioDeviceDescriptors&)>;
 
 class AudioVolumeKeyEventCallback;
 class AudioPreferredDeviceChangeCallback;
@@ -74,7 +74,7 @@ public:
     void OnAvailableDeviceChange(const AudioStandard::AudioDeviceUsage usage,
         const AudioStandard::DeviceChangeAction& deviceChangeAction) override;
 
-    void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptorsWithSptr& desc) override;
+    void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& desc) override;
 
     bool GetRendererRunning(int32_t uid);
 
@@ -83,25 +83,25 @@ public:
     int32_t RegisterVolumeKeyEventCallback(const std::function<void(int32_t)>& callback);
     int32_t UnregisterVolumeKeyEventCallback();
 
-    AudioDeviceDescriptorsWithSptr GetAvailableDevices();
+    AudioDeviceDescriptors GetAvailableDevices();
     int32_t SetAvailableDeviceChangeCallback(const std::function<void(
-        const AudioDeviceDescriptorsWithSptr&)>& callback);
+        const AudioDeviceDescriptors&)>& callback);
     int32_t UnsetAvailableDeviceChangeCallback();
 
-    AudioDeviceDescriptorsWithSptr GetDevices();
+    AudioDeviceDescriptors GetDevices();
     int32_t SetDeviceChangeCallback();
     int32_t UnsetDeviceChangeCallback();
 
-    int32_t RegisterAllowedPlaybackCallback(const std::function<bool(int32_t, int32_t)>& callback);
-
-    AudioDeviceDescriptorsWithSptr GetPreferredOutputDeviceForRendererInfo();
+    AudioDeviceDescriptors GetPreferredOutputDeviceForRendererInfo();
     int32_t SetPreferredOutputDeviceChangeCallback(const std::function<void(
-        const AudioDeviceDescriptorsWithSptr&)>& callback);
+        const AudioDeviceDescriptors&)>& callback);
     int32_t UnsetPreferredOutputDeviceChangeCallback();
 
     int32_t SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc);
-    AudioDeviceDescriptorWithSptr FindRenderDeviceForUsage(const AudioDeviceDescriptorsWithSptr& devices,
+    AudioDeviceDescriptorWithSptr FindRenderDeviceForUsage(const AudioDeviceDescriptors& devices,
         const AudioDeviceDescriptorWithSptr& desc);
+
+    int32_t RegisterAllowedPlaybackCallback(const std::function<bool(int32_t, int32_t)>& callback);
 private:
     static std::shared_ptr<AudioAdapter> instance_;
     static std::once_flag onceFlag_;
@@ -114,6 +114,7 @@ private:
         AudioStandard::STREAM_USAGE_AUDIOBOOK
     };
     std::recursive_mutex listenersLock_;
+    bool is2in1_ {false};
 
     int32_t volumeMax_ = 0;
     int32_t volumeMin_ = 0;
@@ -121,7 +122,6 @@ private:
     std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
 
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
-    bool is2in1_ {false};
 
     std::shared_ptr<AudioAllowedPlaybackCallback> playbackCallback_;
 };
@@ -144,10 +144,10 @@ private:
 class AudioPreferredDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDeviceChangeCallback {
 public:
     explicit AudioPreferredDeviceChangeCallback(const std::function<void(
-        const AudioDeviceDescriptorsWithSptr&)>& callback) : callback_(callback) { }
+        const AudioDeviceDescriptors&)>& callback) : callback_(callback) { }
     ~AudioPreferredDeviceChangeCallback() = default;
 
-    void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptorsWithSptr& desc) override
+    void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& desc) override
     {
         auto device = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
         callback_(device);

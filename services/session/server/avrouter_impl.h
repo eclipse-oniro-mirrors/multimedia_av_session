@@ -18,6 +18,7 @@
 
 #include "av_router.h"
 #include "avcast_provider_manager.h"
+#include "hw_cast_provider.h"
 #include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
@@ -97,7 +98,7 @@ public:
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
-    void DisconnetOtherSession(std::string sessionId, DeviceInfo deviceInfo) override;
+    void DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo) override;
 
 protected:
 
@@ -108,7 +109,7 @@ private:
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
     std::pair<std::string, std::string> castServiceNameStatePair_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
-    const int64_t noMirrorCastHandle = -1;
+    const int64_t noMirrorCastHandle_ = -1;
     int32_t providerNumber_ = 0;
     std::map<int64_t, CastHandleInfo> castHandleToInfoMap_;
     std::map<std::string, std::shared_ptr<IAVRouterListener>> mirrorSessionMap_;

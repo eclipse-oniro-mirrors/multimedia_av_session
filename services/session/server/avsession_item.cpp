@@ -33,11 +33,11 @@
 #include "avsession_radar.h"
 #include "avsession_event_handler.h"
 #include "bundle_status_adapter.h"
-#include "want_agent_helper.h"
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "avsession_hianalytics_report.h"
+#include "want_agent_helper.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -699,7 +699,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     auto preparecallback = [this]() {
         if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && isFirstCallback_) {
             isFirstCallback_ = false;
-            AVRouter::GetInstance().DisconnetOtherSession(GetSessionId(),
+            AVRouter::GetInstance().DisconnectOtherSession(GetSessionId(),
                 GetDescriptor().outputDeviceInfo_.deviceInfos_[0]);
         }
     };
@@ -723,7 +723,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
             }
         });
     }
-    
+
     InitializeCastCommands();
     return remoteObject;
 }
@@ -1125,7 +1125,7 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
+void AVSessionItem::HandleCastValidCommandChange(const std::vector<int32_t> &cmds)
 {
     std::lock_guard lockGuard(castControllersLock_);
     SLOGI("send command change event to controller, controller size: %{public}d, cmds size is: %{public}d,",
@@ -1191,7 +1191,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
     std::lock_guard lockGuard(castHandleLock_);
 
-    if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 &&
+    if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && castHandle_ <= 0 &&
         descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
         castHandle_ = AVRouter::GetInstance().GetMirrorCastHandle();
         InitAVCastControllerProxy();
@@ -1277,11 +1277,13 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
-    std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
-    if (mirrorToStreamFlag_) {
-        mirrorToStreamFlag_ = false;
-        SLOGI("cast not add to collaboration when mirror to stream cast");
-        return;
+    {
+        std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
+        if (mirrorToStreamFlag_) {
+            mirrorToStreamFlag_ = false;
+            SLOGI("cast not add to collaboration when mirror to stream cast");
+            return;
+        }
     }
     if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
