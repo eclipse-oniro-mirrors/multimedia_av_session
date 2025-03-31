@@ -30,7 +30,7 @@ namespace OHOS::AVSession {
 class HwCastProvider : public AVCastProvider, public CastEngine::ICastSessionManagerListener,
     public std::enable_shared_from_this<HwCastProvider> {
 public:
-    HwCastProvider() = default;
+    HwCastProvider();
     ~HwCastProvider() override;
 
     int32_t Init() override;

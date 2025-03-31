@@ -485,7 +485,7 @@ void AVSessionManagerImpl::RegisterClientDeathObserver()
             "ERROR_INFO", "avsession manager impl register client death observer register failed");
         return;
     }
-    SLOGI("success");
+    SLOGI("RegisterClientDeathObserver with ClientDeathStub success");
 }
 
 ServiceDeathRecipient::ServiceDeathRecipient(const std::function<void()>& callback)

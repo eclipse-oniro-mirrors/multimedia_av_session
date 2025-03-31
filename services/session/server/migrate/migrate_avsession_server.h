@@ -88,7 +88,7 @@ public:
         int64_t delayTime = 0);
 
     static Json::Value ConvertAudioDeviceDescriptorToJson(const AudioDeviceDescriptorWithSptr& device);
-    static Json::Value ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptorsWithSptr& devices);
+    static Json::Value ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptors& devices);
 
 private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;

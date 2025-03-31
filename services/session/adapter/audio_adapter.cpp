@@ -55,11 +55,11 @@ void AudioAdapter::Init()
     ret = AudioStandard::AudioRoutingManager::GetInstance()->SetPreferredOutputDeviceChangeCallback(
         rendererInfo, shared_from_this());
     CHECK_AND_PRINT_LOG(ret == 0, "register audio device changed event listener failed!");
+    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
 
     AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
     volumeMax_ = AudioStandard::AudioSystemManager::GetInstance()->GetMaxVolume(streamType);
     volumeMin_ = AudioStandard::AudioSystemManager::GetInstance()->GetMinVolume(streamType);
-    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
 }
 
 void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
@@ -80,8 +80,7 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
         return AVSESSION_ERROR;
     }
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    auto ret =
-        AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "get renderer state failed!");
     auto muteRet = AVSESSION_ERROR;
     for (const auto& info : audioRendererChangeInfo) {
@@ -128,7 +127,7 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage 
         SLOGI("PC no need unmute");
         return AVSESSION_ERROR;
     }
-    SLOGI("unmute uid=%{public}d stream usage %{public}d", uid, usage);
+    SLOGI("usage unmute uid=%{public}d stream usage %{public}d", uid, usage);
     auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
         uid, AudioStandard::StreamSetState::STREAM_UNMUTE, usage);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "unmute uid=%{public}d failed!", uid);
@@ -181,7 +180,7 @@ void AudioAdapter::OnAvailableDeviceChange(const AudioStandard::AudioDeviceUsage
     } else {
         SLOGI("receive disconnect available device change");
     }
-    AudioDeviceDescriptorsWithSptr deviceDescriptors = GetAvailableDevices();
+    AudioDeviceDescriptors deviceDescriptors = GetAvailableDevices();
     for (auto& device : deviceDescriptors) {
         SLOGI("OnDeviceChange output deviceCategory_ %{public}d, deviceType_ %{public}d",
             static_cast<int32_t>(device->deviceCategory_), static_cast<int32_t>(device->deviceType_));
@@ -189,7 +188,7 @@ void AudioAdapter::OnAvailableDeviceChange(const AudioStandard::AudioDeviceUsage
     availableDeviceChangeCallbackFunc_(deviceDescriptors);
 }
 
-void AudioAdapter::OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptorsWithSptr& desc)
+void AudioAdapter::OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& desc)
 {
     for (const auto& listener : deviceChangeListeners_) {
         if (listener) {
@@ -243,9 +242,9 @@ int32_t AudioAdapter::UnregisterVolumeKeyEventCallback()
     return AVSESSION_SUCCESS;
 }
 
-AudioDeviceDescriptorsWithSptr AudioAdapter::GetAvailableDevices()
+AudioDeviceDescriptors AudioAdapter::GetAvailableDevices()
 {
-    AudioDeviceDescriptorsWithSptr outDeviceDescriptors;
+    AudioDeviceDescriptors outDeviceDescriptors;
     AudioDeviceDescriptors devices = AudioStandard::AudioRoutingManager::GetInstance()->GetAvailableDevices(
         AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES);
     for (auto& device : devices) {
@@ -281,7 +280,7 @@ int32_t AudioAdapter::RegisterAllowedPlaybackCallback(const std::function<bool(i
     return AVSESSION_SUCCESS;
 }
 
-AudioDeviceDescriptorsWithSptr AudioAdapter::GetDevices()
+AudioDeviceDescriptors AudioAdapter::GetDevices()
 {
     auto devices = AudioStandard::AudioSystemManager::GetInstance()->GetDevices(
         AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
@@ -308,14 +307,14 @@ int32_t AudioAdapter::UnsetDeviceChangeCallback()
     return AVSESSION_SUCCESS;
 }
 
-AudioDeviceDescriptorsWithSptr AudioAdapter::GetPreferredOutputDeviceForRendererInfo()
+AudioDeviceDescriptors AudioAdapter::GetPreferredOutputDeviceForRendererInfo()
 {
     AudioStandard::AudioRendererInfo rendererInfo = {};
     rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
-    AudioDeviceDescriptorsWithSptr outDeviceDescriptors;
+    AudioDeviceDescriptors outDeviceDescriptors;
     auto ret = AudioStandard::AudioRoutingManager::GetInstance()->GetPreferredOutputDeviceForRendererInfo(
         rendererInfo, outDeviceDescriptors);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AudioDeviceDescriptorsWithSptr{},
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AudioDeviceDescriptors{},
         "GetPreferredOutputDeviceForRendererInfo failed");
     for (auto& device : outDeviceDescriptors) {
         SLOGI("preferred output deviceCategory_ %{public}d, deviceType_ %{public}d",
@@ -342,7 +341,7 @@ int32_t AudioAdapter::UnsetPreferredOutputDeviceChangeCallback()
     return AVSESSION_SUCCESS;
 }
 
-AudioDeviceDescriptorWithSptr AudioAdapter::FindRenderDeviceForUsage(const AudioDeviceDescriptorsWithSptr& devices,
+AudioDeviceDescriptorWithSptr AudioAdapter::FindRenderDeviceForUsage(const AudioDeviceDescriptors& devices,
     const AudioDeviceDescriptorWithSptr& desc)
 {
     auto itr = std::find_if(devices.cbegin(), devices.cend(), [&desc](const auto &device) {
@@ -359,7 +358,7 @@ int32_t AudioAdapter::SelectOutputDevice(const AudioDeviceDescriptorWithSptr& de
     AudioDeviceDescriptorWithSptr device = FindRenderDeviceForUsage(GetAvailableDevices(), desc);
     CHECK_AND_RETURN_RET_LOG(device != nullptr, AVSESSION_ERROR, "Give device invaild");
     
-    AudioDeviceDescriptorsWithSptr deviceDescriptorVector { device };
+    AudioDeviceDescriptors deviceDescriptorVector { device };
     auto ret = AudioStandard::AudioSystemManager::GetInstance()->SelectOutputDevice(deviceDescriptorVector);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SelectOutputDevice failed");
     return AVSESSION_SUCCESS;

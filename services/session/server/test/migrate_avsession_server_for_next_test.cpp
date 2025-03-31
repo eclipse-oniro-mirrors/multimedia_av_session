@@ -538,7 +538,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext002, 
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorsToJson001, TestSize.Level1)
 {
-    AudioDeviceDescriptorsWithSptr ptrs;
+    AudioDeviceDescriptors ptrs;
     AudioDeviceDescriptorWithSptr ptr {new AudioDeviceDescriptor()};
     ptrs.push_back(ptr);
     EXPECT_EQ(ptrs.size() > 0, true);
@@ -553,7 +553,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptors
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorsToJson002, TestSize.Level1)
 {
-    AudioDeviceDescriptorsWithSptr ptrs;
+    AudioDeviceDescriptors ptrs;
     ptrs.push_back(nullptr);
     EXPECT_EQ(ptrs.size() > 0, true);
     g_MigrateAVSessionServer->ConvertAudioDeviceDescriptorsToJson(ptrs);

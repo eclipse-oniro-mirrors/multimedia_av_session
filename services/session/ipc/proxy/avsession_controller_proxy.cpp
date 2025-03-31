@@ -28,6 +28,7 @@ AVSessionControllerProxy::AVSessionControllerProxy(const sptr<IRemoteObject>& im
 
 AVSessionControllerProxy::~AVSessionControllerProxy()
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     SLOGI("destroy");
     if (callback_) {
         callback_->RemoveListenerForPlaybackState();
@@ -36,6 +37,7 @@ AVSessionControllerProxy::~AVSessionControllerProxy()
 
 int32_t AVSessionControllerProxy::GetAVCallMetaData(AVCallMetaData& avCallMetaData)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -60,6 +62,7 @@ int32_t AVSessionControllerProxy::GetAVCallMetaData(AVCallMetaData& avCallMetaDa
 
 int32_t AVSessionControllerProxy::GetAVCallState(AVCallState& avCallState)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -84,6 +87,7 @@ int32_t AVSessionControllerProxy::GetAVCallState(AVCallState& avCallState)
 
 int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -118,6 +122,7 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
 
 int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -170,6 +175,7 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
 
 int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -208,6 +214,7 @@ int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& item
 
 int32_t AVSessionControllerProxy::GetAVQueueTitle(std::string& title)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -232,6 +239,7 @@ int32_t AVSessionControllerProxy::GetAVQueueTitle(std::string& title)
 
 int32_t AVSessionControllerProxy::SkipToQueueItem(int32_t& itemId)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -249,6 +257,7 @@ int32_t AVSessionControllerProxy::SkipToQueueItem(int32_t& itemId)
 
 int32_t AVSessionControllerProxy::GetExtras(AAFwk::WantParams& extras)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -258,7 +267,6 @@ int32_t AVSessionControllerProxy::GetExtras(AAFwk::WantParams& extras)
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    std::lock_guard lockGuard(controllerProxyLock_);
     SLOGI("prepare to get extras sendRequest");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "check again controller is destroy");
     SLOGI("get extras sendRequest");
@@ -277,6 +285,7 @@ int32_t AVSessionControllerProxy::GetExtras(AAFwk::WantParams& extras)
 
 int32_t AVSessionControllerProxy::GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -287,7 +296,6 @@ int32_t AVSessionControllerProxy::GetExtrasWithEvent(const std::string& extraEve
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
     MessageOption option;
-    std::lock_guard lockGuard(controllerProxyLock_);
     SLOGI("prepare to get extras with event sendRequest");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "check again controller is destroy");
     SLOGI("get extras with event sendRequest");
@@ -306,12 +314,15 @@ int32_t AVSessionControllerProxy::GetExtrasWithEvent(const std::string& extraEve
 
 int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendAVKeyEvent");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_COMMAND_NOT_SUPPORT, "keyEvent not valid");
-    bool isActive {};
-    CHECK_AND_RETURN_RET_LOG(IsSessionActive(isActive) == AVSESSION_SUCCESS &&
-        isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+    bool isActive = false;
+    int32_t retForIsActive = IsSessionActive(isActive);
+    CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, ERR_SESSION_DEACTIVE,
+        "IsSessionActive check Fail:%{public}d", retForIsActive);
+    CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
 
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -331,6 +342,7 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 
 int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -356,6 +368,7 @@ int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::Wa
 
 int32_t AVSessionControllerProxy::GetLaunchAbilityInner(AbilityRuntime::WantAgent::WantAgent*& ability)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -381,6 +394,7 @@ int32_t AVSessionControllerProxy::GetLaunchAbilityInner(AbilityRuntime::WantAgen
 
 int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -403,6 +417,7 @@ int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
 
 int32_t AVSessionControllerProxy::IsSessionActive(bool& isActive)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -425,18 +440,20 @@ int32_t AVSessionControllerProxy::IsSessionActive(bool& isActive)
 
 int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand& cmd)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendControlCommand");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_COMMAND_NOT_SUPPORT, "command not valid");
-    bool isActive {};
-    CHECK_AND_RETURN_RET_LOG(IsSessionActive(isActive) == AVSESSION_SUCCESS &&
-        isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+    bool isActive = false;
+    int32_t retForIsActive = IsSessionActive(isActive);
+    CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, ERR_SESSION_DEACTIVE,
+        "IsSessionActiveCheck Fail:%{public}d", retForIsActive);
+    CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&cmd), ERR_MARSHALLING, "write cmd failed");
 
-    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     SLOGI("check destroy bef get remote");
     auto remote = Remote();
@@ -454,6 +471,7 @@ int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand& cmd
 int32_t AVSessionControllerProxy::SendCommonCommand(const std::string& commonCommand,
     const AAFwk::WantParams& commandArgs)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendCommonCommand");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "Controller is destroy");
     bool isActive {};
@@ -479,6 +497,7 @@ int32_t AVSessionControllerProxy::SendCommonCommand(const std::string& commonCom
 
 int32_t AVSessionControllerProxy::SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -498,6 +517,7 @@ int32_t AVSessionControllerProxy::SetAVCallMetaFilter(const AVCallMetaData::AVCa
 
 int32_t AVSessionControllerProxy::SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -517,6 +537,7 @@ int32_t AVSessionControllerProxy::SetAVCallStateFilter(const AVCallState::AVCall
 
 int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -536,6 +557,7 @@ int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType& 
 
 int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -555,6 +577,7 @@ int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::Playb
 
 int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
 
     callback_ = new(std::nothrow) AVControllerCallbackClient(callback);
@@ -570,6 +593,7 @@ int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVContr
 
 int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject>& callback)
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
@@ -589,13 +613,13 @@ int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject
 
 int32_t AVSessionControllerProxy::Destroy()
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     SLOGI("Proxy received destroy event");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
-    std::lock_guard lockGuard(controllerProxyLock_);
     SLOGI("check lock bef destroy in");
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
@@ -612,6 +636,7 @@ int32_t AVSessionControllerProxy::Destroy()
 
 std::string AVSessionControllerProxy::GetSessionId()
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, "", "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), "", "write interface token failed");
@@ -629,6 +654,7 @@ std::string AVSessionControllerProxy::GetSessionId()
 
 int64_t AVSessionControllerProxy::GetRealPlaybackPosition()
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     AVPlaybackState::Position position;
     {
         std::lock_guard lockGuard(currentStateLock_);
@@ -647,6 +673,7 @@ int64_t AVSessionControllerProxy::GetRealPlaybackPosition()
 
 bool AVSessionControllerProxy::IsDestroy()
 {
+    std::lock_guard lockGuard(controllerProxyLock_);
     return isDestroy_;
 }
 }

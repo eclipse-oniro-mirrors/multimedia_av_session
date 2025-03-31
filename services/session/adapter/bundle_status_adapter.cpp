@@ -18,6 +18,7 @@
 #include "avsession_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "nlohmann/json.hpp"
 #include "want.h"
 #include "want_params_wrapper.h"
 #include "string_wrapper.h"
@@ -159,6 +160,7 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
 
 bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
 {
+    // check bundle support background mode & playmusiclist intent
     nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
     CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
     CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");

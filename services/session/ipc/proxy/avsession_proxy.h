@@ -29,6 +29,7 @@
 #include "avplayback_state.h"
 #include "avmedia_description.h"
 #include "avqueue_item.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS::AVSession {
 class AVSessionProxy : public IRemoteProxy<IAVSession> {

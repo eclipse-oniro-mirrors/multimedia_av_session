@@ -407,7 +407,7 @@ void MigrateAVSessionProxy::ProcessVolumeControlCommand(Json::Value jsonValue)
     preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_VOLUME, args);
 }
 
-void DeviceJsonArrayToVector(Json::Value& jsonArray, AudioDeviceDescriptorsWithSptr& devices)
+void DevicesJsonArrayToVector(Json::Value& jsonArray, AudioDeviceDescriptors& devices)
 {
     devices.clear();
     for (const Json::Value& jsonObject : jsonArray) {
@@ -436,7 +436,7 @@ void MigrateAVSessionProxy::ProcessAvailableDevices(Json::Value jsonValue)
     CHECK_AND_RETURN_LOG(jsonValue[MEDIA_AVAILABLE_DEVICES_LIST].isArray(), "json object is not array");
     
     Json::Value jsonArray = jsonValue[MEDIA_AVAILABLE_DEVICES_LIST];
-    DeviceJsonArrayToVector(jsonArray, availableDevices_);
+    DevicesJsonArrayToVector(jsonArray, availableDevices_);
 
     std::string jsonStr;
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
@@ -452,7 +452,7 @@ void MigrateAVSessionProxy::ProcessPreferredOutputDevice(Json::Value jsonValue)
     CHECK_AND_RETURN_LOG(jsonValue[MEDIA_AVAILABLE_DEVICES_LIST].isArray(), "json object is not array");
 
     Json::Value jsonArray = jsonValue[MEDIA_AVAILABLE_DEVICES_LIST];
-    DeviceJsonArrayToVector(jsonArray, preferredOutputDevice_);
+    DevicesJsonArrayToVector(jsonArray, preferredOutputDevice_);
 
     std::string jsonStr;
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);

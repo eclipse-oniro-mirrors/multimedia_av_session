@@ -437,7 +437,7 @@ std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFu
 
 AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceChangeCallbackFunc()
 {
-    return [this](const AudioDeviceDescriptorsWithSptr& devices) {
+    return [this](const AudioDeviceDescriptors& devices) {
         std::lock_guard lockGuard(migrateDeviceChangeLock_);
         Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
         std::string msg = std::string({MSG_HEAD_MODE, SYNC_AVAIL_DEVICES_LIST});
@@ -453,7 +453,7 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceCha
 
 AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceChangeCallbackFunc()
 {
-    return [this](const AudioDeviceDescriptorsWithSptr& devices) {
+    return [this](const AudioDeviceDescriptors& devices) {
         std::lock_guard lockGuard(migrateDeviceChangeLock_);
         Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
         std::string msg = std::string({MSG_HEAD_MODE, SYNC_CURRENT_DEVICE});
@@ -469,7 +469,7 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
 }
 
 Json::Value MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(
-    const AudioDeviceDescriptorsWithSptr& devices)
+    const AudioDeviceDescriptors& devices)
 {
     Json::Value jsonArray(Json::arrayValue);
     int32_t deviceNum = 0;
