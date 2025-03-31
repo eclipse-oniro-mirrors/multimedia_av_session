@@ -136,3 +136,35 @@ static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, Test
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
     EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
 }
+
+/**
+* @tc.name: OnDeviceChange001
+* @tc.desc: test OnDeviceChange when deviceChangeAction type is DISCONNECT
+* @tc.type: FUNC
+*/
+static HWTEST(AudioDeviceManagerTest, OnDeviceChange001, TestSize.Level1)
+{
+    DeviceChangeAction deviceChangeAction;
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
+}
+
+/**
+* @tc.name: OnDeviceChange002
+* @tc.desc: test OnDeviceChange when deviceChangeAction type is DISCONNECT
+* @tc.type: FUNC
+*/
+static HWTEST(AudioDeviceManagerTest, OnDeviceChange002, TestSize.Level1)
+{
+    DeviceChangeAction deviceChangeAction;
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
+    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
+    deviceChangeAction.deviceDescriptors.push_back(descriptor);
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
+}

@@ -445,6 +445,7 @@ ohos_unittest("AudioDeviceManagerTest") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "audio_framework:audio_client",
+    "audio_framework:audio_foundation",
     "background_task_mgr:bgtaskmgr_innerkits",
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
@@ -1135,7 +1136,10 @@ ohos_unittest("AVSessionDynamicLoaderTest") {
 
   configs = [ ":module_private_config" ]
 
-  cflags_cc = [ "--coverage" ]
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
 
   ldflags = [ "--coverage" ]
 

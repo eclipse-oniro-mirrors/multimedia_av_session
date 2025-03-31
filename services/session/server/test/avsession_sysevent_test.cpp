@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <utility>
 
 #include "avsession_sysevent.h"
 
@@ -54,5 +55,32 @@ static HWTEST_F(AVsessionSyseventTest, Regiter001, testing::ext::TestSize.Level1
     AVSessionSysEvent::GetInstance().Regiter();
     AVSessionSysEvent::GetInstance().Regiter();
     AVSessionSysEvent::GetInstance().Unregister();
+}
+
+/**
+* @tc.name: AddLowQualityInfo001
+* @tc.desc: test AddLowQualityInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(AVsessionSyseventTest, AddLowQualityInfo001, testing::ext::TestSize.Level1)
+{
+    AVSessionSysEvent::BackControlReportInfo reportInfo;
+    AVSessionSysEvent::GetInstance().lowQualityInfos_.insert(std::make_pair("default", reportInfo));
+    AVSessionSysEvent::GetInstance().AddLowQualityInfo(reportInfo);
+}
+
+/**
+* @tc.name: AddLowQualityInfo002
+* @tc.desc: test AddLowQualityInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(AVsessionSyseventTest, AddLowQualityInfo002, testing::ext::TestSize.Level1)
+{
+    AVSessionSysEvent::BackControlReportInfo reportInfo;
+    reportInfo.bundleName_ = "default";
+    AVSessionSysEvent::GetInstance().lowQualityInfos_.insert(std::make_pair("default", reportInfo));
+    AVSessionSysEvent::GetInstance().AddLowQualityInfo(reportInfo);
 }
 #endif
