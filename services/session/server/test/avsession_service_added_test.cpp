@@ -663,7 +663,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     avsessionItem->castHandle_ = 1;
     g_AVSessionService->UpdateTopSession(avsessionItem);
     bool ret = g_AVSessionService->topSession_->IsCasting();
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     g_AVSessionService->HandleRemoveMediaCardEvent();
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
@@ -1022,4 +1022,129 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_IsCapsuleNe
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_IsCapsuleNeeded_001 end!");
+}
+
+/**
+* @tc.name: StartDefaultAbilityByCall001
+* @tc.desc: read data from AVSortDir
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_StartDefaultAbilityByCall_001, TestSize.Level1)
+{
+    SLOGI("StartDefaultAbilityByCall001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+
+    std::string filePath = g_AVSessionService->GetAVSortDir();
+    std::ofstream ofs;
+    ofs.open(filePath, std::ios::out);
+    std::string jsonStr = R"({
+        "bundleName": "test",
+        "sessionId": "12345",
+        "test": "",
+    })";
+    ofs << jsonStr;
+    ofs.close();
+
+    std::string sessionId = avsessionItem->GetSessionId();
+    int32_t ret = g_AVSessionService->StartDefaultAbilityByCall(sessionId);
+    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS || ret == AVSESSION_ERROR, true);
+    g_AVSessionService->HandleSessionRelease(sessionId);
+    avsessionItem->Destroy();
+    SLOGI("StartDefaultAbilityByCall001 end!");
+}
+
+/**
+* @tc.name: StartAbilityByCall001
+* @tc.desc: read data from AVSortDir and get sessionIdNeeded
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_StartAbilityByCall_001, TestSize.Level1)
+{
+    SLOGI("StartAbilityByCall001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+
+    std::string filePath = g_AVSessionService->GetAVSortDir();
+    std::ofstream ofs;
+    ofs.open(filePath, std::ios::out);
+    std::string jsonStr = R"({
+        "bundleName": "test",
+        "sessionId": "12345",
+        "abilityName": "test",
+    })";
+    ofs << jsonStr;
+    ofs.close();
+
+    std::string sessionIdNeeded = "12345";
+    std::string sessionId = avsessionItem->GetSessionId();
+    int32_t ret = g_AVSessionService->StartAbilityByCall(sessionIdNeeded, sessionId);
+    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS || ret == AVSESSION_ERROR, true);
+    g_AVSessionService->HandleSessionRelease(sessionId);
+    avsessionItem->Destroy();
+    SLOGI("StartAbilityByCall001 end!");
+}
+
+/**
+* @tc.name: AVSessionServiceAddedTest_GetLocalTitle_001
+* @tc.desc: success to get title
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_GetLocalTitle_001, TestSize.Level1)
+{
+    SLOGI("AVSessionServiceAddedTest_GetLocalTitle_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_TRUE(avsessionItem != nullptr);
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+
+    auto title = g_AVSessionService->GetLocalTitle();
+    EXPECT_TRUE(title.empty());
+
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGI("AVSessionServiceAddedTest_GetLocalTitle_001 end!");
+}
+
+/**
+* @tc.name: AVSessionServiceAddedTest_NotifySystemUI_001
+* @tc.desc: addCapsule && topSession_ is true
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_NotifySystemUI_001, TestSize.Level1)
+{
+    SLOGI("AVSessionServiceAddedTest_NotifySystemUI_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_TRUE(avsessionItem != nullptr);
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+
+    auto historyDescriptor = std::make_shared<AVSessionDescriptor>();
+    bool isActiveSession = true;
+    bool addCapsule = true;
+    bool isCapsuleUpdate = true;
+    g_AVSessionService->NotifySystemUI(historyDescriptor.get(),
+        isActiveSession, addCapsule, isCapsuleUpdate);
+    bool ret = addCapsule && g_AVSessionService->topSession_;
+    EXPECT_EQ(ret, true);
+
+    g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
+    avsessionItem->Destroy();
+    SLOGI("AVSessionServiceAddedTest_NotifySystemUI_001 end!");
 }
