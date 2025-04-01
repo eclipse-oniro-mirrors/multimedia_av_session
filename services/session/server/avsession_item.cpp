@@ -1363,7 +1363,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
-    DealCollaborationPublishState(castState, deviceInfo);
+    if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
+        DealCollaborationPublishState(castState, deviceInfo);
+    }
     newCastState = castState;
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
