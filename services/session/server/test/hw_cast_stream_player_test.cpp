@@ -31,6 +31,9 @@ using namespace OHOS::CastEngine;
 
 namespace OHOS {
 namespace AVSession {
+
+const static int32_t INVAILD_STATE_CODE = 1000;
+
 class HwCastStreamPlayerTest : public testing::TestWithParam<int> {
 public:
     static void SetUpTestCase();
@@ -60,6 +63,8 @@ public:
 
 class StreamPlayerIMock : public OHOS::CastEngine::IStreamPlayer {
 public:
+    explicit StreamPlayerIMock(int state = 0) : state_(state) {}
+
     int GetPosition(int32_t& currentPosition) override { return 0; }
 
     int Seek(int32_t position) override { return 0; }
@@ -84,7 +89,14 @@ public:
 
     int SetSurface(const std::string &surfaceInfo) override { return 0; }
 
-    int Load(const OHOS::CastEngine::MediaInfo &media) override { return 0; }
+    int Load(const OHOS::CastEngine::MediaInfo &media) override
+    {
+        if (state_ == 0) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
 
     int Play() override { return 0; }
 
@@ -100,7 +112,15 @@ public:
 
     int Previous() override { return 0; }
 
-    int GetPlayerStatus(OHOS::CastEngine::PlayerStates &status) override { return 0; }
+    int GetPlayerStatus(OHOS::CastEngine::PlayerStates &status) override
+    {
+        if (state_ == 0) {
+            status = OHOS::CastEngine::PlayerStates::PLAYER_STATE_ERROR;
+        } else {
+            status = static_cast<OHOS::CastEngine::PlayerStates>(INVAILD_STATE_CODE);
+        }
+        return 0;
+    }
 
     int GetDuration(int &duration) override { return 0; }
 
@@ -108,11 +128,27 @@ public:
 
     int GetMute(bool &mute) override { return 0; }
 
-    int GetLoopMode(OHOS::CastEngine::LoopMode &loopMode) override { return 0; }
+    int GetLoopMode(OHOS::CastEngine::LoopMode &loopMode) override
+    {
+        if (state_ == 0) {
+            loopMode = OHOS::CastEngine::LoopMode::LOOP_MODE_SINGLE;
+        } else {
+            loopMode = static_cast<OHOS::CastEngine::LoopMode>(INVAILD_STATE_CODE);
+        }
+        return 0;
+    }
 
     int GetMediaCapabilities(std::string &jsonCapabilities) override { return 0; }
 
-    int GetPlaySpeed(OHOS::CastEngine::PlaybackSpeed &speed) override { return 0; }
+    int GetPlaySpeed(OHOS::CastEngine::PlaybackSpeed &speed) override
+    {
+        if (state_ == 0) {
+            speed = OHOS::CastEngine::PlaybackSpeed::SPEED_FORWARD_1_00_X;
+        } else {
+            speed = static_cast<OHOS::CastEngine::PlaybackSpeed>(INVAILD_STATE_CODE);
+        }
+        return 0;
+    }
 
     int GetMediaInfoHolder(OHOS::CastEngine::MediaInfoHolder &hold) override { return 0; }
 
@@ -121,6 +157,9 @@ public:
     int GetAvailableCapability(OHOS::CastEngine::StreamCapability &streamCapability) override { return 0; }
 
     int Release() override { return 0; }
+
+private:
+    int state_ = 0;
 };
 
 std::shared_ptr<ICastSession> CreateSession()
@@ -255,6 +294,41 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SendControlCommand002
+ * @tc.desc: test all AVCastControlCommand for SendControlCommand
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level1)
+{
+    SLOGI("SendControlCommand002 begin!");
+    std::vector<int32_t> commands = {
+        AVCastControlCommand::CAST_CONTROL_CMD_INVALID,
+        AVCastControlCommand::CAST_CONTROL_CMD_PLAY,
+        AVCastControlCommand::CAST_CONTROL_CMD_PAUSE,
+        AVCastControlCommand::CAST_CONTROL_CMD_STOP,
+        AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT,
+        AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS,
+        AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD,
+        AVCastControlCommand::CAST_CONTROL_CMD_REWIND,
+        AVCastControlCommand::CAST_CONTROL_CMD_SEEK,
+        AVCastControlCommand::CAST_CONTROL_CMD_SET_VOLUME,
+        AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED,
+        AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE,
+        AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE,
+        AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_MUTE,
+        AVCastControlCommand::CAST_CONTROL_CMD_MAX
+    };
+    ASSERT_TRUE(hwCastStreamPlayer->streamPlayer_ != nullptr);
+    for (int32_t cmd : commands) {
+        AVCastControlCommand avCastControlCommand;
+        avCastControlCommand.SetCommand(cmd);
+        hwCastStreamPlayer->SendControlCommand(avCastControlCommand);
+    }
+    SLOGI("SendControlCommand002 end!");
+}
+
+/**
  * @tc.name: Start001
  * @tc.desc: start no media id and fd src
  * @tc.type: FUNC
@@ -311,6 +385,54 @@ HWTEST_F(HwCastStreamPlayerTest, Start003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Start004
+ * @tc.desc: set callback for data source
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Start004, TestSize.Level1)
+{
+    SLOGI("Start004 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("Media url");
+    AVDataSrcDescriptor dataSrcDescriptor;
+    dataSrcDescriptor.hasCallback = true;
+    dataSrcDescriptor.callback_ = [](void*, uint32_t, int64_t) -> int32_t { return 0; };
+    description->SetDataSrc(dataSrcDescriptor);
+    
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    hwCastStreamPlayer->Start(avQueueItem);
+    SLOGI("Start004 end!");
+}
+
+/**
+ * @tc.name: Start005
+ * @tc.desc: set callback for data source but callback is null
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Start005, TestSize.Level1)
+{
+    SLOGI("Start005 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("Media url");
+    AVDataSrcDescriptor dataSrcDescriptor;
+    dataSrcDescriptor.hasCallback = true;
+    dataSrcDescriptor.callback_ = nullptr;
+    description->SetDataSrc(dataSrcDescriptor);
+
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    hwCastStreamPlayer->Start(avQueueItem);
+    SLOGI("Start005 end!");
+}
+
+/**
  * @tc.name: Prepare001
  * @tc.desc: prepare no media id and fd src
  * @tc.type: FUNC
@@ -352,6 +474,133 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Prepare003
+ * @tc.desc: RepeatPrepare is true
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Prepare003, TestSize.Level1)
+{
+    SLOGI("Prepare003 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("");
+    description->SetIconUri("URI_CACHE");
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    ret = hwCastStreamPlayer->Prepare(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("Prepare003 end!");
+}
+
+/**
+ * @tc.name: Prepare004
+ * @tc.desc: set callback for dataSrcDescriptor
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Prepare004, TestSize.Level1)
+{
+    SLOGI("Prepare004 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("");
+    description->SetIconUri("");
+    AVDataSrcDescriptor dataSrcDescriptor;
+    dataSrcDescriptor.hasCallback = true;
+    dataSrcDescriptor.callback_ = [](void*, uint32_t, int64_t) -> int32_t { return 0; };
+    description->SetDataSrc(dataSrcDescriptor);
+
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    ret = hwCastStreamPlayer->Prepare(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("Prepare004 end!");
+}
+
+/**
+ * @tc.name: Prepare005
+ * @tc.desc: set callback for dataSrcDescriptor but callback is null
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Prepare005, TestSize.Level1)
+{
+    SLOGI("Prepare005 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("");
+    description->SetIconUri("");
+    AVDataSrcDescriptor dataSrcDescriptor;
+    dataSrcDescriptor.hasCallback = true;
+    dataSrcDescriptor.callback_ = nullptr;
+    description->SetDataSrc(dataSrcDescriptor);
+
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    ret = hwCastStreamPlayer->Prepare(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("Prepare005 end!");
+}
+
+/**
+ * @tc.name: Prepare006
+ * @tc.desc: streamPlayer_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Prepare006, TestSize.Level1)
+{
+    SLOGI("Prepare006 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("");
+    description->SetIconUri("");
+    AVDataSrcDescriptor dataSrcDescriptor;
+    dataSrcDescriptor.hasCallback = true;
+    dataSrcDescriptor.callback_ = nullptr;
+    description->SetDataSrc(dataSrcDescriptor);
+
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    hwCastStreamPlayer->streamPlayer_ = nullptr;
+    ret = hwCastStreamPlayer->Prepare(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("Prepare006 end!");
+}
+
+/**
+ * @tc.name: Prepare007
+ * @tc.desc: streamPlayer_->Load is not AVSESSION_SUCCESS
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Prepare007, TestSize.Level1)
+{
+    SLOGI("Prepare007 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("");
+    description->SetIconUri("");
+    AVDataSrcDescriptor dataSrcDescriptor;
+    dataSrcDescriptor.hasCallback = true;
+    dataSrcDescriptor.callback_ = nullptr;
+    description->SetDataSrc(dataSrcDescriptor);
+
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>(1);
+    ret = hwCastStreamPlayer->Prepare(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("Prepare007 end!");
+}
+
+/**
  * @tc.name: GetDuration001
  * @tc.desc: GetDuration
  * @tc.type: FUNC
@@ -377,6 +626,21 @@ HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState001, TestSize.Level1)
     AVPlaybackState state;
     ASSERT_EQ(hwCastStreamPlayer->GetCastAVPlaybackState(state), AVSESSION_SUCCESS);
     SLOGI("GetCastAVPlaybackState001 end!");
+}
+
+/**
+ * @tc.name: GetCastAVPlaybackState002
+ * @tc.desc: failed to data from map
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState002, TestSize.Level1)
+{
+    SLOGI("GetCastAVPlaybackState002 begin!");
+    AVPlaybackState state;
+    hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>(1);
+    ASSERT_EQ(hwCastStreamPlayer->GetCastAVPlaybackState(state), AVSESSION_SUCCESS);
+    SLOGI("GetCastAVPlaybackState002 end!");
 }
 
 /**
