@@ -1335,7 +1335,7 @@ HWTEST_F(AVSessionControllerTest, HasSession001, TestSize.Level1)
 
 /**
 * @tc.name: GetExtrasTest001
-* @tc.desc: Return cumtom media packets - extras
+* @tc.desc: Return custom media packets - extras
 * @tc.type: FUNC
 * @tc.require: I6TD43
 */
@@ -1368,6 +1368,39 @@ HWTEST_F(AVSessionControllerTest, GetExtrasTest003, TestSize.Level1)
     EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetExtras(resultExtras), ERR_SESSION_NOT_EXIST);
     SLOGI("GetExtrasTest003 End");
+}
+
+/**
+* @tc.name: GetExtrasWithEvent001
+* @tc.desc: Return custom media packets - extras
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerTest, GetExtrasWithEvent001, TestSize.Level1)
+{
+    SLOGI("GetExtrasWithEvent001 Begin");
+    OHOS::AAFwk::WantParams resultExtras;
+    const std::string extraEvent = "AUDIO_SET_VOLUME";
+
+    EXPECT_EQ(controller_->GetExtrasWithEvent(extraEvent, resultExtras), AVSESSION_SUCCESS);
+    SLOGI("GetExtrasWithEvent001 End");
+}
+
+/**
+* @tc.name: GetExtrasWithEvent002
+* @tc.desc: Return custom media packets - session not exist
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerTest, GetExtrasWithEvent002, TestSize.Level1)
+{
+    SLOGI("GetExtrasWithEvent002 Begin");
+    OHOS::AAFwk::WantParams resultExtras;
+    const std::string extraEvent = "AUDIO_SET_VOLUME";
+
+    EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
+    EXPECT_EQ(controller_->GetExtrasWithEvent(extraEvent, resultExtras), ERR_SESSION_NOT_EXIST);
+    SLOGI("GetExtrasWithEvent002 End");
 }
 } // namespace AVSession
 } // namespace OHOS

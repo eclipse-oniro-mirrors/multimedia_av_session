@@ -586,3 +586,32 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand002, Test
     g_MigrateAVSessionServer->VolumeControlCommand(jsonValue);
     EXPECT_EQ(jsonValue.isMember(AUDIO_VOLUME), true);
 }
+
+/**
+ * @tc.name: RegisterAudioCallbackAndTrigger001
+ * @tc.desc: tset the member of RegisterAudioCallbackAndTrigger
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, RegisterAudioCallbackAndTrigger001, TestSize.Level1)
+{
+    bool flag = false;
+    g_MigrateAVSessionServer->RegisterAudioCallbackAndTrigger();
+    EXPECT_FALSE(flag);
+}
+
+/**
+ * @tc.name: RegisterAudioCallbackAndTrigger002
+ * @tc.desc: tset the member of RegisterAudioCallbackAndTrigger
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, RegisterAudioCallbackAndTrigger002, TestSize.Level1)
+{
+    bool flag = false;
+    std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer =
+        std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT);
+    migrateAVSessionServer->RegisterAudioCallbackAndTrigger();
+    migrateAVSessionServer->UnregisterAudioCallback();
+    EXPECT_FALSE(flag);
+}

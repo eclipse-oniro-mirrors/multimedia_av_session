@@ -24,6 +24,7 @@
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
+using OHOS::AudioStandard::AudioDeviceUsage;
 using OHOS::AudioStandard::AudioRendererChangeInfo;
 using OHOS::AudioStandard::RendererState;
 
@@ -410,27 +411,6 @@ static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnDeviceChange001
-* @tc.desc: Test OnDeviceChange
-* @tc.type: FUNC
-*/
-static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
-{
-    SLOGD("PauseAudioStream001 begin!");
-    bool ret = false;
-    AudioAdapter::GetInstance().AddDeviceChangeListener(
-        [&ret] (const AudioDeviceDescriptors &desc) {
-        ret = desc.empty();
-    });
-    AudioAdapter::GetInstance().AddDeviceChangeListener(nullptr);
-
-    DeviceChangeAction action = {};
-    action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
-    AudioAdapter::GetInstance().OnDeviceChange(action);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: OnPreferredOutputDeviceUpdated001
  * @tc.desc: Notify registered listeners when the preferred audio output device is updated.
  *           This method iterates through all registered listeners and calls their callback functions
@@ -452,6 +432,226 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceUpdated001, TestSize.Leve
     audioAdapter.deviceChangeListeners_ =
         std::vector<OHOS::AVSession::AudioAdapter::PreferOutputDeviceChangeListener>();
     audioAdapter.OnPreferredOutputDeviceUpdated(desc);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnAvailableDeviceChange001
+ * @tc.desc: Notify registered listener when the available audio output devices are updated.
+ *           This method calls registered listener's callback function with the device change action.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnAvailableDeviceChange001, TestSize.Level1)
+{
+    SLOGD("OnAvailableDeviceChange001 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().SetAvailableDeviceChangeCallback(
+        [&ret] (const AudioDeviceDescriptors &desc) {
+        ret = desc.empty();
+    });
+
+    DeviceChangeAction action = {};
+    action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnAvailableDeviceChange002
+ * @tc.desc: Notify registered listener when the available audio output devices are updated.
+ *           This method calls registered listener's callback function with the device change action.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnAvailableDeviceChange002, TestSize.Level1)
+{
+    SLOGD("OnAvailableDeviceChange002 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().SetAvailableDeviceChangeCallback(
+        [&ret] (const AudioDeviceDescriptors &desc) {
+        ret = desc.empty();
+    });
+
+    DeviceChangeAction action = {};
+    action.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnAvailableDeviceChange003
+ * @tc.desc: Notify registered listener when the available audio output devices are updated.
+ *           This method calls registered listener's callback function with the device change action.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnAvailableDeviceChange003, TestSize.Level1)
+{
+    SLOGD("OnAvailableDeviceChange003 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().SetAvailableDeviceChangeCallback(
+        [&ret] (const AudioDeviceDescriptors &desc) {
+        ret = desc.empty();
+    });
+    AudioAdapter::GetInstance().UnsetAvailableDeviceChangeCallback();
+
+    DeviceChangeAction action = {};
+    action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnVolumeKeyEvent001
+ * @tc.desc: Notify registered listener when the volume is updated.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnVolumeKeyEvent001, TestSize.Level1)
+{
+    SLOGD("OnVolumeKeyEvent001 begin!");
+    int32_t volume = -1;
+    AudioAdapter::GetInstance().RegisterVolumeKeyEventCallback(
+        [&volume] (int32_t volumeNum) {
+        volume = volumeNum;
+    });
+    
+    AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
+    sleep(1);
+    EXPECT_TRUE(volume != -1);
+}
+
+/**
+ * @tc.name: OnVolumeKeyEvent002
+ * @tc.desc: Notify registered listener when the volume is updated.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnVolumeKeyEvent002, TestSize.Level1)
+{
+    SLOGD("OnVolumeKeyEvent002 begin!");
+    int32_t volume = -1;
+    AudioAdapter::GetInstance().RegisterVolumeKeyEventCallback(
+        [&volume] (int32_t volumeNum) {
+        volume = volumeNum;
+    });
+    AudioAdapter::GetInstance().UnregisterVolumeKeyEventCallback();
+
+    AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
+    sleep(1);
+    EXPECT_TRUE(volume == -1);
+}
+
+/**
+* @tc.name: OnDeviceChange001
+* @tc.desc: Test OnDeviceChange
+* @tc.type: FUNC
+*/
+static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
+{
+    SLOGD("PauseAudioStream001 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().AddDeviceChangeListener(
+        [&ret] (const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) {
+        ret = desc.empty();
+    });
+    AudioAdapter::GetInstance().AddDeviceChangeListener(nullptr);
+
+    DeviceChangeAction action = {};
+    action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
+    AudioAdapter::GetInstance().OnDeviceChange(action);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnDeviceChange002
+ * @tc.desc: Notify registered listener when the audio output devices are updated.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnDeviceChange002, TestSize.Level1)
+{
+    SLOGD("OnDeviceChange002 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().SetDeviceChangeCallback();
+
+    DeviceChangeAction action = {};
+    action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    audioAdapter.OnDeviceChange(action);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnDeviceChange003
+ * @tc.desc: Notify registered listener when the audio output devices are updated.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnDeviceChange003, TestSize.Level1)
+{
+    SLOGD("OnDeviceChange003 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().SetDeviceChangeCallback();
+    AudioAdapter::GetInstance().UnsetDeviceChangeCallback();
+
+    DeviceChangeAction action = {};
+    action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    audioAdapter.OnDeviceChange(action);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnPreferredOutputDeviceChange001
+ * @tc.desc: Notify registered listener when the audio preferred device is updated.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange001, TestSize.Level1)
+{
+    SLOGD("OnPreferredOutputDeviceChange001 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().SetPreferredOutputDeviceChangeCallback(
+        [&ret] (const AudioDeviceDescriptors &desc) {
+        auto device = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
+        ret = device.empty();
+    });
+
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
+    CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
+    audioAdapter.SelectOutputDevice(availableDevices[0]);
+    sleep(1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnPreferredOutputDeviceChange002
+ * @tc.desc: Notify registered listener when the audio preferred device is updated.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange002, TestSize.Level1)
+{
+    SLOGD("OnPreferredOutputDeviceChange002 begin!");
+    bool ret = false;
+    AudioAdapter::GetInstance().SetPreferredOutputDeviceChangeCallback(
+        [&ret] (const AudioDeviceDescriptors &desc) {
+        auto device = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
+        ret = device.empty();
+    });
+    AudioAdapter::GetInstance().UnsetPreferredOutputDeviceChangeCallback();
+
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
+    CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
+    audioAdapter.SelectOutputDevice(availableDevices[0]);
+    sleep(1);
     EXPECT_FALSE(ret);
 }
 
