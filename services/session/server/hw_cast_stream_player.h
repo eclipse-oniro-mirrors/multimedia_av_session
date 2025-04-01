@@ -31,7 +31,7 @@ struct JsonCapabilities {
     std::vector<std::string> decoderTypes_;
     std::vector<HDRFormat> hdrFormats_;
     std::vector<float> playSpeeds_;
-    std::vector<std::map<std::string, std::vector<ResolutionLevel>>> decoderSupportResolutions_;
+    std::map<std::string, std::vector<ResolutionLevel>> decoderSupportResolutions_;
 };
 
 class HwCastStreamPlayer : public IAVCastControllerProxy, public CastEngine::IStreamPlayerListener,
@@ -132,17 +132,8 @@ private:
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_75_X, 1.75},
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_2_00_X, 2.00},
         {CastEngine::PlaybackSpeed::SPEED_FORWARD_0_50_X, 0.50},
-        {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_50_X, 1.50}
-    };
-    std::map<int, float> castMapToSpeed_ = {
-        {0, 0.75},
-        {1, 1.00},
-        {2, 1.25},
-        {3, 1.75},
-        {4, 2.00},
-        {5, 0.50},
-        {6, 1.50},
-        {7, 3.00}
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_1_50_X, 1.50},
+        {CastEngine::PlaybackSpeed::SPEED_FORWARD_3_00_X, 3.00}
     };
     std::map<CastEngine::LoopMode, int32_t> castPlusLoopModeToInt_ = {
         {CastEngine::LoopMode::LOOP_MODE_SEQUENCE, AVPlaybackState::LOOP_MODE_SEQUENCE},
