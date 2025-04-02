@@ -404,6 +404,8 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
     releaseSessionBundleName_ = descriptor.elementName_.GetBundleName();
     SendRemoteHistorySessionList(deviceId_);
     SendRemoteControllerList(deviceId_);
+    releaseSessionId_ = "";
+    releaseSessionBundleName_ = "";
 }
 
 void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descriptor)
