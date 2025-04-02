@@ -25,6 +25,7 @@
 #include "avsession_info.h"
 #include "avsession_service.h"
 #include "audio_info.h"
+#include "client_death_proxy.h"
 #include "system_ability_definition.h"
 #include "system_ability_ondemand_reason.h"
 
@@ -1100,6 +1101,135 @@ static HWTEST_F(AVSessionServiceTestSecond, NotifyRemoteDistributedSessionContro
     g_AVSessionService->GetUsersManager().sessionListenersMap_.insert(std::make_pair(1, nullptr));
     g_AVSessionService->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
     SLOGD("NotifyRemoteDistributedSessionControllersChanged003 end!");
+}
+
+/**
+* @tc.name: NotifyRemoteDistributedSessionControllersChanged004
+* @tc.desc: the innerSessionListeners_ and listenerMap are not empty
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifyRemoteDistributedSessionControllersChanged004, TestSize.Level1)
+{
+    SLOGI("NotifyRemoteDistributedSessionControllersChanged004 begin!");
+    pid_t pid = 3040;
+    OHOS::sptr<ISessionListener> listener = nullptr;
+    g_AVSessionService->AddSessionListener(pid, listener);
+    g_AVSessionService->AddSessionListenerForAllUsers(pid, listener);
+    
+    pid_t pid2 = 3041;
+    OHOS::sptr<ISessionListener> listener2 = new TestISessionListener();
+    g_AVSessionService->AddSessionListener(pid2, listener2);
+    g_AVSessionService->AddSessionListenerForAllUsers(pid2, listener2);
+
+    g_AVSessionService->innerSessionListeners_.push_back(nullptr);
+    auto sessionListeners = std::make_shared<TestSessionListener>();
+    g_AVSessionService->innerSessionListeners_.push_back(sessionListeners.get());
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers {};
+    g_AVSessionService->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
+
+    EXPECT_TRUE(!g_AVSessionService->innerSessionListeners_.empty());
+    SLOGI("NotifyRemoteDistributedSessionControllersChanged004 end!");
+}
+
+/**
+* @tc.name: RemoveClientDeathObserver001
+* @tc.desc: observer != nullptr && recipient != nullptr
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, RemoveClientDeathObserver001, TestSize.Level1)
+{
+    SLOGD("RemoveClientDeathObserver001 begin!");
+    pid_t pid = 3030;
+    auto mgr = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    ASSERT_TRUE(mgr != nullptr);
+    auto object = mgr->GetSystemAbility(OHOS::AVSESSION_SERVICE_ID);
+    ASSERT_TRUE(object != nullptr);
+    OHOS::sptr<ClientDeathProxy> observer = OHOS::iface_cast<ClientDeathProxy>(object);
+    ASSERT_TRUE(observer != nullptr);
+    auto func = []() -> void {};
+    OHOS::sptr<ClientDeathRecipient> recipient = new ClientDeathRecipient(func);
+    g_AVSessionService->AddClientDeathObserver(pid, observer, recipient);
+    g_AVSessionService->RemoveClientDeathObserver(pid);
+    bool ret = observer != nullptr && recipient != nullptr;
+    EXPECT_EQ(ret, true);
+    SLOGD("RemoveClientDeathObserver001 end!");
+}
+
+/**
+* @tc.name: RemoveClientDeathObserver002
+* @tc.desc: observer == nullptr && recipient != nullptr
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, RemoveClientDeathObserver002, TestSize.Level1)
+{
+    SLOGD("RemoveClientDeathObserver002 begin!");
+    pid_t pid = 3031;
+    OHOS::sptr<IClientDeath> observer = nullptr;
+    auto func = []() -> void {};
+    OHOS::sptr<ClientDeathRecipient> recipient = new ClientDeathRecipient(func);
+    g_AVSessionService->AddClientDeathObserver(pid, observer, recipient);
+    g_AVSessionService->RemoveClientDeathObserver(pid);
+    bool ret = observer != nullptr && recipient != nullptr;
+    EXPECT_EQ(ret, false);
+    SLOGD("RemoveClientDeathObserver002 end!");
+}
+
+/**
+* @tc.name: RemoveClientDeathObserver003
+* @tc.desc: observer != nullptr && recipient == nullptr
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, RemoveClientDeathObserver003, TestSize.Level1)
+{
+    SLOGD("RemoveClientDeathObserver003 begin!");
+    pid_t pid = 3032;
+    OHOS::sptr<IClientDeath> observer = new TestIClientDeath();
+    OHOS::sptr<ClientDeathRecipient> recipient = nullptr;
+    g_AVSessionService->AddClientDeathObserver(pid, observer, recipient);
+    g_AVSessionService->RemoveClientDeathObserver(pid);
+    bool ret = observer != nullptr && recipient != nullptr;
+    EXPECT_EQ(ret, false);
+    SLOGD("RemoveClientDeathObserver003 end!");
+}
+
+/**
+* @tc.name: RegisterClientDeathObserver001
+* @tc.desc: observer != nullptr && recipient == nullptr
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, RegisterClientDeathObserver001, TestSize.Level1)
+{
+    SLOGD("RegisterClientDeathObserver001 begin!");
+    auto mgr = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    ASSERT_TRUE(mgr != nullptr);
+    auto object = mgr->GetSystemAbility(OHOS::AVSESSION_SERVICE_ID);
+    ASSERT_TRUE(object != nullptr);
+    OHOS::sptr<ClientDeathProxy> observer = OHOS::iface_cast<ClientDeathProxy>(object);
+    ASSERT_TRUE(observer != nullptr);
+    int32_t ret = g_AVSessionService->RegisterClientDeathObserver(observer);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("RegisterClientDeathObserver001 end!");
+}
+
+/**
+* @tc.name: GetTrustedDeviceName001
+* @tc.desc: fail to get trusted device name
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, GetTrustedDeviceName001, TestSize.Level1)
+{
+    SLOGI("GetTrustedDeviceName001 begin!");
+    std::string networkId = "@@##**&&";
+    std::string deviceName = "";
+    int32_t ret = g_AVSessionService->GetTrustedDeviceName(networkId, deviceName);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetTrustedDeviceName001 end!");
 }
 
 /**
