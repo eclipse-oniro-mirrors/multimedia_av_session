@@ -392,18 +392,17 @@ void MigrateAVSessionServer::ProcControlCommandFromNext(Json::Value commandJsonV
     sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
     CHECK_AND_RETURN_LOG(controller != nullptr, "ProcControlCommandFromNext but get controller null");
     AVControlCommand command;
-    if (AVSESSION_SUCCESS == command.SetCommand(commandCode)) {
-        if (commandCode == AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE) {
-            commandArgs = (commandArgs.empty() || commandArgs == DEFAULT_STRING) ? curAssetId_ : commandArgs;
-            command.SetAssetId(commandArgs);
-            SLOGI("ProcControlCommandFromNext toggle fav for:%{public}s", commandArgs.c_str());
-        }
-        controller->SendControlCommand(command);
-        SLOGI("ProcControlCommandFromNext code:%{public}d done", commandCode);
-    } else {
+    if (AVSESSION_SUCCESS != command.SetCommand(commandCode)) {
         SLOGE("ProcControlCommandFromNext parse invalid command type:%{public}d", commandCode);
         return;
     }
+    if (commandCode == AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE) {
+        commandArgs = (commandArgs.empty() || commandArgs == DEFAULT_STRING) ? curAssetId_ : commandArgs;
+        command.SetAssetId(commandArgs);
+        SLOGI("ProcControlCommandFromNext toggle fav for:%{public}s", commandArgs.c_str());
+    }
+    controller->SendControlCommand(command);
+    SLOGI("ProcNextCommand code:%{public}d done", commandCode);
 }
 
 void MigrateAVSessionServer::ProcessColdStartFromNext(Json::Value commandJsonValue)

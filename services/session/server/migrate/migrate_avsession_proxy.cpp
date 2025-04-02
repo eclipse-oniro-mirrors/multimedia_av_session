@@ -473,11 +473,11 @@ void MigrateAVSessionProxy::ProcessBundleImg(std::string bundleIconStr)
     if (imgVec.size() <= 0) {
         SLOGE("ProcessBundleImg with empty img, return");
         return;
-    } else {
-        std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
-        innerPixelMap->SetInnerImgBuffer(imgVec);
-        metaData.SetBundleIcon(innerPixelMap);
     }
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
+    innerPixelMap->SetInnerImgBuffer(imgVec);
+    metaData.SetBundleIcon(innerPixelMap);
+
     remoteSession_->SetAVMetaData(metaData);
     SLOGI("ProcessBundleImg set img size:%{public}d", static_cast<int>(metaData.GetBundleIcon() == nullptr ?
         -1 : metaData.GetBundleIcon()->GetInnerImgBuffer().size()));
