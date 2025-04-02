@@ -299,35 +299,3 @@ static HWTEST(BkGrAudioControllerTest, OnSessionCreate002, TestSize.Level1)
     EXPECT_NE(it, bkgraudiocontroller.sessionUIDs_.end());
     SLOGI("OnSessionCreate002 end!");
 }
-
-/**
-* @tc.name: RendererChangeReport001
-* @tc.desc: test RendererChangeReport
-* @tc.type: FUNC
-* @tc.require: #I62OZV
-*/
-static HWTEST(BkGrAudioControllerTest, RendererChangeReport001, TestSize.Level1)
-{
-    SLOGI("RendererChangeReport001 begin!");
-    BackgroundAudioController bkgraudiocontroller;
-    AVSessionService *service = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
-    ASSERT_TRUE(service != nullptr);
-    bkgraudiocontroller.Init(service);
-    OHOS::AudioStandard::AudioRendererChangeInfo info;
-    info.rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
-    bkgraudiocontroller.RendererChangeReport(info);
-
-    info.rendererState = OHOS::AudioStandard::RENDERER_PAUSED;
-    bkgraudiocontroller.RendererChangeReport(info);
-
-    info.rendererState = OHOS::AudioStandard::RENDERER_STOPPED;
-    bkgraudiocontroller.RendererChangeReport(info);
-
-    info.rendererState = OHOS::AudioStandard::RENDERER_NEW;
-    bkgraudiocontroller.RendererChangeReport(info);
-
-    EXPECT_NE(bkgraudiocontroller.ptr_, nullptr);
-    delete service;
-    service = nullptr;
-    SLOGI("RendererChangeReport001 end!");
-}

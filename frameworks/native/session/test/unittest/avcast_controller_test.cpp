@@ -1342,7 +1342,9 @@ HWTEST_F(AVCastControllerTest, SetQueueItemDataSrc001, TestSize.Level1)
     std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
     description->SetDataSrc(dataSrc);
     AVQueueItem avQueueItem;
+    avQueueItem.IsValid();
     avQueueItem.SetDescription(description);
+    avQueueItem.IsValid();
     castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
     castController_->isPlayingState_ = true;
     castController_->SetQueueItemDataSrc(avQueueItem);
