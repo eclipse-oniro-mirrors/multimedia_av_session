@@ -324,6 +324,7 @@ private:
     std::string GetAnonymousDeviceId(std::string deviceId);
     void ReportAVCastControllerInfo();
     void InitAVCastControllerProxy();
+    bool CheckTitleChange(const AVMetaData& meta);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -411,6 +412,8 @@ private:
     volatile bool isDestroyed_ = false;
 
     static const int32_t DEFAULT_USER_ID = 100;
+
+    static constexpr const char *defaultBundleName = "com.example.himusicdemo";
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;
