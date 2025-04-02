@@ -16,8 +16,6 @@
 #include <gtest/gtest.h>
 
 #include "account_manager_adapter.h"
-#include "avsession_errors.h"
-#include "avsession_log.h"
 #include "avsession_users_manager.h"
 #include "isession_listener.h"
 
@@ -43,47 +41,27 @@ void AVSessionUsersManagerTest::TearDown() {}
 class ISessionListenerMock : public ISessionListener {
 public:
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override {};
-
     void OnSessionRelease(const AVSessionDescriptor& descriptor) override {};
-
     void OnTopSessionChange(const AVSessionDescriptor& descriptor) override {};
-
     void OnAudioSessionChecked(const int32_t uid) override {};
-
     void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {};
-
     void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
-
     void OnDeviceOffline(const std::string& deviceId) override {};
-
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override {};
-
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 
-/**
- * @tc.name: HandleUserRemoved001
- * @tc.desc: the sessionStackMapByUserId_ is empty
- * @tc.type: FUNC
- */
-static HWTEST(AVSessionUsersManagerTest, HandleUserRemoved001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved001, TestSize.Level1)
 {
-    SLOGD("HandleUserRemoved001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 0;
     manager.HandleUserRemoved(userId);
     EXPECT_TRUE(manager.sessionStackMapByUserId_.size() == 0);
 }
 
-/**
- * @tc.name: HandleUserRemoved002
- * @tc.desc: the sessionStackMapByUserId_ is not empty and other maps are empty
- * @tc.type: FUNC
- */
-static HWTEST(AVSessionUsersManagerTest, HandleUserRemoved002, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved002, TestSize.Level1)
 {
-    SLOGD("HandleUserRemoved002 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 0;
     std::shared_ptr<SessionStack> stack = std::make_shared<SessionStack>();
@@ -92,14 +70,8 @@ static HWTEST(AVSessionUsersManagerTest, HandleUserRemoved002, TestSize.Level1)
     EXPECT_TRUE(manager.sessionStackMapByUserId_.size() == 0);
 }
 
-/**
- * @tc.name: HandleUserRemoved003
- * @tc.desc: the sessionStackMapByUserId_ and other maps are not empty
- * @tc.type: FUNC
- */
-static HWTEST(AVSessionUsersManagerTest, HandleUserRemoved003, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved003, TestSize.Level1)
 {
-    SLOGD("HandleUserRemoved003 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 0;
     std::shared_ptr<SessionStack> stack = std::make_shared<SessionStack>();
@@ -111,14 +83,8 @@ static HWTEST(AVSessionUsersManagerTest, HandleUserRemoved003, TestSize.Level1)
     EXPECT_TRUE(manager.sessionStackMapByUserId_.size() == 0);
 }
 
-/**
- * @tc.name: AddSessionListener001
- * @tc.desc: have no find id
- * @tc.type: FUNC
- */
-static HWTEST(AVSessionUsersManagerTest, AddSessionListener001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, AddSessionListener001, TestSize.Level1)
 {
-    SLOGD("AddSessionListener001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     pid_t pid = 0;
     OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
@@ -128,14 +94,8 @@ static HWTEST(AVSessionUsersManagerTest, AddSessionListener001, TestSize.Level1)
     EXPECT_TRUE(iterForListenerMap != manager.sessionListenersMapByUserId_.end());
 }
 
-/**
- * @tc.name: RemoveSessionListener001
- * @tc.desc: find id and remove it
- * @tc.type: FUNC
- */
-static HWTEST(AVSessionUsersManagerTest, RemoveSessionListener001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, RemoveSessionListener001, TestSize.Level1)
 {
-    SLOGD("RemoveSessionListener001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     pid_t pid = 0;
     OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
@@ -148,14 +108,8 @@ static HWTEST(AVSessionUsersManagerTest, RemoveSessionListener001, TestSize.Leve
     EXPECT_TRUE(manager.sessionListenersMapByUserId_.size() > 0);
 }
 
-/**
- * @tc.name: GetContainerFromUser001
- * @tc.desc: find the id
- * @tc.type: FUNC
- */
-static HWTEST(AVSessionUsersManagerTest, GetContainerFromUser001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, GetContainerFromUser001, TestSize.Level1)
 {
-    SLOGD("GetContainerFromUser001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 0;
     manager.sessionStackMapByUserId_.insert({userId, nullptr});
@@ -164,17 +118,68 @@ static HWTEST(AVSessionUsersManagerTest, GetContainerFromUser001, TestSize.Level
     EXPECT_TRUE(iter != manager.sessionStackMapByUserId_.end());
 }
 
-/**
- * @tc.name: GetDirForCurrentUser001
- * @tc.desc: set the invalid id
- * @tc.type: FUNC
- */
-static HWTEST(AVSessionUsersManagerTest, GetDirForCurrentUser001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, GetDirForCurrentUser001, TestSize.Level1)
 {
-    SLOGD("GetDirForCurrentUser001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     manager.curUserId_ = -1;
     int32_t userId = 0;
     std::string ret = manager.GetDirForCurrentUser(userId);
     EXPECT_TRUE(ret == "/data/service/el2/public/av_session/");
+}
+
+HWTEST_F(AVSessionUsersManagerTest, Init001, TestSize.Level1)
+{
+    int32_t userId = 1;
+    AVSessionUsersManager::GetInstance().Init();
+    for (const auto& listener : AccountManagerAdapter::GetInstance().accountEventsListenerList_) {
+        if (listener) {
+            listener(AccountManagerAdapter::accountEventSwitched, userId);
+        }
+    }
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
+}
+
+HWTEST_F(AVSessionUsersManagerTest, Init002, TestSize.Level1)
+{
+    int32_t userId = 1;
+    int32_t newUserId = 100;
+    AVSessionUsersManager::GetInstance().Init();
+    for (const auto& listener : AccountManagerAdapter::GetInstance().accountEventsListenerList_) {
+        if (listener) {
+            listener(AccountManagerAdapter::accountEventRemoved, userId);
+        }
+    }
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, newUserId);
+}
+
+HWTEST_F(AVSessionUsersManagerTest, Init003, TestSize.Level1)
+{
+    int32_t userId = 100;
+    AVSessionUsersManager::GetInstance().Init();
+    for (const auto& listener : AccountManagerAdapter::GetInstance().accountEventsListenerList_) {
+        if (listener) {
+            listener("other", 1);
+        }
+    }
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
+}
+
+HWTEST_F(AVSessionUsersManagerTest, Init004, TestSize.Level1)
+{
+    int32_t userId = 1;
+    AVSessionUsersManager::GetInstance().Init();
+    AVSessionUsersManager::GetInstance().aliveUsers_.push_back(userId);
+    for (const auto& listener : AccountManagerAdapter::GetInstance().accountEventsListenerList_) {
+        if (listener) {
+            listener(AccountManagerAdapter::accountEventSwitched, userId);
+        }
+    }
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
+}
+
+HWTEST_F(AVSessionUsersManagerTest, GetCurSessionListForKeyEvent001, TestSize.Level1)
+{
+    int32_t userId = 1;
+    AVSessionUsersManager::GetInstance().GetCurSessionListForKeyEvent(userId);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
 }

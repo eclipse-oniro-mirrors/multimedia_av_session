@@ -1930,6 +1930,8 @@ ohos_unittest("SessionStackTest") {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
   }
+
+  cflags_cc = [ "-fno-access-control" ]
 }
 
 ohos_unittest("AVRouterTest") {
