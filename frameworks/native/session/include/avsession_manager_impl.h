@@ -134,7 +134,7 @@ private:
     static constexpr int userIdForAllUsers_ = -1;
     std::atomic<bool> isServiceDie = false;
 #ifdef START_STOP_ON_DEMAND_ENABLE
-    const int32_t loadSystemAbilityWaitTimeOut_ = 3;
+    const int32_t loadSystemAbilityWaitTimeOut_ = 30;
 #endif
 };
 
