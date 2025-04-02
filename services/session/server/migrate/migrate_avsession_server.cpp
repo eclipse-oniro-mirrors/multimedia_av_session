@@ -142,6 +142,7 @@ void MigrateAVSessionServer::CreateController(const std::string &sessionId)
         }
     }
     sptr<IRemoteObject> proxyObject;
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "createController without servicePtr");
     int32_t ret = servicePtr_->CreateControllerInner(sessionId, proxyObject);
     if (ret != AVSESSION_SUCCESS && !(ret == ERR_CONTROLLER_IS_EXIST && proxyObject != nullptr)) {
         SLOGW("CreateControllerInner fail");

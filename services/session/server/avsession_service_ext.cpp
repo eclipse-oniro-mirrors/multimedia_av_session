@@ -755,19 +755,18 @@ bool AVSessionService::CheckWhetherTargetDevIsNext(const OHOS::DistributedHardwa
 int32_t AVSessionService::GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
     std::vector<sptr<IRemoteObject>>& sessionControllers)
 {
-    if (sessionType == DistributedSessionType::TYPE_SESSION_REMOTE && !migrateAVSessionProxyMap_.empty()) {
-        for (const auto& pair : migrateAVSessionProxyMap_) {
-            std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
-                std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
-            CHECK_AND_CONTINUE(migrateAVSessionProxy != nullptr);
-            migrateAVSessionProxy->GetDistributedSessionControllerList(sessionControllers);
-        }
-    } else {
+    if (sessionType != DistributedSessionType::TYPE_SESSION_REMOTE || migrateAVSessionProxyMap_.empty()) {
         SLOGE("GetDistributedSessionControllersInner with err type:%{public}d|proxyEmpty:%{public}d",
             static_cast<int>(sessionType), static_cast<int>(migrateAVSessionProxyMap_.empty()));
         return ERR_REMOTE_CONNECTION_NOT_EXIST;
     }
-    SLOGI("GetDistributedSessionControllersInner with size:%{public}d", static_cast<int>(sessionControllers.size()));
+    for (const auto& pair : migrateAVSessionProxyMap_) {
+        std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
+            std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
+        CHECK_AND_CONTINUE(migrateAVSessionProxy != nullptr);
+        migrateAVSessionProxy->GetDistributedSessionControllerList(sessionControllers);
+    }
+    SLOGI("GetDistributedController size:%{public}d", static_cast<int>(sessionControllers.size()));
     return AVSESSION_SUCCESS;
 }
 
