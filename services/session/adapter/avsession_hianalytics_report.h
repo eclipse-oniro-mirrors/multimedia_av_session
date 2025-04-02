@@ -31,5 +31,10 @@ public:
 private:
     static void ConnectHAClient(std::string eventId, std::unordered_map<std::string, std::string> properties);
 };
+
+struct HaResponseLite {
+    int32_t code;
+    std::string message;
+};
 }
 #endif // AVSESSION_HIANALYTICS_REPORT_H
