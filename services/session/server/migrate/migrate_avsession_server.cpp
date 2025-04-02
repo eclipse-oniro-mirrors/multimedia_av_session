@@ -670,7 +670,7 @@ Json::Value MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerIte
     AVMetaData data;
     data.Reset();
     avcontroller->GetAVMetaData(data);
-    metadata = ConvertMetadataToJson(data, false);
+    metadata = ConvertMetadataToJson(data);
 
     AVPlaybackState state;
     if (AVSESSION_SUCCESS == avcontroller->GetAVPlaybackState(state)) {
