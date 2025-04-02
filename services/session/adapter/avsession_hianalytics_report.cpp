@@ -48,6 +48,7 @@ const char *HA_KEY_AVSESSION_ID = "$SessionId";
 const char *HA_KEY_AVSESSION_MEDIA_ID = "$MediaId";
 const char *HA_KEY_AVSESSION_TYPE = "$SessionType";
 const char *HA_KEY_RESOURCE_DURATION = "$Duration";
+void *g_haClientHandle = nullptr;
 
 std::string GetProtocol(int supportProtocol)
 {
@@ -66,22 +67,23 @@ void AVSessionHiAnalyticsReport::ConnectHAClient(std::string eventId,
     std::unordered_map<std::string, std::string> properties)
 {
     SLOGI("ConnectHAClient start");
-    void *haClientHandle = dlopen("libha_client_core.z.so", RTLD_NOW);
-    if (haClientHandle == nullptr) {
-        SLOGE("dlopen ha_client failed, reason:%{public}sn", dlerror());
-        return;
+    if (g_haClientHandle == nullptr) {
+        SLOGI("dlopen ha_client_lite start");
+        g_haClientHandle = dlopen("libha_client_core.z.so", RTLD_NOW);
+        if (g_haClientHandle == nullptr) {
+            SLOGE("dlopen ha_client failed, reason:%{public}sn", dlerror());
+            return;
+        }
     }
-    void *onHAEventFunc = dlsym(haClientHandle, "onEvent");
+    void *onHAEventFunc = dlsym(g_haClientHandle, "onEvent");
     if (onHAEventFunc == nullptr) {
         SLOGE("dlsm onEvent failed, reason:%{public}sn", dlerror());
-        dlclose(haClientHandle);
         return;
     }
-    auto onHAEvent = reinterpret_cast<int(*)(
+    auto onHAEvent = reinterpret_cast<HaResponseLite(*)(
         std::string, int32_t, std::string, std::unordered_map<std::string, std::string>)>(onHAEventFunc);
     onHAEvent(HA_INSTANCE_TAG, 0, eventId, properties);
     SLOGI("OnHaEvent eventId: %{public}s", eventId.c_str());
-    dlclose(haClientHandle);
 }
 
 void AVSessionHiAnalyticsReport::PublishRecommendInfo(const std::string &bundleName, const std::string &sessionId,
