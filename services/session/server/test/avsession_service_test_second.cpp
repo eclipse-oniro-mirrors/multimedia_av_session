@@ -1376,82 +1376,142 @@ static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigr
 }
 
 /**
- * @tc.name: NotifyLocalFrontSessionChangeForMigrate002
- * @tc.desc: localFrontSessionId_.empty() && localFrontSessionIdUpdate.length() > 0
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate002, TestSize.Level1)
+* @tc.name: SuperLauncher002
+* @tc.desc: Verifying SuperLauncher with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher002, TestSize.Level1)
 {
-    SLOGD("NotifyLocalFrontSessionChangeForMigrate002 begin!");
-    std::string networkId = "test1";
-    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
-    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, migrateAVSession});
-    
-    g_AVSessionService->localFrontSessionId_ = "";
-    std::string localFrontSessionIdUpdate = "test";
-    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
-    EXPECT_TRUE(g_AVSessionService != nullptr);
-    SLOGD("NotifyLocalFrontSessionChangeForMigrate002 end!");
+    g_AVSessionService->SuperLauncher("adcdef", "HuaweiCast", "", "IDLE");
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
 }
 
 /**
- * @tc.name: NotifyLocalFrontSessionChangeForMigrate003
- * @tc.desc: !localFrontSessionId_.empty() && localFrontSessionIdUpdate.length() > 0
-            && localFrontSessionId_ != localFrontSessionIdUpdate
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate003, TestSize.Level1)
+* @tc.name: SuperLauncher003
+* @tc.desc: Verifying SuperLauncher with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher003, TestSize.Level1)
 {
-    SLOGD("NotifyLocalFrontSessionChangeForMigrate003 begin!");
-    std::string networkId = "test2";
-    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
-    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, migrateAVSession});
-    
-    g_AVSessionService->localFrontSessionId_ = "localFrontSessionId";
-    std::string localFrontSessionIdUpdate = "localFrontSessionIdUpdate";
-    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
-    EXPECT_TRUE(g_AVSessionService != nullptr);
-    SLOGD("NotifyLocalFrontSessionChangeForMigrate003 end!");
+    g_AVSessionService->is2in1_ = true;
+    g_AVSessionService->SuperLauncher("adcdef", "HuaweiCast", "a, b, c", "IDLE");
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
 }
 
 /**
- * @tc.name: NotifyLocalFrontSessionChangeForMigrate004
- * @tc.desc: !localFrontSessionId_.empty() && localFrontSessionIdUpdate.empty()
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate004, TestSize.Level1)
+* @tc.name: NotifyMigrateStop001
+* @tc.desc: Verifying NotifyMigrateStop with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifyMigrateStop001, TestSize.Level1)
 {
-    SLOGD("NotifyLocalFrontSessionChangeForMigrate004 begin!");
-    std::string networkId = "test3";
-    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
-    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, migrateAVSession});
-    
-    g_AVSessionService->localFrontSessionId_ = "localFrontSessionId";
-    std::string localFrontSessionIdUpdate = "";
-    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
-    EXPECT_TRUE(g_AVSessionService != nullptr);
-    SLOGD("NotifyLocalFrontSessionChangeForMigrate004 end!");
+    g_AVSessionService->NotifyMigrateStop("deviceId");
+    EXPECT_NE(g_AVSessionService->migrateAVSession_, nullptr);
 }
 
 /**
- * @tc.name: NotifyLocalFrontSessionChangeForMigrate005
- * @tc.desc: localFrontSessionId_.empty() && localFrontSessionIdUpdate.empty()
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigrate005, TestSize.Level1)
+* @tc.name: SplitExtraInfo001
+* @tc.desc: Verifying SplitExtraInfo with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo001, TestSize.Level1)
 {
-    SLOGD("NotifyLocalFrontSessionChangeForMigrate005 begin!");
-    std::string networkId = "test4";
-    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
-    g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, migrateAVSession});
-    
-    g_AVSessionService->localFrontSessionId_ = "";
-    std::string localFrontSessionIdUpdate = "";
-    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
-    EXPECT_TRUE(g_AVSessionService != nullptr);
-    SLOGD("NotifyLocalFrontSessionChangeForMigrate005 end!");
+    const string supportInfo = "SUPPORT_MIRROR_TO_STREAM:true";
+    g_AVSessionService->SplitExtraInfo(supportInfo);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, true);
+
+    const string deviceInfo = "deviceId : dev01";
+    g_AVSessionService->SplitExtraInfo(deviceInfo);
+    EXPECT_NE(g_AVSessionService->castDeviceId_, "");
+
+    const string nameInfo = "deviceName : device";
+    g_AVSessionService->SplitExtraInfo(nameInfo);
+    EXPECT_NE(g_AVSessionService->castDeviceName_, "");
+
+    const string deviceTypeInfo = "deviceType : 1";
+    g_AVSessionService->SplitExtraInfo(deviceTypeInfo);
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 1);
+}
+
+/**
+* @tc.name: checkEnableCast001
+* @tc.desc: Verifying checkEnableCast with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, checkEnableCast001, TestSize.Level1)
+{
+    g_AVSessionService->isInCast_ = false;
+    auto ret = g_AVSessionService->checkEnableCast(true);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: StopCast001
+* @tc.desc: Verifying StopCast with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, StopCast001, TestSize.Level1)
+{
+    auto avsessionHere = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    ASSERT_TRUE(avsessionHere != nullptr);
+
+    g_AVSessionService->GetUsersManager().GetContainerFromAll().AddSession(
+        getpid(), g_testAnotherAbilityName, avsessionHere);
+    avsessionHere->descriptor_.sessionTag_ = "RemoteCast";
+    SessionToken sessionToken;
+    sessionToken.sessionId = avsessionHere->GetSessionId();
+    g_AVSessionService->isInCast_ = false;
+    auto ret = g_AVSessionService->StopCast(sessionToken);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: MirrorToStreamCast001
+* @tc.desc: Verifying MirrorToStreamCast with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, MirrorToStreamCast001, TestSize.Level1)
+{
+    auto avsessionHere = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    ASSERT_TRUE(avsessionHere != nullptr);
+    g_AVSessionService->isSupportMirrorToStream_ = true;
+    g_AVSessionService->castServiceNameStatePair_.second = "CONNECT_SUCC";
+    g_AVSessionService->is2in1_ = false;
+    auto ret = g_AVSessionService->MirrorToStreamCast(avsessionHere);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: GetDistributedSessionControllersInner001
+* @tc.desc: Verifying GetDistributedSessionControllersInner with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, GetDistributedSessionControllersInner001, TestSize.Level1)
+{
+    DistributedSessionType sessionType = TYPE_SESSION_REMOTE;
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    auto ret = g_AVSessionService->GetDistributedSessionControllersInner(sessionType, sessionControllers);
+    EXPECT_EQ(ret, ERR_REMOTE_CONNECTION_NOT_EXIST);
+}
+
+/**
+* @tc.name: GetDistributedSessionControllersInner002
+* @tc.desc: Verifying GetDistributedSessionControllersInner with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, GetDistributedSessionControllersInner002, TestSize.Level1)
+{
+    DistributedSessionType sessionType = TYPE_SESSION_MIGRATE_IN;
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    auto ret = g_AVSessionService->GetDistributedSessionControllersInner(sessionType, sessionControllers);
+    EXPECT_EQ(ret, ERR_REMOTE_CONNECTION_NOT_EXIST);
 }
