@@ -405,6 +405,8 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
     releaseSessionBundleName_ = descriptor.elementName_.GetBundleName();
     SendRemoteHistorySessionList(deviceId_);
     SendRemoteControllerList(deviceId_);
+    releaseSessionId_ = "";
+    releaseSessionBundleName_ = "";
 }
 
 void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descriptor)
@@ -669,7 +671,7 @@ Json::Value MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerIte
     AVMetaData data;
     data.Reset();
     avcontroller->GetAVMetaData(data);
-    metadata = ConvertMetadataToJson(data, false);
+    metadata = ConvertMetadataToJson(data);
 
     AVPlaybackState state;
     if (AVSESSION_SUCCESS == avcontroller->GetAVPlaybackState(state)) {
