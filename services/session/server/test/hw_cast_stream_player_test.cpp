@@ -1046,6 +1046,35 @@ HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged001, TestSize.Level
 }
 
 /**
+ * @tc.name: OnAvailableCapabilityChanged002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged002, TestSize.Level1)
+{
+    SLOGI("OnAvailableCapabilityChanged002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    CastEngine::StreamCapability streamCapability;
+    streamCapability.isPlaySupported = true;
+    streamCapability.isPauseSupported = true;
+    streamCapability.isStopSupported = true;
+    streamCapability.isNextSupported = true;
+    streamCapability.isPreviousSupported = true;
+    streamCapability.isSeekSupported = true;
+    streamCapability.isFastForwardSupported = true;
+    streamCapability.isFastRewindSupported = true;
+    streamCapability.isLoopModeSupported = true;
+    streamCapability.isSetVolumeSupported = true;
+
+    hwCastStreamPlayer->OnAvailableCapabilityChanged(streamCapability);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnAvailableCapabilityChanged002 end!");
+}
+
+/**
  * @tc.name: CheckCastTime001
  * @tc.desc: CheckCastTime
  * @tc.type: FUNC
@@ -1058,6 +1087,21 @@ HWTEST_F(HwCastStreamPlayerTest, CheckCastTime001, TestSize.Level1)
     int32_t ret = hwCastStreamPlayer->CheckCastTime(castTime);
     EXPECT_EQ(ret, castTime);
     SLOGI("CheckCastTime001 end!");
+}
+
+/**
+ * @tc.name: CheckCastTime002
+ * @tc.desc: castTime is less than 1000
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, CheckCastTime002, TestSize.Level1)
+{
+    SLOGI("CheckCastTime002 begin!");
+    int32_t castTime = 1;
+    int32_t ret = hwCastStreamPlayer->CheckCastTime(castTime);
+    EXPECT_EQ(ret, 1000);
+    SLOGI("CheckCastTime002 end!");
 }
 
 /**
@@ -1102,6 +1146,32 @@ HWTEST_F(HwCastStreamPlayerTest, SetValidAbility002, TestSize.Level1)
     auto ret = hwCastStreamPlayer->SetValidAbility(validAbilityList);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SetValidAbility002 end!");
+}
+
+/**
+ * @tc.name: SetValidAbility003
+ * @tc.desc: test all cmds in SetValidAbility
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, SetValidAbility003, TestSize.Level1)
+{
+    SLOGI("SetValidAbility003 begin!");
+    std::vector<int32_t> validAbilityList;
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SEEK);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_REWIND);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE);
+    validAbilityList.push_back(AVCastControlCommand::CAST_CONTROL_CMD_SET_VOLUME);
+    validAbilityList.push_back(INVAILD_STATE_CODE);
+    auto ret = hwCastStreamPlayer->SetValidAbility(validAbilityList);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("SetValidAbility003 end!");
 }
 
 /**
