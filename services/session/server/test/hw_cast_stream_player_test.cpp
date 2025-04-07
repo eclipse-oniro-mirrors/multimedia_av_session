@@ -761,6 +761,24 @@ HWTEST_F(HwCastStreamPlayerTest, OnStateChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnStateChanged002
+ * @tc.desc: push listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnStateChanged002, TestSize.Level1)
+{
+    SLOGI("OnStateChanged002 begin!");
+    auto state = static_cast<OHOS::CastEngine::PlayerStates>(1000);
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    hwCastStreamPlayer->OnStateChanged(state, true);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnStateChanged002 end!");
+}
+
+/**
  * @tc.name: OnPositionChanged001
  * @tc.desc: OnPositionChanged invalid
  * @tc.type: FUNC
@@ -793,6 +811,23 @@ HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnPositionChanged003
+ * @tc.desc: push listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged003, TestSize.Level1)
+{
+    SLOGI("OnPositionChanged003 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    hwCastStreamPlayer->OnPositionChanged(1, 1, 1);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnPositionChanged003 end!");
+}
+
+/**
  * @tc.name: OnMediaItemChanged001
  * @tc.desc: OnMediaItemChanged
  * @tc.type: FUNC
@@ -810,6 +845,24 @@ HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnMediaItemChanged002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged002, TestSize.Level1)
+{
+    SLOGI("OnMediaItemChanged002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    CastEngine::MediaInfo mediaInfo;
+    hwCastStreamPlayer->OnMediaItemChanged(mediaInfo);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnMediaItemChanged002 end!");
+}
+
+/**
  * @tc.name: OnNextRequest001
  * @tc.desc: OnNextRequest
  * @tc.type: FUNC
@@ -823,6 +876,23 @@ HWTEST_F(HwCastStreamPlayerTest, OnNextRequest001, TestSize.Level1)
     hwCastStreamPlayer->OnNextRequest();
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
     SLOGI("OnNextRequest001 end!");
+}
+
+/**
+ * @tc.name: OnNextRequest002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnNextRequest002, TestSize.Level1)
+{
+    SLOGI("OnNextRequest002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    hwCastStreamPlayer->OnNextRequest();
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnNextRequest002 end!");
 }
 
 /**
@@ -858,6 +928,23 @@ HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnVolumeChanged002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged002, TestSize.Level1)
+{
+    SLOGI("OnVolumeChanged002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    hwCastStreamPlayer->OnVolumeChanged(5, 15);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnVolumeChanged002 end!");
+}
+
+/**
  * @tc.name: OnLoopModeChanged001
  * @tc.desc: OnLoopModeChanged
  * @tc.type: FUNC
@@ -871,6 +958,24 @@ HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged001, TestSize.Level1)
     hwCastStreamPlayer->OnLoopModeChanged(CastEngine::LoopMode::LOOP_MODE_SINGLE);
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
     SLOGI("OnLoopModeChanged001 end!");
+}
+
+/**
+ * @tc.name: OnLoopModeChanged002
+ * @tc.desc: send error code
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged002, TestSize.Level1)
+{
+    SLOGI("OnLoopModeChanged002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    auto loopMode = static_cast<OHOS::CastEngine::LoopMode>(1000);
+    hwCastStreamPlayer->OnLoopModeChanged(loopMode);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnLoopModeChanged002 end!");
 }
 
 /**
@@ -890,6 +995,24 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnPlaySpeedChanged002
+ * @tc.desc: send error code
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged002, TestSize.Level1)
+{
+    SLOGI("OnPlaySpeedChanged002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    auto playSpeed = static_cast<OHOS::CastEngine::PlaybackSpeed>(1000);
+    hwCastStreamPlayer->OnPlaySpeedChanged(playSpeed);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnPlaySpeedChanged002 end!");
+}
+
+/**
  * @tc.name: OnPlayerError001
  * @tc.desc: OnPlayerError
  * @tc.type: FUNC
@@ -903,6 +1026,23 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayerError001, TestSize.Level1)
     hwCastStreamPlayer->OnPlayerError(10003, "PLAYER_ERROR");
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
     SLOGI("OnPlayerError001 end!");
+}
+
+/**
+ * @tc.name: OnPlayerError002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnPlayerError002, TestSize.Level1)
+{
+    SLOGI("OnPlayerError002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    hwCastStreamPlayer->OnPlayerError(10003, "PLAYER_ERROR");
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnPlayerError002 end!");
 }
 
 /**
@@ -923,6 +1063,24 @@ HWTEST_F(HwCastStreamPlayerTest, OnSeekDone001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnSeekDone002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnSeekDone002, TestSize.Level1)
+{
+    SLOGI("OnSeekDone002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    int32_t seekNumber = 0;
+    hwCastStreamPlayer->OnSeekDone(seekNumber);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnSeekDone002 end!");
+}
+
+/**
  * @tc.name: OnVideoSizeChanged001
  * @tc.desc: OnVideoSizeChanged
  * @tc.type: FUNC
@@ -939,6 +1097,23 @@ HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnVideoSizeChanged002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged002, TestSize.Level1)
+{
+    SLOGI("OnVideoSizeChanged002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    hwCastStreamPlayer->OnVideoSizeChanged(0, 0);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnVideoSizeChanged002 end!");
+}
+
+/**
  * @tc.name: OnEndOfStream001
  * @tc.desc: OnEndOfStream
  * @tc.type: FUNC
@@ -952,6 +1127,23 @@ HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream001, TestSize.Level1)
     hwCastStreamPlayer->OnEndOfStream(0);
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
     SLOGI("OnEndOfStream001 end!");
+}
+
+/**
+ * @tc.name: OnEndOfStream002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream002, TestSize.Level1)
+{
+    SLOGI("OnEndOfStream002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    hwCastStreamPlayer->OnEndOfStream(0);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnEndOfStream002 end!");
 }
 
 /**
@@ -972,6 +1164,24 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnPlayRequest002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest002, TestSize.Level1)
+{
+    SLOGI("OnPlayRequest002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    CastEngine::MediaInfo mediaInfo;
+    hwCastStreamPlayer->OnPlayRequest(mediaInfo);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnPlayRequest002 end!");
+}
+
+/**
  * @tc.name: OnKeyRequest001
  * @tc.desc: OnKeyRequest
  * @tc.type: FUNC
@@ -987,6 +1197,25 @@ HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest001, TestSize.Level1)
     hwCastStreamPlayer->OnKeyRequest(assetId, keyRequestData);
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
     SLOGI("OnKeyRequest001 end!");
+}
+
+/**
+ * @tc.name: OnKeyRequest002
+ * @tc.desc: add listener to streamPlayerListenerList_
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest002, TestSize.Level1)
+{
+    SLOGI("OnKeyRequest002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    std::string assetId = "assetId";
+    std::vector<uint8_t> keyRequestData;
+    hwCastStreamPlayer->OnKeyRequest(assetId, keyRequestData);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnKeyRequest002 end!");
 }
 
 /**
@@ -1021,6 +1250,20 @@ HWTEST_F(HwCastStreamPlayerTest, GetValidAbility001, TestSize.Level1)
     SLOGI("GetValidAbility001 end!");
 }
 
+/**
+ * @tc.name: GetValidAbility002
+ * @tc.desc: streamPlayer_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetValidAbility002, TestSize.Level1)
+{
+    SLOGI("GetValidAbility002 begin!");
+    std::vector<int32_t> validAbilityList;
+    hwCastStreamPlayer->streamPlayer_ = nullptr;
+    ASSERT_EQ(hwCastStreamPlayer->GetValidAbility(validAbilityList), AVSESSION_ERROR);
+    SLOGI("GetValidAbility002 end!");
+}
 
 /**
  * @tc.name: OnAvailableCapabilityChanged001
@@ -1189,5 +1432,117 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged001, TestSize.Level1)
     hwCastStreamPlayer->OnAlbumCoverChanged(pixelMap);
     SLOGI("OnAlbumCoverChanged001 end!");
 }
+
+/**
+ * @tc.name: OnAlbumCoverChanged002
+ * @tc.desc: pixelMap is not nullptr but innerPixelMap is nullptr
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged002, TestSize.Level1)
+{
+    SLOGI("OnAlbumCoverChanged002 begin!");
+    auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
+    hwCastStreamPlayer->OnAlbumCoverChanged(pixelMap);
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap =
+        AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
+    EXPECT_TRUE(innerPixelMap == nullptr);
+    SLOGI("OnAlbumCoverChanged002 end!");
+}
+
+/**
+ * @tc.name: OnAlbumCoverChanged003
+ * @tc.desc: pixelMap is not nullptr but innerPixelMap and nullptr
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged003, TestSize.Level1)
+{
+    SLOGI("OnAlbumCoverChanged003 begin!");
+    auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
+    OHOS::Media::ImageInfo imageInfo = {
+        .size = {2, 2},
+        .pixelFormat = OHOS::Media::PixelFormat::ARGB_8888,
+        .colorSpace = OHOS::Media::ColorSpace::SRGB,
+        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
+        .baseDensity = 0,
+        .encodedFormat = ""
+    };
+    std::vector<std::uint8_t> buffer(4, 1);
+    pixelMap->SetPixelsAddr(buffer.data(), nullptr, 4, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
+    pixelMap->SetImageInfo(imageInfo);
+
+    hwCastStreamPlayer->OnAlbumCoverChanged(pixelMap);
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap =
+        AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
+    EXPECT_TRUE(innerPixelMap != nullptr);
+    SLOGI("OnAlbumCoverChanged003 end!");
+}
+
+/**
+ * @tc.name: OnAlbumCoverChanged004
+ * @tc.desc: pixelMap is not nullptr but innerPixelMap and nullptr
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged004, TestSize.Level1)
+{
+    SLOGI("OnAlbumCoverChanged004 begin!");
+    auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
+    OHOS::Media::ImageInfo imageInfo = {
+        .size = {2, 2},
+        .pixelFormat = OHOS::Media::PixelFormat::ARGB_8888,
+        .colorSpace = OHOS::Media::ColorSpace::SRGB,
+        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
+        .baseDensity = 0,
+        .encodedFormat = ""
+    };
+    std::vector<std::uint8_t> buffer(4, 1);
+    pixelMap->SetPixelsAddr(buffer.data(), nullptr, 4, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
+    pixelMap->SetImageInfo(imageInfo);
+
+    hwCastStreamPlayer->OnAlbumCoverChanged(pixelMap);
+    auto innerPixelMap = AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
+    EXPECT_TRUE(innerPixelMap != nullptr);
+    SLOGI("OnAlbumCoverChanged004 end!");
+}
+
+/**
+ * @tc.name: OnAlbumCoverChanged005
+ * @tc.desc: pixelMap is not nullptr but innerPixelMap and nullptr
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged005, TestSize.Level1)
+{
+    SLOGI("OnAlbumCoverChanged005 begin!");
+    auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
+    OHOS::Media::ImageInfo imageInfo = {
+        .size = {2, 2},
+        .pixelFormat = OHOS::Media::PixelFormat::ARGB_8888,
+        .colorSpace = OHOS::Media::ColorSpace::SRGB,
+        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
+        .baseDensity = 0,
+        .encodedFormat = ""
+    };
+    std::vector<std::uint8_t> buffer(4, 1);
+    pixelMap->SetPixelsAddr(buffer.data(), nullptr, 4, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
+    pixelMap->SetImageInfo(imageInfo);
+
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->RefreshCurrentAVQueueItem(avQueueItem);
+
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+
+    hwCastStreamPlayer->OnAlbumCoverChanged(pixelMap);
+    auto innerPixelMap = AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
+    EXPECT_TRUE(innerPixelMap != nullptr);
+    SLOGI("OnAlbumCoverChanged005 end!");
+}
+
 } // namespace AVSession
 } // namespace OHOS
