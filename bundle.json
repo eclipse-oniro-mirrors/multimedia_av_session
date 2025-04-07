@@ -16,7 +16,8 @@
           "SystemCapability.Multimedia.AVSession.AVCast",
           "SystemCapability.Multimedia.AVSession.Core",
           "SystemCapability.Multimedia.AVSession.ExtendedDisplayCast",
-          "SystemCapability.Multimedia.AVSession.Manager"
+          "SystemCapability.Multimedia.AVSession.Manager",
+          "SystemCapability.Multimedia.AVSession.AVInputCast"
       ],
       "features": [ "av_session_enable_start_stop_on_demand" ],
       "adapted_system_type": [ "standard" ],
@@ -75,7 +76,8 @@
             "//foundation/multimedia/av_session/utils:avsession_utils",
             "//foundation/multimedia/av_session/avpicker:avcastpicker",
             "//foundation/multimedia/av_session/avpicker:avcastpickerparam",
-            "//foundation/multimedia/av_session/avvolumepanel:avvolumepanel"
+            "//foundation/multimedia/av_session/avvolumepanel:avvolumepanel",
+            "//foundation/multimedia/av_session/avinputcastpicker:avinputcastpicker"
           ],
           "service_group": [
             "//foundation/multimedia/av_session/services/session:avsession_item",
