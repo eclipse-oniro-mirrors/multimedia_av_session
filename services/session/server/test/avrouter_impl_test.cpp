@@ -33,6 +33,29 @@ public:
     virtual ~AVRouterImplMock() {}
 };
 
+class AVCastControllerProxyMock : public IAVCastControllerProxy {
+public:
+    void Release() {};
+    int32_t RegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>
+        iAVCastControllerProxyListener) {return 0;}
+    int32_t UnRegisterControllerListener(const std::shared_ptr<IAVCastControllerProxyListener>
+        iAVCastControllerProxyListener) {return 0;}
+    AVQueueItem GetCurrentItem() {return AVQueueItem();}
+    int32_t Start(const AVQueueItem& avQueueItem) {return 0;}
+    int32_t Prepare(const AVQueueItem& avQueueItem) {return 0;}
+    void SendControlCommand(const AVCastControlCommand cmd) {}
+    int32_t GetDuration(int32_t& duration) {return 0;}
+    int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) {return 0;}
+    int32_t SetValidAbility(const std::vector<int32_t>& validAbilityList) {return 0;}
+    int32_t GetValidAbility(std::vector<int32_t> &validAbilityList) {return 0;}
+    int32_t SetDisplaySurface(std::string& surfaceId) {return 0;}
+    int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) {return 0;}
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) {return 0;}
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) {return 0;}
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) {return 0;}
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
+};
+
 class AVRouterImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1270,6 +1293,102 @@ static HWTEST_F(AVRouterImplTest, UnRegisterCallback002, TestSize.Level1)
     EXPECT_TRUE(AVSESSION_SUCCESS == ret);
     SLOGI("UnRegisterCallback002 end");
 }
+/**
+* @tc.name: Release001
+* @tc.desc: call Release when hasSessionAlive_ is true
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, Release001, TestSize.Level1)
+{
+    std::shared_ptr<AVRouterImpl> aVRouterImpl = std::make_shared<AVRouterImplMock>();
+    aVRouterImpl->hasSessionAlive_ = true;
+    auto ret = aVRouterImpl->Release();
+    EXPECT_EQ(ret, false);
+}
 
+/**
+* @tc.name: GetRemoteController007
+* @tc.desc: find controller in providerManagerMap_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, GetRemoteController007, TestSize.Level1)
+{
+    SLOGI("GetRemoteController007 begin");
+    int32_t providerNumber = 1;
+    int32_t castId = 1;
+    g_AVRouterImpl->providerNumber_ = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12345";
+    castHandleInfo.avRouterListener_ = nullptr;
+    castHandleInfo.avCastControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    auto controller = g_AVRouterImpl->GetRemoteController(castHandle);
+    EXPECT_NE(controller, nullptr);
+    SLOGI("GetRemoteController007 end");
+}
+
+/**
+* @tc.name: GetRemoteController008
+* @tc.desc: find controller in providerManagerMap_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, GetRemoteController008, TestSize.Level1)
+{
+    SLOGI("GetRemoteController008 begin");
+    int32_t providerNumber = 1;
+    int32_t castId = 1;
+    g_AVRouterImpl->providerNumber_ = 1;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.sessionId_ = "12345";
+    castHandleInfo.avRouterListener_ = nullptr;
+    g_AVRouterImpl->castHandleToInfoMap_.clear();
+
+    auto controller = g_AVRouterImpl->GetRemoteController(castHandle);
+    EXPECT_EQ(controller, nullptr);
+    SLOGI("GetRemoteController008 end");
+}
+
+/**
+* @tc.name: DisconnectOtherSession006
+* @tc.desc: listener is nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, DisconnectOtherSession006, TestSize.Level1)
+{
+    SLOGI("DisconnectOtherSession006 begin");
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = 1;
+
+    std::string sessionId = "12345";
+    std::shared_ptr<IAVRouterListener> listener = std::make_shared<AVRouterListenerMock>();
+    ASSERT_TRUE(listener != nullptr);
+    g_AVRouterImpl->mirrorSessionMap_.insert({sessionId, listener});
+    g_AVRouterImpl->mirrorSessionMap_.insert({"other_id", listener});
+
+    g_AVRouterImpl->DisconnectOtherSession(sessionId, deviceInfo);
+    EXPECT_TRUE(listener != nullptr);
+    SLOGI("DisconnectOtherSession006 end");
+}
 } //AVSession
 } //OHOS

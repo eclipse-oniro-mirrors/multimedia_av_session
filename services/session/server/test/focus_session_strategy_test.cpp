@@ -232,3 +232,134 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestS
     EXPECT_EQ(ret, true);
     SLOGD("IsFocusSession002 end!");
 }
+
+/**
+* @tc.name: HandleAudioRenderStateChangeEvent006
+* @tc.desc: Test HandleAudioRenderStateChangeEvent
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent006, testing::ext::TestSize.Level1)
+{
+    SLOGD("HandleAudioRenderStateChangeEvent006 begin!");
+    LOG_SetCallback(MyLogCallback);
+    FocusSessionStrategy focusSessionStrategy;
+    std::shared_ptr<AudioRendererChangeInfo> info1 = std::make_shared<AudioRendererChangeInfo>();
+    info1->clientUID = 1;
+    info1->sessionId = 2;
+    info1->rendererState = RendererState::RENDERER_RELEASED;
+
+    std::shared_ptr<AudioRendererChangeInfo> info2 = std::make_shared<AudioRendererChangeInfo>();
+    info2->clientUID = 3;
+    info2->sessionId = 4;
+    info2->rendererState = RendererState::RENDERER_RUNNING;
+    
+    AudioRendererChangeInfos infos;
+    infos.push_back(std::move(info1));
+    infos.push_back(std::move(info2));
+
+    focusSessionStrategy.currentStates_.insert({1, 1});
+
+    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
+    focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
+    focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+    SLOGD("HandleAudioRenderStateChangeEvent006 end!");
+}
+
+/**
+* @tc.name: UpdateFocusSession001
+* @tc.desc: Test UpdateFocusSession
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, UpdateFocusSession001, testing::ext::TestSize.Level1)
+{
+    SLOGD("UpdateFocusSession001 begin!");
+    LOG_SetCallback(MyLogCallback);
+    FocusSessionStrategy focusSessionStrategy;
+    auto func = [](const OHOS::AVSession::FocusSessionStrategy::FocusSessionChangeInfo&) {
+        return false;
+    };
+    focusSessionStrategy.RegisterFocusSessionSelector(func);
+    focusSessionStrategy.UpdateFocusSession(1);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+    SLOGD("UpdateFocusSession001 end!");
+}
+
+/**
+* @tc.name: IsFocusSession003
+* @tc.desc: Test IsFocusSession
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, IsFocusSession003, testing::ext::TestSize.Level1)
+{
+    SLOGD("IsFocusSession003 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.lastStates_.insert({1, 2});
+    bool ret = focusSessionStrategy.IsFocusSession(1);
+    EXPECT_EQ(ret, false);
+    SLOGD("IsFocusSession003 end!");
+}
+
+/**
+* @tc.name: CheckFocusSessionStop001
+* @tc.desc: Test CheckFocusSessionStop
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, CheckFocusSessionStop001, testing::ext::TestSize.Level1)
+{
+    SLOGD("CheckFocusSessionStop001 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.lastStates_.insert({1, 2});
+    bool ret = focusSessionStrategy.CheckFocusSessionStop(1);
+    EXPECT_EQ(ret, true);
+    SLOGD("CheckFocusSessionStop001 end!");
+}
+
+/**
+* @tc.name: DelayStopFocusSession001
+* @tc.desc: Test DelayStopFocusSession
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession001, testing::ext::TestSize.Level1)
+{
+    SLOGD("DelayStopFocusSession001 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.lastStates_.insert({1, 1});
+    focusSessionStrategy.DelayStopFocusSession(1);
+    sleep(6);
+    SLOGD("DelayStopFocusSession001 end!");
+}
+
+/**
+* @tc.name: DelayStopFocusSession002
+* @tc.desc: Test DelayStopFocusSession
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession002, testing::ext::TestSize.Level1)
+{
+    SLOGD("DelayStopFocusSession002 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
+    focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
+    focusSessionStrategy.lastStates_.insert({1, 2});
+    focusSessionStrategy.DelayStopFocusSession(1);
+    sleep(6);
+    SLOGD("DelayStopFocusSession002 end!");
+}
+
+/**
+* @tc.name: DelayStopFocusSession003
+* @tc.desc: Test DelayStopFocusSession
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession003, testing::ext::TestSize.Level1)
+{
+    SLOGD("DelayStopFocusSession003 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
+    focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
+    focusSessionStrategy.lastStates_.insert({1, 1});
+    focusSessionStrategy.DelayStopFocusSession(1);
+    sleep(6);
+    SLOGD("DelayStopFocusSession003 end!");
+}

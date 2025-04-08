@@ -66,6 +66,33 @@ void AVControllerItemTest::SetUp()
 void AVControllerItemTest::TearDown()
 {}
 
+class IAVControllerCallbackTest : public IAVControllerCallback {
+    void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override {};
+    void OnAVCallStateChange(const AVCallState& avCallState) override {};
+    void OnSessionDestroy() override {};
+    void OnPlaybackStateChange(const AVPlaybackState& state) override {};
+    void OnMetaDataChange(const AVMetaData& data) override {};
+    void OnActiveStateChange(bool isActive) override {};
+    void OnValidCommandChange(const std::vector<int32_t>& cmds) override {};
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override {};
+    void OnSessionEventChange(const std::string& event, const OHOS::AAFwk::WantParams& args) override {};
+    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override {};
+    void OnQueueTitleChange(const std::string& title) override {};
+    void OnExtrasChange(const OHOS::AAFwk::WantParams& extras) override {};
+    OHOS::sptr<IRemoteObject> AsObject() override
+    {
+        OHOS::AppExecFwk::ElementName elementName;
+        elementName.SetBundleName(g_testAnotherBundleName);
+        elementName.SetAbilityName(g_testAnotherAbilityName);
+        OHOS::sptr<AVSessionItem> avsessionHere_ = g_AVSessionService->CreateSessionInner(
+            g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+        std::string sessionId = avsessionHere_->GetSessionId();
+        OHOS::sptr<IRemoteObject> object = nullptr;
+        g_AVSessionService->CreateControllerInner(sessionId, object);
+        return object;
+    }
+};
+
 /**
 * @tc.name: GetAVMetaData001
 * @tc.desc: Test GetAVMetaData with no media image
@@ -142,7 +169,7 @@ HWTEST_F(AVControllerItemTest, SendCommonCommand001, TestSize.Level1)
 
 /**
 * @tc.name: SendCommonCommand002
-* @tc.desc: Test GetAVMetaData with with not null migrateProxyCallback_
+* @tc.desc: Test SendCommonCommand with with not null migrateProxyCallback_
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
@@ -161,7 +188,7 @@ HWTEST_F(AVControllerItemTest, SendCommonCommand002, TestSize.Level1)
 
 /**
 * @tc.name: Destroy001
-* @tc.desc: Test GetAVMetaData with with sessionId_ is DEFAULT
+* @tc.desc: Test Destroy with with sessionId_ is DEFAULT
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
@@ -172,4 +199,56 @@ HWTEST_F(AVControllerItemTest, Destroy001, TestSize.Level1)
     controller->sessionId_ = "DEFAULT";
     auto ret = controller->Destroy();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: HandleSessionDestroy001
+* @tc.desc: Test HandleSessionDestroy with with callback_ is not nullptr
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+HWTEST_F(AVControllerItemTest, HandleSessionDestroy001, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    OHOS::sptr<IAVControllerCallback> callback = new IAVControllerCallbackTest();
+    ASSERT_TRUE(callback != nullptr);
+    controller->callback_ = callback;
+    controller->HandleSessionDestroy();
+    EXPECT_EQ(controller->session_, nullptr);
+}
+
+/**
+* @tc.name: HandleAVCallStateChange001
+* @tc.desc: Test HandleAVCallStateChange with with callback_ is not nullptr
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+HWTEST_F(AVControllerItemTest, HandleAVCallStateChange001, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    OHOS::sptr<IAVControllerCallback> callback = new IAVControllerCallbackTest();
+    ASSERT_TRUE(callback != nullptr);
+    controller->callback_ = callback;
+    AVCallState callState;
+    controller->HandleAVCallStateChange(callState);
+    EXPECT_NE(controller->session_, nullptr);
+}
+
+/**
+* @tc.name: HandleActiveStateChange001
+* @tc.desc: Test HandleActiveStateChange with with callback_ is not nullptr
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+HWTEST_F(AVControllerItemTest, HandleActiveStateChange001, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    OHOS::sptr<IAVControllerCallback> callback = new IAVControllerCallbackTest();
+    ASSERT_TRUE(callback != nullptr);
+    controller->callback_ = callback;
+    controller->HandleActiveStateChange(false);
+    EXPECT_NE(controller->session_, nullptr);
 }
