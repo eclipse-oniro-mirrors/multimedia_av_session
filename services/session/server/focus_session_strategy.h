@@ -48,6 +48,7 @@ private:
     bool CheckFocusSessionStop(const int32_t uid);
     void UpdateFocusSession(const int32_t uid);
     void DelayStopFocusSession(const int32_t uid);
+    void ProcAudioRenderChange(const AudioRendererChangeInfos& infos);
 
     FocusSessionChangeCallback callback_;
     FocusSessionSelector selector_;
@@ -58,6 +59,12 @@ private:
     const int32_t cancelTimeout = 5000;
     const int32_t runningState = 2;
     const int32_t stopState = 0;
+    const int32_t ancoUid = 1041;
+    const std::vector<AudioStandard::StreamUsage> ALLOWED_ANCO_STREAM_USAGE {
+        AudioStandard::STREAM_USAGE_MUSIC,
+        AudioStandard::STREAM_USAGE_MOVIE,
+        AudioStandard::STREAM_USAGE_VOICE_COMMUNICATION
+    };
 };
 }
 #endif // OHOS_FOCUS_SESSION_STRATEGY_H
