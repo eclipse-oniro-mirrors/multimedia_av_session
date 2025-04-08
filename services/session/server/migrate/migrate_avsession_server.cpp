@@ -81,17 +81,14 @@ void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
 
 void MigrateAVSessionServer::RegisterAudioCallbackAndTrigger()
 {
-    volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
     AudioAdapter::GetInstance().RegisterVolumeKeyEventCallback(volumeKeyEventCallbackFunc_);
-    AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
+    volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
 
-    availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
-    availableDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetAvailableDevices());
     AudioAdapter::GetInstance().SetAvailableDeviceChangeCallback(availableDeviceChangeCallbackFunc_);
+    availableDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetAvailableDevices());
 
-    preferredDeviceChangeCallbackFunc_ = GetPreferredDeviceChangeCallbackFunc();
-    preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
     AudioAdapter::GetInstance().SetPreferredOutputDeviceChangeCallback(preferredDeviceChangeCallbackFunc_);
+    preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
 }
 
 void MigrateAVSessionServer::UnregisterAudioCallback()

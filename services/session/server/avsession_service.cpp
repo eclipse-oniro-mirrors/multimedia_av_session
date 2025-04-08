@@ -2781,7 +2781,6 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
         }
     }
 
-    SLOGI("isAllSessionCast_ %{public}d, outputDeviceId_ is %{public}s", isAllSessionCast_, outputDeviceId_.c_str());
     return AVSESSION_SUCCESS;
 }
 

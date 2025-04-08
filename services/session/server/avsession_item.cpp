@@ -635,7 +635,7 @@ void AVSessionItem::InitAVCastControllerProxy()
     if (castControllerProxy_ == nullptr) {
         SLOGI("CastControllerProxy is null, start get new proxy");
         {
-            std::lock_guard lockGuard(castHandleLock_);
+            std::lock_guard lockGuard(castLock_);
             castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
         }
     }
@@ -941,7 +941,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
         std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
         mirrorToStreamFlag_ = true;
     }
-    std::lock_guard lockGuard(castHandleLock_);
+    std::lock_guard lockGuard(castLock_);
     castServiceNameStatePair_ = serviceNameStatePair;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -1189,7 +1189,7 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
 
 int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
-    std::lock_guard lockGuard(castHandleLock_);
+    std::lock_guard lockGuard(castLock_);
 
     if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && castHandle_ <= 0 &&
         descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
@@ -1242,7 +1242,7 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("Add device process");
-    std::lock_guard lockGuard(castHandleLock_);
+    std::lock_guard lockGuard(castLock_);
     AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_,
         GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
     int32_t castId = static_cast<int32_t>(castHandle_);
@@ -1454,7 +1454,7 @@ void AVSessionItem::ListenCollaborationApplyResult()
 
 int32_t AVSessionItem::StopCast(bool continuePlay)
 {
-    std::lock_guard lockGuard(castHandleLock_);
+    std::lock_guard lockGuard(castLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
@@ -2383,7 +2383,6 @@ bool AVSessionItem::IsCasting()
 void AVSessionItem::GetCurrentCastItem(AVQueueItem& currentItem)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::lock_guard lockGuard(castHandleLock_);
     CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
     currentItem = castControllerProxy_->GetCurrentItem();
 #endif
@@ -2394,7 +2393,6 @@ AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
 {
     AVPlaybackState playbackState;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::lock_guard lockGuard(castHandleLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, playbackState, "cast controller proxy is nullptr");
     auto ret = castControllerProxy_->GetCastAVPlaybackState(playbackState);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, playbackState, "getstate error");
@@ -2405,7 +2403,6 @@ AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
 void AVSessionItem::SendControlCommandToCast(AVCastControlCommand cmd)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::lock_guard lockGuard(castHandleLock_);
     CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
     castControllerProxy_->SendControlCommand(cmd);
 #endif
