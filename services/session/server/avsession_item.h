@@ -145,6 +145,8 @@ public:
 
     AAFwk::WantParams GetExtras();
 
+    void KeyEventExtras(AAFwk::IArray* list);
+
     std::vector<int32_t> GetSupportCommand();
 
     AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
@@ -184,6 +186,8 @@ public:
     void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
 
     void SetServiceCallbackForCallStart(const std::function<void(AVSessionItem&)>& callback);
+
+    void SetServiceCallbackForKeyEvent(const std::function<void(std::string)>& callback);
 
     void SetOutputDevice(const OutputDeviceInfo& info);
 
@@ -374,6 +378,8 @@ private:
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
+    std::function<void(std::string)> serviceCallbackForKeyEvent_;
+
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
 
