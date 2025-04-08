@@ -394,8 +394,12 @@ private:
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
 
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurKeyEventSessionList(int32_t userId = 0);
+
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
+
+    void AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
 
@@ -432,6 +436,7 @@ private:
     std::recursive_mutex sortFileReadWriteLock_;
     std::recursive_mutex avQueueFileReadWriteLock_;
     std::recursive_mutex fileCheckLock_;
+    std::recursive_mutex keyEventListLock_;
 
     std::recursive_mutex migrateListenersLock_;
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
@@ -492,7 +497,7 @@ private:
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
     const int32_t saType = 1;
-    const int32_t MAX_NOTIFICATION_NUM = 3;
+    const uint32_t MAX_NOTIFICATION_NUM = 3;
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
 };
 } // namespace OHOS::AVSession

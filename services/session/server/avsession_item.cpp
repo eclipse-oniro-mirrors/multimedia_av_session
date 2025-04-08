@@ -34,6 +34,7 @@
 #include "avsession_event_handler.h"
 #include "bundle_status_adapter.h"
 #include "array_wrapper.h"
+#include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "want_agent_helper.h"
 
@@ -531,6 +532,14 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
         }
     }
 #endif
+
+    if (extras.HasParam("support-keyevent")) {
+        auto value = extras.GetParam("support-keyevent");
+        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        if (list != nullptr && AAFwk::Array::IsBooleanArray(list)) {
+            KeyEventExtras(list);
+        }
+    }
 
     {
         std::lock_guard controllerLockGuard(controllersLock_);
@@ -1616,6 +1625,21 @@ AAFwk::WantParams AVSessionItem::GetExtras()
     return extras_;
 }
 
+void AVSessionItem::KeyEventExtras(AAFwk::IArray* list)
+{
+    auto func = [this](AAFwk::IInterface* object) {
+        if (object != nullptr) {
+            AAFwk::IBoolean* booleanValue = AAFwk::IBoolean::Query(object);
+            if (booleanValue != nullptr && AAFwk::Boolean::Unbox(booleanValue) &&
+                serviceCallbackForKeyEvent_) {
+                SLOGI("AVSessionItem send addkeyeventsession event to service");
+                serviceCallbackForKeyEvent_(GetSessionId());
+            }
+        }
+    };
+    AAFwk::Array::ForEach(list, func);
+}
+
 void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
@@ -1922,6 +1946,12 @@ void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
     serviceCallbackForUpdateSession_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForKeyEvent(const std::function<void(std::string)>& callback)
+{
+    SLOGI("SetServiceCallbackForKeyEvent in");
+    serviceCallbackForKeyEvent_ = callback;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

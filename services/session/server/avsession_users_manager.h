@@ -39,6 +39,8 @@ public:
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront();
 
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForKeyEvent(int32_t userId);
+
     int32_t GetCurrentUserId();
 
     std::string GetDirForCurrentUser(int32_t userId = 0);
@@ -84,6 +86,7 @@ private:
     std::map<int32_t, std::shared_ptr<SessionStack>> sessionStackMapByUserId_;
     std::shared_ptr<SessionStack> sessionStackForAll_;
     std::map<int32_t, std::shared_ptr<std::list<sptr<AVSessionItem>>>> frontSessionListMapByUserId_;
+    std::map<int32_t, std::shared_ptr<std::list<sptr<AVSessionItem>>>> keyEventListMapByUserId_;
     std::map<int32_t, std::map<pid_t, sptr<ISessionListener>>> sessionListenersMapByUserId_;
     std::map<pid_t, sptr<ISessionListener>> sessionListenersMap_;
     std::map<pid_t, sptr<AVSessionItem>> topSessionsMapByUserId_;
