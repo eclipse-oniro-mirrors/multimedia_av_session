@@ -548,6 +548,14 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
         }
     }
 
+    if (extras.HasParam("support-keyevent")) {
+        auto value = extras.GetParam("support-keyevent");
+        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        if (list != nullptr && AAFwk::Array::IsBooleanArray(list)) {
+            KeyEventExtras(list);
+        }
+    }
+
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
@@ -1717,6 +1725,21 @@ void AVSessionItem::NotificationExtras(AAFwk::IArray* list)
     }
 }
 
+void AVSessionItem::KeyEventExtras(AAFwk::IArray* list)
+{
+    auto func = [this](AAFwk::IInterface* object) {
+        if (object != nullptr) {
+            AAFwk::IBoolean* booleanValue = AAFwk::IBoolean::Query(object);
+            if (booleanValue != nullptr && AAFwk::Boolean::Unbox(booleanValue) &&
+                serviceCallbackForKeyEvent_) {
+                SLOGI("AVSessionItem send addkeyeventsession event to service");
+                serviceCallbackForKeyEvent_(GetSessionId());
+            }
+        }
+    };
+    AAFwk::Array::ForEach(list, func);
+}
+
 bool AVSessionItem::IsNotShowNotification()
 {
     return isNotShowNotification_;
@@ -2056,6 +2079,12 @@ void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
     serviceCallbackForUpdateSession_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForKeyEvent(const std::function<void(std::string)>& callback)
+{
+    SLOGI("SetServiceCallbackForKeyEvent in");
+    serviceCallbackForKeyEvent_ = callback;
 }
 
 void AVSessionItem::SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback)

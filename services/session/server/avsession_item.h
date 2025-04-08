@@ -148,6 +148,8 @@ public:
 
     AAFwk::WantParams GetExtras();
 
+    void KeyEventExtras(AAFwk::IArray* list);
+
     void NotificationExtras(AAFwk::IArray* list);
 
     bool IsNotShowNotification();
@@ -191,6 +193,8 @@ public:
     void SetServiceCallbackForRelease(const std::function<void(AVSessionItem&)>& callback);
 
     void SetServiceCallbackForCallStart(const std::function<void(AVSessionItem&)>& callback);
+
+    void SetServiceCallbackForKeyEvent(const std::function<void(std::string)>& callback);
 
     void SetOutputDevice(const OutputDeviceInfo& info);
 
@@ -398,6 +402,7 @@ private:
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
+    std::function<void(std::string)> serviceCallbackForKeyEvent_;
     std::function<void(std::string, bool)> serviceCallbackForNtf_;
     std::function<void(std::string)> updateExtrasCallback_;
     volatile bool isFirstAddToFront_ = true;

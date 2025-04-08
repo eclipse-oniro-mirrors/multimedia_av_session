@@ -506,6 +506,8 @@ private:
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront(int32_t userId = 0);
 
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurKeyEventSessionList(int32_t userId = 0);
+
     int32_t GetLocalDeviceType();
 
     void DoTargetDevListenWithDM();
@@ -602,6 +604,8 @@ private:
     std::recursive_mutex castAudioSessionMapLock_;
 
     std::recursive_mutex historicalRecordListenersLock_;
+
+    std::recursive_mutex keyEventListLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::map<std::string, std::string> castServiceNameMapState_;
