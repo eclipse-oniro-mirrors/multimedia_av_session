@@ -354,7 +354,9 @@ void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
         }
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this]() {
-                if (IsTopSessionPlaying() || hasRemoveEvent_.load()) {
+                if (IsTopSessionPlaying() || hasRemoveEvent_.load() || isMediaCardOpen_.load()) {
+                    SLOGI("HandleMediaCardState hasRemoveEvent_:%{public}d isMediaCardOpen_:%{public}d",
+                        hasRemoveEvent_.load(), isMediaCardOpen_.load());
                     return;
                 }
                 {
@@ -1160,12 +1162,6 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "castSession not exist");
-        if ((topSession_ == nullptr || (topSession_ != nullptr && topSession_->IsCasting())) && isPlaying) {
-            SLOGI("MediaCapsule fresh castSession %{public}s to top, isMediaChange %{public}d",
-                session->GetBundleName().c_str(), isChange);
-            UpdateTopSession(session);
-            NotifySystemUI(nullptr, true, true, isChange);
-        }
         if (topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
             SLOGI("MediaCapsule topSession is castSession %{public}s isPlaying %{public}d isMediaChange %{public}d",
                 topSession_->GetBundleName().c_str(), isPlaying, isChange);
@@ -1174,6 +1170,14 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
                     isMediaCardOpen_.load(), hasRemoveEvent_.load());
                 return;
             }
+            NotifySystemUI(nullptr, true, isPlaying, isChange);
+            return;
+        }
+        bool castChange = topSession_ && topSession_->IsCasting() && (topSession_.GetRefPtr() != session.GetRefPtr());
+        if ((topSession_ == nullptr || castChange) && isPlaying) {
+            SLOGI("MediaCapsule fresh castSession %{public}s to top, isMediaChange %{public}d",
+                session->GetBundleName().c_str(), isChange);
+            UpdateTopSession(session);
             NotifySystemUI(nullptr, true, isPlaying, isChange);
         }
     });
@@ -1225,8 +1229,6 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
         UpdateFrontSession(session, isAdd);
     });
-    AddCapsuleServiceCallback(sessionItem);
-    AddKeyEventServiceCallback(sessionItem);
     sessionItem->SetServiceCallbackForUpdateExtras([this](std::string sessionId) {
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
@@ -1236,6 +1238,8 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
             NotifySystemUI(&selectSession, true, IsCapsuleNeeded(), false);
         }
     });
+    AddCapsuleServiceCallback(sessionItem);
+    AddKeyEventServiceCallback(sessionItem);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
@@ -1391,6 +1395,7 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
         "SESSION_ID",  sessionId,
         "SESSION_TAG", sessionTag,
         "SESSION_TYPE", sessionType,
+        "API_PARAM", apiParamString,
         "ERROR_CODE", res,
         "ERROR_MSG", errMsg);
 }
@@ -2915,7 +2920,7 @@ void AVSessionService::ClearControllerForClientDiedNoLock(pid_t pid)
     SLOGI("remove controllers size=%{public}d", static_cast<int>(controllers.size()));
     if (!controllers.empty()) {
         for (const auto& controller : controllers) {
-            controller->Destroy();
+            controller->DestroyWithoutReply();
         }
     }
     it = controllers_.find(pid);
@@ -3154,13 +3159,59 @@ void AVSessionService::PublishEvent(int32_t mediaPlayState)
     SLOGI("NewPublishCommonEvent:%{public}d return %{public}d", mediaPlayState, ret);
 }
 
+std::string GetDefaultImageStr()
+{
+    std::string imgStr = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQuMDAwMDAwIiBoZWlnaHQ9IjI0LjAwMDAwMCIgd"
+    "mlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5r"
+    "PSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KCTxkZXNjPgoJCQlDcmVhdGVkIHdpdGggUGl4c28uCgk8L2Rlc2M+Cgk8ZGV"
+    "mcy8+Cgk8ZyBvcGFjaXR5PSIwLjMwMDAwMCI+CgkJPGNpcmNsZSBpZD0i6JKZ54mIIiByPSIxMi4wMDAwMDAiIHRyYW5zZm9ybT0ibW"
+    "F0cml4KDAgMSAtMSAwIDEyIDEyKSIgZmlsbD0iI0ZGRkZGRiIgZmlsbC1vcGFjaXR5PSIxLjAwMDAwMCIvPgoJCTxjaXJjbGUgaWQ9I"
+    "uiSmeeJiCIgcj0iMTEuNTAwMDAwIiB0cmFuc2Zvcm09Im1hdHJpeCgwIDEgLTEgMCAxMiAxMikiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ry"
+    "b2tlLW9wYWNpdHk9IjAiIHN0cm9rZS13aWR0aD0iMS4wMDAwMDAiLz4KCTwvZz4KCTxtYXNrIGlkPSJtYXNrXzE1M183OTU5IiBmaWx"
+    "sPSJ3aGl0ZSI+CgkJPHBhdGggaWQ9IuW9oueKtue7k+WQiCIgZD0iTTE3LjY0MzYgNi42NTM5OUMxNy42NTM1IDYuNzE2OCAxNy42Nj"
+    "AxIDYuNzgwMDkgMTcuNjYzNCA2Ljg0MzUxTDE3LjY2NTkgNi45Mzg4NEwxNy42NjY2IDE0LjE2NjZDMTcuNjY2NiAxNC4xNzk3IDE3L"
+    "jY2NjIgMTQuMTkyNiAxNy42NjU1IDE0LjIwNTVDMTcuNjYxNiAxNC44NjgzIDE3LjY1NDYgMTUuMTgzNyAxNy41MTE0IDE1LjcxNDlD"
+    "MTcuMzY1OCAxNi4yNTQzIDE3LjA4MDkgMTYuNzYyMSAxNi41MTMyIDE3LjA4OTRDMTUuNDggMTcuNjg0OCAxNC4yMjggMTcuNDUwOSA"
+    "xMy43MTY3IDE2LjU2NjlDMTMuMjA1NCAxNS42ODI5IDEzLjYyODUgMTQuNDgzNSAxNC42NjE2IDEzLjg4ODFDMTUuMDg2MSAxMy42ND"
+    "M0IDE1LjYyNTcgMTMuNDI3MSAxNS45OTg5IDEzLjA4NTVDMTYuMjIzIDEyLjg4MDQgMTYuMzMyMiAxMi41ODU1IDE2LjMzMjIgMTEuO"
+    "TE4OEMxNi4zMzIyIDExLjkwMDQgMTYuMzMyNSAxMS44ODI0IDE2LjMzMyAxMS44NjUxTDE2LjMzMjcgOC41MDk4OUw5LjY2NjU2IDku"
+    "Njg2MjhMOS42NjY1NiAxNS4xMzEyQzkuNjY3MyAxNS4yNzA4IDkuNjY3MjQgMTUuNDExMyA5LjY2NjU2IDE1LjU1MDNMOS42NjY1NiA"
+    "xNS42NjY3QzkuNjY2NTYgMTUuNjc4MyA5LjY2NjI2IDE1LjY4OTggOS42NjU2NSAxNS43MDE0QzkuNjYxNSAxNi4zMDk2IDkuNjQ5Mz"
+    "UgMTYuNjIwNCA5LjUxMjA4IDE3LjEyOTVDOS4zNjY1OCAxNy42Njg4IDkuMDgxNiAxOC4xNzY3IDguNTEzOTIgMTguNTAzOUM3LjQ4M"
+    "DcxIDE5LjA5OTQgNi4yMjg3IDE4Ljg2NTQgNS43MTc0MSAxNy45ODE0QzUuMjA2MTIgMTcuMDk3NCA1LjYyOTIxIDE1Ljg5OCA2LjY2"
+    "MjM1IDE1LjMwMjZDNy4wODY3OSAxNS4wNTggNy42MjY0IDE0Ljg0MTcgNy45OTk2MyAxNC41QzguMjIzNjkgMTQuMjk0OSA4LjMzMjk"
+    "1IDE0IDguMzMyOTUgMTMuMzMzM0M4LjMzMjk1IDEzLjMyMjcgOC4zMzMwNyAxMy4zMTIyIDguMzMzMjUgMTMuMzAxOUw4LjMzMzI1ID"
+    "cuODMwNzVDOC4zMzMyNSA2Ljk2NzUzIDguOTM0MTQgNi4yMjcwNSA5Ljc2NjYgNi4wNDE1Nkw5Ljg4MTUzIDYuMDE5NzFMMTUuNTQ3N"
+    "SA1LjEyNzk5QzE2LjU0NzcgNC45NzA1MiAxNy40ODYyIDUuNjUzNzUgMTcuNjQzNiA2LjY1Mzk5WiIgY2xpcC1ydWxlPSJldmVub2Rk"
+    "IiBmaWxsPSIiIGZpbGwtb3BhY2l0eT0iMS4wMDAwMDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPgoJPC9tYXNrPgoJPHBhdGggaWQ9IuW"
+    "9oueKtue7k+WQiCIgZD0iTTE3LjY0MzYgNi42NTM5OUMxNy42NTM1IDYuNzE2OCAxNy42NjAxIDYuNzgwMDkgMTcuNjYzNCA2Ljg0Mz"
+    "UxTDE3LjY2NTkgNi45Mzg4NEwxNy42NjY2IDE0LjE2NjZDMTcuNjY2NiAxNC4xNzk3IDE3LjY2NjIgMTQuMTkyNiAxNy42NjU1IDE0L"
+    "jIwNTVDMTcuNjYxNiAxNC44NjgzIDE3LjY1NDYgMTUuMTgzNyAxNy41MTE0IDE1LjcxNDlDMTcuMzY1OCAxNi4yNTQzIDE3LjA4MDkg"
+    "MTYuNzYyMSAxNi41MTMyIDE3LjA4OTRDMTUuNDggMTcuNjg0OCAxNC4yMjggMTcuNDUwOSAxMy43MTY3IDE2LjU2NjlDMTMuMjA1NCA"
+    "xNS42ODI5IDEzLjYyODUgMTQuNDgzNSAxNC42NjE2IDEzLjg4ODFDMTUuMDg2MSAxMy42NDM0IDE1LjYyNTcgMTMuNDI3MSAxNS45OT"
+    "g5IDEzLjA4NTVDMTYuMjIzIDEyLjg4MDQgMTYuMzMyMiAxMi41ODU1IDE2LjMzMjIgMTEuOTE4OEMxNi4zMzIyIDExLjkwMDQgMTYuM"
+    "zMyNSAxMS44ODI0IDE2LjMzMyAxMS44NjUxTDE2LjMzMjcgOC41MDk4OUw5LjY2NjU2IDkuNjg2MjhMOS42NjY1NiAxNS4xMzEyQzku"
+    "NjY3MyAxNS4yNzA4IDkuNjY3MjQgMTUuNDExMyA5LjY2NjU2IDE1LjU1MDNMOS42NjY1NiAxNS42NjY3QzkuNjY2NTYgMTUuNjc4MyA"
+    "5LjY2NjI2IDE1LjY4OTggOS42NjU2NSAxNS43MDE0QzkuNjYxNSAxNi4zMDk2IDkuNjQ5MzUgMTYuNjIwNCA5LjUxMjA4IDE3LjEyOT"
+    "VDOS4zNjY1OCAxNy42Njg4IDkuMDgxNiAxOC4xNzY3IDguNTEzOTIgMTguNTAzOUM3LjQ4MDcxIDE5LjA5OTQgNi4yMjg3IDE4Ljg2N"
+    "TQgNS43MTc0MSAxNy45ODE0QzUuMjA2MTIgMTcuMDk3NCA1LjYyOTIxIDE1Ljg5OCA2LjY2MjM1IDE1LjMwMjZDNy4wODY3OSAxNS4w"
+    "NTggNy42MjY0IDE0Ljg0MTcgNy45OTk2MyAxNC41QzguMjIzNjkgMTQuMjk0OSA4LjMzMjk1IDE0IDguMzMyOTUgMTMuMzMzM0M4LjM"
+    "zMjk1IDEzLjMyMjcgOC4zMzMwNyAxMy4zMTIyIDguMzMzMjUgMTMuMzAxOUw4LjMzMzI1IDcuODMwNzVDOC4zMzMyNSA2Ljk2NzUzID"
+    "guOTM0MTQgNi4yMjcwNSA5Ljc2NjYgNi4wNDE1Nkw5Ljg4MTUzIDYuMDE5NzFMMTUuNTQ3NSA1LjEyNzk5QzE2LjU0NzcgNC45NzA1M"
+    "iAxNy40ODYyIDUuNjUzNzUgMTcuNjQzNiA2LjY1Mzk5WiIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjMDAwMDAwIiBmaWxsLW9w"
+    "YWNpdHk9IjAuNDAwMDAwIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIG1hc2s9InVybCgjbWFza18xNTNfNzk1OSkiLz4KCTxwYXRoIGlkPSL"
+    "lvaLnirbnu5PlkIgiIGQ9IiIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjMDAwMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDAwMDAwIi"
+    "BmaWxsLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==";
+    return imgStr;
+}
+
 std::shared_ptr<Media::PixelMap> ConvertDefaultImage()
 {
     if (g_defaultMediaImage) {
         return g_defaultMediaImage;
     }
 
-    std::string image = "defaultImage";
+    std::string image = GetDefaultImageStr();
     uint32_t errorCode = 0;
     Media::SourceOptions opts;
     auto imageSource = Media::ImageSource::CreateImageSource(reinterpret_cast<const uint8_t*>(image.c_str()),
@@ -3285,9 +3336,8 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         static_cast<int>(historyDescriptor != nullptr), userId);
     if (addCapsule && topSession_) {
         std::shared_ptr<AVSessionPixelMap> iPixelMap = std::make_shared<AVSessionPixelMap>();
-        std::string sessionId = topSession_->GetSessionId();
         std::string fileDir = AVSessionUtils::GetCachePathName(userId);
-        std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
+        std::string fileName = topSession_->GetSessionId() + AVSessionUtils::GetFileSuffix();
         AVSessionUtils::ReadImageFromFile(iPixelMap, fileDir, fileName);
         AVQueueItem item;
         topSession_->GetCurrentCastItem(item);
@@ -3308,8 +3358,6 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
     request.SetWantAgent(wantAgent);
     request.SetLabel(std::to_string(userId));
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removeWantAgent = CreateNftRemoveWant(uid);
-    request.SetRemovalWantAgent(removeWantAgent);
     if (topSession_) {
         if (topSession_->IsNotShowNotification()) {
             std::shared_ptr<AAFwk::WantParams> want = std::make_shared<AAFwk::WantParams>();
@@ -3317,6 +3365,8 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
             request.SetAdditionalData(want);
         }
     }
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removeWantAgent = CreateNftRemoveWant(uid);
+    request.SetRemovalWantAgent(removeWantAgent);
     {
         std::lock_guard lockGuard(notifyLock_);
         g_NotifyRequest = request;
@@ -3428,26 +3478,6 @@ void AVSessionService::NotifyRemoteDistributedSessionControllersChanged(
 void AVSessionService::InitRadarBMS()
 {
     AVSessionRadar::GetInstance().InitBMS();
-}
-
-void AVSessionService::ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid)
-{
-    AVSessionRadarInfo info(func);
-    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
-    AVSessionRadar::GetInstance().StartCastBegin(outputDeviceInfo, info);
-}
-
-void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceInfo& outputDeviceInfo,
-    int32_t uid, int ret)
-{
-    AVSessionRadarInfo info(func);
-    info.bundleName_ = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
-    if (ret == AVSESSION_SUCCESS) {
-        AVSessionRadar::GetInstance().StartCastEnd(outputDeviceInfo, info);
-    } else {
-        info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
-        AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
-    }
 }
 
 std::function<bool(int32_t, int32_t)> AVSessionService::GetAllowedPlaybackCallbackFunc()

@@ -252,8 +252,8 @@ int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_
         CHECK_AND_RETURN_RET_LOG(size, ret, "size=0");
 
         std::vector<AVQueueInfo> result(size);
-        for (auto& avqueueInfo : result) {
-            CHECK_AND_RETURN_RET_LOG(avqueueInfo.Unmarshalling(reply), ERR_UNMARSHALLING, "read avqueueInfo failed");
+        for (auto& avQueueInfo : result) {
+            CHECK_AND_RETURN_RET_LOG(avQueueInfo.Unmarshalling(reply), ERR_UNMARSHALLING, "read avqueueInfo failed");
         }
         avQueueInfos = result;
         return ret;
@@ -295,10 +295,12 @@ int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, co
 int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {
-    SLOGI("create controller in without lock");
+    std::lock_guard lockGuard(createControllerMutex_);
+    SLOGI("create controller in");
     sptr<IRemoteObject> object;
     auto ret = AVSessionServiceProxy::CreateControllerInner(sessionId, object);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");
+    CHECK_AND_RETURN_RET_LOG((ret == AVSESSION_SUCCESS || ret == ERR_CONTROLLER_IS_EXIST),
+        ret, "CreateControllerInner failed");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     auto controllerObject = iface_cast<AVSessionControllerProxy>(object);

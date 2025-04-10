@@ -28,8 +28,17 @@ namespace OHOS::AVSession {
 const uint32_t UNTRUSTED_DEVICE = 0;
 const uint32_t TRUSTED_DEVICE = 1;
 
+HwCastProvider::HwCastProvider()
+{
+    SLOGD("pre construct the HwCastProvider");
+    std::lock_guard lockGuard(mutexLock_);
+    SLOGI("destruct the HwCastProvider");
+}
+
 HwCastProvider::~HwCastProvider()
 {
+    SLOGD("pre destruct the HwCastProvider");
+    std::lock_guard lockGuard(mutexLock_);
     SLOGI("destruct the HwCastProvider");
 }
 
