@@ -92,8 +92,6 @@ public:
     int32_t SetDeviceChangeCallback();
     int32_t UnsetDeviceChangeCallback();
 
-    int32_t RegisterAllowedPlaybackCallback(const std::function<bool(int32_t, int32_t)>& callback);
-
     AudioDeviceDescriptorsWithSptr GetPreferredOutputDeviceForRendererInfo();
     int32_t SetPreferredOutputDeviceChangeCallback(const std::function<void(
         const AudioDeviceDescriptorsWithSptr&)>& callback);
@@ -102,6 +100,8 @@ public:
     int32_t SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc);
     AudioDeviceDescriptorWithSptr FindRenderDeviceForUsage(const AudioDeviceDescriptorsWithSptr& devices,
         const AudioDeviceDescriptorWithSptr& desc);
+
+    int32_t RegisterAllowedPlaybackCallback(const std::function<bool(int32_t, int32_t)>& callback);
 private:
     static std::shared_ptr<AudioAdapter> instance_;
     static std::once_flag onceFlag_;
@@ -114,6 +114,7 @@ private:
         AudioStandard::STREAM_USAGE_AUDIOBOOK
     };
     std::recursive_mutex listenersLock_;
+    bool is2in1_ {false};
 
     int32_t volumeMax_ = 0;
     int32_t volumeMin_ = 0;
@@ -121,8 +122,6 @@ private:
     std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
 
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
-    bool is2in1_ {false};
-
     std::shared_ptr<AudioAllowedPlaybackCallback> playbackCallback_;
 };
 

@@ -55,11 +55,11 @@ void AudioAdapter::Init()
     ret = AudioStandard::AudioRoutingManager::GetInstance()->SetPreferredOutputDeviceChangeCallback(
         rendererInfo, shared_from_this());
     CHECK_AND_PRINT_LOG(ret == 0, "register audio device changed event listener failed!");
+    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
 
     AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
     volumeMax_ = AudioStandard::AudioSystemManager::GetInstance()->GetMaxVolume(streamType);
     volumeMin_ = AudioStandard::AudioSystemManager::GetInstance()->GetMinVolume(streamType);
-    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
 }
 
 void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
@@ -80,8 +80,7 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
         return AVSESSION_ERROR;
     }
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    auto ret =
-        AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "get renderer state failed!");
     auto muteRet = AVSESSION_ERROR;
     for (const auto& info : audioRendererChangeInfo) {
@@ -107,8 +106,7 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
         return AVSESSION_ERROR;
     }
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    auto ret =
-        AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "get renderer state failed!");
     for (const auto& info : audioRendererChangeInfo) {
         if (info->clientUID == uid && info->rendererState == AudioStandard::RENDERER_RUNNING && info->backMute) {
@@ -128,7 +126,7 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage 
         SLOGI("PC no need unmute");
         return AVSESSION_ERROR;
     }
-    SLOGI("unmute uid=%{public}d stream usage %{public}d", uid, usage);
+    SLOGI("usage unmute uid=%{public}d stream usage %{public}d", uid, usage);
     auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
         uid, AudioStandard::StreamSetState::STREAM_UNMUTE, usage);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "unmute uid=%{public}d failed!", uid);
@@ -201,8 +199,7 @@ void AudioAdapter::OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptorsWi
 bool AudioAdapter::GetRendererRunning(int32_t uid)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    auto ret =
-        AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     CHECK_AND_RETURN_RET_LOG(ret == 0, false, "get renderer state failed!");
     for (const auto& info : audioRendererChangeInfo) {
         CHECK_AND_RETURN_RET_LOG(!(info->clientUID == uid && info->rendererState == AudioStandard::RENDERER_RUNNING),

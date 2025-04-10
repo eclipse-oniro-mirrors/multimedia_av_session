@@ -33,10 +33,10 @@
 #include "avsession_radar.h"
 #include "avsession_event_handler.h"
 #include "bundle_status_adapter.h"
-#include "want_agent_helper.h"
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
+#include "want_agent_helper.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -65,7 +65,10 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t user
 {
     SLOGI("constructor session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
+    {
+        std::lock_guard aliveLockGuard(isAliveLock_);
         isAlivePtr_ = std::make_shared<bool>(true);
+    }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     cssListener_ = std::make_shared<CssListener>(this);
 #endif
@@ -78,8 +81,11 @@ AVSessionItem::~AVSessionItem()
     if (IsActive()) {
         Deactivate();
     }
-    if (isAlivePtr_ != nullptr) {
-        *isAlivePtr_ = false;
+    {
+        std::lock_guard aliveLockGuard(isAliveLock_);
+        if (isAlivePtr_ != nullptr) {
+            *isAlivePtr_ = false;
+        }
     }
 }
 
@@ -353,6 +359,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d, isAlive:%{public}d",
         meta.GetTitle().c_str(), static_cast<int>(GetPid()), (isAlivePtr_ == nullptr) ? -1 : *isAlivePtr_);
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_]() {
+        std::lock_guard aliveLockGuard(isAliveLock_);
         CHECK_AND_RETURN_LOG(isAlivePtr != nullptr && *isAlivePtr, "handle metadatachange with session gone, return");
         SLOGI("HandleMetaDataChange in postTask with title %{public}s and size %{public}d",
             meta.GetTitle().c_str(), static_cast<int>(controllers_.size()));
@@ -660,7 +667,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     auto preparecallback = [this]() {
         if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && isFirstCallback_) {
             isFirstCallback_ = false;
-            AVRouter::GetInstance().DisconnetOtherSession(GetSessionId(),
+            AVRouter::GetInstance().DisconnectOtherSession(GetSessionId(),
                 GetDescriptor().outputDeviceInfo_.deviceInfos_[0]);
         }
     };
@@ -1086,7 +1093,7 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionItem::HandleCastValidCommandChange(std::vector<int32_t> &cmds)
+void AVSessionItem::HandleCastValidCommandChange(const std::vector<int32_t> &cmds)
 {
     std::lock_guard lockGuard(castControllersLock_);
     SLOGI("send command change event to controller, controller size: %{public}d, cmds size is: %{public}d,",
@@ -1152,7 +1159,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
     std::lock_guard lockGuard(castHandleLock_);
 
-    if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 &&
+    if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 &&  castHandle_ <= 0 &&
         descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
         castHandle_ = AVRouter::GetInstance().GetMirrorCastHandle();
         InitAVCastControllerProxy();
@@ -1238,11 +1245,13 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
-    std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
-    if (mirrorToStreamFlag_) {
-        mirrorToStreamFlag_ = false;
-        SLOGI("cast not add to collaboration when mirror to stream cast");
-        return;
+    {
+        std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
+        if (mirrorToStreamFlag_) {
+            mirrorToStreamFlag_ = false;
+            SLOGI("cast not add to collaboration when mirror to stream cast");
+            return;
+        }
     }
     if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(

@@ -68,7 +68,7 @@ int32_t AVControllerItem::RegisterAVControllerCallback(const std::shared_ptr<AVC
 int32_t AVControllerItem::UnregisterAVControllerCallback()
 {
     std::lock_guard lockGuard(callbackMutex_);
-    SLOGE("UnregisterAVControllerCallback pid:%{public}d", static_cast<int>(pid_));
+    SLOGI("UnregisterAVControllerCallback pid:%{public}d", static_cast<int>(pid_));
     innerCallback_ = nullptr;
     return AVSESSION_SUCCESS;
 }
@@ -329,6 +329,25 @@ int32_t AVControllerItem::Destroy()
         }
     }
 
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControllerItem::DestroyWithoutReply()
+{
+    SLOGI("do controller DestroyWithoutReply for pid %{public}d", static_cast<int>(pid_));
+    {
+        std::lock_guard callbackLockGuard(callbackMutex_);
+        innerCallback_ = nullptr;
+        callback_ = nullptr;
+    }
+    {
+        std::lock_guard sessionLockGuard(sessionMutex_);
+        if (session_ != nullptr) {
+            session_->HandleControllerRelease(pid_);
+            sessionId_.clear();
+            session_ = nullptr;
+        }
+    }
     return AVSESSION_SUCCESS;
 }
 

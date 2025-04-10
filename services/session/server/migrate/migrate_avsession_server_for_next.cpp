@@ -138,8 +138,9 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
     }
     {
         std::lock_guard lockGuard(cacheJsonLock_);
-        if (metaData == metaDataCache_) {
-            SLOGI("DoMetaDataSyncToRemote with repeat title:%{public}s", data.GetTitle().c_str());
+        if (metaData == metaDataCache_ || metaData.empty()) {
+            SLOGI("DoMetaDataSyncToRemote with repeat title:%{public}s|empty:%{public}d",
+                data.GetTitle().c_str(), metaData.empty());
             return;
         }
     }
@@ -202,9 +203,9 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
     }
     {
         std::lock_guard lockGuard(cacheJsonLock_);
-        if (playbackState == playbackStateCache_) {
-            SLOGI("DoPlaybackStateSyncToRemote with repeat state:%{public}d|isFavor:%{public}d",
-                state.GetState(), state.GetFavorite());
+        if (playbackState == playbackStateCache_ || playbackState.empty()) {
+            SLOGI("DoPlaybackStateSyncToRemote with repeat state:%{public}d|isFavor:%{public}d|empty:%{public}d",
+                state.GetState(), state.GetFavorite(), playbackState.empty());
             return;
         }
     }
@@ -389,8 +390,12 @@ void MigrateAVSessionServer::ProcControlCommandFromNext(Json::Value commandJsonV
             commandJsonValue[COMMAND_ARGS].asString() : "";
     }
 
-    sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
-    CHECK_AND_RETURN_LOG(controller != nullptr, "ProcControlCommandFromNext but get controller null");
+    sptr<AVControllerItem> controller = nullptr;
+    {
+        std::lock_guard lockGuard(migrateControllerLock_);
+        controller = playerIdToControllerMap_[lastSessionId_];
+        CHECK_AND_RETURN_LOG(controller != nullptr, "ProcControlCommandFromNext but get controller null");
+    }
     AVControlCommand command;
     if (AVSESSION_SUCCESS == command.SetCommand(commandCode)) {
         if (commandCode == AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE) {

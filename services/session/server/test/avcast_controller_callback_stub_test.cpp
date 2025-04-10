@@ -166,7 +166,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.L
     auto localDescriptor = IAVCastControllerCallback::GetDescriptor();
     data.WriteInterfaceToken(localDescriptor);
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 /**

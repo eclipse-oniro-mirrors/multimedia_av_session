@@ -218,10 +218,6 @@ public:
     
     void SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback);
 
-    void RegisterAVSessionCallback(std::shared_ptr<AVSessionCallback> callbackOfMigrate);
-
-    void SetSupportCommand(std::vector<int32_t> cmds);
-
     bool IsCasting();
 
     void GetCurrentCastItem(AVQueueItem& item);
@@ -232,7 +228,14 @@ public:
 
     void SetServiceCallbackForUpdateExtras(const std::function<void(std::string)>& callback);
 
+    void RegisterAVSessionCallback(std::shared_ptr<AVSessionCallback> callbackOfMigrate);
+
+    void SetSupportCommand(std::vector<int32_t> cmds);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+        DeviceInfo deviceInfo);
+
     void InitializeCastCommands();
 
     void AddSessionCommandToCast(int32_t cmd);
@@ -241,14 +244,11 @@ public:
 
     int32_t SessionCommandToCastCommand(int32_t cmd);
 
-    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
-        DeviceInfo deviceInfo);
-
     int32_t AddSupportCastCommand(int32_t cmd);
 
     int32_t DeleteSupportCastCommand(int32_t cmd);
 
-    void HandleCastValidCommandChange(std::vector<int32_t> &cmds);
+    void HandleCastValidCommandChange(const std::vector<int32_t> &cmds);
 
     int32_t ReleaseCast(bool continuePlay = false) override;
 
@@ -403,10 +403,11 @@ private:
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
     std::function<void(std::string)> serviceCallbackForKeyEvent_;
-    std::function<void(std::string, bool)> serviceCallbackForNtf_;
     std::function<void(std::string)> updateExtrasCallback_;
+    std::function<void(std::string, bool)> serviceCallbackForNtf_;
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
+    bool isNotShowNotification_ = false;
     bool isMediaChange_ = true;
 
     int32_t castConnectStateForDisconnect_ = 5;
@@ -429,13 +430,15 @@ private:
 
     std::recursive_mutex destroyLock_;
 
-    std::recursive_mutex displayListenerLock_;
-
     std::recursive_mutex remoteCallbackLock_;
 
     std::recursive_mutex remoteSourceLock_;
 
     std::recursive_mutex remoteSinkLock_;
+
+    std::shared_ptr<bool> isAlivePtr_;
+
+    std::recursive_mutex isAliveLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castHandleLock_;
@@ -462,19 +465,17 @@ private:
     std::recursive_mutex castControllersLock_;
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
     std::shared_ptr<CssListener> cssListener_;
-    std::shared_ptr<IAVRouterListener> iAVRouterListener_;
     sptr<HwCastDisplayListener> displayListener_;
+    std::recursive_mutex displayListenerLock_;
+    std::shared_ptr<IAVRouterListener> iAVRouterListener_;
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     std::function<void(std::string)> serviceCallbackForStream_;
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;
-    std::shared_ptr<bool> isAlivePtr_;
-    std::recursive_mutex isAliveLock_;
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
-    bool isNotShowNotification_ = false;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
 #endif
 };

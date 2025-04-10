@@ -85,7 +85,7 @@ private:
 
     std::mutex onMetadataChangeLock_;
     std::mutex onPlaybackChangeLock_;
-    std::mutex onCommandChangeLock_;
+    std::mutex onValidCommandChangeLock_;
 };
 }
 #endif // OHOS_AVCONTROLLER_CALLBACK_STUB_H
