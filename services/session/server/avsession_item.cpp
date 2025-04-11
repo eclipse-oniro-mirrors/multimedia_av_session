@@ -1271,6 +1271,9 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
         ProcessFrontSession("Disconnect");
     }
     SaveLocalDeviceInfo();
+    if (serviceCallbackForCastNtf_) {
+        serviceCallbackForCastNtf_(GetSessionId(), false, false);
+    }
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
 
@@ -1345,8 +1348,7 @@ void AVSessionItem::ListenCollaborationOnStop()
 void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 {
     if (descriptor_.sessionTag_ == "RemoteCast") {
-        SLOGI("Remote CastConnectStateChange, return");
-        return;
+        SLOGI("Remote PublishAVCastHa");
     }
 
     if (castState == connectStateFromCast_) {
