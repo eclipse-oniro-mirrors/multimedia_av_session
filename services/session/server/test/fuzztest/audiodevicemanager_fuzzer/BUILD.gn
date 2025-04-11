@@ -1,0 +1,78 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/test.gni")
+import("../../../../../../bluetooth_part.gni")
+import("../../../../../../castplus_cast_engine_part.gni")
+module_output_path = "av_session/av_session"
+
+##############################fuzztest##########################################
+ohos_fuzztest("AudioDeviceManagerFuzzTest") {
+  module_out_path = module_output_path
+  fuzz_config_file = "../audiodevicemanager_fuzzer"
+  include_dirs = [
+    "../",
+    "../../../remote",
+    "../../../../adapter",
+    "../../../../server",
+    "../../../../server/migrate",
+  ]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fno-access-control",
+  ]
+  sources = [ "audiodevicemanager_fuzzer.cpp" ]
+  deps = [
+    "./../../../../../../frameworks/native/session:avsession_client_static",
+    "./../../../../../session:avsession_item_static",
+    "./../../../../../session:avsession_service_static",
+  ]
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libtokensetproc_shared",
+    "audio_framework:audio_client",
+    "background_task_mgr:bgtaskmgr_innerkits",
+    "c_utils:utils",
+    "data_object:distributeddataobject_impl",
+    "device_manager:devicemanagersdk",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "jsoncpp:jsoncpp",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "window_manager:libdm_lite",
+    "window_manager:libwm",
+  ]
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../../session:avsession_cast_item_static",
+    ]
+  }
+
+  if (bluetooth_part_enable) {
+    cflags += [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
+}
+###############################################################################

@@ -52,6 +52,9 @@ void SessionListenerStubFuzzer::FuzzTests(const uint8_t* data, size_t size)
 
     std::string deviceId(reinterpret_cast<const char *>(data), size);
     g_SessionListenerStubClient->OnDeviceOffline(deviceId);
+
+    std::vector<sptr<IRemoteObject>> sessionControllers;
+    g_SessionListenerStubClient->OnRemoteDistributedSessionChange(sessionControllers);
 }
 
 void SessionListenerStubTest(uint8_t* data, size_t size)

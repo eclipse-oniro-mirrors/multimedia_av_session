@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
+#include "avsessionserviceproxy_fuzzer.h"
+
+#include <cstdint>
 #include <iostream>
 #include <memory>
 
 #include "iservice_registry.h"
-#include "ipc_skeleton.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
-#include "avsessionserviceproxy_fuzzer.h"
 #include "system_ability_definition.h"
-#include "session_listener_client.h"
 #include "securec.h"
 
 using namespace std;
@@ -56,6 +56,22 @@ T GetData()
     return object;
 }
 
+std::string GetString()
+{
+    size_t objectSize = (GetData<int8_t>() % MAX_CODE_TEST) + 1;
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return "OVER_SIZE";
+    }
+    char object[objectSize + 1];
+    errno_t ret = memcpy_s(object, sizeof(object), RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return "";
+    }
+    g_pos += objectSize;
+    std::string output(object);
+    return output;
+}
+
 template<class T>
 uint32_t GetArrLength(T& arr)
 {
@@ -69,53 +85,35 @@ uint32_t GetArrLength(T& arr)
 void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskOne(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy,
     sptr<IRemoteObject> object)
 {
-    std::string tag(
-        reinterpret_cast<const char*>(RAW_DATA + sizeof(uint32_t)), g_dataSize - sizeof(uint32_t));
-    std::string sessionId(
-        reinterpret_cast<const char*>(RAW_DATA + sizeof(uint32_t) * 2), g_dataSize - sizeof(uint32_t) * 2);
-    std::string testBundleName(
-        reinterpret_cast<const char*>(RAW_DATA + sizeof(uint32_t) * 3), g_dataSize - sizeof(uint32_t) * 3);
-    std::string testAbilityName(
-        reinterpret_cast<const char*>(RAW_DATA + sizeof(uint32_t) * 4), g_dataSize - sizeof(uint32_t) * 4);
-    std::string assetId(
-        reinterpret_cast<const char*>(RAW_DATA + sizeof(uint32_t) * 5), g_dataSize - sizeof(uint32_t) * 5);
-    int32_t type = GetData<int32_t>();
-    int32_t maxSize = GetData<int32_t>();
-    int32_t maxAppSize = GetData<int32_t>();
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(testBundleName);
-    elementName.SetAbilityName(testAbilityName);
+    elementName.SetBundleName(GetString());
+    elementName.SetAbilityName(GetString());
     std::shared_ptr<AVSession> session = nullptr;
     std::shared_ptr<AVSessionController> controller = nullptr;
     std::vector<AVSessionDescriptor> descriptors;
-    std::vector<AVQueueInfo> avQueueInfos;
-    MessageParcel reply;
+
     AVSessionDescriptor descriptor;
-    const char* buffer = GetData<char *>();
-    avServiceProxy->CreateSession(tag, type, elementName);
-    avServiceProxy->CreateSession(tag, type, elementName, session);
-    avServiceProxy->CreateSessionInner(tag, type, elementName);
-    avServiceProxy->CreateSessionInner(tag, type, elementName, object);
+    avServiceProxy->CreateSession(GetString(), GetData<int32_t>(), elementName);
+    avServiceProxy->CreateSession(GetString(), GetData<int32_t>(), elementName, session);
+    avServiceProxy->CreateSessionInner(GetString(), GetData<int32_t>(), elementName);
+    avServiceProxy->CreateSessionInner(GetString(), GetData<int32_t>(), elementName, object);
     avServiceProxy->GetAllSessionDescriptors(descriptors);
-    avServiceProxy->GetSessionDescriptorsBySessionId(sessionId, descriptor);
-    avServiceProxy->GetHistoricalSessionDescriptors(maxSize, descriptors);
-    avServiceProxy->GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos);
-    avServiceProxy->UnMarshallingAVQueueInfos(reply, avQueueInfos);
-    avServiceProxy->BufferToAVQueueInfoImg(buffer, avQueueInfos);
-    avServiceProxy->StartAVPlayback(testBundleName, assetId);
-    avServiceProxy->CreateController(assetId, controller);
-    avServiceProxy->CreateControllerInner(assetId, object);
+    avServiceProxy->GetSessionDescriptorsBySessionId(GetString(), descriptor);
+    avServiceProxy->GetHistoricalSessionDescriptors(GetData<int32_t>(), descriptors);
+
+    avServiceProxy->StartAVPlayback(GetString(), GetString());
+    avServiceProxy->CreateController(GetString(), controller);
+    avServiceProxy->CreateControllerInner(GetString(), object);
     avServiceProxy->Close();
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> castController = nullptr;
-    avServiceProxy->GetAVCastController(sessionId, castController);
-    avServiceProxy->GetAVCastControllerInner(sessionId, object);
+    avServiceProxy->GetAVCastController(GetString(), castController);
+    avServiceProxy->GetAVCastControllerInner(GetString(), object);
 #endif
 }
 
 void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy)
 {
-    std::string sessionId(GetData<char>(), g_dataSize);
     std::string input(GetData<char>(), g_dataSize);
     std::string output(GetData<char>(), g_dataSize);
 
@@ -129,12 +127,12 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionSe
     item.SetPressed(GetData<bool>());
     keyEventHandle->AddKeyItem(item);
     MMI::KeyEvent keyEvent = *(keyEventHandle.get());
+    AAFwk::Want wantParam;
 
     AVControlCommand command;
-    int32_t cmd = GetData<int32_t>();
-    command.SetCommand(cmd);
+    command.SetCommand(GetData<int32_t>());
     SessionToken sessionToken;
-    sessionToken.sessionId = sessionId;
+    sessionToken.sessionId = GetString();
     std::vector<AudioStandard::AudioDeviceDescriptor> deviceDescriptor;
 
     AVSessionServiceProxy::RemoteServiceCommand remoteCommand =
@@ -146,6 +144,8 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionSe
     avServiceProxy->CastAudio(sessionToken, deviceDescriptor);
     avServiceProxy->CastAudioForAll(deviceDescriptor);
     avServiceProxy->ProcessCastAudioCommand(remoteCommand, input, output);
+    avServiceProxy->SendSystemAVKeyEvent(keyEvent, wantParam);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool enable = GetData<bool>();
     int32_t castDeviceCapability = GetData<int32_t>();
@@ -162,12 +162,41 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionSe
 #endif
 }
 
+void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskThird(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy)
+{
+    std::vector<AVQueueInfo> avQueueInfos;
+    const char* buffer = GetData<char *>();
+    avServiceProxy->BufferToAVQueueInfoImg(buffer, avQueueInfos);
+
+    AVQueueInfo info;
+    info.SetBundleName(GetString());
+    info.SetAVQueueName(GetString());
+    info.SetAVQueueId(GetString());
+    info.SetAVQueueImageUri(GetString());
+    info.SetAVQueueLength(GetData<uint32_t>());
+    avQueueInfos.push_back(info);
+    MessageParcel reply;
+    reply.WriteUint32(0);
+
+    avServiceProxy->GetHistoricalAVQueueInfos(GetData<int32_t>(), GetData<int32_t>(), avQueueInfos);
+    avServiceProxy->UnMarshallingAVQueueInfos(reply, avQueueInfos);
+    OHOS::sptr<ISessionListener> listener = new TestISessionListener();
+    avServiceProxy->RegisterSessionListener(listener);
+    avServiceProxy->RegisterSessionListenerForAllUsers(listener);
+    DistributedSessionType sessionType = static_cast<DistributedSessionType>(GetData<int32_t>());
+    std::vector<std::shared_ptr<AVSessionController>> controllers;
+    avServiceProxy->GetDistributedSessionControllers(sessionType, controllers);
+    std::vector<sptr<IRemoteObject>> innerControllers;
+    avServiceProxy->GetDistributedSessionControllersInner(sessionType, innerControllers);
+}
+
 void AVSessionServiceProxyFuzzer::FuzzDoProxyTask(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy,
     sptr<IRemoteObject> object)
 {
     SLOGI("enter extra fuzz task");
     FuzzDoProxyTaskOne(avServiceProxy, object);
     FuzzDoProxyTaskTwo(avServiceProxy);
+    FuzzDoProxyTaskThird(avServiceProxy);
 }
 
 bool AVSessionServiceProxyFuzzer::FuzzSendRequest()
