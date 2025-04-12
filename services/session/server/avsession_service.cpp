@@ -977,7 +977,10 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(descriptor.userId_);
-    PublishEvent(mediaPlayStateFalse);
+    uint32_t ret = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
+    if (ret == 0) {
+        PublishEvent(mediaPlayStateFalse);
+    }
     SLOGI("NotifySessionRelease for user:%{public}d|listenerSize:%{public}d",
         descriptor.userId_, static_cast<int>(listenerMap.size()));
     for (const auto& [pid, listener] : listenerMap) {
