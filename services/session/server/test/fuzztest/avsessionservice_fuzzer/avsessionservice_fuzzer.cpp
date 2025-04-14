@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "client_death_stub.h"
 #include "audio_info.h"
 #include "audio_adapter.h"
+#include "session_listener_proxy.h"
 
 using namespace std;
 using namespace OHOS::AudioStandard;
@@ -598,6 +599,58 @@ void GetTrustedDeviceName001()
     SLOGI("GetTrustedDeviceName001 end!");
 }
 
+void CheckInterfaceTokenTest()
+{
+    MessageParcel dataMessageParcel;
+    dataMessageParcel.WriteInterfaceToken(GetData<std::u16string>());
+    avsessionService_->CheckInterfaceToken(dataMessageParcel);
+}
+
+void GetAVQueueInfosImgLengthTest()
+{
+    std::vector<AVQueueInfo> avQueueInfos;
+    AVQueueInfo avQueueInfo1;
+    avQueueInfos.push_back(avQueueInfo1);
+
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 1, 0, 1, 1};
+    avQueuePixelMap->SetInnerImgBuffer(imgBuffer);
+    AVQueueInfo avQueueInfo2;
+    avQueueInfo2.avQueueImage_ = avQueuePixelMap;
+    avQueueInfos.push_back(avQueueInfo1);
+    avsessionService_->GetAVQueueInfosImgLength(avQueueInfos);
+}
+
+void HandleRegisterSessionListenerTest()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    OHOS::sptr<IRemoteObject> iRemoteObject;
+    auto sessionListenerProxy = std::make_shared<SessionListenerProxy>(iRemoteObject);
+    data.WriteRemoteObject(sessionListenerProxy->AsObject());
+    avsessionService_->HandleRegisterSessionListener(data, reply);
+}
+
+void HandleRegisterSessionListenerForAllUsersTest()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    OHOS::sptr<IRemoteObject> iRemoteObject;
+    auto sessionListenerProxy = std::make_shared<SessionListenerProxy>(iRemoteObject);
+    data.WriteRemoteObject(sessionListenerProxy->AsObject());
+    avsessionService_->HandleRegisterSessionListenerForAllUsers(data, reply);
+}
+
+void HandleRegisterClientDeathObserverTest()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    OHOS::sptr<IRemoteObject> iRemoteObject;
+    auto clientDeathProxy = std::make_shared<ClientDeathProxy>(iRemoteObject);
+    data.WriteRemoteObject(clientDeathProxy->AsObject());
+    avsessionService_->HandleRegisterClientDeathObserver(data, reply);
+}
+
 class FuzzSessionListener : public SessionListener {
 public:
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override
@@ -650,6 +703,11 @@ void AvSessionServiceTest001()
     ReportStartCastEnd002();
     HandleDeviceChange001();
     GetTrustedDeviceName001();
+    CheckInterfaceTokenTest();
+    GetAVQueueInfosImgLengthTest();
+    HandleRegisterSessionListenerTest();
+    HandleRegisterSessionListenerForAllUsersTest();
+    HandleRegisterClientDeathObserverTest();
 }
 
 void AvSessionServiceTest()
