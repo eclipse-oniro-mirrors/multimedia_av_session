@@ -142,6 +142,8 @@ private:
     static constexpr size_t ARGV_SECOND = 1;
     static constexpr size_t ARGV_THIRD = 2;
 
+    static constexpr size_t UNMASK_CHAR_NUM = 5;
+
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> EventHandlers_;
     static std::map<std::string, NapiAVSessionController> ControllerList_;
 };

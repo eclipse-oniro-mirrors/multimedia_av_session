@@ -148,12 +148,12 @@ napi_status NapiAVSessionController::NewInstance(
 
     CHECK_RETURN(DoRegisterCallback(env, napiController) == napi_ok, "add callback failed", napi_generic_failure);
     SLOGD("add napiController instance prelock for sessionId: %{public}s***%{public}s",
-        napiController->sessionId_.substr(0, 5).c_str(),
-        napiController->sessionId_.substr(napiController->sessionId_.length() - 5).c_str());
+        napiController->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
+        napiController->sessionId_.substr(napiController->sessionId_.length() - UNMASK_CHAR_NUM).c_str());
     std::lock_guard<std::mutex> lock(controllerListMutex_);
     SLOGI("add napiController instance aftlock for sessionId: %{public}s***%{public}s",
-        napiController->sessionId_.substr(0, 5).c_str(),
-        napiController->sessionId_.substr(napiController->sessionId_.length() - 5).c_str());
+        napiController->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
+        napiController->sessionId_.substr(napiController->sessionId_.length() - UNMASK_CHAR_NUM).c_str());
     ControllerList_[napiController->sessionId_] = *napiController;
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiController->sessionId_, property);
@@ -1427,8 +1427,8 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
 napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSessionController* napiController)
 {
     SLOGI("do register callback with for sessionId: %{public}s***%{public}s",
-        napiController->sessionId_.substr(0, 5).c_str(),
-        napiController->sessionId_.substr(napiController->sessionId_.length() - 5).c_str());
+        napiController->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
+        napiController->sessionId_.substr(napiController->sessionId_.length() - UNMASK_CHAR_NUM).c_str());
     if (napiController->callback_ == nullptr) {
         napiController->callback_ = std::make_shared<NapiAVControllerCallback>();
         if (napiController->callback_ == nullptr) {
