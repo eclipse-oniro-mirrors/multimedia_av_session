@@ -411,7 +411,8 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
         return;
     }
-    SLOGI("OnTopSessionChange sessionId_: %{public}s***%{public}s", descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
+    SLOGI("OnTopSessionChange sessionId_: %{public}s***%{public}s",
+        descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         descriptor.sessionId_.substr(descriptor.sessionId_.length() - UNMASK_CHAR_NUM).c_str());
     {
         std::lock_guard lockGuard(topSessionLock_);
