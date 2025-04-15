@@ -317,7 +317,8 @@ export struct AVCastPicker {
 
   @Builder
   private buildDefaultPicker(isCustomPicker: boolean) {
-    UIExtensionComponent(
+    Button() {
+      UIExtensionComponent(
       {
         abilityName: 'UIExtAbility',
         bundleName: 'com.hmos.mediacontroller',
@@ -441,7 +442,22 @@ export struct AVCastPicker {
           this.menuShowStateCallback(this.isMenuShow);
         }
       })
-      .onClick(() => {
+      .onRelease((releaseCode) => {
+        if (releaseCode === 1) {
+          this.restartUECMessage += 1;
+        }
+      })
+      .onError(() => {
+        this.restartUECMessage += 1;
+      })
+      .accessibilityLevel('yes')
+      .accessibilityText(this.accessibilityAudioControlStr)
+    }
+    .backgroundColor('#00000000')
+    .size({ width: '100%', height: '100%' })
+    .accessibilityLevel('yes')
+    .accessibilityText(this.accessibilityAudioControlStr)
+    .onClick(() => {
         let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
         let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
         let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
@@ -464,16 +480,6 @@ export struct AVCastPicker {
           }
         }
       })
-      .onRelease((releaseCode) => {
-        if (releaseCode === 1) {
-          this.restartUECMessage += 1;
-        }
-      })
-      .onError(() => {
-        this.restartUECMessage += 1;
-      })
-      .accessibilityLevel('yes')
-      .accessibilityText(this.accessibilityAudioControlStr)
   }
 
   private hasExtDevice(allDevice: Array<AVCastPickerDeviceInfo>): boolean {
