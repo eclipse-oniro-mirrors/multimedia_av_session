@@ -163,9 +163,9 @@ private:
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
     std::string curAssetId_;
 
-    std::function<void(int32_t)> volumeKeyEventCallbackFunc_;
-    AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
-    AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_;
+    std::function<void(int32_t)> volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
+    AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
+    AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_ = GetPreferredDeviceChangeCallbackFunc();
     Json::Value metaDataCache_;
     Json::Value playbackStateCache_;
     std::recursive_mutex cacheJsonLock_;

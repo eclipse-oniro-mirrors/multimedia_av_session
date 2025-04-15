@@ -603,7 +603,7 @@ void AVSessionItem::InitAVCastControllerProxy()
     if (castControllerProxy_ == nullptr) {
         SLOGI("CastControllerProxy is null, start get new proxy");
         {
-            std::lock_guard lockGuard(castHandleLock_);
+            std::lock_guard lockGuard(castLock_);
             castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
         }
     }
@@ -899,7 +899,7 @@ std::string AVSessionItem::GetAnonymousDeviceId(std::string deviceId)
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string, std::string>& serviceNameStatePair,
     DeviceInfo deviceInfo)
 {
     if (castHandle_ > 0) {
@@ -909,12 +909,12 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::map<std::string, 
         std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
         mirrorToStreamFlag_ = true;
     }
-    std::lock_guard lockGuard(castHandleLock_);
-    castServiceNameMapState_ = serviceNameMapState;
+    std::lock_guard lockGuard(castLock_);
+    castserviceNameStatePair_ = serviceNameStatePair;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     if (AVRouter::GetInstance().GetMirrorCastHandle() == -1) {
-        castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_, GetSessionId());
+        castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, castserviceNameStatePair_, GetSessionId());
         CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId(), deviceInfo);
         AVRouter::GetInstance().SetServiceAllConnectState(castHandle_, deviceInfo);
@@ -1157,7 +1157,7 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
 
 int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
-    std::lock_guard lockGuard(castHandleLock_);
+    std::lock_guard lockGuard(castLock_);
 
     if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 &&  castHandle_ <= 0 &&
         descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
@@ -1194,7 +1194,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
 
 int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 {
-    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameMapState_, GetSessionId());
+    int64_t castHandle = AVRouter::GetInstance().StartCast(outputDeviceInfo, castserviceNameStatePair_, GetSessionId());
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     castHandle_ = castHandle;
@@ -1210,7 +1210,7 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("Add device process");
-    std::lock_guard lockGuard(castHandleLock_);
+    std::lock_guard lockGuard(castLock_);
     AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_,
         GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
     int32_t castId = static_cast<int32_t>(castHandle_);
@@ -1253,7 +1253,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             return;
         }
     }
-    if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
+    if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
             castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {
@@ -1263,7 +1263,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     }
-    if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
+    if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s", deviceInfo.deviceId_.c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
@@ -1299,7 +1299,7 @@ void AVSessionItem::ListenCollaborationOnStop()
 {
     SLOGI("enter ListenCollaborationOnStop");
     CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
-        if (newCastState == castConnectStateForConnected_) {
+        if (newCastState == connectStateFromCast_) {
             if (descriptor_.sessionTag_ == "RemoteCast") {
                 SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
                 AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -1325,7 +1325,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     } else {
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
-    if (castState == castConnectStateForConnected_) { // 6 is connected status (stream)
+    if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         ReportConnectFinish("AVSessionItem::OnCastStateChange", deviceInfo);
@@ -1334,7 +1334,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             callStartCallback_(*this);
         }
     }
-    if (castState == castConnectStateForDisconnect_) { // 5 is disconnected status
+    if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
         DealDisconnect(deviceInfo, isNeedRemove);
     }
@@ -1404,7 +1404,7 @@ void AVSessionItem::ListenCollaborationApplyResult()
 
 int32_t AVSessionItem::StopCast(bool continuePlay)
 {
-    std::lock_guard lockGuard(castHandleLock_);
+    std::lock_guard lockGuard(castLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
@@ -2333,7 +2333,6 @@ bool AVSessionItem::IsCasting()
 void AVSessionItem::GetCurrentCastItem(AVQueueItem& currentItem)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::lock_guard lockGuard(castHandleLock_);
     CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
     currentItem = castControllerProxy_->GetCurrentItem();
 #endif
@@ -2344,7 +2343,6 @@ AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
 {
     AVPlaybackState playbackState;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::lock_guard lockGuard(castHandleLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, playbackState, "cast controller proxy is nullptr");
     auto ret = castControllerProxy_->GetCastAVPlaybackState(playbackState);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, playbackState, "getstate error");
@@ -2355,7 +2353,6 @@ AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
 void AVSessionItem::SendControlCommandToCast(AVCastControlCommand cmd)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::lock_guard lockGuard(castHandleLock_);
     CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
     castControllerProxy_->SendControlCommand(cmd);
 #endif

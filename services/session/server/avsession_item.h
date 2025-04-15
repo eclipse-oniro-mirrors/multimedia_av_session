@@ -233,7 +233,7 @@ public:
     void SetSupportCommand(std::vector<int32_t> cmds);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    int32_t RegisterListenerStreamToCast(const std::map<std::string, std::string>& serviceNameMapState,
+    int32_t RegisterListenerStreamToCast(const std::pair<std::string, std::string>& serviceNameStatePair,
         DeviceInfo deviceInfo);
 
     void InitializeCastCommands();
@@ -410,8 +410,8 @@ private:
     bool isNotShowNotification_ = false;
     bool isMediaChange_ = true;
 
-    int32_t castConnectStateForDisconnect_ = 5;
-    int32_t castConnectStateForConnected_ = 6;
+    int32_t disconnectStateFromCast_ = 5;
+    int32_t connectStateFromCast_ = 6;
     int32_t castDisconnectStateInAVSession_ = 6;
     int32_t removeCmdStep_ = 1000;
 
@@ -441,13 +441,13 @@ private:
     std::recursive_mutex isAliveLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::recursive_mutex castHandleLock_;
+    std::recursive_mutex castLock_;
     int64_t castHandle_ = 0;
     std::string castHandleDeviceId_ = "-100";
     const int32_t streamStateConnection = 6;
     const std::string deviceStateConnection = "CONNECT_SUCC";
     int32_t newCastState = -1;
-    std::map<std::string, std::string> castServiceNameMapState_;
+    std::pair<std::string, std::string> castserviceNameStatePair_;
 
     bool collaborationRejectFlag_ = false;
     bool applyUserResultFlag_ = false;

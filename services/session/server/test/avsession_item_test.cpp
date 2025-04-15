@@ -359,14 +359,14 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_001, Test
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_001 begin!");
     g_AVSessionItem->castHandle_ = 1;
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "1234567890";
     deviceInfo.deviceName_ = "TestDevice";
     deviceInfo.deviceType_ = 1;
     deviceInfo.networkId_ = "12345";
     deviceInfo.supportedProtocols_ = 2;
-    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
+    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameStatePair, deviceInfo);
     EXPECT_EQ(result, AVSESSION_ERROR);
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_001 end!");
 }
@@ -381,14 +381,14 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_002, Test
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_002 begin!");
     g_AVSessionItem->castHandle_ = AVSESSION_ERROR;
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "1234567890";
     deviceInfo.deviceName_ = "TestDevice";
     deviceInfo.deviceType_ = 1;
     deviceInfo.networkId_ = "12345";
     deviceInfo.supportedProtocols_ = 2;
-    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
+    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameStatePair, deviceInfo);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_002 end!");
 }
@@ -403,7 +403,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_003, Test
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_003 begin!");
     g_AVSessionItem->castHandle_ = 0;
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "1234567890";
     deviceInfo.deviceName_ = "TestDevice";
@@ -413,7 +413,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_003, Test
     
     auto mockCastControllerProxy = std::make_shared<MockIAVCastControllerProxy>();
     g_AVSessionItem->castControllerProxy_ = mockCastControllerProxy;
-    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
+    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameStatePair, deviceInfo);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_003 end!");
 }
@@ -429,7 +429,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_004, Test
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_004 begin!");
     g_AVSessionItem->castHandle_ = 0;
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "1234567890";
     deviceInfo.deviceName_ = "TestDevice";
@@ -437,7 +437,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_004, Test
     deviceInfo.networkId_ = "12345";
     deviceInfo.supportedProtocols_ = 2;
     g_AVSessionItem->castControllerProxy_ = nullptr;
-    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
+    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameStatePair, deviceInfo);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_004 end!");
 }
@@ -452,7 +452,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_005, Test
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_005 begin!");
     g_AVSessionItem->castHandle_ = 0;
-    std::map<std::string, std::string> serviceNameMapState;
+    std::pair<std::string, std::string> serviceNameStatePair;
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "1234567890";
     deviceInfo.deviceName_ = "TestDevice";
@@ -464,7 +464,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_005, Test
     g_AVSessionItem->castControllerProxy_ = mockCastControllerProxy;
     AVQueueItem item;
     item.description_ = nullptr;
-    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameMapState, deviceInfo);
+    int32_t result = g_AVSessionItem->RegisterListenerStreamToCast(serviceNameStatePair, deviceInfo);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_005 end!");
 }
