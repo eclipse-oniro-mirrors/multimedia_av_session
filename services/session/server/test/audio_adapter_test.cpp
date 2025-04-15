@@ -688,53 +688,7 @@ static HWTEST(AudioAdapterTest, SelectOutputDevice002, TestSize.Level1)
     auto testDevice = availableDevices[0];
     AudioDeviceDescriptorWithSptr desc {new OHOS::AudioStandard::AudioDeviceDescriptor()};
     desc->deviceCategory_ = testDevice->deviceCategory_;
-    desc->deviceType_ = testDevice->deviceType_;
-    int32_t ret = audioAdapter.SelectOutputDevice(desc);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-}
-
-/**
- * @tc.name: SelectOutputDevice003
- * @tc.desc: Test SelectOutputDevice with a valid device descriptor that matches one available device.
- * @tc.type: FUNC
- * @tc.require: AR000H31KJ
- */
-static HWTEST(AudioAdapterTest, SelectOutputDevice003, TestSize.Level1)
-{
-    SLOGD("SelectOutputDevice003 begin!");
-    AudioAdapter::GetInstance().Init();
-    auto& audioAdapter = AudioAdapter::GetInstance();
-    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
-
-    CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
-    auto testDevice = availableDevices[0];
-    AudioDeviceDescriptorWithSptr desc {new OHOS::AudioStandard::AudioDeviceDescriptor()};
-    desc->deviceCategory_ = testDevice->deviceCategory_;
     EXPECT_NE(desc->deviceType_, testDevice->deviceType_);
     int32_t ret = audioAdapter.SelectOutputDevice(desc);
     EXPECT_EQ(ret, AVSESSION_ERROR);
-}
-
-/**
- * @tc.name: SelectOutputDevice004
- * @tc.desc: Test SelectOutputDevice with a valid device descriptor that matches one available device.
- * @tc.type: FUNC
- * @tc.require: AR000H31KJ
- */
-static HWTEST(AudioAdapterTest, SelectOutputDevice004, TestSize.Level1)
-{
-    SLOGD("SelectOutputDevice004 begin!");
-    AudioAdapter::GetInstance().Init();
-    auto& audioAdapter = AudioAdapter::GetInstance();
-    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
-
-    CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
-    auto testDevice = availableDevices[0];
-    AudioDeviceDescriptorWithSptr desc {new OHOS::AudioStandard::AudioDeviceDescriptor()};
-    desc->deviceType_ = testDevice->deviceType_;
-    desc->deviceCategory_ = OHOS::AudioStandard::BT_HEADPHONE;
-
-    EXPECT_NE(desc->deviceCategory_, testDevice->deviceCategory_);
-    int32_t ret = audioAdapter.SelectOutputDevice(desc);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }

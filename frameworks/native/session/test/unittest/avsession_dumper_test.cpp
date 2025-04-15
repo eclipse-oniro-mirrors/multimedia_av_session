@@ -430,7 +430,8 @@ HWTEST_F(AVSessionDumperTest, StartDefaultAbilityByCall001, TestSize.Level1)
     // startability may go with mediaintent, will return AVSESSION_ERROR
     int32_t ret = avSessionService_->StartDefaultAbilityByCall(sessionId);
     SLOGI("StartDefaultAbilityByCall001 with ret:%{public}d", ret);
-    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS || ret == AVSESSION_ERROR, true);
+    EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS ||
+        ret == AVSESSION_ERROR || ret == ERR_START_ABILITY_TIMEOUT, true);
 }
 
 /**

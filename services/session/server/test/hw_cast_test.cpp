@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "hw_cast_stream_player.h"
@@ -21,6 +22,14 @@
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
+
+class IAVCastSessionStateListenerTest : public IAVCastSessionStateListener {
+public:
+    IAVCastSessionStateListenerTest() = default;
+    virtual ~IAVCastSessionStateListenerTest() = default;
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) override {};
+    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) override {};
+};
 
 class HwCastTest : public testing::Test {
 public:
@@ -1376,6 +1385,8 @@ static HWTEST(HwCastTest, HwCastProviderSessionUnregisterCastSessionStateListene
     SLOGI("HwCastProviderSessionUnregisterCastSessionStateListener001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
     EXPECT_EQ(hwCastProvider != nullptr, true);
-    EXPECT_EQ(hwCastProvider->UnRegisterCastSessionStateListener(0, nullptr), false);
+    std::shared_ptr<IAVCastSessionStateListener> listener = std::make_shared<IAVCastSessionStateListenerTest>();
+    hwCastProvider->RegisterCastSessionStateListener(0, listener);
+    EXPECT_EQ(hwCastProvider->UnRegisterCastSessionStateListener(0, listener), false);
     SLOGI("HwCastProviderSessionUnregisterCastSessionStateListener001 end!");
 }

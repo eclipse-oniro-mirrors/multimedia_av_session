@@ -1,31 +1,29 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+#include "avsessionservice_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
 
 #include "securec.h"
 #include "avsession_item.h"
-#include "ipc_skeleton.h"
-#include "avcontroller_callback_proxy.h"
-#include "avsession_controller_stub.h"
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
 #include "audio_info.h"
 #include "avsession_service.h"
-#include "avsessionservice_fuzzer.h"
 #include "client_death_proxy.h"
 #include "client_death_stub.h"
 #include "audio_info.h"
@@ -651,6 +649,98 @@ void HandleRegisterClientDeathObserverTest()
     avsessionService_->HandleRegisterClientDeathObserver(data, reply);
 }
 
+void OnStartProcessTest()
+{
+    avsessionService_->OnStartProcess();
+}
+
+void OnIdleTest()
+{
+    SystemAbilityOnDemandReason reason;
+    avsessionService_->OnIdle(reason);
+}
+
+void OnActiveTest()
+{
+    SystemAbilityOnDemandReason reason;
+    avsessionService_->OnActive(reason);
+}
+
+void HandleRemoveMediaCardEventTest()
+{
+    SystemAbilityOnDemandReason reason;
+    avsessionService_->HandleRemoveMediaCardEvent();
+}
+
+void IsTopSessionPlayingTest()
+{
+    avsessionService_->IsTopSessionPlaying();
+}
+
+void HandleMediaCardStateChangeEventTest()
+{
+    const string isAppear[] = {"APPEAR", "DISAPPEAR", GetString()};
+    const uint32_t isAppearSize = 3;
+    avsessionService_->HandleMediaCardStateChangeEvent(isAppear[GetData<uint32_t>() % isAppearSize]);
+}
+
+void PullMigrateStubTest()
+{
+    avsessionService_->PullMigrateStub();
+}
+
+void HandleChangeTopSessionTest()
+{
+    avsessionService_->HandleChangeTopSession(GetData<uint32_t>(), GetData<uint32_t>());
+}
+
+void InitCollaborationTest()
+{
+    avsessionService_->InitCollaboration();
+}
+
+void InitCastEngineServiceTest()
+{
+    avsessionService_->InitCastEngineService();
+}
+
+void LowQualityCheckTest()
+{
+    StreamUsage usage = static_cast<StreamUsage>(GetData<int32_t>() % StreamUsage::STREAM_USAGE_MAX);
+    RendererState state = static_cast<RendererState>(GetData<int32_t>() % 7);
+    avsessionService_->LowQualityCheck(GetData<int32_t>(), GetData<int32_t>(), usage, state);
+    avsessionService_->PlayStateCheck(GetData<int32_t>(), usage, state);
+    avsessionService_->NotifyBackgroundReportCheck(GetData<int32_t>(), GetData<int32_t>(), usage, state);
+    avsessionService_->CheckAncoAudio();
+}
+
+void StartAVPlaybackTest()
+{
+    string bundleName = GetString();
+    string assetId = GetString();
+    string deviceId = GetString();
+    avsessionService_->StartAVPlayback(bundleName, assetId, deviceId);
+}
+
+void IsHistoricalSessionTest()
+{
+    string sessionId = GetString();
+    avsessionService_->IsHistoricalSession(sessionId);
+}
+
+void StartDefaultAbilityByCallTest()
+{
+    string sessionId = GetString();
+    avsessionService_->StartDefaultAbilityByCall(sessionId);
+}
+
+void SendSystemAVKeyEventTest()
+{
+    MMI::KeyEvent keyEvent = static_cast<MMI::KeyEvent>(GetData<int32_t>());
+    AAFwk::Want wantParam;
+    avsessionService_->SendSystemAVKeyEvent(keyEvent, wantParam);
+}
+
 class FuzzSessionListener : public SessionListener {
 public:
     void OnSessionCreate(const AVSessionDescriptor& descriptor) override
@@ -693,6 +783,32 @@ void handleusereventTest(sptr<AVSessionService> service)
     service->HandleUserEvent(type, userId);
 }
 
+
+void OnReceiveEventTest(sptr<AVSessionService> service)
+{
+    const string actions[] = {
+        EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND,
+        EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
+        GetString()
+    };
+    FuzzSessionListener listener;
+    avsessionService_->AddInnerSessionListener(&listener);
+    avsessionService_->RemoveInnerSessionListener(&listener);
+    OHOS::EventFwk::CommonEventData eventData;
+    string action = actions[GetData<uint32_t>() % 7];
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avsessionService_);
+    eventSubscriber.OnReceiveEvent(eventData);
+}
+
 void AvSessionServiceTest001()
 {
     GetDeviceInfoTest();
@@ -708,6 +824,21 @@ void AvSessionServiceTest001()
     HandleRegisterSessionListenerTest();
     HandleRegisterSessionListenerForAllUsersTest();
     HandleRegisterClientDeathObserverTest();
+    OnStartProcessTest();
+    OnIdleTest();
+    OnActiveTest();
+    HandleRemoveMediaCardEventTest();
+    IsTopSessionPlayingTest();
+    HandleMediaCardStateChangeEventTest();
+    PullMigrateStubTest();
+    InitCollaborationTest();
+    InitCastEngineServiceTest();
+    LowQualityCheckTest();
+    LowQualityCheckTest();
+    StartAVPlaybackTest();
+    IsHistoricalSessionTest();
+    StartDefaultAbilityByCallTest();
+    SendSystemAVKeyEventTest();
 }
 
 void AvSessionServiceTest()
@@ -736,7 +867,7 @@ void AvSessionServiceTest()
     AvSessionServiceHandleEventTest(avsessionService_);
     ConvertKeyCodeToCommand001();
     handleusereventTest(avsessionService_);
-
+    OnReceiveEventTest(avsessionService_);
     AvSessionServiceTest001();
 }
 

@@ -16,6 +16,7 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("../../../../../../bluetooth_part.gni")
 import("../../../../../../castplus_cast_engine_part.gni")
+import("../../../../../../config.gni")
 module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
@@ -74,6 +75,14 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
   if (bluetooth_part_enable) {
     cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (multimedia_av_session_enable_background_audio_control) {
+    cflags += [ "-DENABLE_BACKGROUND_AUDIO_CONTROL" ]
+  }
+
+  if (av_session_enable_start_stop_on_demand) {
+    defines += [ "START_STOP_ON_DEMAND_ENABLE" ]
   }
 }
 ###############################################################################
