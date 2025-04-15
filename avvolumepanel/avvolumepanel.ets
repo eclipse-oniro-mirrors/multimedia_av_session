@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,28 @@ export struct AVVolumePanel {
   @Prop
   volumeParameter?: AVVolumePanelParameter;
 
-  volumeCallback!: UIExtensionProxy;
+  /*
+   * UIExtensionProxy.
+   */
+  private volumeCallback!: UIExtensionProxy;
+  private panelCountOncreation: number = 0;
+
+  private static currentPanelCount: number = 0;
 
   volumeChange() {
     if (this.volumeCallback != null) {
       console.info(TAG, `volumeChange volumeLevel = ` + this.volumeLevel);
       this.volumeCallback.send({'volume': this.volumeLevel});
     }
+  }
+
+  aboutToAppear(): void {
+    AVVolumePanel.currentPanelCount += 1;
+    this.panelCountOncreation = AVVolumePanel.currentPanelCount;
+  }
+
+  aboutToDisAppear(): void {
+    AVVolumePanel.currentPanelCount -= 1;
   }
 
   build() {
@@ -43,6 +58,8 @@ export struct AVVolumePanel {
           bundleName: 'com.hmos.mediacontroller',
           parameters: {
             'volumeParameter': this.volumeParameter,
+            'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
+            'currentPanelCount': this.panelCountOncreation,
           }
         })
         .onReceive((data) => {
