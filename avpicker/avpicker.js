@@ -559,6 +559,36 @@ export class AVCastPicker extends ViewPU {
 
     buildDefaultPicker(c8, d8 = null) {
         this.observeComponentCreation2((f8, g8) => {
+            Button.createWithChild();
+            Button.size({ width: '100%', height: '100%' });
+            Button.backgroundColor('#00000000');
+            Button.accessibilityLevel('yes');
+            Button.accessibilityText(this.accessibilityAudioControlStr);
+            Button.onClick(() => {
+                let u = this.deviceList.length === 2 &&
+                    !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
+                let v = this.deviceList === null || this.deviceList.length === 0;
+                let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
+                let x = w && (v || u);
+                let y = !w && (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+                    this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
+                if (x || y) {
+                    this.isMenuShow = false;
+                    this.touchMenuItemIndex = -1;
+                    if (this.extensionProxy != null) {
+                        this.extensionProxy.send({'clickEvent': true});
+                    }
+                } else {
+                    this.isMenuShow = !this.isMenuShow;
+                    if (this.isMenuShow) {
+                        this.pickerClickTime = new Date().getTime();
+                    } else {
+                        this.touchMenuItemIndex = -1;
+                    }
+                }
+            });
+        }, Button);
+        this.observeComponentCreation2((f8, g8) => {
             UIExtensionComponent.create({
                 abilityName: 'UIExtAbility',
                 bundleName: 'com.hmos.mediacontroller',
@@ -681,29 +711,6 @@ export class AVCastPicker extends ViewPU {
                     this.menuShowStateCallback(this.isMenuShow);
                 }
             });
-            UIExtensionComponent.onClick(() => {
-                let u = this.deviceList.length === 2 &&
-                    !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
-                let v = this.deviceList === null || this.deviceList.length === 0;
-                let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
-                let x = w && (v || u);
-                let y = !w && (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
-                    this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
-                if (x || y) {
-                    this.isMenuShow = false;
-                    this.touchMenuItemIndex = -1;
-                    if (this.extensionProxy != null) {
-                        this.extensionProxy.send({'clickEvent': true});
-                    }
-                } else {
-                    this.isMenuShow = !this.isMenuShow;
-                    if (this.isMenuShow) {
-                        this.pickerClickTime = new Date().getTime();
-                    } else {
-                        this.touchMenuItemIndex = -1;
-                    }
-                }
-            });
             UIExtensionComponent.onRelease((releaseCode) => {
                 if (releaseCode === 1) {
                     this.restartUECMessage += 1;
@@ -716,6 +723,7 @@ export class AVCastPicker extends ViewPU {
             UIExtensionComponent.accessibilityText(this.__accessibilityAudioControlStr);
             UIExtensionComponent.accessibilityUseSamePage(AccessibilitySamePageMode.FULL_SILENT);
         }, UIExtensionComponent);
+        Button.pop();
     }
 
     hasExtDevice(a) {
