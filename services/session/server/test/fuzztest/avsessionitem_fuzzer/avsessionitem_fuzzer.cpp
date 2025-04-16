@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 #include <cstddef>
 #include <cstdint>
@@ -21,12 +21,8 @@
 #include "securec.h"
 #include "avsession_item.h"
 #include "iav_session.h"
-#include "iremote_stub.h"
 #include "avsession_stub.h"
-#include "avsession_callback_proxy.h"
-#include "avsession_controller_stub.h"
 #include "avsession_service.h"
-#include "avsession_errors.h"
 #include "system_ability_definition.h"
 #include "avcontrol_command.h"
 #include "avcall_meta_data.h"
@@ -231,6 +227,10 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem)
     avSessionItem->GetUid();
     avSessionItem->GetAbilityName();
     avSessionItem->GetRemoteSource();
+    avSessionItem->GetAnonymousDeviceId(GetString());
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    avSessionItem->RegisterListenerStreamToCast(std::make_pair(GetString(), GetString()), deviceInfo);
+#endif
 }
 
 void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem)
