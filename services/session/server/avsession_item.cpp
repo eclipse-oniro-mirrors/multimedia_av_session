@@ -1258,6 +1258,11 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         AVRouter::GetInstance().StopCastSession(castHandle_);
         DoContinuousTaskUnregister();
+    } else {
+        // clear pre session cast info in streamplayer to avoid flash when cast compete
+        if (castControllerProxy_ != nullptr) {
+            castControllerProxy_->RefreshCurrentAVQueueItem(AVQueueItem {});
+        }
     }
     castHandle_ = -1;
     castHandleDeviceId_ = "-100";

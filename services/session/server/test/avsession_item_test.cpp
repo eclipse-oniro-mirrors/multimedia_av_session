@@ -99,6 +99,7 @@ class MockIAVCastControllerProxy : public OHOS::AVSession::IAVCastControllerProx
         override { return 0; }
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override { return 0; }
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override { return 0; }
+    int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) override {return 0;}
 };
 
 void AVsessionItemTest::SetUpTestCase()

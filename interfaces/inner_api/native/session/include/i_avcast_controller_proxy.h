@@ -81,6 +81,14 @@ public:
     virtual AVQueueItem GetCurrentItem() = 0;
 
     /**
+     * @brief Set current queue item.
+     *
+     * @return { int32_t } refresh queue item result.
+     * @since 18
+    */
+    virtual int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) = 0;
+
+    /**
      * @brief Set media info (avQueueItem) to remote, and play immediately.
      *
      * @param { const AVQueueItem& } avQueueItem - AVQueueItem that need to be played.

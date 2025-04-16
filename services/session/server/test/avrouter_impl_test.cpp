@@ -54,6 +54,7 @@ public:
     int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) {return 0;}
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) {return 0;}
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
+    int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
 };
 
 class AVRouterImplTest : public testing::Test {
