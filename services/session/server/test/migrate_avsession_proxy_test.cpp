@@ -301,7 +301,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand002, TestS
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.Level1)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
 
     auto devices = AudioAdapter::GetInstance().GetAvailableDevices();
     Json::Value jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
@@ -317,7 +317,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessPreferredOutputDevice001, TestSize.Level1)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
 
     auto devices = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
     Json::Value jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);

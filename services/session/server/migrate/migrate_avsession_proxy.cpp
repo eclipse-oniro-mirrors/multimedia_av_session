@@ -404,6 +404,7 @@ void MigrateAVSessionProxy::ProcessVolumeControlCommand(Json::Value jsonValue)
 
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
+    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "preSetController_ is nullptr");
     preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_VOLUME, args);
 }
 
@@ -442,6 +443,7 @@ void MigrateAVSessionProxy::ProcessAvailableDevices(Json::Value jsonValue)
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_AVAILABLE_DEVICES, OHOS::AAFwk::String::Box(jsonStr));
+    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "preSetController_ is nullptr");
     preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_AVAILABLE_DEVICES, args);
 }
 
@@ -458,6 +460,7 @@ void MigrateAVSessionProxy::ProcessPreferredOutputDevice(Json::Value jsonValue)
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, OHOS::AAFwk::String::Box(jsonStr));
+    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "preSetController_ is nullptr");
     preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, args);
 }
 
