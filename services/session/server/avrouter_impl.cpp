@@ -548,6 +548,9 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
             }
         }
     }
+    if (castState == castConnectStateForDisconnect_) {
+        servicePtr_->SetIsSupportMirrorToStream(false);
+    }
 }
 
 void AVRouterImpl::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
