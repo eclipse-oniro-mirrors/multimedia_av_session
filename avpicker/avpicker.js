@@ -80,6 +80,7 @@ export class AVCastPicker extends ViewPU {
         this.__isPc = new ObservedPropertySimplePU(false, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
         this.__restartUECMessage = new ObservedPropertySimplePU(1, this, 'restartUECMessage');
+        this.needToRestart = false;
         this.__isShowLoadingProgress = new ObservedPropertySimplePU(false, this, 'isShowLoadingProgress');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
@@ -149,6 +150,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.restartUECMessage !== undefined) {
             this.restartUECMessage = c11.restartUECMessage;
+        }
+        if (c11.needToRestart !== undefined) {
+            this.needToRestart = c11.needToRestart;
         }
         if (c11.isShowLoadingProgress !== undefined) {
             this.isShowLoadingProgress = c11.isShowLoadingProgress;
@@ -565,6 +569,11 @@ export class AVCastPicker extends ViewPU {
             Button.accessibilityLevel('yes');
             Button.accessibilityText(this.accessibilityAudioControlStr);
             Button.onClick(() => {
+                if (this.needToRestart) {
+                    this.needToRestart = false;
+                    this.restartUECMessage += 1;
+                    return;
+                }
                 let u = this.deviceList.length === 2 &&
                     !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
                 let v = this.deviceList === null || this.deviceList.length === 0;
@@ -713,11 +722,11 @@ export class AVCastPicker extends ViewPU {
             });
             UIExtensionComponent.onRelease((releaseCode) => {
                 if (releaseCode === 1) {
-                    this.restartUECMessage += 1;
+                    this.needToRestart = true;
                 }
             });
             UIExtensionComponent.onError(() => {
-                this.restartUECMessage += 1;
+                this.needToRestart = true;
             });
             UIExtensionComponent.accessibilityLevel('yes');
             UIExtensionComponent.accessibilityText(this.__accessibilityAudioControlStr);
