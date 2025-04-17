@@ -174,6 +174,8 @@ public:
 
     void NotifyMirrorToStreamCast();
 
+    void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) override;
+
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const SessionToken& sessionToken) override;
@@ -455,7 +457,7 @@ private:
     const std::string deviceStateDisconnection = "IDLE";
     const std::string seperator = ",";
     int appState = -1;
-    bool isSupportMirrorToStream_ = false;
+    std::atomic<bool> isSupportMirrorToStream_ = false;
     std::string castDeviceId_ = "0";
     std::string castDeviceName_ = " ";
     int32_t castDeviceType_ = 0;
@@ -479,7 +481,6 @@ private:
     int32_t maxHistoryNums = 10;
     int uidForAppStateChange_ = 0;
     bool isFirstPress_ = true;
-    bool isSourceInCast_ = false;
     bool isInCast_ = false;
     bool is2in1_ = false;
 
