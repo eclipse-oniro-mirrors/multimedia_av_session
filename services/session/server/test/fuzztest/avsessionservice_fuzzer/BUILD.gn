@@ -81,6 +81,7 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
     cflags += [ "-DENABLE_BACKGROUND_AUDIO_CONTROL" ]
   }
 
+  defines = []
   if (av_session_enable_start_stop_on_demand) {
     defines += [ "START_STOP_ON_DEMAND_ENABLE" ]
   }
