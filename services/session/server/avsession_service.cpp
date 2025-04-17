@@ -569,6 +569,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
                     "DETAILED_MSG", "avsessionservice handlefocussession, updatetopsession");
             }
             topSession_ = newTopSession;
+            MirrorToStreamCast(topSession_);
         }
         GetUsersManager().SetTopSession(newTopSession, userIdForNewTopSession);
         newTopSession->SetTop(true);

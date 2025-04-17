@@ -85,7 +85,7 @@ private:
         std::vector<int32_t> &supportedCastCmds);
     void checkAbilityFromCmds(
         const std::vector<int32_t>& supportedCastCmds, CastEngine::StreamCapability& streamCapability);
-    int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem);
+    int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) override;
     bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
     int32_t GetMediaCapabilities();
     void ClearJsonCapabilities();
