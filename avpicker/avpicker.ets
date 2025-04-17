@@ -189,6 +189,7 @@ export struct AVCastPicker {
   @State isPc: boolean = false;
   @State isRTL: boolean = false;
   @State restartUECMessage: number = 1;
+  private needToRestart: boolean = false;
   @State isShowLoadingProgress: boolean = false;
 
   MenuStateChange() {
@@ -444,11 +445,11 @@ export struct AVCastPicker {
       })
       .onRelease((releaseCode) => {
         if (releaseCode === 1) {
-          this.restartUECMessage += 1;
+          this.needToRestart = true;
         }
       })
       .onError(() => {
-        this.restartUECMessage += 1;
+        this.needToRestart = true;
       })
       .accessibilityLevel('yes')
       .accessibilityText(this.accessibilityAudioControlStr)
@@ -458,6 +459,11 @@ export struct AVCastPicker {
     .accessibilityLevel('yes')
     .accessibilityText(this.accessibilityAudioControlStr)
     .onClick(() => {
+        if (this.needToRestart) {
+          this.needToRestart = false;
+          this.restartUECMessage += 1;
+          return;
+        }
         let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
         let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
         let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
@@ -506,7 +512,7 @@ export struct AVCastPicker {
   private buildCustomPicker() {
     Stack({ alignContent: Alignment.Center}) {
       Column() {
-        if (isShowLoadingProgress) {
+        if (this.isShowLoadingProgress) {
           LoadingProgress()
             .color($r('sys.color.icon_secondary'))
             .width('20vp')
