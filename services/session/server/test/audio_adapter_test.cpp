@@ -455,6 +455,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange001, TestSize.Level1)
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    sleep(1);
     EXPECT_FALSE(ret);
 }
 
@@ -478,6 +479,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange002, TestSize.Level1)
     action.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    sleep(1);
     EXPECT_FALSE(ret);
 }
 
@@ -502,6 +504,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange003, TestSize.Level1)
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    sleep(1);
     EXPECT_FALSE(ret);
 }
 
