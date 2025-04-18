@@ -530,6 +530,24 @@ void AVSessionService::InitKeyEvent()
         keyCodes, [this](const auto& keyEvent) { SendSystemAVKeyEvent(*keyEvent); });
 }
 
+void ReportFocusSessionChange(const sptr<AVSessionItem>& topSession, const sptr<AVSessionItem>& newTopSession)
+{
+    HISYSEVENT_BEHAVIOR("FOCUS_CHANGE",
+        "OLD_BUNDLE_NAME", topSession->GetDescriptor().elementName_.GetBundleName(),
+        "OLD_MODULE_NAME", topSession->GetDescriptor().elementName_.GetModuleName(),
+        "OLD_ABILITY_NAME", topSession->GetAbilityName(), "OLD_SESSION_PID", topSession->GetPid(),
+        "OLD_SESSION_UID", topSession->GetUid(), "OLD_SESSION_ID", topSession->GetSessionId(),
+        "OLD_SESSION_TAG", topSession->GetDescriptor().sessionTag_,
+        "OLD_SESSION_TYPE", topSession->GetDescriptor().sessionType_,
+        "BUNDLE_NAME", newTopSession->GetDescriptor().elementName_.GetBundleName(),
+        "MODULE_NAME", newTopSession->GetDescriptor().elementName_.GetModuleName(),
+        "ABILITY_NAME", newTopSession->GetAbilityName(), "SESSION_PID", newTopSession->GetPid(),
+        "SESSION_UID", newTopSession->GetUid(), "SESSION_ID", newTopSession->GetSessionId(),
+        "SESSION_TAG", newTopSession->GetDescriptor().sessionTag_,
+        "SESSION_TYPE", newTopSession->GetDescriptor().sessionType_,
+        "DETAILED_MSG", "avsessionservice handlefocussession, updatetopsession");
+}
+
 void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession, int32_t userId)
 {
     AVSessionDescriptor descriptor;
@@ -553,23 +571,12 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
         if (userIdForNewTopSession == GetUsersManager().GetCurrentUserId()) {
             if (topSession_ != nullptr) {
                 topSession_->SetTop(false);
-                HISYSEVENT_BEHAVIOR("FOCUS_CHANGE",
-                    "OLD_BUNDLE_NAME", topSession_->GetDescriptor().elementName_.GetBundleName(),
-                    "OLD_MODULE_NAME", topSession_->GetDescriptor().elementName_.GetModuleName(),
-                    "OLD_ABILITY_NAME", topSession_->GetAbilityName(), "OLD_SESSION_PID", topSession_->GetPid(),
-                    "OLD_SESSION_UID", topSession_->GetUid(), "OLD_SESSION_ID", topSession_->GetSessionId(),
-                    "OLD_SESSION_TAG", topSession_->GetDescriptor().sessionTag_,
-                    "OLD_SESSION_TYPE", topSession_->GetDescriptor().sessionType_,
-                    "BUNDLE_NAME", newTopSession->GetDescriptor().elementName_.GetBundleName(),
-                    "MODULE_NAME", newTopSession->GetDescriptor().elementName_.GetModuleName(),
-                    "ABILITY_NAME", newTopSession->GetAbilityName(), "SESSION_PID", newTopSession->GetPid(),
-                    "SESSION_UID", newTopSession->GetUid(), "SESSION_ID", newTopSession->GetSessionId(),
-                    "SESSION_TAG", newTopSession->GetDescriptor().sessionTag_,
-                    "SESSION_TYPE", newTopSession->GetDescriptor().sessionType_,
-                    "DETAILED_MSG", "avsessionservice handlefocussession, updatetopsession");
+                ReportFocusSessionChange(topSession_, newTopSession);
             }
             topSession_ = newTopSession;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
             MirrorToStreamCast(topSession_);
+#endif // CASTPLUS_CAST_ENGINE_ENABLE
         }
         GetUsersManager().SetTopSession(newTopSession, userIdForNewTopSession);
         newTopSession->SetTop(true);
