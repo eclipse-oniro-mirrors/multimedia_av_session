@@ -266,7 +266,7 @@ std::function<void()> NapiAVCastController::PrepareAsyncExecutor(std::shared_ptr
     AVQueueItem& data)
 {
     return [castController_, data]() {
-        if (castController_>castController_ == nullptr) {
+        if (castController_ == nullptr) {
             return;
         }
         SLOGI("do prepare set with online download prepare with uri alive");
