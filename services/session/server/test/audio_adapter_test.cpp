@@ -556,7 +556,7 @@ static HWTEST(AudioAdapterTest, OnVolumeKeyEvent002, TestSize.Level1)
 */
 static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
 {
-    SLOGD("PauseAudioStream001 begin!");
+    SLOGD("OnDeviceChange001 begin!");
     bool ret = false;
     AudioAdapter::GetInstance().AddDeviceChangeListener(
         [&ret] (const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) {
@@ -579,14 +579,14 @@ static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
 static HWTEST(AudioAdapterTest, OnDeviceChange002, TestSize.Level1)
 {
     SLOGD("OnDeviceChange002 begin!");
-    bool ret = false;
-    AudioAdapter::GetInstance().SetDeviceChangeCallback();
+    bool ret = OHOS::AVSession::AVSESSION_SUCCESS;
+    ret = AudioAdapter::GetInstance().SetDeviceChangeCallback();
 
     DeviceChangeAction action = {};
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnDeviceChange(action);
-    EXPECT_FALSE(ret);
+    EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_SUCCESS);
 }
 
 /**
@@ -598,15 +598,15 @@ static HWTEST(AudioAdapterTest, OnDeviceChange002, TestSize.Level1)
 static HWTEST(AudioAdapterTest, OnDeviceChange003, TestSize.Level1)
 {
     SLOGD("OnDeviceChange003 begin!");
-    bool ret = false;
-    AudioAdapter::GetInstance().SetDeviceChangeCallback();
-    AudioAdapter::GetInstance().UnsetDeviceChangeCallback();
+    bool ret = OHOS::AVSession::AVSESSION_SUCCESS;
+    ret = AudioAdapter::GetInstance().SetDeviceChangeCallback();
+    ret = AudioAdapter::GetInstance().UnsetDeviceChangeCallback();
 
     DeviceChangeAction action = {};
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnDeviceChange(action);
-    EXPECT_FALSE(ret);
+    EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_SUCCESS);
 }
 
 /**

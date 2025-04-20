@@ -1370,6 +1370,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
+    if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
+        deviceInfo = GetDescriptor().outputDeviceInfo_.deviceInfos_[0];
+    }
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
@@ -1407,16 +1410,13 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             }
         }
     }
-    {
-        if (castState == ConnectionState::STATE_DISCONNECTED &&
-            descriptor_.sessionTag_ == "RemoteCast") {
-            SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
-            Destroy();
-        } else {
-            AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
-                DealLocalState(castState);
-                }, "DealLocalState", 0);
-        }
+    if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
+        SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
+        Destroy();
+    } else {
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
+            DealLocalState(castState);
+            }, "DealLocalState", 0);
     }
 }
 

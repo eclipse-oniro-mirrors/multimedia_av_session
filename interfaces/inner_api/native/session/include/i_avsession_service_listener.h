@@ -83,6 +83,14 @@ public:
      * @since 18
     */
     virtual void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) = 0;
+
+    /**
+     * Set discoverable for cast.
+     *
+     * @param { bool } enable - enable cast.
+     * @since 18
+    */
+    virtual int32_t checkEnableCast(bool enable) = 0;
 #endif
 };
 } // namespace OHOS::AVSession

@@ -103,6 +103,7 @@ public:
         void NotifyDeviceOffline(const std::string& deviceId) {}
         void setInCast(bool isInCast) {}
         void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) {}
+        int32_t checkEnableCast(bool enable) { return 0; }
 #endif
     virtual ~AVSessionServiceListenerMock() {}
 };
@@ -1296,14 +1297,13 @@ static HWTEST_F(AVRouterImplTest, UnRegisterCallback002, TestSize.Level1)
 }
 /**
 * @tc.name: Release001
-* @tc.desc: call Release when hasSessionAlive_ is true
+* @tc.desc: call Release
 * @tc.type: FUNC
 * @tc.require: NA
 */
 static HWTEST_F(AVRouterImplTest, Release001, TestSize.Level1)
 {
     std::shared_ptr<AVRouterImpl> aVRouterImpl = std::make_shared<AVRouterImplMock>();
-    aVRouterImpl->hasSessionAlive_ = true;
     auto ret = aVRouterImpl->Release();
     EXPECT_EQ(ret, false);
 }
