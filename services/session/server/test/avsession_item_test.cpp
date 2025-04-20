@@ -32,6 +32,9 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
+namespace OHOS {
+namespace AVSession {
+
 static char g_testSessionTag[] = "test";
 static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
 static char g_testAnotherAbilityName[] = "testAnother.ability";
@@ -516,3 +519,5 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level1)
     EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceType_ == 1);
     SLOGD("AVSessionItem_SetOutputDevice_002 end!");
 }
+} //AVSession
+} //OHOS

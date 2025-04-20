@@ -30,6 +30,9 @@ using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AVSession;
 
+namespace OHOS {
+namespace AVSession {
+
 static uint64_t g_selfTokenId = 0;
 static HapInfoParams g_info = {
     .userID = 100,
@@ -769,3 +772,5 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopDeviceLogging_
     EXPECT_EQ(result, OHOS::ERR_NONE);
     SLOGD("AVSessionServiceStub_HandleStopDeviceLogging_001 end!");
 }
+} //AVSession
+} //OHOS

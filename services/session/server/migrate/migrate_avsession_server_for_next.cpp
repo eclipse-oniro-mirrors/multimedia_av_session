@@ -525,6 +525,7 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
         jsonObject[AUDIO_MAC_ADDRESS].asString() : "ERROR_VALUE";
     
     std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
+    CHECK_AND_RETURN_LOG(device != nullptr, "AudioDeviceDescriptor make shared_ptr is null");
     device->deviceCategory_ = static_cast<AudioStandard::DeviceCategory>(deviceCategory);
     device->deviceType_ = static_cast<AudioStandard::DeviceType>(deviceType);
     device->deviceRole_ = static_cast<AudioStandard::DeviceRole>(deviceRole);

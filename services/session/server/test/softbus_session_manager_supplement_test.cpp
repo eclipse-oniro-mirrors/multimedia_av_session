@@ -31,6 +31,9 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
+namespace OHOS {
+namespace AVSession {
+
 std::shared_ptr<SoftbusDistributedDataManager> g_SoftbusDistributedDataManager {nullptr};
 std::shared_ptr<MigrateAVSessionProxy> g_MigrateAVSessionProxy {nullptr};
 std::shared_ptr<AVSessionService> g_AVSessionService {nullptr};
@@ -242,3 +245,5 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, BytesReceived001, TestSize.
     g_SoftbusDistributedDataManager->BytesReceived(socket, data);
     EXPECT_EQ(g_SoftbusDistributedDataManager->isServer_, false);
 }
+} //AVSession
+} //OHOS

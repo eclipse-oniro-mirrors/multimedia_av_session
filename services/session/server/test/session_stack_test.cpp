@@ -22,6 +22,9 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
+namespace OHOS {
+namespace AVSession {
+
 class SessionStackTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -249,3 +252,5 @@ HWTEST_F(SessionStackTest, GetSessionByUid001, TestSize.Level1)
     avSessionService_->HandleSessionRelease(sessionId);
     sessionStack.sessions_.clear();
 }
+} //AVSession
+} //OHOS
