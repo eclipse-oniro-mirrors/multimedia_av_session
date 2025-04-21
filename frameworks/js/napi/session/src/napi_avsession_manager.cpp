@@ -467,8 +467,7 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
         SLOGE("check create controller with errCode %{public}d", static_cast<int>(context->errCode));
         std::lock_guard lockGuard(createControllerMutex_);
         if (context->errCode == ERR_CONTROLLER_IS_EXIST) {
-            SLOGE("check create controller meet repeat for sessionId: %{public}s***",
-                context->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
+            SLOGE("check create controller meet repeat");
             context->status = NapiAVSessionController::RepeatedInstance(env, context->sessionId_, output);
         } else {
             context->status = NapiAVSessionController::NewInstance(env, context->controller_, output);

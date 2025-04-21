@@ -129,8 +129,6 @@ private:
     static constexpr size_t HISTORICAL_MIN_NUM = 0;
     static constexpr size_t HISTORICAL_MAX_NUM = 10;
 
-    static constexpr size_t UNMASK_CHAR_NUM = 3;
-
     static const std::string DISTRIBUTED_SESSION_CHANGE_EVENT;
 };
 } // namespace OHOS::AVSession

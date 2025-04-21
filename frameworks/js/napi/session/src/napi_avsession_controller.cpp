@@ -1248,19 +1248,16 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
             context->errCode = NapiAVSessionManager::errcode_[ret];
             return;
         }
-        SLOGI("NapiAVSessionController destroy process done for: %{public}s***",
-            napiController->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
+        SLOGI("NapiAVSessionController destroy process done");
     };
     auto complete = [env, context](napi_value& output) {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
         napiController->callback_ = nullptr;
         napiController->controller_ = nullptr;
         std::lock_guard<std::mutex> lock(controllerListMutex_);
-        SLOGI("repeat list check for controller destory: %{public}s***",
-            napiController->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
+        SLOGI("repeat list check for controller destory");
         if (!ControllerList_.empty() && ControllerList_.find(napiController->sessionId_) != ControllerList_.end()) {
-            SLOGI("repeat list erase for controller destory: %{public}s***",
-                napiController->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
+            SLOGI("repeat list erase for controller destory");
             ControllerList_.erase(napiController->sessionId_);
         }
         output = NapiUtils::GetUndefinedValue(env);
