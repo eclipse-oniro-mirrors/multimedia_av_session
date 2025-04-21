@@ -460,7 +460,6 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
     std::string supportCapabilities;
     ClearJsonCapabilities();
     streamPlayer_->GetMediaCapabilities(supportCapabilities);
-    CHECK_AND_RETURN_RET_LOG(!supportCapabilities.empty(), AVSESSION_ERROR, "supportCapabilities is empty");
     CHECK_AND_RETURN_RET_LOG(nlohmann::json::accept(supportCapabilities), AVSESSION_ERROR,
         "supportCapabilities is invalid");
     nlohmann::json value = nlohmann::json::parse(supportCapabilities);
