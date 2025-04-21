@@ -1239,6 +1239,9 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
         ProcessFrontSession("Disconnect");
     }
     SaveLocalDeviceInfo();
+    if (serviceCallbackForCastNtf_) {
+        serviceCallbackForCastNtf_(GetSessionId(), false, false);
+    }
     ReportStopCastFinish("AVSessionItem::OnCastStateChange", deviceInfo);
 }
 
