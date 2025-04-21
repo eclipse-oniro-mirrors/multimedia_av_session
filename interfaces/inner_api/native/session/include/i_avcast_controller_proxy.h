@@ -197,6 +197,14 @@ public:
      * @since 10
     */
     virtual int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) = 0;
+
+    /**
+     * @brief Set current queue item.
+     *
+     * @return { int32_t } refresh queue item result.
+     * @since 18
+    */
+    virtual int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_I_AVCAST_CONTROLLER_PROXY_H

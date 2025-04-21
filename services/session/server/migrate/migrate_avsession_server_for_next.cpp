@@ -469,7 +469,7 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
                 SendJsonStringByte(deviceId_, msg);
             },
             "GetPreferredDeviceChangeCallbackFunc");
-            volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
+        volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
     };
 }
 
