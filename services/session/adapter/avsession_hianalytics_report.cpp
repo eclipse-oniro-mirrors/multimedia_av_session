@@ -93,7 +93,7 @@ void AVSessionHiAnalyticsReport::PublishRecommendInfo(const std::string &bundleN
     properties.emplace(HA_KEY_SRC_BUNDLE_NAME, bundleName);
     properties.emplace(HA_KEY_AVSESSION_ID, sessionId);
     properties.emplace(HA_KEY_AVSESSION_TYPE, sessionType);
-    properties.emplace(HA_KEY_AVSESSION_TYPE, assetId);
+    properties.emplace(HA_KEY_AVSESSION_MEDIA_ID, assetId);
     properties.emplace(HA_KEY_RESOURCE_DURATION, std::to_string(duration));
     SLOGI("PublishRecommendInfo: bundleName:%{public}s duration:%{public}d", bundleName.c_str(), duration);
     ConnectHAClient(HA_AVCAST_RECOMMEND_ID, properties);
