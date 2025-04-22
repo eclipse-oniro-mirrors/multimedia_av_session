@@ -1395,10 +1395,10 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         castState = 6; // 6 is disconnected status of AVSession
         DealDisconnect(deviceInfo, isNeedRemove);
     }
-    HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
         std::lock_guard aliveLockGuard(isAliveLock_);
         if (isAlivePtr_ != nullptr && *isAlivePtr_) {
+            HandleOutputDeviceChange(castState, outputDeviceInfo);
             std::lock_guard controllersLockGuard(controllersLock_);
             for (const auto& controller : controllers_) {
                 if (!controllers_.empty() && controller.second != nullptr) {
