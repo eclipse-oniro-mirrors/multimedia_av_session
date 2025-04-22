@@ -23,6 +23,7 @@
 #include "softbus/softbus_session_utils.h"
 #include "int_wrapper.h"
 #include "string_wrapper.h"
+#include "bool_wrapper.h"
 
 namespace OHOS::AVSession {
 
@@ -223,6 +224,9 @@ const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::Migrate
             case SESSION_NUM_COLD_START_FROM_PROXY:
                 ColdStartFromProxy();
                 break;
+            case SESSION_NUM_SET_MEDIACONTROL_NEED_STATE:
+                NotifyMediaControlNeedStateChange(extras);
+                break;
             default:
                 break;
         }
@@ -240,10 +244,10 @@ void MigrateAVSessionProxy::SetVolume(const AAFwk::WantParams& extras)
 
     volumeNum_ = OHOS::AAFwk::Integer::Unbox(ao);
     Json::Value value;
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_SET_VOLUME_COMMAND});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_SET_VOLUME_COMMAND});
     value[AUDIO_VOLUME] = volumeNum_;
     SoftbusSessionUtils::TransferJsonToStr(value, msg);
-    SendByte(deviceId_, msg);
+    SendByteForNext(deviceId_, msg);
 }
 
 void MigrateAVSessionProxy::SelectOutputDevice(const AAFwk::WantParams& extras)
@@ -255,7 +259,7 @@ void MigrateAVSessionProxy::SelectOutputDevice(const AAFwk::WantParams& extras)
     CHECK_AND_RETURN_LOG(stringValue != nullptr, "extras have no value");
 
     std::string deviceValue = AAFwk::String::Unbox(stringValue);
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_SWITCH_AUDIO_DEVICE_COMMAND});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_SWITCH_AUDIO_DEVICE_COMMAND});
     SendJsonStringByte(deviceId_, msg + deviceValue);
 }
 
@@ -288,11 +292,11 @@ void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantP
 void MigrateAVSessionProxy::ColdStartFromProxy()
 {
     SLOGI("proxy send in ColdStartFromProxy case with bundleName:%{public}s", elementName_.GetAbilityName().c_str());
-    std::string msg = std::string({MSG_HEAD_MODE, COLD_START});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, COLD_START});
     Json::Value controlMsg;
     controlMsg[MIGRATE_BUNDLE_NAME] = elementName_.GetAbilityName();
     SoftbusSessionUtils::TransferJsonToStr(controlMsg, msg);
-    SendByte(deviceId_, msg);
+    SendByteForNext(deviceId_, msg);
 }
 
 void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
@@ -325,6 +329,12 @@ void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
     }
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
+    AVMetaData metaData;
+    if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
+        metaData.SetWriter(elementName_.GetBundleName());
+        remoteSession_->SetAVMetaData(metaData);
+    }
+    SendMediaControlNeedStateMsg();
 }
 
 bool MigrateAVSessionProxy::CheckMediaAlive()
@@ -339,7 +349,17 @@ void MigrateAVSessionProxy::ProcessMetaData(Json::Value jsonValue)
     if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
         SLOGE("ProcessMetaData GetAVMetaData fail");
     }
-    metaData.SetAssetId(DEFAULT_STRING);
+
+    if (jsonValue.isMember(METADATA_ASSET_ID)) {
+        std::string assetId = jsonValue[METADATA_ASSET_ID].isString() ?
+            jsonValue[METADATA_ASSET_ID].asString() : DEFAULT_STRING;
+        std::string oldAsset = metaData.GetAssetId();
+        if (oldAsset != assetId) {
+            metaData.SetTitle("");
+            metaData.SetArtist("");
+        }
+        metaData.SetAssetId(assetId);
+    }
     if (jsonValue.isMember(METADATA_TITLE)) {
         std::string title = jsonValue[METADATA_TITLE].isString() ?
             jsonValue[METADATA_TITLE].asString() : DEFAULT_STRING;
@@ -471,7 +491,9 @@ void MigrateAVSessionProxy::ProcessBundleImg(std::string bundleIconStr)
     if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
         SLOGE("ProcessBundleImg GetAVMetaData fail");
     }
-    metaData.SetAssetId(DEFAULT_STRING);
+    if (metaData.GetAssetId().empty()) {
+        metaData.SetAssetId(DEFAULT_STRING);
+    }
     std::vector<uint8_t> imgVec(bundleIconStr.begin(), bundleIconStr.end());
     if (imgVec.size() <= 0) {
         SLOGE("ProcessBundleImg with empty img, return");
@@ -489,11 +511,19 @@ void MigrateAVSessionProxy::ProcessBundleImg(std::string bundleIconStr)
 void MigrateAVSessionProxy::ProcessMediaImage(std::string mediaImageStr)
 {
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessMediaImage with remote session null");
+    size_t insertPos = mediaImageStr.find('|');
+    CHECK_AND_RETURN_LOG(insertPos != std::string::npos && insertPos > 0 && insertPos < mediaImageStr.size(),
+        "mediaImgStr do not contain assetId, return");
+    std::string assetIdForMediaImg = mediaImageStr.substr(0, insertPos);
+    mediaImageStr.erase(0, insertPos + 1);
     AVMetaData metaData;
     if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
         SLOGE("ProcessMediaImage GetAVMetaData fail");
     }
-    metaData.SetAssetId(DEFAULT_STRING);
+    if (metaData.GetAssetId().empty()) {
+        metaData.SetAssetId(assetIdForMediaImg);
+    }
+    metaData.SetPreviousAssetId(assetIdForMediaImg);
     std::vector<uint8_t> imgVec(mediaImageStr.begin(), mediaImageStr.end());
     if (imgVec.size() <= 0) {
         metaData.SetMediaImageUri(DEFAULT_STRING);
@@ -512,12 +542,22 @@ void MigrateAVSessionProxy::ProcessMediaImage(std::string mediaImageStr)
 void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr)
 {
     SLOGI("SendControlCommandMsg with code:%{public}d", commandCode);
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_COMMAND});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_COMMAND});
     Json::Value controlMsg;
     controlMsg[COMMAND_CODE] = commandCode;
     controlMsg[COMMAND_ARGS] = commandArgsStr;
     SoftbusSessionUtils::TransferJsonToStr(controlMsg, msg);
-    SendByte(deviceId_, msg);
+    SendByteForNext(deviceId_, msg);
+}
+
+void MigrateAVSessionProxy::SendMediaControlNeedStateMsg()
+{
+    SLOGI("SendMediaControlNeedStateMsg with state:%{public}d", isNeedByMediaControl_);
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_MEDIA_CONTROL_NEED_STATE});
+    Json::Value controlMsg;
+    controlMsg[NEED_STATE] = isNeedByMediaControl_;
+    SoftbusSessionUtils::TransferJsonToStr(controlMsg, msg);
+    SendByteForNext(deviceId_, msg);
 }
 
 void MigrateAVSessionProxy::SendSpecialKeepAliveData()
@@ -525,17 +565,33 @@ void MigrateAVSessionProxy::SendSpecialKeepAliveData()
     std::thread([this]() {
         while (!this->deviceId_.empty()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME_FOR_NEXT));
+            if (!isNeedByMediaControl_) {
+                SLOGI("no byte send for client no need");
+                continue;
+            }
             if (this->deviceId_.empty()) {
                 SLOGE("SendSpecialKeepAliveData without deviceId, return");
                 return;
             }
             SLOGI("SendSpecialKeepAliveData for deviceId:%{public}s",
                 SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
-            std::string data = std::string({MSG_HEAD_MODE, SYNC_HEARTBEAT});
-            SendByteToAll(data);
+            std::string data = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_HEARTBEAT});
+            SendByteForNext(deviceId_, data);
         }
         SLOGI("SendSpecialKeepAliveData exit");
     }).detach();
+}
+
+void MigrateAVSessionProxy::NotifyMediaControlNeedStateChange(AAFwk::WantParams& extras)
+{
+    CHECK_AND_RETURN_LOG(extras.HasParam(MEDIACONTROL_NEED_STATE), "extras not have NeedState");
+    auto value = extras.GetParam(MEDIACONTROL_NEED_STATE);
+    AAFwk::IBoolean* boolValue = AAFwk::IBoolean::Query(value);
+    CHECK_AND_RETURN_LOG(boolValue != nullptr, "extras have no NeedState after query");
+    bool isNeed = OHOS::AAFwk::Boolean::Unbox(boolValue);
+    SLOGI("refresh NeedState:%{public}d", isNeed);
+    isNeedByMediaControl_ = isNeed;
+    SendMediaControlNeedStateMsg();
 }
 
 AVSessionObserver::AVSessionObserver(const std::string &playerId, std::weak_ptr<MigrateAVSessionProxy> migrateProxy)

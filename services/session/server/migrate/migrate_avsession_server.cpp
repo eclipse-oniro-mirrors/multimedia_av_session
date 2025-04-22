@@ -34,6 +34,7 @@
 namespace OHOS::AVSession {
 MigrateAVSessionServer::MigrateAVSessionServer(int32_t migrateMode)
 {
+    SLOGI("server start with:%{public}d", migrateMode);
     migrateMode_ = migrateMode;
 }
 
@@ -53,6 +54,10 @@ MigrateAVSessionServer::~MigrateAVSessionServer()
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
 {
     SLOGI("OnConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    if (deviceId_ != deviceId && !deviceId_.empty()) {
+        SLOGI("onConnect but already:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+        return;
+    }
     isSoftbusConnecting_ = true;
     deviceId_ = deviceId;
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
@@ -70,10 +75,18 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
 void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
 {
     SLOGI("OnDisConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    if (deviceId_ != deviceId && !deviceId_.empty()) {
+        SLOGI("onDisconnect but already:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+        return;
+    }
     UnregisterAudioCallback();
     isSoftbusConnecting_ = false;
     if (servicePtr_ == nullptr) {
         SLOGE("do NotifyMigrateStop without servicePtr, return");
+        return;
+    }
+    if (migrateMode_ == MIGRATE_MODE_NEXT) {
+        SLOGI("migrate next should not bother migrate cross");
         return;
     }
     servicePtr_->NotifyMigrateStop(deviceId);
@@ -102,6 +115,9 @@ void MigrateAVSessionServer::UnregisterAudioCallback()
 
 int32_t MigrateAVSessionServer::GetCharacteristic()
 {
+    if (migrateMode_ == MIGRATE_MODE_NEXT) {
+        return MSG_HEAD_MODE_FOR_NEXT;
+    }
     return MSG_HEAD_MODE;
 }
 
@@ -140,7 +156,7 @@ void MigrateAVSessionServer::CreateController(const std::string &sessionId)
     }
     sptr<IRemoteObject> proxyObject;
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "createController without servicePtr");
-    int32_t ret = servicePtr_->CreateControllerInner(sessionId, proxyObject);
+    int32_t ret = servicePtr_->CreateControllerInner(sessionId, proxyObject, migrateMode_);
     if (ret != AVSESSION_SUCCESS && !(ret == ERR_CONTROLLER_IS_EXIST && proxyObject != nullptr)) {
         SLOGW("CreateControllerInner fail");
         return;

@@ -66,7 +66,17 @@ void SoftbusSession::SendJsonStringByte(const std::string &deviceId, const std::
     std::lock_guard lockGuard(deviceMapLock_);
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {
-        SoftbusSessionManager::GetInstance().SendBytes(iter->second, data);
+        SoftbusSessionManager::GetInstance().SendBytesForNext(iter->second, data);
+    }
+}
+
+void SoftbusSession::SendByteForNext(const std::string &deviceId, const std::string &data)
+{
+    std::lock_guard lockGuard(deviceMapLock_);
+    SLOGI("SendByteLength: %{public}d", static_cast<int>(data.size()));
+    auto iter = deviceToSessionMap_.find(deviceId);
+    if (iter != deviceToSessionMap_.end()) {
+        SoftbusSessionManager::GetInstance().SendBytesForNext(iter->second, data);
     }
 }
 

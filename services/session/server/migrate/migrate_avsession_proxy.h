@@ -31,7 +31,7 @@ class AVSessionService;
 class MigrateAVSessionProxy : public SoftbusSessionProxy,
     public std::enable_shared_from_this<MigrateAVSessionProxy> {
 public:
-    explicit MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode = MSG_HEAD_MODE);
+    explicit MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode = MSG_HEAD_MODE_FOR_NEXT);
     ~MigrateAVSessionProxy();
 
     void OnConnectServer(const std::string &deviceId) override;
@@ -55,6 +55,7 @@ public:
         AUDIO_NUM_GET_AVAILABLE_DEVICES = 3,
         AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO = 4,
         SESSION_NUM_COLD_START_FROM_PROXY = 5,
+        SESSION_NUM_SET_MEDIACONTROL_NEED_STATE = 6,
     };
 
     const std::map<const std::string, int32_t> AUDIO_EVENT_MAPS = {
@@ -65,6 +66,7 @@ public:
         {AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO,
             AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO},
         {SESSION_COLD_START_FROM_PROXY, SESSION_NUM_COLD_START_FROM_PROXY},
+        {SESSION_SET_MEDIACONTROL_NEED_STATE, SESSION_NUM_SET_MEDIACONTROL_NEED_STATE},
     };
 
 private:
@@ -81,6 +83,7 @@ private:
     void ProcessMediaImage(std::string mediaImageStr);
     void SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr);
     void SendSpecialKeepAliveData();
+    void SendMediaControlNeedStateMsg();
 
     const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxyControllerCallback();
 
@@ -91,6 +94,7 @@ private:
     void GetAvailableDevices(AAFwk::WantParams& extras);
     void GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras);
     void ColdStartFromProxy();
+    void NotifyMediaControlNeedStateChange(AAFwk::WantParams& extras);
 
     int32_t mMode_;
     std::string deviceId_;
@@ -103,6 +107,8 @@ private:
     AudioDeviceDescriptors availableDevices_;
     AudioDeviceDescriptors preferredOutputDevice_;
     MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback_;
+
+    bool isNeedByMediaControl_ = false;
 };
 
 class AVSessionObserver : public AVSessionCallback {

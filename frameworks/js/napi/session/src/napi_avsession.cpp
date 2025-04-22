@@ -648,7 +648,8 @@ std::function<void()> NapiAVSession::PlaybackStateSyncExecutor(NapiAVSession* na
         std::unique_lock<std::mutex> lock(syncAsyncMutex_);
         auto waitStatus = syncAsyncCond_.wait_for(lock, std::chrono::milliseconds(100));
         if (waitStatus == std::cv_status::timeout) {
-            SLOGE("SetAVPlaybackState in syncExecutor timeout");
+            SLOGE("SetAVPlaybackState:%{public}d in syncExecutor timeout after err:%{public}d",
+                playBackState.GetState(), playBackStateRet_);
             return;
         }
     };
@@ -659,10 +660,6 @@ std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<
     return [context]() {
         std::unique_lock<std::mutex> lock(syncMutex_);
         auto waitStatus = syncCond_.wait_for(lock, std::chrono::milliseconds(100));
-        if (waitStatus == std::cv_status::timeout) {
-            SLOGE("SetAVPlaybackState in asyncExecutor timeout");
-            return;
-        }
 
         if (playBackStateRet_ != AVSESSION_SUCCESS) {
             if (playBackStateRet_ == ERR_SESSION_NOT_EXIST) {
@@ -676,6 +673,10 @@ std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[playBackStateRet_];
+        }
+        if (waitStatus == std::cv_status::timeout) {
+            SLOGE("SetAVPlaybackState in asyncExecutor timeout after err:%{public}d", playBackStateRet_);
+            return;
         }
         syncAsyncCond_.notify_one();
     };

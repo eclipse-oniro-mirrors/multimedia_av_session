@@ -1355,7 +1355,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
 
     NotifySessionCreate(result->GetDescriptor());
     sessionItem = result;
-    
+
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
@@ -1975,16 +1975,24 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
     }
     return ret;
 }
-    
+
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
-    SLOGI("CreateControllerInner for sessionId:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    return CreateControllerInner(sessionId, object, -1);
+}
+
+int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object, pid_t pid)
+{
+    SLOGI("CreateControllerInner for sessionId:%{public}s|%{public}d",
+        AVSessionUtils::GetAnonySessionId(sessionId).c_str(), pid);
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
     if (session == nullptr) {
         SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
         return ERR_SESSION_NOT_EXIST;
     }
-    auto pid = GetCallingPid();
+    if (pid < 0) {
+        pid = GetCallingPid();
+    }
     auto existController = GetPresentController(pid, sessionId);
     if (existController != nullptr) {
         SLOGI("Controller is already existed.");

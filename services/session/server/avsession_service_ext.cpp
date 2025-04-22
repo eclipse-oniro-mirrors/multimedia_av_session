@@ -650,8 +650,9 @@ void AVSessionService::DoDisconnectProcessWithMigrate(const OHOS::DistributedHar
 
 void AVSessionService::DoDisconnectProcessWithMigrateServer(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    SLOGI("DoDisconnectMigrateServer with deviceType:%{public}d", deviceInfo.deviceTypeId);
     std::string networkId = std::string(deviceInfo.networkId);
+    SLOGI("DoDisconnectMigrateServer networkId:%{public}s",
+        AVSessionUtils::GetAnonySessionId(networkId).c_str());
     MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(MigrateAVSessionManager::migrateSceneNext);
     if (migrateAVSessionServerMap_.find(networkId) != migrateAVSessionServerMap_.end()) {
         std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer =
@@ -667,12 +668,14 @@ void AVSessionService::DoDisconnectProcessWithMigrateServer(const OHOS::Distribu
 
 void AVSessionService::DoDisconnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    SLOGI("DoDisconnectProcessWithMigrateProxy with networkId:%{public}s", deviceInfo.networkId);
     std::string networkId = std::string(deviceInfo.networkId);
+    SLOGI("DoDisconnectProcessWithMigrateProxy networkId:%{public}s",
+        AVSessionUtils::GetAnonySessionId(networkId).c_str());
     MigrateAVSessionManager::GetInstance().ReleaseRemoteSessionProxy(networkId,
         MigrateAVSessionManager::migrateSceneNext);
     if (migrateAVSessionProxyMap_.find(networkId) != migrateAVSessionProxyMap_.end()) {
         migrateAVSessionProxyMap_.erase(networkId);
+        PublishEvent(remoteMediaNone);
     } else {
         SLOGE("DoDisconnectProcessWithMigrateProxy find networkId not exist");
     }

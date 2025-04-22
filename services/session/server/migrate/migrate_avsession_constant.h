@@ -48,6 +48,7 @@ constexpr int32_t SYNC_CONTROLLER_CALLBACK_ON_AUDIOINFO_CHANGED = 18;
 
 constexpr int32_t MSG_HEAD_LENGTH = 2;
 constexpr int32_t MSG_HEAD_MODE = 100;
+constexpr int32_t MSG_HEAD_MODE_FOR_NEXT = 101;
 
 constexpr int32_t SYNC_CONTROLLER_LIST = 1;
 constexpr int32_t SYNC_CONTROLLER = 2;
@@ -72,6 +73,8 @@ constexpr int32_t SYNC_AVAIL_DEVICES_LIST = 18;
 constexpr int32_t SYNC_CURRENT_DEVICE = 19;
 constexpr int32_t SYNC_SWITCH_AUDIO_DEVICE_COMMAND = 20;
 
+constexpr int32_t SYNC_MEDIA_CONTROL_NEED_STATE = 21;
+
 constexpr int32_t MESSAGE_CODE_CONNECT_SERVER = 1;
 constexpr int32_t DEFAULT_NUM = 0;
 
@@ -88,6 +91,7 @@ constexpr int REASON_EXIST = -3;
 #define  MIGRATE_SESSION_ID "SessionId"
 #define  MIGRATE_BUNDLE_NAME "BundleName"
 #define  MIGRATE_ABILITY_NAME "AbilityName"
+#define  NEED_STATE "NeedState"
 
 namespace {
 const char* EMIT_UTF8 = "emitUTF8";
@@ -169,6 +173,8 @@ const std::string AUDIO_MAC_ADDRESS = "AudioMacAddress";
 const char* AUDIO_SET_VOLUME = "AUDIO_SET_VOLUME";
 const char* AUDIO_SELECT_OUTPUT_DEVICE = "AUDIO_SELECT_OUTPUT_DEVICE";
 const char* SESSION_COLD_START_FROM_PROXY = "COLD_START";
+const char* SESSION_SET_MEDIACONTROL_NEED_STATE = "MEDIACONTROL_NEED_STATE";
+const char* MEDIACONTROL_NEED_STATE = "NEED_STATE";
 
 const char* AUDIO_GET_VOLUME = "AUDIO_GET_VOLUME";
 const char* AUDIO_GET_AVAILABLE_DEVICES = "AUDIO_GET_AVAILABLE_DEVICES";

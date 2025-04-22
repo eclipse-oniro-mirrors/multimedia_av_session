@@ -680,7 +680,7 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest025, TestSize
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest026, TestSize.Level1)
 {
     SLOGI("OnRemoteRequest026 begin!");
-    uint32_t code = 25;
+    uint32_t code = static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX);
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionService::GetDescriptor());
