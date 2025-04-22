@@ -28,6 +28,7 @@ public:
     void SendByteToAll(const std::string &data);
     void SendByte(const std::string &deviceId, const std::string &data);
     void SendJsonStringByte(const std::string &deviceId, const std::string &data);
+    void SendByteForNext(const std::string &deviceId, const std::string &data);
     void SendByte(int32_t sessionId, const std::string &data);
     void SendMessage(const std::string &deviceId, const std::string &data);
     void SendMessage(int32_t sessionId, const std::string &data);

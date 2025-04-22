@@ -55,6 +55,7 @@ public:
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
+    int32_t GetCallbackNum(int32_t event);
 
 private:
     template<typename T>

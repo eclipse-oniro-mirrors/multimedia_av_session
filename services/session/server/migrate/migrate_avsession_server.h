@@ -124,6 +124,7 @@ private:
     void VolumeControlCommand(Json::Value commandJsonValue);
     void SwitchAudioDeviceCommand(Json::Value jsonObject);
     void ProcessColdStartFromNext(Json::Value commandJsonValue);
+    void ProcessMediaControlNeedStateFromNext(Json::Value commandJsonValue);
     void SendCommandProc(const std::string &command, sptr<AVControllerItem> controller);
     void MediaButtonEventProc(const std::string &command, sptr<AVControllerItem> controller);
     void CommandWithExtrasProc(int mediaCommand, const std::string &extrasCommand, const std::string &extras,
@@ -172,6 +173,7 @@ private:
     Json::Value metaDataCache_;
     Json::Value playbackStateCache_;
     std::recursive_mutex cacheJsonLock_;
+    bool isListenerSet_ = false;
 };
 
 class AVControllerObserver : public AVControllerCallback {

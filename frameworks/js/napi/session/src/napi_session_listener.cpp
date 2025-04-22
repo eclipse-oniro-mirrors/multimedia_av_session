@@ -239,4 +239,9 @@ napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, nap
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
 }
+
+int32_t NapiSessionListener::GetCallbackNum(int32_t event)
+{
+    return callbacks_[event].size();
+}
 }

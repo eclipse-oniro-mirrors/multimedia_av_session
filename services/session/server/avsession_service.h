@@ -183,6 +183,8 @@ public:
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
+    int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object, pid_t pid);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 #endif
