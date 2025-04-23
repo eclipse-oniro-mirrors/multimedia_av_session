@@ -427,7 +427,8 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
         return;
     }
-    SLOGI("OnTopSessionChange sessionId_: %{public}s", descriptor.sessionId_.c_str());
+    SLOGI("OnTopSessionChange sessionId_: %{public}s***",
+        descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
     {
         std::lock_guard lockGuard(topSessionLock_);
         if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO ||

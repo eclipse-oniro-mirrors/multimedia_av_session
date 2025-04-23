@@ -167,6 +167,8 @@ private:
     static constexpr size_t ARGV_FIRST = 0;
     static constexpr size_t ARGV_SECOND = 1;
     static constexpr size_t ARGV_THIRD = 2;
+
+    static constexpr size_t UNMASK_CHAR_NUM = 3;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_H
