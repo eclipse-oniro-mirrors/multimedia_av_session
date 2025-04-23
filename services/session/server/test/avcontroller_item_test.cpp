@@ -23,6 +23,9 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
+namespace OHOS {
+namespace AVSession {
+
 static char g_testSessionTag[] = "test";
 static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
 static char g_testAnotherAbilityName[] = "testAnother.ability";
@@ -252,3 +255,5 @@ HWTEST_F(AVControllerItemTest, HandleActiveStateChange001, TestSize.Level1)
     controller->HandleActiveStateChange(false);
     EXPECT_NE(controller->session_, nullptr);
 }
+} //AVSession
+} //OHOS

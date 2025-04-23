@@ -22,6 +22,9 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
+namespace OHOS {
+namespace AVSession {
+
 class AVSessionUsersManagerTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -183,3 +186,5 @@ HWTEST_F(AVSessionUsersManagerTest, GetCurSessionListForKeyEvent001, TestSize.Le
     AVSessionUsersManager::GetInstance().GetCurSessionListForKeyEvent(userId);
     EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
 }
+} //AVSession
+} //OHOS
