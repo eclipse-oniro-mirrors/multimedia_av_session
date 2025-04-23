@@ -1293,7 +1293,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             return;
         }
     }
-    if (castState == connectStateFromCast_) { // 6 is connected status (stream)
+    if (castState == connectStateFromCast_ || castState == authingStateFromCast_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
             castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {

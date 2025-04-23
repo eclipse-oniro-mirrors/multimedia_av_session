@@ -417,6 +417,7 @@ private:
 
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
+    int32_t authingStateFromCast_ = 10;
     int32_t castDisconnectStateInAVSession_ = 6;
     int32_t removeCmdStep_ = 1000;
 
