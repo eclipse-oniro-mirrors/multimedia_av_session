@@ -136,6 +136,9 @@ private:
     static napi_value ThrowErrorAndReturn(napi_env env, const std::string& message, int32_t errCode);
     static napi_value ThrowErrorAndReturnByErrCode(napi_env env, const std::string& message, int32_t errCode);
 
+    static void DoLastMetaDataRefresh(NapiAVSession* napiAVSession);
+    static bool CheckMetaOutOfDate(NapiAVSession* napiAVSession, OHOS::AVSession::AVMetaData& curMeta);
+
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;
     std::string sessionType_ ;
@@ -143,7 +146,6 @@ private:
     AppExecFwk::ElementName elementName_;
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
-    std::chrono::system_clock::time_point latestMetadataTs_;
     std::string latestMetadataUri_;
     std::string latestMetadataAssetId_;
     std::string latestDownloadedUri_;

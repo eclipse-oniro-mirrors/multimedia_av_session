@@ -116,6 +116,7 @@ private:
         .pkgName = nullptr,
         .dataType = DATA_TYPE_BYTES,
     };
+    std::string socketNameCache_;
 
     bool isServer_ = true;
     std::map<const std::string, int32_t> mProxySocketMap_;

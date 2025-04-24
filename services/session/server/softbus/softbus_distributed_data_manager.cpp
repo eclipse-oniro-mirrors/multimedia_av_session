@@ -40,15 +40,17 @@ void SoftbusDistributedDataManager::Init()
 void SoftbusDistributedDataManager::SessionOpened(int32_t socket, PeerSocketInfo info)
 {
     std::string sessionName = info.name;
-    peerSocketInfo.name = info.name;
-    peerSocketInfo.networkId = info.networkId;
-    peerSocketInfo.pkgName = info.pkgName;
-    peerSocketInfo.dataType = info.dataType;
     if (sessionName != CONFIG_SOFTBUS_SESSION_TAG) {
         SLOGE("onSessionOpened: the group id is not match the media session group. sessionName is %{public}s",
             sessionName.c_str());
         return;
     }
+    SLOGI("set sessionName to:%{public}s onSessionOpened", info.name);
+    socketNameCache_.assign(info.name);
+    peerSocketInfo.name = info.name;
+    peerSocketInfo.networkId = info.networkId;
+    peerSocketInfo.pkgName = info.pkgName;
+    peerSocketInfo.dataType = info.dataType;
     if (isServer_) {
         OnSessionServerOpened();
     }
@@ -56,7 +58,7 @@ void SoftbusDistributedDataManager::SessionOpened(int32_t socket, PeerSocketInfo
 
 void SoftbusDistributedDataManager::SessionClosed(int32_t socket)
 {
-    if (isServer_ && peerSocketInfo.name != CONFIG_SOFTBUS_SESSION_TAG) {
+    if (isServer_ && socketNameCache_ != CONFIG_SOFTBUS_SESSION_TAG) {
         SLOGE("onSessionClosed: the group id is not match the media session group.");
         return;
     }
@@ -69,9 +71,9 @@ void SoftbusDistributedDataManager::SessionClosed(int32_t socket)
 
 void SoftbusDistributedDataManager::MessageReceived(int32_t socket, const std::string &data)
 {
-    if (peerSocketInfo.name != CONFIG_SOFTBUS_SESSION_TAG) {
+    if (socketNameCache_ != CONFIG_SOFTBUS_SESSION_TAG) {
         SLOGE("onMessageReceived: the group id is not match the media session group. sessionName is %{public}s",
-            peerSocketInfo.name);
+            socketNameCache_.c_str());
         return;
     }
     if (isServer_) {
@@ -83,9 +85,9 @@ void SoftbusDistributedDataManager::MessageReceived(int32_t socket, const std::s
 void SoftbusDistributedDataManager::BytesReceived(int32_t socket, const std::string &data)
 {
     if (isServer_) {
-        if (peerSocketInfo.name != CONFIG_SOFTBUS_SESSION_TAG) {
+        if (socketNameCache_ != CONFIG_SOFTBUS_SESSION_TAG) {
             SLOGE("onBytesReceived: the group id is not match the media session group. sessionName is %{public}s",
-                peerSocketInfo.name);
+                socketNameCache_.c_str());
             return;
         }
         OnBytesServerReceived(socket, data);

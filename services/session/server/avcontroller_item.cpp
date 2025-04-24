@@ -110,6 +110,10 @@ int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 
 int32_t AVControllerItem::SetImgForMetaData(AVMetaData& data)
 {
+    if (!data.GetMetaMask().test(AVMetaData::META_KEY_MEDIA_IMAGE)) {
+        SLOGI("curNoImgFor:%{public}s", data.GetTitle().c_str());
+        return AVSESSION_SUCCESS;
+    }
     std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
     std::string fileName = sessionId_ + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
