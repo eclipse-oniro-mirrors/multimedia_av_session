@@ -292,4 +292,61 @@ describe("AVSessionManagerJSTest", function () {
     destroySessionTask();
     done();
   })
+  
+  /*
+   * @tc.name:getDistributedSessionController001
+   * @tc.desc:One on function - lyrics session event
+   * @tc.type: FUNC
+   * @tc.require: I6C6IN
+   */
+  it("getDistributedSessionController001", 0, async function (done) {
+    await createSessionTask();
+    await AVSessionManager.getDistributedSessionController(AVSessionManager.DistributedSessionType.TYPE_SESSION_REMOTE).catch((err) => {
+	  console.error(TAG + " loop : " + i + ", getDistributedSessionController001 error " + JSON.stringify(err));
+      expect().assertFail();
+      destroySessionTask();
+      done();
+    });
+    expect(true).assertTrue();
+    destroySessionTask();
+    done();
+  })
+  
+  /*
+   * @tc.name:getDistributedSessionController002
+   * @tc.desc:One on function - lyrics session event
+   * @tc.type: FUNC
+   * @tc.require: I6C6IN
+   */
+  it("getDistributedSessionController002", 0, async function (done) {
+    await createSessionTask();
+    await AVSessionManager.getDistributedSessionController(AVSessionManager.DistributedSessionType.TYPE_SESSION_MIGRATE_IN).catch((err) => {
+	  console.error(TAG + " loop : " + i + ", getDistributedSessionController002 error " + JSON.stringify(err));
+      expect().assertFail();
+      destroySessionTask();
+      done();
+    });
+    expect(true).assertTrue();
+    destroySessionTask();
+    done();
+  })
+  
+  /*
+   * @tc.name:getDistributedSessionController003
+   * @tc.desc:One on function - lyrics session event
+   * @tc.type: FUNC
+   * @tc.require: I6C6IN
+   */
+  it("getDistributedSessionController003", 0, async function (done) {
+    await createSessionTask();
+    await AVSessionManager.getDistributedSessionController(AVSessionManager.DistributedSessionType.TYPE_SESSION_MIGRATE_OUT).catch((err) => {
+	  console.error(TAG + " loop : " + i + ", getDistributedSessionController003 error " + JSON.stringify(err));
+      expect().assertFail();
+      destroySessionTask();
+      done();
+    });
+    expect(true).assertTrue();
+    destroySessionTask();
+    done();
+  })
 })
