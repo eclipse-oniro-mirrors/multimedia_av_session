@@ -50,6 +50,8 @@ public:
     void OnAudioSessionChecked(const int32_t uid) override {}
     void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {}
     void OnDeviceOffline(const std::string& deviceId) override {}
+    void OnRemoteDistributedSessionChange(
+        const std::vector<sptr<IRemoteObject>>& sessionControllers) override {}
     ~AVSessionListenerDemo() override {}
 };
 
@@ -199,6 +201,21 @@ HWTEST_F(SessionListenerClientTest, OnDeviceOffline002, TestSize.Level1)
     EXPECT_NE(sessionListenerClient, nullptr);
     std::string deviceId = "deviceId";
     sessionListenerClient->OnDeviceOffline(deviceId);
+}
+
+/**
+* @tc.name: OnRemoteDistributedSessionChange001
+* @tc.desc: test OnRemoteDistributedSessionChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnRemoteDistributedSessionChange001, TestSize.Level1)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    std::vector<sptr<IRemoteObject>> sessionControllers;
+    sessionListenerClient->OnRemoteDistributedSessionChange(sessionControllers);
 }
 
 } // namespace AVSESSION
