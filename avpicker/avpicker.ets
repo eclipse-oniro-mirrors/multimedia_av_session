@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,7 +101,8 @@ export interface AVCastPickerDeviceInfo {
   deviceIconName: string,
   isConnected: boolean,
   selectedIconName: string,
-  deviceSource: DeviceSource
+  deviceSource: DeviceSource,
+  networkId: string
 }
 
 @Component
@@ -504,8 +505,9 @@ export struct AVCastPicker {
 
   private hasExtDevice(allDevice: Array<AVCastPickerDeviceInfo>): boolean {
     for (let i = 0; i < allDevice.length; i++) {
-      if (allDevice[i].deviceType !== 1 && // 1 is audio.DeviceType.EARPIECE
-        allDevice[i].deviceType !== 2) { // 2 is audio.DeviceType.SPEAKER
+      let isEarpieceOrSpeaker: boolean = (allDevice[i].deviceType === 1 || allDevice[i].deviceType === 2) &&
+        allDevice[i].networkId === 'LocalDevice';
+      if (!isEarpieceOrSpeaker) {
         return true;
       }
     }
