@@ -220,7 +220,7 @@ napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<AVSession> nativeSes
     if (napiAVSession_ == nullptr || nativeSession == nullptr) {
         return napi_generic_failure;
     }
-    SLOGI("sessionId=%{public}s", napiAVSession_->sessionId_.c_str());
+    SLOGI("sessionId=%{public}s***", napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
     napiAVSession_->session_ = std::move(nativeSession);
     napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
     napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
@@ -259,7 +259,8 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     napiAVSession_->session_ = std::move(nativeSession);
     napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
     napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
-    SLOGI("sessionId=%{public}s, sessionType:%{public}s", napiAVSession_->sessionId_.c_str(),
+    SLOGI("sessionId=%{public}s***, sessionType:%{public}s",
+        napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
 
     napi_value property {};

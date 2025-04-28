@@ -70,6 +70,8 @@ private:
     std::mutex lock_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
     std::shared_ptr<bool> isValid_ = std::make_shared<bool>(false);
+
+    static constexpr size_t UNMASK_CHAR_NUM = 3;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_SESSIONLISTENER_H
