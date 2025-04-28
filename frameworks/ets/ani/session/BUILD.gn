@@ -1,0 +1,97 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//build/ohos/ace/ace.gni")
+import("../../../../castplus_cast_engine_part.gni")
+import("../../../../config.gni")
+
+ohos_shared_library("avsession_ani") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  include_dirs = [
+    "./include",
+    "../../../../interfaces/inner_api/native/session/include",
+    "../../../native/session/include",
+  ]
+  sources = [
+    "./src/ani_async_callback.cpp",
+    "./src/ani_av_session.cpp",
+    "./src/ani_av_session_callback.cpp",
+    "./src/ani_av_session_enum.cpp",
+    "./src/ani_av_session_manager.cpp",
+    "./src/ani_av_session_utils.cpp",
+    "./src/ani_module_avsession.cpp",
+  ]
+
+  deps = [
+    "../../../../utils:avsession_utils",
+    "../../../common:avsession_common",
+    "../../../native/session:avsession_client",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:ani_base_context",
+    "audio_framework:audio_client",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "runtime_core:ani",
+    "runtime_core:libarkruntime",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = []
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [ "../../../native/session:avsession_cast_client" ]
+  }
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  part_name = "av_session"
+  subsystem_name = "multimedia"
+  output_extension = "so"
+}
+
+generate_static_abc("avsession") {
+  base_url = "./ets"
+  files = [ "./ets/@ohos.multimedia.avsession.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/avsession.abc"
+}
+
+ohos_prebuilt_etc("avsession_etc") {
+  source = "$target_out_dir/avsession.abc"
+  module_install_dir = "framework"
+  subsystem_name = "multimedia"
+  part_name = "av_session"
+  deps = [ ":avsession" ]
+}
