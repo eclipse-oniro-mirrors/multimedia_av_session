@@ -191,7 +191,7 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
         false, "deviceInfoSize is illegal");
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(deviceInfo.ReadFromParceldata, false, "Read deviceInfo failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.ReadFromParcel(data), false, "Read deviceInfo failed");
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
     
