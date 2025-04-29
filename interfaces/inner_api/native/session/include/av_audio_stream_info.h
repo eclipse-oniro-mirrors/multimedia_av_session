@@ -215,7 +215,7 @@ public:
         return parcel.WriteInt32(static_cast<int32_t>(samplingRate))
             && parcel.WriteInt32(static_cast<int32_t>(encoding))
             && parcel.WriteInt32(static_cast<int32_t>(format))
-            && parcel.WriteInt32(static_cast<int32_t>(channels)
+            && parcel.WriteInt32(static_cast<int32_t>(channels))
             && parcel.WriteUint64(channelLayout));
     }
     bool ReadFromParcel(Parcel &parcel)
