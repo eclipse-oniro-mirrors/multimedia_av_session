@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1407,6 +1407,18 @@ HWTEST_F(AVSessionControllerTest, GetExtrasWithEvent002, TestSize.Level1)
     EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetExtrasWithEvent(extraEvent, resultExtras), ERR_SESSION_NOT_EXIST);
     SLOGI("GetExtrasWithEvent002 End");
+}
+
+/**
+* @tc.name: GetLaunchAbilityInner001
+* @tc.desc: Get the WantAgent object saved by the application in the session.
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVSessionControllerTest, GetLaunchAbilityInner001, TestSize.Level1)
+{
+    OHOS::AbilityRuntime::WantAgent::WantAgent* ability;
+    EXPECT_EQ(controller_->GetLaunchAbilityInner(ability), AVSESSION_SUCCESS);
 }
 } // namespace AVSession
 } // namespace OHOS
