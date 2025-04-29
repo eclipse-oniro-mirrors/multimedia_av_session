@@ -302,6 +302,14 @@ std::string AVSessionService::GetAVSortDir(int32_t userId)
 
 void AVSessionService::HandleUserEvent(const std::string &type, const int &userId)
 {
+    // del capsule before account switching
+    int32_t curUserId = GetUsersManager().GetCurrentUserId();
+    if (type == AVSessionUsersManager::accountEventSwitched && userId != curUserId && hasMediaCapsule_.load()) {
+        SLOGI("userSwitch userId:%{public}d curUserId:%{public}d hasCapsule:%{public}d",
+            userId, curUserId, hasMediaCapsule_.load());
+        std::lock_guard lockGuard(sessionServiceLock_);
+        NotifySystemUI(nullptr, true, false, false);
+    }
     GetUsersManager().NotifyAccountsEvent(type, userId);
     if (type == AVSessionUsersManager::accountEventSwitched) {
         SLOGD("userSwitch and updateTopSession for userId:%{public}d", userId);
@@ -606,6 +614,7 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t userId)
             }
             if (topSession_->GetUid() == ancoUid) {
                 userId = topSession_->GetUserId();
+                hasMediaCapsule_ = false;
                 int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
                 SLOGI("CancelNotification with userId:%{public}d for anco ret=%{public}d", userId, ret);
             }
@@ -639,6 +648,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         }
         if (topSession_->GetUid() == ancoUid) {
             userId = topSession_->GetUserId();
+            hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
             SLOGI("CancelNotification with user:%{public}d for anco ret=%{public}d", userId, ret);
         }
@@ -723,6 +733,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         std::lock_guard lockGuard(sessionServiceLock_);
         if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
             UpdateTopSession(nullptr, userId);
+            hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
             SLOGI("CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
         }
@@ -2392,6 +2403,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         sessionItem->DestroyTask(continuePlay);
         if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
             UpdateTopSession(nullptr, userId);
+            hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
             SLOGI("Topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
         }
@@ -3325,13 +3337,13 @@ std::string AVSessionService::GetLocalTitle()
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession,
     bool addCapsule, bool isCapsuleUpdate)
 {
-    SLOGI("NotifySystemUI isActiveNtf %{public}d, addCapsule %{public}d isCapsuleUpdate %{public}d",
-        isActiveSession, addCapsule, isCapsuleUpdate);
     is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
-
+    SLOGI("NotifySystemUI isActiveNtf %{public}d, addCapsule %{public}d isCapsuleUpdate %{public}d",
+        isActiveSession, addCapsule, isCapsuleUpdate);
+    hasMediaCapsule_ = addCapsule;
     Notification::NotificationRequest request;
     std::shared_ptr<Notification::NotificationLocalLiveViewContent> localLiveViewContent =
         std::make_shared<Notification::NotificationLocalLiveViewContent>();
