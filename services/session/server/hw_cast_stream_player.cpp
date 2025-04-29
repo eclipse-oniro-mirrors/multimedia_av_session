@@ -335,7 +335,7 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     CastEngine::MediaInfo& mediaInfo)
 {
     if (mediaDescription->GetPcmSrc() && mediaDescription->GetCastInfo() != nullptr) {
-        uid_t appuid = mediaDescription->GetCastInfo()->GetAppUid();
+        uid_t appUid = mediaDescription->GetCastInfo()->GetAppUid();
         SLOGI("buildCastInfo AUDIO_PCM uid %{public}d", appUid);
         mediaInfo.appUid = appUid;
         mediaInfo.mediaType = "AUDIO_PCM";

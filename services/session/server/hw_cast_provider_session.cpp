@@ -206,7 +206,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         audioStreamInfo.format = static_cast<AudioSampleFormat>(castRemoteDevice.audioCapability.format);
         audioStreamInfo.channels = static_cast<AudioChannel>(castRemoteDevice.audioCapability.channels);
         audioStreamInfo.channelLayout = static_cast<AudioChannelLayout>(castRemoteDevice.audioCapability.channelLayout);
-        streamInfos.push_back(audioCapability);
+        streamInfos.push_back(audioStreamInfo);
     }
 
     for (auto listener : tempListenerList) {
