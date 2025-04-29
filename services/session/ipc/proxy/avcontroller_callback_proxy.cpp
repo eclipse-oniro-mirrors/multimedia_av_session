@@ -211,27 +211,7 @@ void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionSta
     int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
-        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.castCategory_), "write castCategory failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.deviceId_), "write deviceId failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.deviceName_), "write deviceName failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.deviceType_), "write deviceType failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.ipAddress_), "write ipAddress failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.networkId_), "write networkId failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.manufacturer_), "write manufacturer failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteString(deviceInfo.modelName_), "write modelName failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.providerId_), "write providerId failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.supportedProtocols_),
-            "write supportedProtocols failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.authenticationStatus_),
-            "write authenticationStatus failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.supportedDrmCapabilities_.size()),
-            "write supportedDrmCapabilities size failed");
-        for (auto supportedDrmCapability : deviceInfo.supportedDrmCapabilities_) {
-            CHECK_AND_RETURN_LOG(parcel.WriteString(supportedDrmCapability),
-                "write supportedDrmCapability failed");
-        }
-        CHECK_AND_RETURN_LOG(parcel.WriteBool(deviceInfo.isLegacy_), "write isLegacy failed");
-        CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfo.mediumTypes_), "write mediumTypes failed");
+        CHECK_AND_RETURN_LOG(deviceInfo.WriteToParcel(parcel), "write deviceInfo failed");
     }
 
     MessageParcel reply;

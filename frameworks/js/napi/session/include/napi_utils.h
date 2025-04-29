@@ -241,6 +241,18 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, AVDataSrcDescriptor& out);
     static napi_status SetValue(napi_env env, const AVDataSrcDescriptor& in, napi_value& out);
 
+    /* napi_value <-> AudioCapabilities */
+    static napi_status GetValue(napi_env env, napi_value in, AudioCapabilities& out);
+    static napi_status SetValue(napi_env env, const AudioCapabilities& in, napi_value& out);
+
+    /* napi_value <-> std::vector<AudioStreamInfo> */
+    static napi_status GetValue(napi_env env, napi_value in, std::vector<AudioStreamInfo>& out);
+    static napi_status SetValue(napi_env env, const std::vector<AudioStreamInfo>& in, napi_value& out);
+
+    /* napi_value <-> AudioStreamInfo */
+    static napi_status GetValue(napi_env env, napi_value in, AudioStreamInfo& out);
+    static napi_status SetValue(napi_env env, const AudioStreamInfo& in, napi_value& out);
+
     /* napi_get_named_property wrapper */
     template <typename T>
     static inline napi_status GetNamedProperty(napi_env env, napi_value in, const std::string& prop, T& value)

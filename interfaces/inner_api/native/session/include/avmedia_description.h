@@ -26,6 +26,7 @@
 #include "want_params.h"
 #include "av_file_descriptor.h"
 #include "av_data_src_descriptor.h"
+#include "av_cast_info.h"
 
 namespace OHOS::AVSession {
 class AVMediaDescription : public Parcelable {
@@ -53,7 +54,8 @@ public:
         MEDIA_DESCRIPTION_KEY_APP_NAME = 19,
         MEDIA_DESCRIPTION_KEY_DRM_SCHEME = 20,
         MEDIA_DESCRIPTION_KEY_DATA_SRC = 21,
-        MEDIA_DESCRIPTION_KEY_MAX = 22,
+        MEDIA_DESCRIPTION_KEY_PCM_SRC = 22,
+        MEDIA_DESCRIPTION_KEY_MAX = 23,
     };
 
     AVMediaDescription() = default;
@@ -129,6 +131,13 @@ public:
     void SetDataSrc(const AVDataSrcDescriptor& fdSrc);
     AVDataSrcDescriptor GetDataSrc() const;
 
+    void SetPcmSrc(const bool pcmSrc);
+    bool GetPcmSrc() const;
+
+    // below not involved in Marshalling
+    void SetCastInfo(const std::shared_ptr<AVCastInfo>& castInfo);
+    std::shared_ptr<AVCastInfo> GetCastInfo() const;
+
     bool IsValid() const;
 
     void Reset();
@@ -156,6 +165,10 @@ private:
     std::string appName_ = "";
     std::string drmScheme_ = "";
     AVDataSrcDescriptor dataSrc_;
+    bool pcmSrc_ = false;
+
+    // below not involved in Marshalling
+    std::shared_ptr<AVCastInfo> castInfo_ = nullptr;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVMEDIA_DESCRIPTION_H

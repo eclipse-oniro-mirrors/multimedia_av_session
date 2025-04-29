@@ -1175,6 +1175,11 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "mediumTypes", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.audioCapabilities_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "audioCapabilities", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
     return napi_ok;
 }
 
@@ -1664,6 +1669,13 @@ napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, Devi
     } else {
         out.mediumTypes_ = COAP;
     }
+    napi_has_named_property(env, in, "audioCapabilities", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "audioCapabilities", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo audioCapabilities failed", status);
+        status = GetValue(env, value, out.audioCapabilities_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo audioCapabilities value failed", status);
+    }
     return napi_ok;
 }
 
@@ -1900,6 +1912,152 @@ napi_status NapiUtils::SetValue(napi_env env, const AVDataSrcDescriptor& in, nap
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "fileSize", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    return napi_ok;
+}
+
+/* napi_value -> AudioCapabilities */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioCapabilities& out)
+{
+    napi_value value {};
+    auto status = napi_ok;
+    bool hasKey = false;
+    status = napi_has_named_property(env, in, "streamInfos", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "streamInfos", &value);
+        CHECK_RETURN(status == napi_ok, "get streamInfos failed", status);
+        status = GetValue(env, value, out.streamInfos_);
+        CHECK_RETURN(status == napi_ok, "get value streamInfos failed", status);
+    }
+    return napi_ok;
+}
+
+/* napi_value <- AudioCapabilities */
+napi_status NapiUtils::SetValue(napi_env env, const AudioCapabilities& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+
+    napi_value property = nullptr;
+    status = SetValue(env, in.streamInfos_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set streamInfos failed", status);
+    status = napi_set_named_property(env, out, "streamInfos", property);
+    CHECK_RETURN(status == napi_ok, "set streamInfos property failed", status);
+    return napi_ok;
+}
+
+/* napi_value -> std::vector<AudioStreamInfo> */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<AudioStreamInfo>& out)
+{
+    uint32_t length {};
+    auto status = napi_get_array_length(env, in, &length);
+    CHECK_RETURN(status == napi_ok, "get streamInfos array length failed", status);
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value element {};
+        status = napi_get_element(env, in, i, &element);
+        CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
+        AudioStreamInfo streamInfo;
+        status = GetValue(env, element, streamInfo);
+        out.push_back(streamInfo);
+    }
+    return status;
+}
+
+/* napi_value <- std::vector<AudioStreamInfo> */
+napi_status NapiUtils::SetValue(napi_env env, const std::vector<AudioStreamInfo>& in, napi_value& out)
+{
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN((status == napi_ok), "create streamInfos array failed!", status);
+    int index = 0;
+    for (auto& item : in) {
+        napi_value element = nullptr;
+        SetValue(env, item, element);
+        status = napi_set_element(env, out, index++, element);
+        CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);
+    }
+    return status;
+}
+
+/* napi_value -> AudioStreamInfo */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStreamInfo& out)
+{
+    napi_value value {};
+    auto status = napi_ok;
+    bool hasKey = false;
+    int audioValue = 0;
+    status = napi_has_named_property(env, in, "samplingRate", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "samplingRate", &value);
+        CHECK_RETURN(status == napi_ok, "get samplingRate failed", status);
+        status = GetValue(env, value, audioValue);
+        CHECK_RETURN(status == napi_ok, "get value samplingRate failed", status);
+        out.sampleRates = static_cast<AudioSamplingRate>(audioValue);
+    }
+    status = napi_has_named_property(env, in, "encodingType", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "encodingType", &value);
+        CHECK_RETURN(status == napi_ok, "get encodingType failed", status);
+        status = GetValue(env, value, audioValue);
+        CHECK_RETURN(status == napi_ok, "get value encoding failed", status);
+        out.encoding = static_cast<AudioEncodingType>(audioValue);
+    }
+    status = napi_has_named_property(env, in, "sampleFormat", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "sampleFormat", &value);
+        CHECK_RETURN(status == napi_ok, "get sampleFormat failed", status);
+        status = GetValue(env, value, audioValue);
+        CHECK_RETURN(status == napi_ok, "get value format failed", status);
+        out.format = static_cast<AudioSampleFormat>(audioValue);
+    }
+    status = napi_has_named_property(env, in, "channels", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "channels", &value);
+        CHECK_RETURN(status == napi_ok, "get channels failed", status);
+        status = GetValue(env, value, audioValue);
+        CHECK_RETURN(status == napi_ok, "get value channels failed", status);
+        out.channels = static_cast<AudioChannel>(audioValue);
+    }
+    status = napi_has_named_property(env, in, "channelLayout", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "channelLayout", &value);
+        CHECK_RETURN(status == napi_ok, "get channelLayout failed", status);
+        status = GetValue(env, value, audioValue);
+        CHECK_RETURN(status == napi_ok, "get value channelLayout failed", status);
+        out.channelLayout = static_cast<AudioChannelLayout>(audioValue);
+    }
+    return napi_ok;
+}
+
+/* napi_value <- AudioStreamInfo */
+napi_status NapiUtils::SetValue(napi_env env, const AudioStreamInfo& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+
+    napi_value property = nullptr;
+    status = SetValue(env, static_cast<int>(in.samplingRate), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set samplingRate failed", status);
+    status = napi_set_named_property(env, out, "samplingRate", property);
+    CHECK_RETURN(status == napi_ok, "set samplingRate property failed", status);
+
+    status = SetValue(env, static_cast<int>(in.encoding), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set encoding failed", status);
+    status = napi_set_named_property(env, out, "encodingType", property);
+    CHECK_RETURN(status == napi_ok, "set encodingType property failed", status);
+
+    status = SetValue(env, static_cast<int>(in.format), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set format failed", status);
+    status = napi_set_named_property(env, out, "sampleFormat", property);
+    CHECK_RETURN(status == napi_ok, "set sampleFormat property failed", status);
+
+    status = SetValue(env, static_cast<int>(in.channels), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set channels failed", status);
+    status = napi_set_named_property(env, out, "channels", property);
+    CHECK_RETURN(status == napi_ok, "set channels property failed", status);
+
+    status = SetValue(env, static_cast<int>(in.channelLayout), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set channelLayout failed", status);
+    status = napi_set_named_property(env, out, "channelLayout", property);
+    CHECK_RETURN(status == napi_ok, "set channelLayout property failed", status);
     return napi_ok;
 }
 
