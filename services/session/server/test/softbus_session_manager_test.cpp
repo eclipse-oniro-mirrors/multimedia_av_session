@@ -104,7 +104,7 @@ static HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.L
     EXPECT_EQ(distributed_->serverMap_.size() > 0, true);
 
     int32_t sessionId = 1;
-    char infoName[] = "testInfoName";
+    char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
     PeerSocketInfo info = {
@@ -219,7 +219,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level1)
 {
     SLOGI("OnSessionOpened001 begin");
     int32_t sessionId = 123;
-    char infoName[] = "testInfoName";
+    char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
     PeerSocketInfo info = {

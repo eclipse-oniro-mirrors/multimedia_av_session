@@ -1983,14 +1983,14 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
 
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object, pid_t pid)
 {
-    SLOGI("CreateControllerInner for sessionId:%{public}s|%{public}d",
-        AVSessionUtils::GetAnonySessionId(sessionId).c_str(), pid);
+    SLOGI("CreateControllerInner for sessionId:%{public}s|%{public}d|%{public}d",
+        AVSessionUtils::GetAnonySessionId(sessionId).c_str(), pid, GetCallingPid());
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
     if (session == nullptr) {
         SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
         return ERR_SESSION_NOT_EXIST;
     }
-    if (pid < 0) {
+    if (pid < 0 || GetCallingPid() != getpid()) {
         pid = GetCallingPid();
     }
     auto existController = GetPresentController(pid, sessionId);

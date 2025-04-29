@@ -528,7 +528,8 @@ int32_t DoDownload(AVMetaData& meta, const std::string uri)
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
     SLOGI("DoDownload with ret %{public}d, %{public}d", static_cast<int>(ret), static_cast<int>(pixelMap == nullptr));
     if (ret && pixelMap != nullptr) {
-        SLOGI("DoDownload success and reset meta except assetId but not, wait for mediacontrol fix");
+        SLOGI("DoDownload success and ResetToBaseMeta");
+        meta.ResetToBaseMeta();
         meta.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
         return AVSESSION_SUCCESS;
     }
@@ -585,12 +586,34 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
     return false;
 }
 
+void NapiAVSession::DoLastMetaDataRefresh(NapiAVSession* napiAVSession)
+{
+    CHECK_AND_RETURN_LOG(napiAVSession != nullptr, "context nullptr!");
+    if (napiAVSession->latestMetadataAssetId_ != napiAVSession->metaData_.GetAssetId() ||
+        napiAVSession->latestMetadataUri_ != napiAVSession->metaData_.GetMediaImageUri() ||
+        !napiAVSession->metaData_.GetMediaImageUri().empty() || napiAVSession->metaData_.GetMediaImage() != nullptr) {
+        napiAVSession->latestDownloadedAssetId_ = (napiAVSession->metaData_.GetAssetId() !=
+            napiAVSession->latestMetadataAssetId_) ? "" : napiAVSession->latestDownloadedAssetId_;
+        napiAVSession->latestMetadataUri_ = napiAVSession->metaData_.GetMediaImageUri();
+        napiAVSession->latestMetadataAssetId_ = napiAVSession->metaData_.GetAssetId();
+    }
+}
+
+bool NapiAVSession::CheckMetaOutOfDate(NapiAVSession* napiAVSession, OHOS::AVSession::AVMetaData& curMeta)
+{
+    CHECK_AND_RETURN_RET_LOG(napiAVSession != nullptr, true, "context nullptr!");
+    return (curMeta.GetAssetId() != napiAVSession->latestMetadataAssetId_) ||
+        (!napiAVSession->latestMetadataUri_.empty() &&
+        curMeta.GetMediaImageUri() != napiAVSession->latestMetadataUri_) ||
+        (napiAVSession->latestDownloadedAssetId_ == napiAVSession->latestMetadataAssetId_ &&
+        napiAVSession->latestDownloadedUri_ == napiAVSession->latestMetadataUri_);
+}
+
 napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVMetadata");
     struct ConcreteContext : public ContextBase {
         AVMetaData metaData;
-        std::chrono::system_clock::time_point metadataTs;
     };
     auto context = std::make_shared<ConcreteContext>();
     CHECK_AND_RETURN_RET_LOG(context != nullptr, NapiUtils::GetUndefinedValue(env), "SetAVMetaData failed: no memory");
@@ -611,22 +634,15 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     }
     napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
-    if (napiAvSession->latestMetadataAssetId_ != napiAvSession->metaData_.GetAssetId() ||
-        napiAvSession->latestMetadataUri_ != napiAvSession->metaData_.GetMediaImageUri() ||
-        !napiAvSession->metaData_.GetMediaImageUri().empty() || napiAvSession->metaData_.GetMediaImage() != nullptr) {
-        context->metadataTs = std::chrono::system_clock::now();
-        napiAvSession->latestMetadataUri_ = napiAvSession->metaData_.GetMediaImageUri();
-        napiAvSession->latestMetadataAssetId_ = napiAvSession->metaData_.GetAssetId();
-        reinterpret_cast<NapiAVSession*>(context->native)->latestMetadataTs_ = context->metadataTs;
-    }
+    DoLastMetaDataRefresh(napiAvSession);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         bool isRepeatDownload = napiSession->latestDownloadedAssetId_ == napiSession->latestMetadataAssetId_ &&
             napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
         bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData, isRepeatDownload);
-        bool timeAvailable = context->metadataTs >= napiSession->latestMetadataTs_;
-        SLOGI("doMetaDataSet res:%{public}d, time:%{public}d", static_cast<int>(res), static_cast<int>(timeAvailable));
-        if (res && timeAvailable && napiSession->session_ != nullptr) {
+        bool isOutOfDate = CheckMetaOutOfDate(napiSession, context->metaData);
+        SLOGI("doMetaDataSet res:%{public}d|%{public}d", static_cast<int>(res), !isOutOfDate);
+        if (res && !isOutOfDate && napiSession->session_ != nullptr) {
             napiSession->latestDownloadedUri_ = context->metaData.GetMediaImageUri();
             napiSession->latestDownloadedAssetId_ = context->metaData.GetAssetId();
             napiSession->session_->SetAVMetaData(context->metaData);
