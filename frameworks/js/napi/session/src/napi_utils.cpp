@@ -1618,6 +1618,9 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = ProcessDeviceInfoParams(env, in, out);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo ProcessDeviceInfoParams failed", status);
 
+    status = ProcessDeviceInfoParamsExtra(env, in, out);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo ProcessDeviceInfoParamsExtra failed", status);
+
     return napi_ok;
 }
 
@@ -1669,6 +1672,14 @@ napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, Devi
     } else {
         out.mediumTypes_ = COAP;
     }
+    return napi_ok;
+}
+
+napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, DeviceInfo& out)
+{
+    napi_value value {};
+    bool hasKey = false;
+    napi_status status = napi_ok;
     napi_has_named_property(env, in, "audioCapabilities", &hasKey);
     if (hasKey) {
         status = napi_get_named_property(env, in, "audioCapabilities", &value);

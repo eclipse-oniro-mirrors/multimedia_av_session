@@ -210,7 +210,7 @@ public:
         channelLayout(channelLayout_)
     {}
     AudioStreamInfo() = default;
-    bool Marshalling(Parcel &parcel) const
+    bool WriteToParcel(Parcel &parcel) const
     {
         return parcel.WriteInt32(static_cast<int32_t>(samplingRate))
             && parcel.WriteInt32(static_cast<int32_t>(encoding))
@@ -218,7 +218,7 @@ public:
             && parcel.WriteInt32(static_cast<int32_t>(channels)
             && parcel.WriteUint64(channelLayout));
     }
-    bool Unmarshalling(Parcel &parcel)
+    bool ReadFromParcel(Parcel &parcel)
     {
         samplingRate = static_cast<AudioSamplingRate>(parcel.ReadInt32());
         encoding = static_cast<AudioEncodingType>(parcel.ReadInt32());
