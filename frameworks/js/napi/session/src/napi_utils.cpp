@@ -1675,7 +1675,7 @@ napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, Devi
     return napi_ok;
 }
 
-napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, DeviceInfo& out)
+napi_status NapiUtils::ProcessDeviceInfoParamsExtra(napi_env env, napi_value in, DeviceInfo& out)
 {
     napi_value value {};
     bool hasKey = false;
@@ -2001,7 +2001,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStreamInfo& ou
         CHECK_RETURN(status == napi_ok, "get samplingRate failed", status);
         status = GetValue(env, value, audioValue);
         CHECK_RETURN(status == napi_ok, "get value samplingRate failed", status);
-        out.sampleRates = static_cast<AudioSamplingRate>(audioValue);
+        out.samplingRate = static_cast<AudioSamplingRate>(audioValue);
     }
     status = napi_has_named_property(env, in, "encodingType", &hasKey);
     if (hasKey) {
