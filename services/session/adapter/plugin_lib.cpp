@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,9 +31,9 @@ PluginLib::PluginLib(const std::string &libName)
     handle_ = dlopen(libName_.c_str(), RTLD_NOW);
     if (handle_ == nullptr) {
         LogDlfcnErr("open lib failed");
-    return;
-}
-SLOGI("%{public}s open succ", libName_.c_str());
+        return;
+    }
+    SLOGI("%{public}s open succ", libName_.c_str());
 }
 
 PluginLib::~PluginLib()
