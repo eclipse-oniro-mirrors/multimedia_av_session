@@ -106,6 +106,8 @@ public:
 
     void SetQueueItemDataSrc(const AVQueueItem& avQueueItem);
 
+    void buildExtraCastInfo(const AVQueueItem& avQueueItem);
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 

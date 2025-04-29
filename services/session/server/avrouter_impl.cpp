@@ -333,8 +333,8 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
             return number;
         }
     }
-    int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].
-        providerId_]->provider_->StartCastSession();
+    int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->StartCastSession(
+        outputDeviceInfo.deviceInfos_[0].supportedProtocols_ & ProtocolType::TYPE_CAST_PLUS_AUDIO);
     CHECK_AND_RETURN_RET_LOG(castId != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     // The first 32 bits are providerId, the last 32 bits are castId
