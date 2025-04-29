@@ -229,6 +229,8 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         mediaInfo.dataSrc = castDataSrc_;
     }
 
+    buildCastInfo(mediaDescription, mediaInfo);
+
     std::lock_guard lockGuard(streamPlayerLock_);
     if (!streamPlayer_) {
         SLOGE("Set media info and start failed");
@@ -315,6 +317,8 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
         mediaInfo.dataSrc = castDataSrc_;
     }
 
+    buildCastInfo(mediaDescription, mediaInfo);
+
     std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("pass playerlock, check item lock, mediaInfo mediaUrl and albumCoverUrl");
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {
@@ -325,6 +329,17 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     }
     SLOGE("Set media info and prepare failed");
     return AVSESSION_ERROR;
+}
+
+void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& mediaDescription,
+    CastEngine::MediaInfo& mediaInfo)
+{
+    if (mediaDescription->GetPcmSrc() && mediaDescription->GetCastInfo() != nullptr) {
+        uid_t appUid = mediaDescription->GetCastInfo()->GetAppUid();
+        SLOGI("buildCastInfo AUDIO_PCM uid %{public}d", appUid);
+        mediaInfo.appUid = appUid;
+        mediaInfo.mediaType = "AUDIO_PCM";
+    }
 }
 
 int32_t HwCastStreamPlayer::GetDuration(int32_t& duration)

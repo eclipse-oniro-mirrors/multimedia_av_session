@@ -191,35 +191,7 @@ int32_t AVSessionCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, M
         false, "deviceInfoSize is illegal");
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.networkId_), false, "Read networkId failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.manufacturer_), false, "Read manufacturer failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.supportedProtocols_), false,
-            "Read supportedProtocols failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.authenticationStatus_), false,
-            "Read authenticationStatus failed");
-        int32_t supportedDrmCapabilityLen = 0;
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedDrmCapabilityLen), false,
-            "read supportedDrmCapabilityLen failed");
-        std::vector<std::string> supportedDrmCapabilities;
-        int32_t maxSupportedDrmCapabilityLen = 10;
-        CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
-            (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
-        for (int j = 0; j < supportedDrmCapabilityLen; j++) {
-            std::string supportedDrmCapability;
-            CHECK_AND_RETURN_RET_LOG(data.ReadString(supportedDrmCapability), false,
-                "read supportedDrmCapability failed");
-            supportedDrmCapabilities.emplace_back(supportedDrmCapability);
-        }
-        deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
-        CHECK_AND_RETURN_RET_LOG(data.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
-        CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.ReadFromParcel(data), false, "Read deviceInfo failed");
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
     
