@@ -73,7 +73,7 @@ struct AVSessionDescriptor {
     bool isThirdPartyApp_ {};
     OutputDeviceInfo outputDeviceInfo_;
 
-    int32_t userId_;
+    int32_t userId_ {};
 };
 
 struct AVSessionBasicInfo {

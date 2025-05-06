@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1549,7 +1549,7 @@ napi_status NapiUtils::GetOptionalString(napi_env env, napi_value in, DeviceInfo
         if (maxLen == 0) {
             out.ipAddress_ = "";
         } else {
-            if (maxLen < 0 || maxLen >= STR_MAX_LENGTH) {
+            if (maxLen >= static_cast<size_t>(STR_MAX_LENGTH)) {
                 return napi_invalid_arg;
             }
             char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};
