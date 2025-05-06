@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -754,8 +754,8 @@ export class AVCastPicker extends ViewPU {
 
     hasExtDevice(a) {
         for (let b = 0; b < a.length; b++) {
-            if (a[b].deviceType !== 1 && // 1 is audio.DeviceType.EARPIECE
-                a[b].deviceType !== 2) { // 2 is audio.DeviceType.SPEAKER
+            let q1 = (a[b].deviceType === 1 || a[b].deviceType === 2) && a[b].networkId === 'LocalDevice';
+            if (!q1) {
                 return true;
             }
         }
