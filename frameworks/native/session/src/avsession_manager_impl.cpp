@@ -91,8 +91,8 @@ void AVSessionManagerImpl::RegisterServiceStateListener(sptr<ISystemAbilityManag
 {
     SLOGI("RegisterServiceStateListener enter");
     if (serviceListener_ == nullptr && serviceStartCallback_) {
-        serviceListener_ = new(std::nothrow) ServiceStatusListener([this] {
-            OnServiceStart();
+        serviceListener_ = new(std::nothrow) ServiceStatusListener([this](bool isAddSystemAbility) {
+            OnServiceStateChange(isAddSystemAbility);
         });
         CHECK_AND_RETURN_LOG(serviceListener_ != nullptr, "serviceListener_ alloc failed");
         auto ret = mgr->SubscribeSystemAbility(AVSESSION_SERVICE_ID, serviceListener_);
@@ -100,13 +100,22 @@ void AVSessionManagerImpl::RegisterServiceStateListener(sptr<ISystemAbilityManag
     }
 }
 
-void AVSessionManagerImpl::OnServiceStart()
+void AVSessionManagerImpl::OnServiceStateChange(bool isAddSystemAbility)
 {
-    SLOGI("OnServiceStart enter isServiceDie: %{public}d", isServiceDie.load());
-    if (serviceStartCallback_ && isServiceDie.load()) {
-        serviceStartCallback_();
+    SLOGI("OnServiceStateChange enter isAddSystemAbility:%{public}d isServiceDie:%{public}d",
+        isAddSystemAbility, isServiceDie_.load());
+    if (isAddSystemAbility) {
+        if (serviceStartCallback_ && isServiceDie_.load()) {
+            serviceStartCallback_();
+            isServiceDie_ = false;
+        }
+    } else {
+        {
+            std::lock_guard<std::mutex> lockGuard(lock_);
+            service_.clear();
+            isServiceDie_ = true;
+        }
     }
-    isServiceDie = false;
 }
 
 void AVSessionManagerImpl::OnServiceDie()
@@ -115,8 +124,6 @@ void AVSessionManagerImpl::OnServiceDie()
     auto callback = deathCallback_;
     {
         std::lock_guard<std::mutex> lockGuard(lock_);
-        service_.clear();
-        isServiceDie = true;
         listenerMapByUserId_.clear();
         deathCallback_ = nullptr;
     }
@@ -501,7 +508,7 @@ void ServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& object)
     }
 }
 
-ServiceStatusListener::ServiceStatusListener(const std::function<void()>& callback)
+ServiceStatusListener::ServiceStatusListener(const std::function<void(bool)>& callback)
     : callback_(callback)
 {
     SLOGD("construct");
@@ -511,11 +518,14 @@ void ServiceStatusListener::OnAddSystemAbility(int32_t systemAbilityId, const st
 {
     SLOGI("OnAddSystemAbility systemAbilityId=%{public}d", systemAbilityId);
     if (callback_) {
-        callback_();
+        callback_(true);
     }
 }
 void ServiceStatusListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     SLOGI("OnRemoveSystemAbility systemAbilityId=%{public}d", systemAbilityId);
+    if (callback_) {
+        callback_(false);
+    }
 }
 } // namespace OHOS::AVSession
