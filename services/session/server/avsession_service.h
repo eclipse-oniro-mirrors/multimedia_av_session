@@ -555,6 +555,7 @@ private:
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;
+    std::atomic<bool> hasMediaCapsule_ = false;
 
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
