@@ -600,8 +600,9 @@ static HWTEST(AudioAdapterTest, OnDeviceChange003, TestSize.Level1)
     SLOGD("OnDeviceChange003 begin!");
     bool ret = OHOS::AVSession::AVSESSION_SUCCESS;
     ret = AudioAdapter::GetInstance().SetDeviceChangeCallback();
-    ret = AudioAdapter::GetInstance().UnsetDeviceChangeCallback();
+    EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_SUCCESS);
 
+    ret = AudioAdapter::GetInstance().UnsetDeviceChangeCallback();
     DeviceChangeAction action = {};
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();

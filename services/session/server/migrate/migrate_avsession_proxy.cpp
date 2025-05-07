@@ -420,7 +420,6 @@ void MigrateAVSessionProxy::ProcessVolumeControlCommand(Json::Value jsonValue)
     }
 
     volumeNum_ = jsonValue[AUDIO_VOLUME].isInt() ? jsonValue[AUDIO_VOLUME].asInt() : -1;
-    AudioAdapter::GetInstance().SetVolume(volumeNum_);
 
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
