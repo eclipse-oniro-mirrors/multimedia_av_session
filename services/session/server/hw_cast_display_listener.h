@@ -32,12 +32,14 @@ public:
     void OnChange(Rosen::DisplayId displayId) override;
     void SetDisplayInfo(sptr<Rosen::DisplayInfo> displayInfo);
     sptr<Rosen::DisplayInfo> GetDisplayInfo();
+    void SetAppCastDisplayId(Rosen::DisplayId displayId);
 
 private:
     void ReportCastDisplay(sptr<Rosen::DisplayInfo> displayInfo, CastDisplayState displayState);
 
     sptr<IAVSessionCallback> listener_;
     sptr<Rosen::DisplayInfo> curDisplayInfo_;
+    unit64_t appCastId_ = 0;
     std::mutex dataMutex_;
 };
 } // namespace OHOS::AVSession

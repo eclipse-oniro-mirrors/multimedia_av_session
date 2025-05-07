@@ -1599,6 +1599,14 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
         auto displayInfo = display->GetDisplayInfo();
         SLOGI("GetAllCastDisplays name: %{public}s, id: %{public}llu",
             displayInfo->GetName().c_str(), (unsigned long long)displayInfo->GetDisplayId());
+        if (displayInfo->GetName() == "HwCast_AppModeDisplay") {
+            displays.clear();
+            SLOGI("GetAllCastDisplays AppCast");
+            if (displayListener_ != nullptr) {
+                displayListener_->SetAppCastDisplayId(displayInfo->GetDisplayId());
+            }
+            break;
+        }
         auto flag = Rosen::DisplayManagerLite::GetInstance().GetVirtualScreenFlag(displayInfo->GetDisplayId());
         if (flag == Rosen::VirtualScreenFlag::CAST) {
             SLOGI("ReportCastDisplay start in");
