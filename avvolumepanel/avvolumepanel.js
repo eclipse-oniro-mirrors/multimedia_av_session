@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,11 @@
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
+
 const TAG = 'AVVolumePanel';
 class AVVolumePanelParameter {
 }
+
 export class AVVolumePanel extends ViewPU {
   constructor(p, q, r, s = -1, t = undefined, u) {
     super(p, r, s, u);
@@ -27,10 +29,12 @@ export class AVVolumePanel extends ViewPU {
     this.__volumeLevel = new SynchedPropertySimpleOneWayPU(q.volumeLevel, this, 'volumeLevel');
     this.__volumeParameter = new SynchedPropertyObjectOneWayPU(q.volumeParameter, this, 'volumeParameter');
     this.volumeCallback = undefined;
+    this.panelCountOnCreation = 0;
     this.setInitiallyProvidedValue(q);
     this.declareWatch('volumeLevel', this.volumeChange);
     this.finalizeConstruction();
   }
+
   setInitiallyProvidedValue(o) {
     if (o.volumeLevel === undefined) {
       this.__volumeLevel.set(0);
@@ -38,39 +42,60 @@ export class AVVolumePanel extends ViewPU {
     if (o.volumeCallback !== undefined) {
       this.volumeCallback = o.volumeCallback;
     }
+    if (o.panelCountOnCreation !== undefined) {
+      this.panelCountOnCreation = o.panelCountOnCreation;
+    }
   }
+
   updateStateVars(n) {
     this.__volumeLevel.reset(n.volumeLevel);
     this.__volumeParameter.reset(n.volumeParameter);
   }
+
   purgeVariableDependenciesOnElmtId(m) {
     this.__volumeLevel.purgeDependencyOnElmtId(m);
     this.__volumeParameter.purgeDependencyOnElmtId(m);
   }
+
   aboutToBeDeleted() {
     this.__volumeLevel.aboutToBeDeleted();
     this.__volumeParameter.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
+
   get volumeLevel() {
     return this.__volumeLevel.get();
   }
+
   set volumeLevel(l) {
     this.__volumeLevel.set(l);
   }
+
   get volumeParameter() {
     return this.__volumeParameter.get();
   }
+
   set volumeParameter(k) {
     this.__volumeParameter.set(k);
   }
+
   volumeChange() {
     if (this.volumeCallback != null) {
       console.info(TAG, `volumechange volumeLevel = ` + this.volumeLevel);
       this.volumeCallback.send({'volume': this.volumeLevel});
     }
   }
+
+  aboutToAppear() {
+    AVVolumePanel.currentPanelCount += 1;
+    this.panelCountOnCreation = AVVolumePanel.currentPanelCount;
+  }
+
+  aboutToDisappear() {
+    AVVolumePanel.currentPanelCount -= 1;
+  }
+
   initialRender() {
     this.observeComponentCreation2((i, j) => {
       Column.create();
@@ -83,6 +108,7 @@ export class AVVolumePanel extends ViewPU {
         parameters: {
           'volumeParameter': this.volumeParameter,
           'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
+          'currentPanelCount': this.panelCountOnCreation,
         }
       });
       UIExtensionComponent.onReceive((h) => {
@@ -100,4 +126,5 @@ export class AVVolumePanel extends ViewPU {
     this.updateDirtyElements();
   }
 }
+AVVolumePanel.currentPanelCount = 0;
 export default {AVVolumePanel, AVVolumePanelParameter};
