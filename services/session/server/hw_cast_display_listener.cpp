@@ -26,6 +26,12 @@ void HwCastDisplayListener::OnConnect(Rosen::DisplayId displayId)
     auto displayInfo = display->GetDisplayInfo();
     CHECK_AND_RETURN_LOG(displayInfo != nullptr, "displayInfo is nullptr");
     auto displayName = displayInfo->GetName();
+    auto curDisplayInfo = GetDisplayInfo();
+    if (displayName == "HwCast_AppModeDisplay" && curDisplayInfo != nullptr) {
+        appCastId_ = displayId;
+        ReportCastDisplay(curDisplayInfo, CastDisplayState::STATE_OFF);
+        return;
+    }
     SLOGI("DisplayId OnConnect: %{public}s", displayName.c_str());
     auto flag = Rosen::DisplayManagerLite::GetInstance().GetVirtualScreenFlag(displayId);
     if (flag == Rosen::VirtualScreenFlag::CAST) {
@@ -39,17 +45,30 @@ void HwCastDisplayListener::OnDisconnect(Rosen::DisplayId displayId)
 {
     SLOGI("OnDisconnect in");
     auto curDisplayInfo = GetDisplayInfo();
-    if (!curDisplayInfo || curDisplayInfo->GetDisplayId() != displayId) {
+    if (!curDisplayInfo) {
         SLOGE("curDisplayInfo_ is null");
         return;
     }
-    auto displayName = curDisplayInfo->GetName();
-    SLOGI("DisplayId OnDisconnect: %{public}s", displayName.c_str());
-    ReportCastDisplay(curDisplayInfo, CastDisplayState::STATE_OFF);
-    SetDisplayInfo(nullptr);
+    if (appCastId_ == displayId) {
+        SLOGI("AppCast OnDisconnect");
+        appCastId_ = 0;
+        ReportCastDisplay(curDisplayInfo, CastDisplayState::STATE_ON);
+        return;
+    }
+    if (curDisplayInfo->GetDisplayId() == displayId) {
+        auto displayName = curDisplayInfo->GetName();
+        SLOGI("DisplayId OnDisconnect: %{public}s", displayName.c_str());
+        ReportCastDisplay(curDisplayInfo, CastDisplayState::STATE_OFF);
+        SetDisplayInfo(nullptr);
+    }
 }
 
 void HwCastDisplayListener::OnChange(Rosen::DisplayId displayId) {}
+
+void HwCastDisplayListener::SetAppCastDisplayId(Rosen::DisplayId displayId)
+{
+    appCastId_ = displayId;
+}
 
 // LCOV_EXCL_START
 void HwCastDisplayListener::SetDisplayInfo(sptr<Rosen::DisplayInfo> displayInfo)
