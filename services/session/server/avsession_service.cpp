@@ -2266,9 +2266,10 @@ void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& observer)
 {
     auto pid = GetCallingPid();
+    auto uid = GetCallingUid();
     SLOGI("enter ClientDeathObserver register with recipient point for pid:%{public}d", static_cast<int>(pid));
     sptr<ClientDeathRecipient> recipient =
-        new(std::nothrow) ClientDeathRecipient([this, pid]() { OnClientDied(pid); });
+        new(std::nothrow) ClientDeathRecipient([this, pid, uid]() { OnClientDied(pid, uid); });
     if (recipient == nullptr) {
         SLOGE("New ClientDeathRecipient failed.");
         HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "RGS_CLIENT_DEATH_OBSERVER_FAILED",
@@ -2305,9 +2306,12 @@ int32_t AVSessionService::Close(void)
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionService::OnClientDied(pid_t pid)
+void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
 {
     ClearClientResources(pid, true);
+    if (BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == MEDIA_CONTROL_BUNDLENAME) {
+        ReleaseCastSession();
+    }
 }
 
 // LCOV_EXCL_START

@@ -128,11 +128,6 @@ class TestIClientDeath : public IClientDeath {
     }
 };
 
-void OnClientDied(pid_t pid)
-{
-    SLOGI("OnClientDied pid = %{public}d", pid);
-}
-
 class AVSessionServiceTestSecond : public testing::Test {
 public:
     static void SetUpTestCase();
