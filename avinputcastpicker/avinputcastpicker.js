@@ -432,4 +432,4 @@ export class AVInputCastPicker extends ViewPU {
     }
 }
 
-export default AVInputCastPicker;
+export default { AVInputCastPicker };
