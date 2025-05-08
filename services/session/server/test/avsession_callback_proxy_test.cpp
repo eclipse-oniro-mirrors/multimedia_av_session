@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -361,6 +361,21 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnPlayFromAssetId001, testing::ext::
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnPlayFromAssetId001, end");
 }
+
+/**
+ * @tc.name: OnPlayWithAssetId001
+ * @tc.desc: Test OnPlayWithAssetId
+ * @tc.type: FUNC
+ */
+ static HWTEST_F(AVSessionCallbackProxyTest, OnPlayWithAssetId001, testing::ext::TestSize.Level1)
+ {
+     SLOGI("OnPlayWithAssetId001, start");
+     LOG_SetCallback(MyLogCallback);
+     std::string assetId = "0";
+     aVSessionCallbackProxy->OnPlayWithAssetId(assetId);
+     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+     SLOGI("OnPlayWithAssetId001, end");
+ }
 
 /**
  * @tc.name: OnCastDisplayChange001

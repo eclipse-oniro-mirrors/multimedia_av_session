@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -310,6 +310,14 @@ public:
      * @since 9
     */
     virtual ~AVSessionCallback() = default;
+
+    /**
+     * @brief Play with assetId.
+     *
+     * @param assetId Id for asset
+     * @since 20
+    */
+    virtual void OnPlayWithAssetId(const std::string& assetId) {};
 };
 
 class AVControllerCallback {

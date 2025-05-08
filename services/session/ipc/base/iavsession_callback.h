@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@ public:
         SESSION_CALLBACK_ON_AVCALL_HANGUP,
         SESSION_CALLBACK_ON_AVCALL_TOGGLE_CALL_MUTE,
         SESSION_CALLBACK_ON_PLAY_FROM_ASSETID,
+        SESSION_CALLBACK_ON_PLAY_WITH_ASSETID,
         SESSION_CALLBACK_ON_CAST_DISPLAY_CHANGE,
         SESSION_CALLBACK_ON_SET_TARGET_LOOPMODE,
         SESSION_CALLBACK_MAX
