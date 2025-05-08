@@ -737,21 +737,24 @@ void AVSessionService::NotifyLocalFrontSessionChangeForMigrate(std::string local
 
 bool AVSessionService::CheckWhetherTargetDevIsNext(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    Json::Reader reader;
-    Json::Value jsonData;
-    if (!reader.parse(deviceInfo.extraData, jsonData)) {
-        SLOGE("CheckWhetherTargetDevIsNext json parse failed");
+    cJSON* jsonData = cJSON_Parse(deviceInfo.extraData.c_str());
+    CHECK_AND_RETURN_RET_LOG(jsonData != nullptr, false, "get jsonData nullptr");
+    if (cJSON_IsInvalid(jsonData) || cJSON_IsNull(jsonData)) {
+        SLOGE("get jsonData invalid");
+        cJSON_Delete(jsonData);
         return false;
     }
-    if (jsonData.isMember("OS_TYPE")) {
-        Json::Value osValue = jsonData["OS_TYPE"];
-        if (osValue.isNumeric()) {
-            double number = osValue.asDouble();
-            if (number > 0) {
-                return true;
-            }
+    if (cJSON_HasObjectItem(jsonData, "OS_TYPE")) {
+        cJSON* osTypeItem = cJSON_GetObjectItem(jsonData, "OS_TYPE");
+        CHECK_AND_RETURN_RET_LOG(osTypeItem != nullptr && !cJSON_IsInvalid(osTypeItem) &&
+            cJSON_IsNumber(osTypeItem), false, "get osTypeItem invalid");
+        if (osTypeItem->valueint > 0 || osTypeItem->valuedouble > 0) {
+            cJSON_Delete(jsonData);
+            return true;
         }
     }
+
+    cJSON_Delete(jsonData);
     return false;
 }
 

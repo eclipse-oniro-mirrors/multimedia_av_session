@@ -255,29 +255,34 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
 {
     std::string jsonStr = data.substr(MSG_HEAD_LENGTH);
     SLOGI("ProcControlCommand: %{public}s", jsonStr.c_str());
-    Json::Reader reader;
-    Json::Value root;
-    if (!reader.parse(jsonStr, root)) {
+    cJSON* root = nullptr;
+    if (!SoftbusSessionUtils::TransferStrToJson(jsonStr, root)) {
         SLOGE("json parse fail");
         return;
     }
-    if (!root.isMember(PLAYER_ID) || !root.isMember(MEDIA_COMMAND) ||
-        !root.isMember(COMMAND)) {
+    if (!cJSON_HasObjectItem(root, PLAYER_ID) || !cJSON_HasObjectItem(root, MEDIA_COMMAND) ||
+        !cJSON_HasObjectItem(root, COMMAND)) {
         SLOGE("json parse with error member");
+        cJSON_Delete(root);
         return;
     }
-    std::string playerId = root[PLAYER_ID].isString() ?
-        root[PLAYER_ID].asString() : "ERROR_PLAYER_ID";
+    std::string playerId = SoftbusSessionUtils::GetStringFromJson(root, PLAYER_ID);
+    playerId = playerId.empty() ? "ERROR_PLAYER_ID" : playerId;
     sptr<AVControllerItem> avcontroller{nullptr};
     auto res = GetControllerById(playerId, avcontroller);
     if (res != AVSESSION_SUCCESS || avcontroller == nullptr) {
         SLOGW("GetControllerById fail");
+        cJSON_Delete(root);
         return;
     }
-    int mediaCommand = root[MEDIA_COMMAND].isInt() ? root[MEDIA_COMMAND].asInt() : -1;
-    std::string command = root[COMMAND].isString() ? root[COMMAND].asString() : "ERROR_COMMAND";
+    int mediaCommand = SoftbusSessionUtils::GetIntFromJson(root, MEDIA_COMMAND);
+    std::string command = SoftbusSessionUtils::GetStringFromJson(root, COMMAND);
+    command = command.empty() ? "ERROR_COMMAND" : command;
     SLOGI("ProcContolCommand mediaCommand: %{public}d", mediaCommand);
-    std::string extras = (root.isMember(EXTRAS) && root[EXTRAS].isString()) ? root[EXTRAS].asString() : "ERROR_EXTRAS";
+    std::string extras = SoftbusSessionUtils::GetStringFromJson(root, EXTRAS);
+    if (extras.empty()) {
+        extras = "ERROR_EXTRAS";
+    }
     switch (mediaCommand) {
         case SYNC_MEDIASESSION_CALLBACK_ON_COMMAND:
             SendCommandProc(command, avcontroller);
@@ -294,25 +299,32 @@ void MigrateAVSessionServer::ProcControlCommand(const std::string &data)
             PlaybackCommandDataProc(mediaCommand, command, avcontroller);
             break;
     }
+    cJSON_Delete(root);
 }
 
 void MigrateAVSessionServer::StartConfigHistorySession(const std::string &data)
 {
     std::string jsonStr = data.substr(MSG_HEAD_LENGTH);
     SLOGI("StartConfigHistorySession: %{public}s", jsonStr.c_str());
-    Json::Reader reader;
-    Json::Value jsonData;
-    if (!reader.parse(jsonStr, jsonData)) {
-        SLOGE("StartConfigHistorySession: parse json failed");
+    cJSON* jsonData = nullptr;
+    if (!SoftbusSessionUtils::TransferStrToJson(jsonStr, jsonData)) {
+        SLOGE("jStartConfigHistorySession: parse json failed");
         return;
     }
-    if (!jsonData.isMember(PLAYER_ID)) {
+
+    if (!cJSON_HasObjectItem(jsonData, PLAYER_ID)) {
         SLOGE("StartConfigHistorySession: json parse with error member");
+        cJSON_Delete(jsonData);
         return;
     }
-    std::string playerId = jsonData[PLAYER_ID].isString() ? jsonData[PLAYER_ID].asString() : "ERROR_PLAYER_ID";
+    std::string playerId = SoftbusSessionUtils::GetStringFromJson(jsonData, PLAYER_ID);
+    if (playerId.empty()) {
+        playerId = "ERROR_PLAYER_ID";
+    }
+
     int32_t ret = servicePtr_->StartAVPlayback(playerId, "");
     SLOGI("StartConfigHistorySession StartAVPlayback %{public}s, ret=%{public}d", playerId.c_str(), ret);
+    cJSON_Delete(jsonData);
 }
 
 // LCOV_EXCL_START
@@ -366,15 +378,14 @@ void MigrateAVSessionServer::Init(AVSessionService *ptr)
 
 void MigrateAVSessionServer::ResetSupportCrossMediaPlay(const std::string &extraInfo)
 {
-    Json::Reader reader;
-    Json::Value jsonData;
-    if (!reader.parse(extraInfo, jsonData)) {
+    cJSON* jsonData = nullptr;
+    if (!SoftbusSessionUtils::TransferStrToJson(extraInfo, jsonData)) {
         SLOGE("json parse fail");
         return;
     }
-    bool isSupportSingleFrameMediaPlay = jsonData[IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY].isBool() ?
-                                        jsonData[IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY].asBool() :
-                                        false;
+    bool isSupportSingleFrameMediaPlay = SoftbusSessionUtils::GetBoolFromJson(jsonData,
+        IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY);
+
     SLOGI("SuperLauncher: isSupportSingleFrameMediaPlay=%{public}d", isSupportSingleFrameMediaPlay);
     supportCrossMediaPlay_ = isSupportSingleFrameMediaPlay;
 }
@@ -524,22 +535,41 @@ void MigrateAVSessionServer::SendRemoteHistorySessionList(const std::string &dev
     }
 }
 
-std::string MigrateAVSessionServer::ConvertHistorySessionListToStr(std::vector<AVSessionDescriptor> sessionDescriptors,
-    std::vector<AVSessionDescriptor> hisSessionDescriptors)
+bool MigrateAVSessionServer::ConvertSessionDescriptorsToCJSON(cJSON* jsonArray, int32_t& descriptorNums)
 {
-    Json::Value jsonArray(Json::arrayValue);
-    int32_t descriptorNums = 0;
-    if (!releaseSessionId_.empty()) {
-        Json::Value releaseData;
-        std::string supportModule;
-        std::string profile;
-        if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(releaseSessionBundleName_, supportModule, profile)) {
-            releaseData[PLAYER_ID] = releaseSessionId_;
-            releaseData[PACKAGE_NAME] = releaseSessionBundleName_;
-            jsonArray[descriptorNums] = releaseData;
-            descriptorNums++;
-        }
+    cJSON* releaseData = SoftbusSessionUtils::GetNewCJSONObject();
+    if (releaseData == nullptr) {
+        SLOGE("get releaseData json with nullptr");
+        return false;
     }
+
+    std::string supportModule;
+    std::string profile;
+    if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(releaseSessionBundleName_, supportModule, profile)) {
+        if (!SoftbusSessionUtils::AddStringToJson(releaseData, PLAYER_ID, releaseSessionId_)) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                PLAYER_ID, releaseSessionId_.c_str());
+            cJSON_Delete(releaseData);
+            return false;
+        }
+        if (!SoftbusSessionUtils::AddStringToJson(releaseData, PACKAGE_NAME, releaseSessionBundleName_)) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                PACKAGE_NAME, releaseSessionBundleName_.c_str());
+            cJSON_Delete(releaseData);
+            return false;
+        }
+        if (!SoftbusSessionUtils::AddJsonToJsonArray(jsonArray, descriptorNums, releaseData)) {
+            SLOGE("AddJsonToJsonArray with index:%{public}d fail", descriptorNums);
+            return false;
+        }
+        descriptorNums++;
+    }
+    return true;
+}
+
+bool MigrateAVSessionServer::ConvertReleaseSessionToCJSON(cJSON* jsonArray,
+    std::vector<AVSessionDescriptor>& sessionDescriptors, int32_t& descriptorNums)
+{
     for (auto iter = sessionDescriptors.begin(); iter != sessionDescriptors.end(); iter++) {
         if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             iter->elementName_.GetBundleName().empty() ||
@@ -547,12 +577,36 @@ std::string MigrateAVSessionServer::ConvertHistorySessionListToStr(std::vector<A
             releaseSessionId_.compare(iter->sessionId_) == 0) {
             continue;
         }
-        Json::Value jsonData;
-        jsonData[PLAYER_ID] = iter->sessionId_;
-        jsonData[PACKAGE_NAME] = iter->elementName_.GetBundleName();
-        jsonArray[descriptorNums] = jsonData;
+
+        cJSON* jsonData = SoftbusSessionUtils::GetNewCJSONObject();
+        if (jsonData == nullptr) {
+            SLOGE("get jsonData json with nullptr");
+            return false;
+        }
+        if (!SoftbusSessionUtils::AddStringToJson(jsonData, PLAYER_ID, iter->sessionId_)) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                PLAYER_ID, iter->sessionId_.c_str());
+            cJSON_Delete(jsonData);
+            return false;
+        }
+        if (!SoftbusSessionUtils::AddStringToJson(jsonData, PACKAGE_NAME, iter->elementName_.GetBundleName())) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                PACKAGE_NAME, iter->elementName_.GetBundleName().c_str());
+            cJSON_Delete(jsonData);
+            return false;
+        }
+        if (!SoftbusSessionUtils::AddJsonToJsonArray(jsonArray, descriptorNums, jsonData)) {
+            SLOGE("AddJsonToJsonArray with index:%{public}d fail", descriptorNums);
+            return false;
+        }
         descriptorNums++;
     }
+    return true;
+}
+
+bool MigrateAVSessionServer::ConvertHisSessionDescriptorsToCJSON(cJSON* jsonArray,
+    std::vector<AVSessionDescriptor>& hisSessionDescriptors, int32_t& descriptorNums)
+{
     for (auto iter = hisSessionDescriptors.begin(); iter != hisSessionDescriptors.end(); iter++) {
         if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             iter->elementName_.GetBundleName().empty() ||
@@ -560,19 +614,66 @@ std::string MigrateAVSessionServer::ConvertHistorySessionListToStr(std::vector<A
             releaseSessionId_.compare(iter->sessionId_) == 0) {
             continue;
         }
-        Json::Value jsonData;
-        jsonData[PLAYER_ID] = iter->sessionId_;
-        jsonData[PACKAGE_NAME] = iter->elementName_.GetBundleName();
-        jsonArray[descriptorNums] = jsonData;
+
+        cJSON* jsonData = SoftbusSessionUtils::GetNewCJSONObject();
+        if (jsonData == nullptr) {
+            SLOGE("get jsonData json with nullptr");
+            return false;
+        }
+        if (!SoftbusSessionUtils::AddStringToJson(jsonData, PLAYER_ID, iter->sessionId_)) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                PLAYER_ID, iter->sessionId_.c_str());
+            cJSON_Delete(jsonData);
+            return false;
+        }
+        if (!SoftbusSessionUtils::AddStringToJson(jsonData, PACKAGE_NAME, iter->elementName_.GetBundleName())) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                PACKAGE_NAME, iter->elementName_.GetBundleName().c_str());
+            cJSON_Delete(jsonData);
+            return false;
+        }
+        if (!SoftbusSessionUtils::AddJsonToJsonArray(jsonArray, descriptorNums, jsonData)) {
+            SLOGE("AddJsonToJsonArray with index:%{public}d fail", descriptorNums);
+            return false;
+        }
         descriptorNums++;
     }
-    Json::Value jsonData;
-    jsonData[HISTORY_MEDIA_PLAYER_INFO] = jsonArray;
-    
-    Json::FastWriter writer;
-    std::string jsonStr = writer.write(jsonData);
+    return true;
+}
+
+std::string MigrateAVSessionServer::ConvertHistorySessionListToStr(std::vector<AVSessionDescriptor> sessionDescriptors,
+    std::vector<AVSessionDescriptor> hisSessionDescriptors)
+{
+    cJSON* jsonArray = SoftbusSessionUtils::GetNewCJSONArray();
+    CHECK_AND_RETURN_RET_LOG(jsonArray != nullptr, "", "get jsonArray with nullptr");
+    int32_t descriptorNums = 0;
+    if (!releaseSessionId_.empty()) {
+        if (!ConvertSessionDescriptorsToCJSON(jsonArray, descriptorNums)) {
+            SLOGE("ConvertSessionDescriptorsToCJSON fail");
+        }
+    }
+    if (!ConvertReleaseSessionToCJSON(jsonArray, sessionDescriptors, descriptorNums)) {
+        SLOGE("ConvertReleaseSessionToCJSON fail");
+    }
+    if (!ConvertHisSessionDescriptorsToCJSON(jsonArray, hisSessionDescriptors, descriptorNums)) {
+        SLOGE("ConvertHisSessionDescriptorsToCJSON fail");
+    }
+    cJSON* jsonData = SoftbusSessionUtils::GetNewCJSONObject();
+    if (jsonData == nullptr) {
+        SLOGE("get jsonData json with nullptr");
+        cJSON_Delete(jsonArray);
+        return "";
+    }
+    if (!SoftbusSessionUtils::AddJsonArrayToJson(jsonData, HISTORY_MEDIA_PLAYER_INFO, jsonArray)) {
+        SLOGE("add jsonArray into jsonData fail");
+        cJSON_Delete(jsonData);
+        return "";
+    }
+    std::string jsonStr;
+    SoftbusSessionUtils::TransferJsonToStr(jsonData, jsonStr);
     char header[] = {MSG_HEAD_MODE, GET_HISTORY_MEDIA_INFO, '\0'};
     std::string msg = std::string(header) + jsonStr;
+    cJSON_Delete(jsonData);
     return msg;
 }
 
@@ -603,26 +704,50 @@ void MigrateAVSessionServer::DelaySendMetaData()
 
 std::string MigrateAVSessionServer::GenerateClearAVSessionMsg()
 {
-    Json::Value jsonArray(Json::arrayValue);
-    Json::Value jsonData;
-    jsonData[MEDIA_CONTROLLER_LIST] = jsonArray;
-    Json::FastWriter writer;
-    std::string jsonStr = writer.write(jsonData);
+    cJSON* jsonArray = SoftbusSessionUtils::GetNewCJSONArray();
+    CHECK_AND_RETURN_RET_LOG(jsonArray != nullptr, "", "get jsonArray with nullptr");
+    cJSON* jsonData = SoftbusSessionUtils::GetNewCJSONObject();
+    if (jsonData == nullptr) {
+        SLOGE("get jsonData json with nullptr");
+        cJSON_Delete(jsonArray);
+        return "";
+    }
+    if (!SoftbusSessionUtils::AddJsonArrayToJson(jsonData, MEDIA_CONTROLLER_LIST, jsonArray)) {
+        SLOGE("add jsonArray into jsonData fail");
+        cJSON_Delete(jsonData);
+        return "";
+    }
+    std::string jsonStr;
+    SoftbusSessionUtils::TransferJsonToStr(jsonData, jsonStr);
+
     char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST, '\0'};
     std::string msg = std::string(header) + jsonStr;
+    cJSON_Delete(jsonData);
     return msg;
 }
 
 std::string MigrateAVSessionServer::GenerateClearHistorySessionMsg()
 {
     SLOGI("GenerateClearHistorySessionMsg");
-    Json::Value jsonArray(Json::arrayValue);
-    Json::Value jsonData;
-    jsonData[HISTORY_MEDIA_PLAYER_INFO] = jsonArray;
-    Json::FastWriter writer;
-    std::string jsonStr = writer.write(jsonData);
+    cJSON* jsonArray = SoftbusSessionUtils::GetNewCJSONArray();
+    CHECK_AND_RETURN_RET_LOG(jsonArray != nullptr, "", "get jsonArray with nullptr");
+    cJSON* jsonData = SoftbusSessionUtils::GetNewCJSONObject();
+    if (jsonData == nullptr) {
+        SLOGE("get jsonData json with nullptr");
+        cJSON_Delete(jsonArray);
+        return "";
+    }
+    if (!SoftbusSessionUtils::AddJsonArrayToJson(jsonData, HISTORY_MEDIA_PLAYER_INFO, jsonArray)) {
+        SLOGE("add jsonArray into jsonData fail");
+        cJSON_Delete(jsonData);
+        return "";
+    }
+    std::string jsonStr;
+    SoftbusSessionUtils::TransferJsonToStr(jsonData, jsonStr);
+
     char header[] = {MSG_HEAD_MODE, GET_HISTORY_MEDIA_INFO, '\0'};
     std::string msg = std::string(header) + jsonStr;
+    cJSON_Delete(jsonData);
     return msg;
 }
 
@@ -652,7 +777,8 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
     std::vector<sptr<AVControllerItem>> avcontrollers)
 {
     SLOGI("ConvertControllersToStr");
-    Json::Value jsonArray(Json::arrayValue);
+    cJSON* jsonArray = SoftbusSessionUtils::GetNewCJSONArray();
+    CHECK_AND_RETURN_RET_LOG(jsonArray != nullptr, "", "get jsonArray with nullptr");
     int32_t sessionNums = 0;
     for (auto& controller : avcontrollers) {
         if (sessionNums >= MAX_SESSION_NUMS) {
@@ -662,40 +788,88 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
             continue;
         }
         std::string playerId = controller->GetSessionId();
-        Json::Value jsonObject = ConvertControllerToJson(controller);
-        jsonObject[PLAYER_ID] = playerId;
-        jsonArray[sessionNums] = jsonObject;
+        cJSON* jsonObject = ConvertControllerToJson(controller);
+        CHECK_AND_CONTINUE(jsonObject != nullptr);
+        if (cJSON_IsInvalid(jsonObject) || cJSON_IsNull(jsonObject)) {
+            SLOGE("get jsonObject from ConvertControllerToJson invalid");
+            cJSON_Delete(jsonObject);
+            continue;
+        }
+        if (!SoftbusSessionUtils::AddStringToJson(jsonObject, PLAYER_ID, playerId)) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                PLAYER_ID, playerId.c_str());
+            cJSON_Delete(jsonObject);
+            continue;
+        }
+        if (!SoftbusSessionUtils::AddJsonToJsonArray(jsonArray, sessionNums, jsonObject)) {
+            SLOGE("AddJsonToJsonArray with index:%{public}d fail", sessionNums);
+            continue;
+        }
         sessionNums++;
     }
-    Json::Value jsonData;
-    jsonData[MEDIA_CONTROLLER_LIST] = jsonArray;
+    if (cJSON_IsInvalid(jsonArray) || cJSON_IsNull(jsonArray)) {
+        SLOGE("get jsonArray aft add object invalid");
+    }
+    cJSON* jsonData = SoftbusSessionUtils::GetNewCJSONObject();
+    if (jsonData == nullptr) {
+        SLOGE("get jsonData json with nullptr");
+    }
+    if (!SoftbusSessionUtils::AddJsonArrayToJson(jsonData, MEDIA_CONTROLLER_LIST, jsonArray)) {
+        SLOGE("add jsonArray into jsonData fail");
+    }
+    std::string jsonStr;
+    SoftbusSessionUtils::TransferJsonToStr(jsonData, jsonStr);
 
-    Json::FastWriter writer;
-    std::string jsonStr = writer.write(jsonData);
     char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER_LIST, '\0'};
     std::string msg = std::string(header) + jsonStr;
+    cJSON_Delete(jsonData);
     return msg;
 }
 // LCOV_EXCL_STOP
 
-Json::Value MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerItem> avcontroller)
+cJSON* MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerItem> avcontroller)
 {
     SLOGI("ConvertControllerToJson");
-    Json::Value metadata;
+    cJSON* metadata = nullptr;
     AVMetaData data;
     data.Reset();
     avcontroller->GetAVMetaData(data);
     metadata = ConvertMetadataToJson(data);
+    CHECK_AND_RETURN_RET_LOG(metadata != nullptr, metadata, "get metadata json with null");
+    if (cJSON_IsInvalid(metadata) || cJSON_IsNull(metadata)) {
+        SLOGE("get metadata json with invalid");
+        cJSON_Delete(metadata);
+        return nullptr;
+    }
 
     AVPlaybackState state;
     if (AVSESSION_SUCCESS == avcontroller->GetAVPlaybackState(state)) {
-        metadata[PLAYBACK_STATE] = RebuildPlayState(state);
+        if (!SoftbusSessionUtils::AddStringToJson(metadata, PLAYBACK_STATE, RebuildPlayState(state))) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                PLAYBACK_STATE, RebuildPlayState(state).c_str());
+            cJSON_Delete(metadata);
+            return nullptr;
+        }
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(metadata, SESSION_INFO,
+        "OAAAAEJOREwBAAAAEwAAAEMAbwBuAHQAcgBvAGwAbABlAHIAVwBoAGkAdABlAEwAaQBzAHQAAAAU\nAAAAAQAAAA==\n")) {
+        SLOGE("AddStringToJson with key:%{public}s fail", SESSION_INFO);
+        cJSON_Delete(metadata);
+        return nullptr;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(metadata, VOLUME_INFO, VOLUMN_INFO)) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}d fail",
+            VOLUME_INFO, VOLUMN_INFO);
+        cJSON_Delete(metadata);
+        return nullptr;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(metadata, PACKAGE_NAME, GetBundleName(avcontroller->GetSessionId()))) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+            PACKAGE_NAME, GetBundleName(avcontroller->GetSessionId()).c_str());
+        cJSON_Delete(metadata);
+        return nullptr;
     }
 
-    metadata[SESSION_INFO] =
-        "OAAAAEJOREwBAAAAEwAAAEMAbwBuAHQAcgBvAGwAbABlAHIAVwBoAGkAdABlAEwAaQBzAHQAAAAU\nAAAAAQAAAA==\n";
-    metadata[VOLUME_INFO] = VOLUMN_INFO;
-    metadata[PACKAGE_NAME] = GetBundleName(avcontroller->GetSessionId());
     return metadata;
 }
 
@@ -765,29 +939,54 @@ std::string MigrateAVSessionServer::RebuildPlayState(const AVPlaybackState &play
     return str;
 }
 
-Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata)
+cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata)
 {
     return ConvertMetadataToJson(metadata, true);
 }
 
-Json::Value MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata, bool includeImage)
+cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata, bool includeImage)
 {
-    Json::Value result;
+    cJSON* result = SoftbusSessionUtils::GetNewCJSONObject();
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, result, "get result json with null");
+    if (cJSON_IsInvalid(result) || cJSON_IsNull(result)) {
+        SLOGE("get result json with invalid");
+        cJSON_Delete(result);
+        return nullptr;
+    }
+
     if (metadata.IsValid()) {
         SLOGI("ConvertMetadataToJson without img");
-        result[METADATA_TITLE] = metadata.GetTitle();
-        result[METADATA_ARTIST] = metadata.GetArtist();
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, metadata.GetTitle())) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                METADATA_TITLE, metadata.GetTitle().c_str());
+            cJSON_Delete(result);
+            return nullptr;
+        }
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, metadata.GetArtist())) {
+            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                METADATA_ARTIST, metadata.GetArtist().c_str());
+            cJSON_Delete(result);
+            return nullptr;
+        }
         if (includeImage) {
             std::string mediaImage = "";
             std::vector<uint8_t> outputData(BUFFER_MAX_SIZE);
-            int32_t ret = CompressToJPEG(metadata, outputData);
+            bool ret = CompressToJPEG(metadata, outputData);
             mediaImage = ((ret == true) && (!outputData.empty())) ? Base64Utils::Base64Encode(outputData) : "";
-            result[METADATA_IMAGE] = mediaImage;
+            if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_IMAGE, mediaImage)) {
+                SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+                    METADATA_IMAGE, mediaImage.c_str());
+                cJSON_Delete(result);
+                return nullptr;
+            }
         }
     } else {
-        result[METADATA_TITLE] = "";
-        result[METADATA_ARTIST] = "";
-        result[METADATA_IMAGE] = "";
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, "") ||
+            !SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, "") ||
+            !SoftbusSessionUtils::AddStringToJson(result, METADATA_IMAGE, "")) {
+            cJSON_Delete(result);
+            return nullptr;
+        }
     }
     return result;
 }
@@ -836,11 +1035,29 @@ std::string MigrateAVSessionServer::ConvertMetadataInfoToStr(
     const std::string playerId, int32_t controlCommand, const AVMetaData &metadata)
 {
     SLOGI("ConvertMetadataInfoToStr");
-    Json::Value metaDataJson = ConvertMetadataToJson(metadata);
-    metaDataJson[PLAYER_ID] = playerId;
-    metaDataJson[MEDIA_INFO] = controlCommand;
-    Json::FastWriter writer;
-    std::string msg = writer.write(metaDataJson);
+    cJSON* metaDataJson = ConvertMetadataToJson(metadata);
+    CHECK_AND_RETURN_RET_LOG(metaDataJson != nullptr, "", "get metaDataJson from ConvertMetadataToJson nullptr");
+    if (cJSON_IsInvalid(metaDataJson) || cJSON_IsNull(metaDataJson)) {
+        SLOGE("get metaDataJson from ConvertMetadataToJson invalid");
+        cJSON_Delete(metaDataJson);
+        return "";
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(metaDataJson, PLAYER_ID, playerId)) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+            PLAYER_ID, playerId.c_str());
+        cJSON_Delete(metaDataJson);
+        return "";
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(metaDataJson, MEDIA_INFO, controlCommand)) {
+        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail",
+            MEDIA_INFO, controlCommand);
+        cJSON_Delete(metaDataJson);
+        return "";
+    }
+
+    std::string msg;
+    SoftbusSessionUtils::TransferJsonToStr(metaDataJson, msg);
+    cJSON_Delete(metaDataJson);
     char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER, '\0'};
     return std::string(header) + msg;
 }
@@ -953,13 +1170,37 @@ void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, cons
 
 void MigrateAVSessionServer::OnPlaybackStateChanged(const std::string &playerId, const AVPlaybackState &state)
 {
-    Json::Value value;
-    value[PLAYER_ID] = playerId;
-    value[MEDIA_INFO] = SYNC_CONTROLLER_CALLBACK_ON_PLAYBACKSTATE_CHANGED;
-    value[CALLBACK_INFO] = RebuildPlayState(state);
+    cJSON* value = SoftbusSessionUtils::GetNewCJSONObject();
+    CHECK_AND_RETURN_LOG(value != nullptr, "get value nullptr");
+    if (cJSON_IsInvalid(value) || cJSON_IsNull(value)) {
+        SLOGE("get value invalid");
+        cJSON_Delete(value);
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(value, PLAYER_ID, playerId)) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+            PLAYER_ID, playerId.c_str());
+        cJSON_Delete(value);
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(value, MEDIA_INFO,
+        SYNC_CONTROLLER_CALLBACK_ON_PLAYBACKSTATE_CHANGED)) {
+        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail",
+            MEDIA_INFO, SYNC_CONTROLLER_CALLBACK_ON_PLAYBACKSTATE_CHANGED);
+        cJSON_Delete(value);
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(value, CALLBACK_INFO, RebuildPlayState(state))) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
+            CALLBACK_INFO, RebuildPlayState(state).c_str());
+        cJSON_Delete(value);
+        return;
+    }
+
     char header[] = {MSG_HEAD_MODE, SYNC_CONTROLLER, '\0'};
-    Json::FastWriter writer;
-    std::string msg = writer.write(value);
+    std::string msg;
+    SoftbusSessionUtils::TransferJsonToStr(value, msg);
+    cJSON_Delete(value);
     std::string result = std::string(header) + msg;
     SendByte(deviceId_, result);
 }

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "ability_manager_interface.h"
-#include "ability_manager_client.h"
 #include "bundle_mgr_proxy.h"
 #include "iremote_stub.h"
 #include "iservice_registry.h"
@@ -47,29 +45,55 @@ InsightAdapter& InsightAdapter::GetInsightAdapterInstance()
 
 bool InsightAdapter::CheckBundleSupport(std::string& profile)
 {
-    nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
-    CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
-    for (const auto& value : profileValues["insightIntents"]) {
-        std::string insightName = value["intentName"];
-        CHECK_AND_RETURN_RET_LOG(value.contains("uiAbility"), false, "json do not contains uiAbility");
-        nlohmann::json abilityValue = value["uiAbility"];
-        if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
+    cJSON* profileValues = cJSON_Parse(profile.c_str());
+    CHECK_AND_RETURN_RET_LOG(profileValues != nullptr, false, "parse profile fail");
+    if (cJSON_IsInvalid(profileValues)) {
+        SLOGE("parse profile not valid json");
+        cJSON_Delete(profileValues);
+        return false;
+    }
+    cJSON* insightIntentsArray = cJSON_GetObjectItem(profileValues, "insightIntents");
+    if (insightIntentsArray == nullptr || !cJSON_IsArray(insightIntentsArray)) {
+        SLOGE("json do not contain insightIntentsArray");
+        cJSON_Delete(profileValues);
+        return false;
+    }
+
+    cJSON* insightIntentsItem = nullptr;
+    cJSON_ArrayForEach(insightIntentsItem, insightIntentsArray) {
+        cJSON* intentNameItem = cJSON_GetObjectItem(insightIntentsItem, "intentName");
+        if (intentNameItem == nullptr || !cJSON_IsString(intentNameItem)) {
+            SLOGE("json do not contain intentName");
             continue;
         }
-        if (abilityValue.is_discarded()) {
-            SLOGE("uiability discarded=%{public}d", abilityValue.is_discarded());
+        const char* insightName = intentNameItem->valuestring;
+        if (insightName != nullptr &&
+            strcmp(insightName, PLAY_MUSICLIST.c_str()) != 0 && strcmp(insightName, PLAY_AUDIO.c_str()) != 0) {
+            continue;
+        }
+
+        cJSON* uiAbilityItem = cJSON_GetObjectItem(insightIntentsItem, "uiAbility");
+        if (uiAbilityItem == nullptr) {
+            SLOGE("json do not contain uiAbility");
+            cJSON_Delete(profileValues);
             return false;
         }
-        CHECK_AND_RETURN_RET_LOG(abilityValue.contains("executeMode"), false, "json do not contains executeMode");
-        auto modeValues = abilityValue["executeMode"];
-        if (modeValues.is_discarded()) {
-            SLOGE("executeMode discarded=%{public}d", modeValues.is_discarded());
+        cJSON* executeModeArray = cJSON_GetObjectItem(uiAbilityItem, "executeMode");
+        if (executeModeArray == nullptr || !cJSON_IsArray(executeModeArray)) {
+            SLOGE("json do not contain executeMode");
+            cJSON_Delete(profileValues);
             return false;
         }
-        auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
-        return (mode != modeValues.end());
+        cJSON* modeItem = nullptr;
+        cJSON_ArrayForEach(modeItem, executeModeArray) {
+            if (cJSON_IsString(modeItem) && modeItem->valuestring != nullptr &&
+                strcmp(modeItem->valuestring, "background") == 0) {
+                cJSON_Delete(profileValues);
+                return true;
+            }
+        }
     }
+    cJSON_Delete(profileValues);
     return false;
 }
 
@@ -132,6 +156,28 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
     wantParam->SetParam("startPlayType", OHOS::AAFwk::String::Box(StartPlayTypeToString.at(startPlayType)));
 }
 
+std::shared_ptr<AppExecFwk::WantParams> InsightAdapter::GetPlayIntentParamWithWantProcess(std::string& insightName,
+    const std::string& assetId, const StartPlayInfo startPlayInfo, StartPlayType startPlayType, bool& res)
+{
+    std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
+    if (insightName == PLAY_MUSICLIST) {
+        AppExecFwk::WantParams innerParams; // construct items array
+        innerParams.SetParam("entityId", OHOS::AAFwk::String::Box(assetId));
+        sptr<OHOS::AAFwk::IArray> array = new (std::nothrow) OHOS::AAFwk::Array(1, OHOS::AAFwk::g_IID_IWantParams);
+        CHECK_AND_RETURN_RET_LOG(array != nullptr, wantParam, "new Array is null");
+        array->Set(0, OHOS::AAFwk::WantParamWrapper::Box(innerParams));
+        wantParam->SetParam("items", array);
+        SetStartPlayInfoToParam(startPlayInfo, startPlayType, wantParam);
+        res = true;
+    }
+    if (insightName == PLAY_AUDIO) {
+        wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(interfaceType, assetId));
+        SetStartPlayInfoToParam(startPlayInfo, startPlayType, wantParam);
+        res = true;
+    }
+    return wantParam;
+}
+
 bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
     AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
 {
@@ -142,46 +188,90 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
         return false;
     }
     SLOGD("GetJsonProfile profile=%{public}s", profile.c_str());
-    nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
-    CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
-    auto res = false;
-    for (const auto& value : profileValues["insightIntents"]) {
-        std::string insightName = value["intentName"];
-        nlohmann::json abilityValue = value["uiAbility"];
-        SLOGD(" insightName=%{public}s", insightName.c_str());
+    cJSON* profileValues = cJSON_Parse(profile.c_str());
+    CHECK_AND_RETURN_RET_LOG(profileValues != nullptr && !cJSON_IsInvalid(profileValues), false, "parse profile fail");
+    cJSON* insightIntentsArray = cJSON_GetObjectItem(profileValues, "insightIntents");
+    if (insightIntentsArray == nullptr || !cJSON_IsArray(insightIntentsArray)) {
+        SLOGE("json do not contain insightIntentsArray");
+        cJSON_Delete(profileValues);
+        return false;
+    }
+    bool res = false;
+    cJSON* insightIntentsItem = nullptr;
+    cJSON_ArrayForEach(insightIntentsItem, insightIntentsArray) {
+        cJSON* intentNameItem = cJSON_GetObjectItem(insightIntentsItem, "intentName");
+        if (intentNameItem == nullptr || !cJSON_IsString(intentNameItem)) {
+            SLOGE("json do not contain intentName");
+            continue;
+        }
+        std::string insightName(intentNameItem->valuestring);
         if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
             continue;
         }
-        if (!value.contains("uiAbility") || abilityValue.is_discarded()) {
-            SLOGE("uiability discarded=%{public}d", abilityValue.is_discarded());
+        cJSON* uiAbilityItem = cJSON_GetObjectItem(insightIntentsItem, "uiAbility");
+        if (uiAbilityItem == nullptr) {
+            SLOGE("json do not contain uiAbility");
             continue;
         }
-        SLOGD("insightName=%{public}s", insightName.c_str());
+        cJSON* abilityItem = cJSON_GetObjectItem(uiAbilityItem, "ability");
+        if (abilityItem == nullptr || !cJSON_IsString(abilityItem)) {
+            SLOGE("json do not contain ability");
+            continue;
+        }
         executeParam.bundleName_ = bundleName;
         executeParam.moduleName_ = supportModule;
-        executeParam.abilityName_ = abilityValue["ability"];
+        executeParam.abilityName_.assign(abilityItem->valuestring);
         executeParam.insightIntentName_ = insightName;
         executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
-        std::shared_ptr<AppExecFwk::WantParams> wantParam = std::make_shared<AppExecFwk::WantParams>();
-        if (insightName == PLAY_MUSICLIST) {
-            AppExecFwk::WantParams innerParams; // construct items array
-            innerParams.SetParam("entityId", OHOS::AAFwk::String::Box(assetId));
-            sptr<OHOS::AAFwk::IArray> array = new (std::nothrow) OHOS::AAFwk::Array(1, OHOS::AAFwk::g_IID_IWantParams);
-            CHECK_AND_RETURN_RET_LOG(array != nullptr, false, "new Array is null");
-            array->Set(0, OHOS::AAFwk::WantParamWrapper::Box(innerParams));
-            wantParam->SetParam("items", array);
-            SetStartPlayInfoToParam(startPlayInfo, startPlayType, wantParam);
-            res = true;
-        }
-        if (insightName == PLAY_AUDIO) {
-            wantParam->SetParam("entityId", AppExecFwk::WantParams::GetInterfaceByType(interfaceType, assetId));
-            SetStartPlayInfoToParam(startPlayInfo, startPlayType, wantParam);
-            res = true;
-        }
+        std::shared_ptr<AppExecFwk::WantParams> wantParam =
+            GetPlayIntentParamWithWantProcess(insightName, assetId, startPlayInfo, startPlayType, res);
         executeParam.insightIntentParam_ = wantParam;
     }
+    cJSON_Delete(profileValues);
     return res;
+}
+
+bool InsightAdapter::ExecuteIntentFromAVSession(uint64_t key, const sptr<IRemoteObject> &callerToken,
+    AppExecFwk::InsightIntentExecuteParam &param)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(ABILITY_MANAGER_INTERFACE_TOKEN)) {
+        SLOGE("write interface token failed");
+        return false;
+    }
+    if (!data.WriteUint64(key)) {
+        SLOGE("write key fail");
+        return false;
+    }
+    if (!data.WriteRemoteObject(callerToken)) {
+        SLOGE("write callerToken fail");
+        return false;
+    }
+    if (!data.WriteParcelable(&param)) {
+        SLOGE("write param fail");
+        return false;
+    }
+
+    sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemManager == nullptr) {
+        SLOGE("Fail to get registry");
+        return false;
+    }
+    sptr<IRemoteObject> remote = systemManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
+    if (remote == nullptr) {
+        SLOGE("Fail to connect ability manager service");
+        return false;
+    }
+    SLOGI("Connect ability manager service success");
+
+    if (remote->SendRequest(static_cast<uint32_t>(AVSESSION_EXECUTE_INTENT_CODE),
+        data, reply, option) != 0) {
+        SLOGE("Send request error");
+        return false;
+    }
+    return reply.ReadInt32() == ERR_OK;
 }
 
 int32_t InsightAdapter::StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &executeParam)
@@ -201,9 +291,8 @@ int32_t InsightAdapter::StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &e
         return AVSESSION_ERROR;
     }
     
-    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteIntent((uint64_t) AVSESSION_SERVICE_ID,
-        remote, executeParam);
-    if (ret != AVSESSION_SUCCESS) {
+    bool ret = ExecuteIntentFromAVSession((uint64_t) AVSESSION_SERVICE_ID, remote, executeParam);
+    if (!ret) {
         SLOGE("ExecuteIntent insightIntent=%{public}s fail", executeParam.insightIntentName_.c_str());
         return AVSESSION_ERROR;
     }

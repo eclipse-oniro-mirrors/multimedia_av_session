@@ -25,9 +25,9 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "cJSON.h"
 
 namespace OHOS::AVSession {
-using json = nlohmann::json;
 AVSessionRadar& AVSessionRadar::GetInstance()
 {
     static AVSessionRadar avSessionRadar;
@@ -129,17 +129,34 @@ void AVSessionRadar::InitBMS()
 // LCOV_EXCL_START
 void AVSessionRadar::GetJsonCastDeviceList(const OutputDeviceInfo &deviceInfo, std::string& deviceList)
 {
-    json jDeviceInfos = json::array();
+    cJSON* jDeviceInfos = cJSON_CreateArray();
     for (const DeviceInfo& deviceInfo : deviceInfo.deviceInfos_) {
-        json jDeviceInfo;
-        jDeviceInfo[PEER_UDID] = GetAnonymousDeviceId(GetUdidByNetworkId(deviceInfo.networkId_));
-        jDeviceInfo[PEER_BT_MAC] = "";
-        jDeviceInfo[PEER_DEV_TYPE] = ConvertHexToString(deviceInfo.deviceType_);
-        jDeviceInfo[PEER_DEV_NAME] = deviceInfo.deviceName_;
-        jDeviceInfos.push_back(jDeviceInfo);
+        cJSON* jDeviceInfo = cJSON_CreateObject();
+        if (jDeviceInfo == nullptr) {
+            SLOGE("fail create jDeviceInfo");
+            continue;
+        }
+        if (cJSON_IsInvalid(jDeviceInfo) || cJSON_IsNull(jDeviceInfo)) {
+            SLOGE("create jDeviceInfo invalid");
+            cJSON_Delete(jDeviceInfo);
+            continue;
+        }
+        cJSON_AddStringToObject(jDeviceInfo, PEER_UDID,
+            GetAnonymousDeviceId(GetUdidByNetworkId(deviceInfo.networkId_)).c_str());
+        cJSON_AddStringToObject(jDeviceInfo, PEER_BT_MAC, "");
+        cJSON_AddStringToObject(jDeviceInfo, PEER_DEV_TYPE, ConvertHexToString(deviceInfo.deviceType_).c_str());
+        cJSON_AddStringToObject(jDeviceInfo, PEER_DEV_NAME, deviceInfo.deviceName_.c_str());
+        cJSON_AddItemToArray(jDeviceInfos, jDeviceInfo);
     }
 
-    deviceList = jDeviceInfos.dump();
+    char* jDeviceInfosStr = cJSON_Print(jDeviceInfos);
+    if (jDeviceInfosStr != nullptr) {
+        deviceList = jDeviceInfosStr;
+        cJSON_free(jDeviceInfosStr);
+    } else {
+        SLOGE("get jDeviceInfosStr with nullptr");
+    }
+    cJSON_Delete(jDeviceInfos);
 }
 
 void AVSessionRadar::GetPeerInfoFromDeviceInfo(const DeviceInfo &deviceInfo, AVSessionRadarInfo &info)

@@ -30,6 +30,7 @@
 #include "avsession_service.h"
 #include "migrate_avsession_manager.h"
 #include "migrate_avsession_server.h"
+#include "softbus/softbus_session_utils.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -448,10 +449,22 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext006, TestSize.Lev
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext001, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[COMMAND_CODE] = 1;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 1)) {
+        SLOGE("AddIntToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionServer->ProcControlCommandFromNext(jsonValue);
-    EXPECT_EQ(jsonValue.isMember(COMMAND_CODE), true);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, COMMAND_CODE), true);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -462,10 +475,22 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext001
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext002, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[COMMAND_ARGS] = "1";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_ARGS, 1)) {
+        SLOGE("AddIntToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionServer->ProcControlCommandFromNext(jsonValue);
-    EXPECT_EQ(jsonValue.isMember(COMMAND_ARGS), true);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, COMMAND_ARGS), true);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -479,10 +504,23 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext003
     std::string id = "001";
     g_MigrateAVSessionServer->lastSessionId_ = id;
     g_MigrateAVSessionServer->playerIdToControllerMap_[id] = g_AVControllerItem;
-    Json::Value jsonValue;
-    jsonValue[COMMAND_CODE] = 10;
+
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 10)) {
+        SLOGE("AddIntToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionServer->ProcControlCommandFromNext(jsonValue);
-    EXPECT_EQ(jsonValue.isMember(COMMAND_CODE), true);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, COMMAND_CODE), true);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -496,10 +534,23 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext004
     std::string id = "001";
     g_MigrateAVSessionServer->lastSessionId_ = id;
     g_MigrateAVSessionServer->playerIdToControllerMap_[id] = g_AVControllerItem;
-    Json::Value jsonValue;
-    jsonValue[COMMAND_CODE] = 0;
+
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 0)) {
+        SLOGE("AddIntToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionServer->ProcControlCommandFromNext(jsonValue);
-    EXPECT_EQ(jsonValue.isMember(COMMAND_CODE), true);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, COMMAND_CODE), true);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -510,10 +561,22 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext004
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext001, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[COMMAND_CODE] = 1;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 1)) {
+        SLOGE("AddIntToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionServer->ProcessColdStartFromNext(jsonValue);
-    EXPECT_EQ(jsonValue.isMember(COMMAND_CODE), true);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, COMMAND_CODE), true);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -524,10 +587,22 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext001, 
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext002, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[MIGRATE_BUNDLE_NAME] = "1";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_BUNDLE_NAME, "1")) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionServer->ProcessColdStartFromNext(jsonValue);
-    EXPECT_EQ(jsonValue.isMember(MIGRATE_BUNDLE_NAME), true);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, MIGRATE_BUNDLE_NAME), true);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -567,10 +642,25 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptors
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand001, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[COMMAND_CODE] = 1;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 1)) {
+        SLOGE("AddIntToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
+    g_MigrateAVSessionServer->ProcessColdStartFromNext(jsonValue);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, MIGRATE_BUNDLE_NAME), false);
+
     g_MigrateAVSessionServer->VolumeControlCommand(jsonValue);
-    EXPECT_EQ(jsonValue.isMember(COMMAND_CODE), true);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, COMMAND_CODE), true);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -581,8 +671,20 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand001, Test
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand002, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[AUDIO_VOLUME] = 1;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(jsonValue, AUDIO_VOLUME, 1)) {
+        SLOGE("AddIntToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionServer->VolumeControlCommand(jsonValue);
-    EXPECT_EQ(jsonValue.isMember(AUDIO_VOLUME), true);
+    EXPECT_EQ(cJSON_HasObjectItem(jsonValue, AUDIO_VOLUME), true);
+    cJSON_Delete(jsonValue);
 }

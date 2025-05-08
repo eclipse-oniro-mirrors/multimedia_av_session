@@ -19,7 +19,7 @@
 #include <map>
 #include <mutex>
 
-#include "json/json.h"
+#include "cJSON.h"
 #include "audio_adapter.h"
 #include "app_manager_adapter.h"
 #include "avcontroller_item.h"
@@ -88,8 +88,8 @@ public:
     bool MigratePostTask(const AppExecFwk::EventHandler::Callback &callback, const std::string &name,
         int64_t delayTime = 0);
 
-    static Json::Value ConvertAudioDeviceDescriptorToJson(const AudioDeviceDescriptorWithSptr& device);
-    static Json::Value ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptors& devices);
+    static cJSON* ConvertAudioDeviceDescriptorToJson(const AudioDeviceDescriptorWithSptr& device);
+    static cJSON* ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptors& devices);
 
 private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
@@ -108,11 +108,11 @@ private:
 
     std::string ConvertControllersToStr(std::vector<sptr<AVControllerItem>> avcontrollers);
 
-    Json::Value ConvertControllerToJson(sptr<AVControllerItem> avcontroller);
+    cJSON* ConvertControllerToJson(sptr<AVControllerItem> avcontroller);
 
-    Json::Value ConvertMetadataToJson(const AVMetaData &metadata);
+    cJSON* ConvertMetadataToJson(const AVMetaData &metadata);
 
-    Json::Value ConvertMetadataToJson(const AVMetaData &metadata, bool includeImage);
+    cJSON* ConvertMetadataToJson(const AVMetaData &metadata, bool includeImage);
 
     std::string ConvertMetadataInfoToStr(const std::string playerId, int32_t controlCommand,
         const AVMetaData &metadata);
@@ -121,11 +121,11 @@ private:
     void SortControllers(std::list<sptr<AVControllerItem>> avcontrollerList);
 
     void ProcControlCommand(const std::string &data);
-    void ProcControlCommandFromNext(Json::Value commandJsonValue);
-    void VolumeControlCommand(Json::Value commandJsonValue);
-    void SwitchAudioDeviceCommand(Json::Value jsonObject);
-    void ProcessColdStartFromNext(Json::Value commandJsonValue);
-    void ProcessMediaControlNeedStateFromNext(Json::Value commandJsonValue);
+    void ProcControlCommandFromNext(cJSON* commandJsonValue);
+    void VolumeControlCommand(cJSON* commandJsonValue);
+    void SwitchAudioDeviceCommand(cJSON* jsonObject);
+    void ProcessColdStartFromNext(cJSON* commandJsonValue);
+    void ProcessMediaControlNeedStateFromNext(cJSON* commandJsonValue);
     void SendCommandProc(const std::string &command, sptr<AVControllerItem> controller);
     void MediaButtonEventProc(const std::string &command, sptr<AVControllerItem> controller);
     void CommandWithExtrasProc(int mediaCommand, const std::string &extrasCommand, const std::string &extras,
@@ -137,6 +137,7 @@ private:
     void DelaySendMetaData();
     bool GetVehicleRelatingState(std::string playerId);
     void UpdateFrontSessionInfoToRemote(sptr<AVControllerItem> controller);
+    void UpdateSessionInfoToRemote(sptr<AVControllerItem> controller);
     void UpdateEmptyInfoToRemote();
     void ProcFromNext(const std::string &deviceId, const std::string &data);
 
@@ -147,6 +148,11 @@ private:
     AudioDeviceDescriptorsCallbackFunc GetAvailableDeviceChangeCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc GetPreferredDeviceChangeCallbackFunc();
 
+    bool ConvertSessionDescriptorsToCJSON(cJSON* jsonArray, int32_t& descriptorNums);
+    bool ConvertReleaseSessionToCJSON(cJSON* jsonArray, std::vector<AVSessionDescriptor>& sessionDescriptors,
+        int32_t& descriptorNums);
+    bool ConvertHisSessionDescriptorsToCJSON(cJSON* jsonArray, std::vector<AVSessionDescriptor>& hisSessionDescriptors,
+        int32_t& descriptorNums);
     std::string ConvertHistorySessionListToStr(std::vector<AVSessionDescriptor> sessionDescriptors,
         std::vector<AVSessionDescriptor> hisSessionDescriptors);
     void StartConfigHistorySession(const std::string &data);
@@ -171,8 +177,8 @@ private:
     std::function<void(int32_t)> volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_ = GetPreferredDeviceChangeCallbackFunc();
-    Json::Value metaDataCache_;
-    Json::Value playbackStateCache_;
+    cJSON* metaDataCache_;
+    cJSON* playbackStateCache_;
     std::recursive_mutex cacheJsonLock_;
     bool isListenerSet_ = false;
 };

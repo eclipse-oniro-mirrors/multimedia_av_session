@@ -16,7 +16,12 @@
 #ifndef ABILITY_DYNAMIC_INSIGHT_H
 #define ABILITY_DYNAMIC_INSIGHT_H
 
+#include <string>
+
 #include "insight_intent_execute_param.h"
+#include "cJSON.h"
+
+#define AVSESSION_EXECUTE_INTENT_CODE 72
 
 namespace OHOS::AVSession {
 #define BLUETOOTH_UID 1002
@@ -57,11 +62,14 @@ public:
         deviceId = id;
     }
 
-    nlohmann::json startPlayInfoToJson() const
+    cJSON* startPlayInfoToJson() const
     {
-        nlohmann::json j;
-        j["deviceId"] = deviceId;
-        j["startPlayBundleName"] = bundleName;
+        cJSON* j = cJSON_CreateObject();
+        if (j == nullptr) {
+            return nullptr;
+        }
+        cJSON_AddStringToObject(j, "deviceId", deviceId.c_str());
+        cJSON_AddStringToObject(j, "startPlayBundleName", bundleName.c_str());
         return j;
     }
 
@@ -93,6 +101,12 @@ private:
 
     bool CheckBundleSupport(std::string& profile);
 
+    std::shared_ptr<AppExecFwk::WantParams> GetPlayIntentParamWithWantProcess(std::string& insightName,
+    const std::string& assetId, const StartPlayInfo startPlayInfo, StartPlayType startPlayType, bool& res);
+
+    bool ExecuteIntentFromAVSession(uint64_t key, const sptr<IRemoteObject> &callerToken,
+        AppExecFwk::InsightIntentExecuteParam &param);
+
     const int32_t getBundleInfoWithHapModule = 0x00000002;
 
     const int32_t startUserId = 100;
@@ -102,6 +116,8 @@ private:
     const std::string PLAY_MUSICLIST = "PlayMusicList";
 
     const std::string PLAY_AUDIO = "PlayAudio";
+
+    const std::u16string ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.aafwk.AbilityManager";
 };
 
 }

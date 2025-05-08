@@ -38,7 +38,7 @@
 #include "file_ex.h"
 #include "iservice_registry.h"
 #include "key_event_adapter.h"
-#include "nlohmann/json.hpp"
+#include "cJSON.h"
 #include "permission_checker.h"
 #include "system_ability_definition.h"
 #include "session_stack.h"
@@ -84,7 +84,6 @@ typedef void (*StopMigrateStubFunc)(void);
 #endif
 
 using namespace std;
-using namespace nlohmann;
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
@@ -663,6 +662,30 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
+bool AVSessionService::InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray)
+{
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "session get null");
+    CHECK_AND_RETURN_RET_LOG(valuesArray != nullptr, false, "valuesArray get null");
+    cJSON* newValue = cJSON_CreateObject();
+    CHECK_AND_RETURN_RET_LOG(newValue != nullptr, false, "newValue get null");
+    cJSON_AddStringToObject(newValue, "sessionId", session->GetSessionId().c_str());
+    cJSON_AddStringToObject(newValue, "bundleName", session->GetBundleName().c_str());
+    cJSON_AddStringToObject(newValue, "abilityName", session->GetAbilityName().c_str());
+    cJSON_AddStringToObject(newValue, "sessionType", session->GetSessionType().c_str());
+    if (cJSON_GetArraySize(valuesArray) <= 0) {
+        cJSON_AddItemToArray(valuesArray, newValue);
+    } else {
+        cJSON_InsertItemInArray(valuesArray, 0, newValue);
+    }
+    if (cJSON_IsInvalid(valuesArray)) {
+        SLOGE("get newValueArray invalid");
+        return false;
+    }
+    return true;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
 void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
 {
     std::lock_guard sortFileLockGuard(sessionFileLock_);
@@ -671,38 +694,45 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
         SLOGE("LoadStringFromFileEx failed when refresh focus session sort!");
         return;
     }
-    nlohmann::json values = json::parse(oldSortContent, nullptr, false);
-    CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
+    cJSON* valuesArray = cJSON_Parse(oldSortContent.c_str());
+    CHECK_AND_RETURN_LOG(valuesArray != nullptr, "cjson parse nullptr");
+    if (cJSON_IsInvalid(valuesArray) || !cJSON_IsArray(valuesArray)) {
+        SLOGE("parse json invalid");
+        cJSON_Delete(valuesArray);
+        return;
+    }
     bool sessionExist = false;
-    for (auto value : values) {
-        if (!value.contains("bundleName") || !value.contains("abilityName")) {
+    int arraySize = cJSON_GetArraySize(valuesArray);
+    for (int i = arraySize - 1; i >= 0; i--) {
+        cJSON* itemToDelete = cJSON_GetArrayItem(valuesArray, i);
+        CHECK_AND_CONTINUE(itemToDelete != nullptr && !cJSON_IsInvalid(itemToDelete));
+        cJSON* bundleNameItem = cJSON_GetObjectItem(itemToDelete, "bundleName");
+        cJSON* abilityNameItem = cJSON_GetObjectItem(itemToDelete, "abilityName");
+        if (bundleNameItem == nullptr || cJSON_IsInvalid(bundleNameItem) || !cJSON_IsString(bundleNameItem) ||
+            abilityNameItem == nullptr || cJSON_IsInvalid(abilityNameItem) || !cJSON_IsString(abilityNameItem)) {
             SLOGI("not contain bundleName or abilityName, pass");
             continue;
         }
-        if (session->GetBundleName() == value["bundleName"] &&
-            session->GetAbilityName() == value["abilityName"]) {
-            values.erase(std::remove(values.begin(), values.end(), value));
+        if (strcmp(session->GetBundleName().c_str(), bundleNameItem->valuestring) == 0 &&
+            strcmp(session->GetAbilityName().c_str(), abilityNameItem->valuestring) == 0) {
+            cJSON_DeleteItemFromArray(valuesArray, i);
             sessionExist = true;
             break;
         }
     }
     if (sessionExist) {
-        nlohmann::json value;
-        value["sessionId"] = session->GetSessionId();
-        value["bundleName"] = session->GetBundleName();
-        value["abilityName"] = session->GetAbilityName();
-        value["sessionType"] = session->GetSessionType();
-        if (values.size() <= 0) {
-            values.push_back(value);
-        } else {
-            values.insert(values.begin(), value);
-        }
+        InsertSessionItemToCJSON(session, valuesArray);
     }
-
-    std::string newSortContent = values.dump();
-    if (!SaveStringToFileEx(GetAVSortDir(), newSortContent)) {
+    char* newSortContent = cJSON_Print(valuesArray);
+    if (newSortContent == nullptr) {
+        SLOGE("newValueArray print fail nullptr");
+    }
+    std::string newSortContentStr(newSortContent);
+    if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
         SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
     }
+    cJSON_free(newSortContent);
+    cJSON_Delete(valuesArray);
 }
 // LCOV_EXCL_STOP
 
@@ -883,21 +913,31 @@ void AVSessionService::RegisterBundleDeleteEventForHistory(int32_t userId)
 
     std::string oldSortContent;
     if (LoadStringFromFileEx(GetAVSortDir(userId), oldSortContent)) {
-        nlohmann::json values = json::parse(oldSortContent, nullptr, false);
-        CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
+        cJSON* valuesArray = cJSON_Parse(oldSortContent.c_str());
+        CHECK_AND_RETURN_LOG(valuesArray != nullptr, "parse json get nullptr");
+        if (cJSON_IsInvalid(valuesArray) || !cJSON_IsArray(valuesArray)) {
+            SLOGE("parse json not valid");
+            cJSON_Delete(valuesArray);
+            return;
+        }
         auto callback = [this](std::string bundleName, int32_t userId) {
             SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
             DeleteAVQueueInfoRecord(bundleName, userId);
             DeleteHistoricalRecord(bundleName, userId);
             NotifyHistoricalRecordChange(bundleName, userId);
         };
-        for (auto value : values) {
-            CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("bundleName"));
-            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(value["bundleName"], callback, userId)) {
-                std::string bundleName = value["bundleName"];
-                SLOGE("SubscribeBundleStatusEvent failed for bundle:%{public}s", bundleName.c_str());
+        cJSON* valueItem = nullptr;
+        cJSON_ArrayForEach(valueItem, valuesArray) {
+            CHECK_AND_CONTINUE(valueItem != nullptr && !cJSON_IsInvalid(valueItem));
+            cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
+            CHECK_AND_CONTINUE(bundleNameItem != nullptr &&
+                !cJSON_IsInvalid(bundleNameItem) && cJSON_IsString(bundleNameItem));
+            std::string bundleNameStr(bundleNameItem->valuestring);
+            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleNameStr, callback, userId)) {
+                SLOGE("SubscribeBundleStatusEvent failed for bundle:%{public}s", bundleNameStr.c_str());
             }
         }
+        cJSON_Delete(valuesArray);
     }
 }
 
@@ -1473,18 +1513,57 @@ bool AVSessionService::IsCapsuleNeeded()
 }
 
 // LCOV_EXCL_START
+bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& sessionId, const std::string& sessionType,
+    const AppExecFwk::ElementName& elementName, cJSON* valuesArray)
+{
+    CHECK_AND_RETURN_RET_LOG(valuesArray != nullptr, false, "valuesArray get null");
+    cJSON* newValue = cJSON_CreateObject();
+    CHECK_AND_RETURN_RET_LOG(newValue != nullptr, false, "newValue get null");
+    cJSON_AddStringToObject(newValue, "sessionId", sessionId.c_str());
+    cJSON_AddStringToObject(newValue, "bundleName", elementName.GetBundleName().c_str());
+    cJSON_AddStringToObject(newValue, "abilityName", elementName.GetAbilityName().c_str());
+    cJSON_AddStringToObject(newValue, "sessionType", sessionType.c_str());
+
+    if (cJSON_GetArraySize(valuesArray) <= 0) {
+        cJSON_AddItemToArray(valuesArray, newValue);
+    } else {
+        cJSON_InsertItemInArray(valuesArray, 0, newValue);
+    }
+    if (cJSON_IsInvalid(valuesArray)) {
+        SLOGE("get newValueArray invalid");
+        return false;
+    }
+
+    char* newSortContent = cJSON_Print(valuesArray);
+    if (newSortContent == nullptr) {
+        SLOGE("newValueArray print fail");
+        return false;
+    }
+    std::string newSortContentStr(newSortContent);
+    if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
+        SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
+    }
+    cJSON_free(newSortContent);
+    return true;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
 void AVSessionService::SaveSessionInfoInFile(const std::string& sessionId, const std::string& sessionType,
                                              const AppExecFwk::ElementName& elementName)
 {
     std::lock_guard sortFileLockGuard(sessionFileLock_);
     SLOGI("refresh sort when session created, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
     std::string oldSortContent;
+
     if (LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
-        nlohmann::json values = json::parse(oldSortContent, nullptr, false);
-        CHECK_AND_RETURN_LOG(!values.is_discarded(), "sort json object is null");
-        if (!values.is_array()) {
-            SLOGI("create new json array for SaveSessionInfoInFile");
-            values = json::array();
+        cJSON* valuesArray = cJSON_Parse(oldSortContent.c_str());
+        CHECK_AND_RETURN_LOG(valuesArray != nullptr, "parse json get nullptr");
+        if (cJSON_IsInvalid(valuesArray) || !cJSON_IsArray(valuesArray)) {
+            SLOGE("parse json not valid");
+            cJSON_Delete(valuesArray);
+            valuesArray = cJSON_CreateArray();
+            CHECK_AND_RETURN_LOG(valuesArray != nullptr, "create array json fail");
         }
         if (oldSortContent.find(elementName.GetBundleName()) == string::npos) {
             auto callback = [this](std::string bundleName, int32_t userId) {
@@ -1498,27 +1577,24 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& sessionId, const
                 SLOGE("SubscribeBundleStatusEvent failed");
             }
         }
-        for (auto value : values) {
-            if (elementName.GetBundleName() == value["bundleName"] &&
-                elementName.GetAbilityName() == value["abilityName"]) {
-                values.erase(std::remove(values.begin(), values.end(), value));
+        int arraySize = cJSON_GetArraySize(valuesArray);
+        for (int i = arraySize - 1; i >= 0; i--) {
+            cJSON* itemToDelete = cJSON_GetArrayItem(valuesArray, i);
+            CHECK_AND_CONTINUE(itemToDelete != nullptr && !cJSON_IsInvalid(itemToDelete));
+            cJSON* bundleNameItem = cJSON_GetObjectItem(itemToDelete, "bundleName");
+            cJSON* abilityNameItem = cJSON_GetObjectItem(itemToDelete, "abilityName");
+            if (bundleNameItem == nullptr || cJSON_IsInvalid(bundleNameItem) || !cJSON_IsString(bundleNameItem) ||
+                abilityNameItem == nullptr || cJSON_IsInvalid(abilityNameItem) || !cJSON_IsString(abilityNameItem)) {
+                SLOGI("not contain bundleName or abilityName, pass");
+                continue;
+            }
+            if (strcmp(elementName.GetBundleName().c_str(), bundleNameItem->valuestring) == 0 &&
+                strcmp(elementName.GetAbilityName().c_str(), abilityNameItem->valuestring) == 0) {
+                cJSON_DeleteItemFromArray(valuesArray, i);
             }
         }
-        nlohmann::json value;
-        value["sessionId"] = sessionId;
-        value["bundleName"] = elementName.GetBundleName();
-        value["abilityName"] = elementName.GetAbilityName();
-        value["sessionType"] = sessionType;
-        if (values.size() <= 0) {
-            values.push_back(value);
-        } else {
-            values.insert(values.begin(), value);
-        }
-        std::string newSortContent = values.dump();
-        SLOGD("SaveSessionInfoInFile::Dump json object finished");
-        if (!SaveStringToFileEx(GetAVSortDir(), newSortContent)) {
-            SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
-        }
+        InsertSessionItemToCJSONAndPrint(sessionId, sessionType, elementName, valuesArray);
+        cJSON_Delete(valuesArray);
     } else {
         SLOGE("LoadStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
     }
@@ -1565,6 +1641,48 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionService::ProcessDescriptorsFromCJSON(std::vector<AVSessionDescriptor>& descriptors, cJSON* valueItem)
+{
+    CHECK_AND_RETURN_LOG(valueItem != nullptr && !cJSON_IsInvalid(valueItem), "valueItem get invalid");
+    cJSON* sessionTypeItem = cJSON_GetObjectItem(valueItem, "sessionType");
+    if (sessionTypeItem == nullptr || cJSON_IsInvalid(sessionTypeItem) || !cJSON_IsString(sessionTypeItem)) {
+        SLOGE("valueItem get sessionType fail");
+        return;
+    }
+    if (strcmp(sessionTypeItem->valuestring, "video") == 0) {
+        SLOGI("GetHistoricalSessionDescriptorsFromFile with no video type session.");
+        return;
+    }
+    cJSON* sessionIdItem = cJSON_GetObjectItem(valueItem, "sessionId");
+    if (sessionIdItem == nullptr || cJSON_IsInvalid(sessionIdItem) || !cJSON_IsString(sessionIdItem)) {
+        SLOGE("valueItem get sessionId fail");
+        return;
+    }
+    std::string sessionId(sessionIdItem->valuestring);
+    auto session = GetContainer().GetSessionById(sessionId);
+    if (session != nullptr) {
+        SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
+            AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        return;
+    }
+    cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
+    if (bundleNameItem == nullptr || cJSON_IsInvalid(bundleNameItem) || !cJSON_IsString(bundleNameItem)) {
+        SLOGE("valueItem get bundleName fail");
+        return;
+    }
+    cJSON* abilityNameItem = cJSON_GetObjectItem(valueItem, "abilityName");
+    if (abilityNameItem == nullptr || cJSON_IsInvalid(abilityNameItem) || !cJSON_IsString(abilityNameItem)) {
+        SLOGE("valueItem get abilityName fail");
+        return;
+    }
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = sessionId;
+    descriptor.elementName_.SetBundleName(std::string(bundleNameItem->valuestring));
+    descriptor.elementName_.SetAbilityName(std::string(abilityNameItem->valuestring));
+    descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptors.push_back(descriptor);
+}
+
 int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors)
 {
     std::string oldSortContent;
@@ -1573,35 +1691,22 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
         return AVSESSION_ERROR;
     }
 
-    nlohmann::json sortValues = json::parse(oldSortContent, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!sortValues.is_null() && !sortValues.is_discarded(),
-        AVSESSION_ERROR, "json object is null or discarded");
-    for (const auto& value : sortValues) {
-        CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded());
-        CHECK_AND_CONTINUE(value.contains("sessionType"));
-        if (value["sessionType"] == "video") {
-            SLOGI("GetHistoricalSessionDescriptorsFromFile with no video type session.");
-            continue;
-        }
-        CHECK_AND_CONTINUE(value.contains("sessionId"));
-        auto session = GetContainer().GetSessionById(value["sessionId"]);
-        if (session != nullptr) {
-            SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
-                AVSessionUtils::GetAnonySessionId(value["sessionId"]).c_str());
-            continue;
-        }
-        AVSessionDescriptor descriptor;
-        CHECK_AND_CONTINUE(value.contains("bundleName"));
-        CHECK_AND_CONTINUE(value.contains("abilityName"));
-        descriptor.sessionId_ = value["sessionId"];
-        descriptor.elementName_.SetBundleName(value["bundleName"]);
-        descriptor.elementName_.SetAbilityName(value["abilityName"]);
-        descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
-        descriptors.push_back(descriptor);
+    cJSON* sortValuesArray = cJSON_Parse(oldSortContent.c_str());
+    CHECK_AND_RETURN_RET_LOG(sortValuesArray != nullptr, AVSESSION_ERROR, "json object is null");
+    if (cJSON_IsInvalid(sortValuesArray) || !cJSON_IsArray(sortValuesArray)) {
+        SLOGE("parse json not valid");
+        cJSON_Delete(sortValuesArray);
+        return AVSESSION_ERROR;
+    }
+
+    cJSON* valueItem = nullptr;
+    cJSON_ArrayForEach(valueItem, sortValuesArray) {
+        ProcessDescriptorsFromCJSON(descriptors, valueItem);
     }
     if (descriptors.size() == 0 && GetContainer().GetAllSessions().size() == 0) {
         SLOGE("GetHistoricalSessionDescriptorsFromFile read empty, return!");
     }
+    cJSON_Delete(sortValuesArray);
     return AVSESSION_SUCCESS;
 }
 
@@ -1625,6 +1730,53 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
 }
 
 // LCOV_EXCL_START
+void AVSessionService::ProcessAvQueueInfosFromCJSON(std::vector<AVQueueInfo>& avQueueInfos, cJSON* valueItem)
+{
+    CHECK_AND_RETURN_LOG(valueItem != nullptr && !cJSON_IsInvalid(valueItem), "get valueItem invalid");
+    cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
+    if (bundleNameItem == nullptr || cJSON_IsInvalid(bundleNameItem) || !cJSON_IsString(bundleNameItem)) {
+        SLOGE("valueItem get bundleName fail");
+        return;
+    }
+    cJSON* avQueueNameItem = cJSON_GetObjectItem(valueItem, "avQueueName");
+    if (avQueueNameItem == nullptr || cJSON_IsInvalid(avQueueNameItem) || !cJSON_IsString(avQueueNameItem)) {
+        SLOGE("valueItem get avQueueName fail");
+        return;
+    }
+    cJSON* avQueueIdItem = cJSON_GetObjectItem(valueItem, "avQueueId");
+    if (avQueueIdItem == nullptr || cJSON_IsInvalid(avQueueIdItem) || !cJSON_IsString(avQueueIdItem)) {
+        SLOGE("valueItem get avQueueId fail");
+        return;
+    }
+    cJSON* imageDirItem = cJSON_GetObjectItem(valueItem, "avQueueImageDir");
+    if (imageDirItem == nullptr || cJSON_IsInvalid(imageDirItem) || !cJSON_IsString(imageDirItem)) {
+        SLOGE("valueItem get avQueueImageDir fail");
+        return;
+    }
+    cJSON* imageNameItem = cJSON_GetObjectItem(valueItem, "avQueueImageName");
+    if (imageNameItem == nullptr || cJSON_IsInvalid(imageNameItem) || !cJSON_IsString(imageNameItem)) {
+        SLOGE("valueItem get avQueueImageName fail");
+        return;
+    }
+    cJSON* imageUri = cJSON_GetObjectItem(valueItem, "avQueueImageUri");
+    if (imageUri == nullptr || cJSON_IsInvalid(imageUri) || !cJSON_IsString(imageUri)) {
+        SLOGE("valueItem get avQueueImageUri fail");
+        return;
+    }
+    AVQueueInfo avQueueInfo;
+    avQueueInfo.SetBundleName(std::string(bundleNameItem->valuestring));
+    avQueueInfo.SetAVQueueName(std::string(avQueueNameItem->valuestring));
+    avQueueInfo.SetAVQueueId(std::string(avQueueIdItem->valuestring));
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
+    AVSessionUtils::ReadImageFromFile(avQueuePixelMap, std::string(imageDirItem->valuestring),
+        std::string(imageNameItem->valuestring));
+    avQueueInfo.SetAVQueueImage(avQueuePixelMap);
+    avQueueInfo.SetAVQueueImageUri(std::string(imageUri->valuestring));
+    avQueueInfos.push_back(avQueueInfo);
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
 int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                                     std::vector<AVQueueInfo>& avQueueInfos)
 {
@@ -1636,26 +1788,74 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
         return AVSESSION_ERROR;
     }
 
-    nlohmann::json avQueueValues = json::parse(oldAVQueueInfoContent, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!avQueueValues.is_discarded(), AVSESSION_ERROR, "json object is null");
-    for (const auto& value : avQueueValues) {
-        AVQueueInfo avQueueInfo;
-        avQueueInfo.SetBundleName(value["bundleName"]);
-        avQueueInfo.SetAVQueueName(value["avQueueName"]);
-        avQueueInfo.SetAVQueueId(value["avQueueId"]);
-        std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
-        CHECK_AND_RETURN_RET_LOG(value.contains("avQueueImageDir"), AVSESSION_ERROR, "avQueueImageDir not contain");
-        CHECK_AND_RETURN_RET_LOG(value.contains("avQueueImageName"), AVSESSION_ERROR, "avQueueImageName not contain");
-        AVSessionUtils::ReadImageFromFile(avQueuePixelMap, value["avQueueImageDir"], value["avQueueImageName"]);
-        avQueueInfo.SetAVQueueImage(avQueuePixelMap);
-        avQueueInfo.SetAVQueueImageUri(value["avQueueImageUri"]);
-        tempAVQueueInfos.push_back(avQueueInfo);
+    cJSON* avQueueValuesArray = cJSON_Parse(oldAVQueueInfoContent.c_str());
+    CHECK_AND_RETURN_RET_LOG(avQueueValuesArray != nullptr, AVSESSION_ERROR, "json object is null");
+    if (cJSON_IsInvalid(avQueueValuesArray) || !cJSON_IsArray(avQueueValuesArray)) {
+        SLOGE("parse json not valid");
+        cJSON_Delete(avQueueValuesArray);
+        return AVSESSION_ERROR;
+    }
+    cJSON* valueItem = nullptr;
+    cJSON_ArrayForEach(valueItem, avQueueValuesArray) {
+        ProcessAvQueueInfosFromCJSON(tempAVQueueInfos, valueItem);
     }
     for (auto iterator = tempAVQueueInfos.begin(); iterator != tempAVQueueInfos.end(); ++iterator) {
         avQueueInfos.push_back(*iterator);
     }
-
+    cJSON_Delete(avQueueValuesArray);
     return AVSESSION_SUCCESS;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+bool AVSessionService::InsertAvQueueInfoToCJSONAndPrint(const std::string &bundleName,
+    const AVMetaData& meta, const int32_t userId, cJSON* valuesArray)
+{
+    CHECK_AND_RETURN_RET_LOG(valuesArray != nullptr, false, "get valuesArray nullptr");
+    cJSON* newValue = cJSON_CreateObject();
+    cJSON_AddStringToObject(newValue, "bundleName", bundleName.c_str());
+    cJSON_AddStringToObject(newValue, "avQueueName", meta.GetAVQueueName().c_str());
+    cJSON_AddStringToObject(newValue, "avQueueId", meta.GetAVQueueId().c_str());
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = meta.GetAVQueueImage();
+    if (innerPixelMap != nullptr) {
+        std::string fileDir = AVSessionUtils::GetFixedPathName(userId);
+        std::string fileName = bundleName + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+        AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
+        innerPixelMap->Clear();
+        cJSON_AddStringToObject(newValue, "avQueueImageDir", fileDir.c_str());
+        cJSON_AddStringToObject(newValue, "avQueueImageName", fileName.c_str());
+    } else {
+        cJSON_AddStringToObject(newValue, "avQueueImageDir", "");
+        cJSON_AddStringToObject(newValue, "avQueueImageName", "");
+    }
+    cJSON_AddStringToObject(newValue, "avQueueImageUri", meta.GetAVQueueImageUri().c_str());
+    if (cJSON_IsInvalid(newValue)) {
+        SLOGE("get valuesArray nullptr");
+        return false;
+    }
+    if (cJSON_GetArraySize(valuesArray) <= 0) {
+        cJSON_AddItemToArray(valuesArray, newValue);
+    } else {
+        cJSON_InsertItemInArray(valuesArray, 0, newValue);
+    }
+    if (cJSON_IsInvalid(valuesArray)) {
+        SLOGE("get newValueArray invalid");
+        return false;
+    }
+
+    char* newAvqueueContent = cJSON_Print(valuesArray);
+    if (newAvqueueContent == nullptr) {
+        SLOGE("newValueArray print fail");
+        return false;
+    }
+    std::string newAvqueueContentStr(newAvqueueContent);
+    if (!SaveStringToFileEx(GetAVQueueDir(userId), newAvqueueContentStr)) {
+        SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
+        cJSON_free(newAvqueueContent);
+        return false;
+    }
+    cJSON_free(newAvqueueContent);
+    return true;
 }
 // LCOV_EXCL_STOP
 
@@ -1663,49 +1863,36 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
 bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName,
     const AVMetaData& meta, const int32_t userId)
 {
-    nlohmann::json values = json::parse(oldContent, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!values.is_discarded(), false, "avQueue json object is null");
-    auto it = values.begin();
-    for (auto& value : values) {
-        if (bundleName == value["bundleName"] && meta.GetAVQueueId() == value["avQueueId"]) {
-            if (meta.GetAVQueueId() == it->at("avQueueId")) {
-                return false;
-            }
-            values.erase(std::remove(values.begin(), values.end(), value));
-        }
-    }
-    if (values.size() >= (size_t)maxAVQueueInfoLen) {
-        values.erase(values.end() - 1);
-    }
-
-    nlohmann::json value;
-    value["bundleName"] = bundleName;
-    value["avQueueName"] = meta.GetAVQueueName();
-    value["avQueueId"] = meta.GetAVQueueId();
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = meta.GetAVQueueImage();
-    if (innerPixelMap != nullptr) {
-        std::string fileDir = AVSessionUtils::GetFixedPathName(userId);
-        std::string fileName = bundleName + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
-        AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
-        innerPixelMap->Clear();
-        value["avQueueImageDir"] = fileDir;
-        value["avQueueImageName"] = fileName;
-    } else {
-        value["avQueueImageDir"] = "";
-        value["avQueueImageName"] = "";
-    }
-    value["avQueueImageUri"] = meta.GetAVQueueImageUri();
-    if (values.size() <= 0) {
-        values.push_back(value);
-    } else {
-        values.insert(values.begin(), value);
-    }
-    std::string newContent = values.dump();
-    if (!SaveStringToFileEx(GetAVQueueDir(userId), newContent)) {
-        SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
+    cJSON* valuesArray = cJSON_Parse(oldContent.c_str());
+    CHECK_AND_RETURN_RET_LOG(valuesArray != nullptr, false, "json parse get nullptr");
+    if (cJSON_IsInvalid(valuesArray) || !cJSON_IsArray(valuesArray)) {
+        SLOGE("get value array invalid");
+        cJSON_Delete(valuesArray);
         return false;
     }
-    return true;
+    int arraySize = cJSON_GetArraySize(valuesArray);
+    for (int i = arraySize - 1; i >= 0; i--) {
+        cJSON* valueItem = cJSON_GetArrayItem(valuesArray, i);
+        CHECK_AND_CONTINUE(valueItem != nullptr && !cJSON_IsInvalid(valueItem));
+        cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
+        cJSON* avQueueIdItem = cJSON_GetObjectItem(valueItem, "avQueueId");
+        if (bundleNameItem == nullptr || avQueueIdItem == nullptr || cJSON_IsInvalid(bundleNameItem) ||
+            !cJSON_IsString(bundleNameItem) || cJSON_IsInvalid(avQueueIdItem) || !cJSON_IsString(avQueueIdItem)) {
+            continue;
+        }
+        if (strcmp(bundleNameItem->valuestring, bundleName.c_str()) == 0 &&
+            strcmp(avQueueIdItem->valuestring, meta.GetAVQueueId().c_str()) == 0) {
+            CHECK_AND_RETURN_RET_LOG(i != 0, false, "avqueue:%{public}s is first", meta.GetAVQueueId().c_str());
+            cJSON_DeleteItemFromArray(valuesArray, i);
+        }
+    }
+    if (cJSON_GetArraySize(valuesArray) >= maxAVQueueInfoLen) {
+        cJSON_DeleteItemFromArray(valuesArray, cJSON_GetArraySize(valuesArray) - 1);
+    }
+
+    bool ret = InsertAvQueueInfoToCJSONAndPrint(bundleName, meta, userId, valuesArray);
+    cJSON_Delete(valuesArray);
+    return ret;
 }
 // LCOV_EXCL_STOP
 
@@ -1832,25 +2019,24 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
 }
 
 // LCOV_EXCL_START
-const nlohmann::json& AVSessionService::GetSubNode(const nlohmann::json& node, const std::string& name)
+const cJSON* AVSessionService::GetSubNode(const cJSON* nodeItem, const std::string& name)
 {
-    static const nlohmann::json jsonNull = nlohmann::json::value_t::null;
-    if (node.is_discarded() || node.is_null()) {
+    if (nodeItem == nullptr || cJSON_IsInvalid(nodeItem)) {
         SLOGE("json node is invalid");
-        return jsonNull;
+        return nullptr;
     }
 
     if (name.empty()) {
         SLOGE("name is invalid");
-        return node;
+        return nodeItem;
     }
 
-    auto it = node.find(name);
-    if (it == node.end()) {
+    const cJSON* subItem = cJSON_GetObjectItem(nodeItem, name.c_str());
+    if (subItem == nullptr || cJSON_IsInvalid(subItem)) {
         SLOGE("%{public}s is not exist in json", name.c_str());
-        return jsonNull;
+        return nullptr;
     }
-    return *it;
+    return subItem;
 }
 // LCOV_EXCL_STOP
 
@@ -1881,6 +2067,45 @@ bool AVSessionService::IsHistoricalSession(const std::string& sessionId)
     return true;
 }
 
+bool AVSessionService::GetDefaultAbilityElementNameFromCJSON(std::string& sortContent,
+    std::string& bundleName, std::string& abilityName)
+{
+    cJSON* sortValuesArray = cJSON_Parse(sortContent.c_str());
+    CHECK_AND_RETURN_RET_LOG(sortValuesArray != nullptr, false, "json object is null");
+    if (cJSON_IsInvalid(sortValuesArray) || !cJSON_IsArray(sortValuesArray)) {
+        SLOGE("sortValuesArray get invalid");
+        cJSON_Delete(sortValuesArray);
+        return false;
+    }
+
+    cJSON* sortValueItem = nullptr;
+    cJSON_ArrayForEach(sortValueItem, sortValuesArray) {
+        CHECK_AND_CONTINUE(sortValueItem != nullptr && !cJSON_IsInvalid(sortValueItem));
+        cJSON* sessionIdItem = cJSON_GetObjectItem(sortValueItem, "sessionId");
+        CHECK_AND_CONTINUE(sessionIdItem != nullptr &&
+            !cJSON_IsInvalid(sessionIdItem) && cJSON_IsString(sessionIdItem));
+        auto session = GetContainer().GetSessionById(std::string(sessionIdItem->valuestring));
+        if (session == nullptr) {
+            cJSON* bundleNameItem = cJSON_GetObjectItem(sortValueItem, "bundleName");
+            cJSON* abilityNameItem = cJSON_GetObjectItem(sortValueItem, "abilityName");
+            CHECK_AND_CONTINUE(bundleNameItem != nullptr &&
+                !cJSON_IsInvalid(bundleNameItem) && cJSON_IsString(bundleNameItem));
+            CHECK_AND_CONTINUE(abilityNameItem != nullptr &&
+                !cJSON_IsInvalid(abilityNameItem) && cJSON_IsString(abilityNameItem));
+            bundleName.assign(bundleNameItem->valuestring);
+            abilityName.assign(abilityNameItem->valuestring);
+            break;
+        } else {
+            SLOGE("Default start alive %{public}s",
+                AVSessionUtils::GetAnonySessionId(std::string(sessionIdItem->valuestring)).c_str());
+            cJSON_Delete(sortValuesArray);
+            return false;
+        }
+    }
+    cJSON_Delete(sortValuesArray);
+    return true;
+}
+
 int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
 {
     std::string bundleName = DEFAULT_BUNDLE_NAME;
@@ -1894,19 +2119,9 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
         }
     }
     if (!sortContent.empty()) {
-        nlohmann::json sortValues = json::parse(sortContent, nullptr, false);
-        CHECK_AND_RETURN_RET_LOG(!sortValues.is_discarded(), AVSESSION_ERROR, "json object is null");
-        for (auto& value : sortValues) {
-            CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("sessionId"));
-            auto session = GetContainer().GetSessionById(value["sessionId"]);
-            if (session == nullptr) {
-                bundleName = value["bundleName"];
-                abilityName = value["abilityName"];
-                break;
-            } else {
-                SLOGE("Default start alive %{public}s", AVSessionUtils::GetAnonySessionId(value["sessionId"]).c_str());
-                return AVSESSION_ERROR;
-            }
+        if (!GetDefaultAbilityElementNameFromCJSON(sortContent, bundleName, abilityName)) {
+            SLOGE("GetDefaultAbilityElementNameFromCJSON fail");
+            return AVSESSION_ERROR;
         }
     }
     std::shared_ptr<AbilityManagerAdapter> ability = nullptr;
@@ -1933,6 +2148,39 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
     return ret;
 }
 
+bool AVSessionService::GetElementNameBySessionIdFromCJSON(std::string& sortContent, const std::string& sessionIdNeeded,
+    std::string& bundleName, std::string& abilityName)
+{
+    cJSON* sortValuesArray = cJSON_Parse(sortContent.c_str());
+    CHECK_AND_RETURN_RET_LOG(sortValuesArray != nullptr, false, "json object is null");
+    if (cJSON_IsInvalid(sortValuesArray) || !cJSON_IsArray(sortValuesArray)) {
+        SLOGE("sortValuesArray get invalid");
+        cJSON_Delete(sortValuesArray);
+        return false;
+    }
+
+    cJSON* sortValueItem = nullptr;
+    cJSON_ArrayForEach(sortValueItem, sortValuesArray) {
+        CHECK_AND_CONTINUE(sortValueItem != nullptr && !cJSON_IsInvalid(sortValueItem));
+        cJSON* sessionIdItem = cJSON_GetObjectItem(sortValueItem, "sessionId");
+        CHECK_AND_CONTINUE(sessionIdItem != nullptr &&
+            !cJSON_IsInvalid(sessionIdItem) && cJSON_IsString(sessionIdItem));
+        if (strcmp(sessionIdNeeded.c_str(), sessionIdItem->valuestring) == 0) {
+            cJSON* bundleNameItem = cJSON_GetObjectItem(sortValueItem, "bundleName");
+            cJSON* abilityNameItem = cJSON_GetObjectItem(sortValueItem, "abilityName");
+            CHECK_AND_CONTINUE(bundleNameItem != nullptr &&
+                !cJSON_IsInvalid(bundleNameItem) && cJSON_IsString(bundleNameItem));
+            CHECK_AND_CONTINUE(abilityNameItem != nullptr &&
+                !cJSON_IsInvalid(abilityNameItem) && cJSON_IsString(abilityNameItem));
+            bundleName.assign(bundleNameItem->valuestring);
+            abilityName.assign(abilityNameItem->valuestring);
+            break;
+        }
+    }
+    cJSON_Delete(sortValuesArray);
+    return true;
+}
+
 int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded, std::string& sessionId)
 {
     std::string content;
@@ -1945,17 +2193,13 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
         }
     }
 
-    nlohmann::json values = json::parse(content, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!values.is_null() && !values.is_discarded(), AVSESSION_ERROR, "json object is null");
     std::string bundleName;
     std::string abilityName;
-    for (auto& value : values) {
-        CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("sessionId"));
-        if (sessionIdNeeded == value["sessionId"]) {
-            bundleName = value["bundleName"];
-            abilityName = value["abilityName"];
-            break;
-        }
+
+    if (!GetElementNameBySessionIdFromCJSON(content, sessionIdNeeded, bundleName, abilityName)) {
+        SLOGE("parse json failed, sessionId=%{public}s",
+            AVSessionUtils::GetAnonySessionId(sessionIdNeeded).c_str());
+        return AVSESSION_ERROR;
     }
     if (bundleName.empty() || abilityName.empty()) {
         SLOGE("Get bundle name & ability name failed, sessionId=%{public}s",
@@ -2314,36 +2558,98 @@ void AVSessionService::OnClientDied(pid_t pid)
 void AVSessionService::DeleteHistoricalRecord(const std::string& bundleName, int32_t userId)
 {
     std::lock_guard sortFileLockGuard(sessionFileLock_);
-    if (userId <= 0) {
-        userId = GetUsersManager().GetCurrentUserId();
-    }
+    userId = userId <= 0 ? GetUsersManager().GetCurrentUserId() : userId;
     if (!CheckUserDirValid(userId)) {
         SLOGE("DeleteHistoricalRecord target user:%{public}d not valid, return", userId);
         return;
     }
     SLOGI("delete historical record, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
     std::string oldContent;
-    std::string newContent;
-    nlohmann::json values;
     if (!LoadStringFromFileEx(GetAVSortDir(userId), oldContent)) {
         SLOGE("LoadStringFromFile failed, filename=%{public}s", SORT_FILE_NAME);
         return;
     }
-    values = json::parse(oldContent, nullptr, false);
-    CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
-    for (auto value : values) {
-        CHECK_AND_CONTINUE(!value.is_null() && !value.is_discarded() && value.contains("bundleName"));
-        if (bundleName == value["bundleName"]) {
-            values.erase(std::remove(values.begin(), values.end(), value));
+    cJSON* valuesArray = cJSON_Parse(oldContent.c_str());
+    CHECK_AND_RETURN_LOG(valuesArray != nullptr, "cjson parse nullptr");
+    if (cJSON_IsInvalid(valuesArray) || !cJSON_IsArray(valuesArray)) {
+        SLOGE("parse json invalid");
+        cJSON_Delete(valuesArray);
+        return;
+    }
+    int arraySize = cJSON_GetArraySize(valuesArray);
+    for (int i = arraySize - 1; i >= 0; i--) {
+        cJSON* valueItem = cJSON_GetArrayItem(valuesArray, i);
+        CHECK_AND_CONTINUE(valueItem != nullptr && !cJSON_IsInvalid(valueItem));
+        cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
+        cJSON* abilityNameItem = cJSON_GetObjectItem(valueItem, "abilityName");
+        if (bundleNameItem == nullptr || cJSON_IsInvalid(bundleNameItem) || !cJSON_IsString(bundleNameItem) ||
+            abilityNameItem == nullptr || cJSON_IsInvalid(abilityNameItem) || !cJSON_IsString(abilityNameItem)) {
+            SLOGI("not contain bundleName or abilityName, pass");
+            continue;
+        }
+        if (strcmp(bundleName.c_str(), bundleNameItem->valuestring) == 0) {
+            cJSON_DeleteItemFromArray(valuesArray, i);
             break;
         }
     }
-    newContent = values.dump();
-    SLOGD("DeleteHistoricalRecord::Dump json object finished");
-    if (!SaveStringToFileEx(GetAVSortDir(userId), newContent)) {
-        SLOGE("SaveStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
+    char* newContent = cJSON_Print(valuesArray);
+    if (newContent == nullptr) {
+        SLOGE("newContent print fail");
+    } else {
+        std::string newContentStr(newContent);
+        if (!SaveStringToFileEx(GetAVSortDir(userId), newContentStr)) {
+            SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
+        }
+        cJSON_free(newContent);
+    }
+    cJSON_Delete(valuesArray);
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+void AVSessionService::DeleteAVQueueInfoRecordFromCJSON(std::string& sortContent,
+    const std::string& bundleName, int32_t userId)
+{
+    cJSON* valuesArray = cJSON_Parse(sortContent.c_str());
+    CHECK_AND_RETURN_LOG(valuesArray != nullptr, "cjson parse nullptr");
+    if (cJSON_IsInvalid(valuesArray) || !cJSON_IsArray(valuesArray)) {
+        SLOGE("parse json invalid");
+        cJSON_Delete(valuesArray);
         return;
     }
+    int arraySize = cJSON_GetArraySize(valuesArray);
+    for (int i = arraySize - 1; i >= 0; i--) {
+        cJSON* valueItem = cJSON_GetArrayItem(valuesArray, i);
+        CHECK_AND_CONTINUE(valueItem != nullptr && !cJSON_IsInvalid(valueItem));
+        cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
+        if (bundleNameItem == nullptr || cJSON_IsInvalid(bundleNameItem) || !cJSON_IsString(bundleNameItem)) {
+            SLOGI("bundleName from json not valid");
+            continue;
+        }
+        if (strcmp(bundleName.c_str(), bundleNameItem->valuestring) == 0) {
+            cJSON* avQueueIdItem = cJSON_GetObjectItem(valueItem, "avQueueId");
+            if (avQueueIdItem == nullptr || cJSON_IsInvalid(avQueueIdItem) || !cJSON_IsString(avQueueIdItem)) {
+                SLOGI("avQueueId from json not valid");
+                continue;
+            }
+            std::string avQueueId(avQueueIdItem->valuestring);
+            std::string fileName = AVSessionUtils::GetFixedPathName(userId) + bundleName + "_" +
+                avQueueId + AVSessionUtils::GetFileSuffix();
+            AVSessionUtils::DeleteFile(fileName);
+            cJSON_DeleteItemFromArray(valuesArray, i);
+        }
+    }
+    char* newContent = cJSON_Print(valuesArray);
+    if (newContent == nullptr) {
+        SLOGE("newContent print fail");
+    } else {
+        std::string newContentStr(newContent);
+        if (!SaveStringToFileEx(GetAVQueueDir(userId), newContentStr)) {
+            SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
+        }
+        cJSON_free(newContent);
+    }
+    cJSON_Delete(valuesArray);
 }
 // LCOV_EXCL_STOP
 
@@ -2361,30 +2667,11 @@ void AVSessionService::DeleteAVQueueInfoRecord(const std::string& bundleName, in
     SLOGI("DeleteAVQueueInfoRecord, bundleName=%{public}s, userId=%{public}d", bundleName.c_str(), userId);
     std::string oldContent;
     std::string newContent;
-    nlohmann::json values;
     if (!LoadStringFromFileEx(GetAVQueueDir(userId), oldContent)) {
         SLOGE("LoadStringFromFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
         return;
     }
-    values = json::parse(oldContent, nullptr, false);
-    CHECK_AND_RETURN_LOG(!values.is_discarded(), "json object is null");
-    for (auto it = values.begin(); it != values.end();) {
-        if (it->at("bundleName") == bundleName) {
-            std::string avQueueId = it->at("avQueueId");
-            std::string fileName = AVSessionUtils::GetFixedPathName(userId) + bundleName + "_" +
-                avQueueId + AVSessionUtils::GetFileSuffix();
-            AVSessionUtils::DeleteFile(fileName);
-            values.erase(it);
-        } else {
-            ++it;
-        }
-    }
-    newContent = values.dump();
-    SLOGD("DeleteAVQueueInfoRecord::Dump json object finished");
-    if (!SaveStringToFileEx(GetAVQueueDir(userId), newContent)) {
-        SLOGE("SaveStringToFile failed, filename=%{public}s", AVQUEUE_FILE_NAME);
-        return;
-    }
+    DeleteAVQueueInfoRecordFromCJSON(oldContent, bundleName, userId);
 }
 // LCOV_EXCL_STOP
 
@@ -2990,6 +3277,35 @@ bool AVSessionService::CheckAndCreateDir(const string& filePath)
     return true;
 }
 
+bool AVSessionService::FillFileWithEmptyContentEx(ofstream& fileWrite)
+{
+    cJSON* emptyValueArray = cJSON_CreateArray();
+    CHECK_AND_RETURN_RET_LOG(emptyValueArray != nullptr, false, "emptyValueArray create nullptr");
+    if (cJSON_IsInvalid(emptyValueArray) || !cJSON_IsArray(emptyValueArray)) {
+        SLOGE("create emptyValueArray invalid");
+        cJSON_Delete(emptyValueArray);
+        return false;
+    }
+    char* emptyContent = cJSON_Print(emptyValueArray);
+    if (emptyContent == nullptr) {
+        SLOGE("newValueArray print fail nullptr");
+        cJSON_Delete(emptyValueArray);
+        return false;
+    }
+    std::string emptyContentStr(emptyContent);
+    SLOGD("LoadStringFromFileEx::Dump json object finished");
+    fileWrite.write(emptyContentStr.c_str(), emptyContentStr.length());
+    if (fileWrite.fail()) {
+        SLOGE("file empty init json fail !");
+        cJSON_free(emptyContent);
+        cJSON_Delete(emptyValueArray);
+        return false;
+    }
+    cJSON_free(emptyContent);
+    cJSON_Delete(emptyValueArray);
+    return true;
+}
+
 bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& content)
 {
     SLOGD("file load in for path: %{public}s", filePath.c_str());
@@ -3019,11 +3335,7 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
             file.close();
             return false;
         }
-        nlohmann::json emptyValue;
-        std::string emptyContent = emptyValue.dump();
-        SLOGD("LoadStringFromFileEx::Dump json object finished");
-        fileWrite.write(emptyContent.c_str(), emptyContent.length());
-        if (fileWrite.fail()) {
+        if (!FillFileWithEmptyContentEx(fileWrite)) {
             SLOGE("file empty init json fail !");
             file.close();
             fileWrite.close();
@@ -3041,8 +3353,15 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
 bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std::string& content)
 {
     SLOGI("file save in for path:%{public}s, content:%{public}s", filePath.c_str(), content.c_str());
-    nlohmann::json checkValues = json::parse(content, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!checkValues.is_discarded(), false, "recv content discarded");
+    cJSON* checkValuesItem = cJSON_Parse(content.c_str());
+    CHECK_AND_RETURN_RET_LOG(checkValuesItem != nullptr, false, "cjson parse nullptr");
+    if (cJSON_IsInvalid(checkValuesItem)) {
+        SLOGE("cjson parse invalid");
+        cJSON_Delete(checkValuesItem);
+        return false;
+    }
+    cJSON_Delete(checkValuesItem);
+
     ofstream file;
     file.open(filePath.c_str(), ios::out | ios::trunc);
     if (!file.is_open()) {
@@ -3081,8 +3400,17 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
     fileRead.seekg(0, ios::beg);
     copy(istreambuf_iterator<char>(fileRead), istreambuf_iterator<char>(), back_inserter(content));
     SLOGD("check content pre clean it: %{public}s", content.c_str());
-    nlohmann::json checkValues = json::parse(content, nullptr, false);
-    if (checkValues.is_discarded()) {
+    cJSON* checkValuesItem = cJSON_Parse(content.c_str());
+    bool isJsonDiscarded = false;
+    if (checkValuesItem == nullptr) {
+        isJsonDiscarded = true;
+    } else {
+        if (cJSON_IsInvalid(checkValuesItem)) {
+            isJsonDiscarded = true;
+            cJSON_Delete(checkValuesItem);
+        }
+    }
+    if (isJsonDiscarded) {
         SLOGE("check content discarded! content %{public}s", content.c_str());
         ofstream fileWrite;
         fileWrite.open(filePath.c_str(), ios::out | ios::trunc);
@@ -3091,11 +3419,7 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
             fileRead.close();
             return false;
         }
-        nlohmann::json emptyValue;
-        std::string emptyContent = emptyValue.dump();
-        SLOGD("LoadStringFromFileEx::Dump json object finished");
-        fileWrite.write(emptyContent.c_str(), emptyContent.length());
-        if (fileWrite.fail()) {
+        if (!FillFileWithEmptyContentEx(fileWrite)) {
             SLOGE("file empty init json fail! content %{public}s", content.c_str());
             fileRead.close();
             fileWrite.close();

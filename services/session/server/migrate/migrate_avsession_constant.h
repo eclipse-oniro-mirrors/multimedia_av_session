@@ -94,97 +94,94 @@ constexpr int REASON_EXIST = -3;
 #define  NEED_STATE "NeedState"
 
 namespace {
-const char* EMIT_UTF8 = "emitUTF8";
-const char* PLAYBACK_SPEED = "playbackSpeed";
-const char* PLAYBACK_POSITION_ELAPSED_TIME = "playbackPositionElapsedTime_";
-const char* PLAYBACK_POSITION_UPDATE_TIME = "playbackPositionUpdateTime_";
-const char* PLAYBACK_GET_ACTIVE_ITEM_ID = "playbackGetActiveItemId";
+#define EMIT_UTF8 "emitUTF8"
+#define PLAYBACK_SPEED "playbackSpeed"
+#define PLAYBACK_POSITION_ELAPSED_TIME "playbackPositionElapsedTime_"
+#define PLAYBACK_POSITION_UPDATE_TIME "playbackPositionUpdateTime_"
+#define PLAYBACK_GET_ACTIVE_ITEM_ID "playbackGetActiveItemId"
 
-const char* EVENT_COMMAND_UNLOCK_LYRIC = "EVENT_COMMAND_UNLOCK_LYRIC";
-const char* EVENT_COMMAND_SHOW_LYRIC = "EVENT_COMMAND_SHOW_LYRIC";
-const char* EVENT_COMMAND_HIDE_LYRIC = "EVENT_COMMAND_HIDE_LYRIC";
+#define EVENT_COMMAND_UNLOCK_LYRIC "EVENT_COMMAND_UNLOCK_LYRIC"
+#define EVENT_COMMAND_SHOW_LYRIC "EVENT_COMMAND_SHOW_LYRIC"
+#define EVENT_COMMAND_HIDE_LYRIC "EVENT_COMMAND_HIDE_LYRIC"
 
-const char* MEDIA_CONTROLLER_LIST = "MediaControllerList";
+#define MEDIA_CONTROLLER_LIST "MediaControllerList"
 
-const char* MEDIA_AVAILABLE_DEVICES_LIST = "MediaAvailableDevicesList";
+#define MEDIA_AVAILABLE_DEVICES_LIST "MediaAvailableDevicesList"
 
-const char* HISTORY_MEDIA_PLAYER_INFO = "HistoryMediaPlayerInfo";
+#define HISTORY_MEDIA_PLAYER_INFO "HistoryMediaPlayerInfo"
 
-const char* MEDIA_SESSION = "MediaSession";
+#define MEDIA_SESSION "MediaSession"
 
-const char* METADATA_TITLE = "MetadataTitle";
+#define METADATA_TITLE "MetadataTitle"
 
-const char* METADATA_ARTIST = "MetadataArtist";
+#define METADATA_ARTIST "MetadataArtist"
 
-const char* METADATA_IMAGE = "MetadataArt";
+#define METADATA_IMAGE "MetadataArt"
 
-const char* PLAYBACK_STATE = "PlaybackState";
+#define PLAYBACK_STATE "PlaybackState"
 
-const char* SESSION_INFO = "SessionInfo";
+#define SESSION_INFO "SessionInfo"
 
-const char* RATING = "Rating";
+#define RATING "Rating"
 
-const char* LYRIC_STATE = "LyricState";
+#define LYRIC_STATE "LyricState"
 
-const char* PLAYBACK_INFO = "PlaybackInfo";
+#define PLAYBACK_INFO "PlaybackInfo"
 
-const char* MEDIA_COMMAND = "MediaCommand";
+#define MEDIA_COMMAND "MediaCommand"
 
-const char* COMMAND = "command";
+#define COMMAND "command"
 
-const char* QUERY = "query";
+#define QUERY "query"
 
-const char* EVENT = "event";
+#define EVENT "event"
 
-const char* EXTRAS = "extras";
+#define EXTRAS "extras"
 
-const char* PLAYER_ID = "PlayerId";
+#define PLAYER_ID "PlayerId"
 
-const char* PACKAGE_NAME = "PackageName";
+#define PACKAGE_NAME "PackageName"
 
-const char* MEDIA_INFO = "MediaInfo";
+#define MEDIA_INFO "MediaInfo"
 
-const char* CALLBACK_INFO = "CallbackInfo";
+#define CALLBACK_INFO "CallbackInfo"
 
-const char* VOLUME_INFO = "VolumeInfo";
+#define VOLUME_INFO "VolumeInfo"
 
-const char* IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY = "mIsSupportSingleFrameMediaPlay";
+#define IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY "mIsSupportSingleFrameMediaPlay"
 
-const char* METADATA_MASK_ALL = "11111111111111111";
-const char* METADATA_MASK_NULL = "00000000000000000";
-const char* PLAYBACK_MASK_ALL = "111111111";
-const char* PLAYBACK_MASK_NULL = "000000000";
+#define METADATA_MASK_ALL "11111111111111111"
+#define METADATA_MASK_NULL "00000000000000000"
+#define PLAYBACK_MASK_ALL "111111111"
+#define PLAYBACK_MASK_NULL "000000000"
 constexpr int32_t VOLUMN_INFO = 15;
 
-const char* CONFIG_SOFTBUS_SESSION_TAG = "Media_Session_RemoteCtrl";
+#define CONFIG_SOFTBUS_SESSION_TAG "Media_Session_RemoteCtrl"
 
-const char* SESSION_ID = "SessionId";
-const char* BUNDLE_NAME = "BundleName";
-const char* ABILITY_NAME = "AbilityName";
+#define AUDIO_VOLUME "AudioVolume"
+#define AUDIO_DEVICE_CATEGORY "AudioDeviceCategory"
+#define AUDIO_DEVICE_TYPE "AudioDeviceType"
+#define AUDIO_DEVICE_ROLE "AudioDeviceRole"
+#define AUDIO_NETWORK_ID "AudioNetworkId"
+#define AUDIO_DEVICE_NAME "AudioDeviceName"
+#define AUDIO_MAC_ADDRESS "AudioMacAddress"
 
-const char* AUDIO_VOLUME = "AudioVolume";
-const char* AUDIO_DEVICE_CATEGORY = "AudioDeviceCategory";
-const char* AUDIO_DEVICE_TYPE = "AudioDeviceType";
-const char* AUDIO_DEVICE_ROLE = "AudioDeviceRole";
-const char* AUDIO_NETWORK_ID = "AudioNetworkId";
-const char* AUDIO_DEVICE_NAME = "AudioDeviceName";
-const std::string AUDIO_MAC_ADDRESS = "AudioMacAddress";
+#define AUDIO_SET_VOLUME "AUDIO_SET_VOLUME"
+#define AUDIO_SELECT_OUTPUT_DEVICE "AUDIO_SELECT_OUTPUT_DEVICE"
+#define SESSION_COLD_START_FROM_PROXY "COLD_START"
+#define SESSION_SET_MEDIACONTROL_NEED_STATE "MEDIACONTROL_NEED_STATE"
+#define MEDIACONTROL_NEED_STATE "NEED_STATE"
 
-const char* AUDIO_SET_VOLUME = "AUDIO_SET_VOLUME";
-const char* AUDIO_SELECT_OUTPUT_DEVICE = "AUDIO_SELECT_OUTPUT_DEVICE";
-const char* SESSION_COLD_START_FROM_PROXY = "COLD_START";
-const char* SESSION_SET_MEDIACONTROL_NEED_STATE = "MEDIACONTROL_NEED_STATE";
-const char* MEDIACONTROL_NEED_STATE = "NEED_STATE";
+#define AUDIO_GET_VOLUME "AUDIO_GET_VOLUME"
+#define AUDIO_GET_AVAILABLE_DEVICES "AUDIO_GET_AVAILABLE_DEVICES"
+#define AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO \
+    "AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO"
 
-const char* AUDIO_GET_VOLUME = "AUDIO_GET_VOLUME";
-const char* AUDIO_GET_AVAILABLE_DEVICES = "AUDIO_GET_AVAILABLE_DEVICES";
-const char* AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO =
-    "AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO";
-
-const char* AUDIO_CALLBACK_VOLUME = "AUDIO_CALLBACK_VOLUME";
-const char* AUDIO_CALLBACK_AVAILABLE_DEVICES = "AUDIO_CALLBACK_AVAILABLE_DEVICES";
-const char* AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO =
-    "AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO";
+#define AUDIO_CALLBACK_VOLUME "AUDIO_CALLBACK_VOLUME"
+#define AUDIO_CALLBACK_AVAILABLE_DEVICES \
+    "AUDIO_CALLBACK_AVAILABLE_DEVICES"
+#define AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO \
+    "AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO"
 }
 } // namespace OHOS::AVSession
 
