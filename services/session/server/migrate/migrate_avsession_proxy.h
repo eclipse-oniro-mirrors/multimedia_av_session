@@ -131,6 +131,7 @@ public:
     void OnAVCallHangUp() override {}
     void OnAVCallToggleCallMute() override {}
     void OnPlayFromAssetId(int64_t assetId) override {}
+    void OnPlayWithAssetId(const std::string& assetId) override {}
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {}
 
 private:

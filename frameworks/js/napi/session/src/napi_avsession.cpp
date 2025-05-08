@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "hangUp", OnAVCallHangUp },
     { "toggleCallMute", OnAVCallToggleCallMute },
     { "playFromAssetId", OnPlayFromAssetId },
+    { "playWithAssetId", OnPlayWithAssetId },
     { "castDisplayChange", OnCastDisplayChange },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
@@ -85,6 +86,7 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "hangUp", OffAVCallHangUp },
     { "toggleCallMute", OffAVCallToggleCallMute },
     { "playFromAssetId", OffPlayFromAssetId },
+    { "playWithAssetId", OffPlayWithAssetId },
     { "castDisplayChange", OffCastDisplayChange },
 };
 std::list<int32_t> registerEventList_;
@@ -101,7 +103,8 @@ std::map<std::string, int32_t> convertEventType_ = {
     { "setLoopMode", AVControlCommand::SESSION_CMD_SET_LOOP_MODE },
     { "toggleFavorite", AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE },
     { "handleKeyEvent", AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT },
-    { "playFromAssetId", AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID }
+    { "playFromAssetId", AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID },
+    { "playWithAssetId", AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID }
 };
 
 std::mutex NapiAVSession::syncMutex_;
@@ -1589,6 +1592,17 @@ napi_status NapiAVSession::OnPlayFromAssetId(napi_env env, NapiAVSession* napiSe
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PLAY_FROM_ASSETID, callback);
 }
 
+napi_status NapiAVSession::OnPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
+    int32_t ret = napiSession->session_->AddSupportCommand(AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "add command failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_PLAY_WITH_ASSETID, callback);
+}
+
 napi_status NapiAVSession::OnCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -1878,6 +1892,23 @@ napi_status NapiAVSession::OffPlayFromAssetId(napi_env env, NapiAVSession* napiS
         CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
                                  "NapiAVSession object is nullptr");
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
+        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
+    }
+    return napi_ok;
+}
+
+napi_status NapiAVSession::OffPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_PLAY_WITH_ASSETID, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
+
+    if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_PLAY_WITH_ASSETID)) {
+        CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
+                                 "NapiAVSession object is nullptr");
+        int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     }
     return napi_ok;

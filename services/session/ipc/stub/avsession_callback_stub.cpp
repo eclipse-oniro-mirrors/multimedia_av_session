@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -252,6 +252,15 @@ int32_t AVSessionCallbackStub::HandleOnPlayFromAssetId(MessageParcel& data, Mess
     int64_t assetId = -1;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt64(assetId), ERR_NONE, "read time failed");
     OnPlayFromAssetId(assetId);
+    return ERR_NONE;
+}
+
+int32_t AVSessionCallbackStub::HandleOnPlayWithAssetId(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionCallbackStub::OnPlayWithAssetId");
+    std::string assetId{};
+    CHECK_AND_RETURN_RET_LOG(data.ReadString(assetId), ERR_NONE, "read time failed");
+    OnPlayWithAssetId(assetId);
     return ERR_NONE;
 }
  

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@ public:
         SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE = 14,
         SESSION_CMD_MEDIA_KEY_SUPPORT = 15,
         SESSION_CMD_SET_TARGET_LOOP_MODE = 16,
+        SESSION_CMD_PLAY_WITH_ASSETID = 17,
         SESSION_CMD_MAX
     };
 
@@ -86,6 +87,9 @@ public:
     int32_t SetPlayFromAssetId(int64_t playFromAssetId);
     int32_t GetPlayFromAssetId(int64_t& playFromAssetId) const;
 
+    int32_t SetPlayWithAssetId(const std::string& playWithAssetId);
+    int32_t GetPlayWithAssetId(std::string& playWithAssetId) const;
+
     const static inline std::vector<int32_t> localCapability {
         SESSION_CMD_PLAY,
         SESSION_CMD_PAUSE,
@@ -99,6 +103,7 @@ public:
         SESSION_CMD_SET_LOOP_MODE,
         SESSION_CMD_TOGGLE_FAVORITE,
         SESSION_CMD_PLAY_FROM_ASSETID,
+        SESSION_CMD_PLAY_WITH_ASSETID,
         SESSION_CMD_AVCALL_ANSWER,
         SESSION_CMD_AVCALL_HANG_UP,
         SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE,

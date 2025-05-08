@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1999,6 +1999,16 @@ void AVSessionItem::HandleOnPlayFromAssetId(const AVControlCommand& cmd)
     int64_t assetId = 0;
     CHECK_AND_RETURN_LOG(cmd.GetPlayFromAssetId(assetId) == AVSESSION_SUCCESS, "Get playFromAssetId failed");
     callback_->OnPlayFromAssetId(assetId);
+}
+
+void AVSessionItem::HandleOnPlayWithAssetId(const AVControlCommand& cmd)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayWithAssetId");
+    std::lock_guard callbackLockGuard(callbackLock_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::string assetId;
+    CHECK_AND_RETURN_LOG(cmd.GetPlayWithAssetId(assetId) == AVSESSION_SUCCESS, "Get playWithAssetId failed");
+    callback_->OnPlayWithAssetId(assetId);
 }
 // LCOV_EXCL_STOP
 
