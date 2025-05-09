@@ -970,6 +970,9 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+#ifdef START_STOP_ON_DEMAND_ENABLE
+        PublishEvent(mediaPlayStateTrue);
+#endif
     for (const auto& [pid, listener] : listenerMap) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
         if (listener != nullptr) {
