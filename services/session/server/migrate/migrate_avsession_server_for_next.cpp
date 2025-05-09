@@ -113,10 +113,10 @@ void MigrateAVSessionServer::HandleFocusPlaybackStateChange(const std::string &s
 void MigrateAVSessionServer::HandleFocusMetaDataChange(const std::string &sessionId, const AVMetaData &data)
 {
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = data.GetMediaImage();
+    DoMetaDataSyncToRemote(data);
     if (innerPixelMap != nullptr) {
         DoMediaImageSyncToRemote(innerPixelMap);
     }
-    DoMetaDataSyncToRemote(data);
 }
 
 void MigrateAVSessionServer::HandleFocusValidCommandChange(const std::string &sessionId,
@@ -135,6 +135,13 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
     }
     if (data.GetMetaMask().test(AVMetaData::META_KEY_ARTIST)) {
         metaData[METADATA_ARTIST] = data.GetArtist();
+    } else if (data.GetMetaMask().test(AVMetaData::META_KEY_SUBTITLE)) {
+        metaData[METADATA_ARTIST] = data.GetSubTitle();
+    }
+    CHECK_AND_RETURN_LOG(!metaData.empty(), "empty metadata return");
+    metaData[METADATA_ASSET_ID] = DEFAULT_STRING;
+    if (data.GetMetaMask().test(AVMetaData::META_KEY_ASSET_ID)) {
+        metaData[METADATA_ASSET_ID] = data.GetAssetId();
     }
     {
         std::lock_guard lockGuard(cacheJsonLock_);
@@ -143,11 +150,11 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
             return;
         }
     }
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_META_INFO});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_META_INFO});
     SoftbusSessionUtils::TransferJsonToStr(metaData, msg);
     MigratePostTask(
         [this, msg]() {
-            SendByte(deviceId_, msg);
+            SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_META_INFO");
     SLOGI("DoMetaDataSyncToRemote async title:%{public}s done", data.GetTitle().c_str());
@@ -164,13 +171,7 @@ void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionP
     SLOGI("DoMediaImageSyncToRemote with img size:%{public}d", static_cast<int>(imgBuffer.size()));
 
     if (imgBuffer.size() <= 0) {
-        std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_MEDIA_IMAGE});
-        SoftbusSessionUtils::TransferJsonToStr(DEFAULT_STRING, msg);
-        MigratePostTask(
-            [this, msg]() {
-                SendByte(deviceId_, msg);
-            },
-            "SYNC_FOCUS_MEDIA_IMAGE");
+        SLOGE("do mediaImg sync with emptyBuffer, return");
         return;
     }
     std::shared_ptr<Media::PixelMap> pixelMap;
@@ -179,13 +180,15 @@ void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionP
     std::shared_ptr<AVSessionPixelMap> innerPixelMapMin = AVSessionPixelMapAdapter::ConvertToInnerWithMinSize(pixelMap);
     CHECK_AND_RETURN_LOG(innerPixelMapMin != nullptr, "DoMediaImageSyncToRemote with innerPixelMapMin null");
     std::vector<uint8_t> imgBufferMin = innerPixelMapMin->GetInnerImgBuffer();
+    std::string assetIdForMediaImg = curAssetId_ + "|";
     std::string imgStrMin(imgBufferMin.begin(), imgBufferMin.end());
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_MEDIA_IMAGE});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_MEDIA_IMAGE});
+    msg += assetIdForMediaImg;
     msg += imgStrMin;
 
     MigratePostTask(
         [this, msg]() {
-            SendByte(deviceId_, msg);
+            SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_MEDIA_IMAGE");
     SLOGI("DoMediaImageSyncToRemote async size:%{public}d", static_cast<int>(msg.size()));
@@ -208,11 +211,11 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
             return;
         }
     }
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_PLAY_STATE});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_PLAY_STATE});
     SoftbusSessionUtils::TransferJsonToStr(playbackState, msg);
-    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+    MigratePostTask(
         [this, msg]() {
-            SendByte(deviceId_, msg);
+            SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_PLAY_STATE");
     SLOGI("DoPlaybackStateSyncToRemote sync state:%{public}d|isFavor:%{public}d done",
@@ -232,11 +235,11 @@ void MigrateAVSessionServer::DoValidCommandsSyncToRemote(const std::vector<int32
         commandsStr.push_back(static_cast<char>(cmd + '0'));
     }
     validCommands[VALID_COMMANDS] = commandsStr;
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_VALID_COMMANDS});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_VALID_COMMANDS});
     SoftbusSessionUtils::TransferJsonToStr(validCommands, msg);
     MigratePostTask(
         [this, msg]() {
-            SendByte(deviceId_, msg);
+            SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_VALID_COMMANDS");
 }
@@ -267,12 +270,12 @@ void MigrateAVSessionServer::DoBundleInfoSyncToRemote(sptr<AVControllerItem> con
     CHECK_AND_RETURN_LOG(innerPixelMapMin != nullptr, "DoBundleInfoSyncToRemote with innerPixelMapMin null");
     std::vector<uint8_t> imgBufferMin = innerPixelMapMin->GetInnerImgBuffer();
     std::string imgStrMin(imgBufferMin.begin(), imgBufferMin.end());
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_BUNDLE_IMG});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_BUNDLE_IMG});
     msg += imgStrMin;
 
     MigratePostTask(
         [this, msg]() {
-            SendByte(deviceId_, msg);
+            SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_BUNDLE_IMG");
     SLOGI("DoBundleInfoSyncToRemote async size:%{public}d", static_cast<int>(msg.size()));
@@ -289,11 +292,11 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
     AppExecFwk::ElementName elementName = controller->GetElementOfSession();
     sessionInfo[MIGRATE_BUNDLE_NAME] = elementName.GetBundleName();
     sessionInfo[MIGRATE_ABILITY_NAME] = elementName.GetAbilityName();
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_SESSION_INFO});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_SESSION_INFO});
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
     MigratePostTask(
         [this, msg]() {
-            SendByte(deviceId_, msg);
+            SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_SESSION_INFO");
 
@@ -305,11 +308,11 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
     AVMetaData metaData;
     int32_t ret = controller->GetAVMetaData(metaData);
     if (AVSESSION_SUCCESS == ret || ERR_INVALID_PARAM == ret) {
+        DoMetaDataSyncToRemote(metaData);
         std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData.GetMediaImage();
         if (innerPixelMap != nullptr) {
             DoMediaImageSyncToRemote(innerPixelMap);
         }
-        DoMetaDataSyncToRemote(metaData);
     } else {
         SLOGE("UpdateFrontSessionInfoToRemote get metadata fail:%{public}d", ret);
     }
@@ -334,11 +337,11 @@ void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
     SLOGI("UpdateEmptyInfoToRemote in async");
     Json::Value sessionInfo;
     sessionInfo[MIGRATE_SESSION_ID] = EMPTY_SESSION;
-    std::string msg = std::string({MSG_HEAD_MODE, SYNC_FOCUS_SESSION_INFO});
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_SESSION_INFO});
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
     MigratePostTask(
         [this, msg]() {
-            SendByte(deviceId_, msg);
+            SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_SESSION_INFO");
 }
@@ -369,6 +372,9 @@ void MigrateAVSessionServer::ProcFromNext(const std::string &deviceId, const std
             break;
         case COLD_START:
             ProcessColdStartFromNext(commandJsonValue);
+            break;
+        case SYNC_MEDIA_CONTROL_NEED_STATE:
+            ProcessMediaControlNeedStateFromNext(commandJsonValue);
             break;
         default:
             SLOGE("messageType %{public}d not support", messageType);
@@ -417,18 +423,34 @@ void MigrateAVSessionServer::ProcessColdStartFromNext(Json::Value commandJsonVal
     servicePtr_->StartAVPlayback(bundleName, "");
 }
 
+void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(Json::Value commandJsonValue)
+{
+    std::string bundleName;
+    if (commandJsonValue.isMember(NEED_STATE)) {
+        bool newListenerSetState = commandJsonValue[NEED_STATE].isBool() ?
+            commandJsonValue[NEED_STATE].asBool() : true;
+        if (!isListenerSet_ && newListenerSetState) {
+            isListenerSet_ = true;
+            LocalFrontSessionArrive(lastSessionId_);
+        } else {
+            isListenerSet_ = newListenerSetState;
+        }
+    }
+    SLOGI("updateListenerState:%{public}d", isListenerSet_);
+}
+
 std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFunc()
 {
     return [this](int32_t volumeNum) {
         std::lock_guard lockGuard(migrateDeviceChangeLock_);
         Json::Value value;
-        std::string msg = std::string({MSG_HEAD_MODE, SYNC_SET_VOLUME_COMMAND});
+        std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_SET_VOLUME_COMMAND});
         value[AUDIO_VOLUME] = volumeNum;
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
         SLOGI("server send set volume num async:%{public}d", volumeNum);
         MigratePostTask(
             [this, msg]() {
-                SendByte(deviceId_, msg);
+                SendByteForNext(deviceId_, msg);
             },
             "SYNC_SET_VOLUME_COMMAND");
     };
@@ -439,7 +461,7 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceCha
     return [this](const AudioDeviceDescriptors& devices) {
         std::lock_guard lockGuard(migrateDeviceChangeLock_);
         Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
-        std::string msg = std::string({MSG_HEAD_MODE, SYNC_AVAIL_DEVICES_LIST});
+        std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_AVAIL_DEVICES_LIST});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
         SLOGI("server send get available device change callback async");
         MigratePostTask(
@@ -455,7 +477,7 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
     return [this](const AudioDeviceDescriptors& devices) {
         std::lock_guard lockGuard(migrateDeviceChangeLock_);
         Json::Value value = ConvertAudioDeviceDescriptorsToJson(devices);
-        std::string msg = std::string({MSG_HEAD_MODE, SYNC_CURRENT_DEVICE});
+        std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_CURRENT_DEVICE});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
         SLOGI("server send get preferred device change callback async");
         MigratePostTask(
@@ -463,7 +485,7 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
                 SendJsonStringByte(deviceId_, msg);
             },
             "SYNC_CURRENT_DEVICE");
-        AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
+        volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
     };
 }
 
@@ -525,6 +547,7 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(Json::Value jsonObject)
         jsonObject[AUDIO_MAC_ADDRESS].asString() : "ERROR_VALUE";
     
     std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
+    CHECK_AND_RETURN_LOG(device != nullptr, "AudioDeviceDescriptor make shared_ptr is null");
     device->deviceCategory_ = static_cast<AudioStandard::DeviceCategory>(deviceCategory);
     device->deviceType_ = static_cast<AudioStandard::DeviceType>(deviceType);
     device->deviceRole_ = static_cast<AudioStandard::DeviceRole>(deviceRole);
@@ -553,6 +576,10 @@ bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Cal
     const std::string &name, int64_t delayTime)
 {
     SLOGD("MigratePostTask with name:%{public}s", name.c_str());
+    if (!isListenerSet_ && name != "LocalFrontSessionArrive" && name != "SYNC_FOCUS_SESSION_INFO") {
+        SLOGI("no send task:%{public}s for no listen", name.c_str());
+        return false;
+    }
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(name);
     return AVSessionEventHandler::GetInstance().AVSessionPostTask(callback, name);
 }

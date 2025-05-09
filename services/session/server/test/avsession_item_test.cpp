@@ -32,6 +32,9 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
+namespace OHOS {
+namespace AVSession {
+
 static char g_testSessionTag[] = "test";
 static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
 static char g_testAnotherAbilityName[] = "testAnother.ability";
@@ -99,6 +102,7 @@ class MockIAVCastControllerProxy : public OHOS::AVSession::IAVCastControllerProx
         override { return 0; }
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override { return 0; }
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override { return 0; }
+    int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) override {return 0;}
 };
 
 void AVsessionItemTest::SetUpTestCase()
@@ -515,3 +519,5 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level1)
     EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceType_ == 1);
     SLOGD("AVSessionItem_SetOutputDevice_002 end!");
 }
+} //AVSession
+} //OHOS

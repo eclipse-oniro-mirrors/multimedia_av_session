@@ -169,7 +169,7 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     migrateManager_->CreateLocalSessionStub("SuperLauncher-Dual", server_);
     EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher-Dual") != migrateManager_->serverMap_.end(), true);
 
-    char infoName[] = "testInfoName";
+    char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
     PeerSocketInfo info = {

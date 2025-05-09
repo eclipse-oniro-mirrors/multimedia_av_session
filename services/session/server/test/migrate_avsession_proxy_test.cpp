@@ -301,7 +301,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand002, TestS
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.Level1)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
 
     auto devices = AudioAdapter::GetInstance().GetAvailableDevices();
     Json::Value jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
@@ -317,7 +317,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessPreferredOutputDevice001, TestSize.Level1)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
 
     auto devices = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
     Json::Value jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
@@ -410,4 +410,47 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage003, TestSize.Level1
     g_MigrateAVSessionProxy->remoteSession_->SetAVMetaData(metaData);
     std::string bundleIconStr = "test";
     g_MigrateAVSessionProxy->ProcessMediaImage(bundleIconStr);
+}
+
+/**
+ * @tc.name: OnConnectServer001
+ * @tc.desc: test the member of OnConnectServer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, OnConnectServer001, TestSize.Level1)
+{
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    std::string deviceId = "123";
+    g_MigrateAVSessionProxy->OnConnectServer(deviceId);
+}
+
+/**
+ * @tc.name: OnDisconnectServer001
+ * @tc.desc: test the member of OnDisconnectServer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, OnDisconnectServer001, TestSize.Level1)
+{
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    std::string deviceId = "123";
+    g_MigrateAVSessionProxy->OnDisconnectServer(deviceId);
+}
+
+/**
+ * @tc.name: OnBytesReceived001
+ * @tc.desc: test the member of OnBytesReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level1)
+{
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    std::string deviceId = "123";
+    std::string msg = "test";
+    g_MigrateAVSessionProxy->OnBytesReceived(deviceId, msg);
 }

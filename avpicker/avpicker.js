@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,6 +82,7 @@ export class AVCastPicker extends ViewPU {
         this.__restartUECMessage = new ObservedPropertySimplePU(1, this, 'restartUECMessage');
         this.needToRestart = false;
         this.__isShowLoadingProgress = new ObservedPropertySimplePU(false, this, 'isShowLoadingProgress');
+        this.pickerCountOnCreation = 0;
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -156,6 +157,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.isShowLoadingProgress !== undefined) {
             this.isShowLoadingProgress = c11.isShowLoadingProgress;
+        }
+        if (c11.pickerCountOnCreation !== undefined) {
+            this.pickerCountOnCreation = c11.pickerCountOnCreation;
         }
     }
 
@@ -348,6 +352,15 @@ export class AVCastPicker extends ViewPU {
 
     set isShowLoadingProgress(g1) {
         this.__isShowLoadingProgress.set(g1);
+    }
+
+    aboutToAppear() {
+        AVCastPicker.currentPickerCount += 1;
+        this.pickerCountOnCreation = AVCastPicker.currentPickerCount;
+    }
+
+    aboutToDisappear() {
+        AVCastPicker.currentPickerCount -= 1;
     }
 
     MenuStateChange() {
@@ -610,6 +623,7 @@ export class AVCastPicker extends ViewPU {
                     'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
                     'isCustomPicker': c8,
                     'message': this.restartUECMessage,
+                    'currentPickerCount': this.pickerCountOnCreation,
                 }
             });
             UIExtensionComponent.onRemoteReady((n8) => {
@@ -722,11 +736,13 @@ export class AVCastPicker extends ViewPU {
                 }
             });
             UIExtensionComponent.onRelease((releaseCode) => {
+                console.error(TAG, `onRelease code ${releaseCode}`);
                 if (releaseCode === 1) {
                     this.needToRestart = true;
                 }
             });
             UIExtensionComponent.onError(() => {
+                console.error(TAG, 'onError ready to restart');
                 this.needToRestart = true;
             });
             UIExtensionComponent.accessibilityLevel('yes');
@@ -738,8 +754,8 @@ export class AVCastPicker extends ViewPU {
 
     hasExtDevice(a) {
         for (let b = 0; b < a.length; b++) {
-            if (a[b].deviceType !== 1 && // 1 is audio.DeviceType.EARPIECE
-                a[b].deviceType !== 2) { // 2 is audio.DeviceType.SPEAKER
+            let q1 = (a[b].deviceType === 1 || a[b].deviceType === 2) && a[b].networkId === 'LocalDevice';
+            if (!q1) {
                 return true;
             }
         }
@@ -806,5 +822,5 @@ export class AVCastPicker extends ViewPU {
         return 'AVCastPicker';
     }
 }
-
+AVCastPicker.currentPickerCount = 0;
 export default AVCastPicker;

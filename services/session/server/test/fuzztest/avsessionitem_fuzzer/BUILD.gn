@@ -33,6 +33,7 @@ ohos_fuzztest("AVSessionItemFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-fno-access-control",
   ]
   sources = [ "avsessionitem_fuzzer.cpp" ]
   deps = [

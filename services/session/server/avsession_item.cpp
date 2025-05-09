@@ -1258,6 +1258,11 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         AVRouter::GetInstance().StopCastSession(castHandle_);
         DoContinuousTaskUnregister();
+    } else {
+        // clear pre session cast info in streamplayer to avoid flash when cast compete
+        if (castControllerProxy_ != nullptr) {
+            castControllerProxy_->RefreshCurrentAVQueueItem(AVQueueItem {});
+        }
     }
     castHandle_ = -1;
     castHandleDeviceId_ = "-100";
@@ -1288,7 +1293,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             return;
         }
     }
-    if (castState == connectStateFromCast_) { // 6 is connected status (stream)
+    if (castState == connectStateFromCast_ || castState == authingStateFromCast_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
             castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {
@@ -1365,6 +1370,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
+    if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
+        deviceInfo = GetDescriptor().outputDeviceInfo_.deviceInfos_[0];
+    }
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
@@ -1390,10 +1398,10 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         castState = 6; // 6 is disconnected status of AVSession
         DealDisconnect(deviceInfo, isNeedRemove);
     }
-    HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
         std::lock_guard aliveLockGuard(isAliveLock_);
         if (isAlivePtr_ != nullptr && *isAlivePtr_) {
+            HandleOutputDeviceChange(castState, outputDeviceInfo);
             std::lock_guard controllersLockGuard(controllersLock_);
             for (const auto& controller : controllers_) {
                 if (!controllers_.empty() && controller.second != nullptr) {
@@ -1402,16 +1410,13 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             }
         }
     }
-    {
-        if (castState == ConnectionState::STATE_DISCONNECTED &&
-            descriptor_.sessionTag_ == "RemoteCast") {
-            SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
-            Destroy();
-        } else {
-            AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
-                DealLocalState(castState);
-                }, "DealLocalState", 0);
-        }
+    if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
+        SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
+        Destroy();
+    } else {
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
+            DealLocalState(castState);
+            }, "DealLocalState", 0);
     }
 }
 

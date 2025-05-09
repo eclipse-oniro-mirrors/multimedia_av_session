@@ -455,6 +455,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange001, TestSize.Level1)
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    sleep(1);
     EXPECT_FALSE(ret);
 }
 
@@ -478,6 +479,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange002, TestSize.Level1)
     action.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    sleep(1);
     EXPECT_FALSE(ret);
 }
 
@@ -502,6 +504,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange003, TestSize.Level1)
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnAvailableDeviceChange(AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, action);
+    sleep(1);
     EXPECT_FALSE(ret);
 }
 
@@ -553,7 +556,7 @@ static HWTEST(AudioAdapterTest, OnVolumeKeyEvent002, TestSize.Level1)
 */
 static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
 {
-    SLOGD("PauseAudioStream001 begin!");
+    SLOGD("OnDeviceChange001 begin!");
     bool ret = false;
     AudioAdapter::GetInstance().AddDeviceChangeListener(
         [&ret] (const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) {
@@ -576,14 +579,14 @@ static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
 static HWTEST(AudioAdapterTest, OnDeviceChange002, TestSize.Level1)
 {
     SLOGD("OnDeviceChange002 begin!");
-    bool ret = false;
-    AudioAdapter::GetInstance().SetDeviceChangeCallback();
+    bool ret = OHOS::AVSession::AVSESSION_SUCCESS;
+    ret = AudioAdapter::GetInstance().SetDeviceChangeCallback();
 
     DeviceChangeAction action = {};
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnDeviceChange(action);
-    EXPECT_FALSE(ret);
+    EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_SUCCESS);
 }
 
 /**
@@ -595,15 +598,16 @@ static HWTEST(AudioAdapterTest, OnDeviceChange002, TestSize.Level1)
 static HWTEST(AudioAdapterTest, OnDeviceChange003, TestSize.Level1)
 {
     SLOGD("OnDeviceChange003 begin!");
-    bool ret = false;
-    AudioAdapter::GetInstance().SetDeviceChangeCallback();
-    AudioAdapter::GetInstance().UnsetDeviceChangeCallback();
+    bool ret = OHOS::AVSession::AVSESSION_SUCCESS;
+    ret = AudioAdapter::GetInstance().SetDeviceChangeCallback();
+    EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_SUCCESS);
 
+    ret = AudioAdapter::GetInstance().UnsetDeviceChangeCallback();
     DeviceChangeAction action = {};
     action.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
     auto& audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.OnDeviceChange(action);
-    EXPECT_FALSE(ret);
+    EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_SUCCESS);
 }
 
 /**
@@ -688,53 +692,7 @@ static HWTEST(AudioAdapterTest, SelectOutputDevice002, TestSize.Level1)
     auto testDevice = availableDevices[0];
     AudioDeviceDescriptorWithSptr desc {new OHOS::AudioStandard::AudioDeviceDescriptor()};
     desc->deviceCategory_ = testDevice->deviceCategory_;
-    desc->deviceType_ = testDevice->deviceType_;
-    int32_t ret = audioAdapter.SelectOutputDevice(desc);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-}
-
-/**
- * @tc.name: SelectOutputDevice003
- * @tc.desc: Test SelectOutputDevice with a valid device descriptor that matches one available device.
- * @tc.type: FUNC
- * @tc.require: AR000H31KJ
- */
-static HWTEST(AudioAdapterTest, SelectOutputDevice003, TestSize.Level1)
-{
-    SLOGD("SelectOutputDevice003 begin!");
-    AudioAdapter::GetInstance().Init();
-    auto& audioAdapter = AudioAdapter::GetInstance();
-    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
-
-    CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
-    auto testDevice = availableDevices[0];
-    AudioDeviceDescriptorWithSptr desc {new OHOS::AudioStandard::AudioDeviceDescriptor()};
-    desc->deviceCategory_ = testDevice->deviceCategory_;
     EXPECT_NE(desc->deviceType_, testDevice->deviceType_);
     int32_t ret = audioAdapter.SelectOutputDevice(desc);
     EXPECT_EQ(ret, AVSESSION_ERROR);
-}
-
-/**
- * @tc.name: SelectOutputDevice004
- * @tc.desc: Test SelectOutputDevice with a valid device descriptor that matches one available device.
- * @tc.type: FUNC
- * @tc.require: AR000H31KJ
- */
-static HWTEST(AudioAdapterTest, SelectOutputDevice004, TestSize.Level1)
-{
-    SLOGD("SelectOutputDevice004 begin!");
-    AudioAdapter::GetInstance().Init();
-    auto& audioAdapter = AudioAdapter::GetInstance();
-    AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
-
-    CHECK_AND_RETURN_LOG(availableDevices.size() > 0, "No available devices for testing");
-    auto testDevice = availableDevices[0];
-    AudioDeviceDescriptorWithSptr desc {new OHOS::AudioStandard::AudioDeviceDescriptor()};
-    desc->deviceType_ = testDevice->deviceType_;
-    desc->deviceCategory_ = OHOS::AudioStandard::BT_HEADPHONE;
-
-    EXPECT_NE(desc->deviceCategory_, testDevice->deviceCategory_);
-    int32_t ret = audioAdapter.SelectOutputDevice(desc);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }

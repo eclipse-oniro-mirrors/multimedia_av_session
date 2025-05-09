@@ -246,5 +246,49 @@ HWTEST_F(AVSessionManagerImplTest, CreateController001, TestSize.Level1)
     EXPECT_EQ(result, ERR_INVALID_PARAM);
 }
 
+/**
+* @tc.name: GetDistributedSessionControllers001
+* @tc.desc: test GetDistributedSessionControllers
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers001, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    std::vector<std::shared_ptr<AVSessionController>> controllers;
+    int32_t result =
+	     impl.GetDistributedSessionControllers(DistributedSessionType::TYPE_SESSION_REMOTE, controllers);
+    EXPECT_NE(result, ERR_INVALID_PARAM);
+}
+
+/**
+* @tc.name: GetDistributedSessionControllers002
+* @tc.desc: test GetDistributedSessionControllers
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers002, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    std::vector<std::shared_ptr<AVSessionController>> controllers;
+    int32_t result =
+	    impl.GetDistributedSessionControllers(DistributedSessionType::TYPE_SESSION_MIGRATE_IN, controllers);
+    EXPECT_NE(result, ERR_INVALID_PARAM);
+}
+
+/**
+* @tc.name: GetDistributedSessionControllers003
+* @tc.desc: test GetDistributedSessionControllers
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers003, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    std::vector<std::shared_ptr<AVSessionController>> controllers;
+    int32_t result =
+	    impl.GetDistributedSessionControllers(DistributedSessionType::TYPE_SESSION_MIGRATE_OUT, controllers);
+    EXPECT_NE(result, ERR_INVALID_PARAM);
+}
 } // namespace AVSession
 } // namespace OHOS

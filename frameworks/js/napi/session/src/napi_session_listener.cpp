@@ -138,20 +138,20 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& firstParam, const 
 void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnSessionCreate");
-    SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
+    SLOGI("sessionId=%{public}s***", descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
     HandleEvent(EVENT_SESSION_CREATED, descriptor);
 }
 
 void NapiSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
-    SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
+    SLOGI("sessionId=%{public}s***", descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
     HandleEvent(EVENT_SESSION_DESTROYED, descriptor);
 }
 
 void NapiSessionListener::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnTopSessionChange");
-    SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
+    SLOGI("sessionId=%{public}s***", descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
     HandleEvent(EVENT_TOP_SESSION_CHANGED, descriptor);
 }
 
@@ -238,5 +238,10 @@ napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, nap
     CHECK_AND_RETURN_RET_LOG(ref != nullptr, napi_ok, "callback has been remove");
     callbacks_[event].remove(ref);
     return napi_delete_reference(env, ref);
+}
+
+int32_t NapiSessionListener::GetCallbackNum(int32_t event)
+{
+    return callbacks_[event].size();
 }
 }

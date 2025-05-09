@@ -34,6 +34,7 @@ class AVSessionService;
 class AVControllerObserver;
 constexpr size_t BUFFER_MAX_SIZE = 1024 * 1024;
 constexpr size_t DEFAULT_QUALITY = 100;
+constexpr size_t UNMASK_CHAR_NUM = 3;
 constexpr int64_t DELAY_TIME = 2000;
 constexpr int64_t DELAY_PLAY_COM_TIME = 500;
 constexpr int32_t MAX_SESSION_NUMS = 2;
@@ -124,6 +125,7 @@ private:
     void VolumeControlCommand(Json::Value commandJsonValue);
     void SwitchAudioDeviceCommand(Json::Value jsonObject);
     void ProcessColdStartFromNext(Json::Value commandJsonValue);
+    void ProcessMediaControlNeedStateFromNext(Json::Value commandJsonValue);
     void SendCommandProc(const std::string &command, sptr<AVControllerItem> controller);
     void MediaButtonEventProc(const std::string &command, sptr<AVControllerItem> controller);
     void CommandWithExtrasProc(int mediaCommand, const std::string &extrasCommand, const std::string &extras,
@@ -172,6 +174,7 @@ private:
     Json::Value metaDataCache_;
     Json::Value playbackStateCache_;
     std::recursive_mutex cacheJsonLock_;
+    bool isListenerSet_ = false;
 };
 
 class AVControllerObserver : public AVControllerCallback {

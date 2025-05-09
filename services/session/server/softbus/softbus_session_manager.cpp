@@ -159,6 +159,20 @@ int32_t SoftbusSessionManager::SendBytes(int32_t socket, const std::string &data
     return ret;
 }
 
+int32_t SoftbusSessionManager::SendBytesForNext(int32_t socket, const std::string &data)
+{
+    if (socket <= 0 || data == "") {
+        SLOGE("the params invalid, unable to send sendBytes by session.");
+        return AVSESSION_ERROR;
+    }
+    int ret = ::SendBytes(socket, data.c_str(), data.length());
+    if (ret != 0) {
+        SLOGE("SendBytes error, ret = %{public}d", ret);
+        return AVSESSION_ERROR;
+    }
+    return ret;
+}
+
 int32_t SoftbusSessionManager::ObtainPeerDeviceId(int32_t socket, std::string &deviceId)
 {
     CHECK_AND_RETURN_RET_LOG(

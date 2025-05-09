@@ -46,6 +46,8 @@ public:
 
     int32_t SendBytes(int32_t socket, const std::string &data);
 
+    int32_t SendBytesForNext(int32_t socket, const std::string &data);
+
     int32_t ObtainPeerDeviceId(int32_t socket, std::string &deviceId);
 
     void AddSessionListener(std::shared_ptr<SoftbusSessionListener> softbusSessionListener);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,7 +101,8 @@ export interface AVCastPickerDeviceInfo {
   deviceIconName: string,
   isConnected: boolean,
   selectedIconName: string,
-  deviceSource: DeviceSource
+  deviceSource: DeviceSource,
+  networkId: string
 }
 
 @Component
@@ -191,6 +192,18 @@ export struct AVCastPicker {
   @State restartUECMessage: number = 1;
   private needToRestart: boolean = false;
   @State isShowLoadingProgress: boolean = false;
+  private pickerCountOnCreation: number = 0;
+
+  private static currentPickerCount: number = 0;
+
+  aboutToAppear(): void {
+    AVCastPicker.currentPickerCount += 1;
+    this.pickerCountOnCreation = AVCastPicker.currentPickerCount;
+  }
+
+  aboutToDisappear(): void {
+    AVCastPicker.currentPickerCount -= 1;
+  }
 
   MenuStateChange() {
     if (this.extensionProxy != null) {
@@ -331,6 +344,7 @@ export struct AVCastPicker {
           'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
           'isCustomPicker': isCustomPicker,
           'message': this.restartUECMessage,
+          'currentPickerCount': this.pickerCountOnCreation,
         }
       })
       .onRemoteReady((proxy: UIExtensionProxy) => {
@@ -444,11 +458,13 @@ export struct AVCastPicker {
         }
       })
       .onRelease((releaseCode) => {
+        console.error(TAG, `onRelease code ${releaseCode}`);
         if (releaseCode === 1) {
           this.needToRestart = true;
         }
       })
       .onError(() => {
+        console.error(TAG, 'onError ready to restart');
         this.needToRestart = true;
       })
     }
@@ -489,8 +505,9 @@ export struct AVCastPicker {
 
   private hasExtDevice(allDevice: Array<AVCastPickerDeviceInfo>): boolean {
     for (let i = 0; i < allDevice.length; i++) {
-      if (allDevice[i].deviceType !== 1 && // 1 is audio.DeviceType.EARPIECE
-        allDevice[i].deviceType !== 2) { // 2 is audio.DeviceType.SPEAKER
+      let isEarpieceOrSpeaker: boolean = (allDevice[i].deviceType === 1 || allDevice[i].deviceType === 2) &&
+        allDevice[i].networkId === 'LocalDevice';
+      if (!isEarpieceOrSpeaker) {
         return true;
       }
     }

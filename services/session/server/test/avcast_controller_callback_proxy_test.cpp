@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,4 +86,17 @@ static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest002, testing::ext
     EXPECT_EQ(keyRequestData.empty(), true);
 }
 
+/**
+* @tc.name: onDataSrcRead001
+* @tc.desc: Test onDataSrcRead
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVCastControllerCallbackProxyTest, onDataSrcRead001, testing::ext::TestSize.Level1)
+{
+    std::shared_ptr<AVSharedMemory> memory = AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test");
+    std::string assetId = "";
+    std::vector<uint8_t> keyRequestData;
+    auto ret = avCastControllerCallbackProxy_->onDataSrcRead(memory, 2, 2);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
 } // namespace OHOS::AVSession

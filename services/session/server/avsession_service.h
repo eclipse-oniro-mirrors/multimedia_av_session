@@ -183,6 +183,8 @@ public:
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
+    int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object, pid_t pid);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 #endif
@@ -199,7 +201,7 @@ public:
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
-    void OnClientDied(pid_t pid);
+    void OnClientDied(pid_t pid, pid_t uid);
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
@@ -553,6 +555,7 @@ private:
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;
+    std::atomic<bool> hasMediaCapsule_ = false;
 
     sptr<AVSessionItem> topSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;

@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 #include <gtest/gtest.h>
 
@@ -22,8 +22,9 @@
 #include "avcast_controller_item.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
-#include "hw_cast_provider.h"
+#include "hw_cast_provider_session.h"
 #include "hw_cast_stream_player.h"
+#include "image_type.h"
 
 using namespace testing::ext;
 using namespace OHOS::CastEngine::CastEngineClient;
@@ -40,6 +41,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMap();
+
     std::shared_ptr<HwCastProviderSession> hwCastProviderSession = nullptr;
     std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = nullptr;
 };
@@ -233,6 +236,29 @@ void HwCastStreamPlayerTest::TearDown()
     if (hwCastStreamPlayer) {
         hwCastStreamPlayer->Release();
     }
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> HwCastStreamPlayerTest::CreatePixelMap()
+{
+    int32_t pixelMapWidth = 4;
+    int32_t pixelMapHeight = 3;
+    const std::shared_ptr<OHOS::Media::PixelMap>& pixelMap = std::make_shared<OHOS::Media::PixelMap>();
+    Media::ImageInfo info;
+    info.size.width = pixelMapWidth;
+    info.size.height = pixelMapHeight;
+    info.pixelFormat = Media::PixelFormat::RGB_888;
+    info.colorSpace = Media::ColorSpace::SRGB;
+    pixelMap->SetImageInfo(info);
+    int32_t rowDataSize = pixelMapWidth;
+    uint32_t bufferSize = rowDataSize * pixelMapHeight;
+    if (bufferSize <= 0) {
+        return pixelMap;
+    }
+
+    std::vector<std::uint8_t> buffer(bufferSize, 0x03);
+    pixelMap->SetPixelsAddr(buffer.data(), nullptr, bufferSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
+
+    return pixelMap;
 }
 
 INSTANTIATE_TEST_CASE_P(SendControlCommand, HwCastStreamPlayerTest, testing::Values(
@@ -1459,19 +1485,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged002, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged003, TestSize.Level1)
 {
     SLOGI("OnAlbumCoverChanged003 begin!");
-    auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
-    OHOS::Media::ImageInfo imageInfo = {
-        .size = {2, 2},
-        .pixelFormat = OHOS::Media::PixelFormat::ARGB_8888,
-        .colorSpace = OHOS::Media::ColorSpace::SRGB,
-        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
-        .baseDensity = 0,
-        .encodedFormat = ""
-    };
-    std::vector<std::uint8_t> buffer(4, 1);
-    pixelMap->SetPixelsAddr(buffer.data(), nullptr, 4, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
-    pixelMap->SetImageInfo(imageInfo);
-
+    auto pixelMap = CreatePixelMap();
     hwCastStreamPlayer->OnAlbumCoverChanged(pixelMap);
     std::shared_ptr<AVSessionPixelMap> innerPixelMap =
         AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
@@ -1488,19 +1502,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged003, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged004, TestSize.Level1)
 {
     SLOGI("OnAlbumCoverChanged004 begin!");
-    auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
-    OHOS::Media::ImageInfo imageInfo = {
-        .size = {2, 2},
-        .pixelFormat = OHOS::Media::PixelFormat::ARGB_8888,
-        .colorSpace = OHOS::Media::ColorSpace::SRGB,
-        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
-        .baseDensity = 0,
-        .encodedFormat = ""
-    };
-    std::vector<std::uint8_t> buffer(4, 1);
-    pixelMap->SetPixelsAddr(buffer.data(), nullptr, 4, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
-    pixelMap->SetImageInfo(imageInfo);
-
+    auto pixelMap = CreatePixelMap();
     hwCastStreamPlayer->OnAlbumCoverChanged(pixelMap);
     auto innerPixelMap = AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
     EXPECT_TRUE(innerPixelMap != nullptr);
@@ -1516,19 +1518,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged004, TestSize.Level1)
 HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged005, TestSize.Level1)
 {
     SLOGI("OnAlbumCoverChanged005 begin!");
-    auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
-    OHOS::Media::ImageInfo imageInfo = {
-        .size = {2, 2},
-        .pixelFormat = OHOS::Media::PixelFormat::ARGB_8888,
-        .colorSpace = OHOS::Media::ColorSpace::SRGB,
-        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
-        .baseDensity = 0,
-        .encodedFormat = ""
-    };
-    std::vector<std::uint8_t> buffer(4, 1);
-    pixelMap->SetPixelsAddr(buffer.data(), nullptr, 4, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
-    pixelMap->SetImageInfo(imageInfo);
-
+    auto pixelMap = CreatePixelMap();
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
@@ -1544,5 +1534,139 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged005, TestSize.Level1)
     SLOGI("OnAlbumCoverChanged005 end!");
 }
 
+/**
+* @tc.name: GetMediaCapabilitiesOfVideo001
+* @tc.desc: json contains needed data
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo001, TestSize.Level1)
+{
+    string capabilities = R"(
+    {
+        "decoderType": ["H264", "H265"],
+        "decoderSupportResolution": {"video/hevc": 0, "video/avc": 1},
+        "HDRFormat": 1,
+        "speed": 1
+    })";
+    nlohmann::json value = nlohmann::json::parse(capabilities);
+    EXPECT_NE(value.empty(), true);
+    hwCastStreamPlayer->GetMediaCapabilitiesOfVideo(value);
+    auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
+    EXPECT_NE(std::find(vec.begin(), vec.end(), "H264"), vec.end());
+
+    string resolution = "H264";
+    ResolutionLevel level;
+    auto ret = hwCastStreamPlayer->GetRecommendedResolutionLevel(resolution, level);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+
+    std::vector<HDRFormat> hdrFormats;
+    ret = hwCastStreamPlayer->GetSupportedHdrCapabilities(hdrFormats);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    std::vector<float> playSpeeds;
+    hwCastStreamPlayer->jsonCapabilitiesSptr_->playSpeeds_.push_back(1.0f);
+    ret = hwCastStreamPlayer->GetSupportedPlaySpeeds(playSpeeds);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: GetMediaCapabilitiesOfVideo002
+* @tc.desc: json not contains needed data
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo002, TestSize.Level1)
+{
+    string capabilities = R"(
+    {
+        "decoderType_NA": ["H264", "H265"],
+        "decoderSupportResolution_NA": {"video/hevc": 0, "video/avc": 1},
+        "HDRFormat_NA": 1
+    })";
+    nlohmann::json value = nlohmann::json::parse(capabilities);
+    EXPECT_NE(value.empty(), true);
+    hwCastStreamPlayer->GetMediaCapabilitiesOfVideo(value);
+    auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
+    EXPECT_EQ(std::find(vec.begin(), vec.end(), "H264"), vec.end());
+}
+
+/**
+* @tc.name: GetMediaCapabilitiesOfAudio001
+* @tc.desc: json contains needed data
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio001, TestSize.Level1)
+{
+    string capabilities = R"(
+    {
+        "decoderType": "mp3"
+    })";
+    nlohmann::json value = nlohmann::json::parse(capabilities);
+    EXPECT_NE(value.empty(), true);
+    hwCastStreamPlayer->GetMediaCapabilitiesOfAudio(value);
+    auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
+    EXPECT_NE(std::find(vec.begin(), vec.end(), "mp3"), vec.end());
+
+    std::vector<std::string> decoderTypes;
+    auto ret = hwCastStreamPlayer->GetSupportedDecoders(decoderTypes);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: GetMediaCapabilitiesOfAudio002
+* @tc.desc: json not contains needed data
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio002, TestSize.Level1)
+{
+    string capabilities = R"(
+    {
+        "decoderType_NA": "mp3"
+    })";
+    nlohmann::json value = nlohmann::json::parse(capabilities);
+    EXPECT_NE(value.empty(), true);
+    hwCastStreamPlayer->GetMediaCapabilitiesOfAudio(value);
+    auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
+    EXPECT_EQ(std::find(vec.begin(), vec.end(), "mp3"), vec.end());
+}
+
+/**
+* @tc.name: checkCmdsFromAbility001
+* @tc.desc: test checkCmdsFromAbility when isFastForwardSupported is true
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(HwCastStreamPlayerTest, checkCmdsFromAbility001, TestSize.Level1)
+{
+    StreamCapability avStreamCapability = {
+        .isFastForwardSupported = true,
+        .isFastRewindSupported = true,
+        .isLoopModeSupported = true,
+        .isSetVolumeSupported = true,
+    };
+    std::vector<int32_t> supportedCastCmds;
+    hwCastStreamPlayer->checkCmdsFromAbility(avStreamCapability, supportedCastCmds);
+    EXPECT_NE(std::find(supportedCastCmds.begin(), supportedCastCmds.end(), 5), supportedCastCmds.end());
+}
+
+/**
+* @tc.name: checkAbilityFromCmds001
+* @tc.desc: test checkAbilityFromCmds
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(HwCastStreamPlayerTest, checkAbilityFromCmds001, TestSize.Level1)
+{
+    std::vector<int32_t> supportedCastCmds;
+    for (auto i = 0; i <= AVCastControlCommand::CAST_CONTROL_CMD_MAX; i++) {
+        supportedCastCmds.push_back(i);
+    }
+    CastEngine::StreamCapability streamCapability;
+    hwCastStreamPlayer->checkAbilityFromCmds(supportedCastCmds, streamCapability);
+    EXPECT_EQ(streamCapability.isFastForwardSupported, true);
+}
 } // namespace AVSession
 } // namespace OHOS

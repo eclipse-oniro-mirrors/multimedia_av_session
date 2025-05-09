@@ -32,6 +32,10 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 using namespace OHOS::AudioStandard;
+
+namespace OHOS {
+namespace AVSession {
+
 static AVMetaData g_metaData;
 static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
@@ -123,11 +127,6 @@ class TestIClientDeath : public IClientDeath {
         return object;
     }
 };
-
-void OnClientDied(pid_t pid)
-{
-    SLOGI("OnClientDied pid = %{public}d", pid);
-}
 
 class AVSessionServiceTestSecond : public testing::Test {
 public:
@@ -1515,3 +1514,5 @@ static HWTEST_F(AVSessionServiceTestSecond, GetDistributedSessionControllersInne
     auto ret = g_AVSessionService->GetDistributedSessionControllersInner(sessionType, sessionControllers);
     EXPECT_EQ(ret, ERR_REMOTE_CONNECTION_NOT_EXIST);
 }
+} //AVSession
+} //OHOS
