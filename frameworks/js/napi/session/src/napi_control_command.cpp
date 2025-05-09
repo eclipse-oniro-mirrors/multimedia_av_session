@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
         { GetTargetLoopMode, SetTargetLoopMode, AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE } },
     { "toggleFavorite", { GetAssetId, SetAssetId, AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE } },
     { "playFromAssetId", { GetPlayFromAssetId, SetPlayFromAssetId, AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID } },
+    { "playWithAssetId", { GetPlayWithAssetId, SetPlayWithAssetId, AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID } },
     { "answer", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_ANSWER } },
     { "hangUp", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_HANG_UP } },
     { "toggleCallMute", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE } },
@@ -379,6 +380,39 @@ napi_status NapiControlCommand::SetPlayFromAssetId(napi_env env, AVControlComman
     auto status = NapiUtils::SetValue(env, playFromAssetId, property);
     if (status != napi_ok) {
         SLOGE("create playFromAssetId property failed");
+        return status;
+    }
+
+    status = napi_set_named_property(env, out, "parameter", property);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "set parameter property failed");
+    return status;
+}
+
+napi_status NapiControlCommand::GetPlayWithAssetId(napi_env env, napi_value in, AVControlCommand& out)
+{
+    std::string playWithAssetId {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "parameter", playWithAssetId);
+    if (status != napi_ok) {
+        SLOGE("get parameter failed");
+        playWithAssetId = "";
+        status = napi_ok;
+    }
+
+    CHECK_AND_RETURN_RET_LOG(out.SetPlayWithAssetId(playWithAssetId) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "set parameter failed");
+    return status;
+}
+
+napi_status NapiControlCommand::SetPlayWithAssetId(napi_env env, AVControlCommand& in, napi_value& out)
+{
+    std::string playWithAssetId {};
+    CHECK_AND_RETURN_RET_LOG(in.GetPlayWithAssetId(playWithAssetId) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "get parameter failed");
+
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, playWithAssetId, property);
+    if (status != napi_ok) {
+        SLOGE("create playWithAssetId property failed");
         return status;
     }
 

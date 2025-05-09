@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,6 +107,7 @@ private:
     static napi_status OnAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -129,6 +130,7 @@ private:
     static napi_status OffAVCallHangUp(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffAVCallToggleCallMute(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);

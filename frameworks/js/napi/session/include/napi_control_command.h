@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,7 @@ public:
     static napi_status GetTargetLoopMode(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status GetAssetId(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status GetPlayFromAssetId(napi_env env, napi_value in, AVControlCommand& out);
+    static napi_status GetPlayWithAssetId(napi_env env, napi_value in, AVControlCommand& out);
 
     static napi_status SetNoneParam(napi_env env, AVControlCommand& in, napi_value& out);
     static napi_status SetSpeed(napi_env env, AVControlCommand& in, napi_value& out);
@@ -53,6 +54,7 @@ public:
     static napi_status SetTargetLoopMode(napi_env env, AVControlCommand& in, napi_value& out);
     static napi_status SetAssetId(napi_env env, AVControlCommand& in, napi_value& out);
     static napi_status SetPlayFromAssetId(napi_env env, AVControlCommand& in, napi_value& out);
+    static napi_status SetPlayWithAssetId(napi_env env, AVControlCommand& in, napi_value& out);
 
 private:
     static std::map<std::string, std::tuple<GetterType, SetterType, int32_t>> commandMap_;

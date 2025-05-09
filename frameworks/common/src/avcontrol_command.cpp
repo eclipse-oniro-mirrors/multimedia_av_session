@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,9 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
             case SESSION_CMD_PLAY_FROM_ASSETID:
                 result->SetPlayFromAssetId(data.ReadInt64());
                 break;
+            case SESSION_CMD_PLAY_WITH_ASSETID:
+                result->SetPlayWithAssetId(data.ReadString());
+                break;
             default:
                 break;
         }
@@ -76,36 +79,40 @@ bool AVControlCommand::Marshalling(Parcel& parcel) const
     }
     switch (cmd_) {
         case SESSION_CMD_FAST_FORWARD:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
-                && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write fast forward time failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_) &&
+                parcel.WriteInt64(std::get<int64_t>(param_)), false, "write fast forward time failed");
             break;
         case SESSION_CMD_REWIND:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
-                && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write rewind time failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_) &&
+                parcel.WriteInt64(std::get<int64_t>(param_)), false, "write rewind time failed");
             break;
         case SESSION_CMD_SEEK:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
-                && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write seek time failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_) &&
+                parcel.WriteInt64(std::get<int64_t>(param_)), false, "write seek time failed");
             break;
         case SESSION_CMD_SET_SPEED:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<double>(param_)
-                && parcel.WriteDouble(std::get<double>(param_)), false, "write speed failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<double>(param_) &&
+                parcel.WriteDouble(std::get<double>(param_)), false, "write speed failed");
             break;
         case SESSION_CMD_SET_LOOP_MODE:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
-                && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write loop mode failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_) &&
+                parcel.WriteInt32(std::get<int32_t>(param_)), false, "write loop mode failed");
             break;
         case SESSION_CMD_SET_TARGET_LOOP_MODE:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
-                && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write target loop mode failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_) &&
+                parcel.WriteInt32(std::get<int32_t>(param_)), false, "write target loop mode failed");
             break;
         case SESSION_CMD_TOGGLE_FAVORITE:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_)
-                && parcel.WriteString(std::get<std::string>(param_)), false, "write toggle favorite failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_) &&
+                parcel.WriteString(std::get<std::string>(param_)), false, "write toggle favorite failed");
             break;
         case SESSION_CMD_PLAY_FROM_ASSETID:
-            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_)
-                && parcel.WriteInt64(std::get<int64_t>(param_)), false, "write play from assetId failed");
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_) &&
+                parcel.WriteInt64(std::get<int64_t>(param_)), false, "write play from assetId failed");
+            break;
+        case SESSION_CMD_PLAY_WITH_ASSETID:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_) &&
+                parcel.WriteString(std::get<std::string>(param_)), false, "write play with assetId failed");
             break;
         default:
             break;
@@ -310,6 +317,26 @@ int32_t AVControlCommand::GetPlayFromAssetId(int64_t& playFromAssetId) const
         return AVSESSION_ERROR;
     }
     playFromAssetId = std::get<int64_t>(param_);
+    return AVSESSION_SUCCESS;
+}
+// LCOV_EXCL_STOP
+
+int32_t AVControlCommand::SetPlayWithAssetId(const std::string& playWithAssetId)
+{
+    if (playWithAssetId.empty()) {
+        return AVSESSION_ERROR;
+    }
+    param_ = playWithAssetId;
+    return AVSESSION_SUCCESS;
+}
+
+// LCOV_EXCL_START
+int32_t AVControlCommand::GetPlayWithAssetId(std::string& playWithAssetId) const
+{
+    if (!std::holds_alternative<std::string>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    playWithAssetId = std::get<std::string>(param_);
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
