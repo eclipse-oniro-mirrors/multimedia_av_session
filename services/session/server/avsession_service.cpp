@@ -644,7 +644,9 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                 return;
             }
             AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+#ifdef START_STOP_ON_DEMAND_ENABLE
             PublishEvent(mediaPlayStateTrue);
+#endif
         }
         if (topSession_->GetUid() == ancoUid) {
             userId = topSession_->GetUserId();
@@ -996,10 +998,6 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(descriptor.userId_);
-    uint32_t ret = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
-    if (ret == 0) {
-        PublishEvent(mediaPlayStateFalse);
-    }
     SLOGI("NotifySessionRelease for user:%{public}d|listenerSize:%{public}d",
         descriptor.userId_, static_cast<int>(listenerMap.size()));
     for (const auto& [pid, listener] : listenerMap) {
@@ -2434,6 +2432,12 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
             }
         }
     }
+#ifdef START_STOP_ON_DEMAND_ENABLE
+    uint32_t ret = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
+    if (ret == 0) {
+        PublishEvent(mediaPlayStateFalse);
+    }
+#endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0 ||
         (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1 &&
