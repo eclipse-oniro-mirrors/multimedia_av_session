@@ -79,6 +79,7 @@ public:
         void NotifyDeviceOffline(const std::string& deviceId) {}
         void setInCast(bool isInCast) {}
         void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) {}
+        int32_t checkEnableCast(bool enable) { return 0; }
 #endif
     virtual ~AVSessionServiceListenerMock() {}
 };

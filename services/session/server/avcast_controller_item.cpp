@@ -242,6 +242,10 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     AVSessionRadarInfo info("AVCastControllerItem::Start");
     SetQueueItemDataSrc(avQueueItem);
+    if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetAppName().empty()) {
+        std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
+        avQueueItem.GetDescription()->SetAppName(bundleName);
+    }
     int32_t ret = castControllerProxy_->Start(avQueueItem);
     std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "start failed";
     std::string mediaIcon = "false";
@@ -318,6 +322,10 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     SetQueueItemDataSrc(avQueueItem);
+    if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetAppName().empty()) {
+        std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
+        avQueueItem.GetDescription()->SetAppName(bundleName);
+    }
     auto ret = castControllerProxy_->Prepare(avQueueItem);
     if (avQueueItem.GetDescription() != nullptr && (avQueueItem.GetDescription()->GetIcon() != nullptr &&
         avQueueItem.GetDescription()->GetIconUri() == "URI_CACHE")) {
