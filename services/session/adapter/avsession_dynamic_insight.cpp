@@ -168,6 +168,7 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
             AppExecFwk::WantParams innerParams; // construct items array
             innerParams.SetParam("entityId", OHOS::AAFwk::String::Box(assetId));
             sptr<OHOS::AAFwk::IArray> array = new (std::nothrow) OHOS::AAFwk::Array(1, OHOS::AAFwk::g_IID_IWantParams);
+            CHECK_AND_RETURN_RET_LOG(array != nullptr, false, "new Array is null");
             array->Set(0, OHOS::AAFwk::WantParamWrapper::Box(innerParams));
             wantParam->SetParam("items", array);
             SetStartPlayInfoToParam(startPlayInfo, startPlayType, wantParam);

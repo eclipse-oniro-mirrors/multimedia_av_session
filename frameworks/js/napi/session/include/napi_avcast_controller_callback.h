@@ -512,7 +512,7 @@ public:
     napi_status saveDataSrc(napi_env env, napi_value avQueueItem);
     int32_t readDataSrc(napi_env env, std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos);
 
-    napi_env env_;
+    napi_env env_ = nullptr;
     napi_ref dataSrcRef_ {};
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
