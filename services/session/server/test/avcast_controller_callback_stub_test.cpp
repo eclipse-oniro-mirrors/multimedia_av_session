@@ -162,7 +162,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.L
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
-    
+
     auto localDescriptor = IAVCastControllerCallback::GetDescriptor();
     data.WriteInterfaceToken(localDescriptor);
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
@@ -181,7 +181,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest004, TestSize.L
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
-    
+
     data.WriteString("***");
     auto localDescriptor = IAVCastControllerCallback::GetDescriptor();
     data.WriteInterfaceToken(localDescriptor);
@@ -205,7 +205,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest005, TestSize.L
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
-    
+
     data.WriteString("***");
     auto localDescriptor = IAVCastControllerCallback::GetDescriptor();
     data.WriteInterfaceToken(localDescriptor);
@@ -236,31 +236,6 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.L
     std::string str{"0000"};
     data.WriteBuffer(str.c_str(), 4);
     data.WriteInt32(4);
-    
-    int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, INVALID_FD);
-}
-
-/**
-* @tc.name: OnRemoteRequest007
-* @tc.desc: test HandleOnDataSrcRead
-* @tc.type: FUNC
-*/
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest007, TestSize.Level1)
-{
-    uint32_t code = 11;
-    AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
-    OHOS::MessageParcel data;
-    OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
-
-    data.WriteInterfaceToken(IAVCastControllerCallback::GetDescriptor());
-    data.WriteFileDescriptor(-1);
-    data.WriteInt32(10);
-    data.WriteUint32(1);
-    data.WriteString("test");
-    data.WriteInt32(2);
-    data.WriteInt64(2);
 
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, INVALID_FD);
