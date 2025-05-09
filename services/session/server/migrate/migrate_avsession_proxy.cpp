@@ -411,14 +411,18 @@ void DevicesJsonArrayToVector(Json::Value& jsonArray, AudioDeviceDescriptorsWith
 {
     devices.clear();
     for (const Json::Value& jsonObject : jsonArray) {
-        int deviceCategory = jsonObject[AUDIO_DEVICE_CATEGORY].asInt();
-        int deviceType = jsonObject[AUDIO_DEVICE_TYPE].asInt();
-        int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].asInt();
-        std::string networkId = jsonObject[AUDIO_NETWORK_ID].asString();
-        std::string deviceName = jsonObject[AUDIO_DEVICE_NAME].asString();
-        std::string macAddress = jsonObject[AUDIO_MAC_ADDRESS].asString();
+        int deviceCategory = jsonObject[AUDIO_DEVICE_CATEGORY].isInt() ? jsonObject[AUDIO_DEVICE_CATEGORY].asInt() : -1;
+        int deviceType = jsonObject[AUDIO_DEVICE_TYPE].isInt() ? jsonObject[AUDIO_DEVICE_TYPE].asInt() : -1;
+        int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].isInt() ? jsonObject[AUDIO_DEVICE_ROLE].asInt() : -1;
+        std::string networkId = jsonObject[AUDIO_NETWORK_ID].isString() ?
+            jsonObject[AUDIO_NETWORK_ID].asString() : "ERROR_TYPE";
+        std::string deviceName = jsonObject[AUDIO_DEVICE_NAME].isString() ?
+            jsonObject[AUDIO_DEVICE_NAME].asString() : "ERROR_TYPE";
+        std::string macAddress = jsonObject[AUDIO_MAC_ADDRESS].isString() ?
+            jsonObject[AUDIO_MAC_ADDRESS].asString() : "ERROR_TYPE";
 
         std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
+        CHECK_AND_RETURN_LOG(device != nullptr, "AudioDeviceDescriptor make shared_ptr is nullptr");
         device->deviceCategory_ = static_cast<AudioStandard::DeviceCategory>(deviceCategory);
         device->deviceType_ = static_cast<AudioStandard::DeviceType>(deviceType);
         device->deviceRole_ = static_cast<AudioStandard::DeviceRole>(deviceRole);
