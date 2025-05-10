@@ -379,7 +379,8 @@ void AVSessionServiceSendSystemControlCommandTest(sptr<AVSessionService> service
 void AvSessionServiceClientTest(sptr<AVSessionService> service)
 {
     int32_t pid = GetData<int32_t>();
-    service->OnClientDied(pid);
+    int32_t uid = GetData<int32_t>();
+    service->OnClientDied(pid, uid);
 
     sptr<IClientDeath> clientDeath = new ClientDeathStub();
     auto func = []() {};

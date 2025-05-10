@@ -199,7 +199,7 @@ public:
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
-    void OnClientDied(pid_t pid);
+    void OnClientDied(pid_t pid, pid_t uid);
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
