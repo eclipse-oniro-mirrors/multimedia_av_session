@@ -173,6 +173,7 @@ std::vector<sptr<AVSessionItem>> SessionStack::GetAllSessions()
 
 bool SessionStack::IsEmpty()
 {
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
     return stack_.empty();
 }
 

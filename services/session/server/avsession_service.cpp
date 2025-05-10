@@ -2987,9 +2987,8 @@ bool AVSessionService::CheckAndCreateDir(const string& filePath)
     CHECK_AND_RETURN_RET_LOG(CheckUserDirValid(), false, "check userDir err!");
     filesystem::path directory = filesystem::path(filePath).parent_path();
     if (!filesystem::exists(directory)) {
-        SLOGI("check file not exist and try create %{public}s", filePath.c_str());
-        CHECK_AND_RETURN_RET_LOG(filesystem::create_directories(directory),
-            false, "Failed to create directory");
+        SLOGI("check file not exist:%{public}s", filePath.c_str());
+        return false;
     }
     return true;
 }

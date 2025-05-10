@@ -1876,7 +1876,7 @@ void AVSessionItem::ExecueCommonCommand(const std::string& commonCommand, const 
         callback_->OnCommonCommand(commonCommand, commandArgs);
     }
 
-    std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
+    std::lock_guard remoteSinkLockGuard(remoteSinkLock_);
     if (remoteSink_ != nullptr) {
         CHECK_AND_RETURN_LOG(remoteSink_->SetCommonCommand(commonCommand, commandArgs) == AVSESSION_SUCCESS,
             "SetCommonCommand failed");
