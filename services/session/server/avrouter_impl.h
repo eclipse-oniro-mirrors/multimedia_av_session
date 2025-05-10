@@ -47,6 +47,8 @@ public:
 
     int32_t Init(IAVSessionServiceListener *servicePtr) override;
 
+    int32_t GetLocalDeviceType();
+
     bool Release() override;
     
     int32_t StartDeviceLogging(int32_t fd, uint32_t maxSize) override;
@@ -112,8 +114,8 @@ private:
     const int64_t noMirrorCastHandle_ = -1;
     int32_t providerNumber_ = 0;
     std::map<int64_t, CastHandleInfo> castHandleToInfoMap_;
+    std::shared_ptr<HwCastProvider> hwProvider_;
     std::map<std::string, std::shared_ptr<IAVRouterListener>> mirrorSessionMap_;
-    bool hasSessionAlive_ = false;
     int32_t providerNumberEnableDefault_ = 1;
     int32_t providerNumberDisable_ = 0;
     bool cacheStartDiscovery_ = false;
@@ -123,6 +125,8 @@ private:
     std::shared_ptr<CastSessionListener> castSessionListener_;
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
+    const int32_t castEngineServiceRestartWaitTime = 100;
+    int32_t deviceType_ = -1;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

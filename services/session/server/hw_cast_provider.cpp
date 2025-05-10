@@ -19,6 +19,7 @@
 #include "hw_cast_stream_player.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_event_handler.h"
 #include "avsession_radar.h"
 
 using namespace OHOS::CastEngine::CastEngineClient;
@@ -447,7 +448,7 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
 void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)
 {
     SLOGI("Cast provider received session create event");
-    std::thread([this, castSession]() {
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castSession]() {
         SLOGI("Cast pvd received session create event and create task thread");
         for (auto listener : castStateListenerList_) {
             listener->OnSessionNeedDestroy();
@@ -481,7 +482,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             listener->OnSessionCreated(castId);
         }
         SLOGI("do session create notify finished %{public}d", castId);
-    }).detach();
+        }, "OnSessionCreated", 0);
 }
 
 void HwCastProvider::OnServiceDied()

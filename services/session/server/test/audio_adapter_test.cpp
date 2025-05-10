@@ -416,7 +416,7 @@ static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
 */
 static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
 {
-    SLOGD("PauseAudioStream001 begin!");
+    SLOGD("OnDeviceChange001 begin!");
     bool ret = false;
     AudioAdapter::GetInstance().AddDeviceChangeListener(
         [&ret] (const AudioDeviceDescriptorsWithSptr &desc) {
