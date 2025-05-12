@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -264,20 +264,25 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty;
+    bool isCastMetaEmpty;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
-        isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
-            metaData_.GetMediaImageUri().empty();
-        SLOGI("frontSession bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d "
+        isMetaEmpty = (metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr);
+        AVQueueItem item;
+        GetCurrentCastItem(item);
+        isCastMetaEmpty = (item.GetDescription() == nullptr ||
+            (item.GetDescription()->GetTitle().empty() && item.GetDescription()->GetIconUri().empty()));
+        SLOGI("frontSession bundle=%{public}s isMetaEmpty=%{public}d isCastMetaEmpty=%{public}d Cmd=%{public}d "
             "castCmd=%{public}d firstAdd=%{public}d",
-            GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
+            GetBundleName().c_str(), isMetaEmpty, isCastMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
             static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     }
-    if (isMetaEmpty || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
+    if ((isMetaEmpty && isCastMetaEmpty) || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
             if (descriptor_.sessionTag_ != "RemoteCast" && isRecommend_) {
+                isAssetChange_ = true;
                 AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(), GetSessionType(),
                     metaData_.GetAssetId(), -1);
             }
