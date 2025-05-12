@@ -102,8 +102,6 @@ public:
 
     int32_t Destroy() override;
 
-    void SetSessionCallbackForCastCap(const std::function<void(std::string, bool, bool)>& callback);
-
     void SetQueueItemDataSrc(const AVQueueItem& avQueueItem);
 
     void buildExtraCastInfo(const AVQueueItem& avQueueItem);
@@ -130,9 +128,7 @@ private:
     std::recursive_mutex castControllerLock_;
     std::recursive_mutex castControllerCallbackLock_;
     std::mutex callbackToSessionLock_;
-    std::function<void(std::string&, bool, bool)> sessionCallbackForCastNtf_;
     bool isPlayingState_ = false;
-    const int32_t cancelTimeout = 5000;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCAST_CONTROLLER_ITEM_H

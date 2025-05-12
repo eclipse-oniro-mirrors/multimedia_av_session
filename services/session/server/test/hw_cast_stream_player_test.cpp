@@ -804,6 +804,20 @@ HWTEST_F(HwCastStreamPlayerTest, OnStateChanged002, TestSize.Level1)
     SLOGI("OnStateChanged002 end!");
 }
 
+
+/**
+* @tc.name: CheckIfCancelCastCapsule001
+* @tc.desc: state is avaiable
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(HwCastStreamPlayerTest, CheckIfCancelCastCapsule001, TestSize.Level1)
+{
+    SLOGI("CheckIfCancelCastCapsule001 begin!");
+    hwCastStreamPlayer->CheckIfCancelCastCapsule();
+    EXPECT_EQ(hwCastStreamPlayer->isPlayingState_, false);
+}
+
 /**
  * @tc.name: OnPositionChanged001
  * @tc.desc: OnPositionChanged invalid

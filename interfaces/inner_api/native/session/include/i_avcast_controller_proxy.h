@@ -205,6 +205,15 @@ public:
      * @since 10
     */
     virtual int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) = 0;
+
+    /**
+     * @brief Set Cast Capsule callback for session item.
+     *
+     * @param { std::function<void(bool, bool)>& } callback - callback for session item.
+     * 
+     * @since 20
+    */
+    virtual void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_I_AVCAST_CONTROLLER_PROXY_H
