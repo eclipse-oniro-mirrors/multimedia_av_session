@@ -40,7 +40,7 @@ public:
     void StopDiscovery() override;
     int32_t SetDiscoverable(const bool enable) override;
     void Release() override;
-    int StartCastSession() override;
+    int StartCastSession(bool isHiStream) override;
     void StopCastSession(int castId) override;
     bool AddCastDevice(int castId, DeviceInfo deviceInfo) override;
     bool RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay = false) override;
@@ -59,6 +59,8 @@ public:
     int64_t GetMirrorCastHandle() override;
     bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) override;
     int32_t GetProtocolType(uint32_t castProtocolType) override;
+
+    int GetCastProtocolType(int castCapability);
 
 private:
     static const int maxCastSessionSize = 256;

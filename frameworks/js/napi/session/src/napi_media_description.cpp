@@ -45,6 +45,7 @@ std::map<std::string, NapiMediaDescription::GetterType> NapiMediaDescription::ge
     { "appName", GetAppName },
     { "drmScheme", GetDrmScheme },
     { "dataSrc", GetDataSrc },
+    { "pcmSrc", GetPcmSrc },
 };
 
 std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setterMap_ = {
@@ -70,6 +71,7 @@ std::map<int32_t, NapiMediaDescription::SetterType> NapiMediaDescription::setter
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_APP_NAME, SetAppName },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DRM_SCHEME, SetDrmScheme },
     { AVMediaDescription::MEDIA_DESCRIPTION_KEY_DATA_SRC, SetDataSrc },
+    { AVMediaDescription::MEDIA_DESCRIPTION_KEY_PCM_SRC, SetPcmSrc },
 };
 
 napi_status NapiMediaDescription::GetValue(napi_env env, napi_value in, AVMediaDescription& out)
@@ -655,6 +657,28 @@ napi_status NapiMediaDescription::SetDataSrc(napi_env env, const AVMediaDescript
     auto status = NapiUtils::SetValue(env, in.GetDataSrc(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "dataSrc", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMediaDescription::GetPcmSrc(napi_env env, napi_value in, AVMediaDescription& out)
+{
+    SLOGD("Start get pcm src from napi_value");
+    bool property;
+    auto status = NapiUtils::GetNamedProperty(env, in, "pcmSrc", property);
+    if (status == napi_ok) {
+        out.SetPcmSrc(property);
+    }
+    return napi_ok;
+}
+
+napi_status NapiMediaDescription::SetPcmSrc(napi_env env, const AVMediaDescription& in, napi_value& out)
+{
+    SLOGD("Start set pcm src from napi_value");
+    napi_value property {};
+    auto status = NapiUtils::SetValue(env, in.GetPcmSrc(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "pcmSrc", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }

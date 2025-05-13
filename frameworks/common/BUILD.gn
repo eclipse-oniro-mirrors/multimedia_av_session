@@ -25,6 +25,7 @@ ohos_shared_library("avsession_common") {
     debug = false
   }
   sources = [
+    "src/av_cast_info.cpp",
     "src/av_data_src_descriptor.cpp",
     "src/av_file_descriptor.cpp",
     "src/av_shared_memory_base.cpp",
