@@ -29,6 +29,8 @@ using namespace std;
 using namespace OHOS;
 using namespace OHOS::AVSession;
 
+namespace OHOS::AVSession {
+
 static constexpr int32_t MAX_CODE_TEST = 8;
 static constexpr int32_t MIN_SIZE_NUM = 4;
 static const uint8_t* RAW_DATA = nullptr;
@@ -209,6 +211,7 @@ bool AVSessionServiceProxyFuzzer::FuzzSendRequest()
         "send request failed");
     return result == AVSESSION_SUCCESS;
 }
+} // namespace OHOS::AVSession
 
 bool OHOS::AVSession::AVServiceProxySendRequestTest()
 {
