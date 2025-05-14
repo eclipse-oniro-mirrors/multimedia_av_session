@@ -183,10 +183,6 @@ HWTEST_F(AVSessionManagerTest, CreatSession002, TestSize.Level1)
     auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
                                                                  elementName);
     EXPECT_NE(session, nullptr);
-    if (session == nullptr) {
-        SLOGE("CreatSession002 with session get nullptr, return");
-        return;
-    }
     session->Destroy();
 
     SLOGI("CreatSession002 end");

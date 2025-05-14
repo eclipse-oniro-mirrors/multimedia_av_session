@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <chrono>
+#include <new>
 #include <thread>
 
 #include "accesstoken_kit.h"
@@ -52,13 +53,13 @@ public:
     void TearDown();
 };
 
-class AVSessionCallbackImpl : public AVSessionCallback {
+class AVSessionCallbackImpl : public IAVSessionCallback {
 public:
-    void OnPlay() override;
-    void OnPause() override;
+    void OnPlay() override {};
+    void OnPause() override {};
     void OnStop() override {};
-    void OnPlayNext() override;
-    void OnPlayPrevious() override;
+    void OnPlayNext() override {};
+    void OnPlayPrevious() override {};
     void OnFastForward(int64_t time) override {};
     void OnRewind(int64_t time) override {};
     void OnSeek(int64_t time) override {};
@@ -76,8 +77,10 @@ public:
     void OnAVCallToggleCallMute() override {};
     void OnPlayFromAssetId(int64_t assetId) override {};
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
+    sptr<IRemoteObject> AsObject() override { return nullptr; }
 
-    ~AVSessionCallbackImpl() override;
+    AVSessionCallbackImpl() = default;
+    ~AVSessionCallbackImpl() = default;
 };
 
 class MockIAVCastControllerProxy : public OHOS::AVSession::IAVCastControllerProxy {
@@ -518,6 +521,23 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level1)
     EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ == "DeviceName1");
     EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceType_ == 1);
     SLOGD("AVSessionItem_SetOutputDevice_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetOutputDevice_002
+ * @tc.desc: Test HandleOnSetTargetLoopMode.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_HandleOnSetTargetLoopMode_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_HandleOnSetTargetLoopMode_001 begin!");
+    OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
+    g_AVSessionItem->callback_ = callback;
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    g_AVSessionItem->HandleOnSetTargetLoopMode(cmd);
+    SLOGD("AVSessionItem_HandleOnSetTargetLoopMode_001 end!");
 }
 } //AVSession
 } //OHOS
