@@ -85,6 +85,8 @@ public:
     int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) {return 0;}
 
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
+
+    void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
 };
 
 class AVCastSessionStateListenerDemo : public IAVCastSessionStateListener {

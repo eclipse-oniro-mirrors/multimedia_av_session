@@ -269,6 +269,7 @@ public:
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) {return 0;}
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
+    void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
 };
 
 /**
@@ -929,7 +930,6 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange004, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     castController_->callback_ = g_AVCastControllerCallbackProxy;
     castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
-    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool)->void {};
     AVPlaybackState state;
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     castController_->OnCastPlaybackStateChange(state);
@@ -1319,7 +1319,6 @@ HWTEST_F(AVCastControllerTest, Prepare004, TestSize.Level1)
     description->SetExtras(nullptr);
     description->SetMediaUri("Media url");
     avQueueItem.SetDescription(description);
-    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
     castController_->isPlayingState_ = false;
     EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
 }
@@ -1344,7 +1343,6 @@ HWTEST_F(AVCastControllerTest, Prepare005, TestSize.Level1)
     description->SetExtras(nullptr);
     description->SetMediaUri("Media url");
     avQueueItem.SetDescription(description);
-    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
     castController_->isPlayingState_ = true;
     EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
 }
@@ -1366,25 +1364,9 @@ HWTEST_F(AVCastControllerTest, SetQueueItemDataSrc001, TestSize.Level1)
     avQueueItem.IsValid();
     avQueueItem.SetDescription(description);
     avQueueItem.IsValid();
-    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
     castController_->isPlayingState_ = true;
     castController_->SetQueueItemDataSrc(avQueueItem);
     EXPECT_EQ(avQueueItem.GetDescription()->GetDataSrc().hasCallback, true);
-}
-
-/**
-* @tc.name: CheckIfCancelCastCapsule001
-* @tc.desc: state is avaiable
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AVCastControllerTest, CheckIfCancelCastCapsule001, TestSize.Level1)
-{
-    LOG_SetCallback(MyLogCallback);
-    castController_->currentState_ =  AVPlaybackState::PLAYBACK_STATE_PAUSE;
-    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
-    castController_->CheckIfCancelCastCapsule();
-    EXPECT_EQ(castController_->IsStopState(castController_->currentState_), true);
 }
 
 /**

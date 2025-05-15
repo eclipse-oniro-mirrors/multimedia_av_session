@@ -76,6 +76,7 @@ public:
     void OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
     void OnAvailableCapabilityChanged(const CastEngine::StreamCapability &streamCapability) override;
     void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
+    void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
@@ -94,6 +95,7 @@ private:
     void GetMediaCapabilitiesOfAudio(cJSON* audioValue);
     AVQueueItem RefreshCurrentItemDuration();
     void buildCastInfo(std::shared_ptr<AVMediaDescription>& mediaDescription, CastEngine::MediaInfo& mediaInfo);
+    void CheckIfCancelCastCapsule();
 
     std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();
     const std::string videoStr_ = "video";
@@ -106,6 +108,8 @@ private:
     const std::string decodeOfAudioStr_ = "audio/av3a";
     const std::string speedStr_ = "speed";
     int32_t castMinTime = 1000;
+    const int32_t cancelTimeout = 5000;
+    bool isPlayingState_ = false;
     std::recursive_mutex streamPlayerLock_;
     std::recursive_mutex curItemLock_;
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer_;
@@ -114,6 +118,7 @@ private:
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
     AVQueueItem currentAVQueueItem_;
     std::shared_ptr<HwCastDataSourceDescriptor> castDataSrc_ = nullptr;
+    std::function<void(bool, bool)> sessionCallbackForCastNtf_;
     std::map<CastEngine::PlayerStates, int32_t> castPlusStateToString_ = {
         {CastEngine::PlayerStates::PLAYER_STATE_ERROR, AVPlaybackState::PLAYBACK_STATE_ERROR},
         {CastEngine::PlayerStates::PLAYER_IDLE, AVPlaybackState::PLAYBACK_STATE_INITIAL},

@@ -21,6 +21,7 @@
 #include "avmedia_description.h"
 #include "avsession_errors.h"
 #include "avsession_sysevent.h"
+#include "avsession_event_handler.h"
 #include "avsession_trace.h"
 #include "avsession_radar.h"
 
@@ -255,14 +256,20 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
 
 bool HwCastStreamPlayer::RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription)
 {
-    std::lock_guard lockGuard(curItemLock_);
-    if (mediaDescription != nullptr &&  currentAVQueueItem_.GetDescription() != nullptr &&
-        mediaDescription->GetIconUri() == "URI_CACHE" && mediaDescription->GetIcon() != nullptr) {
-        currentAVQueueItem_.GetDescription()->SetIcon(mediaDescription->GetIcon());
-        SLOGI("Repeat Prepare only setIcon");
-        return true;
+    bool hasIcon = false;
+    {
+        std::lock_guard lockGuard(curItemLock_);
+        if (mediaDescription != nullptr &&  currentAVQueueItem_.GetDescription() != nullptr &&
+            mediaDescription->GetIconUri() == "URI_CACHE" && mediaDescription->GetIcon() != nullptr) {
+            currentAVQueueItem_.GetDescription()->SetIcon(mediaDescription->GetIcon());
+            SLOGI("Repeat Prepare only setIcon");
+            hasIcon = true;
+        }
     }
-    return false;
+    if (hasIcon && sessionCallbackForCastNtf_ && isPlayingState_) {
+        sessionCallbackForCastNtf_(true, true);
+    }
+    return hasIcon;
 }
 
 int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
@@ -692,6 +699,24 @@ int32_t HwCastStreamPlayer::SetValidAbility(const std::vector<int32_t>& validCmd
     return AVSESSION_SUCCESS;
 }
 
+void HwCastStreamPlayer::SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback)
+{
+    sessionCallbackForCastNtf_ = callback;
+}
+
+void HwCastStreamPlayer::CheckIfCancelCastCapsule()
+{
+    isPlayingState_ = false;
+    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelCastCapsule");
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this]() {
+            if (sessionCallbackForCastNtf_ && !isPlayingState_) {
+                SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", isPlayingState_);
+                sessionCallbackForCastNtf_(false, false);
+            }
+        }, "CancelCastCapsule", cancelTimeout);
+}
+
 void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackState, bool isPlayWhenReady)
 {
     AVPlaybackState avCastPlaybackState;
@@ -701,6 +726,16 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
     } else {
         SLOGD("On state changed, get state %{public}d", castPlusStateToString_[playbackState]);
         avCastPlaybackState.SetState(castPlusStateToString_[playbackState]);
+    }
+    if (avCastPlaybackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+        // play state try notify cast notification
+        isPlayingState_ = true;
+        if (sessionCallbackForCastNtf_) {
+            SLOGI("MediaCapsule addCastCapsule");
+            sessionCallbackForCastNtf_(true, false);
+        }
+    } else {
+        CheckIfCancelCastCapsule();
     }
     RefreshCurrentItemDuration();
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
