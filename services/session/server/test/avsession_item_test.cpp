@@ -524,7 +524,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level1)
 }
 
 /**
- * @tc.name: AVSessionItem_SetOutputDevice_002
+ * @tc.name: AVSessionItem_HandleOnSetTargetLoopMode_001
  * @tc.desc: Test HandleOnSetTargetLoopMode.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
@@ -533,10 +533,14 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_HandleOnSetTargetLoopMode_001, TestSiz
 {
     SLOGD("AVSessionItem_HandleOnSetTargetLoopMode_001 begin!");
     OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
+    ASSERT_TRUE(callback != nullptr);
     g_AVSessionItem->callback_ = callback;
     AVControlCommand cmd;
-    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE);
+    int32_t targetLoopMode = AVSESSION_ERROR;
     g_AVSessionItem->HandleOnSetTargetLoopMode(cmd);
+    auto ret = cmd.GetTargetLoopMode(targetLoopMode);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_HandleOnSetTargetLoopMode_001 end!");
 }
 } //AVSession
