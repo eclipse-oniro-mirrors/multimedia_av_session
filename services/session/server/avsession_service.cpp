@@ -2436,8 +2436,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         }
     }
 #ifdef START_STOP_ON_DEMAND_ENABLE
-    uint32_t ret = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
-    if (ret == 0) {
+    if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0) {
         PublishEvent(mediaPlayStateFalse);
     }
 #endif
