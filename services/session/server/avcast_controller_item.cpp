@@ -18,6 +18,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
+#include "av_cast_info.h"
 #include "av_router.h"
 #include "avsession_sysevent.h"
 #include "avmedia_description.h"
@@ -241,6 +242,7 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     AVSessionRadarInfo info("AVCastControllerItem::Start");
+    buildExtraCastInfo(avQueueItem);
     SetQueueItemDataSrc(avQueueItem);
     if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetAppName().empty()) {
         std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
@@ -321,6 +323,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     SLOGI("Call prepare of cast controller proxy");
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    buildExtraCastInfo(avQueueItem);
     SetQueueItemDataSrc(avQueueItem);
     if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetAppName().empty()) {
         std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
@@ -341,6 +344,16 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     ReportPrepare(ret, avQueueItem);
     preparecallback_();
     return AVSESSION_SUCCESS;
+}
+
+void AVCastControllerItem::buildExtraCastInfo(const AVQueueItem& avQueueItem)
+{
+    std::shared_ptr<AVCastInfo> castInfo = std::make_shared<AVCastInfo>();
+    uid_t appUid = GetCallingUid();
+    castInfo->SetAppUid(appUid);
+    if (avQueueItem.GetDescription() != nullptr) {
+        avQueueItem.GetDescription()->SetCastInfo(castInfo);
+    }
 }
 
 void AVCastControllerItem::SetQueueItemDataSrc(const AVQueueItem& avQueueItem)

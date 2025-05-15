@@ -67,6 +67,8 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
         }
         CHECK_AND_RETURN_RET_LOG(out.WriteBool(deviceInfo.isLegacy_), false, "write isLegacy failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.mediumTypes_), false, "write mediumTypes failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.audioCapabilities_.WriteToParcel(out), false,
+            "write audioCapability failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -115,6 +117,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
+    CHECK_AND_RETURN_RET_LOG(deviceInfo.audioCapabilities_.ReadFromParcel(in), false, "Read audioCapability failed");
     outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
@@ -168,6 +171,7 @@ bool DeviceInfo::WriteToParcel(Parcel& out) const
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isLegacy_), false, "write isLegacy failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(mediumTypes_), false, "write mediumTypes failed");
+    CHECK_AND_RETURN_RET_LOG(audioCapabilities_.WriteToParcel(out), false, "write audioCapability failed");
     return true;
 }
 
@@ -202,6 +206,7 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     supportedDrmCapabilities_ = supportedDrmCapabilities;
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isLegacy_), false, "Read isLegacy failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(mediumTypes_), false, "Read mediumTypes failed");
+    CHECK_AND_RETURN_RET_LOG(audioCapabilities_.ReadFromParcel(in), false, "Read audioCapability failed");
     return true;
 }
 
@@ -210,27 +215,7 @@ bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
     int32_t deviceInfoSize = static_cast<int32_t>(deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : deviceInfos_) {
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.castCategory_), false, "write castCategory failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceId_), false, "write deviceId failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.deviceName_), false, "write deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.deviceType_), false, "write deviceType failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.ipAddress_), false, "write ipAddress failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.networkId_), false, "write networkId failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.manufacturer_), false, "write manufacturer failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.modelName_), false, "write modelName failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.providerId_), false, "write providerId failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedProtocols_), false,
-            "Read supportedProtocols failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.authenticationStatus_), false,
-            "Read authenticationStatus failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedDrmCapabilities_.size()), false,
-            "write supportedDrmCapabilities size failed");
-        for (auto supportedDrmCapability : deviceInfo.supportedDrmCapabilities_) {
-            CHECK_AND_RETURN_RET_LOG(out.WriteString(supportedDrmCapability), false,
-                "write supportedDrmCapability failed");
-        }
-        CHECK_AND_RETURN_RET_LOG(out.WriteBool(deviceInfo.isLegacy_), false, "write isLegacy failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.mediumTypes_), false, "write mediumTypes failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.WriteToParcel(out), false, "write deviceInfo failed");
     }
     return true;
 }
@@ -244,36 +229,33 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
         false, "deviceInfoSize is illegal");
     for (int i = 0; i < deviceInfoSize; i++) {
         DeviceInfo deviceInfo;
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.castCategory_), false, "Read castCategory failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceId_), false, "Read deviceId failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.deviceName_), false, "Read deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.deviceType_), false, "Read deviceType failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.ipAddress_), false, "Read ipAddress failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.networkId_), false, "Read networkId failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.manufacturer_), false, "Read manufacturer failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.supportedProtocols_), false,
-            "Read supportedProtocols failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.authenticationStatus_), false,
-            "Read authenticationStatus failed");
-        int32_t supportedDrmCapabilityLen = 0;
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
-            "read supportedDrmCapabilityLen failed");
-        int32_t maxSupportedDrmCapabilityLen = 10;
-        CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
-            (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
-        std::vector<std::string> supportedDrmCapabilities;
-        for (int k = 0; k < supportedDrmCapabilityLen; k++) {
-            std::string supportedDrmCapability;
-            CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
-                "read supportedDrmCapability failed");
-            supportedDrmCapabilities.emplace_back(supportedDrmCapability);
-        }
-        deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
-        CHECK_AND_RETURN_RET_LOG(in.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
-        CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.ReadFromParcel(in), false, "read deviceInfo failed");
         deviceInfos_.emplace_back(deviceInfo);
+    }
+    return true;
+}
+
+bool AudioCapabilities::WriteToParcel(Parcel& out) const
+{
+    int32_t streamInfoSize = static_cast<int32_t>(streamInfos_.size());
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(streamInfoSize), false, "write streamInfoSize failed");
+    for (AudioStreamInfo streamInfo : streamInfos_) {
+        CHECK_AND_RETURN_RET_LOG(streamInfo.WriteToParcel(out), false, "write streamInfo failed");
+    }
+    return true;
+}
+
+bool AudioCapabilities::ReadFromParcel(Parcel& in)
+{
+    int32_t streamInfoSize;
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(streamInfoSize), false, "read streamInfoSize failed");
+    int32_t maxStreamInfoSize = 1000;
+    CHECK_AND_RETURN_RET_LOG((streamInfoSize >= 0) && (streamInfoSize < maxStreamInfoSize),
+        false, "streamInfoSize is illegal");
+    for (int i = 0; i < streamInfoSize; i++) {
+        AudioStreamInfo streamInfo;
+        CHECK_AND_RETURN_RET_LOG(streamInfo.ReadFromParcel(in), false, "read streamInfo failed");
+        streamInfos_.emplace_back(streamInfo);
     }
     return true;
 }

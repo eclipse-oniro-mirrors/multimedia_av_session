@@ -154,7 +154,6 @@ void AVCastControllerTest::SetUp()
     auto validCallback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         supportedCastCmds = supportedCastCmd_;
-        return;
     };
     auto preparecallback = []() {
         SLOGI("prepare callback");
@@ -802,7 +801,7 @@ HWTEST_F(AVCastControllerTest, StartCastSession001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     // StartCastSession may fail with -1003
-    int32_t ret = hwCastProvider.StartCastSession();
+    int32_t ret = hwCastProvider.StartCastSession(false);
     SLOGI("StartCastSession001 with ret %{public}d", ret);
     EXPECT_TRUE(ret != AVSESSION_SUCCESS);
 }
@@ -1154,6 +1153,27 @@ HWTEST_F(AVCastControllerTest, onDataSrcRead002, TestSize.Level1)
 }
 
 /**
+* @tc.name: onDataSrcRead003
+* @tc.desc: onDataSrcRead, with callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, onDataSrcRead003, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    uint32_t length = 2;
+    int64_t pos = 0;
+    auto ret = castController_->onDataSrcRead(memory, length, pos);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: OnCastPlaybackStateChange005
 * @tc.desc: success to copy and no registrered callback
 * @tc.type: FUNC
@@ -1382,7 +1402,6 @@ HWTEST_F(AVCastControllerTest, AddAvailableCommand002, TestSize.Level1)
     auto validCallback = [](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         supportedCastCmds = { AVCastControlCommand::CAST_CONTROL_CMD_PLAY };
-        return;
     };
     auto preparecallback = []() {
         SLOGI("prepare callback");
@@ -1406,7 +1425,6 @@ HWTEST_F(AVCastControllerTest, RemoveAvailableCommand002, TestSize.Level1)
     auto validCallback = [](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         supportedCastCmds = { AVCastControlCommand::CAST_CONTROL_CMD_PLAY };
-        return;
     };
     auto preparecallback = []() {
         SLOGI("prepare callback");

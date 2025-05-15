@@ -169,8 +169,8 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleNameFromUid001, testing::ext::
     SLOGI("GetBundleNameFromUid001, start");
     BundleStatusAdapter::GetInstance().Init();
     const int32_t uid = 0;
-    BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
-    EXPECT_EQ(uid, 0);
+    auto bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+    EXPECT_EQ(bundleName, "");
     SLOGI("GetBundleNameFromUid001, end");
 }
 

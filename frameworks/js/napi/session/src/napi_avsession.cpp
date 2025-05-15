@@ -111,6 +111,8 @@ std::condition_variable NapiAVSession::syncAsyncCond_;
 std::recursive_mutex registerEventLock_;
 int32_t NapiAVSession::playBackStateRet_ = AVSESSION_ERROR;
 std::shared_ptr<NapiAVSession> NapiAVSession::napiAVSession_ = nullptr;
+std::recursive_mutex NapiAVSession::destroyLock_;
+bool NapiAVSession::isNapiSessionDestroy_ = false;
 
 NapiAVSession::NapiAVSession()
 {
@@ -185,58 +187,39 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
     return self;
 }
 
-std::string NapiAVSession::GetSessionTag()
+napi_status NapiAVSession::ReCreateInstance()
 {
-    return sessionTag_;
-}
-
-void NapiAVSession::SetSessionTag(std::string sessionTag)
-{
-    sessionTag_ = sessionTag;
-}
-
-std::string NapiAVSession::GetSessionType()
-{
-    return sessionType_;
-}
-
-void NapiAVSession::SetSessionType(std::string sessionType)
-{
-    sessionType_ = sessionType;
-}
-
-AppExecFwk::ElementName NapiAVSession::GetSessionElement()
-{
-    return elementName_;
-}
-
-void NapiAVSession::SetSessionElement(AppExecFwk::ElementName elementName)
-{
-    elementName_ = elementName;
-}
-
-napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<AVSession> nativeSession)
-{
-    if (napiAVSession_ == nullptr || nativeSession == nullptr) {
+    if (napiAVSession_ == nullptr) {
         return napi_generic_failure;
     }
+    {
+        std::lock_guard lockGuard(destroyLock_);
+        if (isNapiSessionDestroy_) {
+            SLOGE("isNapiSessionDestroy_=%{public}d", isNapiSessionDestroy_);
+            return napi_generic_failure;
+        }
+    }
     SLOGI("sessionId=%{public}s***", napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
+    std::shared_ptr<AVSession> nativeSession;
+    int32_t ret = AVSessionManager::GetInstance().CreateSession(napiAVSession_->sessionTag_,
+        NapiUtils::ConvertSessionType(napiAVSession_->sessionType_), napiAVSession_->elementName_, nativeSession);
+    CHECK_RETURN(ret == AVSESSION_SUCCESS, "create native session fail", napi_generic_failure);
     napiAVSession_->session_ = std::move(nativeSession);
     napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
     napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
     if (napiAVSession_->callback_ == nullptr) {
         napiAVSession_->callback_ = std::make_shared<NapiAVSessionCallback>();
     }
-    int32_t ret = napiAVSession_->session_->RegisterCallback(napiAVSession_->callback_);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("RegisterCallback fail, ret=%{public}d", ret);
+    int32_t res = napiAVSession_->session_->RegisterCallback(napiAVSession_->callback_);
+    if (res != AVSESSION_SUCCESS) {
+        SLOGE("RegisterCallback fail, ret=%{public}d", res);
     }
 
     {
         std::lock_guard lockGuard(registerEventLock_);
         for (int32_t event : registerEventList_) {
-            int32_t res = napiAVSession_->session_->AddSupportCommand(event);
-            if (res != AVSESSION_SUCCESS) {
+            int32_t result = napiAVSession_->session_->AddSupportCommand(event);
+            if (result != AVSESSION_SUCCESS) {
                 SLOGE("AddSupportCommand fail, ret=%{public}d", res);
                 continue;
             }
@@ -248,7 +231,7 @@ napi_status NapiAVSession::ReCreateInstance(std::shared_ptr<AVSession> nativeSes
 }
 
 napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out,
-    std::shared_ptr<NapiAVSession>& napiSession)
+    std::string tag, AppExecFwk::ElementName elementName)
 {
     napi_value constructor {};
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVSessionConstructorRef, &constructor), napi_generic_failure);
@@ -259,6 +242,8 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     napiAVSession_->session_ = std::move(nativeSession);
     napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
     napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
+    napiAVSession_->sessionTag_ = tag;
+    napiAVSession_->elementName_ = elementName;
     SLOGI("sessionId=%{public}s***, sessionType:%{public}s",
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
@@ -272,7 +257,6 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionType", property), napi_generic_failure);
     out = instance;
-    napiSession = napiAVSession_;
     return napi_ok;
 }
 
@@ -1229,6 +1213,10 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info);
     
     SLOGI("Destroy session begin");
+    {
+        std::lock_guard lockGuard(destroyLock_);
+        isNapiSessionDestroy_ = true;
+    }
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
@@ -1241,7 +1229,6 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
         if (ret == AVSESSION_SUCCESS) {
             napiSession->session_ = nullptr;
             napiSession->callback_ = nullptr;
-            napiAVSession_ = nullptr;
         } else if (ret == ERR_SESSION_NOT_EXIST) {
             context->status = napi_generic_failure;
             context->errMessage = "Destroy session failed : native session not exist";
