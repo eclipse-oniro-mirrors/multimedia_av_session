@@ -39,6 +39,7 @@ common_external_deps = [
   "ability_base:want",
   "ability_runtime:wantagent_innerkits",
   "audio_framework:audio_client",
+  "cJSON:cjson",
   "c_utils:utils",
   "data_object:distributeddataobject_impl",
   "graphic_surface:surface",

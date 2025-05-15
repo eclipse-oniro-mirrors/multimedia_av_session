@@ -802,10 +802,22 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlayback002, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, GetSubNode001, TestSize.Level1)
 {
     SLOGI("GetSubNode001 begin!");
-    nlohmann::json value;
-    value["bundleName"] = g_testAnotherBundleName;
+
+    cJSON* value = cJSON_CreateObject();
+    if (value == nullptr) {
+        SLOGE("get value nullptr");
+        return;
+    }
+    if (cJSON_IsInvalid(value)) {
+        SLOGE("get value invalid");
+        cJSON_Delete(value);
+        return;
+    }
+    cJSON_AddStringToObject(value, "bundleName", g_testAnotherBundleName);
     avservice_->GetSubNode(value, "FAKE_NAME");
     EXPECT_EQ(0, AVSESSION_SUCCESS);
+
+    cJSON_Delete(value);
     SLOGI("GetSubNode001 end!");
 }
 

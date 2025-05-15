@@ -49,7 +49,7 @@
 #include "file_ex.h"
 #include "iservice_registry.h"
 #include "key_event_adapter.h"
-#include "nlohmann/json.hpp"
+#include "cJSON.h"
 #include "session_stack.h"
 #include "avsession_trace.h"
 #include "avsession_dumper.h"
@@ -375,7 +375,7 @@ private:
     void InitCollaboration();
 
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
-    
+
     void RefreshFocusSessionSort(sptr<AVSessionItem> &session);
 
     void UpdateTopSession(const sptr<AVSessionItem>& newTopSession, int32_t userId = 0);
@@ -448,7 +448,7 @@ private:
     
     void DeleteAVQueueInfoRecord(const std::string& bundleName, int32_t userId = 0);
 
-    const nlohmann::json& GetSubNode(const nlohmann::json& node, const std::string& name);
+    const cJSON* GetSubNode(const cJSON* nodeItem, const std::string& name);
 
     void SaveSessionInfoInFile(const std::string& sessionId, const std::string& sessionType,
         const AppExecFwk::ElementName& elementName);
@@ -551,6 +551,28 @@ private:
     void AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     std::string GetLocalTitle();
+
+    bool InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray);
+
+    bool InsertSessionItemToCJSONAndPrint(const std::string& sessionId, const std::string& sessionType,
+        const AppExecFwk::ElementName& elementName, cJSON* valuesArray);
+
+    void ProcessDescriptorsFromCJSON(std::vector<AVSessionDescriptor>& descriptors, cJSON* valueItem);
+
+    void ProcessAvQueueInfosFromCJSON(std::vector<AVQueueInfo>& avQueueInfos, cJSON* valueItem);
+
+    bool InsertAvQueueInfoToCJSONAndPrint(const std::string &bundleName,
+        const AVMetaData& meta, const int32_t userId, cJSON* valuesArray);
+
+    bool GetDefaultAbilityElementNameFromCJSON(std::string& sortContent,
+        std::string& bundleName, std::string& abilityName);
+
+    bool GetElementNameBySessionIdFromCJSON(std::string& sortContent, const std::string& sessionIdNeeded,
+        std::string& bundleName, std::string& abilityName);
+
+    void DeleteAVQueueInfoRecordFromCJSON(std::string& sortContent, const std::string& bundleName, int32_t userId);
+
+    bool FillFileWithEmptyContentEx(ofstream& fileWrite);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;

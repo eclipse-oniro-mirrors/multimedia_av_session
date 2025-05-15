@@ -30,6 +30,7 @@
         "components": [
           "ability_base",
           "ability_runtime",
+          "cJSON",
           "init",
           "access_token",
           "ace_engine",
@@ -61,8 +62,7 @@
           "hicollie"
         ],
         "third_party": [
-          "openssl",
-          "jsoncpp"
+          "openssl"
         ]
       },
       "build": {

@@ -17,7 +17,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "file_ex.h"
-#include "nlohmann/json.hpp"
+#include "cJSON.h"
 
 namespace OHOS::AVSession {
 // LCOV_EXCL_START
@@ -47,17 +47,39 @@ void ParamsConfigOperator::InitConfig()
         return;
     }
     // LCOV_EXCL_START
-    nlohmann::json configs = nlohmann::json::parse(content, nullptr, false);
-    CHECK_AND_RETURN_LOG(configs.is_discarded(), "configs is invalid");
+    cJSON* configsArray = cJSON_Parse(content.c_str());
+    CHECK_AND_RETURN_LOG(configsArray != nullptr, "configs is invalid");
+    if (cJSON_IsInvalid(configsArray) || !cJSON_IsArray(configsArray)) {
+        SLOGE("CheckBundleSupport parse profile not valid json");
+        cJSON_Delete(configsArray);
+        return;
+    }
     SLOGD("InitConfig::parse json object finished");
-    for (auto config : configs.items()) {
-        if (config.value().is_number()) {
-            configIntParams.insert(std::pair<std::string, int32_t>(config.key(), config.value()));
+
+    cJSON* configItem = nullptr;
+    cJSON_ArrayForEach(configItem, configsArray) {
+        if (configItem == nullptr || cJSON_IsInvalid(configItem)) {
+            SLOGE("get config item null or invalid");
+            continue;
         }
-        if (config.value().is_string()) {
-            configStringParams.insert(std::pair<std::string, std::string>(config.key(), config.value()));
+        cJSON* propItem = configItem->child;
+        while (propItem != nullptr) {
+            std::string keyStr = propItem->string;
+            cJSON* valueItem = cJSON_GetObjectItem(propItem, propItem->string);
+            if (valueItem == nullptr) {
+                propItem = propItem->next;
+                continue;
+            }
+            if (cJSON_IsNumber(valueItem)) {
+                configIntParams.insert(std::pair<std::string, int32_t>(keyStr, valueItem->valueint));
+            } else if (cJSON_IsString(valueItem)) {
+                configStringParams.insert(std::pair<std::string, std::string>(keyStr,
+                    std::string(valueItem->valuestring)));
+            }
+            propItem = propItem->next;
         }
     }
+    cJSON_Delete(configsArray);
     // LCOV_EXCL_STOP
 }
 

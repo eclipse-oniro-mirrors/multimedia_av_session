@@ -1549,9 +1549,14 @@ HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo001, TestSize.Level1
         "HDRFormat": 1,
         "speed": 1
     })";
-    nlohmann::json value = nlohmann::json::parse(capabilities);
-    EXPECT_NE(value.empty(), true);
+
+    cJSON* value = cJSON_Parse(capabilities.c_str());
+    EXPECT_NE(value == nullptr, true);
+    EXPECT_NE(cJSON_IsInvalid(value), true);
     hwCastStreamPlayer->GetMediaCapabilitiesOfVideo(value);
+    if (value != nullptr) {
+        cJSON_Delete(value);
+    }
     auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
     EXPECT_NE(std::find(vec.begin(), vec.end(), "H264"), vec.end());
 
@@ -1584,9 +1589,15 @@ HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo002, TestSize.Level1
         "decoderSupportResolution_NA": {"video/hevc": 0, "video/avc": 1},
         "HDRFormat_NA": 1
     })";
-    nlohmann::json value = nlohmann::json::parse(capabilities);
-    EXPECT_NE(value.empty(), true);
+
+    cJSON* value = cJSON_Parse(capabilities.c_str());
+    EXPECT_NE(value == nullptr, true);
+    EXPECT_NE(cJSON_IsInvalid(value), true);
     hwCastStreamPlayer->GetMediaCapabilitiesOfVideo(value);
+    if (value != nullptr) {
+        cJSON_Delete(value);
+    }
+
     auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
     EXPECT_EQ(std::find(vec.begin(), vec.end(), "H264"), vec.end());
 }
@@ -1603,9 +1614,15 @@ HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio001, TestSize.Level1
     {
         "decoderType": "mp3"
     })";
-    nlohmann::json value = nlohmann::json::parse(capabilities);
-    EXPECT_NE(value.empty(), true);
+
+    cJSON* value = cJSON_Parse(capabilities.c_str());
+    EXPECT_NE(value == nullptr, true);
+    EXPECT_NE(cJSON_IsInvalid(value), true);
     hwCastStreamPlayer->GetMediaCapabilitiesOfAudio(value);
+    if (value != nullptr) {
+        cJSON_Delete(value);
+    }
+
     auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
     EXPECT_NE(std::find(vec.begin(), vec.end(), "mp3"), vec.end());
 
@@ -1626,9 +1643,15 @@ HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio002, TestSize.Level1
     {
         "decoderType_NA": "mp3"
     })";
-    nlohmann::json value = nlohmann::json::parse(capabilities);
-    EXPECT_NE(value.empty(), true);
+
+    cJSON* value = cJSON_Parse(capabilities.c_str());
+    EXPECT_NE(value == nullptr, true);
+    EXPECT_NE(cJSON_IsInvalid(value), true);
     hwCastStreamPlayer->GetMediaCapabilitiesOfAudio(value);
+    if (value != nullptr) {
+        cJSON_Delete(value);
+    }
+
     auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
     EXPECT_EQ(std::find(vec.begin(), vec.end(), "mp3"), vec.end());
 }

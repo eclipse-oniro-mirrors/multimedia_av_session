@@ -17,7 +17,7 @@
 #define HW_CAST_STREAM_PLAYER_H
 
 #include <mutex>
-#include <nlohmann/json.hpp>
+#include "cJSON.h"
 
 #include "pixel_map.h"
 #include "cast_engine_common.h"
@@ -89,8 +89,9 @@ private:
     bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
     int32_t GetMediaCapabilities();
     void ClearJsonCapabilities();
-    void GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue);
-    void GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue);
+    void GetMediaDecodeOfVideoFromCJSON(cJSON* videoValue);
+    void GetMediaCapabilitiesOfVideo(cJSON* videoValue);
+    void GetMediaCapabilitiesOfAudio(cJSON* audioValue);
     AVQueueItem RefreshCurrentItemDuration();
     void buildCastInfo(std::shared_ptr<AVMediaDescription>& mediaDescription, CastEngine::MediaInfo& mediaInfo);
 

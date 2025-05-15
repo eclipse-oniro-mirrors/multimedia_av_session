@@ -30,6 +30,7 @@
 #include "migrate_avsession_manager.h"
 #include "migrate_avsession_proxy.h"
 #include "system_ability_definition.h"
+#include "softbus/softbus_session_utils.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -112,11 +113,22 @@ static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallba
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo001, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue["test"] = "test";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessSessionInfo(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -127,13 +139,25 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo001, TestSize.Level
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo002, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[MIGRATE_SESSION_ID] = "";
-    jsonValue[MIGRATE_BUNDLE_NAME] = "";
-    jsonValue[MIGRATE_ABILITY_NAME] = "";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_SESSION_ID, "") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_BUNDLE_NAME, "") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_ABILITY_NAME, "")) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessSessionInfo(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -144,13 +168,25 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo002, TestSize.Level
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo003, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[MIGRATE_SESSION_ID] = DEFAULT_STRING;
-    jsonValue[MIGRATE_BUNDLE_NAME] = DEFAULT_STRING;
-    jsonValue[MIGRATE_ABILITY_NAME] = DEFAULT_STRING;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_SESSION_ID, DEFAULT_STRING) ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_BUNDLE_NAME, DEFAULT_STRING) ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_ABILITY_NAME, DEFAULT_STRING)) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessSessionInfo(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -161,13 +197,25 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo003, TestSize.Level
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo004, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[MIGRATE_SESSION_ID] = EMPTY_SESSION;
-    jsonValue[MIGRATE_BUNDLE_NAME] = EMPTY_SESSION;
-    jsonValue[MIGRATE_ABILITY_NAME] = EMPTY_SESSION;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_SESSION_ID, EMPTY_SESSION) ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_BUNDLE_NAME, EMPTY_SESSION) ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_ABILITY_NAME, EMPTY_SESSION)) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessSessionInfo(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -178,12 +226,24 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo004, TestSize.Level
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData001, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[METADATA_TITLE] = METADATA_TITLE;
-    jsonValue[METADATA_ARTIST] = METADATA_ARTIST;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_TITLE, METADATA_TITLE) ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ARTIST, METADATA_ARTIST)) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessMetaData(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -194,11 +254,23 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData001, TestSize.Level1)
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData002, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue["test"] = "test";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessMetaData(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -209,12 +281,24 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData002, TestSize.Level1)
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState001, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[PLAYBACK_STATE] = PLAYBACK_STATE;
-    jsonValue[FAVOR_STATE] = FAVOR_STATE;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, PLAYBACK_STATE, PLAYBACK_STATE) ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, FAVOR_STATE, FAVOR_STATE)) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessPlaybackState(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -225,11 +309,23 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState001, TestSize.Lev
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState002, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue["test"] = "test";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessPlaybackState(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -240,11 +336,23 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState002, TestSize.Lev
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands001, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[VALID_COMMANDS] = VALID_COMMANDS;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, VALID_COMMANDS, VALID_COMMANDS)) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessValidCommands(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -255,11 +363,23 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands001, TestSize.Lev
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands002, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue["test"] = "test";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessValidCommands(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -270,11 +390,23 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands002, TestSize.Lev
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand001, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue[AUDIO_VOLUME] = AUDIO_VOLUME;
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, AUDIO_VOLUME, AUDIO_VOLUME)) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessVolumeControlCommand(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -285,11 +417,23 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand001, TestS
  */
 static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand002, TestSize.Level1)
 {
-    Json::Value jsonValue;
-    jsonValue["test"] = "test";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
+        SLOGE("AddStringToJson fail");
+        EXPECT_EQ(true, false);
+        cJSON_Delete(jsonValue);
+        return;
+    }
+
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
     g_MigrateAVSessionProxy->ProcessVolumeControlCommand(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -304,8 +448,9 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.
     EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
 
     auto devices = AudioAdapter::GetInstance().GetAvailableDevices();
-    Json::Value jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
+    cJSON* jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
     g_MigrateAVSessionProxy->ProcessAvailableDevices(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**
@@ -320,8 +465,9 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessPreferredOutputDevice001, Test
     EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
 
     auto devices = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
-    Json::Value jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
+    cJSON* jsonValue = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
     g_MigrateAVSessionProxy->ProcessPreferredOutputDevice(jsonValue);
+    cJSON_Delete(jsonValue);
 }
 
 /**

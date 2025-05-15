@@ -18,7 +18,6 @@
 
 #include "radar_constants.h"
 #include "element_name.h"
-#include <nlohmann/json.hpp>
 #include <string>
 #include <algorithm>
 #include "avsession_descriptor.h"

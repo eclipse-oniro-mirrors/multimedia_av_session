@@ -15,8 +15,6 @@
 
 #include "ability_connect_helper.h"
 
-#include "ability_manager_interface.h"
-#include "ability_manager_client.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "iservice_registry.h"
@@ -74,7 +72,7 @@ int32_t AbilityConnectHelper::StartAbilityForegroundByCall(const std::string& bu
     if (remote == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(AAFwk::AbilityManagerInterfaceCode::START_CALL_ABILITY),
+    if (remote->SendRequest(static_cast<uint32_t>(AVSESSION_START_CALL_ABILITY_CODE),
         data, reply, option) != 0) {
         SLOGE("Send request error");
         return ERR_IPC_SEND_REQUEST;
@@ -123,7 +121,7 @@ int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, 
     if (remote == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(AAFwk::AbilityManagerInterfaceCode::START_CALL_ABILITY),
+    if (remote->SendRequest(static_cast<uint32_t>(AVSESSION_START_CALL_ABILITY_CODE),
         data, reply, option) != 0) {
         SLOGE("Send request error");
         return ERR_IPC_SEND_REQUEST;

@@ -84,7 +84,7 @@ void MigrateAVSessionProxy::OnBytesReceived(const std::string &deviceId, const s
         return;
     }
 
-    Json::Value jsonValue;
+    cJSON* jsonValue = nullptr;
     if (!SoftbusSessionUtils::TransferStrToJson(jsonStr, jsonValue)) {
         SLOGE("OnBytesReceived parse json fail");
         return;
@@ -115,6 +115,9 @@ void MigrateAVSessionProxy::OnBytesReceived(const std::string &deviceId, const s
         default:
             SLOGE("OnBytesReceived with unknow infoType:%{public}d", infoType);
             break;
+    }
+    if (jsonValue != nullptr) {
+        cJSON_Delete(jsonValue);
     }
 }
 //LCOV_EXCL_STOP
@@ -243,10 +246,19 @@ void MigrateAVSessionProxy::SetVolume(const AAFwk::WantParams& extras)
     CHECK_AND_RETURN_LOG(ao != nullptr, "extras have no value");
 
     volumeNum_ = OHOS::AAFwk::Integer::Unbox(ao);
-    Json::Value value;
+    cJSON* value = SoftbusSessionUtils::GetNewCJSONObject();
+    if (value == nullptr) {
+        SLOGE("get json value fail");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(value, AUDIO_VOLUME, volumeNum_)) {
+        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail", AUDIO_VOLUME, volumeNum_);
+        cJSON_Delete(value);
+        return;
+    }
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_SET_VOLUME_COMMAND});
-    value[AUDIO_VOLUME] = volumeNum_;
     SoftbusSessionUtils::TransferJsonToStr(value, msg);
+    cJSON_Delete(value);
     SendByteForNext(deviceId_, msg);
 }
 
@@ -272,52 +284,103 @@ void MigrateAVSessionProxy::GetVolume(AAFwk::WantParams& extras)
 void MigrateAVSessionProxy::GetAvailableDevices(AAFwk::WantParams& extras)
 {
     SLOGI("proxy send in GetAvailableDevices case");
-    Json::Value jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(availableDevices_);
-    Json::Value jsonArray = jsonData[MEDIA_AVAILABLE_DEVICES_LIST];
+    cJSON* jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(availableDevices_);
+    CHECK_AND_RETURN_LOG(jsonData != nullptr, "get jsonData nullptr");
+    if (cJSON_IsInvalid(jsonData) || cJSON_IsNull(jsonData)) {
+        SLOGE("get jsonData invalid");
+        cJSON_Delete(jsonData);
+        return;
+    }
+    
+    cJSON* jsonArray = cJSON_GetObjectItem(jsonData, MEDIA_AVAILABLE_DEVICES_LIST);
+    if (jsonArray == nullptr || cJSON_IsInvalid(jsonArray) || cJSON_IsNull(jsonArray)) {
+        SLOGE("get jsonArray invalid");
+        cJSON_Delete(jsonData);
+        return;
+    }
     std::string jsonStr;
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
+    if (jsonStr.empty()) {
+        SLOGE("get jsonStr empty");
+        cJSON_Delete(jsonData);
+        return;
+    }
     extras.SetParam(AUDIO_GET_AVAILABLE_DEVICES, OHOS::AAFwk::String::Box(jsonStr));
+    cJSON_Delete(jsonData);
 }
 
 void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras)
 {
     SLOGI("proxy send in GetPreferredOutputDeviceForRendererInfo case");
-    Json::Value jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(preferredOutputDevice_);
-    Json::Value jsonArray = jsonData[MEDIA_AVAILABLE_DEVICES_LIST];
+    cJSON* jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(preferredOutputDevice_);
+    CHECK_AND_RETURN_LOG(jsonData != nullptr, "get jsonData nullptr");
+    if (cJSON_IsInvalid(jsonData) || cJSON_IsNull(jsonData)) {
+        SLOGE("get jsonData invalid");
+        cJSON_Delete(jsonData);
+        return;
+    }
+    
+    cJSON* jsonArray = cJSON_GetObjectItem(jsonData, MEDIA_AVAILABLE_DEVICES_LIST);
+    if (jsonArray == nullptr || cJSON_IsInvalid(jsonArray) || cJSON_IsNull(jsonArray)) {
+        SLOGE("get jsonArray invalid");
+        cJSON_Delete(jsonData);
+        return;
+    }
     std::string jsonStr;
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
+    if (jsonStr.empty()) {
+        SLOGE("get jsonStr empty");
+        cJSON_Delete(jsonData);
+        return;
+    }
     extras.SetParam(AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, OHOS::AAFwk::String::Box(jsonStr));
+    cJSON_Delete(jsonData);
 }
 
 void MigrateAVSessionProxy::ColdStartFromProxy()
 {
     SLOGI("proxy send in ColdStartFromProxy case with bundleName:%{public}s", elementName_.GetAbilityName().c_str());
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, COLD_START});
-    Json::Value controlMsg;
-    controlMsg[MIGRATE_BUNDLE_NAME] = elementName_.GetAbilityName();
+
+    cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
+    if (controlMsg == nullptr) {
+        SLOGE("get controlMsg fail");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(controlMsg, MIGRATE_BUNDLE_NAME, elementName_.GetAbilityName())) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", MIGRATE_BUNDLE_NAME,
+            elementName_.GetAbilityName().c_str());
+        cJSON_Delete(controlMsg);
+        return;
+    }
+
     SoftbusSessionUtils::TransferJsonToStr(controlMsg, msg);
     SendByteForNext(deviceId_, msg);
+    cJSON_Delete(controlMsg);
 }
 
-void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
+void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
 {
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessSessionInfo with remote session null");
-    std::string sessionId;
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
+        SLOGE("get jsonValue invalid");
+        return;
+    }
+    std::string sessionId = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_SESSION_ID);
+    if (sessionId.empty()) {
+        sessionId = DEFAULT_STRING;
+    }
+    std::string bundleName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_BUNDLE_NAME);
+    if (bundleName.empty()) {
+        sessionId = DEFAULT_STRING;
+    }
+    elementName_.SetBundleName(bundleName);
+    std::string abilityName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_ABILITY_NAME);
+    if (bundleName.empty()) {
+        sessionId = DEFAULT_STRING;
+    }
+    elementName_.SetAbilityName(abilityName);
 
-    if (jsonValue.isMember(MIGRATE_SESSION_ID)) {
-        sessionId = jsonValue[MIGRATE_SESSION_ID].isString() ?
-            jsonValue[MIGRATE_SESSION_ID].asString() : DEFAULT_STRING;
-    }
-    if (jsonValue.isMember(MIGRATE_BUNDLE_NAME)) {
-        std::string bundleName = jsonValue[MIGRATE_BUNDLE_NAME].isString() ?
-            jsonValue[MIGRATE_BUNDLE_NAME].asString() : DEFAULT_STRING;
-        elementName_.SetBundleName(bundleName);
-    }
-    if (jsonValue.isMember(MIGRATE_ABILITY_NAME)) {
-        std::string abilityName = jsonValue[MIGRATE_ABILITY_NAME].isString() ?
-            jsonValue[MIGRATE_ABILITY_NAME].asString() : DEFAULT_STRING;
-        elementName_.SetAbilityName(abilityName);
-    }
     SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s done",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), elementName_.GetBundleName().c_str());
     if (sessionId.empty() || sessionId == DEFAULT_STRING || sessionId == EMPTY_SESSION) {
@@ -330,7 +393,7 @@ void MigrateAVSessionProxy::ProcessSessionInfo(Json::Value jsonValue)
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
     AVMetaData metaData;
-    if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
+    if (AVSESSION_SUCCESS == remoteSession_->GetAVMetaData(metaData)) {
         metaData.SetWriter(elementName_.GetBundleName());
         remoteSession_->SetAVMetaData(metaData);
     }
@@ -342,17 +405,23 @@ bool MigrateAVSessionProxy::CheckMediaAlive()
     return !elementName_.GetBundleName().empty();
 }
 
-void MigrateAVSessionProxy::ProcessMetaData(Json::Value jsonValue)
+void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
 {
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessMetaData with remote session null");
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
+        SLOGE("get jsonValue invalid");
+        return;
+    }
     AVMetaData metaData;
     if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
         SLOGE("ProcessMetaData GetAVMetaData fail");
     }
 
-    if (jsonValue.isMember(METADATA_ASSET_ID)) {
-        std::string assetId = jsonValue[METADATA_ASSET_ID].isString() ?
-            jsonValue[METADATA_ASSET_ID].asString() : DEFAULT_STRING;
+    if (cJSON_HasObjectItem(jsonValue, METADATA_ASSET_ID)) {
+        std::string assetId = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ASSET_ID);
+        if (assetId.empty()) {
+            assetId = DEFAULT_STRING;
+        }
         std::string oldAsset = metaData.GetAssetId();
         if (oldAsset != assetId) {
             metaData.SetTitle("");
@@ -360,66 +429,89 @@ void MigrateAVSessionProxy::ProcessMetaData(Json::Value jsonValue)
         }
         metaData.SetAssetId(assetId);
     }
-    if (jsonValue.isMember(METADATA_TITLE)) {
-        std::string title = jsonValue[METADATA_TITLE].isString() ?
-            jsonValue[METADATA_TITLE].asString() : DEFAULT_STRING;
+    if (cJSON_HasObjectItem(jsonValue, METADATA_TITLE)) {
+        std::string title = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_TITLE);
+        if (title.empty()) {
+            title = DEFAULT_STRING;
+        }
         metaData.SetTitle(title);
     }
-    if (jsonValue.isMember(METADATA_ARTIST)) {
-        std::string artist = jsonValue[METADATA_ARTIST].isString() ?
-            jsonValue[METADATA_ARTIST].asString() : DEFAULT_STRING;
+    if (cJSON_HasObjectItem(jsonValue, METADATA_ARTIST)) {
+        std::string artist = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ARTIST);
+        if (artist.empty()) {
+            artist = DEFAULT_STRING;
+        }
         metaData.SetArtist(artist);
     }
+
     remoteSession_->SetAVMetaData(metaData);
     SLOGI("ProcessMetaData set title:%{public}s", metaData.GetTitle().c_str());
 }
 
-void MigrateAVSessionProxy::ProcessPlaybackState(Json::Value jsonValue)
+void MigrateAVSessionProxy::ProcessPlaybackState(cJSON* jsonValue)
 {
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessPlaybackState with remote session null");
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
+        SLOGE("get jsonValue invalid");
+        return;
+    }
+
     AVPlaybackState playbackState;
     if (AVSESSION_SUCCESS != remoteSession_->GetAVPlaybackState(playbackState)) {
         SLOGE("ProcessPlaybackState GetAVPlaybackState fail");
     }
-    if (jsonValue.isMember(PLAYBACK_STATE)) {
-        int state = jsonValue[PLAYBACK_STATE].isInt() ?
-            jsonValue[PLAYBACK_STATE].asInt() : DEFAULT_NUM;
+
+    if (cJSON_HasObjectItem(jsonValue, PLAYBACK_STATE)) {
+        int state = SoftbusSessionUtils::GetIntFromJson(jsonValue, PLAYBACK_STATE);
         playbackState.SetState(state);
     }
-    if (jsonValue.isMember(FAVOR_STATE)) {
-        int isFavor = jsonValue[FAVOR_STATE].isBool() ?
-            jsonValue[FAVOR_STATE].asBool() : false;
+    if (cJSON_HasObjectItem(jsonValue, FAVOR_STATE)) {
+        int isFavor = SoftbusSessionUtils::GetBoolFromJson(jsonValue, FAVOR_STATE);
         playbackState.SetFavorite(isFavor);
     }
+
     remoteSession_->SetAVPlaybackState(playbackState);
     SLOGI("ProcessPlaybackState set state:%{public}d | isFavor:%{public}d",
         playbackState.GetState(), playbackState.GetFavorite());
 }
 
-void MigrateAVSessionProxy::ProcessValidCommands(Json::Value jsonValue)
+void MigrateAVSessionProxy::ProcessValidCommands(cJSON* jsonValue)
 {
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessValidCommands with remote session null");
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
+        SLOGE("get jsonValue invalid");
+        return;
+    }
+
     std::vector<int32_t> commands;
-    if (jsonValue.isMember(VALID_COMMANDS)) {
-        std::string commandsStr = jsonValue[VALID_COMMANDS].isString() ?
-            jsonValue[VALID_COMMANDS].asString() : "";
+    if (cJSON_HasObjectItem(jsonValue, VALID_COMMANDS)) {
+        std::string commandsStr = SoftbusSessionUtils::GetStringFromJson(jsonValue, VALID_COMMANDS);
+        if (commandsStr.empty()) {
+            commandsStr = DEFAULT_STRING;
+        }
         for (unsigned long i = 0; i < commandsStr.length(); i++) {
             commands.insert(commands.begin(), static_cast<int>(commandsStr[i] - '0'));
         }
         remoteSession_->SetSupportCommand(commands);
     }
+
     SLOGI("ProcessValidCommands set cmd size:%{public}d", static_cast<int>(commands.size()));
 }
 
-void MigrateAVSessionProxy::ProcessVolumeControlCommand(Json::Value jsonValue)
+void MigrateAVSessionProxy::ProcessVolumeControlCommand(cJSON* jsonValue)
 {
     SLOGI("proxy recv in ProcessVolumeControlCommand case");
-    if (!jsonValue.isMember(AUDIO_VOLUME)) {
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
+        SLOGE("get jsonValue invalid");
+        return;
+    }
+
+    if (!cJSON_HasObjectItem(jsonValue, AUDIO_VOLUME)) {
         SLOGE("json parse with error member");
         return;
     }
 
-    volumeNum_ = jsonValue[AUDIO_VOLUME].isInt() ? jsonValue[AUDIO_VOLUME].asInt() : -1;
+    volumeNum_ = SoftbusSessionUtils::GetIntFromJson(jsonValue, AUDIO_VOLUME);
 
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
@@ -427,19 +519,25 @@ void MigrateAVSessionProxy::ProcessVolumeControlCommand(Json::Value jsonValue)
     preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_VOLUME, args);
 }
 
-void DevicesJsonArrayToVector(Json::Value& jsonArray, AudioDeviceDescriptors& devices)
+void DevicesJsonArrayToVector(cJSON* jsonArray, AudioDeviceDescriptors& devices)
 {
+    if (jsonArray == nullptr || cJSON_IsInvalid(jsonArray) || !cJSON_IsArray(jsonArray)) {
+        SLOGE("get jsonArray invalid");
+        return;
+    }
     devices.clear();
-    for (const Json::Value& jsonObject : jsonArray) {
-        int deviceCategory = jsonObject[AUDIO_DEVICE_CATEGORY].isInt() ? jsonObject[AUDIO_DEVICE_CATEGORY].asInt() : -1;
-        int deviceType = jsonObject[AUDIO_DEVICE_TYPE].isInt() ? jsonObject[AUDIO_DEVICE_TYPE].asInt() : -1;
-        int deviceRole = jsonObject[AUDIO_DEVICE_ROLE].isInt() ? jsonObject[AUDIO_DEVICE_ROLE].asInt() : -1;
-        std::string networkId = jsonObject[AUDIO_NETWORK_ID].isString() ?
-            jsonObject[AUDIO_NETWORK_ID].asString() : "ERROR_TYPE";
-        std::string deviceName = jsonObject[AUDIO_DEVICE_NAME].isString() ?
-            jsonObject[AUDIO_DEVICE_NAME].asString() : "ERROR_TYPE";
-        std::string macAddress = jsonObject[AUDIO_MAC_ADDRESS].isString() ?
-            jsonObject[AUDIO_MAC_ADDRESS].asString() : "ERROR_TYPE";
+    cJSON* jsonObject = nullptr;
+    cJSON_ArrayForEach(jsonObject, jsonArray) {
+        CHECK_AND_CONTINUE(jsonObject != nullptr && !cJSON_IsInvalid(jsonObject));
+        int deviceCategory = SoftbusSessionUtils::GetIntFromJson(jsonObject, AUDIO_DEVICE_CATEGORY);
+        int deviceType = SoftbusSessionUtils::GetIntFromJson(jsonObject, AUDIO_DEVICE_TYPE);
+        int deviceRole = SoftbusSessionUtils::GetIntFromJson(jsonObject, AUDIO_DEVICE_ROLE);
+        std::string networkId = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_NETWORK_ID);
+        networkId = networkId.empty() ? "ERROR_TYPE" : networkId;
+        std::string deviceName = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_DEVICE_NAME);
+        deviceName = deviceName.empty() ? "ERROR_TYPE" : deviceName;
+        std::string macAddress = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_MAC_ADDRESS);
+        macAddress = macAddress.empty() ? "ERROR_TYPE" : macAddress;
 
         std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
         CHECK_AND_RETURN_LOG(device != nullptr, "AudioDeviceDescriptor make shared_ptr is nullptr");
@@ -453,13 +551,19 @@ void DevicesJsonArrayToVector(Json::Value& jsonArray, AudioDeviceDescriptors& de
     }
 }
 
-void MigrateAVSessionProxy::ProcessAvailableDevices(Json::Value jsonValue)
+void MigrateAVSessionProxy::ProcessAvailableDevices(cJSON* jsonValue)
 {
     SLOGI("proxy recv in ProcessAvailableDevices case");
-    CHECK_AND_RETURN_LOG(jsonValue.isMember(MEDIA_AVAILABLE_DEVICES_LIST), "json parse with error member");
-    CHECK_AND_RETURN_LOG(jsonValue[MEDIA_AVAILABLE_DEVICES_LIST].isArray(), "json object is not array");
-    
-    Json::Value jsonArray = jsonValue[MEDIA_AVAILABLE_DEVICES_LIST];
+
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || !cJSON_IsNull(jsonValue)) {
+        SLOGE("get jsonValue invalid");
+        return;
+    }
+    CHECK_AND_RETURN_LOG(cJSON_HasObjectItem(jsonValue, MEDIA_AVAILABLE_DEVICES_LIST), "json parse with error member");
+    cJSON* jsonArray = cJSON_GetObjectItem(jsonValue, MEDIA_AVAILABLE_DEVICES_LIST);
+    CHECK_AND_RETURN_LOG(jsonArray != nullptr && !cJSON_IsInvalid(jsonArray) && cJSON_IsArray(jsonArray),
+        "json object is not array");
+
     DevicesJsonArrayToVector(jsonArray, availableDevices_);
 
     std::string jsonStr;
@@ -470,13 +574,19 @@ void MigrateAVSessionProxy::ProcessAvailableDevices(Json::Value jsonValue)
     preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_AVAILABLE_DEVICES, args);
 }
 
-void MigrateAVSessionProxy::ProcessPreferredOutputDevice(Json::Value jsonValue)
+void MigrateAVSessionProxy::ProcessPreferredOutputDevice(cJSON* jsonValue)
 {
     SLOGI("proxy recv in ProcessPreferredOutputDevice case");
-    CHECK_AND_RETURN_LOG(jsonValue.isMember(MEDIA_AVAILABLE_DEVICES_LIST), "json parse with error member");
-    CHECK_AND_RETURN_LOG(jsonValue[MEDIA_AVAILABLE_DEVICES_LIST].isArray(), "json object is not array");
 
-    Json::Value jsonArray = jsonValue[MEDIA_AVAILABLE_DEVICES_LIST];
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || !cJSON_IsNull(jsonValue)) {
+        SLOGE("get jsonValue invalid");
+        return;
+    }
+    CHECK_AND_RETURN_LOG(cJSON_HasObjectItem(jsonValue, MEDIA_AVAILABLE_DEVICES_LIST), "json parse with error member");
+    cJSON* jsonArray = cJSON_GetObjectItem(jsonValue, MEDIA_AVAILABLE_DEVICES_LIST);
+    CHECK_AND_RETURN_LOG(jsonArray != nullptr && !cJSON_IsInvalid(jsonArray) && cJSON_IsArray(jsonArray),
+        "json object is not array");
+
     DevicesJsonArrayToVector(jsonArray, preferredOutputDevice_);
 
     std::string jsonStr;
@@ -546,21 +656,47 @@ void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::stri
 {
     SLOGI("SendControlCommandMsg with code:%{public}d", commandCode);
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_COMMAND});
-    Json::Value controlMsg;
-    controlMsg[COMMAND_CODE] = commandCode;
-    controlMsg[COMMAND_ARGS] = commandArgsStr;
+
+    cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
+    if (controlMsg == nullptr) {
+        SLOGE("get controlMsg fail");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(controlMsg, COMMAND_CODE, commandCode)) {
+        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail", COMMAND_CODE, commandCode);
+        cJSON_Delete(controlMsg);
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(controlMsg, COMMAND_ARGS, commandArgsStr)) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", COMMAND_ARGS, commandArgsStr.c_str());
+        cJSON_Delete(controlMsg);
+        return;
+    }
+
     SoftbusSessionUtils::TransferJsonToStr(controlMsg, msg);
     SendByteForNext(deviceId_, msg);
+    cJSON_Delete(controlMsg);
 }
 
 void MigrateAVSessionProxy::SendMediaControlNeedStateMsg()
 {
     SLOGI("SendMediaControlNeedStateMsg with state:%{public}d", isNeedByMediaControl_);
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_MEDIA_CONTROL_NEED_STATE});
-    Json::Value controlMsg;
-    controlMsg[NEED_STATE] = isNeedByMediaControl_;
+
+    cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
+    if (controlMsg == nullptr) {
+        SLOGE("get controlMsg fail");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddBoolToJson(controlMsg, NEED_STATE, isNeedByMediaControl_)) {
+        SLOGE("AddBoolToJson with key:%{public}s|value:%{public}d fail", NEED_STATE, isNeedByMediaControl_);
+        cJSON_Delete(controlMsg);
+        return;
+    }
+
     SoftbusSessionUtils::TransferJsonToStr(controlMsg, msg);
     SendByteForNext(deviceId_, msg);
+    cJSON_Delete(controlMsg);
 }
 
 void MigrateAVSessionProxy::SendSpecialKeepAliveData()

@@ -18,7 +18,7 @@
 
 #include <algorithm>
 #include <iterator>
-#include <nlohmann/json.hpp>
+#include "cJSON.h"
 #include <string>
 #include <vector>
 
@@ -26,7 +26,6 @@
 #include "avsession_errors.h"
 
 namespace OHOS::AVSession {
-using json = nlohmann::json;
 class JsonUtils {
 public:
     static int32_t GetJsonCapability(const std::vector<std::vector<int32_t>>& capability, std::string& jsonCapability);
@@ -44,12 +43,23 @@ public:
     static int32_t GetSessionDescriptor(const std::string& sessionInfo, AVSessionDescriptor& descriptor);
 
 private:
-    static int32_t JsonToVector(json object, std::vector<int32_t>& out);
+    static int32_t JsonToVector(cJSON* object, std::vector<int32_t>& out);
     static int32_t ConvertSessionType(const std::string& typeString);
     static std::string ConvertSessionType(int32_t type);
-    static bool IsString(const json& jsonObj, const std::string& key);
-    static bool IsInt32(const json& jsonObj, const std::string& key);
-    static bool IsBool(const json& jsonObj, const std::string& key);
+    static bool IsString(cJSON* jsonObj, const std::string& key);
+    static bool IsInt32(cJSON* jsonObj, const std::string& key);
+    static bool IsBool(cJSON* jsonObj, const std::string& key);
+    static int32_t SetSessionCompatibility(cJSON* jsonObj, const AVSessionBasicInfo& basicInfo);
+    static int32_t SetSessionData(cJSON* jsonObj, const AVSessionBasicInfo& basicInfo);
+    static int32_t SetSessionCapabilitySet(cJSON* jsonObj, const AVSessionBasicInfo& basicInfo);
+    static int32_t GetSessionCompatibility(cJSON* jsonObj, AVSessionBasicInfo& basicInfo);
+    static int32_t GetSessionData(cJSON* jsonObj, AVSessionBasicInfo& basicInfo);
+    static int32_t GetSessionCapabilitySet(cJSON* jsonObj, AVSessionBasicInfo& basicInfo);
+    static int32_t SetSessionDescriptorByCJSON(cJSON* sessionDescriptorItem,
+        const AVSessionDescriptor& descriptor);
+    static int32_t GetSessionDescriptorByCJSON(cJSON* sessionDescriptorItem,
+        AVSessionDescriptor& descriptor);
+    static int32_t SetIntVectorToCJSON(cJSON* jsonObject, std::string key, const std::vector<int32_t>& array);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_JSON_UTILS_H
