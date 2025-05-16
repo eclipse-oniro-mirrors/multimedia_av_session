@@ -61,7 +61,7 @@ void BundleStatusAdapter::Init()
     bundleResourceProxy = bundleMgrProxy->GetBundleResourceProxy();
 }
 
-bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, std::string& icon)
+bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, const std::string abilityName, std::string& icon)
 {
     SLOGI("GetBundleIcon with bundleName:%{public}s", bundleName.c_str());
     
@@ -82,8 +82,15 @@ bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, std::strin
             bundleName.c_str(), ret);
         return false;
     }
+    for (AppExecFwk::LauncherAbilityResourceInfo resourceInfo : LauncherAbilityResourceInfoList) {
+        if (abilityName == resourceInfo.abilityName) {
+            icon = resourceInfo.icon;
+        }
+    }
+    if (icon.empty() && LauncherAbilityResourceInfoList.size() > 0) {
+        icon = LauncherAbilityResourceInfoList[LauncherAbilityResourceInfoList.size() - 1].icon;
+    }
 
-    icon = LauncherAbilityResourceInfoList[0].icon;
     return true;
 }
 

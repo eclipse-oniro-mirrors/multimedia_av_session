@@ -33,7 +33,7 @@ int32_t AVRouterImpl::GetLocalDeviceType()
 {
     int32_t deviceType = -1;
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceType("av_session", deviceType);
-    CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "get local device type failed with ret:%{public}d", ret);
+    CHECK_AND_RETURN_RET_LOG(ret == 0, deviceType, "get local device type failed with ret:%{public}d", ret);
     return deviceType;
 }
 

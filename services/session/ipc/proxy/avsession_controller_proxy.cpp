@@ -320,7 +320,7 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
     CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_COMMAND_NOT_SUPPORT, "keyEvent not valid");
     bool isActive = false;
     int32_t retForIsActive = IsSessionActive(isActive);
-    CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, ERR_SESSION_DEACTIVE,
+    CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, retForIsActive,
         "IsSessionActive check Fail:%{public}d", retForIsActive);
     CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
 
@@ -446,9 +446,10 @@ int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand& cmd
     CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_COMMAND_NOT_SUPPORT, "command not valid");
     bool isActive = false;
     int32_t retForIsActive = IsSessionActive(isActive);
-    CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, ERR_SESSION_DEACTIVE,
-        "IsSessionActiveCheck Fail:%{public}d", retForIsActive);
+    CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, retForIsActive,
+        "IsSessionActive check Fail:%{public}d", retForIsActive);
     CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
@@ -474,9 +475,12 @@ int32_t AVSessionControllerProxy::SendCommonCommand(const std::string& commonCom
     std::lock_guard lockGuard(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendCommonCommand");
     CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "Controller is destroy");
-    bool isActive {};
-    CHECK_AND_RETURN_RET_LOG(IsSessionActive(isActive) == AVSESSION_SUCCESS &&
-        isActive, ERR_SESSION_DEACTIVE, "Session is deactivate");
+    bool isActive = false;
+    int32_t retForIsActive = IsSessionActive(isActive);
+    CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, retForIsActive,
+        "IsSessionActive check Fail:%{public}d", retForIsActive);
+    CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "Write interface token failed");

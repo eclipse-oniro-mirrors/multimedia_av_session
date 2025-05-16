@@ -421,8 +421,9 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon001, testing::ext::TestSiz
     BundleStatusAdapter::GetInstance().bundleMgrProxy = nullptr;
     BundleStatusAdapter::GetInstance().bundleResourceProxy = nullptr;
     std::string bundleName = "test";
+    std::string abilityName = "testAbility";
     std::string icon = "test";
-    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, icon);
+    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, abilityName, icon);
     EXPECT_FALSE(ret);
 }
 
@@ -439,8 +440,9 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon002, testing::ext::TestSiz
     BundleStatusAdapter::GetInstance().bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
     BundleStatusAdapter::GetInstance().bundleResourceProxy = nullptr;
     std::string bundleName = "test";
+    std::string abilityName = "testAbility";
     std::string icon = "test";
-    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, icon);
+    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, abilityName, icon);
     EXPECT_FALSE(ret);
 }
 
@@ -458,8 +460,9 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon003, testing::ext::TestSiz
     BundleStatusAdapter::GetInstance().bundleMgrProxy = proxy;
     BundleStatusAdapter::GetInstance().bundleResourceProxy = proxy->GetBundleResourceProxy();
     std::string bundleName = "test";
+    std::string abilityName = "";
     std::string icon = "test";
-    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, icon);
+    bool ret = BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, abilityName, icon);
     EXPECT_FALSE(ret);
 }
 

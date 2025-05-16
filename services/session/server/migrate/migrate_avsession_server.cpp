@@ -48,6 +48,17 @@ MigrateAVSessionServer::~MigrateAVSessionServer()
             controllerObserver->Release();
         }
     }
+    {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        if (metaDataCache_ != nullptr) {
+            cJSON_Delete(metaDataCache_);
+            metaDataCache_ = nullptr;
+        }
+        if (playbackStateCache_ != nullptr) {
+            cJSON_Delete(playbackStateCache_);
+            playbackStateCache_ = nullptr;
+        }
+    }
     SLOGI("MigrateAVSessionServer quit");
 }
 

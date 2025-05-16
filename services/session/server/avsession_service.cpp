@@ -173,6 +173,12 @@ void AVSessionService::OnStartProcess()
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init(this);
     AddInnerSessionListener(&backgroundAudioController_);
+    for (auto& session : GetContainer().GetAllSessions()) {
+        CHECK_AND_CONTINUE(session != nullptr);
+        SLOGI("backgroundAudioController add sessionCreateBef:%{public}s",
+            AVSessionUtils::GetAnonySessionId(session->GetSessionId()).c_str());
+        backgroundAudioController_.OnSessionCreate(session->GetDescriptor());
+    }
 #endif
 
     AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);

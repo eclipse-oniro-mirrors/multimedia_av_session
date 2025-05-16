@@ -453,13 +453,13 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext001
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 1)) {
         SLOGE("AddIntToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionServer->ProcControlCommandFromNext(jsonValue);
@@ -479,13 +479,13 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext002
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_ARGS, 1)) {
         SLOGE("AddIntToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionServer->ProcControlCommandFromNext(jsonValue);
@@ -509,13 +509,13 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext003
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 10)) {
         SLOGE("AddIntToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionServer->ProcControlCommandFromNext(jsonValue);
@@ -539,13 +539,13 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext004
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 0)) {
         SLOGE("AddIntToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionServer->ProcControlCommandFromNext(jsonValue);
@@ -565,13 +565,13 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext001, 
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 1)) {
         SLOGE("AddIntToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionServer->ProcessColdStartFromNext(jsonValue);
@@ -591,13 +591,13 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext002, 
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_BUNDLE_NAME, "1")) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionServer->ProcessColdStartFromNext(jsonValue);
@@ -646,13 +646,13 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand001, Test
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddIntToJson(jsonValue, COMMAND_CODE, 1)) {
         SLOGE("AddIntToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionServer->ProcessColdStartFromNext(jsonValue);
@@ -675,13 +675,13 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand002, Test
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddIntToJson(jsonValue, AUDIO_VOLUME, 1)) {
         SLOGE("AddIntToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionServer->VolumeControlCommand(jsonValue);

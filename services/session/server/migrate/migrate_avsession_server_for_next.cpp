@@ -281,8 +281,9 @@ void MigrateAVSessionServer::DoBundleInfoSyncToRemote(sptr<AVControllerItem> con
     CHECK_AND_RETURN_LOG(controller != nullptr, "DoBundleInfoSyncToRemote with controller null");
     AppExecFwk::ElementName elementName = controller->GetElementOfSession();
     std::string bundleName = elementName.GetBundleName();
+    std::string abilityName = elementName.GetAbilityName();
     std::string iconStr;
-    if (!BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, iconStr)) {
+    if (!BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, abilityName, iconStr)) {
         SLOGE("DoBundleInfoSyncToRemote get bundle icon fail for bundleName:%{public}s", bundleName.c_str());
     }
 
@@ -360,6 +361,7 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
 
 void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> controller)
 {
+    CHECK_AND_RETURN_LOG(controller != nullptr, "controller get nullptr");
     cJSON* sessionInfo = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(sessionInfo != nullptr, "get sessionInfo json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_SESSION_ID, controller->GetSessionId().c_str())) {
@@ -369,9 +371,10 @@ void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> co
         return;
     }
     AppExecFwk::ElementName elementName = controller->GetElementOfSession();
-    if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_BUNDLE_NAME, elementName.GetBundleName().c_str())) {
+    std::string bundleNameForMigrate = elementName.GetBundleName() + "|" + controller->GetSessionType();
+    if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_BUNDLE_NAME, bundleNameForMigrate.c_str())) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-            MIGRATE_BUNDLE_NAME, elementName.GetBundleName().c_str());
+            MIGRATE_BUNDLE_NAME, bundleNameForMigrate.c_str());
         cJSON_Delete(sessionInfo);
         return;
     }

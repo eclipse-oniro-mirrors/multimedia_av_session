@@ -177,8 +177,8 @@ private:
     std::function<void(int32_t)> volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_ = GetPreferredDeviceChangeCallbackFunc();
-    cJSON* metaDataCache_;
-    cJSON* playbackStateCache_;
+    cJSON* metaDataCache_ = nullptr;
+    cJSON* playbackStateCache_ = nullptr;
     std::recursive_mutex cacheJsonLock_;
     bool isListenerSet_ = false;
 };

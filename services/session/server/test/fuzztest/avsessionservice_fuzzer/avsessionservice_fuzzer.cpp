@@ -487,14 +487,15 @@ void StartAVPlayback001()
     cJSON* value = cJSON_CreateObject();
     if (value == nullptr) {
         SLOGE("get value nullptr");
-        return;
+    } else {
+        if (cJSON_IsInvalid(value)) {
+            SLOGE("get value invalid");
+            cJSON_Delete(value);
+            value = nullptr;
+        } else {
+            cJSON_AddStringToObject(value, "bundleName", g_testAnotherBundleName);
+        }
     }
-    if (cJSON_IsInvalid(value)) {
-        SLOGE("get value invalid");
-        cJSON_Delete(value);
-        return;
-    }
-    cJSON_AddStringToObject(value, "bundleName", g_testAnotherBundleName);
 
     avsessionService_->GetSubNode(value, "FAKE_NAME");
     avsessionService_->DeleteHistoricalRecord(g_testAnotherBundleName);
@@ -502,6 +503,7 @@ void StartAVPlayback001()
     avsessionService_->Dump(1, argsList);
 
     cJSON_Delete(value);
+    value = nullptr;
     SLOGI("StartAVPlayback001 end!");
 }
 

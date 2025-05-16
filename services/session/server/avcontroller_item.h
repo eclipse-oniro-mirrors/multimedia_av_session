@@ -120,6 +120,8 @@ public:
 
     int32_t SetImgForMetaData(AVMetaData& data);
 
+    std::string GetSessionType();
+
     bool isFromSession_ = false;
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
