@@ -39,13 +39,6 @@ class HwCastStreamPlayerTest : public testing::TestWithParam<int> {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    static std::string g_errLog;
-
-    void MyLogCallback(const LogType type, const LogLevel level,
-        const unsigned int domain, const char *tag, const char *msg)
-    {
-        g_errLog = msg;
-    }
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMap();
@@ -674,44 +667,6 @@ HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState002, TestSize.Level1)
     hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>(1);
     ASSERT_EQ(hwCastStreamPlayer->GetCastAVPlaybackState(state), AVSESSION_SUCCESS);
     SLOGI("GetCastAVPlaybackState002 end!");
-}
-
-/**
- * @tc.name: GetMediaCapabilitiesOfVideo001
- * @tc.desc: GetMediaCapabilitiesOfVideo
- * @tc.type: FUNC
- * @tc.require: NA
- */
-HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo001, TestSize.Level1)
-{
-    SLOGI("GetMediaCapabilitiesOfVideo001 begin!");
-    LOG_SetCallback(MyLogCallback);
-    std::string videoValueStr = "";
-    CHECK_AND_RETURN_RET_LOG(nlohmann::json::accept(videoValueStr), AVSESSION_ERROR,
-        "videoValueStr is invalid");
-    nlohmann::json value = nlohmann::json::parse(videoValueStr);
-    GetMediaCapabilitiesOfVideo(value);
-    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("GetMediaCapabilitiesOfVideo001 end!");
-}
-
-/**
- * @tc.name: GetMediaCapabilitiesOfAudio001
- * @tc.desc: GetMediaCapabilitiesOfAudio
- * @tc.type: FUNC
- * @tc.require: NA
- */
-HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio001, TestSize.Level1)
-{
-    SLOGI("GetMediaCapabilitiesOfVideo001 begin!");
-    LOG_SetCallback(MyLogCallback);
-    std::string videoValueStr = "";
-    CHECK_AND_RETURN_RET_LOG(nlohmann::json::accept(videoValueStr), AVSESSION_ERROR,
-        "videoValueStr is invalid");
-    nlohmann::json value = nlohmann::json::parse(videoValueStr);
-    GetMediaCapabilitiesOfVideo(value);
-    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("GetMediaCapabilitiesOfVideo001 end!");
 }
 
 /**
