@@ -122,8 +122,6 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
     return exports;
 }
 
-std::shared_ptr<NapiAVSession> napiSession = nullptr;
-
 void processMsg(std::shared_ptr<ContextBase> context, int32_t ret)
 {
     if (ret != AVSESSION_SUCCESS) {
@@ -180,12 +178,8 @@ napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_inf
     };
 
     auto complete = [context](napi_value& output) {
-        context->status = NapiAVSession::NewInstance(context->env, context->session_, output, napiSession);
-        if (napiSession) {
-            SLOGI("NewInstance napiSession");
-            napiSession->SetSessionTag(context->tag_);
-            napiSession->SetSessionElement(context->elementName_);
-        }
+        context->status = NapiAVSession::NewInstance(context->env, context->session_, output,
+            context->tag_, context->elementName_);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
@@ -1430,18 +1424,8 @@ void NapiAVSessionManager::HandleServiceDied()
 
 void NapiAVSessionManager::HandleServiceStart()
 {
-    SLOGI("HandleServiceStart enter");
-    if (napiSession) {
-        std::shared_ptr<AVSession> session;
-        int32_t ret = AVSessionManager::GetInstance().CreateSession(napiSession->GetSessionTag(),
-            NapiUtils::ConvertSessionType(napiSession->GetSessionType()),
-            napiSession->GetSessionElement(), session);
-        SLOGI("HandleServiceStart CreateSession ret=%{public}d", ret);
-        if (ret == AVSESSION_SUCCESS) {
-            auto res = NapiAVSession::ReCreateInstance(session);
-            SLOGI("HandleServiceStart ReCreateInstance ret=%{public}d", res);
-        }
-    }
+    auto res = NapiAVSession::ReCreateInstance();
+    SLOGI("HandleServiceStart ReCreateInstance ret=%{public}d", res);
 }
 
 napi_status NapiAVSessionManager::OffSessionCreate(napi_env env, napi_value callback)

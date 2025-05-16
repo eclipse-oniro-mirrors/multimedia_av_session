@@ -117,7 +117,7 @@ private:
 
     void OnServiceDie();
 
-    void OnServiceStart();
+    void OnServiceStateChange(bool isAddSystemAbility);
 
     void RegisterClientDeathObserver();
 
@@ -132,7 +132,7 @@ private:
     std::function<void()> serviceStartCallback_;
     sptr<ServiceStatusListener> serviceListener_ = nullptr;
     static constexpr int userIdForAllUsers_ = -1;
-    std::atomic<bool> isServiceDie = false;
+    std::atomic<bool> isServiceDie_ = false;
 #ifdef START_STOP_ON_DEMAND_ENABLE
     const int32_t loadSystemAbilityWaitTimeOut_ = 30;
 #endif
@@ -140,12 +140,12 @@ private:
 
 class ServiceStatusListener : public SystemAbilityStatusChangeStub {
 public:
-    explicit ServiceStatusListener(const std::function<void()>& callback);
+    explicit ServiceStatusListener(const std::function<void(bool)>& callback);
 
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 private:
-    std::function<void()> callback_;
+    std::function<void(bool)> callback_;
 };
 
 class ServiceDeathRecipient : public IRemoteObject::DeathRecipient {

@@ -40,7 +40,8 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteParcelable(icon_.get()) &&
         parcel.WriteParcelable(extras_.get()) &&
         parcel.WriteString(drmScheme_) &&
-        dataSrc_.WriteToParcel(parcel);
+        dataSrc_.WriteToParcel(parcel) &&
+        parcel.WriteBool(pcmSrc_);
 }
 
 AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
@@ -75,6 +76,7 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     }
     data.ReadString(result->drmScheme_);
     result->dataSrc_.ReadFromParcel(data);
+    data.ReadBool(result->pcmSrc_);
     return result;
 }
 
@@ -302,6 +304,27 @@ AVDataSrcDescriptor AVMediaDescription::GetDataSrc() const
     return dataSrc_;
 }
 
+void AVMediaDescription::SetPcmSrc(const bool pcmSrc)
+{
+    pcmSrc_ = pcmSrc;
+}
+
+bool AVMediaDescription::GetPcmSrc() const
+{
+    return pcmSrc_;
+}
+
+// below not involved in Marshalling
+void AVMediaDescription::SetCastInfo(const std::shared_ptr<AVCastInfo>& castInfo)
+{
+    castInfo_ = castInfo;
+}
+
+std::shared_ptr<AVCastInfo> AVMediaDescription::GetCastInfo() const
+{
+    return castInfo_;
+}
+
 void AVMediaDescription::Reset()
 {
     mediaId_ = "";
@@ -328,5 +351,7 @@ void AVMediaDescription::Reset()
     drmScheme_ = "";
     AVDataSrcDescriptor dataSrc;
     dataSrc_ = dataSrc;
+    pcmSrc_ = false;
+    castInfo_ = nullptr;
 }
 } // namespace OHOS::AVSession

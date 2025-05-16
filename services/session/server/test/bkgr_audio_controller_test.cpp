@@ -61,7 +61,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease001, TestSize.Level1)
     descriptor.isThirdPartyApp_ = false;
     BackgroundAudioController bkgraudiocontroller;
     bkgraudiocontroller.OnSessionRelease(descriptor);
-    EXPECT_EQ(descriptor.isThirdPartyApp_, false);
+    EXPECT_EQ(bkgraudiocontroller.ptr_, nullptr);
     SLOGI("OnSessionRelease001 end!");
 }
 
@@ -79,7 +79,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease002, TestSize.Level1)
     descriptor.uid_ = -1;
     BackgroundAudioController bkgraudiocontroller;
     bkgraudiocontroller.OnSessionRelease(descriptor);
-    EXPECT_EQ(descriptor.isThirdPartyApp_, true);
+    EXPECT_EQ(bkgraudiocontroller.ptr_, nullptr);
     SLOGI("OnSessionRelease002 end!");
 }
 
@@ -97,7 +97,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease003, TestSize.Level1)
     descriptor.uid_ = 100;
     BackgroundAudioController bkgraudiocontroller;
     bkgraudiocontroller.OnSessionRelease(descriptor);
-    EXPECT_EQ(descriptor.isThirdPartyApp_, true);
+    EXPECT_EQ(bkgraudiocontroller.ptr_, nullptr);
     SLOGI("OnSessionRelease032 end!");
 }
 
@@ -154,7 +154,7 @@ static HWTEST(BkGrAudioControllerTest, HandleAppMuteState001, TestSize.Level1)
     int32_t pid = -1;
     BackgroundAudioController backgroundaudiocontroller;
     backgroundaudiocontroller.HandleAppMuteState(uid, pid, true);
-    EXPECT_EQ(uid, -1);
+    EXPECT_EQ(backgroundaudiocontroller.ptr_, nullptr);
 }
 
 /**
@@ -170,7 +170,7 @@ static HWTEST(BkGrAudioControllerTest, HandleAppMuteState002, TestSize.Level1)
     int32_t pid = -1;
     BackgroundAudioController backgroundaudiocontroller;
     backgroundaudiocontroller.HandleAppMuteState(uid, pid, false);
-    EXPECT_EQ(uid, -1);
+    EXPECT_EQ(backgroundaudiocontroller.ptr_, nullptr);
 }
 
 /**

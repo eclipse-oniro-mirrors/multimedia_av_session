@@ -214,7 +214,7 @@ av_session_ohos_library("avsession_service") {
 
   public_external_deps = [
     "data_object:distributeddataobject_impl",
-    "jsoncpp:jsoncpp",
+    "cJSON:cjson",
     "openssl:libcrypto_shared",
     "relational_store:native_rdb",
   ]
@@ -306,6 +306,7 @@ if (castplus_cast_engine_enable) {
       "audio_framework:audio_client",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "cJSON:cjson",
       "c_utils:utils",
       "data_object:distributeddataobject_impl",
       "device_manager:devicemanagersdk",
@@ -389,6 +390,7 @@ ohos_shared_library("avsession_dynamic_insight") {
     "ability_runtime:ability_manager",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
@@ -498,6 +500,7 @@ av_session_ohos_library("avsession_item") {
     "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "graphic_surface:surface",
@@ -548,7 +551,7 @@ av_session_ohos_library("avsession_item") {
 
   public_external_deps = [
     "data_object:distributeddataobject_impl",
-    "jsoncpp:jsoncpp",
+    "cJSON:cjson",
     "openssl:libcrypto_shared",
     "relational_store:native_rdb",
   ]
@@ -672,7 +675,7 @@ av_session_ohos_library("avsession_cast_item") {
   }
 
   public_external_deps = [
-    "jsoncpp:jsoncpp",
+    "cJSON:cjson",
     "openssl:libcrypto_shared",
   ]
 

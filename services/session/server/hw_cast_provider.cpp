@@ -19,6 +19,7 @@
 #include "hw_cast_stream_player.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_event_handler.h"
 #include "avsession_radar.h"
 
 using namespace OHOS::CastEngine::CastEngineClient;
@@ -66,6 +67,7 @@ int32_t HwCastProvider::StopDeviceLogging()
 bool HwCastProvider::StartDiscovery(int castCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("start discovery and the castCapability is %{public}d", castCapability);
+    castCapability = GetCastProtocolType(castCapability);
     AVSessionRadarInfo info("HwCastProvider::StartDiscovery");
     AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
     auto ret = CastSessionManager::GetInstance().StartDiscovery(castCapability, drmSchemes);
@@ -120,10 +122,12 @@ void HwCastProvider::Release()
     SLOGD("Release done");
 }
 
-int HwCastProvider::StartCastSession()
+int HwCastProvider::StartCastSession(bool isHiStream)
 {
     SLOGI("StartCastSession begin");
-    CastSessionProperty property = {CastEngine::ProtocolType::CAST_PLUS_STREAM, CastEngine::EndType::CAST_SOURCE};
+    CastSessionProperty property = {
+        isHiStream ? CastEngine::ProtocolType::CAST_PLUS_AUDIO : CastEngine::ProtocolType::CAST_PLUS_STREAM,
+        CastEngine::EndType::CAST_SOURCE};
     std::shared_ptr<ICastSession> castSession = nullptr;
     int ret = CastSessionManager::GetInstance().CreateCastSession(property, castSession);
     if (ret != AVSESSION_SUCCESS) {
@@ -152,6 +156,9 @@ int HwCastProvider::StartCastSession()
             } else {
                 hwCastProviderSession->Release();
                 return AVSESSION_ERROR;
+            }
+            if (isHiStream) {
+                hwCastProviderSession->SetProtocolType(CastEngine::ProtocolType::CAST_PLUS_AUDIO);
             }
         }
         hwCastProviderSessionMap_[castId] = hwCastProviderSession;
@@ -390,7 +397,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         return;
     }
     SLOGI("get deviceList size %{public}zu", deviceList.size());
-    for (CastRemoteDevice castRemoteDevice : deviceList) {
+    for (const CastRemoteDevice& castRemoteDevice : deviceList) {
         SLOGI("get devices with deviceName %{public}s", castRemoteDevice.deviceName.c_str());
         DeviceInfo deviceInfo;
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
@@ -447,7 +454,7 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
 void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)
 {
     SLOGI("Cast provider received session create event");
-    std::thread([this, castSession]() {
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castSession]() {
         SLOGI("Cast pvd received session create event and create task thread");
         for (auto listener : castStateListenerList_) {
             listener->OnSessionNeedDestroy();
@@ -481,7 +488,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             listener->OnSessionCreated(castId);
         }
         SLOGI("do session create notify finished %{public}d", castId);
-    }).detach();
+        }, "OnSessionCreated", 0);
 }
 
 void HwCastProvider::OnServiceDied()
@@ -497,7 +504,21 @@ void HwCastProvider::OnServiceDied()
 int32_t HwCastProvider::GetProtocolType(uint32_t castProtocolType)
 {
     int32_t protocolType = (castProtocolType & ProtocolType::TYPE_CAST_PLUS_STREAM) |
-        (castProtocolType & ProtocolType::TYPE_DLNA);
+        (castProtocolType & ProtocolType::TYPE_DLNA) |
+        ((castProtocolType & static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_AUDIO)) ?
+            ProtocolType::TYPE_CAST_PLUS_AUDIO : 0);
     return protocolType;
+}
+
+int HwCastProvider::GetCastProtocolType(int castCapability)
+{
+    int castProtocolType = (castCapability & ProtocolType::TYPE_CAST_PLUS_MIRROR ?
+        static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_MIRROR) : 0) |
+        (castCapability & ProtocolType::TYPE_CAST_PLUS_STREAM ?
+        static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_STREAM) : 0) |
+        (castCapability & ProtocolType::TYPE_DLNA ? static_cast<int>(CastEngine::ProtocolType::DLNA) : 0) |
+        (castCapability & ProtocolType::TYPE_CAST_PLUS_AUDIO ?
+        static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_AUDIO) : 0);
+    return castProtocolType;
 }
 } // namespace OHOS::AVSession

@@ -129,7 +129,7 @@ private:
     pid_t pid_;
     sptr<AVSessionItem> session_;
     std::string sessionId_;
-    int32_t userId_;
+    int32_t userId_ = 0;
     sptr<IAVControllerCallback> callback_;
     std::shared_ptr<AVControllerCallback> innerCallback_;
     AVCallMetaData::AVCallMetaMaskType avCallMetaMask_;

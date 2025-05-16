@@ -50,9 +50,17 @@ void JsonUtilsTest::TearDown()
 static HWTEST(JsonUtilsTest, IsInt32_001, TestSize.Level1)
 {
     SLOGI("IsInt32_001 begin!");
-    json jsonTest = { {"test", 1} };
+
+    cJSON* jsonTest = cJSON_CreateObject();
+    if (jsonTest == nullptr) {
+        SLOGE("create jsontest fail");
+        return;
+    }
+    cJSON_AddNumberToObject(jsonTest, "test", 1);
     bool ret = JsonUtils::IsInt32(jsonTest, "test");
     EXPECT_EQ(ret, true);
+
+    cJSON_Delete(jsonTest);
     SLOGI("IsInt32_001 end!");
 }
 
@@ -65,9 +73,17 @@ static HWTEST(JsonUtilsTest, IsInt32_001, TestSize.Level1)
 static HWTEST(JsonUtilsTest, IsInt32_002, TestSize.Level1)
 {
     SLOGI("IsInt32_002 begin!");
-    json jsonTest = { {"test", "1"} };
+
+    cJSON* jsonTest = cJSON_CreateObject();
+    if (jsonTest == nullptr) {
+        SLOGE("create jsontest fail");
+        return;
+    }
+    cJSON_AddStringToObject(jsonTest, "test", "1");
     bool ret = JsonUtils::IsInt32(jsonTest, "test");
     EXPECT_EQ(ret, false);
+
+    cJSON_Delete(jsonTest);
     SLOGI("IsInt32_002 end!");
 }
 
@@ -80,9 +96,17 @@ static HWTEST(JsonUtilsTest, IsInt32_002, TestSize.Level1)
 static HWTEST(JsonUtilsTest, IsString_001, TestSize.Level1)
 {
     SLOGI("IsString_001 begin!");
-    json jsonTest = { {"test", "123"} };
+
+    cJSON* jsonTest = cJSON_CreateObject();
+    if (jsonTest == nullptr) {
+        SLOGE("create jsontest fail");
+        return;
+    }
+    cJSON_AddStringToObject(jsonTest, "test", "123");
     bool ret = JsonUtils::IsString(jsonTest, "test");
     EXPECT_EQ(ret, true);
+
+    cJSON_Delete(jsonTest);
     SLOGI("IsString_001 end!");
 }
 
@@ -95,9 +119,17 @@ static HWTEST(JsonUtilsTest, IsString_001, TestSize.Level1)
 static HWTEST(JsonUtilsTest, IsString_002, TestSize.Level1)
 {
     SLOGI("IsString_002 begin!");
-    json jsonTest = { {"test", 1} };
+
+    cJSON* jsonTest = cJSON_CreateObject();
+    if (jsonTest == nullptr) {
+        SLOGE("create jsontest fail");
+        return;
+    }
+    cJSON_AddNumberToObject(jsonTest, "test", 1);
     bool ret = JsonUtils::IsString(jsonTest, "test");
     EXPECT_EQ(ret, false);
+
+    cJSON_Delete(jsonTest);
     SLOGI("IsString_002 end!");
 }
 
@@ -110,9 +142,17 @@ static HWTEST(JsonUtilsTest, IsString_002, TestSize.Level1)
 static HWTEST(JsonUtilsTest, IsBool_001, TestSize.Level1)
 {
     SLOGI("IsBool_001 begin!");
-    json jsonTest = { {"test", true} };
+
+    cJSON* jsonTest = cJSON_CreateObject();
+    if (jsonTest == nullptr) {
+        SLOGE("create jsontest fail");
+        return;
+    }
+    cJSON_AddBoolToObject(jsonTest, "test", true);
     bool ret = JsonUtils::IsBool(jsonTest, "test");
     EXPECT_EQ(ret, true);
+
+    cJSON_Delete(jsonTest);
     SLOGI("IsBool_001 end!");
 }
 
@@ -125,9 +165,17 @@ static HWTEST(JsonUtilsTest, IsBool_001, TestSize.Level1)
 static HWTEST(JsonUtilsTest, IsBool_002, TestSize.Level1)
 {
     SLOGI("IsBool_002 begin!");
-    json jsonTest = { {"test", "123"} };
+
+    cJSON* jsonTest = cJSON_CreateObject();
+    if (jsonTest == nullptr) {
+        SLOGE("create jsontest fail");
+        return;
+    }
+    cJSON_AddStringToObject(jsonTest, "test", "123");
     bool ret = JsonUtils::IsBool(jsonTest, "test");
     EXPECT_EQ(ret, false);
+
+    cJSON_Delete(jsonTest);
     SLOGI("IsBool_002 end!");
 }
 

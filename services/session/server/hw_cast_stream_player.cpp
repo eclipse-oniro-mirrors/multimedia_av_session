@@ -21,6 +21,7 @@
 #include "avmedia_description.h"
 #include "avsession_errors.h"
 #include "avsession_sysevent.h"
+#include "avsession_event_handler.h"
 #include "avsession_trace.h"
 #include "avsession_radar.h"
 
@@ -229,6 +230,8 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
         mediaInfo.dataSrc = castDataSrc_;
     }
 
+    buildCastInfo(mediaDescription, mediaInfo);
+
     std::lock_guard lockGuard(streamPlayerLock_);
     if (!streamPlayer_) {
         SLOGE("Set media info and start failed");
@@ -253,14 +256,20 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
 
 bool HwCastStreamPlayer::RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription)
 {
-    std::lock_guard lockGuard(curItemLock_);
-    if (mediaDescription != nullptr &&  currentAVQueueItem_.GetDescription() != nullptr &&
-        mediaDescription->GetIconUri() == "URI_CACHE" && mediaDescription->GetIcon() != nullptr) {
-        currentAVQueueItem_.GetDescription()->SetIcon(mediaDescription->GetIcon());
-        SLOGI("Repeat Prepare only setIcon");
-        return true;
+    bool hasIcon = false;
+    {
+        std::lock_guard lockGuard(curItemLock_);
+        if (mediaDescription != nullptr &&  currentAVQueueItem_.GetDescription() != nullptr &&
+            mediaDescription->GetIconUri() == "URI_CACHE" && mediaDescription->GetIcon() != nullptr) {
+            currentAVQueueItem_.GetDescription()->SetIcon(mediaDescription->GetIcon());
+            SLOGI("Repeat Prepare only setIcon");
+            hasIcon = true;
+        }
     }
-    return false;
+    if (hasIcon && sessionCallbackForCastNtf_ && isPlayingState_) {
+        sessionCallbackForCastNtf_(true, true);
+    }
+    return hasIcon;
 }
 
 int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
@@ -315,6 +324,8 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
         mediaInfo.dataSrc = castDataSrc_;
     }
 
+    buildCastInfo(mediaDescription, mediaInfo);
+
     std::lock_guard lockGuard(streamPlayerLock_);
     SLOGI("pass playerlock, check item lock, mediaInfo mediaUrl and albumCoverUrl");
     if (streamPlayer_ && streamPlayer_->Load(mediaInfo) == AVSESSION_SUCCESS) {
@@ -325,6 +336,17 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     }
     SLOGE("Set media info and prepare failed");
     return AVSESSION_ERROR;
+}
+
+void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& mediaDescription,
+    CastEngine::MediaInfo& mediaInfo)
+{
+    if (mediaDescription->GetPcmSrc() && mediaDescription->GetCastInfo() != nullptr) {
+        uid_t appUid = mediaDescription->GetCastInfo()->GetAppUid();
+        SLOGI("buildCastInfo AUDIO_PCM uid %{public}d", appUid);
+        mediaInfo.appUid = appUid;
+        mediaInfo.mediaType = "AUDIO_PCM";
+    }
 }
 
 int32_t HwCastStreamPlayer::GetDuration(int32_t& duration)
@@ -385,60 +407,93 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     return AVSESSION_SUCCESS;
 }
 
-void HwCastStreamPlayer::GetMediaCapabilitiesOfVideo(nlohmann::json& videoValue)
+void HwCastStreamPlayer::GetMediaDecodeOfVideoFromCJSON(cJSON* videoValue)
 {
-    if (videoValue.contains(decodeTypeStr_)) {
-        for (auto decodeType : videoValue[decodeTypeStr_]) {
-            CHECK_AND_CONTINUE(decodeType.is_string());
-            std::string str = decodeType;
-            SLOGI("get %{public}s is %{public}s", decodeTypeStr_.c_str(), str.c_str());
-            jsonCapabilitiesSptr_->decoderTypes_.emplace_back(decodeType);
-        }
-    }
-    if (videoValue.contains(decodeSupportResolutionStr_)) {
+    CHECK_AND_RETURN_LOG(videoValue != nullptr && !cJSON_IsInvalid(videoValue), "videoValue get invalid");
+    if (cJSON_HasObjectItem(videoValue, decodeSupportResolutionStr_.c_str())) {
+        cJSON* resolutionItem = cJSON_GetObjectItem(videoValue, decodeSupportResolutionStr_.c_str());
+        CHECK_AND_RETURN_LOG(resolutionItem != nullptr && !cJSON_IsInvalid(resolutionItem), "resolution get invalid");
         std::vector<ResolutionLevel> resolutionLevels;
         std::map<std::string, std::vector<ResolutionLevel>> decodeToResolution;
         int num;
-        if (videoValue[decodeSupportResolutionStr_].contains(decodeOfVideoHevcStr_)) {
-            for (auto value : videoValue[decodeSupportResolutionStr_][decodeOfVideoHevcStr_]) {
-                num = value;
+        if (cJSON_HasObjectItem(resolutionItem, decodeOfVideoHevcStr_.c_str())) {
+            cJSON* decodeOfVideoHevcArray = cJSON_GetObjectItem(resolutionItem, decodeOfVideoHevcStr_.c_str());
+            CHECK_AND_RETURN_LOG(decodeOfVideoHevcArray != nullptr && !cJSON_IsInvalid(decodeOfVideoHevcArray) &&
+                cJSON_IsArray(decodeOfVideoHevcArray), "decodeOfVideoHevc get invalid");
+            cJSON* valueItem = nullptr;
+            cJSON_ArrayForEach(valueItem, decodeOfVideoHevcArray) {
+                CHECK_AND_CONTINUE(valueItem != nullptr && !cJSON_IsInvalid(valueItem) && cJSON_IsNumber(valueItem));
+                num = valueItem->valueint;
                 SLOGI("decodeSupportResolution's video/hevc is %{public}d", num);
-                resolutionLevels.emplace_back(value);
+                resolutionLevels.emplace_back(static_cast<ResolutionLevel>(num));
             }
             decodeToResolution[decodeOfVideoHevcStr_] = resolutionLevels;
         }
         resolutionLevels.clear();
-        if (videoValue[decodeSupportResolutionStr_].contains(decodeOfVideoAvcStr_)) {
-            for (auto value : videoValue[decodeSupportResolutionStr_][decodeOfVideoAvcStr_]) {
-                num = value;
+        if (cJSON_HasObjectItem(resolutionItem, decodeOfVideoAvcStr_.c_str())) {
+            cJSON* decodeOfVideoAvcArray = cJSON_GetObjectItem(resolutionItem, decodeOfVideoAvcStr_.c_str());
+            CHECK_AND_RETURN_LOG(decodeOfVideoAvcArray != nullptr && !cJSON_IsInvalid(decodeOfVideoAvcArray) &&
+                cJSON_IsArray(decodeOfVideoAvcArray), "decodeOfVideoAvc get invalid");
+            cJSON* valueItem = nullptr;
+            cJSON_ArrayForEach(valueItem, decodeOfVideoAvcArray) {
+                CHECK_AND_CONTINUE(valueItem != nullptr && !cJSON_IsInvalid(valueItem) && cJSON_IsNumber(valueItem));
+                num = valueItem->valueint;
                 SLOGI("decodeSupportResolution's video/avc is %{public}d", num);
-                resolutionLevels.emplace_back(value);
+                resolutionLevels.emplace_back(static_cast<ResolutionLevel>(num));
             }
-            decodeToResolution[decodeOfVideoAvcStr_] = resolutionLevels;
+            jsonCapabilitiesSptr_->decoderSupportResolutions_ = decodeToResolution;
         }
-        jsonCapabilitiesSptr_->decoderSupportResolutions_ = decodeToResolution;
     } else {
         SLOGI("%{public}s of %{public}s no contains", videoStr_.c_str(), decodeSupportResolutionStr_.c_str());
     }
-    if (videoValue.contains(hdrFormatStr_)) {
-        for (auto hdrFormat: videoValue[hdrFormatStr_]) {
-            CHECK_AND_CONTINUE(hdrFormat.is_number());
-            int num = hdrFormat;
+}
+
+void HwCastStreamPlayer::GetMediaCapabilitiesOfVideo(cJSON* videoValue)
+{
+    CHECK_AND_RETURN_LOG(videoValue != nullptr && !cJSON_IsInvalid(videoValue), "videoValue get invalid");
+    if (cJSON_HasObjectItem(videoValue, decodeTypeStr_.c_str())) {
+        cJSON* decodeTypeArray = cJSON_GetObjectItem(videoValue, decodeTypeStr_.c_str());
+        CHECK_AND_RETURN_LOG(decodeTypeArray != nullptr && !cJSON_IsInvalid(decodeTypeArray) &&
+            cJSON_IsArray(decodeTypeArray), "decodeType get invalid");
+        cJSON* decodeTypeItem = nullptr;
+        cJSON_ArrayForEach(decodeTypeItem, decodeTypeArray) {
+            CHECK_AND_CONTINUE(decodeTypeItem != nullptr && !cJSON_IsInvalid(decodeTypeItem) &&
+                cJSON_IsString(decodeTypeItem));
+            std::string str(decodeTypeItem->valuestring);
+            SLOGI("get %{public}s is %{public}s", decodeTypeStr_.c_str(), str.c_str());
+            jsonCapabilitiesSptr_->decoderTypes_.emplace_back(str);
+        }
+    }
+
+    GetMediaDecodeOfVideoFromCJSON(videoValue);
+
+    if (cJSON_HasObjectItem(videoValue, hdrFormatStr_.c_str())) {
+        cJSON* hdrFormatArray = cJSON_GetObjectItem(videoValue, hdrFormatStr_.c_str());
+        CHECK_AND_RETURN_LOG(hdrFormatArray != nullptr && !cJSON_IsInvalid(hdrFormatArray) &&
+            cJSON_IsArray(hdrFormatArray), "hdrFormat get invalid");
+        cJSON* hdrFormatItem = nullptr;
+        cJSON_ArrayForEach(hdrFormatItem, hdrFormatArray) {
+            CHECK_AND_CONTINUE(hdrFormatItem != nullptr && !cJSON_IsInvalid(hdrFormatItem) &&
+                cJSON_IsNumber(hdrFormatItem));
+            int num = hdrFormatItem->valueint;
             SLOGI("get %{public}s is %{public}d", hdrFormatStr_.c_str(), num);
-            jsonCapabilitiesSptr_->hdrFormats_.emplace_back(hdrFormat);
+            jsonCapabilitiesSptr_->hdrFormats_.emplace_back(static_cast<HDRFormat>(num));
         }
     } else {
         SLOGI("%{public}s of %{public}s no contains", videoStr_.c_str(), hdrFormatStr_.c_str());
     }
 }
 
-void HwCastStreamPlayer::GetMediaCapabilitiesOfAudio(nlohmann::json& audioValue)
+void HwCastStreamPlayer::GetMediaCapabilitiesOfAudio(cJSON* audioValue)
 {
-    if (audioValue.contains(decodeTypeStr_)) {
-        CHECK_AND_BREAK(audioValue[decodeTypeStr_].is_string());
-        std::string str = audioValue[decodeTypeStr_];
+    CHECK_AND_RETURN_LOG(audioValue != nullptr && !cJSON_IsInvalid(audioValue), "audioValue get invalid");
+    if (cJSON_HasObjectItem(audioValue, decodeTypeStr_.c_str())) {
+        cJSON* decodeTypeItem = cJSON_GetObjectItem(audioValue, decodeTypeStr_.c_str());
+        CHECK_AND_RETURN_LOG(decodeTypeItem != nullptr && !cJSON_IsInvalid(decodeTypeItem) &&
+            cJSON_IsString(decodeTypeItem), "decodeType str get invalid");
+        std::string str(decodeTypeItem->valuestring);
         SLOGI("%{public}s of %{public}s", decodeTypeStr_.c_str(), str.c_str());
-        jsonCapabilitiesSptr_->decoderTypes_.emplace_back(audioValue[decodeTypeStr_]);
+        jsonCapabilitiesSptr_->decoderTypes_.emplace_back(str);
     }
 }
 
@@ -460,23 +515,36 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
     std::string supportCapabilities;
     ClearJsonCapabilities();
     streamPlayer_->GetMediaCapabilities(supportCapabilities);
-    CHECK_AND_RETURN_RET_LOG(nlohmann::json::accept(supportCapabilities), AVSESSION_ERROR,
-        "supportCapabilities is invalid");
-    nlohmann::json value = nlohmann::json::parse(supportCapabilities);
-    CHECK_AND_RETURN_RET_LOG(!value.is_null() && !value.is_discarded(), AVSESSION_ERROR, "GetMediaCapabilities fail");
-    if (value.contains(videoStr_)) {
-        GetMediaCapabilitiesOfVideo(value[videoStr_]);
-    } else if (value.contains(audioStr_)) {
-        GetMediaCapabilitiesOfAudio(value[audioStr_]);
+
+    cJSON* valueItem = cJSON_Parse(supportCapabilities.c_str());
+    CHECK_AND_RETURN_RET_LOG(valueItem != nullptr, AVSESSION_ERROR, "supportCapabilities is nullptr");
+    if (cJSON_IsInvalid(valueItem)) {
+        SLOGE("supportCapabilities is invalid");
+        cJSON_Delete(valueItem);
+        return AVSESSION_ERROR;
     }
-    if (value.contains(speedStr_)) {
-        for (auto speed : value[speedStr_]) {
-            CHECK_AND_CONTINUE(speed.is_number());
-            CastEngine::PlaybackSpeed num = speed;
+    if (cJSON_HasObjectItem(valueItem, videoStr_.c_str())) {
+        cJSON* videoItem = cJSON_GetObjectItem(valueItem, videoStr_.c_str());
+        GetMediaCapabilitiesOfVideo(videoItem);
+    } else if (cJSON_HasObjectItem(valueItem, audioStr_.c_str())) {
+        cJSON* audioItem = cJSON_GetObjectItem(valueItem, audioStr_.c_str());
+        GetMediaCapabilitiesOfAudio(audioItem);
+    }
+
+    if (cJSON_HasObjectItem(valueItem, speedStr_.c_str())) {
+        cJSON* speedArray = cJSON_GetObjectItem(valueItem, speedStr_.c_str());
+        CHECK_AND_RETURN_RET_LOG(speedArray != nullptr && !cJSON_IsInvalid(speedArray) &&
+            cJSON_IsArray(speedArray), AVSESSION_ERROR, "speed get invalid");
+        cJSON* speedItem = nullptr;
+        cJSON_ArrayForEach(speedItem, speedArray) {
+            CHECK_AND_CONTINUE(speedItem != nullptr && !cJSON_IsInvalid(speedItem) &&
+                cJSON_IsNumber(speedItem));
+            CastEngine::PlaybackSpeed num = static_cast<CastEngine::PlaybackSpeed>(speedItem->valueint);
             SLOGI("support play speed is %{public}f", castPlusSpeedToDouble_[num]);
             jsonCapabilitiesSptr_->playSpeeds_.emplace_back(castPlusSpeedToDouble_[num]);
         }
     }
+    cJSON_Delete(valueItem);
     return AVSESSION_SUCCESS;
 }
 
@@ -631,6 +699,24 @@ int32_t HwCastStreamPlayer::SetValidAbility(const std::vector<int32_t>& validCmd
     return AVSESSION_SUCCESS;
 }
 
+void HwCastStreamPlayer::SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback)
+{
+    sessionCallbackForCastNtf_ = callback;
+}
+
+void HwCastStreamPlayer::CheckIfCancelCastCapsule()
+{
+    isPlayingState_ = false;
+    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelCastCapsule");
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [this]() {
+            if (sessionCallbackForCastNtf_ && !isPlayingState_) {
+                SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", isPlayingState_);
+                sessionCallbackForCastNtf_(false, false);
+            }
+        }, "CancelCastCapsule", cancelTimeout);
+}
+
 void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackState, bool isPlayWhenReady)
 {
     AVPlaybackState avCastPlaybackState;
@@ -640,6 +726,16 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
     } else {
         SLOGD("On state changed, get state %{public}d", castPlusStateToString_[playbackState]);
         avCastPlaybackState.SetState(castPlusStateToString_[playbackState]);
+    }
+    if (avCastPlaybackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+        // play state try notify cast notification
+        isPlayingState_ = true;
+        if (sessionCallbackForCastNtf_) {
+            SLOGI("MediaCapsule addCastCapsule");
+            sessionCallbackForCastNtf_(true, false);
+        }
+    } else {
+        CheckIfCancelCastCapsule();
     }
     RefreshCurrentItemDuration();
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);

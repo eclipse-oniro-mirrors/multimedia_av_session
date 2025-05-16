@@ -20,7 +20,7 @@
 #include "migrate_avsession_constant.h"
 #include "avcontroller_item.h"
 #include "avsession_item.h"
-#include "json/json.h"
+#include "cJSON.h"
 #include "audio_adapter.h"
 #include "avsession_info.h"
 
@@ -72,13 +72,13 @@ public:
 private:
     void PrepareSessionFromRemote();
     void PrepareControllerOfRemoteSession(sptr<AVSessionItem> sessionItem);
-    void ProcessSessionInfo(Json::Value jsonValue);
-    void ProcessMetaData(Json::Value jsonValue);
-    void ProcessPlaybackState(Json::Value jsonValue);
-    void ProcessValidCommands(Json::Value jsonValue);
-    void ProcessVolumeControlCommand(Json::Value jsonValue);
-    void ProcessAvailableDevices(Json::Value jsonValue);
-    void ProcessPreferredOutputDevice(Json::Value jsonValue);
+    void ProcessSessionInfo(cJSON* jsonValue);
+    void ProcessMetaData(cJSON* jsonValue);
+    void ProcessPlaybackState(cJSON* jsonValue);
+    void ProcessValidCommands(cJSON* jsonValue);
+    void ProcessVolumeControlCommand(cJSON* jsonValue);
+    void ProcessAvailableDevices(cJSON* jsonValue);
+    void ProcessPreferredOutputDevice(cJSON* jsonValue);
     void ProcessBundleImg(std::string bundleIconStr);
     void ProcessMediaImage(std::string mediaImageStr);
     void SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr);

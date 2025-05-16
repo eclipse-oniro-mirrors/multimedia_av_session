@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,27 +49,27 @@ enum class Operation {
 class AVSessionSysEvent {
 public:
     struct LifeCycleInfo {
-        std::string bundleName_;
-        bool appStatus_;
-        int32_t sessionType_;
-        bool isCreateSession_;
+        std::string bundleName_ = "";
+        bool appStatus_ = false;
+        int32_t sessionType_ = 0;
+        bool isCreateSession_ = false;
     };
 
     struct ControllerCommandInfo {
-        std::string bundleName_;
-        pid_t controllerPid_;
-        int32_t controllerCmd_;
+        std::string bundleName_ = "";
+        pid_t controllerPid_ = 0;
+        int32_t controllerCmd_ = 0;
     };
 
     struct BackControlReportInfo {
-        std::string bundleName_;
-        int32_t streamUsage_;
-        bool isBack_;
-        int32_t playDuration_;
-        bool isAudioActive_;
-        int32_t metaDataQuality_;
-        int32_t cmdQuality_;
-        int32_t playbackState_;
+        std::string bundleName_ = "";
+        int32_t streamUsage_ = 0;
+        bool isBack_ = false;
+        int32_t playDuration_ = 0;
+        bool isAudioActive_ = false;
+        int32_t metaDataQuality_ = 0;
+        int32_t cmdQuality_ = 0;
+        int32_t playbackState_ = 0;
     };
 
     static AVSessionSysEvent& GetInstance();
@@ -120,7 +120,7 @@ private:
     AVSessionSysEvent();
     std::map<Operation, uint32_t> optCounts_;
     std::unique_ptr<Utils::Timer> timer_;
-    uint32_t timerId_;
+    uint32_t timerId_ = 0;
     std::recursive_mutex lock_;
     static constexpr uint32_t NOTIFY_TIME_INTERVAL = 1 * 60 * 60 * 1000; // retry after 1 hours
     std::list<AVSessionSysEvent::LifeCycleInfo> lifeCycleInfos_;

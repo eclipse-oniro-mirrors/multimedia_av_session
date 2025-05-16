@@ -58,7 +58,7 @@ ohos_fuzztest("AVSessionStubFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "jsoncpp:jsoncpp",
+    "cJSON:cjson",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",

@@ -56,6 +56,7 @@ common_external_deps = [
   "audio_framework:audio_client",
   "audio_framework:audio_foundation",
   "background_task_mgr:bgtaskmgr_innerkits",
+  "cJSON:cjson",
   "c_utils:utils",
   "device_manager:devicemanagersdk",
   "dsoftbus:softbus_client",
@@ -63,7 +64,6 @@ common_external_deps = [
   "image_framework:image_native",
   "input:libmmi-client",
   "ipc:ipc_single",
-  "jsoncpp:jsoncpp",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]

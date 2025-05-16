@@ -154,7 +154,6 @@ void AVCastControllerTest::SetUp()
     auto validCallback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         supportedCastCmds = supportedCastCmd_;
-        return;
     };
     auto preparecallback = []() {
         SLOGI("prepare callback");
@@ -270,6 +269,7 @@ public:
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) {return 0;}
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
+    void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
 };
 
 /**
@@ -802,7 +802,7 @@ HWTEST_F(AVCastControllerTest, StartCastSession001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     // StartCastSession may fail with -1003
-    int32_t ret = hwCastProvider.StartCastSession();
+    int32_t ret = hwCastProvider.StartCastSession(false);
     SLOGI("StartCastSession001 with ret %{public}d", ret);
     EXPECT_TRUE(ret != AVSESSION_SUCCESS);
 }
@@ -930,7 +930,6 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange004, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     castController_->callback_ = g_AVCastControllerCallbackProxy;
     castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
-    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool)->void {};
     AVPlaybackState state;
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     castController_->OnCastPlaybackStateChange(state);
@@ -1154,6 +1153,27 @@ HWTEST_F(AVCastControllerTest, onDataSrcRead002, TestSize.Level1)
 }
 
 /**
+* @tc.name: onDataSrcRead003
+* @tc.desc: onDataSrcRead, with callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, onDataSrcRead003, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    uint32_t length = 2;
+    int64_t pos = 0;
+    auto ret = castController_->onDataSrcRead(memory, length, pos);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: OnCastPlaybackStateChange005
 * @tc.desc: success to copy and no registrered callback
 * @tc.type: FUNC
@@ -1299,7 +1319,6 @@ HWTEST_F(AVCastControllerTest, Prepare004, TestSize.Level1)
     description->SetExtras(nullptr);
     description->SetMediaUri("Media url");
     avQueueItem.SetDescription(description);
-    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
     castController_->isPlayingState_ = false;
     EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
 }
@@ -1324,7 +1343,6 @@ HWTEST_F(AVCastControllerTest, Prepare005, TestSize.Level1)
     description->SetExtras(nullptr);
     description->SetMediaUri("Media url");
     avQueueItem.SetDescription(description);
-    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
     castController_->isPlayingState_ = true;
     EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
 }
@@ -1346,25 +1364,9 @@ HWTEST_F(AVCastControllerTest, SetQueueItemDataSrc001, TestSize.Level1)
     avQueueItem.IsValid();
     avQueueItem.SetDescription(description);
     avQueueItem.IsValid();
-    castController_->sessionCallbackForCastNtf_ = [](std::string&, bool, bool) -> void {};
     castController_->isPlayingState_ = true;
     castController_->SetQueueItemDataSrc(avQueueItem);
     EXPECT_EQ(avQueueItem.GetDescription()->GetDataSrc().hasCallback, true);
-}
-
-/**
-* @tc.name: CheckIfCancelCastCapsule001
-* @tc.desc: state is avaiable
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AVCastControllerTest, CheckIfCancelCastCapsule001, TestSize.Level1)
-{
-    LOG_SetCallback(MyLogCallback);
-    castController_->currentState_ =  AVPlaybackState::PLAYBACK_STATE_PAUSE;
-    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
-    castController_->CheckIfCancelCastCapsule();
-    EXPECT_EQ(castController_->IsStopState(castController_->currentState_), true);
 }
 
 /**
@@ -1382,7 +1384,6 @@ HWTEST_F(AVCastControllerTest, AddAvailableCommand002, TestSize.Level1)
     auto validCallback = [](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         supportedCastCmds = { AVCastControlCommand::CAST_CONTROL_CMD_PLAY };
-        return;
     };
     auto preparecallback = []() {
         SLOGI("prepare callback");
@@ -1406,7 +1407,6 @@ HWTEST_F(AVCastControllerTest, RemoveAvailableCommand002, TestSize.Level1)
     auto validCallback = [](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         SLOGI("add cast valid command %{public}d", cmd);
         supportedCastCmds = { AVCastControlCommand::CAST_CONTROL_CMD_PLAY };
-        return;
     };
     auto preparecallback = []() {
         SLOGI("prepare callback");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -252,6 +252,27 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest006, TestSize.Level1)
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, 305);
     SLOGI("OnRemoteRequest006 end!");
+}
+
+/**
+* @tc.name: OnRemoteRequest007
+* @tc.desc: Test OnRemoteRequest
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level1)
+{
+    SLOGI("OnRemoteRequest007 begin!");
+    uint32_t code = 20;
+    AVSessionCallbackStubDemo avSessionCallbackStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+
+    data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
+    data.WriteInt32(0);
+    int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnRemoteRequest007 end!");
 }
 }
 }

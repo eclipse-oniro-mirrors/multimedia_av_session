@@ -21,8 +21,7 @@
 #include "permission_checker.h"
 #include "avcast_provider_manager.h"
 #include "avsession_sysevent.h"
-
-static std::shared_ptr<OHOS::AVSession::HwCastProvider> hwProvider_;
+#include "device_manager.h"
 
 namespace OHOS::AVSession {
 AVRouterImpl::AVRouterImpl()
@@ -30,9 +29,18 @@ AVRouterImpl::AVRouterImpl()
     SLOGD("AVRouter construct");
 }
 
+int32_t AVRouterImpl::GetLocalDeviceType()
+{
+    int32_t deviceType = -1;
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceType("av_session", deviceType);
+    CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "get local device type failed with ret:%{public}d", ret);
+    return deviceType;
+}
+
 int32_t AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
 {
     SLOGI("Start init AVRouter");
+    deviceType_ = GetLocalDeviceType();
     {
         std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_ = servicePtr;
@@ -73,9 +81,6 @@ int32_t AVRouterImpl::Init(IAVSessionServiceListener *servicePtr)
 bool AVRouterImpl::Release()
 {
     SLOGI("Start Release AVRouter");
-    if (hasSessionAlive_) {
-        SLOGE("has session alive, but continue");
-    }
     if (hwProvider_ == nullptr) {
         SLOGE("Start Release AVRouter err for no provider");
         return false;
@@ -135,11 +140,11 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
     SLOGI("AVRouterImpl StartCastDiscovery");
     std::lock_guard lockGuard(providerManagerLock_);
 
+    cacheCastDeviceCapability_ = castDeviceCapability;
+    cacheDrmSchemes_ = drmSchemes;
     if (providerManagerMap_.empty()) {
         SLOGI("set cacheStartDiscovery with no element with cap %{public}d", static_cast<int>(castDeviceCapability));
         cacheStartDiscovery_ = true;
-        cacheCastDeviceCapability_ = castDeviceCapability;
-        cacheDrmSchemes_ = drmSchemes;
         return AVSESSION_SUCCESS;
     }
     for (const auto& [number, providerManager] : providerManagerMap_) {
@@ -262,10 +267,25 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
         servicePtr_->setInCast(false);
     }
     std::lock_guard lockGuard(providerManagerLock_);
-    hasSessionAlive_ = false;
     providerNumber_ = providerNumberDisable_;
     providerManagerMap_.clear();
+
+    OnCastStateChange(disconnectStateFromCast_, DeviceInfo {
+        .castCategory_ = AVCastCategory::CATEGORY_LOCAL,
+        .deviceId_ = "-1",
+        .deviceName_ = "RemoteCast",
+    });
     castHandleToInfoMap_.clear();
+
+    if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(castEngineServiceRestartWaitTime));
+        StartCastDiscovery(cacheCastDeviceCapability_, cacheDrmSchemes_);
+        std::lock_guard lockGuard(servicePtrLock_);
+        if (servicePtr_ != nullptr) {
+            servicePtr_->checkEnableCast(true);
+        }
+    }
+
     return AVSESSION_SUCCESS;
 }
 
@@ -313,13 +333,12 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
             return number;
         }
     }
-    int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].
-        providerId_]->provider_->StartCastSession();
+    int32_t castId = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->StartCastSession(
+        outputDeviceInfo.deviceInfos_[0].supportedProtocols_ & ProtocolType::TYPE_CAST_PLUS_AUDIO);
     CHECK_AND_RETURN_RET_LOG(castId != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     // The first 32 bits are providerId, the last 32 bits are castId
     castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) | static_cast<uint32_t>(castId));
-    hasSessionAlive_ = true;
 
     CastHandleInfo castHandleInfo;
     castHandleInfo.sessionId_ = sessionId;
@@ -375,7 +394,6 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle, bool continuePlay)
         AVSESSION_ERROR, "deviceInfos is empty");
     providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
         castHandleToInfoMap_[castHandle].outputDeviceInfo_.deviceInfos_[0], continuePlay);
-    hasSessionAlive_ = false;
     SLOGI("AVRouterImpl stop cast process remove device done");
 
     if (castHandleToInfoMap_.find(castHandle) != castHandleToInfoMap_.end()) {
@@ -405,7 +423,6 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
         && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
     providerManagerMap_[providerNumber]->provider_->StopCastSession(castId);
-    hasSessionAlive_ = false;
 
     for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
         if (number == castHandle) {

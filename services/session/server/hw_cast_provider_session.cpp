@@ -36,6 +36,12 @@ int32_t HwCastProviderSession::Init()
     return AVSESSION_ERROR;
 }
 
+void HwCastProviderSession::SetProtocolType(CastEngine::ProtocolType protocolType)
+{
+    SLOGI("SetProtocolType %{public}d", static_cast<int>(protocolType));
+    protocolType_ = protocolType;
+}
+
 void HwCastProviderSession::Release()
 {
     SLOGI("release the HwCastProviderSession");
@@ -188,11 +194,27 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         stashDeviceState_ = -1;
         tempListenerList = castSessionStateListenerList_;
     }
+
+    std::vector<AudioStreamInfo> streamInfos;
+    if (protocolType_ == CastEngine::ProtocolType::CAST_PLUS_AUDIO) {
+        SLOGI("OnDeviceState CAST_PLUS_AUDIO GetRemoteDeviceInfo");
+        CastRemoteDevice castRemoteDevice = {};
+        castSession_->GetRemoteDeviceInfo(stateInfo.deviceId, castRemoteDevice);
+        AudioStreamInfo audioStreamInfo;
+        audioStreamInfo.samplingRate = static_cast<AudioSamplingRate>(castRemoteDevice.audioCapability.samplingRate);
+        audioStreamInfo.encoding = static_cast<AudioEncodingType>(castRemoteDevice.audioCapability.encoding);
+        audioStreamInfo.format = static_cast<AudioSampleFormat>(castRemoteDevice.audioCapability.format);
+        audioStreamInfo.channels = static_cast<AudioChannel>(castRemoteDevice.audioCapability.channels);
+        audioStreamInfo.channelLayout = static_cast<AudioChannelLayout>(castRemoteDevice.audioCapability.channelLayout);
+        streamInfos.push_back(audioStreamInfo);
+    }
+
     for (auto listener : tempListenerList) {
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stateInfo.deviceId;
         deviceInfo.deviceName_ = "RemoteCast";
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        deviceInfo.audioCapabilities_.streamInfos_ = streamInfos;
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for ListSize %{public}d", static_cast<int>(tempListenerList.size()));
             listener->OnCastStateChange(static_cast<int>(deviceState), deviceInfo);

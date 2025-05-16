@@ -138,10 +138,11 @@ public:
     /**
      * @brief Start cast process.
      *
+     * @param { bool } isHiStream - whether session is hi stream.
      * @return { int } Whether the operation was successful.
      * @since 10
     */
-    virtual int StartCastSession() = 0;
+    virtual int StartCastSession(bool isHiStream) = 0;
 
     /**
      * @brief Stop cast process.

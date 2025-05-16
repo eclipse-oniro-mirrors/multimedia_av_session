@@ -378,7 +378,8 @@ void AVSessionServiceSendSystemControlCommandTest(sptr<AVSessionService> service
 void AvSessionServiceClientTest(sptr<AVSessionService> service)
 {
     int32_t pid = GetData<int32_t>();
-    service->OnClientDied(pid);
+    int32_t uid = GetData<int32_t>();
+    service->OnClientDied(pid, uid);
 
     sptr<IClientDeath> clientDeath = new ClientDeathStub();
     auto func = []() {};
@@ -482,12 +483,25 @@ void StartAVPlayback001()
     int32_t randomNumber = GetData<int32_t>();
     std::string assetName = assetNames[randomNumber % assetNames.size()];
     avsessionService_->StartAVPlayback(g_testAnotherBundleName, assetName);
-    nlohmann::json value;
-    value["bundleName"] = g_testAnotherBundleName;
+
+    cJSON* value = cJSON_CreateObject();
+    if (value == nullptr) {
+        SLOGE("get value nullptr");
+        return;
+    }
+    if (cJSON_IsInvalid(value)) {
+        SLOGE("get value invalid");
+        cJSON_Delete(value);
+        return;
+    }
+    cJSON_AddStringToObject(value, "bundleName", g_testAnotherBundleName);
+
     avsessionService_->GetSubNode(value, "FAKE_NAME");
     avsessionService_->DeleteHistoricalRecord(g_testAnotherBundleName);
     std::vector<std::u16string> argsList;
     avsessionService_->Dump(1, argsList);
+
+    cJSON_Delete(value);
     SLOGI("StartAVPlayback001 end!");
 }
 

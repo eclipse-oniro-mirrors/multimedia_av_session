@@ -24,6 +24,8 @@
 #include "iremote_stub.h"
 #include "want.h"
 
+#define AVSESSION_START_CALL_ABILITY_CODE 1032
+
 namespace OHOS::AVSession {
 class AbilityConnectHelper {
 public:

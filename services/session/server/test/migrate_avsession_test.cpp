@@ -17,6 +17,7 @@
 #include <chrono>
 #include <thread>
 
+#include "cJSON.h"
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
@@ -33,6 +34,7 @@
 #include "migrate_avsession_manager.h"
 #undef protected
 #undef private
+#include "softbus/softbus_session_utils.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -169,7 +171,7 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     migrateManager_->CreateLocalSessionStub("SuperLauncher-Dual", server_);
     EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher-Dual") != migrateManager_->serverMap_.end(), true);
 
-    char infoName[] = "testInfoName";
+    char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
     PeerSocketInfo info = {
@@ -438,9 +440,10 @@ static HWTEST_F(MigrateAVSessionTest, ConvertMetadataToJson001, TestSize.Level1)
     AVMetaData metadata;
     metadata.SetTitle("song");
     metadata.SetArtist("sing");
-    Json::Value ret = server_->ConvertMetadataToJson(metadata);
-    EXPECT_EQ(ret[METADATA_TITLE], "song");
-    EXPECT_EQ(ret[METADATA_ARTIST], "sing");
+    cJSON* ret = server_->ConvertMetadataToJson(metadata);
+    EXPECT_EQ(SoftbusSessionUtils::GetStringFromJson(ret, METADATA_TITLE), "song");
+    EXPECT_EQ(SoftbusSessionUtils::GetStringFromJson(ret, METADATA_ARTIST), "sing");
+    cJSON_Delete(ret);
     SLOGI("ConvertMetadataToJson001 end");
 }
 
@@ -457,16 +460,44 @@ static HWTEST_F(MigrateAVSessionTest, ConvertMetadataInfoToStr001, TestSize.Leve
     int32_t controlCommand = 9;
     AVMetaData metadata;
     metadata.SetDuration(-2);
-    Json::Value result;
-    result[PLAYER_ID] = playerId;
-    result[MEDIA_INFO] = controlCommand;
-    result[METADATA_IMAGE] = "";
-    result[METADATA_ARTIST] = "";
-    result[METADATA_TITLE] = "";
-    Json::FastWriter writer;
-    std::string msg = "d\002" + writer.write(result);
+
+    cJSON* result = SoftbusSessionUtils::GetNewCJSONObject();
+    if (result == nullptr) {
+        SLOGE("get result fail");
+        EXPECT_EQ(true, false);
+        return;
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, "")) {
+        SLOGE("AddStringToJson with key:%{public}s fail", METADATA_TITLE);
+        cJSON_Delete(result);
+        EXPECT_EQ(true, false);
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, "")) {
+        SLOGE("AddStringToJson with key:%{public}s fail", METADATA_ARTIST);
+        cJSON_Delete(result);
+        EXPECT_EQ(true, false);
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_IMAGE, "")) {
+        SLOGE("AddStringToJson with key:%{public}s fail", METADATA_IMAGE);
+        cJSON_Delete(result);
+        EXPECT_EQ(true, false);
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(result, PLAYER_ID, playerId)) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", PLAYER_ID, playerId.c_str());
+        cJSON_Delete(result);
+        EXPECT_EQ(true, false);
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(result, MEDIA_INFO, controlCommand)) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}d fail", MEDIA_INFO, controlCommand);
+        cJSON_Delete(result);
+        EXPECT_EQ(true, false);
+    }
+
+    std::string msg = "d\002";
+    SoftbusSessionUtils::TransferJsonToStr(result, msg);
     std::string ret = server_->ConvertMetadataInfoToStr(playerId, controlCommand, metadata);
     EXPECT_EQ(ret, msg);
+    cJSON_Delete(result);
     SLOGI("ConvertMetadataInfoToStr001 end");
 }
 

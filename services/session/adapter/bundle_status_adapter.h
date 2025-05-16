@@ -84,7 +84,7 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(BundleStatusCallbackImpl);
     std::function<void(const std::string, const int32_t userId)> callback_;
-    int32_t userId_;
+    int32_t userId_ = 0;
 };
 }
 #endif // AV_SESSION_BUNDLE_STATUS_ADAPTER_H

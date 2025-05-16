@@ -18,7 +18,6 @@
 #include "avsession_log.h"
 #include "message_parcel.h"
 #include "ability_connect_callback_interface.h"
-#include "ability_manager_interface.h"
 #include "avsession_descriptor.h"
 #include "avsession_errors.h"
 #include "ipc_types.h"

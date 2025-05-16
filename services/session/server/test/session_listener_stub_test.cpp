@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,10 +232,12 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest007, TestSize.Level1)
     uint32_t code = 5;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
-    data.WriteInterfaceToken(ISessionListener::GetDescriptor());
-    data.WriteString("test");
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
+
+    data.WriteInterfaceToken(ISessionListener::GetDescriptor());
+    data.WriteInt32(0);
+    data.WriteInt64(1);
     int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest007 end!");
@@ -259,4 +261,46 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest008, TestSize.Level1)
     int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, 305);
     SLOGI("OnRemoteRequest008 end!");
+}
+
+/**
+* @tc.name: OnRemoteRequest009
+* @tc.desc:
+* @tc.type: FUNC
+*/
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest009, TestSize.Level1)
+{
+    SLOGI("OnRemoteRequest009 begin!");
+    uint32_t code = 6;
+    SessionListenerStubDemo sessionListenerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+
+    data.WriteInterfaceToken(ISessionListener::GetDescriptor());
+    data.WriteString("test");
+    int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnRemoteRequest009 end!");
+}
+
+/**
+* @tc.name: OnRemoteRequest010
+* @tc.desc:
+* @tc.type: FUNC
+*/
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest010, TestSize.Level1)
+{
+    SLOGI("OnRemoteRequest010 begin!");
+    uint32_t code = 7;
+    SessionListenerStubDemo sessionListenerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+
+    data.WriteInterfaceToken(ISessionListener::GetDescriptor());
+    data.WriteUint32(1);
+    auto ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_UNMARSHALLING);
+    SLOGI("OnRemoteRequest010 end!");
 }

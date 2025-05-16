@@ -385,7 +385,7 @@ private:
     AVCallState avCallState_;
 
     AVSessionDescriptor descriptor_;
-    int32_t userId_;
+    int32_t userId_ = 0;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
     std::vector<AVQueueItem> queueItems_;

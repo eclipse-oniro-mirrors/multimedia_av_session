@@ -38,20 +38,11 @@ class NapiAVSession {
 public:
     static napi_value Init(napi_env env, napi_value exports);
     static napi_status NewInstance(napi_env env, std::shared_ptr<AVSession>& nativeSession, napi_value& out,
-        std::shared_ptr<NapiAVSession>& napiSession);
-    static napi_status ReCreateInstance(std::shared_ptr<AVSession> nativeSession);
+        std::string tag, AppExecFwk::ElementName elementName);
+    static napi_status ReCreateInstance();
 
     NapiAVSession();
     ~NapiAVSession();
-
-    std::string GetSessionTag();
-    void SetSessionTag(std::string sessionTag);
-
-    std::string GetSessionType();
-    void SetSessionType(std::string sessionType);
-
-    AppExecFwk::ElementName GetSessionElement();
-    void SetSessionElement(AppExecFwk::ElementName elementName);
 
     using OnEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
     using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
@@ -136,6 +127,9 @@ private:
     static napi_value ThrowErrorAndReturn(napi_env env, const std::string& message, int32_t errCode);
     static napi_value ThrowErrorAndReturnByErrCode(napi_env env, const std::string& message, int32_t errCode);
 
+    static void DoLastMetaDataRefresh(NapiAVSession* napiAVSession);
+    static bool CheckMetaOutOfDate(NapiAVSession* napiAVSession, OHOS::AVSession::AVMetaData& curMeta);
+
     napi_ref wrapperRef_ {};
     std::string sessionId_ ;
     std::string sessionType_ ;
@@ -143,7 +137,6 @@ private:
     AppExecFwk::ElementName elementName_;
     std::shared_ptr<AVSession> session_;
     std::shared_ptr<NapiAVSessionCallback> callback_;
-    std::chrono::system_clock::time_point latestMetadataTs_;
     std::string latestMetadataUri_;
     std::string latestMetadataAssetId_;
     std::string latestDownloadedUri_;
@@ -156,6 +149,8 @@ private:
     static std::condition_variable syncAsyncCond_;
     static int32_t playBackStateRet_;
     static std::shared_ptr<NapiAVSession> napiAVSession_;
+    static std::recursive_mutex destroyLock_;
+    static bool isNapiSessionDestroy_;
 
     static std::map<std::string, OnEventHandlerType> onEventHandlers_;
     static std::map<std::string, OffEventHandlerType> offEventHandlers_;

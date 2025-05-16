@@ -18,7 +18,7 @@
 #include "avsession_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-#include "nlohmann/json.hpp"
+#include "cJSON.h"
 #include "want.h"
 #include "want_params_wrapper.h"
 #include "string_wrapper.h"
@@ -161,29 +161,54 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
 bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
 {
     // check bundle support background mode & playmusiclist intent
-    nlohmann::json profileValues = nlohmann::json::parse(profile, nullptr, false);
-    CHECK_AND_RETURN_RET_LOG(!profileValues.is_discarded(), false, "json object is null");
-    CHECK_AND_RETURN_RET_LOG(profileValues.contains("insightIntents"), false, "json do not contains insightIntents");
-    for (const auto& value : profileValues["insightIntents"]) {
-        std::string insightName = value["intentName"];
-        CHECK_AND_RETURN_RET_LOG(value.contains("uiAbility"), false, "json do not contains uiAbility");
-        nlohmann::json abilityValue = value["uiAbility"];
-        if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
+    cJSON* profileValues = cJSON_Parse(profile.c_str());
+    CHECK_AND_RETURN_RET_LOG(profileValues != nullptr, false, "parse profile fail");
+    if (cJSON_IsInvalid(profileValues)) {
+        SLOGE("CheckBundleSupport parse profile not valid json");
+        cJSON_Delete(profileValues);
+        return false;
+    }
+    cJSON* insightIntentsArray = cJSON_GetObjectItem(profileValues, "insightIntents");
+    if (insightIntentsArray == nullptr || !cJSON_IsArray(insightIntentsArray)) {
+        SLOGE("CheckBundleSupport json do not contain insightIntentsArray");
+        cJSON_Delete(profileValues);
+        return false;
+    }
+    cJSON* insightIntentsItem = nullptr;
+    cJSON_ArrayForEach(insightIntentsItem, insightIntentsArray) {
+        cJSON* intentNameItem = cJSON_GetObjectItem(insightIntentsItem, "intentName");
+        if (intentNameItem == nullptr || !cJSON_IsString(intentNameItem)) {
+            SLOGE("CheckBundleSupport json do not contain intentName");
             continue;
         }
-        if (abilityValue.is_discarded()) {
-            SLOGE("uiability discarded=%{public}d", abilityValue.is_discarded());
+        const char* insightName = intentNameItem->valuestring;
+        if (insightName != nullptr &&
+            strcmp(insightName, PLAY_MUSICLIST.c_str()) != 0 && strcmp(insightName, PLAY_AUDIO.c_str()) != 0) {
+            continue;
+        }
+
+        cJSON* uiAbilityItem = cJSON_GetObjectItem(insightIntentsItem, "uiAbility");
+        if (uiAbilityItem == nullptr) {
+            SLOGE("CheckBundleSupport json do not contain uiAbility");
+            cJSON_Delete(profileValues);
             return false;
         }
-        CHECK_AND_RETURN_RET_LOG(abilityValue.contains("executeMode"), false, "json do not contains executeMode");
-        auto modeValues = abilityValue["executeMode"];
-        if (modeValues.is_discarded()) {
-            SLOGE("executeMode discarded=%{public}d", modeValues.is_discarded());
+        cJSON* executeModeArray = cJSON_GetObjectItem(uiAbilityItem, "executeMode");
+        if (executeModeArray == nullptr || !cJSON_IsArray(executeModeArray)) {
+            SLOGE("CheckBundleSupport json do not contain executeMode");
+            cJSON_Delete(profileValues);
             return false;
         }
-        auto mode = std::find(modeValues.begin(), modeValues.end(), "background");
-        return (mode != modeValues.end());
+        cJSON* modeItem = nullptr;
+        cJSON_ArrayForEach(modeItem, executeModeArray) {
+            if (cJSON_IsString(modeItem) && modeItem->valuestring != nullptr &&
+                strcmp(modeItem->valuestring, "background") == 0) {
+                cJSON_Delete(profileValues);
+                return true;
+            }
+        }
     }
+    cJSON_Delete(profileValues);
     return false;
 }
 

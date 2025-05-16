@@ -128,11 +128,6 @@ class TestIClientDeath : public IClientDeath {
     }
 };
 
-void OnClientDied(pid_t pid)
-{
-    SLOGI("OnClientDied pid = %{public}d", pid);
-}
-
 class AVSessionServiceTestSecond : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1518,6 +1513,75 @@ static HWTEST_F(AVSessionServiceTestSecond, GetDistributedSessionControllersInne
     std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
     auto ret = g_AVSessionService->GetDistributedSessionControllersInner(sessionType, sessionControllers);
     EXPECT_EQ(ret, ERR_REMOTE_CONNECTION_NOT_EXIST);
+}
+
+/**
+* @tc.name: OnDeviceLogEvent001
+* @tc.desc: Verifying the NotifySessionCreate method with listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, OnDeviceLogEvent001, TestSize.Level1)
+{
+    SLOGD("OnDeviceLogEvent001 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    TestSessionListener* listener = new TestSessionListener();
+    g_AVSessionService->innerSessionListeners_.push_back(listener);
+    DeviceLogEventCode eventId = DeviceLogEventCode::DEVICE_LOG_FULL;
+    listener->OnDeviceLogEvent(eventId, 0);
+    g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionCreate, true);
+    if (listener != nullptr) {
+        delete listener;
+        listener = nullptr;
+    }
+    SLOGD("OnDeviceLogEvent001 end!");
+}
+
+/**
+* @tc.name: OnDeviceOffline001
+* @tc.desc: Verifying the NotifySessionCreate method with listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, OnDeviceOffline001, TestSize.Level1)
+{
+    SLOGD("OnDeviceOffline001 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    TestSessionListener* listener = new TestSessionListener();
+    g_AVSessionService->innerSessionListeners_.push_back(listener);
+    const std::string deviceId = "AUDIO";
+    listener->OnDeviceOffline(deviceId);
+    g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionCreate, true);
+    if (listener != nullptr) {
+        delete listener;
+        listener = nullptr;
+    }
+    SLOGD("OnDeviceOffline001 end!");
+}
+
+/**
+* @tc.name: OnRemoteDistributedSessionChange001
+* @tc.desc: Verifying the NotifySessionCreate method with listener.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, OnRemoteDistributedSessionChange001, TestSize.Level1)
+{
+    SLOGD("OnRemoteDistributedSessionChange001 begin!");
+    AVSessionDescriptor aVSessionDescriptor;
+    TestSessionListener* listener = new TestSessionListener();
+    g_AVSessionService->innerSessionListeners_.push_back(listener);
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    listener->OnRemoteDistributedSessionChange(sessionControllers);
+    g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionCreate, true);
+    if (listener != nullptr) {
+        delete listener;
+        listener = nullptr;
+    }
+    SLOGD("OnRemoteDistributedSessionChange001 end!");
 }
 } //AVSession
 } //OHOS

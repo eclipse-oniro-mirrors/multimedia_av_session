@@ -18,8 +18,16 @@
 
 #include "parcel.h"
 #include "element_name.h"
+#include "av_audio_stream_info.h"
 
 namespace OHOS::AVSession {
+struct AudioCapabilities {
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel& in);
+
+    std::vector<AudioStreamInfo> streamInfos_;
+};
+
 struct DeviceInfo {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel& in);
@@ -38,6 +46,7 @@ struct DeviceInfo {
     std::vector<std::string> supportedDrmCapabilities_;
     bool isLegacy_ = false;
     int32_t mediumTypes_ = 2;
+    AudioCapabilities audioCapabilities_;
 };
 
 struct OutputDeviceInfo {
@@ -73,7 +82,7 @@ struct AVSessionDescriptor {
     bool isThirdPartyApp_ {};
     OutputDeviceInfo outputDeviceInfo_;
 
-    int32_t userId_;
+    int32_t userId_ {};
 };
 
 struct AVSessionBasicInfo {

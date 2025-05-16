@@ -582,6 +582,14 @@ enum ProtocolType {
      * @since 12
      */
     TYPE_DLNA = 4,
+
+    /**
+     * This type indicates the device supports audio casting with high defination to get a better sound quality.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 20
+     */
+    TYPE_CAST_PLUS_AUDIO = 8,
 };
 
 /**

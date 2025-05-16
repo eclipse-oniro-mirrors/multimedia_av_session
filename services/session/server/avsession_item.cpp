@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -264,20 +264,25 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty;
+    bool isCastMetaEmpty;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
-        isMetaEmpty = metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr &&
-            metaData_.GetMediaImageUri().empty();
-        SLOGI("frontSession bundle=%{public}s metaEmpty=%{public}d Cmd=%{public}d "
+        isMetaEmpty = (metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr);
+        AVQueueItem item;
+        GetCurrentCastItem(item);
+        isCastMetaEmpty = (item.GetDescription() == nullptr ||
+            (item.GetDescription()->GetTitle().empty() && item.GetDescription()->GetIconUri().empty()));
+        SLOGI("frontSession bundle=%{public}s isMetaEmpty=%{public}d isCastMetaEmpty=%{public}d Cmd=%{public}d "
             "castCmd=%{public}d firstAdd=%{public}d",
-            GetBundleName().c_str(), isMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
+            GetBundleName().c_str(), isMetaEmpty, isCastMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
             static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     }
-    if (isMetaEmpty || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
+    if ((isMetaEmpty && isCastMetaEmpty) || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
             if (descriptor_.sessionTag_ != "RemoteCast" && isRecommend_) {
+                isAssetChange_ = true;
                 AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(), GetSessionType(),
                     metaData_.GetAssetId(), -1);
             }
@@ -715,11 +720,11 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     sharedPtr->SetSessionId(descriptor_.sessionId_);
     sharedPtr->SetUserId(userId_);
     if (descriptor_.sessionTag_ != "RemoteCast") {
-        sharedPtr->SetSessionCallbackForCastCap([this](std::string sessionId, bool isPlaying, bool isMediaChange) {
-            if (serviceCallbackForCastNtf_ && IsCasting()) {
+        castControllerProxy_->SetSessionCallbackForCastCap([this](bool isPlaying, bool isMediaChange) {
+            if (serviceCallbackForCastNtf_) {
                 SLOGI("MediaCapsule CastCapsule for service isPlaying %{public}d, isMediaChange %{public}d",
                     isPlaying, isMediaChange);
-                serviceCallbackForCastNtf_(sessionId, isPlaying, isMediaChange);
+                serviceCallbackForCastNtf_(descriptor_.sessionId_, isPlaying, isMediaChange);
             }
         });
     }
@@ -1370,6 +1375,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
+    if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
+        deviceInfo = GetDescriptor().outputDeviceInfo_.deviceInfos_[0];
+    }
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
@@ -1377,6 +1385,9 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
+        if (castDeviceInfoMap_[deviceInfo.deviceId_].supportedProtocols_ & ProtocolType::TYPE_CAST_PLUS_AUDIO) {
+            castDeviceInfoMap_[deviceInfo.deviceId_].audioCapabilities_ = deviceInfo.audioCapabilities_;
+        }
         outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
     } else {
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -1407,16 +1418,13 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             }
         }
     }
-    {
-        if (castState == ConnectionState::STATE_DISCONNECTED &&
-            descriptor_.sessionTag_ == "RemoteCast") {
-            SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
-            Destroy();
-        } else {
-            AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
-                DealLocalState(castState);
-                }, "DealLocalState", 0);
-        }
+    if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
+        SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
+        Destroy();
+    } else {
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
+            DealLocalState(castState);
+            }, "DealLocalState", 0);
     }
 }
 
@@ -1599,6 +1607,14 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
         auto displayInfo = display->GetDisplayInfo();
         SLOGI("GetAllCastDisplays name: %{public}s, id: %{public}llu",
             displayInfo->GetName().c_str(), (unsigned long long)displayInfo->GetDisplayId());
+        if (displayInfo->GetName() == "HwCast_AppModeDisplay") {
+            displays.clear();
+            SLOGI("GetAllCastDisplays AppCast");
+            if (displayListener_ != nullptr) {
+                displayListener_->SetAppCastDisplayId(displayInfo->GetDisplayId());
+            }
+            break;
+        }
         auto flag = Rosen::DisplayManagerLite::GetInstance().GetVirtualScreenFlag(displayInfo->GetDisplayId());
         if (flag == Rosen::VirtualScreenFlag::CAST) {
             SLOGI("ReportCastDisplay start in");

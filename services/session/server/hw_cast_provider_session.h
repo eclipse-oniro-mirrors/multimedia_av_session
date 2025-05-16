@@ -41,6 +41,7 @@ public:
     bool UnRegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener);
     bool SetStreamState(DeviceInfo deviceInfo);
     bool GetRemoteNetWorkId(std::string deviceId, std::string &networkId);
+    void SetProtocolType(CastEngine::ProtocolType);
 
 private:
     std::shared_ptr<CastEngine::ICastSession> castSession_;
@@ -48,6 +49,7 @@ private:
     std::recursive_mutex mutex_;
     int32_t stashDeviceState_ = -1;
     std::string stashDeviceId_;
+    CastEngine::ProtocolType protocolType_;
 
     const int32_t deviceStateConnection = 6;
     const int32_t eventIdStart = 2000;

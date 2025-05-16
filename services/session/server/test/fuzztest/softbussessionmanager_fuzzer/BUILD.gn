@@ -53,6 +53,7 @@ ohos_fuzztest("SoftbusSessionManagerFuzzTest") {
     "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
+    "cJSON:cjson",
     "c_utils:utils",
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
@@ -62,7 +63,6 @@ ohos_fuzztest("SoftbusSessionManagerFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_core",
     "ipc:ipc_single",
-    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
