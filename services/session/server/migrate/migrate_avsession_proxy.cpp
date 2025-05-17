@@ -374,15 +374,19 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     if (bundleName.empty()) {
         sessionId = DEFAULT_STRING;
     }
-    elementName_.SetBundleName(bundleName);
+    size_t insertPos = bundleName.find('|');
+    if (insertPos != std::string::npos && insertPos > 0 && insertPos < bundleName.size()) {
+        elementName_.SetBundleName(bundleName.substr(0, insertPos));
+    } else {
+        elementName_.SetBundleName(bundleName);
+    }
     std::string abilityName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_ABILITY_NAME);
     if (bundleName.empty()) {
         sessionId = DEFAULT_STRING;
     }
     elementName_.SetAbilityName(abilityName);
-
-    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s done",
-        SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), elementName_.GetBundleName().c_str());
+    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s end",
+        SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
     if (sessionId.empty() || sessionId == DEFAULT_STRING || sessionId == EMPTY_SESSION) {
         remoteSession_->Deactivate();
         elementName_.SetAbilityName(elementName_.GetBundleName());
@@ -392,9 +396,17 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     }
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
+    AVPlaybackState playbackState;
+    if (AVSESSION_SUCCESS == remoteSession_->GetAVPlaybackState(playbackState)) {
+        playbackState.SetState(0);
+        playbackState.SetFavorite(false);
+        remoteSession_->SetAVPlaybackState(playbackState);
+    }
     AVMetaData metaData;
     if (AVSESSION_SUCCESS == remoteSession_->GetAVMetaData(metaData)) {
-        metaData.SetWriter(elementName_.GetBundleName());
+        metaData.SetWriter(bundleName);
+        metaData.SetTitle("");
+        metaData.SetArtist("");
         remoteSession_->SetAVMetaData(metaData);
     }
     SendMediaControlNeedStateMsg();
@@ -466,7 +478,7 @@ void MigrateAVSessionProxy::ProcessPlaybackState(cJSON* jsonValue)
         playbackState.SetState(state);
     }
     if (cJSON_HasObjectItem(jsonValue, FAVOR_STATE)) {
-        int isFavor = SoftbusSessionUtils::GetBoolFromJson(jsonValue, FAVOR_STATE);
+        bool isFavor = SoftbusSessionUtils::GetBoolFromJson(jsonValue, FAVOR_STATE);
         playbackState.SetFavorite(isFavor);
     }
 
@@ -555,7 +567,7 @@ void MigrateAVSessionProxy::ProcessAvailableDevices(cJSON* jsonValue)
 {
     SLOGI("proxy recv in ProcessAvailableDevices case");
 
-    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || !cJSON_IsNull(jsonValue)) {
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
         SLOGE("get jsonValue invalid");
         return;
     }
@@ -578,7 +590,7 @@ void MigrateAVSessionProxy::ProcessPreferredOutputDevice(cJSON* jsonValue)
 {
     SLOGI("proxy recv in ProcessPreferredOutputDevice case");
 
-    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || !cJSON_IsNull(jsonValue)) {
+    if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
         SLOGE("get jsonValue invalid");
         return;
     }

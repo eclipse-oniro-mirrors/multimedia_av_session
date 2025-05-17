@@ -31,7 +31,7 @@ public:
 
     void Init();
 
-    bool GetBundleIcon(const std::string bundleName, std::string& icon);
+    bool GetBundleIcon(const std::string bundleName, const std::string abilityName, std::string& icon);
 
     bool SubscribeBundleStatusEvent(const std::string bundleName,
         const std::function<void(const std::string, const int32_t userId)>& callback, int32_t userId = DEFAULT_USER_ID);

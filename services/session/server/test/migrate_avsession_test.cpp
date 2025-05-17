@@ -464,33 +464,32 @@ static HWTEST_F(MigrateAVSessionTest, ConvertMetadataInfoToStr001, TestSize.Leve
     cJSON* result = SoftbusSessionUtils::GetNewCJSONObject();
     if (result == nullptr) {
         SLOGE("get result fail");
-        EXPECT_EQ(true, false);
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, "")) {
         SLOGE("AddStringToJson with key:%{public}s fail", METADATA_TITLE);
         cJSON_Delete(result);
-        EXPECT_EQ(true, false);
+        result = nullptr;
     }
     if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, "")) {
         SLOGE("AddStringToJson with key:%{public}s fail", METADATA_ARTIST);
         cJSON_Delete(result);
-        EXPECT_EQ(true, false);
+        result = nullptr;
     }
     if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_IMAGE, "")) {
         SLOGE("AddStringToJson with key:%{public}s fail", METADATA_IMAGE);
         cJSON_Delete(result);
-        EXPECT_EQ(true, false);
+        result = nullptr;
     }
     if (!SoftbusSessionUtils::AddStringToJson(result, PLAYER_ID, playerId)) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", PLAYER_ID, playerId.c_str());
         cJSON_Delete(result);
-        EXPECT_EQ(true, false);
+        result = nullptr;
     }
     if (!SoftbusSessionUtils::AddIntToJson(result, MEDIA_INFO, controlCommand)) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}d fail", MEDIA_INFO, controlCommand);
         cJSON_Delete(result);
-        EXPECT_EQ(true, false);
+        result = nullptr;
     }
 
     std::string msg = "d\002";

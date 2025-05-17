@@ -595,4 +595,12 @@ void AVControllerItem::SetServiceCallbackForRelease(const std::function<void(AVC
     std::lock_guard lockGuard(serviceCallbackMutex_);
     serviceCallback_ = callback;
 }
+
+std::string AVControllerItem::GetSessionType()
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, "", "session not exist");
+    std::string sessionTyteStr = session_->GetSessionType();
+    return sessionTyteStr;
+}
 } // namespace OHOS::AVSession

@@ -54,7 +54,7 @@ static HWTEST(JsonUtilsTest, IsInt32_001, TestSize.Level1)
     cJSON* jsonTest = cJSON_CreateObject();
     if (jsonTest == nullptr) {
         SLOGE("create jsontest fail");
-        return;
+        FAIL();
     }
     cJSON_AddNumberToObject(jsonTest, "test", 1);
     bool ret = JsonUtils::IsInt32(jsonTest, "test");
@@ -77,7 +77,7 @@ static HWTEST(JsonUtilsTest, IsInt32_002, TestSize.Level1)
     cJSON* jsonTest = cJSON_CreateObject();
     if (jsonTest == nullptr) {
         SLOGE("create jsontest fail");
-        return;
+        FAIL();
     }
     cJSON_AddStringToObject(jsonTest, "test", "1");
     bool ret = JsonUtils::IsInt32(jsonTest, "test");
@@ -100,7 +100,7 @@ static HWTEST(JsonUtilsTest, IsString_001, TestSize.Level1)
     cJSON* jsonTest = cJSON_CreateObject();
     if (jsonTest == nullptr) {
         SLOGE("create jsontest fail");
-        return;
+        FAIL();
     }
     cJSON_AddStringToObject(jsonTest, "test", "123");
     bool ret = JsonUtils::IsString(jsonTest, "test");
@@ -123,7 +123,7 @@ static HWTEST(JsonUtilsTest, IsString_002, TestSize.Level1)
     cJSON* jsonTest = cJSON_CreateObject();
     if (jsonTest == nullptr) {
         SLOGE("create jsontest fail");
-        return;
+        FAIL();
     }
     cJSON_AddNumberToObject(jsonTest, "test", 1);
     bool ret = JsonUtils::IsString(jsonTest, "test");
@@ -146,7 +146,7 @@ static HWTEST(JsonUtilsTest, IsBool_001, TestSize.Level1)
     cJSON* jsonTest = cJSON_CreateObject();
     if (jsonTest == nullptr) {
         SLOGE("create jsontest fail");
-        return;
+        FAIL();
     }
     cJSON_AddBoolToObject(jsonTest, "test", true);
     bool ret = JsonUtils::IsBool(jsonTest, "test");
@@ -169,7 +169,7 @@ static HWTEST(JsonUtilsTest, IsBool_002, TestSize.Level1)
     cJSON* jsonTest = cJSON_CreateObject();
     if (jsonTest == nullptr) {
         SLOGE("create jsontest fail");
-        return;
+        FAIL();
     }
     cJSON_AddStringToObject(jsonTest, "test", "123");
     bool ret = JsonUtils::IsBool(jsonTest, "test");

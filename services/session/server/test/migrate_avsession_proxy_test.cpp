@@ -117,13 +117,13 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo001, TestSize.Level
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -143,15 +143,15 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo002, TestSize.Level
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_SESSION_ID, "") ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_BUNDLE_NAME, "") ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_ABILITY_NAME, "")) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -172,15 +172,15 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo003, TestSize.Level
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_SESSION_ID, DEFAULT_STRING) ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_BUNDLE_NAME, DEFAULT_STRING) ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_ABILITY_NAME, DEFAULT_STRING)) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -201,15 +201,15 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo004, TestSize.Level
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_SESSION_ID, EMPTY_SESSION) ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_BUNDLE_NAME, EMPTY_SESSION) ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, MIGRATE_ABILITY_NAME, EMPTY_SESSION)) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -230,14 +230,14 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData001, TestSize.Level1)
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_TITLE, METADATA_TITLE) ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ARTIST, METADATA_ARTIST)) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -258,13 +258,13 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData002, TestSize.Level1)
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -285,14 +285,14 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState001, TestSize.Lev
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, PLAYBACK_STATE, PLAYBACK_STATE) ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, FAVOR_STATE, FAVOR_STATE)) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -313,13 +313,13 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState002, TestSize.Lev
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -340,13 +340,13 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands001, TestSize.Lev
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, VALID_COMMANDS, VALID_COMMANDS)) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -367,13 +367,13 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands002, TestSize.Lev
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -394,13 +394,13 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand001, TestS
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, AUDIO_VOLUME, AUDIO_VOLUME)) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -421,13 +421,13 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand002, TestS
     EXPECT_NE(jsonValue, nullptr);
     if (jsonValue == nullptr) {
         SLOGE("create jsonvalue nullptr");
-        return;
+        FAIL();
     }
     if (!SoftbusSessionUtils::AddStringToJson(jsonValue, "test", "test")) {
         SLOGE("AddStringToJson fail");
-        EXPECT_EQ(true, false);
         cJSON_Delete(jsonValue);
-        return;
+        jsonValue = nullptr;
+        FAIL();
     }
 
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
