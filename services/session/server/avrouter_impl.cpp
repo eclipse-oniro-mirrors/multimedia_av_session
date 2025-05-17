@@ -552,8 +552,11 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
             SLOGI("trigger the OnCastStateChange for registered avRouterListener");
             std::shared_ptr<IAVRouterListener> listener = castHandleInfo.avRouterListener_;
             AVSessionEventHandler::GetInstance().AVSessionPostTask([listener, castState, deviceInfo]() {
-                CHECK_AND_RETURN_RET_LOG(listener != nullptr, AVSESSION_ERROR, "listener is nullptr");
-                listener->OnCastStateChange(castState, deviceInfo, true);
+                if (listener != nullptr) {
+                    listener->OnCastStateChange(castState, deviceInfo, true);
+                } else {
+                    SLOGI("OnCastStateChange fail, listener is nullptr");
+                }
                 }, "OnCastStateChange", 0);
             if (castState == disconnectStateFromCast_) {
                 OutputDeviceInfo localDevice;
