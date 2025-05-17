@@ -555,7 +555,7 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
                 if (listener != nullptr) {
                     listener->OnCastStateChange(castState, deviceInfo, true);
                 } else {
-                    SLOGI("OnCastStateChange fail, listener is nullptr");
+                    SLOGE("OnCastStateChange fail, listener is nullptr");
                 }
                 }, "OnCastStateChange", 0);
             if (castState == disconnectStateFromCast_) {
