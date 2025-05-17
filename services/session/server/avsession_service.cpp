@@ -27,6 +27,7 @@
 #include "account_manager_adapter.h"
 #include "app_manager_adapter.h"
 #include "audio_adapter.h"
+#include "audio_system_manager.h"
 #include "avsession_dynamic_loader.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
@@ -1013,6 +1014,7 @@ sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const s
 void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
+    AudioStandard::AudioSystemManager::GetInstance()->NotifySessionStateChange(descriptor.uid_, descriptor.pid_, true);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
@@ -1041,6 +1043,7 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
 void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
+    AudioStandard::AudioSystemManager::GetInstance()->NotifySessionStateChange(descriptor.uid_, descriptor.pid_, false);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(descriptor.userId_);
     PublishEvent(mediaPlayStateFalse);
     SLOGI("NotifySessionRelease for user:%{public}d|listenerSize:%{public}d",
