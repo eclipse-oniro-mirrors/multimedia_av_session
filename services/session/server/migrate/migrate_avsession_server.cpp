@@ -360,13 +360,13 @@ int32_t MigrateAVSessionServer::GetControllerById(const std::string &sessionId, 
 
 int32_t MigrateAVSessionServer::GetAllControllers(std::vector<sptr<AVControllerItem>> &controller)
 {
-    std::lock_guard lockGuard(migrateControllerLock_);
     std::vector<AVSessionDescriptor> descriptors;
     auto res = servicePtr_->GetAllSessionDescriptors(descriptors);
     if (res != AVSESSION_SUCCESS) {
         SLOGW("GetAllSessionDescriptors failed");
         return AVSESSION_ERROR;
     }
+    std::lock_guard lockGuard(migrateControllerLock_);
     for (auto iter = descriptors.begin(); iter != descriptors.end(); iter++) {
         if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             iter->elementName_.GetBundleName().empty() ||
@@ -493,9 +493,9 @@ void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> c
 void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceId)
 {
     SLOGI("SendRemoteControllerList");
-    SortControllers(sortControllerList_);
     std::vector<sptr<AVControllerItem>> avcontroller;
     auto res = GetAllControllers(avcontroller);
+    SortControllers(sortControllerList_);
     if (res != AVSESSION_SUCCESS) {
         SLOGE("SendRemoteControllerList no top session");
         return;
