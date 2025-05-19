@@ -460,6 +460,7 @@ private:
     bool applyResultFlag_ = false;
     bool waitUserDecisionFlag_ = false;
     bool mirrorToStreamFlag_ = false;
+    std::string collaborationNeedDeviceId_;
     std::string collaborationNeedNetworkId_;
     std::mutex collaborationApplyResultMutex_;
     std::condition_variable connectWaitCallbackCond_;
