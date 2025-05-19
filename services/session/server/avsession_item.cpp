@@ -1394,7 +1394,8 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
-        if (castDeviceInfoMap_[deviceInfo.deviceId_].supportedProtocols_ & ProtocolType::TYPE_CAST_PLUS_AUDIO) {
+        if (static_cast<uint32_t>(castDeviceInfoMap_[deviceInfo.deviceId_].supportedProtocols_) &
+            ProtocolType::TYPE_CAST_PLUS_AUDIO) {
             castDeviceInfoMap_[deviceInfo.deviceId_].audioCapabilities_ = deviceInfo.audioCapabilities_;
         }
         outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);

@@ -49,7 +49,7 @@ private:
     std::recursive_mutex mutex_;
     int32_t stashDeviceState_ = -1;
     std::string stashDeviceId_;
-    CastEngine::ProtocolType protocolType_;
+    CastEngine::ProtocolType protocolType_ = CastEngine::ProtocolType::CAST_PLUS_STREAM;
 
     const int32_t deviceStateConnection = 6;
     const int32_t eventIdStart = 2000;
