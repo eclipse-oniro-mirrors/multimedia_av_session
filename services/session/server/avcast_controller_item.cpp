@@ -312,7 +312,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
 void AVCastControllerItem::buildExtraCastInfo(const AVQueueItem& avQueueItem)
 {
     std::shared_ptr<AVCastInfo> castInfo = std::make_shared<AVCastInfo>();
-    uid_t appUid = GetCallingUid();
+    uid_t appUid = static_cast<uid_t>(GetCallingUid());
     castInfo->SetAppUid(appUid);
     if (avQueueItem.GetDescription() != nullptr) {
         avQueueItem.GetDescription()->SetCastInfo(castInfo);

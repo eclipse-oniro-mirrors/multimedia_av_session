@@ -512,13 +512,14 @@ int32_t HwCastProvider::GetProtocolType(uint32_t castProtocolType)
 
 int HwCastProvider::GetCastProtocolType(int castCapability)
 {
-    int castProtocolType = (castCapability & ProtocolType::TYPE_CAST_PLUS_MIRROR ?
-        static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_MIRROR) : 0) |
-        (castCapability & ProtocolType::TYPE_CAST_PLUS_STREAM ?
-        static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_STREAM) : 0) |
-        (castCapability & ProtocolType::TYPE_DLNA ? static_cast<int>(CastEngine::ProtocolType::DLNA) : 0) |
-        (castCapability & ProtocolType::TYPE_CAST_PLUS_AUDIO ?
-        static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_AUDIO) : 0);
+    uint32_t capability = static_cast<uint32_t>(castCapability);
+    int castProtocolType = static_cast<int>((capability & ProtocolType::TYPE_CAST_PLUS_MIRROR ?
+        static_cast<uint32_t>(CastEngine::ProtocolType::CAST_PLUS_MIRROR) : 0) |
+        (capability & ProtocolType::TYPE_CAST_PLUS_STREAM ?
+        static_cast<uint32_t>(CastEngine::ProtocolType::CAST_PLUS_STREAM) : 0) |
+        (capability & ProtocolType::TYPE_DLNA ? static_cast<uint32_t>(CastEngine::ProtocolType::DLNA) : 0) |
+        (capability & ProtocolType::TYPE_CAST_PLUS_AUDIO ?
+        static_cast<uint32_t>(CastEngine::ProtocolType::CAST_PLUS_AUDIO) : 0));
     return castProtocolType;
 }
 } // namespace OHOS::AVSession
