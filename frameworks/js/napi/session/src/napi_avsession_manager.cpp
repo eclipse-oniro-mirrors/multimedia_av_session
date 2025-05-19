@@ -935,7 +935,9 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
             } else if (ret == ERR_PERMISSION_DENIED) {
                 context->errMessage = "SendSystemControlCommand failed : native send control command permission denied";
             } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
-                context->errMessage = "SendSystemControlCommand failed : native send command overload,Controls the frequency of sending self-query and control commands";
+                string errone = "SendSystemControlCommand failed : native send command overload,";
+                string errtwo = " controls the frequency of sending self-query and control commands";
+                context->errMessage = errone + errtwo;
             } else {
                 context->errMessage = "SendSystemControlCommand failed : native server exception";
             }
