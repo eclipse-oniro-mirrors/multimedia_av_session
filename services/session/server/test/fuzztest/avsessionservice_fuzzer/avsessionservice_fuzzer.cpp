@@ -288,7 +288,7 @@ void AvSessionServiceAVPlaybackTest(sptr<AVSessionService> service)
 void CreateNewControllerForSessionTest(sptr<AVSessionService> service)
 {
     int32_t pid = GetData<int32_t>();
-    
+
     service->CreateNewControllerForSession(pid, avsessionHere_);
     service->CancelCastAudioForClientExit(pid, avsessionHere_);
 }
@@ -362,6 +362,12 @@ void AvSessionServiceCastTest(sptr<AVSessionService> service)
     #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     service->StartCast(token, outputDeviceInfo);
     service->StopCast(token);
+
+    std::string info = GetString();
+    service->SplitExtraInfo(info);
+    bool enable = GetData<bool>();
+    service->checkEnableCast(enable);
+    service->setInCast(enable);
     #endif
 }
 
@@ -415,6 +421,19 @@ void AvSessionServiceHandleEventTest(sptr<AVSessionService> service)
     avsessionService_->UpdateTopSession(avsessionHere_);
     avsessionService_->NotifyMirrorToStreamCast();
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
+
+    static std::vector<DeviceLogEventCode> eventIds {
+        DEVICE_LOG_FULL,
+        DEVICE_LOG_EXCEPTION
+    };
+    uint32_t randomNumber = GetData<uint32_t>();
+    auto eventId = eventIds[randomNumber % eventIds.size()];
+    int64_t param = GetData<int64_t>();
+    avsessionService_->NotifyDeviceLogEvent(eventId, param);
+
+    std::string deviceId = GetString();
+    avsessionService_->NotifyDeviceOffline(deviceId);
+    avsessionService_->IsMirrorToStreamCastAllowed(avsessionHere_);
 #endif
 }
 
@@ -422,7 +441,7 @@ void AvSessionServiceSuperLauncherTest001(sptr<AVSessionService> service)
 {
     vector<string> states { "UNKNOWN", "IDLE", "CONNECTING" };
     vector<string> serviceNames {"Unknown", "SuperLauncher-Dual", "HuaweiCast" };
-    int32_t randomNumber = 1;
+    int32_t randomNumber = GetData<int32_t>();
     std::string serviceName = serviceNames[randomNumber % serviceNames.size()];
     std::string state = states[randomNumber % states.size()];
     std::string deviceId = GetString();
@@ -431,6 +450,14 @@ void AvSessionServiceSuperLauncherTest001(sptr<AVSessionService> service)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     avsessionService_->NotifyMirrorToStreamCast();
 #endif
+
+    std::string deviceId2 = GetString();
+    std::string serviceName2 = serviceNames[randomNumber % serviceNames.size()];
+    std::string extraInfo2 = GetString();
+    service->SuperLauncher(deviceId2, serviceName2, extraInfo2, state);
+    service->ReleaseSuperLauncher(serviceName);
+    service->ConnectSuperLauncher(deviceId, serviceName);
+    service->SucceedSuperLauncher(deviceId, extraInfo);
 }
 
 void StartDefaultAbilityByCall001()
@@ -698,6 +725,9 @@ void HandleMediaCardStateChangeEventTest()
     const string isAppear[] = {"APPEAR", "DISAPPEAR", GetString()};
     const uint32_t isAppearSize = 3;
     avsessionService_->HandleMediaCardStateChangeEvent(isAppear[GetData<uint32_t>() % isAppearSize]);
+
+    int32_t userId = GetData<int32_t>();
+    avsessionService_->RegisterBundleDeleteEventForHistory(userId);
 }
 
 void PullMigrateStubTest()
@@ -763,7 +793,7 @@ public:
     {
         SLOGI("sessionId=%{public}s created", descriptor.sessionId_.c_str());
     }
-    
+
     void OnSessionRelease(const AVSessionDescriptor& descripter) override
     {
         SLOGI("sessionId=%{public}s released", descripter.sessionId_.c_str());
@@ -825,6 +855,126 @@ void OnReceiveEventTest(sptr<AVSessionService> service)
     eventSubscriber.OnReceiveEvent(eventData);
 }
 
+void HandleKeyEventTest()
+{
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HOME);
+    keyEvent->SetActionTime(1);
+    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_CANCEL);
+    avsessionService_->HandleKeyEvent(*(keyEvent.get()));
+}
+
+void GetAVCastControllerInnerTest(sptr<AVSessionService> service)
+{
+    sptr<IRemoteObject> avControllerItemObj;
+    std::string sessionId = GetString();
+
+    #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    service->GetAVCastControllerInner(sessionId, avControllerItemObj);
+    #endif
+}
+
+void CastSessionTest(sptr<AVSessionService> service)
+{
+    auto castHandle = GetData<int64_t>();
+
+    #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    service->CreateSessionByCast(castHandle);
+    service->ReleaseCastSession();
+    #endif
+}
+
+void GetAVQueueDirTest(sptr<AVSessionService> service)
+{
+    int32_t userId = GetData<int32_t>();
+    std::string dirPath = service->GetAVQueueDir(userId);
+    SLOGI("GetAVQueueDirTest dirPath=%{public}s", dirPath.c_str());
+}
+
+void GetAVSortDirTest(sptr<AVSessionService> service)
+{
+    int32_t userId = GetData<int32_t>();
+    std::string dirPath = service->GetAVSortDir(userId);
+    SLOGI("GetAVSortDirTest dirPath=%{public}s", dirPath.c_str());
+}
+
+void NotifyMigrateStopTest(sptr<AVSessionService> service)
+{
+    std::string deviceId = GetString();
+    service->NotifyMigrateStop(deviceId);
+}
+
+void ProcessTargetMigrateTest(sptr<AVSessionService> service)
+{
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    memset_s(&deviceInfo, sizeof(deviceInfo), 0, sizeof(deviceInfo));
+    strcpy_s(deviceInfo.deviceId, sizeof(deviceInfo.deviceId) - 1, GetString().c_str());
+    strcpy_s(deviceInfo.deviceName, sizeof(deviceInfo.deviceName) - 1, GetString().c_str());
+    deviceInfo.deviceTypeId = GetData<uint16_t>();
+    strcpy_s(deviceInfo.networkId, sizeof(deviceInfo.networkId) - 1, GetString().c_str());
+    deviceInfo.range = GetData<int32_t>();
+    deviceInfo.networkType = GetData<int32_t>();
+    static std::vector<OHOS::DistributedHardware::DmAuthForm> authForms {
+        OHOS::DistributedHardware::DmAuthForm::INVALID_TYPE,
+        OHOS::DistributedHardware::DmAuthForm::PEER_TO_PEER,
+        OHOS::DistributedHardware::DmAuthForm::IDENTICAL_ACCOUNT,
+        OHOS::DistributedHardware::DmAuthForm::ACROSS_ACCOUNT
+    };
+    int randomNumber = GetData<uint32_t>();
+    deviceInfo.authForm = authForms[randomNumber % authForms.size()];
+    deviceInfo.extraData = GetString();
+    bool isOnline = GetData<bool>();
+    service->ProcessTargetMigrate(isOnline, deviceInfo);
+}
+
+void GetDistributedSessionControllersInnerTest(sptr<AVSessionService> service)
+{
+    std::string tag = GetString();
+    int32_t type = 0;
+    std::string bundleName = GetString();
+    std::string abilityName = GetString();
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+    if(!avSessionItemObj) {
+        return;
+    }
+    std::vector<sptr<IRemoteObject>> sessionControllers;
+    sessionControllers.push_back(avSessionItemObj);
+    std::vector<DistributedSessionType> sessionTypes {
+        DistributedSessionType::TYPE_SESSION_REMOTE,
+        DistributedSessionType::TYPE_SESSION_MIGRATE_IN,
+        DistributedSessionType::TYPE_SESSION_MIGRATE_OUT,
+        DistributedSessionType::TYPE_SESSION_MAX,
+    };
+    auto randomNumber = GetData<uint32_t>();
+    service->GetDistributedSessionControllersInner(
+        sessionTypes[randomNumber % sessionTypes.size()], sessionControllers);
+
+    service->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
+}
+
+void NotifyRemoteBundleChangeTest(sptr<AVSessionService> service)
+{
+    std::string bundleName = GetString();
+    service->NotifyRemoteBundleChange(bundleName);
+}
+
+void AbilityHasSessionTest(sptr<AVSessionService> service)
+{
+    std::vector<pid_t> pids {
+        GetData<int32_t>(),
+        getpid()
+    };
+    auto randomNumber = GetData<uint32_t>();
+    service->AbilityHasSession(pids[randomNumber % 2]);
+}
+
+void GetPresentControllerTest(sptr<AVSessionService> service)
+{
+    pid_t pid = GetData<pid_t>();
+    std::string sessionId = GetString();
+    service->GetPresentController(pid, sessionId);
+}
+
 void AvSessionServiceTest001()
 {
     GetDeviceInfoTest();
@@ -855,6 +1005,21 @@ void AvSessionServiceTest001()
     IsHistoricalSessionTest();
     StartDefaultAbilityByCallTest();
     SendSystemAVKeyEventTest();
+    HandleKeyEventTest();
+}
+
+void AvSessionServiceTest002(sptr<AVSessionService> service)
+{
+    GetAVCastControllerInnerTest(service);
+    CastSessionTest(service);
+    GetAVQueueDirTest(service);
+    GetAVSortDirTest(service);
+    NotifyMigrateStopTest(service);
+    ProcessTargetMigrateTest(service);
+    NotifyRemoteBundleChangeTest(service);
+    NotifyRemoteBundleChangeTest(service);
+    AbilityHasSessionTest(service);
+    GetPresentControllerTest(service);
 }
 
 void AvSessionServiceTest()
@@ -885,6 +1050,7 @@ void AvSessionServiceTest()
     handleusereventTest(avsessionService_);
     OnReceiveEventTest(avsessionService_);
     AvSessionServiceTest001();
+    AvSessionServiceTest002(avsessionService_);
 }
 
 int32_t AVSessionServiceStubFuzzer::OnRemoteRequest()
