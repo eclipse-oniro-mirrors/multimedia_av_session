@@ -650,7 +650,9 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                 return;
             }
             AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+#ifdef START_STOP_ON_DEMAND_ENABLE
             PublishEvent(mediaPlayStateTrue);
+#endif
         }
         if (topSession_->GetUid() == ancoUid) {
             userId = topSession_->GetUserId();
@@ -1016,6 +1018,9 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
     std::lock_guard lockGuard(sessionListenersLock_);
     AudioStandard::AudioSystemManager::GetInstance()->NotifySessionStateChange(descriptor.uid_, descriptor.pid_, true);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+#ifdef START_STOP_ON_DEMAND_ENABLE
+        PublishEvent(mediaPlayStateTrue);
+#endif
     for (const auto& [pid, listener] : listenerMap) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
         if (listener != nullptr) {
@@ -1045,7 +1050,6 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
     std::lock_guard lockGuard(sessionListenersLock_);
     AudioStandard::AudioSystemManager::GetInstance()->NotifySessionStateChange(descriptor.uid_, descriptor.pid_, false);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(descriptor.userId_);
-    PublishEvent(mediaPlayStateFalse);
     SLOGI("NotifySessionRelease for user:%{public}d|listenerSize:%{public}d",
         descriptor.userId_, static_cast<int>(listenerMap.size()));
     for (const auto& [pid, listener] : listenerMap) {
@@ -2727,6 +2731,11 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
             }
         }
     }
+#ifdef START_STOP_ON_DEMAND_ENABLE
+    if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0) {
+        PublishEvent(mediaPlayStateFalse);
+    }
+#endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0 ||
         (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1 &&
