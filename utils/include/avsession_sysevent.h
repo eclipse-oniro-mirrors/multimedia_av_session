@@ -18,6 +18,7 @@
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 #include <mutex>
+#include "avcontrol_command.h"
 #include "hisysevent.h"
 #include "timer.h"
 #endif
@@ -46,6 +47,41 @@ enum class Operation {
 };
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+enum MetadataQuality {
+    METADATA_QUALITY_NONE = 0,
+    METADATA_QUALITY_TITLE,
+    METADATA_QUALITY_IMG,
+    METADATA_QUALITY_BOTH,
+};
+
+class PlayingStateInfo {
+public:
+    void updateState(uint8_t state);
+    void updateMetaQuality(MetadataQuality metaQuality);
+    void updateCommandQuality(uint32_t commandQuality);
+    void updatePlaybackState(uint8_t playbackState);
+    void updateControl(uint8_t control, std::string callerBundleName);
+
+    std::string bundleName_ = "";
+    std::string appVersion_ = "";
+    std::vector<uint8_t> state_;
+    std::vector<uint64_t> stateTime_;
+    std::vector<uint8_t> metaQuality_;
+    std::vector<uint64_t> metaQualityTime_;
+    std::vector<uint32_t> commandQuality_;
+    std::vector<uint64_t> commandQualityTime_;
+    std::vector<uint8_t> playbackState_;
+    std::vector<uint64_t> playbackStateTime_;
+    std::vector<uint8_t> control_;
+    std::vector<std::string> callerBundleName_;
+    std::vector<uint64_t> controlTime_;
+private:
+    uint8_t lastState_ = 3; // 0 create, 1 release, 3 initial
+    uint32_t lastCommandQuality_ = 0;
+    uint8_t lastPlaybackState_ = 0;
+    uint8_t lastControl_ = AVControlCommand::SESSION_CMD_MAX;
+};
+
 class AVSessionSysEvent {
 public:
     struct LifeCycleInfo {
@@ -114,6 +150,10 @@ public:
     void SetAudioStatus(pid_t uid, int32_t rendererState);
     int32_t GetAudioStatus(pid_t uid);
     void ReportLowQuality();
+    void ReportPlayingState();
+    void RegisterPlayingState();
+    void UnRegisterPlayingState();
+    PlayingStateInfo* GetPlayingStateInfo(std::string bundleName);
 
 private:
     std::map<pid_t, int32_t> audioStatuses_;
@@ -121,11 +161,15 @@ private:
     std::map<Operation, uint32_t> optCounts_;
     std::unique_ptr<Utils::Timer> timer_;
     uint32_t timerId_ = 0;
+    std::unique_ptr<Utils::Timer> playingStateTimer_;
+    uint32_t playingStateTimerId_ = 0;
     std::recursive_mutex lock_;
     static constexpr uint32_t NOTIFY_TIME_INTERVAL = 1 * 60 * 60 * 1000; // retry after 1 hours
+    static constexpr int64_t PLAYING_STATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000; // 24h
     std::list<AVSessionSysEvent::LifeCycleInfo> lifeCycleInfos_;
     std::list<AVSessionSysEvent::ControllerCommandInfo> controllerCommandInfos_;
     std::map<std::string, AVSessionSysEvent::BackControlReportInfo> lowQualityInfos_;
+    std::map<std::string, PlayingStateInfo> playingStateInfos_;
     static constexpr float MULTIPLE = 1.0f;
 };
 #endif

@@ -18,6 +18,8 @@
 
 namespace OHOS::AVSession {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+static const int32_t REPORT_SIZE = 100;
+
 AVSessionSysEvent& AVSessionSysEvent::GetInstance()
 {
     static AVSessionSysEvent avSessionSysEvent;
@@ -179,5 +181,127 @@ void AVSessionSysEvent::SetAudioStatus(pid_t uid, int32_t rendererState)
     audioStatuses_[uid] = rendererState;
 }
 
+void AVSessionSysEvent::ReportPlayingState()
+{
+    std::lock_guard lockGuard(lock_);
+    for (const auto& it : playingStateInfos_) {
+        HiSysWriteStatistic("PLAYING_AVSESSION_STATS",
+            "APP_NAME", it.second.bundleName_,
+            "APP_VERSION", it.second.appVersion_,
+            "AVSESSION_STATE", it.second.state_,
+            "AVSESSION_STATE_TIMESTAMP", it.second.stateTime_,
+            "AVSESSION_META_QUALITY", it.second.metaQuality_,
+            "AVSESSION_META_QUALITY_TIMESTAMP", it.second.metaQualityTime_,
+            "AVSESSION_COMMAND_QUALITY", it.second.commandQuality_,
+            "AVSESSION_COMMAND_QUA_TIMESTAMP", it.second.commandQualityTime_,
+            "AVSESSION_PLAYSTATE", it.second.playbackState_,
+            "AVSESSION_PLAYSTATE_TIMESTAMP", it.second.playbackStateTime_,
+            "AVSESSION_CONTROL", it.second.control_,
+            "AVSESSION_CONTROL_BUNDLE_NAME", it.second.callerBundleName_,
+            "AVSESSION_CONTROL_TIMESTAMP", it.second.controlTime_);
+    }
+    playingStateInfos_.clear();
+}
+
+void AVSessionSysEvent::RegisterPlayingState()
+{
+    if (playingStateTimer_ != nullptr) {
+        return;
+    }
+
+    playingStateTimer_ = std::make_unique<OHOS::Utils::Timer>("PlayingStatisticTimer");
+    auto timeCallback = [this]() {
+        ReportPlayingState();
+    };
+    playingStateTimerId_ = playingStateTimer_->Register(timeCallback, PLAYING_STATE_CHECK_INTERVAL, false);
+    playingStateTimer_->Setup();
+}
+
+void AVSessionSysEvent::UnRegisterPlayingState()
+{
+    if (playingStateTimer_ != nullptr) {
+        playingStateTimer_->Shutdown();
+        playingStateTimer_->Unregister(playingStateTimerId_);
+        playingStateTimer_ = nullptr;
+    }
+}
+
+static int64_t UTCTimeMilliSeconds()
+{
+    struct timespec t;
+    constexpr int64_t SEC_TO_MSEC = 1e3;
+    constexpr int64_t MSEC_TO_NSEC = 1e6;
+    clock_gettime(CLOCK_REALTIME, &t);
+    return t.tv_sec * SEC_TO_MSEC + t.tv_nsec / MSEC_TO_NSEC;
+}
+
+PlayingStateInfo* AVSessionSysEvent::GetPlayingStateInfo(std::string bundleName)
+{
+    std::lock_guard lockGuard(lock_);
+    if (playingStateInfos_.find(bundleName) == playingStateInfos_.end()) {
+        PlayingStateInfo stateInfo;
+        stateInfo.bundleName_ = bundleName;
+        playingStateInfos_.insert(std::make_pair(bundleName, stateInfo));
+    }
+    return &playingStateInfos_[bundleName];
+}
+
+void PlayingStateInfo::updateState(uint8_t state)
+{
+    if (state != lastState_) {
+        lastState_ = state;
+        state_.push_back(state);
+        stateTime_.push_back(UTCTimeMilliSeconds());
+        if (state_.size() >= REPORT_SIZE) {
+            AVSessionSysEvent::GetInstance().ReportPlayingState();
+        }
+    }
+}
+
+void PlayingStateInfo::updateMetaQuality(MetadataQuality metaQuality)
+{
+    metaQuality_.push_back(static_cast<uint8_t>(metaQuality));
+    metaQualityTime_.push_back(UTCTimeMilliSeconds());
+    if (metaQuality_.size() >= REPORT_SIZE) {
+        AVSessionSysEvent::GetInstance().ReportPlayingState();
+    }
+}
+
+void PlayingStateInfo::updateCommandQuality(uint32_t commandQuality)
+{
+    if (commandQuality != lastCommandQuality_) {
+        lastCommandQuality_ = commandQuality;
+        commandQuality_.push_back(commandQuality);
+        commandQualityTime_.push_back(UTCTimeMilliSeconds());
+        if (commandQuality_.size() >= REPORT_SIZE) {
+            AVSessionSysEvent::GetInstance().ReportPlayingState();
+        }
+    }
+}
+
+void PlayingStateInfo::updatePlaybackState(uint8_t playbackState)
+{
+    if (playbackState != lastPlaybackState_) {
+        lastPlaybackState_ = playbackState;
+        playbackState_.push_back(playbackState);
+        playbackStateTime_.push_back(UTCTimeMilliSeconds());
+        if (playbackState_.size() >= REPORT_SIZE) {
+            AVSessionSysEvent::GetInstance().ReportPlayingState();
+        }
+    }
+}
+
+void PlayingStateInfo::updateControl(uint8_t control, std::string callerBundleName)
+{
+    if (control != lastControl_) {
+        lastControl_ = control;
+        control_.push_back(control);
+        callerBundleName_.push_back(callerBundleName);
+        controlTime_.push_back(UTCTimeMilliSeconds());
+        if (control_.size() >= REPORT_SIZE) {
+            AVSessionSysEvent::GetInstance().ReportPlayingState();
+        }
+    }
+}
 #endif
 } // namespace OHOS::AVSession

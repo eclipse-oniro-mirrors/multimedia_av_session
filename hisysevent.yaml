@@ -193,3 +193,19 @@ AVSESSION_WRONG_STATE:
   RENDERER_STATE: {type: UINT32, desc: audiorenderer state}
   AVSESSION_STATE: {type: UINT32, desc: avsession play state}
   USER_BEHAVIOR: {type: UINT32, desc: user behavior}
+
+PLAYING_AVSESSION_STATS:
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: avsession info with app playing}
+  APP_NAME: {type: STRING, desc: app name}
+  APP_VERSION: {type: STRING, desc: app version}
+  AVSESSION_STATE: {type: UINT8, arrsize: 100, desc: avsession state}
+  AVSESSION_STATE_TIMESTAMP: {type: UINT64, arrsize: 100, desc: avsession state change timestamp}
+  AVSESSION_META_QUALITY: {type: UINT8, arrsize: 100, desc: avsession metadata quality}
+  AVSESSION_META_QUALITY_TIMESTAMP: {type: UINT64, arrsize: 100, desc: avsession change timestamp}
+  AVSESSION_COMMAND_QUALITY: {type: UINT32, arrsize: 100, desc: avsession command supprot quality}
+  AVSESSION_COMMAND_QUA_TIMESTAMP: {type: UINT64, arrsize: 100, desc: valid command change timestamp}
+  AVSESSION_PLAYSTATE: {type: UINT8, arrsize: 100, desc: avsession playback state}
+  AVSESSION_PLAYSTATE_TIMESTAMP: {type: UINT64, arrsize: 100, desc: playback state change timestamp}
+  AVSESSION_CONTROL: {type: UINT8, arrsize: 100, desc: avsession controller command}
+  AVSESSION_CONTROL_BUNDLE_NAME: {type: STRING, arrsize: 100, desc: avsession controller caller bundle name}
+  AVSESSION_CONTROL_TIMESTAMP: {type: UINT64, arrsize: 100, desc: send avsession control timestamp}

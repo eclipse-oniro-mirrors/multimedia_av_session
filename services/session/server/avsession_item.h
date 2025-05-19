@@ -293,6 +293,13 @@ public:
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
 #endif
 
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    void ReportPlaybackState(const AVPlaybackState& state);
+    void ReportMetadataChange(const AVMetaData& metadata);
+    void ReportCommandChange();
+    void ReportSessionControl(std::string bundleName, int32_t cmd);
+#endif
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
@@ -388,6 +395,7 @@ private:
     int32_t userId_ = 0;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
+    AVMetaData lastMetaData_;
     std::vector<AVQueueItem> queueItems_;
     std::string queueTitle_;
     AbilityRuntime::WantAgent::WantAgent launchAbility_;

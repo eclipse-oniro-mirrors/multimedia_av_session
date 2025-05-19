@@ -98,6 +98,9 @@ static const int32_t AVSESSION_CONTINUE = 1;
 #ifndef START_STOP_ON_DEMAND_ENABLE
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 #endif
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+static const int32_t CONTROL_COLD_START = 2;
+#endif
 
 const std::map<int, int32_t> keyCodeToCommandMap_ = {
     {MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE, AVControlCommand::SESSION_CMD_PLAY},
@@ -150,6 +153,9 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 AVSessionService::~AVSessionService()
 {
     GetUsersManager().ClearCache();
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    AVSessionSysEvent::GetInstance().UnRegisterPlayingState();
+#endif
 }
 
 void AVSessionService::OnStart()
@@ -158,6 +164,9 @@ void AVSessionService::OnStart()
     GetUsersManager().ClearCache();
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
     OnStartProcess();
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    AVSessionSysEvent::GetInstance().RegisterPlayingState();
+#endif
 }
 
 void AVSessionService::OnStartProcess()
@@ -1429,6 +1438,11 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
         sessionListForFront->push_front(sessionItem);
     }
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+        ReportSessionState(sessionItem, 0);
+#endif
+
     return AVSESSION_SUCCESS;
 }
 
@@ -1979,6 +1993,9 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
         reinterpret_cast<StartAVPlaybackFunc>(dynamicLoader->GetFuntion(
             AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
     if (startAVPlayback) {
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+        ReportSessionControl(CallerBundleName, CONTROL_COLD_START);
+#endif
         return (*startAVPlayback)(bundleName, assetId, startPlayInfo, startPlayType);
     }
     SLOGE("StartAVPlayback fail");
@@ -2007,6 +2024,9 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
         reinterpret_cast<StartAVPlaybackFunc>(dynamicLoader->GetFuntion(
             AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
     if (startAVPlayback) {
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+        ReportSessionControl(CallerBundleName, CONTROL_COLD_START);
+#endif
         return (*startAVPlayback)(bundleName, assetId, startPlayInfo, startPlayType);
     }
     SLOGE("StartAVPlayback fail");
@@ -2569,6 +2589,9 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
     if (BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == MEDIA_CONTROL_BUNDLENAME) {
         ReleaseCastSession();
     }
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    AVSessionSysEvent::GetInstance().ReportPlayingState();
+#endif
 }
 
 // LCOV_EXCL_START
@@ -2703,6 +2726,9 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         int32_t userId = sessionItem->GetUserId();
         userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
         SLOGD("HandleSessionRelease with userId:%{public}d", userId);
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+        ReportSessionState(sessionItem, 1);
+#endif
         NotifySessionRelease(sessionItem->GetDescriptor());
         sessionItem->DestroyTask(continuePlay);
         if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
@@ -2736,6 +2762,11 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         PublishEvent(mediaPlayStateFalse);
     }
 #endif
+    HandleDisableCast();
+}
+
+void AVSessionService::HandleDisableCast()
+{
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0 ||
         (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1 &&
@@ -3866,4 +3897,65 @@ std::function<bool(int32_t, int32_t)> AVSessionService::GetAllowedPlaybackCallba
         return ret;
     };
 }
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+static std::string GetVersionName(std::string bundleName)
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        SLOGE("Get ability manager failed");
+        return "";
+    }
+
+    sptr<IRemoteObject> object = samgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (object == nullptr) {
+        SLOGE("object is NULL.");
+        return "";
+    }
+
+    sptr<OHOS::AppExecFwk::IBundleMgr> bms = iface_cast<OHOS::AppExecFwk::IBundleMgr>(object);
+    if (bms == nullptr) {
+        SLOGE("bundle manager service is NULL.");
+        return "";
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bms->GetBundleInfo(bundleName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+        bundleInfo, AppExecFwk::Constants::ALL_USERID);
+    std::string versionName = bundleInfo.versionName;
+    if (versionName.empty()) {
+        SLOGE("get versionName form application failed.");
+        return "";
+    }
+    return versionName;
+}
+
+void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state)
+{
+    if (session == nullptr) {
+        SLOGE("ReportSessionState session is null");
+        return;
+    }
+    auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(session->GetBundleName());
+    if (stateInfo != nullptr) {
+        stateInfo->bundleName_ = session->GetBundleName();
+        stateInfo->appVersion_ = GetVersionName(session->GetBundleName());
+        stateInfo->updateState(state); // 0: create, 1: release
+    }
+}
+
+void AVSessionService::ReportSessionControl(std::string bundleName, int32_t cmd)
+{
+    if (cmd == AVControlCommand::SESSION_CMD_PLAY ||
+        cmd == AVControlCommand::SESSION_CMD_PAUSE ||
+        cmd == CONTROL_COLD_START) {
+        auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(bundleName);
+        if (stateInfo != nullptr) {
+            stateInfo->updateControl(cmd, BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()));
+        }
+    }
+}
+
+#endif // ENABLE_AVSESSION_SYSEVENT_CONTROL
 } // namespace OHOS::AVSession

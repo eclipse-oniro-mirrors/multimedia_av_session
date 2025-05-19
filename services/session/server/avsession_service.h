@@ -205,6 +205,8 @@ public:
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
+    void HandleDisableCast();
+
     void HandleCallStartEvent();
 
     void HandleControllerRelease(AVControllerItem& controller);
@@ -573,6 +575,11 @@ private:
     void DeleteAVQueueInfoRecordFromCJSON(std::string& sortContent, const std::string& bundleName, int32_t userId);
 
     bool FillFileWithEmptyContentEx(ofstream& fileWrite);
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    void ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state);
+    void ReportSessionControl(std::string bundleName, int32_t cmd);
+#endif
 
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
