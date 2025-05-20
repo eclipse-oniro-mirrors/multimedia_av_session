@@ -330,6 +330,12 @@ void AVSessionService::HandleRemoveMediaCardEvent()
     if (!topSession_) {
         return;
     }
+    auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
+        topSession_->GetUid(), topSession_->GetPid(), false);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("AVSessionNotifyUpdateNotification failed, uid = %{public}d, pid = %{public}d, ret = %{public}d",
+            topSession_->GetUid(), topSession_->GetPid(), ret);
+    }
     if (topSession_->IsCasting()) {
         if (topSession_->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
             AVCastControlCommand castCmd;
@@ -754,6 +760,12 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+    auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
+        sessionItem->GetUid(), sessionItem->GetPid(), isAdd);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("AVSessionNotifyUpdateNotification failed, uid = %{public}d, pid = %{public}d, ret = %{public}d",
+            sessionItem->GetUid(), sessionItem->GetPid(), ret);
+    }
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
     if (isAdd) {
         if (it != sessionListForFront->end()) {
@@ -1016,7 +1028,16 @@ sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const s
 void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    AudioStandard::AudioSystemManager::GetInstance()->NotifySessionStateChange(descriptor.uid_, descriptor.pid_, true);
+    auto audioSystemManager = AudioStandard::AudioSystemManager::GetInstance();
+    if (audioSystemManager != nullptr) {
+        auto ret = audioSystemManager->NotifySessionStateChange(descriptor.uid_, descriptor.pid_, true);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("NotifySessionStateChange failed, uid = %{public}d, pid = %{public}d, ret = %{public}d",
+                descriptor.uid_, descriptor.pid_, ret);
+        }
+    } else {
+        SLOGE("AudioSystemManager is nullptr");
+    }
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
 #ifdef START_STOP_ON_DEMAND_ENABLE
         PublishEvent(mediaPlayStateTrue);
@@ -1048,7 +1069,22 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
 void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    AudioStandard::AudioSystemManager::GetInstance()->NotifySessionStateChange(descriptor.uid_, descriptor.pid_, false);
+    auto audioSystemManager = AudioStandard::AudioSystemManager::GetInstance();
+    if (audioSystemManager != nullptr) {
+        auto ret = audioSystemManager->NotifySessionStateChange(descriptor.uid_, descriptor.pid_, false);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("NotifySessionStateChange failed, uid = %{public}d, pid = %{public}d, ret = %{public}d",
+                descriptor.uid_, descriptor.pid_, ret);
+        }
+    } else {
+        SLOGE("AudioSystemManager is nullptr");
+    }
+    auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
+        descriptor.uid_, descriptor.pid_, false);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("AVSessionNotifyUpdateNotification failed, uid = %{public}d, pid = %{public}d, ret = %{public}d",
+            descriptor.uid_, descriptor.pid_, ret);
+    }
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(descriptor.userId_);
     SLOGI("NotifySessionRelease for user:%{public}d|listenerSize:%{public}d",
         descriptor.userId_, static_cast<int>(listenerMap.size()));
