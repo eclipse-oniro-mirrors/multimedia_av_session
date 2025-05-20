@@ -787,7 +787,8 @@ napi_value NapiAVCastController::SetDisplaySurface(napi_env env, napi_callback_i
             } else if (ret == ERR_COMMAND_NOT_SUPPORT) {
                 context->errMessage = "SetDisplaySurface failed : native command not support";
             } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
-                context->errMessage = "SetDisplaySurface failed : native command send nums overload";
+                context->errMessage = "SetDisplaySurface failed : native command send nums overload, \
+                    controls the frequency of sending self-query and control commands";
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SetDisplaySurface failed : native no permission";
             } else {
@@ -1463,7 +1464,8 @@ std::string NapiAVCastController::GetSendControlCommandErrMsg(int32_t error)
             msg = "SendControlCommand failed : native command not support";
             break;
         case ERR_COMMAND_SEND_EXCEED_MAX:
-            msg = "SendControlCommand failed : native command send nums overload";
+            msg = "SendControlCommand failed : native command send nums overload, \
+                controls the frequency of sending self-query and control commands";
             break;
         default:
             msg = "SendControlCommand failed : native server exception";
