@@ -341,7 +341,9 @@ napi_value NapiAVSession::ThrowErrorAndReturnByErrCode(napi_env env, const std::
     } else if (errCode == ERR_NO_PERMISSION) {
         tempMessage.append(" failed : native no permission");
     } else {
-        tempMessage.append(" failed : native server exception");
+        tempMessage.append(" failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.");
     }
     SLOGI("throw error message: %{public}s", tempMessage.c_str());
     NapiUtils::ThrowError(env, tempMessage.c_str(), NapiAVSessionManager::errcode_[errCode]);
@@ -439,7 +441,9 @@ napi_value NapiAVSession::SetAVCallMetaData(napi_env env, napi_callback_info inf
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SetAVCallMetaData failed : native no permission";
             } else {
-                context->errMessage = "SetAVCallMetaData failed : native server exception";
+                context->errMessage = "SetAVCallMetaData failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -492,7 +496,9 @@ napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SetAVCallState failed : native no permission";
             } else {
-                context->errMessage = "SetAVCallState failed : native server exception";
+                context->errMessage = "SetAVCallState failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -529,7 +535,9 @@ void processErrMsg(std::shared_ptr<ContextBase> context, int32_t ret)
     } else if (ret == ERR_NO_PERMISSION) {
         context->errMessage = "SetAVMetaData failed : native no permission";
     } else {
-        context->errMessage = "SetAVMetaData failed : native server exception";
+        context->errMessage = "SetAVMetaData failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
     }
     context->status = napi_generic_failure;
     context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -670,7 +678,9 @@ std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<
             } else if (playBackStateRet_ == ERR_NO_PERMISSION) {
                 context->errMessage = "SetAVPlaybackState failed : native no permission";
             } else {
-                context->errMessage = "SetAVPlaybackState failed : native server exception";
+                context->errMessage = "SetAVPlaybackState failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[playBackStateRet_];
@@ -770,7 +780,9 @@ napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
             } else if (ret == ERR_MARSHALLING) {
                 context->errMessage = "SetAVQueueItems failed : item number is out of range";
             } else {
-                context->errMessage = "SetAVQueueItems failed : native server exception";
+                context->errMessage = "SetAVQueueItems failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -821,7 +833,9 @@ napi_value NapiAVSession::SetAVQueueTitle(napi_env env, napi_callback_info info)
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SetAVQueueTitle failed : native no permission";
             } else {
-                context->errMessage = "SetAVQueueTitle failed : native server exception";
+                context->errMessage = "SetAVQueueTitle failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -870,7 +884,9 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SetLaunchAbility failed : native no permission";
             } else {
-                context->errMessage = "SetLaunchAbility failed : native server exception";
+                context->errMessage = "SetLaunchAbility failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -920,7 +936,9 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
             } else if (ret == ERR_INVALID_PARAM) {
                 context->errMessage = "SetExtras failed : native invalid parameters";
             } else {
-                context->errMessage = "SetExtras failed : native server exception";
+                context->errMessage = "SetExtras failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -1151,7 +1169,9 @@ napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "Activate failed : native no permission";
             } else {
-                context->errMessage = "Activate session failed : native server exception";
+                context->errMessage = "Activate session failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -1189,7 +1209,9 @@ napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "Deactivate failed : native no permission";
             } else {
-                context->errMessage = "Deactivate session failed : native server exception";
+                context->errMessage = "Deactivate session failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -1239,7 +1261,9 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ret];
         } else {
             context->status = napi_generic_failure;
-            context->errMessage = "Destroy session failed : native server exception";
+            context->errMessage = "Destroy session failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
@@ -1324,7 +1348,9 @@ napi_value NapiAVSession::ReleaseCast(napi_env env, napi_callback_info info)
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "ReleaseCast failed : native no permission";
             } else {
-                context->errMessage = "ReleaseCast failed : native server exception";
+                context->errMessage = "ReleaseCast failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -1370,7 +1396,9 @@ napi_value NapiAVSession::GetAllCastDisplays(napi_env env, napi_callback_info in
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAllCastDisplays failed : native no permission";
             } else {
-                context->errMessage = "GetAllCastDisplays failed : native server exception";
+                context->errMessage = "GetAllCastDisplays failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -1402,7 +1430,9 @@ void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
             message = "SetSessionEvent failed : native no permission";
             break;
         default:
-            message = "SetSessionEvent failed : native server exception";
+            message = "SetSessionEvent failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             break;
     }
 }

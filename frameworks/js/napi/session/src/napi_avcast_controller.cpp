@@ -380,7 +380,9 @@ napi_value NapiAVCastController::GetDuration(napi_env env, napi_callback_info in
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetDuration failed : native no permission";
             } else {
-                context->errMessage = "GetDuration failed : native server exception";
+                context->errMessage = "GetDuration failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller GetDuration failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -423,7 +425,9 @@ napi_value NapiAVCastController::GetCastAVPlaybackState(napi_env env, napi_callb
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetCastAVPlaybackState failed : native no permission";
             } else {
-                context->errMessage = "GetCastAVPlaybackState failed : native server exception";
+                context->errMessage = "GetCastAVPlaybackState failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller GetCastAVPlaybackState failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -466,7 +470,9 @@ napi_value NapiAVCastController::GetSupportedDecoders(napi_env env, napi_callbac
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetSupportedDecoders failed : native no permission";
             } else {
-                context->errMessage = "GetSupportedDecoders failed : native server exception";
+                context->errMessage = "GetSupportedDecoders failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller GetSupportedDecoders failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -519,7 +525,9 @@ napi_value NapiAVCastController::GetRecommendedResolutionLevel(napi_env env, nap
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetRecommendedResolutionLevel failed : native no permission";
             } else {
-                context->errMessage = "GetRecommendedResolutionLevel failed : native server exception";
+                context->errMessage = "GetRecommendedResolutionLevel failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller GetRecommendedResolutionLevel failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -562,7 +570,9 @@ napi_value NapiAVCastController::GetSupportedHdrCapabilities(napi_env env, napi_
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetSupportedHdrCapabilities failed : native no permission";
             } else {
-                context->errMessage = "GetSupportedHdrCapabilities failed : native server exception";
+                context->errMessage = "GetSupportedHdrCapabilities failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller GetSupportedHdrCapabilities failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -605,7 +615,9 @@ napi_value NapiAVCastController::GetSupportedPlaySpeeds(napi_env env, napi_callb
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetSupportedPlaySpeeds failed : native no permission";
             } else {
-                context->errMessage = "GetSupportedPlaySpeeds failed : native server exception";
+                context->errMessage = "GetSupportedPlaySpeeds failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller GetSupportedPlaySpeeds failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -648,7 +660,9 @@ napi_value NapiAVCastController::GetCurrentItem(napi_env env, napi_callback_info
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetCurrentItem failed : native no permission";
             } else {
-                context->errMessage = "GetCurrentItem failed : native server exception";
+                context->errMessage = "GetCurrentItem failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller GetCurrentItem failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -692,7 +706,9 @@ napi_value NapiAVCastController::GetValidCommands(napi_env env, napi_callback_in
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetValidCommands failed : native no permission";
             } else {
-                context->errMessage = "GetValidCommands failed : native server exception";
+                context->errMessage = "GetValidCommands failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller GetValidCommands failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -739,7 +755,9 @@ napi_value NapiAVCastController::Release(napi_env env, napi_callback_info info)
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "release failed : native no permission";
             } else {
-                context->errMessage = "release failed : native server exception";
+                context->errMessage = "release failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller release failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -792,7 +810,9 @@ napi_value NapiAVCastController::SetDisplaySurface(napi_env env, napi_callback_i
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SetDisplaySurface failed : native no permission";
             } else {
-                context->errMessage = "SetDisplaySurface failed : native server exception";
+                context->errMessage = "SetDisplaySurface failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller SetDisplaySurface failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -842,7 +862,9 @@ napi_value NapiAVCastController::ProcessMediaKeyResponse(napi_env env, napi_call
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "ProcessMediaKeyResponse failed : native no permission";
             } else {
-                context->errMessage = "ProcessMediaKeyResponse failed : native server exception";
+                context->errMessage = "ProcessMediaKeyResponse failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             }
             SLOGE("controller ProcessMediaKeyResponse failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -889,7 +911,9 @@ napi_status NapiAVCastController::RegisterCallback(napi_env env, const std::shar
                 NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
                     NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
             } else {
-                NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
+                NapiUtils::ThrowError(env, "OnEvent failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.",
                     NapiAVSessionManager::errcode_[ret]);
             }
             napiCastController->callback_ = nullptr;
@@ -1411,7 +1435,9 @@ void NapiAVCastController::ErrCodeToMessage(int32_t errCode, std::string& messag
             message = "SetSessionEvent failed : native no permission";
             break;
         default:
-            message = "SetSessionEvent failed : native server exception";
+            message = "SetSessionEvent failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             break;
     }
 }
@@ -1468,7 +1494,9 @@ std::string NapiAVCastController::GetSendControlCommandErrMsg(int32_t error)
                 controls the frequency of sending self-query and control commands";
             break;
         default:
-            msg = "SendControlCommand failed : native server exception";
+            msg = "SendControlCommand failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
             break;
     }
     return msg;
