@@ -380,7 +380,7 @@ napi_value NapiAVCastController::GetDuration(napi_env env, napi_callback_info in
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetDuration failed : native no permission";
             } else {
-                context->errMessage = "GetDuration failed : native server exception, 
+                context->errMessage = "GetDuration failed : native server exception, \
                 you are advised to : 1.scheduled retry.\
                 2.destroy the current session or session controller and re-create it.";
             }
