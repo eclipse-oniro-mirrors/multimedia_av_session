@@ -203,7 +203,9 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
             } else if (ret == ERR_PERMISSION_DENIED) {
                 context->errMessage = "GetAllSessionDescriptors failed : native permission denied";
             } else {
-                context->errMessage = "GetAllSessionDescriptors failed : native server exception";
+                context->errMessage = "GetAllSessionDescriptors failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -253,7 +255,9 @@ napi_value NapiAVSessionManager::GetHistoricalSessionDescriptors(napi_env env, n
             } else if (ret == ERR_PERMISSION_DENIED) {
                 context->errMessage = "GetHistoricalSessionDescriptors failed : native permission denied";
             } else {
-                context->errMessage = "GetHistoricalSessionDescriptors failed : native server exception";
+                context->errMessage = "GetHistoricalSessionDescriptors failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -304,7 +308,9 @@ napi_value NapiAVSessionManager::GetHistoricalAVQueueInfos(napi_env env, napi_ca
             } else if (ret == ERR_PERMISSION_DENIED) {
                 context->errMessage = "GetHistoricalAVQueueInfos failed : native permission denied";
             } else {
-                context->errMessage = "GetHistoricalAVQueueInfos failed : native server exception";
+                context->errMessage = "GetHistoricalAVQueueInfos failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -353,7 +359,9 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
             } else if (ret == ERR_PERMISSION_DENIED) {
                 context->errMessage = "StartAVPlayback failed : native permission denied";
             } else {
-                context->errMessage = "StartAVPlayback failed : native server exception";
+                context->errMessage = "StartAVPlayback failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -403,7 +411,9 @@ napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, 
             } else if (ret == ERR_REMOTE_CONNECTION_NOT_EXIST) {
                 context->errMessage = "GetDistributedSessionControllers failed : connect not exist";
             } else {
-                context->errMessage = "GetDistributedSessionControllers failed : native server exception";
+                context->errMessage = "GetDistributedSessionControllers failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -451,7 +461,9 @@ napi_value NapiAVSessionManager::CreateController(napi_env env, napi_callback_in
                 context->errCode = ERR_CONTROLLER_IS_EXIST;
                 return;
             } else {
-                context->errMessage = "CreateController failed : native server exception";
+                context->errMessage = "CreateController failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -504,7 +516,9 @@ napi_value NapiAVSessionManager::GetAVCastController(napi_env env, napi_callback
             } else if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "GetAVCastController failed : native session not exist";
             } else {
-                context->errMessage = "GetAVCastController failed : native server exception";
+                context->errMessage = "GetAVCastController failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -592,7 +606,9 @@ void NapiAVSessionManager::ErrCodeToMessage(int32_t errCode, const std::string& 
             message.append(" failed : native permission denied");
             break;
         default:
-            message.append(" failed : native server exception");
+            message.append(" failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.");
             break;
     }
 }
@@ -624,7 +640,9 @@ napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
             NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
                 NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         } else {
-            NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
+            NapiUtils::ThrowError(env, "OnEvent failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.",
                 NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
         }
         return napi_generic_failure;
@@ -883,7 +901,9 @@ napi_value NapiAVSessionManager::SendSystemAVKeyEvent(napi_env env, napi_callbac
             } else if (ret == ERR_PERMISSION_DENIED) {
                 context->errMessage = "SendSystemAVKeyEvent failed : native permission denied";
             } else {
-                context->errMessage = "SendSystemAVKeyEvent failed : native server exception";
+                context->errMessage = "SendSystemAVKeyEvent failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -938,7 +958,9 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
                 context->errMessage = "SendSystemControlCommand failed : native send command overload, \
                     controls the frequency of sending self-query and control commands";
             } else {
-                context->errMessage = "SendSystemControlCommand failed : native server exception";
+                context->errMessage = "SendSystemControlCommand failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -979,7 +1001,9 @@ napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_
             } else if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "StartCastDiscovery failed : native session not exist";
             } else {
-                context->errMessage = "StartCastDiscovery failed : native server exception";
+                context->errMessage = "StartCastDiscovery failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -1051,7 +1075,9 @@ napi_value NapiAVSessionManager::StopCastDiscovery(napi_env env, napi_callback_i
             } else if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "StopCastDiscovery failed : native session not exist";
             } else {
-                context->errMessage = "StopCastDiscovery failed : native server exception";
+                context->errMessage = "StopCastDiscovery failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -1095,7 +1121,9 @@ napi_value NapiAVSessionManager::SetDiscoverable(napi_env env, napi_callback_inf
             } else if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "SetDiscoverable failed : native session not exist";
             } else {
-                context->errMessage = "SetDiscoverable failed : native server exception";
+                context->errMessage = "SetDiscoverable failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -1119,7 +1147,9 @@ std::string NapiAVSessionManager::GetStartCastErrMsg(int32_t error)
     } else if (error == ERR_SESSION_NOT_EXIST) {
         err = "StartCast failed : native session not exist";
     } else {
-        err = "StartCast failed : native server exception";
+        err = "StartCast failed : native server exception, \
+                you are advised to : 1.scheduled retry.\
+                2.destroy the current session or session controller and re-create it.";
     }
     return err;
 }
@@ -1315,7 +1345,9 @@ napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
             } else if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "StopCast failed : native session not exist";
             } else {
-                context->errMessage = "StopCast failed : native server exception";
+                context->errMessage = "StopCast failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
