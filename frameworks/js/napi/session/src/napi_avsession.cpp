@@ -190,6 +190,7 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
 napi_status NapiAVSession::ReCreateInstance()
 {
     if (napiAVSession_ == nullptr) {
+        SLOGE("napiAVSession is null");
         return napi_generic_failure;
     }
     {

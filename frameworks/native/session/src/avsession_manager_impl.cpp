@@ -102,10 +102,14 @@ void AVSessionManagerImpl::RegisterServiceStateListener(sptr<ISystemAbilityManag
 
 void AVSessionManagerImpl::OnServiceStateChange(bool isAddSystemAbility)
 {
+    if (!serviceStartCallback_) {
+        SLOGI("OnServiceStateChange not register ServiceStartCallback");
+        return;
+    }
     SLOGI("OnServiceStateChange enter isAddSystemAbility:%{public}d isServiceDie:%{public}d",
         isAddSystemAbility, isServiceDie_.load());
     if (isAddSystemAbility) {
-        if (serviceStartCallback_ && isServiceDie_.load()) {
+        if (isServiceDie_.load()) {
             serviceStartCallback_();
             isServiceDie_ = false;
         }
@@ -124,6 +128,10 @@ void AVSessionManagerImpl::OnServiceDie()
     auto callback = deathCallback_;
     {
         std::lock_guard<std::mutex> lockGuard(lock_);
+        if (!serviceStartCallback_) {
+            SLOGI("OnServiceDie not register ServiceStartCallback");
+            service_.clear();
+        }
         listenerMapByUserId_.clear();
         deathCallback_ = nullptr;
     }
