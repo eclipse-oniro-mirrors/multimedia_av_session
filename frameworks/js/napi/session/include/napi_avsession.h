@@ -143,6 +143,7 @@ private:
     std::string latestDownloadedAssetId_;
     AVMetaData metaData_;
 
+    static std::mutex lock_;
     static std::mutex syncMutex_;
     static std::mutex syncAsyncMutex_;
     static std::condition_variable syncCond_;
