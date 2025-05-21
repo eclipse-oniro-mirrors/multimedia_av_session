@@ -82,9 +82,10 @@ bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, const std:
             bundleName.c_str(), ret);
         return false;
     }
-    for (AppExecFwk::LauncherAbilityResourceInfo resourceInfo : LauncherAbilityResourceInfoList) {
+    for (const auto& resourceInfo : LauncherAbilityResourceInfoList) {
         if (abilityName == resourceInfo.abilityName) {
             icon = resourceInfo.icon;
+            break;
         }
     }
     if (icon.empty() && LauncherAbilityResourceInfoList.size() > 0) {

@@ -262,7 +262,8 @@ static HWTEST_F(AVSessionControllerProxyTest, SendCommonCommand001, testing::ext
     std::string commonCommand;
     OHOS::AAFwk::WantParams commandArgs;
     int32_t ret = aVSessionControllerProxyEmpty->SendCommonCommand(commonCommand, commandArgs);
-    EXPECT_EQ(ret, ERR_SESSION_DEACTIVE);
+    // return ERR_SERVICE_NOT_EXIST for remote not set
+    EXPECT_EQ(ret, ERR_SERVICE_NOT_EXIST);
     SLOGI("SendCommonCommand001, end");
 }
 
@@ -608,7 +609,8 @@ static HWTEST_F(AVSessionControllerProxyTest, SendCommonCommand002, testing::ext
     std::string commonCommand;
     OHOS::AAFwk::WantParams commandArgs;
     int32_t ret = aVSessionControllerProxy->SendCommonCommand(commonCommand, commandArgs);
-    EXPECT_EQ(ret, ERR_SESSION_DEACTIVE);
+    // return ERR_IPC_SEND_REQUEST for ipc disable when controller not init
+    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
     SLOGI("SendCommonCommand002, end");
 }
 
