@@ -723,11 +723,13 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     sharedPtr->SetUserId(userId_);
     if (descriptor_.sessionTag_ != "RemoteCast") {
         castControllerProxy_->SetSessionCallbackForCastCap([this](bool isPlaying, bool isMediaChange) {
-            if (serviceCallbackForCastNtf_) {
-                SLOGI("MediaCapsule CastCapsule for service isPlaying %{public}d, isMediaChange %{public}d",
-                    isPlaying, isMediaChange);
-                serviceCallbackForCastNtf_(descriptor_.sessionId_, isPlaying, isMediaChange);
-            }
+            std::thread([this, isPlaying, isMediaChange]() {
+                if (serviceCallbackForCastNtf_) {
+                    SLOGI("MediaCapsule CastCapsule for service isPlaying %{public}d, isMediaChange %{public}d",
+                        isPlaying, isMediaChange);
+                    serviceCallbackForCastNtf_(descriptor_.sessionId_, isPlaying, isMediaChange);
+                }
+            }).detach();
         });
     }
 
