@@ -332,6 +332,7 @@ private:
     void CheckUseAVMetaData(const AVMetaData& meta);
     void PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo);
     void DelRecommend();
+    void UpdateRecommendInfo(bool needRecommend);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {

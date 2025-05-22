@@ -263,6 +263,39 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::UpdateRecommendInfo(bool needRecommend)
+{
+    if (descriptor_.sessionTag_ == "RemoteCast") {
+        return;
+    }
+    AVMetaData meta;
+    AAFwk::WantParams extra;
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        meta = metaData_;
+        extra = extras_;
+    }
+    SLOGI("assetChange:%{public}d AddFront:%{public}d supportCast:%{public}d filter:%{public}d duration:%{public}d",
+        isAssetChange_, isFirstAddToFront_, extra.HasParam("requireAbilityList"), meta.GetFilter(),
+        static_cast<int>(meta.GetDuration()));
+    if (needRecommend) {
+        if (isAssetChange_ && !isFirstAddToFront_ && extra.HasParam("requireAbilityList") &&
+            meta.GetFilter() !=0 && meta.GetDuration() != 0) {
+            isAssetChange_ = false;
+            isRecommend_ = true;
+            AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(),
+                GetSessionType(), meta.GetAssetId(), meta.GetDuration());
+        }
+    } else {
+        if (isRecommend_) {
+            isAssetChange_ = true;
+            AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(), GetSessionType(),
+                metaData_.GetAssetId(), -1);
+        }
+    }
+
+}
+
 void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty;
@@ -283,16 +316,13 @@ void AVSessionItem::HandleFrontSession()
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
-            if (descriptor_.sessionTag_ != "RemoteCast" && isRecommend_) {
-                isAssetChange_ = true;
-                AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(), GetSessionType(),
-                    metaData_.GetAssetId(), -1);
-            }
+            UpdateRecommendInfo(false);
         }
     } else {
         if (isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), true);
             isFirstAddToFront_ = false;
+            UpdateRecommendInfo(true);
         }
     }
 }
@@ -362,15 +392,7 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
         serviceCallbackForAddAVQueueInfo_(*this);
     }
 
-    SLOGI("PublishRecommendInfo assetChange_:%{public}d supportCast:%{public}d filter:%{public}d duration:%{public}d",
-        isAssetChange_, extras_.HasParam("requireAbilityList"), meta.GetFilter(),
-        static_cast<int>(meta.GetDuration()));
-    if (isAssetChange_ && extras_.HasParam("requireAbilityList") && meta.GetFilter() !=0 && meta.GetDuration() != 0) {
-        isAssetChange_ = false;
-        isRecommend_ = true;
-        AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(),
-            GetSessionType(), meta.GetAssetId(), meta.GetDuration());
-    }
+    UpdateRecommendInfo(true);
 }
 
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
@@ -381,8 +403,6 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         ReportSetAVMetaDataInfo(meta);
         if ((metaData_.GetAssetId() != meta.GetAssetId()) || CheckTitleChange(meta)) {
             isMediaChange_ = true;
-        }
-        if (metaData_.GetAssetId() != meta.GetAssetId()) {
             isAssetChange_ = true;
         }
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
