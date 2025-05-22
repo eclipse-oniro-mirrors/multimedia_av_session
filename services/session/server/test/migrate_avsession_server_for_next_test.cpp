@@ -688,3 +688,34 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand002, Test
     EXPECT_EQ(cJSON_HasObjectItem(jsonValue, AUDIO_VOLUME), true);
     cJSON_Delete(jsonValue);
 }
+
+/**
+ * @tc.name: ConvertAudioDeviceDescriptorToJson001
+ * @tc.desc: tset the member of ConvertAudioDeviceDescriptorToJson
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorToJson001, TestSize.Level1)
+{
+    SLOGE("ConvertAudioDeviceDescriptorToJson001 in");
+    AudioDeviceDescriptorWithSptr ptr {new AudioDeviceDescriptor()};
+    EXPECT_EQ(ptr != nullptr, true);
+    cJSON* audioDevJson = g_MigrateAVSessionServer->ConvertAudioDeviceDescriptorToJson(ptr);
+    EXPECT_EQ(audioDevJson != nullptr, true);
+    SLOGE("ConvertAudioDeviceDescriptorToJson001 out");
+}
+
+/**
+ * @tc.name: ConvertAudioDeviceDescriptorToJson002
+ * @tc.desc: tset the member of ConvertAudioDeviceDescriptorToJson
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorToJson002, TestSize.Level1)
+{
+    SLOGE("ConvertAudioDeviceDescriptorToJson002 in");
+    AudioDeviceDescriptorWithSptr ptr = nullptr;
+    cJSON* audioDevJson = g_MigrateAVSessionServer->ConvertAudioDeviceDescriptorToJson(ptr);
+    EXPECT_EQ(audioDevJson == nullptr, true);
+    SLOGE("ConvertAudioDeviceDescriptorToJson002 out");
+}

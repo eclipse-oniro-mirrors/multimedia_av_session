@@ -366,14 +366,11 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
         SLOGE("get jsonValue invalid");
         return;
     }
+
     std::string sessionId = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_SESSION_ID);
-    if (sessionId.empty()) {
-        sessionId = DEFAULT_STRING;
-    }
+    sessionId = sessionId.empty() ? DEFAULT_STRING : sessionId;
     std::string bundleName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_BUNDLE_NAME);
-    if (bundleName.empty()) {
-        sessionId = DEFAULT_STRING;
-    }
+    bundleName = bundleName.empty() ? DEFAULT_STRING : bundleName;
     size_t insertPos = bundleName.find('|');
     if (insertPos != std::string::npos && insertPos > 0 && insertPos < bundleName.size()) {
         elementName_.SetBundleName(bundleName.substr(0, insertPos));
@@ -381,9 +378,7 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
         elementName_.SetBundleName(bundleName);
     }
     std::string abilityName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_ABILITY_NAME);
-    if (bundleName.empty()) {
-        sessionId = DEFAULT_STRING;
-    }
+    abilityName = abilityName.empty() ? DEFAULT_STRING : abilityName;
     elementName_.SetAbilityName(abilityName);
     SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s end",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());

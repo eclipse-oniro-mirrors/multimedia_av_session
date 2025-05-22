@@ -582,14 +582,12 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
 void NapiAVSession::DoLastMetaDataRefresh(NapiAVSession* napiAVSession)
 {
     CHECK_AND_RETURN_LOG(napiAVSession != nullptr, "context nullptr!");
-    if (napiAVSession->latestMetadataAssetId_ != napiAVSession->metaData_.GetAssetId() ||
-        napiAVSession->latestMetadataUri_ != napiAVSession->metaData_.GetMediaImageUri() ||
-        !napiAVSession->metaData_.GetMediaImageUri().empty() || napiAVSession->metaData_.GetMediaImage() != nullptr) {
-        napiAVSession->latestDownloadedAssetId_ = (napiAVSession->metaData_.GetAssetId() !=
-            napiAVSession->latestMetadataAssetId_) ? "" : napiAVSession->latestDownloadedAssetId_;
-        napiAVSession->latestMetadataUri_ = napiAVSession->metaData_.GetMediaImageUri();
-        napiAVSession->latestMetadataAssetId_ = napiAVSession->metaData_.GetAssetId();
-    }
+    napiAVSession->latestDownloadedAssetId_ = (napiAVSession->metaData_.GetAssetId() !=
+        napiAVSession->latestMetadataAssetId_) ? "" : napiAVSession->latestDownloadedAssetId_;
+    napiAVSession->latestDownloadedUri_ = (napiAVSession->metaData_.GetMediaImage() != nullptr) ?
+        "" : napiAVSession->latestDownloadedUri_;
+    napiAVSession->latestMetadataUri_ = napiAVSession->metaData_.GetMediaImageUri();
+    napiAVSession->latestMetadataAssetId_ = napiAVSession->metaData_.GetAssetId();
 }
 
 bool NapiAVSession::CheckMetaOutOfDate(NapiAVSession* napiAVSession, OHOS::AVSession::AVMetaData& curMeta)

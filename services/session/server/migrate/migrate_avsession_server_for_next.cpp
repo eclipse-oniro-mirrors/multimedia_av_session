@@ -627,6 +627,7 @@ cJSON* MigrateAVSessionServer::ConvertAudioDeviceDescriptorToJson(
 {
     cJSON* device = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_RET_LOG(device != nullptr, nullptr, "get device with nullptr");
+    CHECK_AND_RETURN_RET_LOG(desc != nullptr, nullptr, "get desc with nullptr");
 
     if (!SoftbusSessionUtils::AddIntToJson(device, AUDIO_DEVICE_TYPE, static_cast<int32_t>(desc->deviceType_))) {
         SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail",
