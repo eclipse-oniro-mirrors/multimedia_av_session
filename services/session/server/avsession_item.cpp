@@ -2091,6 +2091,16 @@ void AVSessionItem::HandleOnPlayFromAssetId(const AVControlCommand& cmd)
     CHECK_AND_RETURN_LOG(cmd.GetPlayFromAssetId(assetId) == AVSESSION_SUCCESS, "Get playFromAssetId failed");
     callback_->OnPlayFromAssetId(assetId);
 }
+
+void AVSessionItem::HandleOnPlayWithAssetId(const AVControlCommand& cmd)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayWithAssetId");
+    std::lock_guard callbackLockGuard(callbackLock_);
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+    std::string assetId;
+    CHECK_AND_RETURN_LOG(cmd.GetPlayWithAssetId(assetId) == AVSESSION_SUCCESS, "Get playWithAssetId failed");
+    callback_->OnPlayWithAssetId(assetId);
+}
 // LCOV_EXCL_STOP
 
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& controller)

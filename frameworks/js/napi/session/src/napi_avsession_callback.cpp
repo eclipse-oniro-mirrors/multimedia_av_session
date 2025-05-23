@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -284,6 +284,12 @@ void NapiAVSessionCallback::OnPlayFromAssetId(int64_t assetId)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlayFromAssetId");
     HandleEvent(EVENT_PLAY_FROM_ASSETID, assetId);
+}
+
+void NapiAVSessionCallback::OnPlayWithAssetId(const std::string& assetId)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlayWithAssetId");
+    HandleEvent(EVENT_PLAY_WITH_ASSETID, assetId);
 }
 
 void NapiAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo)

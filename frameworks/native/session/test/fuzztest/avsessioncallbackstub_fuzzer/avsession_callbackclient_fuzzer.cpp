@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,6 +90,7 @@ class TestAVSessionCallback : public AVSessionCallback {
     void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
     void OnSkipToQueueItem(int32_t itemId) override;
     void OnPlayFromAssetId(int64_t assetId) override;
+    void OnPlayWithAssetId(const std::string& assetId) override;
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
 };
 
@@ -192,6 +193,11 @@ void TestAVSessionCallback::OnSkipToQueueItem(int32_t itemId)
 void TestAVSessionCallback::OnPlayFromAssetId(int64_t assetId)
 {
     SLOGI("Enter into TestAVSessionCallback::OnPlayFromAssetId.");
+}
+
+void TestAVSessionCallback::OnPlayWithAssetId(const std::string& assetId)
+{
+    SLOGI("Enter into TestAVSessionCallback::OnPlayWithAssetId.");
 }
 
 void TestAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo)
@@ -308,8 +314,10 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner2()
 
     auto itemId = GetData<uint32_t>();
     auto assetId = GetData<uint64_t>();
+    auto assetId1 = GetData<std::string>();
     aVSessionCallbackClient.OnSkipToQueueItem(itemId);
     aVSessionCallbackClient.OnPlayFromAssetId(assetId);
+    aVSessionCallbackClient.OnPlayWithAssetId(assetId1);
 
     CastDisplayInfo castDisplayInfo;
     uint8_t randomNum3 = GetData<uint8_t>();

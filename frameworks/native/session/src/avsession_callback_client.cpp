@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -222,6 +222,16 @@ void AVSessionCallbackClient::OnPlayFromAssetId(int64_t assetId)
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask([callback, assetId]() { callback->OnPlayFromAssetId(assetId); }, std::string(__FUNCTION__)),
+        "AVSessionCallbackClient handler postTask failed");
+}
+
+void AVSessionCallbackClient::OnPlayWithAssetId(const std::string& assetId)
+{
+    CHECK_AND_RETURN_LOG(callback_, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, assetId]() { callback->OnPlayWithAssetId(assetId); }, std::string(__FUNCTION__)),
         "AVSessionCallbackClient handler postTask failed");
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -316,6 +316,7 @@ private:
     void HandleOnSetTargetLoopMode(const AVControlCommand& cmd);
     void HandleOnToggleFavorite(const AVControlCommand& cmd);
     void HandleOnPlayFromAssetId(const AVControlCommand& cmd);
+    void HandleOnPlayWithAssetId(const AVControlCommand& cmd);
 
     void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
     void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
@@ -361,6 +362,8 @@ private:
             [this](const AVControlCommand& cmd) { HandleOnToggleFavorite(cmd); }},
         {AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID,
             [this](const AVControlCommand& cmd) { HandleOnPlayFromAssetId(cmd); }},
+        {AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID,
+            [this](const AVControlCommand& cmd) { HandleOnPlayWithAssetId(cmd); }},
         {AVControlCommand::SESSION_CMD_AVCALL_ANSWER,
             [this](const AVControlCommand& cmd) { HandleOnAVCallAnswer(cmd); }},
         {AVControlCommand::SESSION_CMD_AVCALL_HANG_UP,

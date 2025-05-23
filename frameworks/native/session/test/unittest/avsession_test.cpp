@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,6 +161,7 @@ public:
     void OnAVCallHangUp() override {};
     void OnAVCallToggleCallMute() override {};
     void OnPlayFromAssetId(int64_t assetId) override;
+    void OnPlayWithAssetId(const std::string& assetId) override;
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
 
     ~AVSessionCallbackImpl() override;
@@ -259,6 +260,12 @@ void AVSessionCallbackImpl::OnPlayFromAssetId(int64_t assetId)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayFromAssetId %{public}d", g_onCall);
+}
+
+void AVSessionCallbackImpl::OnPlayWithAssetId(const std::string& assetId)
+{
+    g_onCall = AVSESSION_SUCCESS;
+    SLOGE("OnPlayWithAssetId %{public}d", g_onCall);
 }
 
 void AVSessionCallbackImpl::OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo)
@@ -757,6 +764,8 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
             case AVControlCommand::SESSION_CMD_REWIND : controlCommand.SetRewindTime(10);
                 break;
             case AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID: controlCommand.SetPlayFromAssetId(0);
+                break;
+            case AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID: controlCommand.SetPlayWithAssetId("0");
                 break;
             default:
                 break;
