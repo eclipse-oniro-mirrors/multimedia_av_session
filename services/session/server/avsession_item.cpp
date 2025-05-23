@@ -724,11 +724,10 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     if (descriptor_.sessionTag_ != "RemoteCast") {
         castControllerProxy_->SetSessionCallbackForCastCap([this](bool isPlaying, bool isMediaChange) {
             std::thread([this, isPlaying, isMediaChange]() {
-                if (serviceCallbackForCastNtf_) {
-                    SLOGI("MediaCapsule CastCapsule for service isPlaying %{public}d, isMediaChange %{public}d",
-                        isPlaying, isMediaChange);
-                    serviceCallbackForCastNtf_(descriptor_.sessionId_, isPlaying, isMediaChange);
-                }
+                CHECK_AND_RETURN_LOG(serviceCallbackForCastNtf_ != nullptr, "serviceCallbackForCastNtf_ is empty");
+                SLOGI("MediaCapsule CastCapsule for service isPlaying %{public}d, isMediaChange %{public}d",
+                    isPlaying, isMediaChange);
+                serviceCallbackForCastNtf_(descriptor_.sessionId_, isPlaying, isMediaChange);
             }).detach();
         });
     }
@@ -2303,6 +2302,11 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
     }
+}
+
+std::map<std::string, DeviceInfo> AVSessionItem::GetCastDeviceMap() const
+{
+    return castDeviceInfoMap_;
 }
 #endif
 
