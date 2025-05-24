@@ -215,10 +215,7 @@ napi_status NapiAVSession::ReCreateInstance()
         napiAVSession_->callback_ = std::make_shared<NapiAVSessionCallback>();
     }
     int32_t res = napiAVSession_->session_->RegisterCallback(napiAVSession_->callback_);
-    if (res != AVSESSION_SUCCESS) {
-        SLOGE("RegisterCallback fail, ret=%{public}d", res);
-    }
-
+    CHECK_RETURN(ret == AVSESSION_SUCCESS, "register session callback fail", napi_generic_failure);
     {
         std::lock_guard lockGuard(registerEventLock_);
         for (int32_t event : registerEventList_) {
