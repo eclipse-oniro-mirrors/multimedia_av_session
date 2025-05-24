@@ -2133,6 +2133,7 @@ void AVSessionItem::HandleOnPlayWithAssetId(const AVControlCommand& cmd)
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     std::string assetId;
     CHECK_AND_RETURN_LOG(cmd.GetPlayWithAssetId(assetId) == AVSESSION_SUCCESS, "Get playWithAssetId failed");
+    CHECK_AND_RETURN_LOG(!assetId.empty(), "assetId is empty");
     callback_->OnPlayWithAssetId(assetId);
 }
 // LCOV_EXCL_STOP
