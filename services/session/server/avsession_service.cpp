@@ -1672,12 +1672,7 @@ void AVSessionService::ProcessDescriptorsFromCJSON(std::vector<AVSessionDescript
         return;
     }
     std::string sessionId(sessionIdItem->valuestring);
-    auto session = GetContainer().GetSessionById(sessionId);
-    if (session != nullptr) {
-        SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
-            AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-        return;
-    }
+
     cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
     if (bundleNameItem == nullptr || cJSON_IsInvalid(bundleNameItem) || !cJSON_IsString(bundleNameItem)) {
         SLOGE("valueItem get bundleName fail");
@@ -1723,6 +1718,18 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionService::GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
+{
+    std::lock_guard sortFileLockGuard(sessionFileLock_);
+    std::vector<AVSessionDescriptor> tempDescriptors;
+    GetHistoricalSessionDescriptorsFromFile(tempDescriptors);
+    for (auto iterator = tempDescriptors.begin(); iterator != tempDescriptors.end(); ++iterator) {
+        descriptors.push_back(*iterator);
+    }
+
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
                                                           std::vector<AVSessionDescriptor>& descriptors)
 {
@@ -1735,6 +1742,13 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
     for (auto iterator = tempDescriptors.begin(); iterator != tempDescriptors.end(); ++iterator) {
         if (descriptors.size() >= (size_t)maxSize) {
             break;
+        }
+        std::string sessionId(iterator->sessionId_);
+        auto session = GetContainer().GetSessionById(sessionId);
+        if (session != nullptr) {
+            SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
+                AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+            continue;
         }
         descriptors.push_back(*iterator);
     }
@@ -2462,23 +2476,26 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         }
     }
 
-    std::vector<AVSessionDescriptor> hisDescriptors;
-    GetHistoricalSessionDescriptorsFromFile(hisDescriptors);
+    std::vector<AVSessionDescriptor> coldStartDescriptors;
+    GetColdStartSessionDescriptors(coldStartDescriptors);
+    CHECK_AND_RETURN_LOG(coldStartDescriptors.size() > 0, "get coldStartDescriptors empty");
     // try start play for first history session
     if ((command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY ||
          command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_NEXT ||
-         command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_PREVIOUS) && hisDescriptors.size() != 0) {
+         command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_PREVIOUS) && coldStartDescriptors.size() != 0) {
         sptr<IRemoteObject> object;
         int32_t ret = 0;
+        std::string bundleName = coldStartDescriptors[0].elementName_.GetBundleName();
+        std::string abilityName = coldStartDescriptors[0].elementName_.GetAbilityName();
         if (deviceId.length() == 0) {
-            ret = StartAVPlayback(hisDescriptors[0].elementName_.GetBundleName(), "");
+            ret = StartAVPlayback(bundleName, "");
         } else {
-            ret = StartAVPlayback(hisDescriptors[0].elementName_.GetBundleName(), "", deviceId);
+            ret = StartAVPlayback(bundleName, "", deviceId);
         }
-        SLOGI("Cold play %{public}s, ret=%{public}d", hisDescriptors[0].elementName_.GetBundleName().c_str(), ret);
+        SLOGI("Cold play %{public}s ret=%{public}d", bundleName.c_str(), ret);
     } else {
-        SLOGI("Cold start command=%{public}d, hisDescriptorsSize=%{public}d return", command.GetCommand(),
-              static_cast<int>(hisDescriptors.size()));
+        SLOGI("Cold start command=%{public}d, coldStartDescriptorsSize=%{public}d return", command.GetCommand(),
+              static_cast<int>(coldStartDescriptors.size()));
     }
 }
 

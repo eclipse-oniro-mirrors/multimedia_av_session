@@ -170,6 +170,8 @@ public:
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
+    int32_t GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors);
+
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
     
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
