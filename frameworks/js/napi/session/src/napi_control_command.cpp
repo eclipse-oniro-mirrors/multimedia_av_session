@@ -394,8 +394,7 @@ napi_status NapiControlCommand::GetPlayWithAssetId(napi_env env, napi_value in, 
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", playWithAssetId);
     if (status != napi_ok) {
         SLOGE("get parameter failed");
-        playWithAssetId = "";
-        status = napi_ok;
+        return status;
     }
 
     CHECK_AND_RETURN_RET_LOG(out.SetPlayWithAssetId(playWithAssetId) == AVSESSION_SUCCESS,

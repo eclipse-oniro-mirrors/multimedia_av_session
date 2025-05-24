@@ -324,7 +324,7 @@ int32_t AVControlCommand::GetPlayFromAssetId(int64_t& playFromAssetId) const
 int32_t AVControlCommand::SetPlayWithAssetId(const std::string& playWithAssetId)
 {
     if (playWithAssetId.empty()) {
-        return AVSESSION_ERROR;
+        return ERR_INVALID_PARAM;
     }
     param_ = playWithAssetId;
     return AVSESSION_SUCCESS;
