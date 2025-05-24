@@ -61,6 +61,23 @@ const std::map<int32_t, std::string> sessionTypeMap_ = {
     {AVSession::SESSION_TYPE_VIDEO_CALL, "video_call"},
 };
 
+const std::map<int32_t, int32_t> g_cmdToOffsetMap = {
+    {AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE, 9},
+    {AVControlCommand::SESSION_CMD_PLAY, 8},
+    {AVControlCommand::SESSION_CMD_PAUSE, 7},
+    {AVControlCommand::SESSION_CMD_PLAY_NEXT, 6},
+    {AVControlCommand::SESSION_CMD_PLAY_PREVIOUS, 5},
+    {AVControlCommand::SESSION_CMD_FAST_FORWARD, 4},
+    {AVControlCommand::SESSION_CMD_REWIND, 3},
+    {AVControlCommand::SESSION_CMD_SEEK, 2},
+    {AVControlCommand::SESSION_CMD_SET_LOOP_MODE, 1},
+    {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE, 0}
+};
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+static const int32_t CONTROL_COLD_START = 2;
+#endif
+
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId)
     : descriptor_(descriptor), userId_(userId)
 {
@@ -417,6 +434,9 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         auto ret = remoteSource_->SetAVMetaData(meta);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAVMetaData failed");
     }
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    ReportMetadataChange(meta);
+#endif
     return AVSESSION_SUCCESS;
 }
 
@@ -519,6 +539,9 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     if (remoteSource_ != nullptr) {
         remoteSource_->SetAVPlaybackState(state);
     }
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    ReportPlaybackState(state);
+#endif
     return AVSESSION_SUCCESS;
 }
 
@@ -865,6 +888,10 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AddSessionCommandToCast(cmd);
 #endif
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    ReportCommandChange();
+#endif
     return AVSESSION_SUCCESS;
 }
 
@@ -907,6 +934,10 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     RemoveSessionCommandFromCast(cmd);
+#endif
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    ReportCommandChange();
 #endif
     return AVSESSION_SUCCESS;
 }
@@ -1887,6 +1918,9 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_SUCCESS_CTRL_COMMAND);
     HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(descriptor_.elementName_.GetBundleName(), GetPid(),
         cmd.GetCommand(), descriptor_.sessionType_);
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    ReportSessionControl(descriptor_.elementName_.GetBundleName(), cmd.GetCommand());
+#endif
     return cmdHandlers[code](cmd);
 
     HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
@@ -2454,5 +2488,69 @@ void AVSessionItem::SendControlCommandToCast(AVCastControlCommand cmd)
     castControllerProxy_->SendControlCommand(cmd);
 #endif
 }
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+void AVSessionItem::ReportPlaybackState(const AVPlaybackState& state)
+{
+    if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ||
+        state.GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
+        auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(GetBundleName());
+        if (stateInfo != nullptr) {
+            stateInfo->updatePlaybackState(static_cast<uint8_t>(state.GetState()));
+        }
+    }
+}
+
+void AVSessionItem::ReportMetadataChange(const AVMetaData& metadata)
+{
+    if ((metadata.GetTitle().compare(lastMetaData_.GetTitle()) != 0) ||
+        (metadata.GetMediaImageUri().compare(lastMetaData_.GetMediaImageUri()) != 0)) {
+        lastMetaData_ = metadata;
+        bool hasTitle = !metadata.GetTitle().empty();
+        bool hasImage = metadata.GetMediaImage() != nullptr || !metadata.GetMediaImageUri().empty();
+        MetadataQuality metadataQuality;
+        if (!hasTitle && !hasImage) {
+            metadataQuality = MetadataQuality::METADATA_QUALITY_NONE;
+        } else if (hasTitle && hasImage) {
+            metadataQuality = MetadataQuality::METADATA_QUALITY_BOTH;
+        } else if (hasImage) {
+            metadataQuality = MetadataQuality::METADATA_QUALITY_IMG;
+        } else {
+            metadataQuality = MetadataQuality::METADATA_QUALITY_TITLE;
+        }
+        auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(GetBundleName());
+        if (stateInfo != nullptr) {
+            stateInfo->updateMetaQuality(metadataQuality);
+        }
+    }
+}
+
+void AVSessionItem::ReportCommandChange()
+{
+    int32_t commandQuality = 0;
+    for (auto cmd : GetSupportCommand()) {
+        auto it = g_cmdToOffsetMap.find(cmd);
+        if (it != g_cmdToOffsetMap.end()) {
+            commandQuality += (1 << it->second);
+        }
+    }
+    auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(GetBundleName());
+    if (stateInfo != nullptr) {
+        stateInfo->updateCommandQuality(commandQuality);
+    }
+}
+
+void AVSessionItem::ReportSessionControl(std::string bundleName, int32_t cmd)
+{
+    if (cmd == AVControlCommand::SESSION_CMD_PLAY ||
+        cmd == AVControlCommand::SESSION_CMD_PAUSE ||
+        cmd == CONTROL_COLD_START) {
+        auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(bundleName);
+        if (stateInfo != nullptr) {
+            stateInfo->updateControl(cmd, BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()));
+        }
+    }
+}
+#endif
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession
