@@ -107,6 +107,7 @@ std::map<std::string, int32_t> convertEventType_ = {
     { "playWithAssetId", AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID }
 };
 
+std::mutex NapiAVSession::lock_;
 std::mutex NapiAVSession::syncMutex_;
 std::mutex NapiAVSession::syncAsyncMutex_;
 std::condition_variable NapiAVSession::syncCond_;
@@ -631,12 +632,15 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
         bool isRepeatDownload = napiSession->latestDownloadedAssetId_ == napiSession->latestMetadataAssetId_ &&
             napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
         bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData, isRepeatDownload);
-        bool isOutOfDate = CheckMetaOutOfDate(napiSession, context->metaData);
-        SLOGI("doMetaDataSet res:%{public}d|%{public}d", static_cast<int>(res), !isOutOfDate);
-        if (res && !isOutOfDate && napiSession->session_ != nullptr) {
-            napiSession->latestDownloadedUri_ = context->metaData.GetMediaImageUri();
-            napiSession->latestDownloadedAssetId_ = context->metaData.GetAssetId();
-            napiSession->session_->SetAVMetaData(context->metaData);
+        {
+            std::lock_guard<std::mutex> lockGuard(lock_);
+            bool isOutOfDate = CheckMetaOutOfDate(napiSession, context->metaData);
+            SLOGI("doMetaDataSet res:%{public}d|%{public}d", static_cast<int>(res), !isOutOfDate);
+            if (res && !isOutOfDate && napiSession->session_ != nullptr) {
+                napiSession->latestDownloadedUri_ = context->metaData.GetMediaImageUri();
+                napiSession->latestDownloadedAssetId_ = context->metaData.GetAssetId();
+                napiSession->session_->SetAVMetaData(context->metaData);
+            }
         }
         context->metaData.Reset();
     };
