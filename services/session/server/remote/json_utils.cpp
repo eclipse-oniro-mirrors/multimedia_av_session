@@ -401,20 +401,20 @@ int32_t JsonUtils::GetSessionCapabilitySet(cJSON* jsonObj, AVSessionBasicInfo& b
     CHECK_AND_RETURN_RET_LOG(jsonObj != nullptr && !cJSON_IsInvalid(jsonObj), AVSESSION_ERROR, "json object is err");
 
     cJSON* metaDataItem = cJSON_GetObjectItem(jsonObj, "metaData");
-    CHECK_AND_RETURN_RET_LOG(metaDataItem == nullptr || cJSON_IsInvalid(metaDataItem) ||
-        !cJSON_IsArray(metaDataItem), AVSESSION_ERROR, "get metaDataItem err");
+    CHECK_AND_RETURN_RET_LOG(!(metaDataItem == nullptr || cJSON_IsInvalid(metaDataItem) ||
+        !cJSON_IsArray(metaDataItem)), AVSESSION_ERROR, "get metaDataItem err");
     int32_t ret = JsonToVector(metaDataItem, basicInfo.metaDataCap_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get metaDataCap error");
 
     cJSON* playbackStateItem = cJSON_GetObjectItem(jsonObj, "playbackState");
-    CHECK_AND_RETURN_RET_LOG(playbackStateItem == nullptr || cJSON_IsInvalid(playbackStateItem) ||
-        !cJSON_IsArray(playbackStateItem), AVSESSION_ERROR, "get playbackStateItem err");
+    CHECK_AND_RETURN_RET_LOG(!(playbackStateItem == nullptr || cJSON_IsInvalid(playbackStateItem) ||
+        !cJSON_IsArray(playbackStateItem)), AVSESSION_ERROR, "get playbackStateItem err");
     ret = JsonToVector(playbackStateItem, basicInfo.playBackStateCap_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get playBackStateCap error");
 
     cJSON* controlCommandItem = cJSON_GetObjectItem(jsonObj, "controlCommand");
-    CHECK_AND_RETURN_RET_LOG(controlCommandItem == nullptr || cJSON_IsInvalid(controlCommandItem) ||
-        !cJSON_IsArray(controlCommandItem), AVSESSION_ERROR, "get controlCommandItem err");
+    CHECK_AND_RETURN_RET_LOG(!(controlCommandItem == nullptr || cJSON_IsInvalid(controlCommandItem) ||
+        !cJSON_IsArray(controlCommandItem)), AVSESSION_ERROR, "get controlCommandItem err");
     ret = JsonToVector(controlCommandItem, basicInfo.controlCommandCap_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get controlCommandCap error");
 
@@ -426,39 +426,39 @@ int32_t JsonUtils::GetSessionCompatibility(cJSON* jsonObj, AVSessionBasicInfo& b
     CHECK_AND_RETURN_RET_LOG(jsonObj != nullptr && !cJSON_IsInvalid(jsonObj), AVSESSION_ERROR, "json object is err");
 
     cJSON* networkIdItem = cJSON_GetObjectItem(jsonObj, "networkId");
-    CHECK_AND_RETURN_RET_LOG(networkIdItem == nullptr || cJSON_IsInvalid(networkIdItem) ||
-        !cJSON_IsString(networkIdItem), AVSESSION_ERROR, "get networkIdItem err");
+    CHECK_AND_RETURN_RET_LOG(!(networkIdItem == nullptr || cJSON_IsInvalid(networkIdItem) ||
+        !cJSON_IsString(networkIdItem)), AVSESSION_ERROR, "get networkIdItem err");
     basicInfo.networkId_ = std::string(networkIdItem->valuestring);
     cJSON* vendorIdItem = cJSON_GetObjectItem(jsonObj, "vendorId");
-    CHECK_AND_RETURN_RET_LOG(vendorIdItem == nullptr || cJSON_IsInvalid(vendorIdItem) ||
-        !cJSON_IsString(vendorIdItem), AVSESSION_ERROR, "get vendorIdItem err");
+    CHECK_AND_RETURN_RET_LOG(!(vendorIdItem == nullptr || cJSON_IsInvalid(vendorIdItem) ||
+        !cJSON_IsString(vendorIdItem)), AVSESSION_ERROR, "get vendorIdItem err");
     basicInfo.vendorId_ = std::string(vendorIdItem->valuestring);
     cJSON* deviceTypeItem = cJSON_GetObjectItem(jsonObj, "deviceType");
-    CHECK_AND_RETURN_RET_LOG(deviceTypeItem == nullptr || cJSON_IsInvalid(deviceTypeItem) ||
-        !cJSON_IsString(deviceTypeItem), AVSESSION_ERROR, "get deviceTypeItem err");
+    CHECK_AND_RETURN_RET_LOG(!(deviceTypeItem == nullptr || cJSON_IsInvalid(deviceTypeItem) ||
+        !cJSON_IsString(deviceTypeItem)), AVSESSION_ERROR, "get deviceTypeItem err");
     basicInfo.deviceType_ = std::string(deviceTypeItem->valuestring);
     cJSON* systemVersionItem = cJSON_GetObjectItem(jsonObj, "systemVersion");
-    CHECK_AND_RETURN_RET_LOG(systemVersionItem == nullptr || cJSON_IsInvalid(systemVersionItem) ||
-        !cJSON_IsString(systemVersionItem), AVSESSION_ERROR, "get systemVersionItem err");
+    CHECK_AND_RETURN_RET_LOG(!(systemVersionItem == nullptr || cJSON_IsInvalid(systemVersionItem) ||
+        !cJSON_IsString(systemVersionItem)), AVSESSION_ERROR, "get systemVersionItem err");
     basicInfo.systemVersion_ = std::string(systemVersionItem->valuestring);
     cJSON* sessionVersionItem = cJSON_GetObjectItem(jsonObj, "avsessionVersion");
-    CHECK_AND_RETURN_RET_LOG(sessionVersionItem == nullptr || cJSON_IsInvalid(sessionVersionItem) ||
-        !cJSON_IsNumber(sessionVersionItem), AVSESSION_ERROR, "get sessionVersionItem err");
+    CHECK_AND_RETURN_RET_LOG(!(sessionVersionItem == nullptr || cJSON_IsInvalid(sessionVersionItem) ||
+        !cJSON_IsNumber(sessionVersionItem)), AVSESSION_ERROR, "get sessionVersionItem err");
     basicInfo.sessionVersion_ = sessionVersionItem->valueint;
 
     cJSON* reserveItem = cJSON_GetObjectItem(jsonObj, "reserve");
-    CHECK_AND_RETURN_RET_LOG(reserveItem == nullptr || cJSON_IsInvalid(reserveItem) ||
-        !cJSON_IsArray(reserveItem), AVSESSION_ERROR, "get reserveItem err");
+    CHECK_AND_RETURN_RET_LOG(!(reserveItem == nullptr || cJSON_IsInvalid(reserveItem) ||
+        !cJSON_IsArray(reserveItem)), AVSESSION_ERROR, "get reserveItem err");
     int32_t ret = JsonToVector(reserveItem, basicInfo.reserve_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get reserve error");
     cJSON* featuresItem = cJSON_GetObjectItem(jsonObj, "features");
-    CHECK_AND_RETURN_RET_LOG(featuresItem == nullptr || cJSON_IsInvalid(featuresItem) ||
-        !cJSON_IsArray(featuresItem), AVSESSION_ERROR, "get featuresItem err");
+    CHECK_AND_RETURN_RET_LOG(!(featuresItem == nullptr || cJSON_IsInvalid(featuresItem) ||
+        !cJSON_IsArray(featuresItem)), AVSESSION_ERROR, "get featuresItem err");
     ret = JsonToVector(featuresItem, basicInfo.feature_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get features error");
 
     cJSON* capabilitySetItem = cJSON_GetObjectItem(jsonObj, "capabilitySet");
-    CHECK_AND_RETURN_RET_LOG(capabilitySetItem == nullptr || cJSON_IsInvalid(capabilitySetItem),
+    CHECK_AND_RETURN_RET_LOG(!(capabilitySetItem == nullptr || cJSON_IsInvalid(capabilitySetItem)),
         AVSESSION_ERROR, "get capabilitySetItem err");
     if (GetSessionCapabilitySet(capabilitySetItem, basicInfo) != AVSESSION_SUCCESS) {
         SLOGE("GetSessionCapabilitySet fail");
@@ -466,8 +466,8 @@ int32_t JsonUtils::GetSessionCompatibility(cJSON* jsonObj, AVSessionBasicInfo& b
     }
 
     cJSON* extendCapabilityItem = cJSON_GetObjectItem(jsonObj, "extendCapability");
-    CHECK_AND_RETURN_RET_LOG(extendCapabilityItem == nullptr || cJSON_IsInvalid(extendCapabilityItem) ||
-        !cJSON_IsArray(extendCapabilityItem), AVSESSION_ERROR, "get extendCapabilityItem err");
+    CHECK_AND_RETURN_RET_LOG(!(extendCapabilityItem == nullptr || cJSON_IsInvalid(extendCapabilityItem) ||
+        !cJSON_IsArray(extendCapabilityItem)), AVSESSION_ERROR, "get extendCapabilityItem err");
     ret = JsonToVector(extendCapabilityItem, basicInfo.extendCapability_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get extendCapability error");
 
@@ -479,13 +479,13 @@ int32_t JsonUtils::GetSessionData(cJSON* jsonObj, AVSessionBasicInfo& basicInfo)
     CHECK_AND_RETURN_RET_LOG(jsonObj != nullptr && !cJSON_IsInvalid(jsonObj), AVSESSION_ERROR, "json object is err");
 
     cJSON* systemTimeItem = cJSON_GetObjectItem(jsonObj, "systemTime");
-    CHECK_AND_RETURN_RET_LOG(systemTimeItem == nullptr || cJSON_IsInvalid(systemTimeItem) ||
-        !cJSON_IsNumber(systemTimeItem), AVSESSION_ERROR, "get systemTimeItem err");
+    CHECK_AND_RETURN_RET_LOG(!(systemTimeItem == nullptr || cJSON_IsInvalid(systemTimeItem) ||
+        !cJSON_IsNumber(systemTimeItem)), AVSESSION_ERROR, "get systemTimeItem err");
     basicInfo.systemTime_ = systemTimeItem->valueint;
 
     cJSON* extendItem = cJSON_GetObjectItem(jsonObj, "extend");
-    CHECK_AND_RETURN_RET_LOG(extendItem == nullptr || cJSON_IsInvalid(extendItem) ||
-        !cJSON_IsArray(extendItem), AVSESSION_ERROR, "get extendItem err");
+    CHECK_AND_RETURN_RET_LOG(!(extendItem == nullptr || cJSON_IsInvalid(extendItem) ||
+        !cJSON_IsArray(extendItem)), AVSESSION_ERROR, "get extendItem err");
     int32_t ret = JsonToVector(extendItem, basicInfo.extend_);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AVSESSION_ERROR, "Get extend error");
 
