@@ -323,7 +323,7 @@ export class AVInputCastPicker extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             UIExtensionComponent.create({
                 abilityName: 'AVInputCastPickerAbility',
-                bundleName: 'com.hmos.mediacontroller',
+                bundleName: 'com.hw.hmos.mediacontroller',
                 parameters: {
                     'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
                     'isCustomPicker': isCustomPicker,
