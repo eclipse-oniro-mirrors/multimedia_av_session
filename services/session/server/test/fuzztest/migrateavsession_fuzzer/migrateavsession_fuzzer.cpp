@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "migrateavsession_fuzzer.h"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+#include "migrateavsession_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -52,7 +52,7 @@ T GetData()
     return object;
 }
 
-static std::string GenerateString(size_t target_len) 
+static std::string GenerateString(size_t target_len)
 {
     if (RAW_DATA == nullptr || target_len == 0) {
         return "";
@@ -65,12 +65,12 @@ static std::string GenerateString(size_t target_len)
         return "";
     }
 
-    std::vector<char> buffer(copy_len + 1, '\0'); 
+    std::vector<char> buffer(copy_len + 1, '\0');
 
-    errno_t ret = memcpy_s(buffer.data(), buffer.size(), 
+    errno_t ret = memcpy_s(buffer.data(), buffer.size(),
                         RAW_DATA + g_pos, copy_len);
     if (ret != EOK) {
-        return ""; 
+        return "";
     }
 
     g_pos += copy_len;
@@ -247,7 +247,7 @@ void DoMediaImageSyncToRemoteTest()
         SLOGI("innerPixelMap is null");
         return;
     }
-    
+
     std::vector<uint8_t> innerImgBuffer_;
     for(size_t i = 0; i < g_dataSize; ++i) {
         innerImgBuffer_.push_back(GetData<uint8_t>());
@@ -267,8 +267,11 @@ void DoValidCommandsSyncToRemoteTest()
 
 void OnBytesReceivedTest()
 {
-    std::string deviceId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
-    std::string data = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    constexpr auto MIN_RANDOM_NUM = 2;
+    auto randomNum = (static_cast<uint32_t> (rand()) < MIN_RANDOM_NUM) ?
+        MIN_RANDOM_NUM : static_cast<uint32_t> (rand());
+    std::string deviceId = GenerateString(randomNum % g_dataSize);
+    std::string data = GenerateString(randomNum % g_dataSize);
     std::vector<int32_t> commands {
         SYNC_CONTROLLER_LIST,
         SYNC_CONTROLLER_LIST,
