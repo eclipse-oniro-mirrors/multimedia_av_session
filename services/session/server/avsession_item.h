@@ -270,6 +270,8 @@ public:
 
     void UpdateCastDeviceMap(DeviceInfo deviceInfo);
 
+    std::map<std::string, DeviceInfo> GetCastDeviceMap() const;
+
     void SetCastHandle(int64_t castHandle);
 
     void RegisterDeviceStateCallback();
