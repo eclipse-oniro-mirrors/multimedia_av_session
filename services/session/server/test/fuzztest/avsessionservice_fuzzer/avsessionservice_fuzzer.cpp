@@ -87,6 +87,31 @@ std::string GetString()
     return output;
 }
 
+std::string GenerateString(size_t target_len) {
+    if (RAW_DATA == nullptr || target_len == 0) {
+        return "";
+    }
+
+    const size_t available_len = (g_totalSize > g_sizePos) ? (g_totalSize - g_sizePos) : 0;
+    const size_t copy_len = std::min(target_len, available_len);
+
+    if (copy_len == 0) {
+        return "";
+    }
+
+    std::vector<char> buffer(copy_len + 1, '\0');
+
+    errno_t ret = memcpy_s(buffer.data(), buffer.size(),
+                          RAW_DATA + g_sizePos, copy_len);
+    if (ret != EOK) {
+        return "";
+    }
+
+    g_sizePos += copy_len;
+
+    return std::string(buffer.data());
+}
+
 template<class T>
 uint32_t GetArrLength(T& arr)
 {
@@ -908,10 +933,22 @@ void ProcessTargetMigrateTest(sptr<AVSessionService> service)
 {
     OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
     memset_s(&deviceInfo, sizeof(deviceInfo), 0, sizeof(deviceInfo));
-    strcpy_s(deviceInfo.deviceId, sizeof(deviceInfo.deviceId) - 1, GetString().c_str());
-    strcpy_s(deviceInfo.deviceName, sizeof(deviceInfo.deviceName) - 1, GetString().c_str());
+    constexpr size_t DEVICE_ID_MAX_LEN = sizeof(deviceInfo.deviceId) - 1;
+    std::string deviceId = GenerateString(DEVICE_ID_MAX_LEN);
+    strncpy_s(deviceInfo.deviceId, sizeof(deviceInfo.deviceId),
+             deviceId.c_str(), deviceId.length());
+
+    constexpr size_t DEVICE_NAME_MAX_LEN = sizeof(deviceInfo.deviceName) - 1;
+    std::string deviceName = GenerateString(DEVICE_NAME_MAX_LEN);
+    strncpy_s(deviceInfo.deviceName, sizeof(deviceInfo.deviceName),
+             deviceName.c_str(), deviceName.length());
+
     deviceInfo.deviceTypeId = GetData<uint16_t>();
-    strcpy_s(deviceInfo.networkId, sizeof(deviceInfo.networkId) - 1, GetString().c_str());
+
+    constexpr size_t NETWORK_ID_MAX_LEN = sizeof(deviceInfo.networkId) - 1;
+    std::string networkId = GenerateString(NETWORK_ID_MAX_LEN);
+    strncpy_s(deviceInfo.networkId, sizeof(deviceInfo.networkId),
+             networkId.c_str(), networkId.length());
     deviceInfo.range = GetData<int32_t>();
     deviceInfo.networkType = GetData<int32_t>();
     static std::vector<OHOS::DistributedHardware::DmAuthForm> authForms {
@@ -934,9 +971,11 @@ void GetDistributedSessionControllersInnerTest(sptr<AVSessionService> service)
     std::string bundleName = GetString();
     std::string abilityName = GetString();
     sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
-    if(!avSessionItemObj) {
+    sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
+    if(!avSessionItemObj || !avSessionItem) {
         return;
     }
+    ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
     std::vector<sptr<IRemoteObject>> sessionControllers;
     sessionControllers.push_back(avSessionItemObj);
     std::vector<DistributedSessionType> sessionTypes {
@@ -965,7 +1004,7 @@ void AbilityHasSessionTest(sptr<AVSessionService> service)
         getpid()
     };
     auto randomNumber = GetData<uint32_t>();
-    service->AbilityHasSession(pids[randomNumber % 2]);
+    service->AbilityHasSession(pids[randomNumber % pids.size()]);
 }
 
 void GetPresentControllerTest(sptr<AVSessionService> service)
@@ -1016,7 +1055,6 @@ void AvSessionServiceTest002(sptr<AVSessionService> service)
     GetAVSortDirTest(service);
     NotifyMigrateStopTest(service);
     ProcessTargetMigrateTest(service);
-    NotifyRemoteBundleChangeTest(service);
     NotifyRemoteBundleChangeTest(service);
     AbilityHasSessionTest(service);
     GetPresentControllerTest(service);
