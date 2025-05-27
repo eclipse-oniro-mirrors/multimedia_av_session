@@ -126,7 +126,8 @@ private:
     static napi_status OffPlayRequest(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffKeyRequest(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
 
-    static std::function<void()> PrepareAsyncExecutor(NapiAVCastController* napiController, AVQueueItem& avQueueItem);
+    static std::function<void()> PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
+        AVQueueItem& avQueueItem);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,

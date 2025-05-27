@@ -262,11 +262,11 @@ int32_t NapiAVCastController::DownloadCastImg(std::shared_ptr<AVMediaDescription
     return AVSESSION_ERROR;
 }
 
-std::function<void()> NapiAVCastController::PrepareAsyncExecutor(NapiAVCastController* napiCastController,
+std::function<void()> NapiAVCastController::PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
     AVQueueItem& data)
 {
-    return [napiCastController, data]() {
-        if (napiCastController->castController_ == nullptr) {
+    return [castController_, data]() {
+        if (castController_ == nullptr) {
             return;
         }
         SLOGI("do prepare set with online download prepare with uri alive");
@@ -286,7 +286,10 @@ std::function<void()> NapiAVCastController::PrepareAsyncExecutor(NapiAVCastContr
             } else {
                 description->SetIconUri("URI_CACHE");
                 item.SetDescription(description);
-                auto ret = napiCastController->castController_->Prepare(item);
+                 if (castController_ == nullptr) {
+                    return;
+                }
+                auto ret = castController_->Prepare(item);
                 SLOGI("do prepare set second with ret %{public}d", ret);
             }
         }
@@ -342,7 +345,7 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
     auto complete = [env, context](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        auto asyncExecutor = PrepareAsyncExecutor(napiCastController, context->avQueueItem_);
+        auto asyncExecutor = PrepareAsyncExecutor(napiCastController->castController_, context->avQueueItem_);
         CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
             .AVSessionPostTask(asyncExecutor, "PrepareAsync"),
             "NapiAVCastController PrepareAsync handler postTask failed");
