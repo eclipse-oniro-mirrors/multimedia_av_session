@@ -286,7 +286,7 @@ std::function<void()> NapiAVCastController::PrepareAsyncExecutor(std::shared_ptr
             } else {
                 description->SetIconUri("URI_CACHE");
                 item.SetDescription(description);
-                 if (castController_ == nullptr) {
+                if (castController_ == nullptr) {
                     return;
                 }
                 auto ret = castController_->Prepare(item);
