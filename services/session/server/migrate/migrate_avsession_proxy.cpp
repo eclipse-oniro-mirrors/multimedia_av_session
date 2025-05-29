@@ -399,6 +399,7 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     }
     AVMetaData metaData;
     if (AVSESSION_SUCCESS == remoteSession_->GetAVMetaData(metaData)) {
+        metaData.SetAssetId(metaData.GetAssetId().empty() ? DEFAULT_STRING : metaData.GetAssetId());
         metaData.SetWriter(bundleName);
         metaData.SetTitle("");
         metaData.SetArtist("");
