@@ -406,6 +406,11 @@ int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, std::shared_ptr<
         new DataContextForThreadSafe { dataSrcRef_, mem->GetBase(), length, pos, &result, dataSrcSyncCond_ };
     napi_status status = napi_call_threadsafe_function(threadSafeReadDataSrcFunc_, data, napi_tsfn_blocking);
     CHECK_RETURN(status == napi_ok, "get callback value failed", 0);
+    if (status != napi_ok) {
+        SLOGE("readDataSrc function call failed %{public}d", status);
+        delete data;
+        return 0;
+    }
 
     std::unique_lock<std::mutex> lock(dataSrcSyncLock_);
     auto waitStatus = dataSrcSyncCond_.wait_for(lock, std::chrono::milliseconds(500));
