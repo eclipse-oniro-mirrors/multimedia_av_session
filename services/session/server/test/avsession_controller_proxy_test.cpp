@@ -763,3 +763,18 @@ static HWTEST_F(AVSessionControllerProxyTest, GetRealPlaybackPosition002, testin
     EXPECT_EQ(ret, 0);
     SLOGI("GetRealPlaybackPosition002, end");
 }
+
+/**
+ * @tc.name: GetLaunchAbilityInner001
+ * @tc.desc: Test GetLaunchAbilityInner
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerProxyTest, GetLaunchAbilityInner001, testing::ext::TestSize.Level1)
+{
+    SLOGI("GetLaunchAbilityInner001, start");
+    OHOS::AbilityRuntime::WantAgent::WantAgent ability;
+    OHOS::AbilityRuntime::WantAgent::WantAgent * abilityPtr = &ability;
+    int64_t ret = aVSessionControllerProxy->GetLaunchAbilityInner(abilityPtr);
+    EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
+    SLOGI("GetLaunchAbilityInner001, end");
+}
