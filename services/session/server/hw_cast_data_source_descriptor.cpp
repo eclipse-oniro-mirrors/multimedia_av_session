@@ -35,7 +35,6 @@ int32_t HwCastDataSourceDescriptor::ReadAt(const std::shared_ptr<CastEngine::Cas
     } else {
         SLOGE("no callback");
     }
-    SLOGI("after read %{public}s", mem->GetBase());
     return result;
 }
 
