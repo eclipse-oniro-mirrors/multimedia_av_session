@@ -1423,6 +1423,8 @@ int32_t AVSessionItem::StopCast(bool continuePlay)
 {
     std::lock_guard lockGuard(castLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
