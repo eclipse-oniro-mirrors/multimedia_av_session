@@ -17,6 +17,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
+#include "ipc_skeleton.h"
 #include "media_info_holder.h"
 #include "surface_utils.h"
 #include "session_xcollie.h"
@@ -37,6 +38,7 @@ bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVCastControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption &option)
 {
+    CHECK_AND_RETURN_RET_LOG(IPCSkeleton::IsLocalCalling(), AVSESSION_ERROR, "forbid rpc remote request");
     if (code >= static_cast<uint32_t>(IAVCastController::CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND)
         && code < static_cast<uint32_t>(IAVCastController::CAST_CONTROLLER_CMD_MAX)) {
         SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);

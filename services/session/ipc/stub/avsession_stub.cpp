@@ -16,6 +16,7 @@
 #include "avsession_stub.h"
 #include "avsession_callback_proxy.h"
 #include "avsession_trace.h"
+#include "ipc_skeleton.h"
 #include "session_xcollie.h"
 
 namespace OHOS::AVSession {
@@ -32,6 +33,7 @@ bool AVSessionStub::CheckInterfaceToken(MessageParcel& data)
 
 int32_t AVSessionStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    CHECK_AND_RETURN_RET_LOG(IPCSkeleton::IsLocalCalling(), AVSESSION_ERROR, "forbid rpc remote request");
     if (code >= static_cast<uint32_t>(IAVSession::SESSION_CMD_GET_SESSION_ID)
         && code < static_cast<uint32_t>(IAVSession::SESSION_CMD_MAX)) {
         SessionXCollie sessionXCollie(mapCodeToFuncNameXCollie[code]);
