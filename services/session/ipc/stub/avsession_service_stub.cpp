@@ -46,6 +46,11 @@ bool AVSessionServiceStub::CheckInterfaceToken(MessageParcel& data)
 int32_t AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
                                               MessageOption& option)
 {
+    if (!IPCSkeleton::IsLocalCalling() &&
+        code != static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_COMMAND_TO_REMOTE)) {
+        SLOGI("forbid rpc remote request");
+        return AVSESSION_ERROR;
+    }
     if (code >= static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION) &&
         code < static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX) &&
         code != static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST)) {
