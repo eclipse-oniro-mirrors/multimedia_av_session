@@ -16,6 +16,7 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_trace.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS::AVSession {
 bool SessionListenerStub::CheckInterfaceToken(MessageParcel& data)
@@ -32,6 +33,7 @@ bool SessionListenerStub::CheckInterfaceToken(MessageParcel& data)
 int32_t SessionListenerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
                                              MessageOption& option)
 {
+    CHECK_AND_RETURN_RET_LOG(IPCSkeleton::IsLocalCalling(), AVSESSION_ERROR, "forbid rpc remote request");
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }

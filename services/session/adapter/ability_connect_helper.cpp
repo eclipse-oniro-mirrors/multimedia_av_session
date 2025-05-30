@@ -156,6 +156,7 @@ AbilityConnectionStub::~AbilityConnectionStub()
 int AbilityConnectionStub::OnRemoteRequest(
     uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    CHECK_AND_RETURN_RET_LOG(IPCSkeleton::IsLocalCalling(), AVSESSION_ERROR, "forbid rpc remote request");
     auto descriptor = AbilityConnectionStub::GetDescriptor();
     auto remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
