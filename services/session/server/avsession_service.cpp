@@ -2810,16 +2810,16 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
             }
         }
     }
+    HandleSessionReleaseInner();
+}
+
+void AVSessionService::HandleSessionReleaseInner()
+{
 #ifdef START_STOP_ON_DEMAND_ENABLE
     if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0) {
         PublishEvent(mediaPlayStateFalse);
     }
 #endif
-    HandleDisableCast();
-}
-
-void AVSessionService::HandleDisableCast()
-{
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0 ||
         (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1 &&

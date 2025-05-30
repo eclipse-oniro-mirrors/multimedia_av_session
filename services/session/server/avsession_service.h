@@ -207,7 +207,7 @@ public:
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
-    void HandleDisableCast();
+    void HandleSessionReleaseInner();
 
     void HandleCallStartEvent();
 
