@@ -167,6 +167,8 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
     SLOGI("Session destroy with castHandle: %{public}lld", (long long)castHandle_);
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
         if (!collaborationNeedNetworkId_.empty()) {
+            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         }
@@ -1261,7 +1263,12 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             return;
         }
     }
-    if (castState == connectStateFromCast_ || castState == authingStateFromCast_) { // 6 is connected status (stream)
+    collaborationNeedDeviceId_ = deviceInfo.deviceId_;
+    if (castState == authingStateFromCast_) {
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_CONNECTING);
+    }
+    if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
             castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {
@@ -1276,6 +1283,8 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             SLOGI("networkId is empty, try use deviceId:%{public}s", deviceInfo.deviceId_.c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     }
@@ -1414,6 +1423,8 @@ int32_t AVSessionItem::StopCast(bool continuePlay)
 {
     std::lock_guard lockGuard(castLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
