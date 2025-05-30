@@ -299,7 +299,7 @@ public:
     void ReportPlaybackState(const AVPlaybackState& state);
     void ReportMetadataChange(const AVMetaData& metadata);
     void ReportCommandChange();
-    void ReportSessionControl(std::string bundleName, int32_t cmd);
+    void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 
 protected:

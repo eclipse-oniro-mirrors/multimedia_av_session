@@ -2044,7 +2044,7 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
             AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
     if (startAVPlayback) {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionControl(CallerBundleName, CONTROL_COLD_START);
+        ReportSessionControl(bundleName, CONTROL_COLD_START);
 #endif
         return (*startAVPlayback)(bundleName, assetId, startPlayInfo, startPlayType);
     }
@@ -2075,7 +2075,7 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
             AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
     if (startAVPlayback) {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionControl(CallerBundleName, CONTROL_COLD_START);
+        ReportSessionControl(bundleName, CONTROL_COLD_START);
 #endif
         return (*startAVPlayback)(bundleName, assetId, startPlayInfo, startPlayType);
     }
@@ -2643,7 +2643,8 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
         ReleaseCastSession();
     }
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    AVSessionSysEvent::GetInstance().ReportPlayingState();
+    AVSessionSysEvent::GetInstance().ReportPlayingState(
+        BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid));
 #endif
 }
 
@@ -3998,7 +3999,7 @@ void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, ui
     }
 }
 
-void AVSessionService::ReportSessionControl(std::string bundleName, int32_t cmd)
+void AVSessionService::ReportSessionControl(const std::string& bundleName, int32_t cmd)
 {
     if (cmd == AVControlCommand::SESSION_CMD_PLAY ||
         cmd == AVControlCommand::SESSION_CMD_PAUSE ||

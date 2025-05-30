@@ -2565,7 +2565,7 @@ void AVSessionItem::ReportCommandChange()
     }
 }
 
-void AVSessionItem::ReportSessionControl(std::string bundleName, int32_t cmd)
+void AVSessionItem::ReportSessionControl(const std::string& bundleName, int32_t cmd)
 {
     if (cmd == AVControlCommand::SESSION_CMD_PLAY ||
         cmd == AVControlCommand::SESSION_CMD_PAUSE ||
