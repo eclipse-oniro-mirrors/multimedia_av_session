@@ -80,6 +80,7 @@ private:
     uint32_t lastCommandQuality_ = 0;
     uint8_t lastPlaybackState_ = 0;
     uint8_t lastControl_ = AVControlCommand::SESSION_CMD_MAX;
+    std::recursive_mutex lock_;
 };
 
 class AVSessionSysEvent {
@@ -150,10 +151,11 @@ public:
     void SetAudioStatus(pid_t uid, int32_t rendererState);
     int32_t GetAudioStatus(pid_t uid);
     void ReportLowQuality();
-    void ReportPlayingState();
+    void ReportPlayingState(const std::string& bundleName);
+    void ReportPlayingStateAll();
     void RegisterPlayingState();
     void UnRegisterPlayingState();
-    PlayingStateInfo* GetPlayingStateInfo(std::string bundleName);
+    PlayingStateInfo* GetPlayingStateInfo(const std::string& bundleName);
 
 private:
     std::map<pid_t, int32_t> audioStatuses_;
@@ -169,7 +171,7 @@ private:
     std::list<AVSessionSysEvent::LifeCycleInfo> lifeCycleInfos_;
     std::list<AVSessionSysEvent::ControllerCommandInfo> controllerCommandInfos_;
     std::map<std::string, AVSessionSysEvent::BackControlReportInfo> lowQualityInfos_;
-    std::map<std::string, PlayingStateInfo> playingStateInfos_;
+    std::map<std::string, std::unique_ptr<PlayingStateInfo>> playingStateInfos_;
     static constexpr float MULTIPLE = 1.0f;
 };
 #endif

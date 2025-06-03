@@ -580,7 +580,7 @@ private:
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     void ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state);
-    void ReportSessionControl(std::string bundleName, int32_t cmd);
+    void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 
     std::atomic<uint32_t> sessionSeqNum_ {};

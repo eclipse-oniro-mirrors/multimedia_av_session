@@ -181,24 +181,42 @@ void AVSessionSysEvent::SetAudioStatus(pid_t uid, int32_t rendererState)
     audioStatuses_[uid] = rendererState;
 }
 
-void AVSessionSysEvent::ReportPlayingState()
+void AVSessionSysEvent::ReportPlayingState(const std::string& bundleName)
+{
+    std::lock_guard lockGuard(lock_);
+    if (playingStateInfos_.empty()) {
+        return;
+    }
+
+    if (playingStateInfos_.find(bundleName) == playingStateInfos_.end()) {
+        return;
+    }
+
+    auto playingStateInfo = playingStateInfos_[bundleName].get();
+    if (playingStateInfo != nullptr) {
+        HiSysWriteStatistic("PLAYING_AVSESSION_STATS",
+            "APP_NAME", playingStateInfo->bundleName_,
+            "APP_VERSION", playingStateInfo->appVersion_,
+            "AVSESSION_STATE", playingStateInfo->state_,
+            "AVSESSION_STATE_TIMESTAMP", playingStateInfo->stateTime_,
+            "AVSESSION_META_QUALITY", playingStateInfo->metaQuality_,
+            "AVSESSION_META_QUALITY_TIMESTAMP", playingStateInfo->metaQualityTime_,
+            "AVSESSION_COMMAND_QUALITY", playingStateInfo->commandQuality_,
+            "AVSESSION_COMMAND_QUA_TIMESTAMP", playingStateInfo->commandQualityTime_,
+            "AVSESSION_PLAYSTATE", playingStateInfo->playbackState_,
+            "AVSESSION_PLAYSTATE_TIMESTAMP", playingStateInfo->playbackStateTime_,
+            "AVSESSION_CONTROL", playingStateInfo->control_,
+            "AVSESSION_CONTROL_BUNDLE_NAME", playingStateInfo->callerBundleName_,
+            "AVSESSION_CONTROL_TIMESTAMP", playingStateInfo->controlTime_);
+    }
+    playingStateInfos_.erase(bundleName);
+}
+
+void AVSessionSysEvent::ReportPlayingStateAll()
 {
     std::lock_guard lockGuard(lock_);
     for (const auto& it : playingStateInfos_) {
-        HiSysWriteStatistic("PLAYING_AVSESSION_STATS",
-            "APP_NAME", it.second.bundleName_,
-            "APP_VERSION", it.second.appVersion_,
-            "AVSESSION_STATE", it.second.state_,
-            "AVSESSION_STATE_TIMESTAMP", it.second.stateTime_,
-            "AVSESSION_META_QUALITY", it.second.metaQuality_,
-            "AVSESSION_META_QUALITY_TIMESTAMP", it.second.metaQualityTime_,
-            "AVSESSION_COMMAND_QUALITY", it.second.commandQuality_,
-            "AVSESSION_COMMAND_QUA_TIMESTAMP", it.second.commandQualityTime_,
-            "AVSESSION_PLAYSTATE", it.second.playbackState_,
-            "AVSESSION_PLAYSTATE_TIMESTAMP", it.second.playbackStateTime_,
-            "AVSESSION_CONTROL", it.second.control_,
-            "AVSESSION_CONTROL_BUNDLE_NAME", it.second.callerBundleName_,
-            "AVSESSION_CONTROL_TIMESTAMP", it.second.controlTime_);
+        ReportPlayingState(it.second->bundleName_);
     }
     playingStateInfos_.clear();
 }
@@ -211,7 +229,7 @@ void AVSessionSysEvent::RegisterPlayingState()
 
     playingStateTimer_ = std::make_unique<OHOS::Utils::Timer>("PlayingStatisticTimer");
     auto timeCallback = [this]() {
-        ReportPlayingState();
+        ReportPlayingStateAll();
     };
     playingStateTimerId_ = playingStateTimer_->Register(timeCallback, PLAYING_STATE_CHECK_INTERVAL, false);
     playingStateTimer_->Setup();
@@ -235,71 +253,75 @@ static int64_t UTCTimeMilliSeconds()
     return t.tv_sec * SEC_TO_MSEC + t.tv_nsec / MSEC_TO_NSEC;
 }
 
-PlayingStateInfo* AVSessionSysEvent::GetPlayingStateInfo(std::string bundleName)
+PlayingStateInfo* AVSessionSysEvent::GetPlayingStateInfo(const std::string& bundleName)
 {
     std::lock_guard lockGuard(lock_);
     if (playingStateInfos_.find(bundleName) == playingStateInfos_.end()) {
-        PlayingStateInfo stateInfo;
-        stateInfo.bundleName_ = bundleName;
-        playingStateInfos_.insert(std::make_pair(bundleName, stateInfo));
+        playingStateInfos_.insert({bundleName, std::make_unique<PlayingStateInfo>()});
+        playingStateInfos_[bundleName]->bundleName_ = bundleName;
     }
-    return &playingStateInfos_[bundleName];
+    return playingStateInfos_[bundleName].get();
 }
 
 void PlayingStateInfo::updateState(uint8_t state)
 {
+    std::lock_guard lockGuard(lock_);
     if (state != lastState_) {
         lastState_ = state;
         state_.push_back(state);
         stateTime_.push_back(UTCTimeMilliSeconds());
         if (state_.size() >= REPORT_SIZE) {
-            AVSessionSysEvent::GetInstance().ReportPlayingState();
+            AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
         }
     }
 }
 
 void PlayingStateInfo::updateMetaQuality(MetadataQuality metaQuality)
 {
+    std::lock_guard lockGuard(lock_);
     metaQuality_.push_back(static_cast<uint8_t>(metaQuality));
     metaQualityTime_.push_back(UTCTimeMilliSeconds());
     if (metaQuality_.size() >= REPORT_SIZE) {
-        AVSessionSysEvent::GetInstance().ReportPlayingState();
+        AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
     }
 }
 
 void PlayingStateInfo::updateCommandQuality(uint32_t commandQuality)
 {
+    std::lock_guard lockGuard(lock_);
     if (commandQuality != lastCommandQuality_) {
         lastCommandQuality_ = commandQuality;
         commandQuality_.push_back(commandQuality);
         commandQualityTime_.push_back(UTCTimeMilliSeconds());
         if (commandQuality_.size() >= REPORT_SIZE) {
-            AVSessionSysEvent::GetInstance().ReportPlayingState();
+            AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
         }
     }
 }
 
 void PlayingStateInfo::updatePlaybackState(uint8_t playbackState)
 {
+    std::lock_guard lockGuard(lock_);
     if (playbackState != lastPlaybackState_) {
         lastPlaybackState_ = playbackState;
         playbackState_.push_back(playbackState);
         playbackStateTime_.push_back(UTCTimeMilliSeconds());
         if (playbackState_.size() >= REPORT_SIZE) {
-            AVSessionSysEvent::GetInstance().ReportPlayingState();
+            AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
         }
     }
 }
 
 void PlayingStateInfo::updateControl(uint8_t control, std::string callerBundleName)
 {
+    std::lock_guard lockGuard(lock_);
     if (control != lastControl_) {
         lastControl_ = control;
         control_.push_back(control);
         callerBundleName_.push_back(callerBundleName);
         controlTime_.push_back(UTCTimeMilliSeconds());
         if (control_.size() >= REPORT_SIZE) {
-            AVSessionSysEvent::GetInstance().ReportPlayingState();
+            AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
         }
     }
 }
