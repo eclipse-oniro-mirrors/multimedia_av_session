@@ -299,3 +299,50 @@ static HWTEST(BkGrAudioControllerTest, OnSessionCreate002, TestSize.Level1)
     EXPECT_NE(it, bkgraudiocontroller.sessionUIDs_.end());
     SLOGI("OnSessionCreate002 end!");
 }
+
+/**
+* @tc.name: OnDeviceLogEvent001
+* @tc.desc: test OnDeviceLogEvent
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, OnDeviceLogEvent001, TestSize.Level1)
+{
+    SLOGI("OnDeviceLogEvent001 begin!");
+    DeviceLogEventCode eventCode = DeviceLogEventCode::DEVICE_LOG_FULL;
+    const int64_t param = 1000;
+    BackgroundAudioController bkgraudiocontroller;
+    bkgraudiocontroller.OnDeviceLogEvent(eventCode, param);
+    SLOGI("OnDeviceLogEvent001 end!");
+}
+
+/**
+* @tc.name: OnDeviceOffline001
+* @tc.desc: test OnDeviceOffline
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, OnDeviceOffline001, TestSize.Level1)
+{
+    SLOGI("OnDeviceOffline001 begin!");
+    std::string deviceId = "test";
+    BackgroundAudioController bkgraudiocontroller;
+    bkgraudiocontroller.OnDeviceOffline(deviceId);
+    SLOGI("OnDeviceOffline001 end!");
+}
+
+/**
+* @tc.name: OnRemoteDistributedSessionChange001
+* @tc.desc: test OnRemoteDistributedSessionChange
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, OnRemoteDistributedSessionChange001, TestSize.Level1)
+{
+    SLOGI("OnRemoteDistributedSessionChange begin!");
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    sessionControllers.push_back(nullptr);
+    BackgroundAudioController bkgraudiocontroller;
+    bkgraudiocontroller.OnRemoteDistributedSessionChange(sessionControllers);
+    SLOGI("OnRemoteDistributedSessionChange end!");
+}
