@@ -190,46 +190,8 @@ int32_t HwCastStreamPlayer::RefreshCurrentAVQueueItem(const AVQueueItem& avQueue
 
 int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
 {
-    CastEngine::MediaInfo mediaInfo;
     std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
-    mediaInfo.mediaId = mediaDescription->GetMediaId();
-    mediaInfo.mediaName = mediaDescription->GetTitle();
-    mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
-    if (mediaDescription->GetMediaUri() == "") {
-        if (mediaDescription->GetFdSrc().fd_ == 0) {
-            SLOGW("No media id and fd src");
-            mediaInfo.mediaUrl = "http:";
-        } else {
-            mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
-        }
-    }
-    mediaInfo.mediaType = mediaDescription->GetMediaType();
-    mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
-    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition() < 0 ?
-        0 : mediaDescription->GetStartPosition());
-    mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
-    mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
-    mediaInfo.albumCoverUrl = mediaDescription->GetIconUri() == "" ?
-        mediaDescription->GetAlbumCoverUri() : mediaDescription->GetIconUri();
-    mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
-    mediaInfo.mediaArtist = mediaDescription->GetArtist();
-    mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
-    mediaInfo.appIconUrl = mediaDescription->GetIconUri();
-    mediaInfo.appName = mediaDescription->GetAppName();
-    mediaInfo.drmType = mediaDescription->GetDrmScheme();
-
-    AVDataSrcDescriptor dataSrc = mediaDescription->GetDataSrc();
-    SLOGI("has dataSrc hasCallback %{public}d", dataSrc.hasCallback);
-    if (dataSrc.hasCallback) {
-        if (castDataSrc_ == nullptr) {
-            castDataSrc_ = std::make_shared<AVSession::HwCastDataSourceDescriptor>();
-        }
-        castDataSrc_->SetCallback(dataSrc.callback_);
-        castDataSrc_->SetSize(dataSrc.fileSize);
-        mediaInfo.mediaUrl = "/file";
-        mediaInfo.dataSrc = castDataSrc_;
-    }
-
+    CastEngine::MediaInfo mediaInfo;
     buildCastInfo(mediaDescription, mediaInfo);
 
     std::lock_guard lockGuard(streamPlayerLock_);
@@ -274,56 +236,14 @@ bool HwCastStreamPlayer::RepeatPrepare(std::shared_ptr<AVMediaDescription>& medi
 
 int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
 {
-    CastEngine::MediaInfo mediaInfo;
     std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
     if (RepeatPrepare(mediaDescription)) {
         return AVSESSION_SUCCESS;
     }
-    mediaInfo.mediaId = mediaDescription->GetMediaId();
-    mediaInfo.mediaName = mediaDescription->GetTitle();
     SLOGI("do Prepare with mediaId %{public}s | title %{public}s",
-        mediaInfo.mediaId.c_str(), mediaInfo.mediaName.c_str());
-    if (mediaDescription->GetMediaUri() == "") {
-        if (mediaDescription->GetFdSrc().fd_ == 0) {
-            SLOGW("No media id and fd src");
-            mediaInfo.mediaUrl = "http:";
-            avQueueItem.GetDescription()->SetMediaUri("http:");
-        } else {
-            mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
-        }
-    } else {
-        mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
-    }
-    mediaInfo.mediaType = mediaDescription->GetMediaType();
-    mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
-    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition() < 0 ?
-        0 : mediaDescription->GetStartPosition());
-    mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
-    mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
-    if (mediaDescription->GetIconUri() == "") {
-        mediaInfo.albumCoverUrl = mediaDescription->GetAlbumCoverUri();
-    } else {
-        mediaInfo.albumCoverUrl = mediaDescription->GetIconUri();
-    }
-    mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
-    mediaInfo.mediaArtist = mediaDescription->GetArtist();
-    mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
-    mediaInfo.appIconUrl = mediaDescription->GetIconUri();
-    mediaInfo.appName = mediaDescription->GetAppName();
-    mediaInfo.drmType = mediaDescription->GetDrmScheme();
+        mediaDescription->GetMediaId().c_str(), mediaDescription->GetTitle().c_str());
 
-    AVDataSrcDescriptor dataSrc = mediaDescription->GetDataSrc();
-    SLOGI("has dataSrc hasCallback %{public}d", dataSrc.hasCallback);
-    if (dataSrc.hasCallback) {
-        if (castDataSrc_ == nullptr) {
-            castDataSrc_ = std::make_shared<AVSession::HwCastDataSourceDescriptor>();
-        }
-        castDataSrc_->SetCallback(dataSrc.callback_);
-        castDataSrc_->SetSize(dataSrc.fileSize);
-        mediaInfo.mediaUrl = "/file";
-        mediaInfo.dataSrc = castDataSrc_;
-    }
-
+    CastEngine::MediaInfo mediaInfo;
     buildCastInfo(mediaDescription, mediaInfo);
 
     std::lock_guard lockGuard(streamPlayerLock_);
@@ -341,6 +261,45 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
 void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& mediaDescription,
     CastEngine::MediaInfo& mediaInfo)
 {
+    mediaInfo.mediaId = mediaDescription->GetMediaId();
+    mediaInfo.mediaName = mediaDescription->GetTitle();
+    mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
+    if (mediaDescription->GetMediaUri() == "") {
+        if (mediaDescription->GetFdSrc().fd_ == 0) {
+            SLOGW("No media id and fd src");
+            mediaInfo.mediaUrl = "http:";
+            mediaDescription->SetMediaUri("http:");
+        } else {
+            mediaInfo.mediaUrl = std::to_string(mediaDescription->GetFdSrc().fd_);
+        }
+    }
+    mediaInfo.mediaType = mediaDescription->GetMediaType();
+    mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
+    mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
+    mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
+    mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
+    mediaInfo.albumCoverUrl = mediaDescription->GetIconUri() == "" ?
+        mediaDescription->GetAlbumCoverUri() : mediaDescription->GetIconUri();
+    mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
+    mediaInfo.mediaArtist = mediaDescription->GetArtist();
+    mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
+    mediaInfo.lrcContent = mediaDescription->GetLyricContent();
+    mediaInfo.appIconUrl = mediaDescription->GetIconUri();
+    mediaInfo.appName = mediaDescription->GetAppName();
+    mediaInfo.drmType = mediaDescription->GetDrmScheme();
+
+    AVDataSrcDescriptor dataSrc = mediaDescription->GetDataSrc();
+    SLOGI("has dataSrc hasCallback %{public}d", dataSrc.hasCallback);
+    if (dataSrc.hasCallback) {
+        if (castDataSrc_ == nullptr) {
+            castDataSrc_ = std::make_shared<AVSession::HwCastDataSourceDescriptor>();
+        }
+        castDataSrc_->SetCallback(dataSrc.callback_);
+        castDataSrc_->SetSize(dataSrc.fileSize);
+        mediaInfo.mediaUrl = "/file";
+        mediaInfo.dataSrc = castDataSrc_;
+    }
+
     if (mediaDescription->GetPcmSrc() && mediaDescription->GetCastInfo() != nullptr) {
         uid_t appUid = mediaDescription->GetCastInfo()->GetAppUid();
         SLOGI("buildCastInfo AUDIO_PCM uid %{public}d", appUid);
@@ -798,6 +757,7 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     mediaDescription->SetAlbumTitle(mediaInfo.albumTitle);
     mediaDescription->SetArtist(mediaInfo.mediaArtist);
     mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
+    mediaDescription->SetLyricContent(mediaInfo.lrcContent);
     mediaDescription->SetIconUri(mediaInfo.appIconUrl);
     mediaDescription->SetAppName(mediaInfo.appName);
     mediaDescription->SetDrmScheme(mediaInfo.drmType);
@@ -1003,6 +963,7 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
     mediaDescription->SetAlbumTitle(mediaInfo.albumTitle);
     mediaDescription->SetArtist(mediaInfo.mediaArtist);
     mediaDescription->SetLyricUri(mediaInfo.lrcUrl);
+    mediaDescription->SetLyricContent(mediaInfo.lrcContent);
     mediaDescription->SetIconUri(mediaInfo.appIconUrl);
     mediaDescription->SetAppName(mediaInfo.appName);
     mediaDescription->SetDrmScheme(mediaInfo.drmType);
