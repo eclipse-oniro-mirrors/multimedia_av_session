@@ -102,6 +102,7 @@ public:
         void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) {}
         void NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) {}
         void NotifyDeviceOffline(const std::string& deviceId) {}
+        void NotifyDeviceStateChange(const DeviceState& deviceState) {}
         void setInCast(bool isInCast) {}
         void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) {}
         int32_t checkEnableCast(bool enable) { return 0; }

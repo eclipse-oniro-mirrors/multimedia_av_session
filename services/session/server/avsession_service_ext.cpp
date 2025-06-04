@@ -357,6 +357,17 @@ void AVSessionService::NotifyDeviceOffline(const std::string& deviceId)
 }
 // LCOV_EXCL_STOP
 
+void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        SLOGI("notify device state change with pid %{public}d", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceStateChange");
+        listener->OnDeviceStateChange(deviceState);
+    }
+}
+
 int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());

@@ -51,6 +51,10 @@ public:
     {
     };
 
+    void OnDeviceStateChange(const DeviceState& deviceState) override
+    {
+    };
+
     void OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override
     {

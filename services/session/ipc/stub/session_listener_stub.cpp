@@ -119,4 +119,17 @@ int32_t SessionListenerStub::HandleOnRemoteDistributedSessionChange(MessageParce
     OnRemoteDistributedSessionChange(controllerResult);
     return ERR_NONE;
 }
+
+int32_t SessionListenerStub::HandleOnDeviceStateChange(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("SessionListenerStub::HandleOnDeviceStateChange");
+    DeviceState deviceState;
+    deviceState.deviceId = data.ReadString();
+    deviceState.deviceState = static_cast<ConnectionState>(data.ReadInt32());
+    deviceState.reasonCode = static_cast<ReasonCode>(data.ReadInt32());
+    deviceState.radarErrorCode = data.ReadInt32();
+
+    OnDeviceStateChange(deviceState);
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

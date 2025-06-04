@@ -256,6 +256,18 @@ int32_t AVRouterImpl::OnDeviceOffline(const std::string& deviceId)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVRouterImpl::OnDeviceStateChange(const DeviceState& deviceState)
+{
+    SLOGI("AVRouterImpl received OnDeviceStateChange event");
+
+    std::lock_guard lockGuard(servicePtrLock_);
+    if (servicePtr_ == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    servicePtr_->NotifyDeviceStateChange(deviceState);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
 {
     SLOGI("AVRouterImpl received OnCastServerDied event %{public}d", providerNumber);

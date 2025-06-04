@@ -69,6 +69,14 @@ public:
     virtual void NotifyDeviceOffline(const std::string& deviceId) = 0;
 
     /**
+     * Notify the event of device changed.
+     *
+     * @param { DeviceState } device state info.
+     * @since 20
+    */
+    virtual void NotifyDeviceStateChange(const DeviceState& deviceState) = 0;
+
+    /**
      * set cast state at castservice state changed.
      *
      * @param { bool } isInCast - cast state.

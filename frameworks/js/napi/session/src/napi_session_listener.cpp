@@ -198,6 +198,13 @@ void NapiSessionListener::OnRemoteDistributedSessionChange(
     HandleEvent(EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, sessionControllersRef);
 }
 
+void NapiSessionListener::OnDeviceStateChange(const DeviceState& deviceState)
+{
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceStateChange");
+    SLOGI("Start handle device state changed event");
+    HandleEvent(EVENT_DEVICE_STATE_CHANGED, deviceState);
+}
+
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

@@ -44,7 +44,8 @@ public:
 
     void OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override;
-    
+
+    void OnDeviceStateChange(const DeviceState& deviceState) override;
 private:
     std::shared_ptr<SessionListener> listener_;
 };
