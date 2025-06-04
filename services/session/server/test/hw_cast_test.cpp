@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -273,7 +273,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerGetDuration001, TestSize.Level1)
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
     EXPECT_EQ(streamplayer != nullptr, true);
     streamplayer->Init();
-    int32_t duration;
+    int32_t duration = 0;
     int32_t ret = streamplayer->GetDuration(duration);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("HwCastStreamPlayerGetDuration001 end!");

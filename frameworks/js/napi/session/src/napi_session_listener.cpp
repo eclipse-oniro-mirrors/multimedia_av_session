@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -201,6 +201,7 @@ void NapiSessionListener::OnRemoteDistributedSessionChange(
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
                              napi_generic_failure, "get callback reference failed");
@@ -222,7 +223,7 @@ napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, nap
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGI("remove callback %{public}d", static_cast<int32_t>(event));
-
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     if (callback == nullptr) {
         for (auto& callbackRef : callbacks_[event]) {
             napi_status ret = napi_delete_reference(env, callbackRef);
@@ -242,6 +243,7 @@ napi_status NapiSessionListener::RemoveCallback(napi_env env, int32_t event, nap
 
 int32_t NapiSessionListener::GetCallbackNum(int32_t event)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, 0, "has no event");
     return callbacks_[event].size();
 }
 }

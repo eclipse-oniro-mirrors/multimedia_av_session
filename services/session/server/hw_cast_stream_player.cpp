@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,38 +110,35 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
 void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand castControlCommand)
 {
     std::lock_guard lockGuard(streamPlayerLock_);
-    int32_t timeParam;
+    int32_t param = 0;
     switch (castControlCommand.GetCommand()) {
         case AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD:
-            castControlCommand.GetForwardTime(timeParam);
-            streamPlayer_->FastForward(CheckCastTime(timeParam));
+            castControlCommand.GetForwardTime(param);
+            streamPlayer_->FastForward(CheckCastTime(param));
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_REWIND:
-            castControlCommand.GetRewindTime(timeParam);
-            streamPlayer_->FastRewind(CheckCastTime(timeParam));
+            castControlCommand.GetRewindTime(param);
+            streamPlayer_->FastRewind(CheckCastTime(param));
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SEEK:
-            castControlCommand.GetSeekTime(timeParam);
-            streamPlayer_->Seek(timeParam);
+            castControlCommand.GetSeekTime(param);
+            streamPlayer_->Seek(param);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_VOLUME:
-            int32_t volume;
-            castControlCommand.GetVolume(volume);
-            streamPlayer_->SetVolume(volume);
+            castControlCommand.GetVolume(param);
+            streamPlayer_->SetVolume(param);
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED:
-            int32_t speed;
-            castControlCommand.GetSpeed(speed);
-            streamPlayer_->SetSpeed(static_cast<CastEngine::PlaybackSpeed>(speed));
+            castControlCommand.GetSpeed(param);
+            streamPlayer_->SetSpeed(static_cast<CastEngine::PlaybackSpeed>(param));
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE:
-            int32_t loopMode;
-            castControlCommand.GetLoopMode(loopMode);
-            if (intLoopModeToCastPlus_.count(loopMode) != 0) {
-                SLOGD("SetLoopMode int: %{public}d", loopMode);
-                streamPlayer_->SetLoopMode(intLoopModeToCastPlus_[loopMode]);
+            castControlCommand.GetLoopMode(param);
+            if (intLoopModeToCastPlus_.count(param) != 0) {
+                SLOGD("SetLoopMode int: %{public}d", param);
+                streamPlayer_->SetLoopMode(intLoopModeToCastPlus_[param]);
             } else {
-                SLOGE("invalid LoopMode: %{public}d", loopMode);
+                SLOGE("invalid LoopMode: %{public}d", param);
             }
             break;
         case AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE:
@@ -169,7 +166,7 @@ AVQueueItem HwCastStreamPlayer::GetCurrentItem()
 AVQueueItem HwCastStreamPlayer::RefreshCurrentItemDuration()
 {
     SLOGD("RefreshCurrentItemDuration in");
-    int32_t duration;
+    int32_t duration = 0;
     GetDuration(duration);
     // do not place streamPlayerLock_ in side of curItemLock_
     std::lock_guard lockGuard(curItemLock_);
@@ -380,7 +377,7 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     if (castPlusSpeedToDouble_.count(castPlaybackSpeed) != 0) {
         avPlaybackState.SetSpeed(castPlusSpeedToDouble_[castPlaybackSpeed]);
     }
-    int castPosition;
+    int castPosition = 0;
     streamPlayer_->GetPosition(castPosition);
     AVPlaybackState::Position position;
     position.elapsedTime_ = static_cast<int64_t>(castPosition);
@@ -390,8 +387,8 @@ int32_t HwCastStreamPlayer::GetCastAVPlaybackState(AVPlaybackState& avPlaybackSt
     if (castPlusLoopModeToInt_.count(castLoopMode) != 0) {
         avPlaybackState.SetLoopMode(castPlusLoopModeToInt_[castLoopMode]);
     }
-    int32_t castVolume;
-    int32_t maxCastVolume;
+    int32_t castVolume = 0;
+    int32_t maxCastVolume = 0;
     streamPlayer_->GetVolume(castVolume, maxCastVolume);
     avPlaybackState.SetVolume(castVolume);
 

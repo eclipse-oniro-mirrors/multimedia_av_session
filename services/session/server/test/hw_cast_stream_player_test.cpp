@@ -251,7 +251,7 @@ std::shared_ptr<OHOS::Media::PixelMap> HwCastStreamPlayerTest::CreatePixelMap()
     pixelMap->SetImageInfo(info);
     int32_t rowDataSize = pixelMapWidth;
     uint32_t bufferSize = rowDataSize * pixelMapHeight;
-    if (bufferSize <= 0) {
+    if (bufferSize == 0) {
         return pixelMap;
     }
 

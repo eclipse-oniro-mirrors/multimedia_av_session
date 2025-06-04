@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,7 @@ int32_t AVCastControllerProxy::GetDuration(int32_t& duration)
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
-        int32_t tempDuration;
+        int32_t tempDuration = 0;
         CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(tempDuration), ERR_UNMARSHALLING, "read string failed");
         duration = tempDuration;
     }

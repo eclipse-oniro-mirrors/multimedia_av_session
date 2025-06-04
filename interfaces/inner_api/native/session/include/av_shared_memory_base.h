@@ -123,11 +123,11 @@ private:
     void Close() noexcept;
 
     uint8_t *base_;
-    int32_t capacity_;
-    uint32_t flags_;
+    int32_t capacity_ = 0;
+    uint32_t flags_ = 0;
     std::string name_;
-    int32_t fd_;
-    int32_t size_;
+    int32_t fd_ = 0;
+    int32_t size_ = 0;
     static constexpr int32_t INVALID_POSITION = -1;
 };
 } // namespace AVSession

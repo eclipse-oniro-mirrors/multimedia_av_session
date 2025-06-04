@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ int32_t AVCastControllerCallbackStub::HandleOnPlayPrevious(MessageParcel& data, 
 
 int32_t AVCastControllerCallbackStub::HandleOnSeekDone(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t seekNumber;
+    int32_t seekNumber = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(seekNumber), ERR_NONE, "read seekNumber failed");
     OnSeekDone(seekNumber);
     return ERR_NONE;
@@ -87,8 +87,8 @@ int32_t AVCastControllerCallbackStub::HandleOnSeekDone(MessageParcel& data, Mess
 
 int32_t AVCastControllerCallbackStub::HandleOnVideoSizeChange(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t width;
-    int32_t height;
+    int32_t width = 0;
+    int32_t height = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(width), ERR_NONE, "read time failed");
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(height), ERR_NONE, "read time failed");
     OnVideoSizeChange(width, height);
@@ -97,7 +97,7 @@ int32_t AVCastControllerCallbackStub::HandleOnVideoSizeChange(MessageParcel& dat
 
 int32_t AVCastControllerCallbackStub::HandleOnPlayerError(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t errorCode;
+    int32_t errorCode = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(errorCode), ERR_NONE, "read time failed");
     std::string errorMsg;
     CHECK_AND_RETURN_RET_LOG(data.ReadString(errorMsg), ERR_NONE, "read time failed");
@@ -107,7 +107,7 @@ int32_t AVCastControllerCallbackStub::HandleOnPlayerError(MessageParcel& data, M
 
 int32_t AVCastControllerCallbackStub::HandleOnEndOfStream(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t isLooping;
+    int32_t isLooping = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(isLooping), ERR_NONE, "read isLooping failed");
     OnEndOfStream(isLooping);
     return ERR_NONE;
@@ -157,7 +157,7 @@ int32_t AVCastControllerCallbackStub::HandleOnDataSrcRead(MessageParcel& data, M
 {
     std::shared_ptr<AVSharedMemory> mem = ReadAVSharedMemoryFromParcel(data);
     uint32_t length = static_cast<uint32_t>(data.ReadInt32());
-    int64_t pos;
+    int64_t pos = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt64(pos), ERR_NONE, "read pos failed");
     int32_t result = onDataSrcRead(mem, length, pos);
     reply.WriteInt32(result);

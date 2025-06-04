@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2583,11 +2583,15 @@ void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath
 void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 {
     std::lock_guard lockGuard(clientDeathLock_);
-    sptr<IClientDeath> observer = clientDeathObservers_[pid];
-    sptr<ClientDeathRecipient> recipient = clientDeathRecipients_[pid];
-    if (observer && recipient) {
-        SLOGI("remove clientDeath recipient for %{public}d", static_cast<int>(pid));
-        observer->AsObject()->RemoveDeathRecipient(recipient);
+    auto observerIt = clientDeathObservers_.find(pid);
+    auto recipientIt = clientDeathRecipients_.find(pid);
+    if (observerIt != clientDeathObservers_.end() && recipientIt != clientDeathRecipients_.end()) {
+        sptr<IClientDeath> observer = clientDeathObservers_[pid];
+        sptr<ClientDeathRecipient> recipient = clientDeathRecipients_[pid];
+        if (observer && recipient) {
+            SLOGI("remove clientDeath recipient for %{public}d", static_cast<int>(pid));
+            observer->AsObject()->RemoveDeathRecipient(recipient);
+        }
     }
     clientDeathObservers_.erase(pid);
     clientDeathRecipients_.erase(pid);
