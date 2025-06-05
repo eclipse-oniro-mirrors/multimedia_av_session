@@ -384,6 +384,10 @@ private:
 
     void UpdateTopSession(const sptr<AVSessionItem>& newTopSession, int32_t userId = 0);
 
+    sptr<AVSessionItem> getOtherPlayingSession(int32_t userId, std::string bundleName);
+
+    void HandleOtherSessionPlaying(sptr<AVSessionItem>& session);
+
     void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info, bool isPlaying);
 
     void HandleDeviceChange(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc);
@@ -518,7 +522,9 @@ private:
 
     bool VerifyNotification();
 
-    void HandleChangeTopSession(int32_t infoUid, int32_t userId);
+    void HandleChangeTopSession(int32_t infoUid, int32_t infoPid, int32_t userId);
+
+    bool updateOrder(sptr<AVSessionItem>& sessionItem);
 
     bool IsTopSessionPlaying();
 

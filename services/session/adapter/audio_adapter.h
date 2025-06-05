@@ -76,7 +76,7 @@ public:
 
     void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& desc) override;
 
-    bool GetRendererRunning(int32_t uid);
+    bool GetRendererRunning(int32_t uid, int32_t pid);
 
     int32_t SetVolume(int32_t volume);
     int32_t GetVolume();

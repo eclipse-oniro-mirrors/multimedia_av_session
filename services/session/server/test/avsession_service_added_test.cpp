@@ -688,7 +688,8 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChang
     g_AVSessionService->UpdateTopSession(avsessionItem);
     int32_t infoUid = 0;
     int32_t userId = 0;
-    g_AVSessionService->HandleChangeTopSession(infoUid, userId);
+    int32_t infoPid = 0;
+    g_AVSessionService->HandleChangeTopSession(infoUid, infoPid, userId);
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_001 end!");
@@ -716,9 +717,10 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChang
         && avsessionItem->GetSessionType() != "video_call";
     EXPECT_EQ(check, true);
     g_AVSessionService->UpdateTopSession(avsessionItem);
-    
+
     int32_t userId = 0;
-    g_AVSessionService->HandleChangeTopSession(infoUid, userId);
+    int32_t infoPid = 0;
+    g_AVSessionService->HandleChangeTopSession(infoUid, infoPid, userId);
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_002 end!");
@@ -748,7 +750,8 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChang
     g_AVSessionService->UpdateTopSession(avsessionItem);
     
     int32_t userId = 0;
-    g_AVSessionService->HandleChangeTopSession(infoUid, userId);
+    int32_t infoPid = 0;
+    g_AVSessionService->HandleChangeTopSession(infoUid, infoPid, userId);
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_003 end!");
@@ -778,7 +781,8 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChang
     g_AVSessionService->UpdateTopSession(avsessionItem);
     
     int32_t userId = 0;
-    g_AVSessionService->HandleChangeTopSession(infoUid, userId);
+    int32_t infoPid = 0;
+    g_AVSessionService->HandleChangeTopSession(infoUid, infoPid, userId);
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_004 end!");
@@ -808,7 +812,8 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleChang
     g_AVSessionService->UpdateTopSession(avsessionItem);
     
     int32_t userId = 0;
-    g_AVSessionService->HandleChangeTopSession(ancoUid, userId);
+    int32_t infoPid = 0;
+    g_AVSessionService->HandleChangeTopSession(ancoUid, infoPid, userId);
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_HandleChangeTopSession_005 end!");

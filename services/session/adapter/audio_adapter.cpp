@@ -197,16 +197,18 @@ void AudioAdapter::OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& 
     }
 }
 
-bool AudioAdapter::GetRendererRunning(int32_t uid)
+bool AudioAdapter::GetRendererRunning(int32_t uid, int32_t pid)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
     auto ret =
         AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     CHECK_AND_RETURN_RET_LOG(ret == 0, false, "get renderer state failed!");
     for (const auto& info : audioRendererChangeInfo) {
-        CHECK_AND_RETURN_RET_LOG(!(info->clientUID == uid && info->rendererState == AudioStandard::RENDERER_RUNNING),
-            true, "find uid=%{public}d renderer state is %{public}d", uid, info->rendererState);
+        CHECK_AND_RETURN_RET_LOG(!(info->clientUID == uid && info->clientPid == pid &&
+            info->rendererState == AudioStandard::RENDERER_RUNNING), true,
+            "find uid=%{public}d pid=%{public}d renderer state is %{public}d", uid, pid, info->rendererState);
     }
+
     return false;
 }
 

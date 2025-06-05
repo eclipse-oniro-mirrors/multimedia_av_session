@@ -197,9 +197,11 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestS
     focusSessionStrategy.RegisterFocusSessionSelector(func);
     AudioRendererChangeInfo audioRendererChangeInfo;
     audioRendererChangeInfo.clientUID = 1;
+    audioRendererChangeInfo.clientPid = 1;
+    std::pair<int32_t, int32_t> key = std::make_pair(audioRendererChangeInfo.clientUID, audioRendererChangeInfo.clientPid);
     audioRendererChangeInfo.sessionId = 2;
     audioRendererChangeInfo.rendererState = RendererState::RENDERER_RELEASED;
-    bool ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo.clientUID);
+    bool ret = focusSessionStrategy.IsFocusSession(key);
     EXPECT_EQ(ret, true);
     SLOGD("IsFocusSession001 end!");
 }
@@ -226,9 +228,11 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestS
     focusSessionStrategy.RegisterFocusSessionSelector(func);
     AudioRendererChangeInfo audioRendererChangeInfo;
     audioRendererChangeInfo.clientUID = 1;
+    audioRendererChangeInfo.clientPid = 1;
+    std::pair<int32_t, int32_t> key = std::make_pair(audioRendererChangeInfo.clientUID, audioRendererChangeInfo.clientPid);
     audioRendererChangeInfo.sessionId = 2;
     audioRendererChangeInfo.rendererState = RendererState::RENDERER_RUNNING;
-    bool ret = focusSessionStrategy.IsFocusSession(audioRendererChangeInfo.clientUID);
+    bool ret = focusSessionStrategy.IsFocusSession(key);
     EXPECT_EQ(ret, true);
     SLOGD("IsFocusSession002 end!");
 }
@@ -257,7 +261,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent006, 
     infos.push_back(std::move(info1));
     infos.push_back(std::move(info2));
 
-    focusSessionStrategy.currentStates_.insert({1, 1});
+    focusSessionStrategy.currentStates_.insert({std::make_pair(1, 1), 1});
 
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
@@ -280,7 +284,8 @@ static HWTEST_F(FocusSessionStrategyTest, UpdateFocusSession001, testing::ext::T
         return false;
     };
     focusSessionStrategy.RegisterFocusSessionSelector(func);
-    focusSessionStrategy.UpdateFocusSession(1);
+    std::pair<int32_t, int32_t> key = std::make_pair(1, 1);
+    focusSessionStrategy.UpdateFocusSession(key);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGD("UpdateFocusSession001 end!");
 }
@@ -294,8 +299,9 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession003, testing::ext::TestS
 {
     SLOGD("IsFocusSession003 begin!");
     FocusSessionStrategy focusSessionStrategy;
-    focusSessionStrategy.lastStates_.insert({1, 2});
-    bool ret = focusSessionStrategy.IsFocusSession(1);
+    focusSessionStrategy.lastStates_.insert({std::make_pair(1, 1), 2});
+    std::pair<int32_t, int32_t> key = std::make_pair(1, 1);
+    bool ret = focusSessionStrategy.IsFocusSession(key);
     EXPECT_EQ(ret, false);
     SLOGD("IsFocusSession003 end!");
 }
@@ -309,8 +315,9 @@ static HWTEST_F(FocusSessionStrategyTest, CheckFocusSessionStop001, testing::ext
 {
     SLOGD("CheckFocusSessionStop001 begin!");
     FocusSessionStrategy focusSessionStrategy;
-    focusSessionStrategy.lastStates_.insert({1, 2});
-    bool ret = focusSessionStrategy.CheckFocusSessionStop(1);
+    focusSessionStrategy.lastStates_.insert({std::make_pair(1, 1), 2});
+    std::pair<int32_t, int32_t> key = std::make_pair(1, 1);
+    bool ret = focusSessionStrategy.CheckFocusSessionStop(key);
     EXPECT_EQ(ret, true);
     SLOGD("CheckFocusSessionStop001 end!");
 }
@@ -324,8 +331,9 @@ static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession001, testing::ext
 {
     SLOGD("DelayStopFocusSession001 begin!");
     FocusSessionStrategy focusSessionStrategy;
-    focusSessionStrategy.lastStates_.insert({1, 1});
-    focusSessionStrategy.DelayStopFocusSession(1);
+    focusSessionStrategy.lastStates_.insert({std::make_pair(1, 1), 1});
+    std::pair<int32_t, int32_t> key = std::make_pair(1, 1);
+    focusSessionStrategy.DelayStopFocusSession(key);
     sleep(6);
     SLOGD("DelayStopFocusSession001 end!");
 }
@@ -341,8 +349,9 @@ static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession002, testing::ext
     FocusSessionStrategy focusSessionStrategy;
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
-    focusSessionStrategy.lastStates_.insert({1, 2});
-    focusSessionStrategy.DelayStopFocusSession(1);
+    focusSessionStrategy.lastStates_.insert({std::make_pair(1, 1), 2});
+    std::pair<int32_t, int32_t> key = std::make_pair(1, 1);
+    focusSessionStrategy.DelayStopFocusSession(key);
     sleep(6);
     SLOGD("DelayStopFocusSession002 end!");
 }
@@ -358,8 +367,9 @@ static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession003, testing::ext
     FocusSessionStrategy focusSessionStrategy;
     auto func = [](const FocusSessionStrategy::FocusSessionChangeInfo&, bool) {};
     focusSessionStrategy.RegisterFocusSessionChangeCallback(func);
-    focusSessionStrategy.lastStates_.insert({1, 1});
-    focusSessionStrategy.DelayStopFocusSession(1);
+    focusSessionStrategy.lastStates_.insert({std::make_pair(1, 1), 1});
+    std::pair<int32_t, int32_t> key = std::make_pair(1, 1);
+    focusSessionStrategy.DelayStopFocusSession(key);
     sleep(6);
     SLOGD("DelayStopFocusSession003 end!");
 }
