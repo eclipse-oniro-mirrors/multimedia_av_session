@@ -1271,7 +1271,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         if (session && topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
             SLOGI("MediaCapsule topsession %{public}s updateImage", topSession_->GetBundleName().c_str());
-            NotifySystemUI(nullptr, true, IsCapsuleNeeded(), isMediaChange);
+            NotifySystemUI(nullptr, true, IsCapsuleNeeded() && hasMediaCapsule_.load(), isMediaChange);
         }
     });
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -1352,7 +1352,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
         if (topSession_ && topSession_.GetRefPtr() == session.GetRefPtr()) {
             AVSessionDescriptor selectSession = session->GetDescriptor();
-            NotifySystemUI(&selectSession, true, IsCapsuleNeeded(), false);
+            NotifySystemUI(&selectSession, true, IsCapsuleNeeded() && hasMediaCapsule_.load(), false);
         }
     });
     AddCapsuleServiceCallback(sessionItem);
