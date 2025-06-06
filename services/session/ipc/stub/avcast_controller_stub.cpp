@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,7 +115,7 @@ int32_t AVCastControllerStub::HandlePrepare(MessageParcel& data, MessageParcel& 
 
 int32_t AVCastControllerStub::HandleGetDuration(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t duration;
+    int32_t duration = 0;
     int32_t ret = GetDuration(duration);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_UNMARSHALLING, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {

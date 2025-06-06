@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,7 +127,7 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
     if (!CheckBeforReadFromParcel(in)) {
         return false;
     }
-    int32_t deviceInfoSize;
+    int32_t deviceInfoSize = 0;
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfoSize), false, "read deviceInfoSize failed");
     int32_t maxDeviceInfoSize = 1000;
     CHECK_AND_RETURN_RET_LOG((deviceInfoSize >= 0) && (deviceInfoSize < maxDeviceInfoSize),
@@ -222,7 +222,7 @@ bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
 
 bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
 {
-    int32_t deviceInfoSize;
+    int32_t deviceInfoSize = 0;
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     int32_t maxDeviceInfoSize = 1000;
     CHECK_AND_RETURN_RET_LOG((deviceInfoSize >= 0) && (deviceInfoSize < maxDeviceInfoSize),

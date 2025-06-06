@@ -302,6 +302,7 @@ napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi
 {
     SLOGI("Add callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
                              napi_generic_failure, "get callback reference failed");
@@ -326,6 +327,7 @@ napi_status NapiAVSessionCallback::RemoveCallback(napi_env env, int32_t event, n
 {
     SLOGI("Remove callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     if (callback == nullptr) {
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
@@ -344,6 +346,7 @@ napi_status NapiAVSessionCallback::RemoveCallback(napi_env env, int32_t event, n
 
 bool NapiAVSessionCallback::IsCallbacksEmpty(int32_t event)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, true, "has no event");
     return callbacks_[event].empty();
 }
 }

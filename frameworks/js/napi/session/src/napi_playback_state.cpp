@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,7 +149,7 @@ napi_status NapiPlaybackState::SetValue(napi_env env, const AVPlaybackState& in,
 
 napi_status NapiPlaybackState::GetState(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int32_t property;
+    int32_t property = AVPlaybackState::PLAYBACK_STATE_INITIAL;
     auto status = NapiUtils::GetNamedProperty(env, in, "state", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetState(property);
@@ -246,7 +246,7 @@ napi_status NapiPlaybackState::SetBufferedTime(napi_env env, const AVPlaybackSta
 
 napi_status NapiPlaybackState::GetLoopMode(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int32_t property;
+    int32_t property = AVPlaybackState::LOOP_MODE_SEQUENCE;
     auto status = NapiUtils::GetNamedProperty(env, in, "loopMode", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetLoopMode(property);
@@ -284,7 +284,7 @@ napi_status NapiPlaybackState::SetIsFavorite(napi_env env, const AVPlaybackState
 
 napi_status NapiPlaybackState::GetActiveItemId(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int32_t property;
+    int32_t property = 0;
     auto status = NapiUtils::GetNamedProperty(env, in, "activeItemId", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetActiveItemId(property);
@@ -303,7 +303,7 @@ napi_status NapiPlaybackState::SetActiveItemId(napi_env env, const AVPlaybackSta
 
 napi_status NapiPlaybackState::GetVolume(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int32_t property;
+    int32_t property = 0;
     auto status = NapiUtils::GetNamedProperty(env, in, "volume", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetVolume(property);
@@ -322,7 +322,7 @@ napi_status NapiPlaybackState::SetVolume(napi_env env, const AVPlaybackState& in
 
 napi_status NapiPlaybackState::GetMaxVolume(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int32_t property;
+    int32_t property = 0;
     auto status = NapiUtils::GetNamedProperty(env, in, "maxVolume", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetMaxVolume(property);
@@ -360,7 +360,7 @@ napi_status NapiPlaybackState::SetMuted(napi_env env, const AVPlaybackState& in,
 
 napi_status NapiPlaybackState::GetDuration(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int32_t property;
+    int32_t property = 0;
     auto status = NapiUtils::GetNamedProperty(env, in, "duration", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetDuration(property);
@@ -379,7 +379,7 @@ napi_status NapiPlaybackState::SetDuration(napi_env env, const AVPlaybackState& 
 
 napi_status NapiPlaybackState::GetVideoWidth(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int32_t property;
+    int32_t property = 0;
     auto status = NapiUtils::GetNamedProperty(env, in, "videoWidth", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetVideoWidth(property);
@@ -398,7 +398,7 @@ napi_status NapiPlaybackState::SetVideoWidth(napi_env env, const AVPlaybackState
 
 napi_status NapiPlaybackState::GetVideoHeight(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int32_t property;
+    int32_t property = 0;
     auto status = NapiUtils::GetNamedProperty(env, in, "videoHeight", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetVideoHeight(property);

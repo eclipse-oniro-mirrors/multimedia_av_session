@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -756,7 +756,7 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
     sessionToken.uid = data.ReadInt32();
 
     OutputDeviceInfo outputDeviceInfo;
-    int32_t deviceInfoSize;
+    int32_t deviceInfoSize = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
 
     if (deviceInfoSize > RECEIVE_DEVICE_NUM_MAX) {
@@ -826,7 +826,7 @@ int32_t AVSessionServiceStub::HandleGetDistributedSessionControllersInner(Messag
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-    int32_t sessionTypeValue;
+    int32_t sessionTypeValue = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(sessionTypeValue), false, "Read sessionType failed");
     DistributedSessionType sessionType = DistributedSessionType(sessionTypeValue);
     if (sessionType < DistributedSessionType::TYPE_SESSION_REMOTE ||

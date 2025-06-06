@@ -96,7 +96,7 @@ private:
     void ColdStartFromProxy();
     void NotifyMediaControlNeedStateChange(AAFwk::WantParams& extras);
 
-    int32_t mMode_;
+    int32_t mMode_ = 0;
     std::string deviceId_;
     sptr<AVSessionItem> remoteSession_ = nullptr;
     sptr<AVControllerItem> preSetController_ = nullptr;

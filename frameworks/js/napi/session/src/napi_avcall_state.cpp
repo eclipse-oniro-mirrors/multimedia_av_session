@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,7 +115,7 @@ napi_status NapiAVCallState::SetValue(napi_env env, const AVCallState& in, napi_
 
 napi_status NapiAVCallState::GetAVCallState(napi_env env, napi_value in, AVCallState& out)
 {
-    int32_t property;
+    int32_t property = AVCallState::AVCALL_STATE_IDLE;
     auto status = NapiUtils::GetNamedProperty(env, in, "state", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetAVCallState(property);

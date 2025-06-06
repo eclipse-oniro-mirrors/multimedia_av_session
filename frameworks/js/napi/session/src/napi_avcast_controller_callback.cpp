@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -401,7 +401,7 @@ int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, std::shared_ptr<
         SLOGE("dataSrcRef_ nullptr");
         return 0;
     }
-    int32_t result;
+    int32_t result = 0;
     DataContextForThreadSafe* data =
         new DataContextForThreadSafe { dataSrcRef_, mem->GetBase(), length, pos, &result, dataSrcSyncCond_ };
     napi_status status = napi_call_threadsafe_function(threadSafeReadDataSrcFunc_, data, napi_tsfn_blocking);
@@ -424,8 +424,9 @@ int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, std::shared_ptr<
 napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < AVCastControlCommand::CAST_CONTROL_CMD_MAX,
+        napi_generic_failure, "has no event");
     napi_ref ref = nullptr;
-
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
         napi_generic_failure, "get callback reference failed");
     CHECK_AND_RETURN_RET_LOG(ref == nullptr, napi_ok, "callback has been registered");
@@ -457,6 +458,8 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGI("try remove callback for event %{public}d", event);
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < AVCastControlCommand::CAST_CONTROL_CMD_MAX,
+        napi_generic_failure, "has no event");
     if (callback == nullptr) {
         SLOGD("Remove callback, the callback is nullptr");
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
@@ -488,6 +491,7 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
 
 bool NapiAVCastControllerCallback::IsCallbacksEmpty(int32_t event)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < AVCastControlCommand::CAST_CONTROL_CMD_MAX, true, "has no event");
     return callbacks_[event].empty();
 }
 } // namespace OHOS::AVSession
