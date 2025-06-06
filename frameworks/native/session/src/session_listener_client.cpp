@@ -95,4 +95,12 @@ void SessionListenerClient::OnRemoteDistributedSessionChange(
         copiedListener->OnRemoteDistributedSessionChange(sessionControllers);
     }
 }
+
+void SessionListenerClient::OnDeviceStateChange(const DeviceState& deviceState)
+{
+    auto copiedListener = listener_;
+    if (copiedListener) {
+        copiedListener->OnDeviceStateChange(deviceState);
+    }
+}
 } // namespace OHOS::AVSession

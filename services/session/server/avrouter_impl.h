@@ -67,6 +67,8 @@ public:
 
     int32_t OnDeviceOffline(const std::string& deviceId) override;
 
+    int32_t OnDeviceStateChange(const DeviceState& deviceState) override;
+
     void ReleaseCurrentCastSession() override;
 
     int32_t OnCastSessionCreated(const int32_t castId) override;

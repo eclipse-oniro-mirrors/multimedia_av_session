@@ -127,6 +127,15 @@ public:
     virtual int32_t OnDeviceOffline(const std::string& deviceId) = 0;
 
     /**
+     * @brief Listen for the event of device changed.
+     *
+     * @param { DeviceState } device state info.
+     * @return { int32_t } Whether the device state changed was successful.
+     * @since 20
+    */
+    virtual int32_t OnDeviceStateChange(const DeviceState& deviceState) = 0;
+
+    /**
      * @brief Release current cast session.
      *
      * @since 10

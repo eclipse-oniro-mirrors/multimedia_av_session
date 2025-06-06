@@ -187,6 +187,9 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, std::vector<double>& out);
     static napi_status SetValue(napi_env env, const std::vector<double>& in, napi_value& out);
 
+    /* napi_value <-> DeviceState */
+    static napi_status SetValue(napi_env env, const DeviceState& in, napi_value& out);
+
     /* std::vector<AVSessionDescriptor> <-> napi_value */
     static napi_status SetValue(napi_env env, const std::vector<AVSessionDescriptor>& in, napi_value& out);
     

@@ -248,6 +248,8 @@ public:
 
     void NotifyDeviceOffline(const std::string& deviceId) override;
 
+    void NotifyDeviceStateChange(const DeviceState& deviceState) override;
+
     void NotifyMirrorToStreamCast();
 
     bool IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session);

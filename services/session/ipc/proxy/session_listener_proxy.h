@@ -38,6 +38,8 @@ public:
 
     void OnDeviceOffline(const std::string& deviceId) override;
 
+    void OnDeviceStateChange(const DeviceState& deviceState) override;
+
     void OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override;
 private:
