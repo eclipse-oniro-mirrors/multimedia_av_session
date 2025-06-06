@@ -180,8 +180,8 @@ void AudioAdapterTest007()
 {
     FuzzedDataProvider provider(RAW_DATA, g_totalSize);
 
-    constexpr int MAX_RANGE = 10;
-    auto deviceCount = provider.ConsumeIntegralInRange(0, MAX_RANGE);
+    constexpr int maxRange = 10;
+    auto deviceCount = provider.ConsumeIntegralInRange(0, maxRange);
     AudioDeviceDescriptors deviceDescriptors;
     for (int i = 0; i < deviceCount; ++i) {
         auto desc = std::make_shared<AudioDeviceDescriptor>();
@@ -215,9 +215,9 @@ void AudioAdapterTest008()
 
     bool shouldSetNull = provider.ConsumeBool();
     AudioDeviceDescriptors deviceDescriptors;
-    constexpr int MAX_RANGE = 10;
+    constexpr int maxRange = 10;
     if (!shouldSetNull) {
-        size_t numDescriptors = provider.ConsumeIntegralInRange<size_t>(1, MAX_RANGE);
+        size_t numDescriptors = provider.ConsumeIntegralInRange<size_t>(1, maxRange);
         for (size_t i = 0; i < numDescriptors; ++i) {
             auto descriptor = std::make_shared<AudioDeviceDescriptor>();
             descriptor->deviceType_ = static_cast<AudioStandard::DeviceType>(provider.ConsumeIntegral<int>());
@@ -272,8 +272,8 @@ void AudioAdapterTest009()
     rendererChangeInfo.rendererInfo = rendererInfo;
 
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors;
-    constexpr size_t MAX_DESCRIPTORS = 10;
-    size_t numDescriptors = provider.ConsumeIntegralInRange<size_t>(0, MAX_DESCRIPTORS);
+    constexpr size_t maxDescriptors = 10;
+    size_t numDescriptors = provider.ConsumeIntegralInRange<size_t>(0, maxDescriptors);
     for (size_t i = 0; i < numDescriptors; ++i) {
         deviceDescriptors.push_back(std::make_shared<AudioStandard::AudioDeviceDescriptor>(deviceDescriptor));
     }
@@ -299,7 +299,7 @@ void AudioAdapterTest010()
     int32_t volume = provider.ConsumeIntegral<int32_t>();
     int32_t uid = provider.ConsumeIntegral<int32_t>();
     int32_t pid = provider.ConsumeIntegral<int32_t>();
-    std::function<void(int32_t)> volumeKeyEventCallback = [](int32_t){ };
+    std::function<void(int32_t)> volumeKeyEventCallback = [](int32_t) {};
     std::function<bool(int32_t, int32_t)> allowedPlaybackCallback = [](int32_t, int32_t) { return true; };
 
     auto &audioAdapter = AudioAdapter::GetInstance();
@@ -325,8 +325,8 @@ void AudioAdapterTest011()
     descriptor->deviceName_ = provider.ConsumeRandomLengthString();
 
     AudioDeviceDescriptors devices;
-    constexpr int MAX_DEVICES = 10;
-    size_t count = provider.ConsumeIntegralInRange<size_t>(0, MAX_DEVICES);
+    constexpr int maxDevices = 10;
+    size_t count = provider.ConsumeIntegralInRange<size_t>(0, maxDevices);
     for (size_t i = 0; i < count; ++i) {
         devices.push_back(descriptor);
     }
