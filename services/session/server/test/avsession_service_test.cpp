@@ -1152,9 +1152,9 @@ static HWTEST_F(AVSessionServiceTest, SelectFocusSession001, TestSize.Level1)
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    avsessionHere_->SetPid(pid);
+    avsessionHere_->SetUid(pid);
     FocusSessionStrategy::FocusSessionChangeInfo info;
-    info.pid = pid;
+    info.pid = avsessionHere_->GetPid();
     bool ret = avservice_->SelectFocusSession(info);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();

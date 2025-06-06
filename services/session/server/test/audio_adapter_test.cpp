@@ -391,7 +391,7 @@ static HWTEST(AudioAdapterTest, GetRendererRunning002, TestSize.Level1)
     SLOGI("GetRendererRunning002 begin!");
     AudioAdapter::GetInstance().Init();
     AudioAdapter::GetInstance().GetRendererRunning(AudioAdapterTest::TEST_SESSION_FAIL_ID,
-        AudioAdapterTest::TEST_SESSION_FAIL_ID);  
+        AudioAdapterTest::TEST_SESSION_FAIL_ID);
     SLOGI("GetRendererRunning002 end!");
 }
 
