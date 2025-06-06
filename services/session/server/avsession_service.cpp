@@ -662,7 +662,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
             topSession_->GetUid() != ancoUid) {
             if (!isPlaying && topSession_->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
-                sptr<AVSessionItem> result = getOtherPlayingSession(userId, "");
+                sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
                 HandleOtherSessionPlaying(result);
             }
             if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_.load())) {
@@ -809,7 +809,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     UpdateLocalFrontSession(sessionListForFront);
 }
 
-bool AVSessionService::updateOrder(sptr<AVSessionItem>& sessionItem)
+bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
 {
     GetContainer().UpdateSessionSort(sessionItem);
     RefreshFocusSessionSort(sessionItem);
@@ -831,8 +831,8 @@ bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessi
         if (session->GetDescriptor().sessionTag_ == "RemoteCast" || session->GetPid() != info.pid) {
             continue;
         }
-        bool ret = updateOrder(session);
-        CHECK_AND_RETURN_RET_LOG(ret, false, "updateOrder fail");
+        bool ret = UpdateOrder(session);
+        CHECK_AND_RETURN_RET_LOG(ret, false, "UpdateOrder fail");
         return true;
     }
     return false;
@@ -1302,7 +1302,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
             if (!isPlaying) {
                 int32_t userId = topSession_->GetUserId();
                 userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
-                sptr<AVSessionItem> result = getOtherPlayingSession(userId, "");
+                sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
                 hasOtherSessionPlaying = result != nullptr;
                 HandleOtherSessionPlaying(result);
             }
@@ -1317,7 +1317,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
                 session->GetBundleName().c_str(), isChange);
             UpdateTopSession(session);
             NotifySystemUI(nullptr, true, isPlaying, isChange);
-            updateOrder(session);
+            UpdateOrder(session);
         }
     });
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
@@ -2797,7 +2797,7 @@ void AVSessionService::HandleOtherSessionPlaying(sptr<AVSessionItem>& session)
     CHECK_AND_RETURN_LOG(session != nullptr, "No other sessions are currently playing");
     UpdateTopSession(session);
     CHECK_AND_RETURN_LOG(topSession_ != nullptr, "topSession is nullptr, update topSession fail!");
-    updateOrder(session);
+    UpdateOrder(session);
     if ((session->GetSessionType() == "audio" || session->GetSessionType() == "video") &&
         session->GetUid() != ancoUid) {
         AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
@@ -2811,7 +2811,7 @@ void AVSessionService::HandleOtherSessionPlaying(sptr<AVSessionItem>& session)
     }
 }
 
-sptr <AVSessionItem> AVSessionService::getOtherPlayingSession(int32_t userId, std::string bundleName)
+sptr <AVSessionItem> AVSessionService::GetOtherPlayingSession(int32_t userId, std::string bundleName)
 {
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
@@ -2854,7 +2854,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         NotifySessionRelease(sessionItem->GetDescriptor());
         sessionItem->DestroyTask(continuePlay);
         if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
-            sptr<AVSessionItem> result = getOtherPlayingSession(userId, sessionItem->GetBundleName());
+            sptr<AVSessionItem> result = GetOtherPlayingSession(userId, sessionItem->GetBundleName());
             if (result != nullptr) {
                 HandleOtherSessionPlaying(result);
             } else {

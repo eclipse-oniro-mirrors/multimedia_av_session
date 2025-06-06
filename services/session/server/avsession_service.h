@@ -384,7 +384,7 @@ private:
 
     void UpdateTopSession(const sptr<AVSessionItem>& newTopSession, int32_t userId = 0);
 
-    sptr<AVSessionItem> getOtherPlayingSession(int32_t userId, std::string bundleName);
+    sptr<AVSessionItem> GetOtherPlayingSession(int32_t userId, std::string bundleName);
 
     void HandleOtherSessionPlaying(sptr<AVSessionItem>& session);
 
@@ -524,7 +524,7 @@ private:
 
     void HandleChangeTopSession(int32_t infoUid, int32_t infoPid, int32_t userId);
 
-    bool updateOrder(sptr<AVSessionItem>& sessionItem);
+    bool UpdateOrder(sptr<AVSessionItem>& sessionItem);
 
     bool IsTopSessionPlaying();
 
