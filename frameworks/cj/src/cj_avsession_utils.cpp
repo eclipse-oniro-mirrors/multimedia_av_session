@@ -275,7 +275,7 @@ int32_t InnerSetWantParamsHashMap(CParameters* head, WantParams &wantParams)
     WantParams wp;
     CArray carr;
     carr.head = head->value;
-    carr.size = head->size;
+    carr.size = static_cast<uint64_t>(head->size);
     auto ret = SetDataParameters(carr, wp);
     if (ret != CJNO_ERROR) {
         return ret;
@@ -467,6 +467,10 @@ int32_t GetValue(const WantParams &wantParams, std::string key, CParameters *p)
             return CJNO_ERROR;
         }
         int* ptr = static_cast<int *>(malloc(sizeof(int)));
+        if (ptr == nullptr) {
+            SLOGE("fail to malloc");
+            return ERR_NO_MEMORY;
+        }
         *ptr = AAFwk::Integer::Unbox(ao);
         p->value = static_cast<void *>(ptr);
         p->size = 1;
@@ -479,7 +483,7 @@ int32_t GetValue(const WantParams &wantParams, std::string key, CParameters *p)
             return code;
         }
         p->value = carr.head;
-        p->size = carr.size;
+        p->size = static_cast<int64_t>(carr.size);
         p->valueType = HASH_MAP_TYPE;
     }
     return CJNO_ERROR;
