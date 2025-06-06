@@ -762,7 +762,7 @@ void PullMigrateStubTest()
 
 void HandleChangeTopSessionTest()
 {
-    avsessionService_->HandleChangeTopSession(GetData<uint32_t>(), GetData<uint32_t>());
+    avsessionService_->HandleChangeTopSession(GetData<uint32_t>(), GetData<uint32_t>(), GetData<uint32_t>());
 }
 
 void InitCollaborationTest()
