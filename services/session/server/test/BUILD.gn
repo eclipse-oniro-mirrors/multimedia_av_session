@@ -543,6 +543,11 @@ ohos_unittest("AVSessionItemTest") {
     cflags_cc += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
   }
+
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags_cc += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
 }
 
 ohos_unittest("AVControllerItemTest") {
@@ -1556,8 +1561,8 @@ ohos_unittest("MigrateAVSessionTest") {
     "access_token:libtokensetproc_shared",
     "audio_framework:audio_client",
     "background_task_mgr:bgtaskmgr_innerkits",
-    "c_utils:utils",
     "cJSON:cjson",
+    "c_utils:utils",
     "device_manager:devicemanagersdk",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
@@ -1703,6 +1708,11 @@ ohos_unittest("AVSessionServiceTest") {
   if (bluetooth_part_enable) {
     cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
   }
 }
 
