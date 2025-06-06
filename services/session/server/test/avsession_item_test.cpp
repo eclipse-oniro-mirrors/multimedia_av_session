@@ -44,6 +44,12 @@ static std::shared_ptr<AVSessionService> g_AVSessionService {nullptr};
 static OHOS::sptr<AVSessionItem> g_AVSessionItem {nullptr};
 static OHOS::sptr<AVControllerItem> g_AVControllerItem {nullptr};
 
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+static const int32_t REPORT_SIZE = 100;
+static const int32_t CONTROL_COLD_START = 2;
+#endif
+
+
 class AVsessionItemTest : public testing::Test {
 public:
 
@@ -544,5 +550,112 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_HandleOnSetTargetLoopMode_001, TestSiz
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_HandleOnSetTargetLoopMode_001 end!");
 }
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+/**
+ * @tc.name: AVSessionItem_ReportPlaybackState_001
+ * @tc.desc: Test ReportPlaybackState.
+ * @tc.type: FUNC
+ * @tc.require: #IC7XD5
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_ReportPlaybackState_001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    g_AVSessionItem->ReportPlaybackState(state);
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    g_AVSessionItem->ReportPlaybackState(state);
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PREPARE);
+    g_AVSessionItem->ReportPlaybackState(state);
+
+    auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(g_testAnotherBundleName);
+    ASSERT_TRUE(stateInfo != nullptr);
+    for (auto i = 0; i < REPORT_SIZE; i++) {
+        stateInfo->playbackState_.push_back(0);
+    }
+
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    stateInfo->updatePlaybackState(state.GetState());
+    EXPECT_EQ(stateInfo->playbackState_.size(), 0);
+}
+
+/**
+ * @tc.name: AVSessionItem_ReportMetadataChange_001
+ * @tc.desc: Test ReportMetadataChange.
+ * @tc.type: FUNC
+ * @tc.require: #IC7XD5
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_ReportMetadataChange_001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    std::string title = "Test Title";
+    std::string url = "Test Url";
+    AVMetaData metadata;
+    g_AVSessionItem->ReportMetadataChange(metadata);
+
+    metadata.SetTitle(title);
+    g_AVSessionItem->ReportMetadataChange(metadata);
+
+    metadata.SetTitle("");
+    metadata.SetMediaImageUri(url);
+    g_AVSessionItem->ReportMetadataChange(metadata);
+
+    auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(g_testAnotherBundleName);
+    ASSERT_TRUE(stateInfo != nullptr);
+    for (auto i = 0; i < REPORT_SIZE; i++) {
+        stateInfo->metaQuality_.push_back(0);
+    }
+
+    stateInfo->updateMetaQuality(MetadataQuality::METADATA_QUALITY_BOTH);
+    EXPECT_EQ(stateInfo->metaQuality_.size(), 0);
+}
+
+/**
+ * @tc.name: AVSessionItem_ReportCommandChange_001
+ * @tc.desc: Test ReportCommandChange.
+ * @tc.type: FUNC
+ * @tc.require: #IC7XD5
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_ReportCommandChange_001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    g_AVSessionItem->supportedCmd_.push_back(REPORT_SIZE);
+    g_AVSessionItem->ReportCommandChange();
+
+    auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(g_testAnotherBundleName);
+    ASSERT_TRUE(stateInfo != nullptr);
+    for (auto i = 0; i < REPORT_SIZE; i++) {
+        stateInfo->commandQuality_.push_back(0);
+    }
+
+    stateInfo->updateCommandQuality(REPORT_SIZE);
+    EXPECT_EQ(stateInfo->commandQuality_.size(), 0);
+}
+
+/**
+ * @tc.name: AVSessionItem_ReportSessionControl_001
+ * @tc.desc: Test ReportSessionControl.
+ * @tc.type: FUNC
+ * @tc.require: #IC7XD5
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_ReportSessionControl_001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    g_AVSessionItem->ReportSessionControl(g_testAnotherBundleName, AVControlCommand::SESSION_CMD_PLAY);
+    g_AVSessionItem->ReportSessionControl(g_testAnotherBundleName, AVControlCommand::SESSION_CMD_PAUSE);
+    g_AVSessionItem->ReportSessionControl(g_testAnotherBundleName, CONTROL_COLD_START);
+    g_AVSessionItem->ReportSessionControl(g_testAnotherBundleName, REPORT_SIZE);
+
+    auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(g_testAnotherBundleName);
+    ASSERT_TRUE(stateInfo != nullptr);
+    for (auto i = 0; i < REPORT_SIZE; i++) {
+        stateInfo->control_.push_back(0);
+    }
+
+    stateInfo->updateControl(REPORT_SIZE, g_testAnotherBundleName);
+    EXPECT_EQ(stateInfo->control_.size(), 0);
+}
+#endif
 } //AVSession
 } //OHOS
