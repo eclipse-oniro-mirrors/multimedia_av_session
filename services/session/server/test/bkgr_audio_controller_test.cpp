@@ -346,3 +346,18 @@ static HWTEST(BkGrAudioControllerTest, OnRemoteDistributedSessionChange001, Test
     bkgraudiocontroller.OnRemoteDistributedSessionChange(sessionControllers);
     SLOGI("OnRemoteDistributedSessionChange end!");
 }
+
+/**
+* @tc.name: OnAudioSessionChecked001
+* @tc.desc: test OnAudioSessionChecked
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(BkGrAudioControllerTest, OnAudioSessionChecked001, TestSize.Level1)
+{
+    SLOGI("OnDeviceOffline001 begin!");
+    int32_t uid = 1000;
+    BackgroundAudioController bkgraudiocontroller;
+    bkgraudiocontroller.OnAudioSessionChecked(uid);
+    SLOGI("OnDeviceOffline001 end!");
+}

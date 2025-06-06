@@ -784,3 +784,65 @@ static HWTEST_F(MigrateAVSessionTest, ProcControlCommand010, TestSize.Level1)
     server_->ProcControlCommand(data);
     SLOGI("ProcControlCommand007 end");
 }
+
+/**
+* @tc.name: OnDeviceLogEvent001
+* @tc.desc: test OnDeviceLogEvent
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(MigrateAVSessionTest, OnDeviceLogEvent001, TestSize.Level1)
+{
+    SLOGI("OnDeviceLogEvent001 begin");
+    DeviceLogEventCode eventCode = DeviceLogEventCode::DEVICE_LOG_FULL;
+    const int64_t param = 1000;
+    ASSERT_TRUE(server_ != nullptr);
+    server_->OnDeviceLogEvent(eventCode, param);
+    SLOGI("OnDeviceLogEvent001 end");
+}
+
+/**
+* @tc.name: OnDeviceOffline001
+* @tc.desc: test OnDeviceOffline
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST(MigrateAVSessionTest, OnDeviceOffline001, TestSize.Level1)
+{
+    SLOGI("OnDeviceOffline001 begin");
+    std::string deviceId = "test";
+    ASSERT_TRUE(server_ != nullptr);
+    server_->OnDeviceOffline(deviceId);
+    SLOGI("OnDeviceOffline001 end");
+}
+
+/**
+* @tc.name: OnRemoteDistributedSessionChange001
+* @tc.desc: test OnRemoteDistributedSessionChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST(MigrateAVSessionTest, OnRemoteDistributedSessionChange001, TestSize.Level1)
+{
+    SLOGI("OnRemoteDistributedSessionChange begin");
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    sessionControllers.push_back(nullptr);
+    ASSERT_TRUE(server_ != nullptr);
+    server_->OnRemoteDistributedSessionChange(sessionControllers);
+    SLOGI("OnRemoteDistributedSessionChange end");
+}
+
+/**
+* @tc.name: OnAudioSessionChecked001
+* @tc.desc: test OnAudioSessionChecked
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(MigrateAVSessionTest, OnAudioSessionChecked001, TestSize.Level1)
+{
+    SLOGI("OnDeviceOffline001 begin");
+    int32_t uid = 1000;
+    ASSERT_TRUE(server_ != nullptr);
+    server_->OnAudioSessionChecked(uid);
+    SLOGI("OnDeviceOffline001 end");
+}
