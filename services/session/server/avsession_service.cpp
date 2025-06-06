@@ -2827,9 +2827,10 @@ sptr <AVSessionItem> AVSessionService::getOtherPlayingSession(int32_t userId, st
     }
     if (!bundleName.empty()) {
         sptr<AVSessionItem> firstSession = sessionListForFront->front();
+        CHECK_AND_RETURN_RET_LOG(firstSession != nullptr, nullptr, "firstSession is nullptr!");
         if (firstSession->IsCasting() &&
             firstSession->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
-            SLOGI("find casting session, uid:%{public}d, pid:%{public}d", firstSession->GetUid(), firstSession->GetPid());
+            SLOGI("find casting session, uid:%{public}d", firstSession->GetUid());
             return firstSession;
         }
     }

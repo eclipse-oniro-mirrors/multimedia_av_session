@@ -198,7 +198,8 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestS
     AudioRendererChangeInfo audioRendererChangeInfo;
     audioRendererChangeInfo.clientUID = 1;
     audioRendererChangeInfo.clientPid = 1;
-    std::pair<int32_t, int32_t> key = std::make_pair(audioRendererChangeInfo.clientUID, audioRendererChangeInfo.clientPid);
+    std::pair<int32_t, int32_t> key = std::make_pair(audioRendererChangeInfo.clientUID,
+        audioRendererChangeInfo.clientPid);
     audioRendererChangeInfo.sessionId = 2;
     audioRendererChangeInfo.rendererState = RendererState::RENDERER_RELEASED;
     bool ret = focusSessionStrategy.IsFocusSession(key);
@@ -229,7 +230,8 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestS
     AudioRendererChangeInfo audioRendererChangeInfo;
     audioRendererChangeInfo.clientUID = 1;
     audioRendererChangeInfo.clientPid = 1;
-    std::pair<int32_t, int32_t> key = std::make_pair(audioRendererChangeInfo.clientUID, audioRendererChangeInfo.clientPid);
+    std::pair<int32_t, int32_t> key = std::make_pair(audioRendererChangeInfo.clientUID,
+        audioRendererChangeInfo.clientPid);
     audioRendererChangeInfo.sessionId = 2;
     audioRendererChangeInfo.rendererState = RendererState::RENDERER_RUNNING;
     bool ret = focusSessionStrategy.IsFocusSession(key);
