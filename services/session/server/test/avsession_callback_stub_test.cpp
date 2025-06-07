@@ -275,5 +275,35 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level1)
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest007 end!");
 }
+
+/**
+* @tc.name: OnSetTargetLoopMode001
+* @tc.desc: Test OnSetTargetLoopMode
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVSessionCallbackStubTest, OnSetTargetLoopMode001, TestSize.Level1)
+{
+    SLOGI("OnSetTargetLoopMode001 begin!");
+    auto aVSessionCallback = std::make_shared<AVSessionCallbackStubDemo>();
+    ASSERT_NE(aVSessionCallback, nullptr);
+    int32_t targetLoopMode = 0;
+    aVSessionCallback->OnSetTargetLoopMode(targetLoopMode);
+    SLOGI("OnSetTargetLoopMode001 end!");
+}
+
+/**
+* @tc.name: OnPlayWithAssetId001
+* @tc.desc: Test OnPlayWithAssetId
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVSessionCallbackStubTest, OnPlayWithAssetId001, TestSize.Level1)
+{
+    SLOGI("OnPlayWithAssetId001 begin!");
+    auto aVSessionCallback = std::make_shared<AVSessionCallbackStubDemo>();
+    ASSERT_NE(aVSessionCallback, nullptr);
+    std::string assetId = "test";
+    aVSessionCallback->OnPlayWithAssetId(assetId);
+    SLOGI("OnPlayWithAssetId001 end!");
+}
 }
 }

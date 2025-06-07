@@ -840,9 +840,9 @@ static HWTEST(MigrateAVSessionTest, OnRemoteDistributedSessionChange001, TestSiz
 */
 static HWTEST(MigrateAVSessionTest, OnAudioSessionChecked001, TestSize.Level1)
 {
-    SLOGI("OnDeviceOffline001 begin");
+    SLOGI("OnAudioSessionChecked001 begin");
     int32_t uid = 1000;
     ASSERT_TRUE(server_ != nullptr);
     server_->OnAudioSessionChecked(uid);
-    SLOGI("OnDeviceOffline001 end");
+    SLOGI("OnAudioSessionChecked001 end");
 }
