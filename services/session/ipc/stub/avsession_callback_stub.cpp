@@ -16,6 +16,7 @@
 #include "avsession_callback_stub.h"
 #include "avsession_errors.h"
 #include "iavsession_callback.h"
+#include "ipc_skeleton.h"
 #include "key_event.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
@@ -24,6 +25,7 @@ namespace OHOS::AVSession {
 int32_t AVSessionCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
+    CHECK_AND_RETURN_RET_LOG(IPCSkeleton::IsLocalCalling(), AVSESSION_ERROR, "forbid rpc remote request");
     if (!CheckInterfaceToken(data)) {
         return AVSESSION_ERROR;
     }
