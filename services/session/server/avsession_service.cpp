@@ -664,6 +664,12 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                     isPlaying, isMediaCardOpen_.load(), hasRemoveEvent_.load());
                 return;
             }
+            if (isPlaying) {
+                auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
+                    topSession_->GetUid(), topSession_->GetPid(), true);
+                SLOGD("call AVSessionNotifyUpdateNotification, uid = %{public}d, pid = %{public}d, ret = %{public}d",
+                    topSession_->GetUid(), topSession_->GetPid(), ret);
+            }
             AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
 #ifdef START_STOP_ON_DEMAND_ENABLE
             PublishEvent(mediaPlayStateTrue);
