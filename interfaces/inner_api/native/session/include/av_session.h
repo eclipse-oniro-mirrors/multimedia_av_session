@@ -23,6 +23,7 @@
 #include "want_agent.h"
 #include "want_params.h"
 #include "avsession_controller.h"
+#include "avqueue_info.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller.h"
@@ -246,6 +247,15 @@ public:
      * @since 9
     */
     virtual int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) = 0;
+
+    /**
+     * @brief update avqueue info.
+     *
+     * @param info AVQueueInfo updated to server
+     * @return Return whether the update is successful
+     * @since 20
+    */
+    virtual int32_t UpdateAVQueueInfo(const AVQueueInfo& info) {return 0;};
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**

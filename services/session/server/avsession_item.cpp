@@ -412,6 +412,19 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
     UpdateRecommendInfo(true);
 }
 
+int32_t AVSessionItem::UpdateAVQueueInfo(const AVQueueInfo& info)
+{
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = info.GetAVQueueImage();
+    if (innerPixelMap != nullptr) {
+        std::string fileDir = AVSessionUtils::GetFixedPathName(userId_);
+        std::string fileName = GetBundleName() + "_" + info.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+        SLOGI("write image to file for %{public}s", info.GetAVQueueId().c_str());
+        AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
+        innerPixelMap->Clear();
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     {

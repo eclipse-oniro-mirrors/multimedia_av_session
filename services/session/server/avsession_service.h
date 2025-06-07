@@ -472,6 +472,8 @@ private:
     bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName,
         const AVMetaData& meta, const int32_t userId);
 
+    void DeleteAVQueueImage(cJSON* item);
+
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
     void ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid);

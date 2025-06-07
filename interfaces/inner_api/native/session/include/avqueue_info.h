@@ -21,6 +21,7 @@
 #include <map>
 
 #include "parcel.h"
+#include "message_parcel.h"
 #include "avsession_pixel_map.h"
 
 #ifndef WINDOWS_PLATFORM
@@ -40,6 +41,10 @@ public:
 
     bool Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const;
+
+    static AVQueueInfo* UnmarshallingMessageParcel(MessageParcel& data);
+    bool MarshallingMessageParcel(MessageParcel& parcel) const;
+    bool MarshallingQueueImage(MessageParcel& parcel) const;
 
     void SetBundleName(const std::string& bundleName);
     std::string GetBundleName() const;

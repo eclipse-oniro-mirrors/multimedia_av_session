@@ -124,6 +124,7 @@ public:
     int32_t AddSupportCommand(const int32_t cmd) override { return 0; };
     int32_t DeleteSupportCommand(const int32_t cmd) override { return 0; };
     int32_t SetSessionEvent(const std::string &event, const OHOS::AAFwk::WantParams &args) override { return 0; };
+    int32_t UpdateAVQueueInfo(const AVQueueInfo& info) override { return 0; };
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> GetAVCastController() override { return nullptr; };

@@ -105,6 +105,8 @@ private:
 
     int32_t HandleSetSessionEvent(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleUpdateAVQueueInfoEvent(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply);
     
     int32_t HandleSetAVQueueItems(MessageParcel& data, MessageParcel& reply);
@@ -171,6 +173,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleDeleteSupportCommand(data, reply); }},
         {SESSION_CMD_SET_SESSION_EVENT,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSetSessionEvent(data, reply); }},
+        {SESSION_CMD_UPDATE_QUEUE_INFO,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleUpdateAVQueueInfoEvent(data, reply); }},
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         {SESSION_CMD_RELEASE_CAST,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleReleaseCast(data, reply); }},
@@ -209,6 +213,7 @@ private:
         {SESSION_CMD_ADD_SUPPORT_COMMAND, "HandleAddSupportCommand"},
         {SESSION_CMD_DELETE_SUPPORT_COMMAND, "HandleDeleteSupportCommand"},
         {SESSION_CMD_SET_SESSION_EVENT, "HandleSetSessionEvent"},
+        {SESSION_CMD_UPDATE_QUEUE_INFO, "HandleUpdateAVQueueInfoEvent"},
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         {SESSION_CMD_RELEASE_CAST, "HandleReleaseCast"},
 #endif

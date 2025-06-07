@@ -327,7 +327,7 @@ napi_status NapiUtils::SetValue(napi_env env, const AVSessionDescriptor& in, nap
     return napi_ok;
 }
 
-/* napi_value <-> AVQueueInfo */
+/* napi_value <- AVQueueInfo */
 napi_status NapiUtils::SetValue(napi_env env, const AVQueueInfo& in, napi_value& out)
 {
     napi_status status = napi_create_object(env, &out);
@@ -348,14 +348,6 @@ napi_status NapiUtils::SetValue(napi_env env, const AVQueueInfo& in, napi_value&
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "avQueueId", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
-    
-    auto pixelMap = in.GetAVQueueImage();
-    if (pixelMap != nullptr) {
-        SLOGD(" napi setvalue has avqueueimage");
-        property = Media::PixelMapNapi::CreatePixelMap(env, AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
-        status = napi_set_named_property(env, out, "avQueueImage", property);
-        CHECK_RETURN(status == napi_ok, "set property failed", status);
-    }
 
     auto uri = in.GetAVQueueImageUri();
     if (!uri.empty()) {
@@ -366,6 +358,13 @@ napi_status NapiUtils::SetValue(napi_env env, const AVQueueInfo& in, napi_value&
         CHECK_RETURN(status == napi_ok, "set property failed", status);
     }
 
+    auto pixelMap = in.GetAVQueueImage();
+    if (pixelMap != nullptr && pixelMap->GetInnerImgBuffer().size() > 0) {
+        SLOGD(" napi setvalue has avqueueimage");
+        property = Media::PixelMapNapi::CreatePixelMap(env, AVSessionPixelMapAdapter::ConvertFromInner(pixelMap));
+        status = napi_set_named_property(env, out, "avQueueImage", property);
+        CHECK_RETURN(status == napi_ok, "set property failed", status);
+    }
     return napi_ok;
 }
 

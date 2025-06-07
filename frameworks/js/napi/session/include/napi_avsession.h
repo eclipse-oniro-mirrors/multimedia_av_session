@@ -77,6 +77,8 @@ private:
 
     static std::function<void()> PlaybackStateSyncExecutor(NapiAVSession* napiSession, AVPlaybackState playBackState);
     static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context);
+    static std::function<void()> AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
+        OHOS::AVSession::AVMetaData metaData);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -143,11 +145,13 @@ private:
     std::string latestMetadataAssetId_;
     std::string latestDownloadedUri_;
     std::string latestDownloadedAssetId_;
+    std::string latestDownloadedAVQueueId_;
     AVMetaData metaData_;
 
     static std::mutex lock_;
     static std::mutex syncMutex_;
     static std::mutex syncAsyncMutex_;
+    static std::mutex downloadAVQImgMutex_;
     static std::condition_variable syncCond_;
     static std::condition_variable syncAsyncCond_;
     static int32_t playBackStateRet_;
