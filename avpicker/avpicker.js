@@ -612,6 +612,11 @@ export class AVCastPicker extends ViewPU {
             });
         }, Button);
         this.observeComponentCreation2((f8, g8) => {
+            Column.create();
+            Column.accessibilityLevel('no-hide-descendants');
+            Column.size({ width: '100%', height: '100%' });
+        }, Column);
+        this.observeComponentCreation2((f8, g8) => {
             UIExtensionComponent.create({
                 abilityName: 'UIExtAbility',
                 bundleName: 'com.hmos.mediacontroller',
@@ -749,6 +754,7 @@ export class AVCastPicker extends ViewPU {
             UIExtensionComponent.accessibilityText(this.__accessibilityAudioControlStr);
             UIExtensionComponent.accessibilityUseSamePage(AccessibilitySamePageMode.FULL_SILENT);
         }, UIExtensionComponent);
+        Column.pop();
         Button.pop();
     }
 

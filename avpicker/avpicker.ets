@@ -332,141 +332,145 @@ export struct AVCastPicker {
   @Builder
   private buildDefaultPicker(isCustomPicker: boolean) {
     Button() {
-      UIExtensionComponent(
-      {
-        abilityName: 'UIExtAbility',
-        bundleName: 'com.hmos.mediacontroller',
-        parameters: {
-          'normalColor': this.normalColor,
-          'activeColor': this.activeColor,
-          'pickerColorMode': this.colorMode,
-          'avCastPickerStyle': this.pickerStyle,
-          'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
-          'isCustomPicker': isCustomPicker,
-          'message': this.restartUECMessage,
-          'currentPickerCount': this.pickerCountOnCreation,
-        }
-      })
-      .onRemoteReady((proxy: UIExtensionProxy) => {
-        console.info(TAG, 'onRemoteReady');
-        this.extensionProxy = proxy;
-      })
-      .onReceive((data) => {
-        if (JSON.stringify(data['deviceInfoType']) !== undefined) {
-          console.info(TAG, `deviceInfoType : ${JSON.stringify(data['deviceInfoType'])}`);
-          this.deviceInfoType = data['deviceInfoType'] as string;
-        }
-
-        if (JSON.stringify(data['pickerStyle']) !== undefined) {
-          console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
-          this.pickerStyleFromMediaController = data['pickerStyle'] as AVCastPickerStyle;
-        }
-
-        if (JSON.stringify(data['deviceList']) !== undefined) {
-          console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
-          this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
-          let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
-          let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
-          let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
-          let isExtMenuScene = isCalling && (hasNoDevices || hasOnlySpeakerAndEarpiece);
-          let isPanelForMedia: boolean = !isCalling &&
-            (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
-            this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
-          if (isExtMenuScene || isPanelForMedia) {
-            this.isMenuShow = false;
-            this.touchMenuItemIndex = -1;
+      Column() {
+        UIExtensionComponent(
+        {
+          abilityName: 'UIExtAbility',
+          bundleName: 'com.hmos.mediacontroller',
+          parameters: {
+            'normalColor': this.normalColor,
+            'activeColor': this.activeColor,
+            'pickerColorMode': this.colorMode,
+            'avCastPickerStyle': this.pickerStyle,
+            'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
+            'isCustomPicker': isCustomPicker,
+            'message': this.restartUECMessage,
+            'currentPickerCount': this.pickerCountOnCreation,
           }
-        }
+        })
+        .onRemoteReady((proxy: UIExtensionProxy) => {
+          console.info(TAG, 'onRemoteReady');
+          this.extensionProxy = proxy;
+        })
+        .onReceive((data) => {
+          if (JSON.stringify(data['deviceInfoType']) !== undefined) {
+            console.info(TAG, `deviceInfoType : ${JSON.stringify(data['deviceInfoType'])}`);
+            this.deviceInfoType = data['deviceInfoType'] as string;
+          }
 
-        if (JSON.stringify(data['state']) !== undefined) {
-          console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
-          let isCalling: boolean = (this.sessionType === 'voice_call' || this.sessionType === 'video_call');
-          let isPanelForMedia: boolean = !isCalling &&
-            (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
-            this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
-          if (this.onStateChange != null && isPanelForMedia) {
-            if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
-              this.onStateChange(AVCastPickerState.STATE_APPEARING);
-            } else {
-              this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
+          if (JSON.stringify(data['pickerStyle']) !== undefined) {
+            console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
+            this.pickerStyleFromMediaController = data['pickerStyle'] as AVCastPickerStyle;
+          }
+
+          if (JSON.stringify(data['deviceList']) !== undefined) {
+            console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
+            this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
+            let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
+            let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
+            let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
+            let isExtMenuScene = isCalling && (hasNoDevices || hasOnlySpeakerAndEarpiece);
+            let isPanelForMedia: boolean = !isCalling &&
+              (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+              this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
+            if (isExtMenuScene || isPanelForMedia) {
+              this.isMenuShow = false;
+              this.touchMenuItemIndex = -1;
             }
           }
-        }
 
-        if (JSON.stringify(data['sessionType']) !== undefined) {
-          console.info(TAG, `session type : ${JSON.stringify(data['sessionType'])}`);
-          this.sessionType = data['sessionType'] as string;
-        }
+          if (JSON.stringify(data['state']) !== undefined) {
+            console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
+            let isCalling: boolean = (this.sessionType === 'voice_call' || this.sessionType === 'video_call');
+            let isPanelForMedia: boolean = !isCalling &&
+              (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
+              this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
+            if (this.onStateChange != null && isPanelForMedia) {
+              if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
+                this.onStateChange(AVCastPickerState.STATE_APPEARING);
+              } else {
+                this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
+              }
+            }
+          }
 
-        if (JSON.stringify(data['isShowMenu']) !== undefined) {
-          console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
-          this.isMenuShow = data['isShowMenu'] as boolean;
-          if (!this.isMenuShow) {
+          if (JSON.stringify(data['sessionType']) !== undefined) {
+            console.info(TAG, `session type : ${JSON.stringify(data['sessionType'])}`);
+            this.sessionType = data['sessionType'] as string;
+          }
+
+          if (JSON.stringify(data['isShowMenu']) !== undefined) {
+            console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
+            this.isMenuShow = data['isShowMenu'] as boolean;
+            if (!this.isMenuShow) {
+              this.touchMenuItemIndex = -1;
+            }
+          }
+
+          if (JSON.stringify(data['configurationColorMode']) !== undefined) {
+            console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
+            this.configurationColorMode = data['configurationColorMode'] as number;
+          }
+
+          if (JSON.stringify(data['accessConnected']) !== undefined) {
+            console.info(TAG, `accessConnected : ${JSON.stringify(data['accessConnected'])}`);
+            this.accessibilityConnectedStr = data['accessConnected'] as string;
+          }
+
+          if (JSON.stringify(data['accessAudioControl']) !== undefined) {
+            console.info(TAG, `accessAudioControl : ${JSON.stringify(data['accessAudioControl'])}`);
+            this.accessibilityAudioControlStr = data['accessAudioControl'] as string;
+          }
+
+          if (JSON.stringify(data['isPc']) !== undefined) {
+            console.info(TAG, `isPc : ${JSON.stringify(data['isPc'])}`);
+            this.isPc = data['isPc'] as boolean;
+          }
+
+          if (JSON.stringify(data['isRTL']) !== undefined) {
+            console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);
+            this.isRTL = data['isRTL'] as boolean;
+          }
+
+          if (JSON.stringify(data['maxFontSizeScale']) !== undefined) {
+            console.info(TAG, `maxFontSizeScale : ${JSON.stringify(data['maxFontSizeScale'])}`);
+            this.maxFontSizeScale = data['maxFontSizeScale'] as number;
+          }
+
+          if (JSON.stringify(data['isShowLoadingProgress']) !== undefined) {
+            console.info(TAG, `isShowLoadingProgress : ${JSON.stringify(data['isShowLoadingProgress'])}`);
+            this.isShowLoadingProgress = data['isShowLoadingProgress'] as boolean;
+          }
+        })
+        .size({ width: '100%', height: '100%' })
+        .bindMenu(this.isMenuShow, this.deviceMenu(), {
+          placement: Placement.BottomRight,
+          onDisappear: () => {
+            this.isMenuShow = false;
             this.touchMenuItemIndex = -1;
+            this.menuShowStateCallback(this.isMenuShow);
+          },
+          onAppear: () => {
+            if (this.extensionProxy != null && this.pickerClickTime !== -1) {
+                this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime});
+                this.pickerClickTime = -1;
+            }
+            this.menuShowStateCallback(this.isMenuShow);
           }
-        }
-
-        if (JSON.stringify(data['configurationColorMode']) !== undefined) {
-          console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
-          this.configurationColorMode = data['configurationColorMode'] as number;
-        }
-
-        if (JSON.stringify(data['accessConnected']) !== undefined) {
-          console.info(TAG, `accessConnected : ${JSON.stringify(data['accessConnected'])}`);
-          this.accessibilityConnectedStr = data['accessConnected'] as string;
-        }
-
-        if (JSON.stringify(data['accessAudioControl']) !== undefined) {
-          console.info(TAG, `accessAudioControl : ${JSON.stringify(data['accessAudioControl'])}`);
-          this.accessibilityAudioControlStr = data['accessAudioControl'] as string;
-        }
-
-        if (JSON.stringify(data['isPc']) !== undefined) {
-          console.info(TAG, `isPc : ${JSON.stringify(data['isPc'])}`);
-          this.isPc = data['isPc'] as boolean;
-        }
-
-        if (JSON.stringify(data['isRTL']) !== undefined) {
-          console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);
-          this.isRTL = data['isRTL'] as boolean;
-        }
-
-        if (JSON.stringify(data['maxFontSizeScale']) !== undefined) {
-          console.info(TAG, `maxFontSizeScale : ${JSON.stringify(data['maxFontSizeScale'])}`);
-          this.maxFontSizeScale = data['maxFontSizeScale'] as number;
-        }
-
-        if (JSON.stringify(data['isShowLoadingProgress']) !== undefined) {
-          console.info(TAG, `isShowLoadingProgress : ${JSON.stringify(data['isShowLoadingProgress'])}`);
-          this.isShowLoadingProgress = data['isShowLoadingProgress'] as boolean;
-        }
-      })
-      .size({ width: '100%', height: '100%' })
-      .bindMenu(this.isMenuShow, this.deviceMenu(), {
-        placement: Placement.BottomRight,
-        onDisappear: () => {
-          this.isMenuShow = false;
-          this.touchMenuItemIndex = -1;
-          this.menuShowStateCallback(this.isMenuShow);
-        },
-        onAppear: () => {
-          if (this.extensionProxy != null && this.pickerClickTime !== -1) {
-              this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime});
-              this.pickerClickTime = -1;
+        })
+        .onRelease((releaseCode) => {
+          console.error(TAG, `onRelease code ${releaseCode}`);
+          if (releaseCode === 1) {
+            this.needToRestart = true;
           }
-          this.menuShowStateCallback(this.isMenuShow);
-        }
-      })
-      .onRelease((releaseCode) => {
-        console.error(TAG, `onRelease code ${releaseCode}`);
-        if (releaseCode === 1) {
+        })
+        .onError(() => {
+          console.error(TAG, 'onError ready to restart');
           this.needToRestart = true;
-        }
-      })
-      .onError(() => {
-        console.error(TAG, 'onError ready to restart');
-        this.needToRestart = true;
-      })
+        })
+      }
+      .accessibilityLevel('no-hide-descendants')
+      .size({ width: '100%', height: '100%' })
     }
     .backgroundColor('#00000000')
     .stateEffect(false)
