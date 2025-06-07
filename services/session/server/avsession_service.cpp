@@ -816,6 +816,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
 
 bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
 {
+    CHECK_AND_RETURN_RET_LOG(sessionItem != nullptr, false, "sessionItem is nullptr!");
     GetContainer().UpdateSessionSort(sessionItem);
     RefreshFocusSessionSort(sessionItem);
     std::lock_guard frontLockGuard(sessionFrontLock_);
