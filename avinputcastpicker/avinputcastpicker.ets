@@ -76,6 +76,23 @@ export struct AVInputCastPicker {
    * show menu start time.
    */
   private pickerClickTime: number = -1;
+  /**
+   * picker count on creation.
+   */
+  private pickerCountOnCreation: number = 0;
+  /**
+   * current picker count.
+   */
+  private static currentPickerCount: number = 0;
+
+  aboutToAppear(): void {
+    AVInputCastPicker.currentPickerCount += 1;
+    this.pickerCountOnCreation = AVInputCastPicker.currentPickerCount;
+  }
+
+  aboutToDisappear(): void {
+    AVInputCastPicker.currentPickerCount -= 1;
+  }
 
   @Builder
   iconBuilder(item: AVInputCastPickerDeviceInfo, isSelected: boolean): void {
@@ -168,10 +185,11 @@ export struct AVInputCastPicker {
   private buildDefaultPicker(isCustomPicker: boolean) {
     UIExtensionComponent({
       abilityName: 'AVInputCastPickerAbility',
-      bundleName: 'com.huawei.hmos.mediacontroller',
+      bundleName: 'com.hmos.mediacontroller',
       parameters: {
         'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
         'isCustomPicker': isCustomPicker,
+        'currentPickerCount': this.pickerCountOnCreation,
       }
     })
       .size({ width: '100%', height: '100%' })
