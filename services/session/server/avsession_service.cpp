@@ -93,7 +93,6 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
     
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 static const int32_t COLLABORATION_SA_ID = 70633;
-static const int32_t MININUM_FOR_NOTIFICATION = 5;
 static const int32_t AVSESSION_CONTINUE = 1;
 #ifndef START_STOP_ON_DEMAND_ENABLE
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
@@ -849,13 +848,6 @@ void AVSessionService::InitAudio()
     focusSessionStrategy_.RegisterFocusSessionSelector([this] (const auto& info) {
         return SelectFocusSession(info);
     });
-    AudioAdapter::GetInstance().AddStreamRendererStateListener([this] (const AudioRendererChangeInfos& infos) {
-        OutputDeviceChangeListener(infos);
-    });
-    AudioAdapter::GetInstance().AddDeviceChangeListener(
-        [this] (const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) {
-        HandleDeviceChange(desc);
-    });
     queryAllowedPlaybackCallbackFunc_ = GetAllowedPlaybackCallbackFunc();
     auto ret = AudioAdapter::GetInstance().RegisterAllowedPlaybackCallback(queryAllowedPlaybackCallbackFunc_);
     if (ret != AVSESSION_SUCCESS) {
@@ -872,10 +864,6 @@ sptr <AVSessionItem> AVSessionService::SelectSessionByUid(const AudioRendererCha
     }
     SLOGI("AudioRendererInfo with uid: %{public}d does not have a corresponding session.", info.clientUID);
     return nullptr;
-}
-
-void AVSessionService::OutputDeviceChangeListener(const AudioRendererChangeInfos& infos)
-{
 }
 
 void AVSessionService::InitAMS()
@@ -3920,55 +3908,6 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         hasRemoveEvent_ = false;
         result = Notification::NotificationHelper::PublishNotification(request);
         SLOGI("PublishNotification uid %{public}d, user id %{public}d, result %{public}d", uid, userId, result);
-    }
-}
-// LCOV_EXCL_STOP
-
-// LCOV_EXCL_START
-void AVSessionService::NotifyDeviceChange()
-{
-    // historical sessions
-    std::vector<AVSessionDescriptor> hisDescriptors;
-    GetHistoricalSessionDescriptors(1, hisDescriptors);
-    // all sessions
-    std::vector<AVSessionDescriptor> activeDescriptors;
-    GetAllSessionDescriptors(activeDescriptors);
-    // historical avqueueinfos
-    std::vector<AVQueueInfo> avQueueInfos;
-    GetHistoricalAVQueueInfos(1, 1, avQueueInfos);
-    AVSessionDescriptor selectSession;
-    if (activeDescriptors.size() != 0 || hisDescriptors.size() == 0 || avQueueInfos.size() == 0) {
-        return;
-    }
-    bool isHisMatch = false;
-    for (AVQueueInfo avqueue : avQueueInfos) {
-        if (avqueue.GetBundleName() == hisDescriptors[0].elementName_.GetBundleName()) {
-            isHisMatch = true;
-            break;
-        }
-    }
-    if (!isHisMatch) {
-        SLOGI("no match hisAvqueue for %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
-        return;
-    }
-    if (avQueueInfos.size() >= MININUM_FOR_NOTIFICATION) {
-        SLOGI("history bundle name %{public}s", hisDescriptors[0].elementName_.GetBundleName().c_str());
-    }
-}
-// LCOV_EXCL_STOP
-
-// LCOV_EXCL_START
-void AVSessionService::HandleDeviceChange(
-    const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc)
-{
-    for (auto &audioDeviceDescriptor : desc) {
-        if (audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADSET ||
-            audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_WIRED_HEADPHONES ||
-            audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_USB_HEADSET ||
-            audioDeviceDescriptor->deviceType_ == AudioStandard::DEVICE_TYPE_BLUETOOTH_A2DP) {
-            SLOGI("AVSessionService handle pre notify device type");
-            NotifyDeviceChange();
-        }
     }
 }
 // LCOV_EXCL_STOP

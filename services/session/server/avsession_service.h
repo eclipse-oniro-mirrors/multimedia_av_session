@@ -316,7 +316,6 @@ private:
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession, bool addCapsule,
                         bool isCapsuleUpdate);
-    void NotifyDeviceChange();
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
@@ -334,8 +333,6 @@ private:
     void RemoveHistoricalRecordListener(HistoricalRecordListener* listener);
 
     sptr<AVSessionItem> SelectSessionByUid(const AudioStandard::AudioRendererChangeInfo& info);
-
-    void OutputDeviceChangeListener(const AudioRendererChangeInfos& infos);
 
     std::function<bool(int32_t, int32_t)> GetAllowedPlaybackCallbackFunc();
 
@@ -389,8 +386,6 @@ private:
     void HandleOtherSessionPlaying(sptr<AVSessionItem>& session);
 
     void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info, bool isPlaying);
-
-    void HandleDeviceChange(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc);
 
     __attribute__((no_sanitize("cfi"))) std::shared_ptr<RemoteSessionCommandProcess> GetService(
         const std::string& deviceId);

@@ -506,7 +506,6 @@ void StartDefaultAbilityByCall001()
     AudioRendererChangeInfos infos;
     infos.push_back(std::move(info_));
     avsessionService_->SelectSessionByUid(info);
-    avsessionService_->OutputDeviceChangeListener(infos);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionService_->SaveSessionInfoInFile(avsessionHere_->GetSessionId(),
         "audio", elementName);
@@ -614,30 +613,6 @@ void ConvertKeyCodeToCommand001()
     std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
     descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
     audioDeviceDescriptors.push_back(descriptor);
-    avsessionService_->HandleDeviceChange(audioDeviceDescriptors);
-}
-
-void HandleDeviceChange001()
-{
-    SLOGI("HandleDeviceChange001 begin!");
-    DeviceChangeAction deviceChange;
-    std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
-    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
-    descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
-    int32_t randomNumber = GetData<int32_t>();
-    int32_t enumSize = 2;
-    deviceChange.type = static_cast<DeviceChangeType>(randomNumber % enumSize);
-    deviceChange.flag = static_cast<DeviceFlag>(randomNumber % enumSize);
-
-    audioDeviceDescriptors.push_back(descriptor);
-    deviceChange.deviceDescriptors = audioDeviceDescriptors;
-    avsessionService_->HandleDeviceChange(audioDeviceDescriptors);
-    auto keyEvent = OHOS::MMI::KeyEvent::Create();
-    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_HEADSETHOOK);
-    keyEvent->SetActionTime(1);
-    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_CANCEL);
-    avsessionService_->SendSystemAVKeyEvent(*(keyEvent.get()));
-    SLOGI("HandleDeviceChange001 end!");
 }
 
 void GetTrustedDeviceName001()
@@ -1022,7 +997,6 @@ void AvSessionServiceTest001()
     ReportStartCastBegin001();
     ReportStartCastEnd001();
     ReportStartCastEnd002();
-    HandleDeviceChange001();
     GetTrustedDeviceName001();
     CheckInterfaceTokenTest();
     GetAVQueueInfosImgLengthTest();
