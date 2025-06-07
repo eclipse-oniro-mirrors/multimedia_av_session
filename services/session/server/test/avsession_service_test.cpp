@@ -871,37 +871,6 @@ static HWTEST_F(AVSessionServiceTest, ProcessCastAudioCommand002, TestSize.Level
     SLOGI("ProcessCastAudioCommand002 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, HandleDeviceChange001, TestSize.Level1)
-{
-    SLOGI("HandleDeviceChange001 begin!");
-    DeviceChangeAction deviceChange;
-    std::vector<std::shared_ptr<AudioDeviceDescriptor>> desc;
-    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
-    descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
-    deviceChange.type = static_cast<DeviceChangeType>(0);
-    deviceChange.flag = static_cast<DeviceFlag>(0);
-    desc.push_back(descriptor);
-    avservice_->HandleDeviceChange(desc);
-    EXPECT_EQ(0, AVSESSION_SUCCESS);
-    SLOGI("HandleDeviceChange001 end!");
-}
-
-static HWTEST_F(AVSessionServiceTest, HandleDeviceChange002, TestSize.Level1)
-{
-    SLOGI("HandleDeviceChange002 begin!");
-    DeviceChangeAction deviceChange;
-    std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
-    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
-    descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
-    deviceChange.type = static_cast<DeviceChangeType>(0);
-    deviceChange.flag = static_cast<DeviceFlag>(0);
-
-    audioDeviceDescriptors.push_back(descriptor);
-    avservice_->HandleDeviceChange(audioDeviceDescriptors);
-    EXPECT_EQ(0, AVSESSION_SUCCESS);
-    SLOGI("HandleDeviceChange002 end!");
-}
-
 static HWTEST_F(AVSessionServiceTest, OnReceiveEvent001, TestSize.Level1)
 {
     SLOGI("OnReceiveEvent001 begin!");
@@ -1154,7 +1123,7 @@ static HWTEST_F(AVSessionServiceTest, SelectFocusSession001, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionHere_->SetUid(pid);
     FocusSessionStrategy::FocusSessionChangeInfo info;
-    info.uid = pid;
+    info.pid = avsessionHere_->GetPid();
     bool ret = avservice_->SelectFocusSession(info);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();

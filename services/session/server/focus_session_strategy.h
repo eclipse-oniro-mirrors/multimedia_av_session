@@ -28,6 +28,7 @@ public:
     using StreamUsage = AudioStandard::StreamUsage;
     struct FocusSessionChangeInfo {
         int32_t uid {};
+        int32_t pid {};
         StreamUsage streamUsage {};
     };
     using FocusSessionChangeCallback = std::function<void(const FocusSessionChangeInfo&, bool)>;
@@ -44,18 +45,18 @@ public:
 private:
     void HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos& infos);
 
-    bool IsFocusSession(const int32_t uid);
-    bool CheckFocusSessionStop(const int32_t uid);
-    void UpdateFocusSession(const int32_t uid);
-    void DelayStopFocusSession(const int32_t uid);
+    bool IsFocusSession(const std::pair<int32_t, int32_t> key);
+    bool CheckFocusSessionStop(const std::pair<int32_t, int32_t> key);
+    void UpdateFocusSession(const std::pair<int32_t, int32_t> key);
+    void DelayStopFocusSession(const std::pair<int32_t, int32_t> key);
     void ProcAudioRenderChange(const AudioRendererChangeInfos& infos);
 
     FocusSessionChangeCallback callback_;
     FocusSessionSelector selector_;
     std::shared_ptr<AudioStandard::AudioRendererStateChangeCallback> audioRendererStateChangeCallback_;
     std::recursive_mutex stateLock_;
-    std::map<int32_t, int32_t> lastStates_;
-    std::map<int32_t, int32_t> currentStates_;
+    std::map<std::pair<int32_t, int32_t>, int32_t> lastStates_;   //<<uid,pid>, state>
+    std::map<std::pair<int32_t, int32_t>, int32_t> currentStates_;
     const int32_t cancelTimeout = 5000;
     const int32_t runningState = 2;
     const int32_t stopState = 0;
@@ -64,6 +65,11 @@ private:
         AudioStandard::STREAM_USAGE_MUSIC,
         AudioStandard::STREAM_USAGE_MOVIE,
         AudioStandard::STREAM_USAGE_VOICE_COMMUNICATION
+    };
+    const std::vector<AudioStandard::StreamUsage> ALLOWED_MEDIA_STREAM_USAGE {
+        AudioStandard::STREAM_USAGE_MUSIC,
+        AudioStandard::STREAM_USAGE_MOVIE,
+        AudioStandard::STREAM_USAGE_AUDIOBOOK
     };
 };
 }

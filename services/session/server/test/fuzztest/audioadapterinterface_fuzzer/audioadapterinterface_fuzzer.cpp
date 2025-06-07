@@ -117,7 +117,7 @@ void OHOS::AVSession::AudioAdapterTest()
     audioAdapter.MuteAudioStream(TEST_CLIENT_UID, TEST_CLIENT_PID);
     audioAdapter.UnMuteAudioStream(uid);
     audioAdapter.UnMuteAudioStream(TEST_CLIENT_UID);
-    audioAdapter.GetRendererRunning(uid);
+    audioAdapter.GetRendererRunning(uid, pid);
     audioAdapter.PauseAudioStream(uid, streamUsage);
     audioAdapter.OnRendererStateChange(infosExpected);
 }
