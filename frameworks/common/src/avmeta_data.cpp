@@ -614,10 +614,32 @@ void AVMetaData::Reset()
 
 void AVMetaData::ResetToBaseMeta()
 {
-    metaMask_.reset(META_KEY_LYRIC);
-    metaMask_.reset(META_KEY_SINGLE_LYRIC_TEXT);
+    metaMask_.reset();
+    metaMask_.set(META_KEY_ASSET_ID);
+    metaMask_.set(META_KEY_MEDIA_IMAGE);
+    metaMask_.set(META_KEY_MEDIA_IMAGE_URI);
+    title_ = "";
+    artist_ = "";
+    author_ = "";
+    avQueueName_ = "";
+    avQueueId_ = "";
+    avQueueImage_ = nullptr;
+    avQueueImageUri_ = "";
+    bundleIcon_ = nullptr;
+    album_ = "";
+    writer_ = "";
+    composer_ = "";
+    duration_ = 0;
+    publishDate_ = 0;
+    subTitle_ = "";
+    description_ = "";
     lyric_ = "";
     singleLyricText_ = "";
+    previousAssetId_ = "";
+    nextAssetId_ = "";
+    skipIntervals_ = SECONDS_15;
+    displayTags_ = 0;
+    drmSchemes_.clear();
 }
 
 bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
