@@ -2508,7 +2508,7 @@ static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying003, TestSize.Lev
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("HandleOtherSessionPlaying003 end!");
-} 
+}
 
 /**
  * @tc.name: GetOtherPlayingSession001
