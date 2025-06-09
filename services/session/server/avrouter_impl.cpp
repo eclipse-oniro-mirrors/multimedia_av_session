@@ -580,6 +580,7 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         }
     }
     if (castState == disconnectStateFromCast_) {
+        std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->SetIsSupportMirrorToStream(false);
     }
 }
