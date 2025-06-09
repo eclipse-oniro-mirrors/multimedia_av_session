@@ -43,6 +43,75 @@ bool AVQueueInfo::Unmarshalling(Parcel& data)
     return true;
 }
 
+bool AVQueueInfo::MarshallingMessageParcel(MessageParcel& parcel) const
+{
+    return parcel.WriteString(bundleName_) &&
+        parcel.WriteString(avQueueName_) &&
+        parcel.WriteString(avQueueId_) &&
+        parcel.WriteString(avQueueImageUri_) &&
+        MarshallingQueueImage(parcel);
+}
+
+AVQueueInfo* AVQueueInfo::UnmarshallingMessageParcel(MessageParcel& data)
+{
+    auto *result = new (std::nothrow) AVQueueInfo();
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVQueueInfo failed");
+    if (!data.ReadString(result->bundleName_) ||
+        !data.ReadString(result->avQueueName_) ||
+        !data.ReadString(result->avQueueId_) ||
+        !data.ReadString(result->avQueueImageUri_)) {
+        SLOGE("read AVQueueInfo failed");
+        delete result;
+        return nullptr;
+    }
+    int imageLength = data.ReadInt32();
+    if (imageLength <= 0) {
+        SLOGI("AVQueueInfo::UnmarshallingMessageParcel image length 0");
+        return result;
+    }
+    const char *buffer = nullptr;
+    buffer = reinterpret_cast<const char *>(data.ReadRawData(imageLength));
+    if (buffer == nullptr) {
+        SLOGE("read raw data null buffer with length %{public}d", imageLength);
+        return result;
+    }
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> mediaImageBuffer(buffer, buffer + imageLength);
+    avQueuePixelMap->SetInnerImgBuffer(mediaImageBuffer);
+    result->avQueueImage_ = avQueuePixelMap;
+    return result;
+}
+
+bool AVQueueInfo::MarshallingQueueImage(MessageParcel& parcel) const
+{
+    int imageLength = 0;
+    std::vector<uint8_t> avQueueImageBuffer;
+    if (avQueueImage_ != nullptr) {
+        avQueueImageBuffer = avQueueImage_->GetInnerImgBuffer();
+        imageLength = static_cast<int>(avQueueImageBuffer.size());
+    }
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(imageLength), false, "write image length fail");
+
+    unsigned char *buffer = new (std::nothrow) unsigned char[imageLength];
+    if (buffer == nullptr) {
+        SLOGE("new buffer failed of length = %{public}d", imageLength);
+        return false;
+    }
+
+    for (int i = 0; i < imageLength; i++) {
+        buffer[i] = avQueueImageBuffer[i];
+    }
+
+    if (!parcel.WriteRawData(buffer, imageLength)) {
+        SLOGE("WriteRawData failed");
+        delete[] buffer;
+        return false;
+    }
+
+    delete[] buffer;
+    return true;
+}
+
 void AVQueueInfo::SetBundleName(const std::string& bundleName)
 {
     bundleName_ = bundleName;

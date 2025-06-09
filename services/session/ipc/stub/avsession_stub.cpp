@@ -378,6 +378,19 @@ int32_t AVSessionStub::HandleSetSessionEvent(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleUpdateAVQueueInfoEvent(MessageParcel& data, MessageParcel& reply)
+{
+    sptr info = AVQueueInfo::UnmarshallingMessageParcel(data);
+    if (info == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_UNMARSHALLING, "WriteInt32 result failed");
+        return ERR_UNMARSHALLING;
+    }
+    int32_t ret = UpdateAVQueueInfo(*info);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_UNMARSHALLING, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UpdateAVQueueInfo failed");
+    return ERR_NONE;
+}
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
 {

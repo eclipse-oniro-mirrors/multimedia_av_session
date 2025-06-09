@@ -1978,15 +1978,44 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
             strcmp(avQueueIdItem->valuestring, meta.GetAVQueueId().c_str()) == 0) {
             CHECK_AND_RETURN_RET_LOG(i != 0, false, "avqueue:%{public}s is first", meta.GetAVQueueId().c_str());
             cJSON_DeleteItemFromArray(valuesArray, i);
+            std::string fileName = AVSessionUtils::GetFixedPathName(userId) + bundleName + "_" +
+                meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+            AVSessionUtils::DeleteFile(fileName);
         }
     }
     if (cJSON_GetArraySize(valuesArray) >= maxAVQueueInfoLen) {
+        cJSON* valueItem = cJSON_GetArrayItem(valuesArray, cJSON_GetArraySize(valuesArray) - 1);
+        DeleteAVQueueImage(valueItem);
         cJSON_DeleteItemFromArray(valuesArray, cJSON_GetArraySize(valuesArray) - 1);
     }
 
     bool ret = InsertAvQueueInfoToCJSONAndPrint(bundleName, meta, userId, valuesArray);
     cJSON_Delete(valuesArray);
     return ret;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+void AVSessionService::DeleteAVQueueImage(cJSON* item)
+{
+    if (item == nullptr || cJSON_IsInvalid(item)) {
+        return;
+    }
+    cJSON* imageDirItem = cJSON_GetObjectItem(item, "avQueueImageDir");
+    cJSON* imageNameItem = cJSON_GetObjectItem(item, "avQueueImageName");
+
+    if (imageDirItem == nullptr || cJSON_IsInvalid(imageDirItem) || !cJSON_IsString(imageDirItem)) {
+        SLOGE("invalid imageDirItem");
+        return;
+    }
+
+    if (imageNameItem == nullptr || cJSON_IsInvalid(imageNameItem) || !cJSON_IsString(imageNameItem)) {
+        SLOGE("invalid imageDirItem");
+        return;
+    }
+
+    std::string fileName = std::string(imageDirItem->valuestring + std::string(imageNameItem->valuestring));
+    AVSessionUtils::DeleteFile(fileName);
 }
 // LCOV_EXCL_STOP
 

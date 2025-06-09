@@ -635,6 +635,12 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
     DoLastMetaDataRefresh(napiAvSession);
+
+    auto syncExecutor = AVQueueImgDownloadSyncExecutor(reinterpret_cast<NapiAVSession*>(context->native),
+        context->metaData);
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask(syncExecutor, "AVQueueImgDownload"),
+        "NapiAVSession AVQueueImgDownload handler postTask failed");
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         bool isRepeatDownload = napiSession->latestDownloadedAssetId_ == napiSession->latestMetadataAssetId_ &&
@@ -701,6 +707,28 @@ std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<
             return;
         }
         syncAsyncCond_.notify_one();
+    };
+}
+
+std::function<void()> NapiAVSession::AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
+    OHOS::AVSession::AVMetaData metaData)
+{
+    return [napiSession, metaData]() {
+        AVQueueInfo info = AVQueueInfo();
+        CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "avqImg download NoSession");
+        CHECK_AND_RETURN_LOG(!metaData.GetAVQueueImageUri().empty() && metaData.GetAVQueueImage() == nullptr,
+            "avqImg not match download conditions");
+
+        CHECK_AND_RETURN_LOG(napiSession->latestDownloadedAVQueueId_ != metaData.GetAVQueueId(), "repeat avqId return");
+        std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+        bool ret = NapiUtils::DoDownloadInCommon(pixelMap, metaData.GetAVQueueImageUri());
+        CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "aft avq download NoSession");
+        CHECK_AND_RETURN_LOG(ret && pixelMap != nullptr, "download avqImg fail");
+        napiSession->latestDownloadedAVQueueId_ = metaData.GetAVQueueId();
+        info.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        info.SetAVQueueId(metaData.GetAVQueueId());
+        info.SetAVQueueName(metaData.GetAVQueueName());
+        napiSession->session_->UpdateAVQueueInfo(info);
     };
 }
 

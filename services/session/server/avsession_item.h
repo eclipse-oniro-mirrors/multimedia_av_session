@@ -98,6 +98,8 @@ public:
 
     int32_t SetAVMetaData(const AVMetaData& meta) override;
 
+    int32_t UpdateAVQueueInfo(const AVQueueInfo& info) override;
+
     int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
 
     int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) override;
