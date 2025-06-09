@@ -16,6 +16,7 @@
 #ifndef COLLABORATION_MANAGER_H
 #define COLLABORATION_MANAGER_H
 
+#include <mutex>
 #include <string>
 #include "avsession_log.h"
 #include "avsession_errors.h"
@@ -40,6 +41,8 @@ public:
     std::function<void(void)> sendCollaborationOnStop_;
 
 private:
+    static std::shared_ptr<CollaborationManager> instance_;
+    static std::once_flag onceFlag_;
     const int32_t remoteHardwareListSize_ = 2;
     const int32_t localHardwareListSize_ = 0;
     const std::string serviceName_ = "URLCasting";

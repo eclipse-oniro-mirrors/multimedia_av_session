@@ -16,10 +16,15 @@
 #include "collaboration_manager.h"
 
 namespace OHOS::AVSession {
+std::shared_ptr<CollaborationManager> CollaborationManager::instance_;
+std::once_flag CollaborationManager::onceFlag_;
+
 CollaborationManager& CollaborationManager::GetInstance()
 {
-    static CollaborationManager collaborationManager;
-    return collaborationManager;
+    std::call_once(onceFlag_, [] {
+        instance_ = std::make_shared<CollaborationManager>();
+    });
+    return *instance_;
 }
 
 CollaborationManager::CollaborationManager()
