@@ -2481,18 +2481,21 @@ void AVSessionService::HandleEventHandlerCallBack()
 
 int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
 {
-    if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
-        keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
-        pressCount_++;
-        SLOGI("isFirstPress_=%{public}d", isFirstPress_);
-        if (isFirstPress_) {
-            auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
-                HandleEventHandlerCallBack();
-            }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
-            CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
-            isFirstPress_ = false;
+    {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
+            keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
+            pressCount_++;
+            SLOGI("isFirstPress_=%{public}d", isFirstPress_);
+            if (isFirstPress_) {
+                auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+                    HandleEventHandlerCallBack();
+                }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
+                CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
+                isFirstPress_ = false;
+            }
+            return AVSESSION_SUCCESS;
         }
-        return AVSESSION_SUCCESS;
     }
     {
         std::lock_guard lockGuard(keyEventListLock_);
