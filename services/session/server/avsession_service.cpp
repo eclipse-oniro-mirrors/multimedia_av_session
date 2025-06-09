@@ -1993,7 +1993,7 @@ void AVSessionService::DeleteAVQueueImage(cJSON* item)
     }
 
     if (imageNameItem == nullptr || cJSON_IsInvalid(imageNameItem) || !cJSON_IsString(imageNameItem)) {
-        SLOGE("invalid imageDirItem");
+        SLOGE("invalid imageNameItem");
         return;
     }
 

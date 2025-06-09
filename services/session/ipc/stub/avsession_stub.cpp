@@ -386,7 +386,7 @@ int32_t AVSessionStub::HandleUpdateAVQueueInfoEvent(MessageParcel& data, Message
         return ERR_UNMARSHALLING;
     }
     int32_t ret = UpdateAVQueueInfo(*info);
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_UNMARSHALLING, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UpdateAVQueueInfo failed");
     return ERR_NONE;
 }
