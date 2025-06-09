@@ -177,6 +177,7 @@ int32_t SoftbusSessionManager::ObtainPeerDeviceId(int32_t socket, std::string &d
 {
     CHECK_AND_RETURN_RET_LOG(
         socket > 0, AVSESSION_ERROR, "the session is null, unable to obtain the peer device id.");
+    std::lock_guard lockGuard(socketLock_);
     if (mMap_.find(socket) == mMap_.end()) {
         SLOGE("no find deviceid.");
         return AVSESSION_ERROR;
