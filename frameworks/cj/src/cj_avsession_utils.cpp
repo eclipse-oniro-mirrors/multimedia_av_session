@@ -145,80 +145,69 @@ void SetFdData(std::string key, int *value, WantParams &wantP)
     wantP.SetParam(key, pWantParams);
 }
 
-bool InnerSetWantParamsArrayString(
-    const std::string &key, const std::vector<std::string> &value, WantParams &wantParams)
+bool InnerSetWantParamsArrayString(CParameters* head, WantParams &wantParams)
 {
-    size_t size = value.size();
+    char **strPtr = static_cast<char **>(head->value);
+    std::vector<std::string> strVec;
+    charPtrToVector(strPtr, head->size, strVec);
+    size_t size = strVec.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IString);
     if (ao != nullptr) {
         for (size_t i = 0; i < size; i++) {
-            ao->Set(i, AAFwk::String::Box(value[i]));
+            ao->Set(i, AAFwk::String::Box(strVec[i]));
         }
-        wantParams.SetParam(key, ao);
+        wantParams.SetParam(std::string(head->key), ao);
         return true;
     } else {
         return false;
     }
 }
 
-bool InnerSetWantParamsArrayInt(const std::string &key, const std::vector<int> &value,
-    WantParams &wantParams)
+bool InnerSetWantParamsArrayInt(CParameters* head, WantParams &wantParams)
 {
-    size_t size = value.size();
+    int *intArr = static_cast<int *>(head->value);
+    std::vector<int> intVec(intArr, intArr + head->size);
+    size_t size = intVec.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IInteger);
     if (ao != nullptr) {
         for (size_t i = 0; i < size; i++) {
-            ao->Set(i, AAFwk::Integer::Box(value[i]));
+            ao->Set(i, AAFwk::Integer::Box(intVec[i]));
         }
-        wantParams.SetParam(key, ao);
+        wantParams.SetParam(std::string(head->key), ao);
         return true;
     } else {
         return false;
     }
 }
 
-bool InnerSetWantParamsArrayLong(const std::string &key, const std::vector<long> &value,
-    WantParams &wantParams)
+bool InnerSetWantParamsArrayBool(CParameters* head, WantParams &wantParams)
 {
-    size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_ILong);
-    if (ao != nullptr) {
-        for (size_t i = 0; i < size; i++) {
-            ao->Set(i, AAFwk::Long::Box(value[i]));
-        }
-        wantParams.SetParam(key, ao);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool InnerSetWantParamsArrayBool(const std::string &key, const std::vector<bool> &value,
-    WantParams &wantParams)
-{
-    size_t size = value.size();
+    bool *boolArr = static_cast<bool *>(head->value);
+    std::vector<bool> boolVec(boolArr, boolArr + head->size);
+    size_t size = boolVec.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IBoolean);
     if (ao != nullptr) {
         for (size_t i = 0; i < size; i++) {
-            ao->Set(i, AAFwk::Boolean::Box(value[i]));
+            ao->Set(i, AAFwk::Boolean::Box(boolVec[i]));
         }
-        wantParams.SetParam(key, ao);
+        wantParams.SetParam(std::string(head->key), ao);
         return true;
     } else {
         return false;
     }
 }
 
-bool InnerSetWantParamsArrayDouble(
-    const std::string &key, const std::vector<double> &value, WantParams &wantParams)
+bool InnerSetWantParamsArrayDouble(CParameters* head, WantParams &wantParams)
 {
-    size_t size = value.size();
+    double *doubleArr = static_cast<double *>(head->value);
+    std::vector<double> doubleVec(doubleArr, doubleArr + head->size);
+    size_t size = doubleVec.size();
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IDouble);
     if (ao != nullptr) {
         for (size_t i = 0; i < size; i++) {
-            ao->Set(i, AAFwk::Double::Box(value[i]));
+            ao->Set(i, AAFwk::Double::Box(doubleVec[i]));
         }
-        wantParams.SetParam(key, ao);
+        wantParams.SetParam(std::string(head->key), ao);
         return true;
     } else {
         return false;
@@ -240,6 +229,8 @@ void InnerSetWantParamsArrayFD(CParameters* head, int64_t size, WantParams &want
     return;
 }
 
+int32_t InnerSetWantParamsHashMap(CParameters* head, WantParams &wantParams);
+
 int32_t SetDataParameters(const CArray& parameters, WantParams &wantP)
 {
     auto head = static_cast<CParameters*>(parameters.head);
@@ -259,27 +250,16 @@ int32_t SetDataParameters(const CArray& parameters, WantParams &wantP)
             wantP.SetParam(key, OHOS::AAFwk::Boolean::Box(*static_cast<bool *>(head->value)));
         } else if (head->valueType == FD_TYPE) { // "FD"
             SetFdData(key, static_cast<int *>(head->value), wantP);
+        } else if (head->valueType == HASH_MAP_TYPE) { // hashmap
+            return InnerSetWantParamsHashMap(head, wantP);
         } else if (head->valueType == STR_PTR_TYPE) { // char**
-            char **strPtr = static_cast<char **>(head->value);
-            std::vector<std::string> strVec;
-            charPtrToVector(strPtr, head->size, strVec);
-            InnerSetWantParamsArrayString(key, strVec, wantP);
+            InnerSetWantParamsArrayString(head, wantP);
         } else if (head->valueType == I32_PTR_TYPE) { // int32_t*
-            int *intArr = static_cast<int *>(head->value);
-            std::vector<int> intVec(intArr, intArr + head->size);
-            InnerSetWantParamsArrayInt(key, intVec, wantP);
-        } else if (head->valueType == I64_PTR_TYPE) { // int64_t*
-            long *longArr = static_cast<long *>(head->value);
-            std::vector<long> longVec(longArr, longArr + head->size);
-            InnerSetWantParamsArrayLong(key, longVec, wantP);
+            InnerSetWantParamsArrayInt(head, wantP);
         } else if (head->valueType == BOOL_PTR_TYPE) { // bool*
-            bool *boolArr = static_cast<bool *>(head->value);
-            std::vector<bool> boolVec(boolArr, boolArr + head->size);
-            InnerSetWantParamsArrayBool(key, boolVec, wantP);
+            InnerSetWantParamsArrayBool(head, wantP);
         } else if (head->valueType == DOUBLE_PTR_TYPE) { // double*
-            double *doubleArr = static_cast<double *>(head->value);
-            std::vector<double> doubleVec(doubleArr, doubleArr + head->size);
-            InnerSetWantParamsArrayDouble(key, doubleVec, wantP);
+            InnerSetWantParamsArrayDouble(head, wantP);
         } else if (head->valueType == FD_PTR_TYPE) { // FD*
             InnerSetWantParamsArrayFD(head, head->size, wantP);
         } else {
@@ -287,6 +267,21 @@ int32_t SetDataParameters(const CArray& parameters, WantParams &wantP)
             return AVSESSION_ERROR;
         }
     }
+    return CJNO_ERROR;
+}
+
+int32_t InnerSetWantParamsHashMap(CParameters* head, WantParams &wantParams)
+{
+    WantParams wp;
+    CArray carr;
+    carr.head = head->value;
+    carr.size = static_cast<uint64_t>(head->size);
+    auto ret = SetDataParameters(carr, wp);
+    if (ret != CJNO_ERROR) {
+        return ret;
+    }
+    sptr<AAFwk::IWantParams> pWantParams = AAFwk::WantParamWrapper::Box(wp);
+    wantParams.SetParam(std::string(head->key), pWantParams);
     return CJNO_ERROR;
 }
 
@@ -303,7 +298,7 @@ int32_t InnerWrapWantParamsString(const WantParams &wantParams, CParameters *p)
     }
     std::string natValue = OHOS::AAFwk::String::Unbox(ao);
     p->value = MallocCString(natValue, ret);
-    p->size = static_cast<int64_t>(natValue.length()) + 1;
+    p->size = 1;
     p->valueType = STR_TYPE;
     return ret;
 }
@@ -325,7 +320,7 @@ int32_t InnerWrapWantParamsT(const WantParams &wantParams, CParameters *p)
     }
     *ptr = natValue;
     p->value = static_cast<void*>(ptr);
-    p->size = sizeof(NativeT);
+    p->size = 1;
     return CJNO_ERROR;
 }
 
@@ -450,9 +445,53 @@ int32_t InnerWrapWantParamsFd(const WantParams &wantParams, CParameters *p)
         return error;
     }
     p->value = static_cast<void*>(ptr);
-    p->size = sizeof(int32_t);
+    p->size = 1;
     p->valueType = FD_TYPE;
     return CJNO_ERROR;
+}
+
+int32_t GetValue(const WantParams &wantParams, std::string key, CParameters *p)
+{
+    auto value = wantParams.GetParam(key);
+    AAFwk::IWantParams *o = AAFwk::IWantParams::Query(value);
+    if (o == nullptr) {
+        SLOGE("No value!");
+        return CJNO_ERROR;
+    }
+
+    AAFwk::WantParams wp = AAFwk::WantParamWrapper::Unbox(o);
+    if (wp.GetParam(TYPE_PROPERTY)) { //FD
+        value = wp.GetParam(VALUE_PROPERTY);
+        AAFwk::IInteger *ao = AAFwk::IInteger::Query(value);
+        if (ao == nullptr) {
+            return CJNO_ERROR;
+        }
+        int* ptr = static_cast<int *>(malloc(sizeof(int)));
+        if (ptr == nullptr) {
+            SLOGE("fail to malloc");
+            return ERR_NO_MEMORY;
+        }
+        *ptr = AAFwk::Integer::Unbox(ao);
+        p->value = static_cast<void *>(ptr);
+        p->size = 1;
+        p->valueType = FD_TYPE;
+    } else { // HASHMAP
+        CArray carr{};
+        int32_t code = CJNO_ERROR;
+        ParseParameters(wp, carr, code);
+        if (code != CJNO_ERROR) {
+            return code;
+        }
+        p->value = carr.head;
+        p->size = static_cast<int64_t>(carr.size);
+        p->valueType = HASH_MAP_TYPE;
+    }
+    return CJNO_ERROR;
+}
+
+int32_t InnerWrapWantParams(const WantParams &wantParams, CParameters *p)
+{
+    return GetValue(wantParams, std::string(p->key), p);
 }
 
 int32_t InnerWrapWantParamsArrayFd(sptr<AAFwk::IArray> &ao, CParameters *p)
@@ -548,11 +587,14 @@ void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &co
         } else if (AAFwk::IInteger::Query(iter->second) != nullptr) {
             ptr->valueType = I32_TYPE;
             code = InnerWrapWantParamsT<AAFwk::IInteger, AAFwk::Integer, int>(wantP, ptr);
+        } else if (AAFwk::ILong::Query(iter->second) != nullptr) {
+            ptr->valueType = I64_TYPE;
+            code = InnerWrapWantParamsT<AAFwk::ILong, AAFwk::Long, long>(wantP, ptr);
         } else if (AAFwk::IDouble::Query(iter->second) != nullptr) {
             ptr->valueType = DOUBLE_TYPE;
             code = InnerWrapWantParamsT<AAFwk::IDouble, AAFwk::Double, double>(wantP, ptr);
         } else if (AAFwk::IWantParams::Query(iter->second) != nullptr) {
-            code = InnerWrapWantParamsFd(wantP, ptr);
+            code = InnerWrapWantParams(wantP, ptr);
         } else if (AAFwk::IArray::Query(iter->second) != nullptr) {
             AAFwk::IArray *ao = AAFwk::IArray::Query(iter->second);
             sptr<AAFwk::IArray> array(ao);

@@ -48,6 +48,7 @@ export class AVInputCastPicker extends ViewPU {
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;
+        this.pickerCountOnCreation = 0;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -76,6 +77,9 @@ export class AVInputCastPicker extends ViewPU {
         }
         if (params.pickerClickTime !== undefined) {
             this.pickerClickTime = params.pickerClickTime;
+        }
+        if (params.pickerCountOnCreation !== undefined) {
+            this.pickerCountOnCreation = params.pickerCountOnCreation;
         }
     }
 
@@ -128,6 +132,15 @@ export class AVInputCastPicker extends ViewPU {
 
     set isRTL(newValue) {
         this.__isRTL.set(newValue);
+    }
+
+    aboutToAppear() {
+        AVInputCastPicker.currentPickerCount += 1;
+        this.pickerCountOnCreation = AVInputCastPicker.currentPickerCount;
+    }
+
+    aboutToDisappear() {
+        AVInputCastPicker.currentPickerCount -= 1;
     }
 
     iconBuilder(item, isSelected, parent = null) {
@@ -323,10 +336,11 @@ export class AVInputCastPicker extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             UIExtensionComponent.create({
                 abilityName: 'AVInputCastPickerAbility',
-                bundleName: 'com.hw.hmos.mediacontroller',
+                bundleName: 'com.hmos.mediacontroller',
                 parameters: {
                     'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
                     'isCustomPicker': isCustomPicker,
+                    'currentPickerCount': this.pickerCountOnCreation,
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
@@ -432,4 +446,5 @@ export class AVInputCastPicker extends ViewPU {
     }
 }
 
+AVInputCastPicker.currentPickerCount = 0;
 export default { AVInputCastPicker };

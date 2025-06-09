@@ -119,6 +119,24 @@ void SessionListenerProxy::OnDeviceOffline(const std::string& deviceId)
         "send request fail");
 }
 
+void SessionListenerProxy::OnDeviceStateChange(const DeviceState& deviceState)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_LOG(data.WriteInterfaceToken(GetDescriptor()), "write interface token failed");
+    CHECK_AND_RETURN_LOG(data.WriteString(deviceState.deviceId), "write deviceId failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(static_cast<int32_t>(deviceState.deviceState)), "write deviceState failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(static_cast<int32_t>(deviceState.reasonCode)), "write reasonCode failed");
+    CHECK_AND_RETURN_LOG(data.WriteInt32(static_cast<int32_t>(deviceState.radarErrorCode)),
+        "write radarErrorCode failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_LOG(remote != nullptr, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    CHECK_AND_RETURN_LOG(remote->SendRequest(LISTENER_CMD_DEVICE_STATE_CHANGE, data, reply, option) == 0,
+        "send request fail");
+}
+
 void SessionListenerProxy::OnRemoteDistributedSessionChange(
     const std::vector<sptr<IRemoteObject>>& sessionControllers)
 {

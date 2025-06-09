@@ -871,37 +871,6 @@ static HWTEST_F(AVSessionServiceTest, ProcessCastAudioCommand002, TestSize.Level
     SLOGI("ProcessCastAudioCommand002 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, HandleDeviceChange001, TestSize.Level1)
-{
-    SLOGI("HandleDeviceChange001 begin!");
-    DeviceChangeAction deviceChange;
-    std::vector<std::shared_ptr<AudioDeviceDescriptor>> desc;
-    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
-    descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
-    deviceChange.type = static_cast<DeviceChangeType>(0);
-    deviceChange.flag = static_cast<DeviceFlag>(0);
-    desc.push_back(descriptor);
-    avservice_->HandleDeviceChange(desc);
-    EXPECT_EQ(0, AVSESSION_SUCCESS);
-    SLOGI("HandleDeviceChange001 end!");
-}
-
-static HWTEST_F(AVSessionServiceTest, HandleDeviceChange002, TestSize.Level1)
-{
-    SLOGI("HandleDeviceChange002 begin!");
-    DeviceChangeAction deviceChange;
-    std::vector<std::shared_ptr<AudioDeviceDescriptor>> audioDeviceDescriptors;
-    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
-    descriptor->deviceType_ = OHOS::AudioStandard::DEVICE_TYPE_WIRED_HEADSET;
-    deviceChange.type = static_cast<DeviceChangeType>(0);
-    deviceChange.flag = static_cast<DeviceFlag>(0);
-
-    audioDeviceDescriptors.push_back(descriptor);
-    avservice_->HandleDeviceChange(audioDeviceDescriptors);
-    EXPECT_EQ(0, AVSESSION_SUCCESS);
-    SLOGI("HandleDeviceChange002 end!");
-}
-
 static HWTEST_F(AVSessionServiceTest, OnReceiveEvent001, TestSize.Level1)
 {
     SLOGI("OnReceiveEvent001 begin!");
@@ -1154,7 +1123,7 @@ static HWTEST_F(AVSessionServiceTest, SelectFocusSession001, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avsessionHere_->SetUid(pid);
     FocusSessionStrategy::FocusSessionChangeInfo info;
-    info.uid = pid;
+    info.pid = avsessionHere_->GetPid();
     bool ret = avservice_->SelectFocusSession(info);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
@@ -1757,6 +1726,138 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Leve
     avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
     SLOGD("HandleSystemKeyColdStart002 end!");
+}
+
+/**
+ * @tc.name: UpdateOrder001
+ * @tc.desc: Verifying the UpdateOrder.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, UpdateOrder001, TestSize.Level1)
+{
+    SLOGI("UpdateOrder001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    bool ret = avservice_->UpdateOrder(avsessionHere_);
+    EXPECT_EQ(ret, true);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGI("UpdateOrder001 end!");
+}
+
+/**
+ * @tc.name: UpdateOrder002
+ * @tc.desc: Verifying the UpdateOrder.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, UpdateOrder002, TestSize.Level1)
+{
+    SLOGI("UpdateOrder002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avservice_->UpdateFrontSession(avsessionHere_, true);
+    bool ret = avservice_->UpdateOrder(avsessionHere_);
+    EXPECT_EQ(ret, true);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGI("UpdateOrder002 end!");
+}
+
+/**
+ * @tc.name: HandleOtherSessionPlaying001
+ * @tc.desc: Verifying the HandleOtherSessionPlaying.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying001, TestSize.Level1)
+{
+    SLOGI("HandleOtherSessionPlaying001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avservice_->HandleOtherSessionPlaying(avsessionHere_);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGI("HandleOtherSessionPlaying001 end!");
+}
+
+/**
+ * @tc.name: HandleOtherSessionPlaying002
+ * @tc.desc: Verifying the HandleOtherSessionPlaying.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying002, TestSize.Level1)
+{
+    SLOGI("HandleOtherSessionPlaying002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    int32_t ancoUid = 1041;
+    avsessionHere_->SetUid(ancoUid);
+    avservice_->HandleOtherSessionPlaying(avsessionHere_);
+    bool check = avsessionHere_->GetUid() == ancoUid;
+    EXPECT_EQ(check, true);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGI("HandleOtherSessionPlaying002 end!");
+}
+
+/**
+ * @tc.name: HandleOtherSessionPlaying003
+ * @tc.desc: Verifying the HandleOtherSessionPlaying.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying003, TestSize.Level1)
+{
+    SLOGI("HandleOtherSessionPlaying003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    avservice_->HandleOtherSessionPlaying(avsessionHere_);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGI("HandleOtherSessionPlaying003 end!");
+}
+
+/**
+ * @tc.name: GetOtherPlayingSession001
+ * @tc.desc: Verifying the GetOtherPlayingSession.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession001, TestSize.Level1)
+{
+    SLOGI("GetOtherPlayingSession001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    std::string bundleName = "test";
+    int32_t userId = 0;
+    bool ret = avservice_->GetOtherPlayingSession(userId, bundleName) == nullptr;
+    EXPECT_EQ(ret, true);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGI("GetOtherPlayingSession001 end!");
 }
 
 /**

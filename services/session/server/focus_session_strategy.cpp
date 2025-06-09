@@ -51,31 +51,38 @@ void FocusSessionStrategy::RegisterFocusSessionSelector(const FocusSessionSelect
 void FocusSessionStrategy::ProcAudioRenderChange(const AudioRendererChangeInfos& infos)
 {
     SLOGD("AudioRenderStateChange start");
-    int32_t playingUid = -1;
+    std::pair<int32_t, int32_t> playingKey = std::make_pair(-1, -1);
     for (const auto& info : infos) {
-        SLOGD("AudioRenderStateChange uid=%{public}d sessionId=%{public}d state=%{public}d",
-            info->clientUID, info->sessionId, info->rendererState);
+        SLOGD("AudioRenderStateChange uid=%{public}d pid=%{public}d audioSessionId=%{public}d state=%{public}d",
+            info->clientUID, info->clientPid, info->sessionId, info->rendererState);
         if (info->clientUID == ancoUid && (std::count(ALLOWED_ANCO_STREAM_USAGE.begin(),
             ALLOWED_ANCO_STREAM_USAGE.end(), info->rendererInfo.streamUsage) == 0)) {
             SLOGI("Anco invalid uid=%{public}d usage=%{public}d", info->clientUID, info->rendererInfo.streamUsage);
             continue;
         }
+        if ((std::count(ALLOWED_MEDIA_STREAM_USAGE.begin(),
+            ALLOWED_MEDIA_STREAM_USAGE.end(), info->rendererInfo.streamUsage) == 0)) {
+            SLOGI("Media invalid uid=%{public}d usage=%{public}d", info->clientUID, info->rendererInfo.streamUsage);
+            continue;
+        }
+        CHECK_AND_CONTINUE(info->clientPid != 0);
         {
             std::lock_guard lockGuard(stateLock_);
-            auto it = currentStates_.find(info->clientUID);
+            std::pair<int32_t, int32_t> key = std::make_pair(info->clientUID, info->clientPid);
+            auto it = currentStates_.find(key);
             if (it == currentStates_.end()) {
-                currentStates_[info->clientUID] = stopState;
+                currentStates_[key] = stopState;
             } else if (info->rendererState == AudioStandard::RendererState::RENDERER_RELEASED) {
                 currentStates_.erase(it);
                 continue;
             }
 
             if (info->rendererState == AudioStandard::RendererState::RENDERER_RUNNING) {
-                currentStates_[info->clientUID] = runningState;
-                playingUid = info->clientUID;
+                currentStates_[key] = runningState;
+                playingKey = key;
             }
-            if (playingUid != info->clientUID) {
-                currentStates_[info->clientUID] = stopState;
+            if (playingKey != key) {
+                currentStates_[key] = stopState;
             }
         }
     }
@@ -85,58 +92,57 @@ void FocusSessionStrategy::ProcAudioRenderChange(const AudioRendererChangeInfos&
 void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos& infos)
 {
     ProcAudioRenderChange(infos);
-    int32_t focusSessionUid = -1;
-    int32_t stopSessionUid = -1;
+    std::pair<int32_t, int32_t> focusSessionKey = std::make_pair(-1, -1);
+    std::pair<int32_t, int32_t> stopSessionKey = std::make_pair(-1, -1);
     {
         std::lock_guard lockGuard(stateLock_);
         for (auto it = currentStates_.begin(); it != currentStates_.end(); it++) {
             if (it->second == runningState) {
                 if (IsFocusSession(it->first)) {
-                    focusSessionUid = it->first;
+                    focusSessionKey = it->first;
                     continue;
                 }
             } else {
                 if (CheckFocusSessionStop(it->first)) {
-                    stopSessionUid = it->first;
+                    stopSessionKey = it->first;
                 }
             }
         }
     }
-
-    if (focusSessionUid != -1) {
-        UpdateFocusSession(focusSessionUid);
+    if (focusSessionKey.first != -1 && focusSessionKey.second != -1) {
+        UpdateFocusSession(focusSessionKey);
     }
-
-    if (stopSessionUid != -1) {
-        DelayStopFocusSession(stopSessionUid);
+    if (stopSessionKey.first != -1 && stopSessionKey.second != -1) {
+        DelayStopFocusSession(stopSessionKey);
     }
 }
 
-bool FocusSessionStrategy::IsFocusSession(const int32_t uid)
+bool FocusSessionStrategy::IsFocusSession(const std::pair<int32_t, int32_t> key)
 {
     bool isFocus = false;
-    auto it = lastStates_.find(uid);
+    auto it = lastStates_.find(key);
     if (it == lastStates_.end()) {
         isFocus = true;
     } else {
         isFocus = it->second != runningState;
     }
 
-    lastStates_[uid] = currentStates_[uid];
+    lastStates_[key] = currentStates_[key];
     if (isFocus) {
-        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckFocusStop" + std::to_string(uid));
-        HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", uid,
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckFocusStop" + std::to_string(key.second));
+        HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", key.second,
             "AUDIO_INFO_RENDERER_STATE", AudioStandard::RendererState::RENDERER_RUNNING,
             "DETAILED_MSG", "focussessionstrategy selectfocussession, current focus session info");
-        SLOGI("IsFocusSession uid=%{public}d isFocusTRUE", uid);
+        SLOGI("IsFocusSession uid=%{public}d isFocusTRUE", key.second);
     }
     return isFocus;
 }
 
-void FocusSessionStrategy::UpdateFocusSession(const int32_t uid)
+void FocusSessionStrategy::UpdateFocusSession(const std::pair<int32_t, int32_t> key)
 {
     FocusSessionChangeInfo sessionInfo;
-    sessionInfo.uid = uid;
+    sessionInfo.uid = key.first;
+    sessionInfo.pid = key.second;
     if (selector_) {
         selector_(sessionInfo);
     }
@@ -145,39 +151,40 @@ void FocusSessionStrategy::UpdateFocusSession(const int32_t uid)
     }
 }
 
-bool FocusSessionStrategy::CheckFocusSessionStop(const int32_t uid)
+bool FocusSessionStrategy::CheckFocusSessionStop(const std::pair<int32_t, int32_t> key)
 {
     bool isFocusStop = false;
-    auto it = lastStates_.find(uid);
+    auto it = lastStates_.find(key);
     if (it == lastStates_.end()) {
         isFocusStop = false;
     } else {
         isFocusStop = it->second == runningState;
     }
 
-    lastStates_[uid] = currentStates_[uid];
+    lastStates_[key] = currentStates_[key];
     if (isFocusStop) {
-        SLOGI("CheckFocusSessionStop uid=%{public}d isFocusStopTRUE", uid);
+        SLOGI("CheckFocusSessionStop uid=%{public}d pid=%{public}d isFocusStopTRUE", key.first, key.second);
     }
     return isFocusStop;
 }
 
-void FocusSessionStrategy::DelayStopFocusSession(const int32_t uid)
+void FocusSessionStrategy::DelayStopFocusSession(const std::pair<int32_t, int32_t> key)
 {
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
-        [this, uid]() {
+        [this, key]() {
             {
                 std::lock_guard lockGuard(stateLock_);
-                SLOGI("CheckFocusStop uid=%{public}d lastState=%{public}d", uid, lastStates_[uid]);
-                if (lastStates_[uid] == AudioStandard::RendererState::RENDERER_RUNNING) {
+                SLOGE("DelayStopFocus uid=%{public}d lastState=%{public}d", key.first, lastStates_[key]);
+                if (lastStates_[key] == AudioStandard::RendererState::RENDERER_RUNNING) {
                     return;
                 }
             }
             FocusSessionChangeInfo changeInfo;
-            changeInfo.uid = uid;
+            changeInfo.uid = key.first;
+            changeInfo.pid = key.second;
             if (callback_) {
                 callback_(changeInfo, false);
             }
-        }, "CheckFocusStop" + std::to_string(uid), cancelTimeout);
+        }, "CheckFocusStop" + std::to_string(key.second), cancelTimeout);
 }
 }

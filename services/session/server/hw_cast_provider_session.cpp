@@ -17,6 +17,7 @@
 #include <thread>
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "av_router.h"
 
 using namespace OHOS::CastEngine;
 
@@ -218,8 +219,23 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for ListSize %{public}d", static_cast<int>(tempListenerList.size()));
             listener->OnCastStateChange(static_cast<int>(deviceState), deviceInfo);
+            OnDeviceStateChange(stateInfo);
         }
     }
+}
+
+void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo)
+{
+    SLOGI("OnDeviceStateChange from cast with deviceId %{public}s, state %{public}d, reasonCode %{public}d",
+        stateInfo.deviceId.c_str(), static_cast<int32_t>(stateInfo.deviceState),
+        static_cast<int32_t>(stateInfo.reasonCode));
+
+    DeviceState deviceState;
+    deviceState.deviceId = stateInfo.deviceId;
+    deviceState.deviceState = static_cast<ConnectionState>(static_cast<int32_t>(stateInfo.deviceState));
+    deviceState.reasonCode = static_cast<ReasonCode>(static_cast<int32_t>(stateInfo.reasonCode));
+
+    AVRouter::GetInstance().OnDeviceStateChange(deviceState);
 }
 
 void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const std::string &jsonParam)

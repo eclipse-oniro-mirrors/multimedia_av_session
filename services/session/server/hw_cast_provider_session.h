@@ -42,6 +42,7 @@ public:
     bool SetStreamState(DeviceInfo deviceInfo);
     bool GetRemoteNetWorkId(std::string deviceId, std::string &networkId);
     void SetProtocolType(CastEngine::ProtocolType);
+    void OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo);
 
 private:
     std::shared_ptr<CastEngine::ICastSession> castSession_;

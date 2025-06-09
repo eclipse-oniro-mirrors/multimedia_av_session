@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
     { "deviceAvailable", { OnDeviceAvailable, OffDeviceAvailable } },
     { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
+    { "deviceState", { OnDeviceStateChange, OffDeviceStateChange } },
 };
 
 std::map<DistributedSessionType, std::pair<NapiAVSessionManager::OnEventHandlerType,
@@ -387,7 +388,7 @@ napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, 
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         if (argc == ARGC_ONE && (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
             && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null))) {
-            int32_t sessionTypeValue;
+            int32_t sessionTypeValue = 0;
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], sessionTypeValue);
             context->sessionType_ = DistributedSessionType(sessionTypeValue);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok &&
@@ -780,7 +781,7 @@ napi_value NapiAVSessionManager::OnDistributedSessionChangeEvent(napi_env env, n
         /* require 3 arguments <event, callback> */
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        int32_t sessionTypeValue;
+        int32_t sessionTypeValue = 0;
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], sessionTypeValue);
         CHECK_STATUS_RETURN_VOID(context, "get session type failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->sessionType_ = DistributedSessionType(sessionTypeValue);
@@ -838,7 +839,7 @@ napi_value NapiAVSessionManager::OffDistributedSessionChangeEvent(napi_env env, 
             NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO || argc == ARGC_THREE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        int32_t sessionTypeValue;
+        int32_t sessionTypeValue = 0;
         context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], sessionTypeValue);
         CHECK_STATUS_RETURN_VOID(context, "get session type failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->sessionType_ = DistributedSessionType(sessionTypeValue);
@@ -934,8 +935,8 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
         int32_t ret = AVSessionManager::GetInstance().SendSystemControlCommand(context->command);
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
             double speed;
-            int64_t time;
-            int32_t mode;
+            int64_t time = 0;
+            int32_t mode = AVPlaybackState::LOOP_MODE_SEQUENCE;
             std::string assetId;
             context->command.GetSpeed(speed);
             context->command.GetSeekTime(time);
@@ -1440,6 +1441,13 @@ napi_status NapiAVSessionManager::OnRemoteDistributedSessionChange(napi_env env,
     return listener_->AddCallback(env, NapiSessionListener::EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callback);
 }
 
+napi_status NapiAVSessionManager::OnDeviceStateChange(napi_env env, napi_value callback)
+{
+    SLOGI("OnDeviceStateChange AddCallback");
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
+}
+
 void NapiAVSessionManager::HandleServiceDied()
 {
     if (!serviceDiedCallbacks_.empty() && asyncCallback_ != nullptr) {
@@ -1514,6 +1522,13 @@ napi_status NapiAVSessionManager::OffRemoteDistributedSessionChange(napi_env env
     SLOGI("OffRemoteDistributedSessionChange RemoveCallback");
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callback);
+}
+
+napi_status NapiAVSessionManager::OffDeviceStateChange(napi_env env, napi_value callback)
+{
+    SLOGI("OffDeviceStateChange RemoveCallback");
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
 
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)

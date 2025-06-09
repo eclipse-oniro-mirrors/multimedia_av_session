@@ -248,6 +248,8 @@ public:
 
     void NotifyDeviceOffline(const std::string& deviceId) override;
 
+    void NotifyDeviceStateChange(const DeviceState& deviceState) override;
+
     void NotifyMirrorToStreamCast();
 
     bool IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session);
@@ -316,7 +318,6 @@ private:
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession, bool addCapsule,
                         bool isCapsuleUpdate);
-    void NotifyDeviceChange();
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
@@ -334,8 +335,6 @@ private:
     void RemoveHistoricalRecordListener(HistoricalRecordListener* listener);
 
     sptr<AVSessionItem> SelectSessionByUid(const AudioStandard::AudioRendererChangeInfo& info);
-
-    void OutputDeviceChangeListener(const AudioRendererChangeInfos& infos);
 
     std::function<bool(int32_t, int32_t)> GetAllowedPlaybackCallbackFunc();
 
@@ -384,9 +383,11 @@ private:
 
     void UpdateTopSession(const sptr<AVSessionItem>& newTopSession, int32_t userId = 0);
 
-    void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info, bool isPlaying);
+    sptr<AVSessionItem> GetOtherPlayingSession(int32_t userId, std::string bundleName);
 
-    void HandleDeviceChange(const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc);
+    void HandleOtherSessionPlaying(sptr<AVSessionItem>& session);
+
+    void HandleFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info, bool isPlaying);
 
     __attribute__((no_sanitize("cfi"))) std::shared_ptr<RemoteSessionCommandProcess> GetService(
         const std::string& deviceId);
@@ -518,7 +519,9 @@ private:
 
     bool VerifyNotification();
 
-    void HandleChangeTopSession(int32_t infoUid, int32_t userId);
+    void HandleChangeTopSession(int32_t infoUid, int32_t infoPid, int32_t userId);
+
+    bool UpdateOrder(sptr<AVSessionItem>& sessionItem);
 
     bool IsTopSessionPlaying();
 

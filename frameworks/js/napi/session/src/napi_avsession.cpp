@@ -265,12 +265,20 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
 void AddRegisterEvent(std::string eventName)
 {
     std::lock_guard lockGuard(registerEventLock_);
+    if (convertEventType_.find(eventName) == convertEventType_.end()) {
+        SLOGE("eventName is invalid: eventName = %{public}s",  eventName.c_str());
+        return;
+    }
     registerEventList_.push_back(convertEventType_[eventName]);
 }
 
 void RemoveRegisterEvent(std::string eventName)
 {
     std::lock_guard lockGuard(registerEventLock_);
+    if (convertEventType_.find(eventName) == convertEventType_.end()) {
+        SLOGE("eventName is invalid: eventName = %{public}s",  eventName.c_str());
+        return;
+    }
     registerEventList_.remove(convertEventType_[eventName]);
 }
 

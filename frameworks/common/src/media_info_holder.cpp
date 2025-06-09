@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
     auto *result = new (std::nothrow) MediaInfoHolder();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "result new fail");
 
-    int32_t currentIndex;
+    int32_t currentIndex = 0;
     if (!data.ReadInt32(currentIndex)) {
         SLOGE("write currentIndex failed");
         delete result;
@@ -42,7 +42,7 @@ MediaInfoHolder *MediaInfoHolder::Unmarshalling(Parcel& data)
     }
     
     result->currentIndex_ = currentIndex;
-    int32_t playInfosSize;
+    int32_t playInfosSize = 0;
     if (!data.ReadInt32(playInfosSize)) {
         SLOGE("write playInfosSize failed");
         delete result;

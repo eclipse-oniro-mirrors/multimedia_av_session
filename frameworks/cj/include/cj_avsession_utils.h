@@ -37,6 +37,7 @@ constexpr int32_t CJNO_ERROR = 0;
 
 constexpr int32_t STR_TYPE = 0;
 constexpr int32_t I32_TYPE = 1;
+constexpr int32_t I64_TYPE = 2;
 constexpr int32_t BOOL_TYPE = 3;
 constexpr int32_t FD_TYPE = 4;
 constexpr int32_t STR_PTR_TYPE = 5;
@@ -47,6 +48,7 @@ constexpr int32_t DOUBLE_PTR_TYPE = 9;
 constexpr int32_t FD_PTR_TYPE = 10;
 constexpr int32_t DOUBLE_TYPE = 11;
 constexpr int32_t PIXEL_MAP_TYPE = 13;
+constexpr int32_t HASH_MAP_TYPE = 15;
 constexpr int32_t NONE_VALUE = -1;
 
 /* Native => Cangjie FFI Object*/
@@ -121,6 +123,7 @@ void cjStructHeapFreeAVQueueItem(CArray& cj);
 
 /* Common Methods */
 int32_t CJExecMethod(std::function<int32_t()> method, std::string methodName);
+void ParseParameters(const AAFwk::WantParams &wantP, CArray &cArray, int32_t &code);
 
 template<class NT, class CJT>
 int32_t CJControllerGetterCStruct(

@@ -213,7 +213,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
 
     size_t maxLen = STR_MAX_LENGTH;
     status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
-    if (status != napi_ok || maxLen >= STR_MAX_LENGTH) {
+    if (status != napi_ok || maxLen >= STR_MAX_LENGTH - STR_TAIL_LENGTH) {
         return napi_invalid_arg;
     }
 
@@ -229,6 +229,36 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
 napi_status NapiUtils::SetValue(napi_env env, const std::string& in, napi_value& out)
 {
     return napi_create_string_utf8(env, in.c_str(), in.size(), &out);
+}
+
+/* napi_value <-> DeviceState */
+napi_status NapiUtils::SetValue(napi_env env, const DeviceState& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+
+    napi_value property = nullptr;
+    status = SetValue(env, in.deviceId, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "deviceId", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.deviceState, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "deviceState", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.reasonCode, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "reasonCode", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.radarErrorCode, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "radarErrorCode", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    return napi_ok;
 }
 
 /* napi_value <-> AppExecFwk::ElementName */
@@ -658,7 +688,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVCastPlayerState& 
 
     size_t maxLen = STR_MAX_LENGTH;
     status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
-    if (maxLen >= STR_MAX_LENGTH) {
+    if (maxLen >= STR_MAX_LENGTH - STR_TAIL_LENGTH) {
         return napi_invalid_arg;
     }
 
@@ -1554,7 +1584,7 @@ napi_status NapiUtils::GetOptionalString(napi_env env, napi_value in, DeviceInfo
         if (maxLen == 0) {
             out.ipAddress_ = "";
         } else {
-            if (maxLen >= static_cast<size_t>(STR_MAX_LENGTH)) {
+            if (maxLen >= static_cast<size_t>(STR_MAX_LENGTH - STR_TAIL_LENGTH)) {
                 return napi_invalid_arg;
             }
             char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};

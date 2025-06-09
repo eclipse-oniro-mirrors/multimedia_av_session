@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,7 +230,7 @@ int32_t AVSessionControllerStub::HandleGetAVQueueTitle(MessageParcel& data, Mess
 
 int32_t AVSessionControllerStub::HandleSkipToQueueItem(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t itemId;
+    int32_t itemId = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(itemId), ERR_NONE, "read itemId int32 failed");
     int32_t ret = SkipToQueueItem(itemId);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");

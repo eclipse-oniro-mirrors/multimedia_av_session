@@ -548,4 +548,40 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback002, TestSiz
     SLOGI("RegisterToggleFavoriteCallback002 End");
 }
 
+/**
+ * @tc.name: OnSetTargetLoopMode001
+ * @tc.desc: have registered RegisterToggleFavoriteCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnSetTargetLoopMode001, TestSize.Level1)
+{
+    SLOGI("OnSetTargetLoopMode001 Begin");
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    AVSession_LoopMode loopMode = LOOP_MODE_SINGLE;
+    
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    g_ohAVSessionCallbackImpl.OnSetTargetLoopMode(loopMode);
+    EXPECT_TRUE(oh_avsession != nullptr);
+    SLOGI("OnSetTargetLoopMode001 End");
+}
+
+/**
+ * @tc.name: OnPlayWithAssetId001
+ * @tc.desc: have registered RegisterToggleFavoriteCallback
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnPlayWithAssetId001, TestSize.Level1)
+{
+    SLOGI("OnPlayWithAssetId001 Begin");
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    std::string assetId = "assetId";
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    g_ohAVSessionCallbackImpl.OnPlayWithAssetId(assetId);
+    EXPECT_TRUE(oh_avsession != nullptr);
+    SLOGI("OnPlayWithAssetId001 End");
+}
 } //OHOS::AVSession

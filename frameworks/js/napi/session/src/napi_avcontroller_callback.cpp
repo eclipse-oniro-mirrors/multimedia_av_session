@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -338,6 +338,7 @@ void NapiAVControllerCallback::OnExtrasChange(const AAFwk::WantParams& extras)
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     napi_ref ref = nullptr;
 
     if (threadSafeFunction_ == nullptr) {
@@ -371,6 +372,7 @@ napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGI("remove callback for event %{public}d", event);
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     if (callback == nullptr) {
         SLOGD("Remove callback, the callback is nullptr");
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {

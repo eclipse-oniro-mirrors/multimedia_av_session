@@ -99,6 +99,7 @@ class SessionListenerStubDemo : public SessionListenerStub {
     void OnDeviceAvailable(const OutputDeviceInfo &castOutputDeviceInfo) override {};
     void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
     void OnDeviceOffline(const std::string &deviceId) override {};
+    void OnDeviceStateChange(const DeviceState& deviceState) override {};
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>> &sessionControllers) override {};
 };

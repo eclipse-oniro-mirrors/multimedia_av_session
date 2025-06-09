@@ -37,7 +37,7 @@
  */
 namespace OHOS::AVSession {
 using DeathCallback = std::function<void()>;
-
+struct DeviceState;
 class SessionListener {
 public:
     /**
@@ -105,6 +105,14 @@ public:
     */
     virtual void OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) {};
+
+    /**
+     * @brief Listen for the event of device changed.
+     *
+     * @param { DeviceState } device state info.
+     * @since 20
+    */
+    virtual void OnDeviceStateChange(const DeviceState& deviceState) {};
 
     /**
      * @brief Deconstruct SessionListener.
@@ -904,6 +912,47 @@ struct DecoderType {
      * @since 18
      */
     static constexpr const char *OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a";
+};
+
+/**
+ * Device state used to describe states including discovery, authentication and other scenes.
+ * @typedef DeviceState
+ * @syscap SystemCapability.Multimedia.AVSession.AVCast
+ * @atomicservice
+ * @since 20
+ */
+struct DeviceState {
+    /**
+     * Unique device descriptor.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 20
+     */
+    std::string deviceId;
+
+    /**
+     * Device connection state.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 20
+     */
+    ConnectionState deviceState;
+
+    /**
+     * Reason for connection failure, for example, user cancellation and timeout.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 20
+     */
+    ReasonCode reasonCode;
+
+    /**
+     * System radar error code returned by cast+services.
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     * @atomicservice
+     * @since 20
+     */
+    int32_t radarErrorCode;
 };
 
 enum CastEngineConnectState {

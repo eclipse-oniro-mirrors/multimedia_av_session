@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ napi_status NapiQueueItem::SetValue(napi_env env, const AVQueueItem& in, napi_va
 
 napi_status NapiQueueItem::GetItemId(napi_env env, napi_value in, AVQueueItem& out)
 {
-    int32_t property;
+    int32_t property = 0;
     auto status = NapiUtils::GetNamedProperty(env, in, "itemId", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetItemId(property);
@@ -129,7 +129,7 @@ napi_status NapiQueueItem::GetDataSrc(napi_env env, const napi_value in, napi_va
     status = napi_get_named_property(env, dataSrc, "fileSize", fileSize);
     CHECK_RETURN(status == napi_ok, "get fileSize failed", status);
 
-    int64_t fSize;
+    int64_t fSize = 0;
     napi_get_value_int64(env, *fileSize, &fSize);
     CHECK_RETURN(status == napi_ok, "get fileSize value failed", status);
 

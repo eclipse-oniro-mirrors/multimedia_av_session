@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,10 +156,10 @@ int32_t AVControllerCallbackStub::HandleOnValidCommandChange(MessageParcel& data
 
 int32_t AVControllerCallbackStub::HandleOnOutputDeviceChange(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t connectionState;
+    int32_t connectionState = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(connectionState), false, "write deviceInfoSize failed");
     OutputDeviceInfo outputDeviceInfo;
-    int32_t deviceInfoSize;
+    int32_t deviceInfoSize = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     int32_t maxDeviceInfoSize = 1000; // A maximum of 1000 device change events can be processed at a time
     CHECK_AND_RETURN_RET_LOG((deviceInfoSize >= 0) && (deviceInfoSize < maxDeviceInfoSize),
