@@ -180,6 +180,7 @@ void AVCastControllerItem::OnValidCommandChange(const std::vector<int32_t>& cmds
 
 int32_t AVCastControllerItem::onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos)
 {
+    std::lock_guard lockGuard(castControllerCallbackLock_);
     if (callback_ != nullptr) {
         return callback_->onDataSrcRead(mem, length, pos);
     }
