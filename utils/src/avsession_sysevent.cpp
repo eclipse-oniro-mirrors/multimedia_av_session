@@ -31,6 +31,12 @@ AVSessionSysEvent::AVSessionSysEvent() : optCounts_ {},
 {
 }
 
+AVSessionSysEvent::~AVSessionSysEvent()
+{
+    SLOGI("AVSessionSysEvent destruct");
+    Unregister();
+}
+
 void AVSessionSysEvent::AddOperationCount(Operation operation)
 {
     std::lock_guard lockGuard(lock_);
