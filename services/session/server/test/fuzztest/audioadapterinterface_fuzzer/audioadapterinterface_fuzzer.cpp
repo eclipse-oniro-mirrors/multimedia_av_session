@@ -104,6 +104,7 @@ void AudioAdapterTest004()
     FuzzedDataProvider provider(RAW_DATA, g_totalSize);
 
     int32_t uid = provider.ConsumeIntegral<int32_t>();
+    int32_t pid = provider.ConsumeIntegral<int32_t>();
     int32_t muteUid = provider.ConsumeIntegral<int32_t>();
     OHOS::AudioStandard::StreamUsage muteUsage = static_cast<OHOS::AudioStandard::StreamUsage>(
         provider.ConsumeIntegralInRange<int32_t>(0, OHOS::AudioStandard::STREAM_USAGE_MAX));
@@ -127,7 +128,7 @@ void AudioAdapterTest004()
         provider.ConsumeIntegralInRange<int32_t>(0, OHOS::AudioStandard::STREAM_USAGE_MAX));
 
     auto &audioAdapter = AudioAdapter::GetInstance();
-    audioAdapter.GetRendererRunning(uid);
+    audioAdapter.GetRendererRunning(uid, pid);
     audioAdapter.MuteAudioStream(muteUid, muteUsage);
     audioAdapter.PauseAudioStream(pauseUid, pauseUsage);
     audioAdapter.SelectOutputDevice(desc);
