@@ -1427,7 +1427,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, SessionToken& out)
 
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::DeviceRole& out)
 {
-    int32_t deviceRole;
+    int32_t deviceRole {};
     auto status = GetValue(env, in, deviceRole);
     CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceRole failed", status);
     out = static_cast<AudioStandard::DeviceRole>(deviceRole);
@@ -1436,7 +1436,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::Devi
 
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::DeviceType& out)
 {
-    int32_t deviceType;
+    int32_t deviceType {};
     auto status = GetValue(env, in, deviceType);
     CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor deviceType failed", status);
     out = static_cast<AudioStandard::DeviceType>(deviceType);
@@ -1454,7 +1454,7 @@ napi_status NapiUtils::GetSampleRate(napi_env env, napi_value in, AudioStandard:
         napi_value element {};
         status = napi_get_element(env, value, 0, &element);
         CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
-        int32_t samplingRate;
+        int32_t samplingRate {};
         status = GetValue(env, element, samplingRate);
         CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor audioStreamInfo_ samplingRate value failed", status);
         out = static_cast<AudioStandard::AudioSamplingRate>(samplingRate);
@@ -1473,7 +1473,7 @@ napi_status NapiUtils::GetChannels(napi_env env, napi_value in, AudioStandard::A
         napi_value element {};
         status = napi_get_element(env, value, 0, &element);
         CHECK_RETURN((status == napi_ok) && (element != nullptr), "get element failed", status);
-        int32_t channel;
+        int32_t channel {};
         status = GetValue(env, element, channel);
         CHECK_RETURN(status == napi_ok, "get AudioDeviceDescriptor audioStreamInfo_ channels value failed", status);
         out = static_cast<AudioStandard::AudioChannel>(channel);
