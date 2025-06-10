@@ -54,6 +54,7 @@ void AVSessionSysEvent::Reset()
 
 void AVSessionSysEvent::ReportLowQuality()
 {
+    std::lock_guard lockGuard(lock_);
     for (auto it = lowQualityInfos_.begin(); it != lowQualityInfos_.end(); it++) {
         SLOGD("report low quality for %{public}s", it->second.bundleName_.c_str());
         HiSysWriteStatistic("PLAYING_COMBIND_AVSESSION_STATIS",
