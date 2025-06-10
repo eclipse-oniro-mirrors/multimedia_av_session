@@ -166,6 +166,7 @@ private:
     PlayingStateInfo* GetPlayingStateInfo(const std::string& bundleName);
     std::map<pid_t, int32_t> audioStatuses_;
     AVSessionSysEvent();
+    ~AVSessionSysEvent();
     std::map<Operation, uint32_t> optCounts_;
     std::unique_ptr<Utils::Timer> timer_;
     uint32_t timerId_ = 0;

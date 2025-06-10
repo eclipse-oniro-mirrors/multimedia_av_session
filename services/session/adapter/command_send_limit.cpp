@@ -36,7 +36,8 @@ CommandSendLimit::CommandSendLimit()
 
 CommandSendLimit::~CommandSendLimit()
 {
-    SLOGD("CommandSendLimit destroy");
+    SLOGI("CommandSendLimit destroy");
+    StopTimer();
 }
 
 bool CommandSendLimit::IsCommandSendEnable(pid_t pid)
