@@ -423,8 +423,7 @@ int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, std::shared_ptr<
 napi_status NapiAVCastControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
-    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < AVCastControlCommand::CAST_CONTROL_CMD_MAX,
-        napi_generic_failure, "has no event");
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_CAST_TYPE_MAX, napi_generic_failure, "has no event");
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
         napi_generic_failure, "get callback reference failed");
@@ -457,8 +456,7 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGI("try remove callback for event %{public}d", event);
-    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < AVCastControlCommand::CAST_CONTROL_CMD_MAX,
-        napi_generic_failure, "has no event");
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_CAST_TYPE_MAX, napi_generic_failure, "has no event");
     if (callback == nullptr) {
         SLOGD("Remove callback, the callback is nullptr");
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
@@ -490,7 +488,7 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
 
 bool NapiAVCastControllerCallback::IsCallbacksEmpty(int32_t event)
 {
-    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < AVCastControlCommand::CAST_CONTROL_CMD_MAX, true, "has no event");
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_CAST_TYPE_MAX, true, "has no event");
     return callbacks_[event].empty();
 }
 } // namespace OHOS::AVSession
