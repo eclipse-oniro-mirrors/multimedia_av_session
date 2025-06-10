@@ -78,7 +78,6 @@ void AVSessionServiceExtFuzzer::AVSessionServiceExtFuzzTest(uint8_t* data, size_
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-
     vector<string> states { "UNKNOWN", "IDLE", "CONNECTING" };
     vector<string> serviceNames { "Unknown", "SuperLauncher-Dual", "HuaweiCast" };
     vector<string> deviceIds { " ", "1234567", "7654321" };
@@ -87,7 +86,6 @@ void AVSessionServiceExtFuzzer::AVSessionServiceExtFuzzTest(uint8_t* data, size_
     std::string serviceName = serviceNames[GetData<uint8_t>() % serviceNames.size()];
     std::string deviceId = deviceIds[GetData<uint8_t>() % deviceIds.size()];
     std::string extraInfo = extraInfos[GetData<uint8_t>() % extraInfos.size()];
-
     static sptr<AVSessionService> service = new AVSessionService(GetData<uint8_t>());
     service->SuperLauncher(deviceId, serviceName, extraInfo, state);
 }
@@ -105,10 +103,10 @@ void AVSessionServiceExtRemoteRequest(uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
+    /* Run your code on data */
     RAW_DATA = data;
     g_dataSize = size;
     g_pos = 0;
-    /* Run your code on data */
     AVSessionServiceExtRemoteRequest(data, size);
     return 0;
 }
