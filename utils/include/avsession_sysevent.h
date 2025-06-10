@@ -151,13 +151,19 @@ public:
     void SetAudioStatus(pid_t uid, int32_t rendererState);
     int32_t GetAudioStatus(pid_t uid);
     void ReportLowQuality();
-    void ReportPlayingState(const std::string& bundleName);
-    void ReportPlayingStateAll();
+
     void RegisterPlayingState();
     void UnRegisterPlayingState();
-    PlayingStateInfo* GetPlayingStateInfo(const std::string& bundleName);
+    void ReportPlayingState(const std::string& bundleName);
+    void ReportPlayingStateAll();
+    void UpdateState(const std::string& bundleName, const std::string& appVersion, uint8_t state);
+    void UpdateMetaQuality(const std::string& bundleName, MetadataQuality metaQuality);
+    void UpdateCommandQuality(const std::string& bundleName, uint32_t commandQuality);
+    void UpdatePlaybackState(const std::string& bundleName, uint8_t playbackState);
+    void UpdateControl(const std::string& bundleName, uint8_t control, std::string callerBundleName);
 
 private:
+    PlayingStateInfo* GetPlayingStateInfo(const std::string& bundleName);
     std::map<pid_t, int32_t> audioStatuses_;
     AVSessionSysEvent();
     std::map<Operation, uint32_t> optCounts_;

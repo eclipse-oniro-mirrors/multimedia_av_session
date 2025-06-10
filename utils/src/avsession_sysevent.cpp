@@ -195,6 +195,7 @@ void AVSessionSysEvent::ReportPlayingState(const std::string& bundleName)
 
     auto playingStateInfo = playingStateInfos_[bundleName].get();
     if (playingStateInfo != nullptr) {
+        SLOGD("report playing state for %{public}s", playingStateInfo->bundleName_.c_str());
         HiSysWriteStatistic("PLAYING_AVSESSION_STATS",
             "APP_NAME", playingStateInfo->bundleName_,
             "APP_VERSION", playingStateInfo->appVersion_,
@@ -216,10 +217,13 @@ void AVSessionSysEvent::ReportPlayingState(const std::string& bundleName)
 void AVSessionSysEvent::ReportPlayingStateAll()
 {
     std::lock_guard lockGuard(lock_);
+    std::vector<std::string> keys;
     for (const auto& it : playingStateInfos_) {
-        ReportPlayingState(it.second->bundleName_);
+        keys.push_back(it.first);
     }
-    playingStateInfos_.clear();
+    for (const auto& key : keys) {
+        ReportPlayingState(key);
+    }
 }
 
 void AVSessionSysEvent::RegisterPlayingState()
@@ -262,6 +266,58 @@ PlayingStateInfo* AVSessionSysEvent::GetPlayingStateInfo(const std::string& bund
         playingStateInfos_[bundleName]->bundleName_ = bundleName;
     }
     return playingStateInfos_[bundleName].get();
+}
+
+void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::string& appVersion, uint8_t state)
+{
+    std::lock_guard lockGuard(lock_);
+    PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
+    if (playingStateInfo == nullptr) {
+        return;
+    }
+    playingStateInfo->bundleName_ = bundleName;
+    playingStateInfo->appVersion_ = appVersion;
+    playingStateInfo->updateState(state);
+}
+
+void AVSessionSysEvent::UpdateMetaQuality(const std::string& bundleName, MetadataQuality metaQuality)
+{
+    std::lock_guard lockGuard(lock_);
+    PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
+    if (playingStateInfo == nullptr) {
+        return;
+    }
+    playingStateInfo->updateMetaQuality(metaQuality);
+}
+
+void AVSessionSysEvent::UpdateCommandQuality(const std::string& bundleName, uint32_t commandQuality)
+{
+    std::lock_guard lockGuard(lock_);
+    PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
+    if (playingStateInfo == nullptr) {
+        return;
+    }
+    playingStateInfo->updateCommandQuality(commandQuality);
+}
+
+void AVSessionSysEvent::UpdatePlaybackState(const std::string& bundleName, uint8_t playbackState)
+{
+    std::lock_guard lockGuard(lock_);
+    PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
+    if (playingStateInfo == nullptr) {
+        return;
+    }
+    playingStateInfo->updatePlaybackState(playbackState);
+}
+
+void AVSessionSysEvent::UpdateControl(const std::string& bundleName, uint8_t control, std::string callerBundleName)
+{
+    std::lock_guard lockGuard(lock_);
+    PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
+    if (playingStateInfo == nullptr) {
+        return;
+    }
+    playingStateInfo->updateControl(control, callerBundleName);
 }
 
 void PlayingStateInfo::updateState(uint8_t state)

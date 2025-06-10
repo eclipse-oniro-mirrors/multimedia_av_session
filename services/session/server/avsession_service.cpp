@@ -4046,12 +4046,8 @@ void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, ui
         SLOGE("ReportSessionState session is null");
         return;
     }
-    auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(session->GetBundleName());
-    if (stateInfo != nullptr) {
-        stateInfo->bundleName_ = session->GetBundleName();
-        stateInfo->appVersion_ = GetVersionName(session->GetBundleName());
-        stateInfo->updateState(state); // 0: create, 1: release
-    }
+    AVSessionSysEvent::GetInstance().UpdateState(session->GetBundleName(),
+        GetVersionName(session->GetBundleName()), state);
 }
 
 void AVSessionService::ReportSessionControl(const std::string& bundleName, int32_t cmd)
@@ -4059,10 +4055,8 @@ void AVSessionService::ReportSessionControl(const std::string& bundleName, int32
     if (cmd == AVControlCommand::SESSION_CMD_PLAY ||
         cmd == AVControlCommand::SESSION_CMD_PAUSE ||
         cmd == CONTROL_COLD_START) {
-        auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(bundleName);
-        if (stateInfo != nullptr) {
-            stateInfo->updateControl(cmd, BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()));
-        }
+        AVSessionSysEvent::GetInstance().UpdateControl(bundleName, cmd,
+            BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()));
     }
 }
 
