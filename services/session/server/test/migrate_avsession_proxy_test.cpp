@@ -37,6 +37,7 @@ using namespace OHOS::AVSession;
 
 static std::shared_ptr<AVSessionService> g_AVSessionService {nullptr};
 static std::shared_ptr<MigrateAVSessionProxy> g_MigrateAVSessionProxy {nullptr};
+static std::shared_ptr<AVSessionObserver> g_AVSessionObserver {nullptr};
 
 class MigrateAVSessionProxyTest : public testing::Test {
 public:
@@ -51,6 +52,7 @@ void MigrateAVSessionProxyTest::SetUpTestCase()
     SLOGI("MigrateAVSessionProxyTest SetUpTestCase");
     g_AVSessionService =  std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
     g_MigrateAVSessionProxy = std::make_shared<MigrateAVSessionProxy>(g_AVSessionService.get());
+    g_AVSessionObserver = std::make_shared<AVSessionObserver>();
 }
 
 void MigrateAVSessionProxyTest::TearDownTestCase()
@@ -58,6 +60,7 @@ void MigrateAVSessionProxyTest::TearDownTestCase()
     SLOGI("MigrateAVSessionProxyTest TearDownTestCase");
     g_MigrateAVSessionProxy = nullptr;
     g_AVSessionService = nullptr;
+    g_AVSessionObserver = nullptr;
 }
 
 void MigrateAVSessionProxyTest::SetUp()
@@ -599,4 +602,30 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level1)
     std::string deviceId = "123";
     std::string msg = "test";
     g_MigrateAVSessionProxy->OnBytesReceived(deviceId, msg);
+}
+
+/**
+ * @tc.name: OnSetTargetLoopMode001
+ * @tc.desc: test the member of OnSetTargetLoopMode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, OnSetTargetLoopMode001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionObserver != nullptr);
+    int32_t targetLoopMode = 0;
+    g_AVSessionObserver->OnSetTargetLoopMode(targetLoopMode);
+}
+
+/**
+ * @tc.name: OnPlayWithAssetId001
+ * @tc.desc: test the member of OnPlayWithAssetId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, OnPlayWithAssetId001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionObserver != nullptr);
+    std::string assetId = "test";
+    g_AVSessionObserver->OnPlayWithAssetId(assetId);
 }
