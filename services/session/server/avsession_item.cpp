@@ -2519,10 +2519,8 @@ void AVSessionItem::ReportPlaybackState(const AVPlaybackState& state)
 {
     if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ||
         state.GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
-        auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(GetBundleName());
-        if (stateInfo != nullptr) {
-            stateInfo->updatePlaybackState(static_cast<uint8_t>(state.GetState()));
-        }
+            AVSessionSysEvent::GetInstance().UpdatePlaybackState(GetBundleName(),
+                static_cast<uint8_t>(state.GetState()));
     }
 }
 
@@ -2543,10 +2541,7 @@ void AVSessionItem::ReportMetadataChange(const AVMetaData& metadata)
         } else {
             metadataQuality = MetadataQuality::METADATA_QUALITY_TITLE;
         }
-        auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(GetBundleName());
-        if (stateInfo != nullptr) {
-            stateInfo->updateMetaQuality(metadataQuality);
-        }
+        AVSessionSysEvent::GetInstance().UpdateMetaQuality(GetBundleName(), metadataQuality);
     }
 }
 
@@ -2559,10 +2554,7 @@ void AVSessionItem::ReportCommandChange()
             commandQuality += (1 << it->second);
         }
     }
-    auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(GetBundleName());
-    if (stateInfo != nullptr) {
-        stateInfo->updateCommandQuality(commandQuality);
-    }
+    AVSessionSysEvent::GetInstance().UpdateCommandQuality(GetBundleName(), commandQuality);
 }
 
 void AVSessionItem::ReportSessionControl(const std::string& bundleName, int32_t cmd)
@@ -2570,10 +2562,8 @@ void AVSessionItem::ReportSessionControl(const std::string& bundleName, int32_t 
     if (cmd == AVControlCommand::SESSION_CMD_PLAY ||
         cmd == AVControlCommand::SESSION_CMD_PAUSE ||
         cmd == CONTROL_COLD_START) {
-        auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(bundleName);
-        if (stateInfo != nullptr) {
-            stateInfo->updateControl(cmd, BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()));
-        }
+        AVSessionSysEvent::GetInstance().UpdateControl(bundleName, cmd,
+            BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()));
     }
 }
 #endif
