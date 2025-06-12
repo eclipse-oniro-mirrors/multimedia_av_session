@@ -59,18 +59,20 @@ static std::string GenerateString(size_t target_len)
     if (RAW_DATA == nullptr || target_len == 0) {
         return "";
     }
+
     const size_t available_len = (g_dataSize > g_pos) ? (g_dataSize - g_pos) : 0;
     const size_t copy_len = std::min(target_len, available_len);
-
     if (copy_len == 0) {
         return "";
     }
+
     std::vector<char> buffer(copy_len + 1, '\0');
     errno_t ret = memcpy_s(buffer.data(), buffer.size(),
                         RAW_DATA + g_pos, copy_len);
     if (ret != EOK) {
         return "";
     }
+
     g_pos += copy_len;
     return std::string(buffer.data());
 }
@@ -114,7 +116,7 @@ void HandleFocusMetaDataChangeTest()
 
 void OnMetaDataChangeTest()
 {
-    constexpr int kMS_PER_SEC = 1000;
+    constexpr int kMsPerSec = 1000;
     AVMetaData meta;
     auto randomNum = GetData<uint32_t>();
     meta.SetAssetId(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
@@ -123,7 +125,7 @@ void OnMetaDataChangeTest()
     meta.SetAuthor(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
     meta.SetAlbum(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
     meta.SetComposer(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
-    meta.SetDuration(GetData<uint8_t>() * kMS_PER_SEC);
+    meta.SetDuration(GetData<uint8_t>() * kMsPerSec);
     meta.SetPublishDate(GetData<double>());
     meta.SetDisplayTags(GetData<int32_t>());
     meta.SetSkipIntervals(GetData<int32_t>());
@@ -305,8 +307,9 @@ void ProcFromNextTest()
 
 void ProcControlCommandFromNextTest()
 {
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
     cJSON* json = cJSON_CreateObject();
-    cJSON_AddNumberToObject(json, "CommandCode", 5);
+    cJSON_AddNumberToObject(json, "CommandCode", provider.ConsumeIntegral<int32_t>());
     cJSON_AddStringToObject(json, "CommandArgs", "test_arg");
     migrateServer_->ProcControlCommandFromNext(json);
     cJSON_Delete(json);
@@ -351,8 +354,9 @@ void ConvertAudioDeviceDescriptorsToJsonTest()
 
 void VolumeControlCommandTest()
 {
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
     cJSON* json = cJSON_CreateObject();
-    cJSON_AddNumberToObject(json, "AudioVolume", 50);
+    cJSON_AddNumberToObject(json, "AudioVolume", provider.ConsumeIntegral<uint32_t>());
     migrateServer_->VolumeControlCommand(json);
     cJSON_Delete(json);
 }
