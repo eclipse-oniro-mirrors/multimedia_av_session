@@ -557,31 +557,22 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback002, TestSiz
 HWTEST_F(OHAVSessionCallbackImplTest, OnSetTargetLoopMode001, TestSize.Level1)
 {
     SLOGI("OnSetTargetLoopMode001 Begin");
-    auto avsession = std::make_shared<OHAVSession>();
-    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
-    AVSession_LoopMode loopMode = LOOP_MODE_SINGLE;
-    
-    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
-    g_ohAVSessionCallbackImpl.OnSetTargetLoopMode(loopMode);
-    EXPECT_TRUE(oh_avsession != nullptr);
-    SLOGI("OnSetTargetLoopMode001 End");
-}
-
-/**
- * @tc.name: OnPlayWithAssetId001
- * @tc.desc: have registered RegisterToggleFavoriteCallback
- * @tc.type: FUNC
- * @tc.require: AR000H31JO
- */
-HWTEST_F(OHAVSessionCallbackImplTest, OnPlayWithAssetId001, TestSize.Level1)
-{
-    SLOGI("OnPlayWithAssetId001 Begin");
-    auto avsession = std::make_shared<OHAVSession>();
-    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
     std::string assetId = "assetId";
-    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
     g_ohAVSessionCallbackImpl.OnPlayWithAssetId(assetId);
-    EXPECT_TRUE(oh_avsession != nullptr);
-    SLOGI("OnPlayWithAssetId001 End");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "UnSetPlayCallback001", "com.xxx.hmxx", "ndkxx", &avsession);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    AVSession_LoopMode loopMode = LOOP_MODE_SINGLE;
+    g_ohAVSessionCallbackImpl.OnSetTargetLoopMode(loopMode);
+    g_ohAVSessionCallbackImpl.SetPlayCallback(avsession, command, callback, (void *)(&userData));
+    AVSession_ErrCode ret = g_ohAVSessionCallbackImpl.UnSetPlayCallback(
+        avsession, command, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    SLOGI("OnSetTargetLoopMode001 End");
 }
 } //OHOS::AVSession

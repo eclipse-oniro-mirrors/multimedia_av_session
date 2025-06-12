@@ -277,33 +277,27 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnSetTargetLoopMode001
-* @tc.desc: Test OnSetTargetLoopMode
-* @tc.type: FUNC
-*/
+ * @tc.name: OnSetTargetLoopMode001
+ * @tc.desc: Test OnSetTargetLoopMode
+ * @tc.type: FUNC
+ */
 static HWTEST_F(AVSessionCallbackStubTest, OnSetTargetLoopMode001, TestSize.Level1)
 {
     SLOGI("OnSetTargetLoopMode001 begin!");
-    auto aVSessionCallback = std::make_shared<AVSessionCallbackStubDemo>();
-    ASSERT_NE(aVSessionCallback, nullptr);
-    int32_t targetLoopMode = 0;
-    aVSessionCallback->OnSetTargetLoopMode(targetLoopMode);
-    SLOGI("OnSetTargetLoopMode001 end!");
-}
-
-/**
-* @tc.name: OnPlayWithAssetId001
-* @tc.desc: Test OnPlayWithAssetId
-* @tc.type: FUNC
-*/
-static HWTEST_F(AVSessionCallbackStubTest, OnPlayWithAssetId001, TestSize.Level1)
-{
-    SLOGI("OnPlayWithAssetId001 begin!");
-    auto aVSessionCallback = std::make_shared<AVSessionCallbackStubDemo>();
-    ASSERT_NE(aVSessionCallback, nullptr);
+    uint32_t code = 12;
     std::string assetId = "test";
-    aVSessionCallback->OnPlayWithAssetId(assetId);
-    SLOGI("OnPlayWithAssetId001 end!");
+    int32_t targetLoopMode = 0;
+    AVSessionCallbackStubDemo avSessionCallbackStub;
+    avSessionCallbackStub.OnPlayWithAssetId(assetId);
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
+    data.WriteString("test");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    avSessionCallbackStub.OnSetTargetLoopMode(targetLoopMode);
+    int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnSetTargetLoopMode001 end!");
 }
 }
 }

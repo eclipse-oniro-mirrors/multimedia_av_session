@@ -605,27 +605,37 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnSetTargetLoopMode001
- * @tc.desc: test the member of OnSetTargetLoopMode
+ * @tc.name: ProcessBundleImg004
+ * @tc.desc: test the member of ProcessBundleImg
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, OnSetTargetLoopMode001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg004, TestSize.Level1)
 {
-    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     int32_t targetLoopMode = 0;
+    std::string bundleIconStr = "";
+    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     g_AVSessionObserver->OnSetTargetLoopMode(targetLoopMode);
+    ASSERT_TRUE(g_MigrateAVSessionProxy != nullptr);
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    g_MigrateAVSessionProxy->ProcessBundleImg(bundleIconStr);
 }
 
 /**
- * @tc.name: OnPlayWithAssetId001
- * @tc.desc: test the member of OnPlayWithAssetId
+ * @tc.name: ProcessMediaImage004
+ * @tc.desc: test the member of ProcessMediaImage
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, OnPlayWithAssetId001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage004, TestSize.Level1)
 {
-    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     std::string assetId = "test";
+    std::string bundleIconStr = "123";
+    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     g_AVSessionObserver->OnPlayWithAssetId(assetId);
+    ASSERT_TRUE(g_MigrateAVSessionProxy != nullptr);
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
+    g_MigrateAVSessionProxy->ProcessMediaImage(bundleIconStr);
 }

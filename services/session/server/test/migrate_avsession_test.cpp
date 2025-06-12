@@ -786,63 +786,62 @@ static HWTEST_F(MigrateAVSessionTest, ProcControlCommand010, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnDeviceLogEvent001
-* @tc.desc: test OnDeviceLogEvent
-* @tc.type: FUNC
-* @tc.require:
-*/
-static HWTEST_F(MigrateAVSessionTest, OnDeviceLogEvent001, TestSize.Level1)
-{
-    SLOGI("OnDeviceLogEvent001 begin");
-    DeviceLogEventCode eventCode = DeviceLogEventCode::DEVICE_LOG_FULL;
-    const int64_t param = 1000;
-    ASSERT_TRUE(server_ != nullptr);
-    server_->OnDeviceLogEvent(eventCode, param);
-    SLOGI("OnDeviceLogEvent001 end");
-}
-
-/**
 * @tc.name: OnDeviceOffline001
-* @tc.desc: test OnDeviceOffline
+* @tc.desc: OnDeviceOffline
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST(MigrateAVSessionTest, OnDeviceOffline001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, OnDeviceOffline001, TestSize.Level1)
 {
     SLOGI("OnDeviceOffline001 begin");
+    const int64_t param = 1000;
     std::string deviceId = "test";
-    ASSERT_TRUE(server_ != nullptr);
+    const std::string sessionId = "";
+    DeviceLogEventCode eventCode = DeviceLogEventCode::DEVICE_LOG_FULL;
+    EXPECT_TRUE(server_ != nullptr);
+    server_->OnDeviceLogEvent(eventCode, param);
+    OHOS::sptr<AVControllerItem> controller = nullptr;
     server_->OnDeviceOffline(deviceId);
+    int32_t ret = server_->GetControllerById(sessionId, controller);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("OnDeviceOffline001 end");
 }
 
 /**
-* @tc.name: OnRemoteDistributedSessionChange001
-* @tc.desc: test OnRemoteDistributedSessionChange
+* @tc.name: OnAudioSessionChecked001
+* @tc.desc: OnAudioSessionChecked
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST(MigrateAVSessionTest, OnRemoteDistributedSessionChange001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, OnAudioSessionChecked001, TestSize.Level1)
 {
-    SLOGI("OnRemoteDistributedSessionChange begin");
+    SLOGI("OnAudioSessionChecked001 begin");
+    int32_t uid = 1000;
     std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
     sessionControllers.push_back(nullptr);
     ASSERT_TRUE(server_ != nullptr);
     server_->OnRemoteDistributedSessionChange(sessionControllers);
-    SLOGI("OnRemoteDistributedSessionChange end");
+    server_->OnAudioSessionChecked(uid);
+    int32_t ret = server_->GetCharacteristic();
+    EXPECT_EQ(ret, MSG_HEAD_MODE);
+    SLOGI("OnAudioSessionChecked001 end");
 }
 
 /**
-* @tc.name: OnAudioSessionChecked001
-* @tc.desc: test OnAudioSessionChecked
+* @tc.name: GetControllerById003
+* @tc.desc: GetControllerById
 * @tc.type: FUNC
-* @tc.require: #I62OZV
+* @tc.require:
 */
-static HWTEST(MigrateAVSessionTest, OnAudioSessionChecked001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionTest, GetControllerById003, TestSize.Level1)
 {
-    SLOGI("OnAudioSessionChecked001 begin");
-    int32_t uid = 1000;
+    SLOGI("GetControllerById003 begin");
+    const std::string sessionId = "";
+    OutputDeviceInfo castOutputDeviceInfo;
     ASSERT_TRUE(server_ != nullptr);
-    server_->OnAudioSessionChecked(uid);
-    SLOGI("OnAudioSessionChecked001 end");
+    server_->OnDeviceAvailable(castOutputDeviceInfo);
+    OHOS::sptr<AVControllerItem> controller = nullptr;
+    int32_t ret = server_->GetControllerById(sessionId, controller);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetControllerById003 end");
 }
