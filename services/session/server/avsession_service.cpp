@@ -2528,8 +2528,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, co
         int cmd = ConvertKeyCodeToCommand(keyEvent.GetKeyCode());
         AVControlCommand controlCommand;
         controlCommand.SetCommand(cmd);
-        SLOGI("topSession get nullptr, check if cold start for cmd %{public}d, deviceId is %{public}s",
-            cmd, deviceId.c_str());
+        SLOGI("topSession get nullptr, check if cold start for cmd %{public}d forRemoteDevice", cmd);
         HandleSystemKeyColdStart(controlCommand, deviceId);
     }
     return AVSESSION_SUCCESS;
