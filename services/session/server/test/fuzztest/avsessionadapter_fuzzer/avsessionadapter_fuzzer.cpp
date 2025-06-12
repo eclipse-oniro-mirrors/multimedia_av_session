@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "audio_adapter.h"
 #include "avsession_users_manager.h"
@@ -113,7 +114,46 @@ bool FuzzTest(const uint8_t* rawData, size_t size)
 
 void AVSessionUsersManagerTest()
 {
-    AVSessionUsersManager::GetInstance().Init();
+    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
+
+    int32_t userId = provider.ConsumeIntegral<int32_t>();
+
+    auto &usersManager = AVSessionUsersManager::GetInstance();
+    usersManager.Init();
+    usersManager.GetContainerFromUser(userId);
+    usersManager.HandleUserRemoved(userId);
+    usersManager.GetContainer();
+    usersManager.GetContainerFromAll();
+    usersManager.GetCurSessionListForFront(userId);
+    usersManager.GetCurSessionListForKeyEvent(userId);
+    usersManager.GetCurrentUserId();
+    usersManager.GetDirForCurrentUser(userId);
+
+    pid_t pid = provider.ConsumeIntegral<pid_t>();
+    std::string abilityName = provider.ConsumeRandomLengthString();
+    sptr<AVSessionItem> item;
+    usersManager.AddSessionForCurrentUser(pid, abilityName, item);
+    usersManager.RemoveSessionForAllUser(pid, abilityName);
+
+    std::string sessionId = provider.ConsumeRandomLengthString();
+    usersManager.RemoveSessionForAllUser(sessionId);
+    usersManager.RemoveSessionForAllUser(pid);
+
+    sptr<ISessionListener> listener;
+    usersManager.AddSessionListener(pid, listener);
+    usersManager.AddSessionListenerForAllUsers(pid, listener);
+    usersManager.RemoveSessionListener(pid);
+    usersManager.GetSessionListener(userId);
+    usersManager.GetSessionListenerForAllUsers();
+
+    std::string type = provider.ConsumeRandomLengthString();
+    usersManager.NotifyAccountsEvent(type, userId);
+    sptr<AVSessionItem> session;
+    usersManager.SetTopSession(session);
+    usersManager.SetTopSession(session, userId);
+    usersManager.GetTopSession();
+    usersManager.GetTopSession(userId);
+    usersManager.ClearCache();
 }
 
 void AVSessionAudioAdapterTest()

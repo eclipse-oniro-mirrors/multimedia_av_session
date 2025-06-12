@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "avsession_errors.h"
 #include "avsession_item.h"
@@ -30,6 +31,7 @@
 namespace OHOS::AVSession {
 static const int32_t MAX_CODE_LEN = 512;
 static const int32_t MIN_SIZE_NUM = 4;
+constexpr auto MIN_RANDOM_NUM = 2;
 
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_dataSize = 0;
@@ -57,24 +59,19 @@ static std::string GenerateString(size_t target_len)
     if (RAW_DATA == nullptr || target_len == 0) {
         return "";
     }
-
     const size_t available_len = (g_dataSize > g_pos) ? (g_dataSize - g_pos) : 0;
     const size_t copy_len = std::min(target_len, available_len);
 
     if (copy_len == 0) {
         return "";
     }
-
     std::vector<char> buffer(copy_len + 1, '\0');
-
     errno_t ret = memcpy_s(buffer.data(), buffer.size(),
                         RAW_DATA + g_pos, copy_len);
     if (ret != EOK) {
         return "";
     }
-
     g_pos += copy_len;
-
     return std::string(buffer.data());
 }
 
@@ -117,15 +114,16 @@ void HandleFocusMetaDataChangeTest()
 
 void OnMetaDataChangeTest()
 {
+    constexpr int kMS_PER_SEC = 1000;
     AVMetaData meta;
-
-    meta.SetAssetId(GenerateString(static_cast<uint32_t> (rand()) % g_dataSize));
+    auto randomNum = GetData<uint32_t>();
+    meta.SetAssetId(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
     meta.SetTitle("titile_" + std::to_string(GetData<uint8_t>()));
-    meta.SetArtist(GenerateString(static_cast<uint32_t> (rand()) % g_dataSize));
-    meta.SetAuthor(GenerateString(static_cast<uint32_t> (rand()) % g_dataSize));
-    meta.SetAlbum(GenerateString(static_cast<uint32_t> (rand()) % g_dataSize));
-    meta.SetComposer(GenerateString(static_cast<uint32_t> (rand()) % g_dataSize));
-    meta.SetDuration(GetData<uint8_t>() * 1000);
+    meta.SetArtist(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
+    meta.SetAuthor(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
+    meta.SetAlbum(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
+    meta.SetComposer(GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize));
+    meta.SetDuration(GetData<uint8_t>() * kMS_PER_SEC);
     meta.SetPublishDate(GetData<double>());
     meta.SetDisplayTags(GetData<int32_t>());
     meta.SetSkipIntervals(GetData<int32_t>());
@@ -134,10 +132,10 @@ void OnMetaDataChangeTest()
     drmSchemes.push_back("drm_" + to_string(GetData<uint32_t>()));
     meta.SetDrmSchemes(drmSchemes);
 
-    std::string playerId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    std::string playerId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->OnMetaDataChange(playerId, meta);
 
-    std::string sessionId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    std::string sessionId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->HandleFocusMetaDataChange(sessionId, meta);
     migrateServer_->DoMetaDataSyncToRemote(meta);
 }
@@ -177,66 +175,75 @@ void OnPlaybackStateChangedTest()
     state.SetVideoHeight(GetData<int32_t>());
     state.SetExtras(std::make_shared<AAFwk::WantParams>());
 
-    std::string playerId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    std::string playerId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->OnPlaybackStateChanged(playerId, state);
 
-    std::string sessionId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    std::string sessionId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->HandleFocusPlaybackStateChange(sessionId, state);
     migrateServer_->DoPlaybackStateSyncToRemote(state);
 }
 
 void StopObserveControllerChangedTest()
 {
-    std::string deviceId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string deviceId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->StopObserveControllerChanged(deviceId);
 }
 
 void SendRemoteControllerListTest()
 {
-    std::string deviceId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string deviceId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->SendRemoteControllerList(deviceId);
 }
 
 void SendRemoteHistorySessionListTest()
 {
-    std::string deviceId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string deviceId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->SendRemoteHistorySessionList(deviceId);
 }
 
 void ClearRemoteControllerListTest()
 {
-    std::string deviceId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string deviceId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->ClearRemoteControllerList(deviceId);
 }
 
 void ClearRemoteHistorySessionListTest()
 {
-    std::string deviceId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string deviceId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->ClearRemoteHistorySessionList(deviceId);
 }
 
 void ResetSupportCrossMediaPlayTest()
 {
-    std::string extraInfo = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string extraInfo = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->ResetSupportCrossMediaPlay(extraInfo);
 }
 
 //migrate_avsession_server_for_next.cpp
 void LocalFrontSessionArriveTest()
 {
-    std::string sessionId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string sessionId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->LocalFrontSessionArrive(sessionId);
 }
 
 void LocalFrontSessionChangeTest()
 {
-    std::string sessionId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string sessionId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->LocalFrontSessionChange(sessionId);
 }
 
 void LocalFrontSessionLeaveTest()
 {
-    std::string sessionId = GenerateString(static_cast<uint32_t> (rand()) % g_dataSize);
+    auto randomNum = GetData<uint32_t>();
+    std::string sessionId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->LocalFrontSessionLeave(sessionId);
 }
 
@@ -248,10 +255,11 @@ void DoMediaImageSyncToRemoteTest()
         return;
     }
 
-    std::vector<uint8_t> innerImgBuffer_;
+    std::vector<uint8_t> imgBuffer;
     for(size_t i = 0; i < g_dataSize; ++i) {
-        innerImgBuffer_.push_back(GetData<uint8_t>());
+        imgBuffer.push_back(GetData<uint8_t>());
     }
+    innerPixelMap->SetInnerImgBuffer(imgBuffer);
     migrateServer_->DoMediaImageSyncToRemote(innerPixelMap);
 }
 
@@ -267,9 +275,8 @@ void DoValidCommandsSyncToRemoteTest()
 
 void OnBytesReceivedTest()
 {
-    constexpr auto MIN_RANDOM_NUM = 2;
-    auto randomNum = (static_cast<uint32_t> (rand()) < MIN_RANDOM_NUM) ?
-        MIN_RANDOM_NUM : static_cast<uint32_t> (rand());
+    auto randomNum = GetData<uint32_t>();
+    randomNum = (randomNum < MIN_RANDOM_NUM) ? MIN_RANDOM_NUM : randomNum;
     std::string deviceId = GenerateString(randomNum % g_dataSize);
     std::string data = GenerateString(randomNum % g_dataSize);
     std::vector<int32_t> commands {
@@ -279,8 +286,96 @@ void OnBytesReceivedTest()
         SYNC_HEARTBEAT,
         COLD_START
     };
-    data[1] = commands[static_cast<uint32_t> (rand()) % commands.size()];
+    data[1] = commands[static_cast<uint32_t> (randomNum) % commands.size()];
     migrateServer_->OnBytesReceived(deviceId, data);
+}
+
+void ProcFromNextTest()
+{
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+
+    std::string deviceId = to_string(provider.ConsumeIntegral<uint32_t>());
+    std::string data = provider.ConsumeRandomLengthString();
+    if (data.length() < MIN_SIZE_NUM) {
+        return;
+    }
+    data[1]  = static_cast<char>(provider.ConsumeIntegralInRange(SYNC_CONTROLLER_LIST, SYNC_FOCUS_BUNDLE_IMG));
+    migrateServer_->ProcFromNext(deviceId, data);
+}
+
+void ProcControlCommandFromNextTest()
+{
+    cJSON* json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "CommandCode", 5);
+    cJSON_AddStringToObject(json, "CommandArgs", "test_arg");
+    migrateServer_->ProcControlCommandFromNext(json);
+    cJSON_Delete(json);
+}
+
+void ProcessColdStartFromNextTest()
+{
+    cJSON* json = cJSON_CreateObject();
+    cJSON_AddStringToObject(json, "BundleName", "test_bundleName");
+    migrateServer_->ProcessColdStartFromNext(json);
+    cJSON_Delete(json);
+}
+
+void ProcessMediaControlNeedStateFromNextTest()
+{
+    cJSON* json = cJSON_CreateObject();
+    cJSON_AddStringToObject(json, "NeedState", "test_needState");
+    migrateServer_->ProcessMediaControlNeedStateFromNext(json);
+    cJSON_Delete(json);
+}
+
+void ConvertAudioDeviceDescriptorsToJsonTest()
+{
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+    AudioDeviceDescriptors devices;
+    AudioDeviceDescriptorWithSptr device = std::make_shared<AudioDeviceDescriptor>();
+    device->deviceType_ = static_cast<AudioStandard::DeviceType>(provider.ConsumeIntegralInRange<int>(0,
+        AudioStandard::DeviceType::DEVICE_TYPE_USB_ARM_HEADSET));
+    device->macAddress_ = provider.ConsumeRandomLengthString();
+    device->networkId_ = provider.ConsumeRandomLengthString();
+    device->deviceRole_ = static_cast<AudioStandard::DeviceRole>(provider.ConsumeIntegralInRange<int>(
+        AudioStandard::DeviceRole::INPUT_DEVICE,
+        AudioStandard::DeviceRole::OUTPUT_DEVICE));
+    device->deviceName_ = provider.ConsumeRandomLengthString();
+    device->deviceCategory_ = static_cast<AudioStandard::DeviceCategory>(provider.ConsumeIntegralInRange<int>(
+        AudioStandard::DeviceCategory::CATEGORY_DEFAULT,
+        AudioStandard::DeviceCategory::BT_UNWEAR_HEADPHONE));
+    devices.push_back(device);
+
+    MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
+}
+
+void VolumeControlCommandTest()
+{
+    cJSON* json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "AudioVolume", 50);
+    migrateServer_->VolumeControlCommand(json);
+    cJSON_Delete(json);
+}
+
+void SwitchAudioDeviceCommandTest()
+{
+    cJSON* json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "AudioDeviceCategory", AudioStandard::DeviceCategory::CATEGORY_DEFAULT);
+    cJSON_AddNumberToObject(json, "AudioDeviceType", AudioStandard::DeviceType::DEVICE_TYPE_USB_ARM_HEADSET);
+    cJSON_AddNumberToObject(json, "AudioDeviceRole", AudioStandard::DeviceRole::OUTPUT_DEVICE);
+    cJSON_AddStringToObject(json, "AudioNetworkId", "test_network_id");
+    cJSON_AddStringToObject(json, "AudioDeviceName", "test_device_name");
+    cJSON_AddStringToObject(json, "AudioMacAddress", "test_mac_address");
+    migrateServer_->SwitchAudioDeviceCommand(json);
+    cJSON_Delete(json);
+}
+
+void RegisterAudioCallbackAndTriggerTest()
+{
+    migrateServer_->RegisterAudioCallbackAndTrigger();
+    migrateServer_->UnregisterAudioCallback();
+
+    migrateServer_->DoPostTasksClear();
 }
 
 void MigrateAVSessionFuzzerTest()
@@ -298,7 +393,6 @@ void MigrateAVSessionFuzzerTest()
         return;
     }
     migrateServer_->Init(avservice_);
-    srand(time(NULL));
 
     ConnectProxyTest();
     HandleFocusMetaDataChangeTest();
@@ -316,6 +410,15 @@ void MigrateAVSessionFuzzerTest()
     DoMediaImageSyncToRemoteTest();
     DoValidCommandsSyncToRemoteTest();
     OnBytesReceivedTest();
+
+    ProcFromNextTest();
+    ProcControlCommandFromNextTest();
+    ProcessColdStartFromNextTest();
+    ProcessMediaControlNeedStateFromNextTest();
+    ConvertAudioDeviceDescriptorsToJsonTest();
+    VolumeControlCommandTest();
+    SwitchAudioDeviceCommandTest();
+    RegisterAudioCallbackAndTriggerTest();
 }
 
 /* Fuzzer entry point */
