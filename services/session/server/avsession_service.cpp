@@ -2632,15 +2632,11 @@ void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath
 void AVSessionService::RemoveClientDeathObserver(pid_t pid)
 {
     std::lock_guard lockGuard(clientDeathLock_);
-    auto observerIt = clientDeathObservers_.find(pid);
-    auto recipientIt = clientDeathRecipients_.find(pid);
-    if (observerIt != clientDeathObservers_.end() && recipientIt != clientDeathRecipients_.end()) {
-        sptr<IClientDeath> observer = clientDeathObservers_[pid];
-        sptr<ClientDeathRecipient> recipient = clientDeathRecipients_[pid];
-        if (observer && recipient) {
-            SLOGI("remove clientDeath recipient for %{public}d", static_cast<int>(pid));
-            observer->AsObject()->RemoveDeathRecipient(recipient);
-        }
+    sptr<IClientDeath> observer = clientDeathObservers_[pid];
+    sptr<ClientDeathRecipient> recipient = clientDeathRecipients_[pid];
+    if (observer && recipient) {
+        SLOGI("remove clientDeath recipient for %{public}d", static_cast<int>(pid));
+        observer->AsObject()->RemoveDeathRecipient(recipient);
     }
     clientDeathObservers_.erase(pid);
     clientDeathRecipients_.erase(pid);
