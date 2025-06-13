@@ -532,9 +532,9 @@ int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
 
 int32_t AVCastControllerItem::HandleCastValidCommandChange(const std::vector<int32_t>& cmds)
 {
+    std::lock_guard lockGuard(castControllerCallbackLock_);
     SLOGI("HandleCastValidCommandChange cmd size:%{public}zd", cmds.size());
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
-    std::lock_guard lockGuard(castControllerCallbackLock_);
     callback_->OnCastValidCommandChanged(cmds);
     return AVSESSION_SUCCESS;
 }
