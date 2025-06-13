@@ -34,6 +34,8 @@ group("fuzztest") {
     "permissionchecker_fuzzer:PermissionCheckerFuzzTest",
     "sessionlistenerproxy_fuzzer:SessionListenerProxyFuzzTest",
     "softbussessionmanager_fuzzer:SoftbusSessionManagerFuzzTest",
+    "avsessionserviceext_fuzzer:AVSessionServiceExtFuzzTest",
   ]
 }
 ###############################################################################
+
