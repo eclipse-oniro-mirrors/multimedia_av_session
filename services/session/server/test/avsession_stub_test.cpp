@@ -376,3 +376,40 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level1)
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetAVMetaData003 end!");
 }
+
+/**
+ * @tc.name: HandleUpdateAVQueueInfoEvent001
+ * @tc.desc: Test HandleUpdateAVQueueInfoEvent
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level1)
+{
+    SLOGI("HandleUpdateAVQueueInfoEvent001 begin!");
+    AVQueueInfo info = AVQueueInfo();
+    AVSessionStubDemo avSessionStub;
+    OHOS::MessageParcel data;
+    info.MarshallingMessageParcel(data);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleUpdateAVQueueInfoEvent001 end!");
+}
+
+/**
+ * @tc.name: HandleUpdateAVQueueInfoEvent002
+ * @tc.desc: Test HandleUpdateAVQueueInfoEvent
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level1)
+{
+    SLOGI("HandleUpdateAVQueueInfoEvent002 begin!");
+    AVQueueInfo info = AVQueueInfo();
+    AVSessionStubDemo avSessionStub;
+    OHOS::MessageParcel data;
+    data.WriteInt32(-1);
+    info.MarshallingMessageParcel(data);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
+    EXPECT_NE(ret, OHOS::ERR_NONE);
+    SLOGI("HandleUpdateAVQueueInfoEvent002 end!");
+}

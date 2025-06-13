@@ -2014,7 +2014,7 @@ void AVSessionService::DeleteAVQueueImage(cJSON* item)
         return;
     }
 
-    std::string fileName = std::string(imageDirItem->valuestring + std::string(imageNameItem->valuestring));
+    std::string fileName = std::string(imageDirItem->valuestring) + std::string(imageNameItem->valuestring);
     AVSessionUtils::DeleteFile(fileName);
 }
 // LCOV_EXCL_STOP

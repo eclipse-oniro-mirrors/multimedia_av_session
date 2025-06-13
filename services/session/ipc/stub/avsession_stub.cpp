@@ -382,7 +382,7 @@ int32_t AVSessionStub::HandleUpdateAVQueueInfoEvent(MessageParcel& data, Message
 {
     sptr info = AVQueueInfo::UnmarshallingMessageParcel(data);
     if (info == nullptr) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_UNMARSHALLING, "WriteInt32 result failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_MARSHALLING, "WriteInt32 result failed");
         return ERR_UNMARSHALLING;
     }
     int32_t ret = UpdateAVQueueInfo(*info);
