@@ -48,7 +48,7 @@ void AVsessionSyseventTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVsessionSyseventTest, Regiter001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVsessionSyseventTest, Regiter001, testing::ext::TestSize.Level0)
 {
     AVSessionSysEvent::GetInstance().Unregister();
     EXPECT_EQ(AVSessionSysEvent::GetInstance().timer_, nullptr);
@@ -63,7 +63,7 @@ static HWTEST_F(AVsessionSyseventTest, Regiter001, testing::ext::TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVsessionSyseventTest, AddLowQualityInfo001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVsessionSyseventTest, AddLowQualityInfo001, testing::ext::TestSize.Level0)
 {
     AVSessionSysEvent::BackControlReportInfo reportInfo;
     AVSessionSysEvent::GetInstance().lowQualityInfos_.insert(std::make_pair("default", reportInfo));
@@ -76,7 +76,7 @@ static HWTEST_F(AVsessionSyseventTest, AddLowQualityInfo001, testing::ext::TestS
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVsessionSyseventTest, AddLowQualityInfo002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVsessionSyseventTest, AddLowQualityInfo002, testing::ext::TestSize.Level0)
 {
     AVSessionSysEvent::BackControlReportInfo reportInfo;
     reportInfo.bundleName_ = "default";

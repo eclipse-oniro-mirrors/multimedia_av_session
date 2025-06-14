@@ -49,7 +49,7 @@ void AVSessionDynamicLoaderTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionDynamicLoaderTest, GetFuntion001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionDynamicLoaderTest, GetFuntion001, testing::ext::TestSize.Level0)
 {
     AVSessionDynamicLoader avsessionDynamicLoader;
     avsessionDynamicLoader.OpenDynamicHandle(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH);
@@ -63,7 +63,7 @@ static HWTEST_F(AVSessionDynamicLoaderTest, GetFuntion001, testing::ext::TestSiz
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionDynamicLoaderTest, GetFuntion002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionDynamicLoaderTest, GetFuntion002, testing::ext::TestSize.Level0)
 {
     AVSessionDynamicLoader avsessionDynamicLoader;
     void* dataAddr = malloc(10);
@@ -81,7 +81,7 @@ static HWTEST_F(AVSessionDynamicLoaderTest, GetFuntion002, testing::ext::TestSiz
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionDynamicLoaderTest, CloseDynamicHandle001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionDynamicLoaderTest, CloseDynamicHandle001, testing::ext::TestSize.Level0)
 {
     AVSessionDynamicLoader avsessionDynamicLoader;
     void* dataAddr = malloc(10);
@@ -99,7 +99,7 @@ static HWTEST_F(AVSessionDynamicLoaderTest, CloseDynamicHandle001, testing::ext:
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionDynamicLoaderTest, CloseDynamicHandle002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionDynamicLoaderTest, CloseDynamicHandle002, testing::ext::TestSize.Level0)
 {
     AVSessionDynamicLoader avsessionDynamicLoader;
     avsessionDynamicLoader.dynamicLibHandle_.insert(std::make_pair(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, nullptr));

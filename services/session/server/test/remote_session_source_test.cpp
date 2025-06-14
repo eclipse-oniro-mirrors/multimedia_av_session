@@ -73,7 +73,7 @@ void RemoteSessionSourceTest::TearDown()
  * @tc.desc: Test SetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST_F(RemoteSessionSourceTest, SetAVMetaData001, testing::ext::TestSize.Level1)
+static HWTEST_F(RemoteSessionSourceTest, SetAVMetaData001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVMetaData001 begin!");
     AVMetaData metaData;
@@ -87,7 +87,7 @@ static HWTEST_F(RemoteSessionSourceTest, SetAVMetaData001, testing::ext::TestSiz
  * @tc.desc: Test SetAVPlaybackState
  * @tc.type: FUNC
  */
-static HWTEST_F(RemoteSessionSourceTest, SetAVPlaybackState001, testing::ext::TestSize.Level1)
+static HWTEST_F(RemoteSessionSourceTest, SetAVPlaybackState001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVPlaybackState001 begin!");
     AVPlaybackState state;
@@ -101,7 +101,7 @@ static HWTEST_F(RemoteSessionSourceTest, SetAVPlaybackState001, testing::ext::Te
  * @tc.desc: Test SetSessionEventRemote
  * @tc.type: FUNC
  */
-static HWTEST_F(RemoteSessionSourceTest, SetSessionEventRemote001, testing::ext::TestSize.Level1)
+static HWTEST_F(RemoteSessionSourceTest, SetSessionEventRemote001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetSessionEventRemote001 begin!");
     std::string event = "event";
@@ -116,7 +116,7 @@ static HWTEST_F(RemoteSessionSourceTest, SetSessionEventRemote001, testing::ext:
  * @tc.desc: Test SetAVQueueItems
  * @tc.type: FUNC
  */
-static HWTEST_F(RemoteSessionSourceTest, SetAVQueueItems001, testing::ext::TestSize.Level1)
+static HWTEST_F(RemoteSessionSourceTest, SetAVQueueItems001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVQueueItems001 begin!");
     std::vector<AVQueueItem> items;
@@ -130,7 +130,7 @@ static HWTEST_F(RemoteSessionSourceTest, SetAVQueueItems001, testing::ext::TestS
  * @tc.desc: Test SetAVQueueTitle
  * @tc.type: FUNC
  */
-static HWTEST_F(RemoteSessionSourceTest, SetAVQueueTitle001, testing::ext::TestSize.Level1)
+static HWTEST_F(RemoteSessionSourceTest, SetAVQueueTitle001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVQueueTitle001 begin!");
     std::string title = "title";
@@ -144,7 +144,7 @@ static HWTEST_F(RemoteSessionSourceTest, SetAVQueueTitle001, testing::ext::TestS
  * @tc.desc: Test GetSinkPlaybackStateMaskType
  * @tc.type: FUNC
  */
-static HWTEST_F(RemoteSessionSourceTest, GetSinkPlaybackStateMaskType001, testing::ext::TestSize.Level1)
+static HWTEST_F(RemoteSessionSourceTest, GetSinkPlaybackStateMaskType001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetSinkPlaybackStateMaskType001 begin!");
     AAFwk::WantParams extras;

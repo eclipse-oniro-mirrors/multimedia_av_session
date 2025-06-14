@@ -77,7 +77,7 @@ public:
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVControllerCallbackClientTest, OnPlaybackStateChange001, TestSize.Level1)
+HWTEST_F(AVControllerCallbackClientTest, OnPlaybackStateChange001, TestSize.Level0)
 {
     std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
     std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
@@ -93,7 +93,7 @@ HWTEST_F(AVControllerCallbackClientTest, OnPlaybackStateChange001, TestSize.Leve
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVControllerCallbackClientTest, OnPlaybackStateChange002, TestSize.Level1)
+HWTEST_F(AVControllerCallbackClientTest, OnPlaybackStateChange002, TestSize.Level0)
 {
     std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
     std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =

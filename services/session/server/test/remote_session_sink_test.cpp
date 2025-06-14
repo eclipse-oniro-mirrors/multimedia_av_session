@@ -78,7 +78,7 @@ void RemoteSessionSinkTest::TearDown()
  * @tc.desc: Test SetControlCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(RemoteSessionSinkTest, SetControlCommand001, testing::ext::TestSize.Level1)
+static HWTEST_F(RemoteSessionSinkTest, SetControlCommand001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetControlCommand001 begin!");
     AVControlCommand command;
@@ -94,7 +94,7 @@ static HWTEST_F(RemoteSessionSinkTest, SetControlCommand001, testing::ext::TestS
  * @tc.desc: Test SetCommonCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(RemoteSessionSinkTest, SetCommonCommand002, testing::ext::TestSize.Level1)
+static HWTEST_F(RemoteSessionSinkTest, SetCommonCommand002, testing::ext::TestSize.Level0)
 {
     SLOGI("SetCommonCommand002 begin!");
     std::string commonCommand = "";

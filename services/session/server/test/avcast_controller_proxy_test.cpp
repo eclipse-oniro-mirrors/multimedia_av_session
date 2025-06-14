@@ -65,7 +65,7 @@ void AVCastControllerProxyTest::TearDown()
  * @tc.desc: Test GetDuration
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, GetDuration001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, GetDuration001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetDuration001, start");
     int32_t duration = 0;
@@ -79,7 +79,7 @@ static HWTEST_F(AVCastControllerProxyTest, GetDuration001, testing::ext::TestSiz
  * @tc.desc: Test GetCastAVPlaybackState
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, GetCastAVPlaybackState001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, GetCastAVPlaybackState001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetCastAVPlaybackState001, start");
     AVPlaybackState state;
@@ -93,7 +93,7 @@ static HWTEST_F(AVCastControllerProxyTest, GetCastAVPlaybackState001, testing::e
  * @tc.desc: Test GetCurrentItem
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, GetCurrentItem001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, GetCurrentItem001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetCurrentItem001, start");
     AVQueueItem currentItem;
@@ -107,7 +107,7 @@ static HWTEST_F(AVCastControllerProxyTest, GetCurrentItem001, testing::ext::Test
  * @tc.desc: Test GetValidCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, GetValidCommands001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, GetValidCommands001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetValidCommands001, start");
     std::vector<int32_t> cmds;
@@ -121,7 +121,7 @@ static HWTEST_F(AVCastControllerProxyTest, GetValidCommands001, testing::ext::Te
  * @tc.desc: Test SetDisplaySurface
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, SetDisplaySurface001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, SetDisplaySurface001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetDisplaySurface001, start");
     std::string surfaceId = "1111";
@@ -135,7 +135,7 @@ static HWTEST_F(AVCastControllerProxyTest, SetDisplaySurface001, testing::ext::T
  * @tc.desc: Test ProcessMediaKeyResponse
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse001, testing::ext::TestSize.Level0)
 {
     SLOGI("ProcessMediaKeyResponse001, start");
     std::string assetId = "";
@@ -150,7 +150,7 @@ static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse001, testing::
  * @tc.desc: Test ProcessMediaKeyResponse
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse002, testing::ext::TestSize.Level0)
 {
     SLOGI("ProcessMediaKeyResponse002, start");
     std::string assetId = "";
@@ -165,7 +165,7 @@ static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse002, testing::
  * @tc.desc: Test ProcessMediaKeyResponse
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse003, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse003, testing::ext::TestSize.Level0)
 {
     SLOGI("ProcessMediaKeyResponse003, start");
     std::string assetId = "";
@@ -180,7 +180,7 @@ static HWTEST_F(AVCastControllerProxyTest, ProcessMediaKeyResponse003, testing::
  * @tc.desc: Test AddAvailableCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, AddAvailableCommand001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, AddAvailableCommand001, testing::ext::TestSize.Level0)
 {
     SLOGI("AddAvailableCommand001, start");
     int32_t cmd = 0;
@@ -194,7 +194,7 @@ static HWTEST_F(AVCastControllerProxyTest, AddAvailableCommand001, testing::ext:
  * @tc.desc: Test RemoveAvailableCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerProxyTest, RemoveAvailableCommand001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerProxyTest, RemoveAvailableCommand001, testing::ext::TestSize.Level0)
 {
     SLOGI("RemoveAvailableCommand001, start");
     int32_t cmd = 0;

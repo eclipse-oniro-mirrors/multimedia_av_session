@@ -305,7 +305,7 @@ static OHOS::AVSession::AVMetaData GetAVMetaData()
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_P(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level1)
+HWTEST_P(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level0)
 {
     SLOGI("SendControlCommand001 begin!");
     AVCastControlCommand command;
@@ -325,7 +325,7 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level1)
+HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level0)
 {
     SLOGI("SendControlCommand002 begin!");
     std::vector<int32_t> commands = {
@@ -360,7 +360,7 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Start001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Start001, TestSize.Level0)
 {
     SLOGI("Start001 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -378,7 +378,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level0)
 {
     SLOGI("Start002 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -397,7 +397,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Start003, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Start003, TestSize.Level0)
 {
     SLOGI("Start003 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -416,7 +416,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Start004, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Start004, TestSize.Level0)
 {
     SLOGI("Start004 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -440,7 +440,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Start005, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Start005, TestSize.Level0)
 {
     SLOGI("Start005 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -464,7 +464,7 @@ HWTEST_F(HwCastStreamPlayerTest, Start005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Prepare001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Prepare001, TestSize.Level0)
 {
     SLOGI("Prepare001 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -484,7 +484,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level0)
 {
     SLOGI("Prepare002 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -505,7 +505,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Prepare003, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Prepare003, TestSize.Level0)
 {
     SLOGI("Prepare003 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -526,7 +526,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Prepare004, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Prepare004, TestSize.Level0)
 {
     SLOGI("Prepare004 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -552,7 +552,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Prepare005, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Prepare005, TestSize.Level0)
 {
     SLOGI("Prepare005 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -578,7 +578,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Prepare006, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Prepare006, TestSize.Level0)
 {
     SLOGI("Prepare006 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -605,7 +605,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, Prepare007, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, Prepare007, TestSize.Level0)
 {
     SLOGI("Prepare007 begin!");
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
@@ -632,7 +632,7 @@ HWTEST_F(HwCastStreamPlayerTest, Prepare007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, GetDuration001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetDuration001, TestSize.Level0)
 {
     SLOGI("GetDuration001 begin!");
     int32_t duration = 40000;
@@ -646,7 +646,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetDuration001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState001, TestSize.Level0)
 {
     SLOGI("GetCastAVPlaybackState001 begin!");
     AVPlaybackState state;
@@ -660,7 +660,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState002, TestSize.Level0)
 {
     SLOGI("GetCastAVPlaybackState002 begin!");
     AVPlaybackState state;
@@ -675,7 +675,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetCastAVPlaybackState002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, SetDisplaySurface001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, SetDisplaySurface001, TestSize.Level0)
 {
     SLOGI("SetDisplaySurface001 begin!");
     std::string surfaceId = "surfaceId";
@@ -689,7 +689,7 @@ HWTEST_F(HwCastStreamPlayerTest, SetDisplaySurface001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, ProcessMediaKeyResponse001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, ProcessMediaKeyResponse001, TestSize.Level0)
 {
     SLOGI("ProcessMediaKeyResponse001 begin!");
     std::string assetId = "assetId";
@@ -704,7 +704,7 @@ HWTEST_F(HwCastStreamPlayerTest, ProcessMediaKeyResponse001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener001, TestSize.Level0)
 {
     SLOGI("RegisterControllerListener001 begin!");
     ASSERT_EQ(hwCastStreamPlayer->RegisterControllerListener(nullptr), AVSESSION_ERROR);
@@ -717,7 +717,7 @@ HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener002, TestSize.Level0)
 {
     SLOGI("RegisterControllerListener002 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -732,7 +732,7 @@ HWTEST_F(HwCastStreamPlayerTest, RegisterControllerListener002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener001, TestSize.Level0)
 {
     SLOGI("UnRegisterControllerListener001 begin!");
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(nullptr), AVSESSION_ERROR);
@@ -745,7 +745,7 @@ HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener002, TestSize.Level0)
 {
     SLOGI("UnRegisterControllerListener002 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -760,7 +760,7 @@ HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener003, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener003, TestSize.Level0)
 {
     SLOGI("UnRegisterControllerListener003 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem1 = std::make_shared<AVCastControllerItem>();
@@ -776,7 +776,7 @@ HWTEST_F(HwCastStreamPlayerTest, UnRegisterControllerListener003, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnStateChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnStateChanged001, TestSize.Level0)
 {
     SLOGI("OnStateChanged001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -792,7 +792,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnStateChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnStateChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnStateChanged002, TestSize.Level0)
 {
     SLOGI("OnStateChanged002 begin!");
     auto state = static_cast<OHOS::CastEngine::PlayerStates>(1000);
@@ -811,7 +811,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnStateChanged002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(HwCastStreamPlayerTest, CheckIfCancelCastCapsule001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, CheckIfCancelCastCapsule001, TestSize.Level0)
 {
     SLOGI("CheckIfCancelCastCapsule001 begin!");
     hwCastStreamPlayer->CheckIfCancelCastCapsule();
@@ -824,7 +824,7 @@ HWTEST_F(HwCastStreamPlayerTest, CheckIfCancelCastCapsule001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged001, TestSize.Level0)
 {
     SLOGI("OnPositionChanged001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -840,7 +840,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged002, TestSize.Level0)
 {
     SLOGI("OnPositionChanged002 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -856,7 +856,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged003, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged003, TestSize.Level0)
 {
     SLOGI("OnPositionChanged003 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -873,7 +873,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPositionChanged003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged001, TestSize.Level0)
 {
     SLOGI("OnMediaItemChanged001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -890,7 +890,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged002, TestSize.Level0)
 {
     SLOGI("OnMediaItemChanged002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -908,7 +908,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnNextRequest001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnNextRequest001, TestSize.Level0)
 {
     SLOGI("OnNextRequest001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -924,7 +924,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnNextRequest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnNextRequest002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnNextRequest002, TestSize.Level0)
 {
     SLOGI("OnNextRequest002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -941,7 +941,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnNextRequest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPreviousRequest001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPreviousRequest001, TestSize.Level0)
 {
     SLOGI("OnPreviousRequest001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -957,7 +957,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPreviousRequest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged001, TestSize.Level0)
 {
     SLOGI("OnVolumeChanged001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -973,7 +973,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged002, TestSize.Level0)
 {
     SLOGI("OnVolumeChanged002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -990,7 +990,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnVolumeChanged002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged001, TestSize.Level0)
 {
     SLOGI("OnLoopModeChanged001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1006,7 +1006,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged002, TestSize.Level0)
 {
     SLOGI("OnLoopModeChanged002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1024,7 +1024,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnLoopModeChanged002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged001, TestSize.Level0)
 {
     SLOGI("OnPlaySpeedChanged001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1040,7 +1040,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged002, TestSize.Level0)
 {
     SLOGI("OnPlaySpeedChanged002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1058,7 +1058,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlaySpeedChanged002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPlayerError001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPlayerError001, TestSize.Level0)
 {
     SLOGI("OnPlayerError001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1074,7 +1074,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayerError001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPlayerError002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPlayerError002, TestSize.Level0)
 {
     SLOGI("OnPlayerError002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1091,7 +1091,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayerError002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnSeekDone001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnSeekDone001, TestSize.Level0)
 {
     SLOGI("OnSeekDone001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1108,7 +1108,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnSeekDone001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnSeekDone002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnSeekDone002, TestSize.Level0)
 {
     SLOGI("OnSeekDone002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1126,7 +1126,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnSeekDone002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged001, TestSize.Level0)
 {
     SLOGI("OnVideoSizeChanged001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1142,7 +1142,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged002, TestSize.Level0)
 {
     SLOGI("OnVideoSizeChanged002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1159,7 +1159,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnVideoSizeChanged002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream001, TestSize.Level0)
 {
     SLOGI("OnEndOfStream001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1175,7 +1175,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream002, TestSize.Level0)
 {
     SLOGI("OnEndOfStream002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1192,7 +1192,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnEndOfStream002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest001, TestSize.Level0)
 {
     SLOGI("OnPlayRequest001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1209,7 +1209,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest002, TestSize.Level0)
 {
     SLOGI("OnPlayRequest002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1227,7 +1227,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnPlayRequest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest001, TestSize.Level0)
 {
     SLOGI("OnKeyRequest001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1245,7 +1245,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest002, TestSize.Level0)
 {
     SLOGI("OnKeyRequest002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1264,7 +1264,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, SetValidAbility001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, SetValidAbility001, TestSize.Level0)
 {
     SLOGI("SetValidAbility001 begin!");
     std::vector<int32_t> validAbilityList;
@@ -1282,7 +1282,7 @@ HWTEST_F(HwCastStreamPlayerTest, SetValidAbility001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, GetValidAbility001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetValidAbility001, TestSize.Level0)
 {
     SLOGI("GetValidAbility001 begin!");
     std::vector<int32_t> validAbilityList;
@@ -1296,7 +1296,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetValidAbility001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, GetValidAbility002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetValidAbility002, TestSize.Level0)
 {
     SLOGI("GetValidAbility002 begin!");
     std::vector<int32_t> validAbilityList;
@@ -1311,7 +1311,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetValidAbility002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged001, TestSize.Level0)
 {
     SLOGI("OnAvailableCapabilityChanged001 begin!");
     std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
@@ -1334,7 +1334,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged002, TestSize.Level0)
 {
     SLOGI("OnAvailableCapabilityChanged002 begin!");
     auto controller = std::make_shared<AVCastControllerItem>();
@@ -1363,7 +1363,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAvailableCapabilityChanged002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, CheckCastTime001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, CheckCastTime001, TestSize.Level0)
 {
     SLOGI("CheckCastTime001 begin!");
     int32_t castTime = 1001;
@@ -1378,7 +1378,7 @@ HWTEST_F(HwCastStreamPlayerTest, CheckCastTime001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, CheckCastTime002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, CheckCastTime002, TestSize.Level0)
 {
     SLOGI("CheckCastTime002 begin!");
     int32_t castTime = 1;
@@ -1393,7 +1393,7 @@ HWTEST_F(HwCastStreamPlayerTest, CheckCastTime002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, RepeatPrepare001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, RepeatPrepare001, TestSize.Level0)
 {
     SLOGI("RepeatPrepare001 begin!");
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
@@ -1417,7 +1417,7 @@ HWTEST_F(HwCastStreamPlayerTest, RepeatPrepare001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, SetValidAbility002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, SetValidAbility002, TestSize.Level0)
 {
     SLOGI("SetValidAbility002 begin!");
     std::vector<int32_t> validAbilityList;
@@ -1437,7 +1437,7 @@ HWTEST_F(HwCastStreamPlayerTest, SetValidAbility002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, SetValidAbility003, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, SetValidAbility003, TestSize.Level0)
 {
     SLOGI("SetValidAbility003 begin!");
     std::vector<int32_t> validAbilityList;
@@ -1463,7 +1463,7 @@ HWTEST_F(HwCastStreamPlayerTest, SetValidAbility003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged001, TestSize.Level0)
 {
     SLOGI("OnAlbumCoverChanged001 begin!");
     OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
@@ -1479,7 +1479,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged002, TestSize.Level0)
 {
     SLOGI("OnAlbumCoverChanged002 begin!");
     auto pixelMap = std::make_shared<OHOS::Media::PixelMap>();
@@ -1496,7 +1496,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged003, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged003, TestSize.Level0)
 {
     SLOGI("OnAlbumCoverChanged003 begin!");
     auto pixelMap = CreatePixelMap();
@@ -1513,7 +1513,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged004, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged004, TestSize.Level0)
 {
     SLOGI("OnAlbumCoverChanged004 begin!");
     auto pixelMap = CreatePixelMap();
@@ -1529,7 +1529,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged005, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged005, TestSize.Level0)
 {
     SLOGI("OnAlbumCoverChanged005 begin!");
     auto pixelMap = CreatePixelMap();
@@ -1554,7 +1554,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnAlbumCoverChanged005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo001, TestSize.Level0)
 {
     string capabilities = R"(
     {
@@ -1595,7 +1595,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require: NA
 */
-HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo002, TestSize.Level0)
 {
     string capabilities = R"(
     {
@@ -1622,7 +1622,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfVideo002, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require: NA
 */
-HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio001, TestSize.Level0)
 {
     string capabilities = R"(
     {
@@ -1651,7 +1651,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require: NA
 */
-HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio002, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio002, TestSize.Level0)
 {
     string capabilities = R"(
     {
@@ -1676,7 +1676,7 @@ HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilitiesOfAudio002, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require: NA
 */
-HWTEST_F(HwCastStreamPlayerTest, checkCmdsFromAbility001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, checkCmdsFromAbility001, TestSize.Level0)
 {
     StreamCapability avStreamCapability = {
         .isFastForwardSupported = true,
@@ -1695,7 +1695,7 @@ HWTEST_F(HwCastStreamPlayerTest, checkCmdsFromAbility001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-HWTEST_F(HwCastStreamPlayerTest, checkAbilityFromCmds001, TestSize.Level1)
+HWTEST_F(HwCastStreamPlayerTest, checkAbilityFromCmds001, TestSize.Level0)
 {
     std::vector<int32_t> supportedCastCmds;
     for (auto i = 0; i <= AVCastControlCommand::CAST_CONTROL_CMD_MAX; i++) {

@@ -64,7 +64,7 @@ void ParamsConfigOperatorTest::TearDown()
  * @tc.desc: Test InitConfig
  * @tc.type: FUNC
  */
-static HWTEST_F(ParamsConfigOperatorTest, InitConfig001, testing::ext::TestSize.Level1)
+static HWTEST_F(ParamsConfigOperatorTest, InitConfig001, testing::ext::TestSize.Level0)
 {
     SLOGI("InitConfig001 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -79,7 +79,7 @@ static HWTEST_F(ParamsConfigOperatorTest, InitConfig001, testing::ext::TestSize.
  * @tc.desc: Test GetValueIntByKey
  * @tc.type: FUNC
  */
-static HWTEST_F(ParamsConfigOperatorTest, GetValueIntByKey001, testing::ext::TestSize.Level1)
+static HWTEST_F(ParamsConfigOperatorTest, GetValueIntByKey001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetValueIntByKey001 begin!");
     auto paramsConfigOperator = ParamsConfigOperator::GetInstance();
@@ -94,7 +94,7 @@ static HWTEST_F(ParamsConfigOperatorTest, GetValueIntByKey001, testing::ext::Tes
  * @tc.desc: Test GetValueIntByKey
  * @tc.type: FUNC
  */
-static HWTEST_F(ParamsConfigOperatorTest, GetValueIntByKey002, testing::ext::TestSize.Level1)
+static HWTEST_F(ParamsConfigOperatorTest, GetValueIntByKey002, testing::ext::TestSize.Level0)
 {
     SLOGI("GetValueIntByKey002 begin!");
     auto paramsConfigOperator = ParamsConfigOperator::GetInstance();

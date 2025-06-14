@@ -56,7 +56,7 @@ public:
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 
-HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved001, TestSize.Level0)
 {
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 0;
@@ -64,7 +64,7 @@ HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved001, TestSize.Level1)
     EXPECT_TRUE(manager.sessionStackMapByUserId_.size() == 0);
 }
 
-HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved002, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved002, TestSize.Level0)
 {
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 0;
@@ -74,7 +74,7 @@ HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved002, TestSize.Level1)
     EXPECT_TRUE(manager.sessionStackMapByUserId_.size() == 0);
 }
 
-HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved003, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved003, TestSize.Level0)
 {
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 0;
@@ -87,7 +87,7 @@ HWTEST_F(AVSessionUsersManagerTest, HandleUserRemoved003, TestSize.Level1)
     EXPECT_TRUE(manager.sessionStackMapByUserId_.size() == 0);
 }
 
-HWTEST_F(AVSessionUsersManagerTest, AddSessionListener001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, AddSessionListener001, TestSize.Level0)
 {
     auto& manager = AVSessionUsersManager::GetInstance();
     pid_t pid = 0;
@@ -98,7 +98,7 @@ HWTEST_F(AVSessionUsersManagerTest, AddSessionListener001, TestSize.Level1)
     EXPECT_TRUE(iterForListenerMap != manager.sessionListenersMapByUserId_.end());
 }
 
-HWTEST_F(AVSessionUsersManagerTest, RemoveSessionListener001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, RemoveSessionListener001, TestSize.Level0)
 {
     auto& manager = AVSessionUsersManager::GetInstance();
     pid_t pid = 0;
@@ -112,7 +112,7 @@ HWTEST_F(AVSessionUsersManagerTest, RemoveSessionListener001, TestSize.Level1)
     EXPECT_TRUE(manager.sessionListenersMapByUserId_.size() > 0);
 }
 
-HWTEST_F(AVSessionUsersManagerTest, GetContainerFromUser001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, GetContainerFromUser001, TestSize.Level0)
 {
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 0;
@@ -122,7 +122,7 @@ HWTEST_F(AVSessionUsersManagerTest, GetContainerFromUser001, TestSize.Level1)
     EXPECT_TRUE(iter != manager.sessionStackMapByUserId_.end());
 }
 
-HWTEST_F(AVSessionUsersManagerTest, GetDirForCurrentUser001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, GetDirForCurrentUser001, TestSize.Level0)
 {
     auto& manager = AVSessionUsersManager::GetInstance();
     manager.curUserId_ = -1;
@@ -131,7 +131,7 @@ HWTEST_F(AVSessionUsersManagerTest, GetDirForCurrentUser001, TestSize.Level1)
     EXPECT_TRUE(ret == "/data/service/el2/public/av_session/");
 }
 
-HWTEST_F(AVSessionUsersManagerTest, Init001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, Init001, TestSize.Level0)
 {
     int32_t userId = 1;
     AVSessionUsersManager::GetInstance().Init();
@@ -143,7 +143,7 @@ HWTEST_F(AVSessionUsersManagerTest, Init001, TestSize.Level1)
     EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
 }
 
-HWTEST_F(AVSessionUsersManagerTest, Init002, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, Init002, TestSize.Level0)
 {
     int32_t userId = 1;
     int32_t newUserId = 100;
@@ -156,7 +156,7 @@ HWTEST_F(AVSessionUsersManagerTest, Init002, TestSize.Level1)
     EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, newUserId);
 }
 
-HWTEST_F(AVSessionUsersManagerTest, Init003, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, Init003, TestSize.Level0)
 {
     int32_t userId = 100;
     AVSessionUsersManager::GetInstance().Init();
@@ -168,7 +168,7 @@ HWTEST_F(AVSessionUsersManagerTest, Init003, TestSize.Level1)
     EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
 }
 
-HWTEST_F(AVSessionUsersManagerTest, Init004, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, Init004, TestSize.Level0)
 {
     int32_t userId = 1;
     AVSessionUsersManager::GetInstance().Init();
@@ -181,7 +181,7 @@ HWTEST_F(AVSessionUsersManagerTest, Init004, TestSize.Level1)
     EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
 }
 
-HWTEST_F(AVSessionUsersManagerTest, GetCurSessionListForKeyEvent001, TestSize.Level1)
+HWTEST_F(AVSessionUsersManagerTest, GetCurSessionListForKeyEvent001, TestSize.Level0)
 {
     int32_t userId = 1;
     AVSessionUsersManager::GetInstance().GetCurSessionListForKeyEvent(userId);

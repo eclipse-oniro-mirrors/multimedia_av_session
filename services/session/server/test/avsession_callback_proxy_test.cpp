@@ -73,7 +73,7 @@ void AVSessionCallbackProxyTest::TearDown()
  * @tc.desc: Test OnAVCallAnswer
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallAnswer001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallAnswer001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAVCallAnswer001, start");
     LOG_SetCallback(MyLogCallback);
@@ -87,7 +87,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallAnswer001, testing::ext::Tes
  * @tc.desc: Test OnAVCallHangUp
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallHangUp001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallHangUp001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAVCallHangUp001, start");
     LOG_SetCallback(MyLogCallback);
@@ -101,7 +101,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallHangUp001, testing::ext::Tes
  * @tc.desc: Test OnAVCallToggleCallMute
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallToggleCallMute001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallToggleCallMute001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAVCallToggleCallMute001, start");
     LOG_SetCallback(MyLogCallback);
@@ -115,7 +115,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallToggleCallMute001, testing::
  * @tc.desc: Test OnPlay
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnPlay001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnPlay001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnPlay001, start");
     LOG_SetCallback(MyLogCallback);
@@ -129,7 +129,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnPlay001, testing::ext::TestSize.Le
  * @tc.desc: Test OnPause
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnPause001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnPause001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnPause001, start");
     LOG_SetCallback(MyLogCallback);
@@ -143,7 +143,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnPause001, testing::ext::TestSize.L
  * @tc.desc: Test OnStop
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnStop001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnStop001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnStop001, start");
     LOG_SetCallback(MyLogCallback);
@@ -157,7 +157,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnStop001, testing::ext::TestSize.Le
  * @tc.desc: Test OnPlayNext
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnPlayNext001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnPlayNext001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnPlayNext001, start");
     LOG_SetCallback(MyLogCallback);
@@ -171,7 +171,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnPlayNext001, testing::ext::TestSiz
  * @tc.desc: Test OnPlayPrevious
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnPlayPrevious001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnPlayPrevious001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnPlayPrevious001, start");
     LOG_SetCallback(MyLogCallback);
@@ -185,7 +185,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnPlayPrevious001, testing::ext::Tes
  * @tc.desc: Test OnFastForward
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnFastForward001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnFastForward001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnFastForward001, start");
     LOG_SetCallback(MyLogCallback);
@@ -200,7 +200,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnFastForward001, testing::ext::Test
  * @tc.desc: Test OnRewind
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnRewind001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnRewind001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnRewind001, start");
     LOG_SetCallback(MyLogCallback);
@@ -215,7 +215,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnRewind001, testing::ext::TestSize.
  * @tc.desc: Test OnSeek
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnSeek001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnSeek001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSeek001, start");
     LOG_SetCallback(MyLogCallback);
@@ -230,7 +230,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnSeek001, testing::ext::TestSize.Le
  * @tc.desc: Test OnSetSpeed
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnSetSpeed001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnSetSpeed001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSetSpeed001, start");
     LOG_SetCallback(MyLogCallback);
@@ -245,7 +245,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnSetSpeed001, testing::ext::TestSiz
  * @tc.desc: Test OnSetLoopMode
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnSetLoopMode001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnSetLoopMode001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSetLoopMode001, start");
     LOG_SetCallback(MyLogCallback);
@@ -260,7 +260,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnSetLoopMode001, testing::ext::Test
  * @tc.desc: Test OnSetTargetLoopMode
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnSetTargetLoopMode001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnSetTargetLoopMode001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSetTargetLoopMode001, start");
     LOG_SetCallback(MyLogCallback);
@@ -275,7 +275,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnSetTargetLoopMode001, testing::ext
  * @tc.desc: Test OnToggleFavorite
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnToggleFavorite001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnToggleFavorite001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnToggleFavorite001, start");
     LOG_SetCallback(MyLogCallback);
@@ -290,7 +290,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnToggleFavorite001, testing::ext::T
  * @tc.desc: Test OnMediaKeyEvent
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnMediaKeyEvent001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnMediaKeyEvent001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnMediaKeyEvent001, start");
     LOG_SetCallback(MyLogCallback);
@@ -305,7 +305,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnMediaKeyEvent001, testing::ext::Te
  * @tc.desc: Test OnOutputDeviceChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnOutputDeviceChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnOutputDeviceChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnOutputDeviceChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -321,7 +321,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnOutputDeviceChange001, testing::ex
  * @tc.desc: Test OnCommonCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnCommonCommand001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnCommonCommand001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnCommonCommand001, start");
     LOG_SetCallback(MyLogCallback);
@@ -337,7 +337,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnCommonCommand001, testing::ext::Te
  * @tc.desc: Test OnSkipToQueueItem
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnSkipToQueueItem001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnSkipToQueueItem001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSkipToQueueItem001, start");
     LOG_SetCallback(MyLogCallback);
@@ -352,7 +352,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnSkipToQueueItem001, testing::ext::
  * @tc.desc: Test OnPlayFromAssetId
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnPlayFromAssetId001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnPlayFromAssetId001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnPlayFromAssetId001, start");
     LOG_SetCallback(MyLogCallback);
@@ -367,7 +367,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnPlayFromAssetId001, testing::ext::
  * @tc.desc: Test OnPlayWithAssetId
  * @tc.type: FUNC
  */
- static HWTEST_F(AVSessionCallbackProxyTest, OnPlayWithAssetId001, testing::ext::TestSize.Level1)
+ static HWTEST_F(AVSessionCallbackProxyTest, OnPlayWithAssetId001, testing::ext::TestSize.Level0)
  {
      SLOGI("OnPlayWithAssetId001, start");
      LOG_SetCallback(MyLogCallback);
@@ -382,7 +382,7 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnPlayFromAssetId001, testing::ext::
  * @tc.desc: Test OnCastDisplayChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackProxyTest, OnCastDisplayChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionCallbackProxyTest, OnCastDisplayChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnCastDisplayChange001, start");
     LOG_SetCallback(MyLogCallback);

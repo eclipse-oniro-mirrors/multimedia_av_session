@@ -158,7 +158,7 @@ public:
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
     uint32_t code = 1;
@@ -178,7 +178,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest001, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
     uint32_t code = 2;
@@ -198,7 +198,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest002, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest003, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest003 begin!");
     uint32_t code = 3;
@@ -218,7 +218,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest003, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest004, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest004, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest004 begin!");
     uint32_t code = 4;
@@ -238,7 +238,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest004, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest005, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest005, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest005 begin!");
     uint32_t code = 5;
@@ -258,7 +258,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest005, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest006, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest006, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest006 begin!");
     uint32_t code = 6;
@@ -278,7 +278,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest006, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest007, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest007, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest007 begin!");
     uint32_t code = 7;
@@ -298,7 +298,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest007, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest008, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest008, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest008 begin!");
     uint32_t code = 8;
@@ -318,7 +318,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest008, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest009, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest009, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest009 begin!");
     uint32_t code = 9;
@@ -338,7 +338,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest009, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest010, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest010, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest010 begin!");
     uint32_t code = 10;
@@ -358,7 +358,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest010, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest011, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest011, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest011 begin!");
     uint32_t code = 12;
@@ -378,7 +378,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest011, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest012, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest012, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest012 begin!");
     uint32_t code = 12;
@@ -399,7 +399,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest012, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest013, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest013, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest013 begin!");
     uint32_t code = 12;
@@ -421,7 +421,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest013, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest014, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest014, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest014 begin!");
     uint32_t code = 13;
@@ -441,7 +441,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest014, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest015, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest015, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest015 begin!");
     uint32_t code = 13;
@@ -462,7 +462,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest015, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest016, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest016, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest016 begin!");
     uint32_t code = 13;
@@ -483,7 +483,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest016, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest017, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest017, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest017 begin!");
     uint32_t code = 14;
@@ -503,7 +503,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest017, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest018, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest018, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest018 begin!");
     uint32_t code = 15;
@@ -523,7 +523,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest018, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest019, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest019, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest019 begin!");
     uint32_t code = 16;
@@ -544,7 +544,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest019, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest020, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest020, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest020 begin!");
     uint32_t code = 17;
@@ -565,7 +565,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest020, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest021, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest021, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest021 begin!");
     uint32_t code = 18;
@@ -586,7 +586,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest021, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest022, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest022, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest022 begin!");
     uint32_t code = 19;
@@ -607,7 +607,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest022, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest023, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest023, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest023 begin!");
     uint32_t code = 20;
@@ -627,7 +627,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest023, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest024, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest024, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest024 begin!");
     uint32_t code = static_cast<uint32_t>(OHOS::AVSession::AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST);
@@ -648,7 +648,7 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest024, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceStubTest, HandleCreateSessionInner_001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceStubTest, HandleCreateSessionInner_001, TestSize.Level0)
 {
     SLOGD("HandleCreateSessionInner_001 begin!");
     OHOS::MessageParcel data;
@@ -742,7 +742,7 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStartCast_003, Tes
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopCast_001, TestSize.Level1)
+HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopCast_001, TestSize.Level0)
 {
     SLOGD("AVSessionServiceStub_HandleStopCast_001 begin!");
     OHOS::MessageParcel data;
@@ -762,7 +762,7 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopCast_001, Test
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopDeviceLogging_001, TestSize.Level1)
+HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopDeviceLogging_001, TestSize.Level0)
 {
     SLOGD("AVSessionServiceStub_HandleStopDeviceLogging_001 begin!");
     OHOS::MessageParcel data;
@@ -780,7 +780,7 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopDeviceLogging_
  * @tc.require: #I5Y4MZ
  */
 HWTEST_F(
-    AVSessionServiceStubTest, AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001, TestSize.Level1)
+    AVSessionServiceStubTest, AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001, TestSize.Level0)
 {
     SLOGD("AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001 begin!");
     OHOS::MessageParcel data;
