@@ -1358,6 +1358,11 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         HandleCallStartEvent();
     });
     sessionItem->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
+        if (sessionId == sessionCastState_) {
+            std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+            UpdateLocalFrontSession(sessionListForFront);
+            return;
+        }
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
@@ -1724,37 +1729,30 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
 void AVSessionService::ProcessDescriptorsFromCJSON(std::vector<AVSessionDescriptor>& descriptors, cJSON* valueItem)
 {
     CHECK_AND_RETURN_LOG(valueItem != nullptr && !cJSON_IsInvalid(valueItem), "valueItem get invalid");
-    cJSON* sessionTypeItem = cJSON_GetObjectItem(valueItem, "sessionType");
-    if (sessionTypeItem == nullptr || cJSON_IsInvalid(sessionTypeItem) || !cJSON_IsString(sessionTypeItem)) {
-        SLOGE("valueItem get sessionType fail");
-        return;
-    }
-    if (strcmp(sessionTypeItem->valuestring, "video") == 0) {
-        SLOGI("GetHistoricalSessionDescriptorsFromFile with no video type session.");
-        return;
-    }
+
     cJSON* sessionIdItem = cJSON_GetObjectItem(valueItem, "sessionId");
     if (sessionIdItem == nullptr || cJSON_IsInvalid(sessionIdItem) || !cJSON_IsString(sessionIdItem)) {
         SLOGE("valueItem get sessionId fail");
         return;
     }
     std::string sessionId(sessionIdItem->valuestring);
-
     cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
     if (bundleNameItem == nullptr || cJSON_IsInvalid(bundleNameItem) || !cJSON_IsString(bundleNameItem)) {
         SLOGE("valueItem get bundleName fail");
         return;
     }
+    std::string bundleName(bundleNameItem->valuestring);
     cJSON* abilityNameItem = cJSON_GetObjectItem(valueItem, "abilityName");
     if (abilityNameItem == nullptr || cJSON_IsInvalid(abilityNameItem) || !cJSON_IsString(abilityNameItem)) {
         SLOGE("valueItem get abilityName fail");
         return;
     }
+    std::string abilityName(abilityNameItem->valuestring);
+
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = sessionId;
     descriptor.elementName_.SetBundleName(std::string(bundleNameItem->valuestring));
     descriptor.elementName_.SetAbilityName(std::string(abilityNameItem->valuestring));
-    descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
     descriptors.push_back(descriptor);
 }
 
@@ -2585,13 +2583,12 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
     GetColdStartSessionDescriptors(coldStartDescriptors);
     CHECK_AND_RETURN_LOG(coldStartDescriptors.size() > 0, "get coldStartDescriptors empty");
     // try start play for first history session
-    if ((command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY ||
-         command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_NEXT ||
-         command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_PREVIOUS) && coldStartDescriptors.size() != 0) {
+    if (command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY ||
+        command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_NEXT ||
+        command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY_PREVIOUS) {
         sptr<IRemoteObject> object;
         int32_t ret = 0;
         std::string bundleName = coldStartDescriptors[0].elementName_.GetBundleName();
-        std::string abilityName = coldStartDescriptors[0].elementName_.GetAbilityName();
         if (deviceId.length() == 0) {
             ret = StartAVPlayback(bundleName, "");
         } else {

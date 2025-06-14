@@ -366,22 +366,20 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
         SLOGE("get jsonValue invalid");
         return;
     }
-
-    std::string sessionId = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_SESSION_ID);
-    sessionId = sessionId.empty() ? DEFAULT_STRING : sessionId;
     std::string bundleName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_BUNDLE_NAME);
     bundleName = bundleName.empty() ? DEFAULT_STRING : bundleName;
     size_t insertPos = bundleName.find('|');
     if (insertPos != std::string::npos && insertPos > 0 && insertPos < bundleName.size()) {
         elementName_.SetBundleName(bundleName.substr(0, insertPos));
     } else {
-        elementName_.SetBundleName(bundleName);
+        SLOGE("get bundleName invalid:%{public}s|%{public}s", bundleName.c_str(),
+            elementName_.GetBundleName().c_str());
     }
     std::string abilityName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_ABILITY_NAME);
     abilityName = abilityName.empty() ? DEFAULT_STRING : abilityName;
     elementName_.SetAbilityName(abilityName);
-    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s end",
-        SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
+    std::string sessionId = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_SESSION_ID);
+    sessionId = sessionId.empty() ? DEFAULT_STRING : sessionId;
     if (sessionId.empty() || sessionId == DEFAULT_STRING || sessionId == EMPTY_SESSION) {
         remoteSession_->Deactivate();
         elementName_.SetAbilityName(elementName_.GetBundleName());
@@ -389,6 +387,8 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     } else {
         remoteSession_->Activate();
     }
+    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s end",
+        SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
     AVPlaybackState playbackState;

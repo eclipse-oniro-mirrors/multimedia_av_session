@@ -442,6 +442,7 @@ private:
     static const int32_t DEFAULT_USER_ID = 100;
 
     static constexpr const char *defaultBundleName = "com.example.himusicdemo";
+    static constexpr const char *sessionCastState_ = "CAST_STATE";
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;
