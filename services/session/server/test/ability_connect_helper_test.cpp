@@ -58,7 +58,7 @@ void AbilityConnectHelperTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: #I62OZV
  */
-static HWTEST(AbilityConnectHelperTest, OnRemoteRequest001, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
     uint32_t code = OHOS::AAFwk::IAbilityConnection::ON_ABILITY_DISCONNECT_DONE;
@@ -76,7 +76,7 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I62OZV
  */
-static HWTEST(AbilityConnectHelperTest, OnRemoteRequest002, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
     uint32_t code = OHOS::AAFwk::IAbilityConnection::ON_ABILITY_DISCONNECT_DONE;
@@ -99,7 +99,7 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I62OZV
  */
-static HWTEST(AbilityConnectHelperTest, OnRemoteRequest003, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, OnRemoteRequest003, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest003 begin!");
     uint32_t code = OHOS::AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE;
@@ -122,7 +122,7 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I62OZV
  */
-static HWTEST(AbilityConnectHelperTest, OnRemoteRequest004, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, OnRemoteRequest004, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest004 begin!");
     uint32_t code = OHOS::AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE;
@@ -151,7 +151,7 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I62OZV
  */
-static HWTEST(AbilityConnectHelperTest, OnRemoteRequest005, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, OnRemoteRequest005, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest005 begin!");
     uint32_t code = 3;
@@ -173,7 +173,7 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest005, TestSize.Level1)
  * @tc.desc: Test StartAbilityForegroundByCall
  * @tc.type: FUNC
  */
-static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall001, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall001, TestSize.Level0)
 {
     SLOGI("StartAbilityForegroundByCall001 begin!");
     std::string bundleName;
@@ -188,7 +188,7 @@ static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall002, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall002, TestSize.Level0)
 {
     SLOGI("StartAbilityForegroundByCall002 begin!");
     std::string bundleName = "com.ohos.camera";
@@ -202,7 +202,7 @@ static HWTEST(AbilityConnectHelperTest, StartAbilityForegroundByCall002, TestSiz
  * @tc.desc: Test StartAbilityByCall
  * @tc.type: FUNC
  */
-static HWTEST(AbilityConnectHelperTest, StartAbilityByCall001, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, StartAbilityByCall001, TestSize.Level0)
 {
     SLOGI("StartAbilityByCall001 begin!");
     std::string bundleName;
@@ -216,7 +216,7 @@ static HWTEST(AbilityConnectHelperTest, StartAbilityByCall001, TestSize.Level1)
  * @tc.desc: Test StartAbilityByCall
  * @tc.type: FUNC
  */
-static HWTEST(AbilityConnectHelperTest, StartAbilityByCall002, TestSize.Level1)
+static HWTEST(AbilityConnectHelperTest, StartAbilityByCall002, TestSize.Level0)
 {
     SLOGI("StartAbilityByCall002 begin!");
     std::string bundleName = "com.ohos.camera";

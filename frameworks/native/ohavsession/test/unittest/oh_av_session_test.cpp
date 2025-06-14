@@ -53,7 +53,7 @@ void OHAVSessionTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_Create_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_Create_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_Create_001",
@@ -69,7 +69,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_Create_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_Destory_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_Destory_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_Destory_001",
@@ -85,7 +85,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_Destory_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_Activate_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_Activate_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_Activate_001",
@@ -103,7 +103,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_Activate_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_Deactivate_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_Deactivate_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_Deactivate_001",
@@ -121,7 +121,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_Deactivate_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_GetSessionType_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_GetSessionType_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_GetSessionType_001",
@@ -141,7 +141,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_GetSessionType_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_GetSessionId_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_GetSessionId_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_GetSessionId_001",
@@ -160,7 +160,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_GetSessionId_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_SetAVMetadata_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_SetAVMetadata_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     const uint64_t DURATION = 40000;
@@ -203,7 +203,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_SetAVMetadata_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackState_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackState_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_SetPlaybackState_001",
@@ -222,7 +222,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackState_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackState_002, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackState_002, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_SetPlaybackState_001",
@@ -241,7 +241,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackState_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackPosition_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackPosition_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_SetPlaybackPosition_001",
@@ -262,7 +262,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_SetPlaybackPosition_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_SetFavorite_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_SetFavorite_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -281,7 +281,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_SetFavorite_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_SetLoopMode_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_SetLoopMode_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -300,7 +300,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_SetLoopMode_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterCommandCallback_001",
@@ -325,7 +325,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_002, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_002, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_RegisterCommandCallback_002",
@@ -350,7 +350,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_003, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_003, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_RegisterCommandCallback_003",
@@ -375,7 +375,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_003, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_004, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_004, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_RegisterCommandCallback_004",
@@ -400,7 +400,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_004, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_005, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_005, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_RegisterCommandCallback_005",
@@ -425,7 +425,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_005, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_006, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_006, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_RegisterCommandCallback_006",
@@ -450,7 +450,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterCommandCallback_006, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "UnregisterCommandCallback_001",
@@ -474,7 +474,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_002, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_002, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_UnregisterCommandCallback_002",
@@ -498,7 +498,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_003, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_003, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_UnregisterCommandCallback_003",
@@ -522,7 +522,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_003, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_004, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_004, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_UnregisterCommandCallback_004",
@@ -546,7 +546,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_004, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_005, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_005, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_UnregisterCommandCallback_005",
@@ -570,7 +570,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_005, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_006, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_006, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "OH_AVSession_UnregisterCommandCallback_006",
@@ -594,7 +594,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterCommandCallback_006, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterForwardCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterForwardCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -618,7 +618,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterForwardCallback_001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterForwardCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterForwardCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -644,7 +644,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterForwardCallback_001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterRewindCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterRewindCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -668,7 +668,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterRewindCallback_001, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterRewindCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterRewindCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -694,7 +694,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterRewindCallback_001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterSeekCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterSeekCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -718,7 +718,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterSeekCallback_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterSeekCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterSeekCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -744,7 +744,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterSeekCallback_001, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterSetLoopModeCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterSetLoopModeCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -768,7 +768,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterSetLoopModeCallback_001, TestSize.L
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterSetLoopModeCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterSetLoopModeCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -794,7 +794,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterSetLoopModeCallback_001, TestSize
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterToggleFavoriteCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterToggleFavoriteCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -818,7 +818,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterToggleFavoriteCallback_001, TestSiz
  * @tc.type: FUNC
  * @tc.require: none
 */
-HWTEST(OHAVSessionTest, OH_AVSession_UnregisterToggleFavoriteCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterToggleFavoriteCallback_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
@@ -844,7 +844,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterToggleFavoriteCallback_001, TestS
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, GetEncodeErrcode_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, GetEncodeErrcode_001, TestSize.Level0)
 {
     auto oHAVSession = std::make_shared<OHAVSession>();
     int32_t invalidErrorCode = 9999999;
@@ -858,7 +858,7 @@ HWTEST(OHAVSessionTest, GetEncodeErrcode_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, OHAVSession_GetSessionId_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, OHAVSession_GetSessionId_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -879,7 +879,7 @@ HWTEST(OHAVSessionTest, OHAVSession_GetSessionId_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, RegisterCommandCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, RegisterCommandCallback_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -903,7 +903,7 @@ HWTEST(OHAVSessionTest, RegisterCommandCallback_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, RegisterCommandCallback_002, TestSize.Level1)
+HWTEST(OHAVSessionTest, RegisterCommandCallback_002, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -928,7 +928,7 @@ HWTEST(OHAVSessionTest, RegisterCommandCallback_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterCommandCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -955,7 +955,7 @@ HWTEST(OHAVSessionTest, UnregisterCommandCallback_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterCommandCallback_002, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_002, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -979,7 +979,7 @@ HWTEST(OHAVSessionTest, UnregisterCommandCallback_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterCommandCallback_003, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_003, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1003,7 +1003,7 @@ HWTEST(OHAVSessionTest, UnregisterCommandCallback_003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterCommandCallback_004, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_004, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1027,7 +1027,7 @@ HWTEST(OHAVSessionTest, UnregisterCommandCallback_004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterCommandCallback_005, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_005, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1051,7 +1051,7 @@ HWTEST(OHAVSessionTest, UnregisterCommandCallback_005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterCommandCallback_006, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterCommandCallback_006, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1075,7 +1075,7 @@ HWTEST(OHAVSessionTest, UnregisterCommandCallback_006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterForwardCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterForwardCallback_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1098,7 +1098,7 @@ HWTEST(OHAVSessionTest, UnregisterForwardCallback_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterRewindCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterRewindCallback_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1121,7 +1121,7 @@ HWTEST(OHAVSessionTest, UnregisterRewindCallback_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterSeekCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterSeekCallback_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1144,7 +1144,7 @@ HWTEST(OHAVSessionTest, UnregisterSeekCallback_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterSetLoopModeCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterSetLoopModeCallback_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1167,7 +1167,7 @@ HWTEST(OHAVSessionTest, UnregisterSetLoopModeCallback_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, UnregisterToggleFavoriteCallback_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, UnregisterToggleFavoriteCallback_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1190,7 +1190,7 @@ HWTEST(OHAVSessionTest, UnregisterToggleFavoriteCallback_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, OHAVSession_GetSessionId_002, TestSize.Level1)
+HWTEST(OHAVSessionTest, OHAVSession_GetSessionId_002, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1210,7 +1210,7 @@ HWTEST(OHAVSessionTest, OHAVSession_GetSessionId_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, RegisterCommandCallback_003, TestSize.Level1)
+HWTEST(OHAVSessionTest, RegisterCommandCallback_003, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1235,7 +1235,7 @@ HWTEST(OHAVSessionTest, RegisterCommandCallback_003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, RegisterCommandCallback_004, TestSize.Level1)
+HWTEST(OHAVSessionTest, RegisterCommandCallback_004, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1260,7 +1260,7 @@ HWTEST(OHAVSessionTest, RegisterCommandCallback_004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, CheckAndRegister_001, TestSize.Level1)
+HWTEST(OHAVSessionTest, CheckAndRegister_001, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";
@@ -1278,7 +1278,7 @@ HWTEST(OHAVSessionTest, CheckAndRegister_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, CheckAndRegister_002, TestSize.Level1)
+HWTEST(OHAVSessionTest, CheckAndRegister_002, TestSize.Level0)
 {
     AVSession_Type sessionType = SESSION_TYPE_VIDEO;
     const char* sessionTag = "1";

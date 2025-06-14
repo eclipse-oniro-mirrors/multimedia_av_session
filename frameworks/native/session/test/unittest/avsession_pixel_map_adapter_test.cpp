@@ -49,7 +49,7 @@ void AVSessionPixelMapAdapterTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionPixelMapAdapterTest, OnPlaybackStateChange001, TestSize.Level1)
+HWTEST_F(AVSessionPixelMapAdapterTest, OnPlaybackStateChange001, TestSize.Level0)
 {
     std::shared_ptr<AVSessionPixelMap> ptr = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> vec = {255, 255};
@@ -65,7 +65,7 @@ HWTEST_F(AVSessionPixelMapAdapterTest, OnPlaybackStateChange001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionPixelMapAdapterTest, OnPlaybackStateChange002, TestSize.Level1)
+HWTEST_F(AVSessionPixelMapAdapterTest, OnPlaybackStateChange002, TestSize.Level0)
 {
     std::shared_ptr<AVSessionPixelMap> ptr = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> vec = {0, 0};
@@ -81,7 +81,7 @@ HWTEST_F(AVSessionPixelMapAdapterTest, OnPlaybackStateChange002, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst001, TestSize.Level1)
+HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst001, TestSize.Level0)
 {
     Media::PixelMap pixelMap;
     pixelMap.SetPixelsAddr(nullptr, nullptr, 10, Media::AllocatorType::DMA_ALLOC, nullptr);
@@ -97,7 +97,7 @@ HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionPixelMapAdapterTest, CleanAVSessionPixelMap_001, TestSize.Level1)
+static HWTEST_F(AVSessionPixelMapAdapterTest, CleanAVSessionPixelMap_001, TestSize.Level0)
 {
     SLOGD("AVSessionPixelMapAdapterTest_CleanAVSessionPixelMap_001 begin!");
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
@@ -116,7 +116,7 @@ static HWTEST_F(AVSessionPixelMapAdapterTest, CleanAVSessionPixelMap_001, TestSi
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst_001, TestSize.Level1)
+HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst_001, TestSize.Level0)
 {
     SLOGD("CopyPixMapToDst_001 begin!");
     OHOS::Media::PixelMap source;
@@ -143,7 +143,7 @@ HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInner_001, TestSize.Level1)
+HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInner_001, TestSize.Level0)
 {
     SLOGD("ConvertToInner_001 begin!");
     OHOS::Media::PixelMap source;
@@ -169,7 +169,7 @@ HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInner_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInnerWithMinSize_001, TestSize.Level1)
+HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInnerWithMinSize_001, TestSize.Level0)
 {
     SLOGD("ConvertToInnerWithMinSize_001 begin!");
     OHOS::Media::PixelMap source;
@@ -195,7 +195,7 @@ HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInnerWithMinSize_001, TestSize.L
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInnerWithLimitedSize_001, TestSize.Level1)
+HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInnerWithLimitedSize_001, TestSize.Level0)
 {
     SLOGD("ConvertToInnerWithLimitedSize_001 begin!");
     OHOS::Media::PixelMap source;

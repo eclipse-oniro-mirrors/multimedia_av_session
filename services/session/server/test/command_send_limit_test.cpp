@@ -55,7 +55,7 @@ void CommandSendLimitTest::TearDown()
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable001, testing::ext::TestSize.Level1)
+static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable001, testing::ext::TestSize.Level0)
 {
     SLOGI("StartAbilityByCall001 begin!");
     bool ret = CommandSendLimit::GetInstance().IsCommandSendEnable(0);
@@ -68,7 +68,7 @@ static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable001, testing::ext::Test
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable002, testing::ext::TestSize.Level1)
+static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable002, testing::ext::TestSize.Level0)
 {
     SLOGI("IsCommandSendEnable002 begin!");
     CommandSendLimit::GetInstance().timer_ = std::make_unique<OHOS::Utils::Timer>("EventStatisticTimer");
@@ -82,7 +82,7 @@ static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable002, testing::ext::Test
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable003, testing::ext::TestSize.Level1)
+static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable003, testing::ext::TestSize.Level0)
 {
     SLOGI("IsCommandSendEnable003 begin!");
     CommandSendLimit::GetInstance().commandLimits_[1] = 11;
@@ -96,7 +96,7 @@ static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable003, testing::ext::Test
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable004, testing::ext::TestSize.Level1)
+static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable004, testing::ext::TestSize.Level0)
 {
     SLOGI("IsCommandSendEnable004 begin!");
     CommandSendLimit::GetInstance().commandLimits_[2] = 5;
@@ -110,7 +110,7 @@ static HWTEST_F(CommandSendLimitTest, IsCommandSendEnable004, testing::ext::Test
  * @tc.desc: Test StopTimer
  * @tc.type: FUNC
  */
-static HWTEST_F(CommandSendLimitTest, StopTimer001, testing::ext::TestSize.Level1)
+static HWTEST_F(CommandSendLimitTest, StopTimer001, testing::ext::TestSize.Level0)
 {
     SLOGI("StopTimer001 begin!");
     CommandSendLimit::GetInstance().timer_ = std::make_unique<OHOS::Utils::Timer>("EventStatisticTimer");

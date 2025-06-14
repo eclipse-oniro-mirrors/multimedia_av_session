@@ -48,7 +48,7 @@ void RemoteUtilsTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: AR000H55F4
 */
-HWTEST_F(RemoteUtilsTest, ConvertSessionType001, TestSize.Level1)
+HWTEST_F(RemoteUtilsTest, ConvertSessionType001, TestSize.Level0)
 {
     SLOGI("ConvertSessionType001 begin!");
     std::string sessionInfo;
@@ -73,7 +73,7 @@ HWTEST_F(RemoteUtilsTest, ConvertSessionType001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H55F4
 */
-HWTEST_F(RemoteUtilsTest, ConvertSessionType002, TestSize.Level1)
+HWTEST_F(RemoteUtilsTest, ConvertSessionType002, TestSize.Level0)
 {
     SLOGI("ConvertSessionType002 begin!");
     std::string sessionInfo;
@@ -98,7 +98,7 @@ HWTEST_F(RemoteUtilsTest, ConvertSessionType002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H55F4
 */
-HWTEST_F(RemoteUtilsTest, ConvertSessionType003, TestSize.Level1)
+HWTEST_F(RemoteUtilsTest, ConvertSessionType003, TestSize.Level0)
 {
     SLOGI("ConvertSessionType003 begin!");
     std::string sessionInfo;
@@ -123,7 +123,7 @@ HWTEST_F(RemoteUtilsTest, ConvertSessionType003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H55F4
 */
-HWTEST_F(RemoteUtilsTest, GetJsonCapability001, TestSize.Level1)
+HWTEST_F(RemoteUtilsTest, GetJsonCapability001, TestSize.Level0)
 {
     SLOGI("GetJsonCapability001 begin!");
     std::vector<std::vector<int32_t>> localCapability(4);

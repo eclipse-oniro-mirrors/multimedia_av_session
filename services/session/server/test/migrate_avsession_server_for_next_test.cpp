@@ -89,7 +89,7 @@ void MigrateAVSessionServerForNextTest::TearDown()
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive001, TestSize.Level0)
 {
     std::string sessionId = "";
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
@@ -104,7 +104,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive002, TestSize.Level0)
 {
     std::string sessionId = "test";
     auto observer = std::make_shared<AVControllerObserver>(sessionId);
@@ -122,7 +122,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive002, T
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive003, TestSize.Level0)
 {
     std::string sessionId = "test";
     auto observer = std::make_shared<AVControllerObserver>(sessionId);
@@ -141,7 +141,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive003, T
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive004, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive004, TestSize.Level0)
 {
     std::string sessionId = "test";
     auto observer = std::make_shared<AVControllerObserver>(sessionId);
@@ -160,7 +160,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive004, T
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionLeave001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionLeave001, TestSize.Level0)
 {
     std::string sessionId = "";
     g_MigrateAVSessionServer->LocalFrontSessionLeave(sessionId);
@@ -173,7 +173,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionLeave001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionLeave002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionLeave002, TestSize.Level0)
 {
     std::string sessionId = "test";
     g_MigrateAVSessionServer->LocalFrontSessionLeave(sessionId);
@@ -186,7 +186,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionLeave002, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote001, TestSize.Level0)
 {
     AVMetaData data;
     data.SetAssetId("test");
@@ -201,7 +201,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote002, TestSize.Level0)
 {
     AVMetaData data;
     data.SetAssetId("test");
@@ -216,7 +216,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote002, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote003, TestSize.Level0)
 {
     AVMetaData data;
     data.SetAssetId("test");
@@ -231,7 +231,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote003, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoMediaImageSyncToRemote001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoMediaImageSyncToRemote001, TestSize.Level0)
 {
     std::shared_ptr<AVSessionPixelMap> ptr = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> vec = {0, 1, 0, 1};
@@ -246,7 +246,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoMediaImageSyncToRemote001, 
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoMediaImageSyncToRemote002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoMediaImageSyncToRemote002, TestSize.Level0)
 {
     std::shared_ptr<AVSessionPixelMap> ptr = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> vec = {};
@@ -261,7 +261,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoMediaImageSyncToRemote002, 
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote001, TestSize.Level0)
 {
     AVPlaybackState data;
     data.SetState(1);
@@ -275,7 +275,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote00
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote002, TestSize.Level0)
 {
     AVPlaybackState data;
     data.SetFavorite(true);
@@ -289,7 +289,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote00
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote003, TestSize.Level0)
 {
     AVPlaybackState data;
     data.SetActiveItemId(1);
@@ -303,7 +303,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoPlaybackStateSyncToRemote00
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, DoBundleInfoSyncToRemote001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoBundleInfoSyncToRemote001, TestSize.Level0)
 {
     g_MigrateAVSessionServer->DoBundleInfoSyncToRemote(g_AVControllerItem);
     EXPECT_EQ(g_AVControllerItem != nullptr, true);
@@ -315,7 +315,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoBundleInfoSyncToRemote001, 
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, UpdateFrontSessionInfoToRemote001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, UpdateFrontSessionInfoToRemote001, TestSize.Level0)
 {
     g_MigrateAVSessionServer->UpdateFrontSessionInfoToRemote(g_AVControllerItem);
     EXPECT_EQ(g_AVControllerItem != nullptr, true);
@@ -327,7 +327,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, UpdateFrontSessionInfoToRemot
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, UpdateFrontSessionInfoToRemote002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, UpdateFrontSessionInfoToRemote002, TestSize.Level0)
 {
     AVMetaData metaData;
     g_AVSessionItem->SetAVMetaData(metaData);
@@ -343,7 +343,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, UpdateFrontSessionInfoToRemot
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext001, TestSize.Level0)
 {
     std::string deviceId = "";
     std::string data = "";
@@ -357,7 +357,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext002, TestSize.Level0)
 {
     std::string deviceId = "0000";
     std::string str1(2, char(SYNC_COMMAND));
@@ -375,7 +375,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext003, TestSize.Level0)
 {
     std::string deviceId = "0000";
     std::string str1(2, char(SYNC_SET_VOLUME_COMMAND));
@@ -393,7 +393,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext003, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext004, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext004, TestSize.Level0)
 {
     std::string deviceId = "0000";
     std::string str1(2, char(SYNC_SWITCH_AUDIO_DEVICE_COMMAND));
@@ -411,7 +411,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext004, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext005, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext005, TestSize.Level0)
 {
     std::string deviceId = "0000";
     std::string str1(2, char(COLD_START));
@@ -429,7 +429,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext005, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext006, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext006, TestSize.Level0)
 {
     std::string deviceId = "0000";
     std::string str1(2, char(0));
@@ -447,7 +447,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcFromNext006, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext001, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -473,7 +473,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext001
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext002, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -499,7 +499,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext002
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext003, TestSize.Level0)
 {
     std::string id = "001";
     g_MigrateAVSessionServer->lastSessionId_ = id;
@@ -529,7 +529,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext003
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext004, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext004, TestSize.Level0)
 {
     std::string id = "001";
     g_MigrateAVSessionServer->lastSessionId_ = id;
@@ -559,7 +559,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcControlCommandFromNext004
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext001, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -585,7 +585,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext001, 
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext002, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -611,7 +611,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessColdStartFromNext002, 
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorsToJson001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorsToJson001, TestSize.Level0)
 {
     AudioDeviceDescriptors ptrs;
     AudioDeviceDescriptorWithSptr ptr {new AudioDeviceDescriptor()};
@@ -626,7 +626,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptors
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorsToJson002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorsToJson002, TestSize.Level0)
 {
     AudioDeviceDescriptors ptrs;
     ptrs.push_back(nullptr);
@@ -640,7 +640,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptors
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand001, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -669,7 +669,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand001, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand002, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -695,7 +695,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, VolumeControlCommand002, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorToJson001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorToJson001, TestSize.Level0)
 {
     SLOGE("ConvertAudioDeviceDescriptorToJson001 in");
     AudioDeviceDescriptorWithSptr ptr {new AudioDeviceDescriptor()};
@@ -711,7 +711,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorT
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorToJson002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorToJson002, TestSize.Level0)
 {
     SLOGE("ConvertAudioDeviceDescriptorToJson002 in");
     AudioDeviceDescriptorWithSptr ptr = nullptr;

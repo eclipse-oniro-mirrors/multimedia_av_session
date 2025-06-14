@@ -101,7 +101,7 @@ public:
  * @tc.desc: Test GetSessionId
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetSessionId001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetSessionId001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetSessionId001, start");
     std::string sessionId = g_AVSessionProxy->GetSessionId();
@@ -114,7 +114,7 @@ static HWTEST_F(AVSessionProxyTest, GetSessionId001, testing::ext::TestSize.Leve
  * @tc.desc: Test GetSessionType
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetSessionType001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetSessionType001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetSessionType001, start");
     std::string typeStr = g_AVSessionProxy->GetSessionType();
@@ -127,7 +127,7 @@ static HWTEST_F(AVSessionProxyTest, GetSessionType001, testing::ext::TestSize.Le
  * @tc.desc: Test SetAVCallMetaData
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVCallMetaData001, start");
     AVCallMetaData avCallMetaData;
@@ -141,7 +141,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData001, testing::ext::TestSize
  * @tc.desc: Test SetAVCallMetaData
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData002, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVCallMetaData002, start");
     AVCallMetaData avCallMetaData;
@@ -158,7 +158,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVCallMetaData002, testing::ext::TestSize
  * @tc.desc: Test SetAVCallState
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVCallState001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVCallState001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVCallState001, start");
     AVCallState avCallState;
@@ -173,7 +173,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVCallState001, testing::ext::TestSize.Le
  * @tc.desc: Test SetAVCallState
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVCallState002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVCallState002, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVCallState002, start");
     AVCallState avCallState;
@@ -188,7 +188,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVCallState002, testing::ext::TestSize.Le
  * @tc.desc: Test SetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVMetaData001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVMetaData001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVMetaData001, start");
     AVMetaData meta;
@@ -208,7 +208,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVMetaData001, testing::ext::TestSize.Lev
  * @tc.desc: Test GetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetAVMetaData001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetAVMetaData001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAVMetaData001, start");
     AVMetaData meta;
@@ -222,7 +222,7 @@ static HWTEST_F(AVSessionProxyTest, GetAVMetaData001, testing::ext::TestSize.Lev
  * @tc.desc: Test GetAVPlaybackState
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetAVPlaybackState001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetAVPlaybackState001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAVPlaybackState001, start");
     AVPlaybackState state;
@@ -236,7 +236,7 @@ static HWTEST_F(AVSessionProxyTest, GetAVPlaybackState001, testing::ext::TestSiz
  * @tc.desc: Test SetAVPlaybackState
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVPlaybackState001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVPlaybackState001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVPlaybackState001, start");
     AVPlaybackState avPlaybackState;
@@ -266,7 +266,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVPlaybackState001, testing::ext::TestSiz
  * @tc.desc: Test GetAVQueueItems
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetAVQueueItems001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetAVQueueItems001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAVQueueItems001, start");
     std::vector<AVQueueItem> items = {};
@@ -280,7 +280,7 @@ static HWTEST_F(AVSessionProxyTest, GetAVQueueItems001, testing::ext::TestSize.L
  * @tc.desc: Test SetAVQueueItems
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVQueueItems001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVQueueItems001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVQueueItems001, start");
     std::vector<AVQueueItem> items = {};
@@ -294,7 +294,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVQueueItems001, testing::ext::TestSize.L
  * @tc.desc: Test GetAVQueueTitle
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetAVQueueTitle001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetAVQueueTitle001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAVQueueTitle001, start");
     std::string title = "title";
@@ -308,7 +308,7 @@ static HWTEST_F(AVSessionProxyTest, GetAVQueueTitle001, testing::ext::TestSize.L
  * @tc.desc: Test SetAVQueueTitle
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVQueueTitle001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVQueueTitle001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVQueueTitle001, start");
     std::string title = "title";
@@ -322,7 +322,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVQueueTitle001, testing::ext::TestSize.L
  * @tc.desc: Test SetLaunchAbility
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetLaunchAbility001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetLaunchAbility001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetLaunchAbility001, start");
     OHOS::AbilityRuntime::WantAgent::WantAgent ability;
@@ -336,7 +336,7 @@ static HWTEST_F(AVSessionProxyTest, SetLaunchAbility001, testing::ext::TestSize.
  * @tc.desc: Test GetExtras
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetExtras001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetExtras001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetExtras001, start");
     OHOS::AAFwk::WantParams extras;
@@ -350,7 +350,7 @@ static HWTEST_F(AVSessionProxyTest, GetExtras001, testing::ext::TestSize.Level1)
  * @tc.desc: Test SetExtras
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetExtras001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetExtras001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetExtras001, start");
     OHOS::AAFwk::WantParams extras;
@@ -364,7 +364,7 @@ static HWTEST_F(AVSessionProxyTest, SetExtras001, testing::ext::TestSize.Level1)
  * @tc.desc: Test Deactivate
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, isActivate001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, isActivate001, testing::ext::TestSize.Level0)
 {
     SLOGI("isActivate001, start");
     int32_t ret = g_AVSessionProxy->IsActive();
@@ -377,7 +377,7 @@ static HWTEST_F(AVSessionProxyTest, isActivate001, testing::ext::TestSize.Level1
  * @tc.desc: Test SetSessionEvent
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetSessionEvent001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetSessionEvent001, testing::ext::TestSize.Level0)
 {
     SLOGI("SetSessionEvent001, start");
     std::string event = "AVSessionCallback";
@@ -392,7 +392,7 @@ static HWTEST_F(AVSessionProxyTest, SetSessionEvent001, testing::ext::TestSize.L
  * @tc.desc: Test AddSupportCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, AddSupportCommand001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, AddSupportCommand001, testing::ext::TestSize.Level0)
 {
     SLOGI("AddSupportCommand001, start");
     int32_t cmd = AVControlCommand::SESSION_CMD_PLAY;
@@ -406,7 +406,7 @@ static HWTEST_F(AVSessionProxyTest, AddSupportCommand001, testing::ext::TestSize
  * @tc.desc: Test DeleteSupportCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, DeleteSupportCommand001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, DeleteSupportCommand001, testing::ext::TestSize.Level0)
 {
     SLOGI("DeleteSupportCommand001, start");
     int32_t cmd = AVControlCommand::SESSION_CMD_PLAY;
@@ -423,7 +423,7 @@ static HWTEST_F(AVSessionProxyTest, DeleteSupportCommand001, testing::ext::TestS
  * @tc.desc: Test GetController
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetController001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetController001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetController001, start");
     std::string sessionId = g_AVSessionProxy->GetSessionId();
@@ -441,7 +441,7 @@ static HWTEST_F(AVSessionProxyTest, GetController001, testing::ext::TestSize.Lev
  * @tc.desc: Test RegisterCallback
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, RegisterCallback001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, RegisterCallback001, testing::ext::TestSize.Level0)
 {
     SLOGI("RegisterCallback001, start");
     std::shared_ptr<AVSessionCallback> avSessionCallbackImpl = std::make_shared<AVSessionCallbackImpl>();
@@ -456,7 +456,7 @@ static HWTEST_F(AVSessionProxyTest, RegisterCallback001, testing::ext::TestSize.
  * @tc.desc: Test SetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVMetaData002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVMetaData002, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVMetaData002, start");
     AVMetaData meta;
@@ -483,7 +483,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVMetaData002, testing::ext::TestSize.Lev
  * @tc.desc: Test SetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, SetAVMetaData003, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, SetAVMetaData003, testing::ext::TestSize.Level0)
 {
     SLOGI("SetAVMetaData003, start");
     AVMetaData meta;
@@ -499,7 +499,7 @@ static HWTEST_F(AVSessionProxyTest, SetAVMetaData003, testing::ext::TestSize.Lev
  * @tc.desc: Test GetAVQueueItems
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetAVQueueItems002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetAVQueueItems002, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAVQueueItems002, start");
     std::vector<AVQueueItem> setItems;
@@ -519,7 +519,7 @@ static HWTEST_F(AVSessionProxyTest, GetAVQueueItems002, testing::ext::TestSize.L
  * @tc.desc: Test GetAVCastController
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetAVCastController001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetAVCastController001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAVCastController001, start");
     auto ret = g_AVSessionProxy->GetAVCastController();
@@ -532,7 +532,7 @@ static HWTEST_F(AVSessionProxyTest, GetAVCastController001, testing::ext::TestSi
  * @tc.desc: Test GetAllCastDisplays
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionProxyTest, GetAllCastDisplays001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionProxyTest, GetAllCastDisplays001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAllCastDisplays001, start");
     std::vector<CastDisplayInfo> castDisplays;

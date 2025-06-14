@@ -57,7 +57,7 @@ void PermissionCheckerTest::TearDown()
  * @tc.desc: Test CheckSystemPermission
  * @tc.type: FUNC
  */
-static HWTEST_F(PermissionCheckerTest, CheckSystemPermission001, testing::ext::TestSize.Level1)
+static HWTEST_F(PermissionCheckerTest, CheckSystemPermission001, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckSystemPermission001 begin!");
     auto permissionChecker = PermissionChecker::GetInstance();
@@ -72,7 +72,7 @@ static HWTEST_F(PermissionCheckerTest, CheckSystemPermission001, testing::ext::T
  * @tc.desc: Test CheckSystemPermission
  * @tc.type: FUNC
  */
-static HWTEST_F(PermissionCheckerTest, CheckPermission001, testing::ext::TestSize.Level1)
+static HWTEST_F(PermissionCheckerTest, CheckPermission001, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckPermission001 begin!");
     auto permissionChecker = PermissionChecker::GetInstance();
@@ -86,7 +86,7 @@ static HWTEST_F(PermissionCheckerTest, CheckPermission001, testing::ext::TestSiz
  * @tc.desc: Test CheckSystemPermissionByUid
  * @tc.type: FUNC
  */
-static HWTEST_F(PermissionCheckerTest, CheckSystemPermissionByUid001, testing::ext::TestSize.Level1)
+static HWTEST_F(PermissionCheckerTest, CheckSystemPermissionByUid001, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckSystemPermissionByUid001 begin!");
     auto permissionChecker = PermissionChecker::GetInstance();
