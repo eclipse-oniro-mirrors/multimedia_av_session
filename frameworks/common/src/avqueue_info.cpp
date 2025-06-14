@@ -15,6 +15,7 @@
 
 #include "avqueue_info.h"
 #include "avsession_log.h"
+#include "securec.h"
 
 namespace OHOS::AVSession {
 bool AVQueueInfo::Marshalling(Parcel& parcel) const
@@ -91,16 +92,12 @@ bool AVQueueInfo::MarshallingQueueImage(MessageParcel& parcel) const
         imageLength = static_cast<int>(avQueueImageBuffer.size());
     }
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(imageLength), false, "write image length fail");
+    CHECK_AND_RETURN_RET_LOG(imageLength > 0, true, "no image");
 
     unsigned char *buffer = new (std::nothrow) unsigned char[imageLength];
-    if (buffer == nullptr) {
-        SLOGE("new buffer failed of length = %{public}d", imageLength);
-        return false;
-    }
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, false, "new buffer failed");
 
-    for (int i = 0; i < imageLength; i++) {
-        buffer[i] = avQueueImageBuffer[i];
-    }
+    memcpy_s(buffer, imageLength, avQueueImageBuffer.data(), imageLength);
 
     if (!parcel.WriteRawData(buffer, imageLength)) {
         SLOGE("WriteRawData failed");
