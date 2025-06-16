@@ -19,6 +19,7 @@
 #include "avsession_log.h"
 #include "hw_cast_stream_player.h"
 #include "hw_cast_provider.h"
+#include "hw_cast_display_listener.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -1389,4 +1390,50 @@ static HWTEST(HwCastTest, HwCastProviderSessionUnregisterCastSessionStateListene
     hwCastProvider->RegisterCastSessionStateListener(0, listener);
     EXPECT_EQ(hwCastProvider->UnRegisterCastSessionStateListener(0, listener), false);
     SLOGI("HwCastProviderSessionUnregisterCastSessionStateListener001 end!");
+}
+
+/**
+ * @tc.name: HwCastDisplayListenerOnConnect001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerOnConnect001, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerOnConnect001 begin!");
+    OHOS::sptr<IAVSessionCallback> callback;
+    auto listener = new HwCastDisplayListener(callback);
+    EXPECT_EQ(listener != nullptr, true);
+    OHOS::Rosen::DisplayId displayId = 1000;
+    listener->OnConnect(displayId);
+    SLOGI("HwCastDisplayListenerOnConnect001 end!");
+}
+
+/**
+ * @tc.name: HwCastDisplayListenerOnDisconnect001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerOnDisconnect001, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerOnDisconnect001 begin!");
+    OHOS::sptr<IAVSessionCallback> callback;
+    auto listener = new HwCastDisplayListener(callback);
+    EXPECT_EQ(listener != nullptr, true);
+    OHOS::Rosen::DisplayId displayId = 0;
+    listener->SetDisplayInfo(nullptr);
+    listener->OnDisconnect(displayId);
+
+    auto displayInfo = OHOS::sptr<OHOS::Rosen::DisplayInfo>::MakeSptr();
+    listener->SetDisplayInfo(displayInfo);
+    listener->OnDisconnect(displayId);
+
+    displayId = 1000;
+    listener->OnDisconnect(displayId);
+
+    displayInfo->SetDisplayId(displayId);
+    listener->SetDisplayInfo(displayInfo);
+    listener->OnDisconnect(displayId);
+    SLOGI("HwCastDisplayListenerOnDisconnect001 end!");
 }
