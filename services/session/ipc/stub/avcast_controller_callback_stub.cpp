@@ -130,7 +130,7 @@ int32_t AVCastControllerCallbackStub::HandleOnKeyRequest(MessageParcel& data, Me
     uint32_t requestSize = static_cast<uint32_t>(data.ReadInt32());
     uint32_t requestMaxLen = 8 * 1024 * 1024;
     CHECK_AND_RETURN_RET_LOG(requestSize < requestMaxLen, AVSESSION_ERROR,
-        "This size of request is too large");
+        "The size of request is too large");
     if (requestSize != 0) {
         const uint8_t *requestBuf = static_cast<const uint8_t *>(data.ReadBuffer(requestSize));
         if (requestBuf == nullptr) {

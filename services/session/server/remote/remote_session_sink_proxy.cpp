@@ -44,9 +44,7 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("
     if (createRemoteSessionSinkImpl == nullptr) {
         if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
-            if (handle_ != nullptr) {
-                OPENSSL_thread_stop();
-            }
+            OPENSSL_thread_stop();
             dlclose(handle_);
 #endif
         }
@@ -68,9 +66,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
     if (destroyRemoteSessionSinkImpl == nullptr) {
         if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
-            if (handle_ != nullptr) {
-                OPENSSL_thread_stop();
-            }
+            OPENSSL_thread_stop();
             dlclose(handle_);
 #endif
         }
@@ -82,9 +78,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
 
     if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
-        if (handle_ != nullptr) {
-            OPENSSL_thread_stop();
-        }
+        OPENSSL_thread_stop();
         dlclose(handle_);
 #endif
     }

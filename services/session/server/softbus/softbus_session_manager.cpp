@@ -95,10 +95,10 @@ int32_t SoftbusSessionManager::Bind(const std::string &peerNetworkId, const std:
         return AVSESSION_ERROR;
     }
     SocketInfo info = {
-        .name = const_cast<char*>(CONFIG_SOFTBUS_SESSION_TAG),
-        .peerName = const_cast<char*>(CONFIG_SOFTBUS_SESSION_TAG),
-        .peerNetworkId = const_cast<char*>(peerNetworkId.c_str()),
-        .pkgName = const_cast<char*>(pkgName.c_str()),
+        .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG),
+        .peerName = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG),
+        .peerNetworkId = const_cast<char *>(peerNetworkId.c_str()),
+        .pkgName = const_cast<char *>(pkgName.c_str()),
         .dataType = DATA_TYPE_BYTES
     };
     int32_t socket = ::Socket(info);
@@ -177,7 +177,6 @@ int32_t SoftbusSessionManager::ObtainPeerDeviceId(int32_t socket, std::string &d
 {
     CHECK_AND_RETURN_RET_LOG(
         socket > 0, AVSESSION_ERROR, "the session is null, unable to obtain the peer device id.");
-    std::lock_guard lockGuard(socketLock_);
     if (mMap_.find(socket) == mMap_.end()) {
         SLOGE("no find deviceid.");
         return AVSESSION_ERROR;

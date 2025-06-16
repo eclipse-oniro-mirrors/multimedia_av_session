@@ -561,7 +561,7 @@ static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
     SLOGD("OnDeviceChange001 begin!");
     bool ret = false;
     AudioAdapter::GetInstance().AddDeviceChangeListener(
-        [&ret] (const std::vector<std::shared_ptr<AudioDeviceDescriptor>> &desc) {
+        [&ret] (const AudioDeviceDescriptors &desc) {
         ret = desc.empty();
     });
     AudioAdapter::GetInstance().AddDeviceChangeListener(nullptr);
