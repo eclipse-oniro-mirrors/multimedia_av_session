@@ -70,14 +70,14 @@ void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
     if (controller != nullptr) {
         controller->UnregisterAVControllerCallback();
     } else {
-        SLOGE("LocalFrontSessionLeave but get controller null");
+        SLOGE("LocalFrontSessionChange but get controller null");
     }
     ClearCacheBySessionId(sessionId);
     auto it = playerIdToControllerMap_.find(sessionId);
     if (it != playerIdToControllerMap_.end()) {
         playerIdToControllerMap_.erase(it);
     } else {
-        SLOGE("LocalFrontSessionLeave no find sessionId:%{public}s",
+        SLOGE("LocalFrontSessionChange no find sessionId:%{public}s",
             AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     }
     LocalFrontSessionArrive(sessionId);
@@ -471,8 +471,12 @@ void MigrateAVSessionServer::ProcControlCommandFromNext(cJSON* commandJsonValue)
         commandArgs = SoftbusSessionUtils::GetStringFromJson(commandJsonValue, COMMAND_ARGS);
     }
 
-    sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
-    CHECK_AND_RETURN_LOG(controller != nullptr, "ProcControlCommandFromNext but get controller null");
+    sptr<AVControllerItem> controller = nullptr;
+    {
+        std::lock_guard lockGuard(migrateControllerLock_);
+        controller = playerIdToControllerMap_[lastSessionId_];
+        CHECK_AND_RETURN_LOG(controller != nullptr, "ProcControlCommandFromNext but get controller null");
+    }
     AVControlCommand command;
     if (AVSESSION_SUCCESS != command.SetCommand(commandCode)) {
         SLOGE("ProcControlCommandFromNext parse invalid command type:%{public}d", commandCode);

@@ -180,7 +180,6 @@ void AVCastControllerItem::OnValidCommandChange(const std::vector<int32_t>& cmds
 
 int32_t AVCastControllerItem::onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos)
 {
-    std::lock_guard lockGuard(castControllerCallbackLock_);
     if (callback_ != nullptr) {
         return callback_->onDataSrcRead(mem, length, pos);
     }
@@ -196,11 +195,11 @@ int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd
     AVSessionRadar::GetInstance().SendControlCommandBegin(info);
     castControllerProxy_->SendControlCommand(cmd);
     AVSessionRadar::GetInstance().SendControlCommandEnd(info);
-    std::string apiParamString = "cmd: " + std::to_string(cmd.GetCommand());
+    std::string API_PARAM_STRING = "cmd: " + std::to_string(cmd.GetCommand());
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "SendControlCommand",
         "BUNDLE_NAME", BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
-        "API_PARAM", apiParamString,
+        "API_PARAM", API_PARAM_STRING,
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
     return AVSESSION_SUCCESS;
@@ -220,7 +219,7 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     int32_t ret = castControllerProxy_->Start(avQueueItem);
     std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "start failed";
     std::string mediaIcon = "false";
-    std::string apiParamString = "";
+    std::string API_PARAM_STRING = "";
     std::string startPosition = "";
     std::string duration = "";
     std::string mediauri = "";
@@ -232,7 +231,7 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
             mediaIcon = "true";
         }
         mediauri = avQueueItem.GetDescription()->GetMediaUri().empty() ? "false" : "true";
-        apiParamString = "mediauri: " + mediauri + "," + "iconImage: " + mediaIcon + ","
+        API_PARAM_STRING = "mediauri: " + mediauri + "," + "iconImage: " + mediaIcon + ","
                                         + "mediaId: " + avQueueItem.GetDescription()->GetMediaId() + ","
                                         + "title: " + avQueueItem.GetDescription()->GetTitle() + ","
                                         + "subtitle: " + avQueueItem.GetDescription()->GetSubtitle() + ","
@@ -243,7 +242,7 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Start",
         "BUNDLE_NAME", BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
-        "API_PARAM", apiParamString,
+        "API_PARAM", API_PARAM_STRING,
         "ERROR_CODE", ret,
         "ERROR_MSG", errMsg);
     if (ret != AVSESSION_SUCCESS) {
@@ -259,7 +258,7 @@ void AVCastControllerItem::ReportPrepare(int32_t preRet, const AVQueueItem& avQu
 {
     std::string errMsg = (preRet == AVSESSION_SUCCESS) ? "SUCCESS" : "prepare failed";
     std::string mediaIcon = "false";
-    std::string apiParamString = "";
+    std::string API_PARAM_STRING = "";
     std::string startPosition = "";
     std::string duration = "";
     std::string mediauri = "";
@@ -271,7 +270,7 @@ void AVCastControllerItem::ReportPrepare(int32_t preRet, const AVQueueItem& avQu
             mediaIcon = "true";
         }
         mediauri = avQueueItem.GetDescription()->GetMediaUri().empty() ? "false" : "true";
-        apiParamString = "mediauri: " + mediauri + "," + "iconImage: " + mediaIcon + ","
+        API_PARAM_STRING = "mediauri: " + mediauri + "," + "iconImage: " + mediaIcon + ","
                                         + "mediaId: " + avQueueItem.GetDescription()->GetMediaId() + ","
                                         + "title: " + avQueueItem.GetDescription()->GetTitle() + ","
                                         + "subtitle: " + avQueueItem.GetDescription()->GetSubtitle() + ","
@@ -282,7 +281,7 @@ void AVCastControllerItem::ReportPrepare(int32_t preRet, const AVQueueItem& avQu
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Prepare",
         "BUNDLE_NAME", BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
-        "API_PARAM", apiParamString,
+        "API_PARAM", API_PARAM_STRING,
         "ERROR_CODE", preRet,
         "ERROR_MSG", errMsg);
 }
@@ -361,7 +360,7 @@ int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlayback
     int64_t avElapsedTime = avPlaybackState.GetPosition().elapsedTime_;
     int64_t avUpdateTime = avPlaybackState.GetPosition().updateTime_;
     std::string isFavor = avPlaybackState.GetFavorite() ? "true" : "false";
-    std::string apiParamString = "state: " + std::to_string(avPlaybackState.GetState()) + ", "
+    std::string API_PARAM_STRING = "state: " + std::to_string(avPlaybackState.GetState()) + ", "
                                     + "elapsedTime: " + std::to_string(avElapsedTime) + ", "
                                     + "updateTime: " + std::to_string(avUpdateTime) + ", "
                                     + "loopMode: " + std::to_string(avPlaybackState.GetLoopMode()) + ", "
@@ -369,7 +368,7 @@ int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlayback
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "GetCastAVPlaybackState",
         "BUNDLE_NAME", BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
-        "API_PARAM", apiParamString,
+        "API_PARAM", API_PARAM_STRING,
         "ERROR_CODE", ret,
         "ERROR_MSG", errMsg);
     return ret;
@@ -460,12 +459,12 @@ int32_t AVCastControllerItem::ProcessMediaKeyResponse(const std::string &assetId
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
     auto ret =  castControllerProxy_->ProcessMediaKeyResponse(assetId, response);
-    std::string apiParamString = "assetId: " + assetId;
+    std::string API_PARAM_STRING = "assetId: " + assetId;
     std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "ProcessMediaKeyResponse failed";
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "ProcessMediaKeyResponse",
         "BUNDLE_NAME",  BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
-        "API_PARAM", apiParamString,
+        "API_PARAM", API_PARAM_STRING,
         "ERROR_CODE", ret,
         "ERROR_MSG", errMsg);
     return ret;
@@ -490,11 +489,11 @@ int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)
             "cast controller proxy is nullptr");
         auto ret = castControllerProxy_->SetValidAbility(cmds);
         std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "onCastEvent failed";
-        std::string apiParamString = "cmd: " + std::to_string(cmd);
+        std::string API_PARAM_STRING = "cmd: " + std::to_string(cmd);
         HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
             "API_NAME", "onCastEvent",
             "BUNDLE_NAME", BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
-            "API_PARAM", apiParamString,
+            "API_PARAM", API_PARAM_STRING,
             "ERROR_CODE", ret,
             "ERROR_MSG", errMsg);
     }
@@ -519,11 +518,11 @@ int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
             "cast controller proxy is nullptr");
         auto ret = castControllerProxy_->SetValidAbility(cmds);
         std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "offCastEvent failed";
-        std::string apiParamString = "cmd: " + std::to_string(cmd);
+        std::string API_PARAM_STRING = "cmd: " + std::to_string(cmd);
         HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
             "API_NAME", "offCastEvent",
             "BUNDLE_NAME", BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
-            "API_PARAM", apiParamString,
+            "API_PARAM", API_PARAM_STRING,
             "ERROR_CODE", ret,
             "ERROR_MSG", errMsg);
     }
@@ -532,9 +531,9 @@ int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
 
 int32_t AVCastControllerItem::HandleCastValidCommandChange(const std::vector<int32_t>& cmds)
 {
-    std::lock_guard lockGuard(castControllerCallbackLock_);
     SLOGI("HandleCastValidCommandChange cmd size:%{public}zd", cmds.size());
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
+    std::lock_guard lockGuard(castControllerCallbackLock_);
     callback_->OnCastValidCommandChanged(cmds);
     return AVSESSION_SUCCESS;
 }

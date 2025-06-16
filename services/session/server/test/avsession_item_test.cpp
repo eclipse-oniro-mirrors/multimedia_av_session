@@ -544,8 +544,8 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_HandleOnSetTargetLoopMode_001, TestSiz
     g_AVSessionItem->callback_ = callback;
     AVControlCommand cmd;
     cmd.SetCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE);
-    int32_t targetLoopMode = AVSESSION_ERROR;
     g_AVSessionItem->HandleOnSetTargetLoopMode(cmd);
+    int32_t targetLoopMode = AVSESSION_ERROR;
     auto ret = cmd.GetTargetLoopMode(targetLoopMode);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_HandleOnSetTargetLoopMode_001 end!");

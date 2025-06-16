@@ -33,7 +33,7 @@ HwCastProvider::HwCastProvider()
 {
     SLOGD("pre construct the HwCastProvider");
     std::lock_guard lockGuard(mutexLock_);
-    SLOGI("destruct the HwCastProvider");
+    SLOGI("construct the HwCastProvider");
 }
 
 HwCastProvider::~HwCastProvider()
@@ -102,7 +102,7 @@ int32_t HwCastProvider::SetDiscoverable(const bool enable)
 
 void HwCastProvider::Release()
 {
-    SLOGI("Release the HwCastProvider");
+    SLOGI("cast the HwCastProvider");
     {
         std::lock_guard lockGuard(mutexLock_);
         hwCastProviderSessionMap_.clear();
@@ -118,8 +118,7 @@ void HwCastProvider::Release()
         return;
     }
     CastSessionManager::GetInstance().UnregisterListener();
-    CastSessionManager::GetInstance().Release();
-    SLOGD("Release done");
+    SLOGD("provide release done");
 }
 
 int HwCastProvider::StartCastSession(bool isHiStream)
@@ -167,10 +166,9 @@ int HwCastProvider::StartCastSession(bool isHiStream)
 
     return castId;
 }
-
 void HwCastProvider::StopCastSession(int castId)
 {
-    SLOGI("StopCastSession begin with %{public}d", castId);
+    SLOGI("StopCastSession begin");
     std::lock_guard lockGuard(mutexLock_);
     SLOGI("StopCastSession check lock");
     auto hwCastStreamPlayer = avCastControllerMap_[castId];
@@ -409,8 +407,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.manufacturer_ = castRemoteDevice.manufacturerName;
         deviceInfo.modelName_ = castRemoteDevice.modelName;
         deviceInfo.supportedProtocols_ = GetProtocolType(castRemoteDevice.protocolCapabilities);
-        // should be castRemoteDevice.isTrusted ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
-        deviceInfo.authenticationStatus_ = castRemoteDevice.isLeagacy ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
+        deviceInfo.authenticationStatus_ = castRemoteDevice.isTrushed ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
         deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
         deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
@@ -426,7 +423,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
 
 void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
 {
-    SLOGI("eventId is %{public}d, param is %{public}" PRId64, eventId, param);
+    SLOGI("eventId is %{public}d, param is %{public}lld", eventId, param);
     std::lock_guard lockGuard(mutexLock_);
     for (auto listener : castStateListenerList_) {
         if (listener != nullptr) {

@@ -110,8 +110,8 @@ static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo002, TestSize.Level
 }
 
 /**
- * @tc.name: SendRemoteAudioMsg001
- * @tc.desc: migrateAVSession have created
+ * @tc.name: ClearRemoteAvSessionInfo001
+ * @tc.desc: test ClearRemoteAvSessionInfo
  * @tc.type: FUNC
  */
 static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Level1)

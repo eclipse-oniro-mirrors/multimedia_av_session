@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,7 +237,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.L
     std::string str{"0000"};
     data.WriteBuffer(str.c_str(), 4);
     data.WriteInt32(4);
-
+    
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, INVALID_FD);
 }
