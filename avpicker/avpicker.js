@@ -18,6 +18,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 
 const TAG = 'avcastpicker_component ';
+const castPlusAudioType = 8;
 
 export let AVCastPickerState;
 (function(l11) {
@@ -61,6 +62,7 @@ export class AVCastPicker extends ViewPU {
         this.__activeColor = new ObservedPropertySimplePU(undefined, this, 'activeColor');
         this.__colorMode = new ObservedPropertySimplePU(AVCastPickerColorMode.AUTO, this, 'colorMode');
         this.__deviceList = new ObservedPropertyObjectPU([], this, 'deviceList');
+        this.__fontSizeScale = new ObservedPropertyObjectPU(1, this, 'fontSizeScale');
         this.__sessionType = new ObservedPropertySimplePU('audio', this, 'sessionType');
         this.__pickerStyle = new ObservedPropertySimplePU(AVCastPickerStyle.STYLE_PANEL, this, 'pickerStyle');
         this.__pickerStyleFromMediaController =
@@ -100,6 +102,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.deviceList !== undefined) {
             this.deviceList = c11.deviceList;
+        }
+        if (c11.fontSizeScale !== undefined) {
+            this.fontSizeScale = c11.fontSizeScale;
         }
         if (c11.sessionType !== undefined) {
             this.sessionType = c11.sessionType;
@@ -171,6 +176,7 @@ export class AVCastPicker extends ViewPU {
         this.__activeColor.purgeDependencyOnElmtId(a11);
         this.__colorMode.purgeDependencyOnElmtId(a11);
         this.__deviceList.purgeDependencyOnElmtId(a11);
+        this.__fontSizeScale.purgeDependencyOnElmtId(a11);
         this.__sessionType.purgeDependencyOnElmtId(a11);
         this.__pickerStyle.purgeDependencyOnElmtId(a11);
         this.__pickerStyleFromMediaController.purgeDependencyOnElmtId(a11);
@@ -192,6 +198,7 @@ export class AVCastPicker extends ViewPU {
         this.__activeColor.aboutToBeDeleted();
         this.__colorMode.aboutToBeDeleted();
         this.__deviceList.aboutToBeDeleted();
+        this.__fontSizeScale.aboutToBeDeleted();
         this.__sessionType.aboutToBeDeleted();
         this.__pickerStyle.aboutToBeDeleted();
         this.__pickerStyleFromMediaController.aboutToBeDeleted();
@@ -240,6 +247,14 @@ export class AVCastPicker extends ViewPU {
 
     set deviceList(x10) {
         this.__deviceList.set(x10);
+    }
+
+    get fontSizeScale() {
+        return this.__fontSizeScale.get();
+    }
+
+    set fontSizeScale(x10) {
+        this.__fontSizeScale.set(x10);
     }
 
     get sessionType() {
@@ -369,6 +384,13 @@ export class AVCastPicker extends ViewPU {
         }
     }
 
+    showHighQuality(item) {
+        if (item.supportedProtocols === undefined) {
+            return false;
+        }
+        return (item.supportedProtocols & castPlusAudioType) !== 0;
+    }
+
     initialRender() {
         this.observeComponentCreation2((r10, s10) => {
             Column.create();
@@ -449,12 +471,6 @@ export class AVCastPicker extends ViewPU {
                 { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
             Text.width(this.isPc ? 254 : 144);
-            Text.padding({
-                left: 8,
-                top: this.isPc ? 11 : 17,
-                right: 8,
-                bottom: this.isPc ? 11 : 17
-            });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
             Text.wordBreak(WordBreak.BREAK_ALL);
@@ -462,6 +478,31 @@ export class AVCastPicker extends ViewPU {
             Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
         }, Text);
         Text.pop();
+    }
+
+    highQualityIconBuilder(u2, v1 = null) {
+        Row.create();
+        Row.direction(Direction.Ltr);
+        this.observeComponentCreation2((x1, y1) => {
+            Text.create(u2 ? u2.iconLeft : '');
+            Text.fontSize(7);
+            Text.fontWeight(FontWeight.Medium);
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.maxFontScale(this.maxFontSizeScale);
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((x1, y1) => {
+            Text.create(u2 ? u2.iconRight : '');
+            Text.fontSize(7);
+            Text.fontWeight(FontWeight.Medium);
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.maxFontScale(this.maxFontSizeScale);
+            Text.margin({left: 2 * (Math.min(this.maxFontSizeScale, this.fontSizeScale))});
+        }, Text);
+        Text.pop();
+        Row.pop();
     }
 
     deviceMenu(o8 = null) {
@@ -517,7 +558,47 @@ export class AVCastPicker extends ViewPU {
                     Row.alignItems(VerticalAlign.Center);
                 }, Row);
                 this.iconBuilder.bind(this)(x8, false);
+
+                this.observeComponentCreation2((a10, b10) => {
+                    Flex.create({
+                        direction: FlexDirection.Column,
+                        justifyContent: FlexAlign.Center,
+                    });
+                    Flex.padding({
+                        left: 8,
+                        top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                        right: 8,
+                        bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                    });
+                }, Flex);
                 this.textBuilder.bind(this)(x8);
+                this.observeComponentCreation2((m9, n9) => {
+                    If.create();
+                    if (this.showHighQuality(x8)) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.observeComponentCreation2((u9, v9) => {
+                                Flex.create();
+                                Flex.borderRadius(3);
+                                Flex.border({
+                                    width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
+                                    color: { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
+                                });
+                                Flex.padding({top: 1.5, right: 4, bottom: 1.5, left: 4});
+                                Flex.margin({top: 2});
+                                Flex.width('auto');
+                            }, Flex);
+                            this.highQualityIconBuilder.bind(this)(x8.highQualityParams);
+                            Flex.pop();
+                        });
+                    } else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                        });
+                    }
+                }, If);
+                If.pop();
+                Flex.pop();
+
                 Row.pop();
                 this.observeComponentCreation2((m9, n9) => {
                     If.create();
@@ -659,6 +740,11 @@ export class AVCastPicker extends ViewPU {
                         this.isMenuShow = false;
                         this.touchMenuItemIndex = -1;
                     }
+                }
+
+                if (JSON.stringify(l8.fontSizeScale) !== undefined) {
+                    console.info(TAG, `font size scale : ${JSON.stringify(l8.fontSizeScale)}`);
+                    this.fontSizeScale = l8.fontSizeScale;
                 }
 
                 if (JSON.stringify(l8.state) !== undefined) {
