@@ -227,7 +227,7 @@ napi_status NapiPlaybackState::SetPosition(napi_env env, const AVPlaybackState& 
 
 napi_status NapiPlaybackState::GetBufferedTime(napi_env env, napi_value in, AVPlaybackState& out)
 {
-    int64_t property;
+    int64_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "bufferedTime", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetBufferedTime(property);

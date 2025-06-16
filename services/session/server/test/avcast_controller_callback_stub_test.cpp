@@ -20,6 +20,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "token_setproc.h"
+#include "av_shared_memory_base.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -241,5 +242,17 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.L
     EXPECT_EQ(ret, INVALID_FD);
 }
 
+/**
+* @tc.name: onDataSrcRead001
+* @tc.desc: test onDataSrcRead when memory equal nullptr
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVCastControllerCallbackStubTest, onDataSrcRead001, TestSize.Level1)
+{
+    std::shared_ptr<AVSharedMemory> memory = nullptr;
+    AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
+    auto ret = avCastControllerCallbackStubDemo.onDataSrcRead(memory, 1, 1);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace OHOS
 } // namespace AVSession

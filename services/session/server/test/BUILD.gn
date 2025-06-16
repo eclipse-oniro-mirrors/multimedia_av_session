@@ -1493,7 +1493,10 @@ ohos_unittest("AVSessionControllerProxyTest") {
 
   configs = [ ":module_private_config" ]
 
-  cflags_cc = [ "--coverage" ]
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
 
   ldflags = [ "--coverage" ]
 
