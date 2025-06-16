@@ -27,6 +27,8 @@ void SoftbusSession::OnConnectSession(int32_t sessionId)
     int ret = SoftbusSessionManager::GetInstance().ObtainPeerDeviceId(sessionId, deviceId);
     CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "obtain peer device id failed");
     std::lock_guard lockGuard(deviceMapLock_);
+    SLOGI("OnConnectSession sessionId:%{public}d|deviceId:%{public}s", sessionId,
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     deviceToSessionMap_.insert({ deviceId, sessionId });
 }
 
@@ -37,6 +39,8 @@ void SoftbusSession::OnDisConnectSession(int32_t sessionId)
     int ret = SoftbusSessionManager::GetInstance().ObtainPeerDeviceId(sessionId, deviceId);
     CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "obtain peer device id failed");
     std::lock_guard lockGuard(deviceMapLock_);
+    SLOGI("OnDisConnectSession sessionId:%{public}d|deviceId:%{public}s", sessionId,
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     deviceToSessionMap_.erase(deviceId);
 }
 
@@ -67,6 +71,8 @@ void SoftbusSession::SendJsonStringByte(const std::string &deviceId, const std::
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {
         SoftbusSessionManager::GetInstance().SendBytesForNext(iter->second, data);
+    } else {
+        SLOGE("SendJsonStringByte findNoDevice:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     }
 }
 
@@ -77,6 +83,8 @@ void SoftbusSession::SendByteForNext(const std::string &deviceId, const std::str
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {
         SoftbusSessionManager::GetInstance().SendBytesForNext(iter->second, data);
+    } else {
+        SLOGE("SendByteForNext findNoDevice:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     }
 }
 
