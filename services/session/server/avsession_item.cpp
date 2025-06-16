@@ -124,6 +124,11 @@ std::string AVSessionItem::GetSessionType()
 }
 // LCOV_EXCL_STOP
 
+void AVSessionItem::UpdateSessionElement(const AppExecFwk::ElementName& elementName)
+{
+    descriptor_.elementName_ = elementName;
+}
+
 int32_t AVSessionItem::Destroy()
 {
     SLOGI("AVSessionItem %{public}d check service destroy event with service, check serviceCallback exist",
@@ -542,6 +547,11 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     }
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
+    }
+    if (GetUid() == audioBrokerUid && state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY &&
+        serviceCallbackForMediaSession_) {
+        SLOGI("addAncoCapsule");
+        serviceCallbackForMediaSession_(GetSessionId(), true);
     }
     {
         std::lock_guard controllerLockGuard(controllersLock_);
@@ -2257,6 +2267,12 @@ void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
     serviceCallbackForUpdateSession_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForMediaSession(const std::function<void(std::string, bool)>& callback)
+{
+    SLOGI("SetServiceCallbackForUpdateSession in");
+    serviceCallbackForMediaSession_ = callback;
 }
 
 void AVSessionItem::SetServiceCallbackForKeyEvent(const std::function<void(std::string)>& callback)

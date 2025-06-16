@@ -186,6 +186,8 @@ public:
 
     std::string GetBundleName() const;
 
+    void UpdateSessionElement(const AppExecFwk::ElementName& elementName);
+
     void SetTop(bool top);
 
     std::shared_ptr<RemoteSessionSource> GetRemoteSource();
@@ -217,6 +219,8 @@ public:
     void SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback);
 
     void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
+
+    void SetServiceCallbackForMediaSession(const std::function<void(std::string, bool)>& callback);
     
     void SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback);
 
@@ -421,6 +425,7 @@ private:
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
+    std::function<void(std::string, bool)> serviceCallbackForMediaSession_;
     std::function<void(std::string)> serviceCallbackForKeyEvent_;
     std::function<void(std::string)> updateExtrasCallback_;
     std::function<void(std::string, bool)> serviceCallbackForNtf_;
@@ -440,7 +445,7 @@ private:
     volatile bool isDestroyed_ = false;
 
     static const int32_t DEFAULT_USER_ID = 100;
-
+    static constexpr const int32_t audioBrokerUid = 5557;
     static constexpr const char *defaultBundleName = "com.example.himusicdemo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
 

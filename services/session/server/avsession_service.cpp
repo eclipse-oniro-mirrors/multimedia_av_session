@@ -624,6 +624,17 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+    if (infoUid == ancoUid) {
+        for (const auto& session : *sessionListForFront) {
+            if (session->GetUid() == audioBrokerUid &&
+                session->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+                SLOGI("change uid for anco");
+                infoUid = session->GetUid();
+                infoPid = session->GetPid();
+                break;
+            }
+        }
+    }
     for (const auto& session : *sessionListForFront) {
         if (session->GetUid() == infoUid && session->GetPid() == infoPid &&
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call")) {
@@ -1280,6 +1291,29 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
             NotifySystemUI(nullptr, true, IsCapsuleNeeded() && hasMediaCapsule_.load(), isMediaChange);
         }
     });
+
+    sessionItem->SetServiceCallbackForMediaSession([this](std::string sessionId, bool isPlaying) {
+        // only use for anco mediasession
+        std::lock_guard lockGuard(sessionServiceLock_);
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(session != nullptr, "session not exist");
+        if (topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
+            NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+            return;
+        }
+        if (isPlaying) {
+            UpdateTopSession(session);
+            FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
+            sessionInfo.uid = session->GetUid();
+            sessionInfo.pid = session->GetPid();
+            SelectFocusSession(sessionInfo);
+            NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+        }
+    });
+}
+
+void AVSessionService::AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem)
+{
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem->SetServiceCallbackForCastNtfCapsule([this](std::string sessionId, bool isPlaying, bool isChange) {
         std::lock_guard lockGuard(sessionServiceLock_);
@@ -1378,6 +1412,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         }
     });
     AddCapsuleServiceCallback(sessionItem);
+    AddCastCapsuleServiceCallback(sessionItem);
     AddKeyEventServiceCallback(sessionItem);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
@@ -1452,6 +1487,20 @@ bool AVSessionService::IsParamInvalid(const std::string& tag, int32_t type, cons
     return true;
 }
 
+void AVSessionService::CheckAndUpdateAncoMediaSession(const AppExecFwk::ElementName& elementName)
+{
+    auto uid = GetCallingUid();
+    CHECK_AND_RETURN_LOG(uid == audioBrokerUid, "not broker uid");
+    sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
+    CHECK_AND_RETURN_LOG(session != nullptr, "anco media session is null");
+    auto res = GetUsersManager().UpdateSessionForCurrentUser(session->GetPid(), session->GetAbilityName(),
+        elementName.GetAbilityName(), session);
+    CHECK_AND_RETURN_LOG(res == AVSESSION_SUCCESS, "update media session fail");
+    session->UpdateSessionElement(elementName);
+    SLOGI("updatenewsession %{public}s %{public}s", elementName.GetBundleName().c_str(),
+        elementName.GetAbilityName().c_str());
+}
+
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                              const AppExecFwk::ElementName& elementName,
                                              sptr<AVSessionItem>& sessionItem)
@@ -1463,6 +1512,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     std::lock_guard lockGuard(sessionServiceLock_);
     if (AbilityHasSession(pid)) {
         SLOGE("process %{public}d %{public}s already has one session", pid, elementName.GetAbilityName().c_str());
+        CheckAndUpdateAncoMediaSession(elementName);
         return ERR_SESSION_IS_EXIST;
     }
 
@@ -1591,7 +1641,7 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
 
 bool AVSessionService::IsCapsuleNeeded()
 {
-    if (topSession_ != nullptr) {
+    if (topSession_ != nullptr && topSession_->GetUid() != audioBrokerUid) {
         return topSession_->GetSessionType() == "audio" || topSession_->IsCasting();
     }
     return false;
@@ -3895,7 +3945,9 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         AddCapsule(notifyText, isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
     }
 
-    auto uid = topSession_ ? topSession_->GetUid() : (historyDescriptor ? historyDescriptor->uid_ : -1);
+    auto uid = topSession_ ? (topSession_->GetUid() == audioBrokerUid ?
+        BundleStatusAdapter::GetInstance().GetUidFromBundleName(shellBundle, userId) : topSession_->GetUid()) :
+        (historyDescriptor ? historyDescriptor->uid_ : -1);
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);

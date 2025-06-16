@@ -187,5 +187,21 @@ HWTEST_F(AVSessionUsersManagerTest, GetCurSessionListForKeyEvent001, TestSize.Le
     AVSessionUsersManager::GetInstance().GetCurSessionListForKeyEvent(userId);
     EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
 }
+
+HWTEST_F(AVSessionUsersManagerTest, UpdateSessionForCurrentUser001, TestSize.Level1)
+{
+    auto& manager = AVSessionUsersManager::GetInstance();
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = "SessionId";
+    descriptor.userId_ = 0;
+    sptr<AVSessionItem> item = new(std::nothrow) AVSessionItem(descriptor, descriptor.userId_);
+    int32_t pid = 1;
+    std::string oldAbility = "oldAbilityName";
+    std::string newAbility = "newAbilityName";
+    auto res = manager.AddSessionForCurrentUser(pid, oldAbility, item);
+    EXPECT_EQ(res, 0);
+    res = manager.UpdateSessionForCurrentUser(pid, oldAbility, newAbility, item);
+    EXPECT_EQ(res, 0);
+}
 } //AVSession
 } //OHOS

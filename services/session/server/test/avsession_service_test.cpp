@@ -1877,6 +1877,31 @@ static HWTEST_F(AVSessionServiceTest, OnIdleWithSessions001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: CheckAndUpdateAncoMediaSession001
+ * @tc.desc: update anco media session without anco uid.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CheckAndUpdateAncoMediaSession001, TestSize.Level1)
+{
+    SLOGD("CheckAndUpdateAncoMediaSession001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    OHOS::AppExecFwk::ElementName newElementName;
+    newElementName.SetBundleName("bundleName");
+    newElementName.SetAbilityName("AbilityName");
+    avservice_->CheckAndUpdateAncoMediaSession(newElementName);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGD("CheckAndUpdateAncoMediaSession001 end!");
+}
+
+/**
  * @tc.name: HandleRemoveMediaCardEvent001
  * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a valid session.
  * @tc.type: FUNC

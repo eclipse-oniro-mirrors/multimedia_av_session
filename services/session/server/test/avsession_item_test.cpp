@@ -319,6 +319,24 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: AVSessionItem_UpdateElement_001
+ * @tc.desc: Test update session element.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_UpdateElement_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_UpdateElement_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("TestBundleName");
+    elementName.SetAbilityName("TestAbilityName");
+    g_AVSessionItem->UpdateSessionElement(elementName);
+    EXPECT_EQ(g_AVSessionItem->GetBundleName(), "TestBundleName");
+    EXPECT_EQ(g_AVSessionItem->GetAbilityName(), "TestAbilityName");
+    SLOGD("AVSessionItem_UpdateElement_001 end!");
+}
+
+/**
  * @tc.name: AVSessionItem_GetAnonymousDeviceId_001
  * @tc.desc: Test GetAnonymousDeviceId with empty deviceId.
  * @tc.type: FUNC
