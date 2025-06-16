@@ -780,3 +780,18 @@ static HWTEST_F(AVSessionControllerProxyTest, GetLaunchAbilityInner001, testing:
     EXPECT_EQ(ret, ERR_IPC_SEND_REQUEST);
     SLOGI("GetLaunchAbilityInner001, end");
 }
+
+/**
+ * @tc.name: GetLaunchAbilityInner002
+ * @tc.desc: Test GetLaunchAbilityInner when abilityPtr equal nullptr
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerProxyTest, GetLaunchAbilityInner002, testing::ext::TestSize.Level1)
+{
+    SLOGI("GetLaunchAbilityInner002, start");
+    OHOS::AbilityRuntime::WantAgent::WantAgent * abilityPtr = nullptr;
+    aVSessionControllerProxyEmpty->isDestroy_ = true;
+    int64_t ret = aVSessionControllerProxyEmpty->GetLaunchAbilityInner(abilityPtr);
+    EXPECT_EQ(ret, ERR_CONTROLLER_NOT_EXIST);
+    SLOGI("GetLaunchAbilityInner002, end");
+}
