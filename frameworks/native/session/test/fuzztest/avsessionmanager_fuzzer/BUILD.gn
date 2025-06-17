@@ -29,7 +29,10 @@ ohos_fuzztest("AVSessionManagerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "avsessionmanager_fuzzer.cpp" ]
-  deps = [ "../../../../session:avsession_client" ]
+  deps = [
+    "../../../../session:avsession_client",
+    "../../../../../../utils:avsession_utils",
+  ]
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",

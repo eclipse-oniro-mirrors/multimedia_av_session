@@ -46,17 +46,39 @@ av_session_ohos_library("avsession_client") {
     "src/session_listener_client.cpp",
   ]
 
+  common_sources = [
+    "../../../frameworks/common/src/av_cast_info.cpp",
+    "../../../frameworks/common/src/av_data_src_descriptor.cpp",
+    "../../../frameworks/common/src/av_file_descriptor.cpp",
+    "../../../frameworks/common/src/av_shared_memory_base.cpp",
+    "../../../frameworks/common/src/av_shared_memory_helper.cpp",
+    "../../../frameworks/common/src/avcall_meta_data.cpp",
+    "../../../frameworks/common/src/avcall_state.cpp",
+    "../../../frameworks/common/src/avcast_control_command.cpp",
+    "../../../frameworks/common/src/avcast_player_state.cpp",
+    "../../../frameworks/common/src/avcontrol_command.cpp",
+    "../../../frameworks/common/src/avmedia_description.cpp",
+    "../../../frameworks/common/src/avmeta_data.cpp",
+    "../../../frameworks/common/src/avplayback_state.cpp",
+    "../../../frameworks/common/src/avqueue_info.cpp",
+    "../../../frameworks/common/src/avqueue_item.cpp",
+    "../../../frameworks/common/src/avsession_descriptor.cpp",
+    "../../../frameworks/common/src/avsession_pixel_map.cpp",
+    "../../../frameworks/common/src/media_info.cpp",
+    "../../../frameworks/common/src/media_info_holder.cpp",
+  ]
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
 
-  sources = ipc_sources + client_sources
+  sources = ipc_sources + client_sources + common_sources
 
   public_configs = [ ":avsession_client_config" ]
 
-  public_deps = [
+  deps = [
     "../../../utils:avsession_utils",
     "../../common:avsession_common",
   ]

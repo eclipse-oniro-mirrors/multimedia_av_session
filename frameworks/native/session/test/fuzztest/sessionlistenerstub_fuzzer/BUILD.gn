@@ -38,7 +38,10 @@ ohos_fuzztest("SessionListenerStubFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "session_listenerstub_fuzzer.cpp" ]
-  deps = [ "../../../../session:avsession_client" ]
+  deps = [
+    "../../../../session:avsession_client",
+    "../../../../../../utils:avsession_utils",
+  ]
   external_deps = [
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
