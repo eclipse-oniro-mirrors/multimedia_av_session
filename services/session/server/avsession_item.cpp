@@ -100,6 +100,12 @@ AVSessionItem::~AVSessionItem()
         Deactivate();
     }
     {
+        std::lock_guard callbackForCastCapLockGuard(callbackForCastCapLock_);
+        if (castControllerProxy_ != nullptr) {
+            castControllerProxy_->SetSessionCallbackForCastCap(nullptr);
+        }
+    }
+    {
         std::lock_guard aliveLockGuard(isAliveLock_);
         if (isAlivePtr_ != nullptr) {
             *isAlivePtr_ = false;
@@ -778,6 +784,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     sharedPtr->SetSessionId(descriptor_.sessionId_);
     sharedPtr->SetUserId(userId_);
     if (descriptor_.sessionTag_ != "RemoteCast") {
+        std::lock_guard callbackForCastCapLockGuard(callbackForCastCapLock_);
         castControllerProxy_->SetSessionCallbackForCastCap([this](bool isPlaying, bool isMediaChange) {
             std::thread([this, isPlaying, isMediaChange]() {
                 CHECK_AND_RETURN_LOG(serviceCallbackForCastNtf_ != nullptr, "serviceCallbackForCastNtf_ is empty");

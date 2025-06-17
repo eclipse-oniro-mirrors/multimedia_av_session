@@ -463,6 +463,8 @@ private:
 
     std::recursive_mutex isAliveLock_;
 
+    std::recursive_mutex callbackForCastCapLock_;
+    
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;
     int64_t castHandle_ = 0;
