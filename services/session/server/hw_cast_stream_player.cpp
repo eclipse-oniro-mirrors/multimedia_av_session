@@ -31,7 +31,6 @@ namespace OHOS::AVSession {
 HwCastStreamPlayer::~HwCastStreamPlayer()
 {
     SLOGI("destruct the HwCastStreamPlayer without release");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SendCastCapsule");
 }
 
 int32_t HwCastStreamPlayer::Init()
@@ -226,7 +225,6 @@ bool HwCastStreamPlayer::RepeatPrepare(std::shared_ptr<AVMediaDescription>& medi
             hasIcon = true;
         }
     }
-    std::lock_guard callbackForCastNtfLockGuard(callbackForCastNtfLock_);
     if (hasIcon && sessionCallbackForCastNtf_ && isPlayingState_) {
         sessionCallbackForCastNtf_(true, true);
     }
@@ -659,7 +657,6 @@ int32_t HwCastStreamPlayer::SetValidAbility(const std::vector<int32_t>& validCmd
 
 void HwCastStreamPlayer::SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback)
 {
-    std::lock_guard callbackForCastNtfLockGuard(callbackForCastNtfLock_);
     sessionCallbackForCastNtf_ = callback;
 }
 
@@ -669,7 +666,6 @@ void HwCastStreamPlayer::CheckIfCancelCastCapsule()
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelCastCapsule");
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
         [this]() {
-            std::lock_guard callbackForCastNtfLockGuard(callbackForCastNtfLock_);
             if (sessionCallbackForCastNtf_ && !isPlayingState_) {
                 SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", isPlayingState_);
                 sessionCallbackForCastNtf_(false, false);
@@ -690,14 +686,9 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
     if (avCastPlaybackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         // play state try notify cast notification
         isPlayingState_ = true;
-        std::lock_guard callbackForCastNtfLockGuard(callbackForCastNtfLock_);
         if (sessionCallbackForCastNtf_) {
-            AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SendCastCapsule");
-            AVSessionEventHandler::GetInstance().AVSessionPostTask(
-                [this]() {
-                    SLOGI("MediaCapsule addCastCapsule");
-                    sessionCallbackForCastNtf_(true, false);
-                }, "SendCastCapsule", 0);
+            SLOGI("MediaCapsule addCastCapsule");
+            sessionCallbackForCastNtf_(true, false);
         }
     } else {
         CheckIfCancelCastCapsule();

@@ -115,7 +115,6 @@ private:
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayer_;
     std::recursive_mutex streamPlayerListenerLock_;
     std::recursive_mutex streamPlayerListenerListLock_;
-    std::recursive_mutex  callbackForCastNtfLock_;
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
     AVQueueItem currentAVQueueItem_;
     std::shared_ptr<HwCastDataSourceDescriptor> castDataSrc_ = nullptr;
