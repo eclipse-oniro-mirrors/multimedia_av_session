@@ -102,7 +102,7 @@ int32_t HwCastProvider::SetDiscoverable(const bool enable)
 
 void HwCastProvider::Release()
 {
-    SLOGI("cast the HwCastProvider");
+    SLOGI("cast provider release");
     {
         std::lock_guard lockGuard(mutexLock_);
         hwCastProviderSessionMap_.clear();
@@ -118,7 +118,7 @@ void HwCastProvider::Release()
         return;
     }
     CastSessionManager::GetInstance().UnregisterListener();
-    SLOGD("provide release done");
+    SLOGD("provider release done");
 }
 
 int HwCastProvider::StartCastSession(bool isHiStream)

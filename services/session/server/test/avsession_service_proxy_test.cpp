@@ -68,10 +68,12 @@ static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing:
     sptr<ISystemAbilityManager> mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (mgr == nullptr) {
         SLOGE("failed to get sa mgr");
+        return;
     }
     sptr<IRemoteObject> sessionService = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
     if (sessionService == nullptr) {
         SLOGE("failed to get service");
+        return;
     }
 
     std::string tag = "tag";

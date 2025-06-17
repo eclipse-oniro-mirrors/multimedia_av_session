@@ -375,8 +375,7 @@ static HWTEST(AudioAdapterTest, GetRendererRunning001, TestSize.Level1)
 {
     SLOGI("GetRendererRunning001 begin!");
     AudioAdapter::GetInstance().Init();
-    AudioAdapter::GetInstance().GetRendererRunning(AudioAdapterTest::TEST_CLIENT_UID,
-        AudioAdapterTest::TEST_CLIENT_PID);
+    AudioAdapter::GetInstance().GetRendererRunning(AudioAdapterTest::TEST_CLIENT_UID);
     SLOGI("GetRendererRunning001 end!");
 }
 
@@ -390,8 +389,7 @@ static HWTEST(AudioAdapterTest, GetRendererRunning002, TestSize.Level1)
 {
     SLOGI("GetRendererRunning002 begin!");
     AudioAdapter::GetInstance().Init();
-    AudioAdapter::GetInstance().GetRendererRunning(AudioAdapterTest::TEST_SESSION_FAIL_ID,
-        AudioAdapterTest::TEST_SESSION_FAIL_ID);
+    AudioAdapter::GetInstance().GetRendererRunning(AudioAdapterTest::TEST_SESSION_FAIL_ID);
     SLOGI("GetRendererRunning002 end!");
 }
 

@@ -222,7 +222,6 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-
 static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
 {
     SLOGI("SendSystemAVKeyEvent002 begin!");
@@ -628,7 +627,8 @@ static HWTEST_F(AVSessionServiceTest, SelectSessionByUid002, TestSize.Level1)
 
 static HWTEST_F(AVSessionServiceTest, InitBMS001, TestSize.Level1)
 {
-    SLOGI("InitBMS001 stop to prevent crash in SubscribeBundleStatusEvent");
+    SLOGI("InitBMS001 begin");
+    avservice_->InitBMS();
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("InitBMS001 end!");
 }
@@ -758,7 +758,6 @@ static HWTEST_F(AVSessionServiceTest, SaveAvQueueInfo001, TestSize.Level1)
     std::string oldContent;
     if (!avservice_->LoadStringFromFileEx(avservice_->GetAVQueueDir(), oldContent)) {
         SLOGE("SaveAvQueueInfo001 read avqueueinfo fail, Return!");
-        avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
         return;
     }
     avservice_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta,
@@ -807,18 +806,20 @@ static HWTEST_F(AVSessionServiceTest, GetSubNode001, TestSize.Level1)
     cJSON* value = cJSON_CreateObject();
     if (value == nullptr) {
         SLOGE("get value nullptr");
-        return;
+        FAIL();
     }
     if (cJSON_IsInvalid(value)) {
         SLOGE("get value invalid");
         cJSON_Delete(value);
-        return;
+        value = nullptr;
+        FAIL();
     }
     cJSON_AddStringToObject(value, "bundleName", g_testAnotherBundleName);
     avservice_->GetSubNode(value, "FAKE_NAME");
     EXPECT_EQ(0, AVSESSION_SUCCESS);
 
     cJSON_Delete(value);
+    value = nullptr;
     SLOGI("GetSubNode001 end!");
 }
 
@@ -1445,7 +1446,7 @@ static HWTEST_F(AVSessionServiceTest, CreateControllerInner001, TestSize.Level1)
     std::string sessionId = "default";
     OHOS::sptr<IRemoteObject> object = nullptr;
     int32_t ret = avservice_->CreateControllerInner(sessionId, object);
-    // not support default any more for cold start logic refresh
+    // startability may go with mediaintent, will return AVSESSION_ERROR
     EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS
         || ret == AVSESSION_ERROR || ret == ERR_SESSION_NOT_EXIST, true);
     SLOGI("CreateControllerInner001 end!");
@@ -1529,7 +1530,7 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx003, TestSize.Level1)
     std::ifstream file(filePath, std::ios_base::in);
     bool ret = avservice_->LoadStringFromFileEx(filePath, content);
     file.close();
-    SLOGI("LoadStringFromFileEx003 check ret:%{public}d", static_cast<int>(ret));
+    EXPECT_EQ(ret, false);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("LoadStringFromFileEx003 end!");
@@ -1596,6 +1597,7 @@ static HWTEST_F(AVSessionServiceTest, ReportStartCastEnd001, TestSize.Level1)
     SLOGI("NotifyDeviceAvailable001 end!");
 }
 
+#ifdef BLUETOOTH_ENABLE
 static HWTEST_F(AVSessionServiceTest, OnReceiveEvent003, TestSize.Level1)
 {
     SLOGD("OnReceiveEvent003 begin!");
@@ -1727,7 +1729,7 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Leve
     avsessionHere->Destroy();
     SLOGD("HandleSystemKeyColdStart002 end!");
 }
-
+#endif
 /**
  * @tc.name: UpdateOrder001
  * @tc.desc: Verifying the UpdateOrder.
@@ -2533,7 +2535,7 @@ static HWTEST_F(AVSessionServiceTest, SuperLauncher001, TestSize.Level1)
     EXPECT_EQ(avservice_->migrateAVSession_->supportCrossMediaPlay_, false);
     SLOGD("SuperLauncher001 end!");
 }
-
+ 
 /**
  * @tc.name: ReleaseSuperLauncher001
  * @tc.desc: Verifying ReleaseSuperLauncher with SupportCrossMediaPlay state
@@ -2547,7 +2549,7 @@ static HWTEST_F(AVSessionServiceTest, ReleaseSuperLauncher001, TestSize.Level1)
     EXPECT_EQ(avservice_->migrateAVSession_->supportCrossMediaPlay_, false);
     SLOGD("ReleaseSuperLauncher001 end!");
 }
-
+ 
 /**
  * @tc.name: ConnectSuperLauncher001
  * @tc.desc: Verifying ConnectSuperLauncher001 with init state
@@ -2561,7 +2563,7 @@ static HWTEST_F(AVSessionServiceTest, ConnectSuperLauncher001, TestSize.Level1)
     EXPECT_NE(avservice_->migrateAVSession_->servicePtr_, nullptr);
     SLOGD("ConnectSuperLauncher001 end!");
 }
-
+ 
 /**
  * @tc.name: SucceedSuperLauncher001
  * @tc.desc: Verifying SucceedSuperLauncher001 with init state

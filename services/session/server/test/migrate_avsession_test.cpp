@@ -47,7 +47,7 @@ static const double TEST_SPEED = 1.5;
 static const int64_t TEST_BUFFERED_TIME = 60000;
 static const int32_t TEST_LOOG_MODE = 2;
 static std::shared_ptr<MigrateAVSessionServer> server_;
-static AVSessionService *avservice_;
+static AVSessionService *avservice_ ;
 
 class MigrateAVSessionTest : public testing::Test {
 public:
@@ -525,7 +525,7 @@ static HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub001, TestSize.Level1
 static HWTEST_F(MigrateAVSessionTest, CreateLocalSessionStub002, TestSize.Level1)
 {
     SLOGI("CreateLocalSessionStub002 begin");
-    std::string scene = "SuperLauncher-Dual";
+    std::string scene = "SuperLauncher";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
     EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->CreateLocalSessionStub(scene, server_);
@@ -558,7 +558,7 @@ static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub001, TestSize.Level
 static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub002, TestSize.Level1)
 {
     SLOGI("ReleaseLocalSessionStub002 begin");
-    std::string scene = "SuperLauncher-Dual";
+    std::string scene = "SuperLauncher";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
     EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->CreateLocalSessionStub(scene, server_);
@@ -575,7 +575,7 @@ static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub002, TestSize.Level
 static HWTEST_F(MigrateAVSessionTest, ReleaseLocalSessionStub003, TestSize.Level1)
 {
     SLOGI("ReleaseLocalSessionStub003 begin");
-    std::string scene = "SuperLauncher-Dual";
+    std::string scene = "SuperLauncher";
     std::shared_ptr<MigrateAVSessionManager> migrateManager_ = std::make_shared<MigrateAVSessionManager>();
     EXPECT_TRUE(migrateManager_ != nullptr);
     migrateManager_->ReleaseLocalSessionStub(scene);

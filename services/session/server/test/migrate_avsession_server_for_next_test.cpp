@@ -95,7 +95,6 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive001, T
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     sleep(1);
     EXPECT_EQ(sessionId.size(), 0);
-    sleep(1);
 }
 
 /**
@@ -113,7 +112,6 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive002, T
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     sleep(1);
     EXPECT_EQ(sessionId.size(), 4);
-    sleep(1);
 }
 
 /**
@@ -132,7 +130,6 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive003, T
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     sleep(1);
     EXPECT_EQ(sessionId.size(), 4);
-    sleep(1);
 }
 
 /**
@@ -151,7 +148,6 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive004, T
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     sleep(1);
     EXPECT_EQ(sessionId.size(), 4);
-    sleep(1);
 }
 
 /**

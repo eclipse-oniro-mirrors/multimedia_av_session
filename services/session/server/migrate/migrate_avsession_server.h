@@ -181,7 +181,7 @@ private:
     std::recursive_mutex cacheJsonLock_;
 
     std::string GenerateClearAVSessionMsg();
-    bool isListenerSet_ = false;
+    bool isListenerSet_ = true;
 };
 
 class AVControllerObserver : public AVControllerCallback {
