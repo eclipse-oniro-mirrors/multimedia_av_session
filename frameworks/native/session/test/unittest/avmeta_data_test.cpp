@@ -108,7 +108,7 @@ std::shared_ptr<OHOS::Media::PixelMap> AVMetaDataTest::CreatePixelMap()
 * @tc.type: FUNC
 * @tc.require: AR000H31JO
 */
-HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level0)
 {
     SLOGI("SetAVMetaData001 Begin");
     AVMetaData metaData;
@@ -155,7 +155,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31JO
 */
-HWTEST_F(AVMetaDataTest, SetAVMetaData002, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, SetAVMetaData002, TestSize.Level0)
 {
     SLOGI("SetAVMetaData002 Begin");
     AVMetaData metaData;
@@ -172,7 +172,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31JO
 */
-HWTEST_F(AVMetaDataTest, SetAVMetaData003, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, SetAVMetaData003, TestSize.Level0)
 {
     SLOGI("SetAVMetaData003 Begin");
     AVMetaData metaData;
@@ -189,7 +189,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31JO
 */
-HWTEST_F(AVMetaDataTest, SetAVMetaData004, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, SetAVMetaData004, TestSize.Level0)
 {
     SLOGI("SetAVMetaData004 Begin");
     AVMetaData metaData;
@@ -205,7 +205,7 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31JO
 */
-HWTEST_F(AVMetaDataTest, GetAVMetaData001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, GetAVMetaData001, TestSize.Level0)
 {
     SLOGI("GetAVMetaData001 Begin");
     AVMetaData metaData;
@@ -239,7 +239,7 @@ HWTEST_F(AVMetaDataTest, GetAVMetaData001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling001, TestSize.Level0)
 {
     SLOGI("AVMetaDataMarshalling001 Begin");
     OHOS::Parcel& parcel = g_parcel;
@@ -254,7 +254,7 @@ HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling001, TestSize.Level0)
 {
     SLOGI("AVMetaDataUnmarshalling001 Begin");
     OHOS::Parcel& parcel = g_parcel;
@@ -269,7 +269,7 @@ HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST_F(AVMetaDataTest, AVMetaDataGetMask001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataGetMask001, TestSize.Level0)
 {
     SLOGI("AVMetaDataGetMask001 Begin");
     AVMetaData metaData;
@@ -285,7 +285,7 @@ HWTEST_F(AVMetaDataTest, AVMetaDataGetMask001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataFromMetaIn001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataFromMetaIn001, TestSize.Level0)
 {
     SLOGI("AVMetaDataCopyDataFromMetaIn001 Begin");
     AVMetaData metaData;
@@ -307,7 +307,7 @@ HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataFromMetaIn001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataByMask001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataByMask001, TestSize.Level0)
 {
     SLOGI("AVMetaDataCopyDataByMask001 Begin");
     AVMetaData metaOut;
@@ -331,7 +331,7 @@ HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataByMask001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5YMXD
  */
-HWTEST_F(AVMetaDataTest, SetPreviousAssetId001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, SetPreviousAssetId001, TestSize.Level0)
 {
     SLOGI("SetPreviousAssetId001 Begin");
     AVMetaData metaOut;
@@ -347,7 +347,7 @@ HWTEST_F(AVMetaDataTest, SetPreviousAssetId001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5YMXD
  */
-HWTEST_F(AVMetaDataTest, SetNextAssetId001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, SetNextAssetId001, TestSize.Level0)
 {
     SLOGI("SetNextAssetId001 Begin");
     AVMetaData metaOut;
@@ -363,7 +363,7 @@ HWTEST_F(AVMetaDataTest, SetNextAssetId001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVMetaDataTest, IsValid001, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, IsValid001, TestSize.Level0)
 {
     SLOGI("IsValid001 Begin");
     AVMetaData metaOut;
@@ -382,7 +382,7 @@ HWTEST_F(AVMetaDataTest, IsValid001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVMetaDataTest, IsValid002, TestSize.Level1)
+HWTEST_F(AVMetaDataTest, IsValid002, TestSize.Level0)
 {
     SLOGI("IsValid002 Begin");
     AVMetaData metaOut;
@@ -401,7 +401,7 @@ HWTEST_F(AVMetaDataTest, IsValid002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg001, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg001, TestSize.Level0)
 {
     MessageParcel data;
     data.WriteString("");
@@ -416,7 +416,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg002, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg002, TestSize.Level0)
 {
     std::string test = std::string(30, '*');
     MessageParcel data;
@@ -432,7 +432,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg003, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg003, TestSize.Level0)
 {
     std::string test = "test1111";
     MessageParcel data;
@@ -452,7 +452,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg004, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg004, TestSize.Level0)
 {
     std::string test = "test1111";
     MessageParcel data;
@@ -471,7 +471,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg005, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg005, TestSize.Level0)
 {
     std::string test = "test1111";
     MessageParcel data;
@@ -494,7 +494,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask001, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask001, TestSize.Level0)
 {
     Parcel data;
     auto result = std::make_shared<AVMetaData>();
@@ -511,7 +511,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask002, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask002, TestSize.Level0)
 {
     Parcel data;
     auto result = std::make_shared<AVMetaData>();
@@ -528,7 +528,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask003, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask003, TestSize.Level0)
 {
     Parcel data;
     OHOS::sptr pixelMap = new AVSessionPixelMap();
@@ -550,7 +550,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask004, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask004, TestSize.Level0)
 {
     Parcel data;
     OHOS::sptr pixelMap = new AVSessionPixelMap();
@@ -571,7 +571,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask005, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask005, TestSize.Level0)
 {
     Parcel data;
     OHOS::sptr pixelMap = new AVSessionPixelMap();
@@ -593,7 +593,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask006, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask006, TestSize.Level0)
 {
     Parcel data;
     OHOS::sptr pixelMap = new AVSessionPixelMap();
@@ -617,7 +617,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckParamTask001, TestSize.Level1)
+static HWTEST_F(AVMetaDataTest, UnmarshallingCheckParamTask001, TestSize.Level0)
 {
     Parcel data;
     auto result = std::make_shared<AVMetaData>();

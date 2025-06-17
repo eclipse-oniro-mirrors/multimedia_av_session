@@ -43,7 +43,7 @@ void AudioDeviceManagerTest::TearDown() {}
  * @tc.desc: fail to init callback
  * @tc.type: FUNC
  */
-static HWTEST(AudioDeviceManagerTest, InitAudioStateCallback001, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, InitAudioStateCallback001, TestSize.Level0)
 {
     SLOGI("InitAudioStateCallback001 begin!");
     AudioDeviceManager::GetInstance().isRegistered_ = true;
@@ -58,7 +58,7 @@ static HWTEST(AudioDeviceManagerTest, InitAudioStateCallback001, TestSize.Level1
  * @tc.desc: audioDeviceChangeCallback_ have registered
  * @tc.type: FUNC
  */
-static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback001, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback001, TestSize.Level0)
 {
     SLOGI("RegisterAudioDeviceChangeCallback001 begin!");
     AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
@@ -71,7 +71,7 @@ static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback001, Test
  * @tc.desc: audioPreferedOutputDeviceChangeCallback_ have registered
  * @tc.type: FUNC
  */
-static HWTEST(AudioDeviceManagerTest, RegisterPreferedOutputDeviceChangeCallback001, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, RegisterPreferedOutputDeviceChangeCallback001, TestSize.Level0)
 {
     SLOGI("RegisterPreferedOutputDeviceChangeCallback001 begin!");
     AudioDeviceManager::GetInstance().audioPreferedOutputDeviceChangeCallback_
@@ -85,7 +85,7 @@ static HWTEST(AudioDeviceManagerTest, RegisterPreferedOutputDeviceChangeCallback
  * @tc.desc: fail to send
  * @tc.type: FUNC
  */
-static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo001, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo001, TestSize.Level0)
 {
     SLOGI("SendRemoteAvSessionInfo001 begin!");
     AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
@@ -99,7 +99,7 @@ static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo001, TestSize.Level
  * @tc.desc: success to send
  * @tc.type: FUNC
  */
-static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo002, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo002, TestSize.Level0)
 {
     SLOGI("SendRemoteAvSessionInfo002 begin!");
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession = std::make_shared<MigrateAVSessionServer>();
@@ -114,7 +114,7 @@ static HWTEST(AudioDeviceManagerTest, SendRemoteAvSessionInfo002, TestSize.Level
  * @tc.desc: test ClearRemoteAvSessionInfo
  * @tc.type: FUNC
  */
-static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Level0)
 {
     SLOGI("ClearRemoteAvSessionInfo001 begin!");
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession = std::make_shared<MigrateAVSessionServer>();
@@ -129,7 +129,7 @@ static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Leve
 * @tc.desc: audioDeviceChangeCallback_ have registered with nullptr
 * @tc.type: FUNC
 */
-static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, TestSize.Level0)
 {
     SLOGI("RegisterAudioDeviceChangeCallback001 begin!");
     AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = nullptr;
@@ -142,7 +142,7 @@ static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, Test
 * @tc.desc: test OnDeviceChange when deviceChangeAction type is DISCONNECT
 * @tc.type: FUNC
 */
-static HWTEST(AudioDeviceManagerTest, OnDeviceChange001, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, OnDeviceChange001, TestSize.Level0)
 {
     DeviceChangeAction deviceChangeAction;
     AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
@@ -157,7 +157,7 @@ static HWTEST(AudioDeviceManagerTest, OnDeviceChange001, TestSize.Level1)
 * @tc.desc: test OnDeviceChange when deviceChangeAction type is DISCONNECT
 * @tc.type: FUNC
 */
-static HWTEST(AudioDeviceManagerTest, OnDeviceChange002, TestSize.Level1)
+static HWTEST(AudioDeviceManagerTest, OnDeviceChange002, TestSize.Level0)
 {
     DeviceChangeAction deviceChangeAction;
     AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();

@@ -102,7 +102,7 @@ class IAVControllerCallbackTest : public IAVControllerCallback {
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, GetAVMetaData001, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, GetAVMetaData001, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
@@ -117,7 +117,7 @@ HWTEST_F(AVControllerItemTest, GetAVMetaData001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, GetAVMetaData002, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, GetAVMetaData002, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
@@ -138,7 +138,7 @@ HWTEST_F(AVControllerItemTest, GetAVMetaData002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, GetAVMetaData003, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, GetAVMetaData003, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
@@ -160,7 +160,7 @@ HWTEST_F(AVControllerItemTest, GetAVMetaData003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, SendCommonCommand001, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, SendCommonCommand001, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
@@ -176,7 +176,7 @@ HWTEST_F(AVControllerItemTest, SendCommonCommand001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, SendCommonCommand002, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, SendCommonCommand002, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
@@ -195,7 +195,7 @@ HWTEST_F(AVControllerItemTest, SendCommonCommand002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, Destroy001, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, Destroy001, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
@@ -210,7 +210,7 @@ HWTEST_F(AVControllerItemTest, Destroy001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, HandleSessionDestroy001, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, HandleSessionDestroy001, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
@@ -227,7 +227,7 @@ HWTEST_F(AVControllerItemTest, HandleSessionDestroy001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, HandleAVCallStateChange001, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, HandleAVCallStateChange001, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
@@ -245,7 +245,7 @@ HWTEST_F(AVControllerItemTest, HandleAVCallStateChange001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-HWTEST_F(AVControllerItemTest, HandleActiveStateChange001, TestSize.Level1)
+HWTEST_F(AVControllerItemTest, HandleActiveStateChange001, TestSize.Level0)
 {
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);

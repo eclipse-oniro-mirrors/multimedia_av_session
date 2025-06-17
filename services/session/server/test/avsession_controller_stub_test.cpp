@@ -225,7 +225,7 @@ public:
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
     uint32_t code = 0;
@@ -243,7 +243,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest001, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
     uint32_t code = 0;
@@ -263,7 +263,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest002, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest003, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest003 begin!");
     uint32_t code = 0;
@@ -284,7 +284,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest003, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest004, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest004, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest004 begin!");
     uint32_t code = 2;
@@ -304,7 +304,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest004, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest005, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest005, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest005 begin!");
     uint32_t code = 2;
@@ -325,7 +325,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest005, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest006, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest006, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest006 begin!");
     uint32_t code = 3;
@@ -345,7 +345,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest006, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest007, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest007, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest007 begin!");
     uint32_t code = 3;
@@ -366,7 +366,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest007, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest008, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest008, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest008 begin!");
     uint32_t code = 4;
@@ -386,7 +386,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest008, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest009, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest009, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest009 begin!");
     uint32_t code = 4;
@@ -407,7 +407,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest009, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest010, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest010, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest010 begin!");
     uint32_t code = 5;
@@ -427,7 +427,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest010, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest011, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest011, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest011 begin!");
     uint32_t code = 5;
@@ -448,7 +448,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest011, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest012, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest012, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest012 begin!");
     uint32_t code = 6;
@@ -468,7 +468,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest012, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest013, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest013, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest013 begin!");
     uint32_t code = 6;
@@ -489,7 +489,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest013, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest014, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest014, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest014 begin!");
     uint32_t code = 7;
@@ -509,7 +509,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest014, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest015, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest015, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest015 begin!");
     uint32_t code = 7;
@@ -530,7 +530,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest015, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest016, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest016, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest016 begin!");
     uint32_t code = 8;
@@ -550,7 +550,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest016, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest017, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest017, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest017 begin!");
     uint32_t code = 8;
@@ -571,7 +571,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest017, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest018, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest018, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest018 begin!");
     uint32_t code = 9;
@@ -591,7 +591,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest018, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest019 begin!");
     uint32_t code = 9;
@@ -612,7 +612,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019_1, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest019_1 begin!");
     uint32_t code = 9;
@@ -632,7 +632,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019_1, TestSize.Leve
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019_2, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest019_2 begin!");
     uint32_t code = 9;
@@ -652,7 +652,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest019_2, TestSize.Leve
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest020, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest020, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest020 begin!");
     uint32_t code = 10;
@@ -672,7 +672,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest020, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest021 begin!");
     uint32_t code = 10;
@@ -693,7 +693,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021_1, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest021_1 begin!");
     uint32_t code = 10;
@@ -713,7 +713,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021_1, TestSize.Leve
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021_2, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest021_2 begin!");
     uint32_t code = 10;
@@ -733,7 +733,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest021_2, TestSize.Leve
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest022, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest022, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest022 begin!");
     uint32_t code = 11;
@@ -753,7 +753,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest022, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest023, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest023, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest023 begin!");
     uint32_t code = 11;
@@ -774,7 +774,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest023, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest024, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest024, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest024 begin!");
     uint32_t code = 13;
@@ -794,7 +794,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest024, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest025, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest025, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest025 begin!");
     uint32_t code = 13;
@@ -815,7 +815,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest025, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest026, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest026, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest026 begin!");
     uint32_t code = 14;
@@ -835,7 +835,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest026, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest027, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest027, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest027 begin!");
     uint32_t code = 14;
@@ -856,7 +856,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest027, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest028, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest028, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest028 begin!");
     uint32_t code = 15;
@@ -876,7 +876,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest028, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest029, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest029, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest029 begin!");
     uint32_t code = 15;
@@ -897,7 +897,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest029, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest030, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest030, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest030 begin!");
     uint32_t code = 16;
@@ -917,7 +917,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest030, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest031, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest031, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest031 begin!");
     uint32_t code = 16;
@@ -938,7 +938,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest031, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest032, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest032, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest032 begin!");
     uint32_t code = 17;
@@ -958,7 +958,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest032, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest033, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest033, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest033 begin!");
     uint32_t code = 17;
@@ -979,7 +979,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest033, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest034, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest034, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest034 begin!");
     uint32_t code = 18;
@@ -999,7 +999,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest034, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest035 begin!");
     uint32_t code = 18;
@@ -1020,7 +1020,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035_1, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest035_1 begin!");
     uint32_t code = 18;
@@ -1040,7 +1040,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035_1, TestSize.Leve
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035_2, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest035_2 begin!");
     uint32_t code = 18;
@@ -1060,7 +1060,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest035_2, TestSize.Leve
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest036, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest036, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest036 begin!");
     uint32_t code = 19;
@@ -1080,7 +1080,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest036, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest037, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest037, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest037 begin!");
     uint32_t code = 19;
@@ -1101,7 +1101,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest037, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest038, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest038, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest038 begin!");
     uint32_t code = 20;
@@ -1121,7 +1121,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest038, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest039 begin!");
     uint32_t code = 20;
@@ -1142,7 +1142,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039_1, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest039_1 begin!");
     uint32_t code = 20;
@@ -1162,7 +1162,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039_1, TestSize.Leve
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039_2, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest039_2 begin!");
     uint32_t code = 20;
@@ -1182,7 +1182,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039_2, TestSize.Leve
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest040, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest040, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest040 begin!");
     uint32_t code = 25;
@@ -1203,7 +1203,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest040, TestSize.Level1
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub001, TestSize.Level0)
 {
     SLOGI("DoMetadataGetReplyInStub001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1219,7 +1219,7 @@ static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub001, TestSi
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub002, TestSize.Level0)
 {
     SLOGI("DoMetadataGetReplyInStub002 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1235,7 +1235,7 @@ static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub002, TestSi
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean001, TestSize.Level0)
 {
     SLOGI("DoMetadataImgClean001 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -1251,7 +1251,7 @@ static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean001, TestSize.Lev
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean002, TestSize.Level0)
 {
     SLOGI("DoMetadataImgClean002 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -1267,7 +1267,7 @@ static HWTEST_F(AVSessionControllerStubTest, DoMetadataImgClean002, TestSize.Lev
  * @tc.desc: Test HandleSetAVCallMetaFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter001, TestSize.Level0)
 {
     SLOGI("HandleSetAVCallMetaFilter001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1284,7 +1284,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter001, TestS
  * @tc.desc: Test HandleSetAVCallMetaFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter002, TestSize.Level0)
 {
     SLOGI("HandleSetAVCallMetaFilter002 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1301,7 +1301,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter002, TestS
  * @tc.desc: Test HandleSetAVCallMetaFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter003, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter003, TestSize.Level0)
 {
     SLOGI("HandleSetAVCallMetaFilter003 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1318,7 +1318,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallMetaFilter003, TestS
  * @tc.desc: Test HandleSetAVCallStateFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter001, TestSize.Level0)
 {
     SLOGI("HandleSetAVCallStateFilter001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1335,7 +1335,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter001, Test
  * @tc.desc: Test HandleSetAVCallStateFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter002, TestSize.Level0)
 {
     SLOGI("HandleSetAVCallStateFilter002 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1352,7 +1352,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter002, Test
  * @tc.desc: Test HandleSetAVCallStateFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter003, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter003, TestSize.Level0)
 {
     SLOGI("HandleSetAVCallStateFilter003 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1369,7 +1369,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetAVCallStateFilter003, Test
  * @tc.desc: Test HandleSetMetaFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter001, TestSize.Level0)
 {
     SLOGI("HandleSetMetaFilter001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1386,7 +1386,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter001, TestSize.Le
  * @tc.desc: Test HandleSetMetaFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter002, TestSize.Level0)
 {
     SLOGI("HandleSetMetaFilter002 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1403,7 +1403,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter002, TestSize.Le
  * @tc.desc: Test HandleSetMetaFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter003, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter003, TestSize.Level0)
 {
     SLOGI("HandleSetMetaFilter003 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1420,7 +1420,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetMetaFilter003, TestSize.Le
  * @tc.desc: Test HandleSetPlaybackFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter001, TestSize.Level0)
 {
     SLOGI("HandleSetPlaybackFilter001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1437,7 +1437,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter001, TestSiz
  * @tc.desc: Test HandleSetPlaybackFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter002, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter002, TestSize.Level0)
 {
     SLOGI("HandleSetPlaybackFilter002 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1454,7 +1454,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter002, TestSiz
  * @tc.desc: Test HandleSetPlaybackFilter
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter003, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter003, TestSize.Level0)
 {
     SLOGI("HandleSetPlaybackFilter003 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;
@@ -1471,7 +1471,7 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter003, TestSiz
  * @tc.desc: Test GetLaunchAbilityInner
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionControllerStubTest, GetLaunchAbilityInner001, TestSize.Level1)
+static HWTEST_F(AVSessionControllerStubTest, GetLaunchAbilityInner001, TestSize.Level0)
 {
     SLOGI("GetLaunchAbilityInner001 begin!");
     AVSessionControllerStubDemo avSessionControllerStub;

@@ -61,7 +61,7 @@ public:
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnSessionRelease001, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnSessionRelease001, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -76,7 +76,7 @@ HWTEST_F(SessionListenerClientTest, OnSessionRelease001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnSessionRelease002, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnSessionRelease002, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -91,7 +91,7 @@ HWTEST_F(SessionListenerClientTest, OnSessionRelease002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnTopSessionChange001, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnTopSessionChange001, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -106,7 +106,7 @@ HWTEST_F(SessionListenerClientTest, OnTopSessionChange001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnTopSessionChange002, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnTopSessionChange002, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -121,7 +121,7 @@ HWTEST_F(SessionListenerClientTest, OnTopSessionChange002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnAudioSessionChecked001, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnAudioSessionChecked001, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -135,7 +135,7 @@ HWTEST_F(SessionListenerClientTest, OnAudioSessionChecked001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnAudioSessionChecked002, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnAudioSessionChecked002, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -149,7 +149,7 @@ HWTEST_F(SessionListenerClientTest, OnAudioSessionChecked002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnDeviceAvailable001, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnDeviceAvailable001, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -164,7 +164,7 @@ HWTEST_F(SessionListenerClientTest, OnDeviceAvailable001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnDeviceAvailable002, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnDeviceAvailable002, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -179,7 +179,7 @@ HWTEST_F(SessionListenerClientTest, OnDeviceAvailable002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnDeviceOffline001, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnDeviceOffline001, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -194,7 +194,7 @@ HWTEST_F(SessionListenerClientTest, OnDeviceOffline001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnDeviceOffline002, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnDeviceOffline002, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
@@ -209,7 +209,7 @@ HWTEST_F(SessionListenerClientTest, OnDeviceOffline002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnRemoteDistributedSessionChange001, TestSize.Level1)
+HWTEST_F(SessionListenerClientTest, OnRemoteDistributedSessionChange001, TestSize.Level0)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);

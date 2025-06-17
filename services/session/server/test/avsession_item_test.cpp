@@ -149,7 +149,7 @@ void AVsessionItemTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_DestroyTask_001 begin!");
     g_AVSessionItem->isDestroyed_ = true;
@@ -164,7 +164,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_002, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_002, TestSize.Level0)
 {
     SLOGD("AVSessionItem_DestroyTask_002 begin!");
     g_AVSessionItem->controllers_.clear();
@@ -179,7 +179,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_003, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_003, TestSize.Level0)
 {
     SLOGD("AVSessionItem_DestroyTask_003 begin!");
     g_AVSessionItem->descriptor_.sessionTag_ = "RemoteCast";
@@ -195,7 +195,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_004, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_004, TestSize.Level0)
 {
     SLOGD("AVSessionItem_DestroyTask_004 begin!");
     g_AVSessionItem->descriptor_.sessionTag_ = "TestSession";
@@ -211,7 +211,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_SetAVCallMetaData_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetAVCallMetaData_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_SetAVCallMetaData_001 begin!");
     OHOS::AVSession::AVCallMetaData avCallMetaData;
@@ -228,7 +228,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetAVCallMetaData_001, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_SetAVCallMetaData_002, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetAVCallMetaData_002, TestSize.Level0)
 {
     SLOGD("AVSessionItem_SetAVCallMetaData_002 begin!");
     g_AVSessionItem->controllers_.clear();
@@ -246,7 +246,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetAVCallMetaData_002, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_SetLaunchAbility_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetLaunchAbility_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_SetLaunchAbility_001 begin!");
     OHOS::AbilityRuntime::WantAgent::WantAgent ability;
@@ -261,7 +261,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetLaunchAbility_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_SetLaunchAbility_003, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetLaunchAbility_003, TestSize.Level0)
 {
     SLOGD("AVSessionItem_SetLaunchAbility_003 begin!");
     OHOS::AbilityRuntime::WantAgent::WantAgent ability;
@@ -278,7 +278,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetLaunchAbility_003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_Activate_001 begin!");
     OHOS::sptr<AVControllerItem> controller = g_AVControllerItem;
@@ -294,7 +294,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_002, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_002, TestSize.Level0)
 {
     SLOGD("AVSessionItem_Activate_002 begin!");
     g_AVSessionItem->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VOICE_CALL;
@@ -309,7 +309,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_003, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_003, TestSize.Level0)
 {
     SLOGD("AVSessionItem_Activate_003 begin!");
     g_AVSessionItem->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VIDEO_CALL;
@@ -324,7 +324,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_GetAnonymousDeviceId_001 begin!");
     std::string deviceId = "";
@@ -339,7 +339,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_002, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_002, TestSize.Level0)
 {
     SLOGD("AVSessionItem_GetAnonymousDeviceId_002 begin!");
     std::string deviceId = "12345";
@@ -354,7 +354,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_003, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_003, TestSize.Level0)
 {
     SLOGD("AVSessionItem_GetAnonymousDeviceId_003 begin!");
     std::string deviceId = "1234567890";
@@ -369,7 +369,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetAnonymousDeviceId_003, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_001 begin!");
     g_AVSessionItem->castHandle_ = 1;
@@ -391,7 +391,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_001, Test
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_002, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_002, TestSize.Level0)
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_002 begin!");
     g_AVSessionItem->castHandle_ = AVSESSION_ERROR;
@@ -413,7 +413,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_002, Test
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_003, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_003, TestSize.Level0)
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_003 begin!");
     g_AVSessionItem->castHandle_ = 0;
@@ -439,7 +439,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_003, Test
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_004, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_004, TestSize.Level0)
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_004 begin!");
     g_AVSessionItem->castHandle_ = 0;
@@ -462,7 +462,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_004, Test
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_005, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_005, TestSize.Level0)
 {
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_005 begin!");
     g_AVSessionItem->castHandle_ = 0;
@@ -490,7 +490,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_005, Test
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_SetOutputDevice_001 begin!");
     OutputDeviceInfo info;
@@ -513,7 +513,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level0)
 {
     SLOGD("AVSessionItem_SetOutputDevice_002 begin!");
     OutputDeviceInfo info;
@@ -536,7 +536,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_HandleOnSetTargetLoopMode_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_HandleOnSetTargetLoopMode_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_HandleOnSetTargetLoopMode_001 begin!");
     OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
@@ -558,7 +558,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_HandleOnSetTargetLoopMode_001, TestSiz
  * @tc.type: FUNC
  * @tc.require: #IC7XD5
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_ReportPlaybackState_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_ReportPlaybackState_001, TestSize.Level0)
 {
     ASSERT_TRUE(g_AVSessionItem != nullptr);
     AVPlaybackState state;
@@ -586,7 +586,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportPlaybackState_001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: #IC7XD5
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_ReportMetadataChange_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_ReportMetadataChange_001, TestSize.Level0)
 {
     ASSERT_TRUE(g_AVSessionItem != nullptr);
     std::string title = "Test Title";
@@ -617,7 +617,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportMetadataChange_001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: #IC7XD5
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_ReportCommandChange_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_ReportCommandChange_001, TestSize.Level0)
 {
     ASSERT_TRUE(g_AVSessionItem != nullptr);
     g_AVSessionItem->supportedCmd_.push_back(REPORT_SIZE);
@@ -639,7 +639,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportCommandChange_001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: #IC7XD5
  */
-HWTEST_F(AVsessionItemTest, AVSessionItem_ReportSessionControl_001, TestSize.Level1)
+HWTEST_F(AVsessionItemTest, AVSessionItem_ReportSessionControl_001, TestSize.Level0)
 {
     ASSERT_TRUE(g_AVSessionItem != nullptr);
     g_AVSessionItem->ReportSessionControl(g_testAnotherBundleName, AVControlCommand::SESSION_CMD_PLAY);

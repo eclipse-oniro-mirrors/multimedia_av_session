@@ -47,7 +47,7 @@ void AVPlaybackStateTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: AR000H31JM
 */
-HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level0)
 {
     auto *avp = new (std::nothrow) AVPlaybackState();
     EXPECT_NE(avp, nullptr);
@@ -70,7 +70,7 @@ HWTEST_F(AVPlaybackStateTest, SetState001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVPlaybackStateTest, IsValid001, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, IsValid001, TestSize.Level0)
 {
     AVPlaybackState avPlaybackState;
     avPlaybackState.SetState(1);
@@ -90,7 +90,7 @@ HWTEST_F(AVPlaybackStateTest, IsValid001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVPlaybackStateTest, IsValid002, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, IsValid002, TestSize.Level0)
 {
     AVPlaybackState avPlaybackState;
     avPlaybackState.SetState(-1);
@@ -110,7 +110,7 @@ HWTEST_F(AVPlaybackStateTest, IsValid002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31JM
 */
-HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level0)
 {
     auto *parcel = new (std::nothrow) OHOS::Parcel();
     EXPECT_NE(parcel, nullptr);
@@ -143,7 +143,7 @@ HWTEST_F(AVPlaybackStateTest, GetState001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31JM
 */
-HWTEST_F(AVPlaybackStateTest, GetState002, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, GetState002, TestSize.Level0)
 {
     auto *avp = new (std::nothrow) AVPlaybackState();
     EXPECT_NE(avp, nullptr);
@@ -163,7 +163,7 @@ HWTEST_F(AVPlaybackStateTest, GetState002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVPlaybackStateTest, GetMask001, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, GetMask001, TestSize.Level0)
 {
     AVPlaybackState avPlaybackState;
     avPlaybackState.SetState(0);
@@ -183,7 +183,7 @@ HWTEST_F(AVPlaybackStateTest, GetMask001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVPlaybackStateTest, CopyToByMask001, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, CopyToByMask001, TestSize.Level0)
 {
     AVPlaybackState stateOut;
     stateOut.SetSpeed(3.0);
@@ -201,7 +201,7 @@ HWTEST_F(AVPlaybackStateTest, CopyToByMask001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVPlaybackStateTest, CopyToByMask002, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, CopyToByMask002, TestSize.Level0)
 {
     AVPlaybackState stateOut;
     AVPlaybackState::PlaybackStateMaskType mask = stateOut.GetMask();
@@ -217,7 +217,7 @@ HWTEST_F(AVPlaybackStateTest, CopyToByMask002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVPlaybackStateTest, CopyFrom001, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, CopyFrom001, TestSize.Level0)
 {
     AVPlaybackState stateOut;
     stateOut.SetSpeed(3.0);
@@ -234,7 +234,7 @@ HWTEST_F(AVPlaybackStateTest, CopyFrom001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I5YMXD
 */
-HWTEST_F(AVPlaybackStateTest, CopyFrom002, TestSize.Level1)
+HWTEST_F(AVPlaybackStateTest, CopyFrom002, TestSize.Level0)
 {
     AVPlaybackState stateOut;
 

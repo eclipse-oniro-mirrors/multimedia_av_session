@@ -46,7 +46,7 @@ void AVSessionManagerImplTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange001, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange001, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -61,7 +61,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange002, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange002, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -75,7 +75,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange003, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange003, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -89,7 +89,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange004, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange004, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -104,7 +104,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange005, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange005, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -121,7 +121,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange006, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange006, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -137,7 +137,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange007, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange007, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -153,7 +153,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange008, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange008, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -170,7 +170,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange009, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange009, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -187,7 +187,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange009, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange010, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange010, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -204,7 +204,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange010, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange011, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange011, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -221,7 +221,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange011, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange012, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange012, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     AppExecFwk::ElementName elementName;
@@ -238,7 +238,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange012, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, CreateController001, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, CreateController001, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     std::shared_ptr<AVSessionController> controller = nullptr;
@@ -252,7 +252,7 @@ HWTEST_F(AVSessionManagerImplTest, CreateController001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers001, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers001, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     std::vector<std::shared_ptr<AVSessionController>> controllers;
@@ -267,7 +267,7 @@ HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers001, TestSize
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers002, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers002, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     std::vector<std::shared_ptr<AVSessionController>> controllers;
@@ -282,7 +282,7 @@ HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers002, TestSize
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers003, TestSize.Level1)
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers003, TestSize.Level0)
 {
     AVSessionManagerImpl impl;
     std::vector<std::shared_ptr<AVSessionController>> controllers;

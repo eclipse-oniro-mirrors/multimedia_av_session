@@ -48,7 +48,7 @@ void AVQueueInfoTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVQueueInfoTest, Unmarshalling001, TestSize.Level1)
+HWTEST_F(AVQueueInfoTest, Unmarshalling001, TestSize.Level0)
 {
     AVQueueInfo avqueueInfo;
     avqueueInfo.SetAVQueueName("xiaoqiang");
@@ -68,7 +68,7 @@ HWTEST_F(AVQueueInfoTest, Unmarshalling001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVQueueInfoTest, Unmarshalling002, TestSize.Level1)
+HWTEST_F(AVQueueInfoTest, Unmarshalling002, TestSize.Level0)
 {
     AVQueueInfo avqueueInfo;
     avqueueInfo.SetBundleName("xiaoming");
@@ -88,7 +88,7 @@ HWTEST_F(AVQueueInfoTest, Unmarshalling002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVQueueInfoTest, Unmarshalling003, TestSize.Level1)
+HWTEST_F(AVQueueInfoTest, Unmarshalling003, TestSize.Level0)
 {
     AVQueueInfo avqueueInfo;
     avqueueInfo.SetBundleName("xiaoming");
@@ -108,7 +108,7 @@ HWTEST_F(AVQueueInfoTest, Unmarshalling003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVQueueInfoTest, Unmarshalling004, TestSize.Level1)
+HWTEST_F(AVQueueInfoTest, Unmarshalling004, TestSize.Level0)
 {
     AVQueueInfo avqueueInfo;
     avqueueInfo.SetBundleName("xiaoming");

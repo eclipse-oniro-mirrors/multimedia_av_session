@@ -87,7 +87,7 @@ std::shared_ptr<OHOS::Media::PixelMap> AVCallMetaDataTest::CreatePixelMap()
  * @tc.desc: set av call meta data
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallMetaDataTest, SetAVCallMetaData001, TestSize.Level1)
+HWTEST_F(AVCallMetaDataTest, SetAVCallMetaData001, TestSize.Level0)
 {
     SLOGI("SetAVCallMetaData001 Begin");
     AVCallMetaData avCallMetaData;
@@ -107,7 +107,7 @@ HWTEST_F(AVCallMetaDataTest, SetAVCallMetaData001, TestSize.Level1)
  * @tc.desc: get av call meta data result
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallMetaDataTest, GetAVCallMetaData001, TestSize.Level1)
+HWTEST_F(AVCallMetaDataTest, GetAVCallMetaData001, TestSize.Level0)
 {
     SLOGI("GetAVCallMetaData001 Begin");
     AVCallMetaData avCallMetaData;
@@ -124,7 +124,7 @@ HWTEST_F(AVCallMetaDataTest, GetAVCallMetaData001, TestSize.Level1)
  * @tc.desc: avcallmetadata marshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallMetaDataTest, AVCallMetaDataMarshalling001, TestSize.Level1)
+HWTEST_F(AVCallMetaDataTest, AVCallMetaDataMarshalling001, TestSize.Level0)
 {
     SLOGI("AVCallMetaDataMarshalling001 Begin");
     OHOS::Parcel& parcel = g_parcel;
@@ -138,7 +138,7 @@ HWTEST_F(AVCallMetaDataTest, AVCallMetaDataMarshalling001, TestSize.Level1)
  * @tc.desc: avcallmetadata unmarshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallMetaDataTest, AVCallMetaDataUnmarshalling001, TestSize.Level1)
+HWTEST_F(AVCallMetaDataTest, AVCallMetaDataUnmarshalling001, TestSize.Level0)
 {
     SLOGI("AVCallMetaDataUnmarshalling001 Begin");
     OHOS::Parcel& parcel = g_parcel;
@@ -152,7 +152,7 @@ HWTEST_F(AVCallMetaDataTest, AVCallMetaDataUnmarshalling001, TestSize.Level1)
  * @tc.desc: get avcall meta mask
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallMetaDataTest, AVCallMetaDataGetMask001, TestSize.Level1)
+HWTEST_F(AVCallMetaDataTest, AVCallMetaDataGetMask001, TestSize.Level0)
 {
     SLOGI("AVCallMetaDataGetMask001 Begin");
     AVCallMetaData avCallMetaData;
@@ -167,7 +167,7 @@ HWTEST_F(AVCallMetaDataTest, AVCallMetaDataGetMask001, TestSize.Level1)
  * @tc.desc: copy avcall meta item from @metaIn according to set bit of @metaIn meta mask
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallMetaDataTest, AVCallMetaDataCopyDataFromMetaIn001, TestSize.Level1)
+HWTEST_F(AVCallMetaDataTest, AVCallMetaDataCopyDataFromMetaIn001, TestSize.Level0)
 {
     SLOGI("AVCallMetaDataCopyDataFromMetaIn001 Begin");
     AVCallMetaData avCallMetaData;
@@ -186,7 +186,7 @@ HWTEST_F(AVCallMetaDataTest, AVCallMetaDataCopyDataFromMetaIn001, TestSize.Level
  * @tc.desc: copy avcall meta item to @metaOut according to intersection of meta mask.
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallMetaDataTest, AVCallMetaDataCopyDataByMask001, TestSize.Level1)
+HWTEST_F(AVCallMetaDataTest, AVCallMetaDataCopyDataByMask001, TestSize.Level0)
 {
     SLOGI("AVCallMetaDataCopyDataByMask001 Begin");
     AVCallMetaData metaOut;
