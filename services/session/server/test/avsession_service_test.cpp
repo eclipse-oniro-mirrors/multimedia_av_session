@@ -736,6 +736,47 @@ static HWTEST_F(AVSessionServiceTest, SaveSessionInfoInFile001, TestSize.Level0)
     SLOGI("SaveSessionInfoInFile001 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart001, TestSize.Level0)
+{
+    SLOGI("HandleSystemKeyColdStart001 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_EQ(avsessionHere_ != nullptr, true);
+    AVControlCommand command;
+    avservice_->HandleSystemKeyColdStart(command);
+    EXPECT_NE(avsessionHere_, avservice_->topSession_);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGI("HandleSystemKeyColdStart001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Level0)
+{
+    SLOGD("HandleSystemKeyColdStart002 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_EQ(avsessionHere != nullptr, true);
+    AVControlCommand command;
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    avservice_->HandleSystemKeyColdStart(command);
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+    avservice_->HandleSystemKeyColdStart(command);
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+    avservice_->HandleSystemKeyColdStart(command);
+    EXPECT_NE(avsessionHere, avservice_->topSession_);
+    avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    SLOGD("HandleSystemKeyColdStart002 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, GetHistoricalAVQueueInfos001, TestSize.Level0)
 {
     SLOGI("GetHistoricalAVQueueInfos001 begin!");
@@ -1373,22 +1414,6 @@ static HWTEST_F(AVSessionServiceTest, StartAbilityByCall001, TestSize.Level0)
     SLOGI("StartAbilityByCall001 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart001, TestSize.Level0)
-{
-    SLOGI("HandleSystemKeyColdStart001 begin!");
-    EXPECT_TRUE(avservice_ != nullptr);
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ =
-        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    AVControlCommand command;
-    avservice_->HandleSystemKeyColdStart(command);
-    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
-    avsessionHere_->Destroy();
-    SLOGI("HandleSystemKeyColdStart001 end!");
-}
-
 static HWTEST_F(AVSessionServiceTest, SendSystemControlCommand001, TestSize.Level0)
 {
     SLOGI("SendSystemControlCommand001 begin!");
@@ -1712,24 +1737,8 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent004, TestSize.Level0)
     EXPECT_EQ(ret, nullptr);
     SLOGD("CreateWantAgent004 end!");
 }
-
-static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Level0)
-{
-    SLOGD("HandleSystemKeyColdStart002 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere =
-        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    EXPECT_EQ(avsessionHere != nullptr, true);
-    AVControlCommand command;
-    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-    avservice_->HandleSystemKeyColdStart(command);
-    avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
-    avsessionHere->Destroy();
-    SLOGD("HandleSystemKeyColdStart002 end!");
-}
 #endif
+
 /**
  * @tc.name: UpdateOrder001
  * @tc.desc: Verifying the UpdateOrder.
