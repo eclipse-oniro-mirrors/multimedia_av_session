@@ -47,7 +47,7 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
     { "deviceAvailable", { OnDeviceAvailable, OffDeviceAvailable } },
     { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
-    { "deviceState", { OnDeviceStateChange, OffDeviceStateChange } },
+    { "deviceStateChanged", { OnDeviceStateChanged, OffDeviceStateChanged } },
 };
 
 std::map<DistributedSessionType, std::pair<NapiAVSessionManager::OnEventHandlerType,
@@ -1441,9 +1441,9 @@ napi_status NapiAVSessionManager::OnRemoteDistributedSessionChange(napi_env env,
     return listener_->AddCallback(env, NapiSessionListener::EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callback);
 }
 
-napi_status NapiAVSessionManager::OnDeviceStateChange(napi_env env, napi_value callback)
+napi_status NapiAVSessionManager::OnDeviceStateChanged(napi_env env, napi_value callback)
 {
-    SLOGI("OnDeviceStateChange AddCallback");
+    SLOGI("OnDeviceStateChanged AddCallback");
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
@@ -1524,9 +1524,9 @@ napi_status NapiAVSessionManager::OffRemoteDistributedSessionChange(napi_env env
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callback);
 }
 
-napi_status NapiAVSessionManager::OffDeviceStateChange(napi_env env, napi_value callback)
+napi_status NapiAVSessionManager::OffDeviceStateChanged(napi_env env, napi_value callback)
 {
-    SLOGI("OffDeviceStateChange RemoveCallback");
+    SLOGI("OffDeviceStateChanged RemoveCallback");
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
