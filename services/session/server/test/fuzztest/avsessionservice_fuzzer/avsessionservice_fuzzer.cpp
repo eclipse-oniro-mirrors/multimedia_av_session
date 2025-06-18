@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "securec.h"
 #include "avsession_item.h"
@@ -94,7 +95,6 @@ std::string GenerateString(size_t target_len) {
 
     const size_t available_len = (g_totalSize > g_sizePos) ? (g_totalSize - g_sizePos) : 0;
     const size_t copy_len = std::min(target_len, available_len);
-
     if (copy_len == 0) {
         return "";
     }
@@ -263,7 +263,6 @@ void GetDeviceInfoTest()
 void AvSessionServiceSystemAbilityTest(sptr<AVSessionService> service)
 {
     static std::vector<int32_t> systemAbilityIdSet {
-        SAMGR_DUMP_SAID,
         MULTIMODAL_INPUT_SERVICE_ID,
         AUDIO_POLICY_SERVICE_ID,
         APP_MGR_SERVICE_ID,
@@ -271,7 +270,8 @@ void AvSessionServiceSystemAbilityTest(sptr<AVSessionService> service)
         BUNDLE_MGR_SERVICE_SYS_ABILITY_ID,
         CAST_ENGINE_SA_ID,
         MEMORY_MANAGER_SA_ID,
-        COMMON_EVENT_SERVICE_ID,
+        SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN,
+        COMMON_EVENT_SERVICE_ID
     };
 
     int32_t randomNumber = GetData<uint32_t>();
@@ -408,6 +408,7 @@ void AVSessionServiceSendSystemControlCommandTest(sptr<AVSessionService> service
     service->SendSystemControlCommand(command);
     sptr<FuzzTestISessionListener> listener = new FuzzTestISessionListener();
     service->RegisterSessionListener(listener);
+    service->RegisterSessionListenerForAllUsers(listener);
 }
 
 void AvSessionServiceClientTest(sptr<AVSessionService> service)
@@ -646,8 +647,20 @@ void GetTrustedDeviceName001()
 
 void CheckInterfaceTokenTest()
 {
+    constexpr size_t MAX_RAWDATA_SIZE = 128 * 1024 * 1024;
+    constexpr size_t MAX_TOKEN_SIZE = 32;
+    FuzzedDataProvider provider(RAW_DATA, min(MAX_RAWDATA_SIZE >> 1, g_totalSize));
     MessageParcel dataMessageParcel;
-    dataMessageParcel.WriteInterfaceToken(GetData<std::u16string>());
+    std::u16string token;
+    if (provider.remaining_bytes() < MAX_TOKEN_SIZE << 1) {
+        token = u"";
+    }
+    token.resize(MAX_TOKEN_SIZE);
+    for (size_t i = 0; i < MAX_TOKEN_SIZE; ++i) {
+        uint16_t charVal = provider.ConsumeIntegral<uint16_t>();
+        token[i] = static_cast<char16_t>(charVal);
+    }
+    dataMessageParcel.WriteInterfaceToken(token);
     avsessionService_->CheckInterfaceToken(dataMessageParcel);
 }
 
@@ -739,11 +752,6 @@ void PullMigrateStubTest()
     avsessionService_->PullMigrateStub();
 }
 
-void HandleChangeTopSessionTest()
-{
-    avsessionService_->HandleChangeTopSession(GetData<uint32_t>(), GetData<uint32_t>(), GetData<uint32_t>());
-}
-
 void InitCollaborationTest()
 {
     avsessionService_->InitCollaboration();
@@ -757,10 +765,20 @@ void InitCastEngineServiceTest()
 void LowQualityCheckTest()
 {
     StreamUsage usage = static_cast<StreamUsage>(GetData<int32_t>() % StreamUsage::STREAM_USAGE_MAX);
-    RendererState state = static_cast<RendererState>(GetData<int32_t>() % 7);
-    avsessionService_->LowQualityCheck(GetData<int32_t>(), GetData<int32_t>(), usage, state);
-    avsessionService_->PlayStateCheck(GetData<int32_t>(), usage, state);
-    avsessionService_->NotifyBackgroundReportCheck(GetData<int32_t>(), GetData<int32_t>(), usage, state);
+    RendererState state = static_cast<RendererState>(GetData<uint32_t>() % RendererState::RENDERER_PAUSED -
+        RendererState::RENDERER_PREPARED);
+    std::string abilityName = GetString();
+    int32_t uid = GetData<int32_t>();
+    int32_t pid = GetData<int32_t>();
+    if (avsessionHere_ == nullptr) {
+        return;
+    }
+    avsessionHere_->SetUid(uid);
+    avsessionHere_->SetPid(pid);
+    AVSessionService::GetContainer().AddSession(pid, abilityName, avsessionHere_);
+    avsessionService_->LowQualityCheck(uid, pid, usage, state);
+    avsessionService_->PlayStateCheck(uid, usage, state);
+    avsessionService_->NotifyBackgroundReportCheck(uid, pid, usage, state);
     avsessionService_->CheckAncoAudio();
 }
 
@@ -943,33 +961,6 @@ void ProcessTargetMigrateTest(sptr<AVSessionService> service)
     service->ProcessTargetMigrate(isOnline, deviceInfo);
 }
 
-void GetDistributedSessionControllersInnerTest(sptr<AVSessionService> service)
-{
-    std::string tag = GetString();
-    int32_t type = 0;
-    std::string bundleName = GetString();
-    std::string abilityName = GetString();
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
-    sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
-    if(!avSessionItemObj || !avSessionItem) {
-        return;
-    }
-    ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
-    std::vector<sptr<IRemoteObject>> sessionControllers;
-    sessionControllers.push_back(avSessionItemObj);
-    std::vector<DistributedSessionType> sessionTypes {
-        DistributedSessionType::TYPE_SESSION_REMOTE,
-        DistributedSessionType::TYPE_SESSION_MIGRATE_IN,
-        DistributedSessionType::TYPE_SESSION_MIGRATE_OUT,
-        DistributedSessionType::TYPE_SESSION_MAX,
-    };
-    auto randomNumber = GetData<uint32_t>();
-    service->GetDistributedSessionControllersInner(
-        sessionTypes[randomNumber % sessionTypes.size()], sessionControllers);
-
-    service->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
-}
-
 void NotifyRemoteBundleChangeTest(sptr<AVSessionService> service)
 {
     std::string bundleName = GetString();
@@ -991,6 +982,39 @@ void GetPresentControllerTest(sptr<AVSessionService> service)
     pid_t pid = GetData<pid_t>();
     std::string sessionId = GetString();
     service->GetPresentController(pid, sessionId);
+}
+
+void StartAbilityByCallTest()
+{
+    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
+
+    std::string sessionIdNeeded = provider.ConsumeRandomLengthString();
+    std::string sessionId;
+    avsessionService_->StartAbilityByCall(sessionIdNeeded, sessionId);
+    avsessionService_->IsCapsuleNeeded();
+    avsessionService_->NotifyFlowControl();
+    int32_t uid = provider.ConsumeIntegral<int32_t>();
+    avsessionService_->CreateNftRemoveWant(uid);
+}
+
+void CallbackTest()
+{
+    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
+    if (avsessionHere_ == nullptr) {
+        return;
+    }
+
+    DeviceInfo deviceInfo;
+    bool isNeedRemove = provider.ConsumeBool();
+    avsessionHere_->DealDisconnect(deviceInfo, isNeedRemove);
+
+    AVMetaData meta;
+    shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
+    meta.SetMediaImage(mediaImage);
+    avsessionHere_->isMediaChange_ = true;
+    avsessionHere_->CheckUseAVMetaData(meta);
+    avsessionHere_->isDestroyed_ = false;
+    avsessionHere_->Destroy();
 }
 
 void AvSessionServiceTest001()
@@ -1017,12 +1041,13 @@ void AvSessionServiceTest001()
     InitCollaborationTest();
     InitCastEngineServiceTest();
     LowQualityCheckTest();
-    LowQualityCheckTest();
     StartAVPlaybackTest();
     IsHistoricalSessionTest();
     StartDefaultAbilityByCallTest();
     SendSystemAVKeyEventTest();
     HandleKeyEventTest();
+    StartAbilityByCallTest();
+    CallbackTest();
 }
 
 void AvSessionServiceTest002(sptr<AVSessionService> service)
