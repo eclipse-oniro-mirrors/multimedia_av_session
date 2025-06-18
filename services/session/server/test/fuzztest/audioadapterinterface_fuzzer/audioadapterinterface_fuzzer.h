@@ -23,6 +23,6 @@
 #include "audio_info.h"
 
 namespace OHOS::AVSession {
-    void AudioAdapterTest();
+    void AudioAdapterTest(uint8_t *data, size_t siez);
 }
 #endif

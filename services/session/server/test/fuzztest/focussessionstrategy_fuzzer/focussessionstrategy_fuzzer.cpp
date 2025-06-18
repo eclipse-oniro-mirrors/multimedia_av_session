@@ -36,7 +36,7 @@ static const int32_t MIN_SIZE_NUM = 4;
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_dataSize = 0;
 static size_t g_pos;
-
+ 
 template<class T>
 T GetData()
 {
@@ -99,10 +99,10 @@ void FocusSessionStrategyRemoteRequest(uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
+    /* Run your code on data */
     RAW_DATA = data;
     g_dataSize = size;
     g_pos = 0;
-    /* Run your code on data */
     FocusSessionStrategyRemoteRequest(data, size);
     return 0;
 }
