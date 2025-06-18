@@ -72,10 +72,8 @@ AVQueueInfo* AVQueueInfo::UnmarshallingMessageParcel(MessageParcel& data)
     }
     const char *buffer = nullptr;
     buffer = reinterpret_cast<const char *>(data.ReadRawData(imageLength));
-    if (buffer == nullptr) {
-        SLOGE("read raw data null buffer with length %{public}d", imageLength);
-        return result;
-    }
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, result, "read raw data null buffer");
+
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> mediaImageBuffer(buffer, buffer + imageLength);
     avQueuePixelMap->SetInnerImgBuffer(mediaImageBuffer);
@@ -99,13 +97,9 @@ bool AVQueueInfo::MarshallingQueueImage(MessageParcel& parcel) const
 
     memcpy_s(buffer, imageLength, avQueueImageBuffer.data(), imageLength);
 
-    if (!parcel.WriteRawData(buffer, imageLength)) {
-        SLOGE("WriteRawData failed");
-        delete[] buffer;
-        return false;
-    }
-
+    bool ret = parcel.WriteRawData(buffer, imageLength);
     delete[] buffer;
+    CHECK_AND_RETURN_RET_LOG(ret, false, "WriteRawData failed");
     return true;
 }
 
