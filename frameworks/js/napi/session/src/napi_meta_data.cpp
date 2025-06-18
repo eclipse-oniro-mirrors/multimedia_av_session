@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -451,7 +451,7 @@ napi_status NapiMetaData::SetComposer(napi_env env, const AVMetaData& in, napi_v
 
 napi_status NapiMetaData::GetDuration(napi_env env, napi_value in, AVMetaData& out)
 {
-    int64_t property;
+    int64_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "duration", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     out.SetDuration(property);
@@ -666,7 +666,7 @@ napi_status NapiMetaData::SetNextAssetId(napi_env env, const AVMetaData& in, nap
 
 napi_status NapiMetaData::GetSkipIntervals(napi_env env, napi_value in, AVMetaData& out)
 {
-    int32_t property;
+    int32_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "skipIntervals", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     SLOGD("GetSkipIntervals %{public}d", static_cast<int32_t>(property));
@@ -687,7 +687,7 @@ napi_status NapiMetaData::SetSkipIntervals(napi_env env, const AVMetaData& in, n
 
 napi_status NapiMetaData::GetFilter(napi_env env, napi_value in, AVMetaData& out)
 {
-    int32_t property;
+    int32_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "filter", property);
     CHECK_RETURN(status == napi_ok, "get property failed", status);
     SLOGD("GetFilter %{public}d", static_cast<int32_t>(property));
@@ -708,7 +708,7 @@ napi_status NapiMetaData::SetFilter(napi_env env, const AVMetaData& in, napi_val
 
 napi_status NapiMetaData::GetDisplayTags(napi_env env, napi_value in, AVMetaData& out)
 {
-    int32_t property;
+    int32_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "displayTags", property);
     CHECK_RETURN(status == napi_ok, "get property displayTags failed", status);
     SLOGD("GetDisplayTags %{public}d", static_cast<int32_t>(property));

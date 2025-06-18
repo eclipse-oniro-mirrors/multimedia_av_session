@@ -442,6 +442,7 @@ private:
     static const int32_t DEFAULT_USER_ID = 100;
 
     static constexpr const char *defaultBundleName = "com.example.himusicdemo";
+    static constexpr const char *sessionCastState_ = "CAST_STATE";
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;
@@ -462,6 +463,8 @@ private:
 
     std::recursive_mutex isAliveLock_;
 
+    std::recursive_mutex callbackForCastCapLock_;
+    
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;
     int64_t castHandle_ = 0;

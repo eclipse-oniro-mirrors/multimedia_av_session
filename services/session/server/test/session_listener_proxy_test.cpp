@@ -60,7 +60,7 @@ void SessionListenerProxyTest::TearDown()
  * @tc.desc: Test OnSessionCreate
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerProxyTest, OnSessionCreate001, testing::ext::TestSize.Level1)
+static HWTEST_F(SessionListenerProxyTest, OnSessionCreate001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSessionCreate001, start");
     LOG_SetCallback(MyLogCallback);
@@ -75,7 +75,7 @@ static HWTEST_F(SessionListenerProxyTest, OnSessionCreate001, testing::ext::Test
  * @tc.desc: Test OnSessionRelease
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerProxyTest, OnSessionRelease001, testing::ext::TestSize.Level1)
+static HWTEST_F(SessionListenerProxyTest, OnSessionRelease001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSessionRelease001, start");
     LOG_SetCallback(MyLogCallback);
@@ -90,7 +90,7 @@ static HWTEST_F(SessionListenerProxyTest, OnSessionRelease001, testing::ext::Tes
  * @tc.desc: Test OnTopSessionChange
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerProxyTest, OnTopSessionChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(SessionListenerProxyTest, OnTopSessionChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnTopSessionChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -105,7 +105,7 @@ static HWTEST_F(SessionListenerProxyTest, OnTopSessionChange001, testing::ext::T
  * @tc.desc: Test OnAudioSessionChecked
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerProxyTest, OnAudioSessionChecked001, testing::ext::TestSize.Level1)
+static HWTEST_F(SessionListenerProxyTest, OnAudioSessionChecked001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAudioSessionChecked001, start");
     LOG_SetCallback(MyLogCallback);
@@ -120,7 +120,7 @@ static HWTEST_F(SessionListenerProxyTest, OnAudioSessionChecked001, testing::ext
  * @tc.desc: Test OnDeviceAvailable
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerProxyTest, OnDeviceAvailable001, testing::ext::TestSize.Level1)
+static HWTEST_F(SessionListenerProxyTest, OnDeviceAvailable001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnDeviceAvailable001, start");
     LOG_SetCallback(MyLogCallback);
@@ -135,7 +135,7 @@ static HWTEST_F(SessionListenerProxyTest, OnDeviceAvailable001, testing::ext::Te
  * @tc.desc: Test OnDeviceOffline
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerProxyTest, OnDeviceOffline001, testing::ext::TestSize.Level1)
+static HWTEST_F(SessionListenerProxyTest, OnDeviceOffline001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnDeviceOffline001, start");
     LOG_SetCallback(MyLogCallback);
@@ -150,7 +150,7 @@ static HWTEST_F(SessionListenerProxyTest, OnDeviceOffline001, testing::ext::Test
  * @tc.desc: Test OnRemoteDistributedSessionChange
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerProxyTest, OnRemoteDistributedSessionChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(SessionListenerProxyTest, OnRemoteDistributedSessionChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnRemoteDistributedSessionChange001, start");
     LOG_SetCallback(MyLogCallback);

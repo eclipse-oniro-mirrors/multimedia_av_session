@@ -156,7 +156,6 @@ private:
     std::string ConvertHistorySessionListToStr(std::vector<AVSessionDescriptor> sessionDescriptors,
         std::vector<AVSessionDescriptor> hisSessionDescriptors);
     void StartConfigHistorySession(const std::string &data);
-    std::string GenerateClearAVSessionMsg();
     std::string GenerateClearHistorySessionMsg();
 
     AVSessionService *servicePtr_ = nullptr;
@@ -180,7 +179,9 @@ private:
     cJSON* metaDataCache_ = nullptr;
     cJSON* playbackStateCache_ = nullptr;
     std::recursive_mutex cacheJsonLock_;
-    bool isListenerSet_ = false;
+
+    std::string GenerateClearAVSessionMsg();
+    bool isListenerSet_ = true;
 };
 
 class AVControllerObserver : public AVControllerCallback {

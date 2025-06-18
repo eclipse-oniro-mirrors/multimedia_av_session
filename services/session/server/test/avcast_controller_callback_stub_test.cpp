@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "token_setproc.h"
+#include "av_shared_memory_base.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -121,7 +122,7 @@ public:
 * @tc.desc: test OnRemoteRequest with failed code
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest001, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     uint32_t code = 100;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -139,7 +140,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest001, TestSize.L
 * @tc.desc: test OnRemoteRequest with failed Descriptor
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest002, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     uint32_t code = 100;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -155,7 +156,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest002, TestSize.L
 * @tc.desc: test HandleOnKeyRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     uint32_t code = 9;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -174,7 +175,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.L
 * @tc.desc: test HandleOnKeyRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest004, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest004, TestSize.Level0)
 {
     uint32_t code = 9;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -198,7 +199,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest004, TestSize.L
 * @tc.desc: test HandleOnKeyRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest005, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest005, TestSize.Level0)
 {
     uint32_t code = 9;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -222,7 +223,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest005, TestSize.L
 * @tc.desc: test HandleOnKeyRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.Level0)
 {
     uint32_t code = 9;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -236,9 +237,22 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.L
     std::string str{"0000"};
     data.WriteBuffer(str.c_str(), 4);
     data.WriteInt32(4);
-
+    
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, INVALID_FD);
+}
+
+/**
+* @tc.name: onDataSrcRead001
+* @tc.desc: test onDataSrcRead when memory equal nullptr
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVCastControllerCallbackStubTest, onDataSrcRead001, TestSize.Level1)
+{
+    std::shared_ptr<AVSharedMemory> memory = nullptr;
+    AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
+    auto ret = avCastControllerCallbackStubDemo.onDataSrcRead(memory, 1, 1);
+    EXPECT_EQ(ret, 0);
 }
 } // namespace OHOS
 } // namespace AVSession

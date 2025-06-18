@@ -47,7 +47,7 @@ void JsonUtilsTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsInt32_001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsInt32_001, TestSize.Level0)
 {
     SLOGI("IsInt32_001 begin!");
 
@@ -70,7 +70,7 @@ static HWTEST(JsonUtilsTest, IsInt32_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsInt32_002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsInt32_002, TestSize.Level0)
 {
     SLOGI("IsInt32_002 begin!");
 
@@ -93,7 +93,7 @@ static HWTEST(JsonUtilsTest, IsInt32_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsString_001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsString_001, TestSize.Level0)
 {
     SLOGI("IsString_001 begin!");
 
@@ -116,7 +116,7 @@ static HWTEST(JsonUtilsTest, IsString_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsString_002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsString_002, TestSize.Level0)
 {
     SLOGI("IsString_002 begin!");
 
@@ -139,7 +139,7 @@ static HWTEST(JsonUtilsTest, IsString_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsBool_001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsBool_001, TestSize.Level0)
 {
     SLOGI("IsBool_001 begin!");
 
@@ -162,7 +162,7 @@ static HWTEST(JsonUtilsTest, IsBool_001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsBool_002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsBool_002, TestSize.Level0)
 {
     SLOGI("IsBool_002 begin!");
 
@@ -185,7 +185,7 @@ static HWTEST(JsonUtilsTest, IsBool_002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionBasicInfo001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionBasicInfo001, TestSize.Level0)
 {
     SLOGI("SetSessionBasicInfo001 begin!");
     std::string jsonStr = R"(
@@ -203,7 +203,7 @@ static HWTEST(JsonUtilsTest, SetSessionBasicInfo001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionDescriptors001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionDescriptors001, TestSize.Level0)
 {
     SLOGI("SetSessionDescriptors001 begin!");
     std::string jsonStr = "";
@@ -219,7 +219,7 @@ static HWTEST(JsonUtilsTest, SetSessionDescriptors001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionDescriptors002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionDescriptors002, TestSize.Level0)
 {
     SLOGI("SetSessionDescriptors002 begin!");
     std::string jsonStr = R"(
@@ -237,7 +237,7 @@ static HWTEST(JsonUtilsTest, SetSessionDescriptors002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionDescriptors003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionDescriptors003, TestSize.Level0)
 {
     SLOGI("SetSessionDescriptors003 begin!");
     std::string jsonStr = R"(
@@ -255,7 +255,7 @@ static HWTEST(JsonUtilsTest, SetSessionDescriptors003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionDescriptor001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionDescriptor001, TestSize.Level0)
 {
     SLOGI("SetSessionDescriptor001 begin!");
     std::string jsonStr = "";
@@ -271,7 +271,7 @@ static HWTEST(JsonUtilsTest, SetSessionDescriptor001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionDescriptor002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionDescriptor002, TestSize.Level0)
 {
     SLOGI("SetSessionDescriptor002 begin!");
     std::string jsonStr = R"(
@@ -289,7 +289,7 @@ static HWTEST(JsonUtilsTest, SetSessionDescriptor002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, JsonToVector001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, JsonToVector001, TestSize.Level0)
 {
     SLOGI("JsonToVector001 begin!");
     cJSON* object = nullptr;
@@ -305,7 +305,7 @@ static HWTEST(JsonUtilsTest, JsonToVector001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, JsonToVector002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, JsonToVector002, TestSize.Level0)
 {
     SLOGI("JsonToVector002 begin!");
     cJSON* object = cJSON_CreateObject();
@@ -327,7 +327,7 @@ static HWTEST(JsonUtilsTest, JsonToVector002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, JsonToVector003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, JsonToVector003, TestSize.Level0)
 {
     SLOGI("JsonToVector003 begin!");
     cJSON* array = cJSON_CreateArray();
@@ -350,7 +350,7 @@ static HWTEST(JsonUtilsTest, JsonToVector003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetVectorCapability001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetVectorCapability001, TestSize.Level0)
 {
     SLOGI("GetVectorCapability001 begin!");
     std::string sinkCapability = "";
@@ -367,7 +367,7 @@ static HWTEST(JsonUtilsTest, GetVectorCapability001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetVectorCapability002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetVectorCapability002, TestSize.Level0)
 {
     SLOGI("GetVectorCapability002 begin!");
     std::string sinkCapability = R"(
@@ -385,7 +385,7 @@ static HWTEST(JsonUtilsTest, GetVectorCapability002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetVectorCapability003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetVectorCapability003, TestSize.Level0)
 {
     SLOGI("GetVectorCapability003 begin!");
     std::string sinkCapability = "{ \"key\": \"value\", }";
@@ -401,7 +401,7 @@ static HWTEST(JsonUtilsTest, GetVectorCapability003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsInt32_003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsInt32_003, TestSize.Level0)
 {
     SLOGI("IsInt32_003 begin!");
 
@@ -424,7 +424,7 @@ static HWTEST(JsonUtilsTest, IsInt32_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsInt32_004, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsInt32_004, TestSize.Level0)
 {
     SLOGI("IsInt32_004 begin!");
 
@@ -447,7 +447,7 @@ static HWTEST(JsonUtilsTest, IsInt32_004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsString_003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsString_003, TestSize.Level0)
 {
     SLOGI("IsString_003 begin!");
 
@@ -470,7 +470,7 @@ static HWTEST(JsonUtilsTest, IsString_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, IsBool_003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, IsBool_003, TestSize.Level0)
 {
     SLOGI("IsBool_003 begin!");
 
@@ -493,7 +493,7 @@ static HWTEST(JsonUtilsTest, IsBool_003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetAllCapability001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetAllCapability001, TestSize.Level0)
 {
     SLOGI("GetAllCapability001 begin!");
     std::string sessionInfoStr = R"({
@@ -515,7 +515,7 @@ static HWTEST(JsonUtilsTest, GetAllCapability001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetAllCapability002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetAllCapability002, TestSize.Level0)
 {
     SLOGI("GetAllCapability002 begin!");
     std::string sessionInfoStr = R"({
@@ -537,7 +537,7 @@ static HWTEST(JsonUtilsTest, GetAllCapability002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetAllCapability003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetAllCapability003, TestSize.Level0)
 {
     SLOGI("GetAllCapability003 begin!");
     std::string sessionInfoStr = R"({
@@ -559,7 +559,7 @@ static HWTEST(JsonUtilsTest, GetAllCapability003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetAllCapability004, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetAllCapability004, TestSize.Level0)
 {
     SLOGI("GetAllCapability004 begin!");
     std::string sessionInfoStr = R"({
@@ -581,7 +581,7 @@ static HWTEST(JsonUtilsTest, GetAllCapability004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetAllCapability005, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetAllCapability005, TestSize.Level0)
 {
     SLOGI("GetAllCapability005 begin!");
     std::string sessionInfoStr = R"({
@@ -599,7 +599,7 @@ static HWTEST(JsonUtilsTest, GetAllCapability005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetAllCapability006, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetAllCapability006, TestSize.Level0)
 {
     SLOGI("GetAllCapability006 begin!");
     std::string sessionInfoStr = R"({
@@ -619,7 +619,7 @@ static HWTEST(JsonUtilsTest, GetAllCapability006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetAllCapability007, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetAllCapability007, TestSize.Level0)
 {
     SLOGI("GetAllCapability007 begin!");
     std::string sessionInfoStr = R"({
@@ -639,7 +639,7 @@ static HWTEST(JsonUtilsTest, GetAllCapability007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionCapabilitySet001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionCapabilitySet001, TestSize.Level0)
 {
     SLOGI("SetSessionCapabilitySet001 begin!");
     AVSessionBasicInfo basicInfo;
@@ -664,7 +664,7 @@ static HWTEST(JsonUtilsTest, SetSessionCapabilitySet001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionCapabilitySet002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionCapabilitySet002, TestSize.Level0)
 {
     SLOGI("SetSessionCapabilitySet002 begin!");
     AVSessionBasicInfo basicInfo;
@@ -688,7 +688,7 @@ static HWTEST(JsonUtilsTest, SetSessionCapabilitySet002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionCapabilitySet003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionCapabilitySet003, TestSize.Level0)
 {
     SLOGI("SetSessionCapabilitySet003 begin!");
     AVSessionBasicInfo basicInfo;
@@ -712,7 +712,7 @@ static HWTEST(JsonUtilsTest, SetSessionCapabilitySet003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionCompatibility001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionCompatibility001, TestSize.Level0)
 {
     SLOGI("SetSessionCompatibility001 begin!");
     AVSessionBasicInfo basicInfo;
@@ -737,7 +737,7 @@ static HWTEST(JsonUtilsTest, SetSessionCompatibility001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionCompatibility002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionCompatibility002, TestSize.Level0)
 {
     SLOGI("SetSessionCompatibility002 begin!");
     AVSessionBasicInfo basicInfo;
@@ -761,7 +761,7 @@ static HWTEST(JsonUtilsTest, SetSessionCompatibility002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionCompatibility003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionCompatibility003, TestSize.Level0)
 {
     SLOGI("SetSessionCompatibility003 begin!");
     AVSessionBasicInfo basicInfo;
@@ -785,7 +785,7 @@ static HWTEST(JsonUtilsTest, SetSessionCompatibility003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionData001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionData001, TestSize.Level0)
 {
     SLOGI("SetSessionData001 begin!");
     AVSessionBasicInfo basicInfo;
@@ -807,7 +807,7 @@ static HWTEST(JsonUtilsTest, SetSessionData001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionData002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionData002, TestSize.Level0)
 {
     SLOGI("SetSessionData002 begin!");
     AVSessionBasicInfo basicInfo;
@@ -832,7 +832,7 @@ static HWTEST(JsonUtilsTest, SetSessionData002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionData003, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionData003, TestSize.Level0)
 {
     SLOGI("SetSessionData003 begin!");
     AVSessionBasicInfo basicInfo;
@@ -856,7 +856,7 @@ static HWTEST(JsonUtilsTest, SetSessionData003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, SetSessionBasicInfo002, TestSize.Level1)
+static HWTEST(JsonUtilsTest, SetSessionBasicInfo002, TestSize.Level0)
 {
     SLOGI("SetSessionBasicInfo002 begin!");
     std::string sessionInfoStr = R"({
@@ -878,7 +878,7 @@ static HWTEST(JsonUtilsTest, SetSessionBasicInfo002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetSessionCapabilitySet001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetSessionCapabilitySet001, TestSize.Level0)
 {
     SLOGI("GetSessionCapabilitySet001 begin!");
     AVSessionBasicInfo basicInfo;
@@ -902,7 +902,7 @@ static HWTEST(JsonUtilsTest, GetSessionCapabilitySet001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetSessionCompatibility001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetSessionCompatibility001, TestSize.Level0)
 {
     SLOGI("GetSessionCompatibility001 begin!");
     const char* jsonStr = R"({
@@ -940,7 +940,7 @@ static HWTEST(JsonUtilsTest, GetSessionCompatibility001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetSessionData001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetSessionData001, TestSize.Level0)
 {
     SLOGI("GetSessionData001 begin!");
     const char* jsonStr = R"({
@@ -966,7 +966,7 @@ static HWTEST(JsonUtilsTest, GetSessionData001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetSessionBasicInfo001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetSessionBasicInfo001, TestSize.Level0)
 {
     SLOGI("GetSessionBasicInfo001 begin!");
     const std::string sessionInfo = R"({
@@ -1004,7 +1004,7 @@ static HWTEST(JsonUtilsTest, GetSessionBasicInfo001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(JsonUtilsTest, GetSessionDescriptors001, TestSize.Level1)
+static HWTEST(JsonUtilsTest, GetSessionDescriptors001, TestSize.Level0)
 {
     SLOGI("GetSessionDescriptors001 begin!");
     const std::string sessionInfo = R"({

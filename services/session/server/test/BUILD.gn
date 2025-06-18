@@ -1493,7 +1493,10 @@ ohos_unittest("AVSessionControllerProxyTest") {
 
   configs = [ ":module_private_config" ]
 
-  cflags_cc = [ "--coverage" ]
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
 
   ldflags = [ "--coverage" ]
 
@@ -2163,6 +2166,7 @@ if (castplus_cast_engine_enable) {
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
       "window_manager:libdm_lite",
+      "window_manager:libwmutil_base",
     ]
   }
 }

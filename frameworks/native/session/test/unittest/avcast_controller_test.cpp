@@ -193,6 +193,8 @@ public:
     
     void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) override;
 
+    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos) override;
+
     ~AVCastControllerCallbackImpl() override;
 
     AVPlaybackState state_;
@@ -245,6 +247,11 @@ void AVCastControllerCallbackImpl::OnPlayerError(const int32_t errorCode, const 
 
 void AVCastControllerCallbackImpl::OnCastValidCommandChanged(const std::vector<int32_t> &cmds)
 {
+}
+
+int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos)
+{
+    return 0;
 }
 
 class AVCastControllerProxyMock : public IAVCastControllerProxy {

@@ -15,6 +15,7 @@
 
 #include "avqueue_info.h"
 #include "avsession_log.h"
+#include "securec.h"
 
 namespace OHOS::AVSession {
 bool AVQueueInfo::Marshalling(Parcel& parcel) const
@@ -71,10 +72,8 @@ AVQueueInfo* AVQueueInfo::UnmarshallingMessageParcel(MessageParcel& data)
     }
     const char *buffer = nullptr;
     buffer = reinterpret_cast<const char *>(data.ReadRawData(imageLength));
-    if (buffer == nullptr) {
-        SLOGE("read raw data null buffer with length %{public}d", imageLength);
-        return result;
-    }
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, result, "read raw data null buffer");
+
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> mediaImageBuffer(buffer, buffer + imageLength);
     avQueuePixelMap->SetInnerImgBuffer(mediaImageBuffer);
@@ -91,24 +90,16 @@ bool AVQueueInfo::MarshallingQueueImage(MessageParcel& parcel) const
         imageLength = static_cast<int>(avQueueImageBuffer.size());
     }
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(imageLength), false, "write image length fail");
+    CHECK_AND_RETURN_RET_LOG(imageLength > 0, true, "no image");
 
     unsigned char *buffer = new (std::nothrow) unsigned char[imageLength];
-    if (buffer == nullptr) {
-        SLOGE("new buffer failed of length = %{public}d", imageLength);
-        return false;
-    }
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, false, "new buffer failed");
 
-    for (int i = 0; i < imageLength; i++) {
-        buffer[i] = avQueueImageBuffer[i];
-    }
+    memcpy_s(buffer, imageLength, avQueueImageBuffer.data(), imageLength);
 
-    if (!parcel.WriteRawData(buffer, imageLength)) {
-        SLOGE("WriteRawData failed");
-        delete[] buffer;
-        return false;
-    }
-
+    bool ret = parcel.WriteRawData(buffer, imageLength);
     delete[] buffer;
+    CHECK_AND_RETURN_RET_LOG(ret, false, "WriteRawData failed");
     return true;
 }
 

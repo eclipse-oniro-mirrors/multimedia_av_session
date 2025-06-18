@@ -47,7 +47,7 @@ void AVSharedMemoryBaseTest::TearDown() {}
 * @tc.desc: set the input array  to nullptr
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Write001, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Write001, TestSize.Level0)
 {
     SLOGI("Write001 begin!");
     int32_t size = 10;
@@ -66,7 +66,7 @@ static HWTEST(AVSharedMemoryBaseTest, Write001, TestSize.Level1)
 * @tc.desc: set writeSize to zero
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Write002, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Write002, TestSize.Level0)
 {
     SLOGI("Write002 begin!");
     int32_t size = 10;
@@ -87,7 +87,7 @@ static HWTEST(AVSharedMemoryBaseTest, Write002, TestSize.Level1)
 * @tc.desc: set writeSize equal to INVALID_POSITION
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Write003, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Write003, TestSize.Level0)
 {
     SLOGI("Write003 begin!");
     int32_t size = 10;
@@ -108,7 +108,7 @@ static HWTEST(AVSharedMemoryBaseTest, Write003, TestSize.Level1)
 * @tc.desc: set writeSize bigger than capacity
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Write004, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Write004, TestSize.Level0)
 {
     SLOGI("Write004 begin!");
     int32_t size = 10;
@@ -129,7 +129,7 @@ static HWTEST(AVSharedMemoryBaseTest, Write004, TestSize.Level1)
 * @tc.desc: the base_ of memory is nullptr
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Write005, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Write005, TestSize.Level0)
 {
     SLOGI("Write005 begin!");
     int32_t size = 10;
@@ -150,7 +150,7 @@ static HWTEST(AVSharedMemoryBaseTest, Write005, TestSize.Level1)
 * @tc.desc: success to write
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Write006, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Write006, TestSize.Level0)
 {
     SLOGI("Write006 begin!");
     int32_t size = 10;
@@ -173,7 +173,7 @@ static HWTEST(AVSharedMemoryBaseTest, Write006, TestSize.Level1)
 * @tc.desc: out array is nullptr
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Read001, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Read001, TestSize.Level0)
 {
     SLOGI("Read001 begin!");
     int32_t size = 10;
@@ -192,7 +192,7 @@ static HWTEST(AVSharedMemoryBaseTest, Read001, TestSize.Level1)
 * @tc.desc: set readSize equal to zero
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Read002, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Read002, TestSize.Level0)
 {
     SLOGI("Read002 begin!");
     int32_t size = 10;
@@ -213,7 +213,7 @@ static HWTEST(AVSharedMemoryBaseTest, Read002, TestSize.Level1)
 * @tc.desc: set position equal to INVALID_POSITION
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Read003, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Read003, TestSize.Level0)
 {
     SLOGI("Read003 begin!");
     int32_t size = 10;
@@ -234,7 +234,7 @@ static HWTEST(AVSharedMemoryBaseTest, Read003, TestSize.Level1)
 * @tc.desc: set length bigger than capacity_
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Read004, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Read004, TestSize.Level0)
 {
     SLOGI("Read004 begin!");
     int32_t size = 10;
@@ -256,7 +256,7 @@ static HWTEST(AVSharedMemoryBaseTest, Read004, TestSize.Level1)
 * @tc.desc: base_ array is nullptr
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Read005, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Read005, TestSize.Level0)
 {
     SLOGI("Read005 begin!");
     int32_t size = 10;
@@ -277,7 +277,7 @@ static HWTEST(AVSharedMemoryBaseTest, Read005, TestSize.Level1)
 * @tc.desc: success to read
 * @tc.type: FUNC
 */
-static HWTEST(AVSharedMemoryBaseTest, Read006, TestSize.Level1)
+static HWTEST(AVSharedMemoryBaseTest, Read006, TestSize.Level0)
 {
     SLOGI("Read006 begin!");
     int32_t size = 10;

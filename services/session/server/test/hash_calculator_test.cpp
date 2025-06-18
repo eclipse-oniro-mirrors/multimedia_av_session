@@ -47,7 +47,7 @@ void HashCalculatorTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(HashCalculatorTest, Update001, testing::ext::TestSize.Level1)
+static HWTEST_F(HashCalculatorTest, Update001, testing::ext::TestSize.Level0)
 {
     HashCalculator hashCalculator;
     std::vector<uint8_t> vec;

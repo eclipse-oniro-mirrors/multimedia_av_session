@@ -14,6 +14,7 @@
  */
 
 const TAG = 'avcastpicker_component ';
+const castPlusAudioType = 8;
 
 /**
  * Definition of av cast picker state.
@@ -91,6 +92,11 @@ enum AVCastPickerColorMode {
   LIGHT = 2
 }
 
+interface HighQualityParams {
+  iconLeft: string,
+  iconRight: string,
+}
+
 /**
  * menuItem device info
  */
@@ -102,7 +108,9 @@ export interface AVCastPickerDeviceInfo {
   isConnected: boolean,
   selectedIconName: string,
   deviceSource: DeviceSource,
-  networkId: string
+  networkId: string,
+  supportedProtocols?: number,
+  highQualityParams?: HighQualityParams,
 }
 
 @Component
@@ -126,6 +134,11 @@ export struct AVCastPicker {
    * The device that is displayed in the menu.
    */
   @State deviceList: Array<AVCastPickerDeviceInfo> = [];
+
+  /**
+   * The scale of font size.
+   */
+  @State fontSizeScale: number = 1;
 
   /**
    * Session type transferred by the application.
@@ -211,6 +224,13 @@ export struct AVCastPicker {
     }
   }
 
+  private showHighQuality(item: AVCastPickerDeviceInfo): boolean {
+    if (item.supportedProtocols === undefined) {
+      return false;
+    }
+    return (item.supportedProtocols & castPlusAudioType) !== 0;
+  }
+
   build() {
     Column() {
       if (this.customPicker === undefined) {
@@ -249,17 +269,23 @@ export struct AVCastPicker {
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
         $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
       .width(this.isPc ? 254 : 144)
-      .padding({
-        left: 8,
-        top: this.isPc ? 11 : 17,
-        right: 8,
-        bottom: this.isPc ? 11 : 17
-      })
       .textOverflow({ overflow: TextOverflow.Ellipsis })
       .maxLines(2)
       .wordBreak(WordBreak.BREAK_ALL)
       .maxFontScale(this.maxFontSizeScale)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
+  }
+
+  @Builder
+  highQualityIconBuilder(params: HighQualityParams) {
+    Row() {
+      Text(params.iconLeft)
+        .highQualityStyles(this.maxFontSizeScale)
+      Text(params.iconRight)
+        .highQualityStyles(this.maxFontSizeScale)
+        .margin({left: 2 * (Math.min(this.maxFontSizeScale, this.fontSizeScale))})
+    }
+    .direction(Direction.Ltr)
   }
 
   @Builder
@@ -279,7 +305,25 @@ export struct AVCastPicker {
             Row() {
               this.iconBuilder(item, false)
 
-              this.textBuilder(item)
+              Flex({direction: FlexDirection.Row, justifyContent: FlexAlign.Center}) {
+                this.textBuilder(item)
+                if (this.showHighQuality(item)) {
+                  Flex() {
+                    this.highQualityIconBuilder(item.highQualityParams)
+                  }
+                  .borderRadius(3)
+                  .border({width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)), color: $r('sys.color.font_secondary')})
+                  .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
+                  .margin({top: 2})
+                  .width('auto')
+                }
+              }
+              .padding({
+                left: 8,
+                top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                right: 8,
+                bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+              })
             }
             .alignItems(VerticalAlign.Center)
 
@@ -377,6 +421,11 @@ export struct AVCastPicker {
               this.isMenuShow = false;
               this.touchMenuItemIndex = -1;
             }
+          }
+
+          if (JSON.stringify(data['fontSizeScale']) !== undefined) {
+            console.info(TAG, `font size scale : ${JSON.stringify(data['fontSizeScale'])}`);
+            this.fontSizeScale = data['fontSizeScale'] as number;
           }
 
           if (JSON.stringify(data['state']) !== undefined) {
@@ -556,4 +605,11 @@ export struct AVCastPicker {
     }
     .size({ width: '100%', height: '100%' })
   }
+}
+
+@Extend(Text) function highQualityStyles(maxScale: number) {
+  .fontSize(7)
+  .fontWeight(FontWeight.Medium)
+  .fontColor($r('sys.color.font_secondary'))
+  .maxFontScale(maxScale)
 }

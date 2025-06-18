@@ -79,7 +79,7 @@ void AppManagerAdapterTest::SetUp()
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged001, testing::ext::TestSize.Level1)
+static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAppStateChanged001, start");
     AppManagerAdapter::GetInstance().Init();
@@ -96,7 +96,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged001, testing::ext::TestS
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged002, testing::ext::TestSize.Level1)
+static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged002, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAppStateChanged002, start");
     AppManagerAdapter::GetInstance().Init();
@@ -113,7 +113,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged002, testing::ext::TestS
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged003, testing::ext::TestSize.Level1)
+static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged003, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAppStateChanged003, start");
     g_appProcessData.appState = OHOS::AppExecFwk::ApplicationState::APP_STATE_FOREGROUND;
@@ -131,7 +131,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged003, testing::ext::TestS
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged004, testing::ext::TestSize.Level1)
+static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged004, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAppStateChanged004, start");
     g_appProcessData.appState = OHOS::AppExecFwk::ApplicationState::APP_STATE_FOREGROUND;
@@ -149,7 +149,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged004, testing::ext::TestS
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged005, testing::ext::TestSize.Level1)
+static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged005, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAppStateChanged005, start");
     AppManagerAdapter::GetInstance().Init();
@@ -169,7 +169,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged005, testing::ext::TestS
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged006, testing::ext::TestSize.Level1)
+static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged006, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAppStateChanged006, start");
     AppManagerAdapter::GetInstance().Init();
@@ -189,7 +189,7 @@ static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged006, testing::ext::TestS
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged007, testing::ext::TestSize.Level1)
+static HWTEST_F(AppManagerAdapterTest, OnAppStateChanged007, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAppStateChanged007, start");
     AppManagerAdapter::GetInstance().Init();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,7 +122,7 @@ class AVSessionCallbackStubDemo : public AVSessionCallbackStub {
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest000, TestSize.Level1)
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest000, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest000 begin!");
     uint32_t code = 0;
@@ -139,7 +139,7 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest000, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest001, TestSize.Level1)
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
     uint32_t code = 11;
@@ -159,7 +159,7 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest001, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest002, TestSize.Level1)
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
     uint32_t code = 12;
@@ -180,7 +180,7 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest002, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest003, TestSize.Level1)
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest003 begin!");
     uint32_t code = 13;
@@ -200,7 +200,7 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest003, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest004, TestSize.Level1)
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest004, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest004 begin!");
     uint32_t code = 14;
@@ -220,7 +220,7 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest004, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest005, TestSize.Level1)
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest005, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest005 begin!");
     uint32_t code = 19;
@@ -240,7 +240,7 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest005, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest006, TestSize.Level1)
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest006, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest006 begin!");
     uint32_t code = 25;
@@ -260,7 +260,7 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest006, TestSize.Level1)
 * @tc.desc: Test OnRemoteRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level1)
+static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest007 begin!");
     uint32_t code = 20;
@@ -277,33 +277,27 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level1)
 }
 
 /**
-* @tc.name: OnSetTargetLoopMode001
-* @tc.desc: Test OnSetTargetLoopMode
-* @tc.type: FUNC
-*/
-static HWTEST_F(AVSessionCallbackStubTest, OnSetTargetLoopMode001, TestSize.Level1)
+ * @tc.name: OnSetTargetLoopMode001
+ * @tc.desc: Test OnSetTargetLoopMode
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionCallbackStubTest, OnSetTargetLoopMode001, TestSize.Level0)
 {
     SLOGI("OnSetTargetLoopMode001 begin!");
-    auto aVSessionCallback = std::make_shared<AVSessionCallbackStubDemo>();
-    ASSERT_NE(aVSessionCallback, nullptr);
-    int32_t targetLoopMode = 0;
-    aVSessionCallback->OnSetTargetLoopMode(targetLoopMode);
-    SLOGI("OnSetTargetLoopMode001 end!");
-}
-
-/**
-* @tc.name: OnPlayWithAssetId001
-* @tc.desc: Test OnPlayWithAssetId
-* @tc.type: FUNC
-*/
-static HWTEST_F(AVSessionCallbackStubTest, OnPlayWithAssetId001, TestSize.Level1)
-{
-    SLOGI("OnPlayWithAssetId001 begin!");
-    auto aVSessionCallback = std::make_shared<AVSessionCallbackStubDemo>();
-    ASSERT_NE(aVSessionCallback, nullptr);
+    uint32_t code = 12;
     std::string assetId = "test";
-    aVSessionCallback->OnPlayWithAssetId(assetId);
-    SLOGI("OnPlayWithAssetId001 end!");
+    int32_t targetLoopMode = 0;
+    AVSessionCallbackStubDemo avSessionCallbackStub;
+    avSessionCallbackStub.OnPlayWithAssetId(assetId);
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
+    data.WriteString("test");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    avSessionCallbackStub.OnSetTargetLoopMode(targetLoopMode);
+    int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnSetTargetLoopMode001 end!");
 }
 }
 }

@@ -58,7 +58,7 @@ void AVSessionRadarTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetAnonymousDeviceId001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetAnonymousDeviceId001, TestSize.Level0)
 {
     std::string deviceId = "abcdefghijklmnopkrst";
     std::string ret = AVSessionRadar::GetAnonymousDeviceId(deviceId);
@@ -71,7 +71,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetAnonymousDeviceId001, TestS
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetRadarErrorCode001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetRadarErrorCode001, TestSize.Level0)
 {
     int32_t error = -1020;
     int32_t ret = AVSessionRadar::GetRadarErrorCode(error);
@@ -84,7 +84,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetRadarErrorCode001, TestSize
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetPeerInfo001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetPeerInfo001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionRadarGetPeerInfo001");
     AVSessionRadar::GetInstance().GetPeerInfo(outDeviceInfo_, info);
@@ -99,7 +99,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionRadarGetPeerInfo001, TestSize.Level
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionRadarStartCastDiscoveryBegin001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionRadarStartCastDiscoveryBegin001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionRadarStartCastDiscoveryBegin001");
     AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
@@ -115,7 +115,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionRadarStartCastDiscoveryBegin001, Te
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionRadarStartCastDiscoveryEnd001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionRadarStartCastDiscoveryEnd001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionRadarStartCastDiscoveryEnd001");
     AVSessionRadar::GetInstance().StartCastDiscoveryEnd(info);
@@ -131,7 +131,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionRadarStartCastDiscoveryEnd001, Test
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionRadarFailToStartCastDiscovery001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionRadarFailToStartCastDiscovery001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionRadarFailToStartCastDiscovery001");
     AVSessionRadar::GetInstance().FailToStartCastDiscovery(info);
@@ -147,7 +147,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionRadarFailToStartCastDiscovery001, T
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionRadarCastDeviceAvailable001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionRadarCastDeviceAvailable001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionRadarCastDeviceAvailable001");
     AVSessionRadar::GetInstance().CastDeviceAvailable(outDeviceInfo_, info);
@@ -163,7 +163,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionRadarCastDeviceAvailable001, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStopCastDiscoveryBegin001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStopCastDiscoveryBegin001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStopCastDiscoveryBegin001");
     AVSessionRadar::GetInstance().StopCastDiscoveryBegin(info);
@@ -179,7 +179,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStopCastDiscoveryBegin001, TestSize
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStopCastDiscoveryEnd001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStopCastDiscoveryEnd001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStopCastDiscoveryEnd001");
     AVSessionRadar::GetInstance().StopCastDiscoveryEnd(info);
@@ -195,7 +195,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStopCastDiscoveryEnd001, TestSize.L
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCastDiscovery001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCastDiscovery001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionFailToStopCastDiscovery001");
     AVSessionRadar::GetInstance().FailToStopCastDiscovery(info);
@@ -211,7 +211,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCastDiscovery001, TestSiz
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStartCastBegin001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStartCastBegin001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStartCastBegin001");
     AVSessionRadar::GetInstance().StartCastBegin(outDeviceInfo_, info);
@@ -227,7 +227,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStartCastBegin001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStartCastEnd001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStartCastEnd001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStartCastEnd001");
     AVSessionRadar::GetInstance().StartCastEnd(outDeviceInfo_, info);
@@ -243,7 +243,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStartCastEnd001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionFailToStartCast001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionFailToStartCast001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionFailToStartCast001");
     AVSessionRadar::GetInstance().FailToStartCast(info);
@@ -259,7 +259,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionFailToStartCast001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionFailToStartCast002, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionFailToStartCast002, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionFailToStartCast002");
     AVSessionRadar::GetInstance().FailToStartCast(outDeviceInfo_, info);
@@ -275,7 +275,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionFailToStartCast002, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStartConnect001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStartConnect001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStartConnect001");
     AVSessionRadar::GetInstance().StartConnect(info);
@@ -291,7 +291,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStartConnect001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionConnectFinish001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionConnectFinish001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionConnectFinish001");
     AVSessionRadar::GetInstance().ConnectFinish(outDeviceInfo_.deviceInfos_[0], info);
@@ -307,7 +307,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionConnectFinish001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayBegin001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayBegin001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStartPlayBegin001");
     AVSessionRadar::GetInstance().StartPlayBegin(info);
@@ -323,7 +323,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayBegin001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayEnd001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayEnd001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStartPlayEnd001");
     AVSessionRadar::GetInstance().StartPlayEnd(info);
@@ -339,7 +339,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayEnd001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayFailed001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayFailed001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStartPlayFailed001");
     AVSessionRadar::GetInstance().StartPlayFailed(info);
@@ -355,7 +355,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStartPlayFailed001, TestSize.Level1
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionPlayerStarted001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionPlayerStarted001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionPlayerStarted001");
     AVSessionRadar::GetInstance().PlayerStarted(info);
@@ -371,7 +371,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionPlayerStarted001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionSendControlCommandBegin001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionSendControlCommandBegin001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionSendControlCommandEnd001");
     AVSessionRadar::GetInstance().SendControlCommandBegin(info);
@@ -387,7 +387,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionSendControlCommandBegin001, TestSiz
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionSendControlCommandEnd001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionSendControlCommandEnd001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionSendControlCommandEnd001");
     AVSessionRadar::GetInstance().SendControlCommandEnd(info);
@@ -403,7 +403,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionSendControlCommandEnd001, TestSize.
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionFailToSendControlCommand001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionFailToSendControlCommand001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionFailToSendControlCommand001");
     AVSessionRadar::GetInstance().FailToSendControlCommand(info);
@@ -419,7 +419,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionFailToSendControlCommand001, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionControlCommandRespond001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionControlCommandRespond001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionControlCommandRespond001");
     AVSessionRadar::GetInstance().ControlCommandRespond(info);
@@ -435,7 +435,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionControlCommandRespond001, TestSize.
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionControlCommandError001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionControlCommandError001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionControlCommandError001");
     AVSessionRadar::GetInstance().ControlCommandError(info);
@@ -451,7 +451,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionControlCommandError001, TestSize.Le
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStopCastBegin001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStopCastBegin001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStopCastBegin001");
     AVSessionRadar::GetInstance().StopCastBegin(outDeviceInfo_, info);
@@ -467,7 +467,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStopCastBegin001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStopCastEnd001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStopCastEnd001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStopCastEnd001");
     AVSessionRadar::GetInstance().StopCastEnd(outDeviceInfo_, info);
@@ -483,7 +483,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStopCastEnd001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionStopCastFinish001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionStopCastFinish001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionStopCastFinish001");
     AVSessionRadar::GetInstance().StopCastFinish(outDeviceInfo_.deviceInfos_[0], info);
@@ -499,7 +499,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionStopCastFinish001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCast001, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCast001, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionFailToStopCast001");
     AVSessionRadar::GetInstance().FailToStopCast(info);
@@ -515,7 +515,7 @@ static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCast001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCast002, TestSize.Level1)
+static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCast002, TestSize.Level0)
 {
     AVSessionRadarInfo info("AVSessionFailToStopCast002");
     AVSessionRadar::GetInstance().FailToStopCast(outDeviceInfo_, info);

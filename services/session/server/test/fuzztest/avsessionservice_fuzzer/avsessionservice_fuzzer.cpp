@@ -88,7 +88,8 @@ std::string GetString()
     return output;
 }
 
-std::string GenerateString(size_t target_len) {
+std::string GenerateString(size_t target_len)
+{
     if (RAW_DATA == nullptr || target_len == 0) {
         return "";
     }
@@ -99,10 +100,9 @@ std::string GenerateString(size_t target_len) {
         return "";
     }
 
-    std::vector<char> buffer(copy_len + 1, '\0');
+    std::vector<char> buffer(copy_len + 1, '\n');
 
-    errno_t ret = memcpy_s(buffer.data(), buffer.size(),
-                          RAW_DATA + g_sizePos, copy_len);
+    errno_t ret = memcpy_s(buffer.data(), buffer.size(), RAW_DATA + g_sizePos, copy_len);
     if (ret != EOK) {
         return "";
     }
@@ -275,7 +275,7 @@ void AvSessionServiceSystemAbilityTest(sptr<AVSessionService> service)
     };
 
     int32_t randomNumber = GetData<uint32_t>();
-    int32_t systemAbilityId = systemAbilityIdSet[randomNumber % systemAbilityIdSet.size()];
+    auto systemAbilityId = systemAbilityIdSet[randomNumber % systemAbilityIdSet.size()];
     std::string deviceId = GetString();
     service->OnAddSystemAbility(systemAbilityId, deviceId);
     service->OnRemoveSystemAbility(systemAbilityId, deviceId);
@@ -337,7 +337,7 @@ void AvSessionServiceControllerTest(sptr<AVSessionService> service)
     service->AddAvQueueInfoToFile(*avSessionItem);
     sptr<IRemoteObject> avControllerItemObj;
     std::string sessionId = GetString();
-    uint32_t ret = service->CreateControllerInner(avSessionItem->GetSessionId(), avControllerItemObj);
+    auto ret = service->CreateControllerInner(avSessionItem->GetSessionId(), avControllerItemObj);
     if (ret != AVSESSION_SUCCESS) {
         return;
     }
@@ -471,7 +471,7 @@ void AvSessionServiceSuperLauncherTest001(sptr<AVSessionService> service)
 {
     vector<string> states { "UNKNOWN", "IDLE", "CONNECTING" };
     vector<string> serviceNames {"Unknown", "SuperLauncher-Dual", "HuaweiCast" };
-    int32_t randomNumber = GetData<int32_t>();
+    auto randomNumber = GetData<uint32_t>();
     std::string serviceName = serviceNames[randomNumber % serviceNames.size()];
     std::string state = states[randomNumber % states.size()];
     std::string deviceId = GetString();
@@ -536,7 +536,7 @@ void StartAVPlayback001()
     avsessionService_->AddAvQueueInfoToFile(*avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     vector<string> assetNames { "FAKE_ASSET_NAME1", "FAKE_ASSET_NAME2" };
-    int32_t randomNumber = GetData<int32_t>();
+    auto randomNumber = GetData<uint32_t>();
     std::string assetName = assetNames[randomNumber % assetNames.size()];
     avsessionService_->StartAVPlayback(g_testAnotherBundleName, assetName);
 
@@ -954,7 +954,7 @@ void ProcessTargetMigrateTest(sptr<AVSessionService> service)
         OHOS::DistributedHardware::DmAuthForm::IDENTICAL_ACCOUNT,
         OHOS::DistributedHardware::DmAuthForm::ACROSS_ACCOUNT
     };
-    int randomNumber = GetData<uint32_t>();
+    auto randomNumber = GetData<uint32_t>();
     deviceInfo.authForm = authForms[randomNumber % authForms.size()];
     deviceInfo.extraData = GetString();
     bool isOnline = GetData<bool>();

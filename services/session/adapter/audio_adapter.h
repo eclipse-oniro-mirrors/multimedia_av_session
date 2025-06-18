@@ -76,7 +76,7 @@ public:
 
     void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& desc) override;
 
-    bool GetRendererRunning(int32_t uid, int32_t pid);
+    bool GetRendererRunning(int32_t uid);
 
     int32_t SetVolume(int32_t volume);
     int32_t GetVolume();
@@ -122,7 +122,6 @@ private:
     std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
 
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
-
     std::shared_ptr<AudioAllowedPlaybackCallback> playbackCallback_;
 };
 

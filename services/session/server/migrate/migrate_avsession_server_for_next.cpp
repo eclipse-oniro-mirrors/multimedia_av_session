@@ -70,14 +70,14 @@ void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
     if (controller != nullptr) {
         controller->UnregisterAVControllerCallback();
     } else {
-        SLOGE("LocalFrontSessionLeave but get controller null");
+        SLOGE("LocalFrontSessionChange but get controller null");
     }
     ClearCacheBySessionId(sessionId);
     auto it = playerIdToControllerMap_.find(sessionId);
     if (it != playerIdToControllerMap_.end()) {
         playerIdToControllerMap_.erase(it);
     } else {
-        SLOGE("LocalFrontSessionLeave no find sessionId:%{public}s",
+        SLOGE("LocalFrontSessionChange no find sessionId:%{public}s",
             AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     }
     LocalFrontSessionArrive(sessionId);
@@ -167,9 +167,9 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
     MigratePostTask(
         [this, msg]() {
             SendByteForNext(deviceId_, msg);
-        },
-        "SYNC_FOCUS_META_INFO");
-    SLOGI("DoMetaDataSyncToRemote async title:%{public}s done", data.GetTitle().c_str());
+        }, "SYNC_FOCUS_META_INFO");
+    SLOGI("DoMetaDataSyncToRemote async title:%{public}s|len:%{public}d done",
+        data.GetTitle().c_str(), static_cast<int>(msg.size()));
     {
         std::lock_guard lockGuard(cacheJsonLock_);
         metaDataCache_ = cJSON_Duplicate(metaData, true);
@@ -241,8 +241,8 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
             SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_PLAY_STATE");
-    SLOGI("DoPlaybackStateSyncToRemote sync state:%{public}d|isFavor:%{public}d done",
-        state.GetState(), state.GetFavorite());
+    SLOGI("DoPlaybackStateSyncToRemote sync state:%{public}d|isFavor:%{public}d|len:%{public}d done",
+        state.GetState(), state.GetFavorite(), static_cast<int>(msg.size()));
     {
         std::lock_guard lockGuard(cacheJsonLock_);
         playbackStateCache_ = cJSON_Duplicate(playbackState, true);
@@ -252,8 +252,6 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
 
 void MigrateAVSessionServer::DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands)
 {
-    SLOGI("DoValidCommandsSyncToRemote async commands num:%{public}d", static_cast<int>(commands.size()));
-
     cJSON* validCommands = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(validCommands != nullptr, "get validCommands json with nullptr");
     std::string commandsStr;
@@ -273,6 +271,8 @@ void MigrateAVSessionServer::DoValidCommandsSyncToRemote(const std::vector<int32
             SendByteForNext(deviceId_, msg);
         },
         "SYNC_FOCUS_VALID_COMMANDS");
+    SLOGI("DoValidCommandsSyncToRemote async commands num:%{public}d|content:%{public}s|len:%{public}d done",
+        static_cast<int>(commands.size()), commandsStr.c_str(), static_cast<int>(msg.size()));
     cJSON_Delete(validCommands);
 }
 
@@ -471,8 +471,12 @@ void MigrateAVSessionServer::ProcControlCommandFromNext(cJSON* commandJsonValue)
         commandArgs = SoftbusSessionUtils::GetStringFromJson(commandJsonValue, COMMAND_ARGS);
     }
 
-    sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
-    CHECK_AND_RETURN_LOG(controller != nullptr, "ProcControlCommandFromNext but get controller null");
+    sptr<AVControllerItem> controller = nullptr;
+    {
+        std::lock_guard lockGuard(migrateControllerLock_);
+        controller = playerIdToControllerMap_[lastSessionId_];
+        CHECK_AND_RETURN_LOG(controller != nullptr, "ProcControlCommandFromNext but get controller null");
+    }
     AVControlCommand command;
     if (AVSESSION_SUCCESS != command.SetCommand(commandCode)) {
         SLOGE("ProcControlCommandFromNext parse invalid command type:%{public}d", commandCode);
@@ -500,7 +504,9 @@ void MigrateAVSessionServer::ProcessColdStartFromNext(cJSON* commandJsonValue)
     }
     SLOGI("ProcessColdStartFromNext with bundleName:%{public}s", bundleName.c_str());
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessColdStartFromNext without servicePtr, return");
-    servicePtr_->StartAVPlayback(bundleName, "");
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    servicePtr_->SendSystemControlCommand(cmd);
 }
 
 void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* commandJsonValue)
@@ -515,6 +521,7 @@ void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* command
         if (!isListenerSet_ && newListenerSetState) {
             isListenerSet_ = true;
             LocalFrontSessionArrive(lastSessionId_);
+            RegisterAudioCallbackAndTrigger();
         } else {
             isListenerSet_ = newListenerSetState;
         }

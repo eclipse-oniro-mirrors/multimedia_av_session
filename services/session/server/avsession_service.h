@@ -668,6 +668,7 @@ private:
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
     static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
+    static constexpr const char *sessionCastState_ = "CAST_STATE";
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";

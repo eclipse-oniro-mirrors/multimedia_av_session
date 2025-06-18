@@ -51,6 +51,9 @@ T GetData()
     if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
         return object;
     }
+    if (g_pos >= g_dataSize) {
+        return object;
+    }
     errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
     if (ret != EOK) {
         return {};
@@ -64,20 +67,17 @@ static std::string GenerateString(size_t target_len)
     if (RAW_DATA == nullptr || target_len == 0) {
         return "";
     }
-
     const size_t available_len = (g_dataSize > g_pos) ? (g_dataSize - g_pos) : 0;
     const size_t copy_len = std::min(target_len, available_len);
     if (copy_len == 0) {
         return "";
     }
-
     std::vector<char> buffer(copy_len + 1, '\0');
     errno_t ret = memcpy_s(buffer.data(), buffer.size(),
                         RAW_DATA + g_pos, copy_len);
     if (ret != EOK) {
         return "";
     }
-
     g_pos += copy_len;
     return std::string(buffer.data());
 }
@@ -462,15 +462,12 @@ void MigrateAVSessionFuzzerTest()
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+    if (size < MIN_SIZE_NUM) {
         return 0;
     }
 
-    RAW_DATA = data;
-    g_dataSize = size;
-    g_pos = 0;
     /* Run your code on data */
-    MigrateAVSessionFuzzerTest();
+    MigrateAVSessionFuzzerTest(data, size);
     return 0;
 }
 } // namespace OHOS::AVSession
