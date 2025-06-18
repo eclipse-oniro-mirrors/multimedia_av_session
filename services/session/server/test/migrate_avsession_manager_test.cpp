@@ -72,7 +72,7 @@ void MigrateAVSessionManagerTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy001, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::shared_ptr<MigrateAVSessionProxy> proxy {nullptr};
@@ -88,7 +88,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy001, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy002, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "";
@@ -103,7 +103,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy002, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy003, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = std::string();
@@ -118,7 +118,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy003, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy004, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy004, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";
@@ -133,7 +133,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy004, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy005, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy005, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";
@@ -148,7 +148,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy005, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy006, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy006, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";
@@ -164,7 +164,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, CreateRemoteSessionProxy006, TestSi
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy001, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";
@@ -179,7 +179,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy001, TestS
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy002, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";
@@ -194,7 +194,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy002, TestS
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy003, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";
@@ -209,7 +209,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy003, TestS
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy004, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy004, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";
@@ -224,7 +224,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy004, TestS
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy005, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy005, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";
@@ -240,7 +240,7 @@ static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy005, TestS
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy006, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionManagerTest, ReleaseRemoteSessionProxy006, TestSize.Level0)
 {
     MigrateAVSessionManager::GetInstance().refs_.store(0);
     std::string networkId = "test";

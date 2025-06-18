@@ -162,7 +162,7 @@ protected:
 * @tc.desc: test HandleSendControlCommand
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode0_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode0_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode0_1 begin");
     uint32_t code = 0;
@@ -183,7 +183,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode0_1, TestSize.Level
 * @tc.desc: test HandleSendControlCommand
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode0_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode0_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode0_2 begin");
     uint32_t code = 0;
@@ -206,7 +206,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode0_2, TestSize.Level
 * @tc.desc: test HandleStart
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode1_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode1_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode1_1 begin");
     uint32_t code = 1;
@@ -227,7 +227,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode1_1, TestSize.Level
 * @tc.desc: test HandleStart
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode1_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode1_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode1_2 begin");
     uint32_t code = 1;
@@ -250,7 +250,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode1_2, TestSize.Level
 * @tc.desc: test HandlePrepare
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode2_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode2_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode2_1 begin");
     uint32_t code = 2;
@@ -271,7 +271,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode2_1, TestSize.Level
 * @tc.desc: test HandlePrepare
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode2_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode2_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode2_2 begin");
     uint32_t code = 2;
@@ -294,7 +294,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode2_2, TestSize.Level
 * @tc.desc: test HandleGetDuration
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode3_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode3_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode3_1 begin");
     uint32_t code = 3;
@@ -315,7 +315,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode3_1, TestSize.Level
 * @tc.desc: test HandleGetDuration
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode3_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode3_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode3_2 begin");
     uint32_t code = 3;
@@ -336,7 +336,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode3_2, TestSize.Level
 * @tc.desc: test HandleGetCastAVPlayBackState
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode4_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode4_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode4_1 begin");
     uint32_t code = 4;
@@ -357,7 +357,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode4_1, TestSize.Level
 * @tc.desc: test HandleGetCastAVPlayBackState
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode4_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode4_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode4_2 begin");
     uint32_t code = 4;
@@ -378,7 +378,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode4_2, TestSize.Level
 * @tc.desc: test HandleGetCurrentItem
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode5_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode5_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode5_1 begin");
     uint32_t code = 5;
@@ -399,7 +399,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode5_1, TestSize.Level
 * @tc.desc: test HandleGetCurrentItem
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode5_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode5_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode5_2 begin");
     uint32_t code = 5;
@@ -420,7 +420,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode5_2, TestSize.Level
 * @tc.desc: test HandleGetValidCommands
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode6_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode6_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode6_1 begin");
     uint32_t code = 6;
@@ -441,7 +441,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode6_1, TestSize.Level
 * @tc.desc: test HandleGetValidCommands
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode6_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode6_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode6_2 begin");
     uint32_t code = 6;
@@ -462,7 +462,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode6_2, TestSize.Level
 * @tc.desc: test HandleSetDisplaySurface
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode7_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode7_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode7_1 begin");
     uint32_t code = 7;
@@ -484,7 +484,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode7_1, TestSize.Level
 * @tc.desc: test HandleSetDisplaySurface
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode7_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode7_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode7_2 begin");
     uint32_t code = 7;
@@ -516,7 +516,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode7_2, TestSize.Level
 * @tc.desc: test HandleSetCastPlaybackFilter
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode0_1 begin");
     uint32_t code = 8;
@@ -537,7 +537,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_1, TestSize.Level
 * @tc.desc: test HandleSetCastPlaybackFilter
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode8_2 begin");
     uint32_t code = 8;
@@ -560,7 +560,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_2, TestSize.Level
 * @tc.desc: test HandleSetCastPlaybackFilter
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_3, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_3, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode8_3 begin");
     uint32_t code = 8;
@@ -583,7 +583,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode8_3, TestSize.Level
 * @tc.desc: test HandleProcessMediaKeyResponse
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode9_1 begin");
     uint32_t code = 9;
@@ -605,7 +605,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_1, TestSize.Level
 * @tc.desc: test HandleProcessMediaKeyResponse
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode9_2 begin");
     uint32_t code = 9;
@@ -627,7 +627,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_2, TestSize.Level
 * @tc.desc: test HandleProcessMediaKeyResponse
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_3, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_3, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode9_3 begin");
     uint32_t code = 9;
@@ -651,7 +651,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode9_3, TestSize.Level
 * @tc.desc: test HandleRegisterCallbackInner
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode10_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode10_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode10_1 begin");
     uint32_t code = 10;
@@ -682,7 +682,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode10_1, TestSize.Leve
 * @tc.desc: test HandleRegisterCallbackInner
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode10_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode10_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode10_2 begin");
     uint32_t code = 10;
@@ -745,7 +745,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode11_2, TestSize.Leve
 * @tc.desc: test HandleAddAvailableCommand
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode12_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode12_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode12_1 begin");
     uint32_t code = 12;
@@ -766,7 +766,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode12_1, TestSize.Leve
 * @tc.desc: test HandleAddAvailableCommand
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode12_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode12_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode12_2 begin");
     uint32_t code = 12;
@@ -787,7 +787,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode12_2, TestSize.Leve
 * @tc.desc: test HandleRemoveAvailableCommand
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode13_1, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode13_1, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode13_1 begin");
     uint32_t code = 13;
@@ -808,7 +808,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode13_1, TestSize.Leve
 * @tc.desc: test HandleRemoveAvailableCommand
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode13_2, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode13_2, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode13_2 begin");
     uint32_t code = 13;
@@ -829,7 +829,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode13_2, TestSize.Leve
 * @tc.desc: test OnRemoteRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode14, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode14, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode14 begin");
     uint32_t code = 0;
@@ -848,7 +848,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode14, TestSize.Level1
 * @tc.desc: test OnRemoteRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode15, TestSize.Level1)
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode15, TestSize.Level0)
 {
     SLOGI("OnRemoteRequestCode15 begin");
     uint32_t code = 1000;

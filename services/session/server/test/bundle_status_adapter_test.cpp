@@ -116,7 +116,6 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent001, testing:
             capturedBundleName.c_str(), userId);
     };
     bool ret = BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName, callback);
-    SLOGI("SubscribeBundleStatusEvent001 get ret:%{public}d", static_cast<int>(ret));
     EXPECT_EQ(ret, true);
     SLOGI("SubscribeBundleStatusEvent001, end");
 }
@@ -126,7 +125,7 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent001, testing:
  * @tc.desc: Test SubscribeBundleStatusEvent
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent002, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent002, testing::ext::TestSize.Level0)
 {
     SLOGI("SubscribeBundleStatusEvent002, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -164,7 +163,7 @@ static HWTEST_F(BundleStatusAdapterTest, SubscribeBundleStatusEvent003, testing:
  * @tc.desc: Test GetBundleNameFromUid
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, GetBundleNameFromUid001, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, GetBundleNameFromUid001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetBundleNameFromUid001, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -179,7 +178,7 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleNameFromUid001, testing::ext::
  * @tc.desc: Test CheckBundleSupport
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport001, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport001, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckBundleSupport001, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -194,7 +193,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport001, testing::ext::Te
  * @tc.desc: Test CheckBundleSupport
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport002, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport002, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckBundleSupport002, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -218,7 +217,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport002, testing::ext::Te
  * @tc.desc: Test CheckBundleSupport
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport003, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport003, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckBundleSupport003, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -242,7 +241,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport003, testing::ext::Te
  * @tc.desc: Test CheckBundleSupport
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport004, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport004, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckBundleSupport004, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -266,7 +265,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport004, testing::ext::Te
  * @tc.desc: Test IsAudioPlayback
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback001, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback001, testing::ext::TestSize.Level0)
 {
     SLOGI("IsAudioPlayback001, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -282,7 +281,7 @@ static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback001, testing::ext::TestS
  * @tc.desc: Test IsAudioPlayback
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback002, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback002, testing::ext::TestSize.Level0)
 {
     SLOGI("IsAudioPlayback002, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -303,7 +302,7 @@ static HWTEST_F(BundleStatusAdapterTest, IsAudioPlayback002, testing::ext::TestS
  * @tc.desc: Test NotifyBundleRemoved
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved001, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved001, testing::ext::TestSize.Level0)
 {
     SLOGI("NotifyBundleRemoved001, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -324,7 +323,7 @@ static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved001, testing::ext::T
  * @tc.desc: Test NotifyBundleRemoved
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved002, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved002, testing::ext::TestSize.Level0)
 {
     SLOGI("NotifyBundleRemoved002, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -340,7 +339,7 @@ static HWTEST_F(BundleStatusAdapterTest, NotifyBundleRemoved002, testing::ext::T
  * @tc.desc: Test IsSupportPlayIntent
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent001, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent001, testing::ext::TestSize.Level0)
 {
     SLOGI("IsSupportPlayIntent001, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -357,7 +356,7 @@ static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent001, testing::ext::T
  * @tc.desc: Test IsSupportPlayIntent
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent002, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent002, testing::ext::TestSize.Level0)
 {
     SLOGI("IsSupportPlayIntent002, start");
     BundleStatusAdapter::GetInstance().Init();
@@ -379,7 +378,7 @@ static HWTEST_F(BundleStatusAdapterTest, IsSupportPlayIntent002, testing::ext::T
  * @tc.desc: Test OnBundleStateChanged
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged001, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged001, testing::ext::TestSize.Level0)
 {
     bool ret = false;
     auto callback = [&ret](const std::string& capturedBundleName, int32_t userId) {
@@ -398,7 +397,7 @@ static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged001, testing::ext::
  * @tc.desc: Test OnBundleStateChanged
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged002, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged002, testing::ext::TestSize.Level0)
 {
     bool ret = true;
     auto callback = [&ret](const std::string& capturedBundleName, int32_t userId) {
@@ -416,7 +415,7 @@ static HWTEST_F(BundleStatusAdapterTest, OnBundleStateChanged002, testing::ext::
  * @tc.desc: fail to get icon
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon001, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon001, testing::ext::TestSize.Level0)
 {
     BundleStatusAdapter::GetInstance().bundleMgrProxy = nullptr;
     BundleStatusAdapter::GetInstance().bundleResourceProxy = nullptr;
@@ -432,7 +431,7 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon001, testing::ext::TestSiz
  * @tc.desc: fail to get icon
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon002, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon002, testing::ext::TestSize.Level0)
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
@@ -451,7 +450,7 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon002, testing::ext::TestSiz
  * @tc.desc: fail to get icon
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon003, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon003, testing::ext::TestSize.Level0)
 {
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
@@ -471,7 +470,7 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon003, testing::ext::TestSiz
  * @tc.desc: set intentName to PlayMusicList
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport005, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport005, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckBundleSupport005 start");
     BundleStatusAdapter::GetInstance().Init();
@@ -495,7 +494,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport005, testing::ext::Te
  * @tc.desc: set intentName to PlayAudio
  * @tc.type: FUNC
  */
-static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport006, testing::ext::TestSize.Level1)
+static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport006, testing::ext::TestSize.Level0)
 {
     SLOGI("CheckBundleSupport006 start");
     BundleStatusAdapter::GetInstance().Init();

@@ -79,7 +79,7 @@ void MigrateAVSessionProxyTest::TearDown()
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallback001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallback001, TestSize.Level0)
 {
     MigrateAVSessionProxyControllerCallbackFunc func =
         g_MigrateAVSessionProxy->MigrateAVSessionProxyControllerCallback();
@@ -95,7 +95,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallba
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallback002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallback002, TestSize.Level0)
 {
     auto maps = g_MigrateAVSessionProxy->AUDIO_EVENT_MAPS;
     MigrateAVSessionProxyControllerCallbackFunc func =
@@ -114,7 +114,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, MigrateAVSessionProxyControllerCallba
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo001, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -140,7 +140,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo002, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -169,7 +169,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo003, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -198,7 +198,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo003, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo004, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo004, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -227,7 +227,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessSessionInfo004, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData001, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -255,7 +255,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData002, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -282,7 +282,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState001, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -310,7 +310,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState002, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -337,7 +337,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessPlaybackState002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands001, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -364,7 +364,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands002, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -391,7 +391,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessValidCommands002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand001, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -418,7 +418,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand002, TestSize.Level0)
 {
     cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
     EXPECT_NE(jsonValue, nullptr);
@@ -445,7 +445,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessVolumeControlCommand002, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
@@ -462,7 +462,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessAvailableDevices001, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessPreferredOutputDevice001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessPreferredOutputDevice001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
@@ -479,7 +479,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessPreferredOutputDevice001, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -493,7 +493,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg002, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -507,7 +507,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg003, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -523,7 +523,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -537,7 +537,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage001, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage002, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage002, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -551,7 +551,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage002, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage003, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage003, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -567,7 +567,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage003, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, OnConnectServer001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, OnConnectServer001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -581,7 +581,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnConnectServer001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, OnDisconnectServer001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, OnDisconnectServer001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -595,7 +595,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnDisconnectServer001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
@@ -605,27 +605,37 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnSetTargetLoopMode001
- * @tc.desc: test the member of OnSetTargetLoopMode
+ * @tc.name: ProcessBundleImg004
+ * @tc.desc: test the member of ProcessBundleImg
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, OnSetTargetLoopMode001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg004, TestSize.Level0)
 {
-    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     int32_t targetLoopMode = 0;
+    std::string bundleIconStr = "";
+    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     g_AVSessionObserver->OnSetTargetLoopMode(targetLoopMode);
+    ASSERT_TRUE(g_MigrateAVSessionProxy != nullptr);
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    g_MigrateAVSessionProxy->ProcessBundleImg(bundleIconStr);
 }
 
 /**
- * @tc.name: OnPlayWithAssetId001
- * @tc.desc: test the member of OnPlayWithAssetId
+ * @tc.name: ProcessMediaImage004
+ * @tc.desc: test the member of ProcessMediaImage
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, OnPlayWithAssetId001, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage004, TestSize.Level0)
 {
-    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     std::string assetId = "test";
+    std::string bundleIconStr = "123";
+    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     g_AVSessionObserver->OnPlayWithAssetId(assetId);
+    ASSERT_TRUE(g_MigrateAVSessionProxy != nullptr);
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
+    g_MigrateAVSessionProxy->ProcessMediaImage(bundleIconStr);
 }

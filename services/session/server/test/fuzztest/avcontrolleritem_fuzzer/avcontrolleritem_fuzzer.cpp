@@ -151,7 +151,6 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest()
     avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
     CHECK_AND_RETURN_LOG(avControllerItem != nullptr, "avControllerItem is null");
     ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
-
     MessageParcel dataMessageParcel;
     MessageParcel reply;
     MessageOption option;
@@ -187,7 +186,6 @@ void AvControllerItemDataTest()
     sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type % MIN_SIZE_NUM, elementName);
     sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
     CHECK_AND_RETURN_LOG(avSessionItem != nullptr, "avSessionItem is null");
-    ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
     sptr<AVControllerItem> avControllerItem;
     sptr<IRemoteObject> avControllerItemObj;
     auto ret = service->CreateControllerInner(avSessionItem->GetSessionId(), avControllerItemObj);
@@ -195,7 +193,6 @@ void AvControllerItemDataTest()
     avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
     CHECK_AND_RETURN_LOG(avControllerItem != nullptr, "avControllerItem is null");
     ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
-
     AVPlaybackState playbackstate;
     avControllerItem->GetAVPlaybackState(playbackstate);
     AVMetaData metaData;

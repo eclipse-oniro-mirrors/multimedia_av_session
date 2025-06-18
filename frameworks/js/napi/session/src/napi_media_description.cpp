@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -373,7 +373,7 @@ napi_status NapiMediaDescription::SetMediaType(napi_env env, const AVMediaDescri
 
 napi_status NapiMediaDescription::GetMediaSize(napi_env env, napi_value in, AVMediaDescription& out)
 {
-    int32_t property;
+    int32_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "mediaSize", property);
     CheckAndSetDefaultInt(status, property);
     out.SetMediaSize(property);
@@ -534,7 +534,7 @@ napi_status NapiMediaDescription::SetFdSrc(napi_env env, const AVMediaDescriptio
 napi_status NapiMediaDescription::GetDuration(napi_env env, napi_value in, AVMediaDescription& out)
 {
     SLOGD("Start get Duration from napi_value");
-    int32_t property;
+    int32_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "duration", property);
     CheckAndSetDefaultInt(status, property);
     out.SetDuration(property);
@@ -555,7 +555,7 @@ napi_status NapiMediaDescription::SetDuration(napi_env env, const AVMediaDescrip
 napi_status NapiMediaDescription::GetStartPosition(napi_env env, napi_value in, AVMediaDescription& out)
 {
     SLOGD("Start get StartPosition from napi_value");
-    int32_t property;
+    int32_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "startPosition", property);
     CheckAndSetDefaultInt(status, property);
     out.SetStartPosition(property);
@@ -576,7 +576,7 @@ napi_status NapiMediaDescription::SetStartPosition(napi_env env, const AVMediaDe
 napi_status NapiMediaDescription::GetCreditsPosition(napi_env env, napi_value in, AVMediaDescription& out)
 {
     SLOGD("Start get CreditsPosition from napi_value");
-    int32_t property;
+    int32_t property {};
     auto status = NapiUtils::GetNamedProperty(env, in, "creditsPosition", property);
     CheckAndSetDefaultInt(status, property);
     out.SetCreditsPosition(property);

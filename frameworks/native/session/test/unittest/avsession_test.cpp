@@ -1055,5 +1055,19 @@ HWTEST_F(AvsessionTest, GetAllCastDisplays001, TestSize.Level1)
     SLOGD("GetAllCastDisplays001 End");
 }
 #endif
+
+/**
+* @tc.name: UpdateAVQueueInfo001
+* @tc.desc: update avqueue info
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, UpdateAVQueueInfo001, TestSize.Level1)
+{
+    SLOGD("UpdateAVQueueInfo001 Begin");
+    AVQueueInfo info = AVQueueInfo();
+    EXPECT_EQ(avsession_->UpdateAVQueueInfo(info), AVSESSION_SUCCESS);
+    SLOGD("UpdateAVQueueInfo001 End");
+}
 } // namespace AVSession
 } // namespace OHOS

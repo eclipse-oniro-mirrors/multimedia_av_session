@@ -80,25 +80,24 @@ constexpr int32_t DEFAULT_NUM = 0;
 
 constexpr int REASON_EXIST = -3;
 
-#define DEFAULT_STRING "DEFAULT"
-#define METADATA_ASSET_ID "MetadataAssetId"
-#define  FAVOR_STATE "FavorState"
-#define  VALID_COMMANDS "ValidCommands"
-#define  BUNDLE_ICON "BundleIcon"
-#define  COMMAND_CODE "CommandCode"
-#define  COMMAND_ARGS "CommandArgs"
-#define  EMPTY_SESSION "Empty"
-#define  MIGRATE_SESSION_ID "SessionId"
-#define  MIGRATE_BUNDLE_NAME "BundleName"
-#define  MIGRATE_ABILITY_NAME "AbilityName"
-#define  NEED_STATE "NeedState"
-
-namespace {
 #define EMIT_UTF8 "emitUTF8"
 #define PLAYBACK_SPEED "playbackSpeed"
 #define PLAYBACK_POSITION_ELAPSED_TIME "playbackPositionElapsedTime_"
 #define PLAYBACK_POSITION_UPDATE_TIME "playbackPositionUpdateTime_"
 #define PLAYBACK_GET_ACTIVE_ITEM_ID "playbackGetActiveItemId"
+
+#define DEFAULT_STRING "DEFAULT"
+#define METADATA_ASSET_ID "MetadataAssetId"
+#define FAVOR_STATE "FavorState"
+#define VALID_COMMANDS "ValidCommands"
+#define BUNDLE_ICON "BundleIcon"
+#define COMMAND_CODE "CommandCode"
+#define COMMAND_ARGS "CommandArgs"
+#define EMPTY_SESSION "Empty"
+#define MIGRATE_SESSION_ID "SessionId"
+#define MIGRATE_BUNDLE_NAME "BundleName"
+#define MIGRATE_ABILITY_NAME "AbilityName"
+#define NEED_STATE "NeedState"
 
 #define EVENT_COMMAND_UNLOCK_LYRIC "EVENT_COMMAND_UNLOCK_LYRIC"
 #define EVENT_COMMAND_SHOW_LYRIC "EVENT_COMMAND_SHOW_LYRIC"
@@ -182,7 +181,6 @@ constexpr int32_t VOLUMN_INFO = 15;
     "AUDIO_CALLBACK_AVAILABLE_DEVICES"
 #define AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO \
     "AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO"
-}
 } // namespace OHOS::AVSession
 
 #endif // MIGRATE_AVSESSION_CONSTANT_H

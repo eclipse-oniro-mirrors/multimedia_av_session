@@ -46,7 +46,7 @@ void AVCallStateTest::TearDown()
  * @tc.desc: Setting AVCallState with empty constructor
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallStateTest, SetAVCallState001, TestSize.Level1)
+HWTEST_F(AVCallStateTest, SetAVCallState001, TestSize.Level0)
 {
     auto *avp = new (std::nothrow) AVCallState();
     EXPECT_NE(avp, nullptr);
@@ -63,7 +63,7 @@ HWTEST_F(AVCallStateTest, SetAVCallState001, TestSize.Level1)
  * @tc.desc: Return is avcallstate IsValid success
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallStateTest, IsValid001, TestSize.Level1)
+HWTEST_F(AVCallStateTest, IsValid001, TestSize.Level0)
 {
     AVCallState avCallState;
     avCallState.SetAVCallState(2);
@@ -77,7 +77,7 @@ HWTEST_F(AVCallStateTest, IsValid001, TestSize.Level1)
  * @tc.desc: Return is avcallstate IsValid failed
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallStateTest, IsValid002, TestSize.Level1)
+HWTEST_F(AVCallStateTest, IsValid002, TestSize.Level0)
 {
     AVCallState avCallState;
     avCallState.SetAVCallState(-1);
@@ -91,7 +91,7 @@ HWTEST_F(AVCallStateTest, IsValid002, TestSize.Level1)
  * @tc.desc: Getting avcall state after using marshalling to set
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallStateTest, GetAVCallState001, TestSize.Level1)
+HWTEST_F(AVCallStateTest, GetAVCallState001, TestSize.Level0)
 {
     auto *avp = new (std::nothrow) AVCallState();
     EXPECT_NE(avp, nullptr);
@@ -110,7 +110,7 @@ HWTEST_F(AVCallStateTest, GetAVCallState001, TestSize.Level1)
  * @tc.desc: Return is avcallstate CopyToByMask success
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallStateTest, CopyToByMask001, TestSize.Level1)
+HWTEST_F(AVCallStateTest, CopyToByMask001, TestSize.Level0)
 {
     AVCallState stateOut;
     stateOut.SetAVCallState(2);
@@ -127,7 +127,7 @@ HWTEST_F(AVCallStateTest, CopyToByMask001, TestSize.Level1)
  * @tc.desc: Return is avcallstate CopyToByMask failed
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallStateTest, CopyToByMask002, TestSize.Level1)
+HWTEST_F(AVCallStateTest, CopyToByMask002, TestSize.Level0)
 {
     AVCallState stateOut;
     AVCallState::AVCallStateMaskType mask = stateOut.GetMask();
@@ -142,7 +142,7 @@ HWTEST_F(AVCallStateTest, CopyToByMask002, TestSize.Level1)
  * @tc.desc: Return is avcallstate CopyFrom success
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallStateTest, CopyFrom001, TestSize.Level1)
+HWTEST_F(AVCallStateTest, CopyFrom001, TestSize.Level0)
 {
     AVCallState stateOut;
     stateOut.SetAVCallState(1);
@@ -158,7 +158,7 @@ HWTEST_F(AVCallStateTest, CopyFrom001, TestSize.Level1)
  * @tc.desc: Return is avcallstate CopyFrom failed
  * @tc.type: FUNC
  */
-HWTEST_F(AVCallStateTest, CopyFrom002, TestSize.Level1)
+HWTEST_F(AVCallStateTest, CopyFrom002, TestSize.Level0)
 {
     AVCallState stateOut;
 

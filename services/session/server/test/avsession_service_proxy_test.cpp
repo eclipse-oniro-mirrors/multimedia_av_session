@@ -59,7 +59,7 @@ void AVSessionServiceProxyTest::TearDown()
  * @tc.desc: Test GetAllSessionDescriptors
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAllSessionDescriptors001, start");
 
@@ -68,10 +68,12 @@ static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing:
     sptr<ISystemAbilityManager> mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (mgr == nullptr) {
         SLOGE("failed to get sa mgr");
+        return;
     }
     sptr<IRemoteObject> sessionService = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
     if (sessionService == nullptr) {
         SLOGE("failed to get service");
+        return;
     }
 
     std::string tag = "tag";

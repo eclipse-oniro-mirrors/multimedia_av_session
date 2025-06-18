@@ -70,7 +70,7 @@ void SoftbusSessionManagerSupplementTest::TearDown() {}
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy001, TestSize.Level0)
 {
     std::string peerNetworkId = "";
     std::string packageName = "";
@@ -84,7 +84,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy002, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy002, TestSize.Level0)
 {
     std::string peerNetworkId = "";
     std::string packageName = "";
@@ -98,7 +98,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy002, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy003, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy003, TestSize.Level0)
 {
     std::string peerNetworkId = "";
     std::string packageName = "test";
@@ -112,7 +112,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy003, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy004, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy004, TestSize.Level0)
 {
     std::string peerNetworkId = "test";
     std::string packageName = "";
@@ -126,7 +126,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy004, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy005, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy005, TestSize.Level0)
 {
     std::string peerNetworkId = "0.0.0.0";
     std::string packageName = "packageName";
@@ -144,7 +144,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy005, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy006, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy006, TestSize.Level0)
 {
     std::string peerNetworkId = "0.0.0.0";
     std::string packageName = "packageName";
@@ -164,7 +164,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, CreateProxy006, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy001, TestSize.Level0)
 {
     std::string peerNetworkId = "0.0.0.0";
     bool ret = g_SoftbusDistributedDataManager->ReleaseProxy(nullptr, peerNetworkId);
@@ -177,7 +177,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy002, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy002, TestSize.Level0)
 {
     std::string peerNetworkId = "";
     bool ret = g_SoftbusDistributedDataManager->ReleaseProxy(g_MigrateAVSessionProxy, peerNetworkId);
@@ -190,7 +190,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy002, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy003, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy003, TestSize.Level0)
 {
     std::string peerNetworkId = "0.0.0.0";
     bool ret = g_SoftbusDistributedDataManager->ReleaseProxy(g_MigrateAVSessionProxy, peerNetworkId);
@@ -203,7 +203,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy003, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy004, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy004, TestSize.Level0)
 {
     std::string peerNetworkId = "0.0.0.0";
     int32_t socketId = 1;
@@ -220,7 +220,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy004, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy005, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy005, TestSize.Level0)
 {
     std::string peerNetworkId = "0.0.0.0";
     int32_t characteristic = g_MigrateAVSessionProxy->GetCharacteristic();
@@ -237,7 +237,7 @@ static HWTEST_F(SoftbusSessionManagerSupplementTest, ReleaseProxy005, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(SoftbusSessionManagerSupplementTest, BytesReceived001, TestSize.Level1)
+static HWTEST_F(SoftbusSessionManagerSupplementTest, BytesReceived001, TestSize.Level0)
 {
     int32_t socket = 1;
     std::string data = "test";

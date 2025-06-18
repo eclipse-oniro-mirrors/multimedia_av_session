@@ -17,8 +17,9 @@
 #define HW_CAST_STREAM_PLAYER_H
 
 #include <mutex>
-#include "cJSON.h"
+#include <algorithm>
 
+#include "cJSON.h"
 #include "pixel_map.h"
 #include "cast_engine_common.h"
 #include "i_stream_player.h"

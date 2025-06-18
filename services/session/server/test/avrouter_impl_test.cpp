@@ -116,7 +116,7 @@ public:
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, GetRemoteController001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, GetRemoteController001, TestSize.Level0)
 {
     SLOGI("GetRemoteController001 begin");
     int32_t num = g_AVRouterImpl->providerNumber_;
@@ -133,7 +133,7 @@ static HWTEST_F(AVRouterImplTest, GetRemoteController001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, GetRemoteController002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, GetRemoteController002, TestSize.Level0)
 {
     SLOGI("GetRemoteController002 begin");
     int32_t num = g_AVRouterImpl->providerNumber_;
@@ -151,7 +151,7 @@ static HWTEST_F(AVRouterImplTest, GetRemoteController002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StartCast001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StartCast001, TestSize.Level0)
 {
     SLOGI("StartCast001 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -178,7 +178,7 @@ static HWTEST_F(AVRouterImplTest, StartCast001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StartCast002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StartCast002, TestSize.Level0)
 {
     SLOGI("StartCast002 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -204,7 +204,7 @@ static HWTEST_F(AVRouterImplTest, StartCast002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StartCast003, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StartCast003, TestSize.Level0)
 {
     SLOGI("StartCast003 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -231,7 +231,7 @@ static HWTEST_F(AVRouterImplTest, StartCast003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, AddDevice001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, AddDevice001, TestSize.Level0)
 {
     SLOGI("AddDevice001 begin");
     int32_t tempId = g_AVRouterImpl->providerNumber_;
@@ -259,7 +259,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, AddDevice002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, AddDevice002, TestSize.Level0)
 {
     SLOGI("AddDevice002 begin");
     int32_t tempId = g_AVRouterImpl->providerNumber_;
@@ -287,7 +287,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, AddDevice003, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, AddDevice003, TestSize.Level0)
 {
     SLOGI("AddDevice003 begin");
     int32_t tempId = g_AVRouterImpl->providerNumber_;
@@ -314,7 +314,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, AddDevice004, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, AddDevice004, TestSize.Level0)
 {
     SLOGI("AddDevice004 begin");
     int32_t tempId = g_AVRouterImpl->providerNumber_;
@@ -347,7 +347,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, SetServiceAllConnectState001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, SetServiceAllConnectState001, TestSize.Level0)
 {
     SLOGI("SetServiceAllConnectState001 begin");
     int32_t providerNumber = g_AVRouterImpl->providerNumber_;
@@ -375,7 +375,7 @@ static HWTEST_F(AVRouterImplTest, SetServiceAllConnectState001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, SetServiceAllConnectState002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, SetServiceAllConnectState002, TestSize.Level0)
 {
     SLOGI("SetServiceAllConnectState002 begin");
     int32_t providerNumber = g_AVRouterImpl->providerNumber_;
@@ -403,7 +403,7 @@ static HWTEST_F(AVRouterImplTest, SetServiceAllConnectState002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, OnCastStateChange001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, OnCastStateChange001, TestSize.Level0)
 {
     SLOGI("OnCastStateChange001 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -430,7 +430,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, OnCastStateChange002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, OnCastStateChange002, TestSize.Level0)
 {
     SLOGI("OnCastStateChange002 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -457,7 +457,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, OnCastStateChange003, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, OnCastStateChange003, TestSize.Level0)
 {
     SLOGI("OnCastStateChange003 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -483,7 +483,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, OnCastEventRecv001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, OnCastEventRecv001, TestSize.Level0)
 {
     SLOGI("OnCastEventRecv001 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -510,7 +510,7 @@ static HWTEST_F(AVRouterImplTest, OnCastEventRecv001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, OnCastEventRecv002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, OnCastEventRecv002, TestSize.Level0)
 {
     SLOGI("OnCastEventRecv002 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -538,7 +538,7 @@ static HWTEST_F(AVRouterImplTest, OnCastEventRecv002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, DisconnectOtherSession001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, DisconnectOtherSession001, TestSize.Level0)
 {
     SLOGI("DisconnectOtherSession001 begin");
     DeviceInfo deviceInfo;
@@ -559,7 +559,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, DisconnectOtherSession002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, DisconnectOtherSession002, TestSize.Level0)
 {
     SLOGI("DisconnectOtherSession002 begin");
     DeviceInfo deviceInfo;
@@ -580,7 +580,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, DisconnectOtherSession003, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, DisconnectOtherSession003, TestSize.Level0)
 {
     SLOGI("DisconnectOtherSession003 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -607,7 +607,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, DisconnectOtherSession004, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, DisconnectOtherSession004, TestSize.Level0)
 {
     SLOGI("DisconnectOtherSession004 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -634,7 +634,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, DisconnectOtherSession005, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, DisconnectOtherSession005, TestSize.Level0)
 {
     SLOGI("DisconnectOtherSession005 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -661,7 +661,7 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StartDeviceLogging001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StartDeviceLogging001, TestSize.Level0)
 {
     SLOGI("StartDeviceLogging001 begin");
     int32_t fd = 0;
@@ -679,7 +679,7 @@ static HWTEST_F(AVRouterImplTest, StartDeviceLogging001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StopDeviceLogging001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StopDeviceLogging001, TestSize.Level0)
 {
     SLOGI("StopDeviceLogging001 begin");
     g_AVRouterImpl->cacheStartDeviceLogging_ = false;
@@ -694,7 +694,7 @@ static HWTEST_F(AVRouterImplTest, StopDeviceLogging001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StartCastDiscovery001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StartCastDiscovery001, TestSize.Level0)
 {
     SLOGI("StartCastDiscovery001 begin");
     int32_t castDeviceCapability = 0;
@@ -712,7 +712,7 @@ static HWTEST_F(AVRouterImplTest, StartCastDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StopCastDiscovery001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StopCastDiscovery001, TestSize.Level0)
 {
     SLOGI("StopCastDiscovery001 begin");
     g_AVRouterImpl->cacheStartDeviceLogging_ = false;
@@ -727,7 +727,7 @@ static HWTEST_F(AVRouterImplTest, StopCastDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, OnDeviceAvailable001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, OnDeviceAvailable001, TestSize.Level0)
 {
     SLOGI("OnDeviceAvailable001 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -747,7 +747,7 @@ static HWTEST_F(AVRouterImplTest, OnDeviceAvailable001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, OnCastServerDied001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, OnCastServerDied001, TestSize.Level0)
 {
     SLOGI("OnCastServerDied001 begin");
     int32_t providerNumber = 0;
@@ -764,7 +764,7 @@ static HWTEST_F(AVRouterImplTest, OnCastServerDied001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, GetRemoteController003, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, GetRemoteController003, TestSize.Level0)
 {
     SLOGI("GetRemoteController003 begin");
     g_AVRouterImpl->providerNumber_ = 1;
@@ -793,7 +793,7 @@ static HWTEST_F(AVRouterImplTest, GetRemoteController003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, GetRemoteController004, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, GetRemoteController004, TestSize.Level0)
 {
     SLOGI("GetRemoteController004 begin");
     g_AVRouterImpl->providerNumber_ = 1;
@@ -821,7 +821,7 @@ static HWTEST_F(AVRouterImplTest, GetRemoteController004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StartCast004, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StartCast004, TestSize.Level0)
 {
     SLOGI("StartCast004 begin");
     g_AVRouterImpl->providerNumber_ = 1;
@@ -855,7 +855,7 @@ static HWTEST_F(AVRouterImplTest, StartCast004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StartCast005, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StartCast005, TestSize.Level0)
 {
     SLOGI("StartCast005 begin");
     g_AVRouterImpl->providerNumber_ = 1;
@@ -894,7 +894,7 @@ static HWTEST_F(AVRouterImplTest, StartCast005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StartCast006, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StartCast006, TestSize.Level0)
 {
     SLOGI("StartCast006 begin");
     g_AVRouterImpl->providerNumber_ = 1;
@@ -928,7 +928,7 @@ static HWTEST_F(AVRouterImplTest, StartCast006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, AddDevice005, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, AddDevice005, TestSize.Level0)
 {
     SLOGI("AddDevice005 begin");
     g_AVRouterImpl->providerNumber_ = 1;
@@ -958,7 +958,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level0)
 {
     SLOGI("AddDevice006 begin");
     g_AVRouterImpl->providerNumber_ = 1;
@@ -988,7 +988,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StopCast001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StopCast001, TestSize.Level0)
 {
     SLOGI("StopCast001 begin");
     bool continuePlay = true;
@@ -1025,7 +1025,7 @@ static HWTEST_F(AVRouterImplTest, StopCast001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, StopCastSession001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, StopCastSession001, TestSize.Level0)
 {
     SLOGI("StopCastSession001 begin");
     g_AVRouterImpl->providerNumber_ = 1;
@@ -1060,7 +1060,7 @@ static HWTEST_F(AVRouterImplTest, StopCastSession001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, GetRemoteController005, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, GetRemoteController005, TestSize.Level0)
 {
     SLOGI("GetRemoteController005 begin");
     int32_t providerNumber = 1;
@@ -1094,7 +1094,7 @@ static HWTEST_F(AVRouterImplTest, GetRemoteController005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, GetRemoteController006, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, GetRemoteController006, TestSize.Level0)
 {
     SLOGI("GetRemoteController005 begin");
     int32_t providerNumber = 1;
@@ -1124,7 +1124,7 @@ static HWTEST_F(AVRouterImplTest, GetRemoteController006, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, RegisterCallback001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, RegisterCallback001, TestSize.Level0)
 {
     SLOGI("RegisterCallback001 begin");
     int32_t providerNumber = 20;
@@ -1154,7 +1154,7 @@ static HWTEST_F(AVRouterImplTest, RegisterCallback001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, RegisterCallback002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, RegisterCallback002, TestSize.Level0)
 {
     SLOGI("RegisterCallback002 begin");
     int32_t providerNumber = 21;
@@ -1189,7 +1189,7 @@ static HWTEST_F(AVRouterImplTest, RegisterCallback002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, RegisterCallback003, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, RegisterCallback003, TestSize.Level0)
 {
     SLOGI("RegisterCallback003 begin");
     int32_t providerNumber = 22;
@@ -1224,7 +1224,7 @@ static HWTEST_F(AVRouterImplTest, RegisterCallback003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, UnRegisterCallback001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, UnRegisterCallback001, TestSize.Level0)
 {
     SLOGI("UnRegisterCallback001 begin");
     int32_t providerNumber = 30;
@@ -1264,7 +1264,7 @@ static HWTEST_F(AVRouterImplTest, UnRegisterCallback001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, UnRegisterCallback002, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, UnRegisterCallback002, TestSize.Level0)
 {
     SLOGI("UnRegisterCallback002 begin");
     int32_t providerNumber = 31;
@@ -1303,7 +1303,7 @@ static HWTEST_F(AVRouterImplTest, UnRegisterCallback002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, Release001, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, Release001, TestSize.Level0)
 {
     std::shared_ptr<AVRouterImpl> aVRouterImpl = std::make_shared<AVRouterImplMock>();
     auto ret = aVRouterImpl->Release();
@@ -1316,7 +1316,7 @@ static HWTEST_F(AVRouterImplTest, Release001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, GetRemoteController007, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, GetRemoteController007, TestSize.Level0)
 {
     SLOGI("GetRemoteController007 begin");
     int32_t providerNumber = 1;
@@ -1347,7 +1347,7 @@ static HWTEST_F(AVRouterImplTest, GetRemoteController007, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, GetRemoteController008, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, GetRemoteController008, TestSize.Level0)
 {
     SLOGI("GetRemoteController008 begin");
     int32_t providerNumber = 1;
@@ -1377,7 +1377,7 @@ static HWTEST_F(AVRouterImplTest, GetRemoteController008, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterImplTest, DisconnectOtherSession006, TestSize.Level1)
+static HWTEST_F(AVRouterImplTest, DisconnectOtherSession006, TestSize.Level0)
 {
     SLOGI("DisconnectOtherSession006 begin");
     DeviceInfo deviceInfo;

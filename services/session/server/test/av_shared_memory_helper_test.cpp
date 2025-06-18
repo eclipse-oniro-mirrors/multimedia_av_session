@@ -48,7 +48,7 @@ void AVSharedMemoryHelperTest::TearDown() {}
 * @tc.desc: set fd to -1
 * @tc.type: FUNC
 */
-HWTEST_F(AVSharedMemoryHelperTest, ReadAVSharedMemoryFromParcel001, TestSize.Level1)
+HWTEST_F(AVSharedMemoryHelperTest, ReadAVSharedMemoryFromParcel001, TestSize.Level0)
 {
     SLOGI("ReadAVSharedMemoryFromParcel001 begin!");
     int32_t size = 10;
@@ -66,7 +66,7 @@ HWTEST_F(AVSharedMemoryHelperTest, ReadAVSharedMemoryFromParcel001, TestSize.Lev
 * @tc.desc: set fd to 1
 * @tc.type: FUNC
 */
-HWTEST_F(AVSharedMemoryHelperTest, ReadAVSharedMemoryFromParcel002, TestSize.Level1)
+HWTEST_F(AVSharedMemoryHelperTest, ReadAVSharedMemoryFromParcel002, TestSize.Level0)
 {
     SLOGI("ReadAVSharedMemoryFromParcel002 begin!");
     int32_t size = 10;
@@ -85,7 +85,7 @@ HWTEST_F(AVSharedMemoryHelperTest, ReadAVSharedMemoryFromParcel002, TestSize.Lev
 * @tc.desc: set fd to -1
 * @tc.type: FUNC
 */
-HWTEST_F(AVSharedMemoryHelperTest, ReadAVDataSrcMemoryFromParcel001, TestSize.Level1)
+HWTEST_F(AVSharedMemoryHelperTest, ReadAVDataSrcMemoryFromParcel001, TestSize.Level0)
 {
     SLOGI("WriteAVSharedMemoryToParcel002 begin!");
     int32_t size = 10;
@@ -103,7 +103,7 @@ HWTEST_F(AVSharedMemoryHelperTest, ReadAVDataSrcMemoryFromParcel001, TestSize.Le
 * @tc.desc: set fd to 1
 * @tc.type: FUNC
 */
-HWTEST_F(AVSharedMemoryHelperTest, ReadAVDataSrcMemoryFromParcel002, TestSize.Level1)
+HWTEST_F(AVSharedMemoryHelperTest, ReadAVDataSrcMemoryFromParcel002, TestSize.Level0)
 {
     SLOGI("ReadAVDataSrcMemoryFromParcel002 begin!");
     int32_t size = 10;
@@ -122,7 +122,7 @@ HWTEST_F(AVSharedMemoryHelperTest, ReadAVDataSrcMemoryFromParcel002, TestSize.Le
 * @tc.desc: set memory to nullptr
 * @tc.type: FUNC
 */
-HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel001, TestSize.Level1)
+HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel001, TestSize.Level0)
 {
     SLOGI("WriteAVSharedMemoryToParcel001 begin!");
     std::shared_ptr<AVSharedMemory> memory = nullptr;
@@ -136,7 +136,7 @@ HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel001, TestSize.Leve
  * @tc.desc: set fd to -1
  * @tc.type: FUNC
  */
-HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel002, TestSize.Level1)
+HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel002, TestSize.Level0)
 {
     SLOGI("WriteAVSharedMemoryToParcel002 begin!");
     int32_t size = 10;
@@ -153,7 +153,7 @@ HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel002, TestSize.Leve
 * @tc.desc: success to write
 * @tc.type: FUNC
 */
-HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel003, TestSize.Level1)
+HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel003, TestSize.Level0)
 {
     SLOGI("WriteAVSharedMemoryToParcel003 begin!");
     int32_t size = 10;
@@ -165,6 +165,26 @@ HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel003, TestSize.Leve
     MessageParcel parcel;
     int32_t ret = WriteAVSharedMemoryToParcel(memory, parcel);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: ReadWriteAVSharedMemoryFromParcel001
+* @tc.desc: set fd to 1
+* @tc.type: FUNC
+*/
+HWTEST_F(AVSharedMemoryHelperTest, ReadWriteAVSharedMemoryFromParcel001, TestSize.Level0)
+{
+    SLOGI("ReadWriteAVSharedMemoryFromParcel001 begin!");
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    int fd = open("/data/file.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    memory->fd_ = fd;
+    MessageParcel parcel;
+    WriteAVSharedMemoryToParcel(memory, parcel);
+    auto ret = ReadAVSharedMemoryFromParcel(parcel);
+    EXPECT_EQ(ret, nullptr);
 }
 } //AVSession
 } //OHOS

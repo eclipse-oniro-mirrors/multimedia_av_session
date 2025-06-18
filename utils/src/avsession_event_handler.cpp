@@ -49,7 +49,7 @@ bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const st
 
 void AVSessionEventHandler::AVSessionRemoveTask(const std::string &name)
 {
-    SLOGI("AVSessionEventHandler ProxyRemoveTask");
+    SLOGI("AVSessionEventHandlerRemove:%{public}s", name.c_str());
     std::lock_guard<std::mutex> lockGuard(handlerLock_);
     if (handler_) {
         handler_->RemoveTask(name);

@@ -109,7 +109,7 @@ class SessionListenerStubDemo : public SessionListenerStub {
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest001, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
     uint32_t code = 0;
@@ -127,7 +127,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest001, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest002, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
     uint32_t code = 0;
@@ -147,7 +147,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest002, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest003, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest003 begin!");
     uint32_t code = 1;
@@ -167,7 +167,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest003, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest004, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest004, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest004 begin!");
     uint32_t code = 2;
@@ -187,7 +187,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest004, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest005, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest005, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest005 begin!");
     uint32_t code = 3;
@@ -207,7 +207,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest005, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest006, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest006, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest006 begin!");
     uint32_t code = 4;
@@ -227,7 +227,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest006, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest007, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest007, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest007 begin!");
     uint32_t code = 5;
@@ -249,7 +249,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest007, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest008, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest008, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest008 begin!");
     uint32_t code = 25;
@@ -269,7 +269,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest008, TestSize.Level1)
 * @tc.desc:
 * @tc.type: FUNC
 */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest009, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest009, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest009 begin!");
     uint32_t code = 6;
@@ -290,7 +290,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest009, TestSize.Level1)
 * @tc.desc:
 * @tc.type: FUNC
 */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest010, TestSize.Level1)
+static HWTEST_F(SessionListenerStubTest, OnRemoteRequest010, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest010 begin!");
     uint32_t code = 7;

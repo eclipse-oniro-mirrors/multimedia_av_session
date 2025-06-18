@@ -148,7 +148,7 @@ protected:
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, OnRemoteRequest001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
     uint32_t code = 0;
@@ -166,7 +166,7 @@ static HWTEST(AVSessionStubTest, OnRemoteRequest001, TestSize.Level1)
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, OnRemoteRequest002, TestSize.Level1)
+static HWTEST(AVSessionStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
     uint32_t code = 25;
@@ -184,7 +184,7 @@ static HWTEST(AVSessionStubTest, OnRemoteRequest002, TestSize.Level1)
  * @tc.desc: Test HandleRegisterCallbackInner
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleRegisterCallbackInner001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleRegisterCallbackInner001, TestSize.Level0)
 {
     SLOGI("HandleRegisterCallbackInner001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -200,7 +200,7 @@ static HWTEST(AVSessionStubTest, HandleRegisterCallbackInner001, TestSize.Level1
  * @tc.desc: Test HandleSetAVCallMetaData
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetAVCallMetaData001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetAVCallMetaData001, TestSize.Level0)
 {
     SLOGI("HandleSetAVCallMetaData001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -216,7 +216,7 @@ static HWTEST(AVSessionStubTest, HandleSetAVCallMetaData001, TestSize.Level1)
  * @tc.desc: Test HandleSetAVCallState
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetAVCallState001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetAVCallState001, TestSize.Level0)
 {
     SLOGI("HandleSetAVCallState001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -232,7 +232,7 @@ static HWTEST(AVSessionStubTest, HandleSetAVCallState001, TestSize.Level1)
  * @tc.desc: Test HandleSetAVPlaybackState
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetAVPlaybackState001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetAVPlaybackState001, TestSize.Level0)
 {
     SLOGI("HandleSetAVPlaybackState001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -248,7 +248,7 @@ static HWTEST(AVSessionStubTest, HandleSetAVPlaybackState001, TestSize.Level1)
  * @tc.desc: Test HandleSetLaunchAbility
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetLaunchAbility001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetLaunchAbility001, TestSize.Level0)
 {
     SLOGI("HandleSetLaunchAbility001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -264,7 +264,7 @@ static HWTEST(AVSessionStubTest, HandleSetLaunchAbility001, TestSize.Level1)
  * @tc.desc: Test HandleSetAVQueueItems
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetAVQueueItems001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetAVQueueItems001, TestSize.Level0)
 {
     SLOGI("HandleSetAVQueueItems001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -280,7 +280,7 @@ static HWTEST(AVSessionStubTest, HandleSetAVQueueItems001, TestSize.Level1)
  * @tc.desc: Test HandleSetExtras
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetExtras001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetExtras001, TestSize.Level0)
 {
     SLOGI("HandleSetExtras001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -296,7 +296,7 @@ static HWTEST(AVSessionStubTest, HandleSetExtras001, TestSize.Level1)
  * @tc.desc: Test HandleSetSessionEvent
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetSessionEvent001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetSessionEvent001, TestSize.Level0)
 {
     SLOGI("HandleSetSessionEvent001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -312,7 +312,7 @@ static HWTEST(AVSessionStubTest, HandleSetSessionEvent001, TestSize.Level1)
  * @tc.desc: Test HandleGetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleGetAVMetaData001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleGetAVMetaData001, TestSize.Level0)
 {
     SLOGI("HandleGetAVMetaData001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -328,7 +328,7 @@ static HWTEST(AVSessionStubTest, HandleGetAVMetaData001, TestSize.Level1)
  * @tc.desc: Test HandleSetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetAVMetaData001, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetAVMetaData001, TestSize.Level0)
 {
     SLOGI("HandleSetAVMetaData001 begin!");
     AVSessionStubDemo avSessionStub;
@@ -346,7 +346,7 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData001, TestSize.Level1)
  * @tc.desc: Test HandleSetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetAVMetaData002, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetAVMetaData002, TestSize.Level0)
 {
     SLOGI("HandleSetAVMetaData002 begin!");
     AVSessionStubDemo avSessionStub;
@@ -364,7 +364,7 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData002, TestSize.Level1)
  * @tc.desc: Test HandleSetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level0)
 {
     SLOGI("HandleSetAVMetaData003 begin!");
     AVSessionStubDemo avSessionStub;
@@ -375,4 +375,41 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level1)
     int ret = avSessionStub.HandleSetAVMetaData(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetAVMetaData003 end!");
+}
+
+/**
+ * @tc.name: HandleUpdateAVQueueInfoEvent001
+ * @tc.desc: Test HandleUpdateAVQueueInfoEvent
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level0)
+{
+    SLOGI("HandleUpdateAVQueueInfoEvent001 begin!");
+    AVQueueInfo info = AVQueueInfo();
+    AVSessionStubDemo avSessionStub;
+    OHOS::MessageParcel data;
+    info.MarshallingMessageParcel(data);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleUpdateAVQueueInfoEvent001 end!");
+}
+
+/**
+ * @tc.name: HandleUpdateAVQueueInfoEvent002
+ * @tc.desc: Test HandleUpdateAVQueueInfoEvent
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level0)
+{
+    SLOGI("HandleUpdateAVQueueInfoEvent002 begin!");
+    AVQueueInfo info = AVQueueInfo();
+    AVSessionStubDemo avSessionStub;
+    OHOS::MessageParcel data;
+    data.WriteInt32(-1);
+    info.MarshallingMessageParcel(data);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
+    EXPECT_NE(ret, OHOS::ERR_NONE);
+    SLOGI("HandleUpdateAVQueueInfoEvent002 end!");
 }
