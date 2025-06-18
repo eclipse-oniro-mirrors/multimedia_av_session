@@ -166,5 +166,25 @@ HWTEST_F(AVSharedMemoryHelperTest, WriteAVSharedMemoryToParcel003, TestSize.Leve
     int32_t ret = WriteAVSharedMemoryToParcel(memory, parcel);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
+
+/**
+* @tc.name: ReadWriteAVSharedMemoryFromParcel001
+* @tc.desc: set fd to 1
+* @tc.type: FUNC
+*/
+HWTEST_F(AVSharedMemoryHelperTest, ReadWriteAVSharedMemoryFromParcel001, TestSize.Level0)
+{
+    SLOGI("ReadWriteAVSharedMemoryFromParcel001 begin!");
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    int fd = open("/data/file.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    memory->fd_ = fd;
+    MessageParcel parcel;
+    WriteAVSharedMemoryToParcel(memory, parcel);
+    auto ret = ReadAVSharedMemoryFromParcel(parcel);
+    EXPECT_EQ(ret, nullptr);
+}
 } //AVSession
 } //OHOS
