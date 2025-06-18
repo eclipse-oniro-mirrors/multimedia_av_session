@@ -172,7 +172,7 @@ static OHOS::AVSession::AVMetaData GetAVMetaData()
  * @tc.desc: Test OnSessionDestroy
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnSessionDestroy001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnSessionDestroy001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSessionDestroy001, start");
     LOG_SetCallback(MyLogCallback);
@@ -186,7 +186,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnSessionDestroy001, testing::ext
  * @tc.desc: Test OnAVCallMetaDataChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallMetaDataChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallMetaDataChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAVCallMetaDataChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -201,7 +201,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallMetaDataChange001, testin
  * @tc.desc: Test OnAVCallStateChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallStateChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallStateChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAVCallStateChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -216,7 +216,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnAVCallStateChange001, testing::
  * @tc.desc: Test OnPlaybackStateChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnPlaybackStateChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnPlaybackStateChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnAVCallStateChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -231,7 +231,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnPlaybackStateChange001, testing
  * @tc.desc: Test OnMetaDataChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnMetaDataChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -246,7 +246,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange001, testing::ext
  * @tc.desc: Test OnMetaDataChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange002, testing::ext::TestSize.Level0)
 {
     SLOGI("OnMetaDataChange002, start");
     LOG_SetCallback(MyLogCallback);
@@ -261,7 +261,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange002, testing::ext
  * @tc.desc: Test GetPixelMapBuffer
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetPixelMapBuffer001, start");
     OHOS::AVSession::AVMetaData metaData;
@@ -276,7 +276,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer001, testing::ex
  * @tc.desc: Test GetPixelMapBuffer
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer002, testing::ext::TestSize.Level0)
 {
     SLOGI("GetPixelMapBuffer002, start");
     OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
@@ -311,7 +311,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer002, testing::ex
  * @tc.desc: Test GetPixelMapBuffer
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer003, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer003, testing::ext::TestSize.Level0)
 {
     SLOGI("GetPixelMapBuffer003, start");
     OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
@@ -352,7 +352,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer003, testing::ex
  * @tc.desc: Test OnActiveStateChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnActiveStateChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -367,7 +367,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange001, testing::
  * @tc.desc: Test OnActiveStateChange
  * @tc.type: FUNC
  */
- static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange002, testing::ext::TestSize.Level1)
+ static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange002, testing::ext::TestSize.Level0)
 {
     SLOGI("OnActiveStateChange002, start");
     LOG_SetCallback(MyLogCallback);
@@ -382,7 +382,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnActiveStateChange001, testing::
  * @tc.desc: Test OnValidCommandChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnValidCommandChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnValidCommandChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnValidCommandChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -397,7 +397,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnValidCommandChange001, testing:
  * @tc.desc: Test OnOutputDeviceChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnOutputDeviceChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnOutputDeviceChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnOutputDeviceChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -413,7 +413,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnOutputDeviceChange001, testing:
  * @tc.desc: Test OnSessionEventChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnSessionEventChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnSessionEventChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnSessionEventChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -429,7 +429,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnSessionEventChange001, testing:
  * @tc.desc: Test OnQueueItemsChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnQueueItemsChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnQueueItemsChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnQueueItemsChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -444,7 +444,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnQueueItemsChange001, testing::e
  * @tc.desc: Test OnQueueTitleChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnQueueTitleChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnQueueTitleChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnQueueTitleChange001, start");
     LOG_SetCallback(MyLogCallback);
@@ -459,7 +459,7 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnQueueTitleChange001, testing::e
  * @tc.desc: Test OnExtrasChange
  * @tc.type: FUNC
  */
-static HWTEST_F(AVControllerCallbackProxyTest, OnExtrasChange001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVControllerCallbackProxyTest, OnExtrasChange001, testing::ext::TestSize.Level0)
 {
     SLOGI("OnExtrasChange001, start");
     LOG_SetCallback(MyLogCallback);

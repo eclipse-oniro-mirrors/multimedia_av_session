@@ -59,7 +59,7 @@ void AudioAdapterTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, OnRendererStateChange001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnRendererStateChange001, TestSize.Level0)
 {
     SLOGI("OnRendererStateChange001 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -97,7 +97,7 @@ static HWTEST(AudioAdapterTest, OnRendererStateChange001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level0)
 {
     SLOGI("MuteAudioStream001 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -133,7 +133,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream001, TestSize.Level1)
 * @tc.desc: mute audio stream for valid uid TEST_CLIENT_UID
 * @tc.type: FUNC
 */
-static HWTEST(AudioAdapterTest, MuteAudioStream002, TestSize.Level1)
+static HWTEST(AudioAdapterTest, MuteAudioStream002, TestSize.Level0)
 {
     SLOGI("MuteAudioStream002 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -170,7 +170,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, MuteAudioStream003, TestSize.Level1)
+static HWTEST(AudioAdapterTest, MuteAudioStream003, TestSize.Level0)
 {
     SLOGI("MuteAudioStream003 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -205,7 +205,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, MuteAudioStream004, TestSize.Level1)
+static HWTEST(AudioAdapterTest, MuteAudioStream004, TestSize.Level0)
 {
     SLOGI("MuteAudioStream004 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -240,7 +240,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, UnMuteAudioStream001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, UnMuteAudioStream001, TestSize.Level0)
 {
     SLOGI("UnMuteAudioStream001 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -271,7 +271,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, UnMuteAudioStream002, TestSize.Level1)
+static HWTEST(AudioAdapterTest, UnMuteAudioStream002, TestSize.Level0)
 {
     SLOGI("UnMuteAudioStream002 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -305,7 +305,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, UnMuteAudioStream003, TestSize.Level1)
+static HWTEST(AudioAdapterTest, UnMuteAudioStream003, TestSize.Level0)
 {
     SLOGI("UnMuteAudioStream003 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -338,7 +338,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, UnMuteAudioStream004, TestSize.Level1)
+static HWTEST(AudioAdapterTest, UnMuteAudioStream004, TestSize.Level0)
 {
     SLOGI("UnMuteAudioStream004 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -371,7 +371,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, GetRendererRunning001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, GetRendererRunning001, TestSize.Level0)
 {
     SLOGI("GetRendererRunning001 begin!");
     AudioAdapter::GetInstance().Init();
@@ -385,7 +385,7 @@ static HWTEST(AudioAdapterTest, GetRendererRunning001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, GetRendererRunning002, TestSize.Level1)
+static HWTEST(AudioAdapterTest, GetRendererRunning002, TestSize.Level0)
 {
     SLOGI("GetRendererRunning002 begin!");
     AudioAdapter::GetInstance().Init();
@@ -399,7 +399,7 @@ static HWTEST(AudioAdapterTest, GetRendererRunning002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: AR000H31KJ
 */
-static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level0)
 {
     SLOGD("PauseAudioStream001 begin!");
     AudioAdapter::GetInstance().Init();
@@ -418,7 +418,7 @@ static HWTEST(AudioAdapterTest, PauseAudioStream001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceUpdated001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceUpdated001, TestSize.Level0)
 {
     SLOGD("OnPreferredOutputDeviceUpdated001 begin!");
     bool ret = false;
@@ -442,7 +442,7 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceUpdated001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnAvailableDeviceChange001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnAvailableDeviceChange001, TestSize.Level0)
 {
     SLOGD("OnAvailableDeviceChange001 begin!");
     bool ret = false;
@@ -466,7 +466,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnAvailableDeviceChange002, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnAvailableDeviceChange002, TestSize.Level0)
 {
     SLOGD("OnAvailableDeviceChange002 begin!");
     bool ret = false;
@@ -490,7 +490,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnAvailableDeviceChange003, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnAvailableDeviceChange003, TestSize.Level0)
 {
     SLOGD("OnAvailableDeviceChange003 begin!");
     bool ret = false;
@@ -514,7 +514,7 @@ static HWTEST(AudioAdapterTest, OnAvailableDeviceChange003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnVolumeKeyEvent001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnVolumeKeyEvent001, TestSize.Level0)
 {
     SLOGD("OnVolumeKeyEvent001 begin!");
     int32_t volume = -1;
@@ -534,7 +534,7 @@ static HWTEST(AudioAdapterTest, OnVolumeKeyEvent001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnVolumeKeyEvent002, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnVolumeKeyEvent002, TestSize.Level0)
 {
     SLOGD("OnVolumeKeyEvent002 begin!");
     int32_t volume = -1;
@@ -554,7 +554,7 @@ static HWTEST(AudioAdapterTest, OnVolumeKeyEvent002, TestSize.Level1)
 * @tc.desc: Test OnDeviceChange
 * @tc.type: FUNC
 */
-static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level0)
 {
     SLOGD("OnDeviceChange001 begin!");
     bool ret = false;
@@ -576,7 +576,7 @@ static HWTEST(AudioAdapterTest, OnDeviceChange001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnDeviceChange002, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnDeviceChange002, TestSize.Level0)
 {
     SLOGD("OnDeviceChange002 begin!");
     bool ret = OHOS::AVSession::AVSESSION_SUCCESS;
@@ -595,7 +595,7 @@ static HWTEST(AudioAdapterTest, OnDeviceChange002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnDeviceChange003, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnDeviceChange003, TestSize.Level0)
 {
     SLOGD("OnDeviceChange003 begin!");
     bool ret = OHOS::AVSession::AVSESSION_SUCCESS;
@@ -616,7 +616,7 @@ static HWTEST(AudioAdapterTest, OnDeviceChange003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange001, TestSize.Level0)
 {
     SLOGD("OnPreferredOutputDeviceChange001 begin!");
     bool ret = false;
@@ -640,7 +640,7 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange002, TestSize.Level1)
+static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange002, TestSize.Level0)
 {
     SLOGD("OnPreferredOutputDeviceChange002 begin!");
     bool ret = false;
@@ -665,7 +665,7 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, SelectOutputDevice001, TestSize.Level1)
+static HWTEST(AudioAdapterTest, SelectOutputDevice001, TestSize.Level0)
 {
     SLOGD("SelectOutputDevice001 begin!");
     AudioAdapter::GetInstance().Init();
@@ -681,7 +681,7 @@ static HWTEST(AudioAdapterTest, SelectOutputDevice001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31KJ
  */
-static HWTEST(AudioAdapterTest, SelectOutputDevice002, TestSize.Level1)
+static HWTEST(AudioAdapterTest, SelectOutputDevice002, TestSize.Level0)
 {
     SLOGD("SelectOutputDevice002 begin!");
     AudioAdapter::GetInstance().Init();

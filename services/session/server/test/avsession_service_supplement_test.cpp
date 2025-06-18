@@ -64,7 +64,7 @@ void AVSessionServiceSupplementTest::TearDown()
  * @tc.desc: Test GetService
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, GetService001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, GetService001, TestSize.Level0)
 {
     SLOGI("GetService001 begin!");
     std::string id = "";
@@ -78,7 +78,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetService001, TestSize.Level1)
  * @tc.desc: Test IsLocalDevice
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, IsLocalDevice001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, IsLocalDevice001, TestSize.Level0)
 {
     SLOGI("IsLocalDevice001 begin!");
     std::string id;
@@ -94,7 +94,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, IsLocalDevice001, TestSize.Level
  * @tc.desc: Test GetTrustedDeviceName
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, GetTrustedDeviceName001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, GetTrustedDeviceName001, TestSize.Level0)
 {
     SLOGI("GetTrustedDeviceName001 begin!");
     std::string networkId = "";
@@ -109,7 +109,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetTrustedDeviceName001, TestSiz
  * @tc.desc: Test SetDeviceInfo
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SetDeviceInfo001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SetDeviceInfo001, TestSize.Level0)
 {
     SLOGI("SetDeviceInfo001 begin!");
     AudioStandard::AudioDeviceDescriptor descriptor;
@@ -135,7 +135,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SetDeviceInfo001, TestSize.Level
  * @tc.desc: Test GetAudioDescriptorByDeviceId
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId001, TestSize.Level0)
 {
     SLOGI("GetAudioDescriptorByDeviceId001 begin!");
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descriptors;
@@ -154,7 +154,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId001,
  * @tc.desc: Test GetAudioDescriptorByDeviceId
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId002, TestSize.Level0)
 {
     SLOGI("GetAudioDescriptorByDeviceId002 begin!");
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descriptors;
@@ -173,7 +173,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetAudioDescriptorByDeviceId002,
  * @tc.desc: Test GetDeviceInfo
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, GetDeviceInfo001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, GetDeviceInfo001, TestSize.Level0)
 {
     SLOGI("GetDeviceInfo001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -201,7 +201,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetDeviceInfo001, TestSize.Level
  * @tc.desc: Test GetDeviceInfo
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, GetDeviceInfo002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, GetDeviceInfo002, TestSize.Level0)
 {
     SLOGI("GetDeviceInfo002 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -227,7 +227,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetDeviceInfo002, TestSize.Level
  * @tc.desc: Test CastAudioProcess
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, CastAudioProcess001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, CastAudioProcess001, TestSize.Level0)
 {
     SLOGI("CastAudioProcess001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -254,7 +254,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, CastAudioProcess001, TestSize.Le
  * @tc.desc: Test CastAudioProcess
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, CastAudioProcess002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, CastAudioProcess002, TestSize.Level0)
 {
     SLOGI("CastAudioProcess002 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -282,7 +282,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, CastAudioProcess002, TestSize.Le
  * @tc.desc: Test IsHistoricalSession
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession001, TestSize.Level0)
 {
     SLOGI("IsHistoricalSession001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -310,7 +310,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession001, TestSize
  * @tc.desc: Test IsHistoricalSession
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession002, TestSize.Level0)
 {
     SLOGI("IsHistoricalSession002 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -338,7 +338,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, IsHistoricalSession002, TestSize
  * @tc.desc: Test Dump
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, Dump001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, Dump001, TestSize.Level0)
 {
     SLOGI("Dump001 with OnStartProcess begin!");
     std::vector<std::u16string> argsList;
@@ -353,7 +353,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, Dump001, TestSize.Level1)
  * @tc.desc: Test Dump
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, Dump002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, Dump002, TestSize.Level0)
 {
     SLOGI("Dump002 with OnStartProcess begin!");
     std::vector<std::u16string> argsList;
@@ -370,7 +370,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, Dump002, TestSize.Level1)
  * @tc.desc: Test SaveStringToFile
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx001, TestSize.Level0)
 {
     SLOGI("SaveStringToFileEx001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -395,7 +395,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx001, TestSize.
  * @tc.desc: Test SaveStringToFile
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx002, TestSize.Level0)
 {
     SLOGI("SaveStringToFileEx002 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -418,7 +418,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx002, TestSize.
  * @tc.desc: Test SaveStringToFile
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx003, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx003, TestSize.Level0)
 {
     SLOGI("SaveStringToFileEx003 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -442,7 +442,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SaveStringToFileEx003, TestSize.
  * @tc.desc: Test SuperLauncher
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher001, TestSize.Level0)
 {
     SLOGI("SuperLauncher001 begin!");
     std::string devideId = "***";
@@ -464,7 +464,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher001, TestSize.Level
  * @tc.desc: Test SuperLauncher
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher002, TestSize.Level0)
 {
     SLOGI("SuperLauncher002 begin!");
     std::string devideId = "***";
@@ -481,7 +481,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher002, TestSize.Level
  * @tc.desc: Test SplitExtraInfo
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SplitExtraInfo001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SplitExtraInfo001, TestSize.Level0)
 {
     SLOGI("SplitExtraInfo001 begin!");
     std::string info = R"(
@@ -500,7 +500,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SplitExtraInfo001, TestSize.Leve
  * @tc.desc: Test SplitExtraInfo
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SplitExtraInfo002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SplitExtraInfo002, TestSize.Level0)
 {
     SLOGI("SplitExtraInfo002 begin!");
     std::string info = R"(
@@ -519,7 +519,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SplitExtraInfo002, TestSize.Leve
  * @tc.desc: Test SplitExtraInfo
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceSupplementTest, SplitExtraInfo003, TestSize.Level1)
+static HWTEST_F(AVSessionServiceSupplementTest, SplitExtraInfo003, TestSize.Level0)
 {
     SLOGI("SplitExtraInfo003 begin!");
     std::string info = "";

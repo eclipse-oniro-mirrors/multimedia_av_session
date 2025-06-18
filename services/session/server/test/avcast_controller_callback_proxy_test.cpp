@@ -65,7 +65,7 @@ void AVCastControllerCallbackProxyTest::TearDown()
  * @tc.desc: Test OnKeyRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest001, testing::ext::TestSize.Level0)
 {
     std::string assetId = "";
     std::vector<uint8_t> keyRequestData(100000, 0);
@@ -78,7 +78,7 @@ static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest001, testing::ext
  * @tc.desc: Test OnKeyRequest
  * @tc.type: FUNC
  */
-static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest002, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest002, testing::ext::TestSize.Level0)
 {
     std::string assetId = "";
     std::vector<uint8_t> keyRequestData;
@@ -91,7 +91,7 @@ static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest002, testing::ext
 * @tc.desc: Test onDataSrcRead
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackProxyTest, onDataSrcRead001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackProxyTest, onDataSrcRead001, testing::ext::TestSize.Level0)
 {
     std::shared_ptr<AVSharedMemory> memory = AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test");
     std::string assetId = "";

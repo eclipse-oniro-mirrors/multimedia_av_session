@@ -122,7 +122,7 @@ public:
 * @tc.desc: test OnRemoteRequest with failed code
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest001, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     uint32_t code = 100;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -140,7 +140,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest001, TestSize.L
 * @tc.desc: test OnRemoteRequest with failed Descriptor
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest002, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     uint32_t code = 100;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -156,7 +156,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest002, TestSize.L
 * @tc.desc: test HandleOnKeyRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     uint32_t code = 9;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -175,7 +175,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.L
 * @tc.desc: test HandleOnKeyRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest004, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest004, TestSize.Level0)
 {
     uint32_t code = 9;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -199,7 +199,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest004, TestSize.L
 * @tc.desc: test HandleOnKeyRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest005, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest005, TestSize.Level0)
 {
     uint32_t code = 9;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
@@ -223,7 +223,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest005, TestSize.L
 * @tc.desc: test HandleOnKeyRequest
 * @tc.type: FUNC
 */
-static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.Level1)
+static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.Level0)
 {
     uint32_t code = 9;
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;

@@ -52,7 +52,7 @@ void AbilityManagerAdapterDemoTest::TearDown()
  * @tc.desc: Test StartAbilityByCall
  * @tc.type: FUNC
  */
-static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall001, testing::ext::TestSize.Level1)
+static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall001, testing::ext::TestSize.Level0)
 {
     SLOGI("StartAbilityByCall001 begin!");
     std::string sessionId = "001";
@@ -69,7 +69,7 @@ static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall001, testing::ext
  * @tc.desc: Test StartAbilityByCall
  * @tc.type: FUNC
  */
-static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall002, testing::ext::TestSize.Level1)
+static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall002, testing::ext::TestSize.Level0)
 {
     SLOGI("StartAbilityByCall002 begin!");
     std::string sessionId = "002";
@@ -87,7 +87,7 @@ static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall002, testing::ext
  * @tc.desc: Test StartAbilityByCall
  * @tc.type: FUNC
  */
-static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall003, testing::ext::TestSize.Level1)
+static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall003, testing::ext::TestSize.Level0)
 {
     SLOGI("StartAbilityByCall003 begin!");
     std::string sessionId = "003";
@@ -104,7 +104,7 @@ static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCall003, testing::ext
  * @tc.desc: Test StartAbilityByCallDone
  * @tc.type: FUNC
  */
-static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCallDone001, testing::ext::TestSize.Level1)
+static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCallDone001, testing::ext::TestSize.Level0)
 {
     SLOGI("StartAbilityByCallDone001 begin!");
     std::string sessionId = "001";
@@ -120,7 +120,7 @@ static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCallDone001, testing:
  * @tc.desc: Test StartAbilityByCallDone
  * @tc.type: FUNC
  */
-static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCallDone002, testing::ext::TestSize.Level1)
+static HWTEST(AbilityManagerAdapterDemoTest, StartAbilityByCallDone002, testing::ext::TestSize.Level0)
 {
     SLOGI("StartAbilityByCallDone002 begin!");
     std::string sessionId = "001";

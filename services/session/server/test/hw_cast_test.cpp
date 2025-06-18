@@ -58,7 +58,7 @@ void HwCastTest::TearDown()
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerInit001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerInit001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerInit001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -73,7 +73,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerInit001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerRelease001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerRelease001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerRelease001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -88,7 +88,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerRelease001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -106,7 +106,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand002, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand002, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand002 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -124,7 +124,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand002, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand003, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand003, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand003 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -142,7 +142,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand003, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand004, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand004, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand004 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -160,7 +160,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand004, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand005, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand005, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand005 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -178,7 +178,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand005, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand006, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand006, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommand006 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -196,7 +196,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommand006, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerGetCurrentItem001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerGetCurrentItem001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerGetCurrentItem001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -212,7 +212,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerGetCurrentItem001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerStart001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerStart001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerStart001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -240,7 +240,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerStart001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerPrepare001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerPrepare001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerPrepare001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -268,7 +268,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerPrepare001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerGetDuration001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerGetDuration001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerGetDuration001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -286,7 +286,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerGetDuration001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerGetCastAVPlaybackState001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerGetCastAVPlaybackState001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerGetCastAVPlaybackState001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -304,7 +304,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerGetCastAVPlaybackState001, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSetDisplaySurface001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSetDisplaySurface001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSetDisplaySurface001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -322,7 +322,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSetDisplaySurface001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerRegisterControllerListener001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerRegisterControllerListener001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerRegisterControllerListener001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -339,7 +339,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerRegisterControllerListener001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerUnRegisterControllerListener001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerUnRegisterControllerListener001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerUnRegisterControllerListener001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -356,7 +356,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerUnRegisterControllerListener001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnStateChanged001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnStateChanged001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnStateChanged001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -373,7 +373,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnStateChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnPositionChanged001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -392,7 +392,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged002, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged002, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnPositionChanged002 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -411,7 +411,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged003, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged003, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnPositionChanged003 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -430,7 +430,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged003, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged004, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged004, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnPositionChanged004 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -449,7 +449,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPositionChanged004, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnMediaItemChanged001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnMediaItemChanged001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnMediaItemChanged001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -466,7 +466,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnMediaItemChanged001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnVolumeChanged001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnVolumeChanged001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnVolumeChanged001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -484,7 +484,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnVolumeChanged001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnLoopModeChanged001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnLoopModeChanged001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnLoopModeChanged001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -501,7 +501,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnLoopModeChanged001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnNextRequest001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnNextRequest001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnNextRequest001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -517,7 +517,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnNextRequest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnPreviousRequest001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPreviousRequest001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnPreviousRequest001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -533,7 +533,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPreviousRequest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnPlaySpeedChanged001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPlaySpeedChanged001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnPlaySpeedChanged001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -550,7 +550,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPlaySpeedChanged001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayerError001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayerError001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnPlayerError001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -568,7 +568,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayerError001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnSeekDone001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnSeekDone001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnSeekDone001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -585,7 +585,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnSeekDone001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnVideoSizeChanged001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnVideoSizeChanged001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnVideoSizeChanged001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -603,7 +603,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnVideoSizeChanged001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnEndOfStream001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnEndOfStream001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnEndOfStream001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -620,7 +620,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnEndOfStream001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayRequest001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayRequest001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnPlayRequest001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -637,7 +637,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerOnPlayRequest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerOnKeyRequest001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerOnKeyRequest001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerOnKeyRequest001 begin!");
     std::shared_ptr<HwCastStreamPlayer> streamplayer = std::make_shared<HwCastStreamPlayer>(nullptr);
@@ -811,7 +811,7 @@ public:
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams001, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams001 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -830,7 +830,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams002, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams002, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams002 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -849,7 +849,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams002, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams003, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams003, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams003 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -868,7 +868,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams003, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams004, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams004, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams004 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -887,7 +887,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams004, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams005, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams005, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams005 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -906,7 +906,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams005, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams006, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams006, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams006 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -925,7 +925,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams006, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams007, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams007, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams007 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -944,7 +944,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams007, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams008, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams008, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams008 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -963,7 +963,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams008, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams009, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams009, TestSize.Level0)
 {
     SLOGI("HwCastStreamPlayerSendControlCommandWithParams009 begin!");
     std::shared_ptr<StreamPlayerImpl> player = std::make_shared<StreamPlayerImpl>();
@@ -982,7 +982,7 @@ static HWTEST(HwCastTest, HwCastStreamPlayerSendControlCommandWithParams009, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderInit001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderInit001, TestSize.Level0)
 {
     SLOGI("HwCastProviderInit001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -997,7 +997,7 @@ static HWTEST(HwCastTest, HwCastProviderInit001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderStartDiscovery001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderStartDiscovery001, TestSize.Level0)
 {
     SLOGI("HwCastProviderStartDiscovery001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1015,7 +1015,7 @@ static HWTEST(HwCastTest, HwCastProviderStartDiscovery001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderStopDiscovery001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderStopDiscovery001, TestSize.Level0)
 {
     SLOGI("HwCastProviderStopDiscovery001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1031,7 +1031,7 @@ static HWTEST(HwCastTest, HwCastProviderStopDiscovery001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSetDiscoverable001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSetDiscoverable001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSetDiscoverable001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1048,7 +1048,7 @@ static HWTEST(HwCastTest, HwCastProviderSetDiscoverable001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderRelease001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderRelease001, TestSize.Level0)
 {
     SLOGI("HwCastProviderRelease001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1064,7 +1064,7 @@ static HWTEST(HwCastTest, HwCastProviderRelease001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderStartCastSession001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderStartCastSession001, TestSize.Level0)
 {
     SLOGI("HwCastProviderStartCastSession001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1081,7 +1081,7 @@ static HWTEST(HwCastTest, HwCastProviderStartCastSession001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderStopCastSession001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderStopCastSession001, TestSize.Level0)
 {
     SLOGI("HwCastProviderStopCastSession001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1098,7 +1098,7 @@ static HWTEST(HwCastTest, HwCastProviderStopCastSession001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderAddCastDevice001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderAddCastDevice001, TestSize.Level0)
 {
     SLOGI("HwCastProviderAddCastDevice001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1116,7 +1116,7 @@ static HWTEST(HwCastTest, HwCastProviderAddCastDevice001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderRemoveCastDevice001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderRemoveCastDevice001, TestSize.Level0)
 {
     SLOGI("HwCastProviderRemoveCastDevice001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1134,7 +1134,7 @@ static HWTEST(HwCastTest, HwCastProviderRemoveCastDevice001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderGetRemoteController001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderGetRemoteController001, TestSize.Level0)
 {
     SLOGI("HwCastProviderGetRemoteController001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1151,7 +1151,7 @@ static HWTEST(HwCastTest, HwCastProviderGetRemoteController001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderRegisterCastStateListener001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderRegisterCastStateListener001, TestSize.Level0)
 {
     SLOGI("HwCastProviderRegisterCastStateListener001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1167,7 +1167,7 @@ static HWTEST(HwCastTest, HwCastProviderRegisterCastStateListener001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderUnregisterCastStateListener001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderUnregisterCastStateListener001, TestSize.Level0)
 {
     SLOGI("HwCastProviderUnregisterCastStateListener001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1183,7 +1183,7 @@ static HWTEST(HwCastTest, HwCastProviderUnregisterCastStateListener001, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderRegisterCastSessionStateListener001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderRegisterCastSessionStateListener001, TestSize.Level0)
 {
     SLOGI("HwCastProviderRegisterCastSessionStateListener001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1200,7 +1200,7 @@ static HWTEST(HwCastTest, HwCastProviderRegisterCastSessionStateListener001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderUnregisterCastSessionStateListener001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderUnregisterCastSessionStateListener001, TestSize.Level0)
 {
     SLOGI("HwCastProviderUnregisterCastSessionStateListener001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1217,7 +1217,7 @@ static HWTEST(HwCastTest, HwCastProviderUnregisterCastSessionStateListener001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderOnDeviceFound001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderOnDeviceFound001, TestSize.Level0)
 {
     SLOGI("HwCastProviderOnDeviceFound001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1234,7 +1234,7 @@ static HWTEST(HwCastTest, HwCastProviderOnDeviceFound001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level0)
 {
     SLOGI("HwCastProviderOnSessionCreated001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1250,7 +1250,7 @@ static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderOnServiceDied001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderOnServiceDied001, TestSize.Level0)
 {
     SLOGI("HwCastProviderOnServiceDied001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1266,7 +1266,7 @@ static HWTEST(HwCastTest, HwCastProviderOnServiceDied001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSessionInit001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSessionInit001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSessionInit001 begin!");
     std::shared_ptr<HwCastProviderSession> provideSession = std::make_shared<HwCastProviderSession>(nullptr);
@@ -1281,7 +1281,7 @@ static HWTEST(HwCastTest, HwCastProviderSessionInit001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSessionRelease001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSessionRelease001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSessionRelease001 begin!");
     std::shared_ptr<HwCastProviderSession> provideSession = std::make_shared<HwCastProviderSession>(nullptr);
@@ -1297,7 +1297,7 @@ static HWTEST(HwCastTest, HwCastProviderSessionRelease001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSessionOnDeviceState001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSessionOnDeviceState001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSessionOnDeviceState001 begin!");
     std::shared_ptr<HwCastProviderSession> provideSession = std::make_shared<HwCastProviderSession>(nullptr);
@@ -1315,7 +1315,7 @@ static HWTEST(HwCastTest, HwCastProviderSessionOnDeviceState001, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSessionAddDevice001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSessionAddDevice001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSessionAddDevice001 begin!");
     std::shared_ptr<HwCastProviderSession> provideSession = std::make_shared<HwCastProviderSession>(nullptr);
@@ -1332,7 +1332,7 @@ static HWTEST(HwCastTest, HwCastProviderSessionAddDevice001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSessionRemoveDevice001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSessionRemoveDevice001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSessionRemoveDevice001 begin!");
     std::shared_ptr<HwCastProviderSession> provideSession = std::make_shared<HwCastProviderSession>(nullptr);
@@ -1349,7 +1349,7 @@ static HWTEST(HwCastTest, HwCastProviderSessionRemoveDevice001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSessionCreateStreamPlayer001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSessionCreateStreamPlayer001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSessionCreateStreamPlayer001 begin!");
     std::shared_ptr<HwCastProviderSession> provideSession = std::make_shared<HwCastProviderSession>(nullptr);
@@ -1365,7 +1365,7 @@ static HWTEST(HwCastTest, HwCastProviderSessionCreateStreamPlayer001, TestSize.L
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSessionRegisterCastSessionStateListener001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSessionRegisterCastSessionStateListener001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSessionRegisterCastSessionStateListener001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
@@ -1381,7 +1381,7 @@ static HWTEST(HwCastTest, HwCastProviderSessionRegisterCastSessionStateListener0
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastProviderSessionUnregisterCastSessionStateListener001, TestSize.Level1)
+static HWTEST(HwCastTest, HwCastProviderSessionUnregisterCastSessionStateListener001, TestSize.Level0)
 {
     SLOGI("HwCastProviderSessionUnregisterCastSessionStateListener001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();

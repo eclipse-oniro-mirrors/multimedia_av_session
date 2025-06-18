@@ -55,7 +55,7 @@ void OHAVSessionCallbackImplTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, UnSetPlayCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, UnSetPlayCallback001, TestSize.Level0)
 {
     SLOGI("UnSetPlayCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -79,7 +79,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, UnSetPlayCallback001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetPauseCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetPauseCallback001, TestSize.Level0)
 {
     SLOGI("SetPauseCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -102,7 +102,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetPauseCallback001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetPauseCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetPauseCallback002, TestSize.Level0)
 {
     SLOGI("SetPauseCallback002 Begin");
     OH_AVSession* avsession = nullptr;
@@ -126,7 +126,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetPauseCallback002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, UnSetPauseCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, UnSetPauseCallback001, TestSize.Level0)
 {
     SLOGI("UnSetPauseCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -150,7 +150,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, UnSetPauseCallback001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetStopCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetStopCallback001, TestSize.Level0)
 {
     SLOGI("SetStopCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -173,7 +173,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetStopCallback001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetStopCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetStopCallback002, TestSize.Level0)
 {
     SLOGI("SetStopCallback002 Begin");
     OH_AVSession* avsession = nullptr;
@@ -197,7 +197,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetStopCallback002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetPlayNextCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetPlayNextCallback001, TestSize.Level0)
 {
     SLOGI("SetPlayNextCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -220,7 +220,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetPlayNextCallback001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetPlayNextCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetPlayNextCallback002, TestSize.Level0)
 {
     SLOGI("SetPlayNextCallback002 Begin");
     OH_AVSession* avsession = nullptr;
@@ -244,7 +244,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetPlayNextCallback002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetPlayPreviousCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetPlayPreviousCallback001, TestSize.Level0)
 {
     SLOGI("SetPlayPreviousCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -267,7 +267,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetPlayPreviousCallback001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetPlayPreviousCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetPlayPreviousCallback002, TestSize.Level0)
 {
     SLOGI("SetPlayPreviousCallback002 Begin");
     OH_AVSession* avsession = nullptr;
@@ -291,7 +291,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetPlayPreviousCallback002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, SetPlayCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, SetPlayCallback001, TestSize.Level0)
 {
     SLOGI("SetPlayCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -316,7 +316,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, SetPlayCallback001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterForwardCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterForwardCallback001, TestSize.Level0)
 {
     SLOGI("RegisterForwardCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -338,7 +338,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterForwardCallback001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterSeekCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterSeekCallback001, TestSize.Level0)
 {
     SLOGI("RegisterSeekCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -360,7 +360,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterSeekCallback001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterSetLoopModeCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterSetLoopModeCallback001, TestSize.Level0)
 {
     SLOGI("RegisterSetLoopModeCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -382,7 +382,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterSetLoopModeCallback001, TestSize.L
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback001, TestSize.Level0)
 {
     SLOGI("RegisterToggleFavoriteCallback001 Begin");
     OH_AVSession* avsession = nullptr;
@@ -404,7 +404,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback001, TestSiz
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterForwardCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterForwardCallback002, TestSize.Level0)
 {
     SLOGI("RegisterForwardCallback002 Begin");
     auto avsession = std::make_shared<OHAVSession>();
@@ -434,7 +434,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterForwardCallback002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterRewindCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterRewindCallback002, TestSize.Level0)
 {
     SLOGI("RegisterRewindCallback002 Begin");
     auto avsession = std::make_shared<OHAVSession>();
@@ -464,7 +464,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterRewindCallback002, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterSeekCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterSeekCallback002, TestSize.Level0)
 {
     SLOGI("RegisterSeekCallback002 Begin");
     auto avsession = std::make_shared<OHAVSession>();
@@ -494,7 +494,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterSeekCallback002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterSetLoopModeCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterSetLoopModeCallback002, TestSize.Level0)
 {
     SLOGI("RegisterSetLoopModeCallback002 Begin");
     auto avsession = std::make_shared<OHAVSession>();
@@ -524,7 +524,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterSetLoopModeCallback002, TestSize.L
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback002, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback002, TestSize.Level0)
 {
     SLOGI("RegisterToggleFavoriteCallback002 Begin");
     auto avsession = std::make_shared<OHAVSession>();
@@ -554,7 +554,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback002, TestSiz
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, OnSetTargetLoopMode001, TestSize.Level1)
+HWTEST_F(OHAVSessionCallbackImplTest, OnSetTargetLoopMode001, TestSize.Level0)
 {
     SLOGI("OnSetTargetLoopMode001 Begin");
     std::string assetId = "assetId";

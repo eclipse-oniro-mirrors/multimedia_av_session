@@ -43,7 +43,7 @@ void SessionStackTest::TearDown() {}
 * @tc.desc: verifying session stack remove session
 * @tc.type: FUNC
 */
-HWTEST_F(SessionStackTest, RemoveSession001, TestSize.Level1)
+HWTEST_F(SessionStackTest, RemoveSession001, TestSize.Level0)
 {
     AVSessionService* avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     ASSERT_TRUE(avSessionService_ != nullptr);
@@ -78,7 +78,7 @@ HWTEST_F(SessionStackTest, RemoveSession001, TestSize.Level1)
 * @tc.desc: verifying session stack remove session
 * @tc.type: FUNC
 */
-HWTEST_F(SessionStackTest, RemoveSession002, TestSize.Level1)
+HWTEST_F(SessionStackTest, RemoveSession002, TestSize.Level0)
 {
     AVSessionService* avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     ASSERT_TRUE(avSessionService_ != nullptr);
@@ -110,7 +110,7 @@ HWTEST_F(SessionStackTest, RemoveSession002, TestSize.Level1)
 * @tc.desc: verifying session stack add session
 * @tc.type: FUNC
 */
-HWTEST_F(SessionStackTest, AddSession001, TestSize.Level1)
+HWTEST_F(SessionStackTest, AddSession001, TestSize.Level0)
 {
     OHOS::AppExecFwk::ElementName elementName;
     AVSessionService* avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
@@ -140,7 +140,7 @@ HWTEST_F(SessionStackTest, AddSession001, TestSize.Level1)
 * @tc.desc: verifying session stack get session
 * @tc.type: FUNC
 */
-HWTEST_F(SessionStackTest, GetSession001, TestSize.Level1)
+HWTEST_F(SessionStackTest, GetSession001, TestSize.Level0)
 {
     OHOS::AppExecFwk::ElementName elementName;
     AVSessionService* avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
@@ -172,7 +172,7 @@ HWTEST_F(SessionStackTest, GetSession001, TestSize.Level1)
 * @tc.desc: verifying session stack get session by id
 * @tc.type: FUNC
 */
-HWTEST_F(SessionStackTest, GetSessionById001, TestSize.Level1)
+HWTEST_F(SessionStackTest, GetSessionById001, TestSize.Level0)
 {
     OHOS::AppExecFwk::ElementName elementName;
     AVSessionService* avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
@@ -200,7 +200,7 @@ HWTEST_F(SessionStackTest, GetSessionById001, TestSize.Level1)
 * @tc.desc: verifying session stack UidHasSession
 * @tc.type: FUNC
 */
-HWTEST_F(SessionStackTest, UidHasSession001, TestSize.Level1)
+HWTEST_F(SessionStackTest, UidHasSession001, TestSize.Level0)
 {
     OHOS::AppExecFwk::ElementName elementName;
     AVSessionService* avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
@@ -230,7 +230,7 @@ HWTEST_F(SessionStackTest, UidHasSession001, TestSize.Level1)
 * @tc.desc: verifying session stack get session by uid
 * @tc.type: FUNC
 */
-HWTEST_F(SessionStackTest, GetSessionByUid001, TestSize.Level1)
+HWTEST_F(SessionStackTest, GetSessionByUid001, TestSize.Level0)
 {
     OHOS::AppExecFwk::ElementName elementName;
     AVSessionService* avSessionService_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);

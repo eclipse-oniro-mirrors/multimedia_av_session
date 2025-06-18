@@ -69,7 +69,7 @@ void AVMediaDescriptionTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: I6RJST
 */
-HWTEST_F(AVMediaDescriptionTest, SetAVmediaDescription001, TestSize.Level1)
+HWTEST_F(AVMediaDescriptionTest, SetAVmediaDescription001, TestSize.Level0)
 {
     SLOGI("SetAVMediaDescription001 Begin");
     AVMediaDescription mediaDescription;
@@ -101,7 +101,7 @@ HWTEST_F(AVMediaDescriptionTest, SetAVmediaDescription001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I6RJST
 */
-HWTEST_F(AVMediaDescriptionTest, IsAVmediaDescriptionValid001, TestSize.Level1)
+HWTEST_F(AVMediaDescriptionTest, IsAVmediaDescriptionValid001, TestSize.Level0)
 {
     SLOGI("IsAVmediaDescriptionValid001 Begin");
     AVMediaDescription mediaDescription;
@@ -118,7 +118,7 @@ HWTEST_F(AVMediaDescriptionTest, IsAVmediaDescriptionValid001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: I6RJST
 */
-HWTEST_F(AVMediaDescriptionTest, IsAVmediaDescriptionValid002, TestSize.Level1)
+HWTEST_F(AVMediaDescriptionTest, IsAVmediaDescriptionValid002, TestSize.Level0)
 {
     SLOGI("IsAVmediaDescriptionValid002 Begin");
     AVMediaDescription mediaDescription;
@@ -134,7 +134,7 @@ HWTEST_F(AVMediaDescriptionTest, IsAVmediaDescriptionValid002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:I6RJST
  */
-HWTEST_F(AVMediaDescriptionTest, AVmediaDescriptionMarshalling001, TestSize.Level1)
+HWTEST_F(AVMediaDescriptionTest, AVmediaDescriptionMarshalling001, TestSize.Level0)
 {
     SLOGI("AVmediaDescriptionMarshalling001 Begin");
     OHOS::Parcel& parcel = g_parcel;
@@ -149,7 +149,7 @@ HWTEST_F(AVMediaDescriptionTest, AVmediaDescriptionMarshalling001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:I6RJST
  */
-HWTEST_F(AVMediaDescriptionTest, AVmediaDescriptionUnmarshalling001, TestSize.Level1)
+HWTEST_F(AVMediaDescriptionTest, AVmediaDescriptionUnmarshalling001, TestSize.Level0)
 {
     SLOGI("AVmediaDescriptionUnmarshalling001 Begin");
     OHOS::Parcel& parcel = g_parcel;

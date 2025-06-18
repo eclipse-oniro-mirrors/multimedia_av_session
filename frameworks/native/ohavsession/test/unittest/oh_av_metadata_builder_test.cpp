@@ -55,7 +55,7 @@ void OHAVMetadataBuilderTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData001, TestSize.Level1)
+HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData001, TestSize.Level0)
 {
     SLOGI("SetAVMetaData001 Begin");
     AVMetaData* metadata;
@@ -104,7 +104,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData002, TestSize.Level1)
+HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData002, TestSize.Level0)
 {
     SLOGI("SetAVMetaData002 Begin");
     int ret = g_ohAVMetaDataBuilder.SetSkipIntervals((AVMetadata_SkipIntervals)(SECONDS_30 + 1));
@@ -118,7 +118,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level1)
+HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level0)
 {
     SLOGI("SetAVMetaData001 Begin");
     AVMetaData* metadata;
@@ -172,7 +172,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata001, TestSize.Level1)
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata001, TestSize.Level0)
 {
     SLOGI("GenerateAVMetadata001 Begin");
     AVMetadata_SkipIntervals intervals = SECONDS_10;
@@ -193,7 +193,7 @@ HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata002, TestSize.Level1)
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata002, TestSize.Level0)
 {
     SLOGI("GenerateAVMetadata002 Begin");
     AVMetadata_SkipIntervals intervals = SECONDS_15;
@@ -214,7 +214,7 @@ HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata003, TestSize.Level1)
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata003, TestSize.Level0)
 {
     SLOGI("GenerateAVMetadata003 Begin");
     AVMetadata_SkipIntervals intervals = SECONDS_30;
@@ -235,7 +235,7 @@ HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata004, TestSize.Level1)
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata004, TestSize.Level0)
 {
     SLOGI("GenerateAVMetadata004 Begin");
     AVMetadata_SkipIntervals intervals = static_cast<AVMetadata_SkipIntervals>(100);

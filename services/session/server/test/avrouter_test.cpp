@@ -57,7 +57,7 @@ void AVRouterTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, StartCastDiscovery001, TestSize.Level1)
+static HWTEST_F(AVRouterTest, StartCastDiscovery001, TestSize.Level0)
 {
     SLOGI("StartCastDiscovery001 begin");
     auto ret = AVRouter::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL, {});
@@ -71,7 +71,7 @@ static HWTEST_F(AVRouterTest, StartCastDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, StartCastDiscovery002, TestSize.Level1)
+static HWTEST_F(AVRouterTest, StartCastDiscovery002, TestSize.Level0)
 {
     SLOGI("StartCastDiscovery001 begin");
     auto ret = AVRouter::GetInstance().StartCastDiscovery(-1, {});
@@ -85,7 +85,7 @@ static HWTEST_F(AVRouterTest, StartCastDiscovery002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, StopCastDiscovery001, TestSize.Level1)
+static HWTEST_F(AVRouterTest, StopCastDiscovery001, TestSize.Level0)
 {
     SLOGI("StopCastDiscovery001 begin");
     auto ret = AVRouter::GetInstance().StartCastDiscovery(ProtocolType::TYPE_LOCAL, {});
@@ -101,7 +101,7 @@ static HWTEST_F(AVRouterTest, StopCastDiscovery001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, SetDiscoverable001, TestSize.Level1)
+static HWTEST_F(AVRouterTest, SetDiscoverable001, TestSize.Level0)
 {
     SLOGI("SetDiscoverable001 begin");
     auto ret = AVRouter::GetInstance().SetDiscoverable(true);
@@ -115,7 +115,7 @@ static HWTEST_F(AVRouterTest, SetDiscoverable001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-HWTEST_F(AVRouterTest, OnDeviceAvailable001, TestSize.Level1)
+HWTEST_F(AVRouterTest, OnDeviceAvailable001, TestSize.Level0)
 {
     SLOGI("OnDeviceAvailable001 begin");
     OutputDeviceInfo outputDeviceInfo;
@@ -130,7 +130,7 @@ HWTEST_F(AVRouterTest, OnDeviceAvailable001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, OnCastServerDied001, TestSize.Level1)
+static HWTEST_F(AVRouterTest, OnCastServerDied001, TestSize.Level0)
 {
     SLOGI("OnCastServerDied001 begin");
     auto ret = AVRouter::GetInstance().OnCastServerDied(-1);
@@ -144,7 +144,7 @@ static HWTEST_F(AVRouterTest, OnCastServerDied001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, StartDeviceLogging001, TestSize.Level1)
+static HWTEST_F(AVRouterTest, StartDeviceLogging001, TestSize.Level0)
 {
     SLOGI("StartDeviceLogging001 begin");
     int32_t fd = 1;
@@ -161,7 +161,7 @@ static HWTEST_F(AVRouterTest, StartDeviceLogging001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, StartDeviceLogging002, TestSize.Level1)
+static HWTEST_F(AVRouterTest, StartDeviceLogging002, TestSize.Level0)
 {
     SLOGI("StartDeviceLogging002 begin");
     int32_t fd = 1;
@@ -179,7 +179,7 @@ static HWTEST_F(AVRouterTest, StartDeviceLogging002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, OnDeviceLogEvent001, TestSize.Level1)
+static HWTEST_F(AVRouterTest, OnDeviceLogEvent001, TestSize.Level0)
 {
     SLOGI("OnDeviceLogEvent001 begin");
     DeviceLogEventCode eventId = DEVICE_LOG_FULL;
@@ -196,7 +196,7 @@ static HWTEST_F(AVRouterTest, OnDeviceLogEvent001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, OnDeviceLogEvent002, TestSize.Level1)
+static HWTEST_F(AVRouterTest, OnDeviceLogEvent002, TestSize.Level0)
 {
     SLOGI("OnDeviceLogEvent002 begin");
     DeviceLogEventCode eventId = DEVICE_LOG_FULL;
@@ -213,7 +213,7 @@ static HWTEST_F(AVRouterTest, OnDeviceLogEvent002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, OnDeviceOffline001, TestSize.Level1)
+static HWTEST_F(AVRouterTest, OnDeviceOffline001, TestSize.Level0)
 {
     SLOGI("OnDeviceOffline001 begin");
     std::string deviceId = "***";
@@ -229,7 +229,7 @@ static HWTEST_F(AVRouterTest, OnDeviceOffline001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: NA
 */
-static HWTEST_F(AVRouterTest, OnDeviceOffline002, TestSize.Level1)
+static HWTEST_F(AVRouterTest, OnDeviceOffline002, TestSize.Level0)
 {
     SLOGI("OnDeviceOffline002 begin");
     AVRouter::GetInstance().Init(g_AVSessionService.get());

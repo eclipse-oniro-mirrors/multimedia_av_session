@@ -50,7 +50,7 @@ void MediaInfoHolderTest::TearDown()
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MediaInfoHolderTest, SetAVCallState001, TestSize.Level1)
+HWTEST_F(MediaInfoHolderTest, SetAVCallState001, TestSize.Level0)
 {
     MediaInfoHolder mediaInfoHolder;
     Parcel parcel;
@@ -71,7 +71,7 @@ HWTEST_F(MediaInfoHolderTest, SetAVCallState001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(MediaInfoHolderTest, SetAVCallState002, TestSize.Level1)
+HWTEST_F(MediaInfoHolderTest, SetAVCallState002, TestSize.Level0)
 {
     MediaInfoHolder mediaInfoHolder;
     Parcel parcel;

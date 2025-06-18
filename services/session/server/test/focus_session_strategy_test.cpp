@@ -58,7 +58,7 @@ void FocusSessionStrategyTest::TearDown()
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, testing::ext::TestSize.Level0)
 {
     SLOGD("HandleAudioRenderStateChangeEvent001 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -80,7 +80,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent001, 
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, testing::ext::TestSize.Level0)
 {
     SLOGD("HandleAudioRenderStateChangeEvent002 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -104,7 +104,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent002, 
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, testing::ext::TestSize.Level0)
 {
     SLOGD("HandleAudioRenderStateChangeEvent003 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -126,7 +126,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent003, 
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, testing::ext::TestSize.Level0)
 {
     SLOGD("HandleAudioRenderStateChangeEvent004 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -150,7 +150,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent004, 
  * @tc.desc: Test IsCommandSendEnable
  * @tc.type: FUNC
  */
-static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, testing::ext::TestSize.Level0)
 {
     SLOGD("HandleAudioRenderStateChangeEvent005 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -181,7 +181,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent005, 
  * @tc.desc: Test IsFocusSession
  * @tc.type: FUNC
  */
-static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestSize.Level0)
 {
     SLOGD("IsFocusSession001 begin!");
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
@@ -212,7 +212,7 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession001, testing::ext::TestS
  * @tc.desc: Test IsFocusSession
  * @tc.type: FUNC
  */
-static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestSize.Level0)
 {
     SLOGD("IsFocusSession002 begin!");
     
@@ -244,7 +244,7 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession002, testing::ext::TestS
 * @tc.desc: Test HandleAudioRenderStateChangeEvent
 * @tc.type: FUNC
 */
-static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent006, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent006, testing::ext::TestSize.Level0)
 {
     SLOGD("HandleAudioRenderStateChangeEvent006 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -277,7 +277,7 @@ static HWTEST_F(FocusSessionStrategyTest, HandleAudioRenderStateChangeEvent006, 
 * @tc.desc: Test UpdateFocusSession
 * @tc.type: FUNC
 */
-static HWTEST_F(FocusSessionStrategyTest, UpdateFocusSession001, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, UpdateFocusSession001, testing::ext::TestSize.Level0)
 {
     SLOGD("UpdateFocusSession001 begin!");
     LOG_SetCallback(MyLogCallback);
@@ -297,7 +297,7 @@ static HWTEST_F(FocusSessionStrategyTest, UpdateFocusSession001, testing::ext::T
 * @tc.desc: Test IsFocusSession
 * @tc.type: FUNC
 */
-static HWTEST_F(FocusSessionStrategyTest, IsFocusSession003, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, IsFocusSession003, testing::ext::TestSize.Level0)
 {
     SLOGD("IsFocusSession003 begin!");
     FocusSessionStrategy focusSessionStrategy;
@@ -313,7 +313,7 @@ static HWTEST_F(FocusSessionStrategyTest, IsFocusSession003, testing::ext::TestS
 * @tc.desc: Test CheckFocusSessionStop
 * @tc.type: FUNC
 */
-static HWTEST_F(FocusSessionStrategyTest, CheckFocusSessionStop001, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, CheckFocusSessionStop001, testing::ext::TestSize.Level0)
 {
     SLOGD("CheckFocusSessionStop001 begin!");
     FocusSessionStrategy focusSessionStrategy;
@@ -329,7 +329,7 @@ static HWTEST_F(FocusSessionStrategyTest, CheckFocusSessionStop001, testing::ext
 * @tc.desc: Test DelayStopFocusSession
 * @tc.type: FUNC
 */
-static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession001, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession001, testing::ext::TestSize.Level0)
 {
     SLOGD("DelayStopFocusSession001 begin!");
     FocusSessionStrategy focusSessionStrategy;
@@ -345,7 +345,7 @@ static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession001, testing::ext
 * @tc.desc: Test DelayStopFocusSession
 * @tc.type: FUNC
 */
-static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession002, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession002, testing::ext::TestSize.Level0)
 {
     SLOGD("DelayStopFocusSession002 begin!");
     FocusSessionStrategy focusSessionStrategy;
@@ -363,7 +363,7 @@ static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession002, testing::ext
 * @tc.desc: Test DelayStopFocusSession
 * @tc.type: FUNC
 */
-static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession003, testing::ext::TestSize.Level1)
+static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession003, testing::ext::TestSize.Level0)
 {
     SLOGD("DelayStopFocusSession003 begin!");
     FocusSessionStrategy focusSessionStrategy;

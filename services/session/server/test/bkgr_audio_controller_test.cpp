@@ -54,7 +54,7 @@ void BkGrAudioControllerTest::TearDown()
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnSessionRelease001, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, OnSessionRelease001, TestSize.Level0)
 {
     SLOGI("OnSessionRelease001 begin!");
     AVSessionDescriptor descriptor;
@@ -71,7 +71,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnSessionRelease002, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, OnSessionRelease002, TestSize.Level0)
 {
     SLOGI("OnSessionRelease002 begin!");
     AVSessionDescriptor descriptor;
@@ -89,7 +89,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnSessionRelease003, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, OnSessionRelease003, TestSize.Level0)
 {
     SLOGI("OnSessionRelease003 begin!");
     AVSessionDescriptor descriptor;
@@ -107,7 +107,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease003, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange001, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange001, TestSize.Level0)
 {
     SLOGI("HandleAudioStreamRendererStateChange001 begin!");
     std::shared_ptr<OHOS::AudioStandard::AudioRendererChangeInfo> info =
@@ -126,7 +126,7 @@ static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange001, 
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange002, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange002, TestSize.Level0)
 {
     SLOGI("HandleAudioStreamRendererStateChange002 begin!");
     std::shared_ptr<OHOS::AudioStandard::AudioRendererChangeInfo> info =
@@ -147,7 +147,7 @@ static HWTEST(BkGrAudioControllerTest, HandleAudioStreamRendererStateChange002, 
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, HandleAppMuteState001, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, HandleAppMuteState001, TestSize.Level0)
 {
     SLOGI("HandleAppMuteState001 begin!");
     int32_t uid = -1;
@@ -163,7 +163,7 @@ static HWTEST(BkGrAudioControllerTest, HandleAppMuteState001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, HandleAppMuteState002, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, HandleAppMuteState002, TestSize.Level0)
 {
     SLOGI("HandleAppMuteState001 begin!");
     int32_t uid = -1;
@@ -179,7 +179,7 @@ static HWTEST(BkGrAudioControllerTest, HandleAppMuteState002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, IsBackgroundMode001, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, IsBackgroundMode001, TestSize.Level0)
 {
     SLOGI("IsBackgroundMode001 begin!");
     int32_t creatorUid = 1;
@@ -195,7 +195,7 @@ static HWTEST(BkGrAudioControllerTest, IsBackgroundMode001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, HasAVSession001, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, HasAVSession001, TestSize.Level0)
 {
     SLOGI("HasAVSession001 begin!");
     int32_t uid = 1000;
@@ -210,7 +210,7 @@ static HWTEST(BkGrAudioControllerTest, HasAVSession001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, HasAVSession002, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, HasAVSession002, TestSize.Level0)
 {
     SLOGI("HasAVSession002 begin!");
     int32_t uid = 1000;
@@ -229,7 +229,7 @@ static HWTEST(BkGrAudioControllerTest, HasAVSession002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnSessionRelease004, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, OnSessionRelease004, TestSize.Level0)
 {
     SLOGI("OnSessionRelease004 begin!");
     AVSessionDescriptor descriptor;
@@ -250,7 +250,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnSessionRelease005, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, OnSessionRelease005, TestSize.Level0)
 {
     SLOGI("OnSessionRelease005 begin!");
     AVSessionDescriptor descriptor;
@@ -271,7 +271,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionRelease005, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnSessionCreate001, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, OnSessionCreate001, TestSize.Level0)
 {
     SLOGI("OnSessionCreate001 begin!");
     AVSessionDescriptor descriptor;
@@ -288,7 +288,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionCreate001, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnSessionCreate002, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, OnSessionCreate002, TestSize.Level0)
 {
     SLOGI("OnSessionCreate002 begin!");
     AVSessionDescriptor descriptor;
@@ -306,7 +306,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionCreate002, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnRemoteDistributedSessionChange001, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, OnRemoteDistributedSessionChange001, TestSize.Level0)
 {
     SLOGI("OnRemoteDistributedSessionChange001 begin!");
     DeviceLogEventCode eventCode = DeviceLogEventCode::DEVICE_LOG_FULL;
@@ -335,7 +335,7 @@ static HWTEST(BkGrAudioControllerTest, OnRemoteDistributedSessionChange001, Test
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, IsBackgroundMode002, TestSize.Level1)
+static HWTEST(BkGrAudioControllerTest, IsBackgroundMode002, TestSize.Level0)
 {
     SLOGI("IsBackgroundMode002 begin!");
     int32_t creatorUid = 1;

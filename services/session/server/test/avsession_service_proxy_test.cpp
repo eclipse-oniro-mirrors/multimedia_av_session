@@ -59,7 +59,7 @@ void AVSessionServiceProxyTest::TearDown()
  * @tc.desc: Test GetAllSessionDescriptors
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing::ext::TestSize.Level1)
+static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing::ext::TestSize.Level0)
 {
     SLOGI("GetAllSessionDescriptors001, start");
 
