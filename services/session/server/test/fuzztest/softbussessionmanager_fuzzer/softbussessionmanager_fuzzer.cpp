@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <string>
+#include <fuzzer/FuzzedDataProvider.h>
 #include "avsession_log.h"
 #include "softbussessionmanager_fuzzer.h"
 #include "softbus_session_manager.h"
@@ -51,6 +52,7 @@ public:
 
 void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, size_t size)
 {
+    FuzzedDataProvider proveider(RAW_DATA, g_dataSize);
     std::shared_ptr<SoftbusSessionManager> manager_ = std::make_shared<SoftbusSessionManager>();
     std::shared_ptr<SoftbusSessionListenerDemo> softbusSessionListenerDemo =
         std::make_shared<SoftbusSessionListenerDemo>();
@@ -83,9 +85,14 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     manager_->OnMessage(socket, objectId, dataLen);
     manager_->OnMessage(socket, nullptr, dataLen);
 
-    std::string pkg = to_string(GetData<uint8_t>());
-    manager_->Socket(pkg);
-    manager_->Shutdown(socket);
+    std::string pkg;
+    bool isNUll = GetData<bool>();
+    if (!isNUll) {
+        pkg = to_string(GetData<uint8_t>());
+    }
+    auto ret = manager_->Socket(pkg);
+    manager_->Bind("localhost", pkg);
+    manager_->Shutdown(ret);
 
     std::string inforOne = std::to_string(GetData<uint8_t>());
     std::string inforTwo = std::to_string(GetData<uint8_t>());
@@ -98,6 +105,8 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     manager_->OnBind(socket, info);
 
     manager_->AddSessionListener(nullptr);
+    std::string sendData = proveider.ConsumeRandomLengthString();
+    manager_->SendBytesForNext(socket, sendData);
 }
 
 void SoftbusSessionManagerOnRemoteRequest(uint8_t* data, size_t size)

@@ -37,6 +37,11 @@ static const uint8_t *RAW_DATA = nullptr;
 static size_t g_dataSize = 0;
 static size_t g_pos;
 static std::shared_ptr<MigrateAVSessionServer> migrateServer_;
+AppExecFwk::ElementName elementName;
+sptr<AVSessionItem> avsessionHere_ = nullptr;
+static char g_testSessionTag[] = "test";
+static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
+static char g_testAnotherAbilityName[] = "testAnother.ability";
 
 template<class T>
 T GetData()
@@ -382,6 +387,28 @@ void RegisterAudioCallbackAndTriggerTest()
     migrateServer_->DoPostTasksClear();
 }
 
+void UpdateFrontSessionInfoToRemoteTest(sptr<AVSessionService> service)
+{
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+    if (avsessionHere_ == nullptr) {
+        SLOGI("avsessionHere_ is null");
+        return;
+    }
+    service->AddAvQueueInfoToFile(*avsessionHere_);
+    sptr<IRemoteObject> avControllerItemObj;
+    std::string sessionId = provider.ConsumeRandomLengthString();
+    uint32_t ret = service->CreateControllerInner(avsessionHere_->GetSessionId(), avControllerItemObj);
+    if (ret != AVSESSION_SUCCESS) {
+        return;
+    }
+    sptr<AVControllerItem> avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
+    if (!avControllerItem) {
+        return;
+    }
+    migrateServer_->UpdateFrontSessionInfoToRemote(avControllerItem);
+    migrateServer_->DoBundleInfoSyncToRemote(avControllerItem);
+}
+
 void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
 {
     if (rawData == nullptr || size > MAX_CODE_LEN) {
@@ -391,7 +418,8 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     g_dataSize = size;
     g_pos = 0;
 
-    if (migrateServer_ == nullptr) {
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+    if(migrateServer_ == nullptr) {
         migrateServer_ = std::make_shared<MigrateAVSessionServer>();
     }
     if (migrateServer_ == nullptr) {
@@ -403,6 +431,10 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
         SLOGI("service is null");
         return;
     }
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    avsessionHere_ = avservice_->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     migrateServer_->Init(avservice_);
 
     ConnectProxyTest();
@@ -430,6 +462,8 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     VolumeControlCommandTest();
     SwitchAudioDeviceCommandTest();
     RegisterAudioCallbackAndTriggerTest();
+
+    UpdateFrontSessionInfoToRemoteTest(avservice_);
 }
 
 /* Fuzzer entry point */
