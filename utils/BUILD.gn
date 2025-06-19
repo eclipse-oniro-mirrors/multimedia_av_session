@@ -14,7 +14,6 @@
 import("//build/ohos.gni")
 import("../config.gni")
 
-openssl_dir = "//third_party/openssl"
 config("avsession_utils_config") {
   include_dirs = [ "include" ]
 }
@@ -37,12 +36,9 @@ ohos_shared_library("avsession_utils") {
 
   include_dirs = [
     "./../interfaces/inner_api/native/session/include",
-    "$openssl_dir/include/",
   ]
 
   public_configs = [ ":avsession_utils_config" ]
-
-  deps = [ "//third_party/openssl:libcrypto_shared" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
@@ -56,6 +52,7 @@ ohos_shared_library("avsession_utils") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "openssl:libcrypto_shared",
     "samgr:samgr_proxy",
   ]
 

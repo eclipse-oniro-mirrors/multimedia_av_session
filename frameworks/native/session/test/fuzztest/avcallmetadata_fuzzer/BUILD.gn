@@ -30,7 +30,6 @@ ohos_fuzztest("AVCallMetaDataFuzzTest") {
     "../../../../../../services/session/server/remote",
     "../../../../../../services/session/server",
     "../../../../../../services/session/adapter",
-    "//third_party/json/single_include",
   ]
   cflags = [
     "-g",
@@ -58,6 +57,7 @@ ohos_fuzztest("AVCallMetaDataFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
