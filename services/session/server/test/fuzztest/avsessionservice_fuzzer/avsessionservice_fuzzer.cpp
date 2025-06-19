@@ -652,7 +652,7 @@ void CheckInterfaceTokenTest()
     FuzzedDataProvider provider(RAW_DATA, min(maxRawDataSize >> 1, g_totalSize));
     MessageParcel dataMessageParcel;
     std::u16string token;
-    if (provider.remaining_bytes() < maxTokenSize << 1) {
+    if (provider.remaining_bytes() < (maxTokenSize << 1)) {
         token = u"";
     }
     token.resize(maxTokenSize);
