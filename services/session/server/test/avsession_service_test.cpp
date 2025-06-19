@@ -1871,17 +1871,15 @@ static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession002, TestSize.Level1
     SLOGI("GetOtherPlayingSession002 begin!");
     int32_t userId = 0;
     static char g_testFrontBundleName[] = "testFront.ohos.avsession";
-    static char g_testFrontAbilityName[] = "testFront.ability";
-    static char g_testFrontSessionTag[] = "test";
-    OHOS::AppExecFwk::ElementName elementNameFront_;
-    elementNameFront_.SetBundleName(g_testFrontBundleName);
-    elementNameFront_.SetAbilityName(g_testFrontAbilityName);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionFront_ =
-        avservice_->CreateSessionInner(g_testFrontSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementNameFront_);
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avservice_->UpdateFrontSession(avsessionFront_, true);
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     avsessionFront_->SetAVPlaybackState(g_playbackState);
-    bool ret = avservice_->GetOtherPlayingSession(userId, g_testAnotherBundleName) == nullptr;
+    bool ret = avservice_->GetOtherPlayingSession(userId, g_testFrontBundleName) == nullptr;
     EXPECT_EQ(ret, false);
     avservice_->HandleSessionRelease(avsessionFront_->GetSessionId());
     avsessionFront_->Destroy();
@@ -1899,18 +1897,16 @@ static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession003, TestSize.Level1
     SLOGI("GetOtherPlayingSession003 begin!");
     int32_t userId = 0;
     static char g_testFrontBundleName[] = "testFront.ohos.avsession";
-    static char g_testFrontAbilityName[] = "testFront.ability";
-    static char g_testFrontSessionTag[] = "test";
-    OHOS::AppExecFwk::ElementName elementNameFront_;
-    elementNameFront_.SetBundleName(g_testFrontBundleName);
-    elementNameFront_.SetAbilityName(g_testFrontAbilityName);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionFront_ =
-        avservice_->CreateSessionInner(g_testFrontSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementNameFront_);
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avservice_->UpdateFrontSession(avsessionFront_, true);
-    avsessionFront_->castHandle_ = 1;
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     avsessionFront_->SetAVPlaybackState(g_playbackState);
-    bool ret = avservice_->GetOtherPlayingSession(userId, g_testAnotherBundleName) == nullptr;
+    avsessionFront_->castHandle_ = 1;
+    bool ret = avservice_->GetOtherPlayingSession(userId, g_testFrontBundleName) == nullptr;
     EXPECT_EQ(ret, false);
     avservice_->HandleSessionRelease(avsessionFront_->GetSessionId());
     avsessionFront_->Destroy();
