@@ -23,6 +23,10 @@ CollaborationManager& CollaborationManager::GetInstance()
 {
     std::call_once(onceFlag_, [] {
         instance_ = std::make_shared<CollaborationManager>();
+        instance_->exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr;
+        instance_->exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback = nullptr;
+        instance_->exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = nullptr;
+        instance_->exportapi_.ServiceCollaborationManager_PublishServiceState = nullptr;
     });
     return *instance_;
 }
