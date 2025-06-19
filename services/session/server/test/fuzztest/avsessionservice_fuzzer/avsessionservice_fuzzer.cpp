@@ -1037,7 +1037,6 @@ void AvSessionServiceTest001()
     HandleRemoveMediaCardEventTest();
     IsTopSessionPlayingTest();
     HandleMediaCardStateChangeEventTest();
-    PullMigrateStubTest();
     InitCollaborationTest();
     InitCastEngineServiceTest();
     LowQualityCheckTest();
