@@ -40,6 +40,8 @@ public:
 
     std::string GetBundleNameFromUid(const int32_t uid);
 
+    int32_t GetUidFromBundleName(const std::string bundleName, const int32_t userId);
+
     __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntent(const std::string& bundleName,
         std::string& supportModule, std::string& profile);
 

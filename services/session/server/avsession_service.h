@@ -519,6 +519,8 @@ private:
 
     void AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
 
+    void AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
+
     bool VerifyNotification();
 
     void HandleChangeTopSession(int32_t infoUid, int32_t infoPid, int32_t userId);
@@ -582,6 +584,8 @@ private:
     void DeleteAVQueueInfoRecordFromCJSON(std::string& sortContent, const std::string& bundleName, int32_t userId);
 
     bool FillFileWithEmptyContentEx(ofstream& fileWrite);
+
+    void CheckAndUpdateAncoMediaSession(const AppExecFwk::ElementName& elementName);
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     void ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state);
@@ -706,6 +710,7 @@ private:
     const int32_t allocSpace = 2;
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
+    const int32_t audioBrokerUid = 5557;
     const int32_t saType = 1;
     const int32_t remoteMediaNone = 4;
     const int32_t remoteMediaAlive = 3;
@@ -715,6 +720,7 @@ private:
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
     const int32_t cancelTimeout = 5000;
     const uint8_t doRemoteLoadRetryTime = 5;
+    const char *shellBundle = "com.example.shell";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H
