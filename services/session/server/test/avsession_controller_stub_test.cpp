@@ -217,6 +217,7 @@ public:
             innerMediaPixelMap->Clear();
         }
     };
+    int32_t GetLaunchAbilityInner(OHOS::AbilityRuntime::WantAgent::WantAgent*& ability) override { return 0; }
     bool isSuccess = true;
 };
 

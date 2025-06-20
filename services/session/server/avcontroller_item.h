@@ -75,6 +75,8 @@ public:
 
     int32_t Destroy() override;
 
+    int32_t GetLaunchAbilityInner(AbilityRuntime::WantAgent::WantAgent*& ability) override { return 0; };
+
     int32_t DestroyWithoutReply();
 
     std::string GetSessionId() override;

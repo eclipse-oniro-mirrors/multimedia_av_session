@@ -145,7 +145,7 @@ public:
 
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
-    virtual int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos) {return 0;};
+    virtual int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos) = 0;
 
     /**
      * @brief Deconstruct SessionListener.

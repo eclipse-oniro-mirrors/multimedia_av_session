@@ -84,6 +84,7 @@ public:
     void OnPlayFromAssetId(int64_t assetId) override {};
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
     sptr<IRemoteObject> AsObject() override { return nullptr; }
+    void OnPlayWithAssetId(const std::string& assetId) override {};
 
     AVSessionCallbackImpl() = default;
     ~AVSessionCallbackImpl() = default;
