@@ -660,8 +660,10 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         SLOGI(" HandleFocusSession focusSession is current topSession.");
         if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
             topSession_->GetUid() != ancoUid) {
+            auto hasOtherPlayingSession = false;
             if (!isPlaying && topSession_->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
                 sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
+                hasOtherPlayingSession = result != nullptr;
                 HandleOtherSessionPlaying(result);
             }
             if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_.load())) {
@@ -675,12 +677,14 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                 SLOGD("call AVSessionNotifyUpdateNotification, uid = %{public}d, pid = %{public}d, ret = %{public}d",
                     topSession_->GetUid(), topSession_->GetPid(), ret);
             }
-            AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+            if (!hasOtherPlayingSession) {
+                AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+            }
 #ifdef START_STOP_ON_DEMAND_ENABLE
             PublishEvent(mediaPlayStateTrue);
 #endif
         }
-        if (topSession_->GetUid() == ancoUid) {
+        if (!hasOtherPlayingSession && topSession_->GetUid() == ancoUid) {
             userId = topSession_->GetUserId();
             hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
