@@ -673,7 +673,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                     topSession_->GetUid(), topSession_->GetPid(), ret);
             } else {
                 sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
-                hasOtherPlayingSession = result != nullptr;
+                hasOtherPlayingSession = (result != nullptr);
                 HandleOtherSessionPlaying(result);
             }
             if (!hasOtherPlayingSession) {
@@ -683,7 +683,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
             PublishEvent(mediaPlayStateTrue);
 #endif
         }
-        if (!hasOtherPlayingSession && topSession_->GetUid() == ancoUid) {
+        if (topSession_->GetUid() == ancoUid) {
             userId = topSession_->GetUserId();
             hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
