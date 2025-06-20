@@ -658,9 +658,9 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     }
     if (topSession_ && topSession_->GetUid() == info.uid && topSession_->GetPid() == info.pid) {
         SLOGI(" HandleFocusSession focusSession is current topSession.");
+        auto hasOtherPlayingSession = false;
         if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
             topSession_->GetUid() != ancoUid) {
-            auto hasOtherPlayingSession = false;
             if (!isPlaying && topSession_->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
                 sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
                 hasOtherPlayingSession = result != nullptr;
