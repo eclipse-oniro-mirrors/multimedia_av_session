@@ -67,12 +67,15 @@ static HWTEST_F(AVSessionDynamicLoaderTest, GetFuntion002, testing::ext::TestSiz
 {
     AVSessionDynamicLoader avsessionDynamicLoader;
     void* dataAddr = malloc(10);
+    ASSERT_NE(dataAddr, nullptr);
     avsessionDynamicLoader.dynamicLibHandle_.insert(std::make_pair(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, dataAddr));
     avsessionDynamicLoader.OpenDynamicHandle(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH);
     auto ptr = avsessionDynamicLoader.GetFuntion(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "aaa");
     EXPECT_EQ(ptr, nullptr);
-    int* intArray = static_cast<int*>(dataAddr);
-    delete[] intArray;
+    if (dataAddr != nullptr) {
+        free(dataAddr);
+        dataAddr = nullptr;
+    }
 }
 
 /**
@@ -85,12 +88,15 @@ static HWTEST_F(AVSessionDynamicLoaderTest, CloseDynamicHandle001, testing::ext:
 {
     AVSessionDynamicLoader avsessionDynamicLoader;
     void* dataAddr = malloc(10);
+    ASSERT_NE(dataAddr, nullptr);
     avsessionDynamicLoader.dynamicLibHandle_.insert(std::make_pair(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, dataAddr));
     avsessionDynamicLoader.CloseDynamicHandle(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH);
     auto ptr = avsessionDynamicLoader.GetFuntion(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "aaa");
     EXPECT_EQ(ptr, nullptr);
-    int* intArray = static_cast<int*>(dataAddr);
-    delete[] intArray;
+    if (dataAddr != nullptr) {
+        free(dataAddr);
+        dataAddr = nullptr;
+    }
 }
 
 /**
