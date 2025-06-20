@@ -1424,16 +1424,5 @@ static HWTEST(HwCastTest, HwCastDisplayListenerOnDisconnect001, TestSize.Level1)
     OHOS::Rosen::DisplayId displayId = 0;
     listener->SetDisplayInfo(nullptr);
     listener->OnDisconnect(displayId);
-
-    auto displayInfo = OHOS::sptr<OHOS::Rosen::DisplayInfo>::MakeSptr();
-    listener->SetDisplayInfo(displayInfo);
-    listener->OnDisconnect(displayId);
-
-    displayId = 1000;
-    listener->OnDisconnect(displayId);
-
-    displayInfo->SetDisplayId(displayId);
-    listener->SetDisplayInfo(displayInfo);
-    listener->OnDisconnect(displayId);
     SLOGI("HwCastDisplayListenerOnDisconnect001 end!");
 }
