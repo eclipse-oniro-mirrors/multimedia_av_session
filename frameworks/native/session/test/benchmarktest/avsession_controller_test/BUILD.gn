@@ -33,6 +33,7 @@ ohos_benchmarktest("ControllerTest") {
     "./../../../../../../services/session:avsession_item_static",
     "./../../../../../../services/session:avsession_service_static",
     "./../../../../session:avsession_client_static",
+    "../../../../../../utils:avsession_utils",
   ]
 
   external_deps = [

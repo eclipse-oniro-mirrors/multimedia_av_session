@@ -19,6 +19,7 @@ module_output_path = "av_session/av_session/ndk"
 common_deps = [
   "../../../ohavsession:ohavsession",
   "../../../session:avsession_client",
+  "../../../../../utils:avsession_utils",
 ]
 
 common_external_deps = [

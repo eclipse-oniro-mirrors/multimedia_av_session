@@ -43,6 +43,7 @@ ohos_fuzztest("AVQueueInfoFuzzTest") {
     "./../../../../../../services/session:avsession_item_static",
     "./../../../../../../services/session:avsession_service_static",
     "./../../../../session:avsession_client_static",
+    "./../../../../../../utils:avsession_utils",
   ]
   external_deps = [
     "ability_base:want",

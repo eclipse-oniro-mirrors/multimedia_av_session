@@ -41,6 +41,7 @@ ohos_fuzztest("AudioDeviceManagerFuzzTest") {
     "./../../../../../../frameworks/native/session:avsession_client_static",
     "./../../../../../session:avsession_item_static",
     "./../../../../../session:avsession_service_static",
+    "./../../../../../../utils:avsession_utils",
   ]
   external_deps = [
     "ability_base:want",
