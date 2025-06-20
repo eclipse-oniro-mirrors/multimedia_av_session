@@ -66,15 +66,9 @@ static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing:
     int32_t ret = AVSESSION_ERROR;
 
     sptr<ISystemAbilityManager> mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (mgr == nullptr) {
-        SLOGE("failed to get sa mgr");
-        return;
-    }
+    ASSERT_NE(mgr, nullptr);
     sptr<IRemoteObject> sessionService = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
-    if (sessionService == nullptr) {
-        SLOGE("failed to get service");
-        return;
-    }
+    ASSERT_NE(sessionService, nullptr);
 
     std::string tag = "tag";
     int32_t type = OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
