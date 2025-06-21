@@ -76,9 +76,7 @@ void AVSessionSysEvent::ReportLowQuality()
 
 void AVSessionSysEvent::Regiter()
 {
-    if (timer_ != nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN(timer_ == nullptr);
 
     timer_ = std::make_unique<OHOS::Utils::Timer>("EventStatisticTimer");
     auto timeCallback = [this]() {
@@ -190,14 +188,7 @@ void AVSessionSysEvent::SetAudioStatus(pid_t uid, int32_t rendererState)
 void AVSessionSysEvent::ReportPlayingState(const std::string& bundleName)
 {
     std::lock_guard lockGuard(lock_);
-    if (playingStateInfos_.empty()) {
-        return;
-    }
-
-    if (playingStateInfos_.find(bundleName) == playingStateInfos_.end()) {
-        return;
-    }
-
+    CHECK_AND_RETURN(!playingStateInfos_.empty() && playingStateInfos_.find(bundleName) != playingStateInfos_.end());
     auto playingStateInfo = playingStateInfos_[bundleName].get();
     if (playingStateInfo != nullptr) {
         SLOGD("report playing state for %{public}s", playingStateInfo->bundleName_.c_str());
@@ -233,10 +224,7 @@ void AVSessionSysEvent::ReportPlayingStateAll()
 
 void AVSessionSysEvent::RegisterPlayingState()
 {
-    if (playingStateTimer_ != nullptr) {
-        return;
-    }
-
+    CHECK_AND_RETURN(playingStateTimer_ == nullptr);
     playingStateTimer_ = std::make_unique<OHOS::Utils::Timer>("PlayingStatisticTimer");
     auto timeCallback = [this]() {
         ReportPlayingStateAll();
@@ -277,52 +265,52 @@ void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::st
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    if (playingStateInfo == nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN(playingStateInfo != nullptr);
     playingStateInfo->bundleName_ = bundleName;
     playingStateInfo->appVersion_ = appVersion;
     playingStateInfo->updateState(state);
+    CHECK_AND_RETURN(playingStateInfo->state_.size() >= REPORT_SIZE);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
 void AVSessionSysEvent::UpdateMetaQuality(const std::string& bundleName, MetadataQuality metaQuality)
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    if (playingStateInfo == nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN(playingStateInfo != nullptr);
     playingStateInfo->updateMetaQuality(metaQuality);
+    CHECK_AND_RETURN(playingStateInfo->metaQuality_.size() >= REPORT_SIZE);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
 void AVSessionSysEvent::UpdateCommandQuality(const std::string& bundleName, uint32_t commandQuality)
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    if (playingStateInfo == nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN(playingStateInfo != nullptr);
     playingStateInfo->updateCommandQuality(commandQuality);
+    CHECK_AND_RETURN(playingStateInfo->commandQuality_.size() >= REPORT_SIZE);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
 void AVSessionSysEvent::UpdatePlaybackState(const std::string& bundleName, uint8_t playbackState)
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    if (playingStateInfo == nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN(playingStateInfo != nullptr);
     playingStateInfo->updatePlaybackState(playbackState);
+    CHECK_AND_RETURN(playingStateInfo->playbackState_.size() >= REPORT_SIZE);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
 void AVSessionSysEvent::UpdateControl(const std::string& bundleName, uint8_t control, std::string callerBundleName)
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    if (playingStateInfo == nullptr) {
-        return;
-    }
+    CHECK_AND_RETURN(playingStateInfo != nullptr);
     playingStateInfo->updateControl(control, callerBundleName);
+    CHECK_AND_RETURN(playingStateInfo->control_.size() >= REPORT_SIZE);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
 void PlayingStateInfo::updateState(uint8_t state)
@@ -332,9 +320,6 @@ void PlayingStateInfo::updateState(uint8_t state)
         lastState_ = state;
         state_.push_back(state);
         stateTime_.push_back(UTCTimeMilliSeconds());
-        if (state_.size() >= REPORT_SIZE) {
-            AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
-        }
     }
 }
 
@@ -343,9 +328,6 @@ void PlayingStateInfo::updateMetaQuality(MetadataQuality metaQuality)
     std::lock_guard lockGuard(lock_);
     metaQuality_.push_back(static_cast<uint8_t>(metaQuality));
     metaQualityTime_.push_back(UTCTimeMilliSeconds());
-    if (metaQuality_.size() >= REPORT_SIZE) {
-        AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
-    }
 }
 
 void PlayingStateInfo::updateCommandQuality(uint32_t commandQuality)
@@ -355,9 +337,6 @@ void PlayingStateInfo::updateCommandQuality(uint32_t commandQuality)
         lastCommandQuality_ = commandQuality;
         commandQuality_.push_back(commandQuality);
         commandQualityTime_.push_back(UTCTimeMilliSeconds());
-        if (commandQuality_.size() >= REPORT_SIZE) {
-            AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
-        }
     }
 }
 
@@ -368,9 +347,6 @@ void PlayingStateInfo::updatePlaybackState(uint8_t playbackState)
         lastPlaybackState_ = playbackState;
         playbackState_.push_back(playbackState);
         playbackStateTime_.push_back(UTCTimeMilliSeconds());
-        if (playbackState_.size() >= REPORT_SIZE) {
-            AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
-        }
     }
 }
 
@@ -382,9 +358,6 @@ void PlayingStateInfo::updateControl(uint8_t control, std::string callerBundleNa
         control_.push_back(control);
         callerBundleName_.push_back(callerBundleName);
         controlTime_.push_back(UTCTimeMilliSeconds());
-        if (control_.size() >= REPORT_SIZE) {
-            AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName_);
-        }
     }
 }
 #endif
