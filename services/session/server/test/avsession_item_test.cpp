@@ -672,7 +672,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportSessionControl_001, TestSize.Lev
         stateInfo->control_.push_back(0);
     }
 
-    AVSessionSysEvent::GetInstance().UpdateControl(g_testAnotherBundleName, 0);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(g_testAnotherBundleName);
     EXPECT_EQ(stateInfo->control_.size(), 0);
 }
 #endif
