@@ -30,7 +30,6 @@ ohos_fuzztest("AVSessionStubFuzzTest") {
     "../../../../../../services/session/server/remote",
     "../../../../../../services/session/server",
     "../../../../../../services/session/adapter",
-    "//third_party/json/single_include",
   ]
   cflags = [
     "-g",
@@ -56,6 +55,7 @@ ohos_fuzztest("AVSessionStubFuzzTest") {
     "data_object:distributeddataobject_impl",
     "device_manager:devicemanagersdk",
     "hilog:libhilog",
+    "json:nlohmann_json_static",
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",

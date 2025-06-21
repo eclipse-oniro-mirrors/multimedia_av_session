@@ -36,7 +36,6 @@ common_deps = [
   "../../../../../utils:avsession_utils",
   "../../../../common:avsession_common",
   "../../../session:avsession_client_static",
-  "//third_party/googletest:gtest_main",
 ]
 
 common_deps_without_third_party = [
@@ -64,6 +63,7 @@ common_external_deps = [
   "image_framework:image_native",
   "input:libmmi-client",
   "ipc:ipc_single",
+  "googletest:gtest_main",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
