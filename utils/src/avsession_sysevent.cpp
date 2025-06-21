@@ -271,7 +271,6 @@ void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::st
     playingStateInfo->updateState(state);
     CHECK_AND_RETURN(playingStateInfo->state_.size() >= REPORT_SIZE);
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
-
 }
 
 void AVSessionSysEvent::UpdateMetaQuality(const std::string& bundleName, MetadataQuality metaQuality)
