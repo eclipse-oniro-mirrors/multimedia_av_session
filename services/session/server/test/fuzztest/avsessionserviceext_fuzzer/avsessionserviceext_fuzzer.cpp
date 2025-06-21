@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,16 +68,16 @@ public:
 
 class FuzzExtISessionListener : public ISessionListener {
 public:
-    void OnSessionCreate(const AVSessionDescriptor& descriptor) override {};
-    void OnSessionRelease(const AVSessionDescriptor& descriptor) override {};
-    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override {};
-    void OnAudioSessionChecked(const int32_t uid) override {};
-    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {};
-    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
-    void OnDeviceOffline(const std::string& deviceId) override {};
-    void OnDeviceStateChange(const DeviceState& deviceState) override {};
-    void OnRemoteDistributedSessionChange(
-        const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override {};
+    ErrCode OnSessionCreate(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSessionRelease(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; };
+    ErrCode OnTopSessionChange(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; };
+    ErrCode OnAudioSessionChecked(const int32_t uid) override { return AVSESSION_SUCCESS; };
+    ErrCode OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override { return AVSESSION_SUCCESS; };
+    ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override { return AVSESSION_SUCCESS; };
+    ErrCode OnDeviceOffline(const std::string& deviceId) override { return AVSESSION_SUCCESS; };
+    ErrCode OnDeviceStateChange(const DeviceState& deviceState) override { return AVSESSION_SUCCESS; };
+    ErrCode OnRemoteDistributedSessionChange(
+        const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; };
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 

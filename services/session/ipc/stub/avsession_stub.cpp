@@ -14,7 +14,7 @@
  */
 
 #include "avsession_stub.h"
-#include "avsession_callback_proxy.h"
+#include "av_session_callback_proxy.h"
 #include "avsession_trace.h"
 #include "ipc_skeleton.h"
 #include "session_xcollie.h"

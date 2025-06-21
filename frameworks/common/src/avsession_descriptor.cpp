@@ -17,12 +17,19 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
-bool AVHistoryDescriptor::WriteToParcel(Parcel& out) const
+bool AVHistoryDescriptor::Marshalling(Parcel& out) const
 {
     CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionId_), false, "write sessionId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(bundleName_), false, "write bundleName failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(abilityName_), false, "write abilityName failed");
     return true;
+}
+
+AVHistoryDescriptor* AVHistoryDescriptor::Unmarshalling(Parcel& in)
+{
+    auto info = std::make_unique<AVHistoryDescriptor>();
+    CHECK_AND_RETURN_RET_LOG(info != nullptr && info->ReadFromParcel(in), nullptr, "info is nullptr");
+    return info.release();
 }
 
 bool AVHistoryDescriptor::ReadFromParcel(Parcel& in)
@@ -33,7 +40,7 @@ bool AVHistoryDescriptor::ReadFromParcel(Parcel& in)
     return true;
 }
 
-bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
+bool AVSessionDescriptor::Marshalling(Parcel& out) const
 {
     CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionId_), false, "write sessionId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(sessionType_), false, "write sessionType failed");
@@ -72,6 +79,13 @@ bool AVSessionDescriptor::WriteToParcel(Parcel& out) const
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
+}
+
+AVSessionDescriptor* AVSessionDescriptor::Unmarshalling(Parcel& in)
+{
+    auto info = std::make_unique<AVSessionDescriptor>();
+    CHECK_AND_RETURN_RET_LOG(info != nullptr && info->ReadFromParcel(in), nullptr, "info is nullptr");
+    return info.release();
 }
 
 bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in)
@@ -148,7 +162,7 @@ bool AVSessionDescriptor::ReadFromParcel(Parcel& in)
     return true;
 }
 
-bool DeviceInfo::WriteToParcel(Parcel& out) const
+bool DeviceInfo::Marshalling(Parcel& out) const
 {
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castCategory_), false, "write castCategory failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceId_), false, "write deviceId failed");
@@ -173,6 +187,13 @@ bool DeviceInfo::WriteToParcel(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(mediumTypes_), false, "write mediumTypes failed");
     CHECK_AND_RETURN_RET_LOG(audioCapabilities_.WriteToParcel(out), false, "write audioCapability failed");
     return true;
+}
+
+DeviceInfo* DeviceInfo::Unmarshalling(Parcel& in)
+{
+    auto info = std::make_unique<DeviceInfo>();
+    CHECK_AND_RETURN_RET_LOG(info != nullptr && info->ReadFromParcel(in), nullptr, "info is nullptr");
+    return info.release();
 }
 
 bool DeviceInfo::ReadFromParcel(Parcel& in)
@@ -210,14 +231,21 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     return true;
 }
 
-bool OutputDeviceInfo::WriteToParcel(Parcel& out) const
+bool OutputDeviceInfo::Marshalling(Parcel& out) const
 {
     int32_t deviceInfoSize = static_cast<int32_t>(deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : deviceInfos_) {
-        CHECK_AND_RETURN_RET_LOG(deviceInfo.WriteToParcel(out), false, "write deviceInfo failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.Marshalling(out), false, "write deviceInfo failed");
     }
     return true;
+}
+
+OutputDeviceInfo* OutputDeviceInfo::Unmarshalling(Parcel& in)
+{
+    auto info = std::make_unique<OutputDeviceInfo>();
+    CHECK_AND_RETURN_RET_LOG(info != nullptr && info->ReadFromParcel(in), nullptr, "info is nullptr");
+    return info.release();
 }
 
 bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
@@ -257,6 +285,35 @@ bool AudioCapabilities::ReadFromParcel(Parcel& in)
         CHECK_AND_RETURN_RET_LOG(streamInfo.ReadFromParcel(in), false, "read streamInfo failed");
         streamInfos_.emplace_back(streamInfo);
     }
+    return true;
+}
+
+bool CastDisplayInfo::Marshalling(Parcel& out) const
+{
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(static_cast<int32_t>(displayState)), false, "write displayState failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteUint64(displayId), false, "write displayId failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(name), false, "write name failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(width), false, "write width failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(height), false, "write height failed");
+    return true;
+}
+
+CastDisplayInfo* CastDisplayInfo::Unmarshalling(Parcel& in)
+{
+    auto info = std::make_unique<CastDisplayInfo>();
+    CHECK_AND_RETURN_RET_LOG(info != nullptr && info->ReadFromParcel(in), nullptr, "info is nullptr");
+    return info.release();
+}
+
+bool CastDisplayInfo::ReadFromParcel(Parcel& in)
+{
+    int32_t displayStateTemp = -1;
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(displayStateTemp), false, "read displayState failed");
+    displayState = static_cast<CastDisplayState>(displayStateTemp);
+    CHECK_AND_RETURN_RET_LOG(in.ReadUint64(displayId), false, "read displayId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(name), false, "read name failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(width), false, "read width failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(height), false, "read height failed");
     return true;
 }
 } // namespace OHOS::AVSession

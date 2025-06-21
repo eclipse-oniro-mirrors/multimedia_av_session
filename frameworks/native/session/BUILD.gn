@@ -34,8 +34,6 @@ av_session_ohos_library("avsession_client") {
     "../../../services/session/ipc/proxy/avsession_proxy.cpp",
     "../../../services/session/ipc/proxy/avsession_service_proxy.cpp",
     "../../../services/session/ipc/stub/avcontroller_callback_stub.cpp",
-    "../../../services/session/ipc/stub/avsession_callback_stub.cpp",
-    "../../../services/session/ipc/stub/session_listener_stub.cpp",
   ]
 
   client_sources = [
@@ -76,11 +74,15 @@ av_session_ohos_library("avsession_client") {
 
   sources = ipc_sources + client_sources + common_sources
 
-  public_configs = [ ":avsession_client_config" ]
+  public_configs = [
+    ":avsession_client_config",
+    "../../../services/session:avsession_ipc_config",
+  ]
 
   deps = [
-    "../../../utils:avsession_utils",
     "../../common:avsession_common",
+    "../../../services/session:libidl_avsession_service_interface_stub",
+    "../../../utils:avsession_utils",
   ]
 
   external_deps = [
@@ -135,7 +137,10 @@ ohos_shared_library("avsession_cast_client") {
 
   sources = ipc_sources + client_sources
 
-  public_configs = [ ":avsession_client_config" ]
+  public_configs = [
+    ":avsession_client_config",
+    "../../../services/session:avsession_ipc_config",
+  ]
 
   public_deps = [
     "../../../utils:avsession_utils",

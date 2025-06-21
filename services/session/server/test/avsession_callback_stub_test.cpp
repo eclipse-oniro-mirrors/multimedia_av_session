@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "avsession_callback_stub.h"
+#include "av_session_callback_stub.h"
 #include "avsession_log.h"
 #include "avsession_descriptor.h"
 #include "avsession_errors.h"
@@ -93,28 +93,46 @@ void AVSessionCallbackStubTest::TearDown()
 }
 
 class AVSessionCallbackStubDemo : public AVSessionCallbackStub {
-    void OnPlay() override {};
-    void OnPause() override {};
-    void OnStop() override {};
-    void OnPlayNext() override {};
-    void OnPlayPrevious() override {};
-    void OnFastForward(int64_t time) override {};
-    void OnRewind(int64_t time) override {};
-    void OnSeek(int64_t time) override {};
-    void OnSetSpeed(double speed) override {};
-    void OnSetLoopMode(int32_t loopMode) override {};
-    void OnSetTargetLoopMode(int32_t targetLoopMode) override {};
-    void OnToggleFavorite(const std::string &mediaId) override {};
-    void OnMediaKeyEvent(const OHOS::MMI::KeyEvent &keyEvent) override {};
-    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo &outputDeviceInfo) override {};
-    void OnCommonCommand(const std::string &commonCommand, const OHOS::AAFwk::WantParams &commandArgs) override {};
-    void OnSkipToQueueItem(int32_t itemId) override {};
-    void OnAVCallAnswer() override {};
-    void OnAVCallHangUp() override {};
-    void OnAVCallToggleCallMute() override {};
-    void OnPlayFromAssetId(int64_t assetId) override {};
-    void OnPlayWithAssetId(const std::string &assetId) override {};
-    void OnCastDisplayChange(const CastDisplayInfo &castDisplayInfo) override {};
+    ErrCode OnPlay() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPause() override { return AVSESSION_SUCCESS; };
+    ErrCode OnStop() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlayNext() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlayPrevious() override { return AVSESSION_SUCCESS; };
+    ErrCode OnFastForward(int64_t time) override { return AVSESSION_SUCCESS; };
+    ErrCode OnRewind(int64_t time) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSeek(int64_t time) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSetSpeed(double speed) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSetLoopMode(int32_t loopMode) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSetTargetLoopMode(int32_t targetLoopMode) override
+    {
+        onSetTargetLoopMode_ = true;
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnToggleFavorite(const std::string &mediaId) override { return AVSESSION_SUCCESS; };
+    ErrCode OnMediaKeyEvent(const OHOS::MMI::KeyEvent &keyEvent) override { return AVSESSION_SUCCESS; };
+    ErrCode OnOutputDeviceChange(const int32_t connectionState,
+        const OutputDeviceInfo &outputDeviceInfo) override { return AVSESSION_SUCCESS; };
+    ErrCode OnCommonCommand(const std::string &commonCommand,
+        const OHOS::AAFwk::WantParams &commandArgs) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSkipToQueueItem(int32_t itemId) override { return AVSESSION_SUCCESS; };
+    ErrCode OnAVCallAnswer() override { return AVSESSION_SUCCESS; };
+    ErrCode OnAVCallHangUp() override { return AVSESSION_SUCCESS; };
+    ErrCode OnAVCallToggleCallMute() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlayFromAssetId(int64_t assetId) override
+    {
+        onPlayFromAssetId_ = true;
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnPlayWithAssetId(const std::string &assetId) override
+    {
+        onPlayWithAssetId_ = true;
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnCastDisplayChange(const CastDisplayInfo &castDisplayInfo) override { return AVSESSION_SUCCESS; };
+public:
+    bool onSetTargetLoopMode_ = false;
+    bool onPlayFromAssetId_ = false;
+    bool onPlayWithAssetId_ = false;
 };
 
 /**
@@ -125,13 +143,13 @@ class AVSessionCallbackStubDemo : public AVSessionCallbackStub {
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest000, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest000 begin!");
-    uint32_t code = 0;
+    uint32_t code = 1;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, OHOS::ERR_TRANSACTION_FAILED);
     SLOGI("OnRemoteRequest000 end!");
 }
 /**
@@ -142,11 +160,10 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest000, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
-    uint32_t code = 11;
+    uint32_t code = 2;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
-    data.WriteString("test");
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
@@ -162,12 +179,10 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest001, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
-    uint32_t code = 12;
+    uint32_t code = 3;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
-    SLOGI("OnRemoteRequest002");
-    data.WriteString("test");
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
@@ -183,11 +198,10 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest002, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest003 begin!");
-    uint32_t code = 13;
+    uint32_t code = 4;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
-    data.WriteString("test");
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
@@ -203,11 +217,10 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest003, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest004, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest004 begin!");
-    uint32_t code = 14;
+    uint32_t code = 5;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
-    data.WriteString("test");
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
@@ -223,11 +236,10 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest004, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest005, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest005 begin!");
-    uint32_t code = 19;
+    uint32_t code = 6;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
-    data.WriteString("test");
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
@@ -243,15 +255,14 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest005, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest006, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest006 begin!");
-    uint32_t code = 25;
+    uint32_t code = 7;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
-    data.WriteString("test");
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, 305);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest006 end!");
 }
 
@@ -263,14 +274,13 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest006, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest007 begin!");
-    uint32_t code = 20;
+    uint32_t code = 8;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
 
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
-    data.WriteInt32(0);
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest007 end!");
@@ -284,19 +294,13 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnSetTargetLoopMode001, TestSize.Level0)
 {
     SLOGI("OnSetTargetLoopMode001 begin!");
-    uint32_t code = 12;
     std::string assetId = "test";
-    int32_t targetLoopMode = 0;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     avSessionCallbackStub.OnPlayWithAssetId(assetId);
-    OHOS::MessageParcel data;
-    data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
-    data.WriteString("test");
-    OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
+    EXPECT_EQ(avSessionCallbackStub.onPlayWithAssetId_, true);
+    int32_t targetLoopMode = 0;
     avSessionCallbackStub.OnSetTargetLoopMode(targetLoopMode);
-    int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(avSessionCallbackStub.onSetTargetLoopMode_, true);
     SLOGI("OnSetTargetLoopMode001 end!");
 }
 }

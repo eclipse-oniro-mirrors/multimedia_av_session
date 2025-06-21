@@ -21,7 +21,7 @@
 #include "screen_manager_lite.h"
 #include "display_manager_lite.h"
 #include "display_info.h"
-#include "iavsession_callback.h"
+#include "ia_v_session_callback.h"
 
 namespace OHOS::AVSession {
 class HwCastDisplayListener : public Rosen::ScreenManagerLite::IScreenListener {

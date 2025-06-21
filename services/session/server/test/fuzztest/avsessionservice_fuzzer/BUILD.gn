@@ -42,6 +42,8 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
     "./../../../../../../frameworks/native/session:avsession_client_static",
     "./../../../../../session:avsession_item_static",
     "./../../../../../session:avsession_service_static",
+    "./../../../../../session:libidl_avsession_service_interface_proxy",
+    "./../../../../../session:libidl_avsession_service_interface_stub",
     "./../../../../../../utils:avsession_utils",
   ]
   external_deps = [
@@ -86,5 +88,7 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
   if (av_session_enable_start_stop_on_demand) {
     defines += [ "START_STOP_ON_DEMAND_ENABLE" ]
   }
+
+  public_configs = ["./../../../../../session:avsession_ipc_config"]
 }
 ###############################################################################

@@ -22,9 +22,11 @@
 #include "token_setproc.h"
 
 using namespace testing::ext;
-using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 
+
+namespace OHOS {
+namespace AVSession {
 static uint64_t g_selfTokenId = 0;
 static HapInfoParams g_info = {
     .userID = 100,
@@ -92,16 +94,43 @@ void SessionListenerStubTest::TearDown()
 }
 
 class SessionListenerStubDemo : public SessionListenerStub {
-    void OnSessionCreate(const AVSessionDescriptor &descriptor) override {};
-    void OnSessionRelease(const AVSessionDescriptor &descriptor) override {};
-    void OnTopSessionChange(const AVSessionDescriptor &descriptor) override {};
-    void OnAudioSessionChecked(const int32_t uid) override {};
-    void OnDeviceAvailable(const OutputDeviceInfo &castOutputDeviceInfo) override {};
-    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
-    void OnDeviceOffline(const std::string &deviceId) override {};
-    void OnDeviceStateChange(const DeviceState& deviceState) override {};
-    void OnRemoteDistributedSessionChange(
-        const std::vector<OHOS::sptr<IRemoteObject>> &sessionControllers) override {};
+    ErrCode OnSessionCreate(const AVSessionDescriptor &descriptor) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSessionRelease(const AVSessionDescriptor &descriptor) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnTopSessionChange(const AVSessionDescriptor &descriptor) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnAudioSessionChecked(const int32_t uid) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDeviceAvailable(const OutputDeviceInfo &castOutputDeviceInfo) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDeviceOffline(const std::string &deviceId) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDeviceStateChange(const DeviceState& deviceState) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnRemoteDistributedSessionChange(
+        const std::vector<OHOS::sptr<IRemoteObject>> &sessionControllers) override
+    {
+        return AVSESSION_SUCCESS;
+    };
 };
 
 /**
@@ -112,13 +141,13 @@ class SessionListenerStubDemo : public SessionListenerStub {
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
-    uint32_t code = 0;
+    uint32_t code = 1;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_ERROR);
+    EXPECT_EQ(ret, OHOS::ERR_TRANSACTION_FAILED);
     SLOGI("OnRemoteRequest001 end!");
 }
 
@@ -130,11 +159,12 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest001, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
-    uint32_t code = 0;
+    uint32_t code = 1;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(ISessionListener::GetDescriptor());
-    data.WriteString("test");
+    AVSessionDescriptor descriptor;
+    data.WriteParcelable(&descriptor);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
@@ -150,11 +180,12 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest002, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest003 begin!");
-    uint32_t code = 1;
+    uint32_t code = 2;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(ISessionListener::GetDescriptor());
-    data.WriteString("test");
+    AVSessionDescriptor descriptor;
+    data.WriteParcelable(&descriptor);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
@@ -170,11 +201,12 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest003, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest004, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest004 begin!");
-    uint32_t code = 2;
+    uint32_t code = 3;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(ISessionListener::GetDescriptor());
-    data.WriteString("test");
+    AVSessionDescriptor descriptor;
+    data.WriteParcelable(&descriptor);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
@@ -190,7 +222,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest004, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest005, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest005 begin!");
-    uint32_t code = 3;
+    uint32_t code = 4;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(ISessionListener::GetDescriptor());
@@ -210,11 +242,12 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest005, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest006, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest006 begin!");
-    uint32_t code = 4;
+    uint32_t code = 5;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(ISessionListener::GetDescriptor());
-    data.WriteString("test");
+    OutputDeviceInfo castOutputDeviceInfo;
+    data.WriteParcelable(&castOutputDeviceInfo);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
@@ -230,7 +263,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest006, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest007, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest007 begin!");
-    uint32_t code = 5;
+    uint32_t code = 6;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
@@ -272,7 +305,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest008, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest009, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest009 begin!");
-    uint32_t code = 6;
+    uint32_t code = 7;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
@@ -293,7 +326,7 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest009, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest010, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest010 begin!");
-    uint32_t code = 7;
+    uint32_t code = 8;
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
@@ -302,6 +335,8 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest010, TestSize.Level0)
     data.WriteInterfaceToken(ISessionListener::GetDescriptor());
     data.WriteUint32(1);
     auto ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, ERR_UNMARSHALLING);
+    EXPECT_EQ(ret, OHOS::ERR_INVALID_DATA);
     SLOGI("OnRemoteRequest010 end!");
 }
+} // namespace AVSession
+} // namespace OHOS

@@ -16,7 +16,7 @@
 #include "avsession_proxy.h"
 #include "avsession_callback_client.h"
 #include "avsession_controller_proxy.h"
-#include "iavsession_callback.h"
+#include "ia_v_session_callback.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_trace.h"

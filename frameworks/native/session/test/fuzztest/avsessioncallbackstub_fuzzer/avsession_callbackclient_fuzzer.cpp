@@ -19,8 +19,8 @@
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
-#include "avsession_callback_stub.h"
-#include "iavsession_callback.h"
+#include "av_session_callback_stub.h"
+#include "ia_v_session_callback.h"
 #include "iremote_stub.h"
 #include "avsession_callback_client.h"
 #include "want_params.h"

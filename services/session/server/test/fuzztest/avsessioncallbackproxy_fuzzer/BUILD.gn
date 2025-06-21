@@ -32,6 +32,8 @@ ohos_fuzztest("AVSessionCallbackProxyFuzzTest") {
     "./../../../../../../frameworks/native/session:avsession_client_static",
     "./../../../../../session:avsession_item_static",
     "./../../../../../session:avsession_service_static",
+    "./../../../../../session:libidl_avsession_service_interface_proxy",
+    "./../../../../../session:libidl_avsession_service_interface_stub",
     "./../../../../../../utils:avsession_utils",
   ]
   external_deps = [
@@ -46,5 +48,6 @@ ohos_fuzztest("AVSessionCallbackProxyFuzzTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+  public_configs = ["./../../../../../session:avsession_ipc_config"]
 }
 ###############################################################################

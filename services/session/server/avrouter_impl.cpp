@@ -282,11 +282,11 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
     providerNumber_ = providerNumberDisable_;
     providerManagerMap_.clear();
 
-    OnCastStateChange(disconnectStateFromCast_, DeviceInfo {
-        .castCategory_ = AVCastCategory::CATEGORY_LOCAL,
-        .deviceId_ = "-1",
-        .deviceName_ = "RemoteCast",
-    });
+    auto info = new (std::nothrow) DeviceInfo(AVCastCategory::CATEGORY_LOCAL, "-1", "RemoteCast");
+    if (info != nullptr) {
+        OnCastStateChange(disconnectStateFromCast_, *info);
+    }
+
     castHandleToInfoMap_.clear();
 
     if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {

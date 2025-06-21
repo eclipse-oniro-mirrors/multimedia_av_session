@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,48 +28,58 @@ struct AudioCapabilities {
     std::vector<AudioStreamInfo> streamInfos_;
 };
 
-struct DeviceInfo {
-    bool WriteToParcel(Parcel& out) const;
+class DeviceInfo : public Parcelable {
+public:
+    DeviceInfo() = default;
+    DeviceInfo(int32_t castCategory, std::string deviceId, std::string deviceName)
+        : castCategory_(castCategory), deviceId_(deviceId), deviceName_(deviceName) {}
+    bool Marshalling(Parcel& out) const override;
     bool ReadFromParcel(Parcel& in);
+    static DeviceInfo* Unmarshalling(Parcel& in);
 
-    int32_t castCategory_;
+    int32_t castCategory_ {};
     std::string deviceId_;
     std::string deviceName_;
     std::string networkId_;
     std::string ipAddress_;
     std::string manufacturer_;
     std::string modelName_;
-    int32_t deviceType_;
-    int32_t providerId_;
-    int32_t supportedProtocols_ = 0;
-    int32_t authenticationStatus_ = 0;
+    int32_t deviceType_ {};
+    int32_t providerId_ {};
+    int32_t supportedProtocols_ {};
+    int32_t authenticationStatus_ {};
     std::vector<std::string> supportedDrmCapabilities_;
     bool isLegacy_ = false;
     int32_t mediumTypes_ = 2;
     AudioCapabilities audioCapabilities_;
 };
 
-struct OutputDeviceInfo {
-    bool WriteToParcel(Parcel& out) const;
+class OutputDeviceInfo : public Parcelable {
+public:
+    bool Marshalling(Parcel& out) const override;
     bool ReadFromParcel(Parcel& in);
+    static OutputDeviceInfo* Unmarshalling(Parcel& in);
 
     std::vector<DeviceInfo> deviceInfos_;
 };
 
-struct AVHistoryDescriptor {
-    bool WriteToParcel(Parcel& out) const;
+class AVHistoryDescriptor : public Parcelable {
+    bool Marshalling(Parcel& out) const override;
     bool ReadFromParcel(Parcel& in);
+    static AVHistoryDescriptor* Unmarshalling(Parcel& in);
 
     std::string sessionId_;
     std::string bundleName_;
     std::string abilityName_;
 };
 
-struct AVSessionDescriptor {
-    bool WriteToParcel(Parcel& out) const;
+class AVSessionDescriptor : public Parcelable {
+public:
+    bool Marshalling(Parcel& out) const override;
     bool CheckBeforReadFromParcel(Parcel& in);
     bool CheckBeforReadFromParcel(Parcel& in, DeviceInfo& deviceInfo);
     bool ReadFromParcel(Parcel& in);
+    static AVSessionDescriptor* Unmarshalling(Parcel& in);
 
     std::string sessionId_;
     int32_t sessionType_ {};
@@ -110,14 +120,19 @@ enum CastDisplayState {
 enum DeviceLogEventCode {
     DEVICE_LOG_FULL = 1,
     DEVICE_LOG_EXCEPTION = 2,
+    DEVICE_LOG_MAX = 3,
 };
 
-struct CastDisplayInfo {
+struct CastDisplayInfo: public Parcelable {
+    bool Marshalling(Parcel& out) const override;
+    bool ReadFromParcel(Parcel& in);
+    static CastDisplayInfo* Unmarshalling(Parcel& in);
+
     CastDisplayState displayState;
-    uint64_t displayId;
+    uint64_t displayId {};
     std::string name;
-    int32_t width;
-    int32_t height;
+    int32_t width {};
+    int32_t height {};
 };
 
 enum ReasonCode {

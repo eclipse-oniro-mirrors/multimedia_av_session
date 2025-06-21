@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "session_listener_client.h"
 #include "avsession_log.h"
+#include "avsession_errors.h"
 
 namespace OHOS::AVSession {
 SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListener>& listener)
@@ -28,79 +29,80 @@ SessionListenerClient::~SessionListenerClient()
     SLOGI("SessionListenerClient gone");
 }
 
-void SessionListenerClient::OnSessionCreate(const AVSessionDescriptor& descriptor)
+ErrCode SessionListenerClient::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        SLOGI("on session create for bundle %{public}s", descriptor.elementName_.GetBundleName().c_str());
-        copiedListener->OnSessionCreate(descriptor);
-    } else {
-        SLOGE("on session create with out listener");
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    SLOGI("on session create for bundle %{public}s", descriptor.elementName_.GetBundleName().c_str());
+    copiedListener->OnSessionCreate(descriptor);
+    return AVSESSION_SUCCESS;
 }
 
-void SessionListenerClient::OnSessionRelease(const AVSessionDescriptor& descriptor)
+ErrCode SessionListenerClient::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        copiedListener->OnSessionRelease(descriptor);
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnSessionRelease(descriptor);
+    return AVSESSION_SUCCESS;
 }
 
-void SessionListenerClient::OnTopSessionChange(const AVSessionDescriptor& descriptor)
+ErrCode SessionListenerClient::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        copiedListener->OnTopSessionChange(descriptor);
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnTopSessionChange(descriptor);
+    return AVSESSION_SUCCESS;
 }
 
-void SessionListenerClient::OnAudioSessionChecked(const int32_t uid)
+ErrCode SessionListenerClient::OnAudioSessionChecked(const int32_t uid)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        copiedListener->OnAudioSessionChecked(uid);
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnAudioSessionChecked(uid);
+    return AVSESSION_SUCCESS;
 }
 
-void SessionListenerClient::OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
+ErrCode SessionListenerClient::OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        copiedListener->OnDeviceAvailable(castOutputDeviceInfo);
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnDeviceAvailable(castOutputDeviceInfo);
+    return AVSESSION_SUCCESS;
 }
 
-void SessionListenerClient::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
+ErrCode SessionListenerClient::OnDeviceLogEvent(const int32_t eventId, const int64_t param)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        copiedListener->OnDeviceLogEvent(eventId, param);
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    DeviceLogEventCode eventCode = static_cast<DeviceLogEventCode>(eventId);
+    CHECK_AND_RETURN_RET_LOG(eventCode > 0 &&  eventCode < DeviceLogEventCode::DEVICE_LOG_MAX,
+        AVSESSION_ERROR, "there is no this eventCode");
+    copiedListener->OnDeviceLogEvent(eventCode, param);
+    return AVSESSION_SUCCESS;
 }
 
-void SessionListenerClient::OnDeviceOffline(const std::string& deviceId)
+ErrCode SessionListenerClient::OnDeviceOffline(const std::string& deviceId)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        copiedListener->OnDeviceOffline(deviceId);
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnDeviceOffline(deviceId);
+    return AVSESSION_SUCCESS;
 }
 
-void SessionListenerClient::OnRemoteDistributedSessionChange(
+ErrCode SessionListenerClient::OnRemoteDistributedSessionChange(
     const std::vector<sptr<IRemoteObject>>& sessionControllers)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        copiedListener->OnRemoteDistributedSessionChange(sessionControllers);
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnRemoteDistributedSessionChange(sessionControllers);
+    return AVSESSION_SUCCESS;
 }
 
-void SessionListenerClient::OnDeviceStateChange(const DeviceState& deviceState)
+ErrCode SessionListenerClient::OnDeviceStateChange(const DeviceState& deviceState)
 {
     auto copiedListener = listener_;
-    if (copiedListener) {
-        copiedListener->OnDeviceStateChange(deviceState);
-    }
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnDeviceStateChange(deviceState);
+    return AVSESSION_SUCCESS;
 }
 } // namespace OHOS::AVSession

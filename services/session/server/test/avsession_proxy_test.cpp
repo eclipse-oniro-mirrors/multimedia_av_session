@@ -20,7 +20,7 @@
 #include "avmedia_description.h"
 #include "av_file_descriptor.h"
 #include "system_ability_definition.h"
-#include "avsession_callback_proxy.h"
+#include "av_session_callback_proxy.h"
 #include "avsession_controller_proxy.h"
 #include "avsession_proxy.h"
 #include "avsession_service.h"

@@ -61,30 +61,31 @@ public:
 
 class AVSessionCallbackImpl : public IAVSessionCallback {
 public:
-    void OnPlay() override {};
-    void OnPause() override {};
-    void OnStop() override {};
-    void OnPlayNext() override {};
-    void OnPlayPrevious() override {};
-    void OnFastForward(int64_t time) override {};
-    void OnRewind(int64_t time) override {};
-    void OnSeek(int64_t time) override {};
-    void OnSetSpeed(double speed) override {};
-    void OnSetLoopMode(int32_t loopMode) override {};
-    void OnSetTargetLoopMode(int32_t targetLoopMode) override {};
-    void OnToggleFavorite(const std::string& mediaId) override {};
-    void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override {};
-    void OnOutputDeviceChange(const int32_t connectionState,
-        const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
-    void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override {};
-    void OnSkipToQueueItem(int32_t itemId) override {};
-    void OnAVCallAnswer() override {};
-    void OnAVCallHangUp() override {};
-    void OnAVCallToggleCallMute() override {};
-    void OnPlayFromAssetId(int64_t assetId) override {};
-    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
+    ErrCode OnPlay() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPause() override { return AVSESSION_SUCCESS; };
+    ErrCode OnStop() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlayNext() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlayPrevious() override { return AVSESSION_SUCCESS; };
+    ErrCode OnFastForward(int64_t time) override { return AVSESSION_SUCCESS; };
+    ErrCode OnRewind(int64_t time) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSeek(int64_t time) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSetSpeed(double speed) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSetLoopMode(int32_t loopMode) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSetTargetLoopMode(int32_t targetLoopMode) override { return AVSESSION_SUCCESS; };
+    ErrCode OnToggleFavorite(const std::string& mediaId) override { return AVSESSION_SUCCESS; };
+    ErrCode OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override { return AVSESSION_SUCCESS; };
+    ErrCode OnOutputDeviceChange(const int32_t connectionState,
+        const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override { return AVSESSION_SUCCESS; };
+    ErrCode OnCommonCommand(const std::string& commonCommand,
+        const OHOS::AAFwk::WantParams& commandArgs) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSkipToQueueItem(int32_t itemId) override { return AVSESSION_SUCCESS; };
+    ErrCode OnAVCallAnswer() override { return AVSESSION_SUCCESS; };
+    ErrCode OnAVCallHangUp() override { return AVSESSION_SUCCESS; };
+    ErrCode OnAVCallToggleCallMute() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlayFromAssetId(int64_t assetId) override { return AVSESSION_SUCCESS; };
+    ErrCode OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override { return AVSESSION_SUCCESS; };
     sptr<IRemoteObject> AsObject() override { return nullptr; }
-    void OnPlayWithAssetId(const std::string& assetId) override {};
+    ErrCode OnPlayWithAssetId(const std::string& assetId) override { return AVSESSION_SUCCESS; };
 
     AVSessionCallbackImpl() = default;
     ~AVSessionCallbackImpl() = default;

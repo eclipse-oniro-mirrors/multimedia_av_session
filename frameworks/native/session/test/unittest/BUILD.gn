@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -169,9 +169,16 @@ ohos_unittest("AVSessionControllerTest") {
 
   deps = common_deps
 
+  deps += [
+    "../../../../../services/session:libidl_avsession_service_interface_proxy",
+    "../../../../../services/session:libidl_avsession_service_interface_stub",
+  ]
+
   external_deps = common_external_deps
 
   external_deps += [ "ability_base:base" ]
+
+  public_configs = ["../../../../../services/session:avsession_ipc_config"]
 }
 
 ohos_unittest("AVPlaybackStateTest") {
@@ -287,6 +294,11 @@ ohos_unittest("AVDumperTest") {
 
   deps = common_deps
 
+  deps += [
+    "../../../../../services/session:libidl_avsession_service_interface_proxy",
+    "../../../../../services/session:libidl_avsession_service_interface_stub",
+  ]
+
   visibility = [ ":*" ]
 
   include_dirs = [
@@ -331,6 +343,8 @@ ohos_unittest("AVDumperTest") {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
   }
+
+  public_configs = ["../../../../../services/session:avsession_ipc_config"]
 }
 
 if (castplus_cast_engine_enable) {
