@@ -595,7 +595,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportPlaybackState_001, TestSize.Leve
     }
 
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
-    AVSessionSysEvent::GetInstance().UpdatePlaybackState((g_testAnotherBundleName, state.GetState());
+    AVSessionSysEvent::GetInstance().UpdatePlaybackState(g_testAnotherBundleName, state.GetState());
     EXPECT_EQ(stateInfo->playbackState_.size(), 0);
 }
 
