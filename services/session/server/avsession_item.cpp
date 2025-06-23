@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "audio_manager_proxy.h"
 #include "av_router.h"
 #include "avsession_service.h"
 #include "avcontroller_item.h"
