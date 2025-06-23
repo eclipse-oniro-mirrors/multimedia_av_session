@@ -113,9 +113,20 @@ void ConnectProxyTest()
 
 void HandleFocusMetaDataChangeTest()
 {
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
     std::string sessionId = std::to_string(GetData<uint8_t>());
     AVMetaData data;
     data.SetAVQueueName(std::to_string(GetData<uint8_t>()));
+    std::shared_ptr<AVSessionPixelMap> mediaImage = make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer;
+    constexpr int maxSize = 1024;
+    auto size = provider.ConsumeIntegralInRange(0, maxSize);
+    imgBuffer.resize(size);
+    for (size_t i = 0; i < imgBuffer.size(); ++i) {
+        imgBuffer[i] = GetData<uint8_t>();
+    }
+    mediaImage->SetInnerImgBuffer(imgBuffer);
+    data.SetMediaImage(mediaImage);
     migrateServer_->HandleFocusMetaDataChange(sessionId, data);
 }
 
@@ -144,6 +155,12 @@ void OnMetaDataChangeTest()
 
     std::string sessionId = GenerateString(static_cast<uint32_t> (randomNum) % g_dataSize);
     migrateServer_->HandleFocusMetaDataChange(sessionId, meta);
+    bool binaryChoose = GetData<bool>();
+    if (binaryChoose) {
+        meta.metaMask_.set(AVMetaData::META_KEY_ARTIST);
+    } else {
+        meta.metaMask_.set(AVMetaData::META_KEY_SUBTITLE);
+    }
     migrateServer_->DoMetaDataSyncToRemote(meta);
 }
 
@@ -306,7 +323,15 @@ void ProcFromNextTest()
     if (data.length() < MIN_SIZE_NUM) {
         return;
     }
-    data[1]  = static_cast<char>(provider.ConsumeIntegralInRange(SYNC_CONTROLLER_LIST, SYNC_FOCUS_BUNDLE_IMG));
+    std::vector<int32_t> messageType {
+        SYNC_COMMAND,
+        SYNC_SET_VOLUME_COMMAND,
+        SYNC_SWITCH_AUDIO_DEVICE_COMMAND,
+        COLD_START,
+        SYNC_MEDIA_CONTROL_NEED_STATE,
+        provider.ConsumeIntegral<int32_t>()
+    };
+    data[1]  = messageType[provider.ConsumeIntegral<uint32_t>() % messageType.size()];
     migrateServer_->ProcFromNext(deviceId, data);
 }
 
@@ -390,10 +415,6 @@ void RegisterAudioCallbackAndTriggerTest()
 void UpdateFrontSessionInfoToRemoteTest(sptr<AVSessionService> service)
 {
     FuzzedDataProvider provider(RAW_DATA, g_dataSize);
-    if (avsessionHere_ == nullptr) {
-        SLOGI("avsessionHere_ is null");
-        return;
-    }
     service->AddAvQueueInfoToFile(*avsessionHere_);
     sptr<IRemoteObject> avControllerItemObj;
     std::string sessionId = provider.ConsumeRandomLengthString();
@@ -401,12 +422,21 @@ void UpdateFrontSessionInfoToRemoteTest(sptr<AVSessionService> service)
     if (ret != AVSESSION_SUCCESS) {
         return;
     }
-    sptr<AVControllerItem> avControllerItem = (sptr<AVControllerItem>&)avControllerItemObj;
-    if (!avControllerItem) {
+    sptr<AVControllerItem> controller = (sptr<AVControllerItem>&)avControllerItemObj;
+    if (!controller) {
         return;
     }
-    migrateServer_->UpdateFrontSessionInfoToRemote(avControllerItem);
-    migrateServer_->DoBundleInfoSyncToRemote(avControllerItem);
+    migrateServer_->UpdateFrontSessionInfoToRemote(controller);
+    migrateServer_->DoBundleInfoSyncToRemote(controller);
+}
+
+void HandleFocusValidCommandChangeTest()
+{
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+    std::string sessionId = provider.ConsumeRandomLengthString();
+    std::vector<int32_t> cmds;
+    cmds.push_back(provider.ConsumeIntegral<int32_t>());
+    migrateServer_->HandleFocusValidCommandChange(sessionId, cmds);
 }
 
 void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
@@ -433,8 +463,14 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     }
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
-    avsessionHere_ = avservice_->CreateSessionInner(
-        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    if (avsessionHere_ == nullptr) {
+        avsessionHere_ = avservice_->CreateSessionInner(
+            g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    }
+    if (avsessionHere_ == nullptr) {
+        SLOGI("avsessionHere_ is null");
+        return;
+    }
     migrateServer_->Init(avservice_);
 
     ConnectProxyTest();
@@ -462,7 +498,6 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     VolumeControlCommandTest();
     SwitchAudioDeviceCommandTest();
     RegisterAudioCallbackAndTriggerTest();
-
     UpdateFrontSessionInfoToRemoteTest(avservice_);
 }
 
