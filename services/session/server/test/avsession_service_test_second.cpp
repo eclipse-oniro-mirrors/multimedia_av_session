@@ -1649,7 +1649,7 @@ static HWTEST_F(AVSessionServiceTestSecond, ReportSessionState001, TestSize.Leve
     for (auto i = 0; i < REPORT_SIZE; i++) {
         stateInfo->state_.push_back(0);
     }
-    stateInfo->updateState(0);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(g_testAnotherBundleName);
     EXPECT_EQ(stateInfo->state_.size(), 0);
 }
 
@@ -1672,7 +1672,7 @@ static HWTEST_F(AVSessionServiceTestSecond, ReportSessionControl001, TestSize.Le
     for (auto i = 0; i < REPORT_SIZE; i++) {
         stateInfo->control_.push_back(0);
     }
-    stateInfo->updateControl(0, g_testAnotherBundleName);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(g_testAnotherBundleName);
     EXPECT_EQ(stateInfo->control_.size(), 0);
 }
 #endif

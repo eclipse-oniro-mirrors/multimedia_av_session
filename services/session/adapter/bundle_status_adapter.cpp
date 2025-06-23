@@ -172,6 +172,15 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
     return bundleName;
 }
 
+int32_t BundleStatusAdapter::GetUidFromBundleName(const std::string bundleName, const int32_t userId)
+{
+    int32_t uid = 0;
+    if (bundleMgrProxy != nullptr) {
+        uid = bundleMgrProxy->GetUidByBundleName(bundleName, userId);
+    }
+    return uid;
+}
+
 bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
 {
     // check bundle support background mode & playmusiclist intent

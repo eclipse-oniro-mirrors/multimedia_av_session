@@ -174,6 +174,21 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleNameFromUid001, testing::ext::
 }
 
 /**
+ * @tc.name: GetUidFromBundleName001
+ * @tc.desc: Test GetUidFromBundleName
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BundleStatusAdapterTest, GetUidFromBundleName001, testing::ext::TestSize.Level1)
+{
+    SLOGI("GetUidFromBundleName001, start");
+    BundleStatusAdapter::GetInstance().Init();
+    const std::string bundleName = "TestBundleName";
+    auto uid = BundleStatusAdapter::GetInstance().GetUidFromBundleName(bundleName, 0);
+    EXPECT_EQ(uid, -1);
+    SLOGI("GetUidFromBundleName001, end");
+}
+
+/**
  * @tc.name: CheckBundleSupport001
  * @tc.desc: Test CheckBundleSupport
  * @tc.type: FUNC

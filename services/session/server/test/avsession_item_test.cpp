@@ -321,6 +321,24 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: AVSessionItem_UpdateElement_001
+ * @tc.desc: Test update session element.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_UpdateElement_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_UpdateElement_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("TestBundleName");
+    elementName.SetAbilityName("TestAbilityName");
+    g_AVSessionItem->UpdateSessionElement(elementName);
+    EXPECT_EQ(g_AVSessionItem->GetBundleName(), "TestBundleName");
+    EXPECT_EQ(g_AVSessionItem->GetAbilityName(), "TestAbilityName");
+    SLOGD("AVSessionItem_UpdateElement_001 end!");
+}
+
+/**
  * @tc.name: AVSessionItem_GetAnonymousDeviceId_001
  * @tc.desc: Test GetAnonymousDeviceId with empty deviceId.
  * @tc.type: FUNC
@@ -578,7 +596,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportPlaybackState_001, TestSize.Leve
     }
 
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
-    stateInfo->updatePlaybackState(state.GetState());
+    AVSessionSysEvent::GetInstance().UpdatePlaybackState(g_testAnotherBundleName, state.GetState());
     EXPECT_EQ(stateInfo->playbackState_.size(), 0);
 }
 
@@ -609,7 +627,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportMetadataChange_001, TestSize.Lev
         stateInfo->metaQuality_.push_back(0);
     }
 
-    stateInfo->updateMetaQuality(MetadataQuality::METADATA_QUALITY_BOTH);
+    AVSessionSysEvent::GetInstance().UpdateMetaQuality(g_testAnotherBundleName, MetadataQuality::METADATA_QUALITY_BOTH);
     EXPECT_EQ(stateInfo->metaQuality_.size(), 0);
 }
 
@@ -631,7 +649,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportCommandChange_001, TestSize.Leve
         stateInfo->commandQuality_.push_back(0);
     }
 
-    stateInfo->updateCommandQuality(REPORT_SIZE);
+    AVSessionSysEvent::GetInstance().UpdateCommandQuality(g_testAnotherBundleName, 0);
     EXPECT_EQ(stateInfo->commandQuality_.size(), 0);
 }
 
@@ -655,7 +673,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportSessionControl_001, TestSize.Lev
         stateInfo->control_.push_back(0);
     }
 
-    stateInfo->updateControl(REPORT_SIZE, g_testAnotherBundleName);
+    AVSessionSysEvent::GetInstance().ReportPlayingState(g_testAnotherBundleName);
     EXPECT_EQ(stateInfo->control_.size(), 0);
 }
 #endif

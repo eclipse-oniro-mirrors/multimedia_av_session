@@ -32,7 +32,6 @@ common_deps = [
   "./../../../../frameworks/native/session:avsession_client",
   "./../../../../utils:avsession_utils",
   "./../../../session:avsession_server",
-  "//third_party/openssl:libcrypto_shared",
 ]
 
 common_external_deps = [
@@ -46,6 +45,7 @@ common_external_deps = [
   "hilog:libhilog",
   "input:libmmi-client",
   "ipc:ipc_single",
+  "openssl:libcrypto_shared",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",

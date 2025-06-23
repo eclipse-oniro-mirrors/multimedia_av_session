@@ -32,8 +32,6 @@ ohos_benchmarktest("SessionManagerTest") {
     "../../../../../../utils:avsession_utils",
     "../../../../../common:avsession_common",
     "../../../../session:avsession_client",
-    "//third_party/benchmark:benchmark",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -41,10 +39,12 @@ ohos_benchmarktest("SessionManagerTest") {
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_client",
     "c_utils:utils",
+    "benchmark:benchmark",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "googletest:gtest_main",
     "samgr:samgr_proxy",
   ]
 }

@@ -182,6 +182,24 @@ int32_t AVSessionUsersManager::AddSessionForCurrentUser(pid_t pid,
     return ret;
 }
 
+int32_t AVSessionUsersManager::UpdateSessionForCurrentUser(pid_t pid, const std::string& oldAbilityName,
+    const std::string& newAbilityName, sptr<AVSessionItem>& item)
+{
+    std::lock_guard lockGuard(userLock_);
+    SLOGI("update session %{public}s for user %{public}d", oldAbilityName.c_str(), curUserId_);
+    int32_t ret = AVSESSION_ERROR;
+    sptr<AVSessionItem> result;
+    result = GetContainerFromAll().RemoveSession(pid, oldAbilityName);
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "error when remove session for all");
+    ret = GetContainerFromAll().AddSession(pid, newAbilityName, item);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "error when add session for all");
+    result = GetContainerFromUser(curUserId_).RemoveSession(pid, oldAbilityName);
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "error when remove session for user");
+    ret = GetContainerFromUser(curUserId_).AddSession(pid, newAbilityName, item);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "error when add session for user");
+    return ret;
+}
+
 sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(pid_t pid, const std::string& abilityName)
 {
     std::lock_guard lockGuard(userLock_);

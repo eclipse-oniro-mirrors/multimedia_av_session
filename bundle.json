@@ -59,7 +59,8 @@
           "background_task_mgr",
           "bluetooth",
           "os_account",
-          "hicollie"
+          "hicollie",
+          "openssl"
         ],
         "third_party": [
           "openssl"
