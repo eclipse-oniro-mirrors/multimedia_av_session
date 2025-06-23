@@ -249,7 +249,7 @@ void AVCastControllerCallbackImpl::OnCastValidCommandChanged(const std::vector<i
 {
 }
 
-int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos)
+int32_t AVCastControllerCallbackImpl::onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos)
 {
     return 0;
 }
