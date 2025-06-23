@@ -669,12 +669,9 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     }
     if (topSession_ && topSession_->GetUid() == info.uid && topSession_->GetPid() == info.pid) {
         SLOGI(" HandleFocusSession focusSession is current topSession.");
+        auto hasOtherPlayingSession = false;
         if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
             topSession_->GetUid() != ancoUid) {
-            if (!isPlaying && topSession_->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
-                sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
-                HandleOtherSessionPlaying(result);
-            }
             if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_.load())) {
                 SLOGI("isPlaying:%{public}d isCardOpen_:%{public}d hasRemoveEvent_:%{public}d ",
                     isPlaying, isMediaCardOpen_.load(), hasRemoveEvent_.load());
@@ -685,8 +682,14 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                     topSession_->GetUid(), topSession_->GetPid(), true);
                 SLOGD("call AVSessionNotifyUpdateNotification, uid = %{public}d, pid = %{public}d, ret = %{public}d",
                     topSession_->GetUid(), topSession_->GetPid(), ret);
+            } else {
+                sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
+                hasOtherPlayingSession = (result != nullptr);
+                HandleOtherSessionPlaying(result);
             }
-            AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+            if (!hasOtherPlayingSession) {
+                AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+            }
 #ifdef START_STOP_ON_DEMAND_ENABLE
             PublishEvent(mediaPlayStateTrue);
 #endif
@@ -697,10 +700,6 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
             SLOGI("CancelNotification with user:%{public}d for anco ret=%{public}d", userId, ret);
         }
-        return;
-    }
-    if (!isPlaying) {
-        SLOGI("focusSession no play");
         return;
     }
     HandleChangeTopSession(info.uid, info.pid, userId);
