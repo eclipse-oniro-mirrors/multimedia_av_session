@@ -23,7 +23,7 @@ namespace OHOS::AVSession {
 namespace {
     constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 1 * 1024 * 1024;
     constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 500 * 1024; // ipc max 1m at the same time
-    constexpr int32_t MIN_PIXEL_BUFFER_SIZE = 100 * 1024;
+    constexpr int32_t MIN_PIXEL_BUFFER_SIZE = 40 * 1024;
     constexpr uint8_t IMAGE_BYTE_SIZE = 2;
     constexpr uint8_t DATA_BYTE_SIZE = 4;
     constexpr uint8_t OFFSET_BYTE = 8;

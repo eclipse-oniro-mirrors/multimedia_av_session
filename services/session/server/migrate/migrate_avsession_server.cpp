@@ -32,10 +32,12 @@
 #include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
-MigrateAVSessionServer::MigrateAVSessionServer(int32_t migrateMode)
+MigrateAVSessionServer::MigrateAVSessionServer(int32_t migrateMode, std::string deviceId)
 {
-    SLOGI("server start with:%{public}d", migrateMode);
+    SLOGI("MigrateAVSessionServer start with mode:%{public}d|deviceId:%{public}s.", migrateMode,
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     migrateMode_ = migrateMode;
+    deviceId_ = deviceId;
 }
 
 MigrateAVSessionServer::~MigrateAVSessionServer()
@@ -50,23 +52,20 @@ MigrateAVSessionServer::~MigrateAVSessionServer()
     }
     {
         std::lock_guard lockGuard(cacheJsonLock_);
-        if (metaDataCache_ != nullptr) {
-            cJSON_Delete(metaDataCache_);
-            metaDataCache_ = nullptr;
-        }
-        if (playbackStateCache_ != nullptr) {
-            cJSON_Delete(playbackStateCache_);
-            playbackStateCache_ = nullptr;
-        }
+        metaDataCache_.Reset();
+        playbackStateCache_.SetState(0);
+        playbackStateCache_.SetFavorite(0);
     }
-    SLOGI("MigrateAVSessionServer quit");
+    SLOGI("MigrateAVSessionServer quit with mode:%{public}d|deviceId:%{public}s.", migrateMode_,
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
 }
 
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
 {
-    SLOGI("OnConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    SLOGI("OnConnectProxy: %{public}d|%{public}s.",
+        migrateMode_, SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     if (deviceId_ != deviceId && !deviceId_.empty()) {
-        SLOGI("onConnect but already:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+        SLOGI("onConnect but already:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
         return;
     }
     isSoftbusConnecting_ = true;
@@ -85,7 +84,8 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
 
 void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
 {
-    SLOGI("OnDisConnectProxy: %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    SLOGI("OnDisConnectProxy: %{public}d|%{public}s",
+        migrateMode_, SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     if (deviceId_ != deviceId && !deviceId_.empty()) {
         SLOGI("onDisconnect but already:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
         return;

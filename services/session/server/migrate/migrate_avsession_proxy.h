@@ -31,7 +31,8 @@ class AVSessionService;
 class MigrateAVSessionProxy : public SoftbusSessionProxy,
     public std::enable_shared_from_this<MigrateAVSessionProxy> {
 public:
-    explicit MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode = MSG_HEAD_MODE_FOR_NEXT);
+    explicit MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode = MSG_HEAD_MODE_FOR_NEXT,
+        std::string deviceId = "");
     ~MigrateAVSessionProxy();
 
     void OnConnectServer(const std::string &deviceId) override;
@@ -98,6 +99,7 @@ private:
 
     int32_t mMode_ = 0;
     std::string deviceId_;
+    std::string localDeviceId_;
     sptr<AVSessionItem> remoteSession_ = nullptr;
     sptr<AVControllerItem> preSetController_ = nullptr;
     AVSessionService *servicePtr_ = nullptr;

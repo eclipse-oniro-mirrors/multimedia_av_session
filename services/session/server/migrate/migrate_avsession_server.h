@@ -45,7 +45,7 @@ class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServ
     public HistoricalRecordListener,
     public std::enable_shared_from_this<MigrateAVSessionServer> {
 public:
-    explicit MigrateAVSessionServer(int32_t migrateMode = 0);
+    explicit MigrateAVSessionServer(int32_t migrateMode = 0, std::string deviceId = "");
     ~MigrateAVSessionServer();
 
     void OnConnectProxy(const std::string &deviceId) override;
@@ -176,12 +176,12 @@ private:
     std::function<void(int32_t)> volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_ = GetPreferredDeviceChangeCallbackFunc();
-    cJSON* metaDataCache_ = nullptr;
-    cJSON* playbackStateCache_ = nullptr;
+    AVMetaData metaDataCache_;
+    AVPlaybackState playbackStateCache_;
     std::recursive_mutex cacheJsonLock_;
 
     std::string GenerateClearAVSessionMsg();
-    bool isListenerSet_ = true;
+    bool isListenerSet_ = false;
 };
 
 class AVControllerObserver : public AVControllerCallback {

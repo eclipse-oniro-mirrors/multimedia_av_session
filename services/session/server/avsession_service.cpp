@@ -772,6 +772,7 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
     char* newSortContent = cJSON_Print(valuesArray);
     if (newSortContent == nullptr) {
         SLOGE("newValueArray print fail nullptr");
+        return;
     }
     std::string newSortContentStr(newSortContent);
     if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {

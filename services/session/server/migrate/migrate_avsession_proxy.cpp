@@ -27,10 +27,13 @@
 
 namespace OHOS::AVSession {
 
-MigrateAVSessionProxy::MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode)
+MigrateAVSessionProxy::MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode, std::string deviceId)
 {
+    SLOGI("migrateproxy construct with mode:%{public}d|localDevId:%{public}s.", mode,
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     mMode_ = mode;
     servicePtr_ = ptr;
+    localDeviceId_ = deviceId;
 }
 
 MigrateAVSessionProxy::~MigrateAVSessionProxy()
@@ -41,7 +44,8 @@ MigrateAVSessionProxy::~MigrateAVSessionProxy()
 
 void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
 {
-    SLOGI("MigrateAVSessionProxy OnConnectServer:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    SLOGI("MigrateAVSessionProxy OnConnectServer:%{public}s.",
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     deviceId_ = deviceId;
     SendSpecialKeepAliveData();
     PrepareSessionFromRemote();
@@ -53,8 +57,12 @@ void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
 
 void MigrateAVSessionProxy::OnDisconnectServer(const std::string &deviceId)
 {
-    SLOGI("MigrateAVSessionProxy OnDisconnectServer:%{public}s",
+    SLOGI("MigrateAVSessionProxy OnDisconnectServer:%{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    if (deviceId != deviceId_) {
+        SLOGE("proxy onDisconnect but not:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+        return;
+    }
     deviceId_ = "";
     std::vector<sptr<IRemoteObject>> sessionControllers;
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnDisconnectServer find service ptr null!");
@@ -366,13 +374,14 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
         SLOGE("get jsonValue invalid");
         return;
     }
+    std::string bundleNameBef = elementName_.GetBundleName();
     std::string bundleName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_BUNDLE_NAME);
     bundleName = bundleName.empty() ? DEFAULT_STRING : bundleName;
     size_t insertPos = bundleName.find('|');
     if (insertPos != std::string::npos && insertPos > 0 && insertPos < bundleName.size()) {
         elementName_.SetBundleName(bundleName.substr(0, insertPos));
     } else {
-        SLOGE("get bundleName invalid:%{public}s|%{public}s", bundleName.c_str(),
+        SLOGE("get bundleName invalid:%{public}s|%{public}s.", bundleName.c_str(),
             elementName_.GetBundleName().c_str());
     }
     std::string abilityName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_ABILITY_NAME);
@@ -387,18 +396,19 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     } else {
         remoteSession_->Activate();
     }
-    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s end",
+    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
     AVPlaybackState playbackState;
-    if (AVSESSION_SUCCESS == remoteSession_->GetAVPlaybackState(playbackState)) {
+    if (bundleNameBef != elementName_.GetBundleName() &&
+        AVSESSION_SUCCESS == remoteSession_->GetAVPlaybackState(playbackState)) {
         playbackState.SetState(0);
         playbackState.SetFavorite(false);
         remoteSession_->SetAVPlaybackState(playbackState);
     }
     AVMetaData metaData;
-    if (AVSESSION_SUCCESS == remoteSession_->GetAVMetaData(metaData)) {
+    if (bundleNameBef != elementName_.GetBundleName() && AVSESSION_SUCCESS == remoteSession_->GetAVMetaData(metaData)) {
         metaData.SetAssetId(metaData.GetAssetId().empty() ? DEFAULT_STRING : metaData.GetAssetId());
         metaData.SetWriter(bundleName);
         metaData.SetTitle("");
@@ -655,9 +665,9 @@ void MigrateAVSessionProxy::ProcessMediaImage(std::string mediaImageStr)
         metaData.SetMediaImageUri("");
         metaData.SetMediaImage(innerPixelMap);
     }
-    remoteSession_->SetAVMetaData(metaData);
     SLOGI("ProcessMediaImage set img size:%{public}d", static_cast<int>(metaData.GetMediaImage() == nullptr ?
         -1 : metaData.GetMediaImage()->GetInnerImgBuffer().size()));
+    remoteSession_->SetAVMetaData(metaData);
 }
 
 void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr)
@@ -713,7 +723,7 @@ void MigrateAVSessionProxy::SendSpecialKeepAliveData()
         while (!this->deviceId_.empty()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME_FOR_NEXT));
             if (!isNeedByMediaControl_) {
-                SLOGI("no byte send for client no need");
+                SLOGI("no byte send for client not need");
                 continue;
             }
             if (this->deviceId_.empty()) {
