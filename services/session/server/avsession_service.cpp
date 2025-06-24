@@ -152,9 +152,6 @@ AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
 AVSessionService::~AVSessionService()
 {
     GetUsersManager().ClearCache();
-#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    AVSessionSysEvent::GetInstance().UnRegisterPlayingState();
-#endif
 }
 
 void AVSessionService::OnStart()
@@ -163,9 +160,6 @@ void AVSessionService::OnStart()
     GetUsersManager().ClearCache();
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
     OnStartProcess();
-#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    AVSessionSysEvent::GetInstance().RegisterPlayingState();
-#endif
 }
 
 void AVSessionService::OnStartProcess()
@@ -702,6 +696,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         }
         return;
     }
+    CHECK_AND_RETURN_LOG(isPlaying, "focusSession no play");
     HandleChangeTopSession(info.uid, info.pid, userId);
 }
 // LCOV_EXCL_STOP

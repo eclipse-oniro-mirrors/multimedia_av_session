@@ -152,8 +152,6 @@ public:
     int32_t GetAudioStatus(pid_t uid);
     void ReportLowQuality();
 
-    void RegisterPlayingState();
-    void UnRegisterPlayingState();
     void ReportPlayingState(const std::string& bundleName);
     void ReportPlayingStateAll();
     void UpdateState(const std::string& bundleName, const std::string& appVersion, uint8_t state);
@@ -170,11 +168,9 @@ private:
     std::map<Operation, uint32_t> optCounts_;
     std::unique_ptr<Utils::Timer> timer_;
     uint32_t timerId_ = 0;
-    std::unique_ptr<Utils::Timer> playingStateTimer_;
-    uint32_t playingStateTimerId_ = 0;
     std::recursive_mutex lock_;
     static constexpr uint32_t NOTIFY_TIME_INTERVAL = 1 * 60 * 60 * 1000; // retry after 1 hours
-    static constexpr int64_t PLAYING_STATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000; // 24h
+    int32_t playingStateTriggerCount = 0;
     std::list<AVSessionSysEvent::LifeCycleInfo> lifeCycleInfos_;
     std::list<AVSessionSysEvent::ControllerCommandInfo> controllerCommandInfos_;
     std::map<std::string, AVSessionSysEvent::BackControlReportInfo> lowQualityInfos_;

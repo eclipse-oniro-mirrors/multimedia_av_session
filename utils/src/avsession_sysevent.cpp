@@ -124,6 +124,11 @@ void AVSessionSysEvent::Regiter()
             // LCOV_EXCL_STOP
         }
         Reset();
+        playingStateTriggerCount++;
+        if (playingStateTriggerCount == 24) {
+            ReportPlayingStateAll();
+            playingStateTriggerCount = 0;
+        }
     };
     timerId_ = timer_->Register(timeCallback, NOTIFY_TIME_INTERVAL, false);
     timer_->Setup();
@@ -219,26 +224,6 @@ void AVSessionSysEvent::ReportPlayingStateAll()
     }
     for (const auto& key : keys) {
         ReportPlayingState(key);
-    }
-}
-
-void AVSessionSysEvent::RegisterPlayingState()
-{
-    CHECK_AND_RETURN(playingStateTimer_ == nullptr);
-    playingStateTimer_ = std::make_unique<OHOS::Utils::Timer>("PlayingStatisticTimer");
-    auto timeCallback = [this]() {
-        ReportPlayingStateAll();
-    };
-    playingStateTimerId_ = playingStateTimer_->Register(timeCallback, PLAYING_STATE_CHECK_INTERVAL, false);
-    playingStateTimer_->Setup();
-}
-
-void AVSessionSysEvent::UnRegisterPlayingState()
-{
-    if (playingStateTimer_ != nullptr) {
-        playingStateTimer_->Shutdown();
-        playingStateTimer_->Unregister(playingStateTimerId_);
-        playingStateTimer_ = nullptr;
     }
 }
 
