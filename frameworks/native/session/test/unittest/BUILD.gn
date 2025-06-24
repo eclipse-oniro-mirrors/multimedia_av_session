@@ -24,7 +24,6 @@ config("module_private_config") {
 
   include_dirs = [
     "../../include/",
-    "../../../../../../interfaces/inner_api/native/session/include/",
     "../../../../../services/session/server/",
     "../../../../../services/session/adapter",
   ]
@@ -303,7 +302,6 @@ ohos_unittest("AVDumperTest") {
 
   include_dirs = [
     "../../include/",
-    "../../../../../../interfaces/inner_api/native/session/include/",
     "../../../../../services/session/adapter",
     "../../../../../services/session/server/",
     "../../../../../services/session/server/remote",
