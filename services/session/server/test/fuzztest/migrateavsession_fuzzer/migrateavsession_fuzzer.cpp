@@ -447,32 +447,25 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     RAW_DATA = rawData;
     g_dataSize = size;
     g_pos = 0;
-
-    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
     if(migrateServer_ == nullptr) {
         migrateServer_ = std::make_shared<MigrateAVSessionServer>();
     }
     if (migrateServer_ == nullptr) {
-        SLOGI("server is null");
         return;
     }
     sptr<AVSessionService> avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     if (!avservice_) {
-        SLOGI("service is null");
         return;
     }
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     if (avsessionHere_ == nullptr) {
-        avsessionHere_ = avservice_->CreateSessionInner(
-            g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+        avsessionHere_ = avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     }
     if (avsessionHere_ == nullptr) {
-        SLOGI("avsessionHere_ is null");
         return;
     }
     migrateServer_->Init(avservice_);
-
     ConnectProxyTest();
     HandleFocusMetaDataChangeTest();
     OnMetaDataChangeTest();
@@ -482,14 +475,12 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     ClearRemoteControllerListTest();
     ClearRemoteHistorySessionListTest();
     ResetSupportCrossMediaPlayTest();
-
     LocalFrontSessionArriveTest();
     LocalFrontSessionChangeTest();
     LocalFrontSessionLeaveTest();
     DoMediaImageSyncToRemoteTest();
     DoValidCommandsSyncToRemoteTest();
     OnBytesReceivedTest();
-
     ProcFromNextTest();
     ProcControlCommandFromNextTest();
     ProcessColdStartFromNextTest();
