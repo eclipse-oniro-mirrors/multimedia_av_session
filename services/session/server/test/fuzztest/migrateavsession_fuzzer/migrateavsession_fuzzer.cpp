@@ -487,7 +487,7 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     if (avsessionHere_ == nullptr) {
-        avsessionHere_ = avservice_->CreateSessionInner(g_testSessionTag, 
+        avsessionHere_ = avservice_->CreateSessionInner(g_testSessionTag,
             AVSession::SESSION_TYPE_AUDIO, false, elementName);
     }
     if (avsessionHere_ == nullptr) {
