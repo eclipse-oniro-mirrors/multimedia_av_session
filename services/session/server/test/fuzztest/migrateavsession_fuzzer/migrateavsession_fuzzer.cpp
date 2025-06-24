@@ -120,7 +120,7 @@ void HandleFocusMetaDataChangeTest()
     std::shared_ptr<AVSessionPixelMap> mediaImage = make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> imgBuffer;
     constexpr int maxSize = 1024;
-    auto size = provider.ConsumeIntegralInRange(0, maxSize);
+    auto size = provider.ConsumeIntegralInRange(1, maxSize);
     imgBuffer.resize(size);
     for (size_t i = 0; i < imgBuffer.size(); ++i) {
         imgBuffer[i] = GetData<uint8_t>();
@@ -273,15 +273,18 @@ void LocalFrontSessionLeaveTest()
 
 void DoMediaImageSyncToRemoteTest()
 {
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
     if (innerPixelMap == nullptr) {
         SLOGI("innerPixelMap is null");
         return;
     }
 
-    std::vector<uint8_t> imgBuffer;
-    for(size_t i = 0; i < g_dataSize; ++i) {
-        imgBuffer.push_back(GetData<uint8_t>());
+    constexpr size_t maxSize = 1024 * 1024; // 1MB
+    auto imgSize = provider.ConsumeIntegralInRange<size_t>(1, maxSize);
+    std::vector<uint8_t> imgBuffer(imgSize);
+    for(size_t i = 0; i < imgBuffer.size(); ++i) {
+        imgBuffer[i] = provider.ConsumeIntegral<uint8_t>();
     }
     innerPixelMap->SetInnerImgBuffer(imgBuffer);
     migrateServer_->DoMediaImageSyncToRemote(innerPixelMap);
