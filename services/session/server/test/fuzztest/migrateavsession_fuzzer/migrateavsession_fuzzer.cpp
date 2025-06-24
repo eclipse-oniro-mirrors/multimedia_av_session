@@ -283,7 +283,7 @@ void DoMediaImageSyncToRemoteTest()
     constexpr size_t maxSize = 1024 * 1024; // 1MB
     auto imgSize = provider.ConsumeIntegralInRange<size_t>(1, maxSize);
     std::vector<uint8_t> imgBuffer(imgSize);
-    for(size_t i = 0; i < imgBuffer.size(); ++i) {
+    for (size_t i = 0; i < imgBuffer.size(); ++i) {
         imgBuffer[i] = provider.ConsumeIntegral<uint8_t>();
     }
     innerPixelMap->SetInnerImgBuffer(imgBuffer);
