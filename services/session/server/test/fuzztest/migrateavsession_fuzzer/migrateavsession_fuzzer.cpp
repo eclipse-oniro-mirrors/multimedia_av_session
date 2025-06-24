@@ -439,6 +439,33 @@ void HandleFocusValidCommandChangeTest()
     migrateServer_->HandleFocusValidCommandChange(sessionId, cmds);
 }
 
+void TestFunc()
+{
+    ConnectProxyTest();
+    HandleFocusMetaDataChangeTest();
+    OnMetaDataChangeTest();
+    OnPlaybackStateChangedTest();
+    SendRemoteControllerListTest();
+    SendRemoteHistorySessionListTest();
+    ClearRemoteControllerListTest();
+    ClearRemoteHistorySessionListTest();
+    ResetSupportCrossMediaPlayTest();
+    LocalFrontSessionArriveTest();
+    LocalFrontSessionChangeTest();
+    LocalFrontSessionLeaveTest();
+    DoMediaImageSyncToRemoteTest();
+    DoValidCommandsSyncToRemoteTest();
+    OnBytesReceivedTest();
+    ProcFromNextTest();
+    ProcControlCommandFromNextTest();
+    ProcessColdStartFromNextTest();
+    ProcessMediaControlNeedStateFromNextTest();
+    ConvertAudioDeviceDescriptorsToJsonTest();
+    VolumeControlCommandTest();
+    SwitchAudioDeviceCommandTest();
+    RegisterAudioCallbackAndTriggerTest();
+}
+
 void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
 {
     if (rawData == nullptr || size > MAX_CODE_LEN) {
@@ -466,29 +493,7 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
         return;
     }
     migrateServer_->Init(avservice_);
-    ConnectProxyTest();
-    HandleFocusMetaDataChangeTest();
-    OnMetaDataChangeTest();
-    OnPlaybackStateChangedTest();
-    SendRemoteControllerListTest();
-    SendRemoteHistorySessionListTest();
-    ClearRemoteControllerListTest();
-    ClearRemoteHistorySessionListTest();
-    ResetSupportCrossMediaPlayTest();
-    LocalFrontSessionArriveTest();
-    LocalFrontSessionChangeTest();
-    LocalFrontSessionLeaveTest();
-    DoMediaImageSyncToRemoteTest();
-    DoValidCommandsSyncToRemoteTest();
-    OnBytesReceivedTest();
-    ProcFromNextTest();
-    ProcControlCommandFromNextTest();
-    ProcessColdStartFromNextTest();
-    ProcessMediaControlNeedStateFromNextTest();
-    ConvertAudioDeviceDescriptorsToJsonTest();
-    VolumeControlCommandTest();
-    SwitchAudioDeviceCommandTest();
-    RegisterAudioCallbackAndTriggerTest();
+    TestFunc();
     UpdateFrontSessionInfoToRemoteTest(avservice_);
 }
 
