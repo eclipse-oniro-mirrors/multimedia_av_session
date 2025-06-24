@@ -24,8 +24,6 @@ common_include_dirs = [
   "../../ipc/proxy",
   "../../ipc/stub",
   "../../../../interfaces/inner_api/native/session/include",
-  "//third_party/json/single_include",
-  "$commontype_dir/include",
 ]
 
 common_deps = [
@@ -35,6 +33,7 @@ common_deps = [
 ]
 
 common_external_deps = [
+  "relational_store:native_rdb",
   "ability_base:want",
   "ability_runtime:wantagent_innerkits",
   "audio_framework:audio_client",

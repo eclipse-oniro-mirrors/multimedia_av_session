@@ -36,7 +36,6 @@ config("module_private_config") {
     "../../../../utils/include/",
     "../",
     "../remote",
-    "$commontype_dir/include",
   ]
 }
 
@@ -84,6 +83,7 @@ common_deps_without_third_party = [
 ]
 
 common_external_deps = [
+  "relational_store:native_rdb",
   "ability_base:want",
   "ability_runtime:wantagent_innerkits",
   "access_token:libaccesstoken_sdk",

@@ -23,4 +23,3 @@ declare_args() {
   }
 }
 
-commontype_dir = "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/common_type"
