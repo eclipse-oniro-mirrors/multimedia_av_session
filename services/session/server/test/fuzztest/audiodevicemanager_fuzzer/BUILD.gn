@@ -41,6 +41,8 @@ ohos_fuzztest("AudioDeviceManagerFuzzTest") {
     "./../../../../../../frameworks/native/session:avsession_client_static",
     "./../../../../../session:avsession_item_static",
     "./../../../../../session:avsession_service_static",
+    "./../../../../../session:libidl_avsession_service_interface_proxy",
+    "./../../../../../session:libidl_avsession_service_interface_stub",
     "./../../../../../../utils:avsession_utils",
   ]
   external_deps = [
@@ -75,5 +77,7 @@ ohos_fuzztest("AudioDeviceManagerFuzzTest") {
     cflags += [ "-DBLUETOOTH_ENABLE" ]
     external_deps += [ "bluetooth:btframework" ]
   }
+
+  public_configs = ["./../../../../../session:avsession_ipc_config"]
 }
 ###############################################################################

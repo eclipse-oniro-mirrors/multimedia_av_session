@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
 import("../../av_session_ohos_sources.gni")
 import("../../bluetooth_part.gni")
@@ -23,6 +24,7 @@ group("avsession_server") {
     ":avsession_dynamic_insight",
     ":avsession_item",
     ":avsession_service",
+    ":libidl_avsession_service_interface_proxy",
     "../../sa_profile:avsession_sa_profile",
     "../etc:avsession_service.rc",
     "../etc:ohos.para.dac",
@@ -40,6 +42,57 @@ group("avsession_server_static") {
   ]
 }
 
+config("avsession_ipc_config") {
+  include_dirs = [
+    "../../interfaces/inner_api/native/session/include",
+    "../../frameworks/native/session/include",
+    "../../utils/include",
+    "../session/ipc/base/",
+    "${target_gen_dir}",
+  ]
+}
+
+idl_gen_interface("idl_avsession_service_interface") {
+  sources = [
+    "ipc/idl/IAVSessionCallback.idl",
+    "ipc/idl/ISessionListener.idl",
+  ]
+
+  sources_cpp = [
+    "../../frameworks/common/src/avsession_descriptor.cpp",
+    "../../frameworks/common/src/avplayback_state.cpp",
+    "../../frameworks/common/src/avqueue_item.cpp",
+    "../../frameworks/common/src/avmedia_description.cpp",
+    "../../frameworks/common/src/av_file_descriptor.cpp",
+    "../../frameworks/common/src/av_data_src_descriptor.cpp",
+    "../../frameworks/common/src/avsession_pixel_map.cpp",
+    "../../frameworks/common/src/avcall_meta_data.cpp",
+    "../../frameworks/common/src/avcall_state.cpp",
+    "../../frameworks/common/src/avmeta_data.cpp",
+    "../../frameworks/common/src/avcast_control_command.cpp",
+    "../../frameworks/common/src/avcontrol_command.cpp",
+    "../../frameworks/common/src/avqueue_info.cpp",
+  ]
+
+  sequenceable_ext_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "input:libmmi-client",
+    "audio_framework:audio_client",
+    "audio_framework:audio_foundation",
+    "graphic_surface:surface",
+  ]
+
+  configs = [
+    ":avsession_ipc_config",
+  ]
+
+  log_domainid = "0xD001315"
+  log_tag = "UriPermMgr"
+  subsystem_name = "multimedia"
+  part_name = "av_session"
+}
+
 av_session_ohos_library("avsession_service") {
   stack_protector_ret = true
   install_enable = true
@@ -51,9 +104,10 @@ av_session_ohos_library("avsession_service") {
     integer_overflow = true
     ubsan = true
   }
+
+  public_configs = [":avsession_ipc_config"]
+
   ipc_sources = [
-    "ipc/proxy/session_listener_proxy.cpp",
-    "ipc/stub/avsession_callback_stub.cpp",
     "ipc/stub/avsession_service_stub.cpp",
   ]
 
@@ -138,6 +192,8 @@ av_session_ohos_library("avsession_service") {
   defines += [ "SYSTEM_LIB_PATH = ${system_lib_path}" ]
 
   deps = [
+    ":libidl_avsession_service_interface_proxy",
+    ":libidl_avsession_service_interface_stub",
     "./../../frameworks/common:avsession_common",
     "./../../utils:avsession_utils",
     "./../session:avsession_item",
@@ -411,9 +467,11 @@ av_session_ohos_library("avsession_item") {
     integer_overflow = true
     ubsan = true
   }
+
+  public_configs = [":avsession_ipc_config"]
+
   ipc_sources = [
     "ipc/proxy/avcontroller_callback_proxy.cpp",
-    "ipc/proxy/avsession_callback_proxy.cpp",
     "ipc/stub/avsession_controller_stub.cpp",
     "ipc/stub/avsession_stub.cpp",
   ]
@@ -486,6 +544,7 @@ av_session_ohos_library("avsession_item") {
     "../../frameworks/common:avsession_common",
     "../../frameworks/native/session:avsession_client",
     "../../utils:avsession_utils",
+    ":libidl_avsession_service_interface_proxy",
   ]
 
   external_deps = [
@@ -571,6 +630,9 @@ av_session_ohos_library("avsession_cast_item") {
     integer_overflow = true
     ubsan = true
   }
+
+  public_configs = [":avsession_ipc_config"]
+
   ipc_sources = [
     "ipc/proxy/avcast_controller_callback_proxy.cpp",
     "ipc/stub/avcast_controller_stub.cpp",

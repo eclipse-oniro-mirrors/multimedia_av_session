@@ -16,7 +16,7 @@
 #ifndef OHOS_AVSESSION_CALLBACK_CLIENT_H
 #define OHOS_AVSESSION_CALLBACK_CLIENT_H
 
-#include "avsession_callback_stub.h"
+#include "av_session_callback_stub.h"
 #include "avsession_info.h"
 #include "key_event.h"
 #include "avsession_log.h"
@@ -27,28 +27,28 @@ public:
     explicit AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback);
     ~AVSessionCallbackClient();
 
-    void OnAVCallAnswer() override;
-    void OnAVCallHangUp() override;
-    void OnAVCallToggleCallMute() override;
-    void OnPlay() override;
-    void OnPause() override;
-    void OnStop() override;
-    void OnPlayNext() override;
-    void OnPlayPrevious() override;
-    void OnFastForward(int64_t time) override;
-    void OnRewind(int64_t time) override;
-    void OnSeek(int64_t time) override;
-    void OnSetSpeed(double speed) override;
-    void OnSetLoopMode(int32_t loopMode) override;
-    void OnSetTargetLoopMode(int32_t targetLoopMode) override;
-    void OnToggleFavorite(const std::string& mediaId) override;
-    void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
-    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
-    void OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
-    void OnSkipToQueueItem(int32_t itemId) override;
-    void OnPlayFromAssetId(int64_t assetId) override;
-    void OnPlayWithAssetId(const std::string& assetId) override;
-    void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
+    ErrCode OnAVCallAnswer() override;
+    ErrCode OnAVCallHangUp() override;
+    ErrCode OnAVCallToggleCallMute() override;
+    ErrCode OnPlay() override;
+    ErrCode OnPause() override;
+    ErrCode OnStop() override;
+    ErrCode OnPlayNext() override;
+    ErrCode OnPlayPrevious() override;
+    ErrCode OnFastForward(int64_t time) override;
+    ErrCode OnRewind(int64_t time) override;
+    ErrCode OnSeek(int64_t time) override;
+    ErrCode OnSetSpeed(double speed) override;
+    ErrCode OnSetLoopMode(int32_t loopMode) override;
+    ErrCode OnSetTargetLoopMode(int32_t targetLoopMode) override;
+    ErrCode OnToggleFavorite(const std::string& mediaId) override;
+    ErrCode OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override;
+    ErrCode OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override;
+    ErrCode OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
+    ErrCode OnSkipToQueueItem(int32_t itemId) override;
+    ErrCode OnPlayFromAssetId(int64_t assetId) override;
+    ErrCode OnPlayWithAssetId(const std::string& assetId) override;
+    ErrCode OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;

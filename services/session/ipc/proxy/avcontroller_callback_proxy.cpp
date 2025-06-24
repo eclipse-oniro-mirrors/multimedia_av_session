@@ -211,7 +211,7 @@ void AVControllerCallbackProxy::OnOutputDeviceChange(const int32_t connectionSta
     int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_LOG(parcel.WriteInt32(deviceInfoSize), "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
-        CHECK_AND_RETURN_LOG(deviceInfo.WriteToParcel(parcel), "write deviceInfo failed");
+        CHECK_AND_RETURN_LOG(deviceInfo.Marshalling(parcel), "write deviceInfo failed");
     }
 
     MessageParcel reply;

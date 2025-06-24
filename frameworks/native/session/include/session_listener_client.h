@@ -28,24 +28,24 @@ public:
 
     ~SessionListenerClient();
 
-    void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
+    ErrCode OnSessionCreate(const AVSessionDescriptor& descriptor) override;
 
-    void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
+    ErrCode OnSessionRelease(const AVSessionDescriptor& descriptor) override;
 
-    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
+    ErrCode OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
 
-    void OnAudioSessionChecked(const int32_t uid) override;
+    ErrCode OnAudioSessionChecked(const int32_t uid) override;
 
-    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
+    ErrCode OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
 
-    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override;
+    ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override;
 
-    void OnDeviceOffline(const std::string& deviceId) override;
+    ErrCode OnDeviceOffline(const std::string& deviceId) override;
 
-    void OnRemoteDistributedSessionChange(
+    ErrCode OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override;
 
-    void OnDeviceStateChange(const DeviceState& deviceState) override;
+    ErrCode OnDeviceStateChange(const DeviceState& deviceState) override;
 private:
     std::shared_ptr<SessionListener> listener_;
 };

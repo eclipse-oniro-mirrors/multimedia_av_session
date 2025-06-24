@@ -155,41 +155,50 @@ bool FuzzTest(const uint8_t* rawData, size_t size)
 
 class FuzzTestISessionListener : public ISessionListener {
 public:
-    void OnSessionCreate(const AVSessionDescriptor& descriptor) override
+    ErrCode OnSessionCreate(const AVSessionDescriptor& descriptor) override
     {
+        return AVSESSION_SUCCESS;
     };
 
-    void OnSessionRelease(const AVSessionDescriptor& descriptor) override
+    ErrCode OnSessionRelease(const AVSessionDescriptor& descriptor) override
     {
+        return AVSESSION_SUCCESS;
     };
 
-    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override
+    ErrCode OnTopSessionChange(const AVSessionDescriptor& descriptor) override
     {
+        return AVSESSION_SUCCESS;
     };
 
-    void OnAudioSessionChecked(const int32_t uid) override
+    ErrCode OnAudioSessionChecked(const int32_t uid) override
     {
+        return AVSESSION_SUCCESS;
     };
 
-    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override
+    ErrCode OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override
     {
+        return AVSESSION_SUCCESS;
     };
 
-    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override
+    ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override
     {
+        return AVSESSION_SUCCESS;
     };
 
-    void OnDeviceOffline(const std::string& deviceId) override
+    ErrCode OnDeviceOffline(const std::string& deviceId) override
     {
+        return AVSESSION_SUCCESS;
     };
 
-    void OnDeviceStateChange(const DeviceState& deviceState) override
+    ErrCode OnDeviceStateChange(const DeviceState& deviceState) override
     {
+        return AVSESSION_SUCCESS;
     };
 
-    void OnRemoteDistributedSessionChange(
+    ErrCode OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override
     {
+        return AVSESSION_SUCCESS;
     };
 
     sptr<IRemoteObject> AsObject() override

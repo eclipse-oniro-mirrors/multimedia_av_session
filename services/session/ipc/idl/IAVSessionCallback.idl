@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+sequenceable AvsessionDescriptor..OHOS.AVSession.CastDisplayInfo;
+sequenceable AvsessionDescriptor..OHOS.AVSession.OutputDeviceInfo;
+sequenceable KeyEvent..OHOS.MMI.KeyEvent;
+sequenceable WantParams..OHOS.AAFwk.WantParams;
+sequenceable OHOS.IRemoteObject;
+
+interface OHOS.AVSession.IAVSessionCallback {
+    [oneway] void OnAVCallAnswer();
+
+    [oneway] void OnAVCallHangUp();
+
+    [oneway] void OnAVCallToggleCallMute();
+
+    [oneway] void OnPlay();
+
+    [oneway] void OnPause();
+
+    [oneway] void OnStop();
+
+    [oneway] void OnPlayNext();
+
+    [oneway] void OnPlayPrevious();
+
+    [oneway] void OnFastForward([in] long time);
+
+    [oneway] void OnRewind([in] long time);
+
+    [oneway] void OnSeek([in] long time);
+
+    [oneway] void OnSetSpeed([in] double speed);
+
+    [oneway] void OnSetLoopMode([in] int loopMode);
+
+    [oneway] void OnSetTargetLoopMode([in] int targetLoopMode);
+
+    [oneway] void OnToggleFavorite([in] String mediaId);
+
+    [oneway] void OnMediaKeyEvent([in] KeyEvent keyEvent);
+
+    [oneway] void OnOutputDeviceChange([in] int connectionState, [in] OutputDeviceInfo outputDeviceInfo);
+
+    [oneway] void OnCommonCommand([in] String commonCommand, [in] WantParams commandArgs);
+
+    [oneway] void OnSkipToQueueItem([in] int itemId);
+
+    [oneway] void OnPlayFromAssetId([in] long assetId);
+
+    [oneway] void OnPlayWithAssetId([in] String assetId);
+
+    [oneway] void OnCastDisplayChange([in] CastDisplayInfo castDisplayInfo);
+}

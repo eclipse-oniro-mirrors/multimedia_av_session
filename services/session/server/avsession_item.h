@@ -21,7 +21,7 @@
 #include <map>
 
 #include "avsession_stub.h"
-#include "avsession_callback_proxy.h"
+#include "av_session_callback_proxy.h"
 #include "avcontrol_command.h"
 #include "audio_info.h"
 #include "avcast_control_command.h"

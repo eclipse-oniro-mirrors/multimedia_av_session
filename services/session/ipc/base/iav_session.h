@@ -18,7 +18,7 @@
 
 #include "iremote_broker.h"
 #include "av_session.h"
-#include "iavsession_callback.h"
+#include "ia_v_session_callback.h"
 
 namespace OHOS::AVSession {
 class IAVSession : public AVSession, public IRemoteBroker {

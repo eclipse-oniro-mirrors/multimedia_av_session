@@ -59,33 +59,49 @@ static const int32_t CONTROL_COLD_START = 2;
 class TestISessionListener : public ISessionListener {
     TestISessionListener() = default;
     virtual ~TestISessionListener() = default;
-    void OnSessionCreate(const AVSessionDescriptor& descriptor) override;
-    void OnSessionRelease(const AVSessionDescriptor& descriptor) override;
-    void OnTopSessionChange(const AVSessionDescriptor& descriptor) override;
-    void OnAudioSessionChecked(const int32_t uid) override {};
-    void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {};
-    void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
-    void OnDeviceOffline(const std::string& deviceId) override {};
-    void OnDeviceStateChange(const DeviceState& deviceState) override {};
-    void OnRemoteDistributedSessionChange(
-        const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override {};
+    ErrCode OnSessionCreate(const AVSessionDescriptor& descriptor) override
+    {
+        g_isCallOnSessionCreate = true;
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSessionRelease(const AVSessionDescriptor& descriptor) override
+    {
+        g_isCallOnSessionRelease = true;
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnTopSessionChange(const AVSessionDescriptor& descriptor) override
+    {
+        g_isCallOnTopSessionChange = true;
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnAudioSessionChecked(const int32_t uid) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDeviceOffline(const std::string& deviceId) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDeviceStateChange(const DeviceState& deviceState) override
+    {
+        g_isCallOnTopSessionChange = true;
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnRemoteDistributedSessionChange(
+        const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override
+    {
+        return AVSESSION_SUCCESS;
+    };
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
-
-void TestISessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
-{
-    g_isCallOnSessionCreate = true;
-}
-
-void TestISessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
-{
-    g_isCallOnSessionRelease = true;
-}
-
-void TestISessionListener::OnTopSessionChange(const AVSessionDescriptor& descriptor)
-{
-    g_isCallOnTopSessionChange = true;
-}
 
 class TestSessionListener : public SessionListener {
     TestSessionListener() = default;

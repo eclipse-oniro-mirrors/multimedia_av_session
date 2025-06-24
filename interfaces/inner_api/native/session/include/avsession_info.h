@@ -921,7 +921,7 @@ struct DecoderType {
  * @atomicservice
  * @since 20
  */
-struct DeviceState {
+struct DeviceState: public Parcelable {
     /**
      * Unique device descriptor.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
@@ -952,7 +952,48 @@ struct DeviceState {
      * @atomicservice
      * @since 20
      */
-    int32_t radarErrorCode;
+    int32_t radarErrorCode = 0;
+
+    bool Marshalling(Parcel& out) const override
+    {
+        return out.WriteString(deviceId) &&
+            out.WriteInt32(static_cast<int32_t>(deviceState)) &&
+            out.WriteInt32(static_cast<int32_t>(reasonCode)) &&
+            out.WriteInt32(static_cast<int32_t>(radarErrorCode));
+    }
+
+    static DeviceState* Unmarshalling(Parcel& in)
+    {
+        auto info = std::make_unique<DeviceState>();
+        if (info != nullptr && info->ReadFromParcel(in)) {
+            return info.release();
+        }
+        return nullptr;
+    }
+
+    bool ReadFromParcel(Parcel& in)
+    {
+        if (!in.ReadString(deviceId)) {
+            return false;
+        }
+
+        int32_t deviceStateInt = 0;
+        if (!in.ReadInt32(deviceStateInt)) {
+            return false;
+        }
+        deviceState = static_cast<ConnectionState>(deviceStateInt);
+
+        int32_t reasonCodeInt = 0;
+        if (!in.ReadInt32(reasonCodeInt)) {
+            return false;
+        }
+        reasonCode = static_cast<ReasonCode>(reasonCodeInt);
+
+        if (!in.ReadInt32(radarErrorCode)) {
+            return false;
+        }
+        return true;
+    }
 };
 
 enum CastEngineConnectState {

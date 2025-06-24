@@ -16,7 +16,7 @@
 #ifndef OHOS_AVSESSION_CALLBACK_PROXY_FUZZER_H
 #define OHOS_AVSESSION_CALLBACK_PROXY_FUZZER_H
 #include <cstdint>
-#include "avsession_callback_proxy.h"
+#include "av_session_callback_proxy.h"
 namespace OHOS::AVSession {
 class AvsessionCallbackProxyFuzzerTest : public AVSessionCallbackProxy {
 public:

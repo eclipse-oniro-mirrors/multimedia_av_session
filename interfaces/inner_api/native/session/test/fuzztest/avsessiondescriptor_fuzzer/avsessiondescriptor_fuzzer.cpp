@@ -29,8 +29,8 @@ void OHOS::AVSession::AVSessionDescriptorTest(const uint8_t* data, size_t size)
 
     AVSessionDescriptor avSessionDescriptor;
 
-    avSessionDescriptor.ReadFromParcel(dataParcel);
-    avSessionDescriptor.WriteToParcel(dataParcel);
+    avSessionDescriptor.Unmarshalling(dataParcel);
+    avSessionDescriptor.Marshalling(dataParcel);
 }
 
 /* Fuzzer entry point */
