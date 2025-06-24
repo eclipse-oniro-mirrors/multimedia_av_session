@@ -44,8 +44,8 @@ export namespace avSession {
   export function createAVSession(context: Context, tag: string, type: AVSessionType,
     callback: AsyncCallback<AVSession | undefined>): void {
     let queueSize: int = 2;
-    let blockQueue: BlockingQueue<AVSession | AvSessionAniError> =
-      new ArrayBlockingQueue<AVSession | AvSessionAniError>(queueSize);
+    let blockQueue: containers.BlockingQueue<AVSession | AvSessionAniError> =
+      new containers.ArrayBlockingQueue<AVSession | AvSessionAniError>(queueSize);
     let cb = (): AVSession | AvSessionAniError => {
       let result: AVSession | AvSessionAniError;
       try {
@@ -74,8 +74,8 @@ export namespace avSession {
   export function createAVSession(context: Context, tag: string, type: AVSessionType): Promise<AVSession> {
     return new Promise<AVSession>((resolve: (v: AVSession) => void, reject: RejectString) => {
       let queueSize: int = 2;
-      let blockQueue: BlockingQueue<AVSession | AvSessionAniError> =
-        new ArrayBlockingQueue<AVSession | AvSessionAniError>(queueSize);
+      let blockQueue: containers.BlockingQueue<AVSession | AvSessionAniError> =
+        new containers.ArrayBlockingQueue<AVSession | AvSessionAniError>(queueSize);
       let cb = (): AVSession | AvSessionAniError => {
         let result: AVSession | AvSessionAniError;
         try {
@@ -132,8 +132,8 @@ export namespace avSession {
       return new Promise<Array<CastDisplayInfo>>((resolve: (v: Array<CastDisplayInfo>) => void,
         reject: RejectString) => {
         let queueSize: int = 2;
-        let blockQueue: BlockingQueue<Array<CastDisplayInfo> | AvSessionAniError> =
-          new ArrayBlockingQueue<Array<CastDisplayInfo> | AvSessionAniError>(queueSize);
+        let blockQueue: containers.BlockingQueue<Array<CastDisplayInfo> | AvSessionAniError> =
+          new containers.ArrayBlockingQueue<Array<CastDisplayInfo> | AvSessionAniError>(queueSize);
         let cb = (): Array<CastDisplayInfo> | AvSessionAniError => {
           let result: Array<CastDisplayInfo> | AvSessionAniError;
           try {
