@@ -799,13 +799,13 @@ static HWTEST_F(AVSessionServiceTest, SaveAvQueueInfo001, TestSize.Level0)
     std::string oldContent;
     if (!avservice_->LoadStringFromFileEx(avservice_->GetAVQueueDir(), oldContent)) {
         SLOGE("SaveAvQueueInfo001 read avqueueinfo fail, Return!");
-        return;
+    } else {
+        avservice_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta,
+            avservice_->GetUsersManager().GetCurrentUserId());
+        avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+        EXPECT_EQ(0, AVSESSION_SUCCESS);
+        SLOGI("SaveAvQueueInfo001 end!");
     }
-    avservice_->SaveAvQueueInfo(oldContent, g_testAnotherBundleName, meta,
-        avservice_->GetUsersManager().GetCurrentUserId());
-    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
-    EXPECT_EQ(0, AVSESSION_SUCCESS);
-    SLOGI("SaveAvQueueInfo001 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, AddAvQueueInfoToFile001, TestSize.Level0)

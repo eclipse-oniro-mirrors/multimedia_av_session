@@ -156,8 +156,10 @@ static HWTEST_F(SoftbusSessionManagerTest, RemoveSessionServer001, TestSize.Leve
 {
     SLOGI("RemoveSessionServer001 begin");
     int32_t sessionId = 123;
+    std::string data = "";
+    int32_t ret = manager_->SendMessage(sessionId, data);
+    EXPECT_EQ(ret, -1);
     manager_->Shutdown(sessionId);
-    EXPECT_EQ(sessionId, 123);
     SLOGI("RemoveSessionServer001 end");
 }
 
