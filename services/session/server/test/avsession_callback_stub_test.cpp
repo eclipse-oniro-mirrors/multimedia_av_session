@@ -303,5 +303,21 @@ static HWTEST_F(AVSessionCallbackStubTest, OnSetTargetLoopMode001, TestSize.Leve
     EXPECT_EQ(avSessionCallbackStub.onSetTargetLoopMode_, true);
     SLOGI("OnSetTargetLoopMode001 end!");
 }
+
+/**
+ * @tc.name: OnPlayWithAssetId001
+ * @tc.desc: Test OnPlayWithAssetId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionCallbackStubTest, OnPlayWithAssetId001, TestSize.Level0)
+{
+    SLOGI("OnPlayWithAssetId001 begin!");
+    std::string assetId = "test";
+    AVSessionCallbackStubDemo avSessionCallbackStub;
+    ErrCode ret = avSessionCallbackStub.OnPlayWithAssetId(assetId);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(avSessionCallbackStub.onPlayWithAssetId_, true);
+    SLOGI("OnPlayWithAssetId001 end!");
+}
 }
 }
