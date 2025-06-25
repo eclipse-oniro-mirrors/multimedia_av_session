@@ -545,6 +545,7 @@ int32_t AVSessionService::GetLocalDeviceType()
 void AVSessionService::DoTargetDevListenWithDM()
 {
     localDeviceType_ = GetLocalDeviceType();
+    is2in1_ = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
     targetDeviceType_ = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) ?
         DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE : DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
     SLOGI("get localDeviceType:%{public}d", localDeviceType_);
