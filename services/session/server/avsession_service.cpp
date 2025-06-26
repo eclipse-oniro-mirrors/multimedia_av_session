@@ -938,7 +938,6 @@ void AVSessionService::InitCastEngineService()
 {
     SLOGI("InitCastEngineService in");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
     SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
 #endif
 }
@@ -3907,8 +3906,8 @@ std::string AVSessionService::GetLocalTitle()
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession,
     bool addCapsule, bool isCapsuleUpdate)
 {
-    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
-    CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support");
+    bool is2in1 = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
+    CHECK_AND_RETURN_LOG(!is2in1, "2in1 not support");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
     SLOGI("NotifySystemUI isActiveNtf %{public}d, addCapsule %{public}d isCapsuleUpdate %{public}d",
