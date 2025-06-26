@@ -1393,5 +1393,24 @@ static HWTEST_F(AVRouterImplTest, DisconnectOtherSession006, TestSize.Level0)
     EXPECT_TRUE(listener != nullptr);
     SLOGI("DisconnectOtherSession006 end");
 }
+
+/**
+* @tc.name: OnDeviceStateChange001
+* @tc.desc: set servicePtr_ to not nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, OnDeviceStateChange001, TestSize.Level0)
+{
+    SLOGI("OnDeviceStateChange001 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    DeviceState deviceState;
+    auto listener = std::make_shared<AVSessionServiceListenerMock>();
+    ASSERT_TRUE(listener != nullptr);
+    g_AVRouterImpl->servicePtr_ = listener.get();
+    g_AVRouterImpl->OnDeviceStateChange(deviceState);
+    EXPECT_TRUE(g_AVRouterImpl->servicePtr_ != nullptr);
+    SLOGI("OnDeviceStateChange001 end");
+}
 } //AVSession
 } //OHOS

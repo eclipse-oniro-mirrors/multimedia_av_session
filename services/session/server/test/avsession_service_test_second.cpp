@@ -298,8 +298,11 @@ static HWTEST_F(AVSessionServiceTestSecond, IsLocalDevice001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTestSecond, GetDeviceInfo002, TestSize.Level0)
 {
     SLOGI("GetDeviceInfo002 begin!");
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
+    ASSERT_TRUE(historyDescriptor != nullptr);
+    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
+    ASSERT_TRUE(avsessionHere != nullptr);
     std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors = {
         OHOS::AudioStandard::AudioDeviceDescriptor(OHOS::AudioStandard::DeviceType::DEVICE_TYPE_EARPIECE,
             OHOS::AudioStandard::DeviceRole::INPUT_DEVICE, 1, 1, "LocalDevice")
@@ -342,8 +345,11 @@ static HWTEST_F(AVSessionServiceTestSecond, CastAudioProcess001, TestSize.Level0
 static HWTEST_F(AVSessionServiceTestSecond, CastAudioProcess002, TestSize.Level0)
 {
     SLOGI("CastAudioProcess002 begin!");
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
+    ASSERT_TRUE(historyDescriptor != nullptr);
+    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
+    ASSERT_TRUE(avsessionHere != nullptr);
     std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors = {
         OHOS::AudioStandard::AudioDeviceDescriptor(OHOS::AudioStandard::DeviceType::DEVICE_TYPE_EARPIECE,
             OHOS::AudioStandard::DeviceRole::INPUT_DEVICE, 1, 1, "LocalDevice")
@@ -366,9 +372,11 @@ static HWTEST_F(AVSessionServiceTestSecond, CastAudioProcess002, TestSize.Level0
 static HWTEST_F(AVSessionServiceTestSecond, CastAudioInner001, TestSize.Level0)
 {
     SLOGI("CastAudioInner001 begin!");
-    EXPECT_TRUE(g_AVSessionService != nullptr);
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
+    ASSERT_TRUE(historyDescriptor != nullptr);
+    auto avsessionHere = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
+    ASSERT_TRUE(avsessionHere != nullptr);
     std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors = {
         OHOS::AudioStandard::AudioDeviceDescriptor(OHOS::AudioStandard::DeviceType::DEVICE_TYPE_EARPIECE,
             OHOS::AudioStandard::DeviceRole::INPUT_DEVICE, 1, 1, "LocalDevice")
@@ -651,8 +659,10 @@ static HWTEST_F(AVSessionServiceTestSecond, OnIdleWithSessions002, TestSize.Leve
 static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility002, TestSize.Level0)
 {
     SLOGD("OnAddSystemAbility002 begin!");
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
+    ASSERT_TRUE(historyDescriptor != nullptr);
+    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
 
     int32_t systemAbilityId = OHOS::MULTIMODAL_INPUT_SERVICE_ID;
     const std::string deviceId = "AUDIO";
@@ -839,8 +849,10 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility012, TestSize.Leve
 static HWTEST_F(AVSessionServiceTestSecond, InitBMS002, TestSize.Level0)
 {
     SLOGD("InitBMS002 begin!");
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
+    ASSERT_TRUE(historyDescriptor != nullptr);
+    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
     g_AVSessionService->GetUsersManager().curUserId_ = -1;
     g_AVSessionService->InitBMS();
     EXPECT_NE(g_AVSessionService->topSession_, nullptr);
@@ -1019,6 +1031,30 @@ static HWTEST_F(AVSessionServiceTestSecond, NotifySessionRelease003, TestSize.Le
         listener = nullptr;
     }
     SLOGD("NotifySessionRelease003 end!");
+}
+
+
+/**
+* @tc.name: NotifySessionRelease004
+* @tc.desc: Verifying the NotifySessionRelease method with invalid uid.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, NotifySessionRelease004, TestSize.Level0)
+{
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    AVSessionDescriptor aVSessionDescriptor;
+    TestSessionListener* listener = new TestSessionListener();
+    ASSERT_TRUE(listener != nullptr);
+    g_AVSessionService->innerSessionListeners_.push_back(listener);
+    aVSessionDescriptor.uid_ = AVSESSION_ERROR;
+    g_AVSessionService->NotifySessionRelease(aVSessionDescriptor);
+    EXPECT_EQ(g_isCallOnSessionRelease, true);
+    g_isCallOnSessionRelease = false;
+    if (listener != nullptr) {
+        delete listener;
+        listener = nullptr;
+    }
 }
 
 /**
@@ -1676,5 +1712,48 @@ static HWTEST_F(AVSessionServiceTestSecond, ReportSessionControl001, TestSize.Le
     EXPECT_EQ(stateInfo->control_.size(), 0);
 }
 #endif
+
+/**
+ * @tc.name: HandleRemoveMediaCardEvent003
+ * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a invalid uid.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, HandleRemoveMediaCardEvent003, TestSize.Level0)
+{
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
+    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
+    ASSERT_TRUE(g_AVSessionService->topSession_ != nullptr);
+    bool ret = g_AVSessionService->topSession_->IsCasting();
+    g_AVSessionService->topSession_->SetUid(AVSESSION_ERROR);
+    g_AVSessionService->HandleRemoveMediaCardEvent();
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: UpdateFrontSession005
+ * @tc.desc: Verifying the UpdateFrontSession method with a invalid uid.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestSecond, UpdateFrontSession005, TestSize.Level0)
+{
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    EXPECT_EQ(avsessionHere != nullptr, true);
+    g_AVSessionService->UpdateTopSession(avsessionHere);
+    g_AVSessionService->topSession_->SetUid(AVSESSION_ERROR);
+    g_AVSessionService->UpdateFrontSession(avsessionHere, false);
+    g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+}
 } //AVSession
 } //OHOS

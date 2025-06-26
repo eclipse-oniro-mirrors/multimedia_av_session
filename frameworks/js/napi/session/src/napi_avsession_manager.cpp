@@ -88,6 +88,9 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_PERMISSION_DENIED, 201},
     {ERR_NO_PERMISSION, 202},
     {ERR_INVALID_PARAM, 401},
+    {ERR_REPEAT_CAST, 6600101},
+    {ERR_WAIT_ALLCONNECT_TIMEOUT, 6600101},
+    {ERR_ALLCONNECT_CAST_REJECT, 6600101},
 };
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 {
@@ -1139,6 +1142,11 @@ napi_value NapiAVSessionManager::SetDiscoverable(napi_env env, napi_callback_inf
 std::string NapiAVSessionManager::GetStartCastErrMsg(int32_t error)
 {
     std::string err;
+    const int32_t systemId = 226;
+    const int32_t AvSessionModuleId = 18;
+    const int32_t CastEngineModuleId = 19;
+    const int32_t systemIdOffset = 21;
+    const int32_t moduleIdOffset = 16;
     if (error == ERR_NO_PERMISSION) {
         err = "StartCast failed : native no permission";
     } else if (error == ERR_PERMISSION_DENIED) {
@@ -1147,6 +1155,18 @@ std::string NapiAVSessionManager::GetStartCastErrMsg(int32_t error)
         err = "StartCast failed : native invalid parameters";
     } else if (error == ERR_SESSION_NOT_EXIST) {
         err = "StartCast failed : native session not exist";
+    } else if (error == ERR_WAIT_ALLCONNECT_TIMEOUT) {
+        auto errorCode = (systemId << systemIdOffset) | (AvSessionModuleId << moduleIdOffset) | std::abs(error);
+        err = "StartCast failed : connect timeout, radarErrorCode:" + std::to_string(errorCode);
+    } else if (error == ERR_ALLCONNECT_CAST_REJECT) {
+        auto errorCode = (systemId << systemIdOffset) | (AvSessionModuleId << moduleIdOffset) | std::abs(error);
+        err = "StartCast failed : connect reject, radarErrorCode:" + std::to_string(errorCode);
+    } else if (error == ERR_REPEAT_CAST) {
+        auto errorCode = (systemId << systemIdOffset) | (AvSessionModuleId << moduleIdOffset) | std::abs(error);
+        err = "StartCast failed : repeat cast, radarErrorCode:" + std::to_string(errorCode);
+    } else if (error == ERR_DEVICE_CONNECTION_FAILED) {
+        auto errorCode = (systemId << systemIdOffset) | (CastEngineModuleId << moduleIdOffset) | std::abs(error);
+        err = "StartCast failed : device connect failed, radarErrorCode:" + std::to_string(errorCode);
     } else {
         err = "StartCast failed : native server exception, \
                 you are advised to : 1.scheduled retry.\

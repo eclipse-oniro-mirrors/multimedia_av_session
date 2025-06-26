@@ -364,7 +364,9 @@ void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
     for (const auto& [pid, listener] : listenerMap) {
         SLOGI("notify device state change with pid %{public}d", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceStateChange");
-        listener->OnDeviceStateChange(deviceState);
+        if (listener == nullptr) {
+            listener->OnDeviceStateChange(deviceState);
+        }
     }
 }
 

@@ -777,7 +777,6 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
         SLOGE("SetFirstCallerTokenID fail");
     }
     int32_t ret = StartCast(sessionToken, outputDeviceInfo);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGI("StartCast ret %{public}d", ret);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     SLOGI("HandleStartCast success");
@@ -806,7 +805,6 @@ int32_t AVSessionServiceStub::HandleStopCast(MessageParcel& data, MessageParcel&
     sessionToken.uid = data.ReadInt32();
 
     int32_t ret = StopCast(sessionToken);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StopCast failed");
     SLOGI("StopCast ret %{public}d", ret);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     SLOGI("HandleStopCast success");
