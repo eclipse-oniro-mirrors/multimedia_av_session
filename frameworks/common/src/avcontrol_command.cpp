@@ -106,6 +106,10 @@ bool AVControlCommand::Marshalling(Parcel& parcel) const
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_) &&
                 parcel.WriteString(std::get<std::string>(param_)), false, "write toggle favorite failed");
             break;
+        case SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<bool>(param_) &&
+                parcel.WriteBool(std::get<bool>(param_)), false, "write toggle call mute failed");
+            break;
         case SESSION_CMD_PLAY_FROM_ASSETID:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_) &&
                 parcel.WriteInt64(std::get<int64_t>(param_)), false, "write play from assetId failed");
