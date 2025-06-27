@@ -344,7 +344,9 @@ void AVSessionService::HandleRemoveMediaCardEvent()
             castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
             topSession_->SendControlCommandToCast(castCmd);
         }
-    } else if (AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid())) {
+    } else if (AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid()) ||
+        (topSession_->GetUid() == audioBrokerUid &&
+        topSession_->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY)) {
         AVControlCommand cmd;
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
         topSession_->ExecuteControllerCommand(cmd);
@@ -620,13 +622,12 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     if (infoUid == ancoUid) {
         for (const auto& session : *sessionListForFront) {
-            if (session->GetUid() == audioBrokerUid &&
-                session->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
-                SLOGI("change uid for anco");
-                infoUid = session->GetUid();
-                infoPid = session->GetPid();
-                break;
-            }
+            CHECK_AND_CONTINUE(session->GetUid() == audioBrokerUid &&
+                session->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY);
+            SLOGI("change uid for anco");
+            infoUid = session->GetUid();
+            infoPid = session->GetPid();
+            break;
         }
     }
     for (const auto& session : *sessionListForFront) {
@@ -1290,18 +1291,18 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist");
-        if (topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
+        bool isSameTop = topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr());
+        if (isSameTop) {
             NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
             return;
         }
-        if (isPlaying) {
-            UpdateTopSession(session);
-            FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
-            sessionInfo.uid = session->GetUid();
-            sessionInfo.pid = session->GetPid();
-            SelectFocusSession(sessionInfo);
-            NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
-        }
+        CHECK_AND_RETURN_LOG(isPlaying, "anco media session is not playing");
+        UpdateTopSession(session);
+        FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
+        sessionInfo.uid = session->GetUid();
+        sessionInfo.pid = session->GetPid();
+        SelectFocusSession(sessionInfo);
+        NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
     });
 }
 
@@ -1634,10 +1635,9 @@ sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag
 
 bool AVSessionService::IsCapsuleNeeded()
 {
-    if (topSession_ != nullptr && topSession_->GetUid() != audioBrokerUid) {
-        return topSession_->GetSessionType() == "audio" || topSession_->IsCasting();
-    }
-    return false;
+    CHECK_AND_RETURN_RET_LOG(topSession_ != nullptr && topSession_->GetUid() != audioBrokerUid,
+        false, "audio broker capsule");
+    return topSession_->GetSessionType() == "audio" || topSession_->IsCasting();
 }
 
 // LCOV_EXCL_START
@@ -3939,8 +3939,8 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     }
 
     auto uid = topSession_ ? (topSession_->GetUid() == audioBrokerUid ?
-        BundleStatusAdapter::GetInstance().GetUidFromBundleName(shellBundle, userId) : topSession_->GetUid()) :
-        (historyDescriptor ? historyDescriptor->uid_ : -1);
+        BundleStatusAdapter::GetInstance().GetUidFromBundleName(topSession_->GetBundleName(), userId) :
+        topSession_->GetUid()) : (historyDescriptor ? historyDescriptor->uid_ : -1);
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);
