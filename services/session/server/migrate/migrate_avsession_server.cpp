@@ -967,7 +967,7 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
 
     if (metadata.IsValid()) {
         SLOGI("ConvertMetadataToJson without img");
-        ResetTitleAndArtist(metadata);
+        UpdateLatestTitleAndArtist(metadata);
         if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, latestTitle_)) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
                 METADATA_TITLE, latestTitle_.c_str());
@@ -1003,7 +1003,7 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
     return result;
 }
 
-void MigrateAVSessionServer::ResetTitleAndArtist(const AVMetaData &metadata)
+void MigrateAVSessionServer::UpdateLatestTitleAndArtist(const AVMetaData &metadata)
 {
     if (latestAssetId_ != metadata.GetAssetId()) {
         latestTitle_ = "";

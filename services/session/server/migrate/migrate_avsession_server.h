@@ -157,7 +157,7 @@ private:
         std::vector<AVSessionDescriptor> hisSessionDescriptors);
     void StartConfigHistorySession(const std::string &data);
     std::string GenerateClearHistorySessionMsg();
-    void ResetTitleAndArtist(const AVMetaData &metadata);
+    void UpdateLatestTitleAndArtist(const AVMetaData &metadata);
 
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
