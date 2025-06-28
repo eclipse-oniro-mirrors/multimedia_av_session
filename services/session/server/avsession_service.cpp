@@ -764,8 +764,10 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
         InsertSessionItemToCJSON(session, valuesArray);
     }
     char* newSortContent = cJSON_Print(valuesArray);
-    if (newSortContent == nullptr) {
+    if (valuesArray == nullptr || cJSON_IsInvalid(valuesArray) || newSortContent == nullptr) {
         SLOGE("newValueArray print fail nullptr");
+        cJSON_Delete(valuesArray);
+        return;
     }
     std::string newSortContentStr(newSortContent);
     if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
@@ -1663,7 +1665,7 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& sessi
     }
 
     char* newSortContent = cJSON_Print(valuesArray);
-    if (newSortContent == nullptr) {
+    if (valuesArray == nullptr || cJSON_IsInvalid(valuesArray) || newSortContent == nullptr) {
         SLOGE("newValueArray print fail");
         return false;
     }
@@ -2522,6 +2524,20 @@ void AVSessionService::HandleEventHandlerCallBack()
 
 int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
 {
+    if (keyEvent.GetKeyCode() != MMI::KeyEvent::KEYCODE_HEADSETHOOK &&
+        keyEvent.GetKeyCode() != MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
+        std::lock_guard lockGuard(keyEventListLock_);
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
+        CHECK_AND_RETURN_RET_LOG(keyEventList != nullptr, AVSESSION_ERROR, "keyEventList ptr nullptr!");
+        for (const auto& session : *keyEventList) {
+            session->HandleMediaKeyEvent(keyEvent);
+            return AVSESSION_SUCCESS;
+        }
+    }
+    if (CheckIfOtherAudioPlaying()) {
+        SLOGE("control block for OtherAudioPlaying for key:%{public}d", keyEvent.GetKeyCode());
+        return AVSESSION_SUCCESS;
+    }
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
@@ -2538,15 +2554,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
             return AVSESSION_SUCCESS;
         }
     }
-    {
-        std::lock_guard lockGuard(keyEventListLock_);
-        std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
-        CHECK_AND_RETURN_RET_LOG(keyEventList != nullptr, AVSESSION_ERROR, "keyEventList ptr nullptr!");
-        for (const auto& session : *keyEventList) {
-            session->HandleMediaKeyEvent(keyEvent);
-            return AVSESSION_SUCCESS;
-        }
-    }
+
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         if (topSession_ && !(topSession_->GetBundleName() == "anco_audio" && !topSession_->IsActive())) {
@@ -2643,8 +2651,41 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
     }
 }
 
+bool AVSessionService::CheckIfOtherAudioPlaying()
+{
+    std::vector<int> audioPlayingUids = focusSessionStrategy_.GetAudioPlayingUids();
+    CHECK_AND_RETURN_RET_LOG(!audioPlayingUids.empty(), false, "no other audio playing quit");
+    std::lock_guard frontLockGuard(sessionFrontLock_);
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr quit");
+    CHECK_AND_RETURN_RET_LOG(!sessionListForFront->empty() || topSession_ != nullptr, true,
+        "sessionListForFront and top empty but audio playing, control block");
+    for (int uid : audioPlayingUids) {
+        if (GetUsersManager().GetContainerFromAll().UidHasSession(uid)) {
+            SLOGI("audioplaying but session alive:%{public}d", uid);
+            return false;
+        }
+        std::string bundleNamePlaying = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
+        CHECK_AND_RETURN_RET_LOG(topSession_ == nullptr || bundleNamePlaying != topSession_->GetBundleName(),
+            false, "audioplaying but topBundle alive:%{public}s", bundleNamePlaying.c_str());
+        for (const auto& session : *sessionListForFront) {
+            CHECK_AND_CONTINUE(session != nullptr);
+            if (bundleNamePlaying == session->GetBundleName()) {
+                SLOGE("audioplaying but bundle alive:%{public}s", bundleNamePlaying.c_str());
+                return false;
+            }
+        }
+        SLOGI("audioPlaying and no session:%{public}d", uid);
+    }
+    return true;
+}
+
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
+    if (CheckIfOtherAudioPlaying()) {
+        SLOGE("control block for OtherAudioPlaying with cmd:%{public}d", command.GetCommand());
+        return AVSESSION_SUCCESS;
+    }
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         SLOGI("SendSystemControlCommand with cmd:%{public}d, topSession alive:%{public}d",
