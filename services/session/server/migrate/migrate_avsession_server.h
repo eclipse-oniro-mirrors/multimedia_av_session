@@ -36,6 +36,7 @@ constexpr size_t BUFFER_MAX_SIZE = 1024 * 1024;
 constexpr size_t DEFAULT_QUALITY = 100;
 constexpr size_t UNMASK_CHAR_NUM = 3;
 constexpr int64_t DELAY_TIME = 2000;
+constexpr int64_t DELAY_METADATA_TIME = 100;
 constexpr int64_t DELAY_PLAY_COM_TIME = 500;
 constexpr int32_t MAX_SESSION_NUMS = 2;
 constexpr int32_t MAX_HISTORY_SESSION_NUMS = 6;
@@ -157,7 +158,6 @@ private:
         std::vector<AVSessionDescriptor> hisSessionDescriptors);
     void StartConfigHistorySession(const std::string &data);
     std::string GenerateClearHistorySessionMsg();
-    void UpdateLatestTitleAndArtist(const AVMetaData &metadata);
 
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
@@ -173,9 +173,6 @@ private:
     std::recursive_mutex migrateDeviceChangeLock_;
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
     std::string curAssetId_;
-    std::string latestAssetId_;
-    std::string latestTitle_;
-    std::string latestArtist_;
 
     std::function<void(int32_t)> volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();

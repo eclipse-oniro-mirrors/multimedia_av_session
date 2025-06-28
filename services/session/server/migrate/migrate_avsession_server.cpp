@@ -967,14 +967,13 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
 
     if (metadata.IsValid()) {
         SLOGI("ConvertMetadataToJson without img");
-        UpdateLatestTitleAndArtist(metadata);
-        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, latestTitle_)) {
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, metadata.GetTitle())) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-                METADATA_TITLE, latestTitle_.c_str());
+                METADATA_TITLE, metadata.GetTitle().c_str());
             cJSON_Delete(result);
             return nullptr;
         }
-        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, latestArtist_)) {
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, metadata.GetArtist())) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
                 METADATA_ARTIST, metadata.GetArtist().c_str());
             cJSON_Delete(result);
@@ -1188,10 +1187,10 @@ void MigrateAVSessionServer::OnHistoricalRecordChange()
 
 void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, const AVMetaData &data)
 {
-    std::string metaDataStr = ConvertMetadataInfoToStr(playerId, SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, data);
-    SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", metaDataStr.c_str());
-
-    SendByte(deviceId_, metaDataStr);
+    SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", playerId.c_str());
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        DelaySendMetaData();
+        }, "DelaySendMetaData", DELAY_METADATA_TIME);
 }
 // LCOV_EXCL_STOP
 
