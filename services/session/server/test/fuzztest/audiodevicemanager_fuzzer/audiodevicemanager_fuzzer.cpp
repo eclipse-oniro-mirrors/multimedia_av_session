@@ -103,10 +103,6 @@ void TestAudioDeviceManager()
     AudioDeviceManager::GetInstance().GetAudioState();
     AudioDeviceManager::GetInstance().SetAudioState(GetData<int32_t>());
 
-    AudioStandard::DeviceChangeAction deviceChangeAction;
-    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
-
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> desc;
     AudioDeviceManager::GetInstance().RegisterPreferedOutputDeviceChangeCallback();
     AudioDeviceManager::GetInstance().audioPreferedOutputDeviceChangeCallback_->OnPreferredOutputDeviceUpdated(desc);

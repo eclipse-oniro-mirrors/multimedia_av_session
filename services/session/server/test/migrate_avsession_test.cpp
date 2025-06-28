@@ -438,7 +438,7 @@ static HWTEST_F(MigrateAVSessionTest, ConvertMetadataToJson001, TestSize.Level0)
 {
     SLOGI("ConvertMetadataToJson001 begin");
     AVMetaData metadata;
-    metaData.Reset();
+    metadata.Reset();
     metadata.SetAssetId("123");
     metadata.SetTitle("song");
     metadata.SetArtist("sing");
