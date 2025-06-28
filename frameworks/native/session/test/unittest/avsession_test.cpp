@@ -138,6 +138,194 @@ void AvsessionTest::TearDown()
     g_onCall = AVSESSION_ERROR;
 }
 
+class AVSessionDemo : public AVSession {
+public:
+    std::string GetSessionId() override;
+    std::string GetSessionType() override;
+    int32_t GetAVMetaData(AVMetaData& meta) override;
+    int32_t SetAVMetaData(const AVMetaData& meta) override;
+    int32_t SetAVCallMetaData(const AVCallMetaData& meta) override;
+    int32_t SetAVCallState(const AVCallState& avCallState) override;
+    int32_t GetAVPlaybackState(AVPlaybackState& state) override;
+    int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
+    int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
+    int32_t SetAVQueueItems(const std::vector<AVQueueItem>& items) override;
+    int32_t GetAVQueueTitle(std::string& title) override;
+    int32_t SetAVQueueTitle(const std::string& title) override;
+    int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
+    int32_t GetExtras(AAFwk::WantParams& extras) override;
+    int32_t SetExtras(const AAFwk::WantParams& extras) override;
+    std::shared_ptr<AVSessionController> GetController() override;
+    int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback) override;
+    int32_t Activate() override;
+    int32_t Deactivate() override;
+    bool IsActive() override;
+    int32_t Destroy() override;
+    int32_t AddSupportCommand(const int32_t cmd) override;
+    int32_t DeleteSupportCommand(const int32_t cmd) override;
+    int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
+    int32_t UpdateAVQueueInfo(const AVQueueInfo& info) override;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::shared_ptr<AVCastController> GetAVCastController() override;
+    int32_t ReleaseCast(bool continuePlay = false) override;
+    int32_t StartCastDisplayListener() override;
+    int32_t StopCastDisplayListener() override;
+    int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
+#endif
+};
+
+std::string AVSessionDemo::GetSessionId()
+{
+    return "";
+}
+
+std::string AVSessionDemo::GetSessionType()
+{
+    return "";
+}
+
+int32_t AVSessionDemo::GetAVMetaData(AVMetaData& meta)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetAVMetaData(const AVMetaData& meta)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetAVCallMetaData(const AVCallMetaData& meta)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetAVCallState(const AVCallState& avCallState)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::GetAVPlaybackState(AVPlaybackState& state)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetAVPlaybackState(const AVPlaybackState& state)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::GetAVQueueItems(std::vector<AVQueueItem>& items)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetAVQueueItems(const std::vector<AVQueueItem>& items)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::GetAVQueueTitle(std::string& title)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetAVQueueTitle(const std::string& title)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::GetExtras(AAFwk::WantParams& extras)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetExtras(const AAFwk::WantParams& extras)
+{
+    return 0;
+}
+
+std::shared_ptr<AVSessionController> AVSessionDemo::GetController()
+{
+    return nullptr;
+}
+
+int32_t AVSessionDemo::RegisterCallback(const std::shared_ptr<AVSessionCallback>& callback)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::Activate()
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::Deactivate()
+{
+    return 0;
+}
+
+bool AVSessionDemo::IsActive()
+{
+    return false;
+}
+
+int32_t AVSessionDemo::Destroy()
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::AddSupportCommand(const int32_t cmd)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::DeleteSupportCommand(const int32_t cmd)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::UpdateAVQueueInfo(const AVQueueInfo& info)
+{
+    return 0;
+}
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+std::shared_ptr<AVCastController> AVSessionDemo::GetAVCastController()
+{
+    return nullptr;
+}
+
+int32_t AVSessionDemo::ReleaseCast(bool continuePlay = false)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::StartCastDisplayListener()
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::StopCastDisplayListener()
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays)
+{
+    return 0;
+}
+#endif
+
 class AVSessionCallbackImpl : public AVSessionCallback {
 public:
     void OnPlay() override;
@@ -1068,6 +1256,21 @@ HWTEST_F(AvsessionTest, UpdateAVQueueInfo001, TestSize.Level1)
     AVQueueInfo info = AVQueueInfo();
     EXPECT_EQ(avsession_->UpdateAVQueueInfo(info), AVSESSION_SUCCESS);
     SLOGD("UpdateAVQueueInfo001 End");
+}
+
+/**
+* @tc.name: AVSessionDemoUpdateAVQueueInfo001
+* @tc.desc: create AVSessionDemo and UpdateAVQueueInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, AVSessionDemoUpdateAVQueueInfo001, TestSize.Level1)
+{
+    SLOGE("AVSessionDemoUpdateAVQueueInfo001 Begin");
+    AVSessionDemo avsessionDemo = AVSessionDemo();
+    AVQueueInfo info = AVQueueInfo();
+    EXPECT_EQ(avsessionDemo.UpdateAVQueueInfo(info), AVSESSION_SUCCESS);
+    SLOGE("AVSessionDemoUpdateAVQueueInfo001 End");
 }
 } // namespace AVSession
 } // namespace OHOS
