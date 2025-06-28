@@ -174,11 +174,16 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
 
 int32_t BundleStatusAdapter::GetUidFromBundleName(const std::string bundleName, const int32_t userId)
 {
-    int32_t uid = 0;
-    if (bundleMgrProxy != nullptr) {
-        uid = bundleMgrProxy->GetUidByBundleName(bundleName, userId);
+    AppExecFwk::BundleInfo bundleInfo;
+    {
+        std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
+        CHECK_AND_RETURN_RET_LOG(bundleMgrProxy != nullptr, -1, "bundleMgrProxy is null");
+        auto ret = bundleMgrProxy->GetBundleInfo(bundleName,
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+            bundleInfo, userId);
+        CHECK_AND_RETURN_RET_LOG(ret, -1, "getbundleinfo fail");
     }
-    return uid;
+    return bundleInfo.uid;
 }
 
 bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)

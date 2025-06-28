@@ -554,10 +554,13 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
-    if (GetUid() == audioBrokerUid && state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY &&
-        serviceCallbackForMediaSession_) {
-        SLOGI("addAncoCapsule");
-        serviceCallbackForMediaSession_(GetSessionId(), true);
+    {
+        std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
+        if (GetUid() == audioBrokerUid && state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY &&
+            serviceCallbackForMediaSession_) {
+            SLOGI("addAncoCapsule for:%{public}s", GetBundleName().c_str());
+            serviceCallbackForMediaSession_(GetSessionId(), true);
+        }
     }
     {
         std::lock_guard controllerLockGuard(controllersLock_);
@@ -2279,6 +2282,7 @@ void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(
 void AVSessionItem::SetServiceCallbackForMediaSession(const std::function<void(std::string, bool)>& callback)
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
+    std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
     serviceCallbackForMediaSession_ = callback;
 }
 

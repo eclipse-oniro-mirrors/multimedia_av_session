@@ -469,6 +469,8 @@ private:
     std::recursive_mutex isAliveLock_;
 
     std::recursive_mutex callbackForCastCapLock_;
+
+    std::recursive_mutex mediaSessionCallbackLock_;
     
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;
