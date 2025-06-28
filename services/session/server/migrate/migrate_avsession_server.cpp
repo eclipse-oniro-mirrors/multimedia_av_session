@@ -1002,21 +1002,6 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
     return result;
 }
 
-void MigrateAVSessionServer::UpdateLatestTitleAndArtist(const AVMetaData &metadata)
-{
-    if (latestAssetId_ != metadata.GetAssetId()) {
-        latestTitle_ = "";
-        latestArtist_ = "";
-    }
-    if (!metadata.GetTitle().empty()) {
-        latestTitle_ = metadata.GetTitle();
-    }
-    if (!metadata.GetArtist().empty()) {
-        latestArtist_ = metadata.GetArtist();
-    }
-    latestAssetId_ = metadata.GetAssetId();
-}
-
 bool MigrateAVSessionServer::CompressToJPEG(const AVMetaData &metadata, std::vector<uint8_t> &outputData)
 {
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metadata.GetMediaImage();
