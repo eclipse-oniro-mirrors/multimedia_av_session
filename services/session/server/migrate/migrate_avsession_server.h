@@ -172,6 +172,9 @@ private:
     std::recursive_mutex migrateDeviceChangeLock_;
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
     std::string curAssetId_;
+    std::string latestAssetId_;
+    std::string latestTitle_;
+    std::string latestArtist_;
 
     std::function<void(int32_t)> volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();

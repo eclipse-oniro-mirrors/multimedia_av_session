@@ -967,16 +967,28 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
 
     if (metadata.IsValid()) {
         SLOGI("ConvertMetadataToJson without img");
-        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, metadata.GetTitle())) {
+        if (latestAssetId_ == metadata.GetAssetId() && !metadata.GetTitle().empty()) {
+            latestTitle_ = metadata.GetTitle();
+        } else {
+            latestTitle_ = "";
+        };
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, latestTitle_)) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-                METADATA_TITLE, metadata.GetTitle().c_str());
+                METADATA_TITLE, latestTitle_.c_str());
             cJSON_Delete(result);
+            latestAssetId_ = metadata.GetAssetId();
             return nullptr;
         }
-        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, metadata.GetArtist())) {
+        if (latestAssetId_ == metadata.GetAssetId() && !metadata.GetArtist().empty()) {
+            latestArtist_ = metadata.GetArtist();
+        } else {
+            latestArtist_ = "";
+        };
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, latestArtist_)) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
                 METADATA_ARTIST, metadata.GetArtist().c_str());
             cJSON_Delete(result);
+            latestAssetId_ = metadata.GetAssetId();
             return nullptr;
         }
         if (includeImage) {
@@ -988,9 +1000,11 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
                 SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
                     METADATA_IMAGE, mediaImage.c_str());
                 cJSON_Delete(result);
+                latestAssetId_ = metadata.GetAssetId();
                 return nullptr;
             }
         }
+        latestAssetId_ = metadata.GetAssetId();
     } else {
         if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, "") ||
             !SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, "") ||

@@ -42,21 +42,13 @@ public:
     std::string GetDeviceId();
  
 private:
-    void RegisterAudioDeviceChangeCallback();
-    void UnRegisterAudioDeviceChangeCallback();
     void RegisterPreferedOutputDeviceChangeCallback();
     void UnRegisterPreferedOutputDeviceChangeCallback();
-    std::shared_ptr<AudioStandard::AudioManagerDeviceChangeCallback> audioDeviceChangeCallback_;
     std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> audioPreferedOutputDeviceChangeCallback_;
     bool isRegistered_ = false;
     std::shared_ptr<MigrateAVSessionServer> migrateSession_;
     std::string deviceId_;
-    int32_t outputDevice_ = AUDIO_OUTPUT_SINK;
-};
- 
-class DeviceChangeCallback : public AudioStandard::AudioManagerDeviceChangeCallback {
-public:
-    void OnDeviceChange(const AudioStandard::DeviceChangeAction& deviceChangeAction) override;
+    int32_t outputDevice_ = AUDIO_OUTPUT_SOURCE;
 };
 
 class OutputDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDeviceChangeCallback {

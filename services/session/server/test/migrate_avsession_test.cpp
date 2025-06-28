@@ -438,12 +438,28 @@ static HWTEST_F(MigrateAVSessionTest, ConvertMetadataToJson001, TestSize.Level0)
 {
     SLOGI("ConvertMetadataToJson001 begin");
     AVMetaData metadata;
+    metaData.Reset();
+    metadata.setAssetId("123");
     metadata.SetTitle("song");
     metadata.SetArtist("sing");
     cJSON* ret = server_->ConvertMetadataToJson(metadata);
     EXPECT_EQ(SoftbusSessionUtils::GetStringFromJson(ret, METADATA_TITLE), "song");
     EXPECT_EQ(SoftbusSessionUtils::GetStringFromJson(ret, METADATA_ARTIST), "sing");
     cJSON_Delete(ret);
+    AVMetaData metadataNext;
+    metadataNext.Reset();
+    metadataNext.setAssetId("123");
+    cJSON* retNext = server_->ConvertMetadataToJson(metadataNext);
+    EXPECT_EQ(SoftbusSessionUtils::GetStringFromJson(retNext, METADATA_TITLE), "song");
+    EXPECT_EQ(SoftbusSessionUtils::GetStringFromJson(retNext, METADATA_ARTIST), "sing");
+    cJSON_Delete(retNext);
+    AVMetaData metadataNext2;
+    metadataNext2.Reset();
+    metadataNext2.setAssetId("1234");
+    cJSON* retNext2 = server_->ConvertMetadataToJson(metadataNext2);
+    EXPECT_TRUE(SoftbusSessionUtils::GetStringFromJson(retNext2, METADATA_TITLE) == "");
+    EXPECT_TRUE(SoftbusSessionUtils::GetStringFromJson(retNext2, METADATA_ARTIST) == "");
+    cJSON_Delete(retNext2);
     SLOGI("ConvertMetadataToJson001 end");
 }
 
