@@ -1005,16 +1005,16 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
 
 void MigrateAVSessionServer::ResetTitleAndArtist(const AVMetaData &metadata)
 {
-    if (latestAssetId_ == metadata.GetAssetId() && !metadata.GetTitle().empty()) {
-        latestTitle_ = metadata.GetTitle();
-    } else {
+    if (latestAssetId_ != metadata.GetAssetId()) {
         latestTitle_ = "";
-    };
-    if (latestAssetId_ == metadata.GetAssetId() && !metadata.GetArtist().empty()) {
-        latestArtist_ = metadata.GetArtist();
-    } else {
         latestArtist_ = "";
-    };
+    }
+    if (!metadata.GetTitle().empty()) {
+        latestTitle_ = metadata.GetTitle();
+    }
+    if (!metadata.GetArtist().empty()) {
+        latestArtist_ = metadata.GetArtist();
+    }
     latestAssetId_ = metadata.GetAssetId();
 }
 
