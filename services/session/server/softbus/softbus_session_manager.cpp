@@ -19,6 +19,7 @@
 #include "avsession_errors.h"
 #include "migrate_avsession_constant.h"
 #include "audio_device_manager.h"
+#include "softbus_session_utils.h"
 
 namespace OHOS::AVSession {
 SoftbusSessionManager& SoftbusSessionManager::GetInstance()
@@ -29,7 +30,8 @@ SoftbusSessionManager& SoftbusSessionManager::GetInstance()
 
 static void OnBind(int32_t socket, PeerSocketInfo info)
 {
-    SLOGI("OnBind sessionId[%{public}d] result[%{public}s]", socket, info.networkId);
+    SLOGI("OnBind sessionId[%{public}d] result[%{public}s]", socket,
+        SoftbusSessionUtils::AnonymizeDeviceId(std::string(info.networkId ? info.networkId : "")).c_str());
     SoftbusSessionManager::GetInstance().OnBind(socket, info);
 }
 
@@ -207,7 +209,6 @@ void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
     for (auto listener : sessionListeners_) {
         listener->OnBind(socket, info);
         mMap_.insert({socket, info.networkId});
-        listener->OnBind(socket, info);
     }
 }
 

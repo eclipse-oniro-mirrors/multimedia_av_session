@@ -38,9 +38,10 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
         SLOGE("LocalFrontSessionArrive with sessionId EMPTY");
         return;
     }
+    SLOGI("LocalFrontSessionArrive in:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     MigratePostTask(
         [this, sessionId]() {
-            SLOGI("LocalFrontSessionArrive with sessionId:%{public}s",
+            SLOGI("LocalFrontSessionArrive with sessionId:%{public}s.",
                 AVSessionUtils::GetAnonySessionId(sessionId).c_str());
             CreateController(sessionId);
             sptr<AVControllerItem> controller = nullptr;
@@ -59,7 +60,7 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
             }
             SLOGI("LocalFrontSessionArrive finish");
         },
-        "LocalFrontSessionArrive");
+        "LocalFrontSessionChange");
 }
 
 void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
@@ -85,24 +86,28 @@ void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
 
 void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
 {
-    SLOGI("LocalFrontSessionLeave in");
-    std::lock_guard lockGuard(migrateControllerLock_);
-    sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
-    if (controller != nullptr) {
-        controller->UnregisterAVControllerCallback();
-    } else {
-        SLOGE("LocalFrontSessionLeave but get controller null");
-    }
-    ClearCacheBySessionId(sessionId);
-    auto it = playerIdToControllerMap_.find(sessionId);
-    if (it != playerIdToControllerMap_.end()) {
-        playerIdToControllerMap_.erase(it);
-    } else {
-        SLOGE("LocalFrontSessionLeave no find sessionId:%{public}s",
-            AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-    }
-    UpdateEmptyInfoToRemote();
-    lastSessionId_ = "";
+    SLOGI("LocalFrontSessionLeave in:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    MigratePostTask(
+        [this, sessionId]() {
+            std::lock_guard lockGuard(migrateControllerLock_);
+            sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
+            if (controller != nullptr) {
+                controller->UnregisterAVControllerCallback();
+            } else {
+                SLOGE("LocalFrontSessionLeave but get controller null");
+            }
+            ClearCacheBySessionId(sessionId);
+            auto it = playerIdToControllerMap_.find(sessionId);
+            if (it != playerIdToControllerMap_.end()) {
+                playerIdToControllerMap_.erase(it);
+            } else {
+                SLOGE("LocalFrontSessionLeave no find sessionId:%{public}s",
+                    AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+            }
+            UpdateEmptyInfoToRemote();
+            lastSessionId_ = "";
+        },
+        "LocalFrontSessionChange");
 }
 
 void MigrateAVSessionServer::HandleFocusPlaybackStateChange(const std::string &sessionId, const AVPlaybackState &state)
@@ -127,54 +132,55 @@ void MigrateAVSessionServer::HandleFocusValidCommandChange(const std::string &se
 
 void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
 {
-    cJSON* metaData = SoftbusSessionUtils::GetNewCJSONObject();
-    CHECK_AND_RETURN_LOG(metaData != nullptr, "get metadata json with nullptr");
-    curAssetId_ = data.GetAssetId();
-    if (data.GetMetaMask().test(AVMetaData::META_KEY_TITLE) &&
-        !SoftbusSessionUtils::AddStringToJson(metaData, METADATA_TITLE, data.GetTitle().c_str())) {
-        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", METADATA_TITLE, data.GetTitle().c_str());
-        cJSON_Delete(metaData);
-        return;
+    std::lock_guard lockGuard(cacheJsonLock_);
+    bool needRefresh = false;
+    if (data.GetAssetId() != metaDataCache_.GetAssetId()) {
+        metaDataCache_.Reset();
+        metaDataCache_.SetAssetId(data.GetAssetId());
+        curAssetId_ = data.GetAssetId();
+        needRefresh = true;
     }
-    if (data.GetMetaMask().test(AVMetaData::META_KEY_ARTIST)) {
-        if (!SoftbusSessionUtils::AddStringToJson(metaData, METADATA_ARTIST, data.GetArtist().c_str())) {
-            SLOGE("AddStringToJson key:%{public}s|value:%{public}s fail", METADATA_ARTIST, data.GetArtist().c_str());
-            cJSON_Delete(metaData);
-            return;
-        }
+    if (data.GetMetaMask().test(AVMetaData::META_KEY_TITLE) && data.GetTitle() != metaDataCache_.GetTitle()) {
+        metaDataCache_.SetTitle(data.GetTitle());
+        needRefresh = true;
+    }
+    if (data.GetMetaMask().test(AVMetaData::META_KEY_ARTIST) && data.GetArtist() != metaDataCache_.GetArtist()) {
+        metaDataCache_.SetArtist(data.GetArtist());
+        needRefresh = true;
     } else if (data.GetMetaMask().test(AVMetaData::META_KEY_SUBTITLE) &&
-        !SoftbusSessionUtils::AddStringToJson(metaData, METADATA_ARTIST, data.GetSubTitle().c_str())) {
-        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", METADATA_ARTIST, data.GetSubTitle().c_str());
-        cJSON_Delete(metaData);
+        data.GetSubTitle() != metaDataCache_.GetArtist()) {
+        metaDataCache_.SetArtist(data.GetSubTitle());
+        needRefresh = true;
+    }
+    CHECK_AND_RETURN_LOG(needRefresh, "metadata no change");
+
+    cJSON* metaDataItem = SoftbusSessionUtils::GetNewCJSONObject();
+    CHECK_AND_RETURN_LOG(metaDataItem != nullptr, "get metadata json with nullptr");
+    if (!SoftbusSessionUtils::AddStringToJson(metaDataItem, METADATA_TITLE, metaDataCache_.GetTitle().c_str())) {
+        SLOGE("AddStringToJson with title value:%{public}s fail", metaDataCache_.GetTitle().c_str());
+        cJSON_Delete(metaDataItem);
         return;
     }
-    CHECK_AND_RETURN_LOG(!SoftbusSessionUtils::CheckCJSONObjectEmpty(metaData), "empty metadata return");
-    if (!SoftbusSessionUtils::AddStringToJson(metaData, METADATA_ASSET_ID, data.GetAssetId().c_str())) {
-        SLOGE("AddStringToJson key:%{public}s|value:%{public}s fail", METADATA_ASSET_ID, data.GetAssetId().c_str());
-        cJSON_Delete(metaData);
+    if (!SoftbusSessionUtils::AddStringToJson(metaDataItem, METADATA_ARTIST, metaDataCache_.GetArtist().c_str())) {
+        SLOGE("AddStringToJson artist value:%{public}s fail", metaDataCache_.GetArtist().c_str());
+        cJSON_Delete(metaDataItem);
         return;
     }
-    {
-        std::lock_guard lockGuard(cacheJsonLock_);
-        if (cJSON_Compare(metaData, metaDataCache_, true)) {
-            SLOGI("DoMetaDataSyncToRemote with repeat title:%{public}s", data.GetTitle().c_str());
-            cJSON_Delete(metaData);
-            return;
-        }
+    if (!SoftbusSessionUtils::AddStringToJson(metaDataItem, METADATA_ASSET_ID, metaDataCache_.GetAssetId().c_str())) {
+        SLOGE("AddStringToJson assetId value:%{public}s fail", metaDataCache_.GetAssetId().c_str());
+        cJSON_Delete(metaDataItem);
+        return;
     }
+
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_META_INFO});
-    SoftbusSessionUtils::TransferJsonToStr(metaData, msg);
+    SoftbusSessionUtils::TransferJsonToStr(metaDataItem, msg);
     MigratePostTask(
         [this, msg]() {
             SendByteForNext(deviceId_, msg);
         }, "SYNC_FOCUS_META_INFO");
-    SLOGI("DoMetaDataSyncToRemote async title:%{public}s|len:%{public}d done",
-        data.GetTitle().c_str(), static_cast<int>(msg.size()));
-    {
-        std::lock_guard lockGuard(cacheJsonLock_);
-        metaDataCache_ = cJSON_Duplicate(metaData, true);
-        cJSON_Delete(metaData);
-    }
+    SLOGI("DoMetaDataSyncToRemote async Title:%{public}s|len:%{public}d done",
+        metaDataCache_.GetTitle().c_str(), static_cast<int>(msg.size()));
+    cJSON_Delete(metaDataItem);
 }
 
 void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionPixelMap> innerPixelMap)
@@ -209,45 +215,42 @@ void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionP
 
 void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& state)
 {
-    cJSON* playbackState = SoftbusSessionUtils::GetNewCJSONObject();
-    CHECK_AND_RETURN_LOG(playbackState != nullptr, "get playbackState json with nullptr");
+    std::lock_guard lockGuard(cacheJsonLock_);
+    bool needRefresh = false;
     if (state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_STATE) &&
-        !SoftbusSessionUtils::AddIntToJson(playbackState, PLAYBACK_STATE, state.GetState())) {
-        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail", PLAYBACK_STATE, state.GetState());
-        cJSON_Delete(playbackState);
-        return;
+        state.GetState() != playbackStateCache_.GetState()) {
+        playbackStateCache_.SetState(state.GetState());
+        needRefresh = true;
     }
     if (state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE) &&
-        !SoftbusSessionUtils::AddBoolToJson(playbackState, FAVOR_STATE, state.GetFavorite())) {
-        SLOGE("AddBoolToJson with key:%{public}s|value:%{public}d fail", FAVOR_STATE, state.GetFavorite());
-        cJSON_Delete(playbackState);
+        state.GetFavorite() != playbackStateCache_.GetFavorite()) {
+        playbackStateCache_.SetFavorite(state.GetFavorite());
+        needRefresh = true;
+    }
+    CHECK_AND_RETURN_LOG(needRefresh, "playbackstate no change");
+
+    cJSON* playbackStateItem = SoftbusSessionUtils::GetNewCJSONObject();
+    CHECK_AND_RETURN_LOG(playbackStateItem != nullptr, "get playbackState json with nullptr");
+    if (!SoftbusSessionUtils::AddIntToJson(playbackStateItem, PLAYBACK_STATE, playbackStateCache_.GetState())) {
+        SLOGE("AddStringToJson with state value:%{public}d fail", playbackStateCache_.GetState());
+        cJSON_Delete(playbackStateItem);
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(playbackStateItem, FAVOR_STATE, playbackStateCache_.GetFavorite())) {
+        SLOGE("AddStringToJson with favor value:%{public}d fail", playbackStateCache_.GetFavorite());
+        cJSON_Delete(playbackStateItem);
         return;
     }
 
-    CHECK_AND_RETURN_LOG(!SoftbusSessionUtils::CheckCJSONObjectEmpty(playbackState), "empty playbackState return");
-    {
-        std::lock_guard lockGuard(cacheJsonLock_);
-        if (cJSON_Compare(playbackState, playbackStateCache_, true)) {
-            SLOGI("DoPlaybackStateSyncToRemote with repeat state:%{public}d|isFavor:%{public}d",
-                state.GetState(), state.GetFavorite());
-            cJSON_Delete(playbackState);
-            return;
-        }
-    }
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_PLAY_STATE});
-    SoftbusSessionUtils::TransferJsonToStr(playbackState, msg);
+    SoftbusSessionUtils::TransferJsonToStr(playbackStateItem, msg);
     MigratePostTask(
         [this, msg]() {
             SendByteForNext(deviceId_, msg);
-        },
-        "SYNC_FOCUS_PLAY_STATE");
-    SLOGI("DoPlaybackStateSyncToRemote sync state:%{public}d|isFavor:%{public}d|len:%{public}d done",
-        state.GetState(), state.GetFavorite(), static_cast<int>(msg.size()));
-    {
-        std::lock_guard lockGuard(cacheJsonLock_);
-        playbackStateCache_ = cJSON_Duplicate(playbackState, true);
-        cJSON_Delete(playbackState);
-    }
+        }, "SYNC_FOCUS_PLAY_STATE");
+    SLOGI("DoPlaybackStateSyncToRemote sync state:%{public}d|Favor:%{public}d|len:%{public}d done",
+        playbackStateCache_.GetState(), playbackStateCache_.GetFavorite(), static_cast<int>(msg.size()));
+    cJSON_Delete(playbackStateItem);
 }
 
 void MigrateAVSessionServer::DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands)
@@ -323,14 +326,9 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
     UpdateSessionInfoToRemote(controller);
     {
         std::lock_guard lockGuard(cacheJsonLock_);
-        if (metaDataCache_ != nullptr) {
-            cJSON_Delete(metaDataCache_);
-            metaDataCache_ = nullptr;
-        }
-        if (playbackStateCache_ != nullptr) {
-            cJSON_Delete(playbackStateCache_);
-            playbackStateCache_ = nullptr;
-        }
+        metaDataCache_.Reset();
+        playbackStateCache_.SetState(0);
+        playbackStateCache_.SetFavorite(0);
     }
     AVMetaData metaData;
     int32_t ret = controller->GetAVMetaData(metaData);
@@ -732,6 +730,7 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(cJSON* jsonObject)
 
 void MigrateAVSessionServer::DoPostTasksClear()
 {
+    SLOGI("DoPostTasksClear for migrate:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("LocalFrontSessionArrive");
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_FOCUS_MEDIA_IMAGE");
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_FOCUS_BUNDLE_IMG");
@@ -747,8 +746,12 @@ void MigrateAVSessionServer::DoPostTasksClear()
 bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Callback &callback,
     const std::string &name, int64_t delayTime)
 {
-    SLOGD("MigratePostTask with name:%{public}s", name.c_str());
-    if (!isListenerSet_ && name != "LocalFrontSessionArrive" && name != "SYNC_FOCUS_SESSION_INFO") {
+    if (!isSoftbusConnecting_) {
+        SLOGE("MigratePostTask:%{public}s without connect", name.c_str());
+        return false;
+    }
+    SLOGD("MigratePostTask with name:%{public}s.", name.c_str());
+    if (!isListenerSet_ && name != "LocalFrontSessionChange" && name != "SYNC_FOCUS_SESSION_INFO") {
         SLOGI("no send task:%{public}s for no listen", name.c_str());
         return false;
     }

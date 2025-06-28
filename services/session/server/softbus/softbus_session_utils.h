@@ -101,7 +101,7 @@ public:
         return true;
     }
 
-    static inline bool AddJsonArrayToJson(cJSON* item, const char* key, cJSON*& jsonArray)
+    static inline bool AddJsonArrayToJson(cJSON*& item, const char* key, cJSON*& jsonArray)
     {
         if (item == nullptr || cJSON_IsInvalid(item) || cJSON_IsNull(item) ||
             jsonArray == nullptr || cJSON_IsInvalid(jsonArray) || !cJSON_IsArray(jsonArray)) {
@@ -115,7 +115,7 @@ public:
         return true;
     }
 
-    static inline bool AddJsonToJsonArray(cJSON* jsonArray, int32_t index, cJSON*& item)
+    static inline bool AddJsonToJsonArray(cJSON*& jsonArray, int32_t index, cJSON*& item)
     {
         if (jsonArray == nullptr || cJSON_IsInvalid(jsonArray) || !cJSON_IsArray(jsonArray) ||
             item == nullptr || cJSON_IsInvalid(item) || cJSON_IsNull(item)) {
@@ -200,6 +200,19 @@ public:
             return true;
         }
         return false;
+    }
+
+    static bool CopyCJSONObject(cJSON*& fromItem, cJSON*& toItem)
+    {
+        if (toItem != nullptr) {
+            cJSON_Delete(toItem);
+            toItem = nullptr;
+        }
+        if (fromItem == nullptr || cJSON_IsInvalid(fromItem) || cJSON_IsNull(fromItem)) {
+            return false;
+        }
+        toItem = cJSON_Duplicate(fromItem, true);
+        return true;
     }
 
     static std::string GetEncryptAddr(const std::string& addr)

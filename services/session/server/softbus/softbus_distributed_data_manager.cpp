@@ -45,7 +45,7 @@ void SoftbusDistributedDataManager::SessionOpened(int32_t socket, PeerSocketInfo
             sessionName.c_str());
         return;
     }
-    SLOGI("set sessionName to:%{public}s onSessionOpened", info.name);
+    SLOGI("socket:%{public}d set sessionName to:%{public}s onSessionOpened", socket, info.name);
     socketNameCache_.assign(info.name);
     peerSocketInfo.name = info.name;
     peerSocketInfo.networkId = info.networkId;
@@ -344,18 +344,19 @@ void SoftbusDistributedDataManager::OnSessionProxyClosed(int32_t socket)
     std::string anonymizeNetworkId = SoftbusSessionUtils::AnonymizeDeviceId(networkId);
     SLOGI("OnSessionProxyClosed: the peer network id is %{public}s.", anonymizeNetworkId.c_str());
     std::lock_guard lockGuard(softbusDistributedDataLock_);
-    mDeviceToProxyMap_.erase(networkId);
-    if (mDeviceToProxyMap_.find(networkId) != mDeviceToProxyMap_.end()) {
-        SLOGW("OnSessionProxyClosed: found no socket for device %{public}s", anonymizeNetworkId.c_str());
+    if (mDeviceToProxyMap_.find(networkId) == mDeviceToProxyMap_.end()) {
+        SLOGW("no found socket for device %{public}s.", anonymizeNetworkId.c_str());
         return;
     }
     auto proxyMap = mDeviceToProxyMap_[networkId];
     if (proxyMap.empty()) {
+        SLOGE("get proxyMap empty for device %{public}s.", anonymizeNetworkId.c_str());
         return;
     }
     for (auto it = proxyMap.begin(); it != proxyMap.end(); it++) {
         it->second->DisconnectServer(socket);
     }
+    mDeviceToProxyMap_.erase(networkId);
 }
 
 void SoftbusDistributedDataManager::OnBytesProxyReceived(int32_t socket, const std::string &data)

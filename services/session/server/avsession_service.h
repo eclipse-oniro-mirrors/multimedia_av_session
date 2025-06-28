@@ -19,6 +19,7 @@
 #include <atomic>
 #include <mutex>
 #include <map>
+#include <thread>
 
 #include "iremote_stub.h"
 #include "system_ability.h"
@@ -550,6 +551,8 @@ private:
     void DoDisconnectProcessWithMigrateServer(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
 
     void DoDisconnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    int32_t DoDisconnectAllMigrateServer();
 
     void UpdateLocalFrontSession(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront);
 
