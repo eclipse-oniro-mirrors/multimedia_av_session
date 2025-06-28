@@ -48,13 +48,33 @@ void FocusSessionStrategy::RegisterFocusSessionSelector(const FocusSessionSelect
     selector_ = selector;
 }
 
+void FocusSessionStrategy::SetAudioPlayingUids(std::vector<int> audioPlayingUids)
+{
+    std::lock_guard lockGuard(audioPlayingLock_);
+    audioPlayingUids_ = audioPlayingUids;
+}
+
+std::vector<int> FocusSessionStrategy::GetAudioPlayingUids()
+{
+    std::lock_guard lockGuard(audioPlayingLock_);
+    return audioPlayingUids_;
+}
+
 void FocusSessionStrategy::ProcAudioRenderChange(const AudioRendererChangeInfos& infos)
 {
     SLOGD("AudioRenderStateChange start");
+    std::lock_guard lockGuard(audioPlayingLock_);
+    audioPlayingUids_.clear();
     std::pair<int32_t, int32_t> playingKey = std::make_pair(-1, -1);
     for (const auto& info : infos) {
         SLOGD("AudioRenderStateChange uid=%{public}d pid=%{public}d audioSessionId=%{public}d state=%{public}d",
             info->clientUID, info->clientPid, info->sessionId, info->rendererState);
+        if (std::find(audioPlayingUids_.begin(), audioPlayingUids_.end(), info->clientUID) == audioPlayingUids_.end() &&
+            (std::count(AUDIO_PLAYING_STREAM_USAGE.begin(), AUDIO_PLAYING_STREAM_USAGE.end(),
+            info->rendererInfo.streamUsage) != 0) && (std::count(AUDIO_PLAYING_STREAM_STATE.begin(),
+            AUDIO_PLAYING_STREAM_STATE.end(), info->rendererState) != 0)) {
+            audioPlayingUids_.push_back(info->clientUID);
+        }
         if (info->clientUID == ancoUid && (std::count(ALLOWED_ANCO_STREAM_USAGE.begin(),
             ALLOWED_ANCO_STREAM_USAGE.end(), info->rendererInfo.streamUsage) == 0)) {
             SLOGI("Anco invalid uid=%{public}d usage=%{public}d", info->clientUID, info->rendererInfo.streamUsage);

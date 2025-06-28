@@ -299,6 +299,8 @@ public:
 
     void NotifyRemoteBundleChange(const std::string bundleName);
 
+    bool CheckIfOtherAudioPlaying();
+
 private:
 
     void NotifyProcessStatus(bool isStart);

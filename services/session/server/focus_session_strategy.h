@@ -41,6 +41,8 @@ public:
 
     void RegisterFocusSessionChangeCallback(const FocusSessionChangeCallback& callback);
     void RegisterFocusSessionSelector(const FocusSessionSelector& selector);
+    std::vector<int> GetAudioPlayingUids();
+    void SetAudioPlayingUids(std::vector<int> audioPlayingUids);
 
 private:
     void HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos& infos);
@@ -71,6 +73,19 @@ private:
         AudioStandard::STREAM_USAGE_MOVIE,
         AudioStandard::STREAM_USAGE_AUDIOBOOK
     };
+    const std::vector<AudioStandard::StreamUsage> AUDIO_PLAYING_STREAM_USAGE {
+        AudioStandard::STREAM_USAGE_MUSIC,
+        AudioStandard::STREAM_USAGE_MOVIE,
+        AudioStandard::STREAM_USAGE_AUDIOBOOK,
+        AudioStandard::STREAM_USAGE_VOICE_COMMUNICATION,
+        AudioStandard::STREAM_USAGE_VIDEO_COMMUNICATION,
+        AudioStandard::STREAM_USAGE_RINGTONE
+    };
+    const std::vector<AudioStandard::RendererState> AUDIO_PLAYING_STREAM_STATE {
+        AudioStandard::RendererState::RENDERER_RUNNING
+    };
+    std::vector<int> audioPlayingUids_;
+    std::recursive_mutex audioPlayingLock_;
 };
 }
 #endif // OHOS_FOCUS_SESSION_STRATEGY_H
