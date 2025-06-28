@@ -164,7 +164,6 @@ public:
     int32_t AddSupportCommand(const int32_t cmd) override;
     int32_t DeleteSupportCommand(const int32_t cmd) override;
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
-    int32_t UpdateAVQueueInfo(const AVQueueInfo& info) override;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> GetAVCastController() override;
     int32_t ReleaseCast(bool continuePlay = false) override;
@@ -290,11 +289,6 @@ int32_t AVSessionDemo::DeleteSupportCommand(const int32_t cmd)
 }
 
 int32_t AVSessionDemo::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
-{
-    return 0;
-}
-
-int32_t AVSessionDemo::UpdateAVQueueInfo(const AVQueueInfo& info)
 {
     return 0;
 }
