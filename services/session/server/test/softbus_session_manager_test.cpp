@@ -519,3 +519,33 @@ static HWTEST_F(SoftbusSessionManagerTest, Bind002, TestSize.Level0)
     EXPECT_TRUE(ret == AVSESSION_ERROR);
     SLOGI("Bind002 end");
 }
+
+static HWTEST_F(SoftbusSessionManagerTest, SendBytesForNext001, TestSize.Level0)
+{
+    SLOGI("SendBytesForNext001 begin");
+    int32_t sessionid = -1;
+    std::string data = "123";
+    int32_t ret = manager_->SendBytesForNext(sessionid, data);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("SendBytesForNext001 end");
+}
+
+static HWTEST_F(SoftbusSessionManagerTest, SendBytesForNext002, TestSize.Level0)
+{
+    SLOGI("SendBytesForNext002 begin");
+    int32_t sessionid = 100;
+    std::string data = "";
+    int32_t ret = manager_->SendBytesForNext(sessionid, data);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("SendBytesForNext002 end");
+}
+
+static HWTEST_F(SoftbusSessionManagerTest, SendBytesForNext003, TestSize.Level0)
+{
+    SLOGI("SendBytesForNext003 begin");
+    int32_t sessionid = -1;
+    std::string data = "";
+    int32_t ret = manager_->SendBytesForNext(sessionid, data);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("SendBytesForNext003 end");
+}
