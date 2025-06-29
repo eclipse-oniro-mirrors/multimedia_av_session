@@ -38,6 +38,7 @@ public:
     void ReleaseRemoteSessionProxy(std::string &networkId, std::string scene);
 
     static constexpr const char* migrateSceneNext = "MigrateWithNext";
+    static constexpr const int32_t MSG_HEAD_MODE_FOR_NEXT = 101;
 
 private:
     MigrateAVSessionManager() = default;
