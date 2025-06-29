@@ -38,6 +38,8 @@
 #include "avsession_pixel_map.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_info.h"
+#include "params_config_operator.h"
+#include "avcontrol_command.h"
 
 #define private public
 #define protected public
@@ -59,6 +61,7 @@ static int32_t g_pauseOnCall = AVSESSION_ERROR;
 static int32_t g_nextOnCall = AVSESSION_ERROR;
 static int32_t g_previousOnCall = AVSESSION_ERROR;
 static AVSessionService *avservice_;
+static AVControlCommand *avcommand_;
 
 class AVSessionServiceTest : public testing::Test {
 public:
@@ -2663,4 +2666,60 @@ static HWTEST_F(AVSessionServiceTest, SucceedSuperLauncher001, TestSize.Level0)
     avservice_->SucceedSuperLauncher("adcdef", "SuperLauncher-Dual");
     EXPECT_EQ(avservice_->migrateAVSession_->supportCrossMediaPlay_, false);
     SLOGD("SucceedSuperLauncher001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, IsCapsuleNeeded001, TestSize.Level0)
+{
+    SLOGD("IsCapsuleNeeded001 begin!");
+    avservice_->topSession_ = nullptr;
+    bool result = avservice_->IsCapsuleNeeded();
+    EXPECT_EQ(result, false);
+    SLOGD("IsCapsuleNeeded001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, OnStartProcess001, TestSize.Level0)
+{
+    SLOGD("OnStartProcess001 begin!");
+    OHOS::AVSession::ParamsConfigOperator& configIntParams = OHOS::AVSession::ParamsConfigOperator::GetInstance();
+    configIntParams.InitConfig();
+    configIntParams.GetValueIntByKey("historicalRecord", 0);
+    avservice_->Onstartprocess();
+    EXPECT_EQ(avservice_->maxHistoryNums, 10);
+    SLOGD("OnStartProcess001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, SetForwardTime001, TestSize.Level0)
+{
+    SLOGD("SetForwardTime001 begin!");
+    int64_t test = -1;
+    int32_t ret = avcommand_->SetForwardTime(test);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    SLOGD("SetForwardTime001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, SetRewindTime001, TestSize.Level0)
+{
+    SLOGD("SetRewindTime001 begin!");
+    int64_t test = -1;
+    int32_t ret = avcommand_->SetRewindTime(test);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    SLOGD("SetRewindTime001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, SetSeekTime001, TestSize.Level0)
+{
+    SLOGD("SetSeekTime001 begin!");
+    int64_t test = -1;
+    int32_t ret = avcommand_->SetSeekTime(test);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    SLOGD("SetSeekTime001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, SetPlayWithAssetId001, TestSize.Level0)
+{
+    SLOGD("SetPlayWithAssetId001 begin!");
+    std::string test = "";
+    int32_t ret = avcommand_->SetPlayWithAssetId(test);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    SLOGD("SetPlayWithAssetId001 end!");
 }
