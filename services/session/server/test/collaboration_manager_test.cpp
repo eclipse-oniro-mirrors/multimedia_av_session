@@ -97,6 +97,21 @@ static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback003, testing:
 }
 
 /**
+ * @tc.name: RegisterLifecycleCallback004
+ * @tc.desc: Test RegisterLifecycleCallback
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback004, testing::ext::TestSize.Level0)
+{
+    SLOGI("RegisterLifecycleCallback004, start");
+    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
+        = nullptr;
+    int32_t ret = CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("RegisterLifecycleCallback004, end");
+}
+
+/**
  * @tc.name: UnRegisterLifecycleCallback001
  * @tc.desc: Test UnRegisterLifecycleCallback
  * @tc.type: FUNC
