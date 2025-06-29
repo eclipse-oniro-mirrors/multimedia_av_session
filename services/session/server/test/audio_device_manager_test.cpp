@@ -54,19 +54,6 @@ static HWTEST(AudioDeviceManagerTest, InitAudioStateCallback001, TestSize.Level0
 }
 
 /**
- * @tc.name: RegisterAudioDeviceChangeCallback001
- * @tc.desc: audioDeviceChangeCallback_ have registered
- * @tc.type: FUNC
- */
-static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback001, TestSize.Level0)
-{
-    SLOGI("RegisterAudioDeviceChangeCallback001 begin!");
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
-    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
-}
-
-/**
  * @tc.name: RegisterPreferedOutputDeviceChangeCallback001
  * @tc.desc: audioPreferedOutputDeviceChangeCallback_ have registered
  * @tc.type: FUNC
@@ -122,49 +109,4 @@ static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Leve
     std::string deviceId = "test";
     AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
     EXPECT_TRUE(AudioDeviceManager::GetInstance().migrateSession_ != nullptr);
-}
-
-/**
-* @tc.name: RegisterAudioDeviceChangeCallback002
-* @tc.desc: audioDeviceChangeCallback_ have registered with nullptr
-* @tc.type: FUNC
-*/
-static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, TestSize.Level0)
-{
-    SLOGI("RegisterAudioDeviceChangeCallback001 begin!");
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = nullptr;
-    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
-}
-
-/**
-* @tc.name: OnDeviceChange001
-* @tc.desc: test OnDeviceChange when deviceChangeAction type is DISCONNECT
-* @tc.type: FUNC
-*/
-static HWTEST(AudioDeviceManagerTest, OnDeviceChange001, TestSize.Level0)
-{
-    DeviceChangeAction deviceChangeAction;
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
-    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
-}
-
-/**
-* @tc.name: OnDeviceChange002
-* @tc.desc: test OnDeviceChange when deviceChangeAction type is DISCONNECT
-* @tc.type: FUNC
-*/
-static HWTEST(AudioDeviceManagerTest, OnDeviceChange002, TestSize.Level0)
-{
-    DeviceChangeAction deviceChangeAction;
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
-    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
-    std::shared_ptr<AudioDeviceDescriptor> descriptor = std::make_shared<AudioDeviceDescriptor>();
-    deviceChangeAction.deviceDescriptors.push_back(descriptor);
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
 }

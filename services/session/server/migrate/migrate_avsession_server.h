@@ -36,6 +36,7 @@ constexpr size_t BUFFER_MAX_SIZE = 1024 * 1024;
 constexpr size_t DEFAULT_QUALITY = 100;
 constexpr size_t UNMASK_CHAR_NUM = 3;
 constexpr int64_t DELAY_TIME = 2000;
+constexpr int64_t DELAY_METADATA_TIME = 100;
 constexpr int64_t DELAY_PLAY_COM_TIME = 500;
 constexpr int32_t MAX_SESSION_NUMS = 2;
 constexpr int32_t MAX_HISTORY_SESSION_NUMS = 6;

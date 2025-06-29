@@ -26,21 +26,7 @@ AudioDeviceManager &AudioDeviceManager::GetInstance()
  
 bool AudioDeviceManager::GetSessionInfoSyncState()
 {
-    AudioStandard::AudioRoutingManager *audioRoutingManager =
-        AudioStandard::AudioRoutingManager::GetInstance();
-    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> devices =
-        audioRoutingManager->GetAvailableDevices(AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES);
-    bool isConnected = false;
-    for (auto& device : devices) {
-        if (device != nullptr &&
-            AudioStandard::DeviceCategory::BT_CAR == device->deviceCategory_ &&
-            AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP == device->deviceType_) {
-            isConnected = true;
-            break;
-        }
-    }
-    bool isSourceAudio = AUDIO_OUTPUT_SOURCE == outputDevice_;
-    return isConnected || isSourceAudio;
+    return AUDIO_OUTPUT_SOURCE == outputDevice_;
 }
 
 void AudioDeviceManager::InitAudioStateCallback(std::shared_ptr<MigrateAVSessionServer> migrateAVSession,
@@ -51,7 +37,6 @@ void AudioDeviceManager::InitAudioStateCallback(std::shared_ptr<MigrateAVSession
         SLOGW("device change callback already registered");
         return;
     }
-    RegisterAudioDeviceChangeCallback();
     RegisterPreferedOutputDeviceChangeCallback();
     migrateSession_ = migrateAVSession;
     isRegistered_ = true;
@@ -60,37 +45,9 @@ void AudioDeviceManager::InitAudioStateCallback(std::shared_ptr<MigrateAVSession
 
 void AudioDeviceManager::UnInitAudioStateCallback()
 {
-    UnRegisterAudioDeviceChangeCallback();
     UnRegisterPreferedOutputDeviceChangeCallback();
     isRegistered_ = false;
-}
-
-void AudioDeviceManager::RegisterAudioDeviceChangeCallback()
-{
-    SLOGI("enter RegisterAudioDeviceChangeCallback");
-    if (audioDeviceChangeCallback_ == nullptr) {
-        audioDeviceChangeCallback_ = std::make_shared<DeviceChangeCallback>();
-    }
-    AudioStandard::AudioSystemManager *audioSystemManager =
-        AudioStandard::AudioSystemManager::GetInstance();
-    if (audioSystemManager == nullptr) {
-        SLOGE("audioSystemManager is null");
-        return;
-    }
-    audioSystemManager->SetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG,
-        audioDeviceChangeCallback_);
-}
- 
-void AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
-{
-    SLOGI("enter UnRegisterAudioDeviceChangeCallback");
-    AudioStandard::AudioSystemManager *audioSystemManager =
-        AudioStandard::AudioSystemManager::GetInstance();
-    if (audioSystemManager == nullptr) {
-        SLOGE("audioSystemManager is null");
-        return;
-    }
-    audioSystemManager->UnsetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
+    outputDevice_ = AUDIO_OUTPUT_SOURCE;
 }
 
 void AudioDeviceManager::RegisterPreferedOutputDeviceChangeCallback()
@@ -151,30 +108,6 @@ void AudioDeviceManager::SetAudioState(int32_t state)
 {
     SLOGI("current set audio is %{public}d", state);
     outputDevice_ = state;
-}
- 
-void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeAction &deviceChangeAction)
-{
-    SLOGI("receive OnDeviceChange");
-    AudioStandard::AudioSystemManager *audioSystemManager =
-        AudioStandard::AudioSystemManager::GetInstance();
-    if (audioSystemManager == nullptr) {
-        SLOGE("audioSystemManager is null");
-        return;
-    }
-    if (AudioStandard::DeviceChangeType::DISCONNECT == deviceChangeAction.type) {
-        std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> deviceDescriptors =
-            deviceChangeAction.deviceDescriptors;
-        for (auto &device : deviceDescriptors) {
-            if (device != nullptr &&
-                AudioStandard::DeviceCategory::BT_CAR == device->deviceCategory_ &&
-                AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP == device->deviceType_) {
-                AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(
-                    AudioDeviceManager::GetInstance().GetDeviceId());
-                break;
-            }
-        }
-    }
 }
 
 void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(

@@ -1172,10 +1172,10 @@ void MigrateAVSessionServer::OnHistoricalRecordChange()
 
 void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, const AVMetaData &data)
 {
-    std::string metaDataStr = ConvertMetadataInfoToStr(playerId, SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, data);
-    SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", metaDataStr.c_str());
-
-    SendByte(deviceId_, metaDataStr);
+    SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", playerId.c_str());
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        DelaySendMetaData();
+        }, "DelaySendMetaData", DELAY_METADATA_TIME);
 }
 // LCOV_EXCL_STOP
 
