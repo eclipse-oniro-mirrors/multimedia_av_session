@@ -281,7 +281,7 @@ bool AudioCapabilities::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG((streamInfoSize >= 0) && (streamInfoSize < maxStreamInfoSize),
         false, "streamInfoSize is illegal");
     for (int i = 0; i < streamInfoSize; i++) {
-        AudioStreamInfo streamInfo;
+        AudioStreamInfo streamInfo {};
         CHECK_AND_RETURN_RET_LOG(streamInfo.ReadFromParcel(in), false, "read streamInfo failed");
         streamInfos_.emplace_back(streamInfo);
     }
