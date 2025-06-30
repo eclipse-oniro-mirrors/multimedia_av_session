@@ -2683,8 +2683,8 @@ static HWTEST_F(AVSessionServiceTest, OnStartProcess001, TestSize.Level0)
     OHOS::AVSession::ParamsConfigOperator& configIntParams = OHOS::AVSession::ParamsConfigOperator::GetInstance();
     configIntParams.InitConfig();
     configIntParams.GetValueIntByKey("historicalRecord", 0);
-    avservice_->Onstartprocess();
-    EXPECT_EQ(avservice_->maxHistoryNums, 10);
+    avservice_->OnStartProcess();
+    EXPECT_EQ(avservice_->maxHistoryNums_, 10);
     SLOGD("OnStartProcess001 end!");
 }
 
