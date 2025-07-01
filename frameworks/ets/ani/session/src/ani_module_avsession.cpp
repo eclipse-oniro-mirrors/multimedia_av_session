@@ -30,7 +30,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *staticNsName = "L@ohos/multimedia/avsession/avSession;";
+    static const char *staticNsName = "@ohos.multimedia.avsession.avSession";
     ani_namespace staticNs;
     if (ANI_OK != env->FindNamespace(staticNsName, &staticNs)) {
         SLOGE("Not found %{public}s", staticNsName);
