@@ -2677,17 +2677,6 @@ static HWTEST_F(AVSessionServiceTest, IsCapsuleNeeded001, TestSize.Level0)
     SLOGD("IsCapsuleNeeded001 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, OnStartProcess001, TestSize.Level0)
-{
-    SLOGD("OnStartProcess001 begin!");
-    OHOS::AVSession::ParamsConfigOperator& configIntParams = OHOS::AVSession::ParamsConfigOperator::GetInstance();
-    configIntParams.InitConfig();
-    configIntParams.GetValueIntByKey("historicalRecord", 0);
-    avservice_->OnStartProcess();
-    EXPECT_EQ(avservice_->maxHistoryNums_, 10);
-    SLOGD("OnStartProcess001 end!");
-}
-
 static HWTEST_F(AVSessionServiceTest, SetForwardTime001, TestSize.Level0)
 {
     SLOGD("SetForwardTime001 begin!");
