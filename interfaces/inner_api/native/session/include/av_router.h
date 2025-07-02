@@ -292,6 +292,14 @@ public:
     */
     virtual void DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo) = 0;
 
+    /**
+     * @brief check is in mirror to stream state.
+     *
+     * @return { bool } is in mirror to stream state.
+     * @since 20
+    */
+    virtual bool IsInMirrorToStreamState() = 0;
+
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
     std::string sessionId_ = "-1";
