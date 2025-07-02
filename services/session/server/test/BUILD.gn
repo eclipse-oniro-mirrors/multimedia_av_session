@@ -1794,8 +1794,6 @@ ohos_unittest("MigrateAVSessionTest") {
     "../../../session:avsession_service_static",
     "../../../session:libidl_avsession_service_interface_proxy",
     "../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1872,8 +1870,6 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "../../../session:avsession_server_static",
     "../../../session:libidl_avsession_service_interface_proxy",
     "../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1987,8 +1983,6 @@ ohos_unittest("AppManagerAdapterTest") {
     "./../../../session:avsession_service_static",
     "./../../../session:libidl_avsession_service_interface_proxy",
     "./../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -2026,8 +2020,6 @@ ohos_unittest("AbilityConnectHelperTest") {
     "./../../../session:avsession_service_static",
     "./../../../session:libidl_avsession_service_interface_proxy",
     "./../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -2074,8 +2066,6 @@ ohos_unittest("BkGrAudioControllerTest") {
     "./../../../session:avsession_service_static",
     "./../../../session:libidl_avsession_service_interface_proxy",
     "./../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -2123,8 +2113,6 @@ ohos_unittest("AudioAdapterTest") {
     "../../../session:avsession_server_static",
     "../../../session:libidl_avsession_service_interface_proxy",
     "../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -2151,8 +2139,6 @@ ohos_unittest("RemoteUtilsTest") {
     "../../../session:avsession_server_static",
     "../../../session:libidl_avsession_service_interface_proxy",
     "../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -2182,8 +2168,6 @@ ohos_unittest("SessionStackTest") {
     "../../../session:avsession_server_static",
     "../../../session:libidl_avsession_service_interface_proxy",
     "../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -2258,8 +2242,6 @@ ohos_unittest("AVRouterTest") {
     "../../../session:avsession_server_static",
     "../../../session:libidl_avsession_service_interface_proxy",
     "../../../session:libidl_avsession_service_interface_stub",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
