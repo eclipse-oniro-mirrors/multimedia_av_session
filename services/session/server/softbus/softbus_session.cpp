@@ -94,6 +94,15 @@ void SoftbusSession::SendByte(int32_t sessionId, const std::string &data)
     SoftbusSessionManager::GetInstance().SendBytes(sessionId, data);
 }
 
+void SoftbusSession::SendByteForNext(int32_t sessionId, const std::string &data)
+{
+    SLOGI("SendByteForNext: %{public}d", static_cast<int>(data.size()));
+    int ret = SoftbusSessionManager::GetInstance().SendBytesForNext(sessionId, data);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("SendbyteNext with ret:%{public}d fail!", ret);
+    }
+}
+
 void SoftbusSession::SendMessage(const std::string &deviceId, const std::string &data)
 {
     SLOGI("SendMessage: %{public}s", data.c_str());

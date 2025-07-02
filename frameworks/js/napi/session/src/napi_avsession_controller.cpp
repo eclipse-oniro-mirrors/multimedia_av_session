@@ -967,8 +967,9 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
     };
 
     auto complete = [env, context](napi_value& output) {
+        SLOGI("GetValidCommands size:%{public}d", static_cast<int>(context->stringCmds.size()));
         context->status = NapiUtils::SetValue(env, context->stringCmds, output);
-        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+        CHECK_STATUS_RETURN_VOID(context, "GetValidCommands convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
 
@@ -1019,9 +1020,10 @@ napi_value NapiAVSessionController::GetValidCommandsSync(napi_env env, napi_call
     std::vector<std::string> stringCmds = NapiControlCommand::ConvertCommands(cmds);
     napi_value output {};
     auto status = NapiUtils::SetValue(env, stringCmds, output);
+    SLOGI("GetValidCommandsSync size:%{public}d", static_cast<int>(stringCmds.size()));
     if (status != napi_ok) {
-        SLOGE("convert native object to javascript object failed");
-        NapiUtils::ThrowError(env, "convert native object to javascript object failed",
+        SLOGE("GetValidCommandsSync convert native object to javascript object failed");
+        NapiUtils::ThrowError(env, "GetValidCommandsSync convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
         return NapiUtils::GetUndefinedValue(env);
     }

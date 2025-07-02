@@ -70,7 +70,8 @@ void MigrateAVSessionProxy::OnDisconnectServer(const std::string &deviceId)
     if (preSetController_ != nullptr) {
         preSetController_->RegisterMigrateAVSessionProxyCallback(nullptr);
     }
-    SLOGI("MigrateAVSessionProxy OnDisconnectServer done");
+    servicePtr_->NotifyRemoteBundleChange("");
+    SLOGI("MigrateAVSessionProxy OnDisconnectServer done.");
 }
 
 int32_t MigrateAVSessionProxy::GetCharacteristic()

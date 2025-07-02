@@ -38,7 +38,8 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
         SLOGE("LocalFrontSessionArrive with sessionId EMPTY");
         return;
     }
-    SLOGI("LocalFrontSessionArrive in:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    lastSessionId_ = sessionId;
+    SLOGI("LocalFrontSessionArrive in:%{public}s.", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     MigratePostTask(
         [this, sessionId]() {
             SLOGI("LocalFrontSessionArrive with sessionId:%{public}s.",
@@ -52,7 +53,6 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
             }
 
             controller->isFromSession_ = false;
-            lastSessionId_ = sessionId;
             if (isSoftbusConnecting_) {
                 UpdateFrontSessionInfoToRemote(controller);
             } else {
@@ -65,7 +65,7 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
 
 void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
 {
-    SLOGI("LocalFrontSessionChange in");
+    SLOGI("LocalFrontSessionChange in:%{public}s.", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     std::lock_guard lockGuard(migrateControllerLock_);
     sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
     if (controller != nullptr) {
@@ -73,14 +73,15 @@ void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
     } else {
         SLOGE("LocalFrontSessionChange but get controller null");
     }
-    ClearCacheBySessionId(sessionId);
-    auto it = playerIdToControllerMap_.find(sessionId);
+    ClearCacheBySessionId(lastSessionId_);
+    auto it = playerIdToControllerMap_.find(lastSessionId_);
     if (it != playerIdToControllerMap_.end()) {
         playerIdToControllerMap_.erase(it);
     } else {
         SLOGE("LocalFrontSessionChange no find sessionId:%{public}s",
-            AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+            AVSessionUtils::GetAnonySessionId(lastSessionId_).c_str());
     }
+    lastSessionId_ = "";
     LocalFrontSessionArrive(sessionId);
 }
 
@@ -106,6 +107,7 @@ void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
             }
             UpdateEmptyInfoToRemote();
             lastSessionId_ = "";
+            SLOGI("LocalFrontSessionLeave finish.");
         },
         "LocalFrontSessionChange");
 }
