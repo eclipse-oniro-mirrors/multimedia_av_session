@@ -91,6 +91,14 @@ public:
     virtual int32_t StopCastDiscovery() = 0;
 
     /**
+     * @brief Is stop Discovering Devices
+     *
+     * @return { int32_t } Whether excute StopCastDiscovery func
+     * @since 10
+    */
+   virtual bool IsStopCastDiscovery(pid_t pid) = 0;
+
+    /**
      * @brief Used on the Sink end to set whether it can be discovered or not.
      *
      * @param { const bool } enable - whether the sink device can be discovered or not.
