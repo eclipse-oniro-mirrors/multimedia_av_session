@@ -104,6 +104,8 @@ public:
 
     void DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo) override;
 
+    bool IsInMirrorToStreamState() override;
+
 protected:
 
 private:
@@ -129,6 +131,7 @@ private:
     int32_t connectStateFromCast_ = 6;
     const int32_t castEngineServiceRestartWaitTime = 100;
     int32_t deviceType_ = -1;
+    bool isInMirrorToStream_ = false;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

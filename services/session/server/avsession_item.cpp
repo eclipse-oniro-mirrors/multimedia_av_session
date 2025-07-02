@@ -1046,7 +1046,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
     } else {
         SetCastHandle(AVRouter::GetInstance().GetMirrorCastHandle());
         InitAVCastControllerProxy();
-        if (castControllerProxy_ !=  nullptr && castControllerProxy_->GetCurrentItem().GetDescription() != nullptr) {
+        if (AVRouter::GetInstance().IsInMirrorToStreamState()) {
             SetCastHandle(-1);
             castControllerProxy_ = nullptr;
             return AVSESSION_ERROR;

@@ -2769,7 +2769,7 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
 {
     ClearClientResources(pid, true);
     if (BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == MEDIA_CONTROL_BUNDLENAME) {
-        ReleaseCastSession();
+        SLOGI("mediacontroller on client die");
     }
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     AVSessionSysEvent::GetInstance().ReportPlayingState(

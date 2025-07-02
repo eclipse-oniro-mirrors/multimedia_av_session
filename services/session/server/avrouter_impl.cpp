@@ -558,8 +558,17 @@ int64_t AVRouterImpl::GetMirrorCastHandle()
     return providerManagerMap_[providerNumberEnableDefault_]->provider_->GetMirrorCastHandle();
 }
 
+bool AVRouterImpl::IsInMirrorToStreamState()
+{
+    return isInMirrorToStream_;
+}
+
 void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::MIRROR_TO_STREAM) ||
+        castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM_TO_MIRROR)) {
+        isInMirrorToStream_ = (castState == static_cast<int32_t>(CastEngine::DeviceState::MIRROR_TO_STREAM));
+    }
     for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
         if (castHandleInfo.avRouterListener_ != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered avRouterListener");
