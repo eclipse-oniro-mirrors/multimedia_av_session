@@ -396,6 +396,26 @@ static HWTEST(JsonUtilsTest, GetVectorCapability003, TestSize.Level0)
 }
 
 /**
+* @tc.name: GetVectorCapability004
+* @tc.desc: test GetVectorCapability
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(JsonUtilsTest, GetVectorCapability004, TestSize.Level0)
+{
+    SLOGI("GetVectorCapability004 begin!");
+    std::string sinkCapability = R"({
+        "metaData": [1, 2, 3],
+        "playbackState": [1, 2, 3],
+        "controlCommand": [1, 2, 3]
+    })";
+    std::vector<std::vector<int32_t>> value(3);
+    int32_t ret = JsonUtils::GetVectorCapability(sinkCapability, value);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetVectorCapability004 end!");
+}
+
+/**
 * @tc.name: IsInt32_003
 * @tc.desc: test IsInt32
 * @tc.type: FUNC
@@ -1035,4 +1055,183 @@ static HWTEST(JsonUtilsTest, GetSessionDescriptors001, TestSize.Level0)
 
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetSessionDescriptors001 end!");
+}
+
+/**
+* @tc.name: GetSessionDescriptors002
+* @tc.desc: test GetSessionDescriptors
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(JsonUtilsTest, GetSessionDescriptors002, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptors002 begin!");
+    const std::string sessionInfo = R"({
+        "test": {
+            "sessionDescriptors": [
+                {
+                    "sessionId": "session1",
+                    "type": "audio",
+                    "bundleName": "com.example.app1",
+                    "abilityName": "MainAbility1",
+                    "tag": "tag1",
+                    "isThirdPartyApp": true
+                },
+                {
+                    "sessionId": "session2",
+                    "type": "video",
+                    "bundleName": "com.example.app2",
+                    "abilityName": "MainAbility2",
+                    "tag": "tag2",
+                    "isThirdPartyApp": false
+                }
+            ]
+        }
+    })";
+
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = JsonUtils::GetSessionDescriptors(sessionInfo, descriptors);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionDescriptors002 end!");
+}
+
+/**
+* @tc.name: GetSessionDescriptors003
+* @tc.desc: test GetSessionDescriptors
+* @tc.type: FUNC
+* @tc.require: #I62OZV
+*/
+static HWTEST(JsonUtilsTest, GetSessionDescriptors003, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptors003 begin!");
+    const std::string sessionInfo = R"({
+        "data": {
+            "Descriptors": [
+                {
+                    "sessionId": "session1",
+                    "type": "audio",
+                    "bundleName": "com.example.app1",
+                    "abilityName": "MainAbility1",
+                    "tag": "tag1",
+                    "isThirdPartyApp": true
+                },
+                {
+                    "sessionId": "session2",
+                    "type": "video",
+                    "bundleName": "com.example.app2",
+                    "abilityName": "MainAbility2",
+                    "tag": "tag2",
+                    "isThirdPartyApp": false
+                }
+            ]
+        }
+    })";
+
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = JsonUtils::GetSessionDescriptors(sessionInfo, descriptors);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionDescriptors003 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetSessionDescriptor001, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptor001 begin!");
+    const std::string sessionInfo = R"({
+        "test": {
+            "sessionDescriptors": [
+                {
+                    "sessionId": "session1",
+                    "type": "audio",
+                    "bundleName": "com.example.app1",
+                    "abilityName": "MainAbility1",
+                    "tag": "tag1",
+                    "isThirdPartyApp": true
+                },
+                {
+                    "sessionId": "session2",
+                    "type": "video",
+                    "bundleName": "com.example.app2",
+                    "abilityName": "MainAbility2",
+                    "tag": "tag2",
+                    "isThirdPartyApp": false
+                }
+            ]
+        }
+    })";
+    AVSessionDescriptor descriptor;
+    int32_t ret = JsonUtils::GetSessionDescriptor(sessionInfo, descriptor);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionDescriptor001 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetSessionDescriptor002, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptor002 begin!");
+    const std::string sessionInfo = R"({
+        "data": {
+            "Descriptors": [
+                {
+                    "sessionId": "session1",
+                    "type": "audio",
+                    "bundleName": "com.example.app1",
+                    "abilityName": "MainAbility1",
+                    "tag": "tag1",
+                    "isThirdPartyApp": true
+                },
+                {
+                    "sessionId": "session2",
+                    "type": "video",
+                    "bundleName": "com.example.app2",
+                    "abilityName": "MainAbility2",
+                    "tag": "tag2",
+                    "isThirdPartyApp": false
+                }
+            ]
+        }
+    })";
+    AVSessionDescriptor descriptor;
+    int32_t ret = JsonUtils::GetSessionDescriptor(sessionInfo, descriptor);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionDescriptor002 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetSessionDescriptor003, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptor003 begin!");
+    const std::string sessionInfo = R"({
+        "data": {
+            "sessionDescriptors": [
+                {
+                    "sessionId": true,
+                    "type": "audio",
+                    "bundleName": "com.example.app1",
+                    "abilityName": "MainAbility1",
+                    "tag": "tag1",
+                    "isThirdPartyApp": true
+                },
+                {
+                    "sessionId": false,
+                    "type": "video",
+                    "bundleName": "com.example.app2",
+                    "abilityName": "MainAbility2",
+                    "tag": "tag2",
+                    "isThirdPartyApp": false
+                }
+            ]
+        }
+    })";
+    AVSessionDescriptor descriptor;
+    int32_t ret = JsonUtils::GetSessionDescriptor(sessionInfo, descriptor);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionDescriptor003 end!");
+}
+
+static HWTEST(JsonUtilsTest, SetSessionDescriptorByCJSON001, TestSize.Level0)
+{
+    SLOGI("SetSessionDescriptorByCJSON001 begin!");
+    AVSessionDescriptor descriptor;
+    cJSON* test = nullptr;
+    int32_t ret = OHOS::AVSession::JsonUtils::SetSessionDescriptorByCJSON(test, descriptor);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("SetSessionDescriptorByCJSON001 end!");
 }
