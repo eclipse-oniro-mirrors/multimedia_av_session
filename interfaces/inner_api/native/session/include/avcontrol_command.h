@@ -81,9 +81,6 @@ public:
     int32_t SetAssetId(const std::string& assetId);
     int32_t GetAssetId(std::string& assetId) const;
 
-    int32_t SetAVCallMuted(const bool isAVCallMuted);
-    int32_t IsAVCallMuted(bool& isAVCallMuted) const;
-
     int32_t SetPlayFromAssetId(int64_t playFromAssetId);
     int32_t GetPlayFromAssetId(int64_t& playFromAssetId) const;
 
