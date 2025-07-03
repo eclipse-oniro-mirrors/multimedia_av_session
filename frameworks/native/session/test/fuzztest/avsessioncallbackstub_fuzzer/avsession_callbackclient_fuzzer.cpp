@@ -314,10 +314,10 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner2()
 
     auto itemId = GetData<uint32_t>();
     auto assetId = GetData<uint64_t>();
-    auto assetId1 = GetData<std::string>();
+    auto assetId1 = GetData<std::uint64_t>();
     aVSessionCallbackClient.OnSkipToQueueItem(itemId);
     aVSessionCallbackClient.OnPlayFromAssetId(assetId);
-    aVSessionCallbackClient.OnPlayWithAssetId(assetId1);
+    aVSessionCallbackClient.OnPlayWithAssetId(to_string(assetId1));
 
     CastDisplayInfo castDisplayInfo;
     uint8_t randomNum3 = GetData<uint8_t>();
