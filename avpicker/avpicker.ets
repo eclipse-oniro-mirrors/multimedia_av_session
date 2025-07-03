@@ -397,17 +397,17 @@ export struct AVCastPicker {
           this.extensionProxy = proxy;
         })
         .onReceive((data) => {
-          if (JSON.stringify(data['deviceInfoType']) !== undefined) {
+          if (data['deviceInfoType'] !== undefined) {
             console.info(TAG, `deviceInfoType : ${JSON.stringify(data['deviceInfoType'])}`);
             this.deviceInfoType = data['deviceInfoType'] as string;
           }
 
-          if (JSON.stringify(data['pickerStyle']) !== undefined) {
+          if (data['pickerStyle'] !== undefined) {
             console.info(TAG, `picker style : ${JSON.stringify(data['pickerStyle'])}`);
             this.pickerStyleFromMediaController = data['pickerStyle'] as AVCastPickerStyle;
           }
 
-          if (JSON.stringify(data['deviceList']) !== undefined) {
+          if (data['deviceList'] !== undefined) {
             console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
             this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
             let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
@@ -423,12 +423,12 @@ export struct AVCastPicker {
             }
           }
 
-          if (JSON.stringify(data['fontSizeScale']) !== undefined) {
+          if (data['fontSizeScale'] !== undefined) {
             console.info(TAG, `font size scale : ${JSON.stringify(data['fontSizeScale'])}`);
             this.fontSizeScale = data['fontSizeScale'] as number;
           }
 
-          if (JSON.stringify(data['state']) !== undefined) {
+          if (data['state'] !== undefined) {
             console.info(TAG, `picker state change : ${JSON.stringify(data['state'])}`);
             let isCalling: boolean = (this.sessionType === 'voice_call' || this.sessionType === 'video_call');
             let isPanelForMedia: boolean = !isCalling &&
@@ -443,12 +443,12 @@ export struct AVCastPicker {
             }
           }
 
-          if (JSON.stringify(data['sessionType']) !== undefined) {
+          if (data['sessionType'] !== undefined) {
             console.info(TAG, `session type : ${JSON.stringify(data['sessionType'])}`);
             this.sessionType = data['sessionType'] as string;
           }
 
-          if (JSON.stringify(data['isShowMenu']) !== undefined) {
+          if (data['isShowMenu'] !== undefined) {
             console.info(TAG, `isShowMenu : ${JSON.stringify(data['isShowMenu'])}`);
             this.isMenuShow = data['isShowMenu'] as boolean;
             if (!this.isMenuShow) {
@@ -456,37 +456,37 @@ export struct AVCastPicker {
             }
           }
 
-          if (JSON.stringify(data['configurationColorMode']) !== undefined) {
+          if (data['configurationColorMode'] !== undefined) {
             console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
             this.configurationColorMode = data['configurationColorMode'] as number;
           }
 
-          if (JSON.stringify(data['accessConnected']) !== undefined) {
+          if (data['accessConnected'] !== undefined) {
             console.info(TAG, `accessConnected : ${JSON.stringify(data['accessConnected'])}`);
             this.accessibilityConnectedStr = data['accessConnected'] as string;
           }
 
-          if (JSON.stringify(data['accessAudioControl']) !== undefined) {
+          if (data['accessAudioControl'] !== undefined) {
             console.info(TAG, `accessAudioControl : ${JSON.stringify(data['accessAudioControl'])}`);
             this.accessibilityAudioControlStr = data['accessAudioControl'] as string;
           }
 
-          if (JSON.stringify(data['isPc']) !== undefined) {
+          if (data['isPc'] !== undefined) {
             console.info(TAG, `isPc : ${JSON.stringify(data['isPc'])}`);
             this.isPc = data['isPc'] as boolean;
           }
 
-          if (JSON.stringify(data['isRTL']) !== undefined) {
+          if (data['isRTL'] !== undefined) {
             console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);
             this.isRTL = data['isRTL'] as boolean;
           }
 
-          if (JSON.stringify(data['maxFontSizeScale']) !== undefined) {
+          if (data['maxFontSizeScale'] !== undefined) {
             console.info(TAG, `maxFontSizeScale : ${JSON.stringify(data['maxFontSizeScale'])}`);
             this.maxFontSizeScale = data['maxFontSizeScale'] as number;
           }
 
-          if (JSON.stringify(data['isShowLoadingProgress']) !== undefined) {
+          if (data['isShowLoadingProgress'] !== undefined) {
             console.info(TAG, `isShowLoadingProgress : ${JSON.stringify(data['isShowLoadingProgress'])}`);
             this.isShowLoadingProgress = data['isShowLoadingProgress'] as boolean;
           }

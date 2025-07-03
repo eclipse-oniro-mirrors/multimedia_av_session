@@ -717,17 +717,17 @@ export class AVCastPicker extends ViewPU {
                 this.extensionProxy = n8;
             });
             UIExtensionComponent.onReceive((l8) => {
-                if (JSON.stringify(l8.deviceInfoType) !== undefined) {
+                if (l8.deviceInfoType !== undefined) {
                     console.info(TAG, `deviceInfoType : ${JSON.stringify(l8.deviceInfoType)}`);
                     this.deviceInfoType = l8.deviceInfoType;
                 }
 
-                if (JSON.stringify(l8.pickerStyle) !== undefined) {
+                if (l8.pickerStyle !== undefined) {
                     console.info(TAG, `picker style : ${JSON.stringify(l8.pickerStyle)}`);
                     this.pickerStyleFromMediaController = l8.pickerStyle;
                 }
 
-                if (JSON.stringify(l8.deviceList) !== undefined) {
+                if (l8.deviceList !== undefined) {
                     console.info(TAG, `picker device list : ${JSON.stringify(l8.deviceList)}`);
                     this.deviceList = JSON.parse(JSON.stringify(l8.deviceList));
                     let u = this.deviceList.length === 2 && !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
@@ -742,12 +742,12 @@ export class AVCastPicker extends ViewPU {
                     }
                 }
 
-                if (JSON.stringify(l8.fontSizeScale) !== undefined) {
+                if (l8.fontSizeScale !== undefined) {
                     console.info(TAG, `font size scale : ${JSON.stringify(l8.fontSizeScale)}`);
                     this.fontSizeScale = l8.fontSizeScale;
                 }
 
-                if (JSON.stringify(l8.state) !== undefined) {
+                if (l8.state !== undefined) {
                     console.info(TAG, `picker state change : ${JSON.stringify(l8.state)}`);
                     let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
                     let b21 = !w && (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
@@ -762,12 +762,12 @@ export class AVCastPicker extends ViewPU {
                     }
                 }
 
-                if (JSON.stringify(l8.sessionType) !== undefined) {
+                if (l8.sessionType !== undefined) {
                     console.info(TAG, `session type : ${JSON.stringify(l8.sessionType)}`);
                     this.sessionType = l8.sessionType;
                 }
 
-                if (JSON.stringify(l8.isShowMenu) !== undefined) {
+                if (l8.isShowMenu !== undefined) {
                     console.info(TAG, `isShowMenu : ${l8.isShowMenu}`);
                     this.isMenuShow = l8.isShowMenu;
                     if (!this.isMenuShow) {
@@ -775,37 +775,37 @@ export class AVCastPicker extends ViewPU {
                     }
                 }
 
-                if (JSON.stringify(l8.configurationColorMode) !== undefined) {
+                if (l8.configurationColorMode !== undefined) {
                     console.info(TAG, `configurationColorMode : ${l8.configurationColorMode}`);
                     this.configurationColorMode = l8.configurationColorMode;
                 }
 
-                if (JSON.stringify(l8.accessConnected) !== undefined) {
+                if (l8.accessConnected !== undefined) {
                     console.info(TAG, `accessibilityConnectedStr : ${l8.accessConnected}`);
                     this.accessibilityConnectedStr = l8.accessConnected;
                 }
 
-                if (JSON.stringify(l8.accessAudioControl) !== undefined) {
+                if (l8.accessAudioControl !== undefined) {
                     console.info(TAG, `accessibilityAudioControlStr : ${l8.accessAudioControl}`);
                     this.accessibilityAudioControlStr = l8.accessAudioControl;
                 }
 
-                if (JSON.stringify(l8.isPc) !== undefined) {
+                if (l8.isPc !== undefined) {
                     console.info(TAG, `isPc : ${l8.isPc}`);
                     this.isPc = l8.isPc;
                 }
 
-                if (JSON.stringify(l8.isRTL) !== undefined) {
+                if (l8.isRTL !== undefined) {
                     console.info(TAG, `isRTL : ${l8.isRTL}`);
                     this.isRTL = l8.isRTL;
                 }
 
-                if (JSON.stringify(l8.maxFontSizeScale) !== undefined) {
+                if (l8.maxFontSizeScale !== undefined) {
                     console.info(TAG, `maxFontSizeScale : ${l8.maxFontSizeScale}`);
                     this.maxFontSizeScale = l8.maxFontSizeScale;
                 }
 
-                if (JSON.stringify(l8.isShowLoadingProgress) !== undefined) {
+                if (l8.isShowLoadingProgress !== undefined) {
                     console.info(TAG, `isShowLoadingProgress : ${l8.isShowLoadingProgress}`);
                     this.isShowLoadingProgress = l8.isShowLoadingProgress;
                 }
