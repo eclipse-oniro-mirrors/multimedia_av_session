@@ -2772,7 +2772,6 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
         ReleaseCastSession();
     }
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    AVRouter::GetInstance().IsStopCastDiscovery(pid);
     AVSessionSysEvent::GetInstance().ReportPlayingState(
         BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid));
 #endif
