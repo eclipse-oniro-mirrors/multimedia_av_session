@@ -72,10 +72,8 @@ static HWTEST_F(AVSessionDynamicLoaderTest, GetFuntion002, testing::ext::TestSiz
     avsessionDynamicLoader.OpenDynamicHandle(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH);
     auto ptr = avsessionDynamicLoader.GetFuntion(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "aaa");
     EXPECT_EQ(ptr, nullptr);
-    if (dataAddr != nullptr) {
-        free(dataAddr);
-        dataAddr = nullptr;
-    }
+    free(dataAddr);
+    dataAddr = nullptr;
 }
 
 /**
@@ -93,10 +91,8 @@ static HWTEST_F(AVSessionDynamicLoaderTest, CloseDynamicHandle001, testing::ext:
     avsessionDynamicLoader.CloseDynamicHandle(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH);
     auto ptr = avsessionDynamicLoader.GetFuntion(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "aaa");
     EXPECT_EQ(ptr, nullptr);
-    if (dataAddr != nullptr) {
-        free(dataAddr);
-        dataAddr = nullptr;
-    }
+    free(dataAddr);
+    dataAddr = nullptr;
 }
 
 /**
