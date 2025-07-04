@@ -106,6 +106,8 @@ public:
 
     void buildExtraCastInfo(const AVQueueItem& avQueueItem);
 
+    std::string GetSourceType(const AVQueueItem& avQueueItem);
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
