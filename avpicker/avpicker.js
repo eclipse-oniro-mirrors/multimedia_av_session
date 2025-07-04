@@ -470,7 +470,6 @@ export class AVCastPicker extends ViewPU {
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
                 { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
-            Text.width(this.isPc ? 254 : 144);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
             Text.wordBreak(WordBreak.BREAK_ALL);
@@ -570,6 +569,7 @@ export class AVCastPicker extends ViewPU {
                         right: 8,
                         bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
                     });
+                    Flex.width(this.isPc ? 254 : 144);
                 }, Flex);
                 this.textBuilder.bind(this)(x8);
                 this.observeComponentCreation2((m9, n9) => {

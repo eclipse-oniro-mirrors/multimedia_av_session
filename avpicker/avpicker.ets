@@ -268,7 +268,6 @@ export struct AVCastPicker {
         $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
         $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
-      .width(this.isPc ? 254 : 144)
       .textOverflow({ overflow: TextOverflow.Ellipsis })
       .maxLines(2)
       .wordBreak(WordBreak.BREAK_ALL)
@@ -318,6 +317,7 @@ export struct AVCastPicker {
                   .width('auto')
                 }
               }
+              .width(this.isPc ? 254 : 144)
               .padding({
                 left: 8,
                 top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
