@@ -29,11 +29,11 @@ void SoftbusSessionProxy::ConnectServer(int socketId)
     std::string networkId;
     int ret = SoftbusSessionManager::GetInstance().ObtainPeerDeviceId(socketId, networkId);
     CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "obtain peer network id failed");
-    SLOGI("ConnectServer for device:%{public}s",
+    SLOGI("ConnectServer for device:%{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(networkId).c_str());
     OnConnectSession(socketId);
     char message[] = {GetCharacteristic(), MESSAGE_CODE_CONNECT_SERVER, '\0'};
-    SendByte(socketId, std::string(message));
+    SendByteForNext(socketId, std::string(message));
     OnConnectServer(networkId);
 }
 

@@ -39,7 +39,7 @@ NapiAVCastPickerHelper::NapiAVCastPickerHelper(Ace::UIContent* uiContent)
 
 NapiAVCastPickerHelper::~NapiAVCastPickerHelper()
 {
-    SLOGI("destroy");
+    SLOGI("destroy.");
     *isValid_ = false;
 }
 
@@ -66,9 +66,7 @@ napi_value NapiAVCastPickerHelper::Init(napi_env env, napi_value exports)
 
 napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callback_info info)
 {
-    struct ConcreteContext : public ContextBase {
-        Ace::UIContent* uiContent;
-    };
+    struct ConcreteContext : public ContextBase { Ace::UIContent* uiContent; };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         NapiUtils::ThrowError(env, "ConstructorCallback failed : no memory",
@@ -78,18 +76,17 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        auto stageContext = AbilityRuntime::GetStageModeContext(env, argv[ARGV_FIRST]);
-        if (stageContext == nullptr) {
+        auto stageCtx = AbilityRuntime::GetStageModeContext(env, argv[ARGV_FIRST]);
+        if (stageCtx == nullptr) {
             context->status = napi_generic_failure;
-            NapiUtils::ThrowError(env, "get stageContext failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            NapiUtils::ThrowError(env, "get stageCtx failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             return;
         }
-        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(stageContext);
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(stageCtx);
         if (abilityContext != nullptr) {
             context->uiContent = abilityContext->GetUIContent();
         } else {
-            auto extensionContext =
-                AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(stageContext);
+            auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(stageCtx);
             CHECK_RETURN_VOID(extensionContext != nullptr, "convert to AbilityContext and ExtensionContext fail");
             context->uiContent = extensionContext->GetUIContent();
         }
@@ -103,6 +100,9 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
     auto finalize = [](napi_env env, void* data, void* hint) {
         auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(data);
         CHECK_AND_RETURN_LOG(napiAVCastPickerHelper != nullptr, "napiAVCastPickerHelper is nullptr");
+        if (napiAVCastPickerHelper->uiContent_ != nullptr) {
+            napiAVCastPickerHelper->uiContent_->CloseModalUIExtension(napiAVCastPickerHelper->sessionId_);
+        }
         napi_delete_reference(env, napiAVCastPickerHelper->wrapperRef_);
         delete napiAVCastPickerHelper;
         napiAVCastPickerHelper = nullptr;
@@ -246,8 +246,9 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
         };
         Ace::ModalUIExtensionConfig config;
         config.isProhibitBack = true;
-        int sessionId = napiAVCastPickerHelper->uiContent_->CreateModalUIExtension(request, extensionCallback, config);
-        callback->SetSessionId(sessionId);
+        napiAVCastPickerHelper->sessionId_ =
+            napiAVCastPickerHelper->uiContent_->CreateModalUIExtension(request, extensionCallback, config);
+        callback->SetSessionId(napiAVCastPickerHelper->sessionId_);
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SelectAVPicker", executor, complete);

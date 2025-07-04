@@ -94,6 +94,7 @@ private:
 
     Ace::UIContent *uiContent_;
     napi_ref wrapperRef_{};
+    int sessionId_ = 0;
 
     static constexpr size_t ARGC_ZERO = 0;
     static constexpr size_t ARGC_ONE = 1;
