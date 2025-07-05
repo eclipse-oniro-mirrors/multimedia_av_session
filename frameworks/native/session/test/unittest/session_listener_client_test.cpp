@@ -52,6 +52,7 @@ public:
     void OnDeviceOffline(const std::string& deviceId) override {}
     void OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override {}
+    void OnDeviceStateChange(const DeviceState& deviceState) override {}
     ~AVSessionListenerDemo() override {}
 };
 
@@ -216,6 +217,21 @@ HWTEST_F(SessionListenerClientTest, OnRemoteDistributedSessionChange001, TestSiz
     EXPECT_NE(sessionListenerClient, nullptr);
     std::vector<sptr<IRemoteObject>> sessionControllers;
     sessionListenerClient->OnRemoteDistributedSessionChange(sessionControllers);
+}
+
+/**
+* @tc.name: OnDeviceStateChange001
+* @tc.desc: test OnDeviceStateChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnDeviceStateChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    DeviceState deviceState;
+    sessionListenerClient->OnDeviceStateChange(deviceState);
 }
 
 } // namespace AVSESSION

@@ -1299,19 +1299,19 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     if (castHandle_ > 0) {
         if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
             SLOGI("repeat startcast %{public}lld", (long long)castHandle_);
-            return AVSESSION_ERROR;
+            return ERR_REPEAT_CAST;
         } else {
             SLOGI("cast check with pre cast alive %{public}lld, unregister callback", (long long)castHandle_);
             isSwitchNewDevice_ = true;
             newOutputDeviceInfo_ = outputDeviceInfo;
             StopCast();
             int32_t flag = CastAddToCollaboration(outputDeviceInfo);
-            CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
+            CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, flag, "collaboration to start cast fail");
             return AVSESSION_SUCCESS;
         }
     } else {
         int32_t flag = CastAddToCollaboration(outputDeviceInfo);
-        CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, AVSESSION_ERROR, "collaboration to start cast fail");
+        CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, flag, "collaboration to start cast fail");
     }
     return SubStartCast(outputDeviceInfo);
 }

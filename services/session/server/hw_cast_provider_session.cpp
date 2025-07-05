@@ -232,8 +232,8 @@ void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInf
 
     DeviceState deviceState;
     deviceState.deviceId = stateInfo.deviceId;
-    deviceState.deviceState = static_cast<ConnectionState>(static_cast<int32_t>(stateInfo.deviceState));
-    deviceState.reasonCode = static_cast<ReasonCode>(static_cast<int32_t>(stateInfo.reasonCode));
+    deviceState.deviceState = static_cast<int32_t>(stateInfo.deviceState);
+    deviceState.reasonCode = static_cast<int32_t>(stateInfo.reasonCode);
 
     AVRouter::GetInstance().OnDeviceStateChange(deviceState);
 }

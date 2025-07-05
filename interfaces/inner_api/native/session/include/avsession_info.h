@@ -936,7 +936,7 @@ struct DeviceState: public Parcelable {
      * @atomicservice
      * @since 20
      */
-    ConnectionState deviceState;
+    int32_t deviceState;
 
     /**
      * Reason for connection failure, for example, user cancellation and timeout.
@@ -944,7 +944,7 @@ struct DeviceState: public Parcelable {
      * @atomicservice
      * @since 20
      */
-    ReasonCode reasonCode;
+    int32_t reasonCode;
 
     /**
      * System radar error code returned by cast+services.
@@ -957,9 +957,9 @@ struct DeviceState: public Parcelable {
     bool Marshalling(Parcel& out) const override
     {
         return out.WriteString(deviceId) &&
-            out.WriteInt32(static_cast<int32_t>(deviceState)) &&
-            out.WriteInt32(static_cast<int32_t>(reasonCode)) &&
-            out.WriteInt32(static_cast<int32_t>(radarErrorCode));
+            out.WriteInt32(deviceState) &&
+            out.WriteInt32(reasonCode) &&
+            out.WriteInt32(radarErrorCode);
     }
 
     static DeviceState* Unmarshalling(Parcel& in)
@@ -977,17 +977,13 @@ struct DeviceState: public Parcelable {
             return false;
         }
 
-        int32_t deviceStateInt = 0;
-        if (!in.ReadInt32(deviceStateInt)) {
+        if (!in.ReadInt32(deviceState)) {
             return false;
         }
-        deviceState = static_cast<ConnectionState>(deviceStateInt);
 
-        int32_t reasonCodeInt = 0;
-        if (!in.ReadInt32(reasonCodeInt)) {
+        if (!in.ReadInt32(reasonCode)) {
             return false;
         }
-        reasonCode = static_cast<ReasonCode>(reasonCodeInt);
 
         if (!in.ReadInt32(radarErrorCode)) {
             return false;

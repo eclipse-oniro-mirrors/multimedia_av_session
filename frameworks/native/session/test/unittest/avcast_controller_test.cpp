@@ -768,7 +768,7 @@ HWTEST_F(AVCastControllerTest, StartCast001, TestSize.Level1)
     deviceInfo.castCategory_ = 1;
     deviceInfo.deviceId_ = "deviceId";
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
-    EXPECT_EQ(AVSessionManager::GetInstance().StartCast(sessionToken, outputDeviceInfo), -1007);
+    EXPECT_EQ(AVSessionManager::GetInstance().StartCast(sessionToken, outputDeviceInfo), AVSESSION_ERROR);
 }
 
 /**
