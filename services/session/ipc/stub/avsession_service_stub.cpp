@@ -488,7 +488,8 @@ int32_t AVSessionServiceStub::HandleCastAudio(MessageParcel& data, MessageParcel
 
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors;
     for (int i = 0; i < deviceNum; i++) {
-        auto audioDeviceDescriptor = AudioDeviceDescriptor::UnmarshallingPtr(data);
+        auto audioDeviceDescriptor =
+            std::shared_ptr<AudioDeviceDescriptor>(AudioDeviceDescriptor::Unmarshalling(data));
         if (audioDeviceDescriptor == nullptr) {
             SLOGI("read AudioDeviceDescriptor failed");
             CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
@@ -528,7 +529,8 @@ int32_t AVSessionServiceStub::HandleCastAudioForAll(MessageParcel& data, Message
 
     std::vector<AudioDeviceDescriptor> sinkAudioDescriptors {};
     for (int i = 0; i < deviceNum; i++) {
-        auto audioDeviceDescriptor = AudioDeviceDescriptor::UnmarshallingPtr(data);
+        auto audioDeviceDescriptor =
+            std::shared_ptr<AudioDeviceDescriptor>(AudioDeviceDescriptor::Unmarshalling(data));
         if (audioDeviceDescriptor == nullptr) {
             SLOGI("read AudioDeviceDescriptor failed");
             reply.WriteInt32(ERR_UNMARSHALLING);
