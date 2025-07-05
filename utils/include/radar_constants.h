@@ -109,6 +109,7 @@ const std::string PEER_DEV_NAME = "PEER_DEV_NAME";
 const std::string IS_TRUST = "IS_TRUST";
 const std::string LOCAL_SESS_NAME = "LOCAL_SESS_NAME";
 const std::string PEER_SESS_NAME = "PEER_SESS_NAME";
+const std::string SOURCE_TYPE = "SOURCE_TYPE";
 
 const std::string DEV_PHONE = "00E";
 const std::string DEV_LAPTOP = "00C";

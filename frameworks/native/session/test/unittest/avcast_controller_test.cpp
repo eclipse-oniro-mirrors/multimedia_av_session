@@ -1435,5 +1435,41 @@ HWTEST_F(AVCastControllerTest, Destroy002, TestSize.Level1)
     EXPECT_EQ(castController_->Destroy(), AVSESSION_SUCCESS);
 }
 
+/**
+* @tc.name: GetSourceType001
+* @tc.desc: get source type
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, GetSourceType001, TestSize.Level1)
+{
+    AVQueueItem avQueueItem;
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetPcmSrc(true);
+    avQueueItem.SetDescription(description);
+    EXPECT_EQ(castController_->GetSourceType(avQueueItem), "PCM");
+
+    description->SetPcmSrc(false);
+    AVDataSrcDescriptor dataDes;
+    dataDes.hasCallback = true;
+    description->SetDataSrc(dataDes);
+    EXPECT_EQ(castController_->GetSourceType(avQueueItem), "DATASRC");
+
+    dataDes.hasCallback = false;
+    description->SetDataSrc(dataDes);
+    description->SetMediaUri("xxx");
+    EXPECT_EQ(castController_->GetSourceType(avQueueItem), "URI");
+
+    description->SetMediaUri("");
+    AVFileDescriptor fileDes;
+    fileDes.fd_ = 1;
+    description->SetFdSrc(fileDes);
+    EXPECT_EQ(castController_->GetSourceType(avQueueItem), "FD");
+
+    fileDes.fd_ = 0;
+    description->SetFdSrc(fileDes);
+    EXPECT_EQ(castController_->GetSourceType(avQueueItem), "");
+}
+
 } // namespace AVSession
 } // namespace OHOS

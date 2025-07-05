@@ -45,6 +45,7 @@ struct AVSessionRadarInfo {
     std::string localSessName_;
     std::string peerSessName_;
     std::string bundleName_;
+    std::string sourceType_;
     explicit AVSessionRadarInfo(std::string funcName) : func_(funcName) {}
     void CheckTriggerMode()
     {

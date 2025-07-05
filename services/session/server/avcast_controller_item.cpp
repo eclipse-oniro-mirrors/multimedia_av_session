@@ -239,19 +239,40 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
                                         + "startPosition: " + startPosition + ","
                                         + "duration: " + duration;
     }
+    info.sourceType_ = GetSourceType(avQueueItem);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "Start",
         "BUNDLE_NAME", BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()),
         "API_PARAM", API_PARAM_STRING,
-        "ERROR_CODE", ret,
-        "ERROR_MSG", errMsg);
+        "ERROR_CODE", ret, "ERROR_MSG", errMsg);
     if (ret != AVSESSION_SUCCESS) {
         info.errorCode_ = AVSessionRadar::GetRadarErrorCode(ret);
         AVSessionRadar::GetInstance().StartPlayFailed(info);
     } else {
         AVSessionRadar::GetInstance().StartPlayBegin(info);
+        if (info.sourceType_ == "PCM") {
+            AVSessionRadar::GetInstance().PlayerStarted(info);
+        }
     }
     return AVSESSION_SUCCESS;
+}
+
+std::string AVCastControllerItem::GetSourceType(const AVQueueItem& avQueueItem)
+{
+    CHECK_AND_RETURN_RET(avQueueItem.GetDescription() != nullptr, "");
+    if (avQueueItem.GetDescription()->GetPcmSrc()) {
+        return "PCM";
+    }
+    if (avQueueItem.GetDescription()->GetDataSrc().hasCallback) {
+        return "DATASRC";
+    }
+    if (!avQueueItem.GetDescription()->GetMediaUri().empty()) {
+        return "URI";
+    }
+    if (avQueueItem.GetDescription()->GetFdSrc().fd_ > 0) {
+        return "FD";
+    }
+    return "";
 }
 
 void AVCastControllerItem::ReportPrepare(int32_t preRet, const AVQueueItem& avQueueItem)

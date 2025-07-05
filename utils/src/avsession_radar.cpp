@@ -208,7 +208,8 @@ void AVSessionRadar::ReportWithoutTrustInfo(AVSessionRadarInfo &info)
         PEER_UDID, info.peerUdid_,
         PEER_BT_MAC, info.peerBtMac_,
         PEER_NET_ID, info.peerNetId_,
-        PEER_DEV_TYPE, info.peerDevType_);
+        PEER_DEV_TYPE, info.peerDevType_,
+        SOURCE_TYPE, info.sourceType_);
 }
 
 void AVSessionRadar::ReportWithTrustInfo(AVSessionRadarInfo &info)
@@ -232,6 +233,7 @@ void AVSessionRadar::ReportWithTrustInfo(AVSessionRadarInfo &info)
         PEER_BT_MAC, info.peerBtMac_,
         PEER_NET_ID, info.peerNetId_,
         PEER_DEV_TYPE, info.peerDevType_,
+        SOURCE_TYPE, info.sourceType_,
         IS_TRUST, info.isTrust_);
 }
 
