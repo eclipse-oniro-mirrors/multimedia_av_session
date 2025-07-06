@@ -309,6 +309,10 @@ bool CastDisplayInfo::ReadFromParcel(Parcel& in)
 {
     int32_t displayStateTemp = -1;
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(displayStateTemp), false, "read displayState failed");
+    if (displayStateTemp < static_cast<int32_t>(CastDisplayState::STATE_OFF) ||
+        displayStateTemp > static_cast<int32_t>(CastDisplayState::STATE_ON)) {
+        return false;
+    }
     displayState = static_cast<CastDisplayState>(displayStateTemp);
     CHECK_AND_RETURN_RET_LOG(in.ReadUint64(displayId), false, "read displayId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(name), false, "read name failed");

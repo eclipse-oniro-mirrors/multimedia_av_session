@@ -162,7 +162,10 @@ ohos_unittest("AVSessionManagerImplTest") {
 ohos_unittest("AVSessionControllerTest") {
   module_out_path = module_output_path
 
-  sources = [ "avsession_controller_test.cpp" ]
+  sources = [
+    "avsession_controller_test.cpp",
+    "avsession_callback_client_test.cpp"
+  ]
 
   configs = [ ":module_private_config" ]
 
@@ -209,7 +212,10 @@ ohos_unittest("AVSessionTest") {
 ohos_unittest("AVMetaDataTest") {
   module_out_path = module_output_path
 
-  sources = [ "avmeta_data_test.cpp" ]
+  sources = [
+    "avmeta_data_test.cpp",
+    "avsession_descriptor_test.cpp",
+  ]
 
   cflags_cc = [ "-fno-access-control" ]
 
@@ -361,6 +367,8 @@ if (castplus_cast_engine_enable) {
     deps += [
       "../../../../../services/session:avsession_cast_item_static",
       "../../../../../services/session:avsession_router_static",
+      "../../../../../services/session:libidl_avsession_service_interface_proxy",
+      "../../../../../services/session:libidl_avsession_service_interface_stub",
     ]
 
     visibility = [ ":*" ]
@@ -395,6 +403,7 @@ if (castplus_cast_engine_enable) {
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
+    public_configs = ["../../../../../services/session:avsession_ipc_config"]
   }
 }
 

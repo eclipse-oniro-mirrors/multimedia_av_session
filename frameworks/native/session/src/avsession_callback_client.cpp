@@ -14,8 +14,8 @@
  */
 
 #include "avsession_callback_client.h"
-#include "avsession_event_handler.h"
 #include "avsession_errors.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 AVSessionCallbackClient::AVSessionCallbackClient(const std::shared_ptr<AVSessionCallback>& callback)

@@ -32,6 +32,8 @@ ohos_fuzztest("AVSessionCallbackStubFuzzTest") {
   ]
   sources = [ "avsession_callbackclient_fuzzer.cpp" ]
   deps = [
+    "./../../../../../../services/session:libidl_avsession_service_interface_proxy",
+    "./../../../../../../services/session:libidl_avsession_service_interface_stub",
     "../../../../session:avsession_client",
     "../../../../../../utils:avsession_utils",
   ]
@@ -46,5 +48,6 @@ ohos_fuzztest("AVSessionCallbackStubFuzzTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+  public_configs = ["./../../../../../../services/session:avsession_ipc_config"]
 }
 ###############################################################################

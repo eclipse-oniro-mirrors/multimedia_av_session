@@ -42,6 +42,8 @@ ohos_fuzztest("AVCallMetaDataFuzzTest") {
   deps = [
     "./../../../../../../services/session:avsession_item_static",
     "./../../../../../../services/session:avsession_service_static",
+    "./../../../../../../services/session:libidl_avsession_service_interface_proxy",
+    "./../../../../../../services/session:libidl_avsession_service_interface_stub",
     "./../../../../session:avsession_client_static",
     "./../../../../../../utils:avsession_utils",
   ]
@@ -64,6 +66,7 @@ ohos_fuzztest("AVCallMetaDataFuzzTest") {
     "window_manager:libdm_lite",
     "window_manager:libwm",
   ]
+  public_configs = ["./../../../../../../services/session:avsession_ipc_config"]
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]

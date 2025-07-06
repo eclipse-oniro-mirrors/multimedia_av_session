@@ -33,6 +33,8 @@ ohos_fuzztest("AvSessionServiceProxyFuzzTest") {
   ]
   sources = [ "avsessionserviceproxy_fuzzer.cpp" ]
   deps = [
+    "./../../../../../../services/session:libidl_avsession_service_interface_proxy",
+    "./../../../../../../services/session:libidl_avsession_service_interface_stub",
     "../../../../session:avsession_client",
     "../../../../../../utils:avsession_utils",
   ]
@@ -47,6 +49,7 @@ ohos_fuzztest("AvSessionServiceProxyFuzzTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+  public_configs = ["./../../../../../../services/session:avsession_ipc_config"]
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]

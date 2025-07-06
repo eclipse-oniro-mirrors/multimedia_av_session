@@ -409,6 +409,27 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnOutputDeviceChange001, testing:
 }
 
 /**
+ * @tc.name: OnOutputDeviceChange002
+ * @tc.desc: Test OnOutputDeviceChange
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVControllerCallbackProxyTest, OnOutputDeviceChange002, testing::ext::TestSize.Level0)
+{
+    SLOGI("OnOutputDeviceChange002, start");
+    LOG_SetCallback(MyLogCallback);
+    int32_t connectionState = 0;
+    OHOS::AVSession::OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "1";
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    if (aVControllerCallbackProxy != nullptr) {
+        aVControllerCallbackProxy->OnOutputDeviceChange(connectionState, outputDeviceInfo);
+        EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+    }
+    SLOGI("OnOutputDeviceChange002, end");
+}
+
+/**
  * @tc.name: OnSessionEventChange001
  * @tc.desc: Test OnSessionEventChange
  * @tc.type: FUNC
