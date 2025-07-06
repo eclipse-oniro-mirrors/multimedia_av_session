@@ -40,6 +40,8 @@ ohos_fuzztest("SessionListenerStubFuzzTest") {
   sources = [ "session_listenerstub_fuzzer.cpp" ]
   deps = [
     "../../../../session:avsession_client",
+    "./../../../../../../services/session:libidl_avsession_service_interface_proxy",
+    "./../../../../../../services/session:libidl_avsession_service_interface_stub",
     "../../../../../../utils:avsession_utils",
   ]
   external_deps = [
@@ -53,5 +55,6 @@ ohos_fuzztest("SessionListenerStubFuzzTest") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+  public_configs = ["./../../../../../../services/session:avsession_ipc_config"]
 }
 ###############################################################################

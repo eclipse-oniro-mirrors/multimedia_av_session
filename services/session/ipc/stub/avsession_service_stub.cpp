@@ -102,10 +102,7 @@ int32_t AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel& data
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
     for (const auto& descriptor : descriptors) {
-        if (!descriptor.Marshalling(reply)) {
-            SLOGI("write descriptor failed");
-            break;
-        }
+        CHECK_AND_RETURN_RET_LOG(descriptor.Marshalling(reply), ERR_NONE, "write descriptor failed");
     }
     return ERR_NONE;
 }
@@ -115,9 +112,8 @@ int32_t AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel& dat
     AVSessionDescriptor descriptor;
     int32_t ret = GetSessionDescriptorsBySessionId(data.ReadString(), descriptor);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    if (ret == AVSESSION_SUCCESS) {
-        CHECK_AND_PRINT_LOG(descriptor.Marshalling(reply), "write AVSessionDescriptor failed");
-    }
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "write AVSessionDescriptor failed");
+    CHECK_AND_PRINT_LOG(descriptor.Marshalling(reply), "write AVSessionDescriptor failed");
     return ERR_NONE;
 }
 
@@ -137,10 +133,7 @@ int32_t AVSessionServiceStub::HandleGetHistoricalSessionDescriptors(MessageParce
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
     for (const auto& descriptor : descriptors) {
-        if (!descriptor.Marshalling(reply)) {
-            SLOGI("write descriptor failed");
-            break;
-        }
+        CHECK_AND_RETURN_RET_LOG(descriptor.Marshalling(reply), ERR_NONE, "write descriptor failed");
     }
     return ERR_NONE;
 }

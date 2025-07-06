@@ -26,6 +26,7 @@
 #include "avmedia_description.h"
 #include "avqueue_item.h"
 #include "avsession_descriptor.h"
+#include "av_shared_memory_base.h"
 #include "key_event.h"
 #include "want_params.h"
 #include "av_shared_memory.h"

@@ -14,8 +14,8 @@
  */
 
 #include "session_listener_client.h"
-#include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_log.h"
 
 namespace OHOS::AVSession {
 SessionListenerClient::SessionListenerClient(const std::shared_ptr<SessionListener>& listener)

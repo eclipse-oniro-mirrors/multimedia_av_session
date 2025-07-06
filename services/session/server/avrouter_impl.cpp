@@ -282,10 +282,8 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
     providerNumber_ = providerNumberDisable_;
     providerManagerMap_.clear();
 
-    auto info = new (std::nothrow) DeviceInfo(AVCastCategory::CATEGORY_LOCAL, "-1", "RemoteCast");
-    if (info != nullptr) {
-        OnCastStateChange(disconnectStateFromCast_, *info);
-    }
+    DeviceInfo deviceInfo(AVCastCategory::CATEGORY_LOCAL, "1", "RemoteCast");
+    OnCastStateChange(disconnectStateFromCast_, deviceInfo);
 
     castHandleToInfoMap_.clear();
 
