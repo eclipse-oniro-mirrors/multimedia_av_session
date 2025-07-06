@@ -108,28 +108,6 @@ void AvSessionServiceFuzzer::FuzzTests()
     OutputDeviceInfo outputDeviceInfo;
     avSessionService->CheckBeforeHandleStartCast(dataMessageParcel, outputDeviceInfo);
 
-    OHOS::MessageParcel reply;
-    AVQueueInfo aVQueueInfo;
-    std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
-    avSessionService->MarshallingAVQueueInfos(reply, avQueueInfos);
-
-    unsigned char *buffer = new unsigned char[255];
-    if (buffer != nullptr) {
-        avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
-        delete[] buffer;
-    }
-    avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
-    std::vector<uint8_t> imgBuffer = {GetData<uint8_t>(), GetData<uint8_t>(), GetData<uint8_t>()};
-    mediaPixelMap->SetInnerImgBuffer(imgBuffer);
-    aVQueueInfo.SetAVQueueImage(mediaPixelMap);
-    avQueueInfos = {aVQueueInfo};
-    buffer = new unsigned char[255];
-    if (buffer != nullptr) {
-        avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
-        delete[] buffer;
-    }
-
     OHOS::AVSession::DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = GetData<int32_t>();
     uint8_t randomNum = GetData<uint8_t>();

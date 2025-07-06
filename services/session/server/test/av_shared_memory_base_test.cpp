@@ -26,6 +26,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AVSession {
 
+static OHOS::Parcel g_parcel;
+
 class AVSharedMemoryBaseTest : public testing::Test {
 public:
    static void SetUpTestCase(void);
@@ -41,6 +43,60 @@ void AVSharedMemoryBaseTest::TearDownTestCase() {}
 void AVSharedMemoryBaseTest::SetUp() {}
 
 void AVSharedMemoryBaseTest::TearDown() {}
+
+/**
+ * @tc.name: Unmarshalling001
+ * @tc.desc: unmarshalling test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSharedMemoryBaseTest, Unmarshalling001, TestSize.Level0)
+{
+    SLOGI("Unmarshalling001 Begin");
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    OHOS::Parcel& parcel = g_parcel;
+    auto unmarshallingPtr = memory->Unmarshalling(parcel);
+    EXPECT_EQ(unmarshallingPtr, nullptr);
+}
+
+/**
+ * @tc.name: WriteToParcel001
+ * @tc.desc: WriteToParcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSharedMemoryBaseTest, WriteToParcel001, TestSize.Level0)
+{
+    SLOGI("WriteToParcel001 Begin");
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
+    memory->fd_ = 1;
+    bool ret = memory->WriteToParcel(m_parcel);
+    EXPECT_NE(ret, true);
+    ret = memory->ReadFromParcel(m_parcel);
+    EXPECT_NE(ret, true);
+}
+
+/**
+ * @tc.name: ReadFromParcel001
+ * @tc.desc: ReadFromParcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSharedMemoryBaseTest, ReadFromParcel001, TestSize.Level0)
+{
+    SLOGI("ReadFromParcel001 Begin");
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
+    bool ret = memory->ReadFromParcel(m_parcel);
+    EXPECT_NE(ret, true);
+}
 
 /**
 * @tc.name: Write001

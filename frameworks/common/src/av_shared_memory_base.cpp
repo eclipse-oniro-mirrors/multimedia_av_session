@@ -34,29 +34,68 @@ public:
         : AVSharedMemoryBase(fd, size, flags, name) {}
 };
 
-std::shared_ptr<AVSharedMemory> AVSharedMemoryBase::CreateFromLocal(
+bool AVSharedMemoryBase::Marshalling(Parcel& out) const
+{
+    return WriteToParcel(static_cast<MessageParcel&>(out));
+}
+
+AVSharedMemoryBase* AVSharedMemoryBase::Unmarshalling(Parcel& in)
+{
+    auto info = std::make_unique<AVSharedMemoryBase>();
+    CHECK_AND_RETURN_RET_LOG(info != nullptr && info->ReadFromParcel(static_cast<MessageParcel&>(in)),
+        nullptr, "info is nullptr");
+    return info.release();
+}
+
+bool AVSharedMemoryBase::WriteToParcel(MessageParcel& out) const
+{
+    int32_t fd = GetFd();
+    CHECK_AND_RETURN_RET_LOG(fd < 0, false, "write fd is invalid");
+
+    int32_t size = GetSize();
+    bool res = out.WriteFileDescriptor(fd);
+    CHECK_AND_RETURN_RET_LOG(res, false, "write fd failed");
+    return out.WriteInt32(size) &&  out.WriteUint32(GetFlags()) && out.WriteString(GetName());
+}
+
+bool AVSharedMemoryBase::ReadFromParcel(MessageParcel& in)
+{
+    int32_t fd = in.ReadFileDescriptor();
+    CHECK_AND_RETURN_RET_LOG(fd < 0, false, "read fd is invalid");
+
+    int32_t size = in.ReadInt32();
+    uint32_t flags = in.ReadUint32();
+    std::string name = in.ReadString();
+
+    std::shared_ptr<AVSharedMemoryBase> memory = CreateFromRemote(fd, size, flags, name);
+    CHECK_AND_RETURN_RET_LOG(memory != nullptr && memory->GetBase() != nullptr, false, "CreateFromRemote failed");
+    (void)::close(fd);
+    return true;
+}
+
+
+std::shared_ptr<AVSharedMemoryBase> AVSharedMemoryBase::CreateFromLocal(
     int32_t size, uint32_t flags, const std::string &name)
 {
     std::shared_ptr<AVSharedMemoryBase> memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
     int32_t ret = memory->Init();
     if (ret != static_cast<int32_t>(AVSESSION_SUCCESS)) {
-        SLOGE("Create avsharedmemory failed, ret = %{public}d", ret);
+        SLOGE("Create AVSharedMemoryBase failed, ret = %{public}d", ret);
         return nullptr;
     }
 
     return memory;
 }
 
-std::shared_ptr<AVSharedMemory> AVSharedMemoryBase::CreateFromRemote(
+std::shared_ptr<AVSharedMemoryBase> AVSharedMemoryBase::CreateFromRemote(
     int32_t fd, int32_t size, uint32_t flags, const std::string &name)
 {
     std::shared_ptr<AVSharedMemoryBase> memory = std::make_shared<AVSharedMemoryBaseImpl>(fd, size, flags, name);
     int32_t ret = memory->Init();
     if (ret != static_cast<int32_t>(AVSESSION_SUCCESS)) {
-        SLOGE("Create avsharedmemory failed, ret = %{public}d", ret);
+        SLOGE("Create AVSharedMemoryBase failed, ret = %{public}d", ret);
         return nullptr;
     }
-
     return memory;
 }
 

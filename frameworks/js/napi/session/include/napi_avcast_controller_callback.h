@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -505,12 +505,14 @@ public:
     void OnPlayRequest(const AVQueueItem& avQueueItem) override;
     void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
-    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos) override;
+    int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
+        int64_t pos, int32_t& result) override;
 
     bool IsCallbacksEmpty(int32_t event);
 
     napi_status saveDataSrc(napi_env env, napi_value avQueueItem);
-    int32_t readDataSrc(napi_env env, std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos);
+    int32_t readDataSrc(napi_env env, const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
+        int64_t pos, int32_t& result);
 
     napi_env env_ = nullptr;
     napi_ref dataSrcRef_ {};

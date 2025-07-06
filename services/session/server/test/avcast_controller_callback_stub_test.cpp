@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "accesstoken_kit.h"
-#include "avcast_controller_callback_stub.h"
+#include "av_cast_controller_callback_stub.h"
 #include "avsession_descriptor.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
@@ -94,27 +94,55 @@ void AVCastControllerCallbackStubTest::TearDown()
 
 class AVCastControllerCallbackStubDemo : public AVCastControllerCallbackStub {
 public:
-    void OnCastPlaybackStateChange(const AVPlaybackState& state) override {}
-
-    void OnMediaItemChange(const AVQueueItem& avQueueItem) override {}
-
-    void OnPlayNext() override {}
-
-    void OnPlayPrevious() override {}
-
-    void OnSeekDone(const int32_t seekNumber) override {}
-
-    void OnVideoSizeChange(const int32_t width, const int32_t height) override {}
-
-    void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override {}
-
-    void OnEndOfStream(const int32_t isLooping) override {}
-
-    void OnPlayRequest(const AVQueueItem& avQueueItem) override {}
-
-    void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override {}
-
-    void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) override {}
+    ErrCode OnCastPlaybackStateChange(const AVPlaybackState& state) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnMediaItemChange(const AVQueueItem& avQueueItem) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnPlayNext() override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnPlayPrevious() override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnSeekDone(const int32_t seekNumber) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnVideoSizeChange(const int32_t width, const int32_t height) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnEndOfStream(const int32_t isLooping) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnPlayRequest(const AVQueueItem& avQueueItem) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode OnCastValidCommandChanged(const std::vector<int32_t> &cmds) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+    ErrCode onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
+        int64_t pos, int32_t& result) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 };
 
 /**
@@ -148,7 +176,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest002, TestSize.L
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
 }
 
 /**
@@ -167,7 +195,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest003, TestSize.L
     auto localDescriptor = IAVCastControllerCallback::GetDescriptor();
     data.WriteInterfaceToken(localDescriptor);
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
 }
 
 /**
@@ -191,7 +219,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest004, TestSize.L
     data.WriteInt32(1);
 
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, INVALID_FD);
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
 }
 
 /**
@@ -215,7 +243,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest005, TestSize.L
     data.WriteInt32(0);
 
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, INVALID_FD);
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
 }
 
 /**
@@ -239,7 +267,7 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.L
     data.WriteInt32(4);
     
     int ret = avCastControllerCallbackStubDemo.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, INVALID_FD);
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
 }
 
 /**
@@ -249,10 +277,12 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.L
 */
 static HWTEST_F(AVCastControllerCallbackStubTest, onDataSrcRead001, TestSize.Level1)
 {
-    std::shared_ptr<AVSharedMemory> memory = nullptr;
+    std::shared_ptr<AVSharedMemoryBase> memory = AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test");
+    std::string assetId = "";
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
-    auto ret = avCastControllerCallbackStubDemo.onDataSrcRead(memory, 1, 1);
-    EXPECT_EQ(ret, 0);
+    int32_t result = 0;
+    auto ret = avCastControllerCallbackStubDemo.onDataSrcRead(memory, 2, 2, result);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 } // namespace OHOS
 } // namespace AVSession

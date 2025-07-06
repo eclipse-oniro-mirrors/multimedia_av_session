@@ -1200,38 +1200,6 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest040, TestSize.Level0
 }
 
 /**
- * @tc.name: DoMetadataGetReplyInStub001
- * @tc.desc: Test OnRemoteRequest
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub001, TestSize.Level0)
-{
-    SLOGI("DoMetadataGetReplyInStub001 begin!");
-    AVSessionControllerStubDemo avSessionControllerStub;
-    AVMetaData data;
-    OHOS::MessageParcel reply;
-    int ret = avSessionControllerStub.DoMetadataGetReplyInStub(data, reply);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("DoMetadataGetReplyInStub001 end!");
-}
-
-/**
- * @tc.name: DoMetadataGetReplyInStub002
- * @tc.desc: Test OnRemoteRequest
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionControllerStubTest, DoMetadataGetReplyInStub002, TestSize.Level0)
-{
-    SLOGI("DoMetadataGetReplyInStub002 begin!");
-    AVSessionControllerStubDemo avSessionControllerStub;
-    AVMetaData data = GetAVMetaData();
-    OHOS::MessageParcel reply;
-    int ret = avSessionControllerStub.DoMetadataGetReplyInStub(data, reply);
-    EXPECT_NE(ret, AVSESSION_ERROR);
-    SLOGI("DoMetadataGetReplyInStub002 end!");
-}
-
-/**
  * @tc.name: DoMetadataImgClean001
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC

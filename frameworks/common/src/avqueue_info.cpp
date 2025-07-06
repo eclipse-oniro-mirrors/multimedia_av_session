@@ -20,28 +20,7 @@
 namespace OHOS::AVSession {
 bool AVQueueInfo::Marshalling(Parcel& parcel) const
 {
-    return parcel.WriteString(bundleName_) &&
-        parcel.WriteString(avQueueName_) &&
-        parcel.WriteString(avQueueId_) &&
-        parcel.WriteString(avQueueImageUri_) &&
-        parcel.WriteParcelable(avQueueImage_.get());
-}
-
-bool AVQueueInfo::Unmarshalling(Parcel& data)
-{
-    if (!data.ReadString(bundleName_) ||
-        !data.ReadString(avQueueName_) ||
-        !data.ReadString(avQueueId_) ||
-        !data.ReadString(avQueueImageUri_)) {
-        SLOGE("read AVQueueInfo failed");
-        return false;
-    }
-    avQueueImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
-    if (avQueueImage_ == nullptr) {
-        SLOGE("read AVQueueInfo PixelMap failed");
-        return false;
-    }
-    return true;
+    return MarshallingMessageParcel(static_cast<MessageParcel&>(parcel));
 }
 
 bool AVQueueInfo::MarshallingMessageParcel(MessageParcel& parcel) const
@@ -51,34 +30,6 @@ bool AVQueueInfo::MarshallingMessageParcel(MessageParcel& parcel) const
         parcel.WriteString(avQueueId_) &&
         parcel.WriteString(avQueueImageUri_) &&
         MarshallingQueueImage(parcel);
-}
-
-AVQueueInfo* AVQueueInfo::UnmarshallingMessageParcel(MessageParcel& data)
-{
-    auto *result = new (std::nothrow) AVQueueInfo();
-    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVQueueInfo failed");
-    if (!data.ReadString(result->bundleName_) ||
-        !data.ReadString(result->avQueueName_) ||
-        !data.ReadString(result->avQueueId_) ||
-        !data.ReadString(result->avQueueImageUri_)) {
-        SLOGE("read AVQueueInfo failed");
-        delete result;
-        return nullptr;
-    }
-    int imageLength = data.ReadInt32();
-    if (imageLength <= 0) {
-        SLOGI("AVQueueInfo::UnmarshallingMessageParcel image length 0");
-        return result;
-    }
-    const char *buffer = nullptr;
-    buffer = reinterpret_cast<const char *>(data.ReadRawData(imageLength));
-    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, result, "read raw data null buffer");
-
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
-    std::vector<uint8_t> mediaImageBuffer(buffer, buffer + imageLength);
-    avQueuePixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    result->avQueueImage_ = avQueuePixelMap;
-    return result;
 }
 
 bool AVQueueInfo::MarshallingQueueImage(MessageParcel& parcel) const
@@ -100,6 +51,37 @@ bool AVQueueInfo::MarshallingQueueImage(MessageParcel& parcel) const
     bool ret = parcel.WriteRawData(buffer, imageLength);
     delete[] buffer;
     CHECK_AND_RETURN_RET_LOG(ret, false, "WriteRawData failed");
+    return true;
+}
+
+AVQueueInfo* AVQueueInfo::Unmarshalling(Parcel& in)
+{
+    auto info = std::make_unique<AVQueueInfo>();
+    CHECK_AND_RETURN_RET_LOG(info != nullptr && info->UnmarshallingMessageParcel(static_cast<MessageParcel&>(in)),
+        nullptr, "info is nullptr");
+    return info.release();
+}
+
+bool AVQueueInfo::UnmarshallingMessageParcel(MessageParcel& data)
+{
+    bool ret = data.ReadString(bundleName_) &&
+        data.ReadString(avQueueName_) &&
+        data.ReadString(avQueueId_) &&
+        data.ReadString(avQueueImageUri_);
+    CHECK_AND_RETURN_RET_LOG(ret, false, "read data failed");
+
+    int32_t imageLength {};
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(imageLength), false, "no image");
+    CHECK_AND_RETURN_RET_LOG(imageLength > 0, true, "no image");
+
+    const char *buffer = nullptr;
+    buffer = reinterpret_cast<const char *>(data.ReadRawData(imageLength));
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, false, "read raw data null buffer");
+
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> mediaImageBuffer(buffer, buffer + imageLength);
+    avQueuePixelMap->SetInnerImgBuffer(mediaImageBuffer);
+    avQueueImage_ = avQueuePixelMap;
     return true;
 }
 

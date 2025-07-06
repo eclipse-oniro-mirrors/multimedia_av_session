@@ -72,6 +72,53 @@ public:
 };
 
 /**
+* @tc.name: OnSessionDestroy001
+* @tc.desc: test OnSessionDestroy
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnSessionDestroy001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    aVControllerCallbackClient->OnSessionDestroy();
+}
+
+/**
+* @tc.name: OnAVCallMetaDataChange001
+* @tc.desc: test OnAVCallMetaDataChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnAVCallMetaDataChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    AVCallMetaData data;
+    aVControllerCallbackClient->OnAVCallMetaDataChange(data);
+}
+
+/**
+* @tc.name: OnAVCallStateChange001
+* @tc.desc: test OnAVCallStateChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnAVCallstateChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    AVCallState state;
+    aVControllerCallbackClient->OnAVCallStateChange(state);
+}
+
+/**
 * @tc.name: OnPlaybackStateChange001
 * @tc.desc: test OnPlaybackStateChange
 * @tc.type: FUNC
@@ -103,5 +150,136 @@ HWTEST_F(AVControllerCallbackClientTest, OnPlaybackStateChange002, TestSize.Leve
     aVControllerCallbackClient->AddListenerForPlaybackState([](const AVPlaybackState& state) {});
     aVControllerCallbackClient->OnPlaybackStateChange(avplaybackState);
 }
+
+/**
+* @tc.name: OnMetaDataChange001
+* @tc.desc: test OnMetaDataChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnMetaDataChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    AVMetaData data;
+    aVControllerCallbackClient->OnMetaDataChange(data);
+}
+
+/**
+* @tc.name: OnActiveStateChange001
+* @tc.desc: test OnActiveStateChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnActiveStateChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    bool isActive = true;
+    aVControllerCallbackClient->OnActiveStateChange(isActive);
+}
+
+/**
+* @tc.name: OnValidCommandChange001
+* @tc.desc: test OnValidCommandChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnValidCommandChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    std::vector<int32_t> cmds = {1, 2, 3};
+    aVControllerCallbackClient->OnValidCommandChange(cmds);
+}
+
+/**
+* @tc.name: OnOutputDeviceChange001
+* @tc.desc: test OnOutputDeviceChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnOutputDeviceChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    int32_t connectionState = 1;
+    OutputDeviceInfo info;
+    aVControllerCallbackClient->OnOutputDeviceChange(connectionState, info);
+}
+
+/**
+* @tc.name: OnSessionEventChange001
+* @tc.desc: test OnSessionEventChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnSessionEventChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    std::string event = "";
+    AAFwk::WantParams args;
+    aVControllerCallbackClient->OnSessionEventChange(event, args);
+}
+
+/**
+* @tc.name: OnQueueItemsChange001
+* @tc.desc: test OnQueueItemsChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnQueueItemsChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    std::vector<AVQueueItem> items;
+    aVControllerCallbackClient->OnQueueItemsChange(items);
+}
+
+/**
+* @tc.name: OnQueueTitleChange001
+* @tc.desc: test OnQueueTitleChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnQueueTitleChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    std::string title = "test";
+    aVControllerCallbackClient->OnQueueTitleChange(title);
+}
+
+/**
+* @tc.name: OnExtrasChange001
+* @tc.desc: test OnExtrasChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnExtrasChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    AAFwk::WantParams extras;
+    aVControllerCallbackClient->OnExtrasChange(extras);
+}
+
 } // namespace AVSession
 } // namespace OHOS

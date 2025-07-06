@@ -54,6 +54,8 @@ config("avsession_ipc_config") {
 
 idl_gen_interface("idl_avsession_service_interface") {
   sources = [
+    "ipc/idl/IAVCastControllerCallback.idl",
+    "ipc/idl/IAVControllerCallback.idl",
     "ipc/idl/IAVSessionCallback.idl",
     "ipc/idl/ISessionListener.idl",
   ]
@@ -72,6 +74,7 @@ idl_gen_interface("idl_avsession_service_interface") {
     "../../frameworks/common/src/avcast_control_command.cpp",
     "../../frameworks/common/src/avcontrol_command.cpp",
     "../../frameworks/common/src/avqueue_info.cpp",
+    "../../frameworks/common/src/av_shared_memory_base.cpp",
   ]
 
   sequenceable_ext_deps = [
@@ -471,7 +474,6 @@ av_session_ohos_library("avsession_item") {
   public_configs = [":avsession_ipc_config"]
 
   ipc_sources = [
-    "ipc/proxy/avcontroller_callback_proxy.cpp",
     "ipc/stub/avsession_controller_stub.cpp",
     "ipc/stub/avsession_stub.cpp",
   ]
@@ -634,7 +636,6 @@ av_session_ohos_library("avsession_cast_item") {
   public_configs = [":avsession_ipc_config"]
 
   ipc_sources = [
-    "ipc/proxy/avcast_controller_callback_proxy.cpp",
     "ipc/stub/avcast_controller_stub.cpp",
   ]
 

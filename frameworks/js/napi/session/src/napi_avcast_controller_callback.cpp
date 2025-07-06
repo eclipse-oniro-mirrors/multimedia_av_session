@@ -319,10 +319,11 @@ void NapiAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<i
     HandleEvent(EVENT_CAST_VALID_COMMAND_CHANGED, stringCmds);
 }
 
-int32_t NapiAVCastControllerCallback::onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos)
+int32_t NapiAVCastControllerCallback::onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
+                                                    uint32_t length, int64_t pos, int32_t& result)
 {
     SLOGI("napi onDataSrcRead length %{public}d", length);
-    return readDataSrc(env_, mem, length, pos);
+    return readDataSrc(env_, mem, length, pos, result);
 }
 
 napi_status NapiAVCastControllerCallback::saveDataSrc(napi_env env, napi_value avQueueItem)
@@ -394,14 +395,13 @@ void NapiAVCastControllerCallback::threadSafeReadDataSrcCb(napi_env env, napi_va
     return;
 }
 
-int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, std::shared_ptr<AVSharedMemory> mem,
-    uint32_t length, int64_t pos)
+int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, const std::shared_ptr<AVSharedMemoryBase>& mem,
+    uint32_t length, int64_t pos, int32_t& result)
 {
     if (dataSrcRef_ == nullptr) {
         SLOGE("dataSrcRef_ nullptr");
         return 0;
     }
-    int32_t result = 0;
     DataContextForThreadSafe* data =
         new DataContextForThreadSafe { dataSrcRef_, mem->GetBase(), length, pos, &result, dataSrcSyncCond_ };
     napi_status status = napi_call_threadsafe_function(threadSafeReadDataSrcFunc_, data, napi_tsfn_blocking);

@@ -73,11 +73,11 @@ static napi_value ExportResolutionLevel(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
 
-    (void)SetNamedProperty(env, result, "RESOLUTION_480P", ResolutionLevel::RESOLUTION_480P);
-    (void)SetNamedProperty(env, result, "RESOLUTION_720P", ResolutionLevel::RESOLUTION_720P);
-    (void)SetNamedProperty(env, result, "RESOLUTION_1080P", ResolutionLevel::RESOLUTION_1080P);
-    (void)SetNamedProperty(env, result, "RESOLUTION_2K", ResolutionLevel::RESOLUTION_2K);
-    (void)SetNamedProperty(env, result, "RESOLUTION_4K", ResolutionLevel::RESOLUTION_4K);
+    (void)SetNamedProperty(env, result, "RESOLUTION_480P", static_cast<int32_t>(ResolutionLevel::RESOLUTION_480P));
+    (void)SetNamedProperty(env, result, "RESOLUTION_720P", static_cast<int32_t>(ResolutionLevel::RESOLUTION_720P));
+    (void)SetNamedProperty(env, result, "RESOLUTION_1080P", static_cast<int32_t>(ResolutionLevel::RESOLUTION_1080P));
+    (void)SetNamedProperty(env, result, "RESOLUTION_2K", static_cast<int32_t>(ResolutionLevel::RESOLUTION_2K));
+    (void)SetNamedProperty(env, result, "RESOLUTION_4K", static_cast<int32_t>(ResolutionLevel::RESOLUTION_4K));
 
     napi_object_freeze(env, result);
     return result;
@@ -143,9 +143,10 @@ static napi_value ExportConnectionState(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
 
-    (void)SetNamedProperty(env, result, "STATE_CONNECTING", ConnectionState::STATE_CONNECTING);
-    (void)SetNamedProperty(env, result, "STATE_CONNECTED", ConnectionState::STATE_CONNECTED);
-    (void)SetNamedProperty(env, result, "STATE_DISCONNECTED", ConnectionState::STATE_DISCONNECTED);
+    (void)SetNamedProperty(env, result, "STATE_CONNECTING", static_cast<int32_t>(ConnectionState::STATE_CONNECTING));
+    (void)SetNamedProperty(env, result, "STATE_CONNECTED", static_cast<int32_t>(ConnectionState::STATE_CONNECTED));
+    (void)SetNamedProperty(env, result, "STATE_DISCONNECTED",
+                           static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED));
 
     napi_object_freeze(env, result);
     return result;

@@ -20,7 +20,7 @@
 
 #include "securec.h"
 #include "av_session_callback_proxy.h"
-#include "iavcontroller_callback.h"
+#include "ia_v_controller_callback.h"
 #include "iremote_proxy.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"

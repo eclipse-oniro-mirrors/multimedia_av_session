@@ -144,63 +144,11 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetAVMetaData failed");
 
-    int res = DoMetadataGetReplyInStub(metaData, reply);
-    SLOGD("controllerStub getRes %{public}d", res);
+    ret = reply.WriteParcelable(&metaData);
+    SLOGD("controllerStub getRes %{public}d", ret);
     metaData.SetMediaImageUri(uri);
     DoMetadataImgClean(metaData);
     return ERR_NONE;
-}
-
-int32_t AVSessionControllerStub::DoMetadataGetReplyInStub(AVMetaData& metaData, MessageParcel& reply)
-{
-    int mediaImageLength = 0;
-    std::vector<uint8_t> mediaImageBuffer;
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
-    if (mediaPixelMap != nullptr) {
-        mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
-        mediaImageLength = static_cast<int>(mediaImageBuffer.size());
-        metaData.SetMediaLength(mediaImageLength);
-    }
-
-    int avQueueImageLength = 0;
-    std::vector<uint8_t> avQueueImageBuffer;
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData.GetAVQueueImage();
-    if (avQueuePixelMap != nullptr) {
-        avQueueImageBuffer = avQueuePixelMap->GetInnerImgBuffer();
-        avQueueImageLength = static_cast<int>(avQueueImageBuffer.size());
-        metaData.SetAVQueueLength(avQueueImageLength);
-    }
-
-    int twoImageLength = mediaImageLength + avQueueImageLength;
-    if (twoImageLength == 0) {
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(twoImageLength), "write twoImageLength failed");
-        CHECK_AND_PRINT_LOG(reply.WriteParcelable(&metaData), "write AVMetaData failed");
-        return ERR_NONE;
-    }
-
-    unsigned char *buffer = new (std::nothrow) unsigned char[twoImageLength];
-    if (buffer == nullptr) {
-        SLOGE("new buffer failed of length = %{public}d", twoImageLength);
-        return AVSESSION_ERROR;
-    }
-
-    for (int i = 0; i < mediaImageLength; i++) {
-        buffer[i] = mediaImageBuffer[i];
-    }
-
-    for (int j = mediaImageLength, k = 0; j < twoImageLength && k < avQueueImageLength; j++, k++) {
-        buffer[j] = avQueueImageBuffer[k];
-    }
-
-    if (!reply.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(reply, metaData)) {
-        SLOGE("fail to write image length & metadata except img with clean");
-        delete[] buffer;
-        return AVSESSION_ERROR;
-    }
-    int32_t retForWriteRawData = reply.WriteRawData(buffer, twoImageLength);
-    SLOGD("write img raw data ret with clean %{public}d", retForWriteRawData);
-    delete[] buffer;
-    return retForWriteRawData;
 }
 
 int32_t AVSessionControllerStub::HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply)

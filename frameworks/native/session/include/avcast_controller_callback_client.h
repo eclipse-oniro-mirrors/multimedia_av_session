@@ -16,7 +16,7 @@
 #ifndef OHOS_AVCAST_CONTROLLER_CALLBACK_CLIENT_H
 #define OHOS_AVCAST_CONTROLLER_CALLBACK_CLIENT_H
 
-#include "avcast_controller_callback_stub.h"
+#include "av_cast_controller_callback_stub.h"
 #include "avsession_info.h"
 
 namespace OHOS::AVSession {
@@ -25,29 +25,30 @@ public:
     explicit AVCastControllerCallbackClient(const std::shared_ptr<AVCastControllerCallback>& callback);
     ~AVCastControllerCallbackClient();
 
-    void OnCastPlaybackStateChange(const AVPlaybackState& state) override;
+    ErrCode OnCastPlaybackStateChange(const AVPlaybackState& state) override;
 
-    void OnMediaItemChange(const AVQueueItem& avQueueItem) override;
+    ErrCode OnMediaItemChange(const AVQueueItem& avQueueItem) override;
 
-    void OnPlayNext() override;
+    ErrCode OnPlayNext() override;
 
-    void OnPlayPrevious() override;
+    ErrCode OnPlayPrevious() override;
 
-    void OnSeekDone(const int32_t seekNumber) override;
+    ErrCode OnSeekDone(const int32_t seekNumber) override;
 
-    void OnVideoSizeChange(const int32_t width, const int32_t height) override;
+    ErrCode OnVideoSizeChange(const int32_t width, const int32_t height) override;
 
-    void OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
+    ErrCode OnPlayerError(const int32_t errorCode, const std::string& errorMsg) override;
 
-    void OnEndOfStream(const int32_t isLooping) override;
+    ErrCode OnEndOfStream(const int32_t isLooping) override;
 
-    void OnPlayRequest(const AVQueueItem& avQueueItem) override;
+    ErrCode OnPlayRequest(const AVQueueItem& avQueueItem) override;
 
-    void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
+    ErrCode OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
 
-    void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
+    ErrCode OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
 
-    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos) override;
+    ErrCode onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
+        int64_t pos, int32_t& result) override;
 
     void AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 

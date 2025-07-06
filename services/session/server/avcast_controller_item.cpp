@@ -178,10 +178,11 @@ void AVCastControllerItem::OnValidCommandChange(const std::vector<int32_t>& cmds
     HandleCastValidCommandChange(cmds);
 }
 
-int32_t AVCastControllerItem::onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos)
+int32_t AVCastControllerItem::onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
+                                            uint32_t length, int64_t pos, int32_t& result)
 {
     if (callback_ != nullptr) {
-        return callback_->onDataSrcRead(mem, length, pos);
+        return callback_->onDataSrcRead(mem, length, pos, result);
     }
     return 0;
 }
@@ -351,9 +352,10 @@ void AVCastControllerItem::SetQueueItemDataSrc(const AVQueueItem& avQueueItem)
             [this](void* ptr, uint32_t length, int64_t pos) -> int32_t {
                 CastEngine::CastSharedMemoryBase* memPtr = static_cast<CastEngine::CastSharedMemoryBase*>(ptr);
                 SLOGE("called dataSrc callback mem size %{public}d", memPtr->GetSize());
-                std::shared_ptr<AVSharedMemory> mem = AVSharedMemoryBase::CreateFromLocal(memPtr->GetSize(),
+                std::shared_ptr<AVSharedMemoryBase> mem = AVSharedMemoryBase::CreateFromLocal(memPtr->GetSize(),
                     memPtr->GetFlags(), memPtr->GetName());
-                int32_t readSize = onDataSrcRead(mem, length, pos);
+                int32_t readSize = 0;
+                onDataSrcRead(mem, length, pos, readSize);
                 errno_t rc = memcpy_s(memPtr->GetBase(), static_cast<size_t>(mem->GetSize()), mem->GetBase(),
                     static_cast<size_t>(readSize));
                 if (rc != EOK) {

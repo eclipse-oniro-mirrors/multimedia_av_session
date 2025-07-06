@@ -167,8 +167,6 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionSe
 void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskThird(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy)
 {
     std::vector<AVQueueInfo> avQueueInfos;
-    const char* buffer = GetData<char *>();
-    avServiceProxy->BufferToAVQueueInfoImg(buffer, avQueueInfos);
 
     AVQueueInfo info;
     info.SetBundleName(GetString());
@@ -181,7 +179,6 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskThird(std::shared_ptr<AVSession
     reply.WriteUint32(0);
 
     avServiceProxy->GetHistoricalAVQueueInfos(GetData<int32_t>(), GetData<int32_t>(), avQueueInfos);
-    avServiceProxy->UnMarshallingAVQueueInfos(reply, avQueueInfos);
     OHOS::sptr<ISessionListener> listener = new TestISessionListener();
     avServiceProxy->RegisterSessionListener(listener);
     avServiceProxy->RegisterSessionListenerForAllUsers(listener);

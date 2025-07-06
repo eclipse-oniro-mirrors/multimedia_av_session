@@ -135,58 +135,15 @@ int32_t AVSessionStub::HandleSetAVPlaybackState(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
-int32_t AVSessionStub::SetImageData(AVMetaData& meta, const char *buffer, int twoImageLength)
-{
-    int mediaImageLength = meta.GetMediaLength();
-    CHECK_AND_RETURN_RET_LOG(mediaImageLength >= 0, ERR_NONE, "mediaImageLength is negative number");
-    CHECK_AND_RETURN_RET_LOG(mediaImageLength <= twoImageLength, ERR_NONE, "Maybe cuase Out-of-bunds read");
-    
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
-    SLOGD("change for-loop to vector init");
-    std::vector<uint8_t> mediaImageBuffer(buffer, buffer + mediaImageLength);
-    mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    meta.SetMediaImage(mediaPixelMap);
-    
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
-    std::vector<uint8_t> avQueueImageBuffer(buffer + mediaImageLength, buffer + twoImageLength);
-    avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
-    meta.SetAVQueueImage(avQueuePixelMap);
-    
-    return AVSESSION_SUCCESS;
-}
-
 int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVMetaData");
-    int twoImageLength = data.ReadInt32();
-    SLOGD("read length from twoImage %{public}d", twoImageLength);
-    if (twoImageLength <= 0 || twoImageLength > MAX_IMAGE_SIZE) {
-        sptr avMetaData = data.ReadParcelable<AVMetaData>();
-        if (avMetaData == nullptr) {
-            CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
-            return ERR_NONE;
-        }
-        int32_t ret = SetAVMetaData(*avMetaData);
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
-        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetAVMetaData failed");
+    sptr avMetaData = data.ReadParcelable<AVMetaData>();
+    if (avMetaData == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
         return ERR_NONE;
     }
-    
-    AVMetaData meta;
-    AVMetaData::UnmarshallingExceptImg(data, meta);
-    const char *buffer = nullptr;
-    buffer = reinterpret_cast<const char *>(data.ReadRawData(twoImageLength));
-    if (buffer == nullptr) {
-        SLOGI("read raw data with null, try set without length = %{public}d", twoImageLength);
-        int32_t ret = SetAVMetaData(meta);
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
-        CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetAVMetaData failed");
-        return ERR_NONE;
-    }
-
-    CHECK_AND_RETURN_RET_LOG(!SetImageData(meta, buffer, twoImageLength), ERR_NONE, "SetImageData fail");
-
-    int32_t ret = SetAVMetaData(meta);
+    int32_t ret = SetAVMetaData(*avMetaData);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetAVMetaData failed");
     return ERR_NONE;
@@ -380,7 +337,7 @@ int32_t AVSessionStub::HandleSetSessionEvent(MessageParcel& data, MessageParcel&
 
 int32_t AVSessionStub::HandleUpdateAVQueueInfoEvent(MessageParcel& data, MessageParcel& reply)
 {
-    sptr info = AVQueueInfo::UnmarshallingMessageParcel(data);
+    sptr info = data.ReadParcelable<AVQueueInfo>();
     if (info == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_MARSHALLING, "WriteInt32 result failed");
         return ERR_UNMARSHALLING;

@@ -233,11 +233,10 @@ static HWTEST_F(AVSessionServiceAddedTest, StopCast001, TestSize.Level0)
 {
     SLOGD("StopCast001 begin!");
     #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    const OHOS::AVSession::SessionToken sessionToken = {
-        .sessionId = "success",
-        .pid = 1234,
-        .uid = 5678
-    };
+    OHOS::AVSession::SessionToken sessionToken;
+    sessionToken.sessionId = "success",
+    sessionToken.pid = 1234;
+    sessionToken.uid = 5678;
     auto ret = g_AVSessionService->StopCast(sessionToken);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     #endif

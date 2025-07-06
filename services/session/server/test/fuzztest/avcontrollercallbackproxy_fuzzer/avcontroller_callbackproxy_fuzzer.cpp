@@ -19,8 +19,8 @@
 #include <memory>
 
 #include "securec.h"
-#include "avcontroller_callback_proxy.h"
-#include "iavcontroller_callback.h"
+#include "av_controller_callback_proxy.h"
+#include "ia_v_controller_callback.h"
 #include "iremote_proxy.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"

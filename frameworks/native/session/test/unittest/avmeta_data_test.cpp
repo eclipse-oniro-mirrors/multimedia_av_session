@@ -244,8 +244,47 @@ HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling001, TestSize.Level0)
     SLOGI("AVMetaDataMarshalling001 Begin");
     OHOS::Parcel& parcel = g_parcel;
     auto ret = g_metaData.Marshalling(parcel);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     SLOGI("AVMetaDataMarshalling001 End");
+}
+
+/**
+ * @tc.name: AVMetaDataUnmarshalling002
+ * @tc.desc: metadata unmarshalling test
+ * @tc.type: FUNC
+ * @tc.require:AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling002, TestSize.Level0)
+{
+    SLOGI("AVMetaDataUnmarshalling002 Begin");
+    OHOS::Parcel& parcel = g_parcel;
+    g_metaData.SetAVQueueImage(nullptr);
+    auto ret = g_metaData.Marshalling(parcel);
+    EXPECT_EQ(ret, false);
+    OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
+    g_metaData.WriteDrmSchemes(m_parcel);
+    g_metaData.ReadDrmSchemes(m_parcel);
+    SLOGI("AVMetaDataUnmarshalling002 End");
+}
+
+/**
+ * @tc.name: AVMetaDataUnmarshalling003
+ * @tc.desc: metadata unmarshalling test
+ * @tc.type: FUNC
+ * @tc.require:AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling003, TestSize.Level0)
+{
+    SLOGI("AVMetaDataUnmarshalling003 Begin");
+    OHOS::Parcel& parcel = g_parcel;
+    auto pixelMap = std::make_shared<AVSessionPixelMap>();
+    g_metaData.SetAVQueueImage(pixelMap);
+    auto ret = g_metaData.Marshalling(parcel);
+    EXPECT_EQ(ret, false);
+    OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
+    g_metaData.WriteDrmSchemes(m_parcel);
+    g_metaData.ReadDrmSchemes(m_parcel);
+    SLOGI("AVMetaDataUnmarshalling003 End");
 }
 
 /**
@@ -261,6 +300,40 @@ HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling001, TestSize.Level0)
     auto unmarshallingPtr = g_metaData.Unmarshalling(parcel);
     EXPECT_NE(unmarshallingPtr, nullptr);
     SLOGI("AVMetaDataUnmarshalling001 End");
+}
+
+/**
+ * @tc.name: AVMetaDataReadFromParcel001
+ * @tc.desc: metadata ReadFromParcel test
+ * @tc.type: FUNC
+ * @tc.require:AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataReadFromParcel001, TestSize.Level0)
+{
+    SLOGI("AVMetaDataReadFromParcel001 Begin");
+    OHOS::MessageParcel& parcel = static_cast<MessageParcel&>(g_parcel);
+    int32_t twoImageLength = 10;
+    g_metaData.SetMediaLength(5);
+    bool ret = g_metaData.ReadFromParcel(parcel, twoImageLength);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVMetaDataReadFromParcel001 End");
+}
+
+/**
+ * @tc.name: AVMetaDataReadFromParcel002
+ * @tc.desc: metadata ReadFromParcel test
+ * @tc.type: FUNC
+ * @tc.require:AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataReadFromParcel002, TestSize.Level0)
+{
+    SLOGI("AVMetaDataReadFromParcel002 Begin");
+    OHOS::MessageParcel& parcel = static_cast<MessageParcel&>(g_parcel);
+    int32_t twoImageLength = 10;
+    g_metaData.SetMediaLength(10);
+    bool ret = g_metaData.ReadFromParcel(parcel, twoImageLength);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVMetaDataReadFromParcel002 End");
 }
 
 /**
@@ -406,7 +479,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg001, TestSize.Level0)
     MessageParcel data;
     data.WriteString("");
     AVMetaData metaOut;
-    bool ret = AVMetaData::UnmarshallingExceptImg(data, metaOut);
+    bool ret = metaOut.UnmarshallingExceptImg(data);
     EXPECT_EQ(ret, false);
 }
 
@@ -422,7 +495,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg002, TestSize.Level0)
     MessageParcel data;
     data.WriteString(test);
     AVMetaData metaOut;
-    bool ret = AVMetaData::UnmarshallingExceptImg(data, metaOut);
+    bool ret = metaOut.UnmarshallingExceptImg(data);
     EXPECT_EQ(ret, false);
 }
 
@@ -442,7 +515,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg003, TestSize.Level0)
     pixelMap->SetInnerImgBuffer(vec);
     data.WriteParcelable(pixelMap);
     AVMetaData metaOut;
-    bool ret = AVMetaData::UnmarshallingExceptImg(data, metaOut);
+    bool ret = metaOut.UnmarshallingExceptImg(data);
     EXPECT_EQ(ret, true);
 }
 
@@ -461,7 +534,7 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg004, TestSize.Level0)
     std::string bitStr = std::string(26, '1');
     std::bitset<26> bits(bitStr);
     metaOut.metaMask_ = bits;
-    bool ret = AVMetaData::UnmarshallingExceptImg(data, metaOut);
+    bool ret = metaOut.UnmarshallingExceptImg(data);
     EXPECT_EQ(ret, false);
 }
 
@@ -484,146 +557,8 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg005, TestSize.Level0)
     std::string bitStr = std::string(26, '1');
     std::bitset<26> bits(bitStr);
     metaOut.metaMask_ = bits;
-    bool ret = AVMetaData::UnmarshallingExceptImg(data, metaOut);
+    bool ret = metaOut.UnmarshallingExceptImg(data);
     EXPECT_TRUE(ret != false);
 }
-
-/**
-* @tc.name: UnmarshallingCheckImageTask001
-* @tc.desc: read PixelMap failed
-* @tc.type: FUNC
-* @tc.require: NA
-*/
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask001, TestSize.Level0)
-{
-    Parcel data;
-    auto result = std::make_shared<AVMetaData>();
-    std::string bitStr = std::string(26, '0');
-    std::bitset<26> bits(bitStr);
-    result->metaMask_ = bits;
-    bool ret = AVMetaData::UnmarshallingCheckImageTask(data, result.get());
-    EXPECT_TRUE(ret == true);
-}
-
-/**
-* @tc.name: UnmarshallingCheckImageTask002
-* @tc.desc: read PixelMap failed
-* @tc.type: FUNC
-* @tc.require: NA
-*/
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask002, TestSize.Level0)
-{
-    Parcel data;
-    auto result = std::make_shared<AVMetaData>();
-    std::string bitStr = std::string(26, '1');
-    std::bitset<26> bits(bitStr);
-    result->metaMask_ = bits;
-    bool ret = AVMetaData::UnmarshallingCheckImageTask(data, result.get());
-    EXPECT_TRUE(ret == false);
-}
-
-/**
-* @tc.name: UnmarshallingCheckImageTask003
-* @tc.desc: read avqueue PixelMap failed
-* @tc.type: FUNC
-* @tc.require: NA
-*/
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask003, TestSize.Level0)
-{
-    Parcel data;
-    OHOS::sptr pixelMap = new AVSessionPixelMap();
-    std::vector<uint8_t> vec = {0, 1, 0, 1};
-    pixelMap->SetInnerImgBuffer(vec);
-    data.WriteParcelable(pixelMap);
-    auto result = std::make_shared<AVMetaData>();
-    std::string bitStr = std::string(26, '1');
-    bitStr[6] = '0';
-    std::bitset<26> bits(bitStr);
-    result->metaMask_ = bits;
-    bool ret = AVMetaData::UnmarshallingCheckImageTask(data, result.get());
-    EXPECT_TRUE(ret == false);
-}
-
-/**
-* @tc.name: UnmarshallingCheckImageTask004
-* @tc.desc: read avqueue PixelMap failed
-* @tc.type: FUNC
-* @tc.require: NA
-*/
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask004, TestSize.Level0)
-{
-    Parcel data;
-    OHOS::sptr pixelMap = new AVSessionPixelMap();
-    std::vector<uint8_t> vec = {0, 1, 0, 1};
-    pixelMap->SetInnerImgBuffer(vec);
-    data.WriteParcelable(pixelMap);
-    auto result = std::make_shared<AVMetaData>();
-    std::string bitStr = std::string(26, '1');
-    std::bitset<26> bits(bitStr);
-    result->metaMask_ = bits;
-    bool ret = AVMetaData::UnmarshallingCheckImageTask(data, result.get());
-    EXPECT_TRUE(ret == false);
-}
-
-/**
-* @tc.name: UnmarshallingCheckImageTask005
-* @tc.desc: read bundle icon failed
-* @tc.type: FUNC
-* @tc.require: NA
-*/
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask005, TestSize.Level0)
-{
-    Parcel data;
-    OHOS::sptr pixelMap = new AVSessionPixelMap();
-    OHOS::sptr pixelMap2 = new AVSessionPixelMap();
-    data.WriteParcelable(pixelMap);
-    data.WriteParcelable(pixelMap2);
-    auto result = std::make_shared<AVMetaData>();
-    std::string bitStr = std::string(26, '1');
-    bitStr[24] = '0';
-    std::bitset<26> bits(bitStr);
-    result->metaMask_ = bits;
-    bool ret = AVMetaData::UnmarshallingCheckImageTask(data, result.get());
-    EXPECT_TRUE(ret == false);
-}
-
-/**
-* @tc.name: UnmarshallingCheckImageTask006
-* @tc.desc: success to read data
-* @tc.type: FUNC
-* @tc.require: NA
-*/
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckImageTask006, TestSize.Level0)
-{
-    Parcel data;
-    OHOS::sptr pixelMap = new AVSessionPixelMap();
-    OHOS::sptr pixelMap2 = new AVSessionPixelMap();
-    OHOS::sptr pixelMap3 = new AVSessionPixelMap();
-    data.WriteParcelable(pixelMap);
-    data.WriteParcelable(pixelMap2);
-    data.WriteParcelable(pixelMap3);
-    auto result = std::make_shared<AVMetaData>();
-    std::string bitStr = std::string(26, '1');
-    bitStr[24] = '0';
-    std::bitset<26> bits(bitStr);
-    result->metaMask_ = bits;
-    bool ret = AVMetaData::UnmarshallingCheckImageTask(data, result.get());
-    EXPECT_TRUE(ret == true);
-}
-
-/**
-* @tc.name: UnmarshallingCheckParamTask001
-* @tc.desc: success to read data
-* @tc.type: FUNC
-* @tc.require: NA
-*/
-static HWTEST_F(AVMetaDataTest, UnmarshallingCheckParamTask001, TestSize.Level0)
-{
-    Parcel data;
-    auto result = std::make_shared<AVMetaData>();
-    bool ret = AVMetaData::UnmarshallingCheckImageTask(data, result.get());
-    EXPECT_TRUE(ret == true);
-}
-
 } // namespace AVSession
 } // namespace OHOS

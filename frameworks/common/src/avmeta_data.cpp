@@ -19,143 +19,143 @@
 namespace OHOS::AVSession {
 bool AVMetaData::Marshalling(Parcel& parcel) const
 {
-    return parcel.WriteString(metaMask_.to_string()) &&
-        parcel.WriteString(assetId_) &&
-        parcel.WriteString(title_) &&
-        parcel.WriteString(artist_) &&
-        parcel.WriteString(author_) &&
-        parcel.WriteString(avQueueName_) &&
-        parcel.WriteString(avQueueId_) &&
-        parcel.WriteString(avQueueImageUri_) &&
-        parcel.WriteString(album_) &&
-        parcel.WriteString(writer_) &&
-        parcel.WriteString(composer_) &&
-        parcel.WriteInt64(duration_) &&
-        parcel.WriteString(mediaImageUri_) &&
-        parcel.WriteDouble(publishDate_) &&
-        parcel.WriteString(subTitle_) &&
-        parcel.WriteString(description_) &&
-        parcel.WriteString(lyric_) &&
-        parcel.WriteString(singleLyricText_) &&
-        parcel.WriteString(previousAssetId_) &&
-        parcel.WriteString(nextAssetId_) &&
-        parcel.WriteInt32(skipIntervals_) &&
-        parcel.WriteInt32(filter_) &&
-        parcel.WriteInt32(displayTags_) &&
-        WriteDrmSchemes(parcel) &&
-        parcel.WriteParcelable(mediaImage_.get()) &&
-        parcel.WriteParcelable(avQueueImage_.get()) &&
-        parcel.WriteParcelable(bundleIcon_.get());
+    return WriteToParcel(static_cast<MessageParcel&>(parcel));
 }
 
-AVMetaData *AVMetaData::Unmarshalling(Parcel& data)
+bool AVMetaData::WriteToParcel(MessageParcel& parcel) const
 {
-    std::string mask;
-    CHECK_AND_RETURN_RET_LOG(data.ReadString(mask) && mask.length() == META_KEY_MAX, nullptr, "mask not valid");
-    CHECK_AND_RETURN_RET_LOG(mask.find_first_not_of("01") == std::string::npos, nullptr, "mask string not 0 or 1");
-    auto *result = new (std::nothrow) AVMetaData();
-    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVMetaData failed");
-    result->metaMask_ = MetaMaskType(mask);
+    int mediaImageLength = 0;
+    std::vector<uint8_t> mediaImageBuffer;
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = GetMediaImage();
+    if (mediaPixelMap != nullptr) {
+        mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
+        mediaImageLength = static_cast<int>(mediaImageBuffer.size());
+        SetMediaLength(mediaImageLength);
+    }
 
-    if (!UnmarshallingCheckParamTask(data, result)) {
-        delete result;
-        result = nullptr;
-        return nullptr;
+    int avQueueImageLength = 0;
+    std::vector<uint8_t> avQueueImageBuffer;
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = GetAVQueueImage();
+    if (avQueuePixelMap != nullptr) {
+        avQueueImageBuffer = avQueuePixelMap->GetInnerImgBuffer();
+        avQueueImageLength = static_cast<int>(avQueueImageBuffer.size());
+        SetAVQueueLength(avQueueImageLength);
     }
-    if (!UnmarshallingCheckImageTask(data, result)) {
-        delete result;
-        result = nullptr;
-        return nullptr;
+    int twoImageLength = mediaImageLength + avQueueImageLength;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(twoImageLength), false, "write twoImageLength failed");
+    CHECK_AND_RETURN_RET_LOG(MarshallingExceptImg(parcel), false, "MarshallingExceptImg failed");
+
+    int32_t maxImageSize = 10 * 1024 *1024;
+    bool isImageValid = twoImageLength > 0 && twoImageLength <= maxImageSize;
+    CHECK_AND_RETURN_RET(isImageValid, true);
+
+    unsigned char *buffer = new (std::nothrow) unsigned char[twoImageLength];
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, false, "new buffer failed");
+    for (int i = 0; i < mediaImageLength; i++) {
+        buffer[i] = mediaImageBuffer[i];
     }
-    return result;
+
+    for (int j = mediaImageLength, k = 0; j < twoImageLength && k < avQueueImageLength; j++, k++) {
+        buffer[j] = avQueueImageBuffer[k];
+    }
+
+    bool retForWriteRawData = parcel.WriteRawData(buffer, twoImageLength);
+    SLOGD("write rawdata ret %{public}d", retForWriteRawData);
+    delete[] buffer;
+    return retForWriteRawData;
 }
 
-bool AVMetaData::UnmarshallingCheckParamTask(Parcel& data, AVMetaData *result)
+AVMetaData *AVMetaData::Unmarshalling(Parcel& in)
 {
-    bool isParamUnsupport = (!data.ReadString(result->assetId_) ||
-        !data.ReadString(result->title_) ||
-        !data.ReadString(result->artist_) ||
-        !data.ReadString(result->author_) ||
-        !data.ReadString(result->avQueueName_) ||
-        !data.ReadString(result->avQueueId_) ||
-        !data.ReadString(result->avQueueImageUri_) ||
-        !data.ReadString(result->album_) ||
-        !data.ReadString(result->writer_) ||
-        !data.ReadString(result->composer_) ||
-        !data.ReadInt64(result->duration_) ||
-        !data.ReadString(result->mediaImageUri_) ||
-        !data.ReadDouble(result->publishDate_) ||
-        !data.ReadString(result->subTitle_) ||
-        !data.ReadString(result->description_) ||
-        !data.ReadString(result->lyric_) ||
-        !data.ReadString(result->singleLyricText_) ||
-        !data.ReadString(result->previousAssetId_) ||
-        !data.ReadString(result->nextAssetId_) ||
-        !data.ReadInt32(result->skipIntervals_) ||
-        !data.ReadInt32(result->filter_) ||
-        !data.ReadInt32(result->displayTags_) ||
-        !ReadDrmSchemes(data, result));
-    if (isParamUnsupport)  {
-        SLOGE("read AVMetaData failed");
-        return false;
+    AVMetaData* metaData = new (std::nothrow) AVMetaData();
+    CHECK_AND_RETURN_RET_LOG(metaData != nullptr, nullptr, "create metaData failed");
+    int twoImageLength = 0;
+    if (in.ReadInt32(twoImageLength)) {
+        SLOGI("read twoImageLength failed");
+        delete metaData;
+        metaData = nullptr;
+        return nullptr;
     }
+    if (metaData->UnmarshallingExceptImg(static_cast<MessageParcel&>(in))) {
+        SLOGI("UnmarshallingExceptImg failed");
+        delete metaData;
+        metaData = nullptr;
+        return nullptr;
+    }
+    int32_t maxImageSize = 10 * 1024 *1024;
+    bool isImageValid = twoImageLength > 0 && twoImageLength <= maxImageSize;
+    CHECK_AND_RETURN_RET(isImageValid, metaData);
+    if (!metaData->ReadFromParcel(static_cast<MessageParcel&>(in), twoImageLength)) {
+        SLOGI("ReadFromParcel failed");
+        delete metaData;
+        metaData = nullptr;
+        return nullptr;
+    }
+    return metaData;
+}
+
+bool AVMetaData::ReadFromParcel(MessageParcel& in, int32_t twoImageLength)
+{
+    const char *buffer = nullptr;
+    buffer = reinterpret_cast<const char *>(in.ReadRawData(twoImageLength));
+    int mediaImageLength = GetMediaLength();
+    CHECK_AND_RETURN_RET_LOG(
+        buffer != nullptr && mediaImageLength > 0 && mediaImageLength <= twoImageLength,
+        ERR_NONE, "readRawData failed");
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> mediaImageBuffer;
+    for (int i = 0; i < mediaImageLength; i++) {
+        mediaImageBuffer.push_back((uint8_t)buffer[i]);
+    }
+    mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
+    SetMediaImage(mediaPixelMap);
+
+    CHECK_AND_RETURN_RET_LOG(twoImageLength > mediaImageLength, true,
+                             "twoImageLength <= mediaImageLengt");
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> avQueueImageBuffer;
+    for (int j = mediaImageLength; j < twoImageLength; j++) {
+        avQueueImageBuffer.push_back((uint8_t)buffer[j]);
+    }
+    avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
+    SetAVQueueImage(avQueuePixelMap);
     return true;
 }
 
-bool AVMetaData::UnmarshallingCheckImageTask(Parcel& data, AVMetaData *result)
+bool AVMetaData::MarshallingExceptImg(MessageParcel& data) const
 {
-    result->mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
-    if (result->metaMask_.test(META_KEY_MEDIA_IMAGE) && result->mediaImage_ == nullptr) {
-        SLOGE("read PixelMap failed");
-        return false;
-    }
-    result->avQueueImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
-    if (result->metaMask_.test(META_KEY_AVQUEUE_IMAGE) && result->avQueueImage_ == nullptr) {
-        SLOGE("read avqueue PixelMap failed");
-        return false;
-    }
-    result->bundleIcon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
-    if (result->metaMask_.test(META_KEY_BUNDLE_ICON) && result->bundleIcon_ == nullptr) {
-        SLOGE("read bundle icon failed");
-        return false;
-    }
-    return true;
-}
-
-bool AVMetaData::MarshallingExceptImg(MessageParcel& data, const AVMetaData metaIn)
-{
-    bool ret = data.WriteString(metaIn.metaMask_.to_string()) &&
-        data.WriteString(metaIn.assetId_) &&
-        data.WriteString(metaIn.title_) &&
-        data.WriteString(metaIn.artist_) &&
-        data.WriteString(metaIn.author_) &&
-        data.WriteString(metaIn.avQueueName_) &&
-        data.WriteString(metaIn.avQueueId_) &&
-        data.WriteString(metaIn.avQueueImageUri_) &&
-        data.WriteString(metaIn.album_) &&
-        data.WriteString(metaIn.writer_) &&
-        data.WriteString(metaIn.composer_) &&
-        data.WriteInt64(metaIn.duration_) &&
-        data.WriteString(metaIn.mediaImageUri_) &&
-        data.WriteDouble(metaIn.publishDate_) &&
-        data.WriteString(metaIn.subTitle_) &&
-        data.WriteString(metaIn.description_) &&
-        data.WriteString(metaIn.lyric_) &&
-        data.WriteString(metaIn.singleLyricText_) &&
-        data.WriteString(metaIn.previousAssetId_) &&
-        data.WriteString(metaIn.nextAssetId_) &&
-        data.WriteInt32(metaIn.skipIntervals_) &&
-        data.WriteInt32(metaIn.filter_) &&
-        data.WriteInt32(metaIn.mediaLength_) &&
-        data.WriteInt32(metaIn.avQueueLength_) &&
-        data.WriteInt32(metaIn.displayTags_) &&
-        data.WriteParcelable(metaIn.bundleIcon_.get());
-        WriteDrmSchemes(data, metaIn);
+    bool ret = data.WriteString(metaMask_.to_string()) &&
+        data.WriteString(assetId_) &&
+        data.WriteString(title_) &&
+        data.WriteString(artist_) &&
+        data.WriteString(author_) &&
+        data.WriteString(avQueueName_) &&
+        data.WriteString(avQueueId_) &&
+        data.WriteString(avQueueImageUri_) &&
+        data.WriteString(album_) &&
+        data.WriteString(writer_) &&
+        data.WriteString(composer_) &&
+        data.WriteInt64(duration_) &&
+        data.WriteString(mediaImageUri_) &&
+        data.WriteDouble(publishDate_) &&
+        data.WriteString(subTitle_) &&
+        data.WriteString(description_) &&
+        data.WriteString(lyric_) &&
+        data.WriteString(singleLyricText_) &&
+        data.WriteString(previousAssetId_) &&
+        data.WriteString(nextAssetId_) &&
+        data.WriteInt32(skipIntervals_) &&
+        data.WriteInt32(filter_) &&
+        data.WriteInt32(mediaLength_) &&
+        data.WriteInt32(avQueueLength_) &&
+        data.WriteInt32(displayTags_) &&
+        data.WriteParcelable(bundleIcon_.get());
+        WriteDrmSchemes(data);
     SLOGD("MarshallingExceptImg without small img ret %{public}d", static_cast<int>(ret));
     return ret;
 }
 
-bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut)
+bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data)
 {
     std::string mask;
     data.ReadString(mask);
@@ -167,40 +167,38 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut
     SLOGD("get mask with %{public}s", mask.c_str());
     for (int32_t i = 0; i < maskSize; ++i) {
         if (mask[i] == '1') {
-            metaOut.metaMask_.flip(maskSize - i - 1);
+            metaMask_.flip(maskSize - i - 1);
         }
     }
 
-    bool ret = !data.ReadString(metaOut.assetId_) ||
-        !data.ReadString(metaOut.title_) ||
-        !data.ReadString(metaOut.artist_) ||
-        !data.ReadString(metaOut.author_) ||
-        !data.ReadString(metaOut.avQueueName_) ||
-        !data.ReadString(metaOut.avQueueId_) ||
-        !data.ReadString(metaOut.avQueueImageUri_) ||
-        !data.ReadString(metaOut.album_) ||
-        !data.ReadString(metaOut.writer_) ||
-        !data.ReadString(metaOut.composer_) ||
-        !data.ReadInt64(metaOut.duration_) ||
-        !data.ReadString(metaOut.mediaImageUri_) ||
-        !data.ReadDouble(metaOut.publishDate_) ||
-        !data.ReadString(metaOut.subTitle_) ||
-        !data.ReadString(metaOut.description_) ||
-        !data.ReadString(metaOut.lyric_) ||
-        !data.ReadString(metaOut.singleLyricText_) ||
-        !data.ReadString(metaOut.previousAssetId_) ||
-        !data.ReadString(metaOut.nextAssetId_) ||
-        !data.ReadInt32(metaOut.skipIntervals_) ||
-        !data.ReadInt32(metaOut.filter_) ||
-        !data.ReadInt32(metaOut.mediaLength_) ||
-        !data.ReadInt32(metaOut.avQueueLength_) ||
-        !data.ReadInt32(metaOut.displayTags_);
-    metaOut.bundleIcon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
-    if (metaOut.metaMask_.test(META_KEY_BUNDLE_ICON) && metaOut.bundleIcon_ == nullptr) {
-        SLOGE("read bundle icon failed");
-        return false;
-    }
-    ret = ret || !ReadDrmSchemes(data, metaOut);
+    bool ret = !data.ReadString(assetId_) ||
+        !data.ReadString(title_) ||
+        !data.ReadString(artist_) ||
+        !data.ReadString(author_) ||
+        !data.ReadString(avQueueName_) ||
+        !data.ReadString(avQueueId_) ||
+        !data.ReadString(avQueueImageUri_) ||
+        !data.ReadString(album_) ||
+        !data.ReadString(writer_) ||
+        !data.ReadString(composer_) ||
+        !data.ReadInt64(duration_) ||
+        !data.ReadString(mediaImageUri_) ||
+        !data.ReadDouble(publishDate_) ||
+        !data.ReadString(subTitle_) ||
+        !data.ReadString(description_) ||
+        !data.ReadString(lyric_) ||
+        !data.ReadString(singleLyricText_) ||
+        !data.ReadString(previousAssetId_) ||
+        !data.ReadString(nextAssetId_) ||
+        !data.ReadInt32(skipIntervals_) ||
+        !data.ReadInt32(filter_) ||
+        !data.ReadInt32(mediaLength_) ||
+        !data.ReadInt32(avQueueLength_) ||
+        !data.ReadInt32(displayTags_);
+    bundleIcon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
+    CHECK_AND_RETURN_RET_LOG(!metaMask_.test(META_KEY_BUNDLE_ICON) || bundleIcon_ != nullptr,
+        false, "read bundle icon failed");
+    ret = ret || !ReadDrmSchemes(data);
     SLOGD("UnmarshallingExceptImg with drm but no small img ret %{public}d", static_cast<int>(ret));
     return ret;
 }
@@ -215,17 +213,17 @@ bool AVMetaData::WriteDrmSchemes(Parcel& parcel) const
     return true;
 }
 
-bool AVMetaData::WriteDrmSchemes(MessageParcel& parcel, const AVMetaData metaData)
+bool AVMetaData::WriteDrmSchemes(MessageParcel& parcel)
 {
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(metaData.drmSchemes_.size()), false,
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(drmSchemes_.size()), false,
         "write drmSchemes size failed");
-    for (auto drmScheme : metaData.drmSchemes_) {
+    for (auto drmScheme : drmSchemes_) {
         CHECK_AND_RETURN_RET_LOG(parcel.WriteString(drmScheme), false, "write drmScheme failed");
     }
     return true;
 }
 
-bool AVMetaData::ReadDrmSchemes(Parcel& parcel, AVMetaData *metaData)
+bool AVMetaData::ReadDrmSchemes(Parcel& parcel, AVMetaData* metaData)
 {
     int32_t drmSchemesLen = 0;
     CHECK_AND_RETURN_RET_LOG(parcel.ReadInt32(drmSchemesLen), false, "read drmSchemesLen failed");
@@ -242,7 +240,7 @@ bool AVMetaData::ReadDrmSchemes(Parcel& parcel, AVMetaData *metaData)
     return true;
 }
 
-bool AVMetaData::ReadDrmSchemes(MessageParcel& parcel, AVMetaData& metaData)
+bool AVMetaData::ReadDrmSchemes(MessageParcel& parcel)
 {
     int32_t drmSchemesLen = 0;
     CHECK_AND_RETURN_RET_LOG(parcel.ReadInt32(drmSchemesLen), false, "read drmSchemesLen failed");
@@ -255,7 +253,7 @@ bool AVMetaData::ReadDrmSchemes(MessageParcel& parcel, AVMetaData& metaData)
         CHECK_AND_RETURN_RET_LOG(parcel.ReadString(drmScheme), false, "read drmScheme failed");
         drmSchemes.emplace_back(drmScheme);
     }
-    metaData.drmSchemes_ = drmSchemes;
+    drmSchemes_ = drmSchemes;
     return true;
 }
 
@@ -533,7 +531,7 @@ int32_t AVMetaData::GetFilter() const
     return filter_;
 }
 
-void AVMetaData::SetMediaLength(int32_t mediaLength)
+void AVMetaData::SetMediaLength(int32_t mediaLength) const
 {
     mediaLength_ = mediaLength;
 }
@@ -543,7 +541,7 @@ int32_t AVMetaData::GetMediaLength() const
     return mediaLength_;
 }
 
-void AVMetaData::SetAVQueueLength(int32_t avQueueLength)
+void AVMetaData::SetAVQueueLength(int32_t avQueueLength) const
 {
     avQueueLength_ = avQueueLength;
 }

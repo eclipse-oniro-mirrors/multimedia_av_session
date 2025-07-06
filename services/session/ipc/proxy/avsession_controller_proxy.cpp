@@ -139,37 +139,9 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetAVMetaData failed");
 
-    int twoImageLength = reply.ReadInt32();
-    if (twoImageLength <= 0 || twoImageLength > maxImageSize) {
-        sptr<AVMetaData> data_ = reply.ReadParcelable<AVMetaData>();
-        CHECK_AND_RETURN_RET_LOG(data_ != nullptr, ERR_UNMARSHALLING, "read AVMetaData failed");
-        data = *data_;
-        return AVSESSION_SUCCESS;
-    }
-
-    AVMetaData::UnmarshallingExceptImg(reply, data);
-    const char *buffer = nullptr;
-    buffer = reinterpret_cast<const char *>(reply.ReadRawData(twoImageLength));
-    if (buffer == nullptr) {
-        SLOGE("read raw data with null, length = %{public}d", twoImageLength);
-        return AVSESSION_SUCCESS;
-    }
-
-    int mediaImageLength = data.GetMediaLength();
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
-    CHECK_AND_RETURN_RET_LOG(mediaPixelMap != nullptr, AVSESSION_ERROR, "mediaPixelMap new fail");
-    SLOGD("change for-loop to vector init");
-    std::vector<uint8_t> mediaImageBuffer(buffer, buffer + mediaImageLength);
-    mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    data.SetMediaImage(mediaPixelMap);
-    
-    if (twoImageLength > mediaImageLength) {
-        std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
-        CHECK_AND_RETURN_RET_LOG(avQueuePixelMap != nullptr, AVSESSION_ERROR, "avQueuePixelMap new fail");
-        std::vector<uint8_t> avQueueImageBuffer(buffer + mediaImageLength, buffer + twoImageLength);
-        avQueuePixelMap->SetInnerImgBuffer(avQueueImageBuffer);
-        data.SetAVQueueImage(avQueuePixelMap);
-    }
+    sptr<AVMetaData> data_ = reply.ReadParcelable<AVMetaData>();
+    CHECK_AND_RETURN_RET_LOG(data_ != nullptr, ERR_UNMARSHALLING, "read AVMetaData failed");
+    data = *data_;
     return AVSESSION_SUCCESS;
 }
 

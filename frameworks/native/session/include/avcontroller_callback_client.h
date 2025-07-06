@@ -16,7 +16,7 @@
 #ifndef OHOS_AVCONTROLLER_CALLBACK_CLIENT_H
 #define OHOS_AVCONTROLLER_CALLBACK_CLIENT_H
 
-#include "avcontroller_callback_stub.h"
+#include "av_controller_callback_stub.h"
 #include "avsession_info.h"
 
 namespace OHOS::AVSession {
@@ -25,33 +25,33 @@ public:
     explicit AVControllerCallbackClient(const std::shared_ptr<AVControllerCallback>& callback);
     ~AVControllerCallbackClient();
 
-    void OnSessionDestroy() override;
+    ErrCode OnSessionDestroy() override;
 
-    void OnAVCallMetaDataChange(const AVCallMetaData& data) override;
+    ErrCode OnAVCallMetaDataChange(const AVCallMetaData& data) override;
 
-    void OnAVCallStateChange(const AVCallState& state) override;
+    ErrCode OnAVCallStateChange(const AVCallState& state) override;
 
-    void OnPlaybackStateChange(const AVPlaybackState& state) override;
+    ErrCode OnPlaybackStateChange(const AVPlaybackState& state) override;
 
-    void OnMetaDataChange(const AVMetaData& data) override;
+    ErrCode OnMetaDataChange(const AVMetaData& data) override;
 
-    void OnActiveStateChange(bool isActive) override;
+    ErrCode OnActiveStateChange(bool isActive) override;
 
-    void OnValidCommandChange(const std::vector<int32_t>& cmds) override;
+    ErrCode OnValidCommandChange(const std::vector<int32_t>& cmds) override;
 
-    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info) override;
+    ErrCode OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info) override;
 
-    void AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
+    ErrCode AddListenerForPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
-    void RemoveListenerForPlaybackState();
+    ErrCode RemoveListenerForPlaybackState();
 
-    void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
+    ErrCode OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override;
 
-    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override;
+    ErrCode OnQueueItemsChange(const std::vector<AVQueueItem>& items) override;
 
-    void OnQueueTitleChange(const std::string& title) override;
+    ErrCode OnQueueTitleChange(const std::string& title) override;
 
-    void OnExtrasChange(const AAFwk::WantParams& extras) override;
+    ErrCode OnExtrasChange(const AAFwk::WantParams& extras) override;
 
 private:
     std::shared_ptr<AVControllerCallback> callback_;

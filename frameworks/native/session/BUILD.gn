@@ -33,7 +33,6 @@ av_session_ohos_library("avsession_client") {
     "../../../services/session/ipc/proxy/avsession_controller_proxy.cpp",
     "../../../services/session/ipc/proxy/avsession_proxy.cpp",
     "../../../services/session/ipc/proxy/avsession_service_proxy.cpp",
-    "../../../services/session/ipc/stub/avcontroller_callback_stub.cpp",
   ]
 
   client_sources = [
@@ -131,7 +130,6 @@ ohos_shared_library("avsession_cast_client") {
   }
   ipc_sources = [
     "../../../services/session/ipc/proxy/avcast_controller_proxy.cpp",
-    "../../../services/session/ipc/stub/avcast_controller_callback_stub.cpp",
   ]
 
   client_sources = [ "src/avcast_controller_callback_client.cpp" ]

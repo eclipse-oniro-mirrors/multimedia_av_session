@@ -536,7 +536,7 @@ napi_value NapiAVCastController::GetRecommendedResolutionLevel(napi_env env, nap
     };
 
     auto complete = [env, context](napi_value& output) {
-        context->status = NapiUtils::SetValue(env, context->resolutionLevel, output);
+        context->status = NapiUtils::SetValue(env, static_cast<int32_t>(context->resolutionLevel), output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };

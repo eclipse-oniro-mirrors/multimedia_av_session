@@ -34,12 +34,6 @@ using namespace OHOS::AVSession;
 static uint64_t g_selfTokenId = 0;
 static std::string g_errLog;
 
-static void MyLogCallback(const LogType type, const LogLevel level,
-    const unsigned int domain, const char *tag, const char *msg)
-{
-    g_errLog = msg;
-}
-
 static HapInfoParams g_info = {
     .userID = 100,
     .bundleName = "ohos.permission_test.demo",
@@ -712,24 +706,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, HandleStartDeviceLogging001,
 }
 
 /**
- * @tc.name: MarshallingAVQueueInfos001
- * @tc.desc: Test MarshallingAVQueueInfos
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceStubPermissionTest, MarshallingAVQueueInfos001, TestSize.Level0)
-{
-    SLOGI("MarshallingAVQueueInfos001 begin!");
-    LOG_SetCallback(MyLogCallback);
-    AVSessionServiceStubDemo avsessionservicestub;
-    OHOS::MessageParcel reply;
-    AVQueueInfo aVQueueInfo;
-    std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
-    avsessionservicestub.MarshallingAVQueueInfos(reply, avQueueInfos);
-    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("MarshallingAVQueueInfos001 end!");
-}
-
-/**
  * @tc.name: GetAVQueueInfosImgLength002
  * @tc.desc: Test GetAVQueueInfosImgLength
  * @tc.type: FUNC
@@ -747,46 +723,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, GetAVQueueInfosImgLength002,
     int ret = avsessionservicestub.GetAVQueueInfosImgLength(avQueueInfos);
     EXPECT_EQ(ret, 3);
     SLOGI("GetAVQueueInfosImgLength002 end!");
-}
-
-/**
- * @tc.name: AVQueueInfoImgToBuffer001
- * @tc.desc: Test AVQueueInfoImgToBuffer
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer001, TestSize.Level0)
-{
-    SLOGI("AVQueueInfoImgToBuffer001 begin!");
-    LOG_SetCallback(MyLogCallback);
-    AVSessionServiceStubDemo avsessionservicestub;
-    AVQueueInfo aVQueueInfo;
-    std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
-    unsigned char *buffer = new unsigned char[255];
-    avsessionservicestub.AVQueueInfoImgToBuffer(avQueueInfos, buffer);
-    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("AVQueueInfoImgToBuffer001 end!");
-}
-
-/**
- * @tc.name: AVQueueInfoImgToBuffer002
- * @tc.desc: Test AVQueueInfoImgToBuffer
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer002, TestSize.Level0)
-{
-    SLOGI("AVQueueInfoImgToBuffer002 begin!");
-    LOG_SetCallback(MyLogCallback);
-    AVSessionServiceStubDemo avsessionservicestub;
-    AVQueueInfo aVQueueInfo;
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
-    std::vector<uint8_t> imgBuffer = {1, 2, 3};
-    mediaPixelMap->SetInnerImgBuffer(imgBuffer);
-    aVQueueInfo.SetAVQueueImage(mediaPixelMap);
-    std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
-    unsigned char *buffer = new unsigned char[255];
-    avsessionservicestub.AVQueueInfoImgToBuffer(avQueueInfos, buffer);
-    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("AVQueueInfoImgToBuffer002 end!");
 }
 
 /**
