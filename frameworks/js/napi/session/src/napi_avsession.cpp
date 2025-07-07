@@ -1915,6 +1915,9 @@ napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* na
 
 napi_status NapiAVSession::OffCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_SEND_COMMON_COMMAND, callback);
 }
 
