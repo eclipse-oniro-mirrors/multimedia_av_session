@@ -1077,6 +1077,7 @@ static HWTEST_F(AVSessionServiceTestSecond, PlayStateCheck002, TestSize.Level0)
     RendererState rendererState = RendererState::RENDERER_RUNNING;
     g_AVSessionService->PlayStateCheck(1, streamUsage, rendererState);
     EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    avsessionHere->Destroy();
     SLOGD("PlayStateCheck002 end!");
 }
 
@@ -1424,10 +1425,12 @@ static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigr
 {
     SLOGD("NotifyLocalFrontSessionChangeForMigrate001 begin!");
     std::string networkId = "test";
+    OHOS::DistributedHardware::DmDeviceInfo localDevice;
     g_AVSessionService->migrateAVSessionServerMap_.insert({networkId, nullptr});
 
     std::string localFrontSessionIdUpdate = "test";
     g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionIdUpdate);
+    g_AVSessionService->DoDisconnectProcessWithMigrateServer(localDevice);
     EXPECT_TRUE(g_AVSessionService != nullptr);
     SLOGD("NotifyLocalFrontSessionChangeForMigrate001 end!");
 }
@@ -1515,17 +1518,27 @@ static HWTEST_F(AVSessionServiceTestSecond, checkEnableCast001, TestSize.Level0)
 */
 static HWTEST_F(AVSessionServiceTestSecond, StopCast001, TestSize.Level0)
 {
-    auto avsessionHere = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    auto avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("StopCast001 but sessionPre exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
+    auto avsessionHere = CreateSession();
     ASSERT_TRUE(avsessionHere != nullptr);
+    g_AVSessionService->migrateAVSessionServerMap_.clear();
 
-    g_AVSessionService->GetUsersManager().GetContainerFromAll().AddSession(
-        getpid(), g_testAnotherAbilityName, avsessionHere);
     avsessionHere->descriptor_.sessionTag_ = "RemoteCast";
     SessionToken sessionToken;
     sessionToken.sessionId = avsessionHere->GetSessionId();
     g_AVSessionService->isInCast_ = false;
     auto ret = g_AVSessionService->StopCast(sessionToken);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avsessionHere->Destroy();
+    avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("StopCast001 but sessionPre still exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
 }
 
 /**
@@ -1536,13 +1549,24 @@ static HWTEST_F(AVSessionServiceTestSecond, StopCast001, TestSize.Level0)
 */
 static HWTEST_F(AVSessionServiceTestSecond, MirrorToStreamCast001, TestSize.Level0)
 {
-    auto avsessionHere = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    auto avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("MirrorToStreamCast001 but sessionPre exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
+    auto avsessionHere = CreateSession();
     ASSERT_TRUE(avsessionHere != nullptr);
     g_AVSessionService->isSupportMirrorToStream_ = true;
     g_AVSessionService->castServiceNameStatePair_.second = "CONNECT_SUCC";
     g_AVSessionService->is2in1_ = false;
     auto ret = g_AVSessionService->MirrorToStreamCast(avsessionHere);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avsessionHere->Destroy();
+    avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("MirrorToStreamCast001 but sessionPre still exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
 }
 
 /**
@@ -1746,9 +1770,14 @@ static HWTEST_F(AVSessionServiceTestSecond, UpdateFrontSession005, TestSize.Leve
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
+    auto avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("StopCast001 but sessionPre exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
     OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
         g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
-    EXPECT_EQ(avsessionHere != nullptr, true);
+    ASSERT_TRUE(avsessionHere != nullptr);
     g_AVSessionService->UpdateTopSession(avsessionHere);
     g_AVSessionService->topSession_->SetUid(AVSESSION_ERROR);
     g_AVSessionService->UpdateFrontSession(avsessionHere, false);

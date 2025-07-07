@@ -2003,10 +2003,13 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
     cJSON* valuesArray = cJSON_Parse(oldContent.c_str());
     CHECK_AND_RETURN_RET_LOG(valuesArray != nullptr, false, "json parse get nullptr");
     if (cJSON_IsInvalid(valuesArray) || !cJSON_IsArray(valuesArray)) {
-        SLOGE("get value array invalid");
+        SLOGE("get value array invalid but createNew");
         cJSON_Delete(valuesArray);
-        return false;
+        valuesArray = nullptr;
+        valuesArray = cJSON_CreateArray();
+        CHECK_AND_RETURN_RET_LOG(valuesArray != nullptr, false, "create array json again fail");
     }
+
     int arraySize = cJSON_GetArraySize(valuesArray);
     for (int i = arraySize - 1; i >= 0; i--) {
         cJSON* valueItem = cJSON_GetArrayItem(valuesArray, i);
