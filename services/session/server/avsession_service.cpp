@@ -2768,9 +2768,12 @@ int32_t AVSessionService::Close(void)
 void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
 {
     ClearClientResources(pid, true);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVRouter::GetInstance().IsStopCastDiscovery(pid);
     if (BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == MEDIA_CONTROL_BUNDLENAME) {
         ReleaseCastSession();
     }
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     AVSessionSysEvent::GetInstance().ReportPlayingState(
         BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid));
