@@ -1182,7 +1182,7 @@ HWTEST_F(AVCastControllerTest, onDataSrcRead003, TestSize.Level1)
     int64_t pos = 0;
     int32_t result = 0;
     auto ret = castController_->onDataSrcRead(memory, length, pos, result);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 
 /**

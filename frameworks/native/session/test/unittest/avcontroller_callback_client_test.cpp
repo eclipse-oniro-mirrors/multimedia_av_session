@@ -108,7 +108,7 @@ HWTEST_F(AVControllerCallbackClientTest, OnAVCallMetaDataChange001, TestSize.Lev
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVControllerCallbackClientTest, OnAVCallstateChange001, TestSize.Level0)
+HWTEST_F(AVControllerCallbackClientTest, OnAVCallStateChange001, TestSize.Level0)
 {
     std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
     std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =

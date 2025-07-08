@@ -147,10 +147,7 @@ public:
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
     virtual int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
-        int64_t pos, int32_t& result)
-    {
-        return 0;
-    };
+        int64_t pos, int32_t& result) = 0;
 
     /**
      * @brief Deconstruct SessionListener.
@@ -463,10 +460,7 @@ public:
     virtual void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) = 0;
 
     virtual int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
-        int64_t pos, int32_t& result)
-    {
-        return 0;
-    };
+        int64_t pos, int32_t& result) = 0;
 
     /**
      * @brief Deconstruct AVControllerCallback.

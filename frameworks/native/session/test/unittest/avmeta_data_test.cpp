@@ -249,14 +249,14 @@ HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling001, TestSize.Level0)
 }
 
 /**
- * @tc.name: AVMetaDataUnmarshalling002
- * @tc.desc: metadata unmarshalling test
+ * @tc.name: AVMetaDataMarshalling002
+ * @tc.desc: metadata marshalling test
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling002, TestSize.Level0)
+HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling002, TestSize.Level0)
 {
-    SLOGI("AVMetaDataUnmarshalling002 Begin");
+    SLOGI("AVMetaDataMarshalling002 Begin");
     OHOS::Parcel& parcel = g_parcel;
     g_metaData.SetAVQueueImage(nullptr);
     auto ret = g_metaData.Marshalling(parcel);
@@ -264,18 +264,18 @@ HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling002, TestSize.Level0)
     OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
     g_metaData.WriteDrmSchemes(m_parcel);
     g_metaData.ReadDrmSchemes(m_parcel);
-    SLOGI("AVMetaDataUnmarshalling002 End");
+    SLOGI("AVMetaDataMarshalling002 End");
 }
 
 /**
- * @tc.name: AVMetaDataUnmarshalling003
- * @tc.desc: metadata unmarshalling test
+ * @tc.name: AVMetaDataMarshalling003
+ * @tc.desc: metadata marshalling test
  * @tc.type: FUNC
  * @tc.require:AR000H31JO
  */
-HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling003, TestSize.Level0)
+HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling003, TestSize.Level0)
 {
-    SLOGI("AVMetaDataUnmarshalling003 Begin");
+    SLOGI("AVMetaDataMarshalling003 Begin");
     OHOS::Parcel& parcel = g_parcel;
     auto pixelMap = std::make_shared<AVSessionPixelMap>();
     g_metaData.SetAVQueueImage(pixelMap);
@@ -284,7 +284,67 @@ HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling003, TestSize.Level0)
     OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
     g_metaData.WriteDrmSchemes(m_parcel);
     g_metaData.ReadDrmSchemes(m_parcel);
-    SLOGI("AVMetaDataUnmarshalling003 End");
+    SLOGI("AVMetaDataMarshalling003 End");
+}
+
+/**
+ * @tc.name: AVMetaDataMarshalling004
+ * @tc.desc: metadata marshalling test
+ * @tc.type: FUNC
+ * @tc.require:AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling004, TestSize.Level0)
+{
+    SLOGI("AVMetaDataMarshalling004 Begin");
+    OHOS::Parcel& parcel = g_parcel;
+    auto pixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> vec = {0, 1, 0, 1};
+    pixelMap->SetInnerImgBuffer(vec);
+    g_metaData.SetMediaImage(pixelMap);
+    g_metaData.SetAVQueueImage(pixelMap);
+    auto ret = g_metaData.Marshalling(parcel);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVMetaDataMarshalling004 End");
+}
+
+/**
+ * @tc.name: AVMetaDataMarshalling005
+ * @tc.desc: metadata marshalling test
+ * @tc.type: FUNC
+ * @tc.require:AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling005, TestSize.Level0)
+{
+    SLOGI("AVMetaDataMarshalling005 Begin");
+    OHOS::Parcel& parcel = g_parcel;
+    auto pixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> vec = {0, 1, 0, 1};
+    pixelMap->SetInnerImgBuffer(vec);
+    g_metaData.SetMediaImage(pixelMap);
+    g_metaData.SetAVQueueImage(nullptr);
+    auto ret = g_metaData.Marshalling(parcel);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVMetaDataMarshalling005 End");
+}
+
+/**
+ * @tc.name: AVMetaDataMarshalling006
+ * @tc.desc: metadata marshalling test
+ * @tc.type: FUNC
+ * @tc.require:AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataMarshalling006, TestSize.Level0)
+{
+    SLOGI("AVMetaDataMarshalling006 Begin");
+    OHOS::Parcel& parcel = g_parcel;
+    auto pixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> vec = {0, 1, 0, 1};
+    pixelMap->SetInnerImgBuffer(vec);
+    g_metaData.SetMediaImage(nullptr);
+    g_metaData.SetAVQueueImage(pixelMap);
+    auto ret = g_metaData.Marshalling(parcel);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVMetaDataMarshalling006 End");
 }
 
 /**

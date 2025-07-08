@@ -65,12 +65,12 @@ void AVCastControllerCallbackClientTest::TearDown()
 {}
 
 /**
-* @tc.name: OnCastPlayStateChange001
-* @tc.desc: test OnCastPlayStateChange
+* @tc.name: OnCastPlaybackStateChange001
+* @tc.desc: test OnCastPlaybackStateChange
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVCastControllerCallbackClientTest, OnCastPlayStateChange001, TestSize.Level1)
+HWTEST_F(AVCastControllerCallbackClientTest, OnCastPlaybackStateChange001, TestSize.Level1)
 {
     std::shared_ptr<AVCastControllerCallback> controllerCallback = std::make_shared<AVCastControllerCallbackImpl>();
     std::shared_ptr<AVCastControllerCallbackClient> controllerCallbackClient =
@@ -260,5 +260,5 @@ HWTEST_F(AVCastControllerCallbackClientTest, onDataSrcRead001, TestSize.Level1)
     int32_t result = 0;
     controllerCallbackClient->onDataSrcRead(mem, length, pos, result);
 }
-}
-}
+} // namespace AVSESSION
+} // namespace OHOS

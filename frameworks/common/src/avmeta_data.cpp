@@ -41,7 +41,7 @@ bool AVMetaData::WriteToParcel(MessageParcel& parcel) const
         avQueueImageLength = static_cast<int>(avQueueImageBuffer.size());
         SetAVQueueLength(avQueueImageLength);
     }
-    int twoImageLength = mediaImageLength + avQueueImageLength;
+    int32_t twoImageLength = mediaImageLength + avQueueImageLength;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(twoImageLength), false, "write twoImageLength failed");
     CHECK_AND_RETURN_RET_LOG(MarshallingExceptImg(parcel), false, "MarshallingExceptImg failed");
 
@@ -70,7 +70,7 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& in)
     AVMetaData* metaData = new (std::nothrow) AVMetaData();
     CHECK_AND_RETURN_RET_LOG(metaData != nullptr, nullptr, "create metaData failed");
     int twoImageLength = 0;
-    if (in.ReadInt32(twoImageLength)) {
+    if (!in.ReadInt32(twoImageLength)) {
         SLOGI("read twoImageLength failed");
         delete metaData;
         metaData = nullptr;
@@ -100,8 +100,8 @@ bool AVMetaData::ReadFromParcel(MessageParcel& in, int32_t twoImageLength)
     buffer = reinterpret_cast<const char *>(in.ReadRawData(twoImageLength));
     int mediaImageLength = GetMediaLength();
     CHECK_AND_RETURN_RET_LOG(
-        buffer != nullptr && mediaImageLength > 0 && mediaImageLength <= twoImageLength,
-        ERR_NONE, "readRawData failed");
+        buffer != nullptr && mediaImageLength >= 0 && mediaImageLength <= twoImageLength,
+        false, "readRawData failed");
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> mediaImageBuffer;
     for (int i = 0; i < mediaImageLength; i++) {
@@ -111,7 +111,7 @@ bool AVMetaData::ReadFromParcel(MessageParcel& in, int32_t twoImageLength)
     SetMediaImage(mediaPixelMap);
 
     CHECK_AND_RETURN_RET_LOG(twoImageLength > mediaImageLength, true,
-                             "twoImageLength <= mediaImageLengt");
+                             "twoImageLength <= mediaImageLength");
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> avQueueImageBuffer;
     for (int j = mediaImageLength; j < twoImageLength; j++) {
