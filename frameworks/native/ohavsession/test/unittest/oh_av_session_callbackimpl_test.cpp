@@ -569,8 +569,10 @@ HWTEST_F(OHAVSessionCallbackImplTest, OnSetTargetLoopMode001, TestSize.Level0)
     int userData = 1;
     AVSession_LoopMode loopMode = LOOP_MODE_SINGLE;
     g_ohAVSessionCallbackImpl.OnSetTargetLoopMode(loopMode);
-    g_ohAVSessionCallbackImpl.SetPlayCallback(avsession, command, callback, (void *)(&userData));
-    AVSession_ErrCode ret = g_ohAVSessionCallbackImpl.UnSetPlayCallback(
+    AVSession_ErrCode ret = g_ohAVSessionCallbackImpl.SetPlayCallback(avsession, command,
+        callback, (void *)(&userData));
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = g_ohAVSessionCallbackImpl.UnSetPlayCallback(
         avsession, command, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     SLOGI("OnSetTargetLoopMode001 End");

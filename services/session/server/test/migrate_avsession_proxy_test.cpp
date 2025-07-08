@@ -605,12 +605,12 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level0)
 }
 
 /**
- * @tc.name: ProcessBundleImg004
+ * @tc.name: PrepareSessionFromRemote_WhenTargetLoopModeSet_Success
  * @tc.desc: test the member of ProcessBundleImg
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg004, TestSize.Level0)
+static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenTargetLoopModeSet_Success, TestSize.Level0)
 {
     int32_t targetLoopMode = 0;
     std::string bundleIconStr = "";
@@ -618,8 +618,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessBundleImg004, TestSize.Level0)
     g_AVSessionObserver->OnSetTargetLoopMode(targetLoopMode);
     ASSERT_TRUE(g_MigrateAVSessionProxy != nullptr);
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
-    g_MigrateAVSessionProxy->ProcessBundleImg(bundleIconStr);
+    EXPECT_NE(g_MigrateAVSessionProxy->remoteSession_, nullptr);
 }
 
 /**
