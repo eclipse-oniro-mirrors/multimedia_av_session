@@ -1413,7 +1413,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
 
 void AVSessionItem::DealLocalState(int32_t castState)
 {
-    if (castState == ConnectionState::STATE_DISCONNECTED) {
+    if (castState == static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED)) {
         if (!isSwitchNewDevice_) {
             OutputDeviceInfo outputDeviceInfo;
             DeviceInfo deviceInfo;

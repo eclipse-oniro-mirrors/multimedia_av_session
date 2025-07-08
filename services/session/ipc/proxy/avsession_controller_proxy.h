@@ -89,7 +89,6 @@ private:
     AVPlaybackState currentState_;
     bool isDestroy_ = false;
     const int32_t maxItemNumber = 1000;
-    const int32_t maxImageSize = 10 * 1024 * 1024;
 
     std::recursive_mutex controllerProxyLock_;
     sptr<AVControllerCallbackClient> callback_;

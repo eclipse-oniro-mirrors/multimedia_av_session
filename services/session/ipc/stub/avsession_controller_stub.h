@@ -88,8 +88,6 @@ private:
     static bool CheckInterfaceToken(MessageParcel& data);
 
     virtual void DoMetadataImgClean(AVMetaData& data) = 0;
-    
-    static int32_t DoMetadataGetReplyInStub(AVMetaData& metaData, MessageParcel& reply);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
     std::map<uint32_t, HandlerFunc> handlers = {

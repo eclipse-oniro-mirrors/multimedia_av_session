@@ -193,7 +193,8 @@ public:
     
     void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) override;
 
-    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos) override;
+    int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
+                          uint32_t length, int64_t pos, int32_t& result) override;
 
     ~AVCastControllerCallbackImpl() override;
 
@@ -249,7 +250,8 @@ void AVCastControllerCallbackImpl::OnCastValidCommandChanged(const std::vector<i
 {
 }
 
-int32_t AVCastControllerCallbackImpl::onDataSrcRead(std::shared_ptr<AVSharedMemory>mem, uint32_t length, int64_t pos)
+int32_t AVCastControllerCallbackImpl::onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
+                                                    uint32_t length, int64_t pos, int32_t& result)
 {
     return 0;
 }
@@ -1135,10 +1137,11 @@ HWTEST_F(AVCastControllerTest, onDataSrcRead001, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
     castController_->callback_ = nullptr;
-    std::shared_ptr<AVSharedMemory> mem = nullptr;
+    std::shared_ptr<AVSharedMemoryBase> mem = nullptr;
     uint32_t length = 0;
     int64_t pos = 0;
-    castController_->onDataSrcRead(mem, length, pos);
+    int32_t result = 0;
+    castController_->onDataSrcRead(mem, length, pos, result);
     EXPECT_TRUE(castController_->callback_ == nullptr);
 }
 
@@ -1152,10 +1155,11 @@ HWTEST_F(AVCastControllerTest, onDataSrcRead002, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
     castController_->callback_ = g_AVCastControllerCallbackProxy;
-    std::shared_ptr<AVSharedMemory> mem = nullptr;
+    std::shared_ptr<AVSharedMemoryBase> mem = nullptr;
     uint32_t length = 0;
     int64_t pos = 0;
-    castController_->onDataSrcRead(mem, length, pos);
+    int32_t result = 0;
+    castController_->onDataSrcRead(mem, length, pos, result);
     EXPECT_TRUE(castController_->callback_ != nullptr);
 }
 
@@ -1176,7 +1180,8 @@ HWTEST_F(AVCastControllerTest, onDataSrcRead003, TestSize.Level1)
     auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
     uint32_t length = 2;
     int64_t pos = 0;
-    auto ret = castController_->onDataSrcRead(memory, length, pos);
+    int32_t result = 0;
+    auto ret = castController_->onDataSrcRead(memory, length, pos, result);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 

@@ -19,10 +19,12 @@
 #include <string>
 #include "av_shared_memory.h"
 #include "nocopyable.h"
+#include "iremote_proxy.h"
 
 namespace OHOS {
 namespace AVSession {
-class __attribute__((visibility("default"))) AVSharedMemoryBase : public AVSharedMemory, public NoCopyable {
+class __attribute__((visibility("default"))) AVSharedMemoryBase :
+    public AVSharedMemory, public NoCopyable, public Parcelable {
 public:
     /**
      * @brief Construct a new AVSharedMemoryBase object. This function should only be used in the
@@ -32,7 +34,7 @@ public:
      * @param flags the memory's accessible flags, refer to {@AVSharedMemoryBase::Flags}.
      * @param name the debug string
      */
-    static std::shared_ptr<AVSharedMemory> CreateFromLocal(int32_t size, uint32_t flags, const std::string &name);
+    static std::shared_ptr<AVSharedMemoryBase> CreateFromLocal(int32_t size, uint32_t flags, const std::string &name);
 
     /**
      * @brief Construct a new AVSharedMemoryBase object. This function should only be used in the
@@ -40,10 +42,10 @@ public:
      *
      * @param fd the memory's fdInit()
      * @param size the memory's size, bytes.
-     * @param flags the memory's accessible flags, refer to {@AVSharedMemory::Flags}.
+     * @param flags the memory's accessible flags, refer to {@AVSharedMemoryBase::Flags}.
      * @param name the debug string
      */
-    static std::shared_ptr<AVSharedMemory> CreateFromRemote(int32_t fd, int32_t size, uint32_t flags,
+    static std::shared_ptr<AVSharedMemoryBase> CreateFromRemote(int32_t fd, int32_t size, uint32_t flags,
                                                             const std::string &name);
 
     ~AVSharedMemoryBase();
@@ -53,10 +55,16 @@ public:
      * local process.
      *
      * @param size the memory's size, bytes.
-     * @param flags the memory's accessible flags, refer to {@AVSharedMemory::Flags}.
+     * @param flags the memory's accessible flags, refer to {@AVSharedMemoryBase::Flags}.
      * @param name the debug string
      */
     AVSharedMemoryBase(int32_t size, uint32_t flags, const std::string &name);
+
+    /**
+     * @brief Construct a new AVSharedMemoryBase object. This function should only be used in the
+     * local process.
+     */
+    AVSharedMemoryBase() {};
 
     /**
      * @brief Intialize the memory. Call this interface firstly before the other interface.
@@ -114,6 +122,11 @@ public:
     {
         return (base_ != nullptr) ? flags_ : 0;
     }
+
+    bool Marshalling(Parcel& out) const override;
+    bool WriteToParcel(MessageParcel& out) const;
+    bool ReadFromParcel(MessageParcel& in);
+    static AVSharedMemoryBase* Unmarshalling(Parcel& in);
 
 protected:
     AVSharedMemoryBase(int32_t fd, int32_t size, uint32_t flags, const std::string &name);

@@ -188,38 +188,6 @@ int32_t AVSessionServiceProxy::GetHistoricalSessionDescriptors(int32_t maxSize,
     return ret;
 }
 
-void AVSessionServiceProxy::UnMarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos)
-{
-    uint32_t size {};
-    CHECK_AND_RETURN_LOG(reply.ReadUint32(size), "UnMarshallingAVQueueInfos size failed");
-    CHECK_AND_RETURN_LOG(size, "UnMarshallingAVQueueInfos size=0");
-
-    for (uint32_t i = 0; i < size; i++) {
-        AVQueueInfo avQueueInfo;
-        avQueueInfo.SetBundleName(reply.ReadString());
-        avQueueInfo.SetAVQueueName(reply.ReadString());
-        avQueueInfo.SetAVQueueId(reply.ReadString());
-        avQueueInfo.SetAVQueueImageUri(reply.ReadString());
-        avQueueInfo.SetAVQueueLength(reply.ReadUint32());
-        avQueueInfos.push_back(avQueueInfo);
-    }
-}
-
-void AVSessionServiceProxy::BufferToAVQueueInfoImg(const char *buffer, std::vector<AVQueueInfo>& avQueueInfos)
-{
-    int k = 0;
-    for (auto& avQueueInfo : avQueueInfos) {
-        std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
-        std::vector<uint8_t> imgBuffer;
-        int avQueueLength = avQueueInfo.GetAVQueueLength();
-        for (int i = 0; i < avQueueLength; i++, k++) {
-            imgBuffer.push_back((uint8_t)buffer[k]);
-        }
-        pixelMap->SetInnerImgBuffer(imgBuffer);
-        avQueueInfo.SetAVQueueImage(pixelMap);
-    }
-}
-
 int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
     std::vector<AVQueueInfo>& avQueueInfos)
 {
@@ -245,29 +213,18 @@ int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_
     if (ret != AVSESSION_SUCCESS) {
         return ret;
     }
-    int bufferLength = reply.ReadInt32();
-    if (bufferLength == 0) {
-        uint32_t size {};
-        CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
-        CHECK_AND_RETURN_RET_LOG(size, ret, "size=0");
-
-        std::vector<AVQueueInfo> result(size);
-        for (auto& avQueueInfo : result) {
-            CHECK_AND_RETURN_RET_LOG(avQueueInfo.Unmarshalling(reply), ERR_UNMARSHALLING, "read avQueueInfo failed");
-        }
-        avQueueInfos = result;
-        return ret;
+    uint32_t size {};
+    CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
+    CHECK_AND_RETURN_RET_LOG(size, ret, "size = 0");
+    std::vector<AVQueueInfo> result(size);
+    for (auto& avQueueInfo : result) {
+        AVQueueInfo* temp = reply.ReadParcelable<AVQueueInfo>();
+        CHECK_AND_RETURN_RET_LOG(temp != nullptr, ERR_UNMARSHALLING, "read AVQueueInfo failed");
+        avQueueInfo = *temp;
+        delete temp;
     }
-    UnMarshallingAVQueueInfos(reply, avQueueInfos);
-    const char *buffer = nullptr;
-    buffer = reinterpret_cast<const char *>(reply.ReadRawData(bufferLength));
-    if (buffer == nullptr) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
-        SLOGE("read raw data failed, length = %{public}d", bufferLength);
-        return AVSESSION_ERROR;
-    }
-    BufferToAVQueueInfoImg(buffer, avQueueInfos);
-    return AVSESSION_SUCCESS;
+    avQueueInfos = result;
+    return ret;
 }
 
 int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
@@ -754,7 +711,8 @@ int32_t AVSessionServiceProxy::GetDistributedSessionControllersInner(const Distr
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_UNMARSHALLING,
                              "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionType), ERR_UNMARSHALLING, "write sessionType failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(static_cast<int32_t>(sessionType)),
+                             ERR_UNMARSHALLING, "write sessionType failed");
 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");

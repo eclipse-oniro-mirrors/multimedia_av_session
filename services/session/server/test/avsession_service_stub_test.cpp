@@ -785,7 +785,7 @@ HWTEST_F(
     SLOGD("AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001 begin!");
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
-    data.WriteInt32(DistributedSessionType::TYPE_SESSION_REMOTE);
+    data.WriteInt32(static_cast<int32_t>(DistributedSessionType::TYPE_SESSION_REMOTE));
     AVSessionServiceStubPerDemo stub;
     int32_t result = stub.HandleGetDistributedSessionControllersInner(data, reply);
     EXPECT_EQ(result, OHOS::ERR_NONE);

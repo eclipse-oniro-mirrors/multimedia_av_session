@@ -17,7 +17,7 @@
 #define OHOS_AVCAST_CONTROLLER_ITEM_H
 
 #include "i_avcast_controller_proxy.h"
-#include "avcast_controller_callback_proxy.h"
+#include "av_cast_controller_callback_proxy.h"
 #include "avcast_controller_stub.h"
 #include "avcast_control_command.h"
 #include "av_shared_memory_base.h"
@@ -56,7 +56,8 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
 
-    int32_t onDataSrcRead(std::shared_ptr<AVSharedMemory> mem, uint32_t length, int64_t pos) override;
+    int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
+                          uint32_t length, int64_t pos, int32_t& result) override;
 
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 

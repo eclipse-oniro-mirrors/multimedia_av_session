@@ -70,18 +70,54 @@ void AVControllerItemTest::TearDown()
 {}
 
 class IAVControllerCallbackTest : public IAVControllerCallback {
-    void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override {};
-    void OnAVCallStateChange(const AVCallState& avCallState) override {};
-    void OnSessionDestroy() override {};
-    void OnPlaybackStateChange(const AVPlaybackState& state) override {};
-    void OnMetaDataChange(const AVMetaData& data) override {};
-    void OnActiveStateChange(bool isActive) override {};
-    void OnValidCommandChange(const std::vector<int32_t>& cmds) override {};
-    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override {};
-    void OnSessionEventChange(const std::string& event, const OHOS::AAFwk::WantParams& args) override {};
-    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override {};
-    void OnQueueTitleChange(const std::string& title) override {};
-    void OnExtrasChange(const OHOS::AAFwk::WantParams& extras) override {};
+    ErrCode OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnAVCallStateChange(const AVCallState& avCallState) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSessionDestroy() override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnPlaybackStateChange(const AVPlaybackState& state) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnMetaDataChange(const AVMetaData& data) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnActiveStateChange(bool isActive) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnValidCommandChange(const std::vector<int32_t>& cmds) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSessionEventChange(const std::string& event, const OHOS::AAFwk::WantParams& ARGS) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnQueueItemsChange(const std::vector<AVQueueItem>& items) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnQueueTitleChange(const std::string& title) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnExtrasChange(const OHOS::AAFwk::WantParams& extras) override
+    {
+        return AVSESSION_SUCCESS;
+    };
     OHOS::sptr<IRemoteObject> AsObject() override
     {
         OHOS::AppExecFwk::ElementName elementName;

@@ -94,7 +94,10 @@ ohos_unittest("MediaInfoHolderTest") {
 ohos_unittest("AVQueueInfoTest") {
   module_out_path = module_output_path
 
-  sources = [ "avqueue_info_test.cpp" ]
+  sources = [
+    "avqueue_info_test.cpp",
+    "avqueue_item_test.cpp",
+  ]
 
   configs = [ ":module_private_config" ]
 
@@ -106,7 +109,10 @@ ohos_unittest("AVQueueInfoTest") {
 ohos_unittest("AVControllerCallbackClientTest") {
   module_out_path = module_output_path
 
-  sources = [ "avcontroller_callback_client_test.cpp" ]
+  sources = [
+    "avcontroller_callback_client_test.cpp",
+    "avcast_controller_callback_client_test.cpp",
+  ]
 
   configs = [ ":module_private_config" ]
 

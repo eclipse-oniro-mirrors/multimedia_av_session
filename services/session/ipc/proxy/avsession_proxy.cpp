@@ -171,58 +171,6 @@ int32_t AVSessionProxy::SetAVCallState(const AVCallState& avCallState)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-
-int32_t AVSessionProxy::GetPixelMapBuffer(AVMetaData& metaData, MessageParcel& data)
-{
-    int mediaImageLength = 0;
-    std::vector<uint8_t> mediaImageBuffer;
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
-    if (mediaPixelMap != nullptr) {
-        mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
-        mediaImageLength = static_cast<int>(mediaImageBuffer.size());
-        metaData.SetMediaLength(mediaImageLength);
-    }
-
-    int avQueueImageLength = 0;
-    std::vector<uint8_t> avQueueImageBuffer;
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData.GetAVQueueImage();
-    if (avQueuePixelMap != nullptr) {
-        avQueueImageBuffer = avQueuePixelMap->GetInnerImgBuffer();
-        avQueueImageLength = static_cast<int>(avQueueImageBuffer.size());
-        metaData.SetAVQueueLength(avQueueImageLength);
-    }
-
-    int twoImageLength = mediaImageLength + avQueueImageLength;
-    if (twoImageLength == 0) {
-        return 0;
-    }
-    
-    unsigned char *buffer = new (std::nothrow) unsigned char[twoImageLength];
-    if (buffer == nullptr) {
-        SLOGE("new buffer failed of length = %{public}d", twoImageLength);
-        return -1;
-    }
-    
-    for (int i = 0; i < mediaImageLength; i++) {
-        buffer[i] = mediaImageBuffer[i];
-    }
-    
-    for (int j = mediaImageLength, k = 0; j < twoImageLength && k < avQueueImageLength; j++, k++) {
-        buffer[j] = avQueueImageBuffer[k];
-    }
-
-    if (!data.WriteInt32(twoImageLength) || !AVMetaData::MarshallingExceptImg(data, metaData)) {
-        SLOGE("fail to write image length & metadata except img");
-        delete[] buffer;
-        return -1;
-    }
-    int32_t retForWriteRawData = data.WriteRawData(buffer, twoImageLength);
-    SLOGI("write img raw data ret %{public}d", retForWriteRawData);
-
-    delete[] buffer;
-    return twoImageLength;
-}
-
 int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetAVMetaData");
@@ -243,26 +191,9 @@ int32_t AVSessionProxy::SetAVMetaData(const AVMetaData& meta)
 
     AVMetaData metaData;
     CHECK_AND_RETURN_RET_LOG(metaData.CopyFrom(meta), AVSESSION_ERROR, "avmetadata CopyFrom error");
-    int twoImageLength = GetPixelMapBuffer(metaData, data);
-    if (twoImageLength == 0) {
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(twoImageLength), ERR_MARSHALLING, "write twoImageLength failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&meta), ERR_MARSHALLING, "write AVMetaData failed");
-        CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) == 0,
-            ERR_IPC_SEND_REQUEST, "send request failed");
-
-        int32_t ret = AVSESSION_ERROR;
-        return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
-    }
-    
-    if (twoImageLength == -1) {
-        SLOGE("fail to write parcel");
-        return AVSESSION_ERROR;
-    }
-
-    if (remote->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) != 0) {
-        SLOGE("send request fail with raw img");
-        return ERR_IPC_SEND_REQUEST;
-    }
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&meta), ERR_MARSHALLING, "write AVMetaData failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_META_DATA, data, reply, option) == 0,
+                             ERR_IPC_SEND_REQUEST, "send request failed");
     SLOGI("set avmetadata done");
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
@@ -302,8 +233,7 @@ int32_t AVSessionProxy::UpdateAVQueueInfo(const AVQueueInfo& info)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(info.MarshallingMessageParcel(data),
-        ERR_MARSHALLING, "Write info failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&info), ERR_MARSHALLING, "Write info failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_UPDATE_QUEUE_INFO, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;

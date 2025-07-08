@@ -153,34 +153,6 @@ int32_t AVSessionServiceStub::GetAVQueueInfosImgLength(std::vector<AVQueueInfo>&
     return sumLength;
 }
 
-
-void AVSessionServiceStub::MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos)
-{
-    CHECK_AND_RETURN_LOG(reply.WriteUint32(avQueueInfos.size()), "MarshallingAVQueueInfos size failed");
-    for (const auto& avQueueInfo : avQueueInfos) {
-        reply.WriteString(avQueueInfo.GetBundleName());
-        reply.WriteString(avQueueInfo.GetAVQueueName());
-        reply.WriteString(avQueueInfo.GetAVQueueId());
-        reply.WriteString(avQueueInfo.GetAVQueueImageUri());
-        reply.WriteUint32(avQueueInfo.GetAVQueueLength());
-    }
-}
-
-void AVSessionServiceStub::AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer)
-{
-    int k = 0;
-    for (auto& avQueueInfo : avQueueInfos) {
-        std::shared_ptr<AVSessionPixelMap> pixelMap = avQueueInfo.GetAVQueueImage();
-        if (pixelMap != nullptr) {
-            std::vector<uint8_t> imgBuffer = pixelMap->GetInnerImgBuffer();
-            int length = avQueueInfo.GetAVQueueLength();
-            for (int i = 0; i< length; i++, k++) {
-                buffer[k] = imgBuffer[i];
-            }
-        }
-    }
-}
-
 int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& data, MessageParcel& reply)
 {
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
@@ -198,34 +170,13 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
     int32_t ret = GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
 
-    int bufferLength = GetAVQueueInfosImgLength(avQueueInfos);
-    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(bufferLength), ERR_NONE, "write buffer length failed");
-    if (bufferLength == 0) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(avQueueInfos.size()), ERR_NONE, "write size failed");
-        for (const auto& avQueueInfo : avQueueInfos) {
-            if (!avQueueInfo.Marshalling(reply)) {
-                SLOGE("write avQueueInfo failed");
-                break;
-            }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(avQueueInfos.size()), ERR_NONE, "write size failed");
+    for (const auto& avQueueInfo : avQueueInfos) {
+        if (reply.WriteParcelable(&avQueueInfo)) {
+            SLOGE("write avQueueInfo failed");
+            break;
         }
-        return ERR_NONE;
     }
-
-    unsigned char *buffer = new (std::nothrow) unsigned char[bufferLength];
-    if (buffer == nullptr) {
-        SLOGE("new buffer failed of length = %{public}d", bufferLength);
-        return AVSESSION_ERROR;
-    }
-
-    MarshallingAVQueueInfos(reply, avQueueInfos);
-    AVQueueInfoImgToBuffer(avQueueInfos, buffer);
-    if (!reply.WriteRawData(buffer, bufferLength)) {
-        SLOGE("fail to write parcel");
-        delete[] buffer;
-        return AVSESSION_ERROR;
-    }
-
-    delete[] buffer;
     return ERR_NONE;
 }
 

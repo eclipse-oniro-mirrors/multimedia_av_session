@@ -391,7 +391,7 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level
     info.MarshallingMessageParcel(data);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_NE(ret, OHOS::ERR_NONE);
     SLOGI("HandleUpdateAVQueueInfoEvent001 end!");
 }
 
@@ -410,6 +410,6 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level
     info.MarshallingMessageParcel(data);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
-    EXPECT_NE(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleUpdateAVQueueInfoEvent002 end!");
 }

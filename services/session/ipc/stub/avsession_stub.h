@@ -61,8 +61,6 @@ private:
 
     int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
-    int32_t SetImageData(AVMetaData& meta, const char *buffer, int twoImageLength);
-
     int32_t HandleSetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetAVPlaybackState(MessageParcel& data, MessageParcel& reply);
@@ -221,7 +219,6 @@ private:
         {SESSION_CMD_SET_AVCALL_STATE, "HandleSetAVCallState"}
     };
 
-    int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
     const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
 };
 }

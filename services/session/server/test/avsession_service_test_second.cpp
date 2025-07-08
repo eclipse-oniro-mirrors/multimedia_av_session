@@ -1577,7 +1577,7 @@ static HWTEST_F(AVSessionServiceTestSecond, MirrorToStreamCast001, TestSize.Leve
 */
 static HWTEST_F(AVSessionServiceTestSecond, GetDistributedSessionControllersInner001, TestSize.Level0)
 {
-    DistributedSessionType sessionType = TYPE_SESSION_REMOTE;
+    DistributedSessionType sessionType = DistributedSessionType::TYPE_SESSION_REMOTE;
     std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
     auto ret = g_AVSessionService->GetDistributedSessionControllersInner(sessionType, sessionControllers);
     EXPECT_EQ(ret, ERR_REMOTE_CONNECTION_NOT_EXIST);
@@ -1591,7 +1591,7 @@ static HWTEST_F(AVSessionServiceTestSecond, GetDistributedSessionControllersInne
 */
 static HWTEST_F(AVSessionServiceTestSecond, GetDistributedSessionControllersInner002, TestSize.Level0)
 {
-    DistributedSessionType sessionType = TYPE_SESSION_MIGRATE_IN;
+    DistributedSessionType sessionType = DistributedSessionType::TYPE_SESSION_MIGRATE_IN;
     std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
     auto ret = g_AVSessionService->GetDistributedSessionControllersInner(sessionType, sessionControllers);
     EXPECT_EQ(ret, ERR_REMOTE_CONNECTION_NOT_EXIST);

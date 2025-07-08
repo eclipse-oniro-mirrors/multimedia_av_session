@@ -20,7 +20,7 @@
 #include <string>
 
 #include "avsession_item.h"
-#include "avcontroller_callback_proxy.h"
+#include "av_controller_callback_proxy.h"
 #include "avsession_controller_stub.h"
 #include "audio_info.h"
 

@@ -69,6 +69,9 @@ public:
     void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData);
 
     void OnCastValidCommandChanged(const std::vector<int32_t> &cmds);
+
+    int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
+        uint32_t length, int64_t pos, int32_t & result) {return 0;};
 private:
     // std::shared_ptr<CJAVSessionCastControllerImpl> controller_;
     std::function<void(CCallbackData*)> doCall_;

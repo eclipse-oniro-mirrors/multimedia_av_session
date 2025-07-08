@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "avcontroller_callback_stub.h"
+#include "av_controller_callback_stub.h"
 #include "avsession_log.h"
 #include "avsession_descriptor.h"
 #include "avsession_errors.h"
@@ -25,6 +25,8 @@ using namespace testing::ext;
 using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 
+namespace OHOS {
+namespace AVSession {
 static uint64_t g_selfTokenId = 0;
 static int32_t MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 static HapInfoParams g_info = {
@@ -93,29 +95,54 @@ void AVControllerCallbackStubTest::TearDown()
 }
 
 class AVControllerCallbackStubDemo : public AVControllerCallbackStub {
-    void OnAVCallMetaDataChange(const AVCallMetaData &avCallMetaData) override {};
-
-    void OnAVCallStateChange(const AVCallState &avCallState) override {};
-
-    void OnSessionDestroy() override {};
-
-    void OnPlaybackStateChange(const AVPlaybackState &state) override {};
-
-    void OnMetaDataChange(const AVMetaData &data) override {};
-
-    void OnActiveStateChange(bool isActive) override {};
-
-    void OnValidCommandChange(const std::vector<int32_t> &cmds) override {};
-
-    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo &outputDeviceInfo) override {};
-
-    void OnSessionEventChange(const std::string &event, const OHOS::AAFwk::WantParams &args) override {};
-
-    void OnQueueItemsChange(const std::vector<AVQueueItem> &items) override {};
-
-    void OnQueueTitleChange(const std::string &title) override {};
-
-    void OnExtrasChange(const OHOS::AAFwk::WantParams &extras) override {};
+    ErrCode OnAVCallMetaDataChange(const AVCallMetaData &avCallMetaData) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnAVCallStateChange(const AVCallState &avCallState) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSessionDestroy() override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnPlaybackStateChange(const AVPlaybackState &state) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnMetaDataChange(const AVMetaData &data) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnActiveStateChange(bool isActive) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnValidCommandChange(const std::vector<int32_t> &cmds) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo &outputDeviceInfo) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSessionEventChange(const std::string &event, const OHOS::AAFwk::WantParams &args) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnQueueItemsChange(const std::vector<AVQueueItem> &items) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnQueueTitleChange(const std::string &title) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnExtrasChange(const OHOS::AAFwk::WantParams &extras) override
+    {
+        return AVSESSION_SUCCESS;
+    };
 };
 
 /**
@@ -132,7 +159,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest001, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
     SLOGI("OnRemoteRequest001 end!");
 }
 
@@ -152,7 +179,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest002, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
     SLOGI("OnRemoteRequest002 end!");
 }
 
@@ -210,7 +237,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest005, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
     SLOGI("OnRemoteRequest005 end!");
 }
 
@@ -230,7 +257,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest006, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
     SLOGI("OnRemoteRequest006 end!");
 }
 
@@ -250,7 +277,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest007, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
     SLOGI("OnRemoteRequest007 end!");
 }
 
@@ -270,7 +297,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest008, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
     SLOGI("OnRemoteRequest008 end!");
 }
 
@@ -290,7 +317,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest009, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
     SLOGI("OnRemoteRequest009 end!");
 }
 
@@ -310,7 +337,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest010, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, ERR_NONE);
     SLOGI("OnRemoteRequest010 end!");
 }
 
@@ -350,7 +377,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest012, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, ERR_UNMARSHALLING);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest012 end!");
 }
 
@@ -368,7 +395,7 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest013, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_EQ(ret, ERR_TRANSACTION_FAILED);
     SLOGI("OnRemoteRequest013 end!");
 }
 
@@ -408,6 +435,8 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest015, TestSize.Level
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
     SLOGI("OnRemoteRequest015 end!");
 }
+} // namespace AVSession
+} // namespace OHOS

@@ -17,7 +17,7 @@
 #define OHOS_IAVSESSION_CONTROLLER_H
 
 #include "avsession_controller.h"
-#include "iavcontroller_callback.h"
+#include "ia_v_controller_callback.h"
 #include "iremote_broker.h"
 
 namespace OHOS::AVSession {

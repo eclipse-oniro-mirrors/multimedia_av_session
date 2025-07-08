@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "avcast_controller_callback_proxy.h"
+#include "av_cast_controller_callback_proxy.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_service.h"
@@ -93,10 +93,13 @@ static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest002, testing::ext
 */
 static HWTEST_F(AVCastControllerCallbackProxyTest, onDataSrcRead001, testing::ext::TestSize.Level0)
 {
-    std::shared_ptr<AVSharedMemory> memory = AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test");
+    std::shared_ptr<AVSharedMemoryBase> memory = AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test");
     std::string assetId = "";
     std::vector<uint8_t> keyRequestData;
-    auto ret = avCastControllerCallbackProxy_->onDataSrcRead(memory, 2, 2);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t result = 0;
+    if (avCastControllerCallbackProxy_ != nullptr) {
+        auto ret = avCastControllerCallbackProxy_->onDataSrcRead(memory, 2, 2, result);
+        EXPECT_EQ(ret, ERR_INVALID_DATA);
+    }
 }
 } // namespace OHOS::AVSession

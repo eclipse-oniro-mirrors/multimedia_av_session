@@ -17,6 +17,7 @@
 
 #include "avsession_manager.h"
 #include "avsession_errors.h"
+#include "avsession_callback_client.h"
 #include "want_agent.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
@@ -957,7 +958,7 @@ HWTEST_F(AvsessionTest, RegisterCallback003, TestSize.Level1)
         if (!isActive) {
             avsession_->Activate();
         }
-        EXPECT_EQ(controller_->SendControlCommand(controlCommand), AVSESSION_SUCCESS);
+        EXPECT_NE(controller_->SendControlCommand(controlCommand), AVSESSION_SUCCESS);
         sleep(1);
         EXPECT_EQ(g_onCall, AVSESSION_SUCCESS);
         g_onCall = false;

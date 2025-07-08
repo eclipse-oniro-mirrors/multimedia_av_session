@@ -39,10 +39,10 @@ public:
     AVQueueInfo() = default;
     ~AVQueueInfo() = default;
 
-    bool Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const;
+    static AVQueueInfo* Unmarshalling(Parcel& in);
 
-    static AVQueueInfo* UnmarshallingMessageParcel(MessageParcel& data);
+    bool UnmarshallingMessageParcel(MessageParcel& data);
     bool MarshallingMessageParcel(MessageParcel& parcel) const;
     bool MarshallingQueueImage(MessageParcel& parcel) const;
 

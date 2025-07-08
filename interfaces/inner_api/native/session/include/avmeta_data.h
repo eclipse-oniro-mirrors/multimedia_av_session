@@ -79,19 +79,18 @@ public:
     AVMetaData() = default;
     ~AVMetaData() = default;
 
-    static AVMetaData* Unmarshalling(Parcel& data);
+    static AVMetaData* Unmarshalling(Parcel& in);
+    bool ReadFromParcel(MessageParcel& in, int32_t twoImageLength);
     bool Marshalling(Parcel& parcel) const override;
+    bool WriteToParcel(MessageParcel& parcel) const;
 
-    static bool UnmarshallingCheckParamTask(Parcel& data,  AVMetaData *result);
-    static bool UnmarshallingCheckImageTask(Parcel& data,  AVMetaData *result);
-
-    static bool UnmarshallingExceptImg(MessageParcel& data, AVMetaData& metaOut);
-    static bool MarshallingExceptImg(MessageParcel& data, const AVMetaData metaIn);
+    bool UnmarshallingExceptImg(MessageParcel& data);
+    bool MarshallingExceptImg(MessageParcel& data) const;
 
     bool WriteDrmSchemes(Parcel& parcel) const;
-    static bool WriteDrmSchemes(MessageParcel& parcel, const AVMetaData metaData);
+    bool WriteDrmSchemes(MessageParcel& parcel);
+    bool ReadDrmSchemes(MessageParcel& parcel);
     static bool ReadDrmSchemes(Parcel& parcel, AVMetaData *metaData);
-    static bool ReadDrmSchemes(MessageParcel& parcel, AVMetaData& metaData);
 
     void SetAssetId(const std::string& assetId);
     std::string GetAssetId() const;
@@ -165,10 +164,10 @@ public:
     void SetFilter(int32_t filter);
     int32_t GetFilter() const;
     
-    void SetMediaLength(int32_t mediaLength);
+    void SetMediaLength(int32_t mediaLength) const;
     int32_t GetMediaLength() const;
 
-    void SetAVQueueLength(int32_t avQueueLength);
+    void SetAVQueueLength(int32_t avQueueLength) const;
     int32_t GetAVQueueLength() const;
 
     void SetDisplayTags(int32_t displayTags);
@@ -243,8 +242,8 @@ private:
     std::string nextAssetId_ = "";
     int32_t skipIntervals_ = SECONDS_15;
     int32_t filter_ = 2;
-    int32_t mediaLength_ = 0;
-    int32_t avQueueLength_ = 0;
+    mutable int32_t mediaLength_ = 0;
+    mutable int32_t avQueueLength_ = 0;
     int32_t displayTags_ = 0;
     std::vector<std::string> drmSchemes_;
     std::shared_ptr<AVSessionPixelMap> bundleIcon_ = nullptr;

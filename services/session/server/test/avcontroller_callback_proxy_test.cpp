@@ -27,7 +27,7 @@
 #include "avsession_pixel_map_adapter.h"
 #define private public
 #define protected public
-#include "avcontroller_callback_proxy.h"
+#include "av_controller_callback_proxy.h"
 #undef protected
 #undef private
 
@@ -254,97 +254,6 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnMetaDataChange002, testing::ext
     aVControllerCallbackProxy->OnMetaDataChange(data);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnMetaDataChange002, end");
-}
-
-/**
- * @tc.name: GetPixelMapBuffer001
- * @tc.desc: Test GetPixelMapBuffer
- * @tc.type: FUNC
- */
-static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer001, testing::ext::TestSize.Level0)
-{
-    SLOGI("GetPixelMapBuffer001, start");
-    OHOS::AVSession::AVMetaData metaData;
-    OHOS::MessageParcel parcel;
-    int32_t ret = aVControllerCallbackProxy->GetPixelMapBuffer(metaData, parcel);
-    EXPECT_EQ(ret, 0);
-    SLOGI("GetPixelMapBuffer001, end");
-}
-
-/**
- * @tc.name: GetPixelMapBuffer002
- * @tc.desc: Test GetPixelMapBuffer
- * @tc.type: FUNC
- */
-static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer002, testing::ext::TestSize.Level0)
-{
-    SLOGI("GetPixelMapBuffer002, start");
-    OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
-    OHOS::MessageParcel parcel;
-    int32_t ret = aVControllerCallbackProxy->GetPixelMapBuffer(metaData, parcel);
-
-    int32_t mediaImageLength = 0;
-    std::vector<uint8_t> mediaImageBuffer;
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
-    if (mediaPixelMap != nullptr) {
-        mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
-        mediaImageLength = static_cast<int32_t>(mediaImageBuffer.size());
-        metaData.SetMediaLength(mediaImageLength);
-    }
-
-    int32_t avQueueImageLength = 0;
-    std::vector<uint8_t> avQueueImageBuffer;
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData.GetAVQueueImage();
-    if (avQueuePixelMap != nullptr) {
-        avQueueImageBuffer = avQueuePixelMap->GetInnerImgBuffer();
-        avQueueImageLength = static_cast<int32_t>(avQueueImageBuffer.size());
-    }
-
-    int32_t retExpect = mediaImageLength + avQueueImageLength;
-    EXPECT_EQ(ret, retExpect);
-
-    SLOGI("GetPixelMapBuffer002, end");
-}
-
-/**
- * @tc.name: GetPixelMapBuffer003
- * @tc.desc: Test GetPixelMapBuffer
- * @tc.type: FUNC
- */
-static HWTEST_F(AVControllerCallbackProxyTest, GetPixelMapBuffer003, testing::ext::TestSize.Level0)
-{
-    SLOGI("GetPixelMapBuffer003, start");
-    OHOS::AVSession::AVMetaData metaData = GetAVMetaData();
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMapSet = std::make_shared<AVSessionPixelMap>();
-    std::vector<uint8_t> imgBuffer = {0, 1, 0, 1};
-    avQueuePixelMapSet->SetInnerImgBuffer(imgBuffer);
-    metaData.SetAVQueueImage(avQueuePixelMapSet);
-
-    OHOS::MessageParcel parcel;
-    int32_t ret = aVControllerCallbackProxy->GetPixelMapBuffer(metaData, parcel);
-
-    int32_t mediaImageLength = 0;
-    std::vector<uint8_t> mediaImageBuffer;
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = metaData.GetMediaImage();
-    if (mediaPixelMap != nullptr) {
-        mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
-        mediaImageLength = static_cast<int>(mediaImageBuffer.size());
-        metaData.SetMediaLength(mediaImageLength);
-    }
-
-    int32_t avQueueImageLength = 0;
-    std::vector<uint8_t> avQueueImageBuffer;
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMapGet = metaData.GetAVQueueImage();
-    if (avQueuePixelMapGet != nullptr) {
-        avQueueImageBuffer = avQueuePixelMapGet->GetInnerImgBuffer();
-        avQueueImageLength = static_cast<int>(avQueueImageBuffer.size());
-    }
-
-    int32_t retExpect = mediaImageLength + avQueueImageLength;
-
-    EXPECT_EQ(ret, retExpect);
-
-    SLOGI("GetPixelMapBuffer003, end");
 }
 
 /**

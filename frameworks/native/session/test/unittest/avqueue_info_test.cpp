@@ -43,6 +43,26 @@ void AVQueueInfoTest::TearDown()
 {}
 
 /**
+* @tc.name: Marshalling001
+* @tc.desc: test Marshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVQueueInfoTest, Marshalling001, TestSize.Level0)
+{
+    AVQueueInfo avqueueInfo;
+    avqueueInfo.SetAVQueueName("xiaoqiang");
+    EXPECT_EQ(avqueueInfo.GetAVQueueName(), "xiaoqiang");
+    avqueueInfo.SetAVQueueId("aaa");
+    EXPECT_EQ(avqueueInfo.GetAVQueueId(), "aaa");
+    avqueueInfo.SetAVQueueImageUri("bbb");
+    EXPECT_EQ(avqueueInfo.GetAVQueueImageUri(), "bbb");
+    Parcel parcel;
+    bool result = avqueueInfo.Marshalling(parcel);
+    EXPECT_EQ(result, true);
+}
+
+/**
 * @tc.name: Unmarshalling001
 * @tc.desc: test Unmarshalling
 * @tc.type: FUNC

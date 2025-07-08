@@ -18,6 +18,7 @@
 #include "avsession_manager.h"
 #include "avsession_info.h"
 #include "avsession_errors.h"
+#include "avsession_callback_client.h"
 #include "system_ability_definition.h"
 #include "softbus_bus_center.h"
 #include "avsession_log.h"
