@@ -210,6 +210,8 @@ public:
 
     void HandleSessionReleaseInner();
 
+    void CheckIfRemoveNotification(int32_t userId, const sptr<AVSessionItem>& sessionItem);
+
     void HandleCallStartEvent();
 
     void HandleControllerRelease(AVControllerItem& controller);
@@ -725,7 +727,7 @@ private:
     const int32_t NOTIFICATION_CONTROL_TIME = 1000;
     const int32_t cancelTimeout = 5000;
     const uint8_t doRemoteLoadRetryTime = 5;
-    const char *shellBundle = "com.example.shell";
+    const int32_t defaultUserId = 100;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H
