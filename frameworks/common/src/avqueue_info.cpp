@@ -71,7 +71,7 @@ bool AVQueueInfo::UnmarshallingMessageParcel(MessageParcel& data)
     CHECK_AND_RETURN_RET_LOG(ret, false, "read data failed");
 
     int32_t imageLength {};
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(imageLength), false, "no image");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(imageLength), false, "read image length failed");
     CHECK_AND_RETURN_RET_LOG(imageLength > 0, true, "no image");
 
     const char *buffer = nullptr;

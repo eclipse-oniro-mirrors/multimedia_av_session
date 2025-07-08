@@ -32,7 +32,6 @@ using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AVSession;
 
 static uint64_t g_selfTokenId = 0;
-static std::string g_errLog;
 
 static HapInfoParams g_info = {
     .userID = 100,

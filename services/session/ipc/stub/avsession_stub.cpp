@@ -140,7 +140,7 @@ int32_t AVSessionStub::HandleSetAVMetaData(MessageParcel& data, MessageParcel& r
     AVSESSION_TRACE_SYNC_START("AVSessionStub::SetAVMetaData");
     sptr avMetaData = data.ReadParcelable<AVMetaData>();
     if (avMetaData == nullptr) {
-        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_MARSHALLING, "WriteInt32 result failed");
         return ERR_NONE;
     }
     int32_t ret = SetAVMetaData(*avMetaData);

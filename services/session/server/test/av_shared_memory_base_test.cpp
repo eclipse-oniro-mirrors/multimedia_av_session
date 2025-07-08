@@ -46,10 +46,10 @@ void AVSharedMemoryBaseTest::TearDown() {}
 
 /**
  * @tc.name: Unmarshalling001
- * @tc.desc: unmarshalling test
+ * @tc.desc: Unmarshalling test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSharedMemoryBaseTest, Unmarshalling001, TestSize.Level0)
+static HWTEST(AVSharedMemoryBaseTest, Unmarshalling001, TestSize.Level0)
 {
     SLOGI("Unmarshalling001 Begin");
     int32_t size = 10;
@@ -66,7 +66,7 @@ HWTEST_F(AVSharedMemoryBaseTest, Unmarshalling001, TestSize.Level0)
  * @tc.desc: WriteToParcel
  * @tc.type: FUNC
  */
-HWTEST_F(AVSharedMemoryBaseTest, WriteToParcel001, TestSize.Level0)
+static HWTEST(AVSharedMemoryBaseTest, WriteToParcel001, TestSize.Level0)
 {
     SLOGI("WriteToParcel001 Begin");
     int32_t size = 10;
@@ -86,7 +86,7 @@ HWTEST_F(AVSharedMemoryBaseTest, WriteToParcel001, TestSize.Level0)
  * @tc.desc: ReadFromParcel
  * @tc.type: FUNC
  */
-HWTEST_F(AVSharedMemoryBaseTest, ReadFromParcel001, TestSize.Level0)
+static HWTEST(AVSharedMemoryBaseTest, ReadFromParcel001, TestSize.Level0)
 {
     SLOGI("ReadFromParcel001 Begin");
     int32_t size = 10;

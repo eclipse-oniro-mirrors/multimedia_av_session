@@ -63,5 +63,5 @@ HWTEST_F(AVQueueItemTest, Marshalling001, TestSize.Level0)
     bool ret = avQueueItem.Marshalling(parcel);
     EXPECT_EQ(ret, true);
 }
-}
-}
+} // namespace AVSession
+} // namespace OHOS

@@ -172,7 +172,7 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
 
     CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(avQueueInfos.size()), ERR_NONE, "write size failed");
     for (const auto& avQueueInfo : avQueueInfos) {
-        if (reply.WriteParcelable(&avQueueInfo)) {
+        if (!reply.WriteParcelable(&avQueueInfo)) {
             SLOGE("write avQueueInfo failed");
             break;
         }
