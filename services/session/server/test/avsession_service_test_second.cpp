@@ -47,6 +47,7 @@ static const int32_t CAST_ENGINE_SA_ID = 65546;
 static const int32_t AVSESSION_CONTINUE = 1;
 const int32_t KEYCODE_CLEAR = 5;
 const int32_t KEYCODE_HEADSETHOOK = 6;
+const int32_t KEYCODE_MEDIA_PLAY_PAUSE = 10;
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnTopSessionChange = false;
@@ -1090,11 +1091,75 @@ static HWTEST_F(AVSessionServiceTestSecond, PlayStateCheck002, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTestSecond, HandleKeyEvent001, TestSize.Level0)
 {
     SLOGD("HandleKeyEvent001 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
     auto keyEvent = OHOS::MMI::KeyEvent(KEYCODE_CLEAR);
     keyEvent.SetKeyCode(KEYCODE_CLEAR);
     auto ret = g_AVSessionService->HandleKeyEvent(keyEvent);
     EXPECT_EQ(ret, AVSESSION_CONTINUE);
     SLOGD("HandleKeyEvent001 end!");
+}
+
+/**
+* @tc.name: HandleKeyEvent002
+* @tc.desc: Verifying the HandleKeyEvent method with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, HandleKeyEvent002, TestSize.Level0)
+{
+    SLOGD("HandleKeyEvent002 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    auto keyEvent = OHOS::MMI::KeyEvent(KEYCODE_HEADSETHOOK);
+    keyEvent.SetKeyCode(KEYCODE_HEADSETHOOK);
+    auto ret = g_AVSessionService->HandleKeyEvent(keyEvent);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("HandleKeyEvent002 end!");
+}
+
+/**
+* @tc.name: HandleKeyEvent003
+* @tc.desc: Verifying the HandleKeyEvent method with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, HandleKeyEvent003, TestSize.Level0)
+{
+    SLOGD("HandleKeyEvent003 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    auto keyEvent = OHOS::MMI::KeyEvent(KEYCODE_MEDIA_PLAY_PAUSE);
+    keyEvent.SetKeyCode(KEYCODE_MEDIA_PLAY_PAUSE);
+    auto ret = g_AVSessionService->HandleKeyEvent(keyEvent);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("HandleKeyEvent003 end!");
+}
+
+/**
+* @tc.name: HandleKeyEvent004
+* @tc.desc: Verifying the HandleKeyEvent method with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, HandleKeyEvent004, TestSize.Level0)
+{
+    SLOGD("HandleKeyEvent004 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    auto avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("StopCast001 but sessionPre exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
+    std::vector<int> tempAudioPlayingUids {1, 2};
+    auto avsessionHere = CreateSession();
+    ASSERT_TRUE(avsessionHere != nullptr);
+    tempAudioPlayingUids.push_back(avsessionHere->GetUid());
+    g_AVSessionService->focusSessionStrategy_.SetAudioPlayingUids(tempAudioPlayingUids);
+
+    auto keyEvent = OHOS::MMI::KeyEvent(KEYCODE_MEDIA_PLAY_PAUSE);
+    keyEvent.SetKeyCode(KEYCODE_MEDIA_PLAY_PAUSE);
+    auto ret = g_AVSessionService->HandleKeyEvent(keyEvent);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avsessionHere->Destroy();
+    SLOGD("HandleKeyEvent004 end!");
 }
 
 /**

@@ -72,6 +72,8 @@ public:
 
 private:
     void PrepareSessionFromRemote();
+    void ReleaseSessionFromRemote();
+    void ReleaseControllerOfRemoteSession();
     void PrepareControllerOfRemoteSession(sptr<AVSessionItem> sessionItem);
     void ProcessSessionInfo(cJSON* jsonValue);
     void ProcessMetaData(cJSON* jsonValue);

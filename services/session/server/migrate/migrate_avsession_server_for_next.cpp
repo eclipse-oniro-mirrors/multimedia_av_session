@@ -53,12 +53,13 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
             }
 
             controller->isFromSession_ = false;
+            lastSessionId_ = sessionId;
             if (isSoftbusConnecting_) {
                 UpdateFrontSessionInfoToRemote(controller);
             } else {
                 SLOGE("LocalFrontSessionArrive without connect");
             }
-            SLOGI("LocalFrontSessionArrive finish");
+            SLOGI("LocalFrontSessionArrive finish.");
         },
         "LocalFrontSessionChange");
 }
@@ -87,7 +88,8 @@ void MigrateAVSessionServer::LocalFrontSessionChange(std::string &sessionId)
 
 void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
 {
-    SLOGI("LocalFrontSessionLeave in:%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    SLOGI("LocalFrontSessionLeave in:%{public}s.", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+    lastSessionId_ = "";
     MigratePostTask(
         [this, sessionId]() {
             std::lock_guard lockGuard(migrateControllerLock_);
@@ -238,7 +240,7 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
         cJSON_Delete(playbackStateItem);
         return;
     }
-    if (!SoftbusSessionUtils::AddIntToJson(playbackStateItem, FAVOR_STATE, playbackStateCache_.GetFavorite())) {
+    if (!SoftbusSessionUtils::AddBoolToJson(playbackStateItem, FAVOR_STATE, playbackStateCache_.GetFavorite())) {
         SLOGE("AddStringToJson with favor value:%{public}d fail", playbackStateCache_.GetFavorite());
         cJSON_Delete(playbackStateItem);
         return;
@@ -250,7 +252,7 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
         [this, msg]() {
             SendByteForNext(deviceId_, msg);
         }, "SYNC_FOCUS_PLAY_STATE");
-    SLOGI("DoPlaybackStateSyncToRemote sync state:%{public}d|Favor:%{public}d|len:%{public}d done",
+    SLOGI("DoPlaybackStateSyncToRemote sync state:%{public}d|Favor:%{public}d|len:%{public}d done.",
         playbackStateCache_.GetState(), playbackStateCache_.GetFavorite(), static_cast<int>(msg.size()));
     cJSON_Delete(playbackStateItem);
 }
@@ -706,17 +708,8 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(cJSON* jsonObject)
     int deviceType = SoftbusSessionUtils::GetIntFromJson(jsonObject, AUDIO_DEVICE_TYPE);
     int deviceRole = SoftbusSessionUtils::GetIntFromJson(jsonObject, AUDIO_DEVICE_ROLE);
     std::string networkId = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_NETWORK_ID);
-    if (networkId.empty()) {
-        networkId = "ERROR_VALUE";
-    }
     std::string deviceName = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_DEVICE_NAME);
-    if (deviceName.empty()) {
-        deviceName = "ERROR_VALUE";
-    }
     std::string macAddress = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_MAC_ADDRESS);
-    if (macAddress.empty()) {
-        macAddress = "ERROR_VALUE";
-    }
     
     std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
     CHECK_AND_RETURN_LOG(device != nullptr, "AudioDeviceDescriptor make shared_ptr is null");
