@@ -571,6 +571,22 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_HandleOnSetTargetLoopMode_001, TestSiz
     SLOGD("AVSessionItem_HandleOnSetTargetLoopMode_001 end!");
 }
 
+/**
+ * @tc.name: AVSessionItem_DelRecommend_001
+ * @tc.desc: Test DelRecommend.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_DelRecommend_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_DelRecommend_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isRecommend_ = true;
+    g_AVSessionItem->DelRecommend();
+    EXPECT_EQ(g_AVSessionItem->isRecommend_, false);
+    SLOGD("AVSessionItem_DelRecommend_001 end!");
+}
+
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 /**
  * @tc.name: AVSessionItem_ReportPlaybackState_001

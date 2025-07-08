@@ -159,10 +159,15 @@ int32_t AVSessionItem::Destroy()
 
 void AVSessionItem::DelRecommend()
 {
-    if (descriptor_.sessionTag_ != "RemoteCast" && isRecommend_) {
+    CHECK_AND_RETURN_LOG(descriptor_.sessionTag_ != "RemoteCast", "remote cast session, return");
+    if (isRecommend_) {
         AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), "", "", "", -1);
         isRecommend_ = false;
     }
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CHECK_AND_RETURN_LOG(castHandle_ > 0, "delete recommend without casthandler");
+    PublishAVCastHa(disconnectStateFromCast_, GetDescriptor().outputDeviceInfo_.deviceInfos_[0]);
+#endif
 }
 
 int32_t AVSessionItem::DestroyTask(bool continuePlay)
@@ -1450,10 +1455,7 @@ void AVSessionItem::ListenCollaborationOnStop()
 
 void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 {
-    if (descriptor_.sessionTag_ == "RemoteCast") {
-        SLOGI("Remote PublishAVCastHa");
-    }
-
+    CHECK_AND_RETURN_LOG(descriptor_.sessionTag_ != "RemoteCast", "remote cast session, return");
     if (castState == connectStateFromCast_) {
         AVSessionHiAnalyticsReport::PublishCastEvent(GetBundleName(), connectStateFromCast_,
             castDeviceInfoMap_[deviceInfo.deviceId_]);
