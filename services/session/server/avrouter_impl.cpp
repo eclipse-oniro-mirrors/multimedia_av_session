@@ -163,7 +163,7 @@ int32_t AVRouterImpl::StopCastDiscovery()
     std::lock_guard lockGuard(providerManagerLock_);
 
     auto pid = IPCSkeleton::GetCallingPid();
-    CHECK_AND_RETURN_LOG(IsStopCastDiscovery(pid), AVSESSION_SUCCESS, "StopCastDiscovery is invalid");
+    CHECK_AND_RETURN_RET_LOG(IsStopCastDiscovery(pid), AVSESSION_SUCCESS, "StopCastDiscovery is invalid");
     if (cacheStartDiscovery_) {
         SLOGI("clear cacheStartDiscovery when stop discovery");
         cacheStartDiscovery_ = false;
@@ -182,7 +182,7 @@ bool AVRouterImpl::IsStopCastDiscovery(pid_t pid)
     if (std::find(cacheStartDiscoveryPids_.begin(), cacheStartDiscoveryPids_.end(), pid)
         != cacheStartDiscoveryPids_.end()) {
         cacheStartDiscoveryPids_.erase(std::remove(
-            cacheStartDiscoveryPids_.begin(), cacheStartDiscoveryPids_.end(), pid), cacheStartDiscoveryPids_.end()) {
+            cacheStartDiscoveryPids_.begin(), cacheStartDiscoveryPids_.end(), pid), cacheStartDiscoveryPids_.end());
         if (cacheStartDiscoveryPids_.size() == 0) {
             return true;
         } else {
