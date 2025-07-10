@@ -17,22 +17,33 @@
 
 namespace OHOS::AVSession {
 std::shared_ptr<CollaborationManager> CollaborationManager::instance_;
-std::once_flag CollaborationManager::onceFlag_;
+std::recursive_mutex CollaborationManager::instanceLock_;
 
 CollaborationManager& CollaborationManager::GetInstance()
 {
-    std::call_once(onceFlag_, [] {
-        instance_ = std::make_shared<CollaborationManager>();
-        instance_->exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr;
-        instance_->exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback = nullptr;
-        instance_->exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = nullptr;
-        instance_->exportapi_.ServiceCollaborationManager_PublishServiceState = nullptr;
-    });
+    std::lock_guard lockGuard(instanceLock_);
+    if (instance_ != nullptr) {
+        return *instance_;
+    }
+    SLOGI("GetInstance in");
+    instance_ = std::make_shared<CollaborationManager>();
+    instance_->exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr;
+    instance_->exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback = nullptr;
+    instance_->exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = nullptr;
+    instance_->exportapi_.ServiceCollaborationManager_PublishServiceState = nullptr;
     return *instance_;
+}
+
+void CollaborationManager::ReleaseInstance()
+{
+    std::lock_guard lockGuard(instanceLock_);
+    SLOGI("ReleaseInstance in");
+    instance_ = nullptr;
 }
 
 CollaborationManager::CollaborationManager()
 {
+    SLOGI("enter CollaborationManager construct");
     localHardwareList_ = {
         .hardWareType = ServiceCollaborationManagerHardwareType::SCM_UNKNOWN_TYPE,
         .canShare = false

@@ -253,6 +253,7 @@ void AVSessionService::OnStop()
 #endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
+    CollaborationManager::ReleaseInstance();
 #endif
     CommandSendLimit::GetInstance().StopTimer();
     NotifyProcessStatus(false);

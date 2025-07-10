@@ -1100,6 +1100,8 @@ void AvSessionServiceTest()
     OnReceiveEventTest(avsessionService_);
     AvSessionServiceTest001();
     AvSessionServiceTest002(avsessionService_);
+    avsessionService_->OnStop();
+    SLOGI("AvSessionServiceTest done");
 }
 
 int32_t AVSessionServiceStubFuzzer::OnRemoteRequest()
