@@ -233,6 +233,5 @@ HWTEST_F(SessionListenerClientTest, OnDeviceStateChange001, TestSize.Level0)
     DeviceState deviceState;
     sessionListenerClient->OnDeviceStateChange(deviceState);
 }
-
 } // namespace AVSESSION
 } // namespace OHOS
