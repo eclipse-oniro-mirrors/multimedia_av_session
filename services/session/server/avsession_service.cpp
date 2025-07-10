@@ -328,6 +328,7 @@ void AVSessionService::HandleUserEvent(const std::string &type, const int &userI
 void AVSessionService::HandleRemoveMediaCardEvent()
 {
     hasRemoveEvent_ = true;
+    hasMediaCapsule_ = false;
     std::lock_guard lockGuard(sessionServiceLock_);
     if (!topSession_) {
         return;
@@ -633,17 +634,19 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
     for (const auto& session : *sessionListForFront) {
         if (session->GetUid() == infoUid && session->GetPid() == infoPid &&
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call")) {
+            if (session->GetUid() == ancoUid && hasMediaCapsule_.load()) {
+                SLOGI("HandleChangeTopSession anco top hasMediaCapsule_:%{public}d", hasMediaCapsule_.load());
+                AVSessionService::NotifySystemUI(nullptr, true, false, false);
+            }
             UpdateTopSession(session);
             if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
                 topSession_->GetUid() != ancoUid) {
                 AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
                 PublishEvent(mediaPlayStateTrue);
-            }
-            if (topSession_->GetUid() == ancoUid) {
-                userId = topSession_->GetUserId();
-                hasMediaCapsule_ = false;
-                int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-                SLOGI("CancelNotification with userId:%{public}d for anco ret=%{public}d", userId, ret);
+                auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
+                    topSession_->GetUid(), topSession_->GetPid(), true);
+                SLOGD("HandleChangeTopSession Notify Bg, uid = %{public}d, pid = %{public}d, ret = %{public}d",
+                    topSession_->GetUid(), topSession_->GetPid(), ret);
             }
             return;
         }
@@ -688,12 +691,6 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
 #ifdef START_STOP_ON_DEMAND_ENABLE
             PublishEvent(mediaPlayStateTrue);
 #endif
-        }
-        if (topSession_->GetUid() == ancoUid) {
-            userId = topSession_->GetUserId();
-            hasMediaCapsule_ = false;
-            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-            SLOGI("CancelNotification with user:%{public}d for anco ret=%{public}d", userId, ret);
         }
         return;
     }
@@ -2912,13 +2909,6 @@ void AVSessionService::HandleOtherSessionPlaying(sptr<AVSessionItem>& session)
         session->GetUid() != ancoUid) {
         AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
     }
-    if (topSession_->GetUid() == ancoUid) {
-        int32_t userId = session->GetUserId();
-        userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
-        hasMediaCapsule_ = false;
-        int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-        SLOGI("CancelNotification with userId:%{public}d for anco ret=%{public}d", userId, ret);
-    }
 }
 
 sptr <AVSessionItem> AVSessionService::GetOtherPlayingSession(int32_t userId, std::string bundleName)
@@ -2927,7 +2917,8 @@ sptr <AVSessionItem> AVSessionService::GetOtherPlayingSession(int32_t userId, st
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, nullptr, "sessionListForFront ptr nullptr!");
     for (const auto& session : *sessionListForFront) {
-        if (session->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY &&
+        CHECK_AND_CONTINUE(session != nullptr);
+        if (AudioAdapter::GetInstance().GetRendererRunning(session->GetUid()) &&
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") &&
             session->GetBundleName() != bundleName && !session->IsCasting()) {
             SLOGI("find other playing session, uid:%{public}d, pid:%{public}d, bundleName %{public}s",
@@ -2939,12 +2930,41 @@ sptr <AVSessionItem> AVSessionService::GetOtherPlayingSession(int32_t userId, st
         sptr<AVSessionItem> firstSession = sessionListForFront->front();
         CHECK_AND_RETURN_RET_LOG(firstSession != nullptr, nullptr, "firstSession is nullptr!");
         if (firstSession->IsCasting() &&
-            firstSession->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+            firstSession->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
             SLOGI("find casting session, uid:%{public}d", firstSession->GetUid());
             return firstSession;
         }
     }
     return nullptr;
+}
+
+void AVSessionService::CheckIfRemoveNotification(int32_t userId, const sptr<AVSessionItem>& sessionItem)
+{
+    if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
+        sptr<AVSessionItem> result = GetOtherPlayingSession(userId, sessionItem->GetBundleName());
+        if (result != nullptr) {
+            HandleOtherSessionPlaying(result);
+        } else {
+            UpdateTopSession(nullptr, userId);
+            hasMediaCapsule_ = false;
+            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
+            SLOGI("Topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
+        }
+    } else {
+        int32_t notifyId = -1;
+        {
+            std::lock_guard lockGuard(notifyLock_);
+            notifyId = g_NotifyRequest.GetOwnerUid();
+        }
+        int32_t sessionUid = sessionItem->GetUid() == audioBrokerUid ?
+            BundleStatusAdapter::GetInstance().GetUidFromBundleName(sessionItem->GetBundleName(), userId) :
+            sessionItem->GetUid();
+        if (notifyId == sessionUid) {
+            hasMediaCapsule_ = false;
+            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
+            SLOGI("Topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
+        }
+    }
 }
 
 void AVSessionService::HandleSessionRelease(std::string sessionId, bool continuePlay)
@@ -2963,17 +2983,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
 #endif
         NotifySessionRelease(sessionItem->GetDescriptor());
         sessionItem->DestroyTask(continuePlay);
-        if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
-            sptr<AVSessionItem> result = GetOtherPlayingSession(userId, sessionItem->GetBundleName());
-            if (result != nullptr) {
-                HandleOtherSessionPlaying(result);
-            } else {
-                UpdateTopSession(nullptr, userId);
-                hasMediaCapsule_ = false;
-                int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-                SLOGI("Topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
-            }
-        }
+        CheckIfRemoveNotification(userId, sessionItem);
         if (sessionItem->GetRemoteSource() != nullptr) {
             int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
             SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
@@ -3993,6 +4003,9 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetInProgress(true);
     request.SetOwnerUid(uid);
     request.SetIsAgentNotification(true);
+    if (topSession_ && topSession_->GetUid() == audioBrokerUid) {
+        request.SetOwnerUserId(defaultUserId);
+    }
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
     request.SetWantAgent(wantAgent);
