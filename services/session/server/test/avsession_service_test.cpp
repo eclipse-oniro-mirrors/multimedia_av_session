@@ -1894,7 +1894,7 @@ static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession002, TestSize.Level1
     g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     avsessionFront_->SetAVPlaybackState(g_playbackState);
     bool ret = avservice_->GetOtherPlayingSession(userId, gTestFrontBundleName) == nullptr;
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     avservice_->HandleSessionRelease(avsessionFront_->GetSessionId());
     avsessionFront_->Destroy();
     SLOGI("GetOtherPlayingSession002 end!");
@@ -1921,7 +1921,7 @@ static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession003, TestSize.Level1
     avsessionFront_->SetAVPlaybackState(g_playbackState);
     avsessionFront_->castHandle_ = 1;
     bool ret = avservice_->GetOtherPlayingSession(userId, gTestFrontBundleName) == nullptr;
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     avservice_->HandleSessionRelease(avsessionFront_->GetSessionId());
     avsessionFront_->Destroy();
     SLOGI("GetOtherPlayingSession003 end!");
@@ -1966,6 +1966,55 @@ static HWTEST_F(AVSessionServiceTest, CheckAndUpdateAncoMediaSession001, TestSiz
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGD("CheckAndUpdateAncoMediaSession001 end!");
+}
+
+/**
+ * @tc.name: CheckIfRemoveNotification001
+ * @tc.desc: check if remove notification.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification001, TestSize.Level1)
+{
+    SLOGD("CheckIfRemoveNotification001 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    avservice_->UpdateTopSession(avsessionHere_);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    avservice_->CheckIfRemoveNotification(avsessionHere_->GetUserId(), avsessionHere_);
+    EXPECT_EQ(avservice_->topSession_, nullptr);
+    EXPECT_EQ(avservice_->hasMediaCapsule_, false);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGD("CheckIfRemoveNotification001 end!");
+}
+
+/**
+ * @tc.name: CheckIfRemoveNotification002
+ * @tc.desc: check if remove notification.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification002, TestSize.Level1)
+{
+    SLOGD("CheckIfRemoveNotification002 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    avservice_->CheckIfRemoveNotification(avsessionHere_->GetUserId(), avsessionHere_);
+    EXPECT_EQ(avservice_->hasMediaCapsule_, false);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGD("CheckIfRemoveNotification002 end!");
 }
 
 /**

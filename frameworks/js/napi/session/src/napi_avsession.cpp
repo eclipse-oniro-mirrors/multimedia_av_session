@@ -126,6 +126,7 @@ NapiAVSession::NapiAVSession()
 NapiAVSession::~NapiAVSession()
 {
     SLOGI("destroy");
+    AVSessionManager::GetInstance().UnregisterServiceStartCallback();
     std::lock_guard lockGuard(registerEventLock_);
     registerEventList_.clear();
 }
