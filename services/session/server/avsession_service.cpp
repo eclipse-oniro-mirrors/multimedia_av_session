@@ -1339,7 +1339,8 @@ void AVSessionService::AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessio
                 session->GetBundleName().c_str(), isChange);
             UpdateTopSession(session);
             NotifySystemUI(nullptr, true, isPlaying, isChange);
-            UpdateOrder(session);
+            bool ret = UpdateOrder(session);
+            CHECK_AND_RETURN_LOG(ret, "UpdateOrder fail");
         }
     });
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
@@ -2904,7 +2905,8 @@ void AVSessionService::HandleOtherSessionPlaying(sptr<AVSessionItem>& session)
     CHECK_AND_RETURN_LOG(session != nullptr, "No other sessions are currently playing");
     UpdateTopSession(session);
     CHECK_AND_RETURN_LOG(topSession_ != nullptr, "topSession is nullptr, update topSession fail!");
-    UpdateOrder(session);
+    bool ret = UpdateOrder(session);
+    CHECK_AND_RETURN_LOG(ret, "UpdateOrder fail");
     if ((session->GetSessionType() == "audio" || session->GetSessionType() == "video") &&
         session->GetUid() != ancoUid) {
         AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
