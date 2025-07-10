@@ -27,6 +27,7 @@ namespace OHOS::AVSession {
 class CollaborationManager {
 public:
     static CollaborationManager& GetInstance();
+    static void ReleaseInstance();
     CollaborationManager();
     virtual ~CollaborationManager();
     void SendCollaborationApplyResult(const std::function<void(const int32_t code)>& callback);
@@ -42,7 +43,7 @@ public:
 
 private:
     static std::shared_ptr<CollaborationManager> instance_;
-    static std::once_flag onceFlag_;
+    static std::recursive_mutex instanceLock_;
     const int32_t remoteHardwareListSize_ = 2;
     const int32_t localHardwareListSize_ = 0;
     const std::string serviceName_ = "URLCasting";
