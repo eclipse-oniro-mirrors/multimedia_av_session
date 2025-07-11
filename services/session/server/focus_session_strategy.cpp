@@ -92,9 +92,6 @@ void FocusSessionStrategy::ProcAudioRenderChange(const AudioRendererChangeInfos&
             auto it = currentStates_.find(key);
             if (it == currentStates_.end()) {
                 currentStates_[key] = stopState;
-            } else if (info->rendererState == AudioStandard::RendererState::RENDERER_RELEASED) {
-                currentStates_.erase(it);
-                continue;
             }
 
             if (info->rendererState == AudioStandard::RendererState::RENDERER_RUNNING) {
@@ -102,7 +99,8 @@ void FocusSessionStrategy::ProcAudioRenderChange(const AudioRendererChangeInfos&
                 playingKey = key;
             }
             if (playingKey != key) {
-                currentStates_[key] = stopState;
+                currentStates_[key] = info->rendererState == AudioStandard::RendererState::RENDERER_RELEASED ?
+                    releaseState : stopState;
             }
         }
     }
@@ -116,16 +114,23 @@ void FocusSessionStrategy::HandleAudioRenderStateChangeEvent(const AudioRenderer
     std::pair<int32_t, int32_t> stopSessionKey = std::make_pair(-1, -1);
     {
         std::lock_guard lockGuard(stateLock_);
-        for (auto it = currentStates_.begin(); it != currentStates_.end(); it++) {
+        for (auto it = currentStates_.begin(); it != currentStates_.end();) {
             if (it->second == runningState) {
                 if (IsFocusSession(it->first)) {
                     focusSessionKey = it->first;
+                    it++;
                     continue;
                 }
             } else {
                 if (CheckFocusSessionStop(it->first)) {
                     stopSessionKey = it->first;
                 }
+            }
+            if (it->second == releaseState) {
+                lastStates_.erase(it->first);
+                it = currentStates_.erase(it);
+            } else {
+                it++;
             }
         }
     }
@@ -194,10 +199,11 @@ void FocusSessionStrategy::DelayStopFocusSession(const std::pair<int32_t, int32_
         [this, key]() {
             {
                 std::lock_guard lockGuard(stateLock_);
-                SLOGE("DelayStopFocus uid=%{public}d lastState=%{public}d", key.first, lastStates_[key]);
-                if (lastStates_[key] == AudioStandard::RendererState::RENDERER_RUNNING) {
-                    return;
-                }
+                auto it = lastStates_.find(key);
+                CHECK_AND_RETURN_LOG(!(it != lastStates_.end() &&
+                    it->second == AudioStandard::RendererState::RENDERER_RUNNING),
+                    "DelayStopFocus uid=%{public}d pid=%{public}d not found or not running", key.first, key.second);
+                SLOGE("DelayStopFocus uid=%{public}d lastState=%{public}d", it->first.first, it->second);
             }
             FocusSessionChangeInfo changeInfo;
             changeInfo.uid = key.first;

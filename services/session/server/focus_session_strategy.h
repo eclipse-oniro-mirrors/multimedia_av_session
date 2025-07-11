@@ -62,6 +62,7 @@ private:
     const int32_t cancelTimeout = 5000;
     const int32_t runningState = 2;
     const int32_t stopState = 0;
+    const int32_t releaseState = 4;
     const int32_t ancoUid = 1041;
     const std::vector<AudioStandard::StreamUsage> ALLOWED_ANCO_STREAM_USAGE {
         AudioStandard::STREAM_USAGE_MUSIC,
