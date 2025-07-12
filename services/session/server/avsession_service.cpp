@@ -1952,17 +1952,14 @@ bool AVSessionService::InsertAvQueueInfoToCJSONAndPrint(const std::string &bundl
     cJSON_AddStringToObject(newValue, "avQueueName", meta.GetAVQueueName().c_str());
     cJSON_AddStringToObject(newValue, "avQueueId", meta.GetAVQueueId().c_str());
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = meta.GetAVQueueImage();
+    std::string fileDir = AVSessionUtils::GetFixedPathName(userId);
+    std::string fileName = bundleName + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
     if (innerPixelMap != nullptr) {
-        std::string fileDir = AVSessionUtils::GetFixedPathName(userId);
-        std::string fileName = bundleName + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
         innerPixelMap->Clear();
-        cJSON_AddStringToObject(newValue, "avQueueImageDir", fileDir.c_str());
-        cJSON_AddStringToObject(newValue, "avQueueImageName", fileName.c_str());
-    } else {
-        cJSON_AddStringToObject(newValue, "avQueueImageDir", "");
-        cJSON_AddStringToObject(newValue, "avQueueImageName", "");
     }
+    cJSON_AddStringToObject(newValue, "avQueueImageDir", fileDir.c_str());
+    cJSON_AddStringToObject(newValue, "avQueueImageName", fileName.c_str());
     cJSON_AddStringToObject(newValue, "avQueueImageUri", meta.GetAVQueueImageUri().c_str());
     if (cJSON_IsInvalid(newValue)) {
         SLOGE("get valuesArray nullptr");
