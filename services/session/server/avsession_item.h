@@ -510,6 +510,9 @@ private:
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
+
+    const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
+    const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";
 #endif
 };
 } // namespace OHOS::AVSession

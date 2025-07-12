@@ -258,6 +258,7 @@ void AVSessionService::OnStop()
     CommandSendLimit::GetInstance().StopTimer();
     NotifyProcessStatus(false);
     UnSubscribeCommonEvent();
+    BundleStatusAdapter::ReleaseInstance();
 }
 
 EventSubscriber::EventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo, AVSessionService *ptr)
