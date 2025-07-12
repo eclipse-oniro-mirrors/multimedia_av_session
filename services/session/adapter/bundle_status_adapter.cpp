@@ -25,6 +25,9 @@
 #include "array_wrapper.h"
 
 namespace OHOS::AVSession {
+std::shared_ptr<BundleStatusAdapter> BundleStatusAdapter::instance_;
+std::recursive_mutex BundleStatusAdapter::instanceLock_;
+
 BundleStatusAdapter::BundleStatusAdapter()
 {
     SLOGI("construct");
@@ -37,8 +40,20 @@ BundleStatusAdapter::~BundleStatusAdapter()
 
 BundleStatusAdapter& BundleStatusAdapter::GetInstance()
 {
-    static BundleStatusAdapter bundleStatusAdapter;
-    return bundleStatusAdapter;
+    std::lock_guard lockGuard(instanceLock_);
+    if (instance_ != nullptr) {
+        return *instance_;
+    }
+    SLOGI("GetInstance in");
+    instance_ = std::make_shared<BundleStatusAdapter>();
+    return *instance_;
+}
+
+void BundleStatusAdapter::ReleaseInstance()
+{
+    std::lock_guard lockGuard(instanceLock_);
+    SLOGI("ReleaseInstance in");
+    instance_ = nullptr;
 }
 
 void BundleStatusAdapter::Init()

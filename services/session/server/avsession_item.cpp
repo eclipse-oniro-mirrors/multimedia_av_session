@@ -1580,8 +1580,11 @@ int32_t AVSessionItem::StopCast(bool continuePlay)
     }
     {
         CHECK_AND_RETURN_RET_LOG(castHandle_ != 0 && castHandle_ != -1, AVSESSION_SUCCESS, "Not cast session, return");
-        SLOGI("Stop cast process %{public}lld", (long long)castHandle_);
-        if (castHandle_ == AVRouter::GetInstance().GetMirrorCastHandle()) {
+        std::string callingBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
+        bool isMediaOrSceneBoard = (callingBundleName == MEDIA_CONTROL_BUNDLENAME) ||
+                                   (callingBundleName == SCENE_BOARD_BUNDLENAME);
+        SLOGI("Stop cast process %{public}lld with rm device %{public}d", (long long)castHandle_, isMediaOrSceneBoard);
+        if ((castHandle_ == AVRouter::GetInstance().GetMirrorCastHandle()) && !isMediaOrSceneBoard) {
             if (castControllerProxy_ != nullptr) {
                 AVCastControlCommand cmd;
                 cmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_STOP);

@@ -478,6 +478,60 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange003, TestSize.Level0)
 }
 
 /**
+* @tc.name: OnCastStateChange004
+* @tc.desc: castState is mirror to stream
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, OnCastStateChange004, TestSize.Level0)
+{
+    SLOGI("OnCastStateChange004 begin");
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    
+    int64_t castHandle = 2000;
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
+    g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
+
+    int32_t castState = 11;
+    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
+
+    EXPECT_TRUE(g_AVRouterImpl->IsInMirrorToStreamState());
+    SLOGI("OnCastStateChange004 end");
+}
+
+/**
+* @tc.name: OnCastStateChange005
+* @tc.desc: castState is stream to mirror
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, OnCastStateChange005, TestSize.Level0)
+{
+    SLOGI("OnCastStateChange005 begin");
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    
+    int64_t castHandle = 2000;
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
+    g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
+
+    int32_t castState = 12;
+    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
+
+    EXPECT_TRUE(g_AVRouterImpl->IsInMirrorToStreamState() == false);
+    SLOGI("OnCastStateChange005 end");
+}
+
+/**
 * @tc.name: OnCastEventRecv001
 * @tc.desc: listener is nullptr
 * @tc.type: FUNC

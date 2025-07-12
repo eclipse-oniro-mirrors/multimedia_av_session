@@ -27,6 +27,10 @@ class BundleStatusAdapter {
 public:
     static BundleStatusAdapter& GetInstance();
 
+    static void ReleaseInstance();
+
+    BundleStatusAdapter();
+
     ~BundleStatusAdapter();
 
     void Init();
@@ -46,8 +50,6 @@ public:
         std::string& supportModule, std::string& profile);
 
 private:
-    BundleStatusAdapter();
-
     void NotifyBundleRemoved(const std::string bundleName, const int32_t userId);
 
     bool CheckBundleSupport(std::string& profile);
@@ -71,6 +73,10 @@ private:
     std::recursive_mutex bundleMgrProxyLock_;
 
     static const int32_t DEFAULT_USER_ID = 100;
+
+    static std::shared_ptr<BundleStatusAdapter> instance_;
+
+    static std::recursive_mutex instanceLock_;
 };
 
 class BundleStatusCallbackImpl : public AppExecFwk::BundleStatusCallbackHost {

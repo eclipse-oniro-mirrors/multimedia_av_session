@@ -210,9 +210,9 @@ int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId,
 
 int32_t AVSessionService::checkEnableCast(bool enable)
 {
-    std::lock_guard lockGuard(checkEnableCastLock_);
-    SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
+    SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, static_cast<int>(isInCast_.load()));
     if (enable == true && isInCast_ == false) {
+        std::lock_guard lockGuard(isInCastLock_);
         isInCast_ = AVRouter::GetInstance().Init(this) == AVSESSION_SUCCESS ? true : false;
     } else if (enable == false && isInCast_ == true) {
         CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
@@ -220,6 +220,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
             AVSESSION_SUCCESS, "can not release cast with session alive");
         CHECK_AND_RETURN_RET_LOG(castServiceNameStatePair_.second != deviceStateConnection,
             AVSESSION_SUCCESS, "can not release cast with casting");
+        std::lock_guard lockGuard(isInCastLock_);
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
         SLOGD("AVRouter Init in nothing change");
