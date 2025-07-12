@@ -221,17 +221,17 @@ ani_status AniUtils::SetValue(ani_env *env, const std::vector<CastDisplayInfo>& 
 {
     CHECK_AND_RETURN_RET_LOG(env != nullptr, ANI_ERROR, "env is null");
     ani_class cls {};
-    static const std::string className = "Lescompat/Array;";
+    static const std::string className = "escompat.Array";
     ani_status status = env->FindClass(className.c_str(), &cls);
     if (status != ANI_OK) {
-        SLOGE("Can't find Lescompat/Array.");
+        SLOGE("Can't find escompat.Array.");
         return status;
     }
 
     ani_method arrayConstructor {};
-    status = env->Class_FindMethod(cls, "<ctor>", "I:V;", &arrayConstructor);
+    status = env->Class_FindMethod(cls, "<ctor>", "i:;", &arrayConstructor);
     if (status != ANI_OK) {
-        SLOGE("Can't find method <ctor> in Lescompat/Array.");
+        SLOGE("Can't find method <ctor> in escompat.Array.");
         return status;
     }
 
@@ -242,9 +242,9 @@ ani_status AniUtils::SetValue(ani_env *env, const std::vector<CastDisplayInfo>& 
     }
 
     ani_method setMethod {};
-    status = env->Class_FindMethod(cls, "$_set", "ILstd/core/Object;:V", &setMethod);
+    status = env->Class_FindMethod(cls, "$_set", "iC{std.core.Object}:", &setMethod);
     if (status != ANI_OK) {
-        SLOGE("Can't find method $_set in Lescompat/Array.");
+        SLOGE("Can't find method $_set in escompat.Array.");
         return status;
     }
 
@@ -272,7 +272,7 @@ ani_status AniUtils::ToAniString(ani_env *env, const std::string &str, ani_strin
 ani_status AniUtils::ToAniBooleanObject(ani_env *env, bool src, ani_object &aniObj)
 {
     CHECK_AND_RETURN_RET_LOG(env != nullptr, ANI_ERROR, "env is null");
-    static const char *className = "Lstd/core/Boolean;";
+    static const char *className = "std.core.Boolean";
     ani_class cls {};
     ani_status status = env->FindClass(className, &cls);
     if (status != ANI_OK) {
@@ -281,7 +281,7 @@ ani_status AniUtils::ToAniBooleanObject(ani_env *env, bool src, ani_object &aniO
     }
 
     ani_method ctor {};
-    status = env->Class_FindMethod(cls, "<ctor>", "Z:V", &ctor);
+    status = env->Class_FindMethod(cls, "<ctor>", "z:", &ctor);
     if (status != ANI_OK) {
         SLOGE("Failed to find method: ctor");
         return status;
@@ -299,7 +299,7 @@ ani_status AniUtils::ToAniBooleanObject(ani_env *env, bool src, ani_object &aniO
 ani_status AniUtils::ToAniIntObject(ani_env *env, int32_t src, ani_object &aniObj)
 {
     CHECK_AND_RETURN_RET_LOG(env != nullptr, ANI_ERROR, "env is null");
-    static const char *className = "Lstd/core/Int;";
+    static const char *className = "std.core.Int";
     ani_class cls {};
     ani_status status = env->FindClass(className, &cls);
     if (status != ANI_OK) {
@@ -308,7 +308,7 @@ ani_status AniUtils::ToAniIntObject(ani_env *env, int32_t src, ani_object &aniOb
     }
 
     ani_method ctor {};
-    status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor);
+    status = env->Class_FindMethod(cls, "<ctor>", "i:", &ctor);
     if (status != ANI_OK) {
         SLOGE("Failed to find method: ctor");
         return status;
@@ -325,7 +325,7 @@ ani_status AniUtils::ToAniIntObject(ani_env *env, int32_t src, ani_object &aniOb
 ani_status AniUtils::ToAniLongObject(ani_env *env, int64_t src, ani_object &aniObj)
 {
     CHECK_AND_RETURN_RET_LOG(env != nullptr, ANI_ERROR, "env is null");
-    static const char *className = "Lescompat/BigInt;";
+    static const char *className = "escompat.BigInt";
     ani_class cls {};
     ani_status status = env->FindClass(className, &cls);
     if (status != ANI_OK) {
@@ -334,7 +334,7 @@ ani_status AniUtils::ToAniLongObject(ani_env *env, int64_t src, ani_object &aniO
     }
 
     ani_method ctor {};
-    status = env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor);
+    status = env->Class_FindMethod(cls, "<ctor>", "l:", &ctor);
     if (status != ANI_OK) {
         SLOGE("Failed to find method: ctor");
         return status;
@@ -351,7 +351,7 @@ ani_status AniUtils::ToAniLongObject(ani_env *env, int64_t src, ani_object &aniO
 ani_status AniUtils::ThrowError(ani_env *env, const char *aniMessage, int32_t aniCode)
 {
     CHECK_AND_RETURN_RET_LOG(env != nullptr, ANI_ERROR, "env is null");
-    static const std::string className = "L@ohos/multimedia/avsession/AvSessionAniError;";
+    static const std::string className = "@ohos.multimedia.avsession.AvSessionAniError";
     ani_class cls;
     ani_status status = env->FindClass(className.c_str(), &cls);
     if (status != ANI_OK) {
@@ -360,7 +360,7 @@ ani_status AniUtils::ThrowError(ani_env *env, const char *aniMessage, int32_t an
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "DLstd/core/String;:V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dC{std.core.String}:", &ctor)) {
         SLOGE("Can't find <ctor> from class %{public}s", className.c_str());
         return ANI_ERROR;
     }

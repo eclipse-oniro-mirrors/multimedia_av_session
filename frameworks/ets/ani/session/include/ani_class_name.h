@@ -19,10 +19,10 @@
 #include <string>
 
 namespace OHOS::AVSession {
-static const std::string ANI_CLASS_SPACE = "L@ohos/multimedia/avsession/avSession/";
+static const std::string ANI_CLASS_SPACE = "@ohos.multimedia.avsession.avSession.";
 
-static const std::string ANI_CLASS_AV_SESSION_HANDLE = ANI_CLASS_SPACE + "AVSessionHandle;";
+static const std::string ANI_CLASS_AV_SESSION_HANDLE = ANI_CLASS_SPACE + "AVSessionHandle";
 
-static const std::string ANI_CLASS_CAST_DISPLAY_INFO_HANDLE = ANI_CLASS_SPACE + "CastDisplayInfoHandle;";
+static const std::string ANI_CLASS_CAST_DISPLAY_INFO_HANDLE = ANI_CLASS_SPACE + "CastDisplayInfoHandle";
 }
 #endif  // OHOS_ANI_CLASSNAME_H

@@ -120,7 +120,7 @@ ani_object AVSessionAni::Constructor([[maybe_unused]] ani_env *env, ani_object c
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
         SLOGE("Failed to find method: %{public}s", "ctor");
         return avSession_object;
     }
