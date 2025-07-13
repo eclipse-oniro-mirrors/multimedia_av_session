@@ -423,6 +423,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
 {
     SLOGI("AVRouterImpl stop cast session");
 
+    isInMirrorToStream_ = false;
     int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
 
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
