@@ -375,3 +375,67 @@ static HWTEST_F(FocusSessionStrategyTest, DelayStopFocusSession003, testing::ext
     sleep(6);
     SLOGD("DelayStopFocusSession003 end!");
 }
+
+/**
+* @tc.name: ProcAudioRenderChange001
+* @tc.desc: Test ProcAudioRenderChange
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange001, testing::ext::TestSize.Level0)
+{
+    SLOGI("ProcAudioRenderChange001 begin!");
+    std::shared_ptr<AudioRendererChangeInfo> infoA = std::make_shared<AudioRendererChangeInfo>();
+    infoA->clientUID = 1;
+    infoA->sessionId = 1;
+    infoA->rendererState = RendererState::RENDERER_RUNNING;
+    infoA->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    std::shared_ptr<AudioRendererChangeInfo> infoB = std::make_shared<AudioRendererChangeInfo>();
+    infoB->clientUID = 1;
+    infoB->sessionId = 2;
+    infoB->rendererState = RendererState::RENDERER_RUNNING;
+    infoB->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(std::move(infoA));
+    infos.push_back(std::move(infoB));
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+    SLOGE("ProcAudioRenderChange001 num:%{public}d aft ProcAudioRenderChange",
+        static_cast<int>(focusSessionStrategy.audioPlayingUids_.size()));
+    EXPECT_TRUE(focusSessionStrategy.audioPlayingUids_.size() == 1);
+    SLOGI("ProcAudioRenderChange001 end!");
+}
+
+/**
+* @tc.name: ProcAudioRenderChange002
+* @tc.desc: Test ProcAudioRenderChange
+* @tc.type: FUNC
+*/
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange002, testing::ext::TestSize.Level0)
+{
+    SLOGI("ProcAudioRenderChange002 begin!");
+    std::shared_ptr<AudioRendererChangeInfo> infoA = std::make_shared<AudioRendererChangeInfo>();
+    infoA->clientUID = 2;
+    infoA->sessionId = 1;
+    infoA->rendererState = RendererState::RENDERER_RELEASED;
+    infoA->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    std::shared_ptr<AudioRendererChangeInfo> infoB = std::make_shared<AudioRendererChangeInfo>();
+    infoB->clientUID = 2;
+    infoB->sessionId = 2;
+    infoB->rendererState = RendererState::RENDERER_RUNNING;
+    infoB->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_GAME;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(std::move(infoA));
+    infos.push_back(std::move(infoB));
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+    SLOGE("ProcAudioRenderChange002 num:%{public}d aft ProcAudioRenderChange",
+        static_cast<int>(focusSessionStrategy.audioPlayingUids_.size()));
+    EXPECT_TRUE(focusSessionStrategy.audioPlayingUids_.size() == 0);
+    SLOGI("ProcAudioRenderChange002 end!");
+}

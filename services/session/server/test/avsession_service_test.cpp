@@ -741,7 +741,7 @@ static HWTEST_F(AVSessionServiceTest, SaveSessionInfoInFile001, TestSize.Level0)
 
 static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart001, TestSize.Level0)
 {
-    SLOGI("HandleSystemKeyColdStart001 begin!");
+    SLOGI("HandleSystemKeyColdStart001 begin");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -754,12 +754,12 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart001, TestSize.Leve
     EXPECT_NE(avsessionHere_, avservice_->topSession_);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
-    SLOGI("HandleSystemKeyColdStart001 end!");
+    SLOGI("HandleSystemKeyColdStart001 end");
 }
 
 static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Level0)
 {
-    SLOGD("HandleSystemKeyColdStart002 begin!");
+    SLOGD("HandleSystemKeyColdStart002 begin");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -777,7 +777,7 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Leve
     EXPECT_NE(avsessionHere, avservice_->topSession_);
     avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
-    SLOGD("HandleSystemKeyColdStart002 end!");
+    SLOGD("HandleSystemKeyColdStart002 end");
 }
 
 static HWTEST_F(AVSessionServiceTest, GetHistoricalAVQueueInfos001, TestSize.Level0)
@@ -1689,6 +1689,35 @@ static HWTEST_F(AVSessionServiceTest, SendSystemControlCommand002, TestSize.Leve
     avsessionHere->Destroy();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGD("SendSystemControlCommand002 end!");
+}
+
+/**
+* @tc.name: SendSystemControlCommand003
+* @tc.desc: Verifying the SendSystemControlCommand method with valid parameters.
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTest, SendSystemControlCommand003, TestSize.Level0)
+{
+    SLOGI("SendSystemControlCommand003 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    std::vector<int> tempAudioPlayingUids {1, 2};
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(avsessionHere != nullptr);
+    tempAudioPlayingUids.push_back(avsessionHere->GetUid());
+    avservice_->focusSessionStrategy_.SetAudioPlayingUids(tempAudioPlayingUids);
+
+    AVControlCommand command;
+    command.SetCommand(1000);
+    int32_t ret = avservice_->SendSystemControlCommand(command);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    SLOGI("SendSystemControlCommand003 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, CreateWantAgent001, TestSize.Level0)

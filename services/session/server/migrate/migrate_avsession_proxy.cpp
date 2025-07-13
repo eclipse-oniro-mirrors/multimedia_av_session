@@ -50,6 +50,7 @@ void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
     SendSpecialKeepAliveData();
     PrepareSessionFromRemote();
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnConnectServer find service ptr null!");
+    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "OnConnectServer find preSetController null!");
     std::vector<sptr<IRemoteObject>> sessionControllers;
     sessionControllers.push_back(preSetController_);
     servicePtr_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
@@ -67,13 +68,11 @@ void MigrateAVSessionProxy::OnDisconnectServer(const std::string &deviceId)
     std::vector<sptr<IRemoteObject>> sessionControllers;
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnDisconnectServer find service ptr null!");
     servicePtr_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
-    if (preSetController_ != nullptr) {
-        preSetController_->RegisterMigrateAVSessionProxyCallback(nullptr);
-    }
+    ReleaseSessionFromRemote();
     servicePtr_->NotifyRemoteBundleChange("");
     elementName_.SetAbilityName("");
     elementName_.SetBundleName("");
-    SLOGI("MigrateAVSessionProxy OnDisconnectServer finish.");
+    SLOGI("MigrateAVSessionProxy OnDisconnectServer complete");
 }
 
 int32_t MigrateAVSessionProxy::GetCharacteristic()
@@ -213,6 +212,26 @@ void MigrateAVSessionProxy::PrepareControllerOfRemoteSession(sptr<AVSessionItem>
     migrateProxyCallback_ = MigrateAVSessionProxyControllerCallback();
     preSetController_->RegisterMigrateAVSessionProxyCallback(migrateProxyCallback_);
     sessionItem->AddController(DEFAULT_NUM, preSetController_);
+}
+
+void MigrateAVSessionProxy::ReleaseSessionFromRemote()
+{
+    SLOGI("ReleaseSessionFromRemote in");
+    ReleaseControllerOfRemoteSession();
+    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ReleaseSessionFromRemote with remoteSession null");
+    remoteSession_->RegisterAVSessionCallback(nullptr);
+    remoteSession_->Destroy();
+    remoteSession_ = nullptr;
+    SLOGI("ReleaseSessionFromRemote done");
+}
+
+void MigrateAVSessionProxy::ReleaseControllerOfRemoteSession()
+{
+    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "ReleaseControllerOfRemoteSession with preSetController null");
+    preSetController_->RegisterMigrateAVSessionProxyCallback(nullptr);
+    preSetController_->Destroy();
+    preSetController_ = nullptr;
+    SLOGI("ReleaseControllerOfRemoteSession done");
 }
 
 const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::MigrateAVSessionProxyControllerCallback()
@@ -558,11 +577,8 @@ void DevicesJsonArrayToVector(cJSON* jsonArray, AudioDeviceDescriptors& devices)
         int deviceType = SoftbusSessionUtils::GetIntFromJson(jsonObject, AUDIO_DEVICE_TYPE);
         int deviceRole = SoftbusSessionUtils::GetIntFromJson(jsonObject, AUDIO_DEVICE_ROLE);
         std::string networkId = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_NETWORK_ID);
-        networkId = networkId.empty() ? "ERROR_TYPE" : networkId;
         std::string deviceName = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_DEVICE_NAME);
-        deviceName = deviceName.empty() ? "ERROR_TYPE" : deviceName;
         std::string macAddress = SoftbusSessionUtils::GetStringFromJson(jsonObject, AUDIO_MAC_ADDRESS);
-        macAddress = macAddress.empty() ? "ERROR_TYPE" : macAddress;
 
         std::shared_ptr<AudioDeviceDescriptor> device = std::make_shared<AudioDeviceDescriptor>();
         CHECK_AND_RETURN_LOG(device != nullptr, "AudioDeviceDescriptor make shared_ptr is nullptr");
