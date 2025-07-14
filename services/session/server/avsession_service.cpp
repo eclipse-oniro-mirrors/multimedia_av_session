@@ -1042,7 +1042,8 @@ sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const s
             }
         }
     }
-    SLOGI("Not found controller for pid:%{public}d, sessionId:%{public}s.", pid, sessionId.c_str());
+    SLOGI("Not found controller for pid:%{public}d, sessionId:%{public}s.", pid,
+        AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     return nullptr;
 }
 
@@ -3385,7 +3386,7 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
         token.sessionId = session->GetSessionId();
         token.pid = session->GetPid();
         token.uid = session->GetUid();
-        SLOGI("cast session %{public}s", token.sessionId.c_str());
+        SLOGI("cast session %{public}s", AVSessionUtils::GetAnonySessionId(token.sessionId).c_str());
         int32_t ret = CastAudio(token, sinkAudioDescriptors);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudio session %{public}s failed",
                                  AVSessionUtils::GetAnonySessionId(token.sessionId).c_str());

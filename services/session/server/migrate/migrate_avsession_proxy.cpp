@@ -220,18 +220,18 @@ void MigrateAVSessionProxy::ReleaseSessionFromRemote()
     ReleaseControllerOfRemoteSession();
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ReleaseSessionFromRemote with remoteSession null");
     remoteSession_->RegisterAVSessionCallback(nullptr);
-    remoteSession_->Destroy();
+    remoteSession_->DestroyTask();
     remoteSession_ = nullptr;
-    SLOGI("ReleaseSessionFromRemote done");
+    SLOGI("ReleaseSessionFromRemote done.");
 }
 
 void MigrateAVSessionProxy::ReleaseControllerOfRemoteSession()
 {
     CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "ReleaseControllerOfRemoteSession with preSetController null");
     preSetController_->RegisterMigrateAVSessionProxyCallback(nullptr);
-    preSetController_->Destroy();
+    preSetController_->DestroyWithoutReply();
     preSetController_ = nullptr;
-    SLOGI("ReleaseControllerOfRemoteSession done");
+    SLOGI("ReleaseControllerOfRemoteSession done.");
 }
 
 const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::MigrateAVSessionProxyControllerCallback()
@@ -744,10 +744,11 @@ void MigrateAVSessionProxy::SendSpecialKeepAliveData()
 {
     std::thread([this]() {
         while (!this->deviceId_.empty()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME_FOR_NEXT));
             if (!isNeedByMediaControl_) {
-                SLOGI("no byte send for client not need");
-                continue;
+                SLOGI("silent bytes waiting");
+                std::this_thread::sleep_for(std::chrono::milliseconds(SILENT_HEART_BEAT_TIME_FOR_NEXT));
+            } else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME_FOR_NEXT));
             }
             if (this->deviceId_.empty()) {
                 SLOGE("SendSpecialKeepAliveData without deviceId, return");
