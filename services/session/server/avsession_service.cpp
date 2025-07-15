@@ -347,7 +347,7 @@ void AVSessionService::HandleRemoveMediaCardEvent()
             castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
             topSession_->SendControlCommandToCast(castCmd);
         }
-    } else if (AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid()) ||
+    } else if (AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid(), topSession_->GetPid()) ||
         (topSession_->GetUid() == audioBrokerUid &&
         topSession_->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY)) {
         AVControlCommand cmd;
@@ -364,7 +364,7 @@ bool AVSessionService::IsTopSessionPlaying()
     }
     bool isPlaying = topSession_->IsCasting() ?
         (topSession_->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) :
-        AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid());
+        AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid(), topSession_->GetPid());
     return isPlaying;
 }
 
@@ -800,7 +800,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             return;
         }
         sessionListForFront->push_front(sessionItem);
-        if (AudioAdapter::GetInstance().GetRendererRunning(sessionItem->GetUid())) {
+        if (AudioAdapter::GetInstance().GetRendererRunning(sessionItem->GetUid(), sessionItem->GetPid())) {
             SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
             UpdateTopSession(sessionItem);
             AVSessionDescriptor selectSession = sessionItem->GetDescriptor();
@@ -2919,7 +2919,7 @@ sptr <AVSessionItem> AVSessionService::GetOtherPlayingSession(int32_t userId, st
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, nullptr, "sessionListForFront ptr nullptr!");
     for (const auto& session : *sessionListForFront) {
         CHECK_AND_CONTINUE(session != nullptr);
-        if (AudioAdapter::GetInstance().GetRendererRunning(session->GetUid()) &&
+        if (AudioAdapter::GetInstance().GetRendererRunning(session->GetUid(), session->GetPid()) &&
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") &&
             session->GetBundleName() != bundleName && !session->IsCasting()) {
             SLOGI("find other playing session, uid:%{public}d, pid:%{public}d, bundleName %{public}s",
