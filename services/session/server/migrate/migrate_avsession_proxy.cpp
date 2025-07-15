@@ -72,7 +72,7 @@ void MigrateAVSessionProxy::OnDisconnectServer(const std::string &deviceId)
     servicePtr_->NotifyRemoteBundleChange("");
     elementName_.SetAbilityName("");
     elementName_.SetBundleName("");
-    SLOGI("MigrateAVSessionProxy OnDisconnectServer complete.");
+    SLOGI("MigrateAVSessionProxy OnDisconnectServer complete");
 }
 
 int32_t MigrateAVSessionProxy::GetCharacteristic()
