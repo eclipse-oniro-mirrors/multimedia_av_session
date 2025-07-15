@@ -24,6 +24,7 @@
 #include "permission_checker.h"
 #include "avsession_sysevent.h"
 #include "want_params.h"
+#include "string_wrapper.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -271,6 +272,18 @@ int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, co
     CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
         ERR_COMMAND_SEND_EXCEED_MAX, "common command send number exceed max");
     session_->ExecueCommonCommand(commonCommand, commandArgs);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVCastControllerItem::SendCustomData(const AAFwk::WantParams& data)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
+    auto value = data.GetParam("customData");
+    AAFwk::IString* stringValue = AAFwk::IString::Query(value);
+    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData == nullptr");
+    SLOGI("SendCustomData %{public}s", AAFwk::String::Unbox(stringValue).c_str());
+    session_->ExecueCustomData(data);
     return AVSESSION_SUCCESS;
 }
 
@@ -578,6 +591,15 @@ void AVControllerItem::HandleExtrasChange(const AAFwk::WantParams& extras)
     }
 }
 // LCOV_EXCL_STOP
+
+void AVControllerItem::HandleCustomData(const AAFwk::WantParams& data)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnCustomData");
+    if (callback_ != nullptr) {
+        callback_->OnCustomData(data);
+    }
+}
 
 pid_t AVControllerItem::GetPid() const
 {

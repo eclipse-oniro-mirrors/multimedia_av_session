@@ -549,7 +549,7 @@ int32_t AVSessionItem::SetAVQueueTitle(const std::string& title)
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionItem::SendCustomDataInner(const AAFwk::WantParams& data);
+void AVSessionItem::SendCustomDataInner(const AAFwk::WantParams& data)
 {
     std::lock_guard controllerLockGuard(controllersLock_);
 
@@ -564,9 +564,9 @@ void AVSessionItem::SendCustomDataInner(const AAFwk::WantParams& data);
 
 int32_t AVSessionItem::SendCustomData(const AAFwk::WantParams& data)
 {
-    CHECK_AND_RETURN_RET_LOG(extras.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
-    auto value = extras.GetParam("customData");
-    AAFwk::IString* stringValue = AAFwk::IString::Query(data);
+    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
+    auto value = data.GetParam("customData");
+    AAFwk::IString* stringValue = AAFwk::IString::Query(value);
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData == nullptr");
     SLOGI("SendCustomData %{public}s", AAFwk::String::Unbox(stringValue).c_str());
     SendCustomDataInner(data);
@@ -2027,6 +2027,16 @@ void AVSessionItem::ExecueCommonCommand(const std::string& commonCommand, const 
     if (remoteSink_ != nullptr) {
         CHECK_AND_RETURN_LOG(remoteSink_->SetCommonCommand(commonCommand, commandArgs) == AVSESSION_SUCCESS,
             "SetCommonCommand failed");
+    }
+}
+
+void AVSessionItem::ExecuteCustomData(const AAFwk::WantParams& data)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::ExecuteCustomData");
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+        callback_->OnCustomData(data);
     }
 }
 

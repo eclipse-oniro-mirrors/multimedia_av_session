@@ -64,5 +64,5 @@ interface OHOS.AVSession.IAVSessionCallback {
 
     [oneway] void OnCastDisplayChange([in] CastDisplayInfo castDisplayInfo);
 
-    [oneway] void OnCustomData([in] WantParams data);
+    [oneway] void OnCustomData([in] WantParams customData);
 }

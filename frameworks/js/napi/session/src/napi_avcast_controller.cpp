@@ -153,14 +153,14 @@ napi_value NapiAVCastController::SendCustomData(napi_env env, napi_callback_info
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastController::SendCustomData");
     struct ConcrentContext : public ContextBase {
-        AAFwk::WantParams data;
+        AAFwk::WantParams data_;
     };
     auto context = std::make_shared<ConcrentContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
 
-        context->status = NapiUtiles::GetValue(env, argv[ARGV_FIRST], context->customData_);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->data_);
         CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
@@ -177,7 +177,7 @@ napi_value NapiAVCastController::SendCustomData(napi_env env, napi_callback_info
             return;
         }
 
-        int32_t ret = napiCastController->castController_->SendCustomData(context->customData_);
+        int32_t ret = napiCastController->castController_->SendCustomData(context->data_);
         if (ret != AVSESSION_SUCCESS) {
             context->errMessage = "SendCustomData error";
             context->status = napi_generic_failure;
@@ -1277,7 +1277,7 @@ napi_status NapiAVCastController::OnCustomData(napi_env env, NapiAVCastControlle
     napi_value param, napi_value callback)
 {
     return napiCastController->callback_->AddCallback(env,
-        NapiAVCastControllerCallback::EVENT_CAST_CUSTOM_DATA callback);
+        NapiAVCastControllerCallback::EVENT_CAST_CUSTOM_DATA, callback);
 }
 
 napi_status NapiAVCastController::OffPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,

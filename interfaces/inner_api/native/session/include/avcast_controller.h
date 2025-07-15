@@ -43,7 +43,7 @@ public:
     */
     virtual int32_t SendControlCommand(const AVCastControlCommand& cmd) = 0;
 
-    virtual int32_t SendCustomData(const AAFwk::WantParam& data) = 0;
+    virtual int32_t SendCustomData(const AAFwk::WantParams& data) = 0;
 
     virtual int32_t Start(const AVQueueItem& avQueueItem) = 0;
 

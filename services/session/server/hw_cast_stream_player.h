@@ -45,7 +45,7 @@ public:
     void Release() override;
     void SendControlCommand(const AVCastControlCommand castControlCommand) override;
     AVQueueItem GetCurrentItem() override;
-    int32_t SendCustomData(const AAFwk::WantParams& data) override;
+    void SendCustomData(const std::string& data) override;
     int32_t Start(const AVQueueItem& avQueueItem) override;
     int32_t Prepare(const AVQueueItem& avQueueItem) override;
     int32_t GetDuration(int32_t &duration) override;

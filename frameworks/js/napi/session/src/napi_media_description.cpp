@@ -617,7 +617,7 @@ napi_status NapiMediaDescription::SetAppName(napi_env env, const AVMediaDescript
     return status;
 }
 
-napi_status NapiMediaDescription::GetLaunchClientData(napi_env env, const AVMediaDescription& in, napi_value& out)
+napi_status NapiMediaDescription::GetLaunchClientData(napi_env env, napi_value in, AVMediaDescription& out)
 {
     SLOGD("Start get launchClientData from napi_value");
     std::string property;

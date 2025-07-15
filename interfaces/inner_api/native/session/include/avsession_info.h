@@ -146,7 +146,7 @@ public:
 
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
-    virtual void OnCustomData(const AAFwk::WantParams &data) = 0;
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
 
     virtual int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
         int64_t pos, int32_t& result) = 0;
@@ -323,7 +323,7 @@ public:
      * @param data The changed custom media packet.
      * @since 11
      */
-    virtual void OnCustomData(const AAFwk::WantParams& data) = 0;
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
 
     /**
      * @brief Deconstruct AVSessionCallback.
@@ -444,7 +444,7 @@ public:
      * @param data The changed custom media packet.
      * @since 10
      */
-    virtual void OnCustomData(const AAFwk::WantParams& data) = 0;
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
 
     /**
      * @brief Deconstruct AVControllerCallback.
@@ -479,6 +479,8 @@ public:
 
     virtual int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
         int64_t pos, int32_t& result) = 0;
+
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
 
     /**
      * @brief Deconstruct AVControllerCallback.

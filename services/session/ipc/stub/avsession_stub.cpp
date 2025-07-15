@@ -248,7 +248,7 @@ int32_t AVSessionStub::HandleSendCustomData(MessageParcel& data, MessageParcel& 
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
         return ERR_NONE;
     }
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SetCustomData(*customData)), ERR_NONE, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SendCustomData(*customData)), ERR_NONE, "WriteInt32 result failed");
     return ERR_NONE;
 }
 

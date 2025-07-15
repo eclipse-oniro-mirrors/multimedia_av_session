@@ -42,7 +42,7 @@ interface OHOS.AVSession.IAVCastControllerCallback {
 
     [oneway] void OnCastValidCommandChanged([in] int[] cmds);
 
-    [oneway] void OnCustomData([in] WantParams data);
+    [oneway] void OnCustomData([in] WantParams customData);
 
     void onDataSrcRead([in] sharedptr<AVSharedMemoryBase> mem, [in] unsigned int length, [in] long pos, [out] int ret);
 }

@@ -83,7 +83,7 @@ int32_t AVCastControllerStub::HandleSendCustomData(MessageParcel& data, MessageP
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerStub::SendCustomData");
     sptr customData = data.ReadParcelable<AAFwk::WantParams>();
-    if (cmd == nullptr) {
+    if (customData == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING),
             ERR_UNMARSHALLING, "write SendCustomData ret failed");
     } else {

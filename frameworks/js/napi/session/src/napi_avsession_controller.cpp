@@ -1252,13 +1252,10 @@ napi_value NapiAVSessionController::SendCustomData(napi_env env, napi_callback_i
     }
 
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "Invalid arguments",
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->commonCommand_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get common command failed",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->commandArgs_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get command args failed",
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->data_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get data failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, inputParser);

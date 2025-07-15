@@ -157,7 +157,7 @@ ErrCode AVControllerCallbackClient::OnExtrasChange(const AAFwk::WantParams& extr
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVCastControllerCallbackClient::OnCustomData(const AAFwk::WantParams& data)
+ErrCode AVControllerCallbackClient::OnCustomData(const AAFwk::WantParams& data)
 {
     CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
 

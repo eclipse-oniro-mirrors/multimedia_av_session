@@ -508,7 +508,7 @@ public:
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override;
     int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
         int64_t pos, int32_t& result) override;
-    void OnCustomData(const AAFwk::WantParam& data) override;
+    void OnCustomData(const AAFwk::WantParams& data) override;
 
     bool IsCallbacksEmpty(int32_t event);
 

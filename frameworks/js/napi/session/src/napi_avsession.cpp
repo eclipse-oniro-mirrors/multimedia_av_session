@@ -740,7 +740,7 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SendCustomData");
     struct ConcreteContext : public ContextBase {
-        AAFwk::WantParams& data_;
+        AAFwk::WantParams data_;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
@@ -753,7 +753,7 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiPlaybackState::GetValue(env, argv[ARGV_FIRST], context->data_);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->data_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get customData failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
@@ -787,7 +787,7 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
         }
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
-    return NapiAsyncWork::Enqueue(env, context, "SendCustomData", executor, complete)
+    return NapiAsyncWork::Enqueue(env, context, "SendCustomData", executor, complete);
 }
 
 napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info info)

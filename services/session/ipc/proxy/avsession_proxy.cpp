@@ -344,14 +344,14 @@ int32_t AVSessionProxy::SetAVQueueTitle(const std::string& title)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
-int32_t AVSessionProxy::SendCustomData(const AAFwk::WantParams& data)
+int32_t AVSessionProxy::SendCustomData(const AAFwk::WantParams& customData)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::SendCustomData");
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(data),
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&customData),
         ERR_MARSHALLING, "Write state failed");
     MessageParcel reply;
     MessageOption option;

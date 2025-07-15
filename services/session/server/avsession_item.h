@@ -174,7 +174,7 @@ public:
 
     void ExecueCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
 
-    void ExecuteCustomData(const AAFwk::WantParams& data) override;
+    void ExecuteCustomData(const AAFwk::WantParams& data);
 
     int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);
 

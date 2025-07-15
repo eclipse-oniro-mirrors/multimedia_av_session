@@ -268,7 +268,7 @@ ErrCode AVSessionCallbackClient::OnCastDisplayChange(const CastDisplayInfo& cast
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVCastControllerCallbackClient::OnCustomData(const AAFwk::WantParams& data)
+ErrCode AVSessionCallbackClient::OnCustomData(const AAFwk::WantParams& data)
 {
     CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
 
