@@ -186,7 +186,7 @@ HWTEST_F(AVSessionDescriptorTest, Unmarshalling004, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     DeviceState deviceState;
     Parcel in;
-    auto ret = deviceState.UnMarshalling(in);
+    auto ret = deviceState.Unmarshalling(in);
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -202,7 +202,8 @@ HWTEST_F(AVSessionDescriptorTest, ReadFromParcel002, TestSize.Level1)
     DeviceState deviceState;
     Parcel in;
     bool ret = deviceState.ReadFromParcel(in);
-    EXPECT_EQ(ret, false);}
+    EXPECT_EQ(ret, false);
+}
 
 } // namespace AVSession
 } // namespace OHOS
