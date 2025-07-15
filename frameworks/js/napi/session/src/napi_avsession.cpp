@@ -749,7 +749,6 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
                               NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
-
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -775,8 +774,6 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
                 context->errMessage = "SendCustomData failed : native invalid parameters";
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SendCustomData failed : native no permission";
-            } else if (ret == ERR_MARSHALLING) {
-                context->errMessage = "SendCustomData failed : item number is out of range";
             } else {
                 context->errMessage = "SendCustomData failed : native server exception, \
                     you are advised to : 1.scheduled retry.\
