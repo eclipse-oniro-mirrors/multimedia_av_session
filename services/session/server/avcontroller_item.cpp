@@ -275,7 +275,7 @@ int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, co
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVCastControllerItem::SendCustomData(const AAFwk::WantParams& data)
+int32_t AVControllerItem::SendCustomData(const AAFwk::WantParams& data)
 {
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
@@ -283,7 +283,7 @@ int32_t AVCastControllerItem::SendCustomData(const AAFwk::WantParams& data)
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData == nullptr");
     SLOGI("SendCustomData %{public}s", AAFwk::String::Unbox(stringValue).c_str());
-    session_->ExecueCustomData(data);
+    session_->ExecuteCustomData(data);
     return AVSESSION_SUCCESS;
 }
 

@@ -253,7 +253,7 @@ public:
      * @return Returns whether the operation is successful.
      * @since 9
     */
-    virtual int32_t SendCustomData(cosnt AAFwk::WantParams& data) = 0;
+    virtual int32_t SendCustomData(const AAFwk::WantParams& data) = 0;
 
     /**
      * @brief Controller is or not destroy.
