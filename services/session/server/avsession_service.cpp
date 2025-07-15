@@ -2773,7 +2773,7 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
     if (BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == MEDIA_CONTROL_BUNDLENAME) {
         ReleaseCastSession();
     }
-#endif //CASTPLUS_CAST_ENGINE_ENABLE
+#endif // CASTPLUS_CAST_ENGINE_ENABLE
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     AVSessionSysEvent::GetInstance().ReportPlayingState(
         BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid));
