@@ -519,7 +519,7 @@ private:
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";
-    #endif
+#endif
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_ITEM_H
