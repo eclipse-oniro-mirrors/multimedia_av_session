@@ -59,6 +59,7 @@ std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     { "endOfStream", { OnEndOfStream, OffEndOfStream } },
     { "requestPlay", { OnPlayRequest, OffPlayRequest } },
     { "keyRequest", { OnKeyRequest, OffKeyRequest } },
+    { "customDataChange", { OnCustomData, OffCustomData } },
 };
 
 NapiAVCastController::NapiAVCastController()
@@ -79,6 +80,7 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("start", Start),
         DECLARE_NAPI_FUNCTION("prepare", Prepare),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
+        DECLARE_NAPI_FUNCTION("sendCustomData", SendCustomData),
         DECLARE_NAPI_FUNCTION("getDuration", GetDuration),
         DECLARE_NAPI_FUNCTION("getAVPlaybackState", GetCastAVPlaybackState),
         DECLARE_NAPI_FUNCTION("getSupportedDecoders", GetSupportedDecoders),
@@ -145,6 +147,45 @@ napi_status NapiAVCastController::NewInstance(napi_env env, std::shared_ptr<AVCa
 
     out = instance;
     return napi_ok;
+}
+
+napi_value NapiAVCastController::SendCustomData(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastController::SendCustomData");
+    struct ConcrentContext : public ContextBase {
+        AAFwk::WantParams data;
+    };
+    auto context = std::make_shared<ConcrentContext>();
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+
+        context->status = NapiUtiles::GetValue(env, argv[ARGV_FIRST], context->customData_);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "invalid command",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, input);
+    context->taskId = NAPI_CAST_CONTROLLER_SEND_CUSTOM_DATA_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController->castController_ == nullptr) {
+            SLOGE("SendCustomData failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "SendCustomData failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+
+        int32_t ret = napiCastController->castController_->SendCustomData(context->customData_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->errMessage = "SendCustomData error";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "SendCustomData", executor);
 }
 
 napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_info info)
@@ -1232,6 +1273,13 @@ napi_status NapiAVCastController::OnKeyRequest(napi_env env, NapiAVCastControlle
         NapiAVCastControllerCallback::EVENT_CAST_KEY_REQUEST, callback);
 }
 
+napi_status NapiAVCastController::OnCustomData(napi_env env, NapiAVCastController* napiCastController,
+    napi_value param, napi_value callback)
+{
+    return napiCastController->callback_->AddCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_CUSTOM_DATA callback);
+}
+
 napi_status NapiAVCastController::OffPlaybackStateChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
@@ -1417,6 +1465,15 @@ napi_status NapiAVCastController::OffKeyRequest(napi_env env, NapiAVCastControll
         napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_KEY_REQUEST, callback);
+}
+
+napi_status NapiAVCastController::OffCustomData(napi_env env, NapiAVCastController* napiCastController,
+    napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
+    return napiCastController->callback_->RemoveCallback(env,
+        NapiAVCastControllerCallback::EVENT_CAST_CUSTOM_DATA, callback);
 }
 
 void NapiAVCastController::ErrCodeToMessage(int32_t errCode, std::string& message)

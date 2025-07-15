@@ -55,6 +55,8 @@ private:
 
     int32_t HandleSendCommonCommand(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleSendCustomData(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetAVMetaData(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetAVQueueItems(MessageParcel& data, MessageParcel& reply);
@@ -109,6 +111,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSendControlCommand(data, reply); }},
         {CONTROLLER_CMD_SEND_COMMON_COMMAND,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSendCommonCommand(data, reply); }},
+        {CONTROLLER_CMD_SEND_CUSTOM_DATA,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendCustomData(data, reply); }},
         {CONTROLLER_CMD_SET_META_FILTER,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSetMetaFilter(data, reply); }},
         {CONTROLLER_CMD_SET_PLAYBACK_FILTER,
@@ -146,6 +150,7 @@ private:
         {CONTROLLER_CMD_GET_VALID_COMMANDS, "HandleGetValidCommands"},
         {CONTROLLER_CMD_SEND_CONTROL_COMMAND, "HandleSendControlCommand"},
         {CONTROLLER_CMD_SEND_COMMON_COMMAND, "HandleSendCommonCommand"},
+        {CONTROLLER_CMD_SEND_CUSTOM_DATA, "HandleSendCustomData"},
         {CONTROLLER_CMD_SET_META_FILTER, "HandleSetMetaFilter"},
         {CONTROLLER_CMD_SET_PLAYBACK_FILTER, "HandleSetPlaybackFilter"},
         {CONTROLLER_CMD_IS_SESSION_ACTIVE, "HandleIsSessionActive"},

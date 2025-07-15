@@ -37,6 +37,7 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(startPosition_) &&
         parcel.WriteInt32(creditsPosition_) &&
         parcel.WriteString(appName_) &&
+        parcel.WriteString(launchClientData_) &&
         parcel.WriteParcelable(icon_.get()) &&
         parcel.WriteParcelable(extras_.get()) &&
         parcel.WriteString(drmScheme_) &&
@@ -66,6 +67,7 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     data.ReadInt32(result->startPosition_);
     data.ReadInt32(result->creditsPosition_);
     data.ReadString(result->appName_);
+    data.ReadString(result->launchClientData_);
     result->icon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->icon_ == nullptr) {
         SLOGD("read AVMediaDescription - icon null");
@@ -279,6 +281,16 @@ std::string AVMediaDescription::GetAppName() const
     return appName_;
 }
 
+void AVMediaDescription::SetLaunchClientData(const std::string& launchClientData)
+{
+    launchClientData_ = launchClientData;
+}
+
+std::string AVMediaDescription::GetLaunchClientData() const
+{
+    return launchClientData_;
+}
+
 void AVMediaDescription::SetDrmScheme(const std::string& drmScheme)
 {
     drmScheme_ = drmScheme;
@@ -348,6 +360,7 @@ void AVMediaDescription::Reset()
     startPosition_ = 0;
     creditsPosition_ = 0;
     appName_ = "";
+    launchClientData_ = "";
     drmScheme_ = "";
     AVDataSrcDescriptor dataSrc;
     dataSrc_ = dataSrc;

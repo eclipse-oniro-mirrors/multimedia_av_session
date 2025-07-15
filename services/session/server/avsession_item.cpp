@@ -549,6 +549,30 @@ int32_t AVSessionItem::SetAVQueueTitle(const std::string& title)
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::SendCustomDataInner(const AAFwk::WantParams& data);
+{
+    std::lock_guard controllerLockGuard(controllersLock_);
+
+    if (controllers_.size() > 0) {
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandleCustomData(data);
+            }
+        }
+    }
+}
+
+int32_t AVSessionItem::SendCustomData(const AAFwk::WantParams& data)
+{
+    CHECK_AND_RETURN_RET_LOG(extras.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
+    auto value = extras.GetParam("customData");
+    AAFwk::IString* stringValue = AAFwk::IString::Query(data);
+    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData == nullptr");
+    SLOGI("SendCustomData %{public}s", AAFwk::String::Unbox(stringValue).c_str());
+    SendCustomDataInner(data);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     {

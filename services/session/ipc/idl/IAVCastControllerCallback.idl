@@ -15,6 +15,7 @@
 
 sequenceable AvplaybackState..OHOS.AVSession.AVPlaybackState;
 sequenceable AvqueueItem..OHOS.AVSession.AVQueueItem;
+sequenceable WantParams..OHOS.AAFwk.WantParams;
 sequenceable AVSharedMemoryBase..OHOS.AVSession.AVSharedMemoryBase;
 sequenceable OHOS.IRemoteObject;
 
@@ -40,6 +41,8 @@ interface OHOS.AVSession.IAVCastControllerCallback {
     [oneway, ipcincapacity 1024] void OnKeyRequest([in] String assetId, [in] unsigned char[] keyRequestData);
 
     [oneway] void OnCastValidCommandChanged([in] int[] cmds);
+
+    [oneway] void OnCustomData([in] WantParams data);
 
     void onDataSrcRead([in] sharedptr<AVSharedMemoryBase> mem, [in] unsigned int length, [in] long pos, [out] int ret);
 }

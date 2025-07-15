@@ -69,6 +69,7 @@ private:
     static napi_value SkipToQueueItem(napi_env env, napi_callback_info info);
     static napi_value GetExtras(napi_env env, napi_callback_info info);
     static napi_value GetExtrasWithEvent(napi_env env, napi_callback_info info);
+    static napi_value SendCustomData(napi_env env, napi_callback_info info);
 
     static napi_status OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
         napi_value param, napi_value callback);
@@ -94,6 +95,8 @@ private:
         napi_value param, napi_value callback);
     static napi_status OnExtrasChange(napi_env env, NapiAVSessionController* napiController,
         napi_value param, napi_value callback);
+    static napi_status OnCustomData(napi_env env, NapiAVSessionController* napiController,
+        napi_value param, napi_value callback);
 
     static napi_status OffAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
@@ -115,6 +118,8 @@ private:
     static napi_status OffQueueTitleChange(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
     static napi_status OffExtrasChange(napi_env env, NapiAVSessionController* napiController,
+        napi_value callback);
+    static napi_status OffCustomData(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
 
     static napi_status SetAVCallMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);

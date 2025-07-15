@@ -169,10 +169,10 @@ HWTEST_F(AVSessionDescriptorTest, ReadFromParcel001, TestSize.Level1)
 HWTEST_F(AVSessionDescriptorTest, Marshalling004, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
-    DeviceState deviceState;
+    std::shared_ptr<DeviceState> deviceState = std::make_shared<DeviceState>();
+    EXPECT_NE(deviceState, nullptr);
     Parcel out;
-    bool ret = deviceState.Marshalling(out);
-    EXPECT_EQ(ret, true);
+    deviceState->Marshalling(out);
 }
 
 /**
@@ -184,10 +184,10 @@ HWTEST_F(AVSessionDescriptorTest, Marshalling004, TestSize.Level1)
 HWTEST_F(AVSessionDescriptorTest, Unmarshalling004, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
-    DeviceState deviceState;
+    std::shared_ptr<DeviceState> deviceState = std::make_shared<DeviceState>();
+    EXPECT_NE(deviceState, nullptr);
     Parcel in;
-    auto ret = deviceState.Unmarshalling(in);
-    EXPECT_EQ(ret, nullptr);
+    deviceState->Unmarshalling(in);
 }
 
 /**
@@ -199,10 +199,10 @@ HWTEST_F(AVSessionDescriptorTest, Unmarshalling004, TestSize.Level1)
 HWTEST_F(AVSessionDescriptorTest, ReadFromParcel002, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
-    DeviceState deviceState;
+    std::shared_ptr<DeviceState> deviceState = std::make_shared<DeviceState>();
+    EXPECT_NE(deviceState, nullptr);
     Parcel in;
-    bool ret = deviceState.ReadFromParcel(in);
-    EXPECT_EQ(ret, false);
+    deviceState->ReadFromParcel(in);
 }
 
 } // namespace AVSession

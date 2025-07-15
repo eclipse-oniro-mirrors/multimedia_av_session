@@ -61,6 +61,8 @@ public:
 
     int32_t SendControlCommand(const AVControlCommand& cmd) override;
 
+    int32_t SendCustomData(AAFwk::WantParams& data) override;
+
     int32_t SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
 
     int32_t SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter) override;
@@ -106,6 +108,8 @@ public:
     void HandleQueueTitleChange(const std::string& title);
 
     void HandleExtrasChange(const AAFwk::WantParams& extras);
+
+    void HandleCustomData(const AAFwk::WantParams& data);
 
     pid_t GetPid() const;
 

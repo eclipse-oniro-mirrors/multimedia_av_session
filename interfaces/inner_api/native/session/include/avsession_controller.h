@@ -248,6 +248,14 @@ public:
     virtual int64_t GetRealPlaybackPosition() = 0;
 
     /**
+     * @brief Send custom data for 4k.
+     *
+     * @return Returns whether the operation is successful.
+     * @since 9
+    */
+    virtual int32_t SendCustomData(AAFwk::WantParams& data) = 0;
+
+    /**
      * @brief Controller is or not destroy.
      *
      * @return Returns controller is or not destroy.

@@ -33,6 +33,8 @@ public:
 private:
     int32_t HandleSendControlCommand(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleSendCustomData(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleStart(MessageParcel& data, MessageParcel& reply);
     
     int32_t HandlePrepare(MessageParcel& data, MessageParcel& reply);
@@ -108,7 +110,10 @@ private:
         {CAST_CONTROLLER_CMD_ADD_AVAILABLE_COMMAND,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleAddAvailableCommand(data, reply); }},
         {CAST_CONTROLLER_CMD_REMOVE_AVAILABLE_COMMAND,
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleRemoveAvailableCommand(data, reply); }}
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleRemoveAvailableCommand(data, reply); }},
+        {CAST_CONTROLLER_CMD_SEND_CUSTOM_DATA,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendCustomData(data, reply); }},
+            
     };
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
         {CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND, "HandleSendControlCommand"},
@@ -128,7 +133,8 @@ private:
         {CAST_CONTROLLER_CMD_REGISTER_CALLBACK, "HandleRegisterCallbackInner"},
         {CAST_CONTROLLER_CMD_DESTROY, "HandleDestroy"},
         {CAST_CONTROLLER_CMD_ADD_AVAILABLE_COMMAND, "HandleAddAvailableCommand"},
-        {CAST_CONTROLLER_CMD_REMOVE_AVAILABLE_COMMAND, "HandleRemoveAvailableCommand"}
+        {CAST_CONTROLLER_CMD_REMOVE_AVAILABLE_COMMAND, "HandleRemoveAvailableCommand"},
+        {CAST_CONTROLLER_CMD_SEND_CUSTOM_DATA, "HandleSendCustomData"}
     };
     const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
 };

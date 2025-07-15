@@ -53,6 +53,8 @@ public:
 
     ErrCode OnExtrasChange(const AAFwk::WantParams& extras) override;
 
+    ErrCode OnCustomData(const AAFwk::WantParams& extras) override;
+
 private:
     std::shared_ptr<AVControllerCallback> callback_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;

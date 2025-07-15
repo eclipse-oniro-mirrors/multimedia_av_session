@@ -30,6 +30,8 @@ public:
 
     int32_t SendControlCommand(const AVCastControlCommand& cmd) override;
 
+    int32_t SendCustomData(const AAFwk::WantParams& data) override;
+
     int32_t Start(const AVQueueItem& avQueueItem) override;
 
     int32_t Prepare(const AVQueueItem& avQueueItem) override;

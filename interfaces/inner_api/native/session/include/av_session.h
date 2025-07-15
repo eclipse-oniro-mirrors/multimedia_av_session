@@ -172,6 +172,15 @@ public:
     virtual int32_t SetExtras(const AAFwk::WantParams& extras) = 0;
 
     /**
+     * @brief Set custom media packet for 4k.
+     *
+     * @param extras Custom media packet key-value pairs passed
+     * @return Return whether the setting is successful
+     * @since 10
+    */
+    virtual int32_t SendCustomData(const AAFwk::WantParams& data) = 0;
+
+    /**
      * @brief Get the controller corresponding to this session.
      *
      * @return Return to session controller{@link AVSessionController}.

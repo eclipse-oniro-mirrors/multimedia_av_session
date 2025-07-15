@@ -115,6 +115,14 @@ public:
     virtual void SendControlCommand(const AVCastControlCommand cmd) = 0;
 
     /**
+     * @brief Send custom data to remote.
+     *
+     * @param { const AVCastControlCommand } cmd - Command to be executed at remote device.
+     * @since 10
+    */
+    virtual void SendCustomData(const AAFwk::WantParams &data) = 0;
+
+    /**
      * @brief Obtain the duration of the current media.
      *
      * @param { int32_t& } duration - Duration of media.

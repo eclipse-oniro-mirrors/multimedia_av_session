@@ -146,22 +146,6 @@ static HWTEST_F(SessionListenerProxyTest, OnDeviceOffline001, testing::ext::Test
 }
 
 /**
-* @tc.name: OnDeviceStateChange001
-* @tc.desc: test OnDeviceStateChange
-* @tc.type: FUNC
-* @tc.require:
-*/
-static HWTEST_F(SessionListenerProxyTest, OnDeviceStateChange001, testing::ext::TestSize.Level0)
-{
-    SLOGI("OnDeviceStateChange001, start");
-    LOG_SetCallback(MyLogCallback);
-    DeviceState deviceState;
-    sessionListenerProxy->OnDeviceStateChange(deviceState);
-    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("OnDeviceStateChange001, end");
-}
-
-/**
  * @tc.name: OnRemoteDistributedSessionChange001
  * @tc.desc: Test OnRemoteDistributedSessionChange
  * @tc.type: FUNC

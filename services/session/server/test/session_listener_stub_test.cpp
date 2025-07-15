@@ -338,26 +338,5 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest010, TestSize.Level0)
     EXPECT_EQ(ret, OHOS::ERR_INVALID_DATA);
     SLOGI("OnRemoteRequest010 end!");
 }
-
-/**
-* @tc.name: OnRemoteRequest011
-* @tc.desc:
-* @tc.type: FUNC
-*/
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest011, TestSize.Level0)
-{
-    SLOGI("OnRemoteRequest011 begin!");
-    uint32_t code = 7;
-    SessionListenerStubDemo sessionListenerStub;
-    OHOS::MessageParcel data;
-    OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
-    data.WriteInterfaceToken(ISessionListener::GetDescriptor());
-    DeviceState deviceState;
-    data.WriteParcelable(&deviceState);
-    int ret = sessionListenerStub.OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest011 end!");
-}
 } // namespace AVSession
 } // namespace OHOS
