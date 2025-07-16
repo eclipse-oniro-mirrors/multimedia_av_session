@@ -233,7 +233,7 @@ int32_t AVSessionProxy::UpdateAVQueueInfo(const AVQueueInfo& info)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&info), ERR_MARSHALLING, "Write info failed");
+    CHECK_AND_RETURN_RET_LOG(info.MarshallingMessageParcel(data), ERR_MARSHALLING, "Write info failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_UPDATE_QUEUE_INFO, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
