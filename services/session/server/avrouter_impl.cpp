@@ -141,7 +141,7 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
     std::lock_guard lockGuard(providerManagerLock_);
 
     auto pid = IPCSkeleton::GetCallingPid();
-    cacheStartDiscoveryPids_.emplace_back(pid);
+    cacheStartDiscoveryPids_.insert(pid);
     cacheCastDeviceCapability_ = castDeviceCapability;
     cacheDrmSchemes_ = drmSchemes;
     if (providerManagerMap_.empty()) {
@@ -179,11 +179,9 @@ int32_t AVRouterImpl::StopCastDiscovery()
 bool AVRouterImpl::IsStopCastDiscovery(pid_t pid)
 {
     std::lock_guard lockGuard(providerManagerLock_);
-    if (std::find(cacheStartDiscoveryPids_.begin(), cacheStartDiscoveryPids_.end(), pid)
-        != cacheStartDiscoveryPids_.end()) {
-        cacheStartDiscoveryPids_.erase(std::remove(
-            cacheStartDiscoveryPids_.begin(), cacheStartDiscoveryPids_.end(), pid), cacheStartDiscoveryPids_.end());
-        if (cacheStartDiscoveryPids_.size() == 0) {
+    if (cacheStartDiscoveryPids_.find(pid) != cacheStartDiscoveryPids_.end()) {
+        cacheStartDiscoveryPids_.erase(pid);
+        if (cacheStartDiscoveryPids_.empty()) {
             return true;
         } else {
             SLOGI("other pid is not calling StopCastDiscovery");

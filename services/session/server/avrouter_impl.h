@@ -126,7 +126,7 @@ private:
     bool cacheStartDeviceLogging_ = false;
     int32_t cacheCastDeviceCapability_ = -1;
     std::vector<std::string> cacheDrmSchemes_;
-    std::vector<pid_t> cacheStartDiscoveryPids_;
+    std::unordered_set<pid_t> cacheStartDiscoveryPids_;
     std::shared_ptr<CastSessionListener> castSessionListener_;
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
