@@ -143,6 +143,10 @@ class AVControllerCallbackStubDemo : public AVControllerCallbackStub {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnCustomData(const OHOS::AAFwk::WantParams& data) override
+    {
+        return AVSESSION_SUCCESS;
+    };
 };
 
 /**

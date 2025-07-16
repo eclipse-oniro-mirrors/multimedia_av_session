@@ -120,7 +120,7 @@ public:
      * @param { const std::string } customData - String sended to remote device.
      * @since 10
     */
-    virtual void SendCustomData(const std::string &customData) = 0;
+    virtual void SendCustomData(const std::string &customData) {};
 
     /**
      * @brief Obtain the duration of the current media.

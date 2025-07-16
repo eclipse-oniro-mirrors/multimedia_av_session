@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "avsession_info.h"
+#include "avsession_errors.h"
 #include "want_agent.h"
 #include "want_params.h"
 #include "avsession_controller.h"
@@ -178,7 +179,7 @@ public:
      * @return Return whether the setting is successful
      * @since 10
     */
-    virtual int32_t SendCustomData(const AAFwk::WantParams& data) = 0;
+    virtual int32_t SendCustomData(const AAFwk::WantParams& data) { return AVSESSION_SUCCESS; };
 
     /**
      * @brief Get the controller corresponding to this session.

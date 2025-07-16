@@ -23,6 +23,7 @@
 
 #include "media_info_holder.h"
 #include "avsession_info.h"
+#include "avsession_errors.h"
 #include "key_event.h"
 #include "i_avcast_controller_proxy.h"
 #include "avcast_control_command.h"
@@ -43,7 +44,7 @@ public:
     */
     virtual int32_t SendControlCommand(const AVCastControlCommand& cmd) = 0;
 
-    virtual int32_t SendCustomData(const AAFwk::WantParams& data) = 0;
+    virtual int32_t SendCustomData(const AAFwk::WantParams& data) { return AVSESSION_SUCCESS; };
 
     virtual int32_t Start(const AVQueueItem& avQueueItem) = 0;
 
