@@ -776,6 +776,26 @@ static HWTEST_F(AVRouterImplTest, StopCastDiscovery001, TestSize.Level0)
 }
 
 /**
+* @tc.name: IsStopCastDiscovery001
+* @tc.desc: judge excute of StopCastDiscovery
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, IsStopCastDiscovery001, TestSize.Level0)
+{
+    SLOGI("IsStopCastDiscovery001 begin");
+    g_AVRouterImpl->StopCastDiscovery();
+    auto pid = IPCSkeleton::GetCallingPid();
+    EXPECT_TRUE(g_AVRouterImpl->IsStopCastDiscovery(pid) == false);
+
+    int32_t castDeviceCapability = 0;
+    std::vector<std::string> drmSchemes = {"test"};
+    g_AVRouterImpl->StartCastDiscovery(castDeviceCapability, drmSchemes);
+    EXPECT_TRUE(g_AVRouterImpl->IsStopCastDiscovery(pid) == true);
+    SLOGI("IsStopCastDiscovery001 end");
+}
+
+/**
 * @tc.name: OnDeviceAvailable001
 * @tc.desc: set servicePtr_ to not nullptr
 * @tc.type: FUNC

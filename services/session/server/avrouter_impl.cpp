@@ -140,6 +140,8 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
     SLOGI("AVRouterImpl StartCastDiscovery");
     std::lock_guard lockGuard(providerManagerLock_);
 
+    auto pid = IPCSkeleton::GetCallingPid();
+    cacheStartDiscoveryPids_.insert(pid);
     cacheCastDeviceCapability_ = castDeviceCapability;
     cacheDrmSchemes_ = drmSchemes;
     if (providerManagerMap_.empty()) {
@@ -160,6 +162,8 @@ int32_t AVRouterImpl::StopCastDiscovery()
     SLOGI("AVRouterImpl StopCastDiscovery");
     std::lock_guard lockGuard(providerManagerLock_);
 
+    auto pid = IPCSkeleton::GetCallingPid();
+    CHECK_AND_RETURN_RET_LOG(IsStopCastDiscovery(pid), AVSESSION_SUCCESS, "StopCastDiscovery is invalid");
     if (cacheStartDiscovery_) {
         SLOGI("clear cacheStartDiscovery when stop discovery");
         cacheStartDiscovery_ = false;
@@ -170,6 +174,22 @@ int32_t AVRouterImpl::StopCastDiscovery()
         providerManager->provider_->StopDiscovery();
     }
     return AVSESSION_SUCCESS;
+}
+
+bool AVRouterImpl::IsStopCastDiscovery(pid_t pid)
+{
+    std::lock_guard lockGuard(providerManagerLock_);
+    if (cacheStartDiscoveryPids_.find(pid) != cacheStartDiscoveryPids_.end()) {
+        cacheStartDiscoveryPids_.erase(pid);
+        if (cacheStartDiscoveryPids_.empty()) {
+            return true;
+        } else {
+            SLOGI("other pid is not calling StopCastDiscovery");
+        }
+    } else {
+        SLOGI("pid:%{public}d is not include in cacheStartDiscoveryPids", static_cast<int>(pid));
+    }
+    return false;
 }
 
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)

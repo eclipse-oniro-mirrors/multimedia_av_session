@@ -58,6 +58,8 @@ public:
     int32_t StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes) override;
 
     int32_t StopCastDiscovery() override;
+    
+    bool IsStopCastDiscovery(pid_t pid) override;
 
     int32_t SetDiscoverable(const bool enable) override;
 
@@ -126,6 +128,7 @@ private:
     bool cacheStartDeviceLogging_ = false;
     int32_t cacheCastDeviceCapability_ = -1;
     std::vector<std::string> cacheDrmSchemes_;
+    std::unordered_set<pid_t> cacheStartDiscoveryPids_;
     std::shared_ptr<CastSessionListener> castSessionListener_;
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;

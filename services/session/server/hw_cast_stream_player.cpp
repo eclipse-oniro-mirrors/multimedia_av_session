@@ -271,6 +271,7 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
+    SLOGI("mediaDescription duration is %{public}d", mediaDescription->GetDuration());
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
     mediaInfo.albumCoverUrl = mediaDescription->GetIconUri() == "" ?
         mediaDescription->GetAlbumCoverUri() : mediaDescription->GetIconUri();
@@ -865,7 +866,7 @@ void HwCastStreamPlayer::OnPlaySpeedChanged(const CastEngine::PlaybackSpeed spee
     std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
-            SLOGI("trigger the OnPositionChange for registered listeners");
+            SLOGI("trigger the OnPlaySpeedChanged for registered listeners");
             listener->OnCastPlaybackStateChange(avCastPlaybackState);
         }
     }
