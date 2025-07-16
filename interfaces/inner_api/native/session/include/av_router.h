@@ -93,7 +93,7 @@ public:
     /**
      * @brief Is stop Discovering Devices
      *
-     * @return { int32_t } Whether excute StopCastDiscovery func
+     * @return { bool } Whether excute StopCastDiscovery func
      * @since 10
     */
     virtual bool IsStopCastDiscovery(pid_t pid) = 0;
