@@ -282,7 +282,6 @@ int32_t AVControllerItem::SendCustomData(const AAFwk::WantParams& data)
     auto value = data.GetParam("customData");
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData == nullptr");
-    SLOGI("SendCustomData %{public}s", AAFwk::String::Unbox(stringValue).c_str());
     session_->ExecuteCustomData(data);
     return AVSESSION_SUCCESS;
 }

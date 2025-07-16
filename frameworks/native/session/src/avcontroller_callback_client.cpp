@@ -164,7 +164,7 @@ ErrCode AVControllerCallbackClient::OnCustomData(const AAFwk::WantParams& data)
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask([callback, data]() { callback->OnCustomData(data); }, EVENT_NAME),
-        "AVCastControllerCallbackClient handler postTask failed");
+        "AVControllerCallbackClient handler postTask failed");
     return AVSESSION_SUCCESS;
 }
 

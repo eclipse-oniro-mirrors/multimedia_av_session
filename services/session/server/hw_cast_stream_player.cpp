@@ -110,13 +110,11 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
 
 void HwCastStreamPlayer::SendCustomData(const std::string& data)
 {
-    SLOGI("HwCastStreamPlayer::SendCustomData %{public}s", data.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
     if (streamPlayer_ == nullptr) {
         SLOGE("streamPlayer is nullptr");
         return;
     }
-    return;
 }
 
 void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand castControlCommand)
