@@ -1276,6 +1276,8 @@ napi_status NapiAVCastController::OnKeyRequest(napi_env env, NapiAVCastControlle
 napi_status NapiAVCastController::OnCustomData(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
+        napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_CUSTOM_DATA, callback);
 }

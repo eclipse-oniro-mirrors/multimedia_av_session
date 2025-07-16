@@ -1750,7 +1750,7 @@ napi_status NapiAVSessionController::OnPlaybackStateChange(napi_env env, NapiAVS
 }
 
 napi_status NapiAVSessionController::OnCustomData(napi_env env, NapiAVSessionController* napiController,
-                                                      napi_value param, napi_value callback)
+                                                  napi_value param, napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
@@ -1878,7 +1878,7 @@ napi_status NapiAVSessionController::OffPlaybackStateChange(napi_env env, NapiAV
 }
 
 napi_status NapiAVSessionController::OffCustomData(napi_env env, NapiAVSessionController* napiController,
-                                                       napi_value callback)
+                                                   napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
