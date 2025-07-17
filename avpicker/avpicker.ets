@@ -521,6 +521,7 @@ export struct AVCastPicker {
       .accessibilityLevel('no-hide-descendants')
       .size({ width: '100%', height: '100%' })
     }
+    .hoverEffect(HoverEffect.None)
     .backgroundColor('#00000000')
     .stateEffect(false)
     .size({ width: '100%', height: '100%' })
