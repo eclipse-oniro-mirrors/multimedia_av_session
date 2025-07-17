@@ -166,8 +166,8 @@ napi_value NapiAVCastController::SendCustomData(napi_env env, napi_callback_info
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_CAST_CONTROLLER_SEND_CUSTOM_DATA_TASK_ID;
-
     auto executor = [context]() {
+        CHECK_AND_RETURN_LOG(context->native != nullptr, "invalid context native");
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
         if (napiCastController->castController_ == nullptr) {
             SLOGE("SendCustomData failed : controller is nullptr");
@@ -1276,8 +1276,10 @@ napi_status NapiAVCastController::OnKeyRequest(napi_env env, NapiAVCastControlle
 napi_status NapiAVCastController::OnCustomData(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
-    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
-        napi_generic_failure, "callback has not been registered");
+    CHECK_AND_RETURN_RET_LOG(napiCastController != nullptr, napi_generic_failure, "napiCastController is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "napiCastController->callback_ is nullptr");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_CUSTOM_DATA, callback);
 }
@@ -1472,6 +1474,8 @@ napi_status NapiAVCastController::OffKeyRequest(napi_env env, NapiAVCastControll
 napi_status NapiAVCastController::OffCustomData(napi_env env, NapiAVCastController* napiCastController,
     napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController != nullptr, napi_generic_failure, "napiCastController is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr,
         napi_generic_failure, "callback has not been registered");
     return napiCastController->callback_->RemoveCallback(env,

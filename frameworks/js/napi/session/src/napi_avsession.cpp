@@ -759,6 +759,7 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SEND_CUSTOM_DATA_TASK_ID;
     auto executor = [context]() {
+        CHECK_AND_RETURN_LOG(context->native != nullptr, "invalid context native");
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
@@ -1653,6 +1654,8 @@ napi_status NapiAVSession::OnToggleFavorite(napi_env env, NapiAVSession* napiSes
 
 napi_status NapiAVSession::OnCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_CUSTOM_DATA, callback);
