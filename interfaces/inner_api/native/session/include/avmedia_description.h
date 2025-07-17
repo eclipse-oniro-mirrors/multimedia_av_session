@@ -55,7 +55,8 @@ public:
         MEDIA_DESCRIPTION_KEY_DRM_SCHEME = 20,
         MEDIA_DESCRIPTION_KEY_DATA_SRC = 21,
         MEDIA_DESCRIPTION_KEY_PCM_SRC = 22,
-        MEDIA_DESCRIPTION_KEY_MAX = 23,
+        MEDIA_DESCRIPTION_KEY_LAUNCH_CLIENT_DATA = 23,
+        MEDIA_DESCRIPTION_KEY_MAX = 24,
     };
 
     AVMediaDescription() = default;
@@ -85,6 +86,9 @@ public:
 
     void SetExtras(const std::shared_ptr<AAFwk::WantParams>& extras);
     std::shared_ptr<AAFwk::WantParams> GetExtras() const;
+
+    void SetLaunchClientData(const std::string& data);
+    std::string GetLaunchClientData() const;
 
     void SetMediaType(const std::string& mediaType);
     std::string GetMediaType() const;
@@ -153,6 +157,7 @@ private:
     std::string mediaType_ = "";
     int32_t mediaSize_ = 0;
     std::string albumTitle_ = "";
+    std::string launchClientData_ = "";
     std::string albumCoverUri_ = "";
     std::string lyricContent_ = "";
     std::string lyricUri_ = "";

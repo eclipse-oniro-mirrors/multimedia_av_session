@@ -129,6 +129,10 @@ class AVSessionCallbackStubDemo : public AVSessionCallbackStub {
         return AVSESSION_SUCCESS;
     };
     ErrCode OnCastDisplayChange(const CastDisplayInfo &castDisplayInfo) override { return AVSESSION_SUCCESS; };
+    ErrCode OnCustomData(const OHOS::AAFwk::WantParams& data) override
+    {
+        return AVSESSION_SUCCESS;
+    };
 public:
     bool onSetTargetLoopMode_ = false;
     bool onPlayFromAssetId_ = false;

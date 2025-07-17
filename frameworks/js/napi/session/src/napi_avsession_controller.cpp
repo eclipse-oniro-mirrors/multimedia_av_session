@@ -48,6 +48,7 @@ std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     { "queueItemsChange", { OnQueueItemsChange, OffQueueItemsChange } },
     { "queueTitleChange", { OnQueueTitleChange, OffQueueTitleChange } },
     { "extrasChange", { OnExtrasChange, OffExtrasChange } },
+    { "customDataChange", { OnCustomData, OffCustomData } },
 };
 std::map<std::string, NapiAVSessionController> NapiAVSessionController::ControllerList_ = {};
 std::mutex NapiAVSessionController::uvMutex_;
@@ -86,6 +87,7 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getValidCommandsSync", GetValidCommandsSync),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
         DECLARE_NAPI_FUNCTION("sendCommonCommand", SendCommonCommand),
+        DECLARE_NAPI_FUNCTION("sendCustomData", SendCustomData),
         DECLARE_NAPI_FUNCTION("getAVQueueItems", GetAVQueueItems),
         DECLARE_NAPI_FUNCTION("getAVQueueItemsSync", GetAVQueueItemsSync),
         DECLARE_NAPI_FUNCTION("getAVQueueTitle", GetAVQueueTitle),
@@ -1235,6 +1237,51 @@ napi_value NapiAVSessionController::SendCommonCommand(napi_env env, napi_callbac
     return NapiAsyncWork::Enqueue(env, context, "SendCommonCommand", executor, complete);
 }
 
+napi_value NapiAVSessionController::SendCustomData(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionController::SendCustomData");
+    struct ConcreteContext : public ContextBase {
+        AAFwk::WantParams data_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SendCustomData failed : no memory");
+        NapiUtils::ThrowError(env, "SendCustomData failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->data_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get data failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SEND_CUSTOM_DATA_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("SendCustomData failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "SendCustomData failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->SendCustomData(context->data_);
+        if (ret != AVSESSION_SUCCESS) {
+            ErrCodeToMessage(ret, context->errMessage);
+            SLOGE("Controller SendCustomData failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "SendCustomData", executor);
+}
+
 void NapiAVSessionController::ErrCodeToMessage(int32_t errCode, std::string& message)
 {
     switch (errCode) {
@@ -1702,6 +1749,15 @@ napi_status NapiAVSessionController::OnPlaybackStateChange(napi_env env, NapiAVS
                                                   callback);
 }
 
+napi_status NapiAVSessionController::OnCustomData(napi_env env, NapiAVSessionController* napiController,
+                                                  napi_value param, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_CUSTOM_DATA, callback);
+}
+
 napi_status NapiAVSessionController::OnMetaDataChange(napi_env env, NapiAVSessionController* napiController,
                                                       napi_value param, napi_value callback)
 {
@@ -1819,6 +1875,15 @@ napi_status NapiAVSessionController::OffPlaybackStateChange(napi_env env, NapiAV
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE,
                                                      callback);
+}
+
+napi_status NapiAVSessionController::OffCustomData(napi_env env, NapiAVSessionController* napiController,
+                                                   napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_CUSTOM_DATA, callback);
 }
 
 napi_status NapiAVSessionController::OffMetaDataChange(napi_env env, NapiAVSessionController* napiController,

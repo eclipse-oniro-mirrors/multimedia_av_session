@@ -206,6 +206,7 @@ public:
     void OnQueueItemsChange(const std::vector<AVQueueItem> &items) override {}
     void OnQueueTitleChange(const std::string &title) override {}
     void OnExtrasChange(const AAFwk::WantParams &extras) override {}
+    void OnCustomData(const AAFwk::WantParams& data) override {}
 
 private:
     std::weak_ptr<MigrateAVSessionServer> migrateServer_;

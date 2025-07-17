@@ -64,6 +64,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "playFromAssetId", OnPlayFromAssetId },
     { "playWithAssetId", OnPlayWithAssetId },
     { "castDisplayChange", OnCastDisplayChange },
+    { "customDataChange", OnCustomData },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
     { "play", OffPlay },
@@ -88,6 +89,7 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "playFromAssetId", OffPlayFromAssetId },
     { "playWithAssetId", OffPlayWithAssetId },
     { "castDisplayChange", OffCastDisplayChange },
+    { "customDataChange", OffCustomData },
 };
 std::list<int32_t> registerEventList_;
 std::map<std::string, int32_t> convertEventType_ = {
@@ -152,6 +154,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("dispatchSessionEvent", SetSessionEvent),
         DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
+        DECLARE_NAPI_FUNCTION("sendCustomData", SendCustomData),
         DECLARE_NAPI_FUNCTION("getAVCastController", GetAVCastController),
         DECLARE_NAPI_FUNCTION("stopCasting", ReleaseCast),
         DECLARE_NAPI_FUNCTION("getAllCastDisplays", GetAllCastDisplays),
@@ -731,6 +734,58 @@ std::function<void()> NapiAVSession::AVQueueImgDownloadSyncExecutor(NapiAVSessio
         info.SetAVQueueName(metaData.GetAVQueueName());
         napiSession->session_->UpdateAVQueueInfo(info);
     };
+}
+
+napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSession::SendCustomData");
+    struct ConcreteContext : public ContextBase {
+        AAFwk::WantParams data_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SendCustomData failed : no memory");
+        NapiUtils::ThrowError(env, "SendCustomData failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->data_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get customData failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SEND_CUSTOM_DATA_TASK_ID;
+    auto executor = [context]() {
+        CHECK_AND_RETURN_LOG(context->native != nullptr, "invalid context native");
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SendCustomData failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SendCustomData(context->data_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_SESSION_NOT_EXIST) {
+                context->errMessage = "SendCustomData failed : native session not exist";
+            } else if (ret == ERR_INVALID_PARAM) {
+                context->errMessage = "SendCustomData failed : native invalid parameters";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SendCustomData failed : native no permission";
+            } else {
+                context->errMessage = "SendCustomData failed : native server exception, \
+                    you are advised to : 1.scheduled retry.\
+                    2.destroy the current session or session controller and re-create it.";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+    return NapiAsyncWork::Enqueue(env, context, "SendCustomData", executor, complete);
 }
 
 napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info info)
@@ -1597,6 +1652,15 @@ napi_status NapiAVSession::OnToggleFavorite(napi_env env, NapiAVSession* napiSes
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE, callback);
 }
 
+napi_status NapiAVSession::OnCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, napi_generic_failure, "callback is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_CUSTOM_DATA, callback);
+}
+
 napi_status NapiAVSession::OnMediaKeyEvent(napi_env env, NapiAVSession* napiSession, napi_value callback)
 {
     CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure, "session_ is nullptr");
@@ -1904,6 +1968,14 @@ napi_status NapiAVSession::OffMediaKeyEvent(napi_env env, NapiAVSession* napiSes
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, napi_generic_failure, "delete cmd failed");
     }
     return napi_ok;
+}
+
+napi_status NapiAVSession::OffCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_CUSTOM_DATA, callback);
 }
 
 napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* napiSession, napi_value callback)

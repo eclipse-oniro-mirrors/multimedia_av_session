@@ -60,6 +60,7 @@ public:
 #endif
         SESSION_CMD_SET_AVCALL_META_DATA,
         SESSION_CMD_SET_AVCALL_STATE,
+        SESSION_CMD_SEND_CUSTOM_DATA,
         SESSION_CMD_MAX,
     };
 

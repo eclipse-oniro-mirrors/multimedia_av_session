@@ -49,6 +49,8 @@ public:
 
     int32_t SendControlCommand(const AVControlCommand& cmd) override;
 
+    int32_t SendCustomData(const AAFwk::WantParams& data) override;
+
     int32_t SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
 
     int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback) override;

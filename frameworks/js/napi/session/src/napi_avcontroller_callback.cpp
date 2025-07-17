@@ -280,6 +280,12 @@ void NapiAVControllerCallback::OnSessionDestroy()
     }
 }
 
+void NapiAVControllerCallback::OnCustomData(const AAFwk::WantParams& data)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnCustomData");
+    HandleEvent(EVENT_CUSTOM_DATA, data);
+}
+
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnPlaybackStateChange");

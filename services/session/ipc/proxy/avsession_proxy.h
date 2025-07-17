@@ -62,6 +62,8 @@ public:
 
     int32_t SetAVQueueTitle(const std::string& title) override;
 
+    int32_t SendCustomData(const AAFwk::WantParams& data) override;
+
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
     int32_t GetExtras(AAFwk::WantParams& extras) override;

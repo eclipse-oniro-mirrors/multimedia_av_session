@@ -23,6 +23,7 @@
 
 #include "avcontrol_command.h"
 #include "avsession_info.h"
+#include "avsession_errors.h"
 #include "key_event.h"
 #include "want_agent.h"
 
@@ -246,6 +247,14 @@ public:
      * @since 9
     */
     virtual int64_t GetRealPlaybackPosition() = 0;
+
+    /**
+     * @brief Send custom data for 4k.
+     *
+     * @return Returns whether the operation is successful.
+     * @since 9
+    */
+    virtual int32_t SendCustomData(const AAFwk::WantParams& data) { return AVSESSION_SUCCESS; };
 
     /**
      * @brief Controller is or not destroy.

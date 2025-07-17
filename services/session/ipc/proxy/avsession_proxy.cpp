@@ -344,6 +344,26 @@ int32_t AVSessionProxy::SetAVQueueTitle(const std::string& title)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
+int32_t AVSessionProxy::SendCustomData(const AAFwk::WantParams& customData)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SendCustomData");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&customData),
+        ERR_MARSHALLING, "Write state failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SEND_CUSTOM_DATA, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
 int32_t AVSessionProxy::GetAVPlaybackState(AVPlaybackState& state)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");

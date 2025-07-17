@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "avsession_info.h"
+#include "avsession_errors.h"
 #include "want_agent.h"
 #include "want_params.h"
 #include "avsession_controller.h"
@@ -170,6 +171,15 @@ public:
      * @since 10
     */
     virtual int32_t SetExtras(const AAFwk::WantParams& extras) = 0;
+
+    /**
+     * @brief Set custom media packet for 4k.
+     *
+     * @param extras Custom media packet key-value pairs passed
+     * @return Return whether the setting is successful
+     * @since 10
+    */
+    virtual int32_t SendCustomData(const AAFwk::WantParams& data) { return AVSESSION_SUCCESS; };
 
     /**
      * @brief Get the controller corresponding to this session.

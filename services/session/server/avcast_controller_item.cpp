@@ -24,6 +24,7 @@
 #include "avmedia_description.h"
 #include "bundle_status_adapter.h"
 #include "avsession_utils.h"
+#include "string_wrapper.h"
 #include "cast_engine_common.h"
 #include "cast_shared_memory_base.h"
 #include "securec.h"
@@ -78,6 +79,15 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
         if (callback_ != nullptr) {
             callback_->OnCastPlaybackStateChange(stateOut);
         }
+    }
+}
+
+void AVCastControllerItem::OnCustomData(const AAFwk::WantParams& data)
+{
+    SLOGI("Enter OnCustomData in AVCastControllerItem.");
+    std::lock_guard lockGuard(castControllerCallbackLock_);
+    if (callback_ != nullptr) {
+        callback_->OnCustomData(data);
     }
 }
 
@@ -203,6 +213,19 @@ int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd
         "API_PARAM", API_PARAM_STRING,
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVCastControllerItem::SendCustomData(const AAFwk::WantParams& data)
+{
+    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
+    auto value = data.GetParam("customData");
+    AAFwk::IString* stringValue = AAFwk::IString::Query(value);
+    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData isnt a valit string");
+
+    std::lock_guard lockGuard(castControllerLock_);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    castControllerProxy_->SendCustomData(AAFwk::String::Unbox(stringValue).c_str());
     return AVSESSION_SUCCESS;
 }
 

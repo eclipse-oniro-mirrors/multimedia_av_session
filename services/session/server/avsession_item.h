@@ -110,6 +110,10 @@ public:
 
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
+    int32_t SendCustomData(const AAFwk::WantParams& data) override;
+
+    void SendCustomDataInner(const AAFwk::WantParams& data);
+
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
     int32_t GetExtras(AAFwk::WantParams& extras) override;
@@ -169,6 +173,8 @@ public:
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 
     void ExecueCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
+
+    void ExecuteCustomData(const AAFwk::WantParams& data);
 
     int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);
 

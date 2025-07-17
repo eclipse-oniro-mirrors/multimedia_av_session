@@ -471,6 +471,34 @@ int32_t AVSessionControllerProxy::SendCommonCommand(const std::string& commonCom
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
+int32_t AVSessionControllerProxy::SendCustomData(const AAFwk::WantParams& data)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendCustomData");
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "Controller is destroy");
+    bool isActive = false;
+    int32_t retForIsActive = IsSessionActive(isActive);
+    CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, retForIsActive,
+        "IsSessionActive check Fail:%{public}d", retForIsActive);
+    CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "Write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&data),
+        ERR_MARSHALLING, "Write args failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "Get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_CUSTOM_DATA, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "Send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
 int32_t AVSessionControllerProxy::SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter)
 {
     std::lock_guard lockGuard(controllerProxyLock_);

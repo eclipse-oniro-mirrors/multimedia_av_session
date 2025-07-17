@@ -15,6 +15,7 @@
 
 #include "hw_cast_stream_player.h"
 #include "int_wrapper.h"
+#include "string_wrapper.h"
 #include "avsession_log.h"
 #include "avcast_player_state.h"
 #include "avqueue_item.h"
@@ -104,6 +105,15 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
         default:
             SendControlCommandWithParams(castControlCommand);
             break;
+    }
+}
+
+void HwCastStreamPlayer::SendCustomData(const std::string& data)
+{
+    std::lock_guard lockGuard(streamPlayerLock_);
+    if (streamPlayer_ == nullptr) {
+        SLOGE("streamPlayer is nullptr");
+        return;
     }
 }
 

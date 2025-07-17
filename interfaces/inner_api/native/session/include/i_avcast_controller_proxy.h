@@ -115,6 +115,14 @@ public:
     virtual void SendControlCommand(const AVCastControlCommand cmd) = 0;
 
     /**
+     * @brief Send custom data to remote.
+     *
+     * @param { const std::string } customData - String sended to remote device.
+     * @since 10
+    */
+    virtual void SendCustomData(const std::string &customData) {};
+
+    /**
      * @brief Obtain the duration of the current media.
      *
      * @param { int32_t& } duration - Duration of media.
