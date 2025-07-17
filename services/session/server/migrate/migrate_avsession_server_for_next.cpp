@@ -32,6 +32,14 @@
 
 namespace OHOS::AVSession {
 
+void MigrateAVSessionServer::RefreshDeviceId(std::string deviceId)
+{
+    SLOGI("migrate refresh deviceId from:%{public}s to %{public}s.",
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str(),
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    deviceId_ = deviceId;
+}
+
 void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
 {
     if (sessionId.empty()) {

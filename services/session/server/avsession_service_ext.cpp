@@ -631,7 +631,8 @@ void AVSessionService::DoConnectProcessWithMigrateServer(const OHOS::Distributed
         deviceInfo.deviceTypeId,
         AVSessionUtils::GetAnonySessionId(networkId).c_str());
     if (migrateAVSessionServerMap_.find(networkId) == migrateAVSessionServerMap_.end()) {
-        CHECK_AND_RETURN_LOG(DoDisconnectAllMigrateServer() == AVSESSION_SUCCESS, "do disconnect all fail");
+        CHECK_AND_RETURN_LOG(DoHisMigrateServerTransform(networkId) == ERR_SESSION_NOT_EXIST,
+            "hisMigrate transform done");
         std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer =
             std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT, networkId);
         migrateAVSessionServer->Init(this);
@@ -640,7 +641,7 @@ void AVSessionService::DoConnectProcessWithMigrateServer(const OHOS::Distributed
             MigrateAVSessionManager::migrateSceneNext,
             migrateAVSessionServer);
         migrateAVSessionServerMap_.insert({networkId, migrateAVSessionServer});
-        SLOGI("new server success:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
+        SLOGI("new MigrateServer success:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
     } else {
         SLOGE("server already alive:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
     }
@@ -710,19 +711,24 @@ void AVSessionService::DoDisconnectProcessWithMigrateProxy(const OHOS::Distribut
     }
 }
 
-int32_t AVSessionService::DoDisconnectAllMigrateServer()
+int32_t AVSessionService::DoHisMigrateServerTransform(std::string networkId)
 {
-    CHECK_AND_RETURN_RET_LOG(!migrateAVSessionServerMap_.empty(), AVSESSION_SUCCESS,
+    CHECK_AND_RETURN_RET_LOG(!migrateAVSessionServerMap_.empty(), ERR_SESSION_NOT_EXIST,
         "DisconnectAllMigrateServer but empty");
-    SLOGI("DoDisconnectAllMigrateServer size:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
+    SLOGI("DoHisMigrateServerTransform size:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
     auto it = migrateAVSessionServerMap_.begin();
-    while (it != migrateAVSessionServerMap_.end()) {
+    if (it != migrateAVSessionServerMap_.end()) {
         std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer = it->second;
         CHECK_AND_RETURN_RET_LOG(migrateAVSessionServer != nullptr, AVSESSION_ERROR, "get server nullptr");
-        it->second->DoPostTasksClear();
-        it = migrateAVSessionServerMap_.erase(it); // 安全删除并更新迭代器
+        migrateAVSessionServer->DoPostTasksClear();
+        migrateAVSessionServer->RefreshDeviceId(networkId);
+        it = migrateAVSessionServerMap_.erase(it);
+        migrateAVSessionServerMap_.insert({networkId, migrateAVSessionServer});
+        SLOGI("DoHisMigrateServerTransform for:%{public}s", AVSessionUtils::GetAnonySessionId(networkId).c_str());
+        return AVSESSION_SUCCESS;
     }
-    return AVSESSION_SUCCESS;
+
+    return ERR_SESSION_NOT_EXIST;
 }
 
 void AVSessionService::UpdateLocalFrontSession(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront)

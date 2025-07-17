@@ -88,6 +88,7 @@ public:
     void DoPostTasksClear();
     bool MigratePostTask(const AppExecFwk::EventHandler::Callback &callback, const std::string &name,
         int64_t delayTime = 0);
+    void RefreshDeviceId(std::string deviceId);
 
     static cJSON* ConvertAudioDeviceDescriptorToJson(const AudioDeviceDescriptorWithSptr& device);
     static cJSON* ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptors& devices);

@@ -76,7 +76,8 @@ private:
     static napi_value GetAllCastDisplays(napi_env env, napi_callback_info info);
     static napi_value SendCustomData(napi_env env, napi_callback_info info);
 
-    static std::function<void()> PlaybackStateSyncExecutor(NapiAVSession* napiSession, AVPlaybackState playBackState);
+    static std::function<void()> PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
+        AVPlaybackState playBackState);
     static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context);
     static std::function<void()> AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
         OHOS::AVSession::AVMetaData metaData);

@@ -554,7 +554,7 @@ private:
 
     void DoDisconnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
 
-    int32_t DoDisconnectAllMigrateServer();
+    int32_t DoHisMigrateServerTransform(std::string networkId);
 
     void UpdateLocalFrontSession(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront);
 

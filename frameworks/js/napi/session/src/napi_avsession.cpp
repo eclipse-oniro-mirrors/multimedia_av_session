@@ -665,15 +665,15 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
 }
 
-std::function<void()> NapiAVSession::PlaybackStateSyncExecutor(NapiAVSession* napiSession,
+std::function<void()> NapiAVSession::PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
     AVPlaybackState playBackState)
 {
-    return [napiSession, playBackState]() {
-        if (napiSession->session_ == nullptr) {
+    return [session, playBackState]() {
+        if (session == nullptr) {
             playBackStateRet_ = ERR_SESSION_NOT_EXIST;
             return;
         }
-        playBackStateRet_ = napiSession->session_->SetAVPlaybackState(playBackState);
+        playBackStateRet_ = session->SetAVPlaybackState(playBackState);
         syncCond_.notify_one();
         std::unique_lock<std::mutex> lock(syncAsyncMutex_);
         auto waitStatus = syncAsyncCond_.wait_for(lock, std::chrono::milliseconds(100));
@@ -823,7 +823,7 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
         return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", executor, complete);
     }
 
-    auto syncExecutor = PlaybackStateSyncExecutor(napiSession, context->playBackState_);
+    auto syncExecutor = PlaybackStateSyncExecutor(napiSession->session_, context->playBackState_);
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask(syncExecutor, "SetAVPlaybackState"),
         "NapiAVSession SetAVPlaybackState handler postTask failed");

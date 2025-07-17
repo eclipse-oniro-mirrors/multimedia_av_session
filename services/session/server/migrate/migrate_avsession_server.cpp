@@ -434,7 +434,7 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
         SLOGW("no valid avsession");
         return;
     }
-    SLOGI("OnSessionRelease : %{public}s", sessionId.c_str());
+    SLOGI("OnSessionRelease : %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str());
     ClearCacheBySessionId(sessionId);
     releaseSessionId_ = sessionId;
     releaseSessionBundleName_ = descriptor.elementName_.GetBundleName();
