@@ -149,6 +149,7 @@ public:
     static taihe::array<AVSessionController> ToTaiheAVSessionControllerArray(
         const std::vector<std::shared_ptr<OHOS::AVSession::AVSessionController>> &in);
     static taihe::array<DecoderType> ToTaiheDecoderTypeArray(const std::vector<std::string> &in);
+    static keyEvent::KeyEvent ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in);
 
     static OutputDeviceInfo CreateUndefinedOutputDeviceInfo();
 

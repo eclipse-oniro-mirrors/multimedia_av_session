@@ -26,25 +26,7 @@ using namespace ohos::multimedia::avsession::avSession;
 
 class TaiheAVSessionEnum {
 public:
-    enum TaiheAVSkipIntervals : int32_t {
-        SECONDS_10 = 10,
-        SECONDS_15 = 15,
-        SECONDS_30 = 30,
-    };
-
     static bool ToAniEnumHDRFormat(OHOS::AVSession::HDRFormat format, ani_enum_item &aniEnumItem);
-
-    static LoopMode ToTaiheLoopMode(int32_t mode);
-    static AVCastCategory ToTaiheAVCastCategory(int32_t category);
-    static DeviceType ToTaiheDeviceType(int32_t type);
-    static SkipIntervals ToTaiheSkipIntervals(int32_t intervals);
-    static PlaybackState ToTaihePlaybackState(int32_t state);
-    static CastDisplayState ToTaiheCastDisplayState(OHOS::AVSession::CastDisplayState state);
-    static CallState ToTaiheCallState(int32_t state);
-    static ConnectionState ToTaiheConnectionState(int32_t state);
-    static DeviceLogEventCode ToTaiheDeviceLogEventCode(int32_t eventId);
-
-    static OHOS::AVSession::DistributedSessionType ToDistributedSessionType(DistributedSessionType type);
 };
 } // namespace ANI::AVSession
 #endif // TAIHE_AVSESSION_ENUM_H

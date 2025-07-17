@@ -814,27 +814,7 @@ ani_object TaiheUtils::ToAniElementName(const OHOS::AppExecFwk::ElementName &in)
 {
     ani_env *env = taihe::get_env();
     CHECK_RETURN(env != nullptr, "env is nullptr", nullptr);
-
-    ani_class cls {};
-    CHECK_RETURN(env->FindClass("L@ohos/multimedia/avsession/ElementNameImpl;", &cls) == ANI_OK,
-        "FindClass ElementNameImpl failed", nullptr);
-    ani_method ctorMethod {};
-    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", nullptr, &ctorMethod) == ANI_OK,
-        "Class_FindMethod ElementNameImpl <ctor> failed", nullptr);
-
-    ani_string aniId {};
-    CHECK_RETURN(ToAniString(env, in.GetDeviceID(), aniId) == OHOS::AVSession::AVSESSION_SUCCESS,
-        "ToAniString aniId failed", nullptr);
-    ani_string aniBundleName {};
-    CHECK_RETURN(ToAniString(env, in.GetBundleName(), aniBundleName) == OHOS::AVSession::AVSESSION_SUCCESS,
-        "ToAniString aniBundleName failed", nullptr);
-    ani_string aniAbilityName {};
-    CHECK_RETURN(ToAniString(env, in.GetAbilityName(), aniAbilityName) == OHOS::AVSession::AVSESSION_SUCCESS,
-        "ToAniString aniAbilityName failed", nullptr);
-    ani_object result {};
-    CHECK_RETURN(env->Object_New(cls, ctorMethod, &result, aniId, aniBundleName, aniAbilityName) == ANI_OK,
-        "Object_New ElementNameImpl failed", nullptr);
-    return result;
+    return OHOS::AppExecFwk::WrapElementName(env, in);
 }
 
 DeviceInfo TaiheUtils::ToTaiheDeviceInfo(const OHOS::AVSession::DeviceInfo &in)
@@ -844,10 +824,10 @@ DeviceInfo TaiheUtils::ToTaiheDeviceInfo(const OHOS::AVSession::DeviceInfo &in)
         capabilityVec.emplace_back(taihe::string(item));
     }
     DeviceInfo deviceInfo {
-        .castCategory = TaiheAVSessionEnum::ToTaiheAVCastCategory(in.castCategory_),
+        .castCategory = AVCastCategory::from_value(in.castCategory_),
         .deviceId = taihe::string(in.deviceId_),
         .deviceName = taihe::string(in.deviceName_),
-        .deviceType = TaiheAVSessionEnum::ToTaiheDeviceType(in.deviceType_),
+        .deviceType = DeviceType::from_value(in.deviceType_),
         .manufacturer = optional<taihe::string>(std::in_place_t {}, taihe::string(in.manufacturer_)),
         .modelName = optional<taihe::string>(std::in_place_t {}, taihe::string(in.modelName_)),
         .networkId = optional<taihe::string>(std::in_place_t {}, taihe::string(in.networkId_)),
@@ -1017,8 +997,21 @@ ani_object TaiheUtils::ToAniImagePixelMap(std::shared_ptr<OHOS::Media::PixelMap>
 
 ani_object TaiheUtils::ToAniKeyEvent(const OHOS::MMI::KeyEvent &in)
 {
-    ani_object result {};
-    return result;
+    ani_env *env = taihe::get_env();
+    CHECK_RETURN(env != nullptr, "env is nullptr", nullptr);
+
+    ani_namespace scope {};
+    CHECK_RETURN(env->FindNamespace("L@ohos/multimedia/avsession/avSession;", &scope) == ANI_OK,
+        "FindNamespace @ohos/multimedia/avsession/avSession failed", nullptr);
+
+    ani_function function {};
+    CHECK_RETURN(env->Namespace_FindFunction(scope, "createAVKeyEventSync", nullptr, &function) == ANI_OK,
+        "Namespace_FindFunction createAVKeyEventSync failed", nullptr);
+
+    ani_ref aniRef {};
+    CHECK_RETURN(env->Function_Call_Ref(function, &aniRef, reinterpret_cast<ani_long>(&in)) == ANI_OK,
+        "Namespace_FindFunction createAVKeyEventSync failed", nullptr);
+    return static_cast<ani_object>(aniRef);
 }
 
 CastDisplayInfo TaiheUtils::ToTaiheCastDisplayInfo(const OHOS::AVSession::CastDisplayInfo &in)
@@ -1026,7 +1019,7 @@ CastDisplayInfo TaiheUtils::ToTaiheCastDisplayInfo(const OHOS::AVSession::CastDi
     CastDisplayInfo castDisplayInfo {
         .id = static_cast<int64_t>(in.displayId),
         .name = taihe::string(in.name),
-        .state = TaiheAVSessionEnum::ToTaiheCastDisplayState(in.displayState),
+        .state = CastDisplayState::from_value(static_cast<int32_t>(in.displayState)),
         .width = in.width,
         .height = in.height,
     };
@@ -1175,5 +1168,63 @@ taihe::array<DecoderType> TaiheUtils::ToTaiheDecoderTypeArray(const std::vector<
         resultVec.emplace_back(decoderType);
     }
     return taihe::array<DecoderType>(resultVec);
+}
+
+static inputEvent::InputEvent ToTaiheInputEvent(const OHOS::MMI::KeyEvent &in)
+{
+    auto key = in.GetKeyItem();
+    bool isNull = (key == std::nullopt);
+    inputEvent::InputEvent out = {
+        .id = isNull ? 0 : in.GetKeyItem()->GetKeyCode(),
+        .deviceId = isNull ? 0 : in.GetKeyItem()->GetDeviceId(),
+        .actionTime = isNull ? 0 : in.GetKeyItem()->GetDownTime(),
+        .screenId = 0,
+        .windowId = 0,
+    };
+    return out;
+}
+
+static keyEvent::Key ToTaiheKey(const std::optional<OHOS::MMI::KeyEvent::KeyItem> &in)
+{
+    bool isNull = (in == std::nullopt);
+    int32_t keyCode = isNull ? OHOS::MMI::KeyEvent::KEYCODE_UNKNOWN : in->GetKeyCode();
+    keyEvent::Key out = {
+        .code = keyCode::KeyCode::from_value(keyCode),
+        .pressedTime = isNull ? 0 : in->GetDownTime(),
+        .deviceId = isNull ? 0 : in->GetDeviceId(),
+    };
+    return out;
+}
+
+static taihe::array<keyEvent::Key> ToTaiheKeys(const std::vector<OHOS::MMI::KeyEvent::KeyItem> &in)
+{
+    std::vector<keyEvent::Key> resultVec;
+    for (const auto &item : in) {
+        keyEvent::Key result = ToTaiheKey(item);
+        resultVec.emplace_back(result);
+    }
+    return taihe::array<keyEvent::Key>(resultVec);
+}
+
+keyEvent::KeyEvent TaiheUtils::ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in)
+{
+    auto key = in.GetKeyItem();
+    int32_t unicodeChar = (key == std::nullopt) ? 0 : static_cast<int32_t>(key->GetUnicode());
+    keyEvent::KeyEvent out = {
+        .base = ToTaiheInputEvent(in),
+        .action = keyEvent::Action::from_value(in.GetKeyAction()),
+        .key = ToTaiheKey(key),
+        .unicodeChar = unicodeChar,
+        .keys = ToTaiheKeys(in.GetKeyItems()),
+        .ctrlKey = false,
+        .altKey = false,
+        .shiftKey = false,
+        .logoKey = false,
+        .fnKey = in.GetFunctionKey(OHOS::MMI::KeyEvent::KEYCODE_FN),
+        .capsLock = in.GetFunctionKey(OHOS::MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY),
+        .numLock = in.GetFunctionKey(OHOS::MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY),
+        .scrollLock = in.GetFunctionKey(OHOS::MMI::KeyEvent::SCROLL_LOCK_FUNCTION_KEY),
+    };
+    return out;
 }
 } // namespace ANI::AVSession

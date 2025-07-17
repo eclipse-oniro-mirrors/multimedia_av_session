@@ -969,8 +969,7 @@ void AVSessionImpl::OnSetSpeed(callback_view<void(double)> callback)
     }
 }
 
-void AVSessionImpl::OnSetLoopMode(callback_view<void(
-    ::ohos::multimedia::avsession::avSession::LoopMode)> callback)
+void AVSessionImpl::OnSetLoopMode(callback_view<void(LoopMode)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "setLoopMode";
@@ -1012,9 +1011,7 @@ void AVSessionImpl::OnHandleKeyEvent(callback_view<void(uintptr_t)> callback)
     }
 }
 
-void AVSessionImpl::OnOutputDeviceChange(callback_view<void(
-    ::ohos::multimedia::avsession::avSession::ConnectionState,
-    ::ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)> callback)
+void AVSessionImpl::OnOutputDeviceChange(callback_view<void(ConnectionState, OutputDeviceInfo const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "outputDeviceChange";
@@ -1090,8 +1087,7 @@ void AVSessionImpl::OnToggleCallMute(callback_view<void()> callback)
     }
 }
 
-void AVSessionImpl::OnCastDisplayChange(callback_view<void(
-    ::ohos::multimedia::avsession::avSession::CastDisplayInfo const&)> callback)
+void AVSessionImpl::OnCastDisplayChange(callback_view<void(CastDisplayInfo const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "castDisplayChange";
@@ -1309,8 +1305,7 @@ void AVSessionImpl::OffSetSpeed(optional_view<callback<void(double)>> callback)
     }
 }
 
-void AVSessionImpl::OffSetLoopMode(optional_view<callback<void(
-    ::ohos::multimedia::avsession::avSession::LoopMode)>> callback)
+void AVSessionImpl::OffSetLoopMode(optional_view<callback<void(LoopMode)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1372,9 +1367,8 @@ void AVSessionImpl::OffHandleKeyEvent(optional_view<callback<void(uintptr_t)>> c
     }
 }
 
-void AVSessionImpl::OffOutputDeviceChange(optional_view<callback<void(
-    ::ohos::multimedia::avsession::avSession::ConnectionState,
-    ::ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)>> callback)
+void AVSessionImpl::OffOutputDeviceChange(
+    optional_view<callback<void(ConnectionState, OutputDeviceInfo const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1458,8 +1452,7 @@ void AVSessionImpl::OffToggleCallMute(optional_view<callback<void()>> callback)
     }
 }
 
-void AVSessionImpl::OffCastDisplayChange(optional_view<callback<void(
-    ::ohos::multimedia::avsession::avSession::CastDisplayInfo const&)>> callback)
+void AVSessionImpl::OffCastDisplayChange(optional_view<callback<void(CastDisplayInfo const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {

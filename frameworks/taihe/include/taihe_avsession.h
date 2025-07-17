@@ -82,18 +82,16 @@ public:
     void OnPlayFromAssetId(callback_view<void(int64_t)> callback);
     void OnSeek(callback_view<void(int64_t)> callback);
     void OnSetSpeed(callback_view<void(double)> callback);
-    void OnSetLoopMode(callback_view<void(::ohos::multimedia::avsession::avSession::LoopMode)> callback);
+    void OnSetLoopMode(callback_view<void(LoopMode)> callback);
     void OnToggleFavorite(callback_view<void(string_view)> callback);
     void OnHandleKeyEvent(callback_view<void(uintptr_t)> callback);
-    void OnOutputDeviceChange(callback_view<void(::ohos::multimedia::avsession::avSession::ConnectionState,
-        ::ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)> callback);
+    void OnOutputDeviceChange(callback_view<void(ConnectionState, OutputDeviceInfo const&)> callback);
     void OnCommonCommand(callback_view<void(string_view, uintptr_t)> callback);
     void OnSkipToQueueItem(callback_view<void(int32_t)> callback);
     void OnAnswer(callback_view<void()> callback);
     void OnHangUp(callback_view<void()> callback);
     void OnToggleCallMute(callback_view<void()> callback);
-    void OnCastDisplayChange(callback_view<void(
-        ::ohos::multimedia::avsession::avSession::CastDisplayInfo const&)> callback);
+    void OnCastDisplayChange(callback_view<void(CastDisplayInfo const&)> callback);
 
     void OffPlay(optional_view<callback<void()>> callback);
     void OffPause(optional_view<callback<void()>> callback);
@@ -105,20 +103,16 @@ public:
     void OffPlayFromAssetId(optional_view<callback<void(int64_t)>> callback);
     void OffSeek(optional_view<callback<void(int64_t)>> callback);
     void OffSetSpeed(optional_view<callback<void(double)>> callback);
-    void OffSetLoopMode(optional_view<callback<void(
-        ::ohos::multimedia::avsession::avSession::LoopMode)>> callback);
+    void OffSetLoopMode(optional_view<callback<void(LoopMode)>> callback);
     void OffToggleFavorite(optional_view<callback<void(string_view)>> callback);
     void OffHandleKeyEvent(optional_view<callback<void(uintptr_t)>> callback);
-    void OffOutputDeviceChange(optional_view<callback<void(
-        ::ohos::multimedia::avsession::avSession::ConnectionState,
-        ::ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)>> callback);
+    void OffOutputDeviceChange(optional_view<callback<void(ConnectionState, OutputDeviceInfo const&)>> callback);
     void OffCommonCommand(optional_view<callback<void(string_view, uintptr_t)>> callback);
     void OffSkipToQueueItem(optional_view<callback<void(int32_t)>> callback);
     void OffAnswer(optional_view<callback<void()>> callback);
     void OffHangUp(optional_view<callback<void()>> callback);
     void OffToggleCallMute(optional_view<callback<void()>> callback);
-    void OffCastDisplayChange(optional_view<callback<void(
-        ::ohos::multimedia::avsession::avSession::CastDisplayInfo const&)>> callback);
+    void OffCastDisplayChange(optional_view<callback<void(CastDisplayInfo const&)>> callback);
 
     std::string GetSessionIdInner();
     void SetSessionIdInner(std::string sessionId);

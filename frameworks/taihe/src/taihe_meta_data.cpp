@@ -616,7 +616,7 @@ int32_t TaiheMetaData::GetSkipIntervals(AVMetadata const &in, OHOS::AVSession::A
 int32_t TaiheMetaData::SetSkipIntervals(const OHOS::AVSession::AVMetaData &in, AVMetadata &out)
 {
     SLOGD("SetSkipIntervals %{public}d", in.GetSkipIntervals());
-    SkipIntervals intervals = TaiheAVSessionEnum::ToTaiheSkipIntervals(in.GetSkipIntervals());
+    SkipIntervals intervals = SkipIntervals::from_value(in.GetSkipIntervals());
     out.skipIntervals = optional<SkipIntervals>(std::in_place_t {}, intervals);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }

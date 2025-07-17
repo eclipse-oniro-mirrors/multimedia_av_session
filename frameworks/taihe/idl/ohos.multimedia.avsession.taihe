@@ -37,13 +37,13 @@ class MediaAVFileDescriptorImpl implements media.AVFileDescriptor {
   }
 }
 
-class MediaAVDataSrcDescriptorImpl {
+class MediaAVDataSrcDescriptorImpl implements media.AVDataSrcDescriptor {
   fileSize: double;
-  callback: (buffer: ArrayBuffer, length: double, pos: (double | undefined)) => double;
+  callback: (buffer: ArrayBuffer, length: double, pos?: double) => double;
 
   constructor(fileSize: long) {
     this.fileSize = fileSize.toDouble();
-    this.callback = (buffer: ArrayBuffer, length: double, pos: (double | undefined)) => {
+    this.callback = (buffer: ArrayBuffer, length: double, pos?: double) => {
         return 0;
     };
   }
@@ -52,24 +52,6 @@ class MediaAVDataSrcDescriptorImpl {
     if (this.callback != undefined) {
       this.callback(buffer, length.toDouble(), pos.toDouble());
     }
-  }
-}
-
-class ElementNameImpl implements ElementName {
-  deviceId: (string | undefined);
-  bundleName: string;
-  moduleName: (string | undefined);
-  abilityName: string;
-  uri: (string | undefined);
-  shortName: (string | undefined);
-
-  constructor(deviceId: string, bundleName: string, abilityName: string) {
-    this.deviceId = deviceId;
-    this.bundleName = bundleName;
-    this.moduleName = undefined;
-    this.abilityName = abilityName;
-    this.uri = undefined;
-    this.shortName = undefined;
   }
 }
 """)

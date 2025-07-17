@@ -70,7 +70,7 @@ static int32_t GetParameterLoopMode(const taihe::optional<AVCastParameterType> &
 
 static taihe::optional<AVCastParameterType> ToTaiheParameterLoopMode(int32_t in)
 {
-    LoopMode mode = TaiheAVSessionEnum::ToTaiheLoopMode(in);
+    LoopMode mode = LoopMode::from_value(in);
     AVCastParameterType parameter = AVCastParameterType::make_typeLoopMode(mode);
     return taihe::optional<AVCastParameterType>(std::in_place_t {}, parameter);
 }

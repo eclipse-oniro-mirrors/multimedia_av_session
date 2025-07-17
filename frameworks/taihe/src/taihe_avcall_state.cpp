@@ -111,7 +111,7 @@ int32_t TaiheAVCallState::GetCallState(AVCallState const &in, OHOS::AVSession::A
 
 int32_t TaiheAVCallState::SetCallState(const OHOS::AVSession::AVCallState &in, AVCallState &out)
 {
-    out.state = TaiheAVSessionEnum::ToTaiheCallState(in.GetAVCallState());
+    out.state = CallState::from_value(in.GetAVCallState());
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
