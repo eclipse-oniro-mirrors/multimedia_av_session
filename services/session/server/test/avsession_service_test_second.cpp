@@ -20,6 +20,7 @@
 
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_sysevent.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
 #include "avsession_info.h"
@@ -1764,7 +1765,7 @@ static HWTEST_F(AVSessionServiceTestSecond, ReportSessionState001, TestSize.Leve
 {
     ASSERT_TRUE(g_AVSessionService != nullptr);
     sptr<AVSessionItem> session = nullptr;
-    g_AVSessionService->ReportSessionState(session, 0);
+    g_AVSessionService->ReportSessionState(session, SessionState::STATE_CREATE);
 
     auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(g_testAnotherBundleName);
     ASSERT_TRUE(stateInfo != nullptr);

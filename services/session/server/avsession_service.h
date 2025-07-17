@@ -618,7 +618,7 @@ private:
     std::string DoCJSONArrayTransformToString(cJSON* valueItem);
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    void ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state);
+    void ReportSessionState(const sptr<AVSessionItem>& session, SessionState state);
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 
