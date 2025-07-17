@@ -2021,9 +2021,6 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
             strcmp(avQueueIdItem->valuestring, meta.GetAVQueueId().c_str()) == 0) {
             CHECK_AND_RETURN_RET_LOG(i != 0, false, "avqueue:%{public}s is first", meta.GetAVQueueId().c_str());
             cJSON_DeleteItemFromArray(valuesArray, i);
-            std::string fileName = AVSessionUtils::GetFixedPathName(userId) + bundleName + "_" +
-                meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
-            AVSessionUtils::DeleteFile(fileName);
         }
     }
     if (cJSON_GetArraySize(valuesArray) >= maxAVQueueInfoLen) {
