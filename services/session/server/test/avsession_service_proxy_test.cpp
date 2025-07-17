@@ -96,3 +96,35 @@ static HWTEST_F(AVSessionServiceProxyTest, GetAllSessionDescriptors001, testing:
     avSessionServiceProxy = nullptr;
     SLOGI("GetAllSessionDescriptors001, end");
 }
+
+/**
+ * @tc.name: GetHistoricalAVQueueInfos001
+ * @tc.desc: Test GetHistoricalAVQueueInfos
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceProxyTest, GetHistoricalAVQueueInfos001, testing::ext::TestSize.Level0)
+{
+    SLOGI("GetHistoricalAVQueueInfos001, start");
+    AVQueueInfo info = AVQueueInfo();
+    OHOS::MessageParcel data;
+    data.WriteString("bundleName_");
+    data.WriteString("avQueueName_");
+    data.WriteString("avQueueId_");
+    data.WriteString("avQueueImageUri_");
+    info.Marshalling(data);
+    OHOS::MessageParcel reply;
+
+    sptr<ISystemAbilityManager> mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    ASSERT_NE(mgr, nullptr);
+    sptr<IRemoteObject> sessionService = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
+    ASSERT_NE(sessionService, nullptr);
+    std::shared_ptr<AVSessionServiceProxy> avSessionServiceProxy =
+        std::make_shared<AVSessionServiceProxy>(sessionService);
+    int32_t maxSize = 10;
+    int32_t maxAppSize = 100;
+    std::vector<AVQueueInfo> avQueueInfos;
+    int32_t ret = AVSESSION_ERROR;
+    ret = avSessionServiceProxy->GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("GetHistoricalAVQueueInfos001, end");
+}

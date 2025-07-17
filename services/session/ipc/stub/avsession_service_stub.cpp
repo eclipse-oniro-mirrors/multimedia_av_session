@@ -102,10 +102,7 @@ int32_t AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel& data
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
     for (const auto& descriptor : descriptors) {
-        if (!descriptor.Marshalling(reply)) {
-            SLOGI("write descriptor failed");
-            break;
-        }
+        CHECK_AND_BREAK_LOG(descriptor.Marshalling(reply), "write descriptor failed");
     }
     return ERR_NONE;
 }
@@ -136,10 +133,7 @@ int32_t AVSessionServiceStub::HandleGetHistoricalSessionDescriptors(MessageParce
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
     for (const auto& descriptor : descriptors) {
-        if (!descriptor.Marshalling(reply)) {
-            SLOGI("write descriptor failed");
-            break;
-        }
+        CHECK_AND_BREAK_LOG(descriptor.Marshalling(reply), "write descriptor failed");
     }
     return ERR_NONE;
 }
@@ -159,6 +153,33 @@ int32_t AVSessionServiceStub::GetAVQueueInfosImgLength(std::vector<AVQueueInfo>&
     return sumLength;
 }
 
+void AVSessionServiceStub::MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos)
+{
+    CHECK_AND_RETURN_LOG(reply.WriteUint32(avQueueInfos.size()), "MarshallingAVQueueInfos size failed");
+    for (const auto& avQueueInfo : avQueueInfos) {
+        reply.WriteString(avQueueInfo.GetBundleName());
+        reply.WriteString(avQueueInfo.GetAVQueueName());
+        reply.WriteString(avQueueInfo.GetAVQueueId());
+        reply.WriteString(avQueueInfo.GetAVQueueImageUri());
+        reply.WriteUint32(avQueueInfo.GetAVQueueLength());
+    }
+}
+
+void AVSessionServiceStub::AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer)
+{
+    int k = 0;
+    for (auto& avQueueInfo : avQueueInfos) {
+        std::shared_ptr<AVSessionPixelMap> pixelMap = avQueueInfo.GetAVQueueImage();
+        if (pixelMap != nullptr) {
+            std::vector<uint8_t> imgBuffer = pixelMap->GetInnerImgBuffer();
+            int length = avQueueInfo.GetAVQueueLength();
+            for (int i = 0; i< length; i++, k++) {
+                buffer[k] = imgBuffer[i];
+            }
+        }
+    }
+}
+
 int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& data, MessageParcel& reply)
 {
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
@@ -176,13 +197,24 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
     int32_t ret = GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
 
-    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(avQueueInfos.size()), ERR_NONE, "write size failed");
-    for (const auto& avQueueInfo : avQueueInfos) {
-        if (!reply.WriteParcelable(&avQueueInfo)) {
-            SLOGE("write avQueueInfo failed");
-            break;
+    int bufferLength = GetAVQueueInfosImgLength(avQueueInfos);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(bufferLength), ERR_NONE, "write buffer length failed");
+
+    if (bufferLength == 0) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(avQueueInfos.size()), ERR_NONE, "write size failed");
+        for (const auto& avQueueInfo : avQueueInfos) {
+            CHECK_AND_BREAK_LOG(avQueueInfo.Marshalling(reply), "write avQueueInfo failed");
         }
+        return ERR_NONE;
     }
+    unsigned char *buffer = new (std::nothrow) unsigned char[bufferLength];
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, AVSESSION_ERROR, "new buffer failed of length");
+
+    MarshallingAVQueueInfos(reply, avQueueInfos);
+    AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+    bool result = reply.WriteRawData(buffer, bufferLength);
+    delete[] buffer;
+    CHECK_AND_RETURN_RET_LOG(result, AVSESSION_ERROR, "fail to write parcel");
     return ERR_NONE;
 }
 

@@ -388,6 +388,7 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level
     AVQueueInfo info = AVQueueInfo();
     AVSessionStubDemo avSessionStub;
     OHOS::MessageParcel data;
+    data.WriteInt32(1);
     info.MarshallingMessageParcel(data);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);

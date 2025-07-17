@@ -349,7 +349,7 @@ int32_t AVSessionStub::HandleSetSessionEvent(MessageParcel& data, MessageParcel&
 
 int32_t AVSessionStub::HandleUpdateAVQueueInfoEvent(MessageParcel& data, MessageParcel& reply)
 {
-    sptr info = data.ReadParcelable<AVQueueInfo>();
+    sptr info = AVQueueInfo::UnmarshallingMessageParcel(data);
     if (info == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_MARSHALLING, "WriteInt32 result failed");
         return ERR_UNMARSHALLING;

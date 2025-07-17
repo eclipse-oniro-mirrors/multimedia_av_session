@@ -55,6 +55,8 @@ private:
     int32_t HandleClose(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
     int32_t GetAVQueueInfosImgLength(std::vector<AVQueueInfo>& avQueueInfos);
+    void MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos);
+    void AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer);
     int32_t HandleGetDistributedSessionControllersInner(MessageParcel& data, MessageParcel& reply);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;

@@ -78,6 +78,7 @@ HWTEST_F(AVQueueInfoTest, Unmarshalling001, TestSize.Level0)
     avqueueInfo.SetAVQueueImageUri("bbb");
     EXPECT_EQ(avqueueInfo.GetAVQueueImageUri(), "bbb");
     Parcel parcel;
+    avqueueInfo.Marshalling(parcel);
     bool result = avqueueInfo.Unmarshalling(parcel);
     EXPECT_EQ(result, false);
 }
@@ -98,6 +99,7 @@ HWTEST_F(AVQueueInfoTest, Unmarshalling002, TestSize.Level0)
     avqueueInfo.SetAVQueueImageUri("bbb");
     EXPECT_EQ(avqueueInfo.GetAVQueueImageUri(), "bbb");
     Parcel parcel;
+    avqueueInfo.Marshalling(parcel);
     bool result = avqueueInfo.Unmarshalling(parcel);
     EXPECT_EQ(result, false);
 }
@@ -118,6 +120,7 @@ HWTEST_F(AVQueueInfoTest, Unmarshalling003, TestSize.Level0)
     avqueueInfo.SetAVQueueImageUri("bbb");
     EXPECT_EQ(avqueueInfo.GetAVQueueImageUri(), "bbb");
     Parcel parcel;
+    avqueueInfo.Marshalling(parcel);
     bool result = avqueueInfo.Unmarshalling(parcel);
     EXPECT_EQ(result, false);
 }
@@ -138,6 +141,31 @@ HWTEST_F(AVQueueInfoTest, Unmarshalling004, TestSize.Level0)
     avqueueInfo.SetAVQueueId("aaa");
     EXPECT_EQ(avqueueInfo.GetAVQueueId(), "aaa");
     Parcel parcel;
+    bool result = avqueueInfo.Unmarshalling(parcel);
+    EXPECT_EQ(result, false);
+}
+
+/**
+* @tc.name: Unmarshalling005
+* @tc.desc: test Unmarshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVQueueInfoTest, Unmarshalling005, TestSize.Level0)
+{
+    AVQueueInfo avqueueInfo;
+    avqueueInfo.SetBundleName("xiaoming");
+    EXPECT_EQ(avqueueInfo.GetBundleName(), "xiaoming");
+    avqueueInfo.SetAVQueueName("xiaoqiang");
+    EXPECT_EQ(avqueueInfo.GetAVQueueName(), "xiaoqiang");
+    avqueueInfo.SetAVQueueId("aaa");
+    EXPECT_EQ(avqueueInfo.GetAVQueueId(), "aaa");
+    avqueueInfo.SetAVQueueImageUri("bbb");
+    EXPECT_EQ(avqueueInfo.GetAVQueueImageUri(), "bbb");
+    Parcel parcel;
+    avqueueInfo.Marshalling(parcel);
+    std::shared_ptr<AVSessionPixelMap> avQueueImage = std::make_shared<AVSessionPixelMap>();
+    avqueueInfo.SetAVQueueImage(avQueueImage);
     bool result = avqueueInfo.Unmarshalling(parcel);
     EXPECT_EQ(result, false);
 }
