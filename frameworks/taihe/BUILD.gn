@@ -1,0 +1,170 @@
+# Copyright (C) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//build/ohos/taihe_idl/taihe.gni")
+import("//foundation/multimedia/av_session/castplus_cast_engine_part.gni")
+import("//foundation/multimedia/av_session/config.gni")
+
+subsystem_name = "multimedia"
+part_name = "av_session"
+taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
+
+copy_taihe_idl("copy_taihe") {
+  sources = [
+    "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avCastPickerParam.taihe",
+    "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avsession.avSession.taihe",
+    "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avsession.taihe",
+  ]
+  external_deps = [
+    "image_framework:copy_image_taihe",
+    "input:key_event_taihe"
+  ]
+}
+
+ohos_taihe("run_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  deps = [ ":copy_taihe" ]
+  outputs = [
+    "$taihe_generated_file_path/src/ohos.multimedia.avsession.avSession.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.multimedia.avsession.avSession.abi.c",
+  ]
+}
+
+taihe_shared_library("avsession_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  subsystem_name = "$subsystem_name"
+  part_name = "$part_name"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  include_dirs = [
+    "include",
+    "//foundation/multimedia/av_session/frameworks/native/session/include",
+    "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include",
+  ]
+
+  sources = get_target_outputs(":run_taihe")
+  sources += [
+    "src/ani_constructor.cpp",
+    "src/taihe_async_callback.cpp",
+    "src/taihe_avcall_meta_data.cpp",
+    "src/taihe_avcall_state.cpp",
+    "src/taihe_avcast_picker_helper.cpp",
+    "src/taihe_avcontroller_callback.cpp",
+    "src/taihe_avsession.cpp",
+    "src/taihe_avsession_callback.cpp",
+    "src/taihe_avsession_controller.cpp",
+    "src/taihe_avsession_enum.cpp",
+    "src/taihe_avsession_manager.cpp",
+    "src/taihe_cast_control_command.cpp",
+    "src/taihe_control_command.cpp",
+    "src/taihe_media_description.cpp",
+    "src/taihe_meta_data.cpp",
+    "src/taihe_playback_state.cpp",
+    "src/taihe_queue_item.cpp",
+    "src/taihe_session_listener.cpp",
+    "src/taihe_utils.cpp",
+  ]
+
+  deps = [
+    ":run_taihe",
+    "//foundation/multimedia/av_session/frameworks/common:avsession_common",
+    "//foundation/multimedia/av_session/frameworks/native/session:avsession_client",
+    "//foundation/multimedia/av_session/utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:ani_base_context",
+    "ability_runtime:ani_common",
+    "ability_runtime:ani_wantagent_common",
+    "ability_runtime:app_manager",
+    "ability_runtime:ui_extension",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libtokenid_sdk",
+    "ace_engine:ace_uicontent",
+    "audio_framework:audio_foundation",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "curl:curl_shared",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_taihe",
+    "image_framework:image_native",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "runtime_core:ani",
+    "runtime_core:libarkruntime",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = []
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    sources += [
+      "src/taihe_avcast_controller.cpp",
+      "src/taihe_avcast_controller_callback.cpp",
+    ]
+    deps += [ "//foundation/multimedia/av_session/frameworks/native/session:avsession_cast_client" ]
+  }
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+}
+
+generate_static_abc("avsession_taihe_abc") {
+  base_url = "$taihe_generated_file_path"
+  files = [
+    "$taihe_generated_file_path/@ohos.multimedia.avsession.ets",
+    "$taihe_generated_file_path/@ohos.multimedia.avCastPickerParam.ets"
+  ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/avsession_taihe_abc.abc"
+  dependencies = [ ":run_taihe" ]
+}
+
+ohos_prebuilt_etc("avsession_etc") {
+  source = "$target_out_dir/avsession_taihe_abc.abc"
+  module_install_dir = "framework"
+  part_name = "$part_name"
+  subsystem_name = "$subsystem_name"
+  deps = [ ":avsession_taihe_abc" ]
+}
+
+group("av_session_taihe") {
+  deps = [
+    ":avsession_etc",
+    ":avsession_taihe",
+  ]
+}
