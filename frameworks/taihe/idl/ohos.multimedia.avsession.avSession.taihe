@@ -980,6 +980,8 @@ function StartDeviceLoggingSync(url: String, maxSize: Optional<i32>): void;
 @gen_promise("stopDeviceLogging")
 function StopDeviceLoggingSync(): void;
 
+function CreateAVKeyEventSync(nativePtr: i64): KeyEvent;
+
 enum DistributedSessionType :i32 {
   TYPE_SESSION_REMOTE = 0,
   TYPE_SESSION_MIGRATE_IN = 1,

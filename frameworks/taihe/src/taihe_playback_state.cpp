@@ -164,7 +164,7 @@ int32_t TaihePlaybackState::GetState(AVPlaybackState const &in, OHOS::AVSession:
 int32_t TaihePlaybackState::SetState(const OHOS::AVSession::AVPlaybackState &in, AVPlaybackState &out)
 {
     SLOGD("SetState %{public}d", in.GetState());
-    PlaybackState state = TaiheAVSessionEnum::ToTaihePlaybackState(in.GetState());
+    PlaybackState state = PlaybackState::from_value(in.GetState());
     out.state = optional<PlaybackState>(std::in_place_t {}, state);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
@@ -233,7 +233,7 @@ int32_t TaihePlaybackState::GetLoopMode(AVPlaybackState const &in, OHOS::AVSessi
 int32_t TaihePlaybackState::SetLoopMode(const OHOS::AVSession::AVPlaybackState &in, AVPlaybackState &out)
 {
     SLOGD("SetLoopMode %{public}d", in.GetLoopMode());
-    LoopMode mode = TaiheAVSessionEnum::ToTaiheLoopMode(in.GetLoopMode());
+    LoopMode mode = LoopMode::from_value(in.GetLoopMode());
     out.loopMode = optional<LoopMode>(std::in_place_t {}, mode);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }

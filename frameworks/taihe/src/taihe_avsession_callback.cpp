@@ -181,7 +181,7 @@ void TaiheAVSessionCallback::OnSetSpeed(double speed)
 void TaiheAVSessionCallback::OnSetLoopMode(int32_t loopMode)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnSetLoopMode");
-    LoopMode loopModeTaihe = TaiheAVSessionEnum::ToTaiheLoopMode(loopMode);
+    LoopMode loopModeTaihe = LoopMode::from_value(loopMode);
     auto execute = [loopModeTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(LoopMode)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(LoopMode)>>(method);
@@ -220,10 +220,12 @@ void TaiheAVSessionCallback::OnToggleFavorite(const std::string &assertId)
 void TaiheAVSessionCallback::OnMediaKeyEvent(const OHOS::MMI::KeyEvent &keyEvent)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnMediaKeyEvent");
-    auto keyEventAni = TaiheUtils::ToAniKeyEvent(keyEvent);
-    CHECK_RETURN_VOID(keyEventAni != nullptr, "convert keyEvent to ani object failed");
-    uintptr_t keyEventTaihe = reinterpret_cast<uintptr_t>(keyEventAni);
-    auto execute = [keyEventTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [keyEvent](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        auto keyEventAni = TaiheUtils::ToAniKeyEvent(keyEvent);
+        CHECK_RETURN_VOID(keyEventAni != nullptr, "convert keyEvent to ani object failed");
+        uintptr_t keyEventTaihe = reinterpret_cast<uintptr_t>(keyEventAni);
         std::shared_ptr<taihe::callback<void(uintptr_t)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(uintptr_t)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -237,7 +239,7 @@ void TaiheAVSessionCallback::OnOutputDeviceChange(const int32_t connectionState,
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnOutputDeviceChange");
     SLOGI("OnOutputDeviceChange with connectionState %{public}d", connectionState);
-    ConnectionState stateTaihe = TaiheAVSessionEnum::ToTaiheConnectionState(connectionState);
+    ConnectionState stateTaihe = ConnectionState::from_value(connectionState);
     OutputDeviceInfo infoTaihe = TaiheUtils::ToTaiheOutputDeviceInfo(outputDeviceInfo);
     auto execute = [stateTaihe, infoTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(ConnectionState, OutputDeviceInfo const&)>> cacheCallback =
@@ -254,10 +256,12 @@ void TaiheAVSessionCallback::OnCommonCommand(const std::string &commonCommand,
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnCommonCommand");
     dataContext_.commonCommand = string(commonCommand);
     string_view commonCommandTaihe = dataContext_.commonCommand;
-    auto commandArgsAni = TaiheUtils::ToAniWantParams(commandArgs);
-    CHECK_RETURN_VOID(commandArgsAni != nullptr, "convert WantParams to ani object failed");
-    uintptr_t commandArgsTaihe = reinterpret_cast<uintptr_t>(commandArgsAni);
-    auto execute = [commonCommandTaihe, commandArgsTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [commonCommandTaihe, commandArgs](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        auto commandArgsAni = TaiheUtils::ToAniWantParams(commandArgs);
+        CHECK_RETURN_VOID(commandArgsAni != nullptr, "convert WantParams to ani object failed");
+        uintptr_t commandArgsTaihe = reinterpret_cast<uintptr_t>(commandArgsAni);
         std::shared_ptr<taihe::callback<void(string_view, uintptr_t)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view, uintptr_t)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");

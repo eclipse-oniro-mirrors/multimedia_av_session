@@ -1134,31 +1134,63 @@ void StopDeviceLoggingSync()
 #endif
 }
 
-void OnDistributedSessionChange(::ohos::multimedia::avsession::avSession::DistributedSessionType param,
-    callback_view<void(
-    array_view<::ohos::multimedia::avsession::avSession::AVSessionController>)> callback)
+keyEvent::KeyEvent CreateAVKeyEventSync(int64_t nativePtr)
+{
+    inputEvent::InputEvent undefinedInputEvent = {
+        .id = 0,
+        .deviceId = 0,
+        .actionTime = 0,
+        .screenId = 0,
+        .windowId = 0,
+    };
+    keyEvent::Key undefinedKey = {
+        .code = keyCode::KeyCode::from_value(0),
+        .pressedTime = 0,
+        .deviceId = 0,
+    };
+    std::vector<keyEvent::Key> emptyKeys;
+    keyEvent::KeyEvent undefinedKeyEvent = {
+        .base = undefinedInputEvent,
+        .action = keyEvent::Action::from_value(0),
+        .key = undefinedKey,
+        .unicodeChar = 0,
+        .keys = taihe::array<keyEvent::Key>(emptyKeys),
+        .ctrlKey = false,
+        .altKey = false,
+        .shiftKey = false,
+        .logoKey = false,
+        .fnKey = false,
+        .capsLock = false,
+        .numLock = false,
+        .scrollLock = false,
+    };
+    CHECK_RETURN(nativePtr != 0, "Invalid nativePtr", undefinedKeyEvent);
+    OHOS::MMI::KeyEvent *keyEventPtr = reinterpret_cast<OHOS::MMI::KeyEvent*>(nativePtr);
+    CHECK_RETURN(keyEventPtr != nullptr, "keyEventPtr is nullptr", undefinedKeyEvent);
+    return TaiheUtils::ToTaiheKeyEvent(*keyEventPtr);
+}
+
+void OnDistributedSessionChange(DistributedSessionType param,
+    callback_view<void(array_view<AVSessionController>)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
-    OHOS::AVSession::DistributedSessionType sessionType = TaiheAVSessionEnum::ToDistributedSessionType(param);
+    auto sessionType = static_cast<OHOS::AVSession::DistributedSessionType>(param.get_value());
     TaiheAVSessionManager::OnDistributedSessionChangeEvent(sessionType, cacheCallback);
 }
 
-void OnSessionCreate(callback_view<void(
-    ::ohos::multimedia::avsession::avSession::AVSessionDescriptor const&)> callback)
+void OnSessionCreate(callback_view<void(AVSessionDescriptor const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     TaiheAVSessionManager::OnEvent("sessionCreate", cacheCallback);
 }
 
-void OnSessionDestroy(callback_view<void(
-    ::ohos::multimedia::avsession::avSession::AVSessionDescriptor const&)> callback)
+void OnSessionDestroy(callback_view<void(AVSessionDescriptor const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     TaiheAVSessionManager::OnEvent("sessionDestroy", cacheCallback);
 }
 
-void OnTopSessionChange(callback_view<void(
-    ::ohos::multimedia::avsession::avSession::AVSessionDescriptor const&)> callback)
+void OnTopSessionChange(callback_view<void(AVSessionDescriptor const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     TaiheAVSessionManager::OnEvent("topSessionChange", cacheCallback);
@@ -1170,15 +1202,13 @@ void OnSessionServiceDie(callback_view<void()> callback)
     TaiheAVSessionManager::OnEvent("sessionServiceDie", cacheCallback);
 }
 
-void OnDeviceAvailable(callback_view<void(
-    ::ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)> callback)
+void OnDeviceAvailable(callback_view<void(OutputDeviceInfo const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     TaiheAVSessionManager::OnEvent("deviceAvailable", cacheCallback);
 }
 
-void OnDeviceLogEvent(callback_view<void(
-    ::ohos::multimedia::avsession::avSession::DeviceLogEventCode)> callback)
+void OnDeviceLogEvent(callback_view<void(DeviceLogEventCode)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     TaiheAVSessionManager::OnEvent("deviceLogEvent", cacheCallback);
@@ -1190,20 +1220,18 @@ void OnDeviceOffline(callback_view<void(string_view)> callback)
     TaiheAVSessionManager::OnEvent("deviceOffline", cacheCallback);
 }
 
-void OffDistributedSessionChange(::ohos::multimedia::avsession::avSession::DistributedSessionType param,
-    optional_view<callback<void(
-    array_view<::ohos::multimedia::avsession::avSession::AVSessionController>)>> callback)
+void OffDistributedSessionChange(DistributedSessionType param,
+    optional_view<callback<void(array_view<AVSessionController>)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
-    OHOS::AVSession::DistributedSessionType sessionType = TaiheAVSessionEnum::ToDistributedSessionType(param);
+    auto sessionType = static_cast<OHOS::AVSession::DistributedSessionType>(param.get_value());
     TaiheAVSessionManager::OffDistributedSessionChangeEvent(sessionType, cacheCallback);
 }
 
-void OffSessionCreate(optional_view<callback<void(
-    ::ohos::multimedia::avsession::avSession::AVSessionDescriptor const&)>> callback)
+void OffSessionCreate(optional_view<callback<void(AVSessionDescriptor const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1212,8 +1240,7 @@ void OffSessionCreate(optional_view<callback<void(
     TaiheAVSessionManager::OffEvent("sessionCreate", cacheCallback);
 }
 
-void OffSessionDestroy(optional_view<callback<void(
-    ::ohos::multimedia::avsession::avSession::AVSessionDescriptor const&)>> callback)
+void OffSessionDestroy(optional_view<callback<void(AVSessionDescriptor const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1222,8 +1249,7 @@ void OffSessionDestroy(optional_view<callback<void(
     TaiheAVSessionManager::OffEvent("sessionDestroy", cacheCallback);
 }
 
-void OffTopSessionChange(optional_view<callback<void(
-    ::ohos::multimedia::avsession::avSession::AVSessionDescriptor const&)>> callback)
+void OffTopSessionChange(optional_view<callback<void(AVSessionDescriptor const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1241,8 +1267,7 @@ void OffSessionServiceDie(optional_view<callback<void()>> callback)
     TaiheAVSessionManager::OffEvent("sessionServiceDie", cacheCallback);
 }
 
-void OffDeviceAvailable(optional_view<callback<void(
-    ::ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)>> callback)
+void OffDeviceAvailable(optional_view<callback<void(OutputDeviceInfo const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1251,8 +1276,7 @@ void OffDeviceAvailable(optional_view<callback<void(
     TaiheAVSessionManager::OffEvent("deviceAvailable", cacheCallback);
 }
 
-void OffDeviceLogEvent(optional_view<callback<void(
-    ::ohos::multimedia::avsession::avSession::DeviceLogEventCode)>> callback)
+void OffDeviceLogEvent(optional_view<callback<void(DeviceLogEventCode)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1308,6 +1332,7 @@ TH_EXPORT_CPP_API_SendSystemAVKeyEventSync(ANI::AVSession::SendSystemAVKeyEventS
 TH_EXPORT_CPP_API_SendSystemControlCommandSync(ANI::AVSession::SendSystemControlCommandSync);
 TH_EXPORT_CPP_API_StartDeviceLoggingSync(ANI::AVSession::StartDeviceLoggingSync);
 TH_EXPORT_CPP_API_StopDeviceLoggingSync(ANI::AVSession::StopDeviceLoggingSync);
+TH_EXPORT_CPP_API_CreateAVKeyEventSync(ANI::AVSession::CreateAVKeyEventSync);
 TH_EXPORT_CPP_API_OnDistributedSessionChange(ANI::AVSession::OnDistributedSessionChange);
 TH_EXPORT_CPP_API_OnSessionCreate(ANI::AVSession::OnSessionCreate);
 TH_EXPORT_CPP_API_OnSessionDestroy(ANI::AVSession::OnSessionDestroy);

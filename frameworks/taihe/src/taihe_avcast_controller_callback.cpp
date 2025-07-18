@@ -113,8 +113,10 @@ void TaiheAVCastControllerCallback::OnCastPlaybackStateChange(const OHOS::AVSess
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnCastPlaybackStateChange");
     SLOGI("Start handle OnCastPlaybackStateChange event with state: %{public}d", state.GetState());
-    AVPlaybackState stateTaihe = TaiheUtils::ToTaiheAVPlaybackState(state);
-    auto execute = [this, stateTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [this, state](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        AVPlaybackState stateTaihe = TaiheUtils::ToTaiheAVPlaybackState(state);
         std::shared_ptr<taihe::callback<void(AVPlaybackState const&)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(AVPlaybackState const&)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -127,8 +129,10 @@ void TaiheAVCastControllerCallback::OnMediaItemChange(const OHOS::AVSession::AVQ
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnMediaItemChange");
     SLOGI("Start handle OnMediaItemChange event");
-    AVQueueItem queueItemTaihe = TaiheUtils::ToTaiheAVQueueItem(avQueueItem);
-    auto execute = [this, queueItemTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [this, avQueueItem](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        AVQueueItem queueItemTaihe = TaiheUtils::ToTaiheAVQueueItem(avQueueItem);
         std::shared_ptr<taihe::callback<void(AVQueueItem const&)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(AVQueueItem const&)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -276,8 +280,10 @@ void TaiheAVCastControllerCallback::OnPlayRequest(const OHOS::AVSession::AVQueue
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnPlayRequest");
     SLOGI("Start handle OnPlayRequest event");
-    AVQueueItem queueItemTaihe = TaiheUtils::ToTaiheAVQueueItem(avQueueItem);
-    auto execute = [this, queueItemTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [this, avQueueItem](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        AVQueueItem queueItemTaihe = TaiheUtils::ToTaiheAVQueueItem(avQueueItem);
         std::shared_ptr<taihe::callback<void(AVQueueItem const&)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(AVQueueItem const&)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
