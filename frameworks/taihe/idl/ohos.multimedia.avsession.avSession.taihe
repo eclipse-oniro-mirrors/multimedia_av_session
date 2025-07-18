@@ -867,7 +867,7 @@ interface AVCastPickerHelperInner {
 function CreateAVCastPickerHelperInnerSync(context: @sts_type("Context") Opaque): AVCastPickerHelperInner;
 
 @!sts_inject("""
-function businessError<T = void>(c: number, d?: string): BusinessError<T> {
+function businessError<T = void>(c: int, d?: string): BusinessError<T> {
   let err: BusinessError<T> = new BusinessError<T>();
   err.code = c;
   err.message = d ? d : "";
