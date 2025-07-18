@@ -375,7 +375,9 @@ int32_t MigrateAVSessionServer::GetAllControllers(std::vector<sptr<AVControllerI
             continue;
         }
         auto it = playerIdToControllerMap_.find(iter->sessionId_);
-        controller.push_back(it->second);
+        if (it != playerIdToControllerMap_.end()) {
+            controller.push_back(it->second);
+        }
     }
     return AVSESSION_SUCCESS;
 }
