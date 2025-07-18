@@ -659,6 +659,7 @@ export class AVCastPicker extends ViewPU {
         this.observeComponentCreation2((f8, g8) => {
             Button.createWithChild();
             Button.size({ width: '100%', height: '100%' });
+            Button.hoverEffect(HoverEffect.None);
             Button.stateEffect(false);
             Button.backgroundColor('#00000000');
             Button.accessibilityLevel('yes');
