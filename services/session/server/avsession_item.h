@@ -194,6 +194,10 @@ public:
 
     void UpdateSessionElement(const AppExecFwk::ElementName& elementName);
 
+    void SetPlayingTime(int64_t playingTime);
+
+    int64_t GetPlayingTime() const;
+
     void SetTop(bool top);
 
     std::shared_ptr<RemoteSessionSource> GetRemoteSource();
@@ -425,6 +429,7 @@ private:
     std::function<void(AVSessionItem&)> serviceCallback_;
     std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;
+    int64_t playingTime_ = 0;
 
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;

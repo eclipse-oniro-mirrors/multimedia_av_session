@@ -2285,6 +2285,16 @@ std::shared_ptr<RemoteSessionSource> AVSessionItem::GetRemoteSource()
     return remoteSource_;
 }
 
+void AVSessionItem::SetPlayingTime(int64_t playingTime)
+{
+    playingTime_ = playingTime;
+}
+
+int64_t AVSessionItem::GetPlayingTime() const
+{
+    return playingTime_;
+}
+
 void AVSessionItem::HandleControllerRelease(pid_t pid)
 {
     std::lock_guard controllersLockGuard(controllersLock_);

@@ -1998,14 +1998,14 @@ static HWTEST_F(AVSessionServiceTest, CheckAndUpdateAncoMediaSession001, TestSiz
 }
 
 /**
- * @tc.name: CheckIfRemoveNotification001
- * @tc.desc: check if remove notification.
+ * @tc.name: CheckSessionHandleKeyEvent001
+ * @tc.desc: check which session handle key event.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, CheckSessionHandleKeyEvent001, TestSize.Level1)
 {
-    SLOGD("CheckIfRemoveNotification001 begin!");
+    SLOGD("CheckSessionHandleKeyEvent001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -2013,25 +2013,30 @@ static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification001, TestSize.Lev
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
-    avservice_->UpdateTopSession(avsessionHere_);
-    EXPECT_NE(avservice_->topSession_, nullptr);
-    avservice_->CheckIfRemoveNotification(avsessionHere_->GetUserId(), avsessionHere_);
-    EXPECT_EQ(avservice_->topSession_, nullptr);
-    EXPECT_EQ(avservice_->hasMediaCapsule_, false);
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    auto ret = avservice_->CheckSessionHandleKeyEvent(true, cmd, *keyEvent, avsessionHere_);
+    EXPECT_EQ(ret, true);
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_MEDIA_PLAY);
+    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_DOWN);
+    ret = avservice_->CheckSessionHandleKeyEvent(false, cmd, *keyEvent, avsessionHere_);
+    EXPECT_EQ(ret, true);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
-    SLOGD("CheckIfRemoveNotification001 end!");
+    SLOGD("CheckSessionHandleKeyEvent001 end!");
 }
 
 /**
- * @tc.name: CheckIfRemoveNotification002
- * @tc.desc: check if remove notification.
+ * @tc.name: CheckSessionHandleKeyEvent002
+ * @tc.desc: check which session handle key event.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, CheckSessionHandleKeyEvent002, TestSize.Level1)
 {
-    SLOGD("CheckIfRemoveNotification002 begin!");
+    SLOGD("CheckSessionHandleKeyEvent002 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -2039,11 +2044,23 @@ static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification002, TestSize.Lev
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
-    avservice_->CheckIfRemoveNotification(avsessionHere_->GetUserId(), avsessionHere_);
-    EXPECT_EQ(avservice_->hasMediaCapsule_, false);
+    FocusSessionStrategy::FocusSessionChangeInfo info;
+    info.uid = 1041;
+    info.pid = 1041;
+    avservice_->HandleFocusSession(info, true);
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    auto ret = avservice_->CheckSessionHandleKeyEvent(true, cmd, *keyEvent, avsessionHere_);
+    EXPECT_EQ(ret, true);
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_MEDIA_PLAY);
+    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_DOWN);
+    ret = avservice_->CheckSessionHandleKeyEvent(false, cmd, *keyEvent, avsessionHere_);
+    EXPECT_EQ(ret, true);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
-    SLOGD("CheckIfRemoveNotification002 end!");
+    SLOGD("CheckSessionHandleKeyEvent002 end!");
 }
 
 /**
