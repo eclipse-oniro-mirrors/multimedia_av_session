@@ -92,6 +92,8 @@ public:
 
     int SetSurface(const std::string &surfaceInfo) override { return 0; }
 
+    int SendData(const DataType dataType, const std::string &dataStr) override { return 0; }
+
     int Load(const OHOS::CastEngine::MediaInfo &media) override
     {
         if (state_ == 0) {
