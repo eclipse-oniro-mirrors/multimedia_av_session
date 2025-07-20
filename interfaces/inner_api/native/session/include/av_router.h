@@ -198,7 +198,8 @@ public:
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo, const std::string& spid) = 0;
+    virtual int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
+        const std::string& spid) = 0;
 
     /**
      * @brief Stop cast process.
