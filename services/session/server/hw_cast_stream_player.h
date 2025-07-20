@@ -78,6 +78,7 @@ public:
     void OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
     void OnAvailableCapabilityChanged(const CastEngine::StreamCapability &streamCapability) override;
     void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
+    void OnData(const CastEngine::DataType dataType, const std::string& dataStr) override;
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);

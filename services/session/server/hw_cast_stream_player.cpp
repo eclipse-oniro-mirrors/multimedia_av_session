@@ -984,6 +984,11 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
     SLOGI("Stream player received PlayRequest event done");
 }
 
+void HwCastStreamPlayer::OnData(const CastEngine::DataType dataType, const std::string& dataStr)
+{
+    SLOGI("Stream player received OnData event");
+}
+
 void HwCastStreamPlayer::OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     SLOGD("Stream player received ImageChanged event");
