@@ -28,6 +28,7 @@ using namespace OHOS::CastEngine;
 namespace OHOS::AVSession {
 const uint32_t UNTRUSTED_DEVICE = 0;
 const uint32_t TRUSTED_DEVICE = 1;
+const uint32_t SPID_STR_LENGTH = 2;
 
 HwCastProvider::HwCastProvider()
 {
@@ -192,7 +193,7 @@ void HwCastProvider::StopCastSession(int castId)
     castFlag_[castId] = false;
 }
 
-bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
+bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo, const std::string& spid)
 {
     SLOGI("AddCastDevice with config castSession and corresonding castId is %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
@@ -208,7 +209,7 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
         return false;
     }
 
-    return hwCastProviderSession->AddDevice(deviceInfo.deviceId_);
+    return hwCastProviderSession->AddDevice(deviceInfo.deviceId_, spid);
 }
 
 bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay)
@@ -411,6 +412,13 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
         deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
+        SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
+        deviceInfo.supportePullClients_.resize(castRemoteDevice.streamCapability.size() / SPID_STR_LENGTH);
+        SPID_STR_LENGTH
+        for (uint16_t i = 0; i < castRemoteDevice.streamCapability.size() / SPID_STR_LENGTH; i++) {
+            deviceInfo.supportePullClients_[i] =
+                castRemoteDevice.streamCapability.substr(i * SPID_STR_LENGTH, SPID_STR_LENGTH);
+        }
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {

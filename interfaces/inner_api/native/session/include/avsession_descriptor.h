@@ -49,6 +49,7 @@ public:
     int32_t supportedProtocols_ {};
     int32_t authenticationStatus_ {};
     std::vector<std::string> supportedDrmCapabilities_;
+    std::vector<std::string> supportedPullClients_;
     bool isLegacy_ = false;
     int32_t mediumTypes_ = 2;
     AudioCapabilities audioCapabilities_;

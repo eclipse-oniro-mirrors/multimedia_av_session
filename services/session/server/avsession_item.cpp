@@ -677,7 +677,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
         std::lock_guard lockGuard(avsessionItemLock_);
         extras_ = extras;
     }
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (extras.HasParam("requireAbilityList")) {
         auto value = extras.GetParam("requireAbilityList");
@@ -686,8 +685,14 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             SetExtrasInner(list);
         }
     }
+    if (extras.HasParam("request-tv-client")) {
+        auto value = extras.GetParam("request-tv-client");
+        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        if (list != nullptr && AAFwk::Array::IsStringArray(list)) {
+            SetSpid(list);
+        }
+    }
 #endif
-
     if (extras.HasParam("hw_live_view_hidden_when_keyguard")) {
         auto value = extras.GetParam("hw_live_view_hidden_when_keyguard");
         AAFwk::IArray* list = AAFwk::IArray::Query(value);
@@ -695,7 +700,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             NotificationExtras(list);
         }
     }
-
     if (extras.HasParam("support-keyevent")) {
         auto value = extras.GetParam("support-keyevent");
         AAFwk::IArray* list = AAFwk::IArray::Query(value);
@@ -703,7 +707,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             KeyEventExtras(list);
         }
     }
-
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
@@ -712,7 +715,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             }
         }
     }
-
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
         auto ret = remoteSource_->SetExtrasRemote(extras);
@@ -804,7 +806,6 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     auto validCallback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         dealValidCallback(cmd, supportedCastCmds);
     };
-
     auto preparecallback = [this]() {
         if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && isFirstCallback_) {
             isFirstCallback_ = false;
@@ -812,14 +813,12 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
                 GetDescriptor().outputDeviceInfo_.deviceInfos_[0]);
         }
     };
-
     sharedPtr->Init(castControllerProxy_, validCallback, preparecallback);
     {
         std::lock_guard lockGuard(castControllersLock_);
         castControllers_.emplace_back(sharedPtr);
     }
     sptr<IRemoteObject> remoteObject = castController;
-
     sharedPtr->SetSessionTag(descriptor_.sessionTag_);
     sharedPtr->SetSessionId(descriptor_.sessionId_);
     sharedPtr->SetUserId(userId_);
@@ -834,8 +833,12 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
             }).detach();
         });
     }
-
     InitializeCastCommands();
+    if (SearchSpidInCapability(castHandleDeviceId_)) {
+        if (castControllerProxy_ != nullptr) {
+            castControllerProxy_->SetSpid(spid_);
+        }
+    }
     return remoteObject;
 }
 
@@ -1350,7 +1353,7 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 
     SetCastHandle(castHandle);
     SLOGI("start cast check handle set to %{public}lld", (long long)castHandle_);
-    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
+    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo, spid_);
     if (ret == AVSESSION_SUCCESS) {
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
     }
@@ -1358,14 +1361,15 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
     return ret;
 }
 
-int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo)
+int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo,
+    const std::string& spid)
 {
     SLOGI("Add device process");
     std::lock_guard lockGuard(castLock_);
     AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_,
         GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
     int32_t castId = static_cast<int32_t>(castHandle_);
-    int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo);
+    int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo, spid);
     SLOGI("Add device process with ret %{public}d", ret);
     return ret;
 }
@@ -1487,6 +1491,16 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
             castDeviceInfoMap_[deviceInfo.deviceId_]);
         AVSessionHiAnalyticsReport::PublishCastRecord(GetBundleName(), castDeviceInfoMap_[deviceInfo.deviceId_]);
     }
+}
+
+bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
+{
+    for (std::string cap : castDeviceInfoMap_[deviceId].supportedPullClients_) {
+        if (cap == spid_) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
@@ -1772,6 +1786,20 @@ void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
                 descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO && serviceCallbackForStream_) {
                 SLOGI("AVSessionItem send mirrortostream event to service");
                 serviceCallbackForStream_(GetSessionId());
+            }
+        }
+    };
+    AAFwk::Array::ForEach(list, func);
+}
+
+void AVSessionItem::SetSpid(AAFwk::IArray* list)
+{
+    auto func = [this](AAFwk::IInterface* object) {
+        if (object != nullptr) {
+            AAFwk::IString* stringValue = AAFwk::IString::Query(object);
+            if (stringValue != nullptr && AAFwk::String::Unbox(stringValue).lenth() > 0) {
+                spid_ = AAFwk::String::Unbox(stringValue);
+                SLOGI("AVSessionItem SetSpid %{public}s", spid_.c_str());
             }
         }
     };

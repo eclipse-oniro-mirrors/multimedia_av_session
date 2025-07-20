@@ -56,6 +56,7 @@ public:
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
+    void SetSpid(const std::string& spid) {}
 };
 
 class AVRouterImplTest : public testing::Test {
@@ -241,6 +242,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice001, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
+    std::string spid = "21";
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
 
@@ -248,7 +250,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice001, TestSize.Level0)
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
-    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo);
+    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo, spid);
     EXPECT_TRUE(ret == AVSESSION_SUCCESS);
     SLOGI("AddDevice001 end");
 }
@@ -269,6 +271,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice002, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
+    std::string spid = "21";
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
 
@@ -276,7 +279,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice002, TestSize.Level0)
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle + 100, castHandleInfo});
 
-    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo);
+    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo, spid);
     EXPECT_TRUE(ret == AVSESSION_SUCCESS);
     SLOGI("AddDevice002 end");
 }
@@ -297,13 +300,14 @@ static HWTEST_F(AVRouterImplTest, AddDevice003, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
+    std::string spid = "21";
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
 
     AVRouter::CastHandleInfo castHandleInfo;
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
-    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo);
+    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo, spid);
     EXPECT_TRUE(ret == AVSESSION_SUCCESS);
     SLOGI("AddDevice003 end");
 }
@@ -324,6 +328,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice004, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
+    std::string spid = "21";
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
     
@@ -336,7 +341,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice004, TestSize.Level0)
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo2;
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
-    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo);
+    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo, spid);
     EXPECT_TRUE(ret == AVSESSION_SUCCESS);
     SLOGI("AddDevice004 end");
 }
@@ -1014,6 +1019,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice005, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
+    std::string spid = "21";
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
         static_cast<uint32_t>(castId));
     
@@ -1021,7 +1027,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice005, TestSize.Level0)
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
     g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
 
-    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo);
+    int32_t ret = g_AVRouterImpl->AddDevice(castId, outputDeviceInfo, spid);
     EXPECT_TRUE(ret == AVSESSION_SUCCESS);
     SLOGI("AddDevice005 end");
 }

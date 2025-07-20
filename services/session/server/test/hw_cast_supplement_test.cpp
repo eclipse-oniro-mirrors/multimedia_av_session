@@ -185,8 +185,9 @@ static HWTEST(HwCastSupplementTest, AddCastDevice001, TestSize.Level0)
     hwCastProvider->Init();
 
     int32_t castId = 0;
+    std::string spid = "21";
     DeviceInfo deviceInfo;
-    bool ret = hwCastProvider->AddCastDevice(castId, deviceInfo);
+    bool ret = hwCastProvider->AddCastDevice(castId, deviceInfo, spid);
     EXPECT_EQ(ret, false);
     SLOGI("AddCastDevice001 end!");
 }
@@ -204,9 +205,10 @@ static HWTEST(HwCastSupplementTest, AddCastDevice002, TestSize.Level0)
     hwCastProvider->Init();
 
     int32_t castId = 0;
+    std::string spid = "21";
     DeviceInfo deviceInfo;
     hwCastProvider->hwCastProviderSessionMap_[castId] = nullptr;
-    bool ret = hwCastProvider->AddCastDevice(castId, deviceInfo);
+    bool ret = hwCastProvider->AddCastDevice(castId, deviceInfo, spid);
     EXPECT_EQ(ret, false);
     SLOGI("AddCastDevice002 end!");
 }
@@ -224,10 +226,11 @@ static HWTEST(HwCastSupplementTest, AddCastDevice003, TestSize.Level0)
     hwCastProvider->Init();
 
     int32_t castId = 0;
+    std::string spid = "21";
     DeviceInfo deviceInfo;
     auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
     hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
-    bool ret = hwCastProvider->AddCastDevice(castId, deviceInfo);
+    bool ret = hwCastProvider->AddCastDevice(castId, deviceInfo, spid);
     EXPECT_EQ(ret, false);
     SLOGI("AddCastDevice003 end!");
 }

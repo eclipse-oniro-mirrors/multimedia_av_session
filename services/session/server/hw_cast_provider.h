@@ -42,7 +42,7 @@ public:
     void Release() override;
     int StartCastSession(bool isHiStream) override;
     void StopCastSession(int castId) override;
-    bool AddCastDevice(int castId, DeviceInfo deviceInfo) override;
+    bool AddCastDevice(int castId, DeviceInfo deviceInfo, const std::string &spid) override;
     bool RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay = false) override;
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(int castId) override;
     bool RegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener) override;

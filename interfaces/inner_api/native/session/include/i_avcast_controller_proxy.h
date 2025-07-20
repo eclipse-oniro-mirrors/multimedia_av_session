@@ -222,6 +222,15 @@ public:
      * @since 20
     */
     virtual void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) = 0;
+
+    /**
+     * @brief Set spid for pulling clients.
+     *
+     * @param { const std::string& } spid - spid for pulling clients.
+     * 
+     * @since 20
+    */
+    virtual void SetSpid(const std::string& spid) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_I_AVCAST_CONTROLLER_PROXY_H

@@ -270,7 +270,8 @@ public:
 
     int32_t CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo);
 
-    int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
+    int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo,
+        const std::string& spid);
 
     int32_t StopCast(bool continuePlay = false);
 
@@ -301,6 +302,8 @@ public:
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
 
     void SetExtrasInner(AAFwk::IArray* list);
+
+    void SetSpid(AAFwk::IArray* list);
 
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
     
@@ -355,6 +358,7 @@ private:
     void PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo);
     void DelRecommend();
     void UpdateRecommendInfo(bool needRecommend);
+    bool SearchSpidInCapability(const std::string& deviceId);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -510,6 +514,7 @@ private:
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+    std::string spid_;
     std::function<void(std::string)> serviceCallbackForStream_;
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;

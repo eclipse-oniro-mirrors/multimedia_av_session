@@ -82,7 +82,8 @@ public:
     int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, std::string sessionId) override;
 
-    int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) override;
+    int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
+        const std::string& spid) override;
 
     int32_t StopCast(const int64_t castHandle, bool continuePlay = false) override;
 

@@ -80,6 +80,7 @@ public:
     void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
     void OnData(const CastEngine::DataType dataType, const std::string& dataStr) override;
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) override;
+    void SetSpid(const std::string& spid);
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
@@ -110,6 +111,7 @@ private:
     const std::string decodeOfVideoAvcStr_ = "video/avc";
     const std::string decodeOfAudioStr_ = "audio/av3a";
     const std::string speedStr_ = "speed";
+    std::string spid_;
     int32_t castMinTime = 1000;
     const int32_t cancelTimeout = 5000;
     bool isPlayingState_ = false;
