@@ -250,11 +250,13 @@ void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::st
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    CHECK_AND_RETURN(playingStateInfo != nullptr);
+    bool isPlayInfoValid = playingStateInfo != nullptr;
+    CHECK_AND_RETURN(isPlayInfoValid);
     playingStateInfo->bundleName_ = bundleName;
     playingStateInfo->appVersion_ = appVersion;
     playingStateInfo->updateState(state);
-    CHECK_AND_RETURN(playingStateInfo->state_.size() >= REPORT_SIZE);
+    bool isReportOverSize = playingStateInfo->state_.size() >= REPORT_SIZE;
+    CHECK_AND_RETURN(isReportOverSize);
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
@@ -262,9 +264,11 @@ void AVSessionSysEvent::UpdateMetaQuality(const std::string& bundleName, Metadat
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    CHECK_AND_RETURN(playingStateInfo != nullptr);
+    bool isPlayInfoValid = playingStateInfo != nullptr;
+    CHECK_AND_RETURN(isPlayInfoValid);
     playingStateInfo->updateMetaQuality(metaQuality);
-    CHECK_AND_RETURN(playingStateInfo->metaQuality_.size() >= REPORT_SIZE);
+    bool isReportOverSize = playingStateInfo->metaQuality_.size() >= REPORT_SIZE;
+    CHECK_AND_RETURN(isReportOverSize);
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
@@ -272,9 +276,11 @@ void AVSessionSysEvent::UpdateCommandQuality(const std::string& bundleName, uint
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    CHECK_AND_RETURN(playingStateInfo != nullptr);
+    bool isPlayInfoValid = playingStateInfo != nullptr;
+    CHECK_AND_RETURN(isPlayInfoValid);
     playingStateInfo->updateCommandQuality(commandQuality);
-    CHECK_AND_RETURN(playingStateInfo->commandQuality_.size() >= REPORT_SIZE);
+    bool isReportOverSize = playingStateInfo->commandQuality_.size() >= REPORT_SIZE;
+    CHECK_AND_RETURN(isReportOverSize);
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
@@ -282,9 +288,11 @@ void AVSessionSysEvent::UpdatePlaybackState(const std::string& bundleName, uint8
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
-    CHECK_AND_RETURN(playingStateInfo != nullptr);
+    bool isPlayInfoValid = playingStateInfo != nullptr;
+    CHECK_AND_RETURN(isPlayInfoValid);
     playingStateInfo->updatePlaybackState(playbackState);
-    CHECK_AND_RETURN(playingStateInfo->playbackState_.size() >= REPORT_SIZE);
+    bool isReportOverSize = playingStateInfo->playbackState_.size() >= REPORT_SIZE;
+    CHECK_AND_RETURN(isReportOverSize);
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 

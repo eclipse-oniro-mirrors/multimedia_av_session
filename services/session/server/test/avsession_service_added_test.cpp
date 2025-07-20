@@ -537,6 +537,37 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DoConnectPr
 }
 
 /**
+ * @tc.name: AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003
+ * @tc.desc: Test not entering the if branch of DoConnectProcessWithMigrate.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003, TestSize.Level0)
+{
+    SLOGI("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    deviceInfo.deviceTypeId = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+    std::string name = "valid";
+    strcpy_s(deviceInfo.deviceName, name.size(), name.c_str());
+    deviceInfo.deviceName[name.size()] = '\0';
+    std::string networkId = "DEFAULT_NETWORKID";
+    strcpy_s(deviceInfo.networkId, networkId.size(), networkId.c_str());
+    deviceInfo.networkId[networkId.size()] = '\0';
+    g_AVSessionService->localDeviceType_ = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE;
+    std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer =
+        std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT, "DEFAULT_NETWORKID");
+    g_AVSessionService->migrateAVSessionServerMap_.insert({"DEFAULT_NETWORKID", migrateAVSessionServer});
+    int ret = g_AVSessionService->DoHisMigrateServerTransform("DEFAULT_NETWORKID");
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    g_AVSessionService->migrateAVSessionServerMap_.clear();
+    ret = g_AVSessionService->DoHisMigrateServerTransform("DEFAULT_NETWORKID");
+    EXPECT_EQ(ret, ERR_SESSION_NOT_EXIST);
+    g_AVSessionService->DoConnectProcessWithMigrate(deviceInfo);
+    SLOGI("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003 end!");
+}
+
+/**
  * @tc.name: AVSessionServiceAddedTest_HandleUserEvent_001
  * @tc.desc: set type to accountEventSwitched
  * @tc.type: FUNC
