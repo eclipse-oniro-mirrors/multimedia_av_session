@@ -80,7 +80,7 @@ public:
     void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
     void OnData(const CastEngine::DataType dataType, const std::string& dataStr) override;
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) override;
-    void SetSpid(const std::string& spid);
+    void SetSpid(const std::string& spid) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 

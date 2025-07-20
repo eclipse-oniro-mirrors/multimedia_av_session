@@ -299,7 +299,7 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
-    if (spid_.length() > 0 && mediaDescription->GetLaunchClientData().c_str() > 0) {
+    if (spid_.length() > 0 && mediaDescription->GetLaunchClientData().length() > 0) {
         mediaInfo.launchClientData = mediaDescription->GetLaunchClientData();
         mediaInfo.spid = spid_;
     }
@@ -991,11 +991,6 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
         }
     }
     SLOGI("Stream player received PlayRequest event done");
-}
-
-void HwCastStreamPlayer::OnData(const CastEngine::DataType dataType, const std::string& dataStr)
-{
-    SLOGI("Stream player received OnData event");
 }
 
 void HwCastStreamPlayer::OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap)

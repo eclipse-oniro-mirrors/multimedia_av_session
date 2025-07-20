@@ -279,6 +279,7 @@ public:
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
+    void SetSpid(const std::string& spid) {}
 };
 
 /**
@@ -841,8 +842,8 @@ HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
     deviceInfo1.supportedDrmCapabilities_ = supportedDrmCapabilities;
     deviceInfo1.isLegacy_ = false;
     deviceInfo1.mediumTypes_ = 2;
-
-    EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1), false);
+    std::string spid = "21";
+    EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1, spid), false);
 }
 
 HWTEST_F(AVCastControllerTest, RemoveCastDevice001, TestSize.Level1)

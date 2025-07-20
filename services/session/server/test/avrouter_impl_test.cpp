@@ -1050,6 +1050,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
+    std::string spid = "21";
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
         static_cast<uint32_t>(castId));
     
@@ -1057,7 +1058,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level0)
     castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
     g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
 
-    int32_t ret = g_AVRouterImpl->AddDevice(castId + 1, outputDeviceInfo);
+    int32_t ret = g_AVRouterImpl->AddDevice(castId + 1, outputDeviceInfo, spid);
     EXPECT_TRUE(ret == ERR_DEVICE_CONNECTION_FAILED);
     SLOGI("AddDevice006 end");
 }

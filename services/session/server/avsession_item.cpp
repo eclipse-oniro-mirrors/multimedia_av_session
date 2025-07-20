@@ -833,6 +833,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
             }).detach();
         });
     }
+
     InitializeCastCommands();
     if (SearchSpidInCapability(castHandleDeviceId_)) {
         if (castControllerProxy_ != nullptr) {
@@ -1797,7 +1798,7 @@ void AVSessionItem::SetSpid(AAFwk::IArray* list)
     auto func = [this](AAFwk::IInterface* object) {
         if (object != nullptr) {
             AAFwk::IString* stringValue = AAFwk::IString::Query(object);
-            if (stringValue != nullptr && AAFwk::String::Unbox(stringValue).lenth() > 0) {
+            if (stringValue != nullptr && AAFwk::String::Unbox(stringValue).length() > 0) {
                 spid_ = AAFwk::String::Unbox(stringValue);
                 SLOGI("AVSessionItem SetSpid %{public}s", spid_.c_str());
             }

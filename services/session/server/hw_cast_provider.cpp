@@ -413,10 +413,9 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
         deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
         SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
-        deviceInfo.supportePullClients_.resize(castRemoteDevice.streamCapability.size() / SPID_STR_LENGTH);
-        SPID_STR_LENGTH
+        deviceInfo.supportedPullClients_.resize(castRemoteDevice.streamCapability.size() / SPID_STR_LENGTH);
         for (uint16_t i = 0; i < castRemoteDevice.streamCapability.size() / SPID_STR_LENGTH; i++) {
-            deviceInfo.supportePullClients_[i] =
+            deviceInfo.supportedPullClients_[i] =
                 castRemoteDevice.streamCapability.substr(i * SPID_STR_LENGTH, SPID_STR_LENGTH);
         }
         deviceInfoList.emplace_back(deviceInfo);

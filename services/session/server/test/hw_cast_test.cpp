@@ -803,6 +803,11 @@ public:
     {
         return 0;
     };
+
+    int SendData(const OHOS::CastEngine::DataType dataType, const std::string &dataStr) override
+    {
+        return 0;
+    }
 };
 
 /**
@@ -1105,7 +1110,7 @@ static HWTEST(HwCastTest, HwCastProviderAddCastDevice001, TestSize.Level0)
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
     int castId = 0;
-    std::string spid;
+    std::string spid = "21";
     DeviceInfo deviceInfo;
     EXPECT_EQ(hwCastProvider->AddCastDevice(castId, deviceInfo, spid), false);
     SLOGI("HwCastProviderAddCastDevice001 end!");
