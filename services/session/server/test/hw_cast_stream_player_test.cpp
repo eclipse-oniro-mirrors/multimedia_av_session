@@ -357,6 +357,39 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SendCustomData001
+ * @tc.desc: test send data for SendCustomData
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_P(HwCastStreamPlayerTest, SendCustomData001, TestSize.Level0)
+{
+    SLOGI("SendCustomData001 begin!");
+
+    hwCastStreamPlayer->streamPlayer_ = nullptr;
+    std::string data = "test";
+    hwCastStreamPlayer->SendCustomData(data);
+
+    SLOGI("SendCustomData001 end!");
+}
+
+/**
+ * @tc.name: SendCustomData002
+ * @tc.desc: test send data for SendCustomData
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_P(HwCastStreamPlayerTest, SendCustomData002, TestSize.Level0)
+{
+    SLOGI("SendCustomData002 begin!");
+    hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>();
+    ASSERT_TRUE(hwCastStreamPlayer->streamPlayer_ != nullptr);
+    std::string data = "test";
+    hwCastStreamPlayer->SendCustomData(data);
+    SLOGI("SendCustomData002 end!");
+}
+
+/**
  * @tc.name: Start001
  * @tc.desc: start no media id and fd src
  * @tc.type: FUNC
