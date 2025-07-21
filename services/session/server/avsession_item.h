@@ -19,6 +19,8 @@
 #include <dlfcn.h>
 #include <string>
 #include <map>
+#include <mutex>
+#include <shared_mutex>
 
 #include "avsession_stub.h"
 #include "av_session_callback_proxy.h"
@@ -308,6 +310,9 @@ public:
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 
+    void ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap);
+    void ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& avQueuePixelMap);
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
     sptr<IRemoteObject> GetControllerInner() override;
@@ -471,6 +476,8 @@ private:
     std::recursive_mutex callbackForCastCapLock_;
 
     std::recursive_mutex mediaSessionCallbackLock_;
+
+    std::shared_mutex writeAndReadImgLock_;
     
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;

@@ -3981,9 +3981,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         static_cast<int>(historyDescriptor != nullptr), userId);
     if (addCapsule && topSession_) {
         std::shared_ptr<AVSessionPixelMap> iPixelMap = std::make_shared<AVSessionPixelMap>();
-        std::string fileDir = AVSessionUtils::GetCachePathName(userId);
-        std::string fileName = topSession_->GetSessionId() + AVSessionUtils::GetFileSuffix();
-        AVSessionUtils::ReadImageFromFile(iPixelMap, fileDir, fileName);
+        topSession_->ReadMetaDataImg(iPixelMap);
         AVQueueItem item;
         topSession_->GetCurrentCastItem(item);
         std::string notifyText = item.GetDescription() ? item.GetDescription()->GetTitle() : GetLocalTitle();

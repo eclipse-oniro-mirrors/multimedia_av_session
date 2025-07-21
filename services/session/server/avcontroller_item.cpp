@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,24 +108,18 @@ int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 }
 // LCOV_EXCL_STOP
 
-int32_t AVControllerItem::SetImgForMetaData(AVMetaData& data)
+int32_t AVControllerItem::ReadImgForMetaData(AVMetaData& data)
 {
     if (!data.GetMetaMask().test(AVMetaData::META_KEY_MEDIA_IMAGE)) {
         SLOGI("curNoImgFor:%{public}s", data.GetTitle().c_str());
         return AVSESSION_SUCCESS;
     }
-    std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-    std::string fileName = sessionId_ + AVSessionUtils::GetFileSuffix();
-    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
-    data.SetMediaImage(mediaPixelMap);
-    AVSessionUtils::ReadImageFromFile(mediaPixelMap, fileDir, fileName);
-
-    std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "SetImgForMetaData session not exist");
-    std::string avQueueFileName =
-        session_->GetBundleName() + "_" + data.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = data.GetMediaImage();
+    session_->ReadMetaDataImg(innerPixelMap);
+
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = data.GetAVQueueImage();
-    AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
+    session_->ReadMetaDataAVQueueImg(avQueuePixelMap);
     return AVSESSION_SUCCESS;
 }
 
@@ -134,8 +128,8 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
     data = session_->GetMetaDataWithoutImg();
-    int32_t ret = SetImgForMetaData(data);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetImgForMetaData with ret:%{public}d", ret);
+    int32_t ret = ReadImgForMetaData(data);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ReadImgForMetaData with ret:%{public}d", ret);
     if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
         SLOGD("isFromSession %{public}d in metaGet", isFromSession_);
         if (isFromSession_) {
@@ -415,11 +409,9 @@ void AVControllerItem::HandleAVCallMetaDataChange(const AVCallMetaData& avCallMe
     if (avCallMetaData.CopyToByMask(avCallMetaMask_, metaOut)) {
         if (avCallMetaMask_.test(AVCallMetaData::AVCALL_META_KEY_MEDIA_IMAGE)) {
             std::shared_ptr<AVSessionPixelMap> innerPixelMap = nullptr;
-            if (metaOut.GetMediaImage() != nullptr) {
-                std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-                std::string fileName = sessionId_ + AVSessionUtils::GetFileSuffix();
+            if (metaOut.GetMediaImage() != nullptr && session_ != nullptr) {
                 innerPixelMap = metaOut.GetMediaImage();
-                AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
+                session_->ReadMetaDataImg(innerPixelMap);
             }
             metaOut.SetMediaImage(innerPixelMap);
         }
@@ -466,18 +458,15 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
     std::lock_guard metaMaskLockGuard(metaMaskMutex_);
     if (data.CopyToByMask(metaMask_, metaOut)) {
         if ((metaMask_.test(AVMetaData::META_KEY_MEDIA_IMAGE)) && (metaOut.GetMediaImage() != nullptr)) {
-            std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+            CHECK_AND_RETURN_LOG(session_ != nullptr, "Session not exist");
             std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaOut.GetMediaImage();
-            AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, sessionId_ + AVSessionUtils::GetFileSuffix());
+            session_->ReadMetaDataImg(innerPixelMap);
             metaOut.SetMediaImage(innerPixelMap);
         }
         if ((metaMask_.test(AVMetaData::META_KEY_AVQUEUE_IMAGE)) && (metaOut.GetAVQueueImage() != nullptr)) {
-            std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
             CHECK_AND_RETURN_LOG(session_ != nullptr, "Session not exist");
-            std::string avQueueFileName =
-                session_->GetBundleName() + "_" + metaOut.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
             std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaOut.GetAVQueueImage();
-            AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
+            session_->ReadMetaDataAVQueueImg(avQueuePixelMap);
             metaOut.SetAVQueueImage(avQueuePixelMap);
         }
         if (!metaMask_.test(AVMetaData::META_KEY_ASSET_ID)) {
