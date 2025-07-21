@@ -275,7 +275,7 @@ bool AudioCapabilities::WriteToParcel(Parcel& out) const
 
 bool AudioCapabilities::ReadFromParcel(Parcel& in)
 {
-    int32_t streamInfoSize;
+    int32_t streamInfoSize = 0;
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(streamInfoSize), false, "read streamInfoSize failed");
     int32_t maxStreamInfoSize = 1000;
     CHECK_AND_RETURN_RET_LOG((streamInfoSize >= 0) && (streamInfoSize < maxStreamInfoSize),
