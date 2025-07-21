@@ -713,8 +713,6 @@ void AVSessionService::DoDisconnectProcessWithMigrateProxy(const OHOS::Distribut
 
 int32_t AVSessionService::DoHisMigrateServerTransform(std::string networkId)
 {
-    CHECK_AND_RETURN_RET_LOG(!migrateAVSessionServerMap_.empty(), ERR_SESSION_NOT_EXIST,
-        "DisconnectAllMigrateServer but empty");
     SLOGI("DoHisMigrateServerTransform size:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
     auto it = migrateAVSessionServerMap_.begin();
     if (it != migrateAVSessionServerMap_.end()) {

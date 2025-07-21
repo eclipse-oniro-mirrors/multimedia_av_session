@@ -85,7 +85,8 @@ void FocusSessionStrategy::ProcAudioRenderChange(const AudioRendererChangeInfos&
             SLOGI("Media invalid uid=%{public}d usage=%{public}d", info->clientUID, info->rendererInfo.streamUsage);
             continue;
         }
-        CHECK_AND_CONTINUE(info->clientPid != 0);
+        bool isPidValid = info->clientPid != 0;
+        CHECK_AND_CONTINUE(isPidValid);
         {
             std::lock_guard lockGuard(stateLock_);
             std::pair<int32_t, int32_t> key = std::make_pair(info->clientUID, info->clientPid);

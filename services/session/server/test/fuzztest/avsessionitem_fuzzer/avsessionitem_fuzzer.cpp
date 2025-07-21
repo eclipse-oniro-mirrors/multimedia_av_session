@@ -174,6 +174,7 @@ void AvSessionItemTest()
     AvSessionCallItemTest(avSessionItem);
     AvSessionItemTestImplExtension(avSessionItem);
     AvSessionCallItemTestExtension(avSessionItem);
+    BundleStatusAdapter::ReleaseInstance();
 }
 
 void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem)
@@ -345,6 +346,7 @@ void AvSessionItemOnRemoteRequest()
         return;
     }
     avSessionItem->AvSessionItemFuzzerTest();
+    BundleStatusAdapter::ReleaseInstance();
 }
 
 /* Fuzzer entry point */
