@@ -375,7 +375,9 @@ int32_t MigrateAVSessionServer::GetAllControllers(std::vector<sptr<AVControllerI
             continue;
         }
         auto it = playerIdToControllerMap_.find(iter->sessionId_);
-        controller.push_back(it->second);
+        if (it != playerIdToControllerMap_.end()) {
+            controller.push_back(it->second);
+        }
     }
     return AVSESSION_SUCCESS;
 }
@@ -703,10 +705,10 @@ void MigrateAVSessionServer::DelaySendMetaData()
             SLOGI("ready to copy image");
             mediaImage->SetInnerImgBuffer(pixelImage->GetInnerImgBuffer());
             metaDataInfo.SetMediaImage(mediaImage);
-            std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
-                SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, metaDataInfo);
-            SendByte(deviceId_, metaDataStr);
         }
+        std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
+            SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, metaDataInfo);
+        SendByte(deviceId_, metaDataStr);
         if (mediaImage != nullptr) {
             mediaImage->Clear();
         }
