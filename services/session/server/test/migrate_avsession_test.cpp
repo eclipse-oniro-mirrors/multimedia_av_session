@@ -845,3 +845,20 @@ static HWTEST_F(MigrateAVSessionTest, GetControllerById003, TestSize.Level0)
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("GetControllerById003 end");
 }
+
+/**
+* @tc.name: GetAllControllers001
+* @tc.desc: GetAllControllers
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(MigrateAVSessionTest, GetAllControllers001, TestSize.Level1)
+{
+    SLOGI("GetAllControllers001 begin");
+    const std::string sessionId = "1111";
+    server_->CreateController(sessionId);
+    std::vector<OHOS::sptr<AVControllerItem>> controllers;
+    int32_t ret = server_->GetAllControllers(controllers);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetAllControllers001 end");
+}
