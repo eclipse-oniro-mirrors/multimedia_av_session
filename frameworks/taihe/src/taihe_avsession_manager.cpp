@@ -972,13 +972,13 @@ array<AVSessionController> GetDistributedSessionControllerSync(DistributedSessio
     std::vector<AVSessionController> emptyControllers;
     int32_t err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
         OHOS::AVSession::PermissionChecker::CHECK_SYSTEM_PERMISSION);
-    if (err == OHOS::ERR_NONE) {
-        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+    if (err != OHOS::ERR_NONE) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_NO_PERMISSION],
             "Check system permission error");
         return array<AVSessionController>(emptyControllers);
     }
-    if (distributedSessionType >= OHOS::AVSession::DistributedSessionType::TYPE_SESSION_REMOTE &&
-        distributedSessionType < OHOS::AVSession::DistributedSessionType::TYPE_SESSION_MAX) {
+    if (distributedSessionType < OHOS::AVSession::DistributedSessionType::TYPE_SESSION_REMOTE ||
+        distributedSessionType >= OHOS::AVSession::DistributedSessionType::TYPE_SESSION_MAX) {
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
             "GetDistributedSessionControllerSync invalid sessionType");
         return array<AVSessionController>(emptyControllers);
@@ -991,10 +991,10 @@ array<AVSessionController> GetDistributedSessionControllerSync(DistributedSessio
         std::string errMessage = "GetDistributedSessionControllerSync failed : native server exception";
         if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
             errMessage = "GetDistributedSessionControllerSync failed : native no permission";
-        } else if (ret == OHOS::AVSession::ERR_INVALID_PARAM) {
-            errMessage = "GetDistributedSessionControllerSync failed : native invalid parameters";
-        } else if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
-            errMessage = "GetDistributedSessionControllerSync failed : native session not exist";
+        } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
+            errMessage = "GetDistributedSessionControllerSync failed : native permission denied";
+        } else if (ret == OHOS::AVSession::ERR_REMOTE_CONNECTION_NOT_EXIST) {
+            errMessage = "GetDistributedSessionControllerSync failed : connect not exist";
         }
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
         return array<AVSessionController>(emptyControllers);
@@ -1016,12 +1016,12 @@ void SendSystemAVKeyEventSync(keyEvent::KeyEvent const &event)
     int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().SendSystemAVKeyEvent(keyEvent);
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
         std::string errMessage = "SendSystemAVKeyEventSync failed : native server exception";
-        if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+        if (ret == OHOS::AVSession::ERR_COMMAND_NOT_SUPPORT) {
+            errMessage = "SendSystemAVKeyEventSync failed : native invalid keyEvent";
+        } else if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
             errMessage = "SendSystemAVKeyEventSync failed : native no permission";
-        } else if (ret == OHOS::AVSession::ERR_INVALID_PARAM) {
-            errMessage = "SendSystemAVKeyEventSync failed : native invalid parameters";
-        } else if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
-            errMessage = "SendSystemAVKeyEventSync failed : native session not exist";
+        } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
+            errMessage = "SendSystemAVKeyEventSync failed : native permission denied";
         }
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
         return;
@@ -1069,8 +1069,6 @@ void SendSystemControlCommandSync(AVControlCommand command)
             errMessage = "SendSystemControlCommandSync failed : native send control command permission denied";
         } else if (ret == OHOS::AVSession::ERR_COMMAND_SEND_EXCEED_MAX) {
             errMessage = "SendSystemControlCommandSync failed : native send command overload";
-        } else if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
-            errMessage = "SendSystemControlCommandSync failed : native session not exist";
         }
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
         return;
