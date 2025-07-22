@@ -22,6 +22,8 @@
 #include <vector>
 #include <regex>
 
+#include "common_event_manager.h"
+
 #include "avsession_log.h"
 #include "directory_ex.h"
 
@@ -167,6 +169,18 @@ public:
         }
         res.append(sessionId, 0, PRE_LEN).append(tmpStr).append(sessionId, len - PRE_LEN, PRE_LEN);
         return res;
+    }
+
+    static int32_t PublishCommonEvent(const std::string& action)
+    {
+        OHOS::AAFwk::Want want;
+        want.SetAction(action);
+        EventFwk::CommonEventData data;
+        data.SetWant(want);
+        EventFwk::CommonEventPublishInfo publishInfo;
+        int32_t ret = EventFwk::CommonEventManager::NewPublishCommonEvent(data, publishInfo);
+        SLOGI("PublishCommonEvent: %{public}s return %{public}d", action.c_str(), ret);
+        return ret;
     }
 
 private:

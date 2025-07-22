@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "avcast_provider_manager.h"
+#include "avsession_info.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_service.h"
@@ -1111,6 +1112,37 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_003, TestSize.
     std::string jsonParam = "test";
     provideSession->OnEvent(eventId, jsonParam);
     SLOGI("HwCastProviderSession_OnEvent_003 end!");
+}
+
+/**
+ * @tc.name: HwCastSessonToast001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastSessonToast001, TestSize.Level1)
+{
+    SLOGI("HwCastSessonToast001 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
+    OHOS::CastEngine::DeviceStateInfo stateInfo;
+    stateInfo.deviceId = "testDeviceId";
+    stateInfo.deviceState = OHOS::CastEngine::DeviceState::DISCONNECTED;
+    provideSession->OnDeviceState(stateInfo);
+    stateInfo.deviceState = OHOS::CastEngine::DeviceState::AUTHING;
+    provideSession->OnDeviceState(stateInfo);
+    provideSession->AddDevice("testDeviceId", 0);
+    stateInfo.deviceState = OHOS::CastEngine::DeviceState::DISCONNECTED;
+    provideSession->OnDeviceState(stateInfo);
+    stateInfo.deviceState = OHOS::CastEngine::DeviceState::STREAM;
+    provideSession->OnDeviceState(stateInfo);
+    stateInfo.deviceState = OHOS::CastEngine::DeviceState::DISCONNECTED;
+    provideSession->OnDeviceState(stateInfo);
+    provideSession->RemoveDevice("testDeviceId");
+    provideSession->OnDeviceState(stateInfo);
+    EXPECT_EQ(provideSession != nullptr, true);
+    SLOGI("HwCastSessonToast001 end!");
 }
 
 } // OHOS::AVSession
