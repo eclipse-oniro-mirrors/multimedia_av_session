@@ -889,7 +889,7 @@ class AVCastPickerHelper {
 
   select(options?: AVCastPickerOptions): Promise<void> | undefined {
     if (this.objectInner === undefined) {
-      return new Promise<void>((resolve: () => void, reject: (e: BusinessError<void>) => void): void => {
+      return new Promise<void>((resolve: (data: PromiseLike<void>) => void, reject: (e: Error) => void): void => {
         let err: BusinessError<void> = businessError(-1, "AVCastPickerHelperInner is not initialized");
         reject(err);
       });
