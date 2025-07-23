@@ -35,6 +35,7 @@
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "avsession_hianalytics_report.h"
 #include "want_agent_helper.h"
 
@@ -687,9 +688,14 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
     }
     if (extras.HasParam("request-tv-client")) {
         auto value = extras.GetParam("request-tv-client");
-        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        /*AAFwk::IArray* list = AAFwk::IArray::Query(value);
         if (list != nullptr && AAFwk::Array::IsStringArray(list)) {
             SetSpid(list);
+        }*/
+        AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
+        if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
+            spid_ = AAFwk::Integer::Unbox(stringValue);
+            SLOGI("AVSessionItem SetSpid %{public}u", spid_);
         }
     }
 #endif
@@ -1362,8 +1368,7 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
     return ret;
 }
 
-int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo,
-    uint32_t spid)
+int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo, uint32_t spid)
 {
     SLOGI("Add device process");
     std::lock_guard lockGuard(castLock_);
@@ -1496,7 +1501,7 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 
 bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
 {
-    for (std::string cap : castDeviceInfoMap_[deviceId].supportedPullClients_) {
+    for (uint32_t cap : castDeviceInfoMap_[deviceId].supportedPullClients_) {
         if (cap == spid_) {
             return true;
         }
@@ -1797,10 +1802,10 @@ void AVSessionItem::SetSpid(AAFwk::IArray* list)
 {
     auto func = [this](AAFwk::IInterface* object) {
         if (object != nullptr) {
-            AAFwk::IString* stringValue = AAFwk::IString::Query(object);
-            if (stringValue != nullptr && AAFwk::String::Unbox(stringValue).length() > 0) {
-                spid_ = AAFwk::String::Unbox(stringValue);
-                SLOGI("AVSessionItem SetSpid %{public}s", spid_.c_str());
+            AAFwk::IInteger* intValue = AAFwk::IInteger::Query(object);
+            if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
+                spid_ = AAFwk::Integer::Unbox(stringValue);
+                SLOGI("AVSessionItem SetSpid %{public}u", spid_);
             }
         }
     };

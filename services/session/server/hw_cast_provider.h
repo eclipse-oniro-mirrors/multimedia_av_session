@@ -63,6 +63,7 @@ public:
     int GetCastProtocolType(int castCapability);
 
 private:
+    std::vector<uint32_t> ParsePullClients(const std::string& str);
     static const int maxCastSessionSize = 256;
     std::vector<bool> castFlag_ = std::vector<bool>(maxCastSessionSize, false);
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;

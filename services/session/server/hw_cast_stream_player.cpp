@@ -299,7 +299,7 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
-    if (spid_.length() > 0 && mediaDescription->GetLaunchClientData().length() > 0) {
+    if (spid_ > 0 && mediaDescription->GetLaunchClientData().length() > 0) {
         mediaInfo.launchClientData = mediaDescription->GetLaunchClientData();
         mediaInfo.spid = spid_;
     }

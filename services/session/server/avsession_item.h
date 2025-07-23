@@ -514,7 +514,7 @@ private:
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
-    std::string spid_;
+    uint32_t spid_;
     std::function<void(std::string)> serviceCallbackForStream_;
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;

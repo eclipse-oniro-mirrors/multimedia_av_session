@@ -386,16 +386,19 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
     return hwCastProviderSession->UnRegisterCastSessionStateListener(listener);
 }
 
-std::vector<uint32_t> ParsePullClients(const std::string& str)
+std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
 {
     std::vector<uint32_t> ret;
-    json j = json::parse(str);
+    if (str.length() <= 0) {
+        return ret;
+    }
+    nlohmann::json j = nlohmann::json::parse(str);
     if (!j.is_array()) {
         return ret;
     }
     for (const auto& item : j) {
         if (item.is_number_integer()) {
-            result.push_back(item.get<int>());
+            ret.push_back(item.get<int>());
         }
     }
     return ret;

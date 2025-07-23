@@ -329,18 +329,6 @@ int32_t AVSessionManagerImpl::RegisterSessionListenerForAllUsers(const std::shar
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionManagerImpl::RemoveSessionListener()
-{
-    auto service = GetService();
-    if (service == nullptr) {
-        return ERR_SERVICE_NOT_EXIST;
-    }
-
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    service->RemoveSessionListener(GetCallingPid());
-    return AVSESSION_SUCCESS;
-}
-
 int32_t AVSessionManagerImpl::RegisterServiceDeathCallback(const DeathCallback& callback)
 {
     deathCallback_ = callback;

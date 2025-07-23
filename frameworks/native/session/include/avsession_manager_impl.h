@@ -68,8 +68,6 @@ public:
 
     int32_t RegisterSessionListenerForAllUsers(const std::shared_ptr<SessionListener>& listener) override;
 
-    int32_t RemoveSessionListener() override;
-
     int32_t RegisterServiceDeathCallback(const DeathCallback& callback) override;
 
     int32_t UnregisterServiceDeathCallback() override;
