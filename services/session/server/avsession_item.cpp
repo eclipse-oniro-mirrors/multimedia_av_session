@@ -688,10 +688,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
     }
     if (extras.HasParam("request-tv-client")) {
         auto value = extras.GetParam("request-tv-client");
-        /*AAFwk::IArray* list = AAFwk::IArray::Query(value);
-        if (list != nullptr && AAFwk::Array::IsStringArray(list)) {
-            SetSpid(list);
-        }*/
         AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
         if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
             spid_ = AAFwk::Integer::Unbox(intValue);
@@ -1792,20 +1788,6 @@ void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
                 descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO && serviceCallbackForStream_) {
                 SLOGI("AVSessionItem send mirrortostream event to service");
                 serviceCallbackForStream_(GetSessionId());
-            }
-        }
-    };
-    AAFwk::Array::ForEach(list, func);
-}
-
-void AVSessionItem::SetSpid(AAFwk::IArray* list)
-{
-    auto func = [this](AAFwk::IInterface* object) {
-        if (object != nullptr) {
-            AAFwk::IInteger* intValue = AAFwk::IInteger::Query(object);
-            if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
-                spid_ = AAFwk::Integer::Unbox(stringValue);
-                SLOGI("AVSessionItem SetSpid %{public}u", spid_);
             }
         }
     };

@@ -303,8 +303,6 @@ public:
 
     void SetExtrasInner(AAFwk::IArray* list);
 
-    void SetSpid(AAFwk::IArray* list);
-
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
     
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
