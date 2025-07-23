@@ -28,7 +28,6 @@ using namespace OHOS::CastEngine;
 namespace OHOS::AVSession {
 const uint32_t UNTRUSTED_DEVICE = 0;
 const uint32_t TRUSTED_DEVICE = 1;
-const uint32_t SPID_STR_LENGTH = 2;
 
 HwCastProvider::HwCastProvider()
 {
@@ -193,7 +192,7 @@ void HwCastProvider::StopCastSession(int castId)
     castFlag_[castId] = false;
 }
 
-bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo, const std::string& spid)
+bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t spid)
 {
     SLOGI("AddCastDevice with config castSession and corresonding castId is %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
@@ -387,6 +386,20 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
     return hwCastProviderSession->UnRegisterCastSessionStateListener(listener);
 }
 
+std::vector<uint32_t> ParsePullClients(const std::string& str)
+{
+    std::vector<uint32_t> ret;
+    json j = json::parse(str);
+    if (!j.is_array()) {
+        return ret;
+    }
+    for (const auto& item : j) {
+        if (item.is_number_integer()) {
+            result.push_back(item.get<int>());
+        }
+    }
+    return ret;
+}
 
 void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceList)
 {
@@ -413,11 +426,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
         deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
         SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
-        deviceInfo.supportedPullClients_.resize(castRemoteDevice.streamCapability.size() / SPID_STR_LENGTH);
-        for (uint16_t i = 0; i < castRemoteDevice.streamCapability.size() / SPID_STR_LENGTH; i++) {
-            deviceInfo.supportedPullClients_[i] =
-                castRemoteDevice.streamCapability.substr(i * SPID_STR_LENGTH, SPID_STR_LENGTH);
-        }
+        deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {

@@ -271,7 +271,7 @@ public:
     int32_t CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo);
 
     int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo,
-        const std::string& spid);
+        uint32_t spid);
 
     int32_t StopCast(bool continuePlay = false);
 

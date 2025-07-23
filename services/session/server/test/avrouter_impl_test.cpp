@@ -56,7 +56,7 @@ public:
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
-    void SetSpid(const std::string& spid) {}
+    void SetSpid(uint32_t spid) {}
 };
 
 class AVRouterImplTest : public testing::Test {
@@ -242,7 +242,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice001, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
-    std::string spid = "21";
+    uint32_t spid = 33;
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
 
@@ -271,7 +271,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice002, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
-    std::string spid = "21";
+    uint32_t spid = 33;
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
 
@@ -300,7 +300,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice003, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
-    std::string spid = "21";
+    uint32_t spid = 33;
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
 
@@ -328,7 +328,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice004, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
-    std::string spid = "21";
+    uint32_t spid = 33;
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
     
@@ -1019,7 +1019,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice005, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
-    std::string spid = "21";
+    uint32_t spid = 33;
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
         static_cast<uint32_t>(castId));
     
@@ -1050,7 +1050,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level0)
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     int32_t castId = 1;
-    std::string spid = "21";
+    uint32_t spid = 33;
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
         static_cast<uint32_t>(castId));
     

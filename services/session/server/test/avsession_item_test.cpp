@@ -116,7 +116,7 @@ class MockIAVCastControllerProxy : public OHOS::AVSession::IAVCastControllerProx
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override { return 0; }
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) override {return 0;}
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) override {}
-    void SetSpid(const std::string& spid) override {}
+    void SetSpid(uint32_t spid) override {}
 };
 
 void AVsessionItemTest::SetUpTestCase()

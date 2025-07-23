@@ -194,12 +194,12 @@ public:
      *
      * @param { int32_t } castId - Find the corresponding provider through this ID.
      * @param { OutputDeviceInfo } outputDeviceInfo - Devices to be connected.
-     * @param { const std::string& } spid - app id for pulling client.
+     * @param { uint32_t } spid - app id for pulling client.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
     virtual int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
-        const std::string& spid) = 0;
+        uint32_t spid) = 0;
 
     /**
      * @brief Stop cast process.

@@ -118,9 +118,9 @@ void HwCastStreamPlayer::SendCustomData(const std::string& data)
     streamPlayer_->SendData(DataType::CUSTOM_DATA, data);
 }
 
-void HwCastStreamPlayer::SetSpid(const std::string& spid)
+void HwCastStreamPlayer::SetSpid(uint32_t spid)
 {
-    SLOGI("SetSpid spid %{public}s", spid.c_str());
+    SLOGI("SetSpid spid %{public}u", spid);
     spid_ = spid;
 }
 

@@ -385,7 +385,7 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
 }
 
 int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
-    const std::string& spid)
+    uint32_t spid)
 {
     SLOGI("AVRouterImpl AddDevice process");
     

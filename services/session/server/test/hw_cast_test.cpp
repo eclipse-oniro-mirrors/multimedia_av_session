@@ -1110,7 +1110,7 @@ static HWTEST(HwCastTest, HwCastProviderAddCastDevice001, TestSize.Level0)
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
     int castId = 0;
-    std::string spid = "21";
+    uint32_t spid = 33;
     DeviceInfo deviceInfo;
     EXPECT_EQ(hwCastProvider->AddCastDevice(castId, deviceInfo, spid), false);
     SLOGI("HwCastProviderAddCastDevice001 end!");
@@ -1328,7 +1328,7 @@ static HWTEST(HwCastTest, HwCastProviderSessionAddDevice001, TestSize.Level0)
     EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
     std::string deviceId = "deviceId";
-    std::string spid = "21";
+    uint32_t spid = 33;
     EXPECT_EQ(provideSession->AddDevice(deviceId, spid), false);
     SLOGI("HwCastProviderSessionAddDevice001 end!");
 }

@@ -1363,7 +1363,7 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 }
 
 int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo,
-    const std::string& spid)
+    uint32_t spid)
 {
     SLOGI("Add device process");
     std::lock_guard lockGuard(castLock_);

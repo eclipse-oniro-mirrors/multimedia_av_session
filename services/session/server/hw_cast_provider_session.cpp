@@ -54,7 +54,7 @@ void HwCastProviderSession::Release()
     castSession_ = nullptr;
 }
 
-bool HwCastProviderSession::AddDevice(const std::string deviceId, const std::string &spid)
+bool HwCastProviderSession::AddDevice(const std::string deviceId, uint32_t spid)
 {
     SLOGI("AddDevice in HwCastProviderSession");
     if (!castSession_) {
