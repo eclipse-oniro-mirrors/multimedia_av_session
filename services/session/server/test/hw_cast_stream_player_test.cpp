@@ -503,10 +503,37 @@ HWTEST_F(HwCastStreamPlayerTest, Start005, TestSize.Level0)
 
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
+    uint32_t spid = 33;
+    hwCastStreamPlayer->SetSpid(spid);
     auto ret = hwCastStreamPlayer->Start(avQueueItem);
     ASSERT_EQ(ret, AVSESSION_SUCCESS);
     hwCastStreamPlayer->Start(avQueueItem);
     SLOGI("Start005 end!");
+}
+
+/**
+ * @tc.name: Start006
+ * @tc.desc: start and setspid
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Start006, TestSize.Level0)
+{
+    SLOGI("Start006 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("Media url");
+    AVDataSrcDescriptor dataSrcDescriptor;
+    dataSrcDescriptor.hasCallback = true;
+    dataSrcDescriptor.callback_ = [](void*, uint32_t, int64_t) -> int32_t { return 0; };
+    description->SetDataSrc(dataSrcDescriptor);
+    uint32_t spid = 33;
+    hwCastStreamPlayer->SetSpid(spid);
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    hwCastStreamPlayer->Start(avQueueItem);
+    SLOGI("Start006 end!");
 }
 
 /**
