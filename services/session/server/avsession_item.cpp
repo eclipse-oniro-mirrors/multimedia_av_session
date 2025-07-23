@@ -672,6 +672,20 @@ int32_t AVSessionItem::GetExtras(AAFwk::WantParams& extras)
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::SetSpid(const AAFwk::WantParams& extras)
+{
+    if (extras.HasParam("request-tv-client")) {
+        auto value = extras.GetParam("request-tv-client");
+        AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
+        if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
+            spid_ = AAFwk::Integer::Unbox(intValue);
+            SLOGI("AVSessionItem SetSpid %{public}u", spid_);
+        } else {
+            SLOGE("AVSessionItem SetSpid failed");
+        }
+    }
+}
+
 int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
 {
     {
@@ -686,14 +700,7 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             SetExtrasInner(list);
         }
     }
-    if (extras.HasParam("request-tv-client")) {
-        auto value = extras.GetParam("request-tv-client");
-        AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
-        if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
-            spid_ = AAFwk::Integer::Unbox(intValue);
-            SLOGI("AVSessionItem SetSpid %{public}u", spid_);
-        }
-    }
+    SetSpid(extras);
 #endif
     if (extras.HasParam("hw_live_view_hidden_when_keyguard")) {
         auto value = extras.GetParam("hw_live_view_hidden_when_keyguard");
