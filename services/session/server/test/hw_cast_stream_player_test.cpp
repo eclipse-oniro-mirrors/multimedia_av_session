@@ -400,8 +400,8 @@ HWTEST_P(HwCastStreamPlayerTest, SetSpid001, TestSize.Level0)
     SLOGI("SetSpid001 begin!");
     hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>();
     ASSERT_TRUE(hwCastStreamPlayer->streamPlayer_ != nullptr);
-    std::string data = "test";
-    hwCastStreamPlayer->SetSpid(data);
+    uint32_t spid = 33;
+    hwCastStreamPlayer->SetSpid(spid);
     SLOGI("SetSpid001 end!");
 }
 

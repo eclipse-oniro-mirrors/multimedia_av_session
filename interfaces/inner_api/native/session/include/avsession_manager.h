@@ -146,14 +146,6 @@ public:
     virtual int32_t RegisterSessionListenerForAllUsers(const std::shared_ptr<SessionListener>& listener) = 0;
 
     /**
-     * @brief UnListen for sessionListener callback event for all users.
-     *
-     * @return Whether to return successful Listener.
-     * @since 9
-    */
-    virtual int32_t RemoveSessionListener() = 0;
-
-    /**
      * @brief Listen for service death callback event.
      *
      * @param callback Listen for death callback event{@link DeathCallback}.

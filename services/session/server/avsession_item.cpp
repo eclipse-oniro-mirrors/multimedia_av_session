@@ -694,7 +694,7 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
         }*/
         AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
         if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
-            spid_ = AAFwk::Integer::Unbox(stringValue);
+            spid_ = AAFwk::Integer::Unbox(intValue);
             SLOGI("AVSessionItem SetSpid %{public}u", spid_);
         }
     }
