@@ -78,7 +78,9 @@ public:
     void OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap) override;
     void OnAvailableCapabilityChanged(const CastEngine::StreamCapability &streamCapability) override;
     void OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData) override;
+    void OnData(const CastEngine::DataType dataType, const std::string& dataStr) override;
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) override;
+    void SetSpid(uint32_t spid) override;
 
     void SendControlCommandWithParams(const AVCastControlCommand castControlCommand);
 
@@ -109,6 +111,7 @@ private:
     const std::string decodeOfVideoAvcStr_ = "video/avc";
     const std::string decodeOfAudioStr_ = "audio/av3a";
     const std::string speedStr_ = "speed";
+    uint32_t spid_ = 0;
     int32_t castMinTime = 1000;
     const int32_t cancelTimeout = 5000;
     bool isPlayingState_ = false;

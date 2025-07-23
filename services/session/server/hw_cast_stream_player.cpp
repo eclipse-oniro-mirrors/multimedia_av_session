@@ -115,6 +115,13 @@ void HwCastStreamPlayer::SendCustomData(const std::string& data)
         SLOGE("streamPlayer is nullptr");
         return;
     }
+    streamPlayer_->SendData(DataType::CUSTOM_DATA, data);
+}
+
+void HwCastStreamPlayer::SetSpid(uint32_t spid)
+{
+    SLOGI("SetSpid spid %{public}u", spid);
+    spid_ = spid;
 }
 
 void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand castControlCommand)
@@ -292,7 +299,10 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
-
+    if (spid_ > 0 && mediaDescription->GetLaunchClientData().length() > 0) {
+        mediaInfo.launchClientData = mediaDescription->GetLaunchClientData();
+        mediaInfo.spid = spid_;
+    }
     AVDataSrcDescriptor dataSrc = mediaDescription->GetDataSrc();
     SLOGI("has dataSrc hasCallback %{public}d", dataSrc.hasCallback);
     if (dataSrc.hasCallback) {
@@ -304,7 +314,6 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
         mediaInfo.mediaUrl = "/file";
         mediaInfo.dataSrc = castDataSrc_;
     }
-
     if (mediaDescription->GetPcmSrc() && mediaDescription->GetCastInfo() != nullptr) {
         uid_t appUid = mediaDescription->GetCastInfo()->GetAppUid();
         SLOGI("buildCastInfo AUDIO_PCM uid %{public}d", appUid);
@@ -987,6 +996,18 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
 void HwCastStreamPlayer::OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     SLOGD("Stream player received ImageChanged event");
+}
+
+void HwCastStreamPlayer::OnData(const CastEngine::DataType dataType, const std::string& dataStr)
+{
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            AAFwk::WantParams data;
+            data.SetParam("customData", AAFwk::String::Box(dataStr));
+            listener->OnCustomData(data);
+        }
+    }
 }
 
 void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap)

@@ -119,10 +119,11 @@ public:
      *
      * @param { int32_t } castId - Find the corresponding provider through this ID.
      * @param { DeviceInfo } deviceInfo - Devices to be connected.
+     * @param { uint32_t } spid - app id for pulling client.
      * @return { bool } Whether the operation was successful.
      * @since 10
     */
-    virtual bool AddCastDevice(int castId, DeviceInfo deviceInfo) = 0;
+    virtual bool AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t spid) = 0;
 
     /**
      * @brief Notify CastEngine to remove (disconnect) remote devices.

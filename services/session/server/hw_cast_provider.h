@@ -42,7 +42,7 @@ public:
     void Release() override;
     int StartCastSession(bool isHiStream) override;
     void StopCastSession(int castId) override;
-    bool AddCastDevice(int castId, DeviceInfo deviceInfo) override;
+    bool AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t spid) override;
     bool RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay = false) override;
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(int castId) override;
     bool RegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener) override;
@@ -63,6 +63,7 @@ public:
     int GetCastProtocolType(int castCapability);
 
 private:
+    std::vector<uint32_t> ParsePullClients(const std::string& str);
     static const int maxCastSessionSize = 256;
     std::vector<bool> castFlag_ = std::vector<bool>(maxCastSessionSize, false);
     std::map<int, std::shared_ptr<HwCastProviderSession>> hwCastProviderSessionMap_;

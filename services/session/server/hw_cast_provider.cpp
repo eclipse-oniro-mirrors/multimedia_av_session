@@ -192,7 +192,7 @@ void HwCastProvider::StopCastSession(int castId)
     castFlag_[castId] = false;
 }
 
-bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
+bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t spid)
 {
     SLOGI("AddCastDevice with config castSession and corresonding castId is %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
@@ -208,7 +208,7 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
         return false;
     }
 
-    return hwCastProviderSession->AddDevice(deviceInfo.deviceId_);
+    return hwCastProviderSession->AddDevice(deviceInfo.deviceId_, spid);
 }
 
 bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay)
@@ -386,6 +386,23 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
     return hwCastProviderSession->UnRegisterCastSessionStateListener(listener);
 }
 
+std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
+{
+    std::vector<uint32_t> ret;
+    if (str.length() <= 0) {
+        return ret;
+    }
+    nlohmann::json j = nlohmann::json::parse(str);
+    if (!j.is_array()) {
+        return ret;
+    }
+    for (const auto& item : j) {
+        if (item.is_number_integer()) {
+            ret.push_back(item.get<int>());
+        }
+    }
+    return ret;
+}
 
 void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceList)
 {
@@ -411,6 +428,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
         deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
+        SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
+        deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {

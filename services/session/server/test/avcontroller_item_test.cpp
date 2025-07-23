@@ -19,6 +19,7 @@
 
 #include "system_ability_definition.h"
 #include "avsession_service.h"
+#include "string_wrapper.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -230,6 +231,24 @@ HWTEST_F(AVControllerItemTest, SendCommonCommand002, TestSize.Level0)
 }
 
 /**
+* @tc.name: SendCustomData001
+* @tc.desc: Test SendCustomData with null migrateProxyCallback_
+* @tc.type: FUNC
+* @tc.require: #ICNHGY
+*/
+HWTEST_F(AVControllerItemTest, SendCustomData001, TestSize.Level0)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    std::string test = "test";
+    OHOS::AAFwk::WantParams data;
+    data.SetParam("customData", AAFwk::String::Box(test));
+
+    auto ret = controller->SendCustomData(data);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: Destroy001
 * @tc.desc: Test Destroy with with sessionId_ is DEFAULT
 * @tc.type: FUNC
@@ -293,6 +312,44 @@ HWTEST_F(AVControllerItemTest, HandleActiveStateChange001, TestSize.Level0)
     ASSERT_TRUE(callback != nullptr);
     controller->callback_ = callback;
     controller->HandleActiveStateChange(false);
+    EXPECT_NE(controller->session_, nullptr);
+}
+
+
+/**
+* @tc.name: HandleCustomData001
+* @tc.desc: handle customData
+* @tc.type: FUNC
+* @tc.require: #ICNHGY
+*/
+HWTEST_F(AVControllerItemTest, HandleCustomData001, TestSize.Level0)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    OHOS::sptr<IAVControllerCallback> callback = new IAVControllerCallbackTest();
+    ASSERT_TRUE(callback != nullptr);
+    controller->callback_ = callback;
+    AAFwk::WantParams data;
+    std::string test = "test";
+    data.SetParam("customData", AAFwk::String::Box(test));
+    controller->HandleCustomData(data);
+    EXPECT_NE(controller->session_, nullptr);
+}
+
+/**
+* @tc.name: HandleCustomData002
+* @tc.desc: handle customData
+* @tc.type: FUNC
+* @tc.require: #ICNHGY
+*/
+HWTEST_F(AVControllerItemTest, HandleCustomData002, TestSize.Level0)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    AAFwk::WantParams data;
+    std::string test = "test";
+    data.SetParam("customData", AAFwk::String::Box(test));
+    controller->HandleCustomData(data);
     EXPECT_NE(controller->session_, nullptr);
 }
 } //AVSession
