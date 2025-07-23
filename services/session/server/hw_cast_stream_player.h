@@ -111,7 +111,7 @@ private:
     const std::string decodeOfVideoAvcStr_ = "video/avc";
     const std::string decodeOfAudioStr_ = "audio/av3a";
     const std::string speedStr_ = "speed";
-    uint32_t spid_;
+    uint32_t spid_ = 0;
     int32_t castMinTime = 1000;
     const int32_t cancelTimeout = 5000;
     bool isPlayingState_ = false;
