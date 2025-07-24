@@ -158,12 +158,12 @@ interface AVCastController {
   @gen_promise("release")
   ReleaseSync(): void;
 
-  @!sts_inject_into_interface("on(type: string, filter: object, callback: (data: object) => void): void;")
+  @!sts_inject_into_interface("on(type: string, filter: Array<String> | String, callback: (data: object) => void): void;")
   @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
   @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")
   @!sts_inject_into_interface("on(type: string, callback: (data_0: object, data_1: object) => void): void;")
   @!sts_inject_into_class("""
-    on(type: string, filter: object, callback: object): void {
+    on(type: string, filter: Array<String> | String, callback: object): void {
       if (type === "playbackStateChange") {
         if (Array.isArray(filter)) {
           this.onPlaybackStateChangeFilter(filter as Array<String>, callback as (data: AVPlaybackState) => void);
@@ -701,12 +701,12 @@ interface AVSessionController {
   @gen_promise("getExtrasWithEvent")
   GetExtrasWithEventSync(extraEvent: String): @sts_type("Record<String, Object>") Opaque;
 
-  @!sts_inject_into_interface("on(type: string, filter: object, callback: (data: object) => void): void;")
+  @!sts_inject_into_interface("on(type: string, filter: Array<String> | String, callback: (data: object) => void): void;")
   @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
   @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")
   @!sts_inject_into_interface("on(type: string, callback: (data_0: object, data_1: object) => void): void;")
   @!sts_inject_into_class("""
-    on(type: string, filter: object, callback: object): void {
+    on(type: string, filter: Array<String> | String, callback: object): void {
       if (type === "metadataChange") {
         if (Array.isArray(filter)) {
           this.onMetadataChangeFilter(filter as Array<String>, callback as (data: AVMetadata) => void);
