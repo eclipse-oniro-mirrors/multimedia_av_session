@@ -622,12 +622,12 @@ static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenTargetLo
 }
 
 /**
- * @tc.name: PrepareSessionFromRemote_WhenTargetLoopModeSet_Success
+ * @tc.name: PrepareSessionFromRemote_WhenValidBundleIcon_ExpectSuccess
  * @tc.desc: test the member of PrepareSessionFromRemote
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenTargetLoopModeSet_Success, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenValidBundleIcon_ExpectSuccess, TestSize.Level1)
 {
     std::string assetId = "test";
     std::string bundleIconStr = "123";
