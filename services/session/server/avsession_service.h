@@ -208,9 +208,9 @@ public:
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
-    void HandleSessionReleaseInner();
+    void HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem);
 
-    void CheckIfRemoveNotification(int32_t userId, const sptr<AVSessionItem>& sessionItem);
+    void HandleSessionReleaseInner();
 
     void HandleCallStartEvent();
 
@@ -594,6 +594,11 @@ private:
 
     void CheckAndUpdateAncoMediaSession(const AppExecFwk::ElementName& elementName);
 
+    void UpdateSessionTimestamp(sptr<AVSessionItem> session);
+
+    bool CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd, const MMI::KeyEvent& keyEvent,
+        sptr<AVSessionItem> session);
+
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     void ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state);
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
@@ -605,6 +610,7 @@ private:
     std::atomic<bool> hasMediaCapsule_ = false;
 
     sptr<AVSessionItem> topSession_;
+    sptr<AVSessionItem> ancoSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
     std::map<pid_t, sptr<ClientDeathRecipient>> clientDeathRecipients_;
