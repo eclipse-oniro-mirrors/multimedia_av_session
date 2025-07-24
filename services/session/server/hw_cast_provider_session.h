@@ -21,6 +21,7 @@
 #include "i_cast_session.h"
 #include "cast_engine_common.h"
 #include "avsession_info.h"
+#include "avsession_utils.h"
 
 namespace OHOS::AVSession {
 class HwCastProviderSession : public CastEngine::ICastSessionListener,
@@ -45,16 +46,21 @@ public:
     void OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo);
 
 private:
+    void computeToastOnDeviceState(CastEngine::DeviceState state);
+
     std::shared_ptr<CastEngine::ICastSession> castSession_;
     std::vector<std::shared_ptr<IAVCastSessionStateListener>> castSessionStateListenerList_;
     std::recursive_mutex mutex_;
     int32_t stashDeviceState_ = -1;
     std::string stashDeviceId_;
     CastEngine::ProtocolType protocolType_ = CastEngine::ProtocolType::CAST_PLUS_STREAM;
+    int32_t avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
 
     const int32_t deviceStateConnection = 6;
     const int32_t eventIdStart = 2000;
     const int32_t eventIdEnd = 2999;
+    const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
+    const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
 };
 } // namespace OHOS::AVSession
 
