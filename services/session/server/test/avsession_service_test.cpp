@@ -225,7 +225,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level0)
 {
     SLOGI("SendSystemAVKeyEvent002 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -630,7 +630,7 @@ static HWTEST_F(AVSessionServiceTest, SelectSessionByUid002, TestSize.Level0)
 
 static HWTEST_F(AVSessionServiceTest, InitBMS001, TestSize.Level0)
 {
-    SLOGI("InitBMS001 begin");
+    SLOGI("InitBMS001 begin!");
     avservice_->InitBMS();
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("InitBMS001 end!");
@@ -916,7 +916,7 @@ static HWTEST_F(AVSessionServiceTest, ProcessCastAudioCommand002, TestSize.Level
     SLOGI("ProcessCastAudioCommand002 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, OnReceiveEvent001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, OnReceiveEvent001, TestSize.Level1)
 {
     SLOGI("OnReceiveEvent001 begin!");
     OHOS::EventFwk::CommonEventData eventData;
@@ -1626,7 +1626,7 @@ static HWTEST_F(AVSessionServiceTest, ReportStartCastEnd001, TestSize.Level0)
 }
 
 #ifdef BLUETOOTH_ENABLE
-static HWTEST_F(AVSessionServiceTest, OnReceiveEvent003, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, OnReceiveEvent003, TestSize.Level0)
 {
     SLOGD("OnReceiveEvent003 begin!");
     OHOS::EventFwk::CommonEventData eventData;
@@ -1791,7 +1791,7 @@ static HWTEST_F(AVSessionServiceTest, UpdateOrder001, TestSize.Level0)
     avsessionHere_->Destroy();
     SLOGI("UpdateOrder001 end!");
 }
-
+ 
 /**
  * @tc.name: UpdateOrder002
  * @tc.desc: Verifying the UpdateOrder.
@@ -1820,7 +1820,7 @@ static HWTEST_F(AVSessionServiceTest, UpdateOrder002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying001, TestSize.Level1)
 {
     SLOGI("HandleOtherSessionPlaying001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1858,14 +1858,14 @@ static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying002, TestSize.Lev
     avsessionHere_->Destroy();
     SLOGI("HandleOtherSessionPlaying002 end!");
 }
-
+ 
 /**
  * @tc.name: HandleOtherSessionPlaying003
  * @tc.desc: Verifying the HandleOtherSessionPlaying.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying003, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying003, TestSize.Level1)
 {
     SLOGI("HandleOtherSessionPlaying003 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1886,7 +1886,7 @@ static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying003, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession001, TestSize.Level1)
 {
     SLOGI("GetOtherPlayingSession001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1928,7 +1928,7 @@ static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession002, TestSize.Level1
     avsessionFront_->Destroy();
     SLOGI("GetOtherPlayingSession002 end!");
 }
-
+ 
 /**
  * @tc.name: GetOtherPlayingSession003
  * @tc.desc: Verifying the GetOtherPlayingSession.

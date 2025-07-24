@@ -283,8 +283,8 @@ void AvSessionServiceSystemAbilityTest(sptr<AVSessionService> service)
         COMMON_EVENT_SERVICE_ID
     };
 
-    int32_t randomNumber = GetData<uint32_t>();
-    auto systemAbilityId = systemAbilityIdSet[randomNumber % systemAbilityIdSet.size()];
+    auto randomNumber = GetData<uint32_t>();
+    int32_t systemAbilityId = systemAbilityIdSet[randomNumber % systemAbilityIdSet.size()];
     std::string deviceId = GetString();
     service->OnAddSystemAbility(systemAbilityId, deviceId);
     service->OnRemoveSystemAbility(systemAbilityId, deviceId);

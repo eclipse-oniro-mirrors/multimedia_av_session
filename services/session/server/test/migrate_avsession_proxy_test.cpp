@@ -570,7 +570,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage003, TestSize.Level0
 static HWTEST_F(MigrateAVSessionProxyTest, OnConnectServer001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    EXPECT_TRUE(g_MigrateAVSessionProxy->remoteSession_ != nullptr);
     std::string deviceId = "123";
     g_MigrateAVSessionProxy->OnConnectServer(deviceId);
 }
@@ -584,7 +584,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnConnectServer001, TestSize.Level0)
 static HWTEST_F(MigrateAVSessionProxyTest, OnDisconnectServer001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    EXPECT_TRUE(g_MigrateAVSessionProxy->remoteSession_ != nullptr);
     std::string deviceId = "123";
     g_MigrateAVSessionProxy->OnDisconnectServer(deviceId);
 }
@@ -598,7 +598,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnDisconnectServer001, TestSize.Level
 static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level0)
 {
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_ != nullptr, true);
+    EXPECT_TRUE(g_MigrateAVSessionProxy->remoteSession_ != nullptr);
     std::string deviceId = "123";
     std::string msg = "test";
     g_MigrateAVSessionProxy->OnBytesReceived(deviceId, msg);
@@ -606,7 +606,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, OnBytesReceived001, TestSize.Level0)
 
 /**
  * @tc.name: PrepareSessionFromRemote_WhenTargetLoopModeSet_Success
- * @tc.desc: test the member of ProcessBundleImg
+ * @tc.desc: test the member of PrepareSessionFromRemote
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -622,12 +622,12 @@ static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenTargetLo
 }
 
 /**
- * @tc.name: ProcessMediaImage004
- * @tc.desc: test the member of ProcessMediaImage
+ * @tc.name: PrepareSessionFromRemote_WhenTargetLoopModeSet_Success
+ * @tc.desc: test the member of PrepareSessionFromRemote
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage004, TestSize.Level0)
+static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenTargetLoopModeSet_Success, TestSize.Level1)
 {
     std::string assetId = "test";
     std::string bundleIconStr = "123";
@@ -635,6 +635,6 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMediaImage004, TestSize.Level0
     g_AVSessionObserver->OnPlayWithAssetId(assetId);
     ASSERT_TRUE(g_MigrateAVSessionProxy != nullptr);
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
-    EXPECT_EQ(g_MigrateAVSessionProxy->preSetController_ != nullptr, true);
+    EXPECT_NE(g_MigrateAVSessionProxy->preSetController_, nullptr);
     g_MigrateAVSessionProxy->ProcessMediaImage(bundleIconStr);
 }
