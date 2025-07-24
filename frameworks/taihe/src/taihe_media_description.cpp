@@ -46,6 +46,7 @@ std::map<std::string, TaiheMediaDescription::GetterType> TaiheMediaDescription::
     {"appName", GetAppName},
     {"drmScheme", GetDrmScheme},
     {"dataSrc", GetDataSrc},
+    {"pcmSrc", GetPcmSrc},
 };
 
 std::map<int32_t, TaiheMediaDescription::SetterType> TaiheMediaDescription::setterMap_ = {
@@ -71,6 +72,7 @@ std::map<int32_t, TaiheMediaDescription::SetterType> TaiheMediaDescription::sett
     {OHOS::AVSession::AVMediaDescription::MEDIA_DESCRIPTION_KEY_APP_NAME, SetAppName},
     {OHOS::AVSession::AVMediaDescription::MEDIA_DESCRIPTION_KEY_DRM_SCHEME, SetDrmScheme},
     {OHOS::AVSession::AVMediaDescription::MEDIA_DESCRIPTION_KEY_DATA_SRC, SetDataSrc},
+    {OHOS::AVSession::AVMediaDescription::MEDIA_DESCRIPTION_KEY_PCM_SRC, SetPcmSrc},
 };
 
 int32_t TaiheMediaDescription::GetAVMediaDescription(
@@ -426,6 +428,20 @@ int32_t TaiheMediaDescription::SetDataSrc(const OHOS::AVSession::AVMediaDescript
     auto property = TaiheUtils::ToAniAVDataSrcDescriptor(in.GetDataSrc());
     out.dataSrc = (property == nullptr) ? optional<uintptr_t>(std::nullopt) :
         optional<uintptr_t>(std::in_place_t {}, reinterpret_cast<uintptr_t>(property));
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheMediaDescription::GetPcmSrc(AVMediaDescription const &in, OHOS::AVSession::AVMediaDescription &out)
+{
+    (void)in;
+    (void)out;
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheMediaDescription::SetPcmSrc(const OHOS::AVSession::AVMediaDescription &in, AVMediaDescription &out)
+{
+    (void)in;
+    (void)out;
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
