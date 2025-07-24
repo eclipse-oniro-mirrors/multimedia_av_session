@@ -499,6 +499,8 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     migrateServer_->Init(avservice_);
     TestFunc();
     UpdateFrontSessionInfoToRemoteTest(avservice_);
+    avservice_->OnStop();
+    SLOGI("MigrateAVSessionFuzzerTest done");
 }
 
 /* Fuzzer entry point */

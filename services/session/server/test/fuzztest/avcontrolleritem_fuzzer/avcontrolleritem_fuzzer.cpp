@@ -161,6 +161,8 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest()
     g_sizePos += sizeof(uint32_t);
     dataMessageParcel.RewindRead(0);
     avControllerItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
+    service->OnStop();
+    SLOGI("FuzzOnRemoteRequest done");
 }
 
 void AvControllerItemRemoteRequestTest()
@@ -211,6 +213,8 @@ void AvControllerItemDataTest()
     AvControllerItemDataTestSecond(avControllerItem);
     AvControllerItemDataTestThird(avControllerItem);
     avControllerItem->RegisterCallbackInner(avControllerItemObj);
+    service->OnStop();
+    SLOGI("AvControllerItemDataTest done");
 }
 
 void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem)
@@ -308,6 +312,8 @@ void AvControllerItemTest()
     ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
     AvControllerItemTestImpl(avControllerItem);
     AvControllerItemTestImplSecond(avControllerItem);
+    service->OnStop();
+    SLOGI("AvControllerItemTest done");
 }
 
 void AvControllerItemTestImpl(sptr<AVControllerItem> avControllerItem)
