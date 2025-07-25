@@ -634,7 +634,8 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
         if (session->GetUid() == infoUid && session->GetPid() == infoPid &&
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call")) {
             UpdateTopSession(session);
-            if (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") {
+            if (topSession_ != nullptr &&
+                (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video")) {
                 AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
                 PublishEvent(mediaPlayStateTrue);
                 auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
