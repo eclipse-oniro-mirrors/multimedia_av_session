@@ -408,7 +408,6 @@ struct OutputDeviceInfo {
 }
 
 union AVControlParameterType {
-  typeLong: i64;
   typeDouble: f64;
   typeString: String;
   typeLoopMode: LoopMode;
