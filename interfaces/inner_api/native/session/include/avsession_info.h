@@ -937,6 +937,20 @@ struct DecoderType {
     static constexpr const char *OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a";
 };
 
+enum CastEngineConnectState {
+    CONNECTING = 0,
+    CONNECTED = 1,
+    PAUSED = 2,
+    PLAYING = 3,
+    DISCONNECTING = 4,
+    DISCONNECTED = 5,
+    STREAM = 6,
+    MIRROR_TO_UI = 7,
+    UI_TO_MIRROR = 8,
+    UICAST = 9,
+    DEVICE_STATE_MAX = 10,
+};
+
 /**
  * Device state used to describe states including discovery, authentication and other scenes.
  * @typedef DeviceState
@@ -951,7 +965,7 @@ struct DeviceState: public Parcelable {
      * @atomicservice
      * @since 20
      */
-    std::string deviceId;
+    std::string deviceId = "";
 
     /**
      * Device connection state.
@@ -959,7 +973,7 @@ struct DeviceState: public Parcelable {
      * @atomicservice
      * @since 20
      */
-    int32_t deviceState;
+    int32_t deviceState = CastEngineConnectState::DISCONNECTED;
 
     /**
      * Reason for connection failure, for example, user cancellation and timeout.
@@ -967,7 +981,7 @@ struct DeviceState: public Parcelable {
      * @atomicservice
      * @since 20
      */
-    int32_t reasonCode;
+    int32_t reasonCode = 0;
 
     /**
      * System radar error code returned by cast+services.
@@ -1013,20 +1027,6 @@ struct DeviceState: public Parcelable {
         }
         return true;
     }
-};
-
-enum CastEngineConnectState {
-    CONNECTING = 0,
-    CONNECTED = 1,
-    PAUSED = 2,
-    PLAYING = 3,
-    DISCONNECTING = 4,
-    DISCONNECTED = 5,
-    STREAM = 6,
-    MIRROR_TO_UI = 7,
-    UI_TO_MIRROR = 8,
-    UICAST = 9,
-    DEVICE_STATE_MAX = 10,
 };
 
 /**
