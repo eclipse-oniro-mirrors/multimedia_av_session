@@ -676,7 +676,7 @@ private:
     const int32_t beginAddPos = 3;
     const int32_t endDecPos = 4;
     const int32_t typeAddPos = 2;
-    std::recursive_mutex isInCastLock_;
+    std::recursive_mutex checkEnableCastLock_;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
@@ -695,7 +695,7 @@ private:
     int32_t pressCount_ {};
     int32_t maxHistoryNums_ = 10;
     bool isFirstPress_ = true;
-    std::atomic<bool> isInCast_ = false;
+    bool isInCast_ = false;
     bool is2in1_ = false;
 
     void *migrateStubFuncHandle_ = nullptr;
