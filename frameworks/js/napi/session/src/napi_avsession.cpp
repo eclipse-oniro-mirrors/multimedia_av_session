@@ -758,7 +758,6 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SEND_CUSTOM_DATA_TASK_ID;
-    CHECK_AND_RETURN_LOG(context->native != nullptr, "invalid context native");
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
