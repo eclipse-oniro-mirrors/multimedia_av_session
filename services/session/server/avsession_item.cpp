@@ -1490,6 +1490,10 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 
 bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
 {
+    if (castDeviceInfoMap_.count(deviceId) != 1) {
+        SLOGE("deviceId map deviceinfo is not exit");
+        return false;
+    }
     for (uint32_t cap : castDeviceInfoMap_[deviceId].supportedPullClients_) {
         if (cap == spid_) {
             return true;

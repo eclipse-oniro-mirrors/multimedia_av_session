@@ -398,7 +398,7 @@ std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
     }
     for (const auto& item : j) {
         if (item.is_number_integer()) {
-            ret.push_back(item.get<int>());
+            ret.push_back(item.get<uint32_t>());
         }
     }
     return ret;
