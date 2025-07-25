@@ -12,25 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #include "gtest/gtest.h"
-
+ 
 #include "avsession_callback_client.h"
 #include "avsession_descriptor.h"
-
+ 
 using namespace testing::ext;
-
+ 
 namespace OHOS {
 namespace AVSession {
 namespace {
+
 std::string g_errLog;
 void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
-    const char *msg)
+                   const char *msg)
 {
     g_errLog = msg;
 }
-} // namespace
-
+}   // namespace
+ 
 class AVSessionDescriptorTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -38,25 +39,25 @@ public:
     void SetUp() override;
     void TearDown() override;
 };
-
+ 
 void AVSessionDescriptorTest::SetUpTestCase()
 {}
-
+ 
 void AVSessionDescriptorTest::TearDownTestCase()
 {}
-
+ 
 void AVSessionDescriptorTest::SetUp()
 {}
-
+ 
 void AVSessionDescriptorTest::TearDown()
 {}
-
+ 
 /**
- * @tc.name: Marshalling001
- * @tc.desc: test Marshalling
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: Marshalling001
+* @tc.desc: test Marshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, Marshalling001, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
@@ -66,28 +67,28 @@ HWTEST_F(AVSessionDescriptorTest, Marshalling001, TestSize.Level1)
     bool ret = avHistoryDescriptor->Marshalling(out);
     EXPECT_EQ(ret, true);
 }
-
+ 
 /**
- * @tc.name: Unmarshalling001
- * @tc.desc: test Unmarshalling
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: Unmarshalling001
+* @tc.desc: test Unmarshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, Unmarshalling001, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
     std::shared_ptr<AVHistoryDescriptor> avHistoryDescriptor = std::make_shared<AVHistoryDescriptor>();
-    EXPECT_NE(avHistoryDescriptor, nullptr);
     Parcel in;
+    EXPECT_NE(avHistoryDescriptor, nullptr);
     avHistoryDescriptor->Unmarshalling(in);
 }
-
+ 
 /**
- * @tc.name: Marshalling002
- * @tc.desc: test Marshalling
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: Marshalling002
+* @tc.desc: test Marshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, Marshalling002, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
@@ -97,13 +98,13 @@ HWTEST_F(AVSessionDescriptorTest, Marshalling002, TestSize.Level1)
     bool ret = deviceInfo->Marshalling(out);
     EXPECT_EQ(ret, true);
 }
-
+ 
 /**
- * @tc.name: Unmarshalling002
- * @tc.desc: test Unmarshalling
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: Unmarshalling002
+* @tc.desc: test Unmarshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, Unmarshalling002, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
@@ -112,13 +113,13 @@ HWTEST_F(AVSessionDescriptorTest, Unmarshalling002, TestSize.Level1)
     Parcel in;
     deviceInfo->Unmarshalling(in);
 }
-
+ 
 /**
- * @tc.name: Marshalling003
- * @tc.desc: test Marshalling
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: Marshalling003
+* @tc.desc: test Marshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, Marshalling003, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
@@ -128,13 +129,13 @@ HWTEST_F(AVSessionDescriptorTest, Marshalling003, TestSize.Level1)
     bool ret = castDisplayInfo->Marshalling(out);
     EXPECT_EQ(ret, true);
 }
-
+ 
 /**
- * @tc.name: Unmarshalling003
- * @tc.desc: test Unmarshalling
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: Unmarshalling003
+* @tc.desc: test Unmarshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, Unmarshalling003, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
@@ -143,14 +144,14 @@ HWTEST_F(AVSessionDescriptorTest, Unmarshalling003, TestSize.Level1)
     Parcel in;
     castDisplayInfo->Unmarshalling(in);
 }
-
+ 
 /**
- * @tc.name: ReadFromParcel001
- * @tc.desc: test ReadFromParcel
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AVSessionDescriptorTest, ReadFromParcel001, TestSize.Level1)
+* @tc.name: ReadFromParcel003
+* @tc.desc: test ReadFromParcel
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionDescriptorTest, ReadFromParcel003, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
     std::shared_ptr<CastDisplayInfo> castDisplayInfo = std::make_shared<CastDisplayInfo>();
@@ -161,11 +162,11 @@ HWTEST_F(AVSessionDescriptorTest, ReadFromParcel001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Marshalling004
- * @tc.desc: test Marshalling
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: Marshalling004
+* @tc.desc: test Marshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, Marshalling004, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
@@ -176,11 +177,11 @@ HWTEST_F(AVSessionDescriptorTest, Marshalling004, TestSize.Level1)
 }
 
 /**
- * @tc.name: Unmarshalling004
- * @tc.desc: test Unmarshalling
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: Unmarshalling004
+* @tc.desc: test Unmarshalling
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, Unmarshalling004, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
@@ -191,11 +192,11 @@ HWTEST_F(AVSessionDescriptorTest, Unmarshalling004, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReadFromParcel002
- * @tc.desc: test ReadFromParcel
- * @tc.type: FUNC
- * @tc.require:
- */
+* @tc.name: ReadFromParcel004
+* @tc.desc: test ReadFromParcel
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(AVSessionDescriptorTest, ReadFromParcel002, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
@@ -205,5 +206,5 @@ HWTEST_F(AVSessionDescriptorTest, ReadFromParcel002, TestSize.Level1)
     EXPECT_EQ(ret, false);
 }
 
-} // namespace AVSession
+} // namespace AVSESSION
 } // namespace OHOS
