@@ -599,6 +599,8 @@ private:
     bool CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd, const MMI::KeyEvent& keyEvent,
         sptr<AVSessionItem> session);
 
+    std::string DoCJSONArrayTransformToString(cJSON* valueItem);
+
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     void ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state);
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);

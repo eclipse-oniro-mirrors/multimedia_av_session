@@ -762,19 +762,23 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
     if (sessionExist) {
         InsertSessionItemToCJSON(session, valuesArray);
     }
-    char* newSortContent = cJSON_Print(valuesArray);
-    if (valuesArray == nullptr || cJSON_IsInvalid(valuesArray) || newSortContent == nullptr) {
-        SLOGE("newValueArray print fail nullptr");
-        cJSON_Delete(valuesArray);
-        return;
-    }
-    std::string newSortContentStr(newSortContent);
+    std::string newSortContentStr = DoCJSONArrayTransformToString(valuesArray);
     if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
         SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
     }
-    cJSON_free(newSortContent);
     cJSON_Delete(valuesArray);
 }
+
+std::string AVSessionService::DoCJSONArrayTransformToString(cJSON* valueItem)
+{
+    CHECK_AND_RETURN_RET_LOG(valueItem != nullptr && !cJSON_IsInvalid(valueItem), "", "valueItem invalid");
+    char* newSortContent = cJSON_Print(valueItem);
+    CHECK_AND_RETURN_RET_LOG(newSortContent != nullptr, "", "newValueArray print fail nullptr");
+    std::string newSortContentStr(newSortContent);
+    cJSON_free(newSortContent);
+    return newSortContentStr;
+}
+
 // LCOV_EXCL_STOP
 
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
@@ -1665,17 +1669,10 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& sessi
         SLOGE("get newValueArray invalid");
         return false;
     }
-
-    char* newSortContent = cJSON_Print(valuesArray);
-    if (valuesArray == nullptr || cJSON_IsInvalid(valuesArray) || newSortContent == nullptr) {
-        SLOGE("newValueArray print fail");
-        return false;
-    }
-    std::string newSortContentStr(newSortContent);
+    std::string newSortContentStr = DoCJSONArrayTransformToString(valuesArray);
     if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
         SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
     }
-    cJSON_free(newSortContent);
     return true;
 }
 // LCOV_EXCL_STOP

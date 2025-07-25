@@ -135,7 +135,7 @@ private:
     int32_t MapMemory(bool isRemote);
     void Close() noexcept;
 
-    uint8_t *base_;
+    uint8_t *base_ = nullptr;
     int32_t capacity_ = 0;
     uint32_t flags_ = 0;
     std::string name_;
