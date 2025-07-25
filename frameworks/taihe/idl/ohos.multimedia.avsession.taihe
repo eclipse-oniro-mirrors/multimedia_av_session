@@ -26,31 +26,31 @@ import type Context from 'application.BaseContext';
 import type hdrCapability from '@ohos.graphics.hdrCapability';
 
 class MediaAVFileDescriptorImpl implements media.AVFileDescriptor {
-  fd: double;
-  offset: (double | undefined);
-  length: (double | undefined);
+  fd: int;
+  offset: (long | undefined);
+  length: (long | undefined);
 
   constructor(fd: int, offset: long, length: long) {
-    this.fd = fd.toDouble();
-    this.offset = offset.toDouble();
-    this.length = length.toDouble();
+    this.fd = fd;
+    this.offset = offset;
+    this.length = length;
   }
 }
 
 class MediaAVDataSrcDescriptorImpl implements media.AVDataSrcDescriptor {
-  fileSize: double;
-  callback: (buffer: ArrayBuffer, length: double, pos?: double) => double;
+  fileSize: long;
+  callback: (buffer: ArrayBuffer, length: long, pos?: long) => int;
 
   constructor(fileSize: long) {
-    this.fileSize = fileSize.toDouble();
-    this.callback = (buffer: ArrayBuffer, length: double, pos?: double) => {
+    this.fileSize = fileSize;
+    this.callback = (buffer: ArrayBuffer, length: long, pos?: long) => {
         return 0;
     };
   }
 
   OnData(buffer: ArrayBuffer, length: int, pos: long): void {
     if (this.callback != undefined) {
-      this.callback(buffer, length.toDouble(), pos.toDouble());
+      this.callback(buffer, length.toLong(), pos);
     }
   }
 }
