@@ -44,7 +44,11 @@ public:
 private:
     void RegisterPreferedOutputDeviceChangeCallback();
     void UnRegisterPreferedOutputDeviceChangeCallback();
+    void RegisterAudioDeviceChangeCallback();
+    void UnRegisterAudioDeviceChangeCallback();
     std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> audioPreferedOutputDeviceChangeCallback_;
+    std::shared_ptr<AudioStandard::AudioManagerDeviceChangeCallback> audioDeviceChangeCallback_;
+
     bool isRegistered_ = false;
     std::shared_ptr<MigrateAVSessionServer> migrateSession_;
     std::string deviceId_;
@@ -57,6 +61,11 @@ public:
         const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc) override;
 private:
     std::recursive_mutex lock_;
+};
+ 
+class DeviceChangeCallback : public AudioStandard::AudioManagerDeviceChangeCallback {
+public:
+    void OnDeviceChange(const AudioStandard::DeviceChangeAction& deviceChangeAction) override;
 };
 }
 #endif
