@@ -167,7 +167,6 @@ napi_value NapiAVCastController::SendCustomData(napi_env env, napi_callback_info
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_CAST_CONTROLLER_SEND_CUSTOM_DATA_TASK_ID;
     auto executor = [context]() {
-        CHECK_AND_RETURN_LOG(context->native != nullptr, "invalid context native");
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
         if (napiCastController->castController_ == nullptr) {
             SLOGE("SendCustomData failed : controller is nullptr");

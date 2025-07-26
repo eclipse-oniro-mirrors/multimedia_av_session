@@ -568,7 +568,7 @@ int32_t AVSessionItem::SendCustomData(const AAFwk::WantParams& data)
     CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
     auto value = data.GetParam("customData");
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
-    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData isnt a valid string");
+    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
     SendCustomDataInner(data);
     return AVSESSION_SUCCESS;
 }
@@ -1490,7 +1490,12 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 
 bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
 {
-    for (uint32_t cap : castDeviceInfoMap_[deviceId].supportedPullClients_) {
+    auto iter = castDeviceInfoMap_.find(deviceId);
+    if (iter == castDeviceInfoMap_.end()) {
+        SLOGE("deviceId map deviceinfo is not exit");
+        return false;
+    }
+    for (uint32_t cap : iter->second.supportedPullClients_) {
         if (cap == spid_) {
             return true;
         }

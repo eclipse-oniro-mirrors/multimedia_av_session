@@ -221,11 +221,12 @@ int32_t AVCastControllerItem::SendCustomData(const AAFwk::WantParams& data)
     CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
     auto value = data.GetParam("customData");
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
-    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData isnt a valit string");
+    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
 
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
-    castControllerProxy_->SendCustomData(AAFwk::String::Unbox(stringValue).c_str());
+    std::string str = AAFwk::String::Unbox(stringValue);
+    castControllerProxy_->SendCustomData(str);
     return AVSESSION_SUCCESS;
 }
 

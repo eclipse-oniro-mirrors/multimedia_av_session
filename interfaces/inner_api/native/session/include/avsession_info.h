@@ -318,7 +318,7 @@ public:
     virtual void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) = 0;
 
     /**
-     * @brief custom media packet fot 4k change callback.
+     * @brief custom media packet for 4k change callback.
      *
      * @param data The changed custom media packet.
      * @since 11
@@ -439,7 +439,7 @@ public:
     virtual void OnExtrasChange(const AAFwk::WantParams& extras) = 0;
 
     /**
-     * @brief Session custom media packet fot 4k change callback.
+     * @brief Session custom media packet for 4k change callback.
      *
      * @param data The changed custom media packet.
      * @since 10
