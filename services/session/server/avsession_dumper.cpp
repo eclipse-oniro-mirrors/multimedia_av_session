@@ -21,13 +21,13 @@
 
 namespace OHOS::AVSession {
 const int32_t TIME_MAX = 64;
-const char* ARGS_HELP = "-h";
-const char* ILLEGAL_INFORMATION = "AVSession service, enter '-h' for usage.\n";
-const char* ARGS_SHOW_METADATA = "-show_metadata";
-const char* ARGS_SHOW_SESSION_INFO = "-show_session_info";
-const char* ARGS_SHOW_CONTROLLER_INFO = "-show_controller_info";
-const char* ARGS_SHOW_ERROR_INFO = "-show_error_info";
-const char* ARGS_TRUSTED_DEVICES_INFO = "-show_trusted_devices_Info";
+const std::string ARGS_HELP = "-h";
+const std::string ILLEGAL_INFORMATION = "AVSession service, enter '-h' for usage.\n";
+const std::string ARGS_SHOW_METADATA = "-show_metadata";
+const std::string ARGS_SHOW_SESSION_INFO = "-show_session_info";
+const std::string ARGS_SHOW_CONTROLLER_INFO = "-show_controller_info";
+const std::string ARGS_SHOW_ERROR_INFO = "-show_error_info";
+const std::string ARGS_TRUSTED_DEVICES_INFO = "-show_trusted_devices_Info";
 
 std::map<std::string, AVSessionDumper::DumpActionType> AVSessionDumper::funcMap_ = {
     { ARGS_SHOW_METADATA, AVSessionDumper::ShowMetaData },

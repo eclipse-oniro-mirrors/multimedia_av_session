@@ -166,12 +166,12 @@ static HWTEST_F(SessionListenerProxyTest, OnDeviceStateChange001, testing::ext::
  * @tc.desc: Test OnRemoteDistributedSessionChange
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerProxyTest, OnRemoteDistributedSessionChange001, testing::ext::TestSize.Level0)
+static HWTEST_F(SessionListenerProxyTest, OnRemoteDistributedSessionChange001, testing::ext::TestSize.Level1)
 {
     SLOGI("OnRemoteDistributedSessionChange001, start");
     LOG_SetCallback(MyLogCallback);
     std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
     sessionListenerProxy->OnRemoteDistributedSessionChange(sessionControllers);
-    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+    EXPECT_TRUE(g_errLog.find("faild") == std::string::npos);
     SLOGI("OnRemoteDistributedSessionChange001, end");
 }

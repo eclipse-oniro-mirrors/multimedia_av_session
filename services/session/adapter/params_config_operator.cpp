@@ -59,7 +59,7 @@ void ParamsConfigOperator::InitConfig()
     cJSON* configItem = nullptr;
     cJSON_ArrayForEach(configItem, configsArray) {
         if (configItem == nullptr || cJSON_IsInvalid(configItem)) {
-            SLOGE("get config item null or invalid");
+            SLOGE("get config item null");
             continue;
         }
         cJSON* propItem = configItem->child;

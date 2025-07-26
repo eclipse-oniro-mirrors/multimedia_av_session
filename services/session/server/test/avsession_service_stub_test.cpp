@@ -826,7 +826,7 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopDeviceLogging_
  * @tc.require: #I5Y4MZ
  */
 HWTEST_F(
-    AVSessionServiceStubTest, AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001, TestSize.Level0)
+    AVSessionServiceStubTest, AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001, TestSize.Level1)
 {
     SLOGD("AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001 begin!");
     OHOS::MessageParcel data;

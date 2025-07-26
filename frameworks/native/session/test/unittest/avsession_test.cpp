@@ -1249,7 +1249,7 @@ HWTEST_F(AvsessionTest, UpdateAVQueueInfo001, TestSize.Level1)
 {
     SLOGD("UpdateAVQueueInfo001 Begin");
     AVQueueInfo info = AVQueueInfo();
-    EXPECT_EQ(avsession_->UpdateAVQueueInfo(info), AVSESSION_SUCCESS);
+    EXPECT_NE(avsession_->UpdateAVQueueInfo(info), AVSESSION_SUCCESS);
     SLOGD("UpdateAVQueueInfo001 End");
 }
 

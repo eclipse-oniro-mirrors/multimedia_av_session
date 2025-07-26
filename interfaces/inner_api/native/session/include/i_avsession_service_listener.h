@@ -28,13 +28,13 @@ class IAVSessionServiceListener {
 public:
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+
     /**
      * Release cast session at sink end.
      *
      * @since 10
     */
     virtual void ReleaseCastSession() = 0;
-
     /**
      * Create a new session at sink device.
      *
@@ -71,7 +71,7 @@ public:
     /**
      * Notify the event of device changed.
      *
-     * @param { DeviceState } device state info.
+     * @param { DeviceState& } deviceState - state info.
      * @since 20
     */
     virtual void NotifyDeviceStateChange(const DeviceState& deviceState) = 0;

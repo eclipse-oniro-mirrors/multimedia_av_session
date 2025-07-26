@@ -69,15 +69,15 @@ void FocusSessionStrategyFuzzer::FocusSessionStrategyFuzzTest(uint8_t* data, siz
     FocusSessionStrategy focusSessionStrategy;
 
     std::shared_ptr<AudioRendererChangeInfo> info = std::make_shared<AudioRendererChangeInfo>();
-    info->clientUID = GetData<uint8_t>();
-    info->sessionId = GetData<uint8_t>();
+    info->clientUID = GetData<uint32_t>();
+    info->sessionId = GetData<uint32_t>();
     info->rendererState = rendererStates[GetData<uint8_t>() % rendererStates.size()];
 
     AudioRendererChangeInfo info_ = {};
-    info_.clientUID = GetData<uint8_t>();
-    info_.clientPid = GetData<uint8_t>();
+    info_.clientUID = GetData<uint32_t>();
+    info_.sessionId = GetData<uint32_t>();
+    info_.clientPid = GetData<uint32_t>();
     std::pair<int32_t, int32_t> key = std::make_pair(info_.clientUID, info_.clientPid);
-    info_.sessionId = GetData<uint8_t>();
     info_.rendererState = rendererStates[GetData<uint8_t>() % rendererStates.size()];
     focusSessionStrategy.IsFocusSession(key);
 

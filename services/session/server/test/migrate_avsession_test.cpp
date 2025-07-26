@@ -791,7 +791,7 @@ static HWTEST_F(MigrateAVSessionTest, ProcControlCommand010, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionTest, OnDeviceOffline001, TestSize.Level0)
+static HWTEST_F(MigrateAVSessionTest, OnDeviceOffline001, TestSize.Level1)
 {
     SLOGI("OnDeviceOffline001 begin");
     const int64_t param = 1000;
@@ -813,7 +813,7 @@ static HWTEST_F(MigrateAVSessionTest, OnDeviceOffline001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionTest, OnAudioSessionChecked001, TestSize.Level0)
+static HWTEST_F(MigrateAVSessionTest, OnAudioSessionChecked001, TestSize.Level1)
 {
     SLOGI("OnAudioSessionChecked001 begin");
     int32_t uid = 1000;
@@ -833,7 +833,7 @@ static HWTEST_F(MigrateAVSessionTest, OnAudioSessionChecked001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-static HWTEST_F(MigrateAVSessionTest, GetControllerById003, TestSize.Level0)
+static HWTEST_F(MigrateAVSessionTest, GetControllerById003, TestSize.Level1)
 {
     SLOGI("GetControllerById003 begin");
     const std::string sessionId = "";
