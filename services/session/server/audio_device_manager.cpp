@@ -48,6 +48,8 @@ void AudioDeviceManager::UnInitAudioStateCallback()
 {
     UnRegisterPreferedOutputDeviceChangeCallback();
     UnRegisterAudioDeviceChangeCallback();
+    audioPreferedOutputDeviceChangeCallback_ = nullptr;
+    audioDeviceChangeCallback_ = nullptr;
     isRegistered_ = false;
     outputDevice_ = AUDIO_OUTPUT_SOURCE;
 }

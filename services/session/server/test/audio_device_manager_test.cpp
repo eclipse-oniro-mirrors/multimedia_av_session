@@ -68,6 +68,20 @@ static HWTEST(AudioDeviceManagerTest, RegisterPreferedOutputDeviceChangeCallback
 }
 
 /**
+ * @tc.name: RegisterAudioDeviceChangeCallback001
+ * @tc.desc: audioDeviceChangeCallback_ have registered
+ * @tc.type: FUNC
+ */
+static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback001, TestSize.Level1)
+{
+    SLOGI("RegisterAudioDeviceChangeCallback001 begin!");
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_
+        = std::make_shared<DeviceChangeCallback>();
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
+}
+
+/**
  * @tc.name: SendRemoteAvSessionInfo001
  * @tc.desc: fail to send
  * @tc.type: FUNC
