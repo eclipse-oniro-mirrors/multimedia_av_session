@@ -717,6 +717,17 @@ int32_t AVSessionServiceStub::CheckBeforeHandleStartCast(MessageParcel& data, Ou
     deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
     CHECK_AND_RETURN_RET_LOG(data.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
+
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedPullClientsLen), false,
+        "read supportedPullClientsLen failed");
+    std::vector<std::string> supportedPullClients;
+    for (int i = 0; i < supportedPullClientsLen; i++) {
+        std::string supportedPullClient;
+        CHECK_AND_RETURN_RET_LOG(data.ReadUInt32(supportedPullClient), false,
+            "read supportedPullClient failed");
+        supportedPullClients.emplace_back(supportedPullClient);
+    }
+    deviceInfo.supportedPullClients_ = supportedPullClients;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }

@@ -1210,6 +1210,12 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "audioCapabilities", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.supportedPullClients_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "supportedPullClients", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
     return napi_ok;
 }
 
@@ -1699,6 +1705,13 @@ napi_status NapiUtils::ProcessDeviceInfoParams(napi_env env, napi_value in, Devi
         CHECK_RETURN(status == napi_ok, "get DeviceInfo mediumTypes value failed", status);
     } else {
         out.mediumTypes_ = COAP;
+    }
+    napi_has_named_property(env, in, "supportedPullClients", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "supportedPullClients", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedPullClients failed", status);
+        status = GetValue(env, value, out.supportedPullClients_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedPullClients value failed", status);
     }
     return napi_ok;
 }

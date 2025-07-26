@@ -698,6 +698,12 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
         CHECK_AND_RETURN_RET_LOG(data.WriteBool(deviceInfo.isLegacy_), ERR_MARSHALLING, "write isLegacy failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.mediumTypes_), ERR_MARSHALLING,
             "write mediumTypes failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedPullClients_.size()), ERR_MARSHALLING,
+            "write supportedPullClients size failed");
+        for (auto supportedPullClients : deviceInfo.supportedPullClients_) {
+            CHECK_AND_RETURN_RET_LOG(data.WriteUInt32(supportedPullClients), ERR_MARSHALLING,
+                "write supportedDrmCapability failed");
+        }
     }
 
     auto remote = Remote();
