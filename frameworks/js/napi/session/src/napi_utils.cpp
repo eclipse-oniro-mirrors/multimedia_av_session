@@ -1211,10 +1211,12 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     status = napi_set_named_property(env, out, "audioCapabilities", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
-    status = SetValue(env, in.supportedPullClients_, property);
-    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
-    status = napi_set_named_property(env, out, "supportedPullClients", property);
-    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    if (in.supportedPullClients_.size() > 0) {
+        status = SetValue(env, in.supportedPullClients_, property);
+        CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+        status = napi_set_named_property(env, out, "supportedPullClients", property);
+        CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    }
 
     return napi_ok;
 }
