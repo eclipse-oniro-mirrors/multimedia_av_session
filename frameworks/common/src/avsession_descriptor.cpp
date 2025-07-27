@@ -79,7 +79,7 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedPullClients_.size()), false,
             "write supportedPullClients size failed");
         for (auto supportedPullClient : deviceInfo.supportedPullClients_) {
-            CHECK_AND_RETURN_RET_LOG(out.WriteUInt32(supportedPullClient), false,
+            CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false,
                 "write supportedPullClient failed");
         }
     }
@@ -145,7 +145,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     std::vector<std::uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient = 0;
-        CHECK_AND_RETURN_RET_LOG(in.ReadUInt32(supportedPullClient), false,
+        CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false,
             "read supportedDrmCapability failed");
         supportedPullClients.emplace_back(supportedPullClient);
     }
@@ -208,7 +208,7 @@ bool DeviceInfo::Marshalling(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportedPullClients_.size()), false,
         "write supportedPullClients size failed");
     for (auto supportedPullClient : supportedPullClients_) {
-        CHECK_AND_RETURN_RET_LOG(out.WriteUInt32(supportedPullClient), false,
+        CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false,
             "write supportedPullClient failed");
     }
     return true;
@@ -257,7 +257,7 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     std::vector<uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient;
-        CHECK_AND_RETURN_RET_LOG(in.ReadUInt32(supportedPullClient), false,
+        CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false,
             "read supportedPullClients failed");
         supportedPullClients.emplace_back(supportedPullClient);
     }

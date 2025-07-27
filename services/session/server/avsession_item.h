@@ -305,7 +305,7 @@ public:
 
     void SetSpid(const AAFwk::WantParams& extras);
 
-    const std::string& GetSpid();
+    uint32_t GetSpid();
 
     void DeleteSpidNotSelf(DeviceInfo& deviceInfo);
 

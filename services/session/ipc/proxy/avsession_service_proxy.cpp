@@ -701,7 +701,7 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedPullClients_.size()), ERR_MARSHALLING,
             "write supportedPullClients size failed");
         for (auto supportedPullClients : deviceInfo.supportedPullClients_) {
-            CHECK_AND_RETURN_RET_LOG(data.WriteUInt32(supportedPullClients), ERR_MARSHALLING,
+            CHECK_AND_RETURN_RET_LOG(data.WriteUint32(supportedPullClients), ERR_MARSHALLING,
                 "write supportedDrmCapability failed");
         }
     }

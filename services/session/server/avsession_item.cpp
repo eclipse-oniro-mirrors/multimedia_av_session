@@ -1778,7 +1778,7 @@ void AVSessionItem::SetSpid(const AAFwk::WantParams& extras)
     }
 }
 
-const std::string& AVSessionItem::GetSpid()
+uint32_t AVSessionItem::GetSpid()
 {
     std::unique_lock <std::mutex> lock(spidMutex_);
     return spid_;
