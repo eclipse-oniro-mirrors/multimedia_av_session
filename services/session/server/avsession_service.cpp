@@ -341,6 +341,7 @@ void AVSessionService::HandleRemoveMediaCardEvent()
         SLOGE("AVSessionNotifyUpdateNotification failed, uid = %{public}d, pid = %{public}d, ret = %{public}d",
             topSession_->GetUid(), topSession_->GetPid(), ret);
     }
+    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("NotifyFlowControl");
     if (topSession_->IsCasting()) {
         AVCastControlCommand castCmd;
         castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
@@ -369,12 +370,14 @@ void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
     if (isAppear == "APPEAR") {
         isMediaCardOpen_ = true;
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckCardStateChangeStop");
+        hasCardStateChangeStopTask_ = false;
     } else if (isAppear == "DISAPPEAR") {
         isMediaCardOpen_ = false;
         if (IsTopSessionPlaying() || hasRemoveEvent_.load()) {
             SLOGI("HandleMediaCardState hasRemoveEvent_:%{public}d ", hasRemoveEvent_.load());
             return;
         }
+        hasCardStateChangeStopTask_ = true;
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this]() {
                 if (IsTopSessionPlaying() || hasRemoveEvent_.load() || isMediaCardOpen_.load()) {
@@ -385,6 +388,7 @@ void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
                 {
                     std::lock_guard lockGuard(sessionServiceLock_);
                     NotifySystemUI(nullptr, true, false, false);
+                    hasCardStateChangeStopTask_ = false;
                 }
             }, "CheckCardStateChangeStop", cancelTimeout);
     }
@@ -671,11 +675,11 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         SLOGI(" HandleFocusSession focusSession is current topSession.");
         auto hasOtherPlayingSession = false;
         if (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") {
-            if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_.load())) {
-                SLOGI("isPlaying:%{public}d isCardOpen_:%{public}d hasRemoveEvent_:%{public}d ",
-                    isPlaying, isMediaCardOpen_.load(), hasRemoveEvent_.load());
-                return;
-            }
+            bool notPublishNotification = !isPlaying &&
+                (isMediaCardOpen_ || hasRemoveEvent_.load() || hasCardStateChangeStopTask_.load());
+            CHECK_AND_RETURN_LOG(!notPublishNotification,
+                "isPlaying:%{public}d isCardOpen_:%{public}d hasRemoveEvent_:%{public}d hasRemoveTask_:%{public}d",
+                isPlaying, isMediaCardOpen_.load(), hasRemoveEvent_.load(), hasCardStateChangeStopTask_.load());
             if (isPlaying) {
                 auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
                     topSession_->GetUid(), topSession_->GetPid(), true);
@@ -4009,6 +4013,8 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         topSession_->GetCurrentCastItem(item);
         std::string notifyText = item.GetDescription() ? item.GetDescription()->GetTitle() : GetLocalTitle();
         AddCapsule(notifyText, isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckCardStateChangeStop");
+        hasCardStateChangeStopTask_ = false;
     }
 
     auto uid = topSession_ ? (topSession_->GetUid() == audioBrokerUid ?

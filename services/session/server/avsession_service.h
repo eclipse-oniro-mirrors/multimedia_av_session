@@ -610,6 +610,7 @@ private:
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;
     std::atomic<bool> hasMediaCapsule_ = false;
+    std::atomic<bool> hasCardStateChangeStopTask_ = false;
 
     sptr<AVSessionItem> topSession_;
     sptr<AVSessionItem> ancoSession_;
