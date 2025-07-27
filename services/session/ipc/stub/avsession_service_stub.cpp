@@ -721,9 +721,9 @@ int32_t AVSessionServiceStub::CheckBeforeHandleStartCast(MessageParcel& data, Ou
     int32_t supportedPullClientsLen = 0;
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedPullClientsLen), false,
         "read supportedPullClientsLen failed");
-    std::vector<std::string> supportedPullClients;
+    std::vector<std::uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
-        std::string supportedPullClient;
+        uint32_t supportedPullClient;
         CHECK_AND_RETURN_RET_LOG(data.ReadUint32(supportedPullClient), false,
             "read supportedPullClient failed");
         supportedPullClients.emplace_back(supportedPullClient);

@@ -254,6 +254,7 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(mediumTypes_), false, "Read mediumTypes failed");
     CHECK_AND_RETURN_RET_LOG(audioCapabilities_.ReadFromParcel(in), false, "Read audioCapability failed");
 
+    int32_t supportedPullClientsLen = 0;
     std::vector<uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient;
