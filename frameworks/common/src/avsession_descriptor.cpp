@@ -146,7 +146,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient = 0;
         CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false,
-            "read supportedDrmCapability failed");
+            "read supportedPullClient failed");
         supportedPullClients.emplace_back(supportedPullClient);
     }
     deviceInfo.supportedPullClients_ = supportedPullClients;
