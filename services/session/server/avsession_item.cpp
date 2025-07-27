@@ -832,7 +832,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     InitializeCastCommands();
     if (SearchSpidInCapability(castHandleDeviceId_)) {
         if (castControllerProxy_ != nullptr) {
-            castControllerProxy_->SetSpid(spid_);
+            castControllerProxy_->SetSpid(GetSpid());
         }
     }
     return remoteObject;
@@ -1349,7 +1349,7 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 
     SetCastHandle(castHandle);
     SLOGI("start cast check handle set to %{public}lld", (long long)castHandle_);
-    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo, spid_);
+    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo, GetSpid());
     if (ret == AVSESSION_SUCCESS) {
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
     }
@@ -1488,21 +1488,6 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
     }
 }
 
-bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
-{
-    auto iter = castDeviceInfoMap_.find(deviceId);
-    if (iter == castDeviceInfoMap_.end()) {
-        SLOGE("deviceId map deviceinfo is not exit");
-        return false;
-    }
-    for (uint32_t cap : iter->second.supportedPullClients_) {
-        if (cap == spid_) {
-            return true;
-        }
-    }
-    return false;
-}
-
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
@@ -1513,6 +1498,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
+    DeleteSpidNotSelf(deviceInfo);
     newCastState = castState;
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
@@ -1779,6 +1765,7 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
 
 void AVSessionItem::SetSpid(const AAFwk::WantParams& extras)
 {
+    std::unique_lock <std::mutex> lock(spidMutex_);
     if (extras.HasParam("request-tv-client")) {
         auto value = extras.GetParam("request-tv-client");
         AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
@@ -1788,6 +1775,38 @@ void AVSessionItem::SetSpid(const AAFwk::WantParams& extras)
         } else {
             SLOGE("AVSessionItem SetSpid failed");
         }
+    }
+}
+
+const std::string& AVSessionItem::GetSpid()
+{
+    std::unique_lock <std::mutex> lock(spidMutex_);
+    return spid_;
+}
+
+bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
+{
+    std::unique_lock <std::mutex> lock(spidMutex_);
+    auto iter = castDeviceInfoMap_.find(deviceId);
+    if (iter == castDeviceInfoMap_.end()) {
+        SLOGE("deviceId map deviceinfo is not exit");
+        return false;
+    }
+    for (uint32_t cap : iter->second.supportedPullClients_) {
+        if (cap == spid_) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void AVSessionItem::DeleteSpidNotSelf(DeviceInfo& deviceInfo)
+{
+    std::unique_lock <std::mutex> lock(spidMutex_);
+    auto it = std::find(deviceInfo.supportedPullClients_.begin(), deviceInfo.supportedPullClients_.end(), spid_);
+    if (it != deviceInfo.supportedPullClients_.end()) {
+        deviceInfo.supportedPullClients_.clear();
+        deviceInfo.supportedPullClients_.push_back(spid_);
     }
 }
 

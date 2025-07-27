@@ -305,6 +305,10 @@ public:
 
     void SetSpid(const AAFwk::WantParams& extras);
 
+    const std::string& GetSpid();
+
+    void DeleteSpidNotSelf(DeviceInfo& deviceInfo);
+
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
     
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
@@ -515,6 +519,7 @@ private:
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     uint32_t spid_ = 0;
+    std::mutex spidMutex_;
     std::function<void(std::string)> serviceCallbackForStream_;
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;
