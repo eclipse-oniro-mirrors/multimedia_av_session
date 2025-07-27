@@ -705,7 +705,6 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
                 "write supportedDrmCapability failed");
         }
     }
-
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
