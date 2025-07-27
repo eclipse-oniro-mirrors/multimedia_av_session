@@ -143,7 +143,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedPullClientsLen), false,
         "read supportedPullClientsLen failed");
     std::vector<std::uint32_t> supportedPullClients;
-    for (int i = 0; i < supportedPullClientsLen; i++) {
+    for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient = 0;
         CHECK_AND_RETURN_RET_LOG(in.ReadUInt32(supportedPullClient), false,
             "read supportedDrmCapability failed");
@@ -255,7 +255,7 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(audioCapabilities_.ReadFromParcel(in), false, "Read audioCapability failed");
 
     std::vector<uint32_t> supportedPullClients;
-    for (int i = 0; i < supportedPullClientsLen; i++) {
+    for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient;
         CHECK_AND_RETURN_RET_LOG(in.ReadUInt32(supportedPullClient), false,
             "read supportedPullClients failed");
