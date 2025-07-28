@@ -106,6 +106,10 @@ void TestAudioDeviceManager()
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> desc;
     AudioDeviceManager::GetInstance().RegisterPreferedOutputDeviceChangeCallback();
     AudioDeviceManager::GetInstance().audioPreferedOutputDeviceChangeCallback_->OnPreferredOutputDeviceUpdated(desc);
+    
+    AudioStandard::DeviceChangeAction deviceChangeAction;
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
 }
 
 /* Fuzzer entry point */
