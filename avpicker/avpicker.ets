@@ -15,6 +15,7 @@
 
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
+const MAX_PICKER_LIMIT = 20;
 
 /**
  * Definition of av cast picker state.
@@ -206,12 +207,17 @@ export struct AVCastPicker {
   private needToRestart: boolean = false;
   @State isShowLoadingProgress: boolean = false;
   private pickerCountOnCreation: number = 0;
+  @State isDisabledByPickerLimit: boolean = false;
 
   private static currentPickerCount: number = 0;
 
   aboutToAppear(): void {
     AVCastPicker.currentPickerCount += 1;
     this.pickerCountOnCreation = AVCastPicker.currentPickerCount;
+    if (this.pickerCountOnCreation > MAX_PICKER_LIMIT) {
+      console.info(TAG, 'disable picker');
+      this.isDisabledByPickerLimit = true;
+    }
   }
 
   aboutToDisappear(): void {
@@ -233,7 +239,9 @@ export struct AVCastPicker {
 
   build() {
     Column() {
-      if (this.customPicker === undefined) {
+      if (this.isDisabledByPickerLimit) {
+        this.buildDisabledPicker();
+      } else if (this.customPicker === undefined) {
         this.buildDefaultPicker(false);
       } else {
         this.buildCustomPicker();
@@ -320,9 +328,9 @@ export struct AVCastPicker {
               .width(this.isPc ? 254 : 144)
               .padding({
                 left: 8,
-                top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                top: this.isPc ? 11 : (this.showHighQuality(item) ? 7 : 17),
                 right: 8,
-                bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                bottom: this.isPc ? 11 : (this.showHighQuality(item) ? 7 : 17),
               })
             }
             .alignItems(VerticalAlign.Center)
@@ -371,6 +379,11 @@ export struct AVCastPicker {
     }
     .width(this.isPc ? 326 : 216)
     .borderRadius(this.isPc ? 8 : 20)
+  }
+
+  @Builder
+  private buildDisabledPicker() {
+    Column();
   }
 
   @Builder

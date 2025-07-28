@@ -19,6 +19,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
+const t = 20;
 
 export let AVCastPickerState;
 (function(l11) {
@@ -85,6 +86,7 @@ export class AVCastPicker extends ViewPU {
         this.needToRestart = false;
         this.__isShowLoadingProgress = new ObservedPropertySimplePU(false, this, 'isShowLoadingProgress');
         this.pickerCountOnCreation = 0;
+        this.__isDisabledByPickerLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPickerLimit');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -166,6 +168,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.pickerCountOnCreation !== undefined) {
             this.pickerCountOnCreation = c11.pickerCountOnCreation;
         }
+        if (c11.isDisabledByPickerLimit !== undefined) {
+            this.isDisabledByPickerLimit = c11.isDisabledByPickerLimit;
+        }
     }
 
     updateStateVars(b11) {
@@ -191,6 +196,7 @@ export class AVCastPicker extends ViewPU {
         this.__isRTL.purgeDependencyOnElmtId(a11);
         this.__restartUECMessage.purgeDependencyOnElmtId(a11);
         this.__isShowLoadingProgress.purgeDependencyOnElmtId(a11);
+        this.__isDisabledByPickerLimit.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -213,6 +219,7 @@ export class AVCastPicker extends ViewPU {
         this.__isRTL.aboutToBeDeleted();
         this.__restartUECMessage.aboutToBeDeleted();
         this.__isShowLoadingProgress.aboutToBeDeleted();
+        this.__isDisabledByPickerLimit.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -369,9 +376,21 @@ export class AVCastPicker extends ViewPU {
         this.__isShowLoadingProgress.set(g1);
     }
 
+    get isDisabledByPickerLimit() {
+        return this.__isDisabledByPickerLimit.get();
+    }
+
+    set isDisabledByPickerLimit(g1) {
+        this.__isDisabledByPickerLimit.set(g1);
+    }
+
     aboutToAppear() {
         AVCastPicker.currentPickerCount += 1;
         this.pickerCountOnCreation = AVCastPicker.currentPickerCount;
+        if (this.pickerCountOnCreation > t) {
+            console.info(TAG, 'disable picker');
+            this.isDisabledByPickerLimit = true;
+        }
     }
 
     aboutToDisappear() {
@@ -398,7 +417,11 @@ export class AVCastPicker extends ViewPU {
         }, Column);
         this.observeComponentCreation2((n10, o10) => {
             If.create();
-            if (this.customPicker === undefined) {
+            if (this.isDisabledByPickerLimit) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.buildDisabledPicker.bind(this)();
+                });
+            } else if (this.customPicker === undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.buildDefaultPicker.bind(this)(false);
                 });
@@ -655,6 +678,12 @@ export class AVCastPicker extends ViewPU {
         Column.pop();
     }
 
+    buildDisabledPicker(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+        }, Column);
+        Column.pop();
+    }
     buildDefaultPicker(c8, d8 = null) {
         this.observeComponentCreation2((f8, g8) => {
             Button.createWithChild();
