@@ -175,7 +175,7 @@ void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
 void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeAction &deviceChangeAction)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descs = deviceChangeAction.deviceDescriptors;
-    if(descs.size() == 0) {
+    if (descs.size() == 0) {
         SLOGE("callback device list is null");
         return;
     }
