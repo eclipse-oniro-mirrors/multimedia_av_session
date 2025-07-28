@@ -472,7 +472,7 @@ export class AVCastPicker extends ViewPU {
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
-            Text.wordBreak(WordBreak.BREAK_ALL);
+            Text.wordBreak(WordBreak.BREAK_WORD);
             Text.maxFontScale(this.maxFontSizeScale);
             Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
         }, Text);
