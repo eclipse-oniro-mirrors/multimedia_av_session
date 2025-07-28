@@ -2578,7 +2578,6 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
         std::lock_guard lockGuard(sessionServiceLock_);
         AVControlCommand cmd;
         if (topSession_ && CheckSessionHandleKeyEvent(false, cmd, keyEvent, topSession_)) {
-            topSession_->HandleMediaKeyEvent(keyEvent);
             return AVSESSION_SUCCESS;
         }
     }
