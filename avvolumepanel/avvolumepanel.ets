@@ -14,6 +14,7 @@
  */
 
 const TAG = 'AVVolumePanel';
+const MAX_PANEL_LIMIT = 20;
 
 class AVVolumePanelParameter {
   public position?: Position;
@@ -31,6 +32,7 @@ export struct AVVolumePanel {
    */
   private volumeCallback!: UIExtensionProxy;
   private panelCountOncreation: number = 0;
+  @State isDisabledByPanelLimit: boolean = false;
 
   private static currentPanelCount: number = 0;
 
@@ -44,6 +46,10 @@ export struct AVVolumePanel {
   aboutToAppear(): void {
     AVVolumePanel.currentPanelCount += 1;
     this.panelCountOncreation = AVVolumePanel.currentPanelCount;
+    if (this.panelCountOncreation > MAX_PANEL_LIMIT) {
+      console.info(TAG, 'disable panel');
+      this.isDisabledByPanelLimit = true;
+    }
   }
 
   aboutToDisAppear(): void {
@@ -52,7 +58,10 @@ export struct AVVolumePanel {
 
   build() {
     Column() {
-      UIExtensionComponent(
+      if (this.isDisabledByPanelLimit) {
+        Column();
+      } else {
+        UIExtensionComponent(
         {
           abilityName: 'AVVolumeExtension',
           bundleName: 'com.hmos.mediacontroller',
@@ -70,6 +79,7 @@ export struct AVVolumePanel {
           this.volumeCallback = callback;
         })
         .size({width: '100%', height: '100%'})
+      }
     }.size({width: '100%', height: '100%'})
   }
 }
