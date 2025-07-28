@@ -28,6 +28,7 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem);
 void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem);
 void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem);
 void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem);
+void AvSessionItemTestCustomData(sptr<AVSessionItem> avSessionItem);
 
 class AvSessionItemFuzzer {
 public:

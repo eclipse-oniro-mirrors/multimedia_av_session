@@ -17,6 +17,7 @@
 #include <cstdint>
 
 #include "securec.h"
+#include "string_wrapper.h"
 #include "avsession_item.h"
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
@@ -365,6 +366,9 @@ void AvControllerItemTestImplSecond(sptr<AVControllerItem> avControllerItem)
     avControllerItem->HandleQueueItemsChange(items);
     avControllerItem->HandleQueueTitleChange(title);
     avControllerItem->HandleExtrasChange(wantParams);
+    wantParams.SetParam("customData", AAFwk::String::Box(GetString()));
+    avControllerItem->SendCustomData(wantParams);
+    avControllerItem->HandleCustomData(wantParams);
 
     std::string sessionId = GetString();
     auto releaseCallback = [](AVControllerItem& item) {};
