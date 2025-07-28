@@ -229,13 +229,16 @@ int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
 {
     std::lock_guard lockGuard(avsessionItemLock_);
     CHECK_AND_RETURN_RET_LOG(avCallMetaData_.CopyFrom(avCallMetaData), AVSESSION_ERROR, "AVCallMetaData set error");
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
-    if (innerPixelMap != nullptr) {
-        std::string sessionId = GetSessionId();
-        std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-        AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, sessionId + AVSessionUtils::GetFileSuffix());
-        innerPixelMap->Clear();
-        avCallMetaData_.SetMediaImage(innerPixelMap);
+    {
+        std::unique_lock<std::shared_mutex> lock(writeAndReadImgLock_);
+        std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
+        if (innerPixelMap != nullptr) {
+            std::string sessionId = GetSessionId();
+            std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+            AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, sessionId + AVSessionUtils::GetFileSuffix());
+            innerPixelMap->Clear();
+            avCallMetaData_.SetMediaImage(innerPixelMap);
+        }
     }
 
     {
@@ -273,16 +276,11 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
     std::lock_guard lockGuard(avsessionItemLock_);
     SessionXCollie sessionXCollie("avsession::GetAVMetaData");
-    std::string sessionId = GetSessionId();
-    std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-    std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
-    AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
+    ReadMetaDataImg(innerPixelMap);
 
-    std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
-    std::string avQueueFileName = GetBundleName() + "_" + metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
-    AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
+    ReadMetaDataAVQueueImg(avQueuePixelMap);
 
     meta = metaData_;
     return AVSESSION_SUCCESS;
@@ -452,6 +450,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
             isAssetChange_ = true;
         }
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
+        std::unique_lock<std::shared_mutex> lock(writeAndReadImgLock_);
         std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
         if (innerPixelMap != nullptr) {
             std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
@@ -1839,11 +1838,8 @@ AVCallState AVSessionItem::GetAVCallState()
 AVCallMetaData AVSessionItem::GetAVCallMetaData()
 {
     std::lock_guard lockGuard(avsessionItemLock_);
-    std::string sessionId = GetSessionId();
-    std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-    std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
-    AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
+    ReadMetaDataImg(innerPixelMap);
     return avCallMetaData_;
 }
 
@@ -1863,17 +1859,28 @@ AVMetaData AVSessionItem::GetMetaDataWithoutImg()
 AVMetaData AVSessionItem::GetMetaData()
 {
     std::lock_guard lockGuard(avsessionItemLock_);
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+    ReadMetaDataImg(innerPixelMap);
+
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
+    ReadMetaDataAVQueueImg(avQueuePixelMap);
+    return metaData_;
+}
+
+void AVSessionItem::ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap)
+{
+    std::shared_lock<std::shared_mutex> lock(writeAndReadImgLock_);
     std::string sessionId = GetSessionId();
     std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
     std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
+}
 
+void AVSessionItem::ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& avQueuePixelMap)
+{
     std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
     std::string avQueueFileName = GetBundleName() + "_" + metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
     AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
-    return metaData_;
 }
 
 std::vector<AVQueueItem> AVSessionItem::GetQueueItems()

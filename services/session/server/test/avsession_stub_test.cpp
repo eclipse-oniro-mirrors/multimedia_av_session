@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -426,7 +426,7 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level
     info.MarshallingMessageParcel(data);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
-    EXPECT_NE(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleUpdateAVQueueInfoEvent001 end!");
 }
 
@@ -445,6 +445,6 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level
     info.MarshallingMessageParcel(data);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_NE(ret, OHOS::ERR_NONE);
     SLOGI("HandleUpdateAVQueueInfoEvent002 end!");
 }

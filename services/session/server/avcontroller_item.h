@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,7 +124,7 @@ public:
     int32_t RegisterMigrateAVSessionProxyCallback(
         const std::function<int32_t(const std::string&, AAFwk::WantParams&)>& callback);
 
-    int32_t SetImgForMetaData(AVMetaData& data);
+    int32_t ReadImgForMetaData(AVMetaData& data);
 
     std::string GetSessionType();
 
