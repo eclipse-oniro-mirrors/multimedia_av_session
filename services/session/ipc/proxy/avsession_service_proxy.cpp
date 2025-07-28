@@ -670,7 +670,6 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
     CHECK_AND_RETURN_RET_LOG(data.WriteString(sessionToken.sessionId), ERR_MARSHALLING, "write sessionId failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionToken.pid), ERR_MARSHALLING, "write pid failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionToken.uid), ERR_MARSHALLING, "write uid failed");
-
     int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfoSize), ERR_MARSHALLING, "write deviceInfoSize failed");
     for (const DeviceInfo& deviceInfo : outputDeviceInfo.deviceInfos_) {
@@ -698,8 +697,12 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
         CHECK_AND_RETURN_RET_LOG(data.WriteBool(deviceInfo.isLegacy_), ERR_MARSHALLING, "write isLegacy failed");
         CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.mediumTypes_), ERR_MARSHALLING,
             "write mediumTypes failed");
+        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedPullClients_.size()), ERR_MARSHALLING,
+            "write supportedPullClients size failed");
+        for (auto supportedPullClient : deviceInfo.supportedPullClients_) {
+            CHECK_AND_RETURN_RET_LOG(data.WriteUint32(supportedPullClient), ERR_MARSHALLING, "write client failed");
+        }
     }
-
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;

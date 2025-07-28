@@ -76,6 +76,12 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.mediumTypes_), false, "write mediumTypes failed");
         CHECK_AND_RETURN_RET_LOG(deviceInfo.audioCapabilities_.WriteToParcel(out), false,
             "write audioCapability failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedPullClients_.size()), false,
+            "write supportedPullClients size failed");
+        for (auto supportedPullClient : deviceInfo.supportedPullClients_) {
+            CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false,
+                "write supportedPullClient failed");
+        }
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -132,6 +138,18 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
     CHECK_AND_RETURN_RET_LOG(deviceInfo.audioCapabilities_.ReadFromParcel(in), false, "Read audioCapability failed");
+
+    int32_t supportedPullClientsLen = 0;
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedPullClientsLen), false,
+        "read supportedPullClientsLen failed");
+    std::vector<std::uint32_t> supportedPullClients;
+    for (int j = 0; j < supportedPullClientsLen; j++) {
+        uint32_t supportedPullClient = 0;
+        CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false,
+            "read supportedPullClient failed");
+        supportedPullClients.emplace_back(supportedPullClient);
+    }
+    deviceInfo.supportedPullClients_ = supportedPullClients;
     outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
@@ -186,6 +204,13 @@ bool DeviceInfo::Marshalling(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isLegacy_), false, "write isLegacy failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(mediumTypes_), false, "write mediumTypes failed");
     CHECK_AND_RETURN_RET_LOG(audioCapabilities_.WriteToParcel(out), false, "write audioCapability failed");
+
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportedPullClients_.size()), false,
+        "write supportedPullClients size failed");
+    for (auto supportedPullClient : supportedPullClients_) {
+        CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false,
+            "write supportedPullClient failed");
+    }
     return true;
 }
 
@@ -228,6 +253,17 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isLegacy_), false, "Read isLegacy failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(mediumTypes_), false, "Read mediumTypes failed");
     CHECK_AND_RETURN_RET_LOG(audioCapabilities_.ReadFromParcel(in), false, "Read audioCapability failed");
+
+    int32_t supportedPullClientsLen = 0;
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedPullClientsLen), false, "read supportedPullClientsLen failed");
+    std::vector<uint32_t> supportedPullClients;
+    for (int j = 0; j < supportedPullClientsLen; j++) {
+        uint32_t supportedPullClient;
+        CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false,
+            "read supportedPullClients failed");
+        supportedPullClients.emplace_back(supportedPullClient);
+    }
+    supportedPullClients_ = supportedPullClients;
     return true;
 }
 

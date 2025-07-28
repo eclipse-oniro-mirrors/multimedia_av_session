@@ -1210,6 +1210,14 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "audioCapabilities", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    if (in.supportedPullClients_.size() > 0) {
+        status = SetValue(env, in.supportedPullClients_, property);
+        CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+        status = napi_set_named_property(env, out, "supportedPullClients", property);
+        CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    }
+
     return napi_ok;
 }
 
@@ -1714,6 +1722,13 @@ napi_status NapiUtils::ProcessDeviceInfoParamsExtra(napi_env env, napi_value in,
         CHECK_RETURN(status == napi_ok, "get DeviceInfo audioCapabilities failed", status);
         status = GetValue(env, value, out.audioCapabilities_);
         CHECK_RETURN(status == napi_ok, "get DeviceInfo audioCapabilities value failed", status);
+    }
+    napi_has_named_property(env, in, "supportedPullClients", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "supportedPullClients", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedPullClients failed", status);
+        status = GetValue(env, value, out.supportedPullClients_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedPullClients value failed", status);
     }
     return napi_ok;
 }
