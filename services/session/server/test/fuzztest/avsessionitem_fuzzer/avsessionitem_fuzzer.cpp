@@ -19,6 +19,8 @@
 #include <memory>
 
 #include "securec.h"
+#include "int_wrapper.h"
+#include "string_wrapper.h"
 #include "avsession_item.h"
 #include "iav_session.h"
 #include "avsession_stub.h"
@@ -234,6 +236,18 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem)
 #endif
 }
 
+void AvSessionItemTestCustomData(sptr<AVSessionItem> avSessionItem)
+{
+    AAFwk::WantParams wantParams;
+    std::string deviceId = GetString();
+    wantParams.SetParam("request-tv-client", AAFwk::Integer::Box(GetData<uint8_t>()));
+    avSessionItem->SetSpid(wantParams);
+    avSessionItem->SearchSpidInCapability(deviceId);
+    wantParams.SetParam("customData", AAFwk::String::Box(GetString()));
+    avSessionItem->SendCustomData(wantParams);
+    avSessionItem->ExecuteCustomData(wantParams);
+}
+
 void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem)
 {
     int32_t state = GetData<int32_t>();
@@ -288,6 +302,8 @@ void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem)
     avSessionItem->SetPid(pid);
     avSessionItem->SetUid(uid);
     avSessionItem->HandleControllerRelease(pid);
+
+    AvSessionItemTestCustomData(avSessionItem);
 }
 
 void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem)

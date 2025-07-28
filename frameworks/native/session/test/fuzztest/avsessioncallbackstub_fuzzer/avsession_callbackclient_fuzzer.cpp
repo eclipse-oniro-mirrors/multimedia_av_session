@@ -26,6 +26,7 @@
 #include "want_params.h"
 #include "avsession_callbackclient_fuzzer.h"
 #include "securec.h"
+#include "string_wrapper.h"
 
 using namespace std;
 using namespace OHOS;
@@ -57,6 +58,22 @@ T GetData()
     }
     g_pos += objectSize;
     return object;
+}
+
+std::string GetString()
+{
+    size_t objectSize = (GetData<int8_t>() % MAX_CODE_TEST) + 1;
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return "OVER_SIZE";
+    }
+    char object[objectSize + 1];
+    errno_t ret = memcpy_s(object, sizeof(object), RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return "";
+    }
+    g_pos += objectSize;
+    std::string output(object);
+    return output;
 }
 
 template<class T>
@@ -92,6 +109,7 @@ class TestAVSessionCallback : public AVSessionCallback {
     void OnPlayFromAssetId(int64_t assetId) override;
     void OnPlayWithAssetId(const std::string& assetId) override;
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
+    void OnCustomData(const AAFwk::WantParams& data) override;
 };
 
 void TestAVSessionCallback::OnAVCallAnswer()
@@ -205,6 +223,11 @@ void TestAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDispl
     SLOGI("Enter into TestAVSessionCallback::OnCastDisplayChange.");
 }
 
+void TestAVSessionCallback::OnCustomData(const AAFwk::WantParams& data)
+{
+    SLOGI("Enter into TestAVSessionCallback::OnCustomData.");
+}
+
 void AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(int32_t code)
 {
     if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
@@ -274,6 +297,9 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner1()
     aVSessionCallbackClient.OnSetSpeed(speed);
     aVSessionCallbackClient.OnSetLoopMode(loopMode);
     aVSessionCallbackClient.OnSetTargetLoopMode(targetLoopMode);
+    OHOS::AAFwk::WantParams params;
+    params.SetParam("customData", AAFwk::String::Box(GetString()));
+    aVSessionCallbackClient.OnCustomData(params);
 
     uint8_t randomNum = GetData<uint8_t>();
     std::vector<std::string> mediaIds = { "mediaId1", "mediaId2", "mediaId3" };
