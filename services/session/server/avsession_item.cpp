@@ -1769,7 +1769,7 @@ void AVSessionItem::SetSpid(const AAFwk::WantParams& extras)
         auto value = extras.GetParam("request-tv-client");
         AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
         if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
-            spid_ = AAFwk::Integer::Unbox(intValue);
+            spid_ = static_cast<uint32_t>(AAFwk::Integer::Unbox(intValue));
             SLOGI("AVSessionItem SetSpid %{public}u", spid_);
         } else {
             SLOGE("AVSessionItem SetSpid failed");
@@ -1799,7 +1799,7 @@ bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
     return false;
 }
 
-void AVSessionItem::DeleteSpidNotSelf(DeviceInfo& deviceInfo)
+void AVSessionItem::DeleteSpidNotSelf(const DeviceInfo& deviceInfo)
 {
     std::unique_lock <std::mutex> lock(spidMutex_);
     auto it = std::find(deviceInfo.supportedPullClients_.begin(), deviceInfo.supportedPullClients_.end(), spid_);

@@ -272,10 +272,10 @@ int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, co
 int32_t AVControllerItem::SendCustomData(const AAFwk::WantParams& data)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
+    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params don't have customData");
     auto value = data.GetParam("customData");
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
-    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData isnt a valid string");
+    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
     session_->ExecuteCustomData(data);
     return AVSESSION_SUCCESS;

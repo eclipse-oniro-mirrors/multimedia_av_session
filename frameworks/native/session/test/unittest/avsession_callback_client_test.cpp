@@ -470,5 +470,23 @@ HWTEST_F(AVSessionCallbackClientTest, OnCastDisplayChange001, TestSize.Level1)
     ErrCode ret = sessionCallbackClient->OnCastDisplayChange(castDisplayInfo);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
-} // namespace AVSESSION
+
+/**
+ * @tc.name: OnCustomData001
+ * @tc.desc: test OnCustomData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionCallbackClientTest, OnCustomData001, TestSize.Level0)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::shared_ptr<AVSessionCallback> sessionCallback = std::make_shared<AVSessionCallbackImpl>();
+    std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
+        std::make_shared<AVSessionCallbackClient>(sessionCallback);
+    EXPECT_NE(sessionCallbackClient, nullptr);
+    OHOS::AAFwk::WantParams extras;
+    ErrCode ret = sessionCallbackClient->OnCustomData(extras);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+} // namespace AVSession
 } // namespace OHOS

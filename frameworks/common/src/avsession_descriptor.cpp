@@ -140,8 +140,11 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     CHECK_AND_RETURN_RET_LOG(deviceInfo.audioCapabilities_.ReadFromParcel(in), false, "Read audioCapability failed");
 
     int32_t supportedPullClientsLen = 0;
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedPullClientsLen), false,
-        "read supportedPullClientsLen failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedPullClientsLen), false, "read supportedPullClientsLen failed");
+    // max length of the clients vector
+    int32_t maxSupportedPullClientsLen = 256;
+    CHECK_AND_RETURN_RET_LOG((supportedPullClientsLen >= 0) &&
+        (supportedPullClientsLen <= maxSupportedPullClientsLen), false, "supportedPullClientsLen is illegal");
     std::vector<std::uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient = 0;
@@ -256,6 +259,10 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
 
     int32_t supportedPullClientsLen = 0;
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedPullClientsLen), false, "read supportedPullClientsLen failed");
+    // max length of the clients vector
+    int32_t maxSupportedPullClientsLen = 256;
+    CHECK_AND_RETURN_RET_LOG((supportedPullClientsLen >= 0) &&
+        (supportedPullClientsLen <= maxSupportedPullClientsLen), false, "supportedPullClientsLen is illegal");
     std::vector<uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient;

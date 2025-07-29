@@ -719,8 +719,11 @@ int32_t AVSessionServiceStub::CheckBeforeHandleStartCast(MessageParcel& data, Ou
     CHECK_AND_RETURN_RET_LOG(data.ReadInt32(deviceInfo.mediumTypes_), false, "Read mediumTypes failed");
 
     int32_t supportedPullClientsLen = 0;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedPullClientsLen), false,
-        "read supportedPullClientsLen failed");
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(supportedPullClientsLen), false, "read supportedPullClientsLen failed");
+    // max length of the clients vector
+    int32_t maxSupportedPullClientsLen = 256;
+    CHECK_AND_RETURN_RET_LOG((supportedPullClientsLen >= 0) &&
+        (supportedPullClientsLen <= maxSupportedPullClientsLen), false, "supportedPullClientsLen is illegal");
     std::vector<std::uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient;

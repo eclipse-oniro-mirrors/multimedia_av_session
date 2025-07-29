@@ -313,7 +313,7 @@ public:
 
     uint32_t GetSpid();
 
-    void DeleteSpidNotSelf(DeviceInfo& deviceInfo);
+    void DeleteSpidNotSelf(const DeviceInfo& deviceInfo);
 
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
     
