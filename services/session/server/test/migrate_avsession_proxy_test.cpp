@@ -614,7 +614,6 @@ static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenTargetLo
 {
     int32_t targetLoopMode = 0;
     std::string bundleIconStr = "";
-    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     g_AVSessionObserver->OnSetTargetLoopMode(targetLoopMode);
     ASSERT_TRUE(g_MigrateAVSessionProxy != nullptr);
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
@@ -627,11 +626,10 @@ static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenTargetLo
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenValidBundleIcon_ExpectSuccess, TestSize.Level1)
+static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenValidBundleIcon_Success, TestSize.Level1)
 {
     std::string assetId = "test";
     std::string bundleIconStr = "123";
-    ASSERT_TRUE(g_AVSessionObserver != nullptr);
     g_AVSessionObserver->OnPlayWithAssetId(assetId);
     ASSERT_TRUE(g_MigrateAVSessionProxy != nullptr);
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();

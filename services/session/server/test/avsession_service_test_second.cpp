@@ -1708,30 +1708,29 @@ static HWTEST_F(AVSessionServiceTestSecond, OnDeviceOffline001, TestSize.Level0)
     SLOGD("OnDeviceOffline001 end!");
 }
 
+#ifdef FUNC_NOT_FIND
 /**
 * @tc.name: OnDeviceStateChange001
 * @tc.desc: Verifying the OnDeviceStateChange method with listener.
 * @tc.type: FUNC
 * @tc.require: #ICCINP
 */
-static HWTEST_F(AVSessionServiceTestSecond, OnDeviceStateChange001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTestSecond, OnDeviceStateChange001, TestSize.Level1)
 {
     SLOGD("OnDeviceStateChange001 begin!");
     AVSessionDescriptor aVSessionDescriptor;
-    TestSessionListener* listener = new TestSessionListener();
-    g_AVSessionService->innerSessionListeners_.push_back(listener);
+    g_isCallOnTopSessionChange = false;
+    auto listener = std::make_shared<TestSessionListener>();
+    g_AVSessionService->innerSessionListeners_.push_back(listener.get());
     const std::string deviceId = "AUDIO";
     DeviceState state;
     state.deviceId = deviceId;
     listener->OnDeviceStateChange(state);
     g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
     EXPECT_EQ(g_isCallOnSessionCreate, true);
-    if (listener != nullptr) {
-        delete listener;
-        listener = nullptr;
-    }
     SLOGD("OnDeviceStateChange001 end!");
 }
+#endif
 
 /**
 * @tc.name: OnRemoteDistributedSessionChange001

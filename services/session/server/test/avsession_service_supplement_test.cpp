@@ -27,7 +27,7 @@ namespace OHOS::AVSession {
 static char g_testSessionTag[] = "test";
 static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
 static char g_testAnotherAbilityName[] = "testAnother.ability";
-static sptr<AVSessionService> g_AVSessionService;
+static std::shared_ptr<AVSessionService> g_AVSessionService;
 
 class AVSessionServiceSupplementTest : public testing::Test {
 public:
@@ -41,14 +41,11 @@ void AVSessionServiceSupplementTest::SetUpTestCase()
 {
     SLOGI("set up AVSessionServiceTest with OnStart");
     system("killall -9 com.example.hiMusicDemo");
-    g_AVSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID, true);
-    g_AVSessionService->OnStart();
-    SLOGI("set up AVSessionServiceTest done");
+    g_AVSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
 }
 
 void AVSessionServiceSupplementTest::TearDownTestCase()
 {
-    SLOGI("tear down AVSessionServiceTest");
 }
 
 void AVSessionServiceSupplementTest::SetUp()
