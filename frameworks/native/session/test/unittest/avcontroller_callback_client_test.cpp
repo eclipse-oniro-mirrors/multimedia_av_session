@@ -68,6 +68,8 @@ public:
 
     void OnExtrasChange(const AAFwk::WantParams& extras) override {}
 
+    void OnCustomData(const OHOS::AAFwk::WantParams& data) override {};
+
     ~AVControllerCallbackDemo() override {}
 };
 
@@ -279,6 +281,22 @@ HWTEST_F(AVControllerCallbackClientTest, OnExtrasChange001, TestSize.Level0)
     EXPECT_NE(aVControllerCallbackClient, nullptr);
     AAFwk::WantParams extras;
     aVControllerCallbackClient->OnExtrasChange(extras);
+}
+
+/**
+* @tc.name: OnCustomData001
+* @tc.desc: test OnCustomData
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnCustomData001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    EXPECT_NE(aVControllerCallbackClient, nullptr);
+    AAFwk::WantParams data;
+    aVControllerCallbackClient->OnCustomData(extras);
 }
 
 } // namespace AVSession

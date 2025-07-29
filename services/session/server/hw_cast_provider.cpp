@@ -392,15 +392,26 @@ std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
     if (str.length() <= 0) {
         return ret;
     }
-    nlohmann::json j = nlohmann::json::parse(str);
-    if (!j.is_array()) {
+
+    cJSON* array = cJSON_Parse(str.c_str());
+    if (array == nullptr) {
         return ret;
     }
-    for (const auto& item : j) {
-        if (item.is_number_integer()) {
-            ret.push_back(item.get<uint32_t>());
-        }
+    if (cJSON_IsInvalid(array) || !cJSON_IsArray(array)) {
+        SLOGE("pullClients is invalid");
+        cJSON_Delete(array);
+        return ret;
     }
+
+    cJSON* item;
+    int idex = 0;
+    cJSON_ArrayForEach(item, array) {
+        CHECK_AND_CONTINUE(item != nullptr && !cJSON_IsInvalid(item) &&
+            cJSON_IsNumber(item));
+        ret.push_back(static_cast(item->valueint));
+    }
+
+    cJSON_Delete(array);
     return ret;
 }
 
