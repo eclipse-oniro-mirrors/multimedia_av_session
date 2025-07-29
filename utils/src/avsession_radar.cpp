@@ -141,11 +141,11 @@ void AVSessionRadar::GetJsonCastDeviceList(const OutputDeviceInfo &deviceInfo, s
             cJSON_Delete(jDeviceInfo);
             continue;
         }
-        cJSON_AddStringToObject(jDeviceInfo, PEER_UDID.c_str(),
+        cJSON_AddStringToObject(jDeviceInfo, PEER_UDID,
             GetAnonymousDeviceId(GetUdidByNetworkId(deviceInfo.networkId_)).c_str());
-        cJSON_AddStringToObject(jDeviceInfo, PEER_BT_MAC.c_str(), "");
-        cJSON_AddStringToObject(jDeviceInfo, PEER_DEV_TYPE.c_str(), ConvertHexToString(deviceInfo.deviceType_).c_str());
-        cJSON_AddStringToObject(jDeviceInfo, PEER_DEV_NAME.c_str(), deviceInfo.deviceName_.c_str());
+        cJSON_AddStringToObject(jDeviceInfo, PEER_BT_MAC, "");
+        cJSON_AddStringToObject(jDeviceInfo, PEER_DEV_TYPE, ConvertHexToString(deviceInfo.deviceType_).c_str());
+        cJSON_AddStringToObject(jDeviceInfo, PEER_DEV_NAME, deviceInfo.deviceName_.c_str());
         cJSON_AddItemToArray(jDeviceInfos, jDeviceInfo);
     }
 

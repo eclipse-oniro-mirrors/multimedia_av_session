@@ -1075,9 +1075,9 @@ static HWTEST(HwCastTest, HwCastProviderStartCastSession001, TestSize.Level0)
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
     EXPECT_EQ(hwCastProvider != nullptr, true);
     // Init may fail with -1, StartCastSession may fail with -1003
-    int32_t retForInit = hwCastProvider->Init();
+    hwCastProvider->Init();
     int32_t retForStart = hwCastProvider->StartCastSession(false);
-    SLOGI("HwCastProviderStartCastSession001 end with ret %{public}d | %{public}d", retForInit, retForStart);
+    SLOGI("HwCastProviderStartCastSession001 end with ret %{public}d", retForStart);
 }
 
 /**

@@ -71,7 +71,7 @@ public:
     /**
      * Notify the event of device changed.
      *
-     * @param { DeviceState& } deviceState - state info.
+     * @param { DeviceState& } deviceState - device state info.
      * @since 20
     */
     virtual void NotifyDeviceStateChange(const DeviceState& deviceState) = 0;

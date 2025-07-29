@@ -87,6 +87,7 @@ sptr<Rosen::DisplayInfo> HwCastDisplayListener::GetDisplayInfo()
 // LCOV_EXCL_START
 void HwCastDisplayListener::ReportCastDisplay(sptr<Rosen::DisplayInfo> displayInfo, CastDisplayState displayState)
 {
+    SLOGI("Screen ReportCastDisplay");
     CastDisplayInfo castDisplayInfo;
     castDisplayInfo.displayState = displayState;
     castDisplayInfo.displayId = displayInfo->GetDisplayId();

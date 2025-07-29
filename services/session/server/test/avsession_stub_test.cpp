@@ -412,6 +412,30 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HandleSetAVMetaData004
+ * @tc.desc: Test HandleSetAVMetaData
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetAVMetaData004, TestSize.Level0)
+{
+    SLOGI("HandleSetAVMetaData004 begin!");
+    AVSessionStubDemo avSessionStub;
+    AVMetaData meta;
+    std::string assetId = "assetId";
+    meta.SetAssetId(assetId);
+    std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5, 6, 7, 8};
+    mediaImage->SetInnerImgBuffer(imgBuffer);
+    meta.SetMediaImage(mediaImage);
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteParcelable(&meta);
+    int ret = avSessionStub.HandleSetAVMetaData(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSetAVMetaData004 end!");
+}
+
+/**
  * @tc.name: HandleUpdateAVQueueInfoEvent001
  * @tc.desc: Test HandleUpdateAVQueueInfoEvent
  * @tc.type: FUNC

@@ -93,7 +93,7 @@ public:
     /**
      * @brief Is stop Discovering Devices
      *
-     * @return { bool } Whether excute StopCastDiscovery func
+     * @return { bool } Whether execute StopCastDiscovery func
      * @since 10
     */
     virtual bool IsStopCastDiscovery(pid_t pid) = 0;
@@ -137,7 +137,7 @@ public:
     /**
      * @brief Listen for the event of device changed.
      *
-     * @param { DeviceState } device state info.
+     * @param { DeviceState& } device state info.
      * @return { int32_t } Whether the device state changed was successful.
      * @since 20
     */
@@ -226,7 +226,7 @@ public:
      * @param { int64_t } castHandleconst - The ID corresponding to the provider.
      * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
      * @param { std::string } sessionId - avsession id.
-     * @param deviceInfo The device info.
+     * @param { deviceInfo } The device info.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
