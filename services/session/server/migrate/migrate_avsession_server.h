@@ -16,6 +16,7 @@
 #ifndef OHOS_AVSESSION_SERVER_H
 #define OHOS_AVSESSION_SERVER_H
 
+#include <atomic>
 #include <map>
 #include <mutex>
 
@@ -144,6 +145,7 @@ private:
     void ProcFromNext(const std::string &deviceId, const std::string &data);
 
     void RegisterAudioCallbackAndTrigger();
+    void TriggerAudioCallback();
     void UnregisterAudioCallback();
     
     std::function<void(int32_t)> GetVolumeKeyEventCallbackFunc();
@@ -183,7 +185,7 @@ private:
     std::recursive_mutex cacheJsonLock_;
 
     std::string GenerateClearAVSessionMsg();
-    bool isListenerSet_ = false;
+    std::atomic<bool> isNeedByRemote = false;
 };
 
 class AVControllerObserver : public AVControllerCallback {
