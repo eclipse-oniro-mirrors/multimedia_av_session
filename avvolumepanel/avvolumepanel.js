@@ -17,7 +17,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 
 const TAG = 'AVVolumePanel';
-const t = 20;
+const t1 = 20;
 class AVVolumePanelParameter {
 }
 
@@ -105,7 +105,7 @@ export class AVVolumePanel extends ViewPU {
   aboutToAppear() {
     AVVolumePanel.currentPanelCount += 1;
     this.panelCountOnCreation = AVVolumePanel.currentPanelCount;
-    if (this.panelCountOnCreation > t) {
+    if (this.panelCountOnCreation > t1) {
       console.info(TAG, 'disable picker');
       this.isDisabledByPanelLimit = true;
     }
