@@ -564,7 +564,7 @@ void AVSessionItem::SendCustomDataInner(const AAFwk::WantParams& data)
 
 int32_t AVSessionItem::SendCustomData(const AAFwk::WantParams& data)
 {
-    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
+    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params don't have customData");
     auto value = data.GetParam("customData");
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
@@ -1497,7 +1497,12 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
-    DeleteSpidNotSelf(deviceInfo);
+
+    if (SearchSpidInCapability(deviceInfo.deviceId_)) {
+        deviceInfo.supportedPullClients_.clear();
+        deviceInfo.supportedPullClients_.push_back(GetSpid());
+        SLOGI("OnCastStateChange add pull client: %{public}u", GetSpid());
+    }
     newCastState = castState;
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
@@ -1769,7 +1774,7 @@ void AVSessionItem::SetSpid(const AAFwk::WantParams& extras)
         auto value = extras.GetParam("request-tv-client");
         AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
         if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
-            spid_ = AAFwk::Integer::Unbox(intValue);
+            spid_ = static_cast<uint32_t>(AAFwk::Integer::Unbox(intValue));
             SLOGI("AVSessionItem SetSpid %{public}u", spid_);
         } else {
             SLOGE("AVSessionItem SetSpid failed");
@@ -1797,16 +1802,6 @@ bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
         }
     }
     return false;
-}
-
-void AVSessionItem::DeleteSpidNotSelf(DeviceInfo& deviceInfo)
-{
-    std::unique_lock <std::mutex> lock(spidMutex_);
-    auto it = std::find(deviceInfo.supportedPullClients_.begin(), deviceInfo.supportedPullClients_.end(), spid_);
-    if (it != deviceInfo.supportedPullClients_.end()) {
-        deviceInfo.supportedPullClients_.clear();
-        deviceInfo.supportedPullClients_.push_back(spid_);
-    }
 }
 
 void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)

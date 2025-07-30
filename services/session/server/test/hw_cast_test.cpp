@@ -1255,6 +1255,26 @@ static HWTEST(HwCastTest, HwCastProviderOnDeviceFound002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HwCastProviderOnDeviceFound003
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastProviderOnDeviceFound003, TestSize.Level0)
+{
+    SLOGI("HwCastProviderOnDeviceFound003 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+    std::vector<OHOS::CastEngine::CastRemoteDevice> devices;
+    OHOS::CastEngine::CastRemoteDevice dev;
+    dev.streamCapability = "33";
+    devices.push_back(dev);
+    hwCastProvider->OnDeviceFound(devices);
+    SLOGI("HwCastProviderOnDeviceFound003 end!");
+}
+
+/**
  * @tc.name: HwCastProviderOnSessionCreated001
  * @tc.desc:
  * @tc.type: FUNC

@@ -262,19 +262,19 @@ static HWTEST(AVSessionStubTest, HandleSendCustomData001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HandleSendCustomData001
+ * @tc.name: HandleSendCustomData002
  * @tc.desc: Test HandleSendCustomData
  * @tc.type: FUNC
  */
 static HWTEST(AVSessionStubTest, HandleSendCustomData002, TestSize.Level0)
 {
-    SLOGI("HandleSendCustomData001 begin!");
+    SLOGI("HandleSendCustomData002 begin!");
     AVSessionStubDemo avSessionStub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleSendCustomData(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("HandleSendCustomData001 end!");
+    SLOGI("HandleSendCustomData002 end!");
 }
 
 /**

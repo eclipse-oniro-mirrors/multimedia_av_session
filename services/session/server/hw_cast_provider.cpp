@@ -389,18 +389,23 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
 std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
 {
     std::vector<uint32_t> ret;
-    if (str.length() <= 0) {
+
+    cJSON* array = cJSON_Parse(str.c_str());
+    if (array == nullptr) {
         return ret;
     }
-    nlohmann::json j = nlohmann::json::parse(str);
-    if (!j.is_array()) {
+    if (cJSON_IsInvalid(array) || !cJSON_IsArray(array)) {
+        SLOGE("pullClients is invalid");
+        cJSON_Delete(array);
         return ret;
     }
-    for (const auto& item : j) {
-        if (item.is_number_integer()) {
-            ret.push_back(item.get<uint32_t>());
-        }
+    cJSON* item;
+    cJSON_ArrayForEach(item, array) {
+        CHECK_AND_CONTINUE(item != nullptr && !cJSON_IsInvalid(item) &&
+            cJSON_IsNumber(item));
+        ret.push_back(static_cast<uint32_t>(item->valueint));
     }
+    cJSON_Delete(array);
     return ret;
 }
 
