@@ -1497,7 +1497,12 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
-    DeleteSpidNotSelf(deviceInfo);
+
+    if (SearchSpidInCapability(deviceInfo.deviceId_)) {
+        deviceInfo.supportedPullClients_.clear();
+        deviceInfo.supportedPullClients_.push_back(GetSpid());
+        SLOGI("OnCastStateChange add pull client: %{public}u", GetSpid());
+    }
     newCastState = castState;
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
@@ -1797,16 +1802,6 @@ bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
         }
     }
     return false;
-}
-
-void AVSessionItem::DeleteSpidNotSelf(const DeviceInfo& deviceInfo)
-{
-    std::unique_lock <std::mutex> lock(spidMutex_);
-    auto it = std::find(deviceInfo.supportedPullClients_.begin(), deviceInfo.supportedPullClients_.end(), spid_);
-    if (it != deviceInfo.supportedPullClients_.end()) {
-        deviceInfo.supportedPullClients_.clear();
-        deviceInfo.supportedPullClients_.push_back(spid_);
-    }
 }
 
 void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
