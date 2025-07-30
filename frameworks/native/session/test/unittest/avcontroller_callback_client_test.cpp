@@ -296,7 +296,7 @@ HWTEST_F(AVControllerCallbackClientTest, OnCustomData001, TestSize.Level0)
         std::make_shared<AVControllerCallbackClient>(ptr);
     EXPECT_NE(aVControllerCallbackClient, nullptr);
     AAFwk::WantParams data;
-    aVControllerCallbackClient->OnCustomData(extras);
+    aVControllerCallbackClient->OnCustomData(data);
 }
 
 } // namespace AVSession

@@ -402,7 +402,7 @@ std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
         cJSON_Delete(array);
         return ret;
     }
-    int idex = 0;
+    cJSON* item;
     cJSON_ArrayForEach(item, array) {
         CHECK_AND_CONTINUE(item != nullptr && !cJSON_IsInvalid(item) &&
             cJSON_IsNumber(item));

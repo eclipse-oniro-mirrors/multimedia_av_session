@@ -19,6 +19,7 @@
 #include "avcast_controller_callback_client.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "string_wrapper.h"
 
 using namespace testing::ext;
 
@@ -40,7 +41,7 @@ public:
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override {};
     int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
                           int64_t pos, int32_t& result) override { return 0; };
-    virtual void OnCustomData(const AAFwk::WantParams& data) override {};
+    void OnCustomData(const AAFwk::WantParams& data) override {};
 
     ~AVCastControllerCallbackImpl() override {};
 };
@@ -275,8 +276,8 @@ HWTEST_F(AVCastControllerCallbackClientTest, OnCustomData001, TestSize.Level1)
         std::make_shared<AVCastControllerCallbackClient>(controllerCallback);
     EXPECT_NE(controllerCallbackClient, nullptr);
     std::string dataStr = "test";
-    AAFwk::WantParams data;
-    data.SetParam("customData", AAFwk::String::Box(dataStr));
+    OHOS::AAFwk::WantParams data;
+    data.SetParam("customData", OHOS::AAFwk::String::Box(dataStr));
     controllerCallbackClient->OnCustomData(data);
 }
 } // namespace AVSESSION

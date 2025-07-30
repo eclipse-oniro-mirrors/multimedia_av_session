@@ -564,7 +564,7 @@ void AVSessionItem::SendCustomDataInner(const AAFwk::WantParams& data)
 
 int32_t AVSessionItem::SendCustomData(const AAFwk::WantParams& data)
 {
-    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params dont have customData");
+    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params don't have customData");
     auto value = data.GetParam("customData");
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
