@@ -506,8 +506,11 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
 
     if (cJSON_HasObjectItem(valueItem, speedStr_.c_str())) {
         cJSON* speedArray = cJSON_GetObjectItem(valueItem, speedStr_.c_str());
-        CHECK_AND_RETURN_RET_LOG(speedArray != nullptr && !cJSON_IsInvalid(speedArray) &&
-            cJSON_IsArray(speedArray), AVSESSION_ERROR, "speed get invalid");
+        if (speedArray == nullptr || cJSON_IsInvalid(speedArray) || !cJSON_IsArray(speedArray)) {
+        SLOGE("speed get null or invalid");
+        cJSON_Delete(valueItem);
+        return AVSESSION_ERROR;
+    }
         cJSON* speedItem = nullptr;
         cJSON_ArrayForEach(speedItem, speedArray) {
             CHECK_AND_CONTINUE(speedItem != nullptr && !cJSON_IsInvalid(speedItem) &&
@@ -518,6 +521,7 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
         }
     }
     cJSON_Delete(valueItem);
+    SLOGI("GetMediaCapabilities success");
     return AVSESSION_SUCCESS;
 }
 

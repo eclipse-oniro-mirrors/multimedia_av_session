@@ -252,13 +252,13 @@ HWTEST_F(AVSessionManagerImplTest, CreateController001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers001, TestSize.Level0)
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers001, TestSize.Level1)
 {
     AVSessionManagerImpl impl;
     std::vector<std::shared_ptr<AVSessionController>> controllers;
     int32_t result =
 	     impl.GetDistributedSessionControllers(DistributedSessionType::TYPE_SESSION_REMOTE, controllers);
-    EXPECT_NE(result, ERR_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_REMOTE_CONNECTION_NOT_EXIST);
 }
 
 /**
@@ -267,13 +267,13 @@ HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers001, TestSize
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers002, TestSize.Level0)
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers002, TestSize.Level1)
 {
     AVSessionManagerImpl impl;
     std::vector<std::shared_ptr<AVSessionController>> controllers;
     int32_t result =
 	    impl.GetDistributedSessionControllers(DistributedSessionType::TYPE_SESSION_MIGRATE_IN, controllers);
-    EXPECT_NE(result, ERR_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_REMOTE_CONNECTION_NOT_EXIST);
 }
 
 /**
@@ -282,13 +282,13 @@ HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers002, TestSize
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers003, TestSize.Level0)
+HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers003, TestSize.Level1)
 {
     AVSessionManagerImpl impl;
     std::vector<std::shared_ptr<AVSessionController>> controllers;
     int32_t result =
 	    impl.GetDistributedSessionControllers(DistributedSessionType::TYPE_SESSION_MIGRATE_OUT, controllers);
-    EXPECT_NE(result, ERR_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_REMOTE_CONNECTION_NOT_EXIST);
 }
 } // namespace AVSession
 } // namespace OHOS

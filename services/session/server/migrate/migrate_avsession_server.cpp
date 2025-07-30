@@ -401,6 +401,7 @@ void MigrateAVSessionServer::ResetSupportCrossMediaPlay(const std::string &extra
 
     SLOGI("SuperLauncher: isSupportSingleFrameMediaPlay=%{public}d", isSupportSingleFrameMediaPlay);
     supportCrossMediaPlay_ = isSupportSingleFrameMediaPlay;
+    cJSON_Delete(jsonData);
 }
 
 // LCOV_EXCL_START

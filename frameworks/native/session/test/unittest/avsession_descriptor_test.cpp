@@ -22,15 +22,15 @@ using namespace testing::ext;
  
 namespace OHOS {
 namespace AVSession {
-namespace {
 
+namespace {
 std::string g_errLog;
 void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
                    const char *msg)
 {
     g_errLog = msg;
 }
-}   // namespace
+}  // namespace
  
 class AVSessionDescriptorTest : public testing::Test {
 public:
@@ -197,7 +197,7 @@ HWTEST_F(AVSessionDescriptorTest, Unmarshalling004, TestSize.Level1)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVSessionDescriptorTest, ReadFromParcel002, TestSize.Level1)
+HWTEST_F(AVSessionDescriptorTest, ReadFromParcel004, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
     DeviceState deviceState;
@@ -205,6 +205,5 @@ HWTEST_F(AVSessionDescriptorTest, ReadFromParcel002, TestSize.Level1)
     bool ret = deviceState.ReadFromParcel(in);
     EXPECT_EQ(ret, false);
 }
-
 } // namespace AVSESSION
 } // namespace OHOS

@@ -191,12 +191,17 @@ public:
         return valueArray;
     }
 
-    static inline bool CheckCJSONObjectEmpty(cJSON* item)
+    static bool CheckCJSONObjectEmpty(cJSON* item)
     {
-        if (item == nullptr || cJSON_IsInvalid(item) || cJSON_IsNull(item)) {
+        if (item == nullptr) {
+            return true;
+        }
+        if (cJSON_IsInvalid(item) || cJSON_IsNull(item)) {
+            cJSON_Delete(item);
             return true;
         }
         if (item->child == nullptr) {
+            cJSON_Delete(item);
             return true;
         }
         return false;

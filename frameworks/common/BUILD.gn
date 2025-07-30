@@ -56,8 +56,8 @@ ohos_shared_library("avsession_common") {
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
-    "image_framework:image_native",
     "ipc:ipc_core",
+    "image_framework:image_native",
   ]
 
   subsystem_name = "multimedia"
