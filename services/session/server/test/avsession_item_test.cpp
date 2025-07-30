@@ -337,6 +337,13 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_UpdateElement_001, TestSize.Level1)
     g_AVSessionItem->UpdateSessionElement(elementName);
     EXPECT_EQ(g_AVSessionItem->GetBundleName(), "TestBundleName");
     EXPECT_EQ(g_AVSessionItem->GetAbilityName(), "TestAbilityName");
+
+    OHOS::AppExecFwk::ElementName oriElementName;
+    oriElementName.SetBundleName(g_testAnotherBundleName);
+    oriElementName.SetAbilityName(g_testAnotherAbilityName);
+    g_AVSessionItem->UpdateSessionElement(oriElementName);
+    EXPECT_EQ(g_AVSessionItem->GetBundleName(), g_testAnotherBundleName);
+    EXPECT_EQ(g_AVSessionItem->GetAbilityName(), g_testAnotherAbilityName);
     SLOGD("AVSessionItem_UpdateElement_001 end!");
 }
 

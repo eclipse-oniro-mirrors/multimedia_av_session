@@ -226,7 +226,7 @@ public:
      * @param { int64_t } castHandleconst - The ID corresponding to the provider.
      * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
      * @param { std::string } sessionId - avsession id.
-     * @param { deviceInfo } The device info.
+     * @param { deviceInfo } deviceInfo The device info.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
