@@ -389,9 +389,6 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
 std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
 {
     std::vector<uint32_t> ret;
-    if (str.length() <= 0) {
-        return ret;
-    }
 
     cJSON* array = cJSON_Parse(str.c_str());
     if (array == nullptr) {
