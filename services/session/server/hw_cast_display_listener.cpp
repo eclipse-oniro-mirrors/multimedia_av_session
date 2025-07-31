@@ -63,7 +63,20 @@ void HwCastDisplayListener::OnDisconnect(Rosen::DisplayId displayId)
     }
 }
 
-void HwCastDisplayListener::OnChange(Rosen::DisplayId displayId) {}
+void HwCastDisplayListener::OnChange(Rosen::DisplayId displayId)
+{
+    auto display = Rosen::DisplayManagerLite::GetInstance().GetDisplayById(displayId);
+    CHECK_AND_RETURN_LOG(display != nullptr, "display is nullptr");
+    auto displayInfo = display->GetDisplayInfo();
+    CHECK_AND_RETURN_LOG(displayInfo != nullptr, "displayInfo is nullptr");
+
+    CastDisplayInfo castDisplayInfo;
+    castDisplayInfo.displayId = displayInfo->GetDisplayId();
+    castDisplayInfo.name = displayInfo->GetName();
+    castDisplayInfo.width = static_cast<int32_t>(displayInfo->GetWidth());
+    castDisplayInfo.height = static_cast<int32_t>(displayInfo->GetHeight());
+    listener_->OnCastDisplaySizeChange(castDisplayInfo);
+}
 
 void HwCastDisplayListener::SetAppCastDisplayId(Rosen::DisplayId displayId)
 {
