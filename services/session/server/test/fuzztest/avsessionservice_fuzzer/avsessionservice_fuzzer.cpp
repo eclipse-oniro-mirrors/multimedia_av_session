@@ -331,16 +331,19 @@ void CreateNewControllerForSessionTest(sptr<AVSessionService> service)
     service->CancelCastAudioForClientExit(pid, avsessionHere_);
 }
 
-void AvSessionServiceControllerTest(sptr<AVSessionService> service)
+static void AvSessionServiceControllerTest(sptr<AVSessionService> service)
 {
-    std::string tag = GetString();
-    int32_t type = 0;
-    std::string bundleName = GetString();
-    std::string abilityName = GetString();
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
-    sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
-    if (!avSessionItem) {
-        return;
+    sptr<AVSessionItem> avSessionItem = avsessionHere_;
+    if (avSessionItem == nullptr) {
+        std::string tag = GetString();
+        int32_t type = 0;
+        std::string bundleName = GetString();
+        std::string abilityName = GetString();
+        sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+        avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
+        if (avSessionItem == nullptr) {
+            return;
+        }
     }
     ResourceAutoDestroy<sptr<AVSessionItem>> avSessionItemRelease(avSessionItem);
     service->AddAvQueueInfoToFile(*avSessionItem);
@@ -363,16 +366,19 @@ void AvSessionServiceControllerTest(sptr<AVSessionService> service)
     service->CreateControllerInner("default", avControllerItemObj);
 }
 
-void AvSessionServiceCastTest(sptr<AVSessionService> service)
+static void AvSessionServiceCastTest(sptr<AVSessionService> service)
 {
-    std::string tag = GetString();
-    int32_t type = 0;
-    std::string bundleName = GetString();
-    std::string abilityName = GetString();
-    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
-    sptr<AVSessionItem> avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
-    if (!avSessionItem) {
-        return;
+    sptr<AVSessionItem> avSessionItem = avsessionHere_;
+    if (avSessionItem == nullptr) {
+        std::string tag = GetString();
+        int32_t type = 0;
+        std::string bundleName = GetString();
+        std::string abilityName = GetString();
+        sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type, elementName);
+        avSessionItem = (sptr<AVSessionItem>&)avSessionItemObj;
+        if (avSessionItem == nullptr) {
+            return;
+        }
     }
     SessionToken token;
     token.sessionId = avSessionItem->GetSessionId();

@@ -146,10 +146,18 @@ void AVSessionServiceExtFuzzTest002()
         provider.ConsumeIntegralInRange<int32_t>(OHOS::DistributedHardware::DmAuthForm::INVALID_TYPE,
         OHOS::DistributedHardware::DmAuthForm::SHARE));
     deviceInfo.extraData = provider.ConsumeRandomLengthString();
+    std::string localFrontSessionId = provider.ConsumeRandomLengthString(DM_MAX_DEVICE_ID_LEN);
 
     service->OnAddSystemAbility(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID,
         deviceInfo.deviceId);
     service->ProcessTargetMigrate(isOnline, deviceInfo);
+    service->DoConnectProcessWithMigrate(deviceInfo);
+    service->DoConnectProcessWithMigrateServer(deviceInfo);
+    service->NotifyLocalFrontSessionChangeForMigrate(localFrontSessionId);
+    service->DoHisMigrateServerTransform(networkId);
+    service->DoDisconnectProcessWithMigrate(deviceInfo);
+    service->DoDisconnectProcessWithMigrateServer(deviceInfo);
+    service->DoRemoteAVSessionLoad(deviceId);
 }
 
 void AVSessionServiceExtFuzzTest003()
