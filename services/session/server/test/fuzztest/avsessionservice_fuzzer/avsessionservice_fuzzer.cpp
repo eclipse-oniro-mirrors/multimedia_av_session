@@ -331,11 +331,8 @@ void CreateNewControllerForSessionTest(sptr<AVSessionService> service)
     service->CancelCastAudioForClientExit(pid, avsessionHere_);
 }
 
-void AvSessionServiceControllerTest(sptr<AVSessionService> service)
+static void AvSessionServiceControllerTest(sptr<AVSessionService> service)
 {
-    if (service == nullptr) {
-        return;
-    }
     sptr<AVSessionItem> avSessionItem = avsessionHere_;
     if (avSessionItem == nullptr) {
         std::string tag = GetString();
@@ -369,7 +366,7 @@ void AvSessionServiceControllerTest(sptr<AVSessionService> service)
     service->CreateControllerInner("default", avControllerItemObj);
 }
 
-void AvSessionServiceCastTest(sptr<AVSessionService> service)
+static void AvSessionServiceCastTest(sptr<AVSessionService> service)
 {
     sptr<AVSessionItem> avSessionItem = avsessionHere_;
     if (avSessionItem == nullptr) {
