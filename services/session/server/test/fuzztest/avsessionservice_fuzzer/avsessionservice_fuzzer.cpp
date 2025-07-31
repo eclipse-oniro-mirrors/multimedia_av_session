@@ -333,6 +333,9 @@ void CreateNewControllerForSessionTest(sptr<AVSessionService> service)
 
 void AvSessionServiceControllerTest(sptr<AVSessionService> service)
 {
+    if (service == nullptr) {
+        return;
+    }
     sptr<AVSessionItem> avSessionItem = avsessionHere_;
     if (avSessionItem == nullptr) {
         std::string tag = GetString();
