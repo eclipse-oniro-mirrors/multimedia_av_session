@@ -115,6 +115,16 @@ void MigrateAVSessionServer::RegisterAudioCallbackAndTrigger()
     preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
 }
 
+void MigrateAVSessionServer::TriggerAudioCallback()
+{
+    CHECK_AND_RETURN_LOG(volumeKeyEventCallbackFunc_ != nullptr, "VolumeKeyEventCallback nullptr");
+    CHECK_AND_RETURN_LOG(availableDeviceChangeCallbackFunc_ != nullptr, "AvailableDeviceChangeCallback nullptr");
+    CHECK_AND_RETURN_LOG(preferredDeviceChangeCallbackFunc_ != nullptr, "PreferredOutputDeviceChangeCallback nullptr");
+    volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
+    availableDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetAvailableDevices());
+    preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
+}
+
 void MigrateAVSessionServer::UnregisterAudioCallback()
 {
     if (migrateMode_ == MIGRATE_MODE_NEXT) {

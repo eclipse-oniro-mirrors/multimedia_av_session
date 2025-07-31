@@ -16,6 +16,10 @@
 #ifndef OHOS_MIGRATE_AVSESSION_PROXY_H
 #define OHOS_MIGRATE_AVSESSION_PROXY_H
 
+#include <atomic>
+#include <mutex>
+#include <thread>
+
 #include "softbus/softbus_session_proxy.h"
 #include "migrate_avsession_constant.h"
 #include "avcontroller_item.h"
@@ -112,7 +116,11 @@ private:
     AudioDeviceDescriptors preferredOutputDevice_;
     MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback_;
 
-    bool isNeedByMediaControl_ = false;
+    std::atomic<bool> isNeedByMediaControl = false;
+    std::thread keepAliveworker_;
+    std::recursive_mutex migrateProxyDeviceIdLock_;
+    std::mutex keepAliveMtx_;
+    std::condition_variable keepAliveCv_;
 };
 
 class AVSessionObserver : public AVSessionCallback {

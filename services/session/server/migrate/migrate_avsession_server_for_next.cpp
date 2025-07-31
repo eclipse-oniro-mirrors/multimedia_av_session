@@ -528,15 +528,16 @@ void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* command
 
     if (cJSON_HasObjectItem(commandJsonValue, NEED_STATE)) {
         bool newListenerSetState = SoftbusSessionUtils::GetBoolFromJson(commandJsonValue, NEED_STATE);
-        if (!isListenerSet_ && newListenerSetState) {
-            isListenerSet_ = true;
+        if (!isNeedByRemote.load() && newListenerSetState) {
+            SLOGI("isNeed refresh data");
+            isNeedByRemote.store(true);
             LocalFrontSessionArrive(lastSessionId_);
-            RegisterAudioCallbackAndTrigger();
+            TriggerAudioCallback();
         } else {
-            isListenerSet_ = newListenerSetState;
+            isNeedByRemote.store(newListenerSetState);
         }
     }
-    SLOGI("updateListenerState:%{public}d", isListenerSet_);
+    SLOGI("isNeedSet:%{public}d", isNeedByRemote.load());
 }
 
 std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFunc()
@@ -754,7 +755,7 @@ bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Cal
         return false;
     }
     SLOGD("MigratePostTask with name:%{public}s.", name.c_str());
-    if (!isListenerSet_ && name != "LocalFrontSessionChange" && name != "SYNC_FOCUS_SESSION_INFO") {
+    if (!isNeedByRemote.load() && name != "LocalFrontSessionChange" && name != "SYNC_FOCUS_SESSION_INFO") {
         SLOGI("no send task:%{public}s for no listen", name.c_str());
         return false;
     }
