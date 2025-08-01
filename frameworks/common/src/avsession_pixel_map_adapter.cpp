@@ -65,7 +65,9 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
 
     uint32_t imgByteSizeExist = innerImgBuffer.size() - IMAGE_BYTE_SIZE - imgBufferSize - DATA_BYTE_SIZE;
     uint32_t imgByteSizeInner = static_cast<uint32_t>(pixelMap->GetByteCount());
-    CHECK_AND_RETURN_RET_LOG(imgByteSizeInner == imgByteSizeExist, nullptr, "imageInfo size error");
+
+    memset_s(&imageInfo, sizeof(Media::ImageInfo), 0, sizeof(Media::ImageInfo));
+    CHECK_AND_RETURN_RET_LOG(imgByteSizeInner == imgByteSizeExist, nullptr, "imageInfo size error!");
 
     uint32_t dataSize = 0;
     for (uint8_t i = 0; i < DATA_BYTE_SIZE; i++) {
@@ -76,7 +78,7 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     void* dataAddr = static_cast<void*>(innerImgBuffer.data() + IMAGE_BYTE_SIZE + imgBufferSize + DATA_BYTE_SIZE);
     pixelMap->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
     uint8_t imgTopicNumber = innerImgBuffer[innerImgSize / 2] + innerImgBuffer[innerImgSize / 2 + 1];
-    SLOGI("ConvertFromInner:%{public}u srcSize=[%{public}d, %{public}d}], dstSize=[%{public}d, %{public}d}]",
+    SLOGI("ConvertFromInner:%{public}u srcSize=[%{public}d, %{public}d}], dstSize=[%{public}d, %{public}d}].",
         imgTopicNumber, pixelMap->GetWidth(), pixelMap->GetHeight(), originalWidth_, originalHeight_);
     Media::InitializationOptions options;
     options.alphaType = imageInfo.alphaType;

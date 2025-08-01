@@ -32,6 +32,7 @@ NapiSessionListener::NapiSessionListener()
 NapiSessionListener::~NapiSessionListener()
 {
     SLOGI("destroy");
+    std::lock_guard<std::mutex> lockGuard(lock_);
     *isValid_ = false;
 }
 
