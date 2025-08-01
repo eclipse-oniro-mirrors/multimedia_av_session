@@ -316,8 +316,8 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
         return ThrowErrorAndReturn(env, "event name invalid", ERR_INVALID_PARAM);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession->session_ == nullptr) {
-        SLOGE("OnEvent failed : session is nullptr");
+    if (napiSession->session_ == nullptr || isNapiSessionDestroy_) {
+        SLOGE("OnEvent failed : session is nullptr or Destorying:%{public}d", isNapiSessionDestroy_);
         return ThrowErrorAndReturn(env, "OnEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
     if (napiSession->callback_ == nullptr) {
@@ -398,8 +398,8 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
             NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
         return NapiUtils::GetUndefinedValue(env);
     }
-    if (napiSession->session_ == nullptr) {
-        SLOGE("OffEvent failed : session is nullptr");
+    if (napiSession->session_ == nullptr || isNapiSessionDestroy_) {
+        SLOGE("OffEvent failed : session is nullptr or Destorying:%{public}d", isNapiSessionDestroy_);
         NapiUtils::ThrowError(env, "OffEvent failed : session is nullptr",
             NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
         return NapiUtils::GetUndefinedValue(env);
