@@ -235,6 +235,11 @@ void HwCastProviderSession::computeToastOnDeviceState(CastEngine::DeviceState st
         avToastDeviceState_ = ConnectionState::STATE_CONNECTED;
         return;
     }
+    // stream to mirror scene, session is not hold by avsession
+    if (state == CastEngine::DeviceState::STREAM_TO_MIRROR) {
+        avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
+        return;
+    }
     if (state != CastEngine::DeviceState::DISCONNECTED) {
         return;
     }

@@ -1144,6 +1144,8 @@ static HWTEST(HwCastTest, HwCastSessonToast001, TestSize.Level1)
     provideSession->OnDeviceState(stateInfo);
     provideSession->RemoveDevice("testDeviceId");
     provideSession->OnDeviceState(stateInfo);
+    stateInfo.deviceState = OHOS::CastEngine::DeviceState::STREAM_TO_MIRROR;
+    provideSession->OnDeviceState(stateInfo);
     EXPECT_EQ(provideSession != nullptr, true);
     SLOGI("HwCastSessonToast001 end!");
 }
