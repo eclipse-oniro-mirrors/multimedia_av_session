@@ -500,9 +500,8 @@ int32_t TaiheMetaData::SetPublishDate(const OHOS::AVSession::AVMetaData &in, AVM
     CHECK_RETURN(env->FindClass("Lescompat/Date;", &cls) == ANI_OK,
         "FindClass Lescompat/Date failed", OHOS::AVSession::AVSESSION_ERROR);
     ani_method ctorMethod {};
-    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &ctorMethod) == ANI_OK,
-        "Class_FindMethod Lescompat/Date <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
-
+    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "X{C{std.core.Double}C{std.core.String}C{escompat.Date}}",
+        &ctorMethod) == ANI_OK, "Class_FindMethod Lescompat/Date <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
     ani_object aniDoubleObject {};
     int32_t ret = TaiheUtils::ToAniDoubleObject(env, in.GetPublishDate(), aniDoubleObject);
     CHECK_RETURN(ret == OHOS::AVSession::AVSESSION_SUCCESS, "ToAniDoubleObject failed", ret);
