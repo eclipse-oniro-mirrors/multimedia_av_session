@@ -98,6 +98,7 @@ int32_t AVCastControllerStub::HandleStart(MessageParcel& data, MessageParcel& re
     sptr<AVQueueItem> avQueueItem = data.ReadParcelable<AVQueueItem>();
     AVFileDescriptor avFileDescriptor;
     avFileDescriptor.fd_ = data.ReadFileDescriptor();
+    close(avFileDescriptor.fd_);
     if (avQueueItem == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write Start ret failed");
     } else {
@@ -118,6 +119,7 @@ int32_t AVCastControllerStub::HandlePrepare(MessageParcel& data, MessageParcel& 
             SLOGD("Need get fd from proxy");
             AVFileDescriptor avFileDescriptor;
             avFileDescriptor.fd_ = data.ReadFileDescriptor();
+            close(avFileDescriptor.fd_);
             SLOGD("Prepare received fd %{public}d", avFileDescriptor.fd_);
             avQueueItem->GetDescription()->SetFdSrc(avFileDescriptor);
         }
