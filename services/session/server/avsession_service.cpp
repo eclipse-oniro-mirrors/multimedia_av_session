@@ -1480,6 +1480,9 @@ bool AVSessionService::IsParamInvalid(const std::string& tag, int32_t type, cons
         SLOGE("element is invalid when create session");
         return false;
     }
+    if (GetCallingUid() == audioBrokerUid && tag == "ancoMediaSession") {
+        return true;
+    }
     std::regex nameRegex("[A-Za-z\\w\\.]*");
     if (!std::regex_match(elementName.GetBundleName(), nameRegex)) {
         SLOGE("err regex when create session, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
