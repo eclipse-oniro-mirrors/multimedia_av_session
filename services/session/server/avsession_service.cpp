@@ -807,7 +807,6 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             return;
         }
         sessionListForFront->push_front(sessionItem);
-        UpdateSessionTimestamp(sessionItem);
         if (AudioAdapter::GetInstance().GetRendererRunning(sessionItem->GetUid(), sessionItem->GetPid())) {
             SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
             UpdateTopSession(sessionItem);
@@ -2479,6 +2478,28 @@ int32_t AVSessionService::RegisterSessionListenerForAllUsers(const sptr<ISession
 }
 
 // LCOV_EXCL_START
+AVControlCommand AVSessionService::GetSessionProcCommand()
+{
+    AVControlCommand cmd;
+    if (topSession_ != nullptr) {
+        sptr<AVSessionItem> procSession = topSession_;
+        if (IsAncoValid()) {
+            procSession = topSession_->GetPlayingTime() > ancoSession_->GetPlayingTime() ?
+                topSession_ : ancoSession_;
+        }
+        auto playbackState = procSession->GetPlaybackState();
+        cmd.SetCommand(playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ?
+            AVControlCommand::SESSION_CMD_PAUSE : AVControlCommand::SESSION_CMD_PLAY);
+    } else if (IsAncoValid()) {
+        auto state = ancoSession_->GetPlaybackState();
+        cmd.SetCommand(state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ?
+            AVControlCommand::SESSION_CMD_PAUSE : AVControlCommand::SESSION_CMD_PLAY);
+    } else {
+        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    }
+    return cmd;
+}
+
 void AVSessionService::HandleEventHandlerCallBack()
 {
     SLOGI("handle eventHandler callback isFirstPress_=%{public}d, pressCount_:%{public}d", isFirstPress_, pressCount_);
@@ -2491,13 +2512,7 @@ void AVSessionService::HandleEventHandlerCallBack()
         } else if (pressCount_ == DOUBLE_CLICK) {
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
         } else if (pressCount_ == ONE_CLICK) {
-            if (topSession_) {
-                auto playbackState = topSession_->GetPlaybackState();
-                cmd.SetCommand(playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ?
-                    AVControlCommand::SESSION_CMD_PAUSE : AVControlCommand::SESSION_CMD_PLAY);
-            } else {
-                cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-            }
+            cmd = GetSessionProcCommand();
         } else {
             pressCount_ = 0;
             isFirstPress_ = true;
@@ -2514,6 +2529,7 @@ void AVSessionService::HandleEventHandlerCallBack()
                 SLOGI("HandleEventHandlerCallBack this is an external audio");
             } else {
                 auto keyEvent = MMI::KeyEvent::Create();
+                CHECK_AND_RETURN_LOG(keyEvent != nullptr, "handle event keyevent is null");
                 CheckSessionHandleKeyEvent(true, cmd, *keyEvent, topSession_);
             }
         }
@@ -2525,6 +2541,12 @@ void AVSessionService::HandleEventHandlerCallBack()
     isFirstPress_ = true;
 }
 // LCOV_EXCL_STOP
+
+bool AVSessionService::IsAncoValid()
+{
+    std::lock_guard lockGuard(sessionServiceLock_);
+    return ancoSession_ != nullptr && ancoSession_->IsActive();
+}
 
 bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd,
     const MMI::KeyEvent& keyEvent, sptr<AVSessionItem> session)
@@ -2560,7 +2582,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
             return AVSESSION_SUCCESS;
         }
     }
-    if (CheckIfOtherAudioPlaying() && (ancoSession_ == nullptr || !ancoSession_->IsActive())) {
+    if (CheckIfOtherAudioPlaying()) {
         SLOGE("control block for OtherAudioPlaying for key:%{public}d", keyEvent.GetKeyCode());
         return AVSESSION_SUCCESS;
     }
@@ -2584,7 +2606,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         AVControlCommand cmd;
-        if (topSession_ && CheckSessionHandleKeyEvent(false, cmd, keyEvent, topSession_)) {
+        if (topSession_ != nullptr && CheckSessionHandleKeyEvent(false, cmd, keyEvent, topSession_)) {
             return AVSESSION_SUCCESS;
         }
     }
@@ -2641,6 +2663,7 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
     SLOGI("cmd=%{public}d with no topsession", command.GetCommand());
     // try proc command for first front session
     {
+        std::lock_guard lockGuard(sessionServiceLock_);
         std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
@@ -2648,6 +2671,7 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
             CHECK_AND_CONTINUE(session != nullptr);
             if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
                 auto keyEvent = MMI::KeyEvent::Create();
+                CHECK_AND_RETURN_LOG(keyEvent != nullptr, "handle event keyevent is null");
                 CheckSessionHandleKeyEvent(true, command, *keyEvent, session);
                 SLOGI("ExecuteCommand %{public}d for front session: %{public}s", command.GetCommand(),
                       session->GetBundleName().c_str());
@@ -2656,7 +2680,7 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         }
     }
 
-    if (ancoSession_ != nullptr && ancoSession_->IsActive()) {
+    if (IsAncoValid()) {
         SLOGI("ExecuteCommand %{public}d for anco_audio without top and frontlist", command.GetCommand());
         ancoSession_->ExecuteControllerCommand(command);
         return;
@@ -2691,7 +2715,7 @@ bool AVSessionService::CheckIfOtherAudioPlaying()
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr quit");
-    CHECK_AND_RETURN_RET_LOG(!sessionListForFront->empty() || topSession_ != nullptr, true,
+    CHECK_AND_RETURN_RET_LOG(!sessionListForFront->empty() || topSession_ != nullptr || IsAncoValid(), true,
         "sessionListForFront and top empty but audio playing, control block");
     for (int uid : audioPlayingUids) {
         if (GetUsersManager().GetContainerFromAll().UidHasSession(uid)) {
@@ -2715,7 +2739,7 @@ bool AVSessionService::CheckIfOtherAudioPlaying()
 
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
-    if (CheckIfOtherAudioPlaying() && (ancoSession_ == nullptr || !ancoSession_->IsActive())) {
+    if (CheckIfOtherAudioPlaying()) {
         SLOGE("control block for OtherAudioPlaying with cmd:%{public}d", command.GetCommand());
         return AVSESSION_SUCCESS;
     }
@@ -2727,6 +2751,7 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
             CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
                 ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
             auto keyEvent = MMI::KeyEvent::Create();
+            CHECK_AND_RETURN_RET_LOG(keyEvent != nullptr, AVSESSION_SUCCESS, "handle event keyevent is null");
             CheckSessionHandleKeyEvent(true, command, *keyEvent, topSession_);
             return AVSESSION_SUCCESS;
         }
