@@ -1267,6 +1267,23 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange008, TestSize.Level1)
 }
 
 /**
+* @tc.name: OnCustomData001
+* @tc.desc: OnCustomData, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCustomData001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    std::string dataStr = "test";
+    OHOS::AAFwk::WantParams data;
+    data.SetParam("customData", OHOS::AAFwk::String::Box(dataStr));
+    castController_->OnCustomData(data);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
+}
+
+/**
 * @tc.name: Prepare002
 * @tc.desc: GetIcon is not nullptr but GetIconUri is failed
 * @tc.type: FUNC
