@@ -41,7 +41,6 @@ public:
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override {};
     int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
                           int64_t pos, int32_t& result) override { return 0; };
-    void OnCustomData(const AAFwk::WantParams& data) override {};
 
     ~AVCastControllerCallbackImpl() override {};
 };
