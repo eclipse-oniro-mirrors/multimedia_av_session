@@ -17,6 +17,7 @@
 
 #include "accesstoken_kit.h"
 #include "bool_wrapper.h"
+#include "string_wrapper.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "want_agent.h"
