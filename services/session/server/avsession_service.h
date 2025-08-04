@@ -452,6 +452,8 @@ private:
 
     void HandleEventHandlerCallBack();
 
+    AVControlCommand GetSessionProcCommand();
+
     bool IsHistoricalSession(const std::string& sessionId);
 
     void DeleteHistoricalRecord(const std::string& bundleName, int32_t userId = 0);
@@ -598,6 +600,8 @@ private:
 
     bool CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd, const MMI::KeyEvent& keyEvent,
         sptr<AVSessionItem> session);
+
+    bool IsAncoValid();
 
     std::string DoCJSONArrayTransformToString(cJSON* valueItem);
 
