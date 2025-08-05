@@ -209,9 +209,9 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}lld", (long long)castHandle_);
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         if (!collaborationNeedNetworkId_.empty()) {
-            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
-                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         }
