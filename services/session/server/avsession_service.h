@@ -167,6 +167,10 @@ public:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                sptr<IRemoteObject>& object) override;
 
+    int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extra,
+                                        const AppExecFwk::ElementName& elementName,
+                                        sptr<IRemoteObject>& object) override;
+
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
@@ -349,9 +353,16 @@ private:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
 
+    int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
+                                        bool thirdPartyApp, const AppExecFwk::ElementName& elementName,
+                                        sptr<AVSessionItem>& sessionItem);
+
     bool IsParamInvalid(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName);
 
     void ServiceCallback(sptr<AVSessionItem>& sessionItem);
+
+    sptr<AVSessionItem> CreateNewSessionWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
+                                                  bool thirdPartyApp, const AppExecFwk::ElementName& elementName);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                          const AppExecFwk::ElementName& elementName);

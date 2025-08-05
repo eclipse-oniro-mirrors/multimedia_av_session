@@ -43,6 +43,10 @@ public:
     virtual int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                        sptr<IRemoteObject>& session) = 0;
 
+    virtual int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
+                                           const AppExecFwk::ElementName& elementName,
+                                           sptr<IRemoteObject>& session) = 0;
+
     virtual int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) = 0;
 
     virtual int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId,
