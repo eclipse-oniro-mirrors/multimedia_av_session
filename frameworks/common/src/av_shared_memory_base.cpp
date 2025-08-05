@@ -61,6 +61,7 @@ bool AVSharedMemoryBase::WriteToParcel(MessageParcel& out) const
 bool AVSharedMemoryBase::ReadFromParcel(MessageParcel& in)
 {
     int32_t fd = in.ReadFileDescriptor();
+    close(fd);
     CHECK_AND_RETURN_RET_LOG(fd < 0, false, "read fd is invalid");
 
     int32_t size = in.ReadInt32();
@@ -69,7 +70,6 @@ bool AVSharedMemoryBase::ReadFromParcel(MessageParcel& in)
 
     std::shared_ptr<AVSharedMemoryBase> memory = CreateFromRemote(fd, size, flags, name);
     CHECK_AND_RETURN_RET_LOG(memory != nullptr && memory->GetBase() != nullptr, false, "CreateFromRemote failed");
-    (void)::close(fd);
     return true;
 }
 
