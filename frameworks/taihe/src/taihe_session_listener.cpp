@@ -166,6 +166,26 @@ void TaiheSessionListener::OnDeviceOffline(const std::string& deviceId)
     HandleEvent(EVENT_DEVICE_OFFLINE, execute);
 }
 
+void TaiheSessionListener::OnDeviceStateChange(const OHOS::AVSession::DeviceState& deviceState)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnDeviceStateChange");
+    SLOGI("Start handle device state changed event");
+    DeviceState deviceStateTaihe = TaiheUtils::ToTaiheDeviceState(deviceState);
+    std::weak_ptr<TaiheSessionListener> weakThis = shared_from_this();
+    auto execute = [weakThis, deviceStateTaihe](std::shared_ptr<uintptr_t> method) {
+        auto self = weakThis.lock();
+        if (!self || !(self->isValid_) || !(*(self->isValid_))) {
+            SLOGE("TaiheSessionListener is invalid");
+            return;
+        }
+        std::shared_ptr<taihe::callback<void(DeviceState const&)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(DeviceState const&)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(deviceStateTaihe);
+    };
+    HandleEvent(EVENT_DEVICE_STATE_CHANGED, execute);
+}
+
 void TaiheSessionListener::OnRemoteDistributedSessionChange(
     const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers)
 {

@@ -992,6 +992,13 @@ enum DeviceLogEventCode :i32 {
   DEVICE_LOG_EXCEPTION = 2,
 }
 
+struct DeviceState {
+  @readonly deviceId: String;
+  @readonly deviceState: i32;
+  @readonly reasonCode: i32;
+  @readonly radarErrorCode: i32;
+}
+
 @on_off("distributedSessionChange")
 function OnDistributedSessionChange(param: DistributedSessionType, callback: (data: Array<AVSessionController>) => void): void;
 @on_off("distributedSessionChange")
@@ -1010,6 +1017,7 @@ export function on(type: string, cb: (arg_0: Object) => void) {
     case "deviceAvailable": return onDeviceAvailable(cb);
     case "deviceLogEvent": return onDeviceLogEvent(cb);
     case "deviceOffline": return onDeviceOffline(cb);
+    case "deviceStateChanged": return onDeviceStateChange(cb);
   }
 }
 export function off(type: string, cb: (arg_0: Object) => void) {
@@ -1020,6 +1028,7 @@ export function off(type: string, cb: (arg_0: Object) => void) {
     case "deviceAvailable": return offDeviceAvailable(cb as ((arg_0: OutputDeviceInfo) => void) | undefined);
     case "deviceLogEvent": return offDeviceLogEvent(cb as ((arg_0: DeviceLogEventCode) => void) | undefined);
     case "deviceOffline": return offDeviceOffline(cb as ((arg_0: String) => void) | undefined);
+    case "deviceStateChanged": return offDeviceStateChange(cb as ((arg_0: DeviceState) => void) | undefined);
   }
 }
 """)
@@ -1030,6 +1039,7 @@ function OnTopSessionChange(callback: (session: AVSessionDescriptor) => void): v
 function OnDeviceAvailable(callback: (device: OutputDeviceInfo) => void): void;
 function OnDeviceLogEvent(callback: (eventCode: DeviceLogEventCode) => void): void;
 function OnDeviceOffline(callback: (deviceId: String) => void): void;
+function OnDeviceStateChange(callback: (deviceState: DeviceState) => void): void;
 
 function OffSessionCreate(callback: Optional<(session: AVSessionDescriptor) => void>): void;
 function OffSessionDestroy(callback: Optional<(session: AVSessionDescriptor) => void>): void;
@@ -1037,6 +1047,7 @@ function OffTopSessionChange(callback: Optional<(session: AVSessionDescriptor) =
 function OffDeviceAvailable(callback: Optional<(device: OutputDeviceInfo) => void>): void;
 function OffDeviceLogEvent(callback: Optional<(eventCode: DeviceLogEventCode) => void>): void;
 function OffDeviceOffline(callback: Optional<(deviceId: String) => void>): void;
+function OffDeviceStateChange(callback: Optional<(deviceState: DeviceState) => void>): void;
 
 enum AVSessionErrorCode : i32 {
   ERR_CODE_SERVICE_EXCEPTION = 6600101,

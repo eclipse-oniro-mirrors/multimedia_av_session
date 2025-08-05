@@ -125,6 +125,7 @@ public:
 
     static DeviceInfo ToTaiheDeviceInfo(const OHOS::AVSession::DeviceInfo &in);
     static OutputDeviceInfo ToTaiheOutputDeviceInfo(const OHOS::AVSession::OutputDeviceInfo &in);
+    static DeviceState ToTaiheDeviceState(const OHOS::AVSession::DeviceState &in);
     static AVSessionDescriptor ToTaiheAVSessionDescriptor(const OHOS::AVSession::AVSessionDescriptor &in);
     static taihe::array<AVSessionDescriptor> ToTaiheAVSessionDescriptorArray(
         const std::vector<OHOS::AVSession::AVSessionDescriptor> &in);

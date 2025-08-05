@@ -49,6 +49,7 @@ std::map<std::string, std::pair<TaiheAVSessionManager::OnEventHandlerType, Taihe
     { "deviceAvailable", { OnDeviceAvailable, OffDeviceAvailable } },
     { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
+    { "deviceStateChange", { OnDeviceStateChange, OffDeviceStateChange } },
 };
 
 std::map<OHOS::AVSession::DistributedSessionType, std::pair<TaiheAVSessionManager::OnEventHandlerType,
@@ -377,6 +378,14 @@ int32_t TaiheAVSessionManager::OnDeviceOffline(std::shared_ptr<uintptr_t> &callb
     return listener_->AddCallback(TaiheSessionListener::EVENT_DEVICE_OFFLINE, callback);
 }
 
+int32_t TaiheAVSessionManager::OnDeviceStateChange(std::shared_ptr<uintptr_t> &callback)
+{
+    std::lock_guard lockGuard(listenerMutex_);
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
+        "callback has not been registered");
+    return listener_->AddCallback(TaiheSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
+}
+
 int32_t TaiheAVSessionManager::OnServiceDie(std::shared_ptr<uintptr_t> &callback)
 {
     std::shared_ptr<uintptr_t> targetCb;
@@ -458,6 +467,14 @@ int32_t TaiheAVSessionManager::OffDeviceOffline(std::shared_ptr<uintptr_t> &call
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "callback has not been registered");
     return listener_->RemoveCallback(TaiheSessionListener::EVENT_DEVICE_OFFLINE, callback);
+}
+
+int32_t TaiheAVSessionManager::OffDeviceStateChange(std::shared_ptr<uintptr_t> &callback)
+{
+    std::lock_guard lockGuard(listenerMutex_);
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
+        "callback has not been registered");
+    return listener_->RemoveCallback(TaiheSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
 
 int32_t TaiheAVSessionManager::OffRemoteDistributedSessionChange(std::shared_ptr<uintptr_t> &callback)
@@ -1218,6 +1235,12 @@ void OnDeviceOffline(callback_view<void(string_view)> callback)
     TaiheAVSessionManager::OnEvent("deviceOffline", cacheCallback);
 }
 
+void OnDeviceStateChange(callback_view<void(DeviceState const&)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    TaiheAVSessionManager::OnEvent("deviceStateChange", cacheCallback);
+}
+
 void OffDistributedSessionChange(DistributedSessionType param,
     optional_view<callback<void(array_view<AVSessionController>)>> callback)
 {
@@ -1292,6 +1315,15 @@ void OffDeviceOffline(optional_view<callback<void(string_view)>> callback)
     TaiheAVSessionManager::OffEvent("deviceOffline", cacheCallback);
 }
 
+void OffDeviceStateChange(optional_view<callback<void(DeviceState const&)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    TaiheAVSessionManager::OffEvent("deviceStateChange", cacheCallback);
+}
+
 AVCastPickerHelperInner CreateAVCastPickerHelperInnerSync(uintptr_t context)
 {
     AVCastPickerHelperInner output = make_holder<AVCastPickerHelperInnerImpl, AVCastPickerHelperInner>();
@@ -1339,6 +1371,7 @@ TH_EXPORT_CPP_API_OnSessionServiceDie(ANI::AVSession::OnSessionServiceDie);
 TH_EXPORT_CPP_API_OnDeviceAvailable(ANI::AVSession::OnDeviceAvailable);
 TH_EXPORT_CPP_API_OnDeviceLogEvent(ANI::AVSession::OnDeviceLogEvent);
 TH_EXPORT_CPP_API_OnDeviceOffline(ANI::AVSession::OnDeviceOffline);
+TH_EXPORT_CPP_API_OnDeviceStateChange(ANI::AVSession::OnDeviceStateChange);
 TH_EXPORT_CPP_API_OffDistributedSessionChange(ANI::AVSession::OffDistributedSessionChange);
 TH_EXPORT_CPP_API_OffSessionCreate(ANI::AVSession::OffSessionCreate);
 TH_EXPORT_CPP_API_OffSessionDestroy(ANI::AVSession::OffSessionDestroy);
@@ -1347,3 +1380,4 @@ TH_EXPORT_CPP_API_OffSessionServiceDie(ANI::AVSession::OffSessionServiceDie);
 TH_EXPORT_CPP_API_OffDeviceAvailable(ANI::AVSession::OffDeviceAvailable);
 TH_EXPORT_CPP_API_OffDeviceLogEvent(ANI::AVSession::OffDeviceLogEvent);
 TH_EXPORT_CPP_API_OffDeviceOffline(ANI::AVSession::OffDeviceOffline);
+TH_EXPORT_CPP_API_OffDeviceStateChange(ANI::AVSession::OffDeviceStateChange);

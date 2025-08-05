@@ -867,6 +867,17 @@ OutputDeviceInfo TaiheUtils::CreateUndefinedOutputDeviceInfo()
     return output;
 }
 
+DeviceState TaiheUtils::ToTaiheDeviceState(const OHOS::AVSession::DeviceState &in)
+{
+    DeviceState deviceState {
+        .deviceId = taihe::string(in.deviceId),
+        .deviceState = static_cast<int32_t>(in.deviceState),
+        .reasonCode = static_cast<int32_t>(in.reasonCode),
+        .radarErrorCode = static_cast<int32_t>(in.radarErrorCode),
+    };
+    return deviceState;
+}
+
 AVSessionDescriptor TaiheUtils::ToTaiheAVSessionDescriptor(const OHOS::AVSession::AVSessionDescriptor &in)
 {
     auto elementName = ToAniElementName(in.elementName_);
