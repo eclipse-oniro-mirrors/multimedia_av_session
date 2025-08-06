@@ -62,6 +62,7 @@ public:
     static int32_t OnDeviceAvailable(std::shared_ptr<uintptr_t> &callback);
     static int32_t OnDeviceLogEvent(std::shared_ptr<uintptr_t> &callback);
     static int32_t OnDeviceOffline(std::shared_ptr<uintptr_t> &callback);
+    static int32_t OnDeviceStateChange(std::shared_ptr<uintptr_t> &callback);
     static int32_t OnServiceDie(std::shared_ptr<uintptr_t> &callback);
     static int32_t OnRemoteDistributedSessionChange(std::shared_ptr<uintptr_t> &callback);
 
@@ -72,6 +73,7 @@ public:
     static int32_t OffDeviceAvailable(std::shared_ptr<uintptr_t> &callback);
     static int32_t OffDeviceLogEvent(std::shared_ptr<uintptr_t> &callback);
     static int32_t OffDeviceOffline(std::shared_ptr<uintptr_t> &callback);
+    static int32_t OffDeviceStateChange(std::shared_ptr<uintptr_t> &callback);
     static int32_t OffServiceDie(std::shared_ptr<uintptr_t> &callback);
     static int32_t OffRemoteDistributedSessionChange(std::shared_ptr<uintptr_t> &callback);
 

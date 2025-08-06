@@ -27,7 +27,8 @@
 namespace ANI::AVSession {
 using namespace taihe;
 using namespace ohos::multimedia::avsession::avSession;
-class TaiheSessionListener : public OHOS::AVSession::SessionListener {
+class TaiheSessionListener : public OHOS::AVSession::SessionListener,
+                             public std::enable_shared_from_this<TaiheSessionListener> {
 public:
     enum {
         EVENT_SESSION_CREATED,
@@ -37,6 +38,7 @@ public:
         EVENT_DEVICE_AVAILABLE,
         EVENT_DEVICE_LOG_EVENT,
         EVENT_DEVICE_OFFLINE,
+        EVENT_DEVICE_STATE_CHANGED,
         EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED,
         EVENT_TYPE_MAX
     };
@@ -51,6 +53,7 @@ public:
     void OnDeviceAvailable(const OHOS::AVSession::OutputDeviceInfo& castOutputDeviceInfo) override;
     void OnDeviceLogEvent(const OHOS::AVSession::DeviceLogEventCode eventId, const int64_t param) override;
     void OnDeviceOffline(const std::string& deviceId) override;
+    void OnDeviceStateChange(const OHOS::AVSession::DeviceState& deviceState) override;
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override;
 
