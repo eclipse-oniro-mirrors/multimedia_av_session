@@ -204,6 +204,8 @@ void AVSessionService::OnStartProcess()
         SLOGI("set boot avsession service started true");
     }
 #endif
+
+    AVSessionUtils::PublishCommonEvent("usual.event.AVSESSION_START");
 }
 
 void AVSessionService::OnDump()
