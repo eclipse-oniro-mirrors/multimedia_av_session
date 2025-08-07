@@ -52,11 +52,11 @@ ani_object TaiheUtils::CreateAniEmptyRecord()
     CHECK_RETURN(env != nullptr, "env is nullptr", aniRecord);
 
     ani_class cls {};
-    static const std::string className = "Lescompat/Record;";
+    static const std::string className = "escompat.Record";
     CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find Lescompat/Record", aniRecord);
 
     ani_method constructor {};
-    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &constructor) == ANI_OK,
+    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "C{std.core.Object}:", &constructor) == ANI_OK,
         "Can't find method <ctor> in Lescompat/Record", aniRecord);
 
     CHECK_RETURN(env->Object_New(cls, constructor, &aniRecord, nullptr) == ANI_OK,
@@ -220,7 +220,7 @@ bool TaiheUtils::IsAniArray(ani_env *env, ani_object obj)
 {
     CHECK_RETURN(env != nullptr && obj != nullptr, "env or obj is nullptr", false);
     ani_class cls {};
-    static const std::string className = "Lescompat/Array;";
+    static const std::string className = "escompat.Array";
     CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find Lescompat/Array.", false);
 
     ani_static_method isArrayMethod {};
@@ -271,7 +271,7 @@ int32_t TaiheUtils::GetAniOptionalPropertyInt32(ani_env *env, ani_object obj, co
     }
 
     ani_class cls {};
-    if (env->FindClass("Lstd/core/Int;", &cls) != ANI_OK) {
+    if (env->FindClass("std.core.Int", &cls) != ANI_OK) {
         SLOGE("GetAniOptionalPropertyInt32 [%{public}s] find Lstd/core/Int failed", name.c_str());
         return OHOS::AVSession::AVSESSION_ERROR;
     }
@@ -295,7 +295,7 @@ static int32_t GetAniInt32(ani_env *env, ani_object obj, int32_t &value)
     CHECK_RETURN(!TaiheUtils::IsAniUndefined(env, obj), "undefined object", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_class cls {};
-    static const std::string className = "Lstd/core/Int;";
+    static const std::string className = "std.core.Int";
     CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK,
         "Can't find Lstd/core/Int", OHOS::AVSession::AVSESSION_ERROR);
 
@@ -325,7 +325,7 @@ int32_t TaiheUtils::GetAniPropertyInt32Array(ani_env *env, ani_object obj, const
         "Call method <get>length failed", OHOS::AVSession::AVSESSION_ERROR);
     for (ani_int i = 0; i < static_cast<ani_int>(length); i++) {
         ani_ref ref;
-        CHECK_RETURN(env->Object_CallMethodByName_Ref(valueObj, "$_get", "I:Lstd/core/Object;", &ref, i) == ANI_OK,
+        CHECK_RETURN(env->Object_CallMethodByName_Ref(valueObj, "$_get", "i:C{std.core.Object}", &ref, i) == ANI_OK,
             "Call method $_get failed.", OHOS::AVSession::AVSESSION_ERROR);
 
         int32_t value = 0;
@@ -377,7 +377,7 @@ int32_t TaiheUtils::GetAniOptionalPropertyInt64(ani_env *env, ani_object obj, co
     }
 
     ani_class cls {};
-    if (env->FindClass("Lstd/core/Int;", &cls) != ANI_OK) {
+    if (env->FindClass("std.core.Int", &cls) != ANI_OK) {
         SLOGE("GetAniOptionalPropertyInt64 [%{public}s] find Lstd/core/Int failed", name.c_str());
         return OHOS::AVSession::AVSESSION_ERROR;
     }
@@ -420,11 +420,11 @@ int32_t TaiheUtils::ToAniDoubleObject(ani_env *env, double in, ani_object &out)
     CHECK_RETURN(env != nullptr, "env is nullptr", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_class cls {};
-    CHECK_RETURN(env->FindClass("Lstd/core/Double;", &cls) == ANI_OK,
+    CHECK_RETURN(env->FindClass("std.core.Double", &cls) == ANI_OK,
         "FindClass Lstd/core/Double failed", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_method ctorMethod {};
-    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "D:V", &ctorMethod) == ANI_OK,
+    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "d:", &ctorMethod) == ANI_OK,
         "Class_FindMethod Lstd/core/Double <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
 
     CHECK_RETURN(env->Object_New(cls, ctorMethod, &out, static_cast<ani_double>(in)) == ANI_OK,
@@ -635,7 +635,7 @@ int32_t TaiheUtils::GetAVDataSrcDescriptor(uintptr_t in, OHOS::AVSession::AVData
         CHECK_RETURN(env != nullptr, "env is nullptr", 0);
 
         ani_class cls {};
-        CHECK_RETURN(env->FindClass("L@ohos/multimedia/avsession/MediaAVDataSrcDescriptorImpl;", &cls) == ANI_OK,
+        CHECK_RETURN(env->FindClass("@ohos.multimedia.avsession.MediaAVDataSrcDescriptorImpl", &cls) == ANI_OK,
             "FindClass MediaAVDataSrcDescriptorImpl failed", 0);
         ani_static_method onData {};
         CHECK_RETURN(env->Class_FindStaticMethod(cls, "OnData", nullptr, &onData) == ANI_OK,
@@ -964,7 +964,7 @@ ani_object TaiheUtils::ToAniAVFileDescriptor(const OHOS::AVSession::AVFileDescri
     CHECK_RETURN(env != nullptr, "env is nullptr", nullptr);
 
     ani_class cls {};
-    CHECK_RETURN(env->FindClass("L@ohos/multimedia/avsession/MediaAVFileDescriptorImpl;", &cls) == ANI_OK,
+    CHECK_RETURN(env->FindClass("@ohos.multimedia.avsession.MediaAVFileDescriptorImpl", &cls) == ANI_OK,
         "FindClass MediaAVFileDescriptorImpl failed", nullptr);
     ani_method ctorMethod {};
     CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", nullptr, &ctorMethod) == ANI_OK,
@@ -985,7 +985,7 @@ ani_object TaiheUtils::ToAniAVDataSrcDescriptor(const OHOS::AVSession::AVDataSrc
     CHECK_RETURN(env != nullptr, "env is nullptr", nullptr);
 
     ani_class cls {};
-    CHECK_RETURN(env->FindClass("L@ohos/multimedia/avsession/MediaAVDataSrcDescriptorImpl;", &cls) == ANI_OK,
+    CHECK_RETURN(env->FindClass("@ohos.multimedia.avsession.MediaAVDataSrcDescriptorImpl", &cls) == ANI_OK,
         "FindClass MediaAVDataSrcDescriptorImpl failed", nullptr);
     ani_method ctorMethod {};
     CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", nullptr, &ctorMethod) == ANI_OK,
@@ -1012,7 +1012,7 @@ ani_object TaiheUtils::ToAniKeyEvent(const OHOS::MMI::KeyEvent &in)
     CHECK_RETURN(env != nullptr, "env is nullptr", nullptr);
 
     ani_namespace scope {};
-    CHECK_RETURN(env->FindNamespace("L@ohos/multimedia/avsession/avSession;", &scope) == ANI_OK,
+    CHECK_RETURN(env->FindNamespace("@ohos.multimedia.avsession.avSession", &scope) == ANI_OK,
         "FindNamespace @ohos/multimedia/avsession/avSession failed", nullptr);
 
     ani_function function {};
@@ -1142,7 +1142,7 @@ ani_object TaiheUtils::ToBusinessError(ani_env *env, int32_t code, const std::st
     CHECK_ERROR_RETURN_RET_LOG(ANI_OK != env->FindClass(CLASS_NAME_BUSINESSERROR, &cls), err,
         "find class %{public}s failed", CLASS_NAME_BUSINESSERROR);
     ani_method ctor {};
-    CHECK_ERROR_RETURN_RET_LOG(ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor), err,
+    CHECK_ERROR_RETURN_RET_LOG(ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":", &ctor), err,
         "find method BusinessError constructor failed");
     ani_object error {};
     CHECK_ERROR_RETURN_RET_LOG(ANI_OK != env->Object_New(cls, ctor, &error), err,
