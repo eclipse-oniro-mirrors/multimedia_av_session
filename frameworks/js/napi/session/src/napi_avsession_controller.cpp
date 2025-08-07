@@ -1128,8 +1128,7 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
             } else if (ret == ERR_COMMAND_NOT_SUPPORT) {
                 context->errMessage = "SendControlCommand failed : native command not support";
             } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
-                context->errMessage = "SendControlCommand failed : native command send nums overload, \
-                    controls the frequency of sending self-query and control commands";
+                context->errMessage = "SendControlCommand failed : native command send nums overload";
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SendControlCommand failed : native no permission";
             } else {

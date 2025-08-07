@@ -70,6 +70,8 @@ HWTEST_F(OHAVSessionCallbackImplTest, UnSetPlayCallback001, TestSize.Level0)
     AVSession_ErrCode ret = g_ohAVSessionCallbackImpl.UnSetPlayCallback(
         avsession, command, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     SLOGI("UnSetPlayCallback001 End");
 }
 
@@ -554,7 +556,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterToggleFavoriteCallback002, TestSiz
  * @tc.type: FUNC
  * @tc.require: AR000H31JO
  */
-HWTEST_F(OHAVSessionCallbackImplTest, OnSetTargetLoopMode001, TestSize.Level0)
+HWTEST_F(OHAVSessionCallbackImplTest, OnSetTargetLoopMode001, TestSize.Level1)
 {
     SLOGI("OnSetTargetLoopMode001 Begin");
     std::string assetId = "assetId";

@@ -174,10 +174,10 @@ public:
     int32_t GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors);
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
-    
+
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                       std::vector<AVQueueInfo>& avQueueInfos) override;
-    
+
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
 
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId, const std::string& deviceId);
@@ -209,6 +209,8 @@ public:
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
     void HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem);
+
+    void HandleDisableCast();
 
     void HandleSessionReleaseInner();
 
@@ -273,7 +275,7 @@ public:
 #endif
 
     int32_t Close(void) override;
-    
+
     void AddAvQueueInfoToFile(AVSessionItem& session);
 
     std::string GetAVQueueDir(int32_t userId = 0);
@@ -305,7 +307,6 @@ public:
     bool CheckIfOtherAudioPlaying();
 
 private:
-
     void NotifyProcessStatus(bool isStart);
 
     static SessionContainer& GetContainer();
@@ -508,10 +509,10 @@ private:
     bool CheckAncoAudio();
 
     int32_t ConvertKeyCodeToCommand(int keyCode);
-    
+
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
-    
+
     void LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::StreamUsage streamUsage,
         AudioStandard::RendererState rendererState);
 

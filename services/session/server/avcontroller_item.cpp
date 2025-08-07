@@ -69,7 +69,7 @@ int32_t AVControllerItem::RegisterAVControllerCallback(const std::shared_ptr<AVC
 int32_t AVControllerItem::UnregisterAVControllerCallback()
 {
     std::lock_guard lockGuard(callbackMutex_);
-    SLOGE("UnregisterAVControllerCallback pid:%{public}d", static_cast<int>(pid_));
+    SLOGI("UnregisterAVControllerCallback pid %{public}d", static_cast<int>(pid_));
     innerCallback_ = nullptr;
     return AVSESSION_SUCCESS;
 }

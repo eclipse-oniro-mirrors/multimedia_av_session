@@ -1708,7 +1708,6 @@ static HWTEST_F(AVSessionServiceTestSecond, OnDeviceOffline001, TestSize.Level0)
     SLOGD("OnDeviceOffline001 end!");
 }
 
-#ifdef FUNC_NOT_FIND
 /**
 * @tc.name: OnDeviceStateChange001
 * @tc.desc: Verifying the OnDeviceStateChange method with listener.
@@ -1730,7 +1729,6 @@ static HWTEST_F(AVSessionServiceTestSecond, OnDeviceStateChange001, TestSize.Lev
     EXPECT_EQ(g_isCallOnSessionCreate, true);
     SLOGD("OnDeviceStateChange001 end!");
 }
-#endif
 
 /**
 * @tc.name: OnRemoteDistributedSessionChange001
