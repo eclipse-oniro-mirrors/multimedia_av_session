@@ -93,8 +93,7 @@ static HWTEST_F(AVCastControllerCallbackProxyTest, OnKeyRequest002, testing::ext
 */
 static HWTEST_F(AVCastControllerCallbackProxyTest, onDataSrcRead001, testing::ext::TestSize.Level1)
 {
-    std::shared_ptr<AVSharedMemoryBase> memory =
-      std::shared_ptr<AVSharedMemoryBase>(AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test"));
+    std::shared_ptr<AVSharedMemoryBase> memory = AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test");
     std::string assetId = "";
     std::vector<uint8_t> keyRequestData;
     int32_t result = 0;

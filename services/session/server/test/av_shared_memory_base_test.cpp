@@ -61,6 +61,37 @@ static HWTEST(AVSharedMemoryBaseTest, Unmarshalling001, TestSize.Level0)
 }
 
 /**
+* @tc.name: Unmarshalling002
+* @tc.desc: Unmarshalling
+* @tc.type: FUNC
+*/
+static HWTEST(AVSharedMemoryBaseTest, Unmarshalling002, TestSize.Level0)
+{
+    SLOGI("Unmarshalling002 Begin");
+    OHOS::MessageParcel parcel;
+    parcel.WriteFileDescriptor(1);
+    auto unmarshallingPtr = AVSharedMemoryBase::Unmarshalling(parcel);
+    EXPECT_NE(unmarshallingPtr, nullptr);
+}
+
+/**
+* @tc.name: Unmarshalling003
+* @tc.desc: Unmarshalling
+* @tc.type: FUNC
+*/
+static HWTEST(AVSharedMemoryBaseTest, Unmarshalling003, TestSize.Level0)
+{
+    SLOGI("Unmarshalling003 Begin");
+    OHOS::MessageParcel parcel;
+    parcel.WriteFileDescriptor(1);
+    parcel.WriteInt32(10);
+    parcel.WriteUint32(1);
+    parcel.WriteString("test");
+    auto unmarshallingPtr = AVSharedMemoryBase::Unmarshalling(parcel);
+    EXPECT_NE(unmarshallingPtr, nullptr);
+}
+
+/**
  * @tc.name: Marshalling001
  * @tc.desc: Marshalling
  * @tc.type: FUNC
