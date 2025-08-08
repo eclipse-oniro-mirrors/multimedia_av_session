@@ -108,8 +108,8 @@ std::string GenerateString(size_t target_len)
     }
 
     g_sizePos += copy_len;
-
-    return std::string(buffer.data());
+    buffer[copy_len] = '\n';
+    return std::string(buffer.data(), copy_len + 1);
 }
 
 template<class T>
