@@ -91,6 +91,7 @@ public:
     bool isActive_ {};
     bool isTopSession_ {};
     bool isThirdPartyApp_ {};
+    int32_t index_ {};
     OutputDeviceInfo outputDeviceInfo_;
 
     int32_t userId_ {};

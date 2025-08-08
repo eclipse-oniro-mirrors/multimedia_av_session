@@ -71,6 +71,7 @@
 #include "image_source.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_dynamic_insight.h"
+#include "softbus/softbus_session_utils.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -1430,6 +1431,57 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 }
 
+static int32_t GetIntValueFromJson(const std::string& extraInfo, const char* key)
+{
+    auto defaultValue = 0;
+    cJSON* jsonData = nullptr;
+    if (!SoftbusSessionUtils::TransferStrToJson(extraInfo, jsonData)) {
+        SLOGE("json parse fail");
+        return defaultValue;
+    }
+    int32_t value = SoftbusSessionUtils::GetIntFromJson(jsonData, key);
+    cJSON_Delete(jsonData);
+    return value;
+}
+
+sptr<AVSessionItem> AVSessionService::CreateNewSessionWithExtra(const std::string& tag, int32_t type,
+                                                                const std::string& extraInfo, bool thirdPartyApp,
+                                                                const AppExecFwk::ElementName& elementName)
+{
+    SLOGI("%{public}s %{public}d %{public}s %{public}s thirdPartyApp=%{public}d", tag.c_str(), type,
+          elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str(), thirdPartyApp);
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = AllocSessionId();
+    if (descriptor.sessionId_.empty()) {
+        SLOGE("alloc session id failed");
+        return nullptr;
+    }
+    descriptor.userId_ = GetUsersManager().GetCurrentUserId();
+    descriptor.sessionTag_ = tag;
+    descriptor.sessionType_ = type;
+    descriptor.elementName_ = elementName;
+    descriptor.isThirdPartyApp_ = thirdPartyApp;
+    descriptor.index_ = GetIntValueFromJson(extraInfo, "index");
+
+    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor, descriptor.userId_);
+    if (result == nullptr) {
+        return nullptr;
+    }
+    result->SetPid(GetCallingPid());
+    result->SetUid(GetCallingUid());
+    ServiceCallback(result);
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "LocalDevice";
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    result->SetOutputDevice(outputDeviceInfo);
+
+    return result;
+}
+
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {
@@ -1564,6 +1616,59 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionService::CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extra,
+                                                      bool thirdPartyApp, const AppExecFwk::ElementName& elementName,
+                                                      sptr<AVSessionItem>& sessionItem)
+{
+    if (!IsParamInvalid(tag, type, elementName)) {
+        return ERR_INVALID_PARAM;
+    }
+    auto pid = GetCallingPid();
+    std::lock_guard lockGuard(sessionServiceLock_);
+    if (AbilityHasSession(pid)) {
+        SLOGE("process %{public}d %{public}s already has one session", pid, elementName.GetAbilityName().c_str());
+        CheckAndUpdateAncoMediaSession(elementName);
+        return ERR_SESSION_IS_EXIST;
+    }
+
+    sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, elementName);
+    if (result == nullptr) {
+        SLOGE("create new session failed");
+        if (dumpHelper_ != nullptr) {
+            dumpHelper_->SetErrorInfo("AVSessionService::CreateSessionInner  create new session failed");
+        }
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "CALLER_PID", pid, "TAG", tag, "TYPE", type, "BUNDLE_NAME",
+            elementName.GetBundleName(), "ERROR_MSG", "avsessionservice createsessioninner create new session failed");
+        return ERR_NO_MEMORY;
+    }
+    if (GetUsersManager().AddSessionForCurrentUser(pid, elementName.GetAbilityName(), result) != AVSESSION_SUCCESS) {
+        SLOGE("session num exceed max");
+        return ERR_SESSION_EXCEED_MAX;
+    }
+
+    HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
+        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
+
+    NotifySessionCreate(result->GetDescriptor());
+    sessionItem = result;
+
+    std::lock_guard frontLockGuard(sessionFrontLock_);
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
+    auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
+    if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL) &&
+        it == sessionListForFront->end()) {
+        SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
+        sessionListForFront->push_front(sessionItem);
+    }
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+        ReportSessionState(sessionItem, 0);
+#endif
+
+    return AVSESSION_SUCCESS;
+}
+
 sptr<AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                          const AppExecFwk::ElementName& elementName)
 {
@@ -1615,6 +1720,45 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     std::string profile;
     if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
         SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
+        SaveSessionInfoInFile(session->GetSessionId(), session->GetSessionType(), elementName);
+    }
+
+    {
+        std::lock_guard lockGuard1(abilityManagerLock_);
+        std::string bundleName = session->GetDescriptor().elementName_.GetBundleName();
+        std::string abilityName = session->GetDescriptor().elementName_.GetAbilityName();
+        auto it = abilityManager_.find(bundleName + abilityName);
+        if (it != abilityManager_.end() && it->second != nullptr) {
+            it->second->StartAbilityByCallDone(session->GetDescriptor().sessionId_);
+        }
+    }
+
+    object = session;
+    ReportSessionInfo(session, static_cast<int32_t>(res));
+
+    {
+        std::lock_guard lockGuard(isAllSessionCastLock_);
+        CHECK_AND_RETURN_RET_LOG(isAllSessionCast_, AVSESSION_SUCCESS, "no need to cast");
+    }
+    CHECK_AND_RETURN_RET_LOG(CastAudioForNewSession(session) == AVSESSION_SUCCESS,
+                             AVSESSION_SUCCESS, "cast new session error");
+    return res;
+}
+
+int32_t AVSessionService::CreateSessionInnerWithExtra(const std::string& tag, int32_t type,
+                                                      const std::string& extraInfo,
+                                                      const AppExecFwk::ElementName& elementName,
+                                                      sptr<IRemoteObject>& object)
+{
+    sptr<AVSessionItem> session;
+    auto res = CreateSessionInnerWithExtra(tag, type, extraInfo,
+        PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION),
+        elementName, session);
+    CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, res, "create session fail");
+
+    std::string supportModule;
+    std::string profile;
+    if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
         SaveSessionInfoInFile(session->GetSessionId(), session->GetSessionType(), elementName);
     }
 
