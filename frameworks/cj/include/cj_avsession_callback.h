@@ -50,6 +50,7 @@ public:
     void OnAVCallToggleCallMute() override;
     void OnPlayFromAssetId(int64_t assetId) override;
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
+    void OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) override;
 
     void RegisterCallback(int32_t type, int64_t id);
     void UnRegisterCallback(int32_t type);
@@ -98,6 +99,7 @@ private:
     std::function<void(void)> hangUp;
     std::function<void(void)> toggleCallMute;
     std::function<void(const CCastDisplayInfo)> castDisplayChange;
+    std::function<void(const CCastDisplayInfo)> castDisplaySizeChange;
     std::map<int32_t, void(CJAVSessionCallback::*)(int64_t)> typeToCallbackMap_;
     std::vector<std::shared_ptr<std::recursive_mutex>> callbackMutexMap_;
 };

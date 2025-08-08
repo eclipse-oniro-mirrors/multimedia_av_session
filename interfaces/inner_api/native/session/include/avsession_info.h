@@ -318,6 +318,14 @@ public:
     virtual void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) = 0;
 
     /**
+     * @brief cast display size change.
+     *
+     * @param castDisplayInfo for castDisplay
+     * @since 11
+     */
+    virtual void OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) {};
+
+    /**
      * @brief custom media packet for 4k change callback.
      *
      * @param data The changed custom media packet.

@@ -47,6 +47,7 @@ public:
         EVENT_AVCALL_TOGGLE_CALL_MUTE,
         EVENT_PLAY_FROM_ASSETID,
         EVENT_DISPLAY_CHANGE,
+        EVENT_DISPLAY_SIZE_CHANGE,
         EVENT_SET_TARGET_LOOP_MODE,
         EVENT_PLAY_WITH_ASSETID,
         EVENT_CUSTOM_DATA,
@@ -78,6 +79,7 @@ public:
     void OnPlayFromAssetId(int64_t assetId) override;
     void OnPlayWithAssetId(const std::string& assetId) override;
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
+    void OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) override;
     void OnCustomData(const AAFwk::WantParams& data) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);

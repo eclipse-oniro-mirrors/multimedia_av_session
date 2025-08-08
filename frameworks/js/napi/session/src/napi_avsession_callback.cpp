@@ -304,6 +304,12 @@ void NapiAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDispl
     HandleEvent(EVENT_DISPLAY_CHANGE, castDisplayInfo);
 }
 
+void NapiAVSessionCallback::OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnCastDisplaySizeChange");
+    HandleEvent(EVENT_DISPLAY_CHANGE, castDisplayInfo);
+}
+
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     SLOGI("Add callback %{public}d", event);
