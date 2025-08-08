@@ -507,9 +507,9 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
     if (cJSON_HasObjectItem(valueItem, speedStr_.c_str())) {
         cJSON* speedArray = cJSON_GetObjectItem(valueItem, speedStr_.c_str());
         if (speedArray == nullptr || cJSON_IsInvalid(speedArray) || !cJSON_IsArray(speedArray)) {
-        SLOGE("speed get null or invalid");
-        cJSON_Delete(valueItem);
-        return AVSESSION_ERROR;
+            SLOGE("speed get null or invalid");
+            cJSON_Delete(valueItem);
+            return AVSESSION_ERROR;
     }
         cJSON* speedItem = nullptr;
         cJSON_ArrayForEach(speedItem, speedArray) {
@@ -539,7 +539,7 @@ int32_t HwCastStreamPlayer::GetSupportedDecoders(std::vector<std::string>& decod
 
 int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel)
 {
-    SLOGI("enter GetRecommendedResolutionLevel");
+    SLOGI("enter GetRecommendedResolutionLevel and decoderType is %{public}s", decoderType.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
     CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     if (jsonCapabilitiesSptr_->decoderSupportResolutions_.empty()) {

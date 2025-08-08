@@ -68,7 +68,7 @@ ohos_fuzztest("AVSessionAdapterFuzzTest") {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
       "../../../../../../frameworks/native/session:avsession_cast_client",
-      "../../../../../session:avsession_cast_item_static",
+      "../../../../../session:avsession_cast_item",
     ]
   }
 

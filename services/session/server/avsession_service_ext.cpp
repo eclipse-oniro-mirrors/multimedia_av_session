@@ -15,7 +15,6 @@
 
 #include "audio_device_manager.h"
 #include "avsession_service.h"
-
 #include "migrate_avsession_manager.h"
 
 namespace OHOS::AVSession {
@@ -364,7 +363,7 @@ void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
     for (const auto& [pid, listener] : listenerMap) {
         SLOGI("notify device state change with pid %{public}d", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceStateChange");
-        if (listener == nullptr) {
+        if (listener != nullptr) {
             listener->OnDeviceStateChange(deviceState);
         }
     }
@@ -795,8 +794,11 @@ bool AVSessionService::CheckWhetherTargetDevIsNext(const OHOS::DistributedHardwa
     }
     if (cJSON_HasObjectItem(jsonData, "OS_TYPE")) {
         cJSON* osTypeItem = cJSON_GetObjectItem(jsonData, "OS_TYPE");
-        CHECK_AND_RETURN_RET_LOG(osTypeItem != nullptr && !cJSON_IsInvalid(osTypeItem) &&
-            cJSON_IsNumber(osTypeItem), false, "get osTypeItem invalid");
+        if (osTypeItem == nullptr || cJSON_IsInvalid(osTypeItem) || !cJSON_IsNumber(osTypeItem)) {
+            SLOGE("get osTypeItem invalid");
+            cJSON_Delete(jsonData);
+            return false;
+        }
         if (osTypeItem->valueint > 0 || osTypeItem->valuedouble > 0) {
             cJSON_Delete(jsonData);
             return true;

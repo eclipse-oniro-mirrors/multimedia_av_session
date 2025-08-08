@@ -63,7 +63,7 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
-    "window_manager:libwm",
+    "audio_framework:audio_foundation",
   ]
 
   if (castplus_cast_engine_enable) {

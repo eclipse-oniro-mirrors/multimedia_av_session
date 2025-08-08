@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -159,7 +160,7 @@ public:
     void KeyEventExtras(AAFwk::IArray* list);
 
     void NotificationExtras(AAFwk::IArray* list);
-
+ 
     bool IsNotShowNotification();
 
     std::vector<int32_t> GetSupportCommand();
@@ -266,7 +267,7 @@ public:
 
     int32_t DeleteSupportCastCommand(int32_t cmd);
 
-    void HandleCastValidCommandChange(const std::vector<int32_t> &cmds);
+    void HandleCastValidCommandChange(const std::vector<int32_t>& cmds);
 
     int32_t ReleaseCast(bool continuePlay = false) override;
 
@@ -495,7 +496,7 @@ private:
     std::recursive_mutex mediaSessionCallbackLock_;
 
     std::shared_mutex writeAndReadImgLock_;
-    
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;
     int64_t castHandle_ = 0;

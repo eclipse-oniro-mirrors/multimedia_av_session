@@ -106,8 +106,7 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
         return AVSESSION_ERROR;
     }
     std::vector<std::shared_ptr<AudioStandard::AudioRendererChangeInfo>> audioRendererChangeInfo;
-    auto ret =
-        AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
+    auto ret = AudioStandard::AudioStreamManager::GetInstance()->GetCurrentRendererChangeInfos(audioRendererChangeInfo);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "get renderer state failed!");
     for (const auto& info : audioRendererChangeInfo) {
         if (info->clientUID == uid && info->rendererState == AudioStandard::RENDERER_RUNNING && info->backMute) {
@@ -204,9 +203,8 @@ bool AudioAdapter::GetRendererRunning(int32_t uid, int32_t pid)
     CHECK_AND_RETURN_RET_LOG(ret == 0, false, "get renderer state failed!");
     for (const auto& info : audioRendererChangeInfo) {
         CHECK_AND_RETURN_RET_LOG(!(info->clientUID == uid && info->clientPid == pid &&
-                                 info->rendererState == AudioStandard::RENDERER_RUNNING), true,
-                                 "find uid=%{public}d pid=%{public}d renderer state is %{public}d",
-                                 uid, pid, info->rendererState);
+            info->rendererState == AudioStandard::RENDERER_RUNNING), true,
+            "find uid=%{public}d pid=%{public}d renderer state is %{public}d", uid, pid, info->rendererState);
     }
 
     return false;
