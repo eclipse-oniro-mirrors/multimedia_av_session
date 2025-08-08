@@ -48,7 +48,6 @@ av_session_ohos_library("avsession_client") {
     "../../../frameworks/common/src/av_data_src_descriptor.cpp",
     "../../../frameworks/common/src/av_file_descriptor.cpp",
     "../../../frameworks/common/src/av_shared_memory_base.cpp",
-    "../../../frameworks/common/src/av_shared_memory_helper.cpp",
     "../../../frameworks/common/src/avcall_meta_data.cpp",
     "../../../frameworks/common/src/avcall_state.cpp",
     "../../../frameworks/common/src/avcast_control_command.cpp",

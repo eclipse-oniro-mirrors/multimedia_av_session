@@ -45,7 +45,7 @@ public:
      * @param flags the memory's accessible flags, refer to {@AVSharedMemoryBase::Flags}.
      * @param name the debug string
      */
-    static std::shared_ptr<AVSharedMemoryBase> CreateFromRemote(int32_t fd, int32_t size, uint32_t flags,
+    static AVSharedMemoryBase* CreateFromRemote(int32_t fd, int32_t size, uint32_t flags,
                                                             const std::string &name);
 
     ~AVSharedMemoryBase();

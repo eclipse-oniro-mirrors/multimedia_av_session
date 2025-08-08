@@ -162,7 +162,8 @@ ErrCode AVCastControllerCallbackClient::onDataSrcRead(const std::shared_ptr<AVSh
                                                       uint32_t length, int64_t pos, int32_t& result)
 {
     auto callback = callback_;
-    return callback->onDataSrcRead(mem, length, pos, result);
+    callback->onDataSrcRead(mem, length, pos, result);
+    return AVSESSION_SUCCESS;
 }
 
 ErrCode AVCastControllerCallbackClient::OnCustomData(const AAFwk::WantParams& data)

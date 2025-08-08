@@ -281,7 +281,8 @@ static HWTEST_F(AVCastControllerCallbackStubTest, OnRemoteRequest006, TestSize.L
 */
 static HWTEST_F(AVCastControllerCallbackStubTest, onDataSrcRead001, TestSize.Level1)
 {
-    std::shared_ptr<AVSharedMemoryBase> memory = AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test");
+    std::shared_ptr<AVSharedMemoryBase> memory =
+      std::shared_ptr<AVSharedMemoryBase>(AVSharedMemoryBase::CreateFromRemote(-1, 10, 1, "test"));
     std::string assetId = "";
     AVCastControllerCallbackStubDemo avCastControllerCallbackStubDemo;
     int32_t result = 0;
