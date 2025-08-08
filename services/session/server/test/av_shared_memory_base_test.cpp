@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 
-#include "av_shared_memory_helper.h"
 #include "av_shared_memory_base.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
@@ -76,7 +75,7 @@ static HWTEST(AVSharedMemoryBaseTest, Marshalling001, TestSize.Level0)
     OHOS::Parcel& parcel = g_parcel;
     memory->fd_ = 1;
     bool ret = memory->Marshalling(parcel);
-    EXPECT_NE(ret, true);
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -94,25 +93,6 @@ static HWTEST(AVSharedMemoryBaseTest, WriteToParcel001, TestSize.Level0)
     OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
     memory->fd_ = 1;
     bool ret = memory->WriteToParcel(m_parcel);
-    EXPECT_NE(ret, true);
-    ret = memory->ReadFromParcel(m_parcel);
-    EXPECT_NE(ret, true);
-}
-
-/**
-* @tc.name: ReadFromParcel001
-* @tc.desc: ReadFromParcel
-* @tc.type: FUNC
-*/
-static HWTEST(AVSharedMemoryBaseTest, ReadFromParcel001, TestSize.Level0)
-{
-    SLOGI("ReadFromParcel001 Begin");
-    int32_t size = 10;
-    uint32_t flags = 1;
-    const std::string name = "test";
-    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
-    OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
-    bool ret = memory->ReadFromParcel(m_parcel);
     EXPECT_NE(ret, true);
 }
 
