@@ -4160,7 +4160,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support.");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
-    SLOGI("NotifySystemUI isActiveNtf %{public}d, addCapsule %{public}d isCapsuleUpdate %{public}d",
+    SLOGI("NotifySystemUI isActiveNtf %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d",
         isActiveSession, addCapsule, isCapsuleUpdate);
     hasMediaCapsule_ = addCapsule;
     Notification::NotificationRequest request;
