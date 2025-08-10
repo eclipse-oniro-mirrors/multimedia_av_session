@@ -233,7 +233,7 @@ public:
 
     void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
 
-    void SetServiceCallbackForMediaSession(const std::function<void(std::string, bool)>& callback);
+    void SetServiceCallbackForMediaSession(const std::function<void(std::string, bool, bool)>& callback);
     
     void SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback);
 
@@ -371,6 +371,7 @@ private:
     void DelRecommend();
     void UpdateRecommendInfo(bool needRecommend);
     bool SearchSpidInCapability(const std::string& deviceId);
+    void CheckIfSendCapsule(const AVPlaybackState& state);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -448,7 +449,7 @@ private:
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
-    std::function<void(std::string, bool)> serviceCallbackForMediaSession_;
+    std::function<void(std::string, bool, bool)> serviceCallbackForMediaSession_;
     std::function<void(std::string)> serviceCallbackForKeyEvent_;
     std::function<void(std::string)> updateExtrasCallback_;
     std::function<void(std::string, bool)> serviceCallbackForNtf_;
@@ -458,6 +459,7 @@ private:
     bool isMediaChange_ = true;
     bool isAssetChange_ = false;
     bool isRecommend_ = false;
+    bool isPlayingState_ = false;
 
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
@@ -471,6 +473,7 @@ private:
     static constexpr const int32_t audioBrokerUid = 5557;
     static constexpr const char *defaultBundleName = "com.example.himusicdemo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
+    static constexpr const int32_t cancelTimeout = 5000;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;

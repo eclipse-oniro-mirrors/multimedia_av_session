@@ -597,6 +597,29 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DelRecommend_001, TestSize.Level1)
     SLOGD("AVSessionItem_DelRecommend_001 end!");
 }
 
+/**
+ * @tc.name: AVSessionItem_CheckIfSendCapsule_001
+ * @tc.desc: Test CheckIfSendCapsule.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_CheckIfSendCapsule_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_CheckIfSendCapsule_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    int oriUid = g_AVSessionItem->GetUid();
+    g_AVSessionItem->SetUid(5557);
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    g_AVSessionItem->CheckIfSendCapsule(state);
+    EXPECT_EQ(g_AVSessionItem->isPlayingState_, true);
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    g_AVSessionItem->CheckIfSendCapsule(state);
+    EXPECT_EQ(g_AVSessionItem->isPlayingState_, false);
+    g_AVSessionItem->SetUid(oriUid);
+    SLOGD("AVSessionItem_CheckIfSendCapsule_001 end!");
+}
+
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 /**
  * @tc.name: AVSessionItem_ReportPlaybackState_001

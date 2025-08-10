@@ -1299,14 +1299,31 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         }
     });
 
-    sessionItem->SetServiceCallbackForMediaSession([this](std::string sessionId, bool isPlaying) {
+    sessionItem->SetServiceCallbackForMediaSession([this](std::string sessionId, bool isPlaying, bool isMediaChange) {
         // only use for anco mediasession
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist");
-        bool isSameTop = topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr());
+        bool isSameTop = topSession_ != nullptr && (topSession_.GetRefPtr() == session.GetRefPtr());
         if (isSameTop) {
-            NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+            SLOGI("ancoCapsule topSession is %{public}s isPlaying %{public}d isMediaChange %{public}d",
+                topSession_->GetBundleName().c_str(), isPlaying, isMediaChange);
+            if (!isPlaying && (isMediaCardOpen_.load() || hasRemoveEvent_.load())) {
+                SLOGI("ancoCapsule del isCardOpen_:%{public}d hasRemoveEvent_:%{public}d",
+                    isMediaCardOpen_.load(), hasRemoveEvent_.load());
+                return;
+            }
+            auto hasOtherSessionPlaying = false;
+            if (!isPlaying) {
+                int32_t userId = topSession_->GetUserId();
+                userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
+                sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
+                hasOtherSessionPlaying = result != nullptr;
+                HandleOtherSessionPlaying(result);
+            }
+            if (!hasOtherSessionPlaying) {
+                NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isMediaChange);
+            }
             return;
         }
         CHECK_AND_RETURN_LOG(isPlaying, "anco media session is not playing");
@@ -1315,7 +1332,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         sessionInfo.uid = session->GetUid();
         sessionInfo.pid = session->GetPid();
         SelectFocusSession(sessionInfo);
-        NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+        NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isMediaChange);
     });
 }
 
@@ -1343,7 +1360,7 @@ void AVSessionService::AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessio
                 HandleOtherSessionPlaying(result);
             }
             if (!hasOtherSessionPlaying) {
-                NotifySystemUI(nullptr, true, isPlaying, isChange);
+                NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isChange);
             }
             return;
         }
@@ -4139,6 +4156,7 @@ std::string AVSessionService::GetLocalTitle()
 {
     AVMetaData meta = topSession_->GetMetaData();
     bool isTitleLyric = (topSession_->GetBundleName() == DEFAULT_BUNDLE_NAME) && !meta.GetDescription().empty();
+    bool isAncoLyric = (topSession_->GetUid() == audioBrokerUid && meta.GetArtist().find("-") != std::string::npos);
     std::string songName;
     if (isTitleLyric) {
         std::string description = meta.GetDescription();
@@ -4147,8 +4165,15 @@ std::string AVSessionService::GetLocalTitle()
             songName = description.substr(0, pos);
         }
         SLOGI("GetLocalTitle description:%{public}s, title:%{public}s", description.c_str(), songName.c_str());
+    } else if (isAncoLyric) {
+        std::string ancoTitle = meta.GetArtist();
+        size_t posi = ancoTitle.find("-");
+        if (posi != std::string::npos) {
+            songName = ancoTitle.substr(0, posi);
+        }
+        SLOGI("GetLocalTitle isAncoLyric title:%{public}s", songName.c_str());
     }
-    std::string localTitle = isTitleLyric ? songName : meta.GetTitle();
+    std::string localTitle = isTitleLyric || isAncoLyric ? songName : meta.GetTitle();
     SLOGI("GetLocalTitle localTitle:%{public}s", localTitle.c_str());
     return localTitle;
 }
@@ -4192,6 +4217,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     auto uid = topSession_ ? (topSession_->GetUid() == audioBrokerUid ?
         BundleStatusAdapter::GetInstance().GetUidFromBundleName(topSession_->GetBundleName(), userId) :
         topSession_->GetUid()) : (historyDescriptor ? historyDescriptor->uid_ : -1);
+    bool isBroker = topSession_ != nullptr && topSession_->GetUid() == audioBrokerUid;
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);
@@ -4200,7 +4226,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetInProgress(true);
     request.SetOwnerUid(uid);
     request.SetIsAgentNotification(true);
-    if (topSession_ && topSession_->GetUid() == audioBrokerUid) {
+    if (isBroker) {
         request.SetOwnerUserId(defaultUserId);
     }
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
@@ -4225,11 +4251,12 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     Notification::NotificationHelper::SetHashCodeRule(1);
     if (NotifyFlowControl()) {
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
-            [this, uid]() {
+            [this, uid, isBroker]() {
                 bool isTopSessionNtf = false;
                 {
                     std::lock_guard lockGuard(sessionServiceLock_);
-                    isTopSessionNtf = topSession_ && topSession_->GetUid() == uid;
+                    isTopSessionNtf = topSession_ != nullptr && (topSession_->GetUid() == uid ||
+                        (isBroker && topSession_->GetUid() == audioBrokerUid));
                 }
                 std::lock_guard lockGuard(notifyLock_);
                 hasRemoveEvent_ = false;
