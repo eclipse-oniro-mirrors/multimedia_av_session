@@ -415,7 +415,7 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level0)
  * @tc.desc: Test HandleSetAVMetaData
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleSetAVMetaData004, TestSize.Level1)
+static HWTEST(AVSessionStubTest, HandleSetAVMetaData004, TestSize.Level0)
 {
     SLOGI("HandleSetAVMetaData004 begin!");
     AVSessionStubDemo avSessionStub;
