@@ -1627,7 +1627,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     }
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionState(sessionItem, 0);
+        ReportSessionState(sessionItem, SessionState::STATE_CREATE);
 #endif
 
     return AVSESSION_SUCCESS;
@@ -1680,7 +1680,7 @@ int32_t AVSessionService::CreateSessionInnerWithExtra(const std::string& tag, in
     }
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionState(sessionItem, 0);
+        ReportSessionState(sessionItem, SessionState::STATE_CREATE);
 #endif
 
     return AVSESSION_SUCCESS;
@@ -3190,7 +3190,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
         SLOGD("HandleSessionRelease with userId:%{public}d", userId);
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionState(sessionItem, 1);
+        ReportSessionState(sessionItem, SessionState::STATE_RELEASE);
 #endif
         NotifySessionRelease(sessionItem->GetDescriptor());
         if (sessionItem->GetUid() == ancoUid) {
@@ -4326,39 +4326,43 @@ std::function<bool(int32_t, int32_t)> AVSessionService::GetAllowedPlaybackCallba
 }
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-static std::string GetVersionName(std::string bundleName)
+static std::string GetVersionName(const std::string& bundleName)
 {
+    std::string versionName = "";
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
         SLOGE("Get ability manager failed");
-        return "";
+        return versionName;
     }
 
     sptr<IRemoteObject> object = samgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (object == nullptr) {
         SLOGE("object is NULL.");
-        return "";
+        return versionName;
     }
 
     sptr<OHOS::AppExecFwk::IBundleMgr> bms = iface_cast<OHOS::AppExecFwk::IBundleMgr>(object);
     if (bms == nullptr) {
         SLOGE("bundle manager service is NULL.");
-        return "";
+        return versionName;
     }
 
     AppExecFwk::BundleInfo bundleInfo;
-    bms->GetBundleInfo(bundleName,
+    if (!bms->GetBundleInfo(bundleName,
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
-        bundleInfo, AppExecFwk::Constants::ALL_USERID);
-    std::string versionName = bundleInfo.versionName;
+        bundleInfo, AppExecFwk::Constants::ALL_USERID)) {
+            SLOGE("GetBundleInfo=%{public}s fail", bundleName.c_str());
+            return versionName;
+    }
+    versionName = bundleInfo.versionName;
     if (versionName.empty()) {
         SLOGE("get versionName form application failed.");
-        return "";
+        return versionName;
     }
     return versionName;
 }
 
-void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state)
+void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, SessionState state)
 {
     if (session == nullptr) {
         SLOGE("ReportSessionState session is null");
