@@ -2086,6 +2086,62 @@ static HWTEST_F(AVSessionServiceTest, UpdateSessionTimestamp001, TestSize.Level1
     SLOGD("UpdateSessionTimestamp001 end!");
 }
 
+/**
+ * @tc.name: GetLocalTitle001
+ * @tc.desc: get local title.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
+{
+    SLOGD("GetLocalTitle001 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    avservice_->UpdateTopSession(avsessionHere_);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    AVMetaData metadata;
+    metadata.SetAssetId("mediaId");
+    metadata.SetDescription("title;artist");
+    avsessionHere_->SetAVMetaData(g_metaData);
+    std::string songName = avservice_->GetLocalTitle();
+    EXPECT_EQ(songName, "title");
+    avsessionHere_->Destroy();
+    SLOGD("GetLocalTitle001 end!");
+}
+
+/**
+ * @tc.name: GetLocalTitle002
+ * @tc.desc: get local title.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetLocalTitle002, TestSize.Level1)
+{
+    SLOGD("GetLocalTitle002 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    avservice_->UpdateTopSession(avsessionHere_);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    avsessionHere_->SetUid(5557);
+    AVMetaData metadata;
+    metadata.SetAssetId("mediaId");
+    metadata.SetDescription("title-artist");
+    avsessionHere_->SetAVMetaData(g_metaData);
+    std::string songName = avservice_->GetLocalTitle();
+    EXPECT_EQ(songName, "title");
+    avsessionHere_->Destroy();
+    SLOGD("GetLocalTitle002 end!");
+}
 
 /**
  * @tc.name: HandleRemoveMediaCardEvent001
