@@ -465,7 +465,7 @@ HWTEST_F(AVSessionManagerTest, CreateController003, TestSize.Level1)
     std::shared_ptr<AVSessionController> controller;
     auto ret = AVSessionManager::GetInstance().CreateController("default", controller);
     SLOGI("CreateController003 get ret %{public}d", static_cast<int>(ret));
-    // not support default any more for cold start logic refresh
+    // ability may be not available or go with mediaintent will return AVSESSION_ERROR
     EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS
         || ret == AVSESSION_ERROR || ret == ERR_SESSION_NOT_EXIST, true);
     SLOGI("CreateController003 here end");

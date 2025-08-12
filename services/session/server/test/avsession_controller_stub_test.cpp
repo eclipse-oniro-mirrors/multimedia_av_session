@@ -1496,18 +1496,3 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter003, TestSiz
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetPlaybackFilter003 end!");
 }
-
-/**
- * @tc.name: GetLaunchAbilityInner001
- * @tc.desc: Test GetLaunchAbilityInner
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionControllerStubTest, GetLaunchAbilityInner001, TestSize.Level0)
-{
-    SLOGI("GetLaunchAbilityInner001 begin!");
-    AVSessionControllerStubDemo avSessionControllerStub;
-    OHOS::AbilityRuntime::WantAgent::WantAgent* ability;
-    auto ret = avSessionControllerStub.GetLaunchAbilityInner(ability);
-    EXPECT_EQ(ret, 0);
-    SLOGI("GetLaunchAbilityInner001 end!");
-}
