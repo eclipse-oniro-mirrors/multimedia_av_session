@@ -82,7 +82,7 @@ av_session_ohos_library("avsession_client") {
     "../../../services/session:libidl_avsession_service_interface_stub",
     "../../../services/session:libidl_avsession_service_interface_proxy",
     "../../../utils:avsession_utils",
-    "../../session:avsession_cast_client"，
+    "../../session:avsession_cast_client",
   ]
 
   external_deps = [
