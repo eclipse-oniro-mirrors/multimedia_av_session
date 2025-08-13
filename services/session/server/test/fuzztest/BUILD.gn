@@ -27,6 +27,7 @@ group("fuzztest") {
     "avsessioncallbackproxy_fuzzer:AVSessionCallbackProxyFuzzTest",
     "avsessionitem_fuzzer:AVSessionItemFuzzTest",
     "avsessionservice_fuzzer:AVSessionServiceFuzzTest",
+    "avsessionserviceext_fuzzer:AVSessionServiceExtFuzzTest",
     "bkgraudiocontroller_fuzzer:BkGrAudioControllerFuzzTest",
     "collaborationmanager_fuzzer:CollaborationManagerFuzzTest",
     "focussessionstrategy_fuzzer:FocusSessionStrategyFuzzTest",

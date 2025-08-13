@@ -26,9 +26,8 @@ config("avsession_client_config") {
   ]
 }
 
-av_session_ohos_library("avsession_client") {
+ohos_shared_library("avsession_client") {
   install_enable = true
-  deps = []
   ipc_sources = [
     "../../../services/session/ipc/proxy/avsession_controller_proxy.cpp",
     "../../../services/session/ipc/proxy/avsession_proxy.cpp",
@@ -117,6 +116,80 @@ av_session_ohos_library("avsession_client") {
   }
 
   innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "multimedia"
+  part_name = "av_session"
+}
+
+ohos_static_library("avsession_client_static") {
+  #install_enable = true
+  ipc_sources = [
+    "../../../services/session/ipc/proxy/avsession_controller_proxy.cpp",
+    "../../../services/session/ipc/proxy/avsession_proxy.cpp",
+    "../../../services/session/ipc/proxy/avsession_service_proxy.cpp",
+  ]
+
+  client_sources = [
+    "src/avcontroller_callback_client.cpp",
+    "src/avsession_callback_client.cpp",
+    "src/avsession_manager.cpp",
+    "src/avsession_manager_impl.cpp",
+    "src/session_listener_client.cpp",
+  ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = ipc_sources + client_sources
+
+  public_configs = [
+    ":avsession_client_config",
+    "../../../services/session:avsession_ipc_config",
+  ]
+
+  deps = [
+    "../../../services/session:libidl_avsession_service_interface_stub",
+    "../../../services/session:libidl_avsession_service_interface_proxy",
+  ]
+
+  deps += [
+    "../../common:avsession_common",
+    "../../../utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
+    "audio_framework:audio_foundation",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = []
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [ "./../session:avsession_cast_client" ]
+  }
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (av_session_enable_start_stop_on_demand) {
+    cflags += [ "-DSTART_STOP_ON_DEMAND_ENABLE" ]
+  }
+
   subsystem_name = "multimedia"
   part_name = "av_session"
 }
