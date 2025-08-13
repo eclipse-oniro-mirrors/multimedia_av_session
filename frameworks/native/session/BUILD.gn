@@ -82,6 +82,7 @@ av_session_ohos_library("avsession_client") {
     "../../../services/session:libidl_avsession_service_interface_stub",
     "../../../services/session:libidl_avsession_service_interface_proxy",
     "../../../utils:avsession_utils",
+    "../session:avsession_cast_client",
   ]
 
   external_deps = [
@@ -99,7 +100,6 @@ av_session_ohos_library("avsession_client") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    deps += [ "../../session:avsession_cast_client" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {
