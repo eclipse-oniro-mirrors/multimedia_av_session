@@ -356,7 +356,7 @@ export struct AVCastPicker {
           .backgroundColor(this.touchMenuItemIndex === index ?
             $r('sys.color.interactive_click') : '#00FFFFFF')
           .borderRadius(this.touchMenuItemIndex === index ?
-            (this.isPc ? $r('sys.float.corner_radius_level2') : $r('sys.float.corner_radius_level8')): 0)
+            (this.isPc ? $r('sys.float.corner_radius_level2') : $r('sys.float.corner_radius_level8')) : 0)
 
           if (!this.isPc && (index != this.deviceList.length - 1)) {
             Divider()
@@ -423,7 +423,8 @@ export struct AVCastPicker {
           if (data['deviceList'] !== undefined) {
             console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
             this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
-            let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
+            let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 &&
+              !this.hasExtDevice(this.deviceList);
             let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
             let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
             let isExtMenuScene = isCalling && (hasNoDevices || hasOnlySpeakerAndEarpiece);

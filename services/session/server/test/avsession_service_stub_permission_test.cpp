@@ -111,6 +111,8 @@ public:
         const OHOS::AppExecFwk::ElementName &elementName) override { return nullptr; };
     int32_t CreateSessionInner(const std::string &tag, int32_t type, const OHOS::AppExecFwk::ElementName &elementName,
         OHOS::sptr<IRemoteObject> &session) override { return 0; };
+    int32_t CreateSessionInnerWithExtra(const std::string &tag, int32_t type, const std::string& extraInfo,
+        const OHOS::AppExecFwk::ElementName &elementName, OHOS::sptr<IRemoteObject> &session) override { return 0; };
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor> &descriptors) override { return 0; };
     int32_t GetSessionDescriptorsBySessionId(const std::string &sessionId,
         AVSessionDescriptor &descriptor) override { return isSuccess ? AVSESSION_SUCCESS : 0; };

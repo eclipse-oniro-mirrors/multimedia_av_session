@@ -104,6 +104,7 @@ private:
     static napi_status OnPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnCastDisplaySizeChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);

@@ -54,9 +54,15 @@ enum MetadataQuality {
     METADATA_QUALITY_BOTH,
 };
 
+enum class SessionState {
+    STATE_CREATE = 0,
+    STATE_RELEASE,
+    STATE_INITIAL,
+};
+
 class PlayingStateInfo {
 public:
-    void updateState(uint8_t state);
+    void updateState(SessionState state);
     void updateMetaQuality(MetadataQuality metaQuality);
     void updateCommandQuality(uint32_t commandQuality);
     void updatePlaybackState(uint8_t playbackState);
@@ -76,7 +82,7 @@ public:
     std::vector<std::string> callerBundleName_;
     std::vector<uint64_t> controlTime_;
 private:
-    uint8_t lastState_ = 3; // 0 create, 1 release, 3 initial
+    SessionState lastState_ = SessionState::STATE_INITIAL;
     uint32_t lastCommandQuality_ = 0;
     uint8_t lastPlaybackState_ = 0;
     uint8_t lastControl_ = AVControlCommand::SESSION_CMD_MAX;
@@ -154,7 +160,7 @@ public:
 
     void ReportPlayingState(const std::string& bundleName);
     void ReportPlayingStateAll();
-    void UpdateState(const std::string& bundleName, const std::string& appVersion, uint8_t state);
+    void UpdateState(const std::string& bundleName, const std::string& appVersion, SessionState state);
     void UpdateMetaQuality(const std::string& bundleName, MetadataQuality metaQuality);
     void UpdateCommandQuality(const std::string& bundleName, uint32_t commandQuality);
     void UpdatePlaybackState(const std::string& bundleName, uint8_t playbackState);

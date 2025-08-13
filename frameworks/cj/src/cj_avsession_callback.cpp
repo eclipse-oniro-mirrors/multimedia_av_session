@@ -563,4 +563,20 @@ void CJAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDisplay
         cjStructHeapFree(ccastDisplayInfo);
     }
 }
+
+void CJAVSessionCallback::OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo)
+{
+    std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[CAST_DISPLAY_CHANGE]);
+    if (castDisplayChange) {
+        SLOGD("cast display size change");
+        CCastDisplayInfo ccastDisplayInfo;
+        int ret = CJNO_ERROR;
+        ret = ConvertNativeToCJStruct(castDisplayInfo, ccastDisplayInfo);
+        if (ret != CJNO_ERROR) {
+            SLOGD("CastDisplayInfo convert to C Type failed");
+            return ;
+        }
+        castDisplaySizeChange(ccastDisplayInfo);
+    }
+}
 } // end of avsession namespace

@@ -64,6 +64,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "playFromAssetId", OnPlayFromAssetId },
     { "playWithAssetId", OnPlayWithAssetId },
     { "castDisplayChange", OnCastDisplayChange },
+    { "castDisplaySizeChange", OnCastDisplaySizeChange },
     { "customDataChange", OnCustomData },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
@@ -748,7 +749,6 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SEND_CUSTOM_DATA_TASK_ID;
     auto executor = [context]() {
-        CHECK_AND_RETURN_LOG(context->native != nullptr, "invalid context native");
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
@@ -1714,6 +1714,22 @@ napi_status NapiAVSession::OnCastDisplayChange(napi_env env, NapiAVSession* napi
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
                              "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_DISPLAY_CHANGE, callback);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "AddCallback failed");
+    CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
+                             "NapiAVSession object is nullptr");
+    napiSession->session_->StartCastDisplayListener();
+#else
+    return napi_generic_failure;
+#endif
+    return napi_ok;
+}
+
+napi_status NapiAVSession::OnCastDisplaySizeChange(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+                             "NapiAVSessionCallback object is nullptr");
+    auto status = napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_DISPLAY_SIZE_CHANGE, callback);
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "AddCallback failed");
     CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
                              "NapiAVSession object is nullptr");

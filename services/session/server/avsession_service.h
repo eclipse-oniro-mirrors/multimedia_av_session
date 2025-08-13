@@ -167,6 +167,10 @@ public:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                sptr<IRemoteObject>& object) override;
 
+    int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extra,
+                                        const AppExecFwk::ElementName& elementName,
+                                        sptr<IRemoteObject>& object) override;
+
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
@@ -174,10 +178,10 @@ public:
     int32_t GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors);
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
-    
+
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                       std::vector<AVQueueInfo>& avQueueInfos) override;
-    
+
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
 
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId, const std::string& deviceId);
@@ -209,6 +213,8 @@ public:
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
     void HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem);
+
+    void HandleDisableCast();
 
     void HandleSessionReleaseInner();
 
@@ -273,7 +279,7 @@ public:
 #endif
 
     int32_t Close(void) override;
-    
+
     void AddAvQueueInfoToFile(AVSessionItem& session);
 
     std::string GetAVQueueDir(int32_t userId = 0);
@@ -305,7 +311,6 @@ public:
     bool CheckIfOtherAudioPlaying();
 
 private:
-
     void NotifyProcessStatus(bool isStart);
 
     static SessionContainer& GetContainer();
@@ -349,9 +354,16 @@ private:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
 
+    int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
+                                        bool thirdPartyApp, const AppExecFwk::ElementName& elementName,
+                                        sptr<AVSessionItem>& sessionItem);
+
     bool IsParamInvalid(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName);
 
     void ServiceCallback(sptr<AVSessionItem>& sessionItem);
+
+    sptr<AVSessionItem> CreateNewSessionWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
+                                                  bool thirdPartyApp, const AppExecFwk::ElementName& elementName);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                          const AppExecFwk::ElementName& elementName);
@@ -452,6 +464,8 @@ private:
 
     void HandleEventHandlerCallBack();
 
+    AVControlCommand GetSessionProcCommand();
+
     bool IsHistoricalSession(const std::string& sessionId);
 
     void DeleteHistoricalRecord(const std::string& bundleName, int32_t userId = 0);
@@ -508,10 +522,10 @@ private:
     bool CheckAncoAudio();
 
     int32_t ConvertKeyCodeToCommand(int keyCode);
-    
+
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
-    
+
     void LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::StreamUsage streamUsage,
         AudioStandard::RendererState rendererState);
 
@@ -599,10 +613,12 @@ private:
     bool CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd, const MMI::KeyEvent& keyEvent,
         sptr<AVSessionItem> session);
 
+    bool IsAncoValid();
+
     std::string DoCJSONArrayTransformToString(cJSON* valueItem);
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    void ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state);
+    void ReportSessionState(const sptr<AVSessionItem>& session, SessionState state);
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 

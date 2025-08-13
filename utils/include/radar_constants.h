@@ -112,11 +112,11 @@ const char* LOCAL_SESS_NAME = "LOCAL_SESS_NAME";
 const char* PEER_SESS_NAME = "PEER_SESS_NAME";
 const char* SOURCE_TYPE = "SOURCE_TYPE";
 
-const char* DEV_PHONE = "00E";
-const char* DEV_LAPTOP = "00C";
-const char* AVSESSION_PKG_NAME = "av_session";
-const char* CAST_ENGINE_PKG = "cast_engine_service";
-const char* MEDIA_CONTROL_PKG = "mediacontroller";
+const std::string DEV_PHONE = "00E";
+const std::string DEV_LAPTOP = "00C";
+const std::string AVSESSION_PKG_NAME = "av_session";
+const std::string CAST_ENGINE_PKG = "cast_engine_service";
+const std::string MEDIA_CONTROL_PKG = "mediacontroller";
 }
 constexpr uint32_t DEVICE_ID_MIN_LEN = 10;
 } // namespace OHOS::AVSession

@@ -790,12 +790,14 @@ static HWTEST_F(AVRouterImplTest, IsStopCastDiscovery001, TestSize.Level0)
 {
     SLOGI("IsStopCastDiscovery001 begin");
     g_AVRouterImpl->StopCastDiscovery();
-    auto pid = IPCSkeleton::GetCallingPid();
+    auto pid = getpid();
     EXPECT_TRUE(g_AVRouterImpl->IsStopCastDiscovery(pid) == false);
 
     int32_t castDeviceCapability = 0;
     std::vector<std::string> drmSchemes = {"test"};
     g_AVRouterImpl->StartCastDiscovery(castDeviceCapability, drmSchemes);
+
+    EXPECT_TRUE(g_AVRouterImpl->IsStopCastDiscovery(100) == false);
     EXPECT_TRUE(g_AVRouterImpl->IsStopCastDiscovery(pid) == true);
     SLOGI("IsStopCastDiscovery001 end");
 }

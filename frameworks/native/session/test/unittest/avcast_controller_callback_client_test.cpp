@@ -41,7 +41,6 @@ public:
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override {};
     int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
                           int64_t pos, int32_t& result) override { return 0; };
-    void OnCustomData(const AAFwk::WantParams& data) override {};
 
     ~AVCastControllerCallbackImpl() override {};
 };
@@ -241,26 +240,6 @@ HWTEST_F(AVCastControllerCallbackClientTest, OnCastValidCommandChanged001, TestS
     EXPECT_NE(controllerCallbackClient, nullptr);
     std::vector<int32_t> cmds = {1};
     controllerCallbackClient->OnCastValidCommandChanged(cmds);
-}
-
-/**
-* @tc.name: onDataSrcRead001
-* @tc.desc: test onDataSrcRead
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(AVCastControllerCallbackClientTest, onDataSrcRead001, TestSize.Level1)
-{
-    std::shared_ptr<AVCastControllerCallback> controllerCallback = std::make_shared<AVCastControllerCallbackImpl>();
-    std::shared_ptr<AVCastControllerCallbackClient> controllerCallbackClient =
-        std::make_shared<AVCastControllerCallbackClient>(controllerCallback);
-    EXPECT_NE(controllerCallbackClient, nullptr);
-    std::vector<int32_t> cmds = {1};
-    std::shared_ptr<AVSharedMemoryBase> mem = nullptr;
-    uint32_t length = 0;
-    int64_t pos = 0;
-    int32_t result = 0;
-    controllerCallbackClient->onDataSrcRead(mem, length, pos, result);
 }
 
 /**

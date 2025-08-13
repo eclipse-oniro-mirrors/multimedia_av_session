@@ -68,8 +68,6 @@ public:
 
     void OnExtrasChange(const AAFwk::WantParams& extras) override {}
 
-    void OnCustomData(const OHOS::AAFwk::WantParams& data) override {};
-
     ~AVControllerCallbackDemo() override {}
 };
 

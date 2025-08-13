@@ -331,10 +331,8 @@ static HWTEST_F(AVControllerCallbackProxyTest, OnOutputDeviceChange002, testing:
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "1";
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
-    if (aVControllerCallbackProxy != nullptr) {
-        aVControllerCallbackProxy->OnOutputDeviceChange(connectionState, outputDeviceInfo);
-        EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    }
+    aVControllerCallbackProxy->OnOutputDeviceChange(connectionState, outputDeviceInfo);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnOutputDeviceChange002, end");
 }
 

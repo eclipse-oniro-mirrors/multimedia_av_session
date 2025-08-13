@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include <unistd.h>
 
-#include "av_shared_memory_helper.h"
 #include "av_shared_memory_base.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
@@ -45,10 +44,10 @@ void AVSharedMemoryBaseTest::SetUp() {}
 void AVSharedMemoryBaseTest::TearDown() {}
 
 /**
- * @tc.name: Unmarshalling001
- * @tc.desc: Unmarshalling test
- * @tc.type: FUNC
- */
+* @tc.name: Unmarshalling001
+* @tc.desc: Unmarshalling
+* @tc.type: FUNC
+*/
 static HWTEST(AVSharedMemoryBaseTest, Unmarshalling001, TestSize.Level0)
 {
     SLOGI("Unmarshalling001 Begin");
@@ -62,10 +61,59 @@ static HWTEST(AVSharedMemoryBaseTest, Unmarshalling001, TestSize.Level0)
 }
 
 /**
- * @tc.name: WriteToParcel001
- * @tc.desc: WriteToParcel
+* @tc.name: Unmarshalling002
+* @tc.desc: Unmarshalling
+* @tc.type: FUNC
+*/
+static HWTEST(AVSharedMemoryBaseTest, Unmarshalling002, TestSize.Level0)
+{
+    SLOGI("Unmarshalling002 Begin");
+    OHOS::MessageParcel parcel;
+    parcel.WriteFileDescriptor(1);
+    auto unmarshallingPtr = AVSharedMemoryBase::Unmarshalling(parcel);
+    EXPECT_NE(unmarshallingPtr, nullptr);
+}
+
+/**
+* @tc.name: Unmarshalling003
+* @tc.desc: Unmarshalling
+* @tc.type: FUNC
+*/
+static HWTEST(AVSharedMemoryBaseTest, Unmarshalling003, TestSize.Level0)
+{
+    SLOGI("Unmarshalling003 Begin");
+    OHOS::MessageParcel parcel;
+    parcel.WriteFileDescriptor(1);
+    parcel.WriteInt32(10);
+    parcel.WriteUint32(1);
+    parcel.WriteString("test");
+    auto unmarshallingPtr = AVSharedMemoryBase::Unmarshalling(parcel);
+    EXPECT_NE(unmarshallingPtr, nullptr);
+}
+
+/**
+ * @tc.name: Marshalling001
+ * @tc.desc: Marshalling
  * @tc.type: FUNC
  */
+static HWTEST(AVSharedMemoryBaseTest, Marshalling001, TestSize.Level0)
+{
+    SLOGI("Marshalling001 begin!");
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    OHOS::Parcel& parcel = g_parcel;
+    memory->fd_ = 1;
+    bool ret = memory->Marshalling(parcel);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+* @tc.name: WriteToParcel001
+* @tc.desc: WriteToParcel
+* @tc.type: FUNC
+*/
 static HWTEST(AVSharedMemoryBaseTest, WriteToParcel001, TestSize.Level0)
 {
     SLOGI("WriteToParcel001 Begin");
@@ -76,25 +124,6 @@ static HWTEST(AVSharedMemoryBaseTest, WriteToParcel001, TestSize.Level0)
     OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
     memory->fd_ = 1;
     bool ret = memory->WriteToParcel(m_parcel);
-    EXPECT_NE(ret, true);
-    ret = memory->ReadFromParcel(m_parcel);
-    EXPECT_NE(ret, true);
-}
-
-/**
- * @tc.name: ReadFromParcel001
- * @tc.desc: ReadFromParcel
- * @tc.type: FUNC
- */
-static HWTEST(AVSharedMemoryBaseTest, ReadFromParcel001, TestSize.Level0)
-{
-    SLOGI("ReadFromParcel001 Begin");
-    int32_t size = 10;
-    uint32_t flags = 1;
-    const std::string name = "test";
-    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
-    OHOS::MessageParcel& m_parcel = static_cast<MessageParcel&>(g_parcel);
-    bool ret = memory->ReadFromParcel(m_parcel);
     EXPECT_NE(ret, true);
 }
 

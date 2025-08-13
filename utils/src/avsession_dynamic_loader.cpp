@@ -60,16 +60,10 @@ void* AVSessionDynamicLoader::OpenDynamicHandle(std::string dynamicLibrary)
         SLOGD("OpenDynamicHandle get dynamicLibrary %{public}s", dynamicLibrary.c_str());
     }
     if (dynamicLibHandle_[dynamicLibrary] == nullptr) {
-        char sourceLibraryRealPath[PATH_MAX] = { 0x00 };
-        if (realpath(dynamicLibrary.c_str(), sourceLibraryRealPath) == nullptr) {
-            SLOGE("check avsession_dynamic path failed %{public}s", dynamicLibrary.c_str());
-            return nullptr;
-        }
-
 #ifndef TEST_COVERAGE
-        void* dynamicLibHandle = dlopen(sourceLibraryRealPath, RTLD_NOW);
+        void* dynamicLibHandle = dlopen(dynamicLibrary.c_str(), RTLD_NOW);
         if (dynamicLibHandle == nullptr) {
-            SLOGE("Failed to open library avsession_dynamic, reason: %{public}sn", dlerror());
+            SLOGE("Failed to open %{public}s, reason: %{public}sn", dynamicLibrary.c_str(), dlerror());
             return nullptr;
         }
         SLOGI("open library %{public}s success", dynamicLibrary.c_str());

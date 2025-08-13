@@ -146,7 +146,7 @@ public:
 
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
-    virtual void OnCustomData(const AAFwk::WantParams& data) {};
+    virtual void OnCustomData(const AAFwk::WantParams& data) = 0;
 
     virtual int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
         int64_t pos, int32_t& result) = 0;
@@ -316,6 +316,14 @@ public:
      * @since 11
      */
     virtual void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) = 0;
+
+    /**
+     * @brief cast display size change.
+     *
+     * @param castDisplayInfo for castDisplay
+     * @since 11
+     */
+    virtual void OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) {};
 
     /**
      * @brief custom media packet for 4k change callback.

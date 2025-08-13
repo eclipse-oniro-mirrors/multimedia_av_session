@@ -403,7 +403,6 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level0)
     SLOGI("HandleSetAVMetaData003 begin!");
     AVSessionStubDemo avSessionStub;
     OHOS::MessageParcel data;
-    data.WriteInterfaceToken(IAVSession::GetDescriptor());
     data.WriteInt32(MAX_IMAGE_SIZE - 1);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleSetAVMetaData(data, reply);
@@ -440,7 +439,7 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData004, TestSize.Level0)
  * @tc.desc: Test HandleUpdateAVQueueInfoEvent
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level0)
+static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level1)
 {
     SLOGI("HandleUpdateAVQueueInfoEvent001 begin!");
     AVQueueInfo info = AVQueueInfo();
@@ -459,7 +458,7 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level
  * @tc.desc: Test HandleUpdateAVQueueInfoEvent
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level0)
+static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level1)
 {
     SLOGI("HandleUpdateAVQueueInfoEvent002 begin!");
     AVQueueInfo info = AVQueueInfo();

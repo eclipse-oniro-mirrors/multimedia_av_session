@@ -84,6 +84,7 @@ public:
     ErrCode OnAVCallToggleCallMute() override { return AVSESSION_SUCCESS; };
     ErrCode OnPlayFromAssetId(int64_t assetId) override { return AVSESSION_SUCCESS; };
     ErrCode OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override { return AVSESSION_SUCCESS; };
+    ErrCode OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) override { return AVSESSION_SUCCESS; };
     sptr<IRemoteObject> AsObject() override { return nullptr; }
     ErrCode OnPlayWithAssetId(const std::string& assetId) override { return AVSESSION_SUCCESS; };
     ErrCode OnCustomData(const OHOS::AAFwk::WantParams& data) override { return AVSESSION_SUCCESS; };
@@ -594,6 +595,29 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DelRecommend_001, TestSize.Level1)
     g_AVSessionItem->DelRecommend();
     EXPECT_EQ(g_AVSessionItem->isRecommend_, false);
     SLOGD("AVSessionItem_DelRecommend_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_CheckIfSendCapsule_001
+ * @tc.desc: Test CheckIfSendCapsule.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_CheckIfSendCapsule_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_CheckIfSendCapsule_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    int oriUid = g_AVSessionItem->GetUid();
+    g_AVSessionItem->SetUid(5557);
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    g_AVSessionItem->CheckIfSendCapsule(state);
+    EXPECT_EQ(g_AVSessionItem->isPlayingState_, true);
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    g_AVSessionItem->CheckIfSendCapsule(state);
+    EXPECT_EQ(g_AVSessionItem->isPlayingState_, false);
+    g_AVSessionItem->SetUid(oriUid);
+    SLOGD("AVSessionItem_CheckIfSendCapsule_001 end!");
 }
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL

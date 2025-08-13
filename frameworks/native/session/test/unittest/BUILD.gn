@@ -37,14 +37,6 @@ common_deps = [
   "../../../session:avsession_client_static",
 ]
 
-common_deps_without_third_party = [
-  "../../../../../services/session:avsession_item_static",
-  "../../../../../services/session:avsession_service_static",
-  "../../../../../utils:avsession_utils",
-  "../../../../common:avsession_common",
-  "../../../session:avsession_client_static",
-]
-
 common_external_deps = [
   "ability_base:want",
   "ability_runtime:wantagent_innerkits",
@@ -368,7 +360,7 @@ if (castplus_cast_engine_enable) {
       "-fno-access-control",
     ]
 
-    deps = common_deps_without_third_party
+    deps = common_deps
 
     deps += [
       "../../../../../services/session:avsession_cast_item_static",
@@ -390,6 +382,7 @@ if (castplus_cast_engine_enable) {
     external_deps = common_external_deps
 
     external_deps += [
+      "ability_base:base",
       "ability_base:want",
       "ability_runtime:app_manager",
       "ability_runtime:wantagent_innerkits",
@@ -402,13 +395,13 @@ if (castplus_cast_engine_enable) {
       "cast_engine:cast_engine_client",
       "data_object:distributeddataobject_impl",
       "device_manager:devicemanagersdk",
-      "googletest:gtest_main",
       "hilog:libhilog",
       "input:libmmi-client",
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
+
     public_configs = ["../../../../../services/session:avsession_ipc_config"]
   }
 }

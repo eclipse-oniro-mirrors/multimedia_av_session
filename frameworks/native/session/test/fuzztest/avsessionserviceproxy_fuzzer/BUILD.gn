@@ -35,7 +35,7 @@ ohos_fuzztest("AvSessionServiceProxyFuzzTest") {
   deps = [
     "./../../../../../../services/session:libidl_avsession_service_interface_proxy",
     "./../../../../../../services/session:libidl_avsession_service_interface_stub",
-    "../../../../session:avsession_client",
+    "../../../../session:avsession_client_static",
     "../../../../../../utils:avsession_utils",
   ]
   external_deps = [
@@ -53,7 +53,10 @@ ohos_fuzztest("AvSessionServiceProxyFuzzTest") {
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
-    deps += [ "../../../../../../services/session:avsession_cast_item_static" ]
+    deps += [ 
+      "../../../../../../services/session:avsession_cast_item_static",
+      "../../../../session:avsession_cast_client",
+    ]
   }
 
   if (bluetooth_part_enable) {

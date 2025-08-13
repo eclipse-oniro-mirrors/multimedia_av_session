@@ -246,7 +246,7 @@ PlayingStateInfo* AVSessionSysEvent::GetPlayingStateInfo(const std::string& bund
     return playingStateInfos_[bundleName].get();
 }
 
-void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::string& appVersion, uint8_t state)
+void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::string& appVersion, SessionState state)
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
@@ -306,12 +306,12 @@ void AVSessionSysEvent::UpdateControl(const std::string& bundleName, uint8_t con
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
-void PlayingStateInfo::updateState(uint8_t state)
+void PlayingStateInfo::updateState(SessionState state)
 {
     std::lock_guard lockGuard(lock_);
     if (state != lastState_) {
         lastState_ = state;
-        state_.push_back(state);
+        state_.push_back(static_cast<uint8_t>(state));
         stateTime_.push_back(UTCTimeMilliSeconds());
     }
 }

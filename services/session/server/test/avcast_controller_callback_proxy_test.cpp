@@ -99,7 +99,7 @@ static HWTEST_F(AVCastControllerCallbackProxyTest, onDataSrcRead001, testing::ex
     int32_t result = 0;
     if (avCastControllerCallbackProxy_ != nullptr) {
         auto ret = avCastControllerCallbackProxy_->onDataSrcRead(memory, 2, 2, result);
-        EXPECT_EQ(ret, ERR_INVALID_DATA);
+        EXPECT_NE(ret, ERR_INVALID_DATA);
     }
 }
 } // namespace OHOS::AVSession

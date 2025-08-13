@@ -209,9 +209,9 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}lld", (long long)castHandle_);
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         if (!collaborationNeedNetworkId_.empty()) {
-            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
-                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         }
@@ -404,9 +404,11 @@ void AVSessionItem::ReportSetAVMetaDataInfo(const AVMetaData& meta)
 
 bool AVSessionItem::CheckTitleChange(const AVMetaData& meta)
 {
-    bool isTitleLyric = (GetBundleName() == defaultBundleName) && !meta.GetDescription().empty();
     bool isTitleChange = metaData_.GetTitle() != meta.GetTitle();
-    SLOGI("CheckTitleChange isTitleLyric:%{public}d isTitleChange:%{public}d", isTitleLyric, isTitleChange);
+    bool isAncoTitleLyric = GetUid() == audioBrokerUid && meta.GetArtist().find("-") != std::string::npos;
+    bool isTitleLyric = ((GetBundleName() == defaultBundleName) && !meta.GetDescription().empty()) || isAncoTitleLyric;
+    SLOGI("CheckTitleChange isTitleLyric:%{public}d isAncoTitleLyric:%{public}d isTitleChange:%{public}d",
+        isTitleLyric, isAncoTitleLyric, isTitleChange);
     return isTitleChange && !isTitleLyric;
 }
 
@@ -572,6 +574,33 @@ int32_t AVSessionItem::SendCustomData(const AAFwk::WantParams& data)
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
+{
+    CHECK_AND_RETURN_LOG(GetUid() == audioBrokerUid, "not audio broker");
+    if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY && (!isPlayingState_ || isMediaChange_)) {
+        isPlayingState_ = true;
+        {
+            std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
+            if (serviceCallbackForMediaSession_) {
+                SLOGI("anco capsule add for %{public}s", GetBundleName().c_str());
+                serviceCallbackForMediaSession_(GetSessionId(), true, isMediaChange_);
+            }
+        }
+    } else if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE ||
+        state.GetState() == AVPlaybackState::PLAYBACK_STATE_STOP) {
+        isPlayingState_ = false;
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelAncoMediaCapsule");
+        AVSessionEventHandler::GetInstance().AVSessionPostTask(
+            [this]() {
+                std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
+                if (serviceCallbackForMediaSession_ && !isPlayingState_) {
+                    SLOGI("anco capsule del for %{public}s", GetBundleName().c_str());
+                    serviceCallbackForMediaSession_(GetSessionId(), false, false);
+                }
+            }, "CancelAncoMediaCapsule", cancelTimeout);
+    }
+}
+
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     {
@@ -581,14 +610,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
-    {
-        std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
-        if (GetUid() == audioBrokerUid && state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY &&
-            serviceCallbackForMediaSession_) {
-            SLOGI("addAncoCapsule for:%{public}s", GetBundleName().c_str());
-            serviceCallbackForMediaSession_(GetSessionId(), true);
-        }
-    }
+    CheckIfSendCapsule(state);
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         SLOGD("send HandlePlaybackStateChange in postTask with state %{public}d and controller size %{public}d",
@@ -2375,7 +2397,7 @@ void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(
     serviceCallbackForUpdateSession_ = callback;
 }
 
-void AVSessionItem::SetServiceCallbackForMediaSession(const std::function<void(std::string, bool)>& callback)
+void AVSessionItem::SetServiceCallbackForMediaSession(const std::function<void(std::string, bool, bool)>& callback)
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
     std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);

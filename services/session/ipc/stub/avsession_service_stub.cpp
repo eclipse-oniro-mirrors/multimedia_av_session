@@ -86,6 +86,27 @@ int32_t AVSessionServiceStub::HandleCreateSessionInner(MessageParcel& data, Mess
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleCreateSessionInnerWithExtra(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateSessionInnerWithExtra");
+    auto sessionTag = data.ReadString();
+    auto sessionType = data.ReadInt32();
+    auto extraInfo = data.ReadString();
+    sptr elementName = data.ReadParcelable<AppExecFwk::ElementName>();
+    if (elementName == nullptr) {
+        SLOGI("read element name failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    sptr<IRemoteObject> object;
+    auto ret = CreateSessionInnerWithExtra(sessionTag, sessionType, extraInfo, *elementName, object);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
+    }
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply)
 {
     int32_t err = PermissionChecker::GetInstance().CheckPermission(

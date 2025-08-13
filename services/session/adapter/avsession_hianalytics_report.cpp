@@ -48,6 +48,10 @@ const char *HA_KEY_AVSESSION_ID = "$SessionId";
 const char *HA_KEY_AVSESSION_MEDIA_ID = "$MediaId";
 const char *HA_KEY_AVSESSION_TYPE = "$SessionType";
 const char *HA_KEY_RESOURCE_DURATION = "$Duration";
+const char *ON_EVENT = "_ZN4OHOS7HaCloud15HaClientLiteApi7OnEventERKNSt3__h12basic_stringIcNS2_11char_traitsIcEENS2_"
+    "9allocatorIcEEEENS0_13EventTypeLiteESA_RKNS2_13unordered_mapIS8_S8_NS2_4hashIS8_EENS2_8equal_toIS8_EENS6_INS2"
+    "_4pairIS9_S8_EEEEEE";
+const char *RELEASE = "_ZN4OHOS7HaCloud15HaClientLiteApi7ReleaseEv";
 
 std::string GetProtocol(int supportProtocol)
 {
@@ -66,16 +70,16 @@ void AVSessionHiAnalyticsReport::ConnectHAClient(std::string eventId,
     std::unordered_map<std::string, std::string> properties)
 {
     SLOGI("ConnectHAClient start");
-    void *haClientHandle = dlopen("libha_client_core.z.so", RTLD_NOW);
+    void *haClientHandle = dlopen("libha_client_lite.z.so", RTLD_NOW);
     CHECK_AND_RETURN_LOG(haClientHandle != nullptr, "dlopen ha_client failed, reason:%{public}sn", dlerror());
     // get release func
-    void *releaseFunc = dlsym(haClientHandle, "release");
+    void *releaseFunc = dlsym(haClientHandle, RELEASE);
     if (releaseFunc == nullptr) {
         SLOGE("dlsm release func failed, reason:%{public}sn", dlerror());
         dlclose(haClientHandle);
         return;
     }
-    void *onHAEventFunc = dlsym(haClientHandle, "onEvent");
+    void *onHAEventFunc = dlsym(haClientHandle, ON_EVENT);
     if (onHAEventFunc == nullptr) {
         SLOGE("dlsm onEvent failed, reason:%{public}sn", dlerror());
         dlclose(haClientHandle);
@@ -144,8 +148,8 @@ void AVSessionHiAnalyticsReport::PublishCastRecord(const std::string &bundleName
     properties.emplace(HA_KEY_PEER_NETWORK_ID, deviceInfo.networkId_);
     properties.emplace(HA_KEY_PEER_DEVICE_TYPE, std::to_string(deviceInfo.deviceType_));
     properties.emplace(HA_KEY_PEER_DEVICE_NAME, deviceInfo.deviceName_);
-    SLOGI("PublishCastRecord: bundleName:%{public}s Protocol:%{public}d srcDevice:%{public}s peerDevice:%{public}s",
-        bundleName.c_str(), deviceInfo.supportedProtocols_, localDeviceName.c_str(), deviceInfo.deviceName_.c_str());
+    SLOGI("PublishCastRecord: bundleName:%{public}s Protocol:%{public}d",
+        bundleName.c_str(), deviceInfo.supportedProtocols_);
     ConnectHAClient(HA_AVCAST_RECORD_ID, properties);
     return;
 }
