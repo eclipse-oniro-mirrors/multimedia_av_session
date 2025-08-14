@@ -748,7 +748,7 @@ int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessio
         return AVSESSION_ERROR;
     }
     cJSON* descriptorItem = cJSON_GetObjectItem(dataItem, "sessionDescriptor");
-    if (descriptorItem == nullptr || descriptorItem) {
+    if (descriptorItem == nullptr || cJSON_IsInvalid(descriptorItem)) {
         SLOGE("get descriptorItem null or invalid");
         cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;

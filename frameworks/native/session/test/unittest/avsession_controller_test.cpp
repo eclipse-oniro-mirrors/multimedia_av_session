@@ -104,10 +104,11 @@ void AVSessionControllerTest::SetUp()
 {
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName("demo");
-    elementName.SetAbilityName("demp");
+    elementName.SetAbilityName("demo");
     avsession_ = AVSessionManager::GetInstance().CreateSession("Application", AVSession::SESSION_TYPE_AUDIO,
                                                                elementName);
     ASSERT_NE(avsession_, nullptr);
+
     auto ret = AVSessionManager::GetInstance().CreateController(avsession_->GetSessionId(), controller_);
     ASSERT_EQ(ret, AVSESSION_SUCCESS);
     ASSERT_NE(controller_, nullptr);
@@ -220,7 +221,7 @@ public:
     int32_t Destroy() override;
     std::string GetSessionId() override;
     int32_t RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback) override;
-    int32_t GetLaunchAbilityInner(OHOS::AbilityRuntime::WantAgent::WantAgent*&ability) override { return 0; };
+    int32_t GetLaunchAbilityInner(OHOS::AbilityRuntime::WantAgent::WantAgent*& ability) override { return 0; };
     void DoMetadataImgClean(AVMetaData& data) override
     {
         std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();

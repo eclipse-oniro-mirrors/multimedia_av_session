@@ -138,6 +138,7 @@ int32_t AVRouterImpl::StopDeviceLogging()
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("AVRouterImpl StartCastDiscovery");
+
     std::lock_guard lockGuard(providerManagerLock_);
 
     auto pid = IPCSkeleton::GetCallingPid();
@@ -160,10 +161,12 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
 int32_t AVRouterImpl::StopCastDiscovery()
 {
     SLOGI("AVRouterImpl StopCastDiscovery");
+
     std::lock_guard lockGuard(providerManagerLock_);
 
     auto pid = IPCSkeleton::GetCallingPid();
-    CHECK_AND_RETURN_RET_LOG(IsStopCastDiscovery(pid), AVSESSION_SUCCESS, "StopCastDiscovery is invalid");
+    CHECK_AND_RETURN_RET_LOG(IsStopCastDiscovery(pid), AVSESSION_SUCCESS,
+        "StopCastDiscovery is invalid");
     if (cacheStartDiscovery_) {
         SLOGI("clear cacheStartDiscovery when stop discovery");
         cacheStartDiscovery_ = false;
@@ -195,7 +198,6 @@ bool AVRouterImpl::IsStopCastDiscovery(pid_t pid)
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
     SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
-
     std::lock_guard lockGuard(providerManagerLock_);
 
     for (const auto& [number, providerManager] : providerManagerMap_) {
@@ -302,9 +304,8 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
     providerNumber_ = providerNumberDisable_;
     providerManagerMap_.clear();
 
-    DeviceInfo deviceInfo(AVCastCategory::CATEGORY_LOCAL, "1", "RemoteCast");
+    DeviceInfo deviceInfo(AVCastCategory::CATEGORY_LOCAL, "-1", "RemoteCast");
     OnCastStateChange(disconnectStateFromCast_, deviceInfo);
-
     castHandleToInfoMap_.clear();
 
     if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
@@ -609,7 +610,6 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         }
     }
     if (castState == disconnectStateFromCast_) {
-        std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->SetIsSupportMirrorToStream(false);
     }
 }

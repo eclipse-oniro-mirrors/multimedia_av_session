@@ -23,7 +23,7 @@ using namespace testing::ext;
  
 namespace OHOS {
 namespace AVSession {
-
+ 
 namespace {
 std::string g_errLog;
 void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
@@ -31,7 +31,7 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_errLog = msg;
 }
-}   // namespace
+}  // namespace
  
 class AVSessionCallbackImpl : public AVSessionCallback {
 public:
@@ -57,6 +57,7 @@ public:
     void OnPlayFromAssetId(int64_t assetId) override {};
     void OnPlayWithAssetId(const std::string& assetId) override {};
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
+    void OnCustomData(const OHOS::AAFwk::WantParams& data) override {};
 
     ~AVSessionCallbackImpl() override {};
 };

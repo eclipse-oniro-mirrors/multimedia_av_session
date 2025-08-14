@@ -146,7 +146,7 @@ public:
 
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
-    virtual void OnCustomData(const AAFwk::WantParams& data) = 0;
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
 
     virtual int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
         int64_t pos, int32_t& result) = 0;
@@ -742,7 +742,7 @@ enum DeviceType {
  */
 enum ResolutionLevel {
     /**
-     * Defination of 480P which typically resolution is 640*480.
+     * Definition of 480P which typically resolution is 640*480.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18
@@ -758,7 +758,7 @@ enum ResolutionLevel {
     RESOLUTION_720P = 1,
 
     /**
-     * Defination of 1080P which typically resolution is 1920*1080.
+     * Definition of 1080P which typically resolution is 1920*1080.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18
@@ -766,7 +766,7 @@ enum ResolutionLevel {
     RESOLUTION_1080P = 2,
 
     /**
-     * Defination of 2K which typically resolution is 2560*1440.
+     * Definition of 2K which typically resolution is 2560*1440.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18
@@ -774,7 +774,7 @@ enum ResolutionLevel {
     RESOLUTION_2K = 3,
 
     /**
-     * Defination of 4K which typically resolution is 4096*3840.
+     * Definition of 4K which typically resolution is 4096*3840.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18
@@ -1002,9 +1002,9 @@ struct DeviceState: public Parcelable {
     bool Marshalling(Parcel& out) const override
     {
         return out.WriteString(deviceId) &&
-            out.WriteInt32(deviceState) &&
-            out.WriteInt32(reasonCode) &&
-            out.WriteInt32(radarErrorCode);
+            out.WriteInt32(static_cast<int32_t>(deviceState)) &&
+            out.WriteInt32(static_cast<int32_t>(reasonCode)) &&
+            out.WriteInt32(static_cast<int32_t>(radarErrorCode));
     }
 
     static DeviceState* Unmarshalling(Parcel& in)
