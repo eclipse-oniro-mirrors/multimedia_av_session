@@ -2874,7 +2874,8 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
 bool AVSessionService::CheckIfOtherAudioPlaying()
 {
     std::vector<int> audioPlayingUids = focusSessionStrategy_.GetAudioPlayingUids();
-    CHECK_AND_RETURN_RET_LOG(!audioPlayingUids.empty(), false, "no other audio playing quit");
+    CHECK_AND_RETURN_RET_LOG(!audioPlayingUids.empty(), false, "no other audio playing quit.");
+    std::lock_guard lockGuard(sessionServiceLock_);
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr quit");
