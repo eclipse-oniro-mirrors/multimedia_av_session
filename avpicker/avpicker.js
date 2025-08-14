@@ -502,6 +502,36 @@ export class AVCastPicker extends ViewPU {
         Text.pop();
     }
 
+    subTextBuilder(u3, v1 = null) {
+        this.observeComponentCreation2((x1, y1) => {
+            Row.create();
+            Row.width('100%');
+        }, Row);
+        this.observeComponentCreation2((x1, y1) => {
+            Text.create(`${u3.deviceSubName}...`);
+            Text.fontSize({ 'id': -1, 'type': 10002,
+                params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__' });
+            Text.fontColor(u3.isConnected ?
+                (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
+                { 'id': -1, 'type': 10001, params: ['sys.color.font_emphasize'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
+                (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
+                { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxLines(1);
+            Text.maxFontScale(this.maxFontSizeScale);
+            Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
+        }, Text);
+        Text.pop();
+        Row.pop();
+    }
+
     highQualityIconBuilder(u2, v1 = null) {
         Row.create();
         Row.direction(Direction.Ltr);
@@ -582,22 +612,23 @@ export class AVCastPicker extends ViewPU {
                 this.iconBuilder.bind(this)(x8, false);
 
                 this.observeComponentCreation2((a10, b10) => {
-                    Flex.create({
-                        direction: FlexDirection.Column,
-                        justifyContent: FlexAlign.Center,
-                    });
-                    Flex.padding({
+                    Column.create();
+                    Column.width(this.isPc ? 254 : 144);
+                    Column.padding({
                         left: 8,
                         top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
                         right: 8,
                         bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
                     });
-                    Flex.width(this.isPc ? 254 : 144);
+                }, Column);
+                this.observeComponentCreation2((m9, n9) => {
+                    Flex.create({ direction: FlexDirection.Row, justifyContent: FlexAlign.Start });
+                    Flex.width('100%');
                 }, Flex);
                 this.textBuilder.bind(this)(x8);
                 this.observeComponentCreation2((m9, n9) => {
                     If.create();
-                    if (this.showHighQuality(x8)) {
+                    if (x8.highQualityParams !== undefined && this.showHighQuality(x8)) {
                         this.ifElseBranchUpdateFunction(0, () => {
                             this.observeComponentCreation2((u9, v9) => {
                                 Flex.create();
@@ -621,6 +652,21 @@ export class AVCastPicker extends ViewPU {
                 }, If);
                 If.pop();
                 Flex.pop();
+
+                this.observeComponentCreation2((m9, n9) => {
+                    If.create();
+                    if (x8.fromCall) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.subTextBuilder.bind(this)(x8);
+                        });
+                    }
+                    else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                        });
+                    }
+                }, If);
+                If.pop();
+                Column.pop();
 
                 Row.pop();
                 this.observeComponentCreation2((m9, n9) => {

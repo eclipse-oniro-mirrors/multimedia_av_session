@@ -112,6 +112,8 @@ export interface AVCastPickerDeviceInfo {
   networkId: string,
   supportedProtocols?: number,
   highQualityParams?: HighQualityParams,
+  fromCall?: boolean,
+  deviceSubName?: string,
 }
 
 @Component
@@ -277,10 +279,28 @@ export struct AVCastPicker {
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
         $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
       .textOverflow({ overflow: TextOverflow.Ellipsis })
-      .maxLines(2)
+      .maxLines(item.fromCall ? 1 : 2);
       .wordBreak(WordBreak.BREAK_WORD)
       .maxFontScale(this.maxFontSizeScale)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
+  }
+
+  @Builder
+  subTextBuilder(item: AVCastPickerDeviceInfo) {
+    Row() {
+      Text(`${item.deviceSubName}...`)
+        .fontSize($r('sys.float.ohos_id_text_size_body2'))
+        .fontColor(item.isConnected ?
+          (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+          $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
+          (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+          $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .maxLines(1)
+        .maxFontScale(this.maxFontSizeScale)
+        .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
+    }
+    .width('100%')
   }
 
   @Builder
@@ -311,18 +331,27 @@ export struct AVCastPicker {
           }) {
             Row() {
               this.iconBuilder(item, false)
-
-              Flex({direction: FlexDirection.Row, justifyContent: FlexAlign.Center}) {
-                this.textBuilder(item)
-                if (this.showHighQuality(item)) {
-                  Flex() {
-                    this.highQualityIconBuilder(item.highQualityParams)
+              Column() {
+                Flex({direction: FlexDirection.Row, justifyContent: FlexAlign.Start}) {
+                  this.textBuilder(item)
+                  if (item.highQualityParams !== undefined && this.showHighQuality(item)) {
+                    Flex() {
+                      this.highQualityIconBuilder(item.highQualityParams)
+                    }
+                    .borderRadius(3)
+                    .border({
+                      width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
+                      color: $r('sys.color.font_secondary')
+                    })
+                    .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
+                    .margin({top: 2})
+                    .width('auto')
                   }
-                  .borderRadius(3)
-                  .border({width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)), color: $r('sys.color.font_secondary')})
-                  .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
-                  .margin({top: 2})
-                  .width('auto')
+                }
+                .width('100%')
+
+                if (item.fromCall) {
+                  this.subTextBuilder(item)
                 }
               }
               .width(this.isPc ? 254 : 144)
