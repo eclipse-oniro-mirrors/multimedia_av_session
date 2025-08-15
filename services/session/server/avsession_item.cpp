@@ -1357,6 +1357,9 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             return AVSESSION_SUCCESS;
         }
     } else {
+        if (AVRouter::GetInstance().IsRemoteCasting()) {
+            return SubStartCast(outputDeviceInfo);
+        }
         int32_t flag = CastAddToCollaboration(outputDeviceInfo);
         CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, flag, "collaboration to start cast fail");
     }
