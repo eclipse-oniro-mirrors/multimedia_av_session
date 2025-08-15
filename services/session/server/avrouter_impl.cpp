@@ -584,12 +584,26 @@ bool AVRouterImpl::IsInMirrorToStreamState()
     return isInMirrorToStream_;
 }
 
-void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+bool AVRouterImpl::IsRemoteCasting()
+{
+    return isRemoteCasting_;
+}
+
+void AVRouterImpl::UpdateConnectState(int32_t castState)
 {
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::MIRROR_TO_STREAM) ||
         castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM_TO_MIRROR)) {
         isInMirrorToStream_ = (castState == static_cast<int32_t>(CastEngine::DeviceState::MIRROR_TO_STREAM));
     }
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM) ||
+        castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
+        isRemoteCasting_ = (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM));
+    }
+}
+
+void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+{
+    UpdateConnectState(castState);
     for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
         if (castHandleInfo.avRouterListener_ != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered avRouterListener");

@@ -310,6 +310,14 @@ public:
     */
     virtual bool IsInMirrorToStreamState() = 0;
 
+    /**
+     * @brief check is in stream state.
+     *
+     * @return { bool } is in stream state.
+     * @since 20
+    */
+    virtual bool IsRemoteCasting() = 0;
+
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
     std::string sessionId_ = "-1";
