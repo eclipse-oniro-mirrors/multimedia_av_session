@@ -655,13 +655,13 @@ cJSON* MigrateAVSessionServer::ConvertAudioDeviceDescriptorToJson(
     }
     if (!SoftbusSessionUtils::AddStringToJson(device, AUDIO_MAC_ADDRESS, desc->macAddress_)) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-            AUDIO_MAC_ADDRESS, desc->macAddress_.c_str());
+            AUDIO_MAC_ADDRESS, AVSessionUtils::GetAnonySessionId(desc->macAddress_).c_str());
         cJSON_Delete(device);
         return nullptr;
     }
     if (!SoftbusSessionUtils::AddStringToJson(device, AUDIO_NETWORK_ID, desc->networkId_)) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-            AUDIO_NETWORK_ID, desc->networkId_.c_str());
+            AUDIO_NETWORK_ID, AVSessionUtils::GetAnonySessionId(desc->networkId_).c_str());
         cJSON_Delete(device);
         return nullptr;
     }

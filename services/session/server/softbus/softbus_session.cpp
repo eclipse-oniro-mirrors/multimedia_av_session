@@ -46,7 +46,7 @@ void SoftbusSession::OnDisConnectSession(int32_t sessionId)
 
 void SoftbusSession::SendByteToAll(const std::string &data)
 {
-    SLOGI("SendByteToAll: %{public}s", data.c_str());
+    SLOGI("SendByteToAllLength: %{public}d", static_cast<int>(data.size()));
     std::lock_guard lockGuard(deviceMapLock_);
     for (auto it = deviceToSessionMap_.begin(); it != deviceToSessionMap_.end(); it++) {
         SLOGI("SendByteToAll : %{public}s", data.c_str());
@@ -56,7 +56,7 @@ void SoftbusSession::SendByteToAll(const std::string &data)
 
 void SoftbusSession::SendByte(const std::string &deviceId, const std::string &data)
 {
-    SLOGI("SendByte: %{public}s", data.c_str());
+    SLOGI("SendByteLength: %{public}d", static_cast<int>(data.size()));
     std::lock_guard lockGuard(deviceMapLock_);
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {
@@ -66,7 +66,7 @@ void SoftbusSession::SendByte(const std::string &deviceId, const std::string &da
 
 void SoftbusSession::SendJsonStringByte(const std::string &deviceId, const std::string &data)
 {
-    SLOGI("SendByte: %{public}s", SoftbusSessionUtils::AnonymizeMacAddressInSoftBusMsg(data).c_str());
+    SLOGI("SendJsonStringByteLength: %{public}d", static_cast<int>(data.size()));
     std::lock_guard lockGuard(deviceMapLock_);
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {
@@ -90,13 +90,13 @@ void SoftbusSession::SendByteForNext(const std::string &deviceId, const std::str
 
 void SoftbusSession::SendByte(int32_t sessionId, const std::string &data)
 {
-    SLOGI("SendByte: %{public}s", data.c_str());
+    SLOGI("SendByteLength: %{public}d", static_cast<int>(data.size()));
     SoftbusSessionManager::GetInstance().SendBytes(sessionId, data);
 }
 
 void SoftbusSession::SendByteForNext(int32_t sessionId, const std::string &data)
 {
-    SLOGI("SendByteForNext: %{public}d", static_cast<int>(data.size()));
+    SLOGI("SendByteForNextLength: %{public}d", static_cast<int>(data.size()));
     int ret = SoftbusSessionManager::GetInstance().SendBytesForNext(sessionId, data);
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("SendbyteNext with ret:%{public}d fail!", ret);
@@ -105,7 +105,7 @@ void SoftbusSession::SendByteForNext(int32_t sessionId, const std::string &data)
 
 void SoftbusSession::SendMessage(const std::string &deviceId, const std::string &data)
 {
-    SLOGI("SendMessage: %{public}s", data.c_str());
+    SLOGI("SendMessageLength: %{public}d", static_cast<int>(data.size()));
     std::lock_guard lockGuard(deviceMapLock_);
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {
@@ -115,7 +115,7 @@ void SoftbusSession::SendMessage(const std::string &deviceId, const std::string 
 
 void SoftbusSession::SendMessage(int32_t sessionId, const std::string &data)
 {
-    SLOGI("SendMessage: %{public}s", data.c_str());
+    SLOGI("SendMessageLength: %{public}d", static_cast<int>(data.size()));
     SoftbusSessionManager::GetInstance().SendMessage(sessionId, data);
 }
 // LCOV_EXCL_STOP
