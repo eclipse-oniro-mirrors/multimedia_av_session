@@ -21,9 +21,14 @@ subsystem_name = "multimedia"
 part_name = "av_session"
 taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
 
-copy_taihe_idl("copy_taihe") {
+copy_taihe_idl("copy_taihe_deps") {
   sources = [
     "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avCastPickerParam.taihe",
+  ]
+}
+
+copy_taihe_idl("copy_taihe") {
+  sources = [
     "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avsession.avSession.taihe",
     "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avsession.taihe",
   ]
@@ -31,6 +36,7 @@ copy_taihe_idl("copy_taihe") {
     "image_framework:copy_image_taihe",
     "input:key_event_taihe"
   ]
+  deps = [":copy_taihe_deps"]
 }
 
 ohos_taihe("run_taihe") {
