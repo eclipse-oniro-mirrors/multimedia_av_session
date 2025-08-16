@@ -819,12 +819,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         }
     } else {
         std::lock_guard lockGuard(sessionServiceLock_);
-        if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
-            UpdateTopSession(nullptr, userId);
-            hasMediaCapsule_ = false;
-            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-            SLOGI("CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
-        }
+        HandleTopSessionRelease(userId, sessionItem);
         sessionListForFront->remove(sessionItem);
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
     }
@@ -3174,7 +3169,7 @@ void AVSessionService::HandleTopSessionRelease(int32_t userId, sptr<AVSessionIte
             UpdateTopSession(nullptr, userId);
             hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-            SLOGI("Topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
+            SLOGI("CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
         }
     }
 }
