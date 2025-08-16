@@ -508,7 +508,6 @@ int32_t AVRouterImpl::GetRemoteDrmCapabilities(int64_t castHandle, std::string d
     return AVSESSION_SUCCESS;
 }
 
-
 int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVRouterListener> callback,
     std::string sessionId, DeviceInfo deviceInfo)
 {
