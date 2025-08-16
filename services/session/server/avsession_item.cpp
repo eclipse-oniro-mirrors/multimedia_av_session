@@ -1088,6 +1088,8 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
         SetCastHandle(AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameStatePair_, GetSessionId()));
         CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId(), deviceInfo);
+        AVRouter::GetInstance().GetRemoteDrmCapabilities(castHandle_, deviceInfo.deviceId_,
+            deviceInfo.supportedDrmCapabilities_);
         AVRouter::GetInstance().SetServiceAllConnectState(castHandle_, deviceInfo);
         InitAVCastControllerProxy();
     } else {
@@ -2533,10 +2535,6 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
     }
 }
 
-std::map<std::string, DeviceInfo> AVSessionItem::GetCastDeviceMap() const
-{
-    return castDeviceInfoMap_;
-}
 #endif
 
 void AVSessionItem::ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo)

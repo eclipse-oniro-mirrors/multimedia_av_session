@@ -447,9 +447,6 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
     deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
     deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
     deviceInfo.providerId_ = 1;
-    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "session is nullptr");
-    std::map<std::string, DeviceInfo> sessionCastDeviceMap = session->GetCastDeviceMap();
-    deviceInfo.supportedDrmCapabilities_ = sessionCastDeviceMap[castDeviceId_].supportedDrmCapabilities_;
     return session->RegisterListenerStreamToCast(castServiceNameStatePair_, deviceInfo);
 }
 

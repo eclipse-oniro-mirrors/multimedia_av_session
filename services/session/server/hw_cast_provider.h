@@ -58,6 +58,8 @@ public:
     bool SetStreamState(int64_t castHandle, DeviceInfo deviceInfo) override;
     int64_t GetMirrorCastHandle() override;
     bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) override;
+    bool GetRemoteDrmCapabilities(int32_t castId, std::string deviceId,
+        std::vector<std::string> &drmCapabilities) override;
     int32_t GetProtocolType(uint32_t castProtocolType) override;
 
     int GetCastProtocolType(int castCapability);

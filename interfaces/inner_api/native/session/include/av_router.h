@@ -267,6 +267,18 @@ public:
     virtual int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) = 0;
 
     /**
+     * @brief get remote DrmCapabilities.
+     *
+     * @param { int64_t } castHandle const - The ID corresponding to the castprovider.
+     * @param { string } cast deviceId - The deviceId give cast+ to get remote DrmCapabilities.
+     * @param { string } cast DrmCapabilities - The DrmCapabilities to transmit remote DrmCapabilities.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 11
+    */
+    virtual int32_t GetRemoteDrmCapabilities(int64_t castHandle, std::string deviceId,
+        std::vector<std::string> &drmCapabilities) = 0;
+
+    /**
      * @brief get mirror castHandle.
      *
      * @return { int64_t } mirror castHandle.

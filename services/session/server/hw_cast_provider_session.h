@@ -42,6 +42,7 @@ public:
     bool UnRegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener);
     bool SetStreamState(DeviceInfo deviceInfo);
     bool GetRemoteNetWorkId(std::string deviceId, std::string &networkId);
+    bool GetRemoteDrmCapabilities(std::string deviceId, std::vector<std::string> &drmCapabilities);
     void SetProtocolType(CastEngine::ProtocolType);
     void OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo);
 
