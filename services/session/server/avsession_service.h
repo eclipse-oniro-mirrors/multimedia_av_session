@@ -212,8 +212,6 @@ public:
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
-    void HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem);
-
     void HandleDisableCast();
 
     void HandleSessionReleaseInner();
@@ -616,6 +614,8 @@ private:
     bool IsAncoValid();
 
     std::string DoCJSONArrayTransformToString(cJSON* valueItem);
+
+    void HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem);
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     void ReportSessionState(const sptr<AVSessionItem>& session, SessionState state);
