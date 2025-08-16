@@ -723,7 +723,7 @@ static HWTEST(HwCastSupplementTest, GetRemoteDrmCapabilities001, TestSize.Level0
  * @tc.desc: test GetRemoteDrmCapabilities
  * @tc.type: FUNC
  */
-static HWTEST(HwCastSupplementTest, GetRemoteNetWorkId002, TestSize.Level0)
+static HWTEST(HwCastSupplementTest, GetRemoteDrmCapabilities002, TestSize.Level0)
 {
     SLOGI("GetRemoteDrmCapabilities002 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();

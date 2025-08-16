@@ -266,7 +266,6 @@ public:
     */
     virtual int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) = 0;
 
-    
     /**
      * @brief get remote DrmCapabilities.
      *
