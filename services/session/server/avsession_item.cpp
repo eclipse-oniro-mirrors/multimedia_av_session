@@ -2535,10 +2535,6 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
     }
 }
 
-std::map<std::string, DeviceInfo> AVSessionItem::GetCastDeviceMap() const
-{
-    return castDeviceInfoMap_;
-}
 #endif
 
 void AVSessionItem::ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo)
