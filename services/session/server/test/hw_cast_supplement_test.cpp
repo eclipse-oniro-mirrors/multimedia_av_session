@@ -699,6 +699,69 @@ static HWTEST(HwCastSupplementTest, GetRemoteNetWorkId003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetRemoteDrmCapabilities001
+ * @tc.desc: test GetRemoteDrmCapabilities
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, GetRemoteDrmCapabilities001, TestSize.Level0)
+{
+    SLOGI("GetRemoteDrmCapabilities001 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    std::string deviceId;
+    std::vector<std::string> drmCapabilities;
+    bool ret = hwCastProvider->GetRemoteDrmCapabilities(castId, deviceId, drmCapabilities);
+    EXPECT_EQ(ret, false);
+    SLOGI("GetRemoteDrmCapabilities001 end!");
+}
+
+/**
+ * @tc.name: GetRemoteDrmCapabilities002
+ * @tc.desc: test GetRemoteDrmCapabilities
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, GetRemoteNetWorkId002, TestSize.Level0)
+{
+    SLOGI("GetRemoteDrmCapabilities002 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    std::string deviceId;
+    std::vector<std::string> drmCapabilities;
+    hwCastProvider->hwCastProviderSessionMap_[castId] = nullptr;
+    bool ret = hwCastProvider->GetRemoteDrmCapabilities(castId, deviceId, drmCapabilities);
+    EXPECT_EQ(ret, false);
+    SLOGI("GetRemoteDrmCapabilities002 end!");
+}
+
+/**
+ * @tc.name: GetRemoteDrmCapabilities003
+ * @tc.desc: test GetRemoteDrmCapabilities
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, GetRemoteDrmCapabilities003, TestSize.Level0)
+{
+    SLOGI("GetRemoteDrmCapabilities003 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    std::string deviceId;
+    std::vector<std::string> drmCapabilities = {"testDrmCapabilities"};
+    auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
+    hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+    bool ret = hwCastProvider->GetRemoteDrmCapabilities(castId, deviceId, drmCapabilities);
+    EXPECT_EQ(ret, false);
+    SLOGI("GetRemoteDrmCapabilities003 end!");
+}
+
+/**
  * @tc.name: OnDeviceFound001
  * @tc.desc: test OnDeviceFound
  * @tc.type: FUNC
@@ -900,6 +963,26 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_HwCastProviderSessionR
     std::string deviceId = "test";
     EXPECT_EQ(provideSession->RemoveDevice(deviceId), false);
     SLOGI("HwCastProviderSession_HwCastProviderSessionRemoveDevice_002 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_GetRemoteDrmCapabilities_001
+ * @tc.desc: set sesion to not nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_GetRemoteDrmCapabilities_001, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_GetRemoteDrmCapabilities_001 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    std::string deviceId = "001";
+    std::vector<std::string> drmCapabilities = {"testDrmCapabilities"};
+    bool ret = provideSession->GetRemoteDrmCapabilities(deviceId, drmCapabilities);
+    EXPECT_EQ(ret, true);
+    SLOGI("HwCastProviderSession_GetRemoteDrmCapabilities_001 end!");
 }
 
 /**

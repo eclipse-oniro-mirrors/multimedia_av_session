@@ -214,6 +214,18 @@ public:
     virtual bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) = 0;
 
     /**
+     * @brief get remote DrmCapabilities.
+     *
+     * @param { int32_t } castId const - The ID corresponding to the castprovider.
+     * @param { string } cast deviceId - The deviceId give cast+ to get remote DrmCapabilities.
+     * @param { string } cast DrmCapabilities - The DrmCapabilities to transmit remote DrmCapabilities.
+     * @return { bool } Whether the operation was successful.
+     * @since 11
+    */
+    virtual bool GetRemoteDrmCapabilities(int32_t castId, std::string deviceId,
+        std::vector<std::string> &drmCapabilities) = 0;
+
+    /**
      * @brief get protocol type.
      *
      * @param { uint32_t } cast protocol type - The type of cast protocol.

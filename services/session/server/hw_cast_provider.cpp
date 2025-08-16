@@ -336,6 +336,22 @@ bool HwCastProvider::GetRemoteNetWorkId(int32_t castId, std::string deviceId, st
     return hwCastProviderSession->GetRemoteNetWorkId(deviceId, networkId);
 }
 
+bool HwCastProvider::GetRemoteDrmCapabilities(int32_t castId, std::string deviceId,
+    std::vector<std::string> &drmCapabilities)
+{
+    SLOGI("enter GetRemoteDrmCapabilities");
+    if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
+        SLOGE("GetRemoteDrmCapabilities failed for the castSession corresponding to castId is not exit");
+        return false;
+    }
+    auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
+    if (hwCastProviderSession == nullptr) {
+        SLOGE("GetRemoteDrmCapabilities failed for the hwCastProviderSession is nullptr");
+        return false;
+    }
+    return hwCastProviderSession->GetRemoteDrmCapabilities(deviceId, drmCapabilities);
+}
+
 int64_t HwCastProvider::GetMirrorCastHandle()
 {
     return mirrorCastHandle;

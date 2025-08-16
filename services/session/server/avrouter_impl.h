@@ -99,6 +99,9 @@ public:
 
     int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) override;
 
+    int32_t GetRemoteDrmCapabilities(int64_t castHandle, std::string deviceId,
+        std::vector<std::string> &drmCapabilities) override;
+
     int64_t GetMirrorCastHandle() override;
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);

@@ -99,6 +99,19 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
     return streamPlayerPtr;
 }
 
+bool HwCastProviderSession::GetRemoteDrmCapabilities(std::string deviceId, std::vector<std::string> &drmCapabilities)
+{
+    SLOGI("enter GetRemoteDrmCapabilities");
+    if (!castSession_) {
+        SLOGE("castSession_ is not exist");
+        return false;
+    }
+    CastRemoteDevice castRemoteDevice = {};
+    castSession_->GetRemoteDeviceInfo(deviceId, castRemoteDevice);
+    drmCapabilities = castRemoteDevice.drmCapabilities;
+    return true;
+}
+
 bool HwCastProviderSession::GetRemoteNetWorkId(std::string deviceId, std::string &networkId)
 {
     SLOGI("enter GetRemoteNetWorkId");
