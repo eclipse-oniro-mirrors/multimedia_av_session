@@ -32,6 +32,7 @@ constexpr int32_t MEDIA_SESSION_PLAYBACK_STATE_ERROR = 7;
 constexpr int32_t HEART_BEAT_TIME = 180000;
 constexpr int32_t HEART_BEAT_TIME_FOR_NEXT = 30000;
 constexpr int32_t SILENT_HEART_BEAT_TIME_FOR_NEXT = 3600000;
+constexpr int32_t CHECK_CONNECT_TIME_FOR_NEXT = 3000;
 
 constexpr int32_t SYNC_MEDIASESSION_CALLBACK_ON_COMMAND = 30;
 constexpr int32_t SYNC_MEDIASESSION_CALLBACK_ON_MEDIABUTTON_EVENT = 31;
@@ -80,6 +81,7 @@ constexpr int32_t MESSAGE_CODE_CONNECT_SERVER = 1;
 constexpr int32_t DEFAULT_NUM = 0;
 
 constexpr int REASON_EXIST = -3;
+constexpr int DEFAULT_FAKE_VOLUME = -99;
 
 namespace {
 const char* EMIT_UTF8 = "emitUTF8";
