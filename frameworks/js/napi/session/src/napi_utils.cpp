@@ -1546,11 +1546,11 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AudioStandard::Audi
     }
 
     AudioStandard::DeviceStreamInfo streamInfo;
-    AudioStandard::AudioSamplingRate audioSamplingRate;
+    AudioStandard::AudioSamplingRate audioSamplingRate {};
     GetSampleRate(env, in, audioSamplingRate);
     streamInfo.samplingRate = {audioSamplingRate};
 
-    AudioStandard::AudioChannel audioChannel;
+    AudioStandard::AudioChannel audioChannel {};
     GetChannels(env, in, audioChannel);
     streamInfo.SetChannels({audioChannel});
     out.audioStreamInfo_ = {streamInfo};
