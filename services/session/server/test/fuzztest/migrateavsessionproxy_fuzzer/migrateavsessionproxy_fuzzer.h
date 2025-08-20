@@ -16,4 +16,48 @@
 #ifndef MIGRATE_AVSESSION_PROXY_FUZZER_H
 #define MIGRATE_AVSESSION_PROXY_FUZZER_H
 
+#include "migrate_avsession_proxy.h"
+#include "avsession_service.h"
+
+namespace OHOS::AVSession {
+class MigrateAVSessionProxyTest {
+public:
+    static MigrateAVSessionProxyTest &GetInstance()
+    {
+        static MigrateAVSessionProxyTest test {};
+        return test;
+    }
+
+    MigrateAVSessionProxyTest()
+    {
+        avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+        if (avservice_ == nullptr) {
+            return;
+        }
+        migrateAVSessionProxy_ = std::make_shared<MigrateAVSessionProxy>(avservice_.GetRefPtr());
+        if (migrateAVSessionProxy_ == nullptr) {
+            avservice_->OnStop();
+            return;
+        }
+        migrateAVSessionProxy_->OnConnectServer(deviceId_);
+    }
+
+    ~MigrateAVSessionProxyTest()
+    {
+        if (migrateAVSessionProxy_) {
+            migrateAVSessionProxy_->OnDisconnectServer("");
+            migrateAVSessionProxy_->OnDisconnectServer(deviceId_);
+            migrateAVSessionProxy_->servicePtr_ = nullptr;
+            migrateAVSessionProxy_.reset();
+        }
+        if (avservice_) {
+            avservice_->OnStop();
+        }
+    }
+
+    std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy_ = nullptr;
+    sptr<AVSessionService> avservice_ = nullptr;
+    std::string deviceId_ = "DEFAULT";
+};
+}
 #endif
