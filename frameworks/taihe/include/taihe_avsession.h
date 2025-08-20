@@ -64,7 +64,7 @@ public:
     void SetAVQueueTitleSync(string_view title);
     void SetExtrasSync(uintptr_t extras);
     AVSessionController GetControllerSync();
-    AVCastController GetAVCastControllerSync();
+    optional<AVCastController> GetAVCastControllerSync();
     OutputDeviceInfo GetOutputDeviceSync();
     array<CastDisplayInfo> GetAllCastDisplaysSync();
     void StopCastingSync();

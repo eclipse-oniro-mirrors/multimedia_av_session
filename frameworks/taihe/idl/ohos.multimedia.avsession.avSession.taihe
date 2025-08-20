@@ -464,7 +464,7 @@ interface AVSession {
 
   @gen_async("getAVCastController")
   @gen_promise("getAVCastController")
-  GetAVCastControllerSync(): AVCastController;
+  GetAVCastControllerSync(): Optional<AVCastController>;
 
   @gen_async("getOutputDevice")
   @gen_promise("getOutputDevice")
@@ -926,7 +926,7 @@ function StartAVPlaybackSync(bundleName: String, assetId: String): void;
 
 @gen_async("getAVCastController")
 @gen_promise("getAVCastController")
-function GetAVCastControllerSync(sessionId: String): AVCastController;
+function GetAVCastControllerSync(sessionId: String): Optional<AVCastController>;
 
 @gen_async("startCasting")
 @gen_promise("startCasting")
