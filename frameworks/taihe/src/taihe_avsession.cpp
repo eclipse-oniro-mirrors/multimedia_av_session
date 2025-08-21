@@ -645,10 +645,10 @@ AVSessionController AVSessionImpl::GetControllerSync()
     return output;
 }
 
-AVCastController AVSessionImpl::GetAVCastControllerSync()
+optional<AVCastController> AVSessionImpl::GetAVCastControllerSync()
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::GetAVCastControllerSync");
-    AVCastController undefinedCastController = make_holder<AVCastControllerImpl, AVCastController>();
+    optional<AVCastController> undefinedCastController = optional<AVCastController>(std::nullopt);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (session_ == nullptr) {
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_SESSION_NOT_EXIST],
@@ -670,7 +670,7 @@ AVCastController AVSessionImpl::GetAVCastControllerSync()
             "convert native object to ets object failed");
         return undefinedCastController;
     }
-    return output;
+    return optional<AVCastController>(std::in_place, output);
 #else
     return undefinedCastController;
 #endif
