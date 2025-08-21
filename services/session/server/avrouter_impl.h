@@ -144,6 +144,7 @@ private:
     int32_t deviceType_ = -1;
     std::atomic<bool> isInMirrorToStream_ = false;
     std::atomic<bool> isRemoteCasting_ = false;
+    std::map<std::string, DeviceInfo> castDeviceInfoMap_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H
