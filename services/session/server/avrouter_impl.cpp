@@ -217,9 +217,9 @@ int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
     if (servicePtr_ == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
     }
-    std::lock_guard deviceInfoMapLockGuard(deviceInfoMapLock_);
+    std::lock_guard validDeviceInfoMapLockGuard(validDeviceInfoMapLock_);
     for (const DeviceInfo& deviceInfo : castOutputDeviceInfo.deviceInfos_) {
-        castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
+        validDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
     }
     servicePtr_->NotifyDeviceAvailable(castOutputDeviceInfo);
     return AVSESSION_SUCCESS;
@@ -278,8 +278,8 @@ int32_t AVRouterImpl::OnDeviceOffline(const std::string& deviceId)
     if (servicePtr_ == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
     }
-    std::lock_guard deviceInfoMapLockGuard(deviceInfoMapLock_);
-    castDeviceInfoMap_.erase(deviceId);
+    std::lock_guard validDeviceInfoMapLockGuard(validDeviceInfoMapLock_);
+    validDeviceInfoMap_.erase(deviceId);
     servicePtr_->NotifyDeviceOffline(deviceId);
     return AVSESSION_SUCCESS;
 }
@@ -305,11 +305,11 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
             return ERR_SERVICE_NOT_EXIST;
         }
         servicePtr_->setInCast(false);
-        std::lock_guard deviceInfoMapLockGuard(deviceInfoMapLock_);
-        for (const auto& [deviceId, deviceInfo] : castDeviceInfoMap_) {
+        std::lock_guard validDeviceInfoMapLockGuard(validDeviceInfoMapLock_);
+        for (const auto& [deviceId, deviceInfo] : validDeviceInfoMap_) {
             servicePtr_->NotifyDeviceOffline(deviceId);
         }
-        castDeviceInfoMap_.clear();
+        validDeviceInfoMap_.clear();
     }
     std::lock_guard lockGuard(providerManagerLock_);
     providerNumber_ = providerNumberDisable_;
