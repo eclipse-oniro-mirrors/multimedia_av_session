@@ -49,8 +49,8 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     CHECK_AND_RETURN_RET_LOG(innerPixelMap != nullptr, nullptr, "invalid parameter");
     std::vector<uint8_t> innerImgBuffer = innerPixelMap->GetInnerImgBuffer();
     int32_t innerImgSize = static_cast<int>(innerImgBuffer.size());
-    CHECK_AND_RETURN_RET_LOG(innerImgSize > (IMAGE_BYTE_SIZE + sizeof(Media::ImageInfo)), nullptr,
-        "innerPixelMap has no imageInfo");
+    CHECK_AND_RETURN_RET_LOG(innerImgSize > static_cast<int32_t>(IMAGE_BYTE_SIZE + sizeof(Media::ImageInfo)),
+        nullptr, "innerPixelMap has no imageInfo");
     uint16_t imgBufferSize = static_cast<uint16_t>(innerImgBuffer[0]);
     imgBufferSize = (imgBufferSize << OFFSET_BYTE) + innerImgBuffer[1];
     CHECK_AND_RETURN_RET_LOG(imgBufferSize == sizeof(Media::ImageInfo), nullptr,

@@ -236,8 +236,9 @@ int32_t AVSessionServiceProxy::GetHistoricalSessionDescriptors(int32_t maxSize,
 void AVSessionServiceProxy::UnMarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos)
 {
     uint32_t size {};
+    uint32_t maxAVQueueInfoSize = 99;
     CHECK_AND_RETURN_LOG(reply.ReadUint32(size), "UnMarshallingAVQueueInfos size failed");
-    CHECK_AND_RETURN_LOG(size, "UnMarshallingAVQueueInfos size=0");
+    CHECK_AND_RETURN_LOG(size > 0 && size <= maxAVQueueInfoSize, "UnMarshallingAVQueueInfos size out of range");
 
     for (uint32_t i = 0; i < size; i++) {
         AVQueueInfo avQueueInfo;

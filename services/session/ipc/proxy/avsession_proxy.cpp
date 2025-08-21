@@ -596,8 +596,10 @@ int32_t AVSessionProxy::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDis
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_MARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         int32_t castDisplayNum = 0;
+        int32_t maxCastDisplayNum = 99;
         CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(castDisplayNum), ERR_MARSHALLING, "read castDisplayNum failed");
-        CHECK_AND_RETURN_RET_LOG(castDisplayNum > 0, ERR_MARSHALLING, "castDisplayNum is illegal");
+        CHECK_AND_RETURN_RET_LOG(castDisplayNum > 0 && castDisplayNum <= maxCastDisplayNum, ERR_MARSHALLING,
+            "castDisplayNum is illegal");
         std::vector<CastDisplayInfo> displays;
         for (int32_t i = 0; i < castDisplayNum; i++) {
             CastDisplayInfo castDisplayInfo;

@@ -62,7 +62,9 @@ AVQueueInfo* AVQueueInfo::UnmarshallingMessageParcel(MessageParcel& data)
     }
 
     int imageLength = data.ReadInt32();
-    CHECK_AND_RETURN_RET_LOG(imageLength > 0, result, "AVQueueInfo::UnmarshallingMessageParcel image length 0");
+    int32_t maxImageSize = 10 * 1024 *1024;
+    CHECK_AND_RETURN_RET_LOG(imageLength > 0 && imageLength <= maxImageSize, result,
+        "AVQueueInfo::UnmarshallingMessageParcel image length 0 or exceed max image size");
     const char *buffer = nullptr;
     buffer = reinterpret_cast<const char *>(data.ReadRawData(imageLength));
     CHECK_AND_RETURN_RET_LOG(buffer != nullptr, result, "read raw data null buffer");
