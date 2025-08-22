@@ -681,9 +681,9 @@ void StartAVPlaybackSync(string_view bundleName, string_view assetId)
     }
 }
 
-AVCastController GetAVCastControllerSync(string_view sessionId)
+optional<AVCastController> GetAVCastControllerSync(string_view sessionId)
 {
-    AVCastController undefinedCastController = make_holder<AVCastControllerImpl, AVCastController>();
+    optional<AVCastController> undefinedCastController = optional<AVCastController>(std::nullopt);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionManager::GetAVCastControllerSync");
     std::string sessionIdInner;
@@ -719,7 +719,7 @@ AVCastController GetAVCastControllerSync(string_view sessionId)
             "convert native object to ets object failed");
         return undefinedCastController;
     }
-    return output;
+    return optional<AVCastController>(std::in_place, output);
 #else
     return undefinedCastController;
 #endif
