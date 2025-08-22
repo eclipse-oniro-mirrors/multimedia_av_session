@@ -206,7 +206,7 @@ void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionP
         return;
     }
     std::shared_ptr<Media::PixelMap> pixelMap;
-    pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(innerPixelMap);
+    pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(innerPixelMap, false);
     CHECK_AND_RETURN_LOG(pixelMap != nullptr, "DoMediaImageSyncToRemote with pixelMap null");
     std::shared_ptr<AVSessionPixelMap> innerPixelMapMin = AVSessionPixelMapAdapter::ConvertToInnerWithMinSize(pixelMap);
     CHECK_AND_RETURN_LOG(innerPixelMapMin != nullptr, "DoMediaImageSyncToRemote with innerPixelMapMin null");

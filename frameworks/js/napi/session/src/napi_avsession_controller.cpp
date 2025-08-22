@@ -172,9 +172,9 @@ napi_status NapiAVSessionController::RepeatedInstance(napi_env env, const std::s
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
     NapiAVSessionController* napiController{};
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiController)), napi_generic_failure);
-    SLOGD("check repeat controller prelock with sessionId %{public}s", controllerId.c_str());
+    SLOGD("check repeat controller prelock with sessionId %{public}s", controllerId.substr(0, ARGC_THREE).c_str());
     std::lock_guard<std::mutex> lock(controllerListMutex_);
-    SLOGI("check repeat controller aftlock with sessionId %{public}s", controllerId.c_str());
+    SLOGI("check repeat controller aftlock with sessionId %{public}s", controllerId.substr(0, ARGC_THREE).c_str());
     if (ControllerList_.count(controllerId) <= 0) {
         SLOGE("check repeat without cur session");
         return napi_generic_failure;
@@ -1484,13 +1484,16 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
         }
         std::string registerControllerId = napiController->sessionId_;
         napiController->callback_->AddCallbackForSessionDestroy([registerControllerId]() {
-            SLOGI("repeat list check for session destory: %{public}s", registerControllerId.c_str());
+            SLOGI("repeat list check for session destory: %{public}s",
+                registerControllerId.substr(0, ARGC_THREE).c_str());
             std::lock_guard<std::mutex> lock(controllerListMutex_);
             if (!ControllerList_.empty() && ControllerList_.find(registerControllerId) != ControllerList_.end()) {
-                SLOGI("repeat list erase controller for session destory: %{public}s", registerControllerId.c_str());
+                SLOGI("repeat list erase controller for session destory: %{public}s",
+                    registerControllerId.substr(0, ARGC_THREE).c_str());
                 ControllerList_.erase(registerControllerId);
             } else {
-                SLOGI("repeat list erase fail for session not in list: %{public}s", registerControllerId.c_str());
+                SLOGI("repeat list erase fail for session not in list: %{public}s",
+                    registerControllerId.substr(0, ARGC_THREE).c_str());
             }
         });
         auto ret = napiController->controller_->RegisterCallback(napiController->callback_);
