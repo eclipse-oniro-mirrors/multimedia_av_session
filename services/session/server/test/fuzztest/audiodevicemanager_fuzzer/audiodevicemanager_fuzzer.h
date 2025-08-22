@@ -21,6 +21,9 @@
 
 namespace OHOS::AVSession {
 void TestAudioDeviceManager();
+void TestAudioDeviceManagerExt();
+void TestOutputDeviceChangeCallback();
+void TestDeviceChangeCallback();
 
 class AudioDeviceManagerFuzzer {
 public:

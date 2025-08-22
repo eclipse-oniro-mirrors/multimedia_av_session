@@ -24,6 +24,8 @@ public:
     FocusSessionStrategyFuzzer() = default;
     ~FocusSessionStrategyFuzzer() = default;
     void FocusSessionStrategyFuzzTest(uint8_t* data, size_t size);
+    void FocusSessionStrategyFuzzTestSecond(uint8_t* data, size_t size);
+    void FocusSessionStrategyFuzzTestThird(uint8_t* data, size_t size);
 };
 }
 
