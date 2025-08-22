@@ -84,17 +84,6 @@ static std::string GenerateString(size_t targetLen)
     return std::string(buffer.data());
 }
 
-void OnConnectServerTest()
-{
-    if (g_MigrateAVSessionProxy == nullptr) {
-        return;
-    }
-    std::string deviceId = std::to_string(GetData<uint8_t>());
-    g_MigrateAVSessionProxy->OnConnectServer(deviceId);
-    std::vector<sptr<IRemoteObject>> controllerList;
-    g_MigrateAVSessionProxy->GetDistributedSessionControllerList(controllerList);
-}
-
 void HandlePlayStateCbTest()
 {
     if (g_MigrateAVSessionProxy == nullptr) {
@@ -294,7 +283,6 @@ void ProcessImgTest()
 
 void TestFunc()
 {
-    OnConnectServerTest();
     HandlePlayStateCbTest();
     HandleControllerCallback();
     HandleControllerCallbackExt();
@@ -316,20 +304,14 @@ void MigrateAVSessionProxyFuzzerTest(const uint8_t* rawData, size_t size)
     g_dataSize = size;
     g_pos = 0;
 
-    sptr<AVSessionService> avservice = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
-    if (avservice == nullptr) {
-        SLOGE("avservice is nullptr");
-        return;
-    }
-    g_MigrateAVSessionProxy = std::make_shared<MigrateAVSessionProxy>(avservice.GetRefPtr());
     if (g_MigrateAVSessionProxy == nullptr) {
-        avservice->OnStop();
-        SLOGE("g_MigrateAVSessionProxy is nullptr");
-        return;
+        g_MigrateAVSessionProxy = MigrateAVSessionProxyTest::GetInstance().migrateAVSessionProxy_;
+        if (g_MigrateAVSessionProxy != nullptr) {
+            std::vector<sptr<IRemoteObject>> controllerList;
+            g_MigrateAVSessionProxy->GetDistributedSessionControllerList(controllerList);
+        }
     }
     TestFunc();
-    avservice->OnStop();
-    g_MigrateAVSessionProxy = nullptr;
     SLOGI("MigrateAVSessionFuzzerTest done");
 }
 
