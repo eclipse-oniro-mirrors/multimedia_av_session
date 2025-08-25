@@ -22,6 +22,7 @@
 
 #include "audio_device_manager.h"
 #include "securec.h"
+#include "avsession_service.h"
 
 namespace OHOS {
 namespace AVSession {
@@ -31,6 +32,8 @@ static const int32_t MIN_SIZE_NUM = 10;
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_totalSize = 0;
 static size_t g_sizePos;
+static std::shared_ptr<OutputDeviceChangeCallback> g_outputDeviceChangeCb = nullptr;
+static std::shared_ptr<DeviceChangeCallback> g_deviceChangeCb = nullptr;
 
 /*
 * describe: get data from FUZZ untrusted data(RAW_DATA) which size is according to sizeof(T)
@@ -78,6 +81,15 @@ uint32_t GetArrLength(T& arr)
     return sizeof(arr) / sizeof(arr[0]);
 }
 
+using TestFuncs = void (*)();
+
+TestFuncs g_allFuncs[] = {
+    TestAudioDeviceManager,
+    TestAudioDeviceManagerExt,
+    TestOutputDeviceChangeCallback,
+    TestDeviceChangeCallback
+};
+
 bool FuzzTest(const uint8_t* rawData, size_t size)
 {
     if (rawData == nullptr) {
@@ -89,7 +101,16 @@ bool FuzzTest(const uint8_t* rawData, size_t size)
     g_totalSize = size;
     g_sizePos = 0;
 
-    TestAudioDeviceManager();
+    uint32_t code = GetData<uint32_t>();
+    uint32_t len = GetArrLength(g_allFuncs);
+    if (len > 0) {
+        uint32_t index = code % len;
+        if (g_allFuncs[index]) {
+            g_allFuncs[index]();
+        }
+    } else {
+        SLOGE("%{public}s: The len length is equal to 0", __func__);
+    }
 
     return true;
 }
@@ -110,6 +131,100 @@ void TestAudioDeviceManager()
     AudioStandard::DeviceChangeAction deviceChangeAction;
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
     AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+}
+
+void TestAudioDeviceManagerExt()
+{
+    std::string deviceId = GetString();
+    sptr<AVSessionService> avservice = new (std::nothrow) AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    if (avservice == nullptr) {
+        return;
+    }
+    auto migrateAVSession = std::make_shared<MigrateAVSessionServer>();
+    if (migrateAVSession == nullptr) {
+        return;
+    }
+
+    migrateAVSession->Init(avservice);
+    AudioDeviceManager::GetInstance().InitAudioStateCallback(migrateAVSession, deviceId);
+    AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
+    AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(deviceId);
+    AudioDeviceManager::GetInstance().UnInitAudioStateCallback();
+    AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
+}
+
+void TestOutputDeviceChangeCallback()
+{
+    if (g_outputDeviceChangeCb == nullptr) {
+        g_outputDeviceChangeCb = std::make_shared<OutputDeviceChangeCallback>();
+    }
+    if (g_outputDeviceChangeCb == nullptr) {
+        return;
+    }
+
+    std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descs;
+    descs.push_back(nullptr);
+    g_outputDeviceChangeCb->OnPreferredOutputDeviceUpdated(descs);
+
+    auto desc = std::make_shared<AudioStandard::AudioDeviceDescriptor>();
+    if (desc == nullptr) {
+        return;
+    }
+
+    descs.clear();
+    desc->networkId_ = AudioStandard::LOCAL_NETWORK_ID;
+    descs.push_back(desc);
+    AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SOURCE);
+    g_outputDeviceChangeCb->OnPreferredOutputDeviceUpdated(descs);
+    AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SINK);
+    g_outputDeviceChangeCb->OnPreferredOutputDeviceUpdated(descs);
+
+    descs.clear();
+    desc->networkId_ = AudioStandard::REMOTE_NETWORK_ID;
+    descs.push_back(desc);
+    AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SOURCE);
+    g_outputDeviceChangeCb->OnPreferredOutputDeviceUpdated(descs);
+    AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SINK);
+    g_outputDeviceChangeCb->OnPreferredOutputDeviceUpdated(descs);
+}
+
+void TestDeviceChangeCallback()
+{
+    if (g_deviceChangeCb == nullptr) {
+        g_deviceChangeCb = std::make_shared<DeviceChangeCallback>();
+    }
+    if (g_deviceChangeCb == nullptr) {
+        return;
+    }
+
+    AudioStandard::DeviceChangeAction deviceChangeAction;
+    g_deviceChangeCb->OnDeviceChange(deviceChangeAction);
+
+    deviceChangeAction.deviceDescriptors.push_back(nullptr);
+    g_deviceChangeCb->OnDeviceChange(deviceChangeAction);
+
+    auto desc = std::make_shared<AudioStandard::AudioDeviceDescriptor>();
+    if (desc == nullptr) {
+        return;
+    }
+
+    deviceChangeAction.deviceDescriptors.clear();
+    desc->connectState_ = AudioStandard::ConnectState::VIRTUAL_CONNECTED;
+    deviceChangeAction.deviceDescriptors.push_back(desc);
+    g_deviceChangeCb->OnDeviceChange(deviceChangeAction);
+
+    deviceChangeAction.deviceDescriptors.clear();
+    desc->connectState_ = AudioStandard::ConnectState::CONNECTED;
+    deviceChangeAction.deviceDescriptors.push_back(desc);
+    g_deviceChangeCb->OnDeviceChange(deviceChangeAction);
+
+    deviceChangeAction.deviceDescriptors.clear();
+    desc->connectState_ = AudioStandard::ConnectState::CONNECTED;
+    deviceChangeAction.type = AudioStandard::DeviceChangeType::DISCONNECT;
+    desc->deviceType_ = AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP;
+    desc->deviceCategory_ = AudioStandard::DeviceCategory::BT_CAR;
+    deviceChangeAction.deviceDescriptors.push_back(desc);
+    g_deviceChangeCb->OnDeviceChange(deviceChangeAction);
 }
 
 /* Fuzzer entry point */
