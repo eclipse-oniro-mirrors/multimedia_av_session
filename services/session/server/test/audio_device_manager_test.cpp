@@ -105,7 +105,7 @@ static HWTEST(AudioDeviceManagerTest, UnRegisterAudioDeviceChangeCallback001, Te
     AudioDeviceManager::GetInstance().audioDeviceChangeCallback_
         = std::make_shared<DeviceChangeCallback>();
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
+    int32_t ret = AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 
