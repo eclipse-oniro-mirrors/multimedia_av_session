@@ -148,9 +148,6 @@ AVSessionControllerImpl::AVSessionControllerImpl(std::shared_ptr<AVSessionContro
 AVSessionControllerImpl::~AVSessionControllerImpl()
 {
     SLOGI("destroy");
-    if (controller_ != nullptr) {
-        controller_->Destroy();
-    }
 }
 
 string AVSessionControllerImpl::GetSessionId()
