@@ -12,18 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #include "audio_device_manager.h"
 #include "avsession_log.h"
 #include "migrate_avsession_constant.h"
-
+ 
 namespace OHOS::AVSession {
 AudioDeviceManager &AudioDeviceManager::GetInstance()
 {
     static AudioDeviceManager instance;
     return instance;
 }
-
+ 
 bool AudioDeviceManager::GetSessionInfoSyncState()
 {
     return AUDIO_OUTPUT_SOURCE == outputDevice_;
@@ -97,15 +97,15 @@ void AudioDeviceManager::RegisterAudioDeviceChangeCallback()
         AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG, audioDeviceChangeCallback_);
 }
  
-void AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
+int32_t AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
 {
     SLOGI("enter UnRegisterAudioDeviceChangeCallback");
     AudioStandard::AudioSystemManager *audioSystemManager = AudioStandard::AudioSystemManager::GetInstance();
     if (audioSystemManager == nullptr) {
         SLOGE("audioSystemManager is null");
-        return;
+        return AVSESSION_ERROR;
     }
-    audioSystemManager->UnsetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
+    return audioSystemManager->UnsetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
 }
 
 void AudioDeviceManager::SendRemoteAvSessionInfo(const std::string &deviceId)
@@ -171,7 +171,6 @@ void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
         AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(deviceId);
     }
 }
-
 void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeAction &deviceChangeAction)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descs = deviceChangeAction.deviceDescriptors;
