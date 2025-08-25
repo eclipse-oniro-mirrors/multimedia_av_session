@@ -723,7 +723,7 @@ array<CastDisplayInfo> AVSessionImpl::GetAllCastDisplaysSync()
     }
     return TaiheUtils::ToTaiheCastDisplayInfoArray(castDisplays);
 #else
-    return undefinedCastController;
+    return undefinedInfo;
 #endif
 }
 
