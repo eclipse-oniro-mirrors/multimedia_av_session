@@ -57,6 +57,36 @@ public:
 };
 
 /**
+* @tc.name: OnSessionCreate001
+* @tc.desc: test OnSessionCreate
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnSessionCreate001, TestSize.Level1)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    sessionListenerClient->OnSessionCreate(descriptor);
+}
+
+/**
+* @tc.name: OnSessionCreate002
+* @tc.desc: test OnSessionCreate
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnSessionCreate002, TestSize.Level1)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    sessionListenerClient->OnSessionCreate(descriptor);
+}
+
+/**
 * @tc.name: OnSessionRelease001
 * @tc.desc: test OnSessionRelease
 * @tc.type: FUNC
@@ -160,6 +190,54 @@ HWTEST_F(SessionListenerClientTest, OnDeviceAvailable001, TestSize.Level0)
 }
 
 /**
+* @tc.name: OnDeviceLogEvent001
+* @tc.desc: test OnDeviceLogEvent
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnDeviceLogEvent001, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    int32_t eventId = 1;
+    int64_t param = 2;
+    sessionListenerClient->OnDeviceLogEvent(eventId, param);
+}
+
+/**
+* @tc.name: OnDeviceLogEvent002
+* @tc.desc: test OnDeviceLogEvent
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnDeviceLogEvent002, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    int32_t eventId = 1;
+    int64_t param = 2;
+    sessionListenerClient->OnDeviceLogEvent(eventId, param);
+}
+
+/**
+* @tc.name: OnDeviceLogEvent003
+* @tc.desc: test OnDeviceLogEvent
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnDeviceLogEvent003, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    int32_t eventId = 0;
+    int64_t param = 2;
+    sessionListenerClient->OnDeviceLogEvent(eventId, param);
+}
+
+/**
 * @tc.name: OnDeviceAvailable002
 * @tc.desc: test OnDeviceAvailable
 * @tc.type: FUNC
@@ -210,9 +288,9 @@ HWTEST_F(SessionListenerClientTest, OnDeviceOffline002, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(SessionListenerClientTest, OnRemoteDistributedSessionChange001, TestSize.Level0)
+HWTEST_F(SessionListenerClientTest, OnRemoteDistributedSessionChange001, TestSize.Level1)
 {
-    std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
     EXPECT_NE(sessionListenerClient, nullptr);
     std::vector<sptr<IRemoteObject>> sessionControllers;
@@ -226,6 +304,21 @@ HWTEST_F(SessionListenerClientTest, OnRemoteDistributedSessionChange001, TestSiz
 * @tc.require:
 */
 HWTEST_F(SessionListenerClientTest, OnDeviceStateChange001, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    DeviceState deviceState;
+    sessionListenerClient->OnDeviceStateChange(deviceState);
+}
+
+/**
+* @tc.name: OnDeviceStateChange002
+* @tc.desc: test OnDeviceStateChange
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnDeviceStateChange002, TestSize.Level1)
 {
     std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
     std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);

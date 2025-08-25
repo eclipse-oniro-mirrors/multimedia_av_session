@@ -16,6 +16,7 @@
 #ifndef OHOS_AVSESSION_SERVER_H
 #define OHOS_AVSESSION_SERVER_H
 
+#include <atomic>
 #include <map>
 #include <mutex>
 
@@ -88,6 +89,7 @@ public:
     void DoPostTasksClear();
     bool MigratePostTask(const AppExecFwk::EventHandler::Callback &callback, const std::string &name,
         int64_t delayTime = 0);
+    void RefreshDeviceId(std::string deviceId);
 
     static cJSON* ConvertAudioDeviceDescriptorToJson(const AudioDeviceDescriptorWithSptr& device);
     static cJSON* ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptors& devices);
@@ -143,6 +145,7 @@ private:
     void ProcFromNext(const std::string &deviceId, const std::string &data);
 
     void RegisterAudioCallbackAndTrigger();
+    void TriggerAudioCallback();
     void UnregisterAudioCallback();
     
     std::function<void(int32_t)> GetVolumeKeyEventCallbackFunc();
@@ -182,7 +185,7 @@ private:
     std::recursive_mutex cacheJsonLock_;
 
     std::string GenerateClearAVSessionMsg();
-    bool isListenerSet_ = false;
+    std::atomic<bool> isNeedByRemote = false;
 };
 
 class AVControllerObserver : public AVControllerCallback {
@@ -206,6 +209,7 @@ public:
     void OnQueueItemsChange(const std::vector<AVQueueItem> &items) override {}
     void OnQueueTitleChange(const std::string &title) override {}
     void OnExtrasChange(const AAFwk::WantParams &extras) override {}
+    void OnCustomData(const AAFwk::WantParams& data) override {}
 
 private:
     std::weak_ptr<MigrateAVSessionServer> migrateServer_;

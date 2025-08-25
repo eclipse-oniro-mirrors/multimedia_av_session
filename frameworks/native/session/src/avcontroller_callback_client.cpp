@@ -157,6 +157,17 @@ ErrCode AVControllerCallbackClient::OnExtrasChange(const AAFwk::WantParams& extr
     return AVSESSION_SUCCESS;
 }
 
+ErrCode AVControllerCallbackClient::OnCustomData(const AAFwk::WantParams& data)
+{
+    CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, data]() { callback->OnCustomData(data); }, EVENT_NAME),
+        "AVControllerCallbackClient handler postTask failed");
+    return AVSESSION_SUCCESS;
+}
+
 ErrCode AVControllerCallbackClient::AddListenerForPlaybackState(
     const std::function<void(const AVPlaybackState&)>& listener)
 {

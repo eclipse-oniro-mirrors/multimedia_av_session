@@ -50,6 +50,8 @@ public:
     ErrCode onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
         int64_t pos, int32_t& result) override;
 
+    ErrCode OnCustomData(const AAFwk::WantParams& extras) override;
+
     void AddListenerForCastPlaybackState(const std::function<void(const AVPlaybackState&)>& listener);
 
 private:

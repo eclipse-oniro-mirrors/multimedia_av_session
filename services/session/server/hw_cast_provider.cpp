@@ -192,7 +192,7 @@ void HwCastProvider::StopCastSession(int castId)
     castFlag_[castId] = false;
 }
 
-bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
+bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t spid)
 {
     SLOGI("AddCastDevice with config castSession and corresonding castId is %{public}d", castId);
     std::lock_guard lockGuard(mutexLock_);
@@ -208,7 +208,7 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo)
         return false;
     }
 
-    return hwCastProviderSession->AddDevice(deviceInfo.deviceId_);
+    return hwCastProviderSession->AddDevice(deviceInfo.deviceId_, spid);
 }
 
 bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay)
@@ -336,6 +336,22 @@ bool HwCastProvider::GetRemoteNetWorkId(int32_t castId, std::string deviceId, st
     return hwCastProviderSession->GetRemoteNetWorkId(deviceId, networkId);
 }
 
+bool HwCastProvider::GetRemoteDrmCapabilities(int32_t castId, std::string deviceId,
+    std::vector<std::string> &drmCapabilities)
+{
+    SLOGI("enter GetRemoteDrmCapabilities");
+    if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
+        SLOGE("GetRemoteDrmCapabilities failed for the castSession corresponding to castId is not exit");
+        return false;
+    }
+    auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
+    if (hwCastProviderSession == nullptr) {
+        SLOGE("GetRemoteDrmCapabilities failed for the hwCastProviderSession is nullptr");
+        return false;
+    }
+    return hwCastProviderSession->GetRemoteDrmCapabilities(deviceId, drmCapabilities);
+}
+
 int64_t HwCastProvider::GetMirrorCastHandle()
 {
     return mirrorCastHandle;
@@ -386,6 +402,28 @@ bool HwCastProvider::UnRegisterCastSessionStateListener(int castId,
     return hwCastProviderSession->UnRegisterCastSessionStateListener(listener);
 }
 
+std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
+{
+    std::vector<uint32_t> ret;
+
+    cJSON* array = cJSON_Parse(str.c_str());
+    if (array == nullptr) {
+        return ret;
+    }
+    if (cJSON_IsInvalid(array) || !cJSON_IsArray(array)) {
+        SLOGE("pullClients is invalid");
+        cJSON_Delete(array);
+        return ret;
+    }
+    cJSON* item;
+    cJSON_ArrayForEach(item, array) {
+        CHECK_AND_CONTINUE(item != nullptr && !cJSON_IsInvalid(item) &&
+            cJSON_IsNumber(item));
+        ret.push_back(static_cast<uint32_t>(item->valueint));
+    }
+    cJSON_Delete(array);
+    return ret;
+}
 
 void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceList)
 {
@@ -411,6 +449,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
         deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
         deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
+        SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
+        deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {

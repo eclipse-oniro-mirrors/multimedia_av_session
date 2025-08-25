@@ -85,7 +85,7 @@
 #define CHECK_AND_RETURN_RET(cond, ret)                \
     do {                                               \
         if (!(cond)) {                                 \
-            SLOGE("%{public}s, check failed! ret = %{public}s", #cond, #ret); \
+            SLOGE("%{public}s,checkFail!ret:%{public}s", #cond, #ret); \
             return ret;                                \
         }                                              \
     } while (0)
@@ -93,7 +93,7 @@
 #define CHECK_AND_RETURN(cond)                         \
     do {                                               \
         if (!(cond)) {                                 \
-            SLOGE("%{public}s, check failed!", #cond); \
+            SLOGE("%{public}s,checkFail", #cond); \
             return;                                    \
         }                                              \
     } while (0)
@@ -101,14 +101,14 @@
 #define CHECK_AND_BREAK(cond)                          \
     do {                                               \
         if (!(cond)) {                                 \
-            SLOGE("%{public}s, check failed!", #cond); \
+            SLOGE("%{public}s,checkFail", #cond); \
             break;                                     \
         }                                              \
     } while (0)
 
 #define CHECK_AND_CONTINUE(cond)                       \
         if (!(cond)) {                                 \
-            SLOGE("%{public}s, check failed!", #cond); \
+            SLOGE("%{public}s,checkFail", #cond); \
             continue;                                  \
         }
 #endif // OHOS_AVSESSION_LOG_H

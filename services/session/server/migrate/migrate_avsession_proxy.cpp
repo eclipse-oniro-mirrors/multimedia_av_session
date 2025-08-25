@@ -29,7 +29,8 @@ namespace OHOS::AVSession {
 
 MigrateAVSessionProxy::MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode, std::string deviceId)
 {
-    SLOGI("migrateproxy construct with mode:%{public}d|localDevId:%{public}s.", mode,
+    std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
+    SLOGI("migrateproxy construct with mode:%{public}d,localDevId:%{public}s.", mode,
         SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     mMode_ = mode;
     servicePtr_ = ptr;
@@ -38,7 +39,10 @@ MigrateAVSessionProxy::MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode
 
 MigrateAVSessionProxy::~MigrateAVSessionProxy()
 {
-    SLOGI("MigrateAVSessionProxy destruct with disconnect process");
+    if (checkConnectWorker_.joinable()) {
+        checkConnectWorker_.join();
+    }
+    SLOGI("MigrateAVSessionProxy destruct with disconnect process.");
     OnDisconnectServer(deviceId_);
 }
 
@@ -46,7 +50,10 @@ void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
 {
     SLOGI("MigrateAVSessionProxy OnConnectServer:%{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
-    deviceId_ = deviceId;
+    {
+        std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
+        deviceId_ = deviceId;
+    }
     SendSpecialKeepAliveData();
     PrepareSessionFromRemote();
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnConnectServer find service ptr null!");
@@ -58,13 +65,23 @@ void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
 
 void MigrateAVSessionProxy::OnDisconnectServer(const std::string &deviceId)
 {
-    SLOGI("MigrateAVSessionProxy OnDisconnectServer:%{public}s.",
-        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
-    if (deviceId != deviceId_) {
-        SLOGE("proxy onDisconnect but not:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
-        return;
+    {
+        std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
+        SLOGI("MigrateAVSessionProxy OnDisconnectServer:%{public}s.",
+            SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+        if (deviceId != deviceId_) {
+            SLOGE("proxy onDisconnect but not:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+            return;
+        }
+        deviceId_ = "";
     }
-    deviceId_ = "";
+    {
+        std::lock_guard<std::mutex> lock(keepAliveMtx_);
+        keepAliveCv_.notify_all();
+    }
+    if (keepAliveWorker_.joinable()) {
+        keepAliveWorker_.join();
+    }
     std::vector<sptr<IRemoteObject>> sessionControllers;
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnDisconnectServer find service ptr null!");
     servicePtr_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
@@ -220,18 +237,18 @@ void MigrateAVSessionProxy::ReleaseSessionFromRemote()
     ReleaseControllerOfRemoteSession();
     CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ReleaseSessionFromRemote with remoteSession null");
     remoteSession_->RegisterAVSessionCallback(nullptr);
-    remoteSession_->Destroy();
+    remoteSession_->DestroyTask();
     remoteSession_ = nullptr;
-    SLOGI("ReleaseSessionFromRemote done");
+    SLOGI("ReleaseSessionFromRemote done.");
 }
 
 void MigrateAVSessionProxy::ReleaseControllerOfRemoteSession()
 {
     CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "ReleaseControllerOfRemoteSession with preSetController null");
     preSetController_->RegisterMigrateAVSessionProxyCallback(nullptr);
-    preSetController_->Destroy();
+    preSetController_->DestroyWithoutReply();
     preSetController_ = nullptr;
-    SLOGI("ReleaseControllerOfRemoteSession done");
+    SLOGI("ReleaseControllerOfRemoteSession done.");
 }
 
 const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::MigrateAVSessionProxyControllerCallback()
@@ -279,14 +296,14 @@ void MigrateAVSessionProxy::SetVolume(const AAFwk::WantParams& extras)
     AAFwk::IInteger* ao = AAFwk::IInteger::Query(volume);
     CHECK_AND_RETURN_LOG(ao != nullptr, "extras have no value");
 
-    volumeNum_ = OHOS::AAFwk::Integer::Unbox(ao);
+    volumeNum_.store(OHOS::AAFwk::Integer::Unbox(ao));
     cJSON* value = SoftbusSessionUtils::GetNewCJSONObject();
     if (value == nullptr) {
         SLOGE("get json value fail");
         return;
     }
-    if (!SoftbusSessionUtils::AddIntToJson(value, AUDIO_VOLUME, volumeNum_)) {
-        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail", AUDIO_VOLUME, volumeNum_);
+    if (!SoftbusSessionUtils::AddIntToJson(value, AUDIO_VOLUME, volumeNum_.load())) {
+        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail", AUDIO_VOLUME, volumeNum_.load());
         cJSON_Delete(value);
         return;
     }
@@ -312,7 +329,7 @@ void MigrateAVSessionProxy::SelectOutputDevice(const AAFwk::WantParams& extras)
 void MigrateAVSessionProxy::GetVolume(AAFwk::WantParams& extras)
 {
     SLOGI("proxy send in GetVolume case");
-    extras.SetParam(AUDIO_GET_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
+    extras.SetParam(AUDIO_GET_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_.load()));
 }
 
 void MigrateAVSessionProxy::GetAvailableDevices(AAFwk::WantParams& extras)
@@ -422,23 +439,23 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     } else {
         remoteSession_->Activate();
     }
-    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s.",
+    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s done.",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
-    AVPlaybackState playbackState;
-    if (bundleNameBef != elementName_.GetBundleName() &&
-        AVSESSION_SUCCESS == remoteSession_->GetAVPlaybackState(playbackState)) {
+    if (bundleNameBef != elementName_.GetBundleName()) {
+        AVPlaybackState playbackState;
         playbackState.SetState(0);
         playbackState.SetFavorite(false);
         remoteSession_->SetAVPlaybackState(playbackState);
     }
-    AVMetaData metaData;
-    if (bundleNameBef != elementName_.GetBundleName() && AVSESSION_SUCCESS == remoteSession_->GetAVMetaData(metaData)) {
-        metaData.SetAssetId(metaData.GetAssetId().empty() ? DEFAULT_STRING : metaData.GetAssetId());
+    if (bundleNameBef != elementName_.GetBundleName()) {
+        AVMetaData metaData;
+        metaData.SetAssetId(DEFAULT_STRING);
         metaData.SetWriter(bundleName);
         metaData.SetTitle("");
         metaData.SetArtist("");
+        metaData.SetPreviousAssetId("");
         remoteSession_->SetAVMetaData(metaData);
     }
     SendMediaControlNeedStateMsg();
@@ -555,10 +572,10 @@ void MigrateAVSessionProxy::ProcessVolumeControlCommand(cJSON* jsonValue)
         return;
     }
 
-    volumeNum_ = SoftbusSessionUtils::GetIntFromJson(jsonValue, AUDIO_VOLUME);
+    volumeNum_.store(SoftbusSessionUtils::GetIntFromJson(jsonValue, AUDIO_VOLUME));
 
     AAFwk::WantParams args;
-    args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
+    args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_.load()));
     CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "preSetController_ is nullptr");
     preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_VOLUME, args);
 }
@@ -719,9 +736,9 @@ void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::stri
     cJSON_Delete(controlMsg);
 }
 
-void MigrateAVSessionProxy::SendMediaControlNeedStateMsg()
+void MigrateAVSessionProxy::SendMediaControlNeedStateMsg(bool isMock)
 {
-    SLOGI("SendMediaControlNeedStateMsg with state:%{public}d", isNeedByMediaControl_);
+    SLOGI("SendMediaControlNeedStateMsg with state:%{public}d|mock:%{public}d", isNeedByMediaControl.load(), isMock);
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_MEDIA_CONTROL_NEED_STATE});
 
     cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
@@ -729,8 +746,8 @@ void MigrateAVSessionProxy::SendMediaControlNeedStateMsg()
         SLOGE("get controlMsg fail");
         return;
     }
-    if (!SoftbusSessionUtils::AddBoolToJson(controlMsg, NEED_STATE, isNeedByMediaControl_)) {
-        SLOGE("AddBoolToJson with key:%{public}s|value:%{public}d fail", NEED_STATE, isNeedByMediaControl_);
+    if (!SoftbusSessionUtils::AddBoolToJson(controlMsg, NEED_STATE, isMock ? true : isNeedByMediaControl.load())) {
+        SLOGE("AddBoolToJson with key:%{public}s|value:%{public}d fail", NEED_STATE, isNeedByMediaControl.load());
         cJSON_Delete(controlMsg);
         return;
     }
@@ -742,24 +759,48 @@ void MigrateAVSessionProxy::SendMediaControlNeedStateMsg()
 
 void MigrateAVSessionProxy::SendSpecialKeepAliveData()
 {
-    std::thread([this]() {
-        while (!this->deviceId_.empty()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME_FOR_NEXT));
-            if (!isNeedByMediaControl_) {
-                SLOGI("no byte send for client not need");
-                continue;
-            }
-            if (this->deviceId_.empty()) {
-                SLOGE("SendSpecialKeepAliveData without deviceId, return");
-                return;
-            }
-            SLOGI("SendSpecialKeepAliveData for deviceId:%{public}s",
+    checkConnectWorker_ = std::thread([this]() {
+        SendMediaControlNeedStateMsg(true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_CONNECT_TIME_FOR_NEXT));
+        SendMediaControlNeedStateMsg();
+        if (volumeNum_.load() == DEFAULT_FAKE_VOLUME) {
+            SLOGE("no bytes recv aft connect, disconnect process");
+            OnDisconnectServer(deviceId_);
+        } else {
+            SLOGI("volume recv aft connect:%{public}d", volumeNum_.load());
+        }
+    });
+    keepAliveWorker_ = std::thread([this]() {
+        bool isDeviceIdEmpty = false;
+        {
+            std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
+            isDeviceIdEmpty = this->deviceId_.empty();
+        }
+        while (!isDeviceIdEmpty) {
+            SLOGI("SendSpecialKeepAliveData for deviceId:%{public}s.",
                 SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
             std::string data = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_HEARTBEAT});
             SendByteForNext(deviceId_, data);
+
+            std::unique_lock<std::mutex> lock(keepAliveMtx_);
+            {
+                std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
+                isDeviceIdEmpty = this->deviceId_.empty();
+                CHECK_AND_RETURN_LOG(!isDeviceIdEmpty, "SendSpecialKeepAliveData quit for deviceId empty");
+            }
+            if (!isNeedByMediaControl.load()) {
+                SLOGI("silent bytes waiting.");
+                keepAliveCv_.wait_for(lock, std::chrono::milliseconds(SILENT_HEART_BEAT_TIME_FOR_NEXT));
+            } else {
+                keepAliveCv_.wait_for(lock, std::chrono::milliseconds(HEART_BEAT_TIME_FOR_NEXT));
+            }
+            {
+                std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
+                isDeviceIdEmpty = this->deviceId_.empty();
+            }
         }
-        SLOGI("SendSpecialKeepAliveData exit");
-    }).detach();
+        SLOGI("SendSpecialKeepAliveData exit.");
+    });
 }
 
 void MigrateAVSessionProxy::NotifyMediaControlNeedStateChange(AAFwk::WantParams& extras)
@@ -770,7 +811,7 @@ void MigrateAVSessionProxy::NotifyMediaControlNeedStateChange(AAFwk::WantParams&
     CHECK_AND_RETURN_LOG(boolValue != nullptr, "extras have no NeedState after query");
     bool isNeed = OHOS::AAFwk::Boolean::Unbox(boolValue);
     SLOGI("refresh NeedState:%{public}d", isNeed);
-    isNeedByMediaControl_ = isNeed;
+    isNeedByMediaControl.store(isNeed);
     SendMediaControlNeedStateMsg();
 }
 

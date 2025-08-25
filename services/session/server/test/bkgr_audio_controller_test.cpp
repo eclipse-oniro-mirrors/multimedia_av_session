@@ -306,7 +306,7 @@ static HWTEST(BkGrAudioControllerTest, OnSessionCreate002, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, OnRemoteDistributedSessionChange001, TestSize.Level0)
+static HWTEST(BkGrAudioControllerTest, OnRemoteDistributedSessionChange001, TestSize.Level1)
 {
     SLOGI("OnRemoteDistributedSessionChange001 begin!");
     DeviceLogEventCode eventCode = DeviceLogEventCode::DEVICE_LOG_FULL;
@@ -335,7 +335,7 @@ static HWTEST(BkGrAudioControllerTest, OnRemoteDistributedSessionChange001, Test
 * @tc.type: FUNC
 * @tc.require: #I62OZV
 */
-static HWTEST(BkGrAudioControllerTest, IsBackgroundMode002, TestSize.Level0)
+static HWTEST(BkGrAudioControllerTest, IsBackgroundMode002, TestSize.Level1)
 {
     SLOGI("IsBackgroundMode002 begin!");
     int32_t creatorUid = 1;

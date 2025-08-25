@@ -203,6 +203,10 @@ HWTEST_F(AVSessionUsersManagerTest, UpdateSessionForCurrentUser001, TestSize.Lev
     EXPECT_EQ(res, 0);
     res = manager.UpdateSessionForCurrentUser(pid, oldAbility, newAbility, item);
     EXPECT_EQ(res, 0);
+
+    sptr<AVSessionItem> result;
+    result = manager.GetContainerFromAll().GetSession(pid, newAbility);
+    EXPECT_NE(result, nullptr);
 }
 } //AVSession
 } //OHOS

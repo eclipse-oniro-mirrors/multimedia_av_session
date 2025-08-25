@@ -803,6 +803,11 @@ public:
     {
         return 0;
     };
+
+    int SendData(const OHOS::CastEngine::DataType dataType, const std::string &dataStr) override
+    {
+        return 0;
+    }
 };
 
 /**
@@ -1070,9 +1075,9 @@ static HWTEST(HwCastTest, HwCastProviderStartCastSession001, TestSize.Level0)
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
     EXPECT_EQ(hwCastProvider != nullptr, true);
     // Init may fail with -1, StartCastSession may fail with -1003
-    int32_t retForInit = hwCastProvider->Init();
+    hwCastProvider->Init();
     int32_t retForStart = hwCastProvider->StartCastSession(false);
-    SLOGI("HwCastProviderStartCastSession001 end with ret %{public}d | %{public}d", retForInit, retForStart);
+    SLOGI("HwCastProviderStartCastSession001 end with ret %{public}d", retForStart);
 }
 
 /**
@@ -1105,8 +1110,9 @@ static HWTEST(HwCastTest, HwCastProviderAddCastDevice001, TestSize.Level0)
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
     int castId = 0;
+    uint32_t spid = 33;
     DeviceInfo deviceInfo;
-    EXPECT_EQ(hwCastProvider->AddCastDevice(castId, deviceInfo), false);
+    EXPECT_EQ(hwCastProvider->AddCastDevice(castId, deviceInfo, spid), false);
     SLOGI("HwCastProviderAddCastDevice001 end!");
 }
 
@@ -1229,6 +1235,46 @@ static HWTEST(HwCastTest, HwCastProviderOnDeviceFound001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HwCastProviderOnDeviceFound002
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastProviderOnDeviceFound002, TestSize.Level0)
+{
+    SLOGI("HwCastProviderOnDeviceFound002 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+    std::vector<OHOS::CastEngine::CastRemoteDevice> devices;
+    OHOS::CastEngine::CastRemoteDevice dev;
+    dev.streamCapability = "[33,34]";
+    devices.push_back(dev);
+    hwCastProvider->OnDeviceFound(devices);
+    SLOGI("HwCastProviderOnDeviceFound002 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderOnDeviceFound003
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastProviderOnDeviceFound003, TestSize.Level0)
+{
+    SLOGI("HwCastProviderOnDeviceFound003 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+    std::vector<OHOS::CastEngine::CastRemoteDevice> devices;
+    OHOS::CastEngine::CastRemoteDevice dev;
+    dev.streamCapability = "33";
+    devices.push_back(dev);
+    hwCastProvider->OnDeviceFound(devices);
+    SLOGI("HwCastProviderOnDeviceFound003 end!");
+}
+
+/**
  * @tc.name: HwCastProviderOnSessionCreated001
  * @tc.desc:
  * @tc.type: FUNC
@@ -1322,7 +1368,8 @@ static HWTEST(HwCastTest, HwCastProviderSessionAddDevice001, TestSize.Level0)
     EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
     std::string deviceId = "deviceId";
-    EXPECT_EQ(provideSession->AddDevice(deviceId), false);
+    uint32_t spid = 33;
+    EXPECT_EQ(provideSession->AddDevice(deviceId, spid), false);
     SLOGI("HwCastProviderSessionAddDevice001 end!");
 }
 

@@ -63,7 +63,6 @@
           "openssl"
         ],
         "third_party": [
-          "openssl"
         ]
       },
       "build": {

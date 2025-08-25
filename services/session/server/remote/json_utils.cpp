@@ -281,8 +281,7 @@ int32_t JsonUtils::SetSessionCompatibility(cJSON* jsonObj, const AVSessionBasicI
     cJSON* compatibilityItem = cJSON_GetObjectItem(jsonObj, "compatibility");
     if (compatibilityItem == nullptr || cJSON_IsInvalid(compatibilityItem) || cJSON_IsNull(compatibilityItem)) {
         compatibilityItem = cJSON_CreateObject();
-        CHECK_AND_RETURN_RET_LOG(cJSON_AddItemToObject(jsonObj, "compatibility", compatibilityItem),
-            AVSESSION_ERROR, "fail create compatibilityItem");
+        cJSON_AddItemToObject(jsonObj, "compatibility", compatibilityItem);
     }
     cJSON_AddStringToObject(compatibilityItem, "networkId", basicInfo.networkId_.c_str());
     cJSON_AddStringToObject(compatibilityItem, "vendorId", basicInfo.vendorId_.c_str());
@@ -499,27 +498,28 @@ int32_t JsonUtils::GetSessionBasicInfo(const std::string& sessionInfo, AVSession
     CHECK_AND_RETURN_RET_LOG(sessionInfoItem != nullptr, AVSESSION_ERROR, "sessionInfoItem is null");
     if (cJSON_IsInvalid(sessionInfoItem) || cJSON_IsNull(sessionInfoItem)) {
         SLOGE("get sessionInfoItem invalid");
-        cJSON_free(sessionInfoItem);
+        cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
     if (!cJSON_HasObjectItem(sessionInfoItem, "compatibility") || !cJSON_HasObjectItem(sessionInfoItem, "data")) {
         SLOGE("The key of jsonObj is invalid");
-        cJSON_free(sessionInfoItem);
+        cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
     cJSON* compatibilityItem = cJSON_GetObjectItem(sessionInfoItem, "compatibility");
     if (GetSessionCompatibility(compatibilityItem, basicInfo) != AVSESSION_SUCCESS) {
         SLOGE("GetSessionCompatibility fail");
-        cJSON_free(sessionInfoItem);
+        cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
 
     cJSON* dataItem = cJSON_GetObjectItem(sessionInfoItem, "data");
     if (GetSessionData(dataItem, basicInfo) != AVSESSION_SUCCESS) {
         SLOGE("GetSessionData fail");
-        cJSON_free(sessionInfoItem);
+        cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
+    cJSON_Delete(sessionInfoItem);
     return AVSESSION_SUCCESS;
 }
 
@@ -644,25 +644,23 @@ int32_t JsonUtils::GetSessionDescriptors(const std::string& sessionInfo, std::ve
     }
     if (!cJSON_HasObjectItem(sessionInfoItem, "data")) {
         SLOGE("json object data is null");
-        cJSON_free(sessionInfoItem);
+        cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
     cJSON* dataItem = cJSON_GetObjectItem(sessionInfoItem, "data");
-    CHECK_AND_RETURN_RET_LOG(dataItem != nullptr, AVSESSION_ERROR, "json dataItem is null");
-    if (cJSON_IsInvalid(dataItem)) {
-        SLOGE("get dataItem invalid");
+    if (dataItem == nullptr || cJSON_IsInvalid(dataItem)) {
+        SLOGE("get dataItem null or invalid");
         cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
     if (!cJSON_HasObjectItem(dataItem, "sessionDescriptors")) {
         SLOGE("json object sessionDescriptors is null");
-        cJSON_free(sessionInfoItem);
+        cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
     cJSON* descriptorsArray = cJSON_GetObjectItem(dataItem, "sessionDescriptors");
-    CHECK_AND_RETURN_RET_LOG(descriptorsArray != nullptr, AVSESSION_ERROR, "json descriptorsArray is null");
-    if (cJSON_IsInvalid(descriptorsArray) || !cJSON_IsArray(descriptorsArray)) {
-        SLOGE("get descriptorsArray invalid");
+    if (descriptorsArray == nullptr || cJSON_IsInvalid(descriptorsArray) || !cJSON_IsArray(descriptorsArray)) {
+        SLOGE("get descriptorsArray null or invalid");
         cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
@@ -735,25 +733,23 @@ int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessio
     }
     if (!cJSON_HasObjectItem(sessionInfoItem, "data")) {
         SLOGE("json object data is null");
-        cJSON_free(sessionInfoItem);
+        cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
     cJSON* dataItem = cJSON_GetObjectItem(sessionInfoItem, "data");
-    CHECK_AND_RETURN_RET_LOG(dataItem != nullptr, AVSESSION_ERROR, "json dataItem is null");
-    if (cJSON_IsInvalid(dataItem)) {
-        SLOGE("get dataItem invalid");
+    if (dataItem == nullptr || cJSON_IsInvalid(dataItem)) {
+        SLOGE("get dataItem null or invalid");
         cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
     if (!cJSON_HasObjectItem(dataItem, "sessionDescriptor")) {
         SLOGE("json object sessionDescriptor is null");
-        cJSON_free(sessionInfoItem);
+        cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }
     cJSON* descriptorItem = cJSON_GetObjectItem(dataItem, "sessionDescriptor");
-    CHECK_AND_RETURN_RET_LOG(descriptorItem != nullptr, AVSESSION_ERROR, "json descriptorItem is null");
-    if (cJSON_IsInvalid(descriptorItem)) {
-        SLOGE("get descriptorItem invalid");
+    if (descriptorItem == nullptr || cJSON_IsInvalid(descriptorItem)) {
+        SLOGE("get descriptorItem null or invalid");
         cJSON_Delete(sessionInfoItem);
         return AVSESSION_ERROR;
     }

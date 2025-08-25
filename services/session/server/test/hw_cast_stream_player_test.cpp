@@ -92,6 +92,8 @@ public:
 
     int SetSurface(const std::string &surfaceInfo) override { return 0; }
 
+    int SendData(const OHOS::CastEngine::DataType dataType, const std::string &dataStr) override { return 0; }
+
     int Load(const OHOS::CastEngine::MediaInfo &media) override
     {
         if (state_ == 0) {
@@ -355,6 +357,55 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SendCustomData001
+ * @tc.desc: test send data for SendCustomData
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_P(HwCastStreamPlayerTest, SendCustomData001, TestSize.Level0)
+{
+    SLOGI("SendCustomData001 begin!");
+
+    hwCastStreamPlayer->streamPlayer_ = nullptr;
+    std::string data = "test";
+    hwCastStreamPlayer->SendCustomData(data);
+
+    SLOGI("SendCustomData001 end!");
+}
+
+/**
+ * @tc.name: SendCustomData002
+ * @tc.desc: test send data for SendCustomData
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_P(HwCastStreamPlayerTest, SendCustomData002, TestSize.Level0)
+{
+    SLOGI("SendCustomData002 begin!");
+    hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>();
+    ASSERT_TRUE(hwCastStreamPlayer->streamPlayer_ != nullptr);
+    std::string data = "test";
+    hwCastStreamPlayer->SendCustomData(data);
+    SLOGI("SendCustomData002 end!");
+}
+
+/**
+ * @tc.name: SetSpid001
+ * @tc.desc: test SetSpid
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_P(HwCastStreamPlayerTest, SetSpid001, TestSize.Level0)
+{
+    SLOGI("SetSpid001 begin!");
+    hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>();
+    ASSERT_TRUE(hwCastStreamPlayer->streamPlayer_ != nullptr);
+    uint32_t spid = 33;
+    hwCastStreamPlayer->SetSpid(spid);
+    SLOGI("SetSpid001 end!");
+}
+
+/**
  * @tc.name: Start001
  * @tc.desc: start no media id and fd src
  * @tc.type: FUNC
@@ -452,10 +503,37 @@ HWTEST_F(HwCastStreamPlayerTest, Start005, TestSize.Level0)
 
     AVQueueItem avQueueItem;
     avQueueItem.SetDescription(description);
+    uint32_t spid = 33;
+    hwCastStreamPlayer->SetSpid(spid);
     auto ret = hwCastStreamPlayer->Start(avQueueItem);
     ASSERT_EQ(ret, AVSESSION_SUCCESS);
     hwCastStreamPlayer->Start(avQueueItem);
     SLOGI("Start005 end!");
+}
+
+/**
+ * @tc.name: Start006
+ * @tc.desc: start and setspid
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, Start006, TestSize.Level0)
+{
+    SLOGI("Start006 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetMediaUri("Media url");
+    AVDataSrcDescriptor dataSrcDescriptor;
+    dataSrcDescriptor.hasCallback = true;
+    dataSrcDescriptor.callback_ = [](void*, uint32_t, int64_t) -> int32_t { return 0; };
+    description->SetDataSrc(dataSrcDescriptor);
+    uint32_t spid = 33;
+    hwCastStreamPlayer->SetSpid(spid);
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->Start(avQueueItem);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    hwCastStreamPlayer->Start(avQueueItem);
+    SLOGI("Start006 end!");
 }
 
 /**
@@ -1256,6 +1334,25 @@ HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest002, TestSize.Level0)
     hwCastStreamPlayer->OnKeyRequest(assetId, keyRequestData);
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
     SLOGI("OnKeyRequest002 end!");
+}
+
+/**
+ * @tc.name: OnData001
+ * @tc.desc: test OnData
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_P(HwCastStreamPlayerTest, OnData001, TestSize.Level0)
+{
+    SLOGI("OnData001 begin!");
+
+    std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
+    ASSERT_EQ(hwCastStreamPlayer->RegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    std::string str = "test";
+    hwCastStreamPlayer->OnData(DataType::CUSTOM_DATA, str);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+
+    SLOGI("OnData001 end!");
 }
 
 /**

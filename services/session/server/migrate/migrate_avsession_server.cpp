@@ -115,6 +115,16 @@ void MigrateAVSessionServer::RegisterAudioCallbackAndTrigger()
     preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
 }
 
+void MigrateAVSessionServer::TriggerAudioCallback()
+{
+    CHECK_AND_RETURN_LOG(volumeKeyEventCallbackFunc_ != nullptr, "VolumeKeyEventCallback nullptr");
+    CHECK_AND_RETURN_LOG(availableDeviceChangeCallbackFunc_ != nullptr, "AvailableDeviceChangeCallback nullptr");
+    CHECK_AND_RETURN_LOG(preferredDeviceChangeCallbackFunc_ != nullptr, "PreferredOutputDeviceChangeCallback nullptr");
+    volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
+    availableDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetAvailableDevices());
+    preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
+}
+
 void MigrateAVSessionServer::UnregisterAudioCallback()
 {
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
@@ -245,7 +255,7 @@ void MigrateAVSessionServer::StopObserveControllerChanged(const std::string &dev
 // LCOV_EXCL_START
 void MigrateAVSessionServer::OnBytesReceived(const std::string &deviceId, const std::string &data)
 {
-    SLOGD("OnBytesReceived: %{public}s", data.c_str());
+    SLOGD("OnBytesReceived:%{public}d", static_cast<int>(data.size()));
     if (data.length() < MSG_HEAD_LENGTH) {
         SLOGW("OnBytesReceived: invalid data");
         return;
@@ -334,7 +344,8 @@ void MigrateAVSessionServer::StartConfigHistorySession(const std::string &data)
     }
 
     int32_t ret = servicePtr_->StartAVPlayback(playerId, "");
-    SLOGI("StartConfigHistorySession StartAVPlayback %{public}s, ret=%{public}d", playerId.c_str(), ret);
+    SLOGI("StartConfigHistorySession StartAVPlayback %{public}s, ret=%{public}d",
+        SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str(), ret);
     cJSON_Delete(jsonData);
 }
 
@@ -401,6 +412,7 @@ void MigrateAVSessionServer::ResetSupportCrossMediaPlay(const std::string &extra
 
     SLOGI("SuperLauncher: isSupportSingleFrameMediaPlay=%{public}d", isSupportSingleFrameMediaPlay);
     supportCrossMediaPlay_ = isSupportSingleFrameMediaPlay;
+    cJSON_Delete(jsonData);
 }
 
 // LCOV_EXCL_START
@@ -436,7 +448,7 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
         SLOGW("no valid avsession");
         return;
     }
-    SLOGI("OnSessionRelease : %{public}s", sessionId.c_str());
+    SLOGI("OnSessionRelease : %{public}s", SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str());
     ClearCacheBySessionId(sessionId);
     releaseSessionId_ = sessionId;
     releaseSessionBundleName_ = descriptor.elementName_.GetBundleName();
@@ -810,7 +822,7 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
         }
         if (!SoftbusSessionUtils::AddStringToJson(jsonObject, PLAYER_ID, playerId)) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-                PLAYER_ID, playerId.c_str());
+                PLAYER_ID, SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
             cJSON_Delete(jsonObject);
             continue;
         }
@@ -1057,7 +1069,7 @@ std::string MigrateAVSessionServer::ConvertMetadataInfoToStr(
     }
     if (!SoftbusSessionUtils::AddStringToJson(metaDataJson, PLAYER_ID, playerId)) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-            PLAYER_ID, playerId.c_str());
+            PLAYER_ID, SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
         cJSON_Delete(metaDataJson);
         return "";
     }
@@ -1174,7 +1186,8 @@ void MigrateAVSessionServer::OnHistoricalRecordChange()
 
 void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, const AVMetaData &data)
 {
-    SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s", playerId.c_str());
+    SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s",
+        SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
         DelaySendMetaData();
         }, "DelaySendMetaData", DELAY_METADATA_TIME);
@@ -1192,7 +1205,7 @@ void MigrateAVSessionServer::OnPlaybackStateChanged(const std::string &playerId,
     }
     if (!SoftbusSessionUtils::AddStringToJson(value, PLAYER_ID, playerId)) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-            PLAYER_ID, playerId.c_str());
+            PLAYER_ID, SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
         cJSON_Delete(value);
         return;
     }

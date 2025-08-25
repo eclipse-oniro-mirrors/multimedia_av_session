@@ -29,6 +29,7 @@ public:
 
 private:
     int32_t HandleCreateSessionInner(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleCreateSessionInnerWithExtra(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
@@ -55,12 +56,17 @@ private:
     int32_t HandleClose(MessageParcel& data, MessageParcel& reply);
     static bool CheckInterfaceToken(MessageParcel& data);
     int32_t GetAVQueueInfosImgLength(std::vector<AVQueueInfo>& avQueueInfos);
+    void MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos);
+    void AVQueueInfoImgToBuffer(std::vector<AVQueueInfo>& avQueueInfos, unsigned char *buffer);
     int32_t HandleGetDistributedSessionControllersInner(MessageParcel& data, MessageParcel& reply);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
     std::map<uint32_t, HandlerFunc> handlers = {
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleCreateSessionInner(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION_WITH_EXTRA),
+            [this](MessageParcel& data, MessageParcel& reply)
+            {return HandleCreateSessionInnerWithExtra(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAllSessionDescriptors(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID),
@@ -119,6 +125,8 @@ private:
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION),
             "HandleCreateSessionInner"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION_WITH_EXTRA),
+            "HandleCreateSessionInnerWithExtra"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS),
             "HandleGetAllSessionDescriptors"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID),

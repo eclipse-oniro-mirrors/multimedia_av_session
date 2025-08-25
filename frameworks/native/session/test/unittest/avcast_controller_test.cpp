@@ -17,6 +17,7 @@
 
 #include "accesstoken_kit.h"
 #include "bool_wrapper.h"
+#include "string_wrapper.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "want_agent.h"
@@ -279,6 +280,7 @@ public:
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
+    void SetSpid(uint32_t spid) {}
 };
 
 /**
@@ -841,8 +843,8 @@ HWTEST_F(AVCastControllerTest, AddCastDevice001, TestSize.Level1)
     deviceInfo1.supportedDrmCapabilities_ = supportedDrmCapabilities;
     deviceInfo1.isLegacy_ = false;
     deviceInfo1.mediumTypes_ = 2;
-
-    EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1), false);
+    uint32_t spid = 0;
+    EXPECT_EQ(hwCastProvider.AddCastDevice(1, deviceInfo1, spid), false);
 }
 
 HWTEST_F(AVCastControllerTest, RemoveCastDevice001, TestSize.Level1)
@@ -1263,6 +1265,23 @@ HWTEST_F(AVCastControllerTest, OnCastPlaybackStateChange008, TestSize.Level1)
     castController_->OnCastPlaybackStateChange(state);
     AVPlaybackState stateOut;
     EXPECT_TRUE(state.CopyToByMask(castController_->castPlaybackMask_, stateOut));
+}
+
+/**
+* @tc.name: OnCustomData001
+* @tc.desc: OnCustomData, have reigstered callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, OnCustomData001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    castController_->callback_ = g_AVCastControllerCallbackProxy;
+    std::string dataStr = "test";
+    OHOS::AAFwk::WantParams data;
+    data.SetParam("customData", OHOS::AAFwk::String::Box(dataStr));
+    castController_->OnCustomData(data);
+    EXPECT_TRUE(castController_->callback_ != nullptr);
 }
 
 /**

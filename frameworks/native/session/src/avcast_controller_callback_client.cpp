@@ -162,7 +162,19 @@ ErrCode AVCastControllerCallbackClient::onDataSrcRead(const std::shared_ptr<AVSh
                                                       uint32_t length, int64_t pos, int32_t& result)
 {
     auto callback = callback_;
-    return callback->onDataSrcRead(mem, length, pos, result);
+    callback->onDataSrcRead(mem, length, pos, result);
+    return AVSESSION_SUCCESS;
+}
+
+ErrCode AVCastControllerCallbackClient::OnCustomData(const AAFwk::WantParams& data)
+{
+    CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, data]() { callback->OnCustomData(data); }, EVENT_NAME),
+        "AVCastControllerCallbackClient handler postTask failed");
+    return AVSESSION_SUCCESS;
 }
 
 void AVCastControllerCallbackClient::AddListenerForCastPlaybackState(

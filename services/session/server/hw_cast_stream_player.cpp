@@ -15,6 +15,7 @@
 
 #include "hw_cast_stream_player.h"
 #include "int_wrapper.h"
+#include "string_wrapper.h"
 #include "avsession_log.h"
 #include "avcast_player_state.h"
 #include "avqueue_item.h"
@@ -105,6 +106,22 @@ void HwCastStreamPlayer::SendControlCommand(const AVCastControlCommand castContr
             SendControlCommandWithParams(castControlCommand);
             break;
     }
+}
+
+void HwCastStreamPlayer::SendCustomData(const std::string& data)
+{
+    std::lock_guard lockGuard(streamPlayerLock_);
+    if (streamPlayer_ == nullptr) {
+        SLOGE("streamPlayer is nullptr");
+        return;
+    }
+    streamPlayer_->SendData(DataType::CUSTOM_DATA, data);
+}
+
+void HwCastStreamPlayer::SetSpid(uint32_t spid)
+{
+    SLOGI("SetSpid spid %{public}u", spid);
+    spid_ = spid;
 }
 
 void HwCastStreamPlayer::SendControlCommandWithParams(const AVCastControlCommand castControlCommand)
@@ -282,7 +299,10 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
     mediaInfo.appName = mediaDescription->GetAppName();
     mediaInfo.drmType = mediaDescription->GetDrmScheme();
-
+    if (spid_ > 0 && mediaDescription->GetLaunchClientData().length() > 0) {
+        mediaInfo.launchClientData = mediaDescription->GetLaunchClientData();
+        mediaInfo.spid = spid_;
+    }
     AVDataSrcDescriptor dataSrc = mediaDescription->GetDataSrc();
     SLOGI("has dataSrc hasCallback %{public}d", dataSrc.hasCallback);
     if (dataSrc.hasCallback) {
@@ -294,7 +314,6 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
         mediaInfo.mediaUrl = "/file";
         mediaInfo.dataSrc = castDataSrc_;
     }
-
     if (mediaDescription->GetPcmSrc() && mediaDescription->GetCastInfo() != nullptr) {
         uid_t appUid = mediaDescription->GetCastInfo()->GetAppUid();
         SLOGI("buildCastInfo AUDIO_PCM uid %{public}d", appUid);
@@ -487,8 +506,11 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
 
     if (cJSON_HasObjectItem(valueItem, speedStr_.c_str())) {
         cJSON* speedArray = cJSON_GetObjectItem(valueItem, speedStr_.c_str());
-        CHECK_AND_RETURN_RET_LOG(speedArray != nullptr && !cJSON_IsInvalid(speedArray) &&
-            cJSON_IsArray(speedArray), AVSESSION_ERROR, "speed get invalid");
+        if (speedArray == nullptr || cJSON_IsInvalid(speedArray) || !cJSON_IsArray(speedArray)) {
+            SLOGE("speed get null or invalid");
+            cJSON_Delete(valueItem);
+            return AVSESSION_ERROR;
+    }
         cJSON* speedItem = nullptr;
         cJSON_ArrayForEach(speedItem, speedArray) {
             CHECK_AND_CONTINUE(speedItem != nullptr && !cJSON_IsInvalid(speedItem) &&
@@ -499,6 +521,7 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
         }
     }
     cJSON_Delete(valueItem);
+    SLOGI("GetMediaCapabilities success");
     return AVSESSION_SUCCESS;
 }
 
@@ -516,7 +539,7 @@ int32_t HwCastStreamPlayer::GetSupportedDecoders(std::vector<std::string>& decod
 
 int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel)
 {
-    SLOGI("enter GetRecommendedResolutionLevel");
+    SLOGI("enter GetRecommendedResolutionLevel and decoderType is %{public}s", decoderType.c_str());
     std::lock_guard lockGuard(streamPlayerLock_);
     CHECK_AND_RETURN_RET_LOG(jsonCapabilitiesSptr_, AVSESSION_ERROR, "jsonCapabilitiesSptr_ is nullptr");
     if (jsonCapabilitiesSptr_->decoderSupportResolutions_.empty()) {
@@ -977,6 +1000,18 @@ void HwCastStreamPlayer::OnPlayRequest(const CastEngine::MediaInfo& mediaInfo)
 void HwCastStreamPlayer::OnImageChanged(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     SLOGD("Stream player received ImageChanged event");
+}
+
+void HwCastStreamPlayer::OnData(const CastEngine::DataType dataType, const std::string& dataStr)
+{
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
+    for (auto listener : streamPlayerListenerList_) {
+        if (listener != nullptr) {
+            AAFwk::WantParams data;
+            data.SetParam("customData", AAFwk::String::Box(dataStr));
+            listener->OnCustomData(data);
+        }
+    }
 }
 
 void HwCastStreamPlayer::OnAlbumCoverChanged(std::shared_ptr<Media::PixelMap> pixelMap)

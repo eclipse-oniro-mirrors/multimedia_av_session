@@ -46,4 +46,6 @@
    [oneway] void OnQueueTitleChange([in] String title);
 
    [oneway] void OnExtrasChange([in] WantParams extras);
+
+   [oneway] void OnCustomData([in] WantParams customData);
  }

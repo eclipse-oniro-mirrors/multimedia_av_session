@@ -71,6 +71,7 @@
 #include "image_source.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_dynamic_insight.h"
+#include "softbus/softbus_session_utils.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -204,6 +205,8 @@ void AVSessionService::OnStartProcess()
         SLOGI("set boot avsession service started true");
     }
 #endif
+
+    AVSessionUtils::PublishCommonEvent("usual.event.AVSESSION_START");
 }
 
 void AVSessionService::OnDump()
@@ -341,15 +344,12 @@ void AVSessionService::HandleRemoveMediaCardEvent()
         SLOGE("AVSessionNotifyUpdateNotification failed, uid = %{public}d, pid = %{public}d, ret = %{public}d",
             topSession_->GetUid(), topSession_->GetPid(), ret);
     }
+    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("NotifyFlowControl");
     if (topSession_->IsCasting()) {
-        if (topSession_->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
-            AVCastControlCommand castCmd;
-            castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
-            topSession_->SendControlCommandToCast(castCmd);
-        }
-    } else if (AudioAdapter::GetInstance().GetRendererRunning(topSession_->GetUid(), topSession_->GetPid()) ||
-        (topSession_->GetUid() == audioBrokerUid &&
-        topSession_->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY)) {
+        AVCastControlCommand castCmd;
+        castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
+        topSession_->SendControlCommandToCast(castCmd);
+    } else {
         AVControlCommand cmd;
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
         topSession_->ExecuteControllerCommand(cmd);
@@ -373,12 +373,14 @@ void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
     if (isAppear == "APPEAR") {
         isMediaCardOpen_ = true;
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckCardStateChangeStop");
+        hasCardStateChangeStopTask_ = false;
     } else if (isAppear == "DISAPPEAR") {
         isMediaCardOpen_ = false;
         if (IsTopSessionPlaying() || hasRemoveEvent_.load()) {
             SLOGI("HandleMediaCardState hasRemoveEvent_:%{public}d ", hasRemoveEvent_.load());
             return;
         }
+        hasCardStateChangeStopTask_ = true;
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
             [this]() {
                 if (IsTopSessionPlaying() || hasRemoveEvent_.load() || isMediaCardOpen_.load()) {
@@ -389,6 +391,7 @@ void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
                 {
                     std::lock_guard lockGuard(sessionServiceLock_);
                     NotifySystemUI(nullptr, true, false, false);
+                    hasCardStateChangeStopTask_ = false;
                 }
             }, "CheckCardStateChangeStop", cancelTimeout);
     }
@@ -575,6 +578,15 @@ void ReportFocusSessionChange(const sptr<AVSessionItem>& topSession, const sptr<
         "DETAILED_MSG", "avsessionservice handlefocussession, updatetopsession");
 }
 
+void AVSessionService::UpdateSessionTimestamp(sptr<AVSessionItem> sessionItem)
+{
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "UpdateSessionTimestamp sessionItem is null");
+    auto now = std::chrono::system_clock::now();
+    auto timeSinceEpoch = now.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceEpoch).count();
+    sessionItem->SetPlayingTime(milliseconds);
+}
+
 void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession, int32_t userId)
 {
     AVSessionDescriptor descriptor;
@@ -602,6 +614,8 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
                 ReportFocusSessionChange(topSession_, newTopSession);
             }
             topSession_ = newTopSession;
+            // update topsession playingtime
+            UpdateSessionTimestamp(topSession_);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
             MirrorToStreamCast(topSession_);
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
@@ -623,26 +637,12 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
-    if (infoUid == ancoUid) {
-        for (const auto& session : *sessionListForFront) {
-            CHECK_AND_CONTINUE(session->GetUid() == audioBrokerUid &&
-                session->GetPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY);
-            SLOGI("change uid for anco");
-            infoUid = session->GetUid();
-            infoPid = session->GetPid();
-            break;
-        }
-    }
     for (const auto& session : *sessionListForFront) {
         if (session->GetUid() == infoUid && session->GetPid() == infoPid &&
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call")) {
-            if (session->GetUid() == ancoUid && hasMediaCapsule_.load()) {
-                SLOGI("HandleChangeTopSession anco top hasMediaCapsule_:%{public}d", hasMediaCapsule_.load());
-                AVSessionService::NotifySystemUI(nullptr, true, false, false);
-            }
             UpdateTopSession(session);
-            if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
-                topSession_->GetUid() != ancoUid) {
+            if (topSession_ != nullptr &&
+                (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video")) {
                 AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
                 PublishEvent(mediaPlayStateTrue);
                 auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
@@ -661,6 +661,13 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     SLOGI("uid=%{public}d, pid=%{public}d curTop:%{public}s",
         info.uid, info.pid, (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     std::lock_guard lockGuard(sessionServiceLock_);
+    if (info.uid == ancoUid && isPlaying) {
+        sptr<AVSessionItem> sessionItem = GetContainer().GetSessionByUid(info.uid);
+        CHECK_AND_RETURN_LOG(sessionItem != nullptr, "handle focusession no anco_audio");
+        ancoSession_ = sessionItem;
+        UpdateSessionTimestamp(ancoSession_);
+        return;
+    }
     int32_t userId = GetUsersManager().GetCurrentUserId();
     if ((topSession_ && topSession_->GetUid() == info.uid && topSession_->GetPid() == info.pid) &&
         topSession_->IsCasting()) {
@@ -670,13 +677,12 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     if (topSession_ && topSession_->GetUid() == info.uid && topSession_->GetPid() == info.pid) {
         SLOGI(" HandleFocusSession focusSession is current topSession.");
         auto hasOtherPlayingSession = false;
-        if ((topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") &&
-            topSession_->GetUid() != ancoUid) {
-            if (!isPlaying && (isMediaCardOpen_ || hasRemoveEvent_.load())) {
-                SLOGI("isPlaying:%{public}d isCardOpen_:%{public}d hasRemoveEvent_:%{public}d ",
-                    isPlaying, isMediaCardOpen_.load(), hasRemoveEvent_.load());
-                return;
-            }
+        if (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") {
+            bool notPublishNotification = !isPlaying &&
+                (isMediaCardOpen_ || hasRemoveEvent_.load() || hasCardStateChangeStopTask_.load());
+            CHECK_AND_RETURN_LOG(!notPublishNotification,
+                "isPlaying:%{public}d isCardOpen_:%{public}d hasRemoveEvent_:%{public}d hasRemoveTask_:%{public}d",
+                isPlaying, isMediaCardOpen_.load(), hasRemoveEvent_.load(), hasCardStateChangeStopTask_.load());
             if (isPlaying) {
                 auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
                     topSession_->GetUid(), topSession_->GetPid(), true);
@@ -763,19 +769,23 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
     if (sessionExist) {
         InsertSessionItemToCJSON(session, valuesArray);
     }
-    char* newSortContent = cJSON_Print(valuesArray);
-    if (valuesArray == nullptr || cJSON_IsInvalid(valuesArray) || newSortContent == nullptr) {
-        SLOGE("newValueArray print fail nullptr");
-        cJSON_Delete(valuesArray);
-        return;
-    }
-    std::string newSortContentStr(newSortContent);
+    std::string newSortContentStr = DoCJSONArrayTransformToString(valuesArray);
     if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
         SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
     }
-    cJSON_free(newSortContent);
     cJSON_Delete(valuesArray);
 }
+
+std::string AVSessionService::DoCJSONArrayTransformToString(cJSON* valueItem)
+{
+    CHECK_AND_RETURN_RET_LOG(valueItem != nullptr && !cJSON_IsInvalid(valueItem), "", "valueItem invalid");
+    char* newSortContent = cJSON_Print(valueItem);
+    CHECK_AND_RETURN_RET_LOG(newSortContent != nullptr, "", "newValueArray print fail nullptr");
+    std::string newSortContentStr(newSortContent);
+    cJSON_free(newSortContent);
+    return newSortContentStr;
+}
+
 // LCOV_EXCL_STOP
 
 void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd)
@@ -809,12 +819,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         }
     } else {
         std::lock_guard lockGuard(sessionServiceLock_);
-        if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
-            UpdateTopSession(nullptr, userId);
-            hasMediaCapsule_ = false;
-            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-            SLOGI("CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
-        }
+        HandleTopSessionRelease(userId, sessionItem);
         sessionListForFront->remove(sessionItem);
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
     }
@@ -834,6 +839,7 @@ bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
         SLOGI("session is in sessionListForFront_, need to change order of it.");
         sessionListForFront->remove(sessionItem);
         sessionListForFront->push_front(sessionItem);
+        UpdateSessionTimestamp(sessionItem);
     }
     return true;
 }
@@ -1042,7 +1048,8 @@ sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const s
             }
         }
     }
-    SLOGI("Not found controller for pid:%{public}d, sessionId:%{public}s.", pid, sessionId.c_str());
+    SLOGI("Not found controller for pid:%{public}d, sessionId:%{public}s.", pid,
+        AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     return nullptr;
 }
 
@@ -1287,14 +1294,31 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         }
     });
 
-    sessionItem->SetServiceCallbackForMediaSession([this](std::string sessionId, bool isPlaying) {
+    sessionItem->SetServiceCallbackForMediaSession([this](std::string sessionId, bool isPlaying, bool isMediaChange) {
         // only use for anco mediasession
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist");
-        bool isSameTop = topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr());
+        bool isSameTop = topSession_ != nullptr && (topSession_.GetRefPtr() == session.GetRefPtr());
         if (isSameTop) {
-            NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+            SLOGI("ancoCapsule topSession is %{public}s isPlaying %{public}d isMediaChange %{public}d",
+                topSession_->GetBundleName().c_str(), isPlaying, isMediaChange);
+            if (!isPlaying && (isMediaCardOpen_.load() || hasRemoveEvent_.load())) {
+                SLOGI("ancoCapsule del isCardOpen_:%{public}d hasRemoveEvent_:%{public}d",
+                    isMediaCardOpen_.load(), hasRemoveEvent_.load());
+                return;
+            }
+            auto hasOtherSessionPlaying = false;
+            if (!isPlaying) {
+                int32_t userId = topSession_->GetUserId();
+                userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
+                sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
+                hasOtherSessionPlaying = result != nullptr;
+                HandleOtherSessionPlaying(result);
+            }
+            if (!hasOtherSessionPlaying) {
+                NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isMediaChange);
+            }
             return;
         }
         CHECK_AND_RETURN_LOG(isPlaying, "anco media session is not playing");
@@ -1303,7 +1327,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         sessionInfo.uid = session->GetUid();
         sessionInfo.pid = session->GetPid();
         SelectFocusSession(sessionInfo);
-        NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false);
+        NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isMediaChange);
     });
 }
 
@@ -1331,7 +1355,7 @@ void AVSessionService::AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessio
                 HandleOtherSessionPlaying(result);
             }
             if (!hasOtherSessionPlaying) {
-                NotifySystemUI(nullptr, true, isPlaying, isChange);
+                NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isChange);
             }
             return;
         }
@@ -1419,6 +1443,57 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 }
 
+static int32_t GetIntValueFromJson(const std::string& extraInfo, const char* key)
+{
+    auto defaultValue = 0;
+    cJSON* jsonData = nullptr;
+    if (!SoftbusSessionUtils::TransferStrToJson(extraInfo, jsonData)) {
+        SLOGE("json parse fail");
+        return defaultValue;
+    }
+    int32_t value = SoftbusSessionUtils::GetIntFromJson(jsonData, key);
+    cJSON_Delete(jsonData);
+    return value;
+}
+
+sptr<AVSessionItem> AVSessionService::CreateNewSessionWithExtra(const std::string& tag, int32_t type,
+                                                                const std::string& extraInfo, bool thirdPartyApp,
+                                                                const AppExecFwk::ElementName& elementName)
+{
+    SLOGI("%{public}s %{public}d %{public}s %{public}s thirdPartyApp=%{public}d", tag.c_str(), type,
+          elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str(), thirdPartyApp);
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = AllocSessionId();
+    if (descriptor.sessionId_.empty()) {
+        SLOGE("alloc session id failed");
+        return nullptr;
+    }
+    descriptor.userId_ = GetUsersManager().GetCurrentUserId();
+    descriptor.sessionTag_ = tag;
+    descriptor.sessionType_ = type;
+    descriptor.elementName_ = elementName;
+    descriptor.isThirdPartyApp_ = thirdPartyApp;
+    descriptor.index_ = GetIntValueFromJson(extraInfo, "index");
+
+    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor, descriptor.userId_);
+    if (result == nullptr) {
+        return nullptr;
+    }
+    result->SetPid(GetCallingPid());
+    result->SetUid(GetCallingUid());
+    ServiceCallback(result);
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "LocalDevice";
+    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    result->SetOutputDevice(outputDeviceInfo);
+
+    return result;
+}
+
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {
@@ -1469,6 +1544,9 @@ bool AVSessionService::IsParamInvalid(const std::string& tag, int32_t type, cons
     if (elementName.GetBundleName().empty() || elementName.GetAbilityName().empty()) {
         SLOGE("element is invalid when create session");
         return false;
+    }
+    if (GetCallingUid() == audioBrokerUid && tag == "ancoMediaSession") {
+        return true;
     }
     std::regex nameRegex("[A-Za-z\\w\\.]*");
     if (!std::regex_match(elementName.GetBundleName(), nameRegex)) {
@@ -1537,14 +1615,67 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
-    if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL ||
-        (tag == "anco_audio" && GetCallingUid() == ancoUid)) && it == sessionListForFront->end()) {
+    if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL) &&
+        it == sessionListForFront->end()) {
         SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
         sessionListForFront->push_front(sessionItem);
     }
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionState(sessionItem, 0);
+        ReportSessionState(sessionItem, SessionState::STATE_CREATE);
+#endif
+
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extra,
+                                                      bool thirdPartyApp, const AppExecFwk::ElementName& elementName,
+                                                      sptr<AVSessionItem>& sessionItem)
+{
+    if (!IsParamInvalid(tag, type, elementName)) {
+        return ERR_INVALID_PARAM;
+    }
+    auto pid = GetCallingPid();
+    std::lock_guard lockGuard(sessionServiceLock_);
+    if (AbilityHasSession(pid)) {
+        SLOGE("process %{public}d %{public}s already has one session", pid, elementName.GetAbilityName().c_str());
+        CheckAndUpdateAncoMediaSession(elementName);
+        return ERR_SESSION_IS_EXIST;
+    }
+
+    sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, elementName);
+    if (result == nullptr) {
+        SLOGE("create new session failed");
+        if (dumpHelper_ != nullptr) {
+            dumpHelper_->SetErrorInfo("AVSessionService::CreateSessionInner  create new session failed");
+        }
+        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "CALLER_PID", pid, "TAG", tag, "TYPE", type, "BUNDLE_NAME",
+            elementName.GetBundleName(), "ERROR_MSG", "avsessionservice createsessioninner create new session failed");
+        return ERR_NO_MEMORY;
+    }
+    if (GetUsersManager().AddSessionForCurrentUser(pid, elementName.GetAbilityName(), result) != AVSESSION_SUCCESS) {
+        SLOGE("session num exceed max");
+        return ERR_SESSION_EXCEED_MAX;
+    }
+
+    HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
+        AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
+
+    NotifySessionCreate(result->GetDescriptor());
+    sessionItem = result;
+
+    std::lock_guard frontLockGuard(sessionFrontLock_);
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
+    auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
+    if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL) &&
+        it == sessionListForFront->end()) {
+        SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
+        sessionListForFront->push_front(sessionItem);
+    }
+
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+        ReportSessionState(sessionItem, SessionState::STATE_CREATE);
 #endif
 
     return AVSESSION_SUCCESS;
@@ -1626,6 +1757,45 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     return res;
 }
 
+int32_t AVSessionService::CreateSessionInnerWithExtra(const std::string& tag, int32_t type,
+                                                      const std::string& extraInfo,
+                                                      const AppExecFwk::ElementName& elementName,
+                                                      sptr<IRemoteObject>& object)
+{
+    sptr<AVSessionItem> session;
+    auto res = CreateSessionInnerWithExtra(tag, type, extraInfo,
+        PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION),
+        elementName, session);
+    CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, res, "create session fail");
+
+    std::string supportModule;
+    std::string profile;
+    if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
+        SaveSessionInfoInFile(session->GetSessionId(), session->GetSessionType(), elementName);
+    }
+
+    {
+        std::lock_guard lockGuard1(abilityManagerLock_);
+        std::string bundleName = session->GetDescriptor().elementName_.GetBundleName();
+        std::string abilityName = session->GetDescriptor().elementName_.GetAbilityName();
+        auto it = abilityManager_.find(bundleName + abilityName);
+        if (it != abilityManager_.end() && it->second != nullptr) {
+            it->second->StartAbilityByCallDone(session->GetDescriptor().sessionId_);
+        }
+    }
+
+    object = session;
+    ReportSessionInfo(session, static_cast<int32_t>(res));
+
+    {
+        std::lock_guard lockGuard(isAllSessionCastLock_);
+        CHECK_AND_RETURN_RET_LOG(isAllSessionCast_, AVSESSION_SUCCESS, "no need to cast");
+    }
+    CHECK_AND_RETURN_RET_LOG(CastAudioForNewSession(session) == AVSESSION_SUCCESS,
+                             AVSESSION_SUCCESS, "cast new session error");
+    return res;
+}
+
 sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
                                                           const AppExecFwk::ElementName& elementName)
 {
@@ -1663,17 +1833,10 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& sessi
         SLOGE("get newValueArray invalid");
         return false;
     }
-
-    char* newSortContent = cJSON_Print(valuesArray);
-    if (valuesArray == nullptr || cJSON_IsInvalid(valuesArray) || newSortContent == nullptr) {
-        SLOGE("newValueArray print fail");
-        return false;
-    }
-    std::string newSortContentStr(newSortContent);
+    std::string newSortContentStr = DoCJSONArrayTransformToString(valuesArray);
     if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
         SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
     }
-    cJSON_free(newSortContent);
     return true;
 }
 // LCOV_EXCL_STOP
@@ -2021,9 +2184,6 @@ bool AVSessionService::SaveAvQueueInfo(std::string& oldContent, const std::strin
             strcmp(avQueueIdItem->valuestring, meta.GetAVQueueId().c_str()) == 0) {
             CHECK_AND_RETURN_RET_LOG(i != 0, false, "avqueue:%{public}s is first", meta.GetAVQueueId().c_str());
             cJSON_DeleteItemFromArray(valuesArray, i);
-            std::string fileName = AVSessionUtils::GetFixedPathName(userId) + bundleName + "_" +
-                meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
-            AVSessionUtils::DeleteFile(fileName);
         }
     }
     if (cJSON_GetArraySize(valuesArray) >= maxAVQueueInfoLen) {
@@ -2476,6 +2636,28 @@ int32_t AVSessionService::RegisterSessionListenerForAllUsers(const sptr<ISession
 }
 
 // LCOV_EXCL_START
+AVControlCommand AVSessionService::GetSessionProcCommand()
+{
+    AVControlCommand cmd;
+    if (topSession_ != nullptr) {
+        sptr<AVSessionItem> procSession = topSession_;
+        if (IsAncoValid()) {
+            procSession = topSession_->GetPlayingTime() > ancoSession_->GetPlayingTime() ?
+                topSession_ : ancoSession_;
+        }
+        auto playbackState = procSession->GetPlaybackState();
+        cmd.SetCommand(playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ?
+            AVControlCommand::SESSION_CMD_PAUSE : AVControlCommand::SESSION_CMD_PLAY);
+    } else if (IsAncoValid()) {
+        auto state = ancoSession_->GetPlaybackState();
+        cmd.SetCommand(state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ?
+            AVControlCommand::SESSION_CMD_PAUSE : AVControlCommand::SESSION_CMD_PLAY);
+    } else {
+        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    }
+    return cmd;
+}
+
 void AVSessionService::HandleEventHandlerCallBack()
 {
     SLOGI("handle eventHandler callback isFirstPress_=%{public}d, pressCount_:%{public}d", isFirstPress_, pressCount_);
@@ -2488,13 +2670,7 @@ void AVSessionService::HandleEventHandlerCallBack()
         } else if (pressCount_ == DOUBLE_CLICK) {
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
         } else if (pressCount_ == ONE_CLICK) {
-            if (topSession_) {
-                auto playbackState = topSession_->GetPlaybackState();
-                cmd.SetCommand(playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ?
-                    AVControlCommand::SESSION_CMD_PAUSE : AVControlCommand::SESSION_CMD_PLAY);
-            } else {
-                cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-            }
+            cmd = GetSessionProcCommand();
         } else {
             pressCount_ = 0;
             isFirstPress_ = true;
@@ -2502,7 +2678,7 @@ void AVSessionService::HandleEventHandlerCallBack()
             return;
         }
         SLOGI("HandleEventHandlerCallBack proc cmd=%{public}d", cmd.GetCommand());
-        if (!topSession_ || (topSession_->GetBundleName() == "anco_audio" && !topSession_->IsActive())) {
+        if (!topSession_) {
             shouldColdPlay = true;
             SLOGI("HandleEventHandlerCallBack checkTop:%{public}d|shouldColdStart=%{public}d",
                 static_cast<int>(topSession_ != nullptr), shouldColdPlay);
@@ -2510,7 +2686,9 @@ void AVSessionService::HandleEventHandlerCallBack()
             if (topSession_->GetDescriptor().sessionTag_ == "external_audio") {
                 SLOGI("HandleEventHandlerCallBack this is an external audio");
             } else {
-                topSession_->ExecuteControllerCommand(cmd);
+                auto keyEvent = MMI::KeyEvent::Create();
+                CHECK_AND_RETURN_LOG(keyEvent != nullptr, "handle event keyevent is null");
+                CheckSessionHandleKeyEvent(true, cmd, *keyEvent, topSession_);
             }
         }
     }
@@ -2521,6 +2699,34 @@ void AVSessionService::HandleEventHandlerCallBack()
     isFirstPress_ = true;
 }
 // LCOV_EXCL_STOP
+
+bool AVSessionService::IsAncoValid()
+{
+    std::lock_guard lockGuard(sessionServiceLock_);
+    return ancoSession_ != nullptr && ancoSession_->IsActive();
+}
+
+bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd,
+    const MMI::KeyEvent& keyEvent, sptr<AVSessionItem> session)
+{
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "handlevent session is null");
+    sptr<AVSessionItem> procSession = nullptr;
+    if (ancoSession_ == nullptr || !ancoSession_->IsActive()) {
+        procSession = session;
+    } else {
+        procSession = session->GetPlayingTime() > ancoSession_->GetPlayingTime() ? session : ancoSession_;
+    }
+    CHECK_AND_RETURN_RET_LOG(procSession != nullptr, false, "handlevent session is null");
+    SLOGI("CheckSessionHandleKeyEvent procSession:%{public}s", procSession->GetBundleName().c_str());
+    if (procCmd) {
+        procSession->ExecuteControllerCommand(cmd);
+        SLOGI("CheckSessionHandleKeyEvent proc cmd:%{public}d", cmd.GetCommand());
+    } else {
+        procSession->HandleMediaKeyEvent(keyEvent);
+        SLOGI("CheckSessionHandleKeyEvent proc event:%{public}d", keyEvent.GetKeyCode());
+    }
+    return true;
+}
 
 int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
 {
@@ -2557,8 +2763,8 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
 
     {
         std::lock_guard lockGuard(sessionServiceLock_);
-        if (topSession_ && !(topSession_->GetBundleName() == "anco_audio" && !topSession_->IsActive())) {
-            topSession_->HandleMediaKeyEvent(keyEvent);
+        AVControlCommand cmd;
+        if (topSession_ != nullptr && CheckSessionHandleKeyEvent(false, cmd, keyEvent, topSession_)) {
             return AVSESSION_SUCCESS;
         }
     }
@@ -2615,18 +2821,27 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
     SLOGI("cmd=%{public}d with no topsession", command.GetCommand());
     // try proc command for first front session
     {
+        std::lock_guard lockGuard(sessionServiceLock_);
         std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
         for (const auto& session : *sessionListForFront) {
-            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call" &&
-                !(session->GetBundleName() == "anco_audio" && !session->IsActive())) {
-                session->ExecuteControllerCommand(command);
+            CHECK_AND_CONTINUE(session != nullptr);
+            if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
+                auto keyEvent = MMI::KeyEvent::Create();
+                CHECK_AND_RETURN_LOG(keyEvent != nullptr, "handle event keyevent is null");
+                CheckSessionHandleKeyEvent(true, command, *keyEvent, session);
                 SLOGI("ExecuteCommand %{public}d for front session: %{public}s", command.GetCommand(),
                       session->GetBundleName().c_str());
                 return;
             }
         }
+    }
+
+    if (IsAncoValid()) {
+        SLOGI("ExecuteCommand %{public}d for anco_audio without top and frontlist", command.GetCommand());
+        ancoSession_->ExecuteControllerCommand(command);
+        return;
     }
 
     std::vector<AVSessionDescriptor> coldStartDescriptors;
@@ -2654,11 +2869,12 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
 bool AVSessionService::CheckIfOtherAudioPlaying()
 {
     std::vector<int> audioPlayingUids = focusSessionStrategy_.GetAudioPlayingUids();
-    CHECK_AND_RETURN_RET_LOG(!audioPlayingUids.empty(), false, "no other audio playing quit");
+    CHECK_AND_RETURN_RET_LOG(!audioPlayingUids.empty(), false, "no other audio playing quit.");
+    std::lock_guard lockGuard(sessionServiceLock_);
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr quit");
-    CHECK_AND_RETURN_RET_LOG(!sessionListForFront->empty() || topSession_ != nullptr, true,
+    CHECK_AND_RETURN_RET_LOG(!sessionListForFront->empty() || topSession_ != nullptr || IsAncoValid(), true,
         "sessionListForFront and top empty but audio playing, control block");
     for (int uid : audioPlayingUids) {
         if (GetUsersManager().GetContainerFromAll().UidHasSession(uid)) {
@@ -2690,10 +2906,12 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
         std::lock_guard lockGuard(sessionServiceLock_);
         SLOGI("SendSystemControlCommand with cmd:%{public}d, topSession alive:%{public}d",
               command.GetCommand(), static_cast<int>(topSession_ != nullptr));
-        if (topSession_ && !(topSession_->GetBundleName() == "anco_audio" && !topSession_->IsActive())) {
+        if (topSession_) {
             CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(GetCallingPid()),
                 ERR_COMMAND_SEND_EXCEED_MAX, "command excuted number exceed max");
-            topSession_->ExecuteControllerCommand(command);
+            auto keyEvent = MMI::KeyEvent::Create();
+            CHECK_AND_RETURN_RET_LOG(keyEvent != nullptr, AVSESSION_SUCCESS, "handle event keyevent is null");
+            CheckSessionHandleKeyEvent(true, command, *keyEvent, topSession_);
             return AVSESSION_SUCCESS;
         }
     }
@@ -2909,8 +3127,7 @@ void AVSessionService::HandleOtherSessionPlaying(sptr<AVSessionItem>& session)
     CHECK_AND_RETURN_LOG(topSession_ != nullptr, "topSession is nullptr, update topSession fail!");
     bool updateOrderResult = UpdateOrder(session);
     CHECK_AND_RETURN_LOG(updateOrderResult, "UpdateOrder fail");
-    if ((session->GetSessionType() == "audio" || session->GetSessionType() == "video") &&
-        session->GetUid() != ancoUid) {
+    if (session->GetSessionType() == "audio" || session->GetSessionType() == "video") {
         AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
     }
 }
@@ -2942,7 +3159,7 @@ sptr <AVSessionItem> AVSessionService::GetOtherPlayingSession(int32_t userId, st
     return nullptr;
 }
 
-void AVSessionService::CheckIfRemoveNotification(int32_t userId, const sptr<AVSessionItem>& sessionItem)
+void AVSessionService::HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem)
 {
     if (GetUsersManager().GetTopSession(userId).GetRefPtr() == sessionItem.GetRefPtr()) {
         sptr<AVSessionItem> result = GetOtherPlayingSession(userId, sessionItem->GetBundleName());
@@ -2952,21 +3169,7 @@ void AVSessionService::CheckIfRemoveNotification(int32_t userId, const sptr<AVSe
             UpdateTopSession(nullptr, userId);
             hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-            SLOGI("Topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
-        }
-    } else {
-        int32_t notifyId = -1;
-        {
-            std::lock_guard lockGuard(notifyLock_);
-            notifyId = g_NotifyRequest.GetOwnerUid();
-        }
-        int32_t sessionUid = sessionItem->GetUid() == audioBrokerUid ?
-            BundleStatusAdapter::GetInstance().GetUidFromBundleName(sessionItem->GetBundleName(), userId) :
-            sessionItem->GetUid();
-        if (notifyId == sessionUid) {
-            hasMediaCapsule_ = false;
-            int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId), 0);
-            SLOGI("Topsession release CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
+            SLOGI("CancelNotification with userId:%{public}d, ret=%{public}d", userId, ret);
         }
     }
 }
@@ -2983,11 +3186,14 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
         SLOGD("HandleSessionRelease with userId:%{public}d", userId);
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionState(sessionItem, 1);
+        ReportSessionState(sessionItem, SessionState::STATE_RELEASE);
 #endif
         NotifySessionRelease(sessionItem->GetDescriptor());
+        if (sessionItem->GetUid() == ancoUid) {
+            ancoSession_ = nullptr;
+        }
         sessionItem->DestroyTask(continuePlay);
-        CheckIfRemoveNotification(userId, sessionItem);
+        HandleTopSessionRelease(userId, sessionItem);
         if (sessionItem->GetRemoteSource() != nullptr) {
             int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
             SLOGI("CancelCastAudioForClientExit ret is %{public}d", ret);
@@ -3390,7 +3596,7 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
         token.sessionId = session->GetSessionId();
         token.pid = session->GetPid();
         token.uid = session->GetUid();
-        SLOGI("cast session %{public}s", token.sessionId.c_str());
+        SLOGI("cast session %{public}s", AVSessionUtils::GetAnonySessionId(token.sessionId).c_str());
         int32_t ret = CastAudio(token, sinkAudioDescriptors);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CastAudio session %{public}s failed",
                                  AVSessionUtils::GetAnonySessionId(token.sessionId).c_str());
@@ -3946,6 +4152,7 @@ std::string AVSessionService::GetLocalTitle()
 {
     AVMetaData meta = topSession_->GetMetaData();
     bool isTitleLyric = (topSession_->GetBundleName() == DEFAULT_BUNDLE_NAME) && !meta.GetDescription().empty();
+    bool isAncoLyric = (topSession_->GetUid() == audioBrokerUid && meta.GetArtist().find("-") != std::string::npos);
     std::string songName;
     if (isTitleLyric) {
         std::string description = meta.GetDescription();
@@ -3954,8 +4161,15 @@ std::string AVSessionService::GetLocalTitle()
             songName = description.substr(0, pos);
         }
         SLOGI("GetLocalTitle description:%{public}s, title:%{public}s", description.c_str(), songName.c_str());
+    } else if (isAncoLyric) {
+        std::string ancoTitle = meta.GetArtist();
+        size_t posi = ancoTitle.find("-");
+        if (posi != std::string::npos) {
+            songName = ancoTitle.substr(0, posi);
+        }
+        SLOGI("GetLocalTitle isAncoLyric title:%{public}s", songName.c_str());
     }
-    std::string localTitle = isTitleLyric ? songName : meta.GetTitle();
+    std::string localTitle = isTitleLyric || isAncoLyric ? songName : meta.GetTitle();
     SLOGI("GetLocalTitle localTitle:%{public}s", localTitle.c_str());
     return localTitle;
 }
@@ -3967,7 +4181,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support.");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
-    SLOGI("NotifySystemUI isActiveNtf %{public}d, addCapsule %{public}d isCapsuleUpdate %{public}d",
+    SLOGI("NotifySystemUI isActiveNtf %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d",
         isActiveSession, addCapsule, isCapsuleUpdate);
     hasMediaCapsule_ = addCapsule;
     Notification::NotificationRequest request;
@@ -3986,18 +4200,20 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         static_cast<int>(historyDescriptor != nullptr), userId);
     if (addCapsule && topSession_) {
         std::shared_ptr<AVSessionPixelMap> iPixelMap = std::make_shared<AVSessionPixelMap>();
-        std::string fileDir = AVSessionUtils::GetCachePathName(userId);
-        std::string fileName = topSession_->GetSessionId() + AVSessionUtils::GetFileSuffix();
-        AVSessionUtils::ReadImageFromFile(iPixelMap, fileDir, fileName);
+        topSession_->ReadMetaDataImg(iPixelMap);
         AVQueueItem item;
         topSession_->GetCurrentCastItem(item);
-        std::string notifyText = item.GetDescription() ? item.GetDescription()->GetTitle() : GetLocalTitle();
+        std::string notifyText = item.GetDescription() && item.GetDescription()->GetPcmSrc() ?
+            item.GetDescription()->GetTitle() : GetLocalTitle();
         AddCapsule(notifyText, isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckCardStateChangeStop");
+        hasCardStateChangeStopTask_ = false;
     }
 
     auto uid = topSession_ ? (topSession_->GetUid() == audioBrokerUid ?
         BundleStatusAdapter::GetInstance().GetUidFromBundleName(topSession_->GetBundleName(), userId) :
         topSession_->GetUid()) : (historyDescriptor ? historyDescriptor->uid_ : -1);
+    bool isBroker = topSession_ != nullptr && topSession_->GetUid() == audioBrokerUid;
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetNotificationId(0);
     request.SetContent(content);
@@ -4006,7 +4222,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetInProgress(true);
     request.SetOwnerUid(uid);
     request.SetIsAgentNotification(true);
-    if (topSession_ && topSession_->GetUid() == audioBrokerUid) {
+    if (isBroker) {
         request.SetOwnerUserId(defaultUserId);
     }
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
@@ -4031,11 +4247,12 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     Notification::NotificationHelper::SetHashCodeRule(1);
     if (NotifyFlowControl()) {
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
-            [this, uid]() {
+            [this, uid, isBroker]() {
                 bool isTopSessionNtf = false;
                 {
                     std::lock_guard lockGuard(sessionServiceLock_);
-                    isTopSessionNtf = topSession_ && topSession_->GetUid() == uid;
+                    isTopSessionNtf = topSession_ != nullptr && (topSession_->GetUid() == uid ||
+                        (isBroker && topSession_->GetUid() == audioBrokerUid));
                 }
                 std::lock_guard lockGuard(notifyLock_);
                 hasRemoveEvent_ = false;
@@ -4105,39 +4322,43 @@ std::function<bool(int32_t, int32_t)> AVSessionService::GetAllowedPlaybackCallba
 }
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-static std::string GetVersionName(std::string bundleName)
+static std::string GetVersionName(const std::string& bundleName)
 {
+    std::string versionName = "";
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
         SLOGE("Get ability manager failed");
-        return "";
+        return versionName;
     }
 
     sptr<IRemoteObject> object = samgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (object == nullptr) {
         SLOGE("object is NULL.");
-        return "";
+        return versionName;
     }
 
     sptr<OHOS::AppExecFwk::IBundleMgr> bms = iface_cast<OHOS::AppExecFwk::IBundleMgr>(object);
     if (bms == nullptr) {
         SLOGE("bundle manager service is NULL.");
-        return "";
+        return versionName;
     }
 
     AppExecFwk::BundleInfo bundleInfo;
-    bms->GetBundleInfo(bundleName,
+    if (!bms->GetBundleInfo(bundleName,
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
-        bundleInfo, AppExecFwk::Constants::ALL_USERID);
-    std::string versionName = bundleInfo.versionName;
+        bundleInfo, AppExecFwk::Constants::ALL_USERID)) {
+            SLOGE("GetBundleInfo=%{public}s fail", bundleName.c_str());
+            return versionName;
+    }
+    versionName = bundleInfo.versionName;
     if (versionName.empty()) {
         SLOGE("get versionName form application failed.");
-        return "";
+        return versionName;
     }
     return versionName;
 }
 
-void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state)
+void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, SessionState state)
 {
     if (session == nullptr) {
         SLOGE("ReportSessionState session is null");

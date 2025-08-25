@@ -138,6 +138,7 @@ int32_t AVRouterImpl::StopDeviceLogging()
 int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes)
 {
     SLOGI("AVRouterImpl StartCastDiscovery");
+
     std::lock_guard lockGuard(providerManagerLock_);
 
     auto pid = IPCSkeleton::GetCallingPid();
@@ -160,10 +161,12 @@ int32_t AVRouterImpl::StartCastDiscovery(int32_t castDeviceCapability, std::vect
 int32_t AVRouterImpl::StopCastDiscovery()
 {
     SLOGI("AVRouterImpl StopCastDiscovery");
+
     std::lock_guard lockGuard(providerManagerLock_);
 
     auto pid = IPCSkeleton::GetCallingPid();
-    CHECK_AND_RETURN_RET_LOG(IsStopCastDiscovery(pid), AVSESSION_SUCCESS, "StopCastDiscovery is invalid");
+    CHECK_AND_RETURN_RET_LOG(IsStopCastDiscovery(pid), AVSESSION_SUCCESS,
+        "StopCastDiscovery is invalid");
     if (cacheStartDiscovery_) {
         SLOGI("clear cacheStartDiscovery when stop discovery");
         cacheStartDiscovery_ = false;
@@ -195,7 +198,6 @@ bool AVRouterImpl::IsStopCastDiscovery(pid_t pid)
 int32_t AVRouterImpl::SetDiscoverable(const bool enable)
 {
     SLOGI("AVRouterImpl SetDiscoverable %{public}d", enable);
-
     std::lock_guard lockGuard(providerManagerLock_);
 
     for (const auto& [number, providerManager] : providerManagerMap_) {
@@ -214,6 +216,10 @@ int32_t AVRouterImpl::OnDeviceAvailable(OutputDeviceInfo& castOutputDeviceInfo)
     std::lock_guard lockGuard(servicePtrLock_);
     if (servicePtr_ == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
+    }
+    std::lock_guard validDeviceInfoMapLockGuard(validDeviceInfoMapLock_);
+    for (const DeviceInfo& deviceInfo : castOutputDeviceInfo.deviceInfos_) {
+        validDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
     }
     servicePtr_->NotifyDeviceAvailable(castOutputDeviceInfo);
     return AVSESSION_SUCCESS;
@@ -272,6 +278,8 @@ int32_t AVRouterImpl::OnDeviceOffline(const std::string& deviceId)
     if (servicePtr_ == nullptr) {
         return ERR_SERVICE_NOT_EXIST;
     }
+    std::lock_guard validDeviceInfoMapLockGuard(validDeviceInfoMapLock_);
+    validDeviceInfoMap_.erase(deviceId);
     servicePtr_->NotifyDeviceOffline(deviceId);
     return AVSESSION_SUCCESS;
 }
@@ -297,14 +305,18 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
             return ERR_SERVICE_NOT_EXIST;
         }
         servicePtr_->setInCast(false);
+        std::lock_guard validDeviceInfoMapLockGuard(validDeviceInfoMapLock_);
+        for (const auto& [deviceId, deviceInfo] : validDeviceInfoMap_) {
+            servicePtr_->NotifyDeviceOffline(deviceId);
+        }
+        validDeviceInfoMap_.clear();
     }
     std::lock_guard lockGuard(providerManagerLock_);
     providerNumber_ = providerNumberDisable_;
     providerManagerMap_.clear();
 
-    DeviceInfo deviceInfo(AVCastCategory::CATEGORY_LOCAL, "1", "RemoteCast");
+    DeviceInfo deviceInfo(AVCastCategory::CATEGORY_LOCAL, "-1", "RemoteCast");
     OnCastStateChange(disconnectStateFromCast_, deviceInfo);
-
     castHandleToInfoMap_.clear();
 
     if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
@@ -384,7 +396,8 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     return castHandle;
 }
 
-int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo)
+int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
+    uint32_t spid)
 {
     SLOGI("AVRouterImpl AddDevice process");
     
@@ -398,7 +411,7 @@ int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& ou
         }
     }
     bool ret = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->AddCastDevice(castId,
-        outputDeviceInfo.deviceInfos_[0]);
+        outputDeviceInfo.deviceInfos_[0], spid);
     SLOGI("AVRouterImpl AddDevice process with ret %{public}d", static_cast<int32_t>(ret));
     if (ret && castHandleToInfoMap_.find(castHandle) != castHandleToInfoMap_.end()) {
         castHandleToInfoMap_[castHandle].outputDeviceInfo_ = outputDeviceInfo;
@@ -493,6 +506,19 @@ int32_t AVRouterImpl::GetRemoteNetWorkId(int64_t castHandle, std::string deviceI
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVRouterImpl::GetRemoteDrmCapabilities(int64_t castHandle, std::string deviceId,
+    std::vector<std::string> &drmCapabilities)
+{
+    int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
+    int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
+        AVSESSION_ERROR, "Can not find corresponding provider");
+    CHECK_AND_RETURN_RET_LOG(providerManagerMap_[providerNumber] != nullptr
+        && providerManagerMap_[providerNumber]->provider_ != nullptr, AVSESSION_ERROR, "provider is nullptr");
+    providerManagerMap_[providerNumber]->provider_->GetRemoteDrmCapabilities(castId, deviceId, drmCapabilities);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVRouterListener> callback,
     std::string sessionId, DeviceInfo deviceInfo)
 {
@@ -582,12 +608,26 @@ bool AVRouterImpl::IsInMirrorToStreamState()
     return isInMirrorToStream_;
 }
 
-void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+bool AVRouterImpl::IsRemoteCasting()
+{
+    return isRemoteCasting_;
+}
+
+void AVRouterImpl::UpdateConnectState(int32_t castState)
 {
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::MIRROR_TO_STREAM) ||
         castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM_TO_MIRROR)) {
         isInMirrorToStream_ = (castState == static_cast<int32_t>(CastEngine::DeviceState::MIRROR_TO_STREAM));
     }
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM) ||
+        castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
+        isRemoteCasting_ = (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM));
+    }
+}
+
+void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+{
+    UpdateConnectState(castState);
     for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
         if (castHandleInfo.avRouterListener_ != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered avRouterListener");
@@ -608,7 +648,6 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         }
     }
     if (castState == disconnectStateFromCast_) {
-        std::lock_guard lockGuard(servicePtrLock_);
         servicePtr_->SetIsSupportMirrorToStream(false);
     }
 }

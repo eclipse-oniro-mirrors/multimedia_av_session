@@ -66,6 +66,22 @@ public:
     */
     virtual int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                   std::shared_ptr<AVSession>& session) = 0;
+
+    /**
+     * Create Session Object.
+     *
+     * @param tag Custom name of the session
+     * @param type Session type
+     * @param extraInfo extra info
+     * @param elementName element Name
+     * @param session Created session {@link AVSession}
+     * @return Returns result of creating session
+     * @since 20
+    */
+    virtual int32_t CreateSessionWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
+                                          const AppExecFwk::ElementName& elementName,
+                                          std::shared_ptr<AVSession>& session) = 0;
+
     /**
      * Send the key command to get the descriptor of all sessions.
      *
@@ -195,7 +211,7 @@ public:
      * @param keyEvent Key event {@linkKeyEvent}
      * @param wantParam The wantParam
      * @return Returns whether the key event was successfully sent to the top session.
-     * @since 9
+     * @since 18
     */
     virtual int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam) = 0;
 

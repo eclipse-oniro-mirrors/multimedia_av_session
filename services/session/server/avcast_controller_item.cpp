@@ -24,6 +24,7 @@
 #include "avmedia_description.h"
 #include "bundle_status_adapter.h"
 #include "avsession_utils.h"
+#include "string_wrapper.h"
 #include "cast_engine_common.h"
 #include "cast_shared_memory_base.h"
 #include "securec.h"
@@ -78,6 +79,15 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
         if (callback_ != nullptr) {
             callback_->OnCastPlaybackStateChange(stateOut);
         }
+    }
+}
+
+void AVCastControllerItem::OnCustomData(const AAFwk::WantParams& data)
+{
+    SLOGI("Enter OnCustomData in AVCastControllerItem.");
+    std::lock_guard lockGuard(castControllerCallbackLock_);
+    if (callback_ != nullptr) {
+        callback_->OnCustomData(data);
     }
 }
 
@@ -203,6 +213,20 @@ int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd
         "API_PARAM", API_PARAM_STRING,
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVCastControllerItem::SendCustomData(const AAFwk::WantParams& data)
+{
+    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params don't have customData");
+    auto value = data.GetParam("customData");
+    AAFwk::IString* stringValue = AAFwk::IString::Query(value);
+    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
+
+    std::lock_guard lockGuard(castControllerLock_);
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    std::string str = AAFwk::String::Unbox(stringValue);
+    castControllerProxy_->SendCustomData(str);
     return AVSESSION_SUCCESS;
 }
 
@@ -554,9 +578,9 @@ int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
 
 int32_t AVCastControllerItem::HandleCastValidCommandChange(const std::vector<int32_t>& cmds)
 {
+    std::lock_guard lockGuard(castControllerCallbackLock_);
     SLOGI("HandleCastValidCommandChange cmd size:%{public}zd", cmds.size());
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
-    std::lock_guard lockGuard(castControllerCallbackLock_);
     callback_->OnCastValidCommandChanged(cmds);
     return AVSESSION_SUCCESS;
 }

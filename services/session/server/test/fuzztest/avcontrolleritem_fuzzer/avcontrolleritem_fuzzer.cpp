@@ -17,6 +17,7 @@
 #include <cstdint>
 
 #include "securec.h"
+#include "string_wrapper.h"
 #include "avsession_item.h"
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
@@ -161,6 +162,8 @@ void AvControllerItemFuzzer::FuzzOnRemoteRequest()
     g_sizePos += sizeof(uint32_t);
     dataMessageParcel.RewindRead(0);
     avControllerItem->OnRemoteRequest(code, dataMessageParcel, reply, option);
+    service->OnStop();
+    SLOGI("FuzzOnRemoteRequest done");
 }
 
 void AvControllerItemRemoteRequestTest()
@@ -211,6 +214,8 @@ void AvControllerItemDataTest()
     AvControllerItemDataTestSecond(avControllerItem);
     AvControllerItemDataTestThird(avControllerItem);
     avControllerItem->RegisterCallbackInner(avControllerItemObj);
+    service->OnStop();
+    SLOGI("AvControllerItemDataTest done");
 }
 
 void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem)
@@ -308,6 +313,8 @@ void AvControllerItemTest()
     ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
     AvControllerItemTestImpl(avControllerItem);
     AvControllerItemTestImplSecond(avControllerItem);
+    service->OnStop();
+    SLOGI("AvControllerItemTest done");
 }
 
 void AvControllerItemTestImpl(sptr<AVControllerItem> avControllerItem)
@@ -359,6 +366,9 @@ void AvControllerItemTestImplSecond(sptr<AVControllerItem> avControllerItem)
     avControllerItem->HandleQueueItemsChange(items);
     avControllerItem->HandleQueueTitleChange(title);
     avControllerItem->HandleExtrasChange(wantParams);
+    wantParams.SetParam("customData", AAFwk::String::Box(GetString()));
+    avControllerItem->SendCustomData(wantParams);
+    avControllerItem->HandleCustomData(wantParams);
 
     std::string sessionId = GetString();
     auto releaseCallback = [](AVControllerItem& item) {};

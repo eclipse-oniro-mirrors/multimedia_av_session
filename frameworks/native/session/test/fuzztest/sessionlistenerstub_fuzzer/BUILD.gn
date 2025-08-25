@@ -39,7 +39,7 @@ ohos_fuzztest("SessionListenerStubFuzzTest") {
   ]
   sources = [ "session_listenerstub_fuzzer.cpp" ]
   deps = [
-    "../../../../session:avsession_client",
+    "../../../../session:avsession_client_static",
     "./../../../../../../services/session:libidl_avsession_service_interface_proxy",
     "./../../../../../../services/session:libidl_avsession_service_interface_stub",
     "../../../../../../utils:avsession_utils",

@@ -1200,6 +1200,68 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest040, TestSize.Level0
 }
 
 /**
+ * @tc.name: OnRemoteRequest041
+ * @tc.desc: Test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest041, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequest041 begin!");
+    uint32_t code = 22;
+    AVSessionControllerStubDemo avSessionControllerStub;
+    avSessionControllerStub.isSuccess = false;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
+    data.WriteString("test");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = avSessionControllerStub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnRemoteRequest041 end!");
+}
+
+/**
+ * @tc.name: OnRemoteRequest042
+ * @tc.desc: Test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest042, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequest042 begin!");
+    uint32_t code = 22;
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
+    data.WriteString("test");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = avSessionControllerStub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnRemoteRequest042 end!");
+}
+
+/**
+ * @tc.name: OnRemoteRequest043
+ * @tc.desc: Test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest043, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequest043 begin!");
+    uint32_t code = 22;
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionController::GetDescriptor());
+    OHOS::AAFwk::WantParams customData;
+    data.WriteParcelable(&customData);
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = avSessionControllerStub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnRemoteRequest043 end!");
+}
+
+/**
  * @tc.name: DoMetadataImgClean001
  * @tc.desc: Test OnRemoteRequest
  * @tc.type: FUNC
@@ -1433,19 +1495,4 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter003, TestSiz
     int ret = avSessionControllerStub.HandleSetPlaybackFilter(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetPlaybackFilter003 end!");
-}
-
-/**
- * @tc.name: GetLaunchAbilityInner001
- * @tc.desc: Test GetLaunchAbilityInner
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionControllerStubTest, GetLaunchAbilityInner001, TestSize.Level0)
-{
-    SLOGI("GetLaunchAbilityInner001 begin!");
-    AVSessionControllerStubDemo avSessionControllerStub;
-    OHOS::AbilityRuntime::WantAgent::WantAgent* ability;
-    auto ret = avSessionControllerStub.GetLaunchAbilityInner(ability);
-    EXPECT_EQ(ret, 0);
-    SLOGI("GetLaunchAbilityInner001 end!");
 }

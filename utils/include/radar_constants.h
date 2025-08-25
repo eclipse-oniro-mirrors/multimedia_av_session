@@ -82,41 +82,42 @@ enum class TrustStatus : int32_t {
 constexpr uint8_t AV_SESSION_SYSTEM_ID = 226;
 constexpr uint8_t AV_SESSION_MODULE_ID = 18;
 
-const std::string AVSESSION_CAST_BEHAVIOR = "AVSESSION_CAST_BEHAVIOR";
+namespace {
+const char* AVSESSION_CAST_BEHAVIOR = "AVSESSION_CAST_BEHAVIOR";
 
-const std::string ORG_PKG = "ORG_PKG";
-const std::string HOST_PKG = "HOST_PKG";
-const std::string TO_CALL_PKG = "TO_CALL_PKG";
-const std::string TRIGGER_MODE = "TRIGGER_MODE";
-const std::string FUNC = "FUNC";
+const char* ORG_PKG = "ORG_PKG";
+const char* HOST_PKG = "HOST_PKG";
+const char* TO_CALL_PKG = "TO_CALL_PKG";
+const char* TRIGGER_MODE = "TRIGGER_MODE";
+const char* FUNC = "FUNC";
 
-const std::string BIZ_SCENE = "BIZ_SCENE";
-const std::string BIZ_STAGE = "BIZ_STAGE";
+const char* BIZ_SCENE = "BIZ_SCENE";
+const char* BIZ_STAGE = "BIZ_STAGE";
 
-const std::string STAGE_RES = "STAGE_RES";
-const std::string BIZ_STATE = "BIZ_STATE";
-const std::string ERROR_CODE = "ERROR_CODE";
+const char* STAGE_RES = "STAGE_RES";
+const char* BIZ_STATE = "BIZ_STATE";
+const char* ERROR_CODE = "ERROR_CODE";
 
-const std::string DISCOVERY_DEVICE_LIST = "DISCOVERY_DEVICE_LIST";
-const std::string LOCAL_UDID = "LOCAL_UDID";
-const std::string LOCAL_NET_ID = "LOCAL_NET_ID";
-const std::string LOCAL_DEV_TYPE = "LOCAL_DEV_TYPE";
-const std::string PEER_UDID = "PEER_UDID";
-const std::string PEER_BT_MAC = "PEER_BT_MAC";
-const std::string PEER_NET_ID = "PEER_NET_ID";
-const std::string PEER_DEV_TYPE = "PEER_DEV_TYPE";
-const std::string PEER_DEV_NAME = "PEER_DEV_NAME";
-const std::string IS_TRUST = "IS_TRUST";
-const std::string LOCAL_SESS_NAME = "LOCAL_SESS_NAME";
-const std::string PEER_SESS_NAME = "PEER_SESS_NAME";
-const std::string SOURCE_TYPE = "SOURCE_TYPE";
+const char* DISCOVERY_DEVICE_LIST = "DISCOVERY_DEVICE_LIST";
+const char* LOCAL_UDID = "LOCAL_UDID";
+const char* LOCAL_NET_ID = "LOCAL_NET_ID";
+const char* LOCAL_DEV_TYPE = "LOCAL_DEV_TYPE";
+const char* PEER_UDID = "PEER_UDID";
+const char* PEER_BT_MAC = "PEER_BT_MAC";
+const char* PEER_NET_ID = "PEER_NET_ID";
+const char* PEER_DEV_TYPE = "PEER_DEV_TYPE";
+const char* PEER_DEV_NAME = "PEER_DEV_NAME";
+const char* IS_TRUST = "IS_TRUST";
+const char* LOCAL_SESS_NAME = "LOCAL_SESS_NAME";
+const char* PEER_SESS_NAME = "PEER_SESS_NAME";
+const char* SOURCE_TYPE = "SOURCE_TYPE";
 
 const std::string DEV_PHONE = "00E";
 const std::string DEV_LAPTOP = "00C";
 const std::string AVSESSION_PKG_NAME = "av_session";
 const std::string CAST_ENGINE_PKG = "cast_engine_service";
 const std::string MEDIA_CONTROL_PKG = "mediacontroller";
-
+}
 constexpr uint32_t DEVICE_ID_MIN_LEN = 10;
 } // namespace OHOS::AVSession
 

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,8 @@
 #include <dlfcn.h>
 #include <string>
 #include <map>
+#include <mutex>
+#include <shared_mutex>
 
 #include "avsession_stub.h"
 #include "av_session_callback_proxy.h"
@@ -110,6 +113,10 @@ public:
 
     int32_t GetAVPlaybackState(AVPlaybackState& state) override;
 
+    int32_t SendCustomData(const AAFwk::WantParams& data) override;
+
+    void SendCustomDataInner(const AAFwk::WantParams& data);
+
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
     int32_t GetExtras(AAFwk::WantParams& extras) override;
@@ -153,7 +160,7 @@ public:
     void KeyEventExtras(AAFwk::IArray* list);
 
     void NotificationExtras(AAFwk::IArray* list);
-
+ 
     bool IsNotShowNotification();
 
     std::vector<int32_t> GetSupportCommand();
@@ -169,6 +176,8 @@ public:
     void ExecuteControllerCommand(const AVControlCommand& cmd);
 
     void ExecueCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
+
+    void ExecuteCustomData(const AAFwk::WantParams& data);
 
     int32_t AddController(pid_t pid, sptr<AVControllerItem>& controller);
 
@@ -187,6 +196,10 @@ public:
     std::string GetBundleName() const;
 
     void UpdateSessionElement(const AppExecFwk::ElementName& elementName);
+
+    void SetPlayingTime(int64_t playingTime);
+
+    int64_t GetPlayingTime() const;
 
     void SetTop(bool top);
 
@@ -220,7 +233,7 @@ public:
 
     void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
 
-    void SetServiceCallbackForMediaSession(const std::function<void(std::string, bool)>& callback);
+    void SetServiceCallbackForMediaSession(const std::function<void(std::string, bool, bool)>& callback);
     
     void SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback);
 
@@ -254,7 +267,7 @@ public:
 
     int32_t DeleteSupportCastCommand(int32_t cmd);
 
-    void HandleCastValidCommandChange(const std::vector<int32_t> &cmds);
+    void HandleCastValidCommandChange(const std::vector<int32_t>& cmds);
 
     int32_t ReleaseCast(bool continuePlay = false) override;
 
@@ -264,7 +277,8 @@ public:
 
     int32_t CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo);
 
-    int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo);
+    int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo,
+        uint32_t spid);
 
     int32_t StopCast(bool continuePlay = false);
 
@@ -275,8 +289,6 @@ public:
     void ReleaseAVCastControllerInner();
 
     void UpdateCastDeviceMap(DeviceInfo deviceInfo);
-
-    std::map<std::string, DeviceInfo> GetCastDeviceMap() const;
 
     void SetCastHandle(int64_t castHandle);
 
@@ -296,6 +308,10 @@ public:
 
     void SetExtrasInner(AAFwk::IArray* list);
 
+    void SetSpid(const AAFwk::WantParams& extras);
+
+    uint32_t GetSpid();
+
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
     
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
@@ -307,6 +323,9 @@ public:
     void ReportCommandChange();
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
+
+    void ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap);
+    void ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& avQueuePixelMap);
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
@@ -349,6 +368,8 @@ private:
     void PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo);
     void DelRecommend();
     void UpdateRecommendInfo(bool needRecommend);
+    bool SearchSpidInCapability(const std::string& deviceId);
+    void CheckIfSendCapsule(const AVPlaybackState& state);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -419,13 +440,14 @@ private:
     std::function<void(AVSessionItem&)> serviceCallback_;
     std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;
+    int64_t playingTime_ = 0;
 
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
     std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
-    std::function<void(std::string, bool)> serviceCallbackForMediaSession_;
+    std::function<void(std::string, bool, bool)> serviceCallbackForMediaSession_;
     std::function<void(std::string)> serviceCallbackForKeyEvent_;
     std::function<void(std::string)> updateExtrasCallback_;
     std::function<void(std::string, bool)> serviceCallbackForNtf_;
@@ -435,6 +457,7 @@ private:
     bool isMediaChange_ = true;
     bool isAssetChange_ = false;
     bool isRecommend_ = false;
+    bool isPlayingState_ = false;
 
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
@@ -448,6 +471,7 @@ private:
     static constexpr const int32_t audioBrokerUid = 5557;
     static constexpr const char *defaultBundleName = "com.example.himusicdemo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
+    static constexpr const int32_t cancelTimeout = 5000;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;
@@ -471,7 +495,9 @@ private:
     std::recursive_mutex callbackForCastCapLock_;
 
     std::recursive_mutex mediaSessionCallbackLock_;
-    
+
+    std::shared_mutex writeAndReadImgLock_;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;
     int64_t castHandle_ = 0;
@@ -504,6 +530,8 @@ private:
     std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
+    uint32_t spid_ = 0;
+    std::mutex spidMutex_;
     std::function<void(std::string)> serviceCallbackForStream_;
     bool isSwitchNewDevice_ = false;
     OutputDeviceInfo newOutputDeviceInfo_;

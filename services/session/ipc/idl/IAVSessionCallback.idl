@@ -63,4 +63,8 @@ interface OHOS.AVSession.IAVSessionCallback {
     [oneway] void OnPlayWithAssetId([in] String assetId);
 
     [oneway] void OnCastDisplayChange([in] CastDisplayInfo castDisplayInfo);
+
+    [oneway] void OnCastDisplaySizeChange([in] CastDisplayInfo castDisplayInfo);
+
+    [oneway] void OnCustomData([in] WantParams customData);
 }

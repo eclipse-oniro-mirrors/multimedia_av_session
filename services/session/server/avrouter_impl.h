@@ -82,7 +82,8 @@ public:
     int64_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, std::string sessionId) override;
 
-    int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) override;
+    int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
+        uint32_t spid) override;
 
     int32_t StopCast(const int64_t castHandle, bool continuePlay = false) override;
 
@@ -98,6 +99,9 @@ public:
 
     int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) override;
 
+    int32_t GetRemoteDrmCapabilities(int64_t castHandle, std::string deviceId,
+        std::vector<std::string> &drmCapabilities) override;
+
     int64_t GetMirrorCastHandle() override;
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
@@ -108,10 +112,15 @@ public:
 
     bool IsInMirrorToStreamState() override;
 
+    bool IsRemoteCasting() override;
+
+    void UpdateConnectState(int32_t castState);
+
 protected:
 
 private:
     std::recursive_mutex servicePtrLock_;
+    std::recursive_mutex validDeviceInfoMapLock_;
     IAVSessionServiceListener *servicePtr_ = nullptr;
     std::recursive_mutex providerManagerLock_;
     std::map<int32_t, std::shared_ptr<AVCastProviderManager>> providerManagerMap_;
@@ -134,7 +143,9 @@ private:
     int32_t connectStateFromCast_ = 6;
     const int32_t castEngineServiceRestartWaitTime = 100;
     int32_t deviceType_ = -1;
-    bool isInMirrorToStream_ = false;
+    std::atomic<bool> isInMirrorToStream_ = false;
+    std::atomic<bool> isRemoteCasting_ = false;
+    std::map<std::string, DeviceInfo> validDeviceInfoMap_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

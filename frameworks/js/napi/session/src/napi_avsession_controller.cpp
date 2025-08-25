@@ -48,6 +48,7 @@ std::map<std::string, std::pair<NapiAVSessionController::OnEventHandlerType,
     { "queueItemsChange", { OnQueueItemsChange, OffQueueItemsChange } },
     { "queueTitleChange", { OnQueueTitleChange, OffQueueTitleChange } },
     { "extrasChange", { OnExtrasChange, OffExtrasChange } },
+    { "customDataChange", { OnCustomData, OffCustomData } },
 };
 std::map<std::string, NapiAVSessionController> NapiAVSessionController::ControllerList_ = {};
 std::mutex NapiAVSessionController::uvMutex_;
@@ -86,6 +87,7 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getValidCommandsSync", GetValidCommandsSync),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
         DECLARE_NAPI_FUNCTION("sendCommonCommand", SendCommonCommand),
+        DECLARE_NAPI_FUNCTION("sendCustomData", SendCustomData),
         DECLARE_NAPI_FUNCTION("getAVQueueItems", GetAVQueueItems),
         DECLARE_NAPI_FUNCTION("getAVQueueItemsSync", GetAVQueueItemsSync),
         DECLARE_NAPI_FUNCTION("getAVQueueTitle", GetAVQueueTitle),
@@ -170,9 +172,9 @@ napi_status NapiAVSessionController::RepeatedInstance(napi_env env, const std::s
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
     NapiAVSessionController* napiController{};
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiController)), napi_generic_failure);
-    SLOGD("check repeat controller prelock with sessionId %{public}s", controllerId.c_str());
+    SLOGD("check repeat controller prelock with sessionId %{public}s", controllerId.substr(0, ARGC_THREE).c_str());
     std::lock_guard<std::mutex> lock(controllerListMutex_);
-    SLOGI("check repeat controller aftlock with sessionId %{public}s", controllerId.c_str());
+    SLOGI("check repeat controller aftlock with sessionId %{public}s", controllerId.substr(0, ARGC_THREE).c_str());
     if (ControllerList_.count(controllerId) <= 0) {
         SLOGE("check repeat without cur session");
         return napi_generic_failure;
@@ -219,9 +221,7 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAVPlaybackState failed : native no permission";
             } else {
-                context->errMessage = "GetAVPlaybackState failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetAVPlaybackState failed : native server exception";
             }
             SLOGE("controller GetAVPlaybackState failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -268,9 +268,7 @@ napi_value NapiAVSessionController::GetAVPlaybackStateSync(napi_env env, napi_ca
             errMessage = "GetAVPlaybackStateSync failed : native no permission";
         } else {
             ret = AVSESSION_ERROR;
-            errMessage = "GetAVPlaybackStateSync failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+            errMessage = "GetAVPlaybackStateSync failed : native server exception";
         }
         SLOGE("controller GetAVPlaybackStateSync failed:%{public}d", ret);
         NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
@@ -314,9 +312,7 @@ napi_value NapiAVSessionController::GetAVCallMetaData(napi_env env, napi_callbac
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAVCallMetaData failed : native no permission";
             } else {
-                context->errMessage = "GetAVCallMetaData failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetAVCallMetaData failed : native server exception";
             }
             SLOGE("controller GetAVCallMetaData failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -359,9 +355,7 @@ napi_value NapiAVSessionController::GetAVCallState(napi_env env, napi_callback_i
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAVCallState failed : native no permission";
             } else {
-                context->errMessage = "GetAVCallState failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetAVCallState failed : native server exception";
             }
             SLOGE("controller GetAVCallState failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -403,9 +397,7 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAVMetaData failed : native no permission";
             } else {
-                context->errMessage = "GetAVMetaData failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetAVMetaData failed : native server exception";
             }
             SLOGE("controller GetAVMetaData failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -455,9 +447,7 @@ napi_value NapiAVSessionController::GetAVMetaDataSync(napi_env env, napi_callbac
             errMessage = "GetAVMetaDataSync failed : native no permission";
         } else {
             ret = AVSESSION_ERROR;
-            errMessage = "GetAVMetaDataSync failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+            errMessage = "GetAVMetaDataSync failed : native server exception";
         }
         SLOGE("controller GetAVMetaDataSync failed:%{public}d", ret);
         NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
@@ -501,9 +491,7 @@ napi_value NapiAVSessionController::GetAVQueueItems(napi_env env, napi_callback_
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAVQueueItems failed : native no permission";
             } else {
-                context->errMessage = "GetAVQueueItems failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetAVQueueItems failed : native server exception";
             }
             SLOGE("controller GetAVQueueItems failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -552,9 +540,7 @@ napi_value NapiAVSessionController::GetAVQueueItemsSync(napi_env env, napi_callb
             errMessage = "GetAVQueueItemsSync failed : native no permission";
         } else {
             ret = AVSESSION_ERROR;
-            errMessage = "GetAVQueueItemsSync failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+            errMessage = "GetAVQueueItemsSync failed : native server exception";
         }
         SLOGE("controller GetAVQueueItemsSync failed:%{public}d", ret);
         NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
@@ -598,9 +584,7 @@ napi_value NapiAVSessionController::GetAVQueueTitle(napi_env env, napi_callback_
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetAVQueueTitle failed : native no permission";
             } else {
-                context->errMessage = "GetAVQueueTitle failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetAVQueueTitle failed : native server exception";
             }
             SLOGE("controller GetAVQueueTitle failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -649,9 +633,7 @@ napi_value NapiAVSessionController::GetAVQueueTitleSync(napi_env env, napi_callb
             errMessage = "GetAVQueueTitleSync failed : native no permission";
         } else {
             ret = AVSESSION_ERROR;
-            errMessage = "GetAVQueueTitleSync failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+            errMessage = "GetAVQueueTitleSync failed : native server exception";
         }
         SLOGE("controller GetAVQueueTitleSync failed:%{public}d", ret);
         NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
@@ -710,9 +692,7 @@ napi_value NapiAVSessionController::SkipToQueueItem(napi_env env, napi_callback_
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SkipToQueueItem failed : native no permission";
             } else {
-                context->errMessage = "SkipToQueueItem failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "SkipToQueueItem failed : native server exception";
             }
             SLOGE("controller SkipToQueueItem failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -752,9 +732,7 @@ napi_value NapiAVSessionController::GetExtras(napi_env env, napi_callback_info i
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetExtras failed : native no permission";
             } else {
-                context->errMessage = "GetExtras failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetExtras failed : native server exception";
             }
             SLOGE("Controller getExtras failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -810,9 +788,7 @@ napi_value NapiAVSessionController::GetExtrasWithEvent(napi_env env, napi_callba
             } else if (ret == ERR_COMMAND_NOT_SUPPORT) {
                 context->errMessage = "GetExtrasWithEvent failed : native invalid key event";
             } else {
-                context->errMessage = "GetExtrasWithEvent failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetExtrasWithEvent failed : native server exception";
             }
             SLOGE("Controller getExtras with event failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -869,9 +845,7 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SendAVKeyEvent failed : native no permission";
             } else {
-                context->errMessage = "SendAVKeyEvent failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "SendAVKeyEvent failed : native server exception";
             }
             SLOGE("controller SendAVKeyEvent failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -909,9 +883,7 @@ napi_value NapiAVSessionController::GetLaunchAbility(napi_env env, napi_callback
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetLaunchAbility failed : native no permission";
             } else {
-                context->errMessage = "GetLaunchAbility failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetLaunchAbility failed : native server exception";
             }
             SLOGE("controller GetLaunchAbility failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -955,9 +927,7 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "GetValidCommands failed : native no permission";
             } else {
-                context->errMessage = "GetValidCommands failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "GetValidCommands failed : native server exception";
             }
             SLOGE("controller GetValidCommands failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -1008,9 +978,7 @@ napi_value NapiAVSessionController::GetValidCommandsSync(napi_env env, napi_call
             errMessage = "GetValidCommandsSync failed : native no permission";
         } else {
             ret = AVSESSION_ERROR;
-            errMessage = "GetValidCommandsSync failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+            errMessage = "GetValidCommandsSync failed : native server exception";
         }
         SLOGE("controller GetValidCommandsSync failed:%{public}d", ret);
         NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
@@ -1056,9 +1024,7 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "IsSessionActive failed : native no permission";
             } else {
-                context->errMessage = "IsSessionActive failed : native server exception, \
-                    you are advised to : 1.scheduled retry.\
-                    2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "IsSessionActive failed : native server exception";
             }
             SLOGE("controller IsSessionActive failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -1107,9 +1073,7 @@ napi_value NapiAVSessionController::IsSessionActiveSync(napi_env env, napi_callb
             errMessage = "IsSessionActiveSync failed : native no permission";
         } else {
             ret = AVSESSION_ERROR;
-            errMessage = "IsSessionActiveSync failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+            errMessage = "IsSessionActiveSync failed : native server exception";
         }
         SLOGE("controller IsSessionActiveSync failed:%{public}d", ret);
         NapiUtils::ThrowError(env, errMessage.c_str(), NapiAVSessionManager::errcode_[ret]);
@@ -1164,14 +1128,11 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
             } else if (ret == ERR_COMMAND_NOT_SUPPORT) {
                 context->errMessage = "SendControlCommand failed : native command not support";
             } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
-                context->errMessage = "SendControlCommand failed : native command send nums overload, \
-                    controls the frequency of sending self-query and control commands";
+                context->errMessage = "SendControlCommand failed : native command send nums overload";
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "SendControlCommand failed : native no permission";
             } else {
-                context->errMessage = "SendControlCommand failed : native server exception, \
-                    you are advised to : 1.scheduled retry.\
-                    2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "SendControlCommand failed : native server exception";
             }
             SLOGE("controller SendControlCommand failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -1235,6 +1196,51 @@ napi_value NapiAVSessionController::SendCommonCommand(napi_env env, napi_callbac
     return NapiAsyncWork::Enqueue(env, context, "SendCommonCommand", executor, complete);
 }
 
+napi_value NapiAVSessionController::SendCustomData(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionController::SendCustomData");
+    struct ConcreteContext : public ContextBase {
+        AAFwk::WantParams data_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SendCustomData failed : no memory");
+        NapiUtils::ThrowError(env, "SendCustomData failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->data_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get data failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SEND_CUSTOM_DATA_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController->controller_ == nullptr) {
+            SLOGE("SendCustomData failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "SendCustomData failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->SendCustomData(context->data_);
+        if (ret != AVSESSION_SUCCESS) {
+            ErrCodeToMessage(ret, context->errMessage);
+            SLOGE("Controller SendCustomData failed:%{public}d", ret);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "SendCustomData", executor);
+}
+
 void NapiAVSessionController::ErrCodeToMessage(int32_t errCode, std::string& message)
 {
     switch (errCode) {
@@ -1251,9 +1257,7 @@ void NapiAVSessionController::ErrCodeToMessage(int32_t errCode, std::string& mes
             message = "SetSessionEvent failed : native no permission";
             break;
         default:
-            message = "SetSessionEvent failed : native server exception, \
-                you are advised to : 1.scheduled retry.\
-                2.destroy the current session or session controller and re-create it.";
+            message = "SetSessionEvent failed : native server exception";
             break;
     }
 }
@@ -1286,9 +1290,7 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
             } else if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "Destroy controller failed : native no permission";
             } else {
-                context->errMessage = "Destroy controller failed : native server exception, \
-                    you are advised to : 1.scheduled retry.\
-                    2.destroy the current session or session controller and re-create it.";
+                context->errMessage = "Destroy controller failed : native server exception";
             }
             SLOGE("controller Destroy failed:%{public}d", ret);
             context->status = napi_generic_failure;
@@ -1482,13 +1484,16 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
         }
         std::string registerControllerId = napiController->sessionId_;
         napiController->callback_->AddCallbackForSessionDestroy([registerControllerId]() {
-            SLOGI("repeat list check for session destory: %{public}s", registerControllerId.c_str());
+            SLOGI("repeat list check for session destory: %{public}s",
+                registerControllerId.substr(0, ARGC_THREE).c_str());
             std::lock_guard<std::mutex> lock(controllerListMutex_);
             if (!ControllerList_.empty() && ControllerList_.find(registerControllerId) != ControllerList_.end()) {
-                SLOGI("repeat list erase controller for session destory: %{public}s", registerControllerId.c_str());
+                SLOGI("repeat list erase controller for session destory: %{public}s",
+                    registerControllerId.substr(0, ARGC_THREE).c_str());
                 ControllerList_.erase(registerControllerId);
             } else {
-                SLOGI("repeat list erase fail for session not in list: %{public}s", registerControllerId.c_str());
+                SLOGI("repeat list erase fail for session not in list: %{public}s",
+                    registerControllerId.substr(0, ARGC_THREE).c_str());
             }
         });
         auto ret = napiController->controller_->RegisterCallback(napiController->callback_);
@@ -1504,9 +1509,7 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
                 NapiUtils::ThrowError(env, "OnEvent failed : native no permission",
                     NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
             } else {
-                NapiUtils::ThrowError(env, "OnEvent failed : native server exception, \
-                    you are advised to : 1.scheduled retry.\
-                    2.destroy the current session or session controller and re-create it.",
+                NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
                     NapiAVSessionManager::errcode_[ret]);
             }
             napiController->callback_ = nullptr;
@@ -1625,7 +1628,6 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
         }
     };
     SLOGD("check offEvent eventName %{public}s", eventName.c_str());
-
     context->GetCbInfo(env, info, input, true);
     if (context->status != napi_ok) {
         SLOGE("check offEvent with status err");
@@ -1700,6 +1702,15 @@ napi_status NapiAVSessionController::OnPlaybackStateChange(napi_env env, NapiAVS
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "SetPlaybackStateFilter failed");
     return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE,
                                                   callback);
+}
+
+napi_status NapiAVSessionController::OnCustomData(napi_env env, NapiAVSessionController* napiController,
+                                                  napi_value param, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_CUSTOM_DATA, callback);
 }
 
 napi_status NapiAVSessionController::OnMetaDataChange(napi_env env, NapiAVSessionController* napiController,
@@ -1819,6 +1830,15 @@ napi_status NapiAVSessionController::OffPlaybackStateChange(napi_env env, NapiAV
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE,
                                                      callback);
+}
+
+napi_status NapiAVSessionController::OffCustomData(napi_env env, NapiAVSessionController* napiController,
+                                                   napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiController->callback_ != nullptr, napi_generic_failure,
+        "callback has not been registered");
+    return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_CUSTOM_DATA, callback);
 }
 
 napi_status NapiAVSessionController::OffMetaDataChange(napi_env env, NapiAVSessionController* napiController,

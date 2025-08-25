@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,8 @@ public:
 
     int32_t SendControlCommand(const AVControlCommand& cmd) override;
 
+    int32_t SendCustomData(const AAFwk::WantParams& data) override;
+
     int32_t SendCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
 
     int32_t SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter) override;
@@ -107,6 +109,8 @@ public:
 
     void HandleExtrasChange(const AAFwk::WantParams& extras);
 
+    void HandleCustomData(const AAFwk::WantParams& data);
+
     pid_t GetPid() const;
 
     bool HasSession(const std::string& sessionId);
@@ -120,7 +124,7 @@ public:
     int32_t RegisterMigrateAVSessionProxyCallback(
         const std::function<int32_t(const std::string&, AAFwk::WantParams&)>& callback);
 
-    int32_t SetImgForMetaData(AVMetaData& data);
+    int32_t ReadImgForMetaData(AVMetaData& data);
 
     std::string GetSessionType();
 

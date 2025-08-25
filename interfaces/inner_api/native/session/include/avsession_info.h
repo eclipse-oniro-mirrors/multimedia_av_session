@@ -146,6 +146,8 @@ public:
 
     virtual void OnValidCommandChange(const std::vector<int32_t> &cmds) = 0;
 
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
+
     virtual int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
         int64_t pos, int32_t& result) = 0;
 
@@ -316,6 +318,22 @@ public:
     virtual void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) = 0;
 
     /**
+     * @brief cast display size change.
+     *
+     * @param castDisplayInfo for castDisplay
+     * @since 11
+     */
+    virtual void OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) {};
+
+    /**
+     * @brief custom media packet for 4k change callback.
+     *
+     * @param data The changed custom media packet.
+     * @since 11
+     */
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
+
+    /**
      * @brief Deconstruct AVSessionCallback.
      * @since 9
     */
@@ -429,6 +447,14 @@ public:
     virtual void OnExtrasChange(const AAFwk::WantParams& extras) = 0;
 
     /**
+     * @brief Session custom media packet for 4k change callback.
+     *
+     * @param data The changed custom media packet.
+     * @since 10
+     */
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
+
+    /**
      * @brief Deconstruct AVControllerCallback.
      * @since 9
     */
@@ -461,6 +487,8 @@ public:
 
     virtual int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
         int64_t pos, int32_t& result) = 0;
+
+    virtual void OnCustomData(const AAFwk::WantParams& data) {};
 
     /**
      * @brief Deconstruct AVControllerCallback.
@@ -714,7 +742,7 @@ enum DeviceType {
  */
 enum ResolutionLevel {
     /**
-     * Defination of 480P which typically resolution is 640*480.
+     * Definition of 480P which typically resolution is 640*480.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18
@@ -730,7 +758,7 @@ enum ResolutionLevel {
     RESOLUTION_720P = 1,
 
     /**
-     * Defination of 1080P which typically resolution is 1920*1080.
+     * Definition of 1080P which typically resolution is 1920*1080.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18
@@ -738,7 +766,7 @@ enum ResolutionLevel {
     RESOLUTION_1080P = 2,
 
     /**
-     * Defination of 2K which typically resolution is 2560*1440.
+     * Definition of 2K which typically resolution is 2560*1440.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18
@@ -746,7 +774,7 @@ enum ResolutionLevel {
     RESOLUTION_2K = 3,
 
     /**
-     * Defination of 4K which typically resolution is 4096*3840.
+     * Definition of 4K which typically resolution is 4096*3840.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18
@@ -917,6 +945,20 @@ struct DecoderType {
     static constexpr const char *OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a";
 };
 
+enum CastEngineConnectState {
+    CONNECTING = 0,
+    CONNECTED = 1,
+    PAUSED = 2,
+    PLAYING = 3,
+    DISCONNECTING = 4,
+    DISCONNECTED = 5,
+    STREAM = 6,
+    MIRROR_TO_UI = 7,
+    UI_TO_MIRROR = 8,
+    UICAST = 9,
+    DEVICE_STATE_MAX = 10,
+};
+
 /**
  * Device state used to describe states including discovery, authentication and other scenes.
  * @typedef DeviceState
@@ -931,7 +973,7 @@ struct DeviceState: public Parcelable {
      * @atomicservice
      * @since 20
      */
-    std::string deviceId;
+    std::string deviceId = "";
 
     /**
      * Device connection state.
@@ -939,7 +981,7 @@ struct DeviceState: public Parcelable {
      * @atomicservice
      * @since 20
      */
-    int32_t deviceState;
+    int32_t deviceState = CastEngineConnectState::DISCONNECTED;
 
     /**
      * Reason for connection failure, for example, user cancellation and timeout.
@@ -947,7 +989,7 @@ struct DeviceState: public Parcelable {
      * @atomicservice
      * @since 20
      */
-    int32_t reasonCode;
+    int32_t reasonCode = 0;
 
     /**
      * System radar error code returned by cast+services.
@@ -960,9 +1002,9 @@ struct DeviceState: public Parcelable {
     bool Marshalling(Parcel& out) const override
     {
         return out.WriteString(deviceId) &&
-            out.WriteInt32(deviceState) &&
-            out.WriteInt32(reasonCode) &&
-            out.WriteInt32(radarErrorCode);
+            out.WriteInt32(static_cast<int32_t>(deviceState)) &&
+            out.WriteInt32(static_cast<int32_t>(reasonCode)) &&
+            out.WriteInt32(static_cast<int32_t>(radarErrorCode));
     }
 
     static DeviceState* Unmarshalling(Parcel& in)
@@ -993,20 +1035,6 @@ struct DeviceState: public Parcelable {
         }
         return true;
     }
-};
-
-enum CastEngineConnectState {
-    CONNECTING = 0,
-    CONNECTED = 1,
-    PAUSED = 2,
-    PLAYING = 3,
-    DISCONNECTING = 4,
-    DISCONNECTED = 5,
-    STREAM = 6,
-    MIRROR_TO_UI = 7,
-    UI_TO_MIRROR = 8,
-    UICAST = 9,
-    DEVICE_STATE_MAX = 10,
 };
 
 /**

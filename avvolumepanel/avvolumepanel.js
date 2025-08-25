@@ -17,6 +17,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 
 const TAG = 'AVVolumePanel';
+const t1 = 20;
 class AVVolumePanelParameter {
 }
 
@@ -30,6 +31,7 @@ export class AVVolumePanel extends ViewPU {
     this.__volumeParameter = new SynchedPropertyObjectOneWayPU(q.volumeParameter, this, 'volumeParameter');
     this.volumeCallback = undefined;
     this.panelCountOnCreation = 0;
+    this.__isDisabledByPanelLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPanelLimit');
     this.setInitiallyProvidedValue(q);
     this.declareWatch('volumeLevel', this.volumeChange);
     this.finalizeConstruction();
@@ -45,6 +47,9 @@ export class AVVolumePanel extends ViewPU {
     if (o.panelCountOnCreation !== undefined) {
       this.panelCountOnCreation = o.panelCountOnCreation;
     }
+    if (o.isDisabledByPanelLimit !== undefined) {
+      this.isDisabledByPanelLimit = o.isDisabledByPanelLimit;
+    }
   }
 
   updateStateVars(n) {
@@ -55,11 +60,13 @@ export class AVVolumePanel extends ViewPU {
   purgeVariableDependenciesOnElmtId(m) {
     this.__volumeLevel.purgeDependencyOnElmtId(m);
     this.__volumeParameter.purgeDependencyOnElmtId(m);
+    this.__isDisabledByPanelLimit.purgeDependencyOnElmtId(a11);
   }
 
   aboutToBeDeleted() {
     this.__volumeLevel.aboutToBeDeleted();
     this.__volumeParameter.aboutToBeDeleted();
+    this.__isDisabledByPanelLimit.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -80,6 +87,14 @@ export class AVVolumePanel extends ViewPU {
     this.__volumeParameter.set(k);
   }
 
+  get isDisabledByPanelLimit() {
+    return this.__isDisabledByPanelLimit.get();
+  }
+
+  set isDisabledByPanelLimit(g1) {
+    this.__isDisabledByPanelLimit.set(g1);
+  }
+
   volumeChange() {
     if (this.volumeCallback != null) {
       console.info(TAG, `volumechange volumeLevel = ` + this.volumeLevel);
@@ -90,6 +105,10 @@ export class AVVolumePanel extends ViewPU {
   aboutToAppear() {
     AVVolumePanel.currentPanelCount += 1;
     this.panelCountOnCreation = AVVolumePanel.currentPanelCount;
+    if (this.panelCountOnCreation > t1) {
+      console.info(TAG, 'disable picker');
+      this.isDisabledByPanelLimit = true;
+    }
   }
 
   aboutToDisappear() {
@@ -102,24 +121,40 @@ export class AVVolumePanel extends ViewPU {
       Column.size({width: '100%', height: '100%'});
     }, Column);
     this.observeComponentCreation2((c, d) => {
-      UIExtensionComponent.create({
-        abilityName: 'AVVolumeExtension',
-        bundleName: 'com.hmos.mediacontroller',
-        parameters: {
-          'volumeParameter': this.volumeParameter,
-          'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
-          'currentPanelCount': this.panelCountOnCreation,
-        }
-      });
-      UIExtensionComponent.onReceive((h) => {
-        console.info(TAG, `onReceive : ${JSON.stringify(h.state)}`);
-      });
-      UIExtensionComponent.onRemoteReady((g) => {
-        console.info(TAG, `onRemoteReady callback : ${JSON.stringify(g)}`);
-        this.volumeCallback = g;
-      });
-      UIExtensionComponent.size({ width: '100%', height: '100%' });
-    }, UIExtensionComponent);
+      If.create();
+      if (this.isDisabledByPanelLimit) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation2((elmId, isInitialRender) => {
+            Column.create();
+          }, Column);
+          Column.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.observeComponentCreation2((elmId, isInitialRender) => {
+            UIExtensionComponent.create({
+              abilityName: 'AVVolumeExtension',
+              bundleName: 'com.hmos.mediacontroller',
+              parameters: {
+                'volumeParameter': this.volumeParameter,
+                'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
+                'currentPanelCount': this.panelCountOnCreation,
+              }
+            });
+            UIExtensionComponent.onReceive((h) => {
+              console.info(TAG, `onReceive : ${JSON.stringify(h.state)}`);
+            });
+            UIExtensionComponent.onRemoteReady((g) => {
+              console.info(TAG, `onRemoteReady callback : ${JSON.stringify(g)}`);
+              this.volumeCallback = g;
+            });
+            UIExtensionComponent.size({ width: '100%', height: '100%' });
+          }, UIExtensionComponent);
+        });
+      }
+    }, If);
+    If.pop();
     Column.pop();
   }
   rerender() {

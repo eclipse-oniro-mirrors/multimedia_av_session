@@ -15,6 +15,7 @@
 
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
+const MAX_PICKER_LIMIT = 20;
 
 /**
  * Definition of av cast picker state.
@@ -111,6 +112,8 @@ export interface AVCastPickerDeviceInfo {
   networkId: string,
   supportedProtocols?: number,
   highQualityParams?: HighQualityParams,
+  fromCall?: boolean,
+  deviceSubName?: string,
 }
 
 @Component
@@ -206,12 +209,17 @@ export struct AVCastPicker {
   private needToRestart: boolean = false;
   @State isShowLoadingProgress: boolean = false;
   private pickerCountOnCreation: number = 0;
+  @State isDisabledByPickerLimit: boolean = false;
 
   private static currentPickerCount: number = 0;
 
   aboutToAppear(): void {
     AVCastPicker.currentPickerCount += 1;
     this.pickerCountOnCreation = AVCastPicker.currentPickerCount;
+    if (this.pickerCountOnCreation > MAX_PICKER_LIMIT) {
+      console.info(TAG, 'disable picker');
+      this.isDisabledByPickerLimit = true;
+    }
   }
 
   aboutToDisappear(): void {
@@ -233,7 +241,9 @@ export struct AVCastPicker {
 
   build() {
     Column() {
-      if (this.customPicker === undefined) {
+      if (this.isDisabledByPickerLimit) {
+        this.buildDisabledPicker();
+      } else if (this.customPicker === undefined) {
         this.buildDefaultPicker(false);
       } else {
         this.buildCustomPicker();
@@ -269,10 +279,28 @@ export struct AVCastPicker {
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
         $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
       .textOverflow({ overflow: TextOverflow.Ellipsis })
-      .maxLines(2)
-      .wordBreak(WordBreak.BREAK_ALL)
+      .maxLines(item.fromCall ? 1 : 2);
+      .wordBreak(WordBreak.BREAK_WORD)
       .maxFontScale(this.maxFontSizeScale)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
+  }
+
+  @Builder
+  subTextBuilder(item: AVCastPickerDeviceInfo) {
+    Row() {
+      Text(`${item.deviceSubName}...`)
+        .fontSize($r('sys.float.ohos_id_text_size_body2'))
+        .fontColor(item.isConnected ?
+          (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+          $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
+          (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
+          $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .maxLines(1)
+        .maxFontScale(this.maxFontSizeScale)
+        .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
+    }
+    .width('100%')
   }
 
   @Builder
@@ -303,26 +331,35 @@ export struct AVCastPicker {
           }) {
             Row() {
               this.iconBuilder(item, false)
-
-              Flex({direction: FlexDirection.Row, justifyContent: FlexAlign.Center}) {
-                this.textBuilder(item)
-                if (this.showHighQuality(item)) {
-                  Flex() {
-                    this.highQualityIconBuilder(item.highQualityParams)
+              Column() {
+                Flex({direction: FlexDirection.Row, justifyContent: FlexAlign.Start}) {
+                  this.textBuilder(item)
+                  if (item.highQualityParams !== undefined && this.showHighQuality(item)) {
+                    Flex() {
+                      this.highQualityIconBuilder(item.highQualityParams)
+                    }
+                    .borderRadius(3)
+                    .border({
+                      width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
+                      color: $r('sys.color.font_secondary')
+                    })
+                    .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
+                    .margin({top: 2})
+                    .width('auto')
                   }
-                  .borderRadius(3)
-                  .border({width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)), color: $r('sys.color.font_secondary')})
-                  .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
-                  .margin({top: 2})
-                  .width('auto')
+                }
+                .width('100%')
+
+                if (item.fromCall) {
+                  this.subTextBuilder(item)
                 }
               }
               .width(this.isPc ? 254 : 144)
               .padding({
                 left: 8,
-                top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                top: this.isPc ? 11 : (this.showHighQuality(item) ? 7 : 17),
                 right: 8,
-                bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                bottom: this.isPc ? 11 : (this.showHighQuality(item) ? 7 : 17),
               })
             }
             .alignItems(VerticalAlign.Center)
@@ -348,7 +385,7 @@ export struct AVCastPicker {
           .backgroundColor(this.touchMenuItemIndex === index ?
             $r('sys.color.interactive_click') : '#00FFFFFF')
           .borderRadius(this.touchMenuItemIndex === index ?
-            (this.isPc ? $r('sys.float.corner_radius_level2') : $r('sys.float.corner_radius_level8')): 0)
+            (this.isPc ? $r('sys.float.corner_radius_level2') : $r('sys.float.corner_radius_level8')) : 0)
 
           if (!this.isPc && (index != this.deviceList.length - 1)) {
             Divider()
@@ -371,6 +408,11 @@ export struct AVCastPicker {
     }
     .width(this.isPc ? 326 : 216)
     .borderRadius(this.isPc ? 8 : 20)
+  }
+
+  @Builder
+  private buildDisabledPicker() {
+    Column();
   }
 
   @Builder
@@ -410,7 +452,8 @@ export struct AVCastPicker {
           if (data['deviceList'] !== undefined) {
             console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
             this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
-            let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 && !this.hasExtDevice(this.deviceList);
+            let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 &&
+              !this.hasExtDevice(this.deviceList);
             let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
             let isCalling: boolean = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
             let isExtMenuScene = isCalling && (hasNoDevices || hasOnlySpeakerAndEarpiece);
@@ -521,6 +564,7 @@ export struct AVCastPicker {
       .accessibilityLevel('no-hide-descendants')
       .size({ width: '100%', height: '100%' })
     }
+    .hoverEffect(HoverEffect.None)
     .backgroundColor('#00000000')
     .stateEffect(false)
     .size({ width: '100%', height: '100%' })

@@ -34,6 +34,26 @@ AVCastControllerProxy::~AVCastControllerProxy()
     Destroy();
 }
 
+int32_t AVCastControllerProxy::SendCustomData(const AAFwk::WantParams& data)
+{
+    AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendCustomData");
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&data), ERR_MARSHALLING, "write data failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SEND_CUSTOM_DATA, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
 int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendControlCommand");

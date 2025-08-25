@@ -222,7 +222,7 @@ export class AVInputCastPicker extends ViewPU {
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
-            Text.wordBreak(WordBreak.BREAK_ALL);
+            Text.wordBreak(WordBreak.BREAK_WORD);
             Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
         }, Text);
         Text.pop();

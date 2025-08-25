@@ -119,10 +119,11 @@ public:
      *
      * @param { int32_t } castId - Find the corresponding provider through this ID.
      * @param { DeviceInfo } deviceInfo - Devices to be connected.
+     * @param { uint32_t } spid - app id for pulling client.
      * @return { bool } Whether the operation was successful.
      * @since 10
     */
-    virtual bool AddCastDevice(int castId, DeviceInfo deviceInfo) = 0;
+    virtual bool AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t spid) = 0;
 
     /**
      * @brief Notify CastEngine to remove (disconnect) remote devices.
@@ -211,6 +212,18 @@ public:
      * @since 11
     */
     virtual bool GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId) = 0;
+
+    /**
+     * @brief get remote DrmCapabilities.
+     *
+     * @param { int32_t } castId const - The ID corresponding to the castprovider.
+     * @param { string } cast deviceId - The deviceId give cast+ to get remote DrmCapabilities.
+     * @param { string } cast DrmCapabilities - The DrmCapabilities to transmit remote DrmCapabilities.
+     * @return { bool } Whether the operation was successful.
+     * @since 11
+    */
+    virtual bool GetRemoteDrmCapabilities(int32_t castId, std::string deviceId,
+        std::vector<std::string> &drmCapabilities) = 0;
 
     /**
      * @brief get protocol type.

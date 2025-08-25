@@ -74,8 +74,10 @@ private:
     static napi_value SetExtras(napi_env env, napi_callback_info info);
     static napi_value ReleaseCast(napi_env env, napi_callback_info info);
     static napi_value GetAllCastDisplays(napi_env env, napi_callback_info info);
+    static napi_value SendCustomData(napi_env env, napi_callback_info info);
 
-    static std::function<void()> PlaybackStateSyncExecutor(NapiAVSession* napiSession, AVPlaybackState playBackState);
+    static std::function<void()> PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
+        AVPlaybackState playBackState);
     static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context);
     static std::function<void()> AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
         OHOS::AVSession::AVMetaData metaData);
@@ -102,6 +104,8 @@ private:
     static napi_status OnPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnCastDisplaySizeChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -125,6 +129,7 @@ private:
     static napi_status OffPlayFromAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
 

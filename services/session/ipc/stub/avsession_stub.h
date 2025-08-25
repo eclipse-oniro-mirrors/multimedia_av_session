@@ -113,6 +113,8 @@ private:
 
     int32_t HandleSetAVQueueTitle(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleSendCustomData(MessageParcel& data, MessageParcel& reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
@@ -145,6 +147,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSetLaunchAbility(data, reply); }},
         {SESSION_CMD_GET_CONTROLLER,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetController(data, reply); }},
+        {SESSION_CMD_SEND_CUSTOM_DATA,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendCustomData(data, reply); }},
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         {SESSION_CMD_GET_AVCAST_CONTROLLER,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCastController(data, reply); }},
@@ -197,6 +201,7 @@ private:
         {SESSION_CMD_SET_EXTRAS, "HandleSetExtras"},
         {SESSION_CMD_SET_LAUNCH_ABILITY, "HandleSetLaunchAbility"},
         {SESSION_CMD_GET_CONTROLLER, "HandleGetController"},
+        {SESSION_CMD_SEND_CUSTOM_DATA, "HandleSendCustomData"},
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         {SESSION_CMD_GET_AVCAST_CONTROLLER, "HandleGetAVCastController"},
         {SESSION_CMD_START_CAST_DISPLAY_LISTENER, "HandleStartCastDisplayListener"},

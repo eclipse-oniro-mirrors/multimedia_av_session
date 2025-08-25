@@ -240,6 +240,18 @@ int32_t AVSessionStub::HandleSetAVQueueTitle(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleSendCustomData(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::SendCustomData");
+    sptr customData = data.ReadParcelable<AAFwk::WantParams>();
+    if (customData == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SendCustomData(*customData)), ERR_NONE, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionStub::HandleGetExtras(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionStub::HandleGetExtras");
@@ -337,7 +349,7 @@ int32_t AVSessionStub::HandleSetSessionEvent(MessageParcel& data, MessageParcel&
 
 int32_t AVSessionStub::HandleUpdateAVQueueInfoEvent(MessageParcel& data, MessageParcel& reply)
 {
-    sptr info = data.ReadParcelable<AVQueueInfo>();
+    sptr info = AVQueueInfo::UnmarshallingMessageParcel(data);
     if (info == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_MARSHALLING, "WriteInt32 result failed");
         return ERR_UNMARSHALLING;

@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/* Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +14,7 @@
 
 sequenceable AvplaybackState..OHOS.AVSession.AVPlaybackState;
 sequenceable AvqueueItem..OHOS.AVSession.AVQueueItem;
+sequenceable WantParams..OHOS.AAFwk.WantParams;
 sequenceable AVSharedMemoryBase..OHOS.AVSession.AVSharedMemoryBase;
 sequenceable OHOS.IRemoteObject;
 
@@ -40,6 +40,8 @@ interface OHOS.AVSession.IAVCastControllerCallback {
     [oneway, ipcincapacity 1024] void OnKeyRequest([in] String assetId, [in] unsigned char[] keyRequestData);
 
     [oneway] void OnCastValidCommandChanged([in] int[] cmds);
+
+    [oneway] void OnCustomData([in] WantParams customData);
 
     void onDataSrcRead([in] sharedptr<AVSharedMemoryBase> mem, [in] unsigned int length, [in] long pos, [out] int ret);
 }

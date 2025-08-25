@@ -19,6 +19,7 @@
 #include "avcast_controller_callback_client.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "string_wrapper.h"
 
 using namespace testing::ext;
 
@@ -40,6 +41,7 @@ public:
     void OnCastValidCommandChanged(const std::vector<int32_t>& cmds) override {};
     int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem, uint32_t length,
                           int64_t pos, int32_t& result) override { return 0; };
+    void OnCustomData(const AAFwk::WantParams& data) override {};
 
     ~AVCastControllerCallbackImpl() override {};
 };
@@ -242,23 +244,21 @@ HWTEST_F(AVCastControllerCallbackClientTest, OnCastValidCommandChanged001, TestS
 }
 
 /**
-* @tc.name: onDataSrcRead001
-* @tc.desc: test onDataSrcRead
+* @tc.name: OnCustomData001
+* @tc.desc: test OnCustomData
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(AVCastControllerCallbackClientTest, onDataSrcRead001, TestSize.Level1)
+HWTEST_F(AVCastControllerCallbackClientTest, OnCustomData001, TestSize.Level1)
 {
     std::shared_ptr<AVCastControllerCallback> controllerCallback = std::make_shared<AVCastControllerCallbackImpl>();
     std::shared_ptr<AVCastControllerCallbackClient> controllerCallbackClient =
         std::make_shared<AVCastControllerCallbackClient>(controllerCallback);
     EXPECT_NE(controllerCallbackClient, nullptr);
-    std::vector<int32_t> cmds = {1};
-    std::shared_ptr<AVSharedMemoryBase> mem = nullptr;
-    uint32_t length = 0;
-    int64_t pos = 0;
-    int32_t result = 0;
-    controllerCallbackClient->onDataSrcRead(mem, length, pos, result);
+    std::string dataStr = "test";
+    OHOS::AAFwk::WantParams data;
+    data.SetParam("customData", OHOS::AAFwk::String::Box(dataStr));
+    controllerCallbackClient->OnCustomData(data);
 }
 } // namespace AVSESSION
 } // namespace OHOS

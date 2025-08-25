@@ -54,7 +54,7 @@ void HwCastProviderSession::Release()
     castSession_ = nullptr;
 }
 
-bool HwCastProviderSession::AddDevice(const std::string deviceId)
+bool HwCastProviderSession::AddDevice(const std::string deviceId, uint32_t spid)
 {
     SLOGI("AddDevice in HwCastProviderSession");
     if (!castSession_) {
@@ -63,8 +63,10 @@ bool HwCastProviderSession::AddDevice(const std::string deviceId)
     }
     CastRemoteDevice castRemoteDevice = {};
     castRemoteDevice.deviceId = deviceId;
+    castRemoteDevice.spid = spid;
 
     int32_t ret = castSession_->AddDevice(castRemoteDevice);
+    avToastDeviceState_ = ConnectionState::STATE_CONNECTING;
     SLOGI("AddDevice in HwCastProviderSession with ret %{public}d", static_cast<int32_t>(ret));
     return (ret == 0) ? true : false;
 }
@@ -77,6 +79,7 @@ bool HwCastProviderSession::RemoveDevice(std::string deviceId, bool continuePlay
         return false;
     }
 
+    avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
     if (continuePlay) {
         return castSession_->RemoveDevice(deviceId, CastEngine::DeviceRemoveAction::ACTION_CONTINUE_PLAY);
     }
@@ -94,6 +97,19 @@ std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPl
     std::shared_ptr<CastEngine::IStreamPlayer> streamPlayerPtr = nullptr;
     castSession_->CreateStreamPlayer(streamPlayerPtr);
     return streamPlayerPtr;
+}
+
+bool HwCastProviderSession::GetRemoteDrmCapabilities(std::string deviceId, std::vector<std::string> &drmCapabilities)
+{
+    SLOGI("enter GetRemoteDrmCapabilities");
+    if (!castSession_) {
+        SLOGE("castSession_ is not exist");
+        return false;
+    }
+    CastRemoteDevice castRemoteDevice = {};
+    castSession_->GetRemoteDeviceInfo(deviceId, castRemoteDevice);
+    drmCapabilities = castRemoteDevice.drmCapabilities;
+    return true;
 }
 
 bool HwCastProviderSession::GetRemoteNetWorkId(std::string deviceId, std::string &networkId)
@@ -184,6 +200,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
 
+    computeToastOnDeviceState(stateInfo.deviceState);
     {
         std::lock_guard lockGuard(mutex_);
         if (castSessionStateListenerList_.size() == 0) {
@@ -221,6 +238,33 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
             listener->OnCastStateChange(static_cast<int>(deviceState), deviceInfo);
             OnDeviceStateChange(stateInfo);
         }
+    }
+}
+
+void HwCastProviderSession::computeToastOnDeviceState(CastEngine::DeviceState state)
+{
+    // device connected
+    if (state == CastEngine::DeviceState::STREAM) {
+        avToastDeviceState_ = ConnectionState::STATE_CONNECTED;
+        return;
+    }
+    // stream to mirror scene, session is not hold by avsession
+    if (state == CastEngine::DeviceState::STREAM_TO_MIRROR) {
+        avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
+        return;
+    }
+    if (state != CastEngine::DeviceState::DISCONNECTED) {
+        return;
+    }
+    // device disconnected after successful connection
+    if (avToastDeviceState_ == ConnectionState::STATE_CONNECTED) {
+        AVSessionUtils::PublishCommonEvent(MEDIA_CAST_DISCONNECT);
+        return;
+    }
+    // device disconnected during connecting
+    if (avToastDeviceState_ == ConnectionState::STATE_CONNECTING) {
+        AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
+        return;
     }
 }
 

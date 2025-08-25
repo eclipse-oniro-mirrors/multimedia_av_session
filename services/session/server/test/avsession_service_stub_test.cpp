@@ -103,6 +103,8 @@ public:
         const OHOS::AppExecFwk::ElementName &elementName) override { return nullptr; };
     int32_t CreateSessionInner(const std::string &tag, int32_t type, const OHOS::AppExecFwk::ElementName &elementName,
         OHOS::sptr<IRemoteObject> &session) override { return 0; };
+    int32_t CreateSessionInnerWithExtra(const std::string &tag, int32_t type, const std::string& extraInfo,
+        const OHOS::AppExecFwk::ElementName &elementName, OHOS::sptr<IRemoteObject> &session) override { return 0; };
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor> &descriptors) override { return 0; };
     int32_t GetSessionDescriptorsBySessionId(const std::string &sessionId,
         AVSessionDescriptor &descriptor) override { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; };
@@ -643,6 +645,52 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest024, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnRemoteRequest0025
+ * @tc.desc: Test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest0025, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequest0025 begin!");
+    uint32_t code = 4;
+    AVSessionServiceStubPerDemo avsessionservicestub;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionService::GetDescriptor());
+    data.WriteString("test");
+    data.WriteString("test2");
+    data.WriteString("test3");
+    data.WriteString("test4");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnRemoteRequest0025 end!");
+}
+
+/**
+ * @tc.name: OnRemoteRequest0026
+ * @tc.desc: Test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest0026, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequest0026 begin!");
+    uint32_t code = 5;
+    AVSessionServiceStubPerDemo avsessionservicestub;
+    OHOS::MessageParcel data;
+    data.WriteInterfaceToken(IAVSessionService::GetDescriptor());
+    data.WriteString("test");
+    data.WriteString("test2");
+    data.WriteString("test3");
+    data.WriteString("test4");
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("OnRemoteRequest0026 end!");
+}
+
+/**
  * @tc.name: HandleCreateSessionInner_001
  * @tc.desc: Test HandleCreateSessionInner with CreateSessionInner returning AVSESSION_SUCCESS.
  * @tc.type: FUNC
@@ -780,7 +828,7 @@ HWTEST_F(AVSessionServiceStubTest, AVSessionServiceStub_HandleStopDeviceLogging_
  * @tc.require: #I5Y4MZ
  */
 HWTEST_F(
-    AVSessionServiceStubTest, AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001, TestSize.Level0)
+    AVSessionServiceStubTest, AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001, TestSize.Level1)
 {
     SLOGD("AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001 begin!");
     OHOS::MessageParcel data;
@@ -791,5 +839,27 @@ HWTEST_F(
     EXPECT_EQ(result, OHOS::ERR_NONE);
     SLOGD("AVSessionServiceStub_HandleGetDistributedSessionControllersInner_001 end!");
 }
-} //AVSession
-} //OHOS
+
+/**
+ * @tc.name: HandleGetHistoricalAVQueueInfos001
+ * @tc.desc: Test HandleGetHistoricalAVQueueInfos
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleGetHistoricalAVQueueInfos001, TestSize.Level0)
+{
+    SLOGI("HandleGetHistoricalAVQueueInfos001 begin!");
+    AVQueueInfo info = AVQueueInfo();
+    OHOS::MessageParcel data;
+    data.WriteString("test");
+    data.WriteString("test2");
+    data.WriteString("test3");
+    data.WriteString("test4");
+    info.Marshalling(data);
+    OHOS::MessageParcel reply;
+    AVSessionServiceStubPerDemo avsessionservicestub;
+    int ret = avsessionservicestub.HandleGetHistoricalAVQueueInfos(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleGetHistoricalAVQueueInfos001 end!");
+}
+} // AVSession
+} // OHOS

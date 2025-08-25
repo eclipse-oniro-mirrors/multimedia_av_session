@@ -864,5 +864,51 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode15, TestSize.Level0
     SLOGI("OnRemoteRequestCode15 end");
 }
 
+/**
+* @tc.name: OnRemoteRequestCode18_1
+* @tc.desc: test HandleSendControlCommand
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode18_1, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequestCode18_1 begin");
+    uint32_t code = 18;
+    AVCastControllerStubDemo aVCastControllerStubDemo;
+    aVCastControllerStubDemo.isSuccess = true;
+    OHOS::MessageParcel data;
+
+    auto localDescriptor = IAVCastController::GetDescriptor();
+    data.WriteInterfaceToken(localDescriptor);
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = aVCastControllerStubDemo.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_NONE);
+    SLOGI("OnRemoteRequestCode18_1 end");
+}
+
+/**
+* @tc.name: OnRemoteRequestCode18_2
+* @tc.desc: test HandleSendControlCommand
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode18_2, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequestCode18_2 begin");
+    uint32_t code = 18;
+    AVCastControllerStubDemo aVCastControllerStubDemo;
+    aVCastControllerStubDemo.isSuccess = true;
+    OHOS::MessageParcel data;
+
+    auto localDescriptor = IAVCastController::GetDescriptor();
+    data.WriteInterfaceToken(localDescriptor);
+    AAFwk::WantParams customData;
+    data.WriteParcelable(&customData);
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = aVCastControllerStubDemo.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_NONE);
+    SLOGI("OnRemoteRequestCode18_2 end");
+}
+
 } // namespace OHOS
 } // namespace AVSession

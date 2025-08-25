@@ -93,7 +93,7 @@ public:
     /**
      * @brief Is stop Discovering Devices
      *
-     * @return { bool } Whether excute StopCastDiscovery func
+     * @return { bool } Whether execute StopCastDiscovery func
      * @since 10
     */
     virtual bool IsStopCastDiscovery(pid_t pid) = 0;
@@ -137,7 +137,7 @@ public:
     /**
      * @brief Listen for the event of device changed.
      *
-     * @param { DeviceState } device state info.
+     * @param { DeviceState& } device state info.
      * @return { int32_t } Whether the device state changed was successful.
      * @since 20
     */
@@ -194,10 +194,12 @@ public:
      *
      * @param { int32_t } castId - Find the corresponding provider through this ID.
      * @param { OutputDeviceInfo } outputDeviceInfo - Devices to be connected.
+     * @param { uint32_t } spid - app id for pulling client.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo) = 0;
+    virtual int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
+        uint32_t spid) = 0;
 
     /**
      * @brief Stop cast process.
@@ -224,7 +226,7 @@ public:
      * @param { int64_t } castHandleconst - The ID corresponding to the provider.
      * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
      * @param { std::string } sessionId - avsession id.
-     * @param deviceInfo The device info.
+     * @param { DeviceInfo } deviceInfo The device info.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
@@ -263,6 +265,18 @@ public:
      * @since 11
     */
     virtual int32_t GetRemoteNetWorkId(int64_t castHandle, std::string deviceId, std::string &networkId) = 0;
+
+    /**
+     * @brief get remote DrmCapabilities.
+     *
+     * @param { int64_t } castHandle const - The ID corresponding to the castprovider.
+     * @param { string } cast deviceId - The deviceId give cast+ to get remote DrmCapabilities.
+     * @param { string } cast DrmCapabilities - The DrmCapabilities to transmit remote DrmCapabilities.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 11
+    */
+    virtual int32_t GetRemoteDrmCapabilities(int64_t castHandle, std::string deviceId,
+        std::vector<std::string> &drmCapabilities) = 0;
 
     /**
      * @brief get mirror castHandle.
@@ -307,6 +321,14 @@ public:
      * @since 20
     */
     virtual bool IsInMirrorToStreamState() = 0;
+
+    /**
+     * @brief check is in stream state.
+     *
+     * @return { bool } is in stream state.
+     * @since 20
+    */
+    virtual bool IsRemoteCasting() = 0;
 
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;

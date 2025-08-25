@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -244,6 +244,40 @@ static HWTEST(AVSessionStubTest, HandleSetAVPlaybackState001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HandleSendCustomData001
+ * @tc.desc: Test HandleSendCustomData
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSendCustomData001, TestSize.Level0)
+{
+    SLOGI("HandleSendCustomData001 begin!");
+    AVSessionStubDemo avSessionStub;
+    OHOS::MessageParcel data;
+    OHOS::AAFwk::WantParams customData;
+    data.WriteParcelable(&customData);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSendCustomData(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSendCustomData001 end!");
+}
+
+/**
+ * @tc.name: HandleSendCustomData002
+ * @tc.desc: Test HandleSendCustomData
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSendCustomData002, TestSize.Level0)
+{
+    SLOGI("HandleSendCustomData002 begin!");
+    AVSessionStubDemo avSessionStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSendCustomData(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSendCustomData002 end!");
+}
+
+/**
  * @tc.name: HandleSetLaunchAbility001
  * @tc.desc: Test HandleSetLaunchAbility
  * @tc.type: FUNC
@@ -369,7 +403,6 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level0)
     SLOGI("HandleSetAVMetaData003 begin!");
     AVSessionStubDemo avSessionStub;
     OHOS::MessageParcel data;
-    data.WriteInterfaceToken(IAVSession::GetDescriptor());
     data.WriteInt32(MAX_IMAGE_SIZE - 1);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleSetAVMetaData(data, reply);
@@ -378,20 +411,45 @@ static HWTEST(AVSessionStubTest, HandleSetAVMetaData003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HandleSetAVMetaData004
+ * @tc.desc: Test HandleSetAVMetaData
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetAVMetaData004, TestSize.Level0)
+{
+    SLOGI("HandleSetAVMetaData004 begin!");
+    AVSessionStubDemo avSessionStub;
+    AVMetaData meta;
+    std::string assetId = "assetId";
+    meta.SetAssetId(assetId);
+    std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5, 6, 7, 8};
+    mediaImage->SetInnerImgBuffer(imgBuffer);
+    meta.SetMediaImage(mediaImage);
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteParcelable(&meta);
+    int ret = avSessionStub.HandleSetAVMetaData(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSetAVMetaData004 end!");
+}
+
+/**
  * @tc.name: HandleUpdateAVQueueInfoEvent001
  * @tc.desc: Test HandleUpdateAVQueueInfoEvent
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level0)
+static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level1)
 {
     SLOGI("HandleUpdateAVQueueInfoEvent001 begin!");
     AVQueueInfo info = AVQueueInfo();
     AVSessionStubDemo avSessionStub;
     OHOS::MessageParcel data;
+    data.WriteInt32(1);
     info.MarshallingMessageParcel(data);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
-    EXPECT_NE(ret, OHOS::ERR_NONE);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleUpdateAVQueueInfoEvent001 end!");
 }
 
@@ -400,7 +458,7 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent001, TestSize.Level
  * @tc.desc: Test HandleUpdateAVQueueInfoEvent
  * @tc.type: FUNC
  */
-static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level0)
+static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level1)
 {
     SLOGI("HandleUpdateAVQueueInfoEvent002 begin!");
     AVQueueInfo info = AVQueueInfo();
@@ -410,6 +468,6 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level
     info.MarshallingMessageParcel(data);
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
-    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    EXPECT_NE(ret, OHOS::ERR_NONE);
     SLOGI("HandleUpdateAVQueueInfoEvent002 end!");
 }

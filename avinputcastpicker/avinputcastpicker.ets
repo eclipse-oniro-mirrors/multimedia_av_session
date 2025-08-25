@@ -118,7 +118,7 @@ export struct AVInputCastPicker {
       })
       .textOverflow({ overflow: TextOverflow.Ellipsis })
       .maxLines(2)
-      .wordBreak(WordBreak.BREAK_ALL)
+      .wordBreak(WordBreak.BREAK_WORD)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
   }
 

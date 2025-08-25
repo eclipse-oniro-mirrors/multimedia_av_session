@@ -15,7 +15,6 @@
 
 #include "audio_device_manager.h"
 #include "avsession_service.h"
-
 #include "migrate_avsession_manager.h"
 
 namespace OHOS::AVSession {
@@ -210,9 +209,9 @@ int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId,
 
 int32_t AVSessionService::checkEnableCast(bool enable)
 {
-    SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, static_cast<int>(isInCast_.load()));
+    std::lock_guard lockGuard(checkEnableCastLock_);
+    SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
     if (enable == true && isInCast_ == false) {
-        std::lock_guard lockGuard(isInCastLock_);
         isInCast_ = AVRouter::GetInstance().Init(this) == AVSESSION_SUCCESS ? true : false;
     } else if (enable == false && isInCast_ == true) {
         CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
@@ -220,7 +219,6 @@ int32_t AVSessionService::checkEnableCast(bool enable)
             AVSESSION_SUCCESS, "can not release cast with session alive");
         CHECK_AND_RETURN_RET_LOG(castServiceNameStatePair_.second != deviceStateConnection,
             AVSESSION_SUCCESS, "can not release cast with casting");
-        std::lock_guard lockGuard(isInCastLock_);
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
         SLOGD("AVRouter Init in nothing change");
@@ -365,7 +363,7 @@ void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
     for (const auto& [pid, listener] : listenerMap) {
         SLOGI("notify device state change with pid %{public}d", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceStateChange");
-        if (listener == nullptr) {
+        if (listener != nullptr) {
             listener->OnDeviceStateChange(deviceState);
         }
     }
@@ -449,9 +447,6 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
     deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
     deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
     deviceInfo.providerId_ = 1;
-    CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "session is nullptr");
-    std::map<std::string, DeviceInfo> sessionCastDeviceMap = session->GetCastDeviceMap();
-    deviceInfo.supportedDrmCapabilities_ = sessionCastDeviceMap[castDeviceId_].supportedDrmCapabilities_;
     return session->RegisterListenerStreamToCast(castServiceNameStatePair_, deviceInfo);
 }
 
@@ -631,7 +626,8 @@ void AVSessionService::DoConnectProcessWithMigrateServer(const OHOS::Distributed
         deviceInfo.deviceTypeId,
         AVSessionUtils::GetAnonySessionId(networkId).c_str());
     if (migrateAVSessionServerMap_.find(networkId) == migrateAVSessionServerMap_.end()) {
-        CHECK_AND_RETURN_LOG(DoDisconnectAllMigrateServer() == AVSESSION_SUCCESS, "do disconnect all fail");
+        CHECK_AND_RETURN_LOG(DoHisMigrateServerTransform(networkId) == ERR_SESSION_NOT_EXIST,
+            "hisMigrate transform done");
         std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer =
             std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT, networkId);
         migrateAVSessionServer->Init(this);
@@ -640,7 +636,7 @@ void AVSessionService::DoConnectProcessWithMigrateServer(const OHOS::Distributed
             MigrateAVSessionManager::migrateSceneNext,
             migrateAVSessionServer);
         migrateAVSessionServerMap_.insert({networkId, migrateAVSessionServer});
-        SLOGI("new server success:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
+        SLOGI("new MigrateServer success:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
     } else {
         SLOGE("server already alive:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
     }
@@ -710,19 +706,22 @@ void AVSessionService::DoDisconnectProcessWithMigrateProxy(const OHOS::Distribut
     }
 }
 
-int32_t AVSessionService::DoDisconnectAllMigrateServer()
+int32_t AVSessionService::DoHisMigrateServerTransform(std::string networkId)
 {
-    CHECK_AND_RETURN_RET_LOG(!migrateAVSessionServerMap_.empty(), AVSESSION_SUCCESS,
-        "DisconnectAllMigrateServer but empty");
-    SLOGI("DoDisconnectAllMigrateServer size:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
+    SLOGI("DoHisMigrateServerTransform size:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
     auto it = migrateAVSessionServerMap_.begin();
-    while (it != migrateAVSessionServerMap_.end()) {
+    if (it != migrateAVSessionServerMap_.end()) {
         std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer = it->second;
         CHECK_AND_RETURN_RET_LOG(migrateAVSessionServer != nullptr, AVSESSION_ERROR, "get server nullptr");
-        it->second->DoPostTasksClear();
-        it = migrateAVSessionServerMap_.erase(it); // 安全删除并更新迭代器
+        migrateAVSessionServer->DoPostTasksClear();
+        migrateAVSessionServer->RefreshDeviceId(networkId);
+        it = migrateAVSessionServerMap_.erase(it);
+        migrateAVSessionServerMap_.insert({networkId, migrateAVSessionServer});
+        SLOGI("DoHisMigrateServerTransform for:%{public}s", AVSessionUtils::GetAnonySessionId(networkId).c_str());
+        return AVSESSION_SUCCESS;
     }
-    return AVSESSION_SUCCESS;
+
+    return ERR_SESSION_NOT_EXIST;
 }
 
 void AVSessionService::UpdateLocalFrontSession(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront)
@@ -792,8 +791,11 @@ bool AVSessionService::CheckWhetherTargetDevIsNext(const OHOS::DistributedHardwa
     }
     if (cJSON_HasObjectItem(jsonData, "OS_TYPE")) {
         cJSON* osTypeItem = cJSON_GetObjectItem(jsonData, "OS_TYPE");
-        CHECK_AND_RETURN_RET_LOG(osTypeItem != nullptr && !cJSON_IsInvalid(osTypeItem) &&
-            cJSON_IsNumber(osTypeItem), false, "get osTypeItem invalid");
+        if (osTypeItem == nullptr || cJSON_IsInvalid(osTypeItem) || !cJSON_IsNumber(osTypeItem)) {
+            SLOGE("get osTypeItem invalid");
+            cJSON_Delete(jsonData);
+            return false;
+        }
         if (osTypeItem->valueint > 0 || osTypeItem->valuedouble > 0) {
             cJSON_Delete(jsonData);
             return true;

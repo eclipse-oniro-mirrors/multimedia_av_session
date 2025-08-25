@@ -225,7 +225,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
-static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent002, TestSize.Level0)
 {
     SLOGI("SendSystemAVKeyEvent002 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -630,7 +630,7 @@ static HWTEST_F(AVSessionServiceTest, SelectSessionByUid002, TestSize.Level0)
 
 static HWTEST_F(AVSessionServiceTest, InitBMS001, TestSize.Level0)
 {
-    SLOGI("InitBMS001 begin");
+    SLOGI("InitBMS001 begin!");
     avservice_->InitBMS();
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("InitBMS001 end!");
@@ -916,7 +916,7 @@ static HWTEST_F(AVSessionServiceTest, ProcessCastAudioCommand002, TestSize.Level
     SLOGI("ProcessCastAudioCommand002 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, OnReceiveEvent001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, OnReceiveEvent001, TestSize.Level1)
 {
     SLOGI("OnReceiveEvent001 begin!");
     OHOS::EventFwk::CommonEventData eventData;
@@ -1626,7 +1626,7 @@ static HWTEST_F(AVSessionServiceTest, ReportStartCastEnd001, TestSize.Level0)
 }
 
 #ifdef BLUETOOTH_ENABLE
-static HWTEST_F(AVSessionServiceTest, OnReceiveEvent003, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, OnReceiveEvent003, TestSize.Level0)
 {
     SLOGD("OnReceiveEvent003 begin!");
     OHOS::EventFwk::CommonEventData eventData;
@@ -1777,7 +1777,7 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, UpdateOrder001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, UpdateOrder001, TestSize.Level1)
 {
     SLOGI("UpdateOrder001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1791,14 +1791,14 @@ static HWTEST_F(AVSessionServiceTest, UpdateOrder001, TestSize.Level0)
     avsessionHere_->Destroy();
     SLOGI("UpdateOrder001 end!");
 }
-
+ 
 /**
  * @tc.name: UpdateOrder002
  * @tc.desc: Verifying the UpdateOrder.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, UpdateOrder002, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, UpdateOrder002, TestSize.Level1)
 {
     SLOGI("UpdateOrder002 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1813,14 +1813,14 @@ static HWTEST_F(AVSessionServiceTest, UpdateOrder002, TestSize.Level0)
     avsessionHere_->Destroy();
     SLOGI("UpdateOrder002 end!");
 }
-
+ 
 /**
  * @tc.name: HandleOtherSessionPlaying001
  * @tc.desc: Verifying the HandleOtherSessionPlaying.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying001, TestSize.Level1)
 {
     SLOGI("HandleOtherSessionPlaying001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1834,14 +1834,14 @@ static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying001, TestSize.Lev
     avsessionHere_->Destroy();
     SLOGI("HandleOtherSessionPlaying001 end!");
 }
-
+ 
 /**
  * @tc.name: HandleOtherSessionPlaying002
  * @tc.desc: Verifying the HandleOtherSessionPlaying.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying002, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying002, TestSize.Level1)
 {
     SLOGI("HandleOtherSessionPlaying002 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1858,14 +1858,14 @@ static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying002, TestSize.Lev
     avsessionHere_->Destroy();
     SLOGI("HandleOtherSessionPlaying002 end!");
 }
-
+ 
 /**
  * @tc.name: HandleOtherSessionPlaying003
  * @tc.desc: Verifying the HandleOtherSessionPlaying.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying003, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying003, TestSize.Level1)
 {
     SLOGI("HandleOtherSessionPlaying003 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1879,14 +1879,14 @@ static HWTEST_F(AVSessionServiceTest, HandleOtherSessionPlaying003, TestSize.Lev
     avsessionHere_->Destroy();
     SLOGI("HandleOtherSessionPlaying003 end!");
 }
-
+ 
 /**
  * @tc.name: GetOtherPlayingSession001
  * @tc.desc: Verifying the GetOtherPlayingSession.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession001, TestSize.Level1)
 {
     SLOGI("GetOtherPlayingSession001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
@@ -1928,7 +1928,7 @@ static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession002, TestSize.Level1
     avsessionFront_->Destroy();
     SLOGI("GetOtherPlayingSession002 end!");
 }
-
+ 
 /**
  * @tc.name: GetOtherPlayingSession003
  * @tc.desc: Verifying the GetOtherPlayingSession.
@@ -1998,14 +1998,103 @@ static HWTEST_F(AVSessionServiceTest, CheckAndUpdateAncoMediaSession001, TestSiz
 }
 
 /**
- * @tc.name: CheckIfRemoveNotification001
- * @tc.desc: check if remove notification.
+ * @tc.name: CheckSessionHandleKeyEvent001
+ * @tc.desc: check which session handle key event.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification001, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, CheckSessionHandleKeyEvent001, TestSize.Level1)
 {
-    SLOGD("CheckIfRemoveNotification001 begin!");
+    SLOGD("CheckSessionHandleKeyEvent001 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    auto ret = avservice_->CheckSessionHandleKeyEvent(true, cmd, *keyEvent, avsessionHere_);
+    EXPECT_EQ(ret, true);
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_MEDIA_PLAY);
+    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_DOWN);
+    ret = avservice_->CheckSessionHandleKeyEvent(false, cmd, *keyEvent, avsessionHere_);
+    EXPECT_EQ(ret, true);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGD("CheckSessionHandleKeyEvent001 end!");
+}
+
+/**
+ * @tc.name: CheckSessionHandleKeyEvent002
+ * @tc.desc: check which session handle key event.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, CheckSessionHandleKeyEvent002, TestSize.Level1)
+{
+    SLOGD("CheckSessionHandleKeyEvent002 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    FocusSessionStrategy::FocusSessionChangeInfo info;
+    info.uid = 1041;
+    info.pid = 1041;
+    avservice_->HandleFocusSession(info, true);
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    auto ret = avservice_->CheckSessionHandleKeyEvent(true, cmd, *keyEvent, avsessionHere_);
+    EXPECT_EQ(ret, true);
+    keyEvent->SetKeyCode(OHOS::MMI::KeyEvent::KEYCODE_MEDIA_PLAY);
+    keyEvent->SetKeyAction(OHOS::MMI::KeyEvent::KEY_ACTION_DOWN);
+    ret = avservice_->CheckSessionHandleKeyEvent(false, cmd, *keyEvent, avsessionHere_);
+    EXPECT_EQ(ret, true);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGD("CheckSessionHandleKeyEvent002 end!");
+}
+
+/**
+ * @tc.name: UpdateSessionTimestamp001
+ * @tc.desc: update timestamp for session item.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, UpdateSessionTimestamp001, TestSize.Level1)
+{
+    SLOGD("UpdateSessionTimestamp001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->UpdateSessionTimestamp(avsessionHere_);
+    EXPECT_NE(avsessionHere_->GetPlayingTime(), 0);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGD("UpdateSessionTimestamp001 end!");
+}
+
+/**
+ * @tc.name: GetLocalTitle001
+ * @tc.desc: get local title.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
+{
+    SLOGD("GetLocalTitle001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -2015,23 +2104,25 @@ static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification001, TestSize.Lev
     EXPECT_NE(avsessionHere_, nullptr);
     avservice_->UpdateTopSession(avsessionHere_);
     EXPECT_NE(avservice_->topSession_, nullptr);
-    avservice_->CheckIfRemoveNotification(avsessionHere_->GetUserId(), avsessionHere_);
-    EXPECT_EQ(avservice_->topSession_, nullptr);
-    EXPECT_EQ(avservice_->hasMediaCapsule_, false);
-    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    AVMetaData metadata;
+    metadata.SetAssetId("mediaId");
+    metadata.SetDescription("title;artist");
+    avsessionHere_->SetAVMetaData(g_metaData);
+    std::string songName = avservice_->GetLocalTitle();
+    EXPECT_EQ(songName, "title");
     avsessionHere_->Destroy();
-    SLOGD("CheckIfRemoveNotification001 end!");
+    SLOGD("GetLocalTitle001 end!");
 }
 
 /**
- * @tc.name: CheckIfRemoveNotification002
- * @tc.desc: check if remove notification.
+ * @tc.name: GetLocalTitle002
+ * @tc.desc: get local title.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
-static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification002, TestSize.Level1)
+static HWTEST_F(AVSessionServiceTest, GetLocalTitle002, TestSize.Level1)
 {
-    SLOGD("CheckIfRemoveNotification002 begin!");
+    SLOGD("GetLocalTitle002 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -2039,11 +2130,17 @@ static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification002, TestSize.Lev
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
-    avservice_->CheckIfRemoveNotification(avsessionHere_->GetUserId(), avsessionHere_);
-    EXPECT_EQ(avservice_->hasMediaCapsule_, false);
-    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avservice_->UpdateTopSession(avsessionHere_);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    avsessionHere_->SetUid(5557);
+    AVMetaData metadata;
+    metadata.SetAssetId("mediaId");
+    metadata.SetDescription("title-artist");
+    avsessionHere_->SetAVMetaData(g_metaData);
+    std::string songName = avservice_->GetLocalTitle();
+    EXPECT_EQ(songName, "title");
     avsessionHere_->Destroy();
-    SLOGD("CheckIfRemoveNotification002 end!");
+    SLOGD("GetLocalTitle002 end!");
 }
 
 /**
@@ -2055,30 +2152,60 @@ static HWTEST_F(AVSessionServiceTest, CheckIfRemoveNotification002, TestSize.Lev
 static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent001, TestSize.Level0)
 {
     SLOGD("HandleRemoveMediaCardEvent001 begin!");
+    const int32_t uid = 5557;
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
-    avservice_->topSession_ =
-        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    bool ret = avservice_->topSession_->IsCasting();
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    avservice_->UpdateTopSession(avsessionHere_);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    avsessionHere_->SetUid(uid);
+    AVPlaybackState playbackState;
+    playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     avservice_->HandleRemoveMediaCardEvent();
-    EXPECT_EQ(ret, false);
+    playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    avservice_->HandleRemoveMediaCardEvent();
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    EXPECT_EQ(avservice_->topSession_, nullptr);
     SLOGD("HandleRemoveMediaCardEvent001 end!");
 }
 
 /**
  * @tc.name: HandleRemoveMediaCardEvent002
- * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a null session.
+ * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a valid session.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
 static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent002, TestSize.Level0)
 {
     SLOGD("HandleRemoveMediaCardEvent002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    avservice_->topSession_ =
+         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    bool ret = avservice_->topSession_->IsCasting();
+    avservice_->HandleRemoveMediaCardEvent();
+    EXPECT_EQ(ret, false);
+    SLOGD("HandleRemoveMediaCardEvent002 end!");
+}
+
+/**
+ * @tc.name: HandleRemoveMediaCardEvent003
+ * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a null session.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent003, TestSize.Level0)
+{
+    SLOGD("HandleRemoveMediaCardEvent003 begin!");
     avservice_->topSession_ = nullptr;
     avservice_->HandleRemoveMediaCardEvent();
     EXPECT_EQ(avservice_->topSession_, nullptr);
-    SLOGD("HandleRemoveMediaCardEvent002 end!");
+    SLOGD("HandleRemoveMediaCardEvent003 end!");
 }
 
 /**

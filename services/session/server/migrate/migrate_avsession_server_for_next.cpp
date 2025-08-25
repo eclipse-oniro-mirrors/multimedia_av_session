@@ -32,6 +32,14 @@
 
 namespace OHOS::AVSession {
 
+void MigrateAVSessionServer::RefreshDeviceId(std::string deviceId)
+{
+    SLOGI("migrate refresh deviceId from:%{public}s to %{public}s.",
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str(),
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    deviceId_ = deviceId;
+}
+
 void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
 {
     if (sessionId.empty()) {
@@ -198,7 +206,7 @@ void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionP
         return;
     }
     std::shared_ptr<Media::PixelMap> pixelMap;
-    pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(innerPixelMap);
+    pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(innerPixelMap, false);
     CHECK_AND_RETURN_LOG(pixelMap != nullptr, "DoMediaImageSyncToRemote with pixelMap null");
     std::shared_ptr<AVSessionPixelMap> innerPixelMapMin = AVSessionPixelMapAdapter::ConvertToInnerWithMinSize(pixelMap);
     CHECK_AND_RETURN_LOG(innerPixelMapMin != nullptr, "DoMediaImageSyncToRemote with innerPixelMapMin null");
@@ -520,15 +528,16 @@ void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* command
 
     if (cJSON_HasObjectItem(commandJsonValue, NEED_STATE)) {
         bool newListenerSetState = SoftbusSessionUtils::GetBoolFromJson(commandJsonValue, NEED_STATE);
-        if (!isListenerSet_ && newListenerSetState) {
-            isListenerSet_ = true;
+        if (!isNeedByRemote.load() && newListenerSetState) {
+            SLOGI("isNeed refresh data");
+            isNeedByRemote.store(true);
             LocalFrontSessionArrive(lastSessionId_);
-            RegisterAudioCallbackAndTrigger();
+            TriggerAudioCallback();
         } else {
-            isListenerSet_ = newListenerSetState;
+            isNeedByRemote.store(newListenerSetState);
         }
     }
-    SLOGI("updateListenerState:%{public}d", isListenerSet_);
+    SLOGI("isNeedSet:%{public}d", isNeedByRemote.load());
 }
 
 std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFunc()
@@ -646,13 +655,13 @@ cJSON* MigrateAVSessionServer::ConvertAudioDeviceDescriptorToJson(
     }
     if (!SoftbusSessionUtils::AddStringToJson(device, AUDIO_MAC_ADDRESS, desc->macAddress_)) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-            AUDIO_MAC_ADDRESS, desc->macAddress_.c_str());
+            AUDIO_MAC_ADDRESS, AVSessionUtils::GetAnonySessionId(desc->macAddress_).c_str());
         cJSON_Delete(device);
         return nullptr;
     }
     if (!SoftbusSessionUtils::AddStringToJson(device, AUDIO_NETWORK_ID, desc->networkId_)) {
         SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-            AUDIO_NETWORK_ID, desc->networkId_.c_str());
+            AUDIO_NETWORK_ID, AVSessionUtils::GetAnonySessionId(desc->networkId_).c_str());
         cJSON_Delete(device);
         return nullptr;
     }
@@ -746,7 +755,7 @@ bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Cal
         return false;
     }
     SLOGD("MigratePostTask with name:%{public}s.", name.c_str());
-    if (!isListenerSet_ && name != "LocalFrontSessionChange" && name != "SYNC_FOCUS_SESSION_INFO") {
+    if (!isNeedByRemote.load() && name != "LocalFrontSessionChange" && name != "SYNC_FOCUS_SESSION_INFO") {
         SLOGI("no send task:%{public}s for no listen", name.c_str());
         return false;
     }

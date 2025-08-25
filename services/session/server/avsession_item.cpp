@@ -35,6 +35,7 @@
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "avsession_hianalytics_report.h"
 #include "want_agent_helper.h"
 
@@ -208,9 +209,9 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}lld", (long long)castHandle_);
     if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         if (!collaborationNeedNetworkId_.empty()) {
-            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
-                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
             CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         }
@@ -228,13 +229,16 @@ int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
 {
     std::lock_guard lockGuard(avsessionItemLock_);
     CHECK_AND_RETURN_RET_LOG(avCallMetaData_.CopyFrom(avCallMetaData), AVSESSION_ERROR, "AVCallMetaData set error");
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
-    if (innerPixelMap != nullptr) {
-        std::string sessionId = GetSessionId();
-        std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-        AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, sessionId + AVSessionUtils::GetFileSuffix());
-        innerPixelMap->Clear();
-        avCallMetaData_.SetMediaImage(innerPixelMap);
+    {
+        std::unique_lock<std::shared_mutex> lock(writeAndReadImgLock_);
+        std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
+        if (innerPixelMap != nullptr) {
+            std::string sessionId = GetSessionId();
+            std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+            AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, sessionId + AVSessionUtils::GetFileSuffix());
+            innerPixelMap->Clear();
+            avCallMetaData_.SetMediaImage(innerPixelMap);
+        }
     }
 
     {
@@ -272,16 +276,11 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 {
     std::lock_guard lockGuard(avsessionItemLock_);
     SessionXCollie sessionXCollie("avsession::GetAVMetaData");
-    std::string sessionId = GetSessionId();
-    std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-    std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
-    AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
+    ReadMetaDataImg(innerPixelMap);
 
-    std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
-    std::string avQueueFileName = GetBundleName() + "_" + metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
-    AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
+    ReadMetaDataAVQueueImg(avQueuePixelMap);
 
     meta = metaData_;
     return AVSESSION_SUCCESS;
@@ -405,9 +404,11 @@ void AVSessionItem::ReportSetAVMetaDataInfo(const AVMetaData& meta)
 
 bool AVSessionItem::CheckTitleChange(const AVMetaData& meta)
 {
-    bool isTitleLyric = (GetBundleName() == defaultBundleName) && !meta.GetDescription().empty();
     bool isTitleChange = metaData_.GetTitle() != meta.GetTitle();
-    SLOGI("CheckTitleChange isTitleLyric:%{public}d isTitleChange:%{public}d", isTitleLyric, isTitleChange);
+    bool isAncoTitleLyric = GetUid() == audioBrokerUid && meta.GetArtist().find("-") != std::string::npos;
+    bool isTitleLyric = ((GetBundleName() == defaultBundleName) && !meta.GetDescription().empty()) || isAncoTitleLyric;
+    SLOGI("CheckTitleChange isTitleLyric:%{public}d isAncoTitleLyric:%{public}d isTitleChange:%{public}d",
+        isTitleLyric, isAncoTitleLyric, isTitleChange);
     return isTitleChange && !isTitleLyric;
 }
 
@@ -451,6 +452,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
             isAssetChange_ = true;
         }
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
+        std::unique_lock<std::shared_mutex> lock(writeAndReadImgLock_);
         std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
         if (innerPixelMap != nullptr) {
             std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
@@ -549,6 +551,56 @@ int32_t AVSessionItem::SetAVQueueTitle(const std::string& title)
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::SendCustomDataInner(const AAFwk::WantParams& data)
+{
+    std::lock_guard controllerLockGuard(controllersLock_);
+
+    if (controllers_.size() > 0) {
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandleCustomData(data);
+            }
+        }
+    }
+}
+
+int32_t AVSessionItem::SendCustomData(const AAFwk::WantParams& data)
+{
+    CHECK_AND_RETURN_RET_LOG(data.HasParam("customData"), AVSESSION_ERROR, "Params don't have customData");
+    auto value = data.GetParam("customData");
+    AAFwk::IString* stringValue = AAFwk::IString::Query(value);
+    CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
+    SendCustomDataInner(data);
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
+{
+    CHECK_AND_RETURN_LOG(GetUid() == audioBrokerUid, "not audio broker");
+    if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY && (!isPlayingState_ || isMediaChange_)) {
+        isPlayingState_ = true;
+        {
+            std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
+            if (serviceCallbackForMediaSession_) {
+                SLOGI("anco capsule add for %{public}s", GetBundleName().c_str());
+                serviceCallbackForMediaSession_(GetSessionId(), true, isMediaChange_);
+            }
+        }
+    } else if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE ||
+        state.GetState() == AVPlaybackState::PLAYBACK_STATE_STOP) {
+        isPlayingState_ = false;
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelAncoMediaCapsule");
+        AVSessionEventHandler::GetInstance().AVSessionPostTask(
+            [this]() {
+                std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
+                if (serviceCallbackForMediaSession_ && !isPlayingState_) {
+                    SLOGI("anco capsule del for %{public}s", GetBundleName().c_str());
+                    serviceCallbackForMediaSession_(GetSessionId(), false, false);
+                }
+            }, "CancelAncoMediaCapsule", cancelTimeout);
+    }
+}
+
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     {
@@ -558,14 +610,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
-    {
-        std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
-        if (GetUid() == audioBrokerUid && state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY &&
-            serviceCallbackForMediaSession_) {
-            SLOGI("addAncoCapsule for:%{public}s", GetBundleName().c_str());
-            serviceCallbackForMediaSession_(GetSessionId(), true);
-        }
-    }
+    CheckIfSendCapsule(state);
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         SLOGD("send HandlePlaybackStateChange in postTask with state %{public}d and controller size %{public}d",
@@ -654,7 +699,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
         std::lock_guard lockGuard(avsessionItemLock_);
         extras_ = extras;
     }
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (extras.HasParam("requireAbilityList")) {
         auto value = extras.GetParam("requireAbilityList");
@@ -663,8 +707,8 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             SetExtrasInner(list);
         }
     }
+    SetSpid(extras);
 #endif
-
     if (extras.HasParam("hw_live_view_hidden_when_keyguard")) {
         auto value = extras.GetParam("hw_live_view_hidden_when_keyguard");
         AAFwk::IArray* list = AAFwk::IArray::Query(value);
@@ -672,7 +716,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             NotificationExtras(list);
         }
     }
-
     if (extras.HasParam("support-keyevent")) {
         auto value = extras.GetParam("support-keyevent");
         AAFwk::IArray* list = AAFwk::IArray::Query(value);
@@ -680,7 +723,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             KeyEventExtras(list);
         }
     }
-
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
@@ -689,7 +731,6 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             }
         }
     }
-
     std::lock_guard remoteSourceLockGuard(remoteSourceLock_);
     if (remoteSource_ != nullptr) {
         auto ret = remoteSource_->SetExtrasRemote(extras);
@@ -781,7 +822,6 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     auto validCallback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         dealValidCallback(cmd, supportedCastCmds);
     };
-
     auto preparecallback = [this]() {
         if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && isFirstCallback_) {
             isFirstCallback_ = false;
@@ -789,14 +829,12 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
                 GetDescriptor().outputDeviceInfo_.deviceInfos_[0]);
         }
     };
-
     sharedPtr->Init(castControllerProxy_, validCallback, preparecallback);
     {
         std::lock_guard lockGuard(castControllersLock_);
         castControllers_.emplace_back(sharedPtr);
     }
     sptr<IRemoteObject> remoteObject = castController;
-
     sharedPtr->SetSessionTag(descriptor_.sessionTag_);
     sharedPtr->SetSessionId(descriptor_.sessionId_);
     sharedPtr->SetUserId(userId_);
@@ -813,6 +851,11 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     }
 
     InitializeCastCommands();
+    if (SearchSpidInCapability(castHandleDeviceId_)) {
+        if (castControllerProxy_ != nullptr) {
+            castControllerProxy_->SetSpid(GetSpid());
+        }
+    }
     return remoteObject;
 }
 
@@ -1045,6 +1088,8 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
         SetCastHandle(AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameStatePair_, GetSessionId()));
         CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId(), deviceInfo);
+        AVRouter::GetInstance().GetRemoteDrmCapabilities(castHandle_, deviceInfo.deviceId_,
+            deviceInfo.supportedDrmCapabilities_);
         AVRouter::GetInstance().SetServiceAllConnectState(castHandle_, deviceInfo);
         InitAVCastControllerProxy();
     } else {
@@ -1314,6 +1359,9 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             return AVSESSION_SUCCESS;
         }
     } else {
+        if (AVRouter::GetInstance().IsRemoteCasting()) {
+            return SubStartCast(outputDeviceInfo);
+        }
         int32_t flag = CastAddToCollaboration(outputDeviceInfo);
         CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, flag, "collaboration to start cast fail");
     }
@@ -1327,7 +1375,7 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
 
     SetCastHandle(castHandle);
     SLOGI("start cast check handle set to %{public}lld", (long long)castHandle_);
-    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo);
+    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo, GetSpid());
     if (ret == AVSESSION_SUCCESS) {
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
     }
@@ -1335,14 +1383,14 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
     return ret;
 }
 
-int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo)
+int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo, uint32_t spid)
 {
     SLOGI("Add device process");
     std::lock_guard lockGuard(castLock_);
     AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_,
         GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
     int32_t castId = static_cast<int32_t>(castHandle_);
-    int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo);
+    int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo, spid);
     SLOGI("Add device process with ret %{public}d", ret);
     return ret;
 }
@@ -1475,6 +1523,12 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     }
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
+    }
+
+    if (SearchSpidInCapability(deviceInfo.deviceId_)) {
+        deviceInfo.supportedPullClients_.clear();
+        deviceInfo.supportedPullClients_.push_back(GetSpid());
+        SLOGI("OnCastStateChange add pull client: %{public}u", GetSpid());
     }
     newCastState = castState;
     ListenCollaborationOnStop();
@@ -1740,6 +1794,43 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::SetSpid(const AAFwk::WantParams& extras)
+{
+    std::unique_lock <std::mutex> lock(spidMutex_);
+    if (extras.HasParam("request-tv-client")) {
+        auto value = extras.GetParam("request-tv-client");
+        AAFwk::IInteger* intValue = AAFwk::IInteger::Query(value);
+        if (intValue != nullptr && AAFwk::Integer::Unbox(intValue) > 0) {
+            spid_ = static_cast<uint32_t>(AAFwk::Integer::Unbox(intValue));
+            SLOGI("AVSessionItem SetSpid %{public}u", spid_);
+        } else {
+            SLOGE("AVSessionItem SetSpid failed");
+        }
+    }
+}
+
+uint32_t AVSessionItem::GetSpid()
+{
+    std::unique_lock <std::mutex> lock(spidMutex_);
+    return spid_;
+}
+
+bool AVSessionItem::SearchSpidInCapability(const std::string& deviceId)
+{
+    std::unique_lock <std::mutex> lock(spidMutex_);
+    auto iter = castDeviceInfoMap_.find(deviceId);
+    if (iter == castDeviceInfoMap_.end()) {
+        SLOGE("deviceId map deviceinfo is not exit");
+        return false;
+    }
+    for (uint32_t cap : iter->second.supportedPullClients_) {
+        if (cap == spid_) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
 {
     auto func = [this](AAFwk::IInterface* object) {
@@ -1788,11 +1879,8 @@ AVCallState AVSessionItem::GetAVCallState()
 AVCallMetaData AVSessionItem::GetAVCallMetaData()
 {
     std::lock_guard lockGuard(avsessionItemLock_);
-    std::string sessionId = GetSessionId();
-    std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-    std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = avCallMetaData_.GetMediaImage();
-    AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
+    ReadMetaDataImg(innerPixelMap);
     return avCallMetaData_;
 }
 
@@ -1812,17 +1900,28 @@ AVMetaData AVSessionItem::GetMetaDataWithoutImg()
 AVMetaData AVSessionItem::GetMetaData()
 {
     std::lock_guard lockGuard(avsessionItemLock_);
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+    ReadMetaDataImg(innerPixelMap);
+
+    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
+    ReadMetaDataAVQueueImg(avQueuePixelMap);
+    return metaData_;
+}
+
+void AVSessionItem::ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap)
+{
+    std::shared_lock<std::shared_mutex> lock(writeAndReadImgLock_);
     std::string sessionId = GetSessionId();
     std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
     std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
+}
 
+void AVSessionItem::ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& avQueuePixelMap)
+{
     std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
     std::string avQueueFileName = GetBundleName() + "_" + metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
-    std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaData_.GetAVQueueImage();
     AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
-    return metaData_;
 }
 
 std::vector<AVQueueItem> AVSessionItem::GetQueueItems()
@@ -2003,6 +2102,16 @@ void AVSessionItem::ExecueCommonCommand(const std::string& commonCommand, const 
     if (remoteSink_ != nullptr) {
         CHECK_AND_RETURN_LOG(remoteSink_->SetCommonCommand(commonCommand, commandArgs) == AVSESSION_SUCCESS,
             "SetCommonCommand failed");
+    }
+}
+
+void AVSessionItem::ExecuteCustomData(const AAFwk::WantParams& data)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionItem::ExecuteCustomData");
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+        callback_->OnCustomData(data);
     }
 }
 
@@ -2252,6 +2361,16 @@ std::shared_ptr<RemoteSessionSource> AVSessionItem::GetRemoteSource()
     return remoteSource_;
 }
 
+void AVSessionItem::SetPlayingTime(int64_t playingTime)
+{
+    playingTime_ = playingTime;
+}
+
+int64_t AVSessionItem::GetPlayingTime() const
+{
+    return playingTime_;
+}
+
 void AVSessionItem::HandleControllerRelease(pid_t pid)
 {
     std::lock_guard controllersLockGuard(controllersLock_);
@@ -2283,7 +2402,7 @@ void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(
     serviceCallbackForUpdateSession_ = callback;
 }
 
-void AVSessionItem::SetServiceCallbackForMediaSession(const std::function<void(std::string, bool)>& callback)
+void AVSessionItem::SetServiceCallbackForMediaSession(const std::function<void(std::string, bool, bool)>& callback)
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
     std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
@@ -2416,10 +2535,6 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
     }
 }
 
-std::map<std::string, DeviceInfo> AVSessionItem::GetCastDeviceMap() const
-{
-    return castDeviceInfoMap_;
-}
 #endif
 
 void AVSessionItem::ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo)

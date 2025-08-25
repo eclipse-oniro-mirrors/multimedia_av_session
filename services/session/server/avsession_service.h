@@ -167,6 +167,10 @@ public:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                sptr<IRemoteObject>& object) override;
 
+    int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extra,
+                                        const AppExecFwk::ElementName& elementName,
+                                        sptr<IRemoteObject>& object) override;
+
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
@@ -174,10 +178,10 @@ public:
     int32_t GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors);
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
-    
+
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                       std::vector<AVQueueInfo>& avQueueInfos) override;
-    
+
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
 
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId, const std::string& deviceId);
@@ -208,9 +212,9 @@ public:
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
-    void HandleSessionReleaseInner();
+    void HandleDisableCast();
 
-    void CheckIfRemoveNotification(int32_t userId, const sptr<AVSessionItem>& sessionItem);
+    void HandleSessionReleaseInner();
 
     void HandleCallStartEvent();
 
@@ -273,7 +277,7 @@ public:
 #endif
 
     int32_t Close(void) override;
-    
+
     void AddAvQueueInfoToFile(AVSessionItem& session);
 
     std::string GetAVQueueDir(int32_t userId = 0);
@@ -305,7 +309,6 @@ public:
     bool CheckIfOtherAudioPlaying();
 
 private:
-
     void NotifyProcessStatus(bool isStart);
 
     static SessionContainer& GetContainer();
@@ -349,9 +352,16 @@ private:
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
 
+    int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
+                                        bool thirdPartyApp, const AppExecFwk::ElementName& elementName,
+                                        sptr<AVSessionItem>& sessionItem);
+
     bool IsParamInvalid(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName);
 
     void ServiceCallback(sptr<AVSessionItem>& sessionItem);
+
+    sptr<AVSessionItem> CreateNewSessionWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
+                                                  bool thirdPartyApp, const AppExecFwk::ElementName& elementName);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                          const AppExecFwk::ElementName& elementName);
@@ -452,6 +462,8 @@ private:
 
     void HandleEventHandlerCallBack();
 
+    AVControlCommand GetSessionProcCommand();
+
     bool IsHistoricalSession(const std::string& sessionId);
 
     void DeleteHistoricalRecord(const std::string& bundleName, int32_t userId = 0);
@@ -508,10 +520,10 @@ private:
     bool CheckAncoAudio();
 
     int32_t ConvertKeyCodeToCommand(int keyCode);
-    
+
     void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
-    
+
     void LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::StreamUsage streamUsage,
         AudioStandard::RendererState rendererState);
 
@@ -554,7 +566,7 @@ private:
 
     void DoDisconnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
 
-    int32_t DoDisconnectAllMigrateServer();
+    int32_t DoHisMigrateServerTransform(std::string networkId);
 
     void UpdateLocalFrontSession(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront);
 
@@ -594,8 +606,19 @@ private:
 
     void CheckAndUpdateAncoMediaSession(const AppExecFwk::ElementName& elementName);
 
+    void UpdateSessionTimestamp(sptr<AVSessionItem> session);
+
+    bool CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd, const MMI::KeyEvent& keyEvent,
+        sptr<AVSessionItem> session);
+
+    bool IsAncoValid();
+
+    std::string DoCJSONArrayTransformToString(cJSON* valueItem);
+
+    void HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem);
+
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    void ReportSessionState(const sptr<AVSessionItem>& session, uint8_t state);
+    void ReportSessionState(const sptr<AVSessionItem>& session, SessionState state);
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 
@@ -603,8 +626,10 @@ private:
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;
     std::atomic<bool> hasMediaCapsule_ = false;
+    std::atomic<bool> hasCardStateChangeStopTask_ = false;
 
     sptr<AVSessionItem> topSession_;
+    sptr<AVSessionItem> ancoSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;
     std::map<pid_t, sptr<ClientDeathRecipient>> clientDeathRecipients_;
@@ -670,7 +695,7 @@ private:
     const int32_t beginAddPos = 3;
     const int32_t endDecPos = 4;
     const int32_t typeAddPos = 2;
-    std::recursive_mutex isInCastLock_;
+    std::recursive_mutex checkEnableCastLock_;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
@@ -689,7 +714,7 @@ private:
     int32_t pressCount_ {};
     int32_t maxHistoryNums_ = 10;
     bool isFirstPress_ = true;
-    std::atomic<bool> isInCast_ = false;
+    bool isInCast_ = false;
     bool is2in1_ = false;
 
     void *migrateStubFuncHandle_ = nullptr;

@@ -33,7 +33,7 @@ ohos_fuzztest("AVSessionPixelMapFuzzTest") {
   deps = [
     "../../../../../../../frameworks/common:avsession_common",
     "../../../../../../../frameworks/js/napi/session:avsession_napi",
-    "../../../../../../../frameworks/native/session:avsession_client",
+    "../../../../../../../frameworks/native/session:avsession_client_static",
     "../../../../../../../utils:avsession_utils",
   ]
   external_deps = [

@@ -20,6 +20,7 @@
 
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_sysevent.h"
 #include "avmeta_data.h"
 #include "avplayback_state.h"
 #include "avsession_info.h"
@@ -1714,22 +1715,19 @@ static HWTEST_F(AVSessionServiceTestSecond, OnDeviceOffline001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: #ICCINP
 */
-static HWTEST_F(AVSessionServiceTestSecond, OnDeviceStateChange001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTestSecond, OnDeviceStateChange001, TestSize.Level1)
 {
     SLOGD("OnDeviceStateChange001 begin!");
     AVSessionDescriptor aVSessionDescriptor;
-    TestSessionListener* listener = new TestSessionListener();
-    g_AVSessionService->innerSessionListeners_.push_back(listener);
+    g_isCallOnTopSessionChange = false;
+    auto listener = std::make_shared<TestSessionListener>();
+    g_AVSessionService->innerSessionListeners_.push_back(listener.get());
     const std::string deviceId = "AUDIO";
     DeviceState state;
     state.deviceId = deviceId;
     listener->OnDeviceStateChange(state);
     g_AVSessionService->NotifySessionCreate(aVSessionDescriptor);
     EXPECT_EQ(g_isCallOnSessionCreate, true);
-    if (listener != nullptr) {
-        delete listener;
-        listener = nullptr;
-    }
     SLOGD("OnDeviceStateChange001 end!");
 }
 
@@ -1767,7 +1765,7 @@ static HWTEST_F(AVSessionServiceTestSecond, ReportSessionState001, TestSize.Leve
 {
     ASSERT_TRUE(g_AVSessionService != nullptr);
     sptr<AVSessionItem> session = nullptr;
-    g_AVSessionService->ReportSessionState(session, 0);
+    g_AVSessionService->ReportSessionState(session, SessionState::STATE_CREATE);
 
     auto stateInfo = AVSessionSysEvent::GetInstance().GetPlayingStateInfo(g_testAnotherBundleName);
     ASSERT_TRUE(stateInfo != nullptr);

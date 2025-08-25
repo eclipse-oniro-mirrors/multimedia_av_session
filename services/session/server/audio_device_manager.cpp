@@ -12,18 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "audio_device_manager.h"
 #include "avsession_log.h"
 #include "migrate_avsession_constant.h"
- 
+
 namespace OHOS::AVSession {
 AudioDeviceManager &AudioDeviceManager::GetInstance()
 {
     static AudioDeviceManager instance;
     return instance;
 }
- 
+
 bool AudioDeviceManager::GetSessionInfoSyncState()
 {
     return AUDIO_OUTPUT_SOURCE == outputDevice_;

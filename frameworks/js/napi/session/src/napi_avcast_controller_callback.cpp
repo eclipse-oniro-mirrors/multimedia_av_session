@@ -193,6 +193,13 @@ void NapiAVCastControllerCallback::OnMediaItemChange(const AVQueueItem& avQueueI
     HandleEvent(EVENT_CAST_MEDIA_ITEM_CHANGE, avQueueItem);
 }
 
+void NapiAVCastControllerCallback::OnCustomData(const AAFwk::WantParams& data)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnCustomData");
+    SLOGI("Start handle OnCustomData event");
+    HandleEvent(EVENT_CAST_CUSTOM_DATA, data);
+}
+
 void NapiAVCastControllerCallback::OnPlayNext()
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayNext");

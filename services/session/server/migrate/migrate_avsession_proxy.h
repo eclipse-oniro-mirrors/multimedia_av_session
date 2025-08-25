@@ -16,6 +16,10 @@
 #ifndef OHOS_MIGRATE_AVSESSION_PROXY_H
 #define OHOS_MIGRATE_AVSESSION_PROXY_H
 
+#include <atomic>
+#include <mutex>
+#include <thread>
+
 #include "softbus/softbus_session_proxy.h"
 #include "migrate_avsession_constant.h"
 #include "avcontroller_item.h"
@@ -86,7 +90,7 @@ private:
     void ProcessMediaImage(std::string mediaImageStr);
     void SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr);
     void SendSpecialKeepAliveData();
-    void SendMediaControlNeedStateMsg();
+    void SendMediaControlNeedStateMsg(bool isMock = false);
 
     const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxyControllerCallback();
 
@@ -107,12 +111,17 @@ private:
     AVSessionService *servicePtr_ = nullptr;
     AppExecFwk::ElementName elementName_;
 
-    int32_t volumeNum_ = 0;
+    std::atomic<int32_t> volumeNum_ = DEFAULT_FAKE_VOLUME;
     AudioDeviceDescriptors availableDevices_;
     AudioDeviceDescriptors preferredOutputDevice_;
     MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback_;
 
-    bool isNeedByMediaControl_ = false;
+    std::atomic<bool> isNeedByMediaControl = false;
+    std::thread keepAliveWorker_;
+    std::thread checkConnectWorker_;
+    std::recursive_mutex migrateProxyDeviceIdLock_;
+    std::mutex keepAliveMtx_;
+    std::condition_variable keepAliveCv_;
 };
 
 class AVSessionObserver : public AVSessionCallback {
@@ -143,6 +152,8 @@ public:
     void OnPlayFromAssetId(int64_t assetId) override {}
     void OnPlayWithAssetId(const std::string& assetId) override {}
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {}
+    void OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) override {}
+    void OnCustomData(const AAFwk::WantParams& data) override {}
 
 private:
     std::weak_ptr<MigrateAVSessionProxy> migrateProxy_;

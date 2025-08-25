@@ -32,7 +32,7 @@ public:
     BundleStatusAdapter();
 
     ~BundleStatusAdapter();
-
+    
     void Init();
 
     bool GetBundleIcon(const std::string bundleName, const std::string abilityName, std::string& icon);

@@ -19,6 +19,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
+const t = 20;
 
 export let AVCastPickerState;
 (function(l11) {
@@ -85,6 +86,7 @@ export class AVCastPicker extends ViewPU {
         this.needToRestart = false;
         this.__isShowLoadingProgress = new ObservedPropertySimplePU(false, this, 'isShowLoadingProgress');
         this.pickerCountOnCreation = 0;
+        this.__isDisabledByPickerLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPickerLimit');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -166,6 +168,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.pickerCountOnCreation !== undefined) {
             this.pickerCountOnCreation = c11.pickerCountOnCreation;
         }
+        if (c11.isDisabledByPickerLimit !== undefined) {
+            this.isDisabledByPickerLimit = c11.isDisabledByPickerLimit;
+        }
     }
 
     updateStateVars(b11) {
@@ -191,6 +196,7 @@ export class AVCastPicker extends ViewPU {
         this.__isRTL.purgeDependencyOnElmtId(a11);
         this.__restartUECMessage.purgeDependencyOnElmtId(a11);
         this.__isShowLoadingProgress.purgeDependencyOnElmtId(a11);
+        this.__isDisabledByPickerLimit.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -213,6 +219,7 @@ export class AVCastPicker extends ViewPU {
         this.__isRTL.aboutToBeDeleted();
         this.__restartUECMessage.aboutToBeDeleted();
         this.__isShowLoadingProgress.aboutToBeDeleted();
+        this.__isDisabledByPickerLimit.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -369,9 +376,21 @@ export class AVCastPicker extends ViewPU {
         this.__isShowLoadingProgress.set(g1);
     }
 
+    get isDisabledByPickerLimit() {
+        return this.__isDisabledByPickerLimit.get();
+    }
+
+    set isDisabledByPickerLimit(g1) {
+        this.__isDisabledByPickerLimit.set(g1);
+    }
+
     aboutToAppear() {
         AVCastPicker.currentPickerCount += 1;
         this.pickerCountOnCreation = AVCastPicker.currentPickerCount;
+        if (this.pickerCountOnCreation > t) {
+            console.info(TAG, 'disable picker');
+            this.isDisabledByPickerLimit = true;
+        }
     }
 
     aboutToDisappear() {
@@ -398,7 +417,11 @@ export class AVCastPicker extends ViewPU {
         }, Column);
         this.observeComponentCreation2((n10, o10) => {
             If.create();
-            if (this.customPicker === undefined) {
+            if (this.isDisabledByPickerLimit) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.buildDisabledPicker.bind(this)();
+                });
+            } else if (this.customPicker === undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.buildDefaultPicker.bind(this)(false);
                 });
@@ -472,11 +495,41 @@ export class AVCastPicker extends ViewPU {
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
-            Text.wordBreak(WordBreak.BREAK_ALL);
+            Text.wordBreak(WordBreak.BREAK_WORD);
             Text.maxFontScale(this.maxFontSizeScale);
             Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
         }, Text);
         Text.pop();
+    }
+
+    subTextBuilder(u3, v1 = null) {
+        this.observeComponentCreation2((x1, y1) => {
+            Row.create();
+            Row.width('100%');
+        }, Row);
+        this.observeComponentCreation2((x1, y1) => {
+            Text.create(`${u3.deviceSubName}...`);
+            Text.fontSize({ 'id': -1, 'type': 10002,
+                params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__' });
+            Text.fontColor(u3.isConnected ?
+                (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
+                { 'id': -1, 'type': 10001, params: ['sys.color.font_emphasize'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
+                (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
+                { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxLines(1);
+            Text.maxFontScale(this.maxFontSizeScale);
+            Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
+        }, Text);
+        Text.pop();
+        Row.pop();
     }
 
     highQualityIconBuilder(u2, v1 = null) {
@@ -559,22 +612,23 @@ export class AVCastPicker extends ViewPU {
                 this.iconBuilder.bind(this)(x8, false);
 
                 this.observeComponentCreation2((a10, b10) => {
-                    Flex.create({
-                        direction: FlexDirection.Column,
-                        justifyContent: FlexAlign.Center,
-                    });
-                    Flex.padding({
+                    Column.create();
+                    Column.width(this.isPc ? 254 : 144);
+                    Column.padding({
                         left: 8,
                         top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
                         right: 8,
                         bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
                     });
-                    Flex.width(this.isPc ? 254 : 144);
+                }, Column);
+                this.observeComponentCreation2((m9, n9) => {
+                    Flex.create({ direction: FlexDirection.Row, justifyContent: FlexAlign.Start });
+                    Flex.width('100%');
                 }, Flex);
                 this.textBuilder.bind(this)(x8);
                 this.observeComponentCreation2((m9, n9) => {
                     If.create();
-                    if (this.showHighQuality(x8)) {
+                    if (x8.highQualityParams !== undefined && this.showHighQuality(x8)) {
                         this.ifElseBranchUpdateFunction(0, () => {
                             this.observeComponentCreation2((u9, v9) => {
                                 Flex.create();
@@ -598,6 +652,21 @@ export class AVCastPicker extends ViewPU {
                 }, If);
                 If.pop();
                 Flex.pop();
+
+                this.observeComponentCreation2((m9, n9) => {
+                    If.create();
+                    if (x8.fromCall) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.subTextBuilder.bind(this)(x8);
+                        });
+                    }
+                    else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                        });
+                    }
+                }, If);
+                If.pop();
+                Column.pop();
 
                 Row.pop();
                 this.observeComponentCreation2((m9, n9) => {
@@ -655,10 +724,17 @@ export class AVCastPicker extends ViewPU {
         Column.pop();
     }
 
+    buildDisabledPicker(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+        }, Column);
+        Column.pop();
+    }
     buildDefaultPicker(c8, d8 = null) {
         this.observeComponentCreation2((f8, g8) => {
             Button.createWithChild();
             Button.size({ width: '100%', height: '100%' });
+            Button.hoverEffect(HoverEffect.None);
             Button.stateEffect(false);
             Button.backgroundColor('#00000000');
             Button.accessibilityLevel('yes');

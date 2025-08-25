@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "avsession_callback_client.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "iservice_registry.h"

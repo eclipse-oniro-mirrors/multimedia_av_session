@@ -236,6 +236,12 @@ void NapiAVSessionCallback::OnToggleFavorite(const std::string& assertId)
     HandleEvent(EVENT_TOGGLE_FAVORITE, assertId);
 }
 
+void NapiAVSessionCallback::OnCustomData(const AAFwk::WantParams& data)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnCustomData");
+    HandleEvent(EVENT_CUSTOM_DATA, data);
+}
+
 void NapiAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnMediaKeyEvent");
@@ -295,6 +301,12 @@ void NapiAVSessionCallback::OnPlayWithAssetId(const std::string& assetId)
 void NapiAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnCastDisplayChange");
+    HandleEvent(EVENT_DISPLAY_CHANGE, castDisplayInfo);
+}
+
+void NapiAVSessionCallback::OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnCastDisplaySizeChange");
     HandleEvent(EVENT_DISPLAY_CHANGE, castDisplayInfo);
 }
 

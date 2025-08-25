@@ -42,9 +42,9 @@ ohos_fuzztest("AVSessionServiceStubFuzzTest") {
   deps = [
     "./../../../../../../services/session:avsession_item_static",
     "./../../../../../../services/session:avsession_service_static",
+    "./../../../../session:avsession_client_static",
     "./../../../../../../services/session:libidl_avsession_service_interface_proxy",
     "./../../../../../../services/session:libidl_avsession_service_interface_stub",
-    "./../../../../session:avsession_client",
     "./../../../../../../utils:avsession_utils",
   ]
   external_deps = [
@@ -65,8 +65,8 @@ ohos_fuzztest("AVSessionServiceStubFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
-    "window_manager:libwm",
   ]
+  
   public_configs = ["./../../../../../../services/session:avsession_ipc_config"]
 
   if (castplus_cast_engine_enable) {

@@ -49,6 +49,8 @@ public:
     ErrCode OnPlayFromAssetId(int64_t assetId) override;
     ErrCode OnPlayWithAssetId(const std::string& assetId) override;
     ErrCode OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
+    ErrCode OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) override;
+    ErrCode OnCustomData(const AAFwk::WantParams& extras) override;
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;
