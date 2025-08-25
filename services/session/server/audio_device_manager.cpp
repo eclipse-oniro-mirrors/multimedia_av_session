@@ -32,7 +32,7 @@ bool AudioDeviceManager::GetSessionInfoSyncState()
 void AudioDeviceManager::InitAudioStateCallback(std::shared_ptr<MigrateAVSessionServer> migrateAVSession,
     std::string deviceId)
 {
-    SLOGI("enter RegisterAudioDeviceChangeCallback");
+    SLOGI("enter InitAudioStateCallback");
     if (isRegistered_) {
         SLOGW("device change callback already registered");
         return;

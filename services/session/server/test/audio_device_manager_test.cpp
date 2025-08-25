@@ -80,6 +80,35 @@ static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback001, Test
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
     EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
 }
+ 
+/**
+ * @tc.name: RegisterAudioDeviceChangeCallback002
+ * @tc.desc: audioDeviceChangeCallback_ have registered
+ * @tc.type: FUNC
+ */
+static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, TestSize.Level1)
+{
+    SLOGI("RegisterAudioDeviceChangeCallback002 begin!");
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_
+        = nullptr;
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
+}
+ 
+/**
+ * @tc.name: UnRegisterAudioDeviceChangeCallback001
+ * @tc.desc: audioDeviceChangeCallback_ have registered
+ * @tc.type: FUNC
+ */
+static HWTEST(AudioDeviceManagerTest, UnRegisterAudioDeviceChangeCallback001, TestSize.Level1)
+{
+    SLOGI("UnRegisterAudioDeviceChangeCallback001 begin!");
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_
+        = std::make_shared<DeviceChangeCallback>();
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ ！= nullptr);
+}
 
 /**
  * @tc.name: SendRemoteAvSessionInfo001
@@ -123,4 +152,129 @@ static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Leve
     std::string deviceId = "test";
     AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
     EXPECT_TRUE(AudioDeviceManager::GetInstance().migrateSession_ != nullptr);
+}
+
+/**
+ * @tc.name: OnDeviceChange001
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+static HWTEST(AudioDeviceManagerTest, OnDeviceChange001, TestSize.Level1)
+{
+    SLOGI("OnDeviceChange001 begin!");
+    OHOS::AudioStandard::DeviceChangeAction deviceChangeAction;
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+}
+
+/**
+ * @tc.name  : OnDeviceChange002
+ * @tc.number: 
+ * @tc.desc  : 测试当设备描述符列表为空时,函数应打印错误日志并返回
+ */
+static HWTEST(AudioDeviceManagerTest,OnDeviceChange002, TestSize.Level0) {
+    SLOGI("OnDeviceChange002 begin!");
+    OHOS::AudioStandard::DeviceChangeAction deviceChangeAction;
+    deviceChangeAction.deviceDescriptors = {};
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors.size(), 0);
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+}
+
+/**
+ * @tc.name  : OnDeviceChange003
+ * @tc.number: OnDeviceChangeTest_003
+ * @tc.desc  : 测试当第一个设备描述符为空时,函数应打印错误日志并返回
+ */
+static HWTEST(AudioDeviceManagerTest,OnDeviceChange003, TestSize.Level0) {
+    SLOGI("OnDeviceChange003 begin!");
+    OHOS::AudioStandard::DeviceChangeAction deviceChangeAction;
+    deviceChangeAction.deviceDescriptors = {nullptr};
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors[0], nullptr);
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+}
+
+/**
+ * @tc.name  : OnDeviceChange004
+ * @tc.number: OnDeviceChangeTest_004
+ * @tc.desc  : 测试当设备连接状态为VIRTUAL_CONNECTED时,函数应打印信息并返回
+ */
+static HWTEST(AudioDeviceManagerTest,OnDeviceChange004, TestSize.Level0) {
+    SLOGI("OnDeviceChange004 begin!");
+    OHOS::AudioStandard::DeviceChangeAction deviceChangeAction;
+    auto desc = std::make_shared<OHOS::AudioStandard::AudioDeviceDescriptor>();
+    desc->connectState_ = OHOS::AudioStandard::ConnectState::VIRTUAL_CONNECTED;
+    deviceChangeAction.deviceDescriptors = {desc};
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->connectState_, OHOS::AudioStandard::ConnectState::VIRTUAL_CONNECTED);
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+}
+
+/**
+ * @tc.name  : OnDeviceChange005
+ * @tc.number: OnDeviceChangeTest_005
+ * @tc.desc  : 测试当设备类型为DEVICE_TYPE_BLUETOOTH_A2DP且设备分类为BT_CAR时,函数应发送远程音频会话信息
+ */
+static HWTEST(AudioDeviceManagerTest,OnDeviceChange005, TestSize.Level0) {
+    SLOGI("OnDeviceChange005 begin!");
+    OHOS::AudioStandard::DeviceChangeAction deviceChangeAction;
+    auto desc = std::make_shared<OHOS::AudioStandard::AudioDeviceDescriptor>();
+    desc->connectState_ = OHOS::AudioStandard::ConnectState::CONNECTED;
+    desc->deviceType_ = OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP;
+    desc->deviceCategory_ = OHOS::AudioStandard::DeviceCategory::BT_CAR;
+    deviceChangeAction.deviceDescriptors = {desc};
+    deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceType_, OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP);
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceCategory_, OHOS::AudioStandard::DeviceCategory::BT_CAR);
+    AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
+    AudioDeviceManager::GetInstance().deviceId_ = "test";
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+}
+
+/**
+ * @tc.name  : OnDeviceChange006
+ * @tc.number: OnDeviceChangeTest_006
+ * @tc.desc  : DEVICE_TYPE_BLUETOOTH_SCO
+ */
+static HWTEST(AudioDeviceManagerTest,OnDeviceChange006, TestSize.Level0) {
+    SLOGI("OnDeviceChange006 begin!");
+    OHOS::AudioStandard::DeviceChangeAction deviceChangeAction;
+    auto desc = std::make_shared<OHOS::AudioStandard::AudioDeviceDescriptor>();
+    desc->connectState_ = OHOS::AudioStandard::ConnectState::CONNECTED;
+    desc->deviceType_ = OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP;
+    desc->deviceCategory_ = OHOS::AudioStandard::DeviceCategory::BT_CAR;
+    deviceChangeAction.deviceDescriptors = {desc};
+    deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
+ 
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceType_, OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP);
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceCategory_, OHOS::AudioStandard::DeviceCategory::BT_CAR);
+    AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
+    AudioDeviceManager::GetInstance().deviceId_ = "test";
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
+}
+
+/**
+ * @tc.name  : OnDeviceChange007
+ * @tc.number: OnDeviceChangeTest_007
+ * @tc.desc  : DEVICE_TYPE_BLUETOOTH_SCO
+ */
+static HWTEST(AudioDeviceManagerTest,OnDeviceChange007, TestSize.Level0) {
+    SLOGI("OnDeviceChange007 begin!");
+    OHOS::AudioStandard::DeviceChangeAction deviceChangeAction;
+    auto desc = std::make_shared<OHOS::AudioStandard::AudioDeviceDescriptor>();
+    desc->connectState_ = OHOS::AudioStandard::ConnectState::CONNECTED;
+    desc->deviceType_ = OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_SCO;
+    desc->deviceCategory_ = OHOS::AudioStandard::DeviceCategory::BT_CAR;
+    deviceChangeAction.deviceDescriptors = {desc};
+    deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
+ 
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceType_, OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_SCO);
+    EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceCategory_, OHOS::AudioStandard::DeviceCategory::BT_CAR);
+    AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
+    AudioDeviceManager::GetInstance().deviceId_ = "test";
+    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
 }
