@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "audio_device_manager.h"
 #include "avsession_log.h"
 #include "migrate_avsession_constant.h"
