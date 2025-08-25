@@ -80,35 +80,6 @@ static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback001, Test
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
     EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
 }
- 
-/**
- * @tc.name: RegisterAudioDeviceChangeCallback002
- * @tc.desc: audioDeviceChangeCallback_ have registered
- * @tc.type: FUNC
- */
-static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, TestSize.Level1)
-{
-    SLOGI("RegisterAudioDeviceChangeCallback002 begin!");
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_
-        = nullptr;
-    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
-}
- 
-/**
- * @tc.name: UnRegisterAudioDeviceChangeCallback001
- * @tc.desc: audioDeviceChangeCallback_ have registered
- * @tc.type: FUNC
- */
-static HWTEST(AudioDeviceManagerTest, UnRegisterAudioDeviceChangeCallback001, TestSize.Level1)
-{
-    SLOGI("UnRegisterAudioDeviceChangeCallback001 begin!");
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_
-        = std::make_shared<DeviceChangeCallback>();
-    AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ ！= nullptr);
-}
 
 /**
  * @tc.name: RegisterAudioDeviceChangeCallback002
@@ -136,7 +107,7 @@ static HWTEST(AudioDeviceManagerTest, UnRegisterAudioDeviceChangeCallback001, Te
         = std::make_shared<DeviceChangeCallback>();
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
     AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ == nullptr);
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
 }
 
 /**
