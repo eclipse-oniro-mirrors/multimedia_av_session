@@ -96,7 +96,7 @@ void AudioDeviceManager::RegisterAudioDeviceChangeCallback()
     audioSystemManager->SetDeviceChangeCallback(
         AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG, audioDeviceChangeCallback_);
 }
- 
+
 int32_t AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
 {
     SLOGI("enter UnRegisterAudioDeviceChangeCallback");
