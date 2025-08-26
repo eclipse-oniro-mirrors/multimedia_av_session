@@ -424,6 +424,18 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        std::shared_ptr<AVSessionPixelMap> avQueueImg = meta.GetAVQueueImage();
+        if (avQueueImg != nullptr && avQueueImg->GetInnerImgBuffer().size() > 0 &&
+            !metaData_.GetAVQueueName().empty() && !metaData_.GetAVQueueId().empty()) {
+            std::string fileDir = AVSessionUtils::GetFixedPathName(userId_);
+            std::string fileName = GetBundleName() + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+            SLOGI("save avQueueImg to file for %{public}s", meta.GetAVQueueId().c_str());
+            AVSessionUtils::WriteImageToFile(avQueueImg, fileDir, fileName);
+            avQueueImg->Clear();
+        }
+    }
 
     UpdateRecommendInfo(true);
 }

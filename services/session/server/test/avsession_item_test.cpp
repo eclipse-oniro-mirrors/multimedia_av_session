@@ -726,5 +726,47 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportSessionControl_001, TestSize.Lev
     EXPECT_EQ(stateInfo->control_.size(), 0);
 }
 #endif
+
+/**
+ * @tc.name: AVSessionItem_CheckUseAVMetaData_001
+ * @tc.desc: Test CheckIfSendCapsule.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_CheckUseAVMetaData_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_CheckUseAVMetaData_001 begin!");
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    g_AVSessionItem->serviceCallbackForAddAVQueueInfo_ = nullptr;
+    AVMetaData metadata;
+    metadata.SetAssetId("test");
+    metadata.SetTitle("test");
+    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    ASSERT_TRUE(metadata.GetAVQueueImage() == nullptr);
+
+    auto avQueueImg = std::make_shared<AVSessionPixelMap>();
+    ASSERT_TRUE(avQueueImg != nullptr);
+    metadata.SetAVQueueImage(avQueueImg);
+    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    ASSERT_TRUE(avQueueImg != nullptr);
+    EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, true);
+
+    std::vector<uint8_t> vec = {0, 1, 0, 1};
+    avQueueImg->SetInnerImgBuffer(vec);
+    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    ASSERT_TRUE(avQueueImg != nullptr);
+    EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, true);
+
+    metadata.SetAVQueueName("test");
+    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    ASSERT_TRUE(avQueueImg != nullptr);
+    EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, true);
+
+    metadata.SetAVQueueId("test");
+    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    ASSERT_TRUE(avQueueImg != nullptr);
+    EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size(), 0);
+    SLOGI("AVSessionItem_CheckUseAVMetaData_001 end!");
+}
 } //AVSession
 } //OHOS
