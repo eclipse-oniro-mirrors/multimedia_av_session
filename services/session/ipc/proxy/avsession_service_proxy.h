@@ -128,6 +128,7 @@ private:
     void BufferToAVQueueInfoImg(const char *buffer, std::vector<AVQueueInfo>& avQueueInfos);
     static inline BrokerDelegator<AVSessionServiceProxy> delegator_;
     std::mutex createControllerMutex_;
+    const uint32_t maxAVQueueInfoSize = 99;
 };
 } // namespace OHOS
 #endif // OHOS_AVSESSION_SERVICE_PROXY_H

@@ -118,6 +118,7 @@ private:
     bool isDestroyed_ = {};
     std::shared_ptr<AVSessionController> controller_;
     const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
+    const int32_t maxCastDisplayNum = 99;
     std::mutex setMetadataLock_;
     std::mutex setPlaybackLock_;
     std::mutex setCommandLock_;

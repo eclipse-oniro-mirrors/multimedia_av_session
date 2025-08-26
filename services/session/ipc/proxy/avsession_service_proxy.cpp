@@ -237,7 +237,7 @@ void AVSessionServiceProxy::UnMarshallingAVQueueInfos(MessageParcel &reply, std:
 {
     uint32_t size {};
     CHECK_AND_RETURN_LOG(reply.ReadUint32(size), "UnMarshallingAVQueueInfos size failed");
-    CHECK_AND_RETURN_LOG(size, "UnMarshallingAVQueueInfos size=0");
+    CHECK_AND_RETURN_LOG(size > 0 && size <= maxAVQueueInfoSize, "UnMarshallingAVQueueInfos size out of range");
 
     for (uint32_t i = 0; i < size; i++) {
         AVQueueInfo avQueueInfo;
