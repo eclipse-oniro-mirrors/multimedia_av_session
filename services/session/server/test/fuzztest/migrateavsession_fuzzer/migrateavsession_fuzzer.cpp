@@ -442,6 +442,71 @@ void HandleFocusValidCommandChangeTest()
     migrateServer_->HandleFocusValidCommandChange(sessionId, cmds);
 }
 
+void CoverExceptionPathTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+
+    std::vector<int32_t> cmds;
+    std::string sessionId = std::to_string(GetData<uint8_t>());
+    migrateServer_->HandleFocusValidCommandChange(sessionId, cmds);
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
+    if (innerPixelMap != nullptr) {
+        migrateServer_->DoMediaImageSyncToRemote(innerPixelMap);
+    }
+    migrateServer_->UpdateEmptyInfoToRemote();
+    migrateServer_->ProcFromNext("", "");
+    migrateServer_->ProcControlCommandFromNext(nullptr);
+    migrateServer_->ProcessColdStartFromNext(nullptr);
+    migrateServer_->ProcessMediaControlNeedStateFromNext(nullptr);
+    AudioDeviceDescriptors devices;
+    devices.push_back(nullptr);
+    cJSON *json = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(devices);
+    cJSON_Delete(json);
+    migrateServer_->VolumeControlCommand(nullptr);
+    migrateServer_->SwitchAudioDeviceCommand(nullptr);
+}
+
+void ProcControlCommandFromNextTestExt()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+
+    sptr<AVControllerItem> avcontroller = new (std::nothrow) AVControllerItem(0, nullptr);
+    if (avcontroller == nullptr) {
+        return;
+    }
+    std::string sessionId = migrateServer_->lastSessionId_;
+    cJSON* json = cJSON_CreateObject();
+    if (json == nullptr) {
+        return;
+    }
+    migrateServer_->playerIdToControllerMap_.insert({sessionId, avcontroller});
+    cJSON_AddNumberToObject(json, "CommandCode", AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
+    cJSON_AddStringToObject(json, "CommandArgs", "test_arg");
+    migrateServer_->ProcControlCommandFromNext(json);
+    migrateServer_->playerIdToControllerMap_.erase(sessionId);
+    cJSON_Delete(json);
+}
+
+void ProcessMediaControlNeedStateFromNextExt()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+
+    cJSON* json = cJSON_CreateObject();
+    if (json == nullptr) {
+        return;
+    }
+    cJSON_AddBoolToObject(json, NEED_STATE, true);
+    migrateServer_->isNeedByRemote.store(false);
+    migrateServer_->ProcessMediaControlNeedStateFromNext(json);
+    cJSON_Delete(json);
+}
+
 void TestFunc()
 {
     ConnectProxyTest();
@@ -467,6 +532,9 @@ void TestFunc()
     VolumeControlCommandTest();
     SwitchAudioDeviceCommandTest();
     RegisterAudioCallbackAndTriggerTest();
+    CoverExceptionPathTest();
+    ProcControlCommandFromNextTestExt();
+    ProcessMediaControlNeedStateFromNextExt();
 }
 
 void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)

@@ -45,7 +45,7 @@ private:
     void RegisterPreferedOutputDeviceChangeCallback();
     void UnRegisterPreferedOutputDeviceChangeCallback();
     void RegisterAudioDeviceChangeCallback();
-    void UnRegisterAudioDeviceChangeCallback();
+    int32_t UnRegisterAudioDeviceChangeCallback();
     std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> audioPreferedOutputDeviceChangeCallback_;
     std::shared_ptr<AudioStandard::AudioManagerDeviceChangeCallback> audioDeviceChangeCallback_;
 
