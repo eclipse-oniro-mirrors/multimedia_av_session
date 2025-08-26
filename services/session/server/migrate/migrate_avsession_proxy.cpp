@@ -39,7 +39,10 @@ MigrateAVSessionProxy::MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode
 
 MigrateAVSessionProxy::~MigrateAVSessionProxy()
 {
-    SLOGI("MigrateAVSessionProxy destruct with disconnect process");
+    if (checkConnectWorker_.joinable()) {
+        checkConnectWorker_.join();
+    }
+    SLOGI("MigrateAVSessionProxy destruct with disconnect process.");
     OnDisconnectServer(deviceId_);
 }
 
@@ -76,8 +79,8 @@ void MigrateAVSessionProxy::OnDisconnectServer(const std::string &deviceId)
         std::lock_guard<std::mutex> lock(keepAliveMtx_);
         keepAliveCv_.notify_all();
     }
-    if (keepAliveworker_.joinable()) {
-        keepAliveworker_.join();
+    if (keepAliveWorker_.joinable()) {
+        keepAliveWorker_.join();
     }
     std::vector<sptr<IRemoteObject>> sessionControllers;
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnDisconnectServer find service ptr null!");
@@ -293,14 +296,14 @@ void MigrateAVSessionProxy::SetVolume(const AAFwk::WantParams& extras)
     AAFwk::IInteger* ao = AAFwk::IInteger::Query(volume);
     CHECK_AND_RETURN_LOG(ao != nullptr, "extras have no value");
 
-    volumeNum_ = OHOS::AAFwk::Integer::Unbox(ao);
+    volumeNum_.store(OHOS::AAFwk::Integer::Unbox(ao));
     cJSON* value = SoftbusSessionUtils::GetNewCJSONObject();
     if (value == nullptr) {
         SLOGE("get json value fail");
         return;
     }
-    if (!SoftbusSessionUtils::AddIntToJson(value, AUDIO_VOLUME, volumeNum_)) {
-        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail", AUDIO_VOLUME, volumeNum_);
+    if (!SoftbusSessionUtils::AddIntToJson(value, AUDIO_VOLUME, volumeNum_.load())) {
+        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail", AUDIO_VOLUME, volumeNum_.load());
         cJSON_Delete(value);
         return;
     }
@@ -326,7 +329,7 @@ void MigrateAVSessionProxy::SelectOutputDevice(const AAFwk::WantParams& extras)
 void MigrateAVSessionProxy::GetVolume(AAFwk::WantParams& extras)
 {
     SLOGI("proxy send in GetVolume case");
-    extras.SetParam(AUDIO_GET_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
+    extras.SetParam(AUDIO_GET_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_.load()));
 }
 
 void MigrateAVSessionProxy::GetAvailableDevices(AAFwk::WantParams& extras)
@@ -436,23 +439,23 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     } else {
         remoteSession_->Activate();
     }
-    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s.",
+    SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s done.",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
-    AVPlaybackState playbackState;
-    if (bundleNameBef != elementName_.GetBundleName() &&
-        AVSESSION_SUCCESS == remoteSession_->GetAVPlaybackState(playbackState)) {
+    if (bundleNameBef != elementName_.GetBundleName()) {
+        AVPlaybackState playbackState;
         playbackState.SetState(0);
         playbackState.SetFavorite(false);
         remoteSession_->SetAVPlaybackState(playbackState);
     }
-    AVMetaData metaData;
-    if (bundleNameBef != elementName_.GetBundleName() && AVSESSION_SUCCESS == remoteSession_->GetAVMetaData(metaData)) {
-        metaData.SetAssetId(metaData.GetAssetId().empty() ? DEFAULT_STRING : metaData.GetAssetId());
+    if (bundleNameBef != elementName_.GetBundleName()) {
+        AVMetaData metaData;
+        metaData.SetAssetId(DEFAULT_STRING);
         metaData.SetWriter(bundleName);
         metaData.SetTitle("");
         metaData.SetArtist("");
+        metaData.SetPreviousAssetId("");
         remoteSession_->SetAVMetaData(metaData);
     }
     SendMediaControlNeedStateMsg();
@@ -569,10 +572,10 @@ void MigrateAVSessionProxy::ProcessVolumeControlCommand(cJSON* jsonValue)
         return;
     }
 
-    volumeNum_ = SoftbusSessionUtils::GetIntFromJson(jsonValue, AUDIO_VOLUME);
+    volumeNum_.store(SoftbusSessionUtils::GetIntFromJson(jsonValue, AUDIO_VOLUME));
 
     AAFwk::WantParams args;
-    args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_));
+    args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_.load()));
     CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "preSetController_ is nullptr");
     preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_VOLUME, args);
 }
@@ -733,9 +736,9 @@ void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::stri
     cJSON_Delete(controlMsg);
 }
 
-void MigrateAVSessionProxy::SendMediaControlNeedStateMsg()
+void MigrateAVSessionProxy::SendMediaControlNeedStateMsg(bool isMock)
 {
-    SLOGI("SendMediaControlNeedStateMsg with state:%{public}d", isNeedByMediaControl.load());
+    SLOGI("SendMediaControlNeedStateMsg with state:%{public}d|mock:%{public}d", isNeedByMediaControl.load(), isMock);
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_MEDIA_CONTROL_NEED_STATE});
 
     cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
@@ -743,7 +746,7 @@ void MigrateAVSessionProxy::SendMediaControlNeedStateMsg()
         SLOGE("get controlMsg fail");
         return;
     }
-    if (!SoftbusSessionUtils::AddBoolToJson(controlMsg, NEED_STATE, isNeedByMediaControl.load())) {
+    if (!SoftbusSessionUtils::AddBoolToJson(controlMsg, NEED_STATE, isMock ? true : isNeedByMediaControl.load())) {
         SLOGE("AddBoolToJson with key:%{public}s|value:%{public}d fail", NEED_STATE, isNeedByMediaControl.load());
         cJSON_Delete(controlMsg);
         return;
@@ -756,7 +759,18 @@ void MigrateAVSessionProxy::SendMediaControlNeedStateMsg()
 
 void MigrateAVSessionProxy::SendSpecialKeepAliveData()
 {
-    keepAliveworker_ = std::thread([this]() {
+    checkConnectWorker_ = std::thread([this]() {
+        SendMediaControlNeedStateMsg(true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(CHECK_CONNECT_TIME_FOR_NEXT));
+        SendMediaControlNeedStateMsg();
+        if (volumeNum_.load() == DEFAULT_FAKE_VOLUME) {
+            SLOGE("no bytes recv aft connect, disconnect process");
+            OnDisconnectServer(deviceId_);
+        } else {
+            SLOGI("volume recv aft connect:%{public}d", volumeNum_.load());
+        }
+    });
+    keepAliveWorker_ = std::thread([this]() {
         bool isDeviceIdEmpty = false;
         {
             std::lock_guard lockGuard(migrateProxyDeviceIdLock_);

@@ -96,16 +96,16 @@ void AudioDeviceManager::RegisterAudioDeviceChangeCallback()
     audioSystemManager->SetDeviceChangeCallback(
         AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG, audioDeviceChangeCallback_);
 }
- 
-void AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
+
+int32_t AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
 {
     SLOGI("enter UnRegisterAudioDeviceChangeCallback");
     AudioStandard::AudioSystemManager *audioSystemManager = AudioStandard::AudioSystemManager::GetInstance();
     if (audioSystemManager == nullptr) {
         SLOGE("audioSystemManager is null");
-        return;
+        return AVSESSION_ERROR;
     }
-    audioSystemManager->UnsetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
+    return audioSystemManager->UnsetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
 }
 
 void AudioDeviceManager::SendRemoteAvSessionInfo(const std::string &deviceId)
@@ -171,7 +171,6 @@ void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
         AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(deviceId);
     }
 }
-
 void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeAction &deviceChangeAction)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descs = deviceChangeAction.deviceDescriptors;

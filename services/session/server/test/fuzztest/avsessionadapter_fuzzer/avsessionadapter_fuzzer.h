@@ -24,6 +24,7 @@ void AVSessionUsersManagerTest();
 void AVSessionAudioAdapterTest();
 void CollaborationManagerTest();
 void PluginLibTest();
+void SessionStackTest();
 
 class AvSessionAdapterFuzzer {
 public:

@@ -34,6 +34,7 @@ static const int32_t MIN_SIZE_NUM = 10;
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_totalSize = 0;
 static size_t g_sizePos;
+static const std::string ABILITY_NAME = "test.ability";
 
 /*
 * describe: get data from FUZZ untrusted data(RAW_DATA) which size is according to sizeof(T)
@@ -81,13 +82,14 @@ uint32_t GetArrLength(T& arr)
     return sizeof(arr) / sizeof(arr[0]);
 }
 
-typedef void (*TestFuncs[4])();
+typedef void (*TestFuncs[5])();
 
 TestFuncs g_allFuncs = {
     AVSessionUsersManagerTest,
     AVSessionAudioAdapterTest,
     CollaborationManagerTest,
     PluginLibTest,
+    SessionStackTest,
 };
 
 bool FuzzTest(const uint8_t* rawData, size_t size)
@@ -196,6 +198,48 @@ void PluginLibTest()
 {
     auto pluginLib = std::make_shared<PluginLib>(GetString());
     pluginLib->LogDlfcnErr(GetString());
+}
+
+void SessionStackTest()
+{
+    SessionStack sessionStack;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetAbilityName(ABILITY_NAME);
+    AVSessionDescriptor descriptor;
+    AVSessionDescriptor descriptorTmp;
+    descriptor.elementName_ = elementName;
+    descriptor.pid_ = getpid();
+    descriptor.uid_ = getpid();
+    descriptor.sessionId_ = std::to_string(GetData<uint16_t>());
+
+    sptr<AVSessionItem> item1 = new (std::nothrow) AVSessionItem(descriptor, descriptor.userId_);
+    if (item1 == nullptr) {
+        return;
+    }
+    sptr<AVSessionItem> item2 = new (std::nothrow) AVSessionItem(descriptorTmp, descriptor.userId_);
+    if (item2 == nullptr) {
+        return;
+    }
+
+    sessionStack.IsEmpty();
+    sessionStack.getAllSessionNum();
+    for (int32_t i = 0; i <= SessionContainer::SESSION_NUM_MAX + 1; i++) {
+        sessionStack.AddSession(descriptor.pid_ + i, ABILITY_NAME, item1);
+    }
+    sessionStack.UpdateSessionSort(item1);
+    sessionStack.UpdateSessionSort(item2);
+    sessionStack.GetSession(descriptor.pid_, ABILITY_NAME);
+    sessionStack.GetSession(0, ABILITY_NAME);
+    sessionStack.GetSessionsByPid(descriptor.pid_);
+    sessionStack.GetSessionsByPid(0);
+    sessionStack.UidHasSession(descriptor.uid_);
+    sessionStack.UidHasSession(0);
+    sessionStack.RemoveSession(0, ABILITY_NAME);
+    sessionStack.RemoveSession(descriptor.pid_, ABILITY_NAME);
+    sessionStack.RemoveSession(0);
+    sessionStack.RemoveSession(descriptor.pid_ + 1);
+    sessionStack.RemoveSession("");
+    sessionStack.RemoveSession(descriptor.sessionId_);
 }
 
 /* Fuzzer entry point */

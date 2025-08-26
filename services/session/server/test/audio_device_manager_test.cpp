@@ -62,7 +62,7 @@ static HWTEST(AudioDeviceManagerTest, RegisterPreferedOutputDeviceChangeCallback
 {
     SLOGI("RegisterPreferedOutputDeviceChangeCallback001 begin!");
     AudioDeviceManager::GetInstance().audioPreferedOutputDeviceChangeCallback_
-        = std::make_shared<OutputDeviceChangeCallback>();
+          = std::make_shared<OutputDeviceChangeCallback>();
     AudioDeviceManager::GetInstance().RegisterPreferedOutputDeviceChangeCallback();
     EXPECT_TRUE(AudioDeviceManager::GetInstance().audioPreferedOutputDeviceChangeCallback_ != nullptr);
 }
@@ -89,8 +89,7 @@ static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback001, Test
 static HWTEST(AudioDeviceManagerTest, RegisterAudioDeviceChangeCallback002, TestSize.Level1)
 {
     SLOGI("RegisterAudioDeviceChangeCallback002 begin!");
-    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_
-        = nullptr;
+    AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ = nullptr;
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
     EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ != nullptr);
 }
@@ -106,8 +105,8 @@ static HWTEST(AudioDeviceManagerTest, UnRegisterAudioDeviceChangeCallback001, Te
     AudioDeviceManager::GetInstance().audioDeviceChangeCallback_
         = std::make_shared<DeviceChangeCallback>();
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
-    AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioDeviceChangeCallback_ == nullptr);
+    int32_t ret = AudioDeviceManager::GetInstance().UnRegisterAudioDeviceChangeCallback();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 
 /**
@@ -207,7 +206,7 @@ static HWTEST(AudioDeviceManagerTest, OnDeviceChange004, TestSize.Level0) {
     desc->connectState_ = OHOS::AudioStandard::ConnectState::VIRTUAL_CONNECTED;
     deviceChangeAction.deviceDescriptors = {desc};
     EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->connectState_,
-              OHOS::AudioStandard::ConnectState::VIRTUAL_CONNECTED);
+                OHOS::AudioStandard::ConnectState::VIRTUAL_CONNECTED);
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
     AudioDeviceManager::GetInstance().audioDeviceChangeCallback_->OnDeviceChange(deviceChangeAction);
 }
@@ -227,9 +226,9 @@ static HWTEST(AudioDeviceManagerTest, OnDeviceChange005, TestSize.Level0) {
     deviceChangeAction.deviceDescriptors = {desc};
     deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
     EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceType_,
-              OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP);
+                OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP);
     EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceCategory_,
-              OHOS::AudioStandard::DeviceCategory::BT_CAR);
+                OHOS::AudioStandard::DeviceCategory::BT_CAR);
     AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
     AudioDeviceManager::GetInstance().deviceId_ = "test";
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
@@ -250,11 +249,10 @@ static HWTEST(AudioDeviceManagerTest, OnDeviceChange006, TestSize.Level0) {
     desc->deviceCategory_ = OHOS::AudioStandard::DeviceCategory::BT_CAR;
     deviceChangeAction.deviceDescriptors = {desc};
     deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::CONNECT;
-
     EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceType_,
-              OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP);
+                OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_A2DP);
     EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceCategory_,
-              OHOS::AudioStandard::DeviceCategory::BT_CAR);
+                OHOS::AudioStandard::DeviceCategory::BT_CAR);
     AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
     AudioDeviceManager::GetInstance().deviceId_ = "test";
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
@@ -275,11 +273,10 @@ static HWTEST(AudioDeviceManagerTest, OnDeviceChange007, TestSize.Level0) {
     desc->deviceCategory_ = OHOS::AudioStandard::DeviceCategory::BT_CAR;
     deviceChangeAction.deviceDescriptors = {desc};
     deviceChangeAction.type = OHOS::AudioStandard::DeviceChangeType::DISCONNECT;
-    
     EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceType_,
-              OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_SCO);
+                OHOS::AudioStandard::DeviceType::DEVICE_TYPE_BLUETOOTH_SCO);
     EXPECT_EQ(deviceChangeAction.deviceDescriptors[0]->deviceCategory_,
-              OHOS::AudioStandard::DeviceCategory::BT_CAR);
+                OHOS::AudioStandard::DeviceCategory::BT_CAR);
     AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
     AudioDeviceManager::GetInstance().deviceId_ = "test";
     AudioDeviceManager::GetInstance().RegisterAudioDeviceChangeCallback();
