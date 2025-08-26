@@ -1075,6 +1075,7 @@ void SendSystemControlCommandSync(AVControlCommand command)
     }
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 static bool JudgeNumString(std::string str)
 {
     SLOGI("enter JudgeNumString");
@@ -1091,6 +1092,7 @@ static bool JudgeNumString(std::string str)
     }
     return true;
 }
+#endif
 
 void StartDeviceLoggingSync(string_view url, optional_view<int32_t> maxSize)
 {
