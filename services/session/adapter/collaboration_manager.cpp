@@ -84,6 +84,10 @@ void CollaborationManager::SendCollaborationOnStop(const std::function<void(void
 __attribute__((no_sanitize("cfi")))static int32_t OnStop(const char* peerNetworkId)
 {
     SLOGE("enter onstop");
+    if (CollaborationManager::GetInstance().sendCollaborationOnStop_ == nullptr) {
+        SLOGE("sendCollaborationOnStop_ function ptr is nullptr");
+        return AVSESSION_ERROR;
+    }
     CollaborationManager::GetInstance().sendCollaborationOnStop_();
     return AVSESSION_SUCCESS;
 }
@@ -104,6 +108,10 @@ __attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
     SLOGI("enter ApplyResult");
     if (result == ServiceCollaborationManagerResultCode::REJECT) {
         SLOGE("return connect reject and reson:%{public}s", reason);
+    }
+    if (CollaborationManager::GetInstance().sendCollaborationApplyResult_ == nullptr) {
+        SLOGE("sendCollaborationApplyResult_ function ptr is nullptr");
+        return AVSESSION_ERROR;
     }
     CollaborationManager::GetInstance().sendCollaborationApplyResult_(result);
     return AVSESSION_SUCCESS;
