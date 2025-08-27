@@ -124,12 +124,14 @@ int32_t AVCastControllerStub::HandlePrepare(MessageParcel& data, MessageParcel& 
             avFileDescriptor.fd_ = data.ReadFileDescriptor();
             SLOGD("Prepare received fd %{public}d", avFileDescriptor.fd_);
             avQueueItem->GetDescription()->SetFdSrc(avFileDescriptor);
-        }
-        CHECK_AND_PRINT_LOG(reply.WriteInt32(Prepare(*avQueueItem)), "Write mediaInfoHolder failed");
-        if (avQueueItem->GetDescription()->GetFdSrc().fd_ < 0) {
-            SLOGE("HandlePrepare read fd is invalid");
+            CHECK_AND_PRINT_LOG(reply.WriteInt32(Prepare(*avQueueItem)), "fd != 0, Write mediaInfoHolder failed");
+            if (avQueueItem->GetDescription()->GetFdSrc().fd_ < 0) {
+                SLOGE("HandlePrepare read fd is invalid");
+            } else {
+                close(avQueueItem->GetDescription()->GetFdSrc().fd_);
+            }
         } else {
-            close(avQueueItem->GetDescription()->GetFdSrc().fd_);
+            CHECK_AND_PRINT_LOG(reply.WriteInt32(Prepare(*avQueueItem)), "Write mediaInfoHolder failed");
         }
     }
     return ERR_NONE;
