@@ -1076,10 +1076,6 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
-    {
-        std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
-        mirrorToStreamFlag_ = true;
-    }
     std::lock_guard lockGuard(castLock_);
     castServiceNameStatePair_ = serviceNameStatePair;
     OutputDeviceInfo outputDeviceInfo;
@@ -1429,14 +1425,9 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
-    {
-        std::lock_guard displayListenerLockGuard(mirrorToStreamLock_);
-        if (mirrorToStreamFlag_) {
-            mirrorToStreamFlag_ = false;
-            SLOGI("cast not add to collaboration when mirror to stream cast");
-            return;
-        }
-    }
+    CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsInMirrorToStreamState(),
+        "cast not add to collaboration when mirror to stream cast");
+
     collaborationNeedDeviceId_ = deviceInfo.deviceId_;
     if (castState == authingStateFromCast_) {
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
