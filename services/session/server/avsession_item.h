@@ -511,7 +511,6 @@ private:
     bool applyUserResultFlag_ = false;
     bool applyResultFlag_ = false;
     bool waitUserDecisionFlag_ = false;
-    bool mirrorToStreamFlag_ = false;
     std::string collaborationNeedDeviceId_;
     std::string collaborationNeedNetworkId_;
     std::mutex collaborationApplyResultMutex_;
@@ -527,7 +526,6 @@ private:
     sptr<HwCastDisplayListener> displayListener_;
     std::recursive_mutex displayListenerLock_;
     std::shared_ptr<IAVRouterListener> iAVRouterListener_;
-    std::recursive_mutex mirrorToStreamLock_;
 
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     uint32_t spid_ = 0;
