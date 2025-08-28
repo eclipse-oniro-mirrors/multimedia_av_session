@@ -194,6 +194,7 @@ export struct AVInputCastPicker {
     })
       .size({ width: '100%', height: '100%' })
       .bindMenu(this.deviceMenu(), {
+        showInSubWindow: false,
         onDisappear: () => {
           this.touchMenuItemIndex = -1;
           if (this.onStateChange !== null && this.onStateChange !== undefined) {
