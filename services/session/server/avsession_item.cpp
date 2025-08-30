@@ -128,6 +128,11 @@ std::string AVSessionItem::GetSessionType()
         return "audio";
     }
 }
+
+std::string AVSessionItem::GetSessionTag()
+{
+    return descriptor_.sessionTag_;
+}
 // LCOV_EXCL_STOP
 
 void AVSessionItem::UpdateSessionElement(const AppExecFwk::ElementName& elementName)
@@ -307,19 +312,19 @@ void AVSessionItem::UpdateRecommendInfo(bool needRecommend)
         extra = extras_;
     }
     SLOGI("assetChange:%{public}d AddFront:%{public}d supportCast:%{public}d filter:%{public}d duration:%{public}d",
-        isAssetChange_, isFirstAddToFront_, extra.HasParam("requireAbilityList"), meta.GetFilter(),
+        isRecommendMediaChange_, isFirstAddToFront_, extra.HasParam("requireAbilityList"), meta.GetFilter(),
         static_cast<int>(meta.GetDuration()));
     if (needRecommend) {
-        if (isAssetChange_ && !isFirstAddToFront_ && extra.HasParam("requireAbilityList") &&
+        if (isRecommendMediaChange_ && !isFirstAddToFront_ && extra.HasParam("requireAbilityList") &&
             meta.GetFilter() !=0 && meta.GetDuration() != 0) {
-            isAssetChange_ = false;
+            isRecommendMediaChange_ = false;
             isRecommend_ = true;
             AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(),
                 GetSessionType(), meta.GetAssetId(), meta.GetDuration());
         }
     } else {
         if (isRecommend_) {
-            isAssetChange_ = true;
+            isRecommendMediaChange_ = true;
             AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(), GetSessionType(),
                 metaData_.GetAssetId(), -1);
         }
@@ -407,8 +412,13 @@ bool AVSessionItem::CheckTitleChange(const AVMetaData& meta)
     bool isTitleChange = metaData_.GetTitle() != meta.GetTitle();
     bool isAncoTitleLyric = GetUid() == audioBrokerUid && meta.GetArtist().find("-") != std::string::npos;
     bool isTitleLyric = ((GetBundleName() == defaultBundleName) && !meta.GetDescription().empty()) || isAncoTitleLyric;
-    SLOGI("CheckTitleChange isTitleLyric:%{public}d isAncoTitleLyric:%{public}d isTitleChange:%{public}d",
-        isTitleLyric, isAncoTitleLyric, isTitleChange);
+    SLOGI("isTitleLyric:%{public}d isAncoTitleLyric:%{public}d isTitleChange:%{public}d isAssetChange:%{public}d",
+        isTitleLyric, isAncoTitleLyric, isTitleChange, isAssetChange_);
+    if (isAssetChange_ && isAncoTitleLyric) {
+        SetLyricTitle(metaData_.GetTitle());
+        isAssetChange_ = false;
+        SLOGI("CheckTitleChange SetLyricTitle %{public}s", GetLyricTitle().c_str());
+    }
     return isTitleChange && !isTitleLyric;
 }
 
@@ -459,9 +469,12 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         std::lock_guard lockGuard(avsessionItemLock_);
         SessionXCollie sessionXCollie("avsession::SetAVMetaData");
         ReportSetAVMetaDataInfo(meta);
+        if (metaData_.GetAssetId() != meta.GetAssetId()) {
+            isAssetChange_ = true;
+        }
         if ((metaData_.GetAssetId() != meta.GetAssetId()) || CheckTitleChange(meta)) {
             isMediaChange_ = true;
-            isAssetChange_ = true;
+            isRecommendMediaChange_ = true;
         }
         CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
         std::unique_lock<std::shared_mutex> lock(writeAndReadImgLock_);
@@ -595,7 +608,7 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
             std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
             if (serviceCallbackForMediaSession_) {
                 SLOGI("anco capsule add for %{public}s", GetBundleName().c_str());
-                serviceCallbackForMediaSession_(GetSessionId(), true, isMediaChange_);
+                serviceCallbackForMediaSession_(GetSessionId(), true, false);
             }
         }
     } else if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE ||
@@ -735,6 +748,7 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
             KeyEventExtras(list);
         }
     }
+    CheckSupportColdStartExtra(extras);
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
@@ -749,6 +763,27 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetRemoteExtras failed");
     }
     return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::CheckSupportColdStartExtra(const AAFwk::WantParams& extras)
+{
+    CHECK_AND_RETURN_LOG(GetUid() == audioBrokerUid, "not audio broker");
+    CHECK_AND_RETURN_LOG(extras.HasParam("isSupportColdStart") && extras.HasParam("ColdStartBundleName") &&
+        extras.HasParam("ColdStartAbilityName"), "extras don't have cold start param");
+    auto supportValue = AAFwk::IBoolean::Query(extras.GetParam("isSupportColdStart"));
+    auto bundleValue = AAFwk::IString::Query(extras.GetParam("ColdStartBundleName"));
+    auto abilityValue = AAFwk::IString::Query(extras.GetParam("ColdStartAbilityName"));
+    CHECK_AND_RETURN_LOG(supportValue != nullptr && bundleValue != nullptr  && abilityValue != nullptr,
+        "extras don't have cold start value");
+
+    bool isSupport = AAFwk::Boolean::Unbox(supportValue);
+    std::string bundleName = AAFwk::String::Unbox(bundleValue);
+    std::string abilityName = AAFwk::String::Unbox(abilityValue);
+    std::lock_guard coldStartLockGuard(coldStartCallbackLock_);
+    if (isSupport && serviceCallbackForAncoStart_ != nullptr) {
+        SLOGI("anco %{public}s support cold start", bundleName.c_str());
+        serviceCallbackForAncoStart_(GetSessionId(), bundleName, abilityName);
+    }
 }
 
 sptr<IRemoteObject> AVSessionItem::GetControllerInner()
@@ -2384,6 +2419,16 @@ int64_t AVSessionItem::GetPlayingTime() const
     return playingTime_;
 }
 
+void AVSessionItem::SetLyricTitle(const std::string& title)
+{
+    lyricTitle_ = title;
+}
+
+std::string AVSessionItem::GetLyricTitle() const
+{
+    return lyricTitle_;
+}
+
 void AVSessionItem::HandleControllerRelease(pid_t pid)
 {
     std::lock_guard controllersLockGuard(controllersLock_);
@@ -2439,6 +2484,14 @@ void AVSessionItem::SetServiceCallbackForUpdateTop(const std::function<void(std:
     SLOGI("SetServiceCallbackForUpdateTop in");
     std::lock_guard updateTopLockGuard(updateTopLock_);
     serviceCallbackForUpdateTop_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForAncoStart(
+    const std::function<void(std::string, std::string, std::string)>& callback)
+{
+    SLOGI("SetServiceCallbackForAncoStart in");
+    std::lock_guard coldStartLockGuard(coldStartCallbackLock_);
+    serviceCallbackForAncoStart_ = callback;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

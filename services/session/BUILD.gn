@@ -54,6 +54,7 @@ config("avsession_ipc_config") {
 
 idl_gen_interface("idl_avsession_service_interface") {
   sources = [
+    "ipc/idl/IAncoMediaSessionListener.idl",
     "ipc/idl/IAVCastControllerCallback.idl",
     "ipc/idl/IAVControllerCallback.idl",
     "ipc/idl/IAVSessionCallback.idl",

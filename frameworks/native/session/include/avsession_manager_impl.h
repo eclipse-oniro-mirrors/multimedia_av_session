@@ -30,6 +30,7 @@
 #include "isession_listener.h"
 #include "avsession_manager.h"
 #include "avsession_controller.h"
+#include "ianco_media_session_listener.h"
 
 namespace OHOS::AVSession {
 class ServiceDeathRecipient;
@@ -92,6 +93,8 @@ public:
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
 
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
+
+    int32_t RegisterAncoMediaSessionListener(const std::shared_ptr<AncoMediaSessionListener> &listener) override;
 
     int32_t Close(void) override;
 

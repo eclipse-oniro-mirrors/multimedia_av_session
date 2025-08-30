@@ -30,6 +30,7 @@
 #include "session_container.h"
 #include "iclient_death.h"
 #include "isession_listener.h"
+#include "ianco_media_session_listener.h"
 #include "focus_session_strategy.h"
 #include "background_audio_controller.h"
 #include "ability_manager_adapter.h"
@@ -186,6 +187,8 @@ public:
 
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId, const std::string& deviceId);
 
+    int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override;
+
     int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent);
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
@@ -287,6 +290,8 @@ public:
     void HandleUserEvent(const std::string &type, const int &userId);
 
     void HandleRemoveMediaCardEvent();
+
+    void HandleBundleRemoveEvent(const std::string bundleName);
 
     void HandleMediaCardStateChangeEvent(std::string isAppear);
 
@@ -472,8 +477,8 @@ private:
 
     const cJSON* GetSubNode(const cJSON* nodeItem, const std::string& name);
 
-    void SaveSessionInfoInFile(const std::string& sessionId, const std::string& sessionType,
-        const AppExecFwk::ElementName& elementName);
+    void SaveSessionInfoInFile(const std::string& tag, const std::string& sessionId,
+        const std::string& sessionType, const AppExecFwk::ElementName& elementName);
 
     bool CheckAndCreateDir(const std::string& filePath);
 
@@ -538,6 +543,8 @@ private:
 
     void AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
 
+    void AddAncoColdStartServiceCallback(sptr<AVSessionItem>& session);
+
     bool VerifyNotification();
 
     void HandleChangeTopSession(int32_t infoUid, int32_t infoPid, int32_t userId);
@@ -586,8 +593,8 @@ private:
 
     bool InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray);
 
-    bool InsertSessionItemToCJSONAndPrint(const std::string& sessionId, const std::string& sessionType,
-        const AppExecFwk::ElementName& elementName, cJSON* valuesArray);
+    bool InsertSessionItemToCJSONAndPrint(const std::string& tag, const std::string& sessionId,
+        const std::string& sessionType, const AppExecFwk::ElementName& elementName, cJSON* valuesArray);
 
     void ProcessDescriptorsFromCJSON(std::vector<AVSessionDescriptor>& descriptors, cJSON* valueItem);
 
@@ -618,6 +625,8 @@ private:
     std::string DoCJSONArrayTransformToString(cJSON* valueItem);
 
     void HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem);
+
+    bool CheckStartAncoMediaPlay(const std::string& bundleName, int32_t *result);
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
     void ReportSessionState(const sptr<AVSessionItem>& session, SessionState state);
@@ -651,6 +660,7 @@ private:
     bool isScreenLocked_ = true;
     std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
     std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
+    sptr<IAncoMediaSessionListener> ancoMediaSessionListener_;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex sessionServiceLock_;
@@ -672,6 +682,8 @@ private:
     std::recursive_mutex clientDeathLock_;
 
     std::recursive_mutex notifyLock_;
+
+    std::recursive_mutex audioBrokerLock_;
 
     // DMSDP related locks
     std::recursive_mutex isAllSessionCastLock_;
@@ -718,6 +730,7 @@ private:
     bool isFirstPress_ = true;
     bool isInCast_ = false;
     bool is2in1_ = false;
+    bool isAudioBrokerStart_ = true;
 
     void *migrateStubFuncHandle_ = nullptr;
 

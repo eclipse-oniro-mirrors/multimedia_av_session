@@ -560,6 +560,23 @@ public:
     virtual void OnHistoricalRecordChange() = 0;
 };
 
+class AncoMediaSessionListener {
+public:
+    /**
+     * @brief Listen for StartAVPlayback events.
+     *
+     * @param bundleName bundle name of play event.
+     * @since 20
+    */
+    virtual int32_t OnStartAVPlayback(const std::string &bundleName) = 0;
+
+    /**
+     * @brief Deconstruct AncoMediaSessionListener.
+     * @since 20
+    */
+    virtual ~AncoMediaSessionListener() = default;
+};
+
 struct SessionToken {
     std::string sessionId;
     pid_t pid;

@@ -253,6 +253,27 @@ int32_t AVSessionManagerImpl::StartAVPlayback(const std::string& bundleName, con
     return service ? service->StartAVPlayback(bundleName, assetId) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::RegisterAncoMediaSessionListener(
+    const std::shared_ptr<AncoMediaSessionListener> &listener)
+{
+    auto service = GetService();
+    if (service == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+
+    sptr<IAncoMediaSessionListener> listenerPtr = new(std::nothrow) AncoMediaSessionListenerImpl(listener);
+    if (listenerPtr == nullptr) {
+        return ERR_INVALID_PARAM;
+    }
+
+    int32_t ret = service->RegisterAncoMediaSessionListener(listenerPtr);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("RegisterAncoMediaSessionListener fail with ret %{public}d", ret);
+        return ret;
+    }
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVSessionManagerImpl::GetDistributedSessionControllers(const DistributedSessionType& sessionType,
     std::vector<std::shared_ptr<AVSessionController>>& sessionControllers)
 {

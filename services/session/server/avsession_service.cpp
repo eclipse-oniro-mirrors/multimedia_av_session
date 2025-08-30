@@ -94,6 +94,7 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
     
 static const int32_t CAST_ENGINE_SA_ID = 65546;
 static const int32_t COLLABORATION_SA_ID = 70633;
+static const int32_t ANCO_BROKER_SA_ID = 66849;
 static const int32_t AVSESSION_CONTINUE = 1;
 #ifndef START_STOP_ON_DEMAND_ENABLE
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
@@ -195,6 +196,7 @@ void AVSessionService::OnStartProcess()
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(ANCO_BROKER_SA_ID);
 
     HISYSEVENT_REGITER;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
@@ -300,6 +302,10 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         std::string param = eventData.GetData();
         SLOGI("OnReceiveEvent notify data:%{public}s", param.c_str());
         servicePtr_->HandleMediaCardStateChangeEvent(param);
+    } else if (action.compare("usual.event.PACKAGE_REMOVED") == 0) {
+        std::string bundleName = want.GetElement().GetBundleName();
+        SLOGI("package remove %{public}s", bundleName.c_str());
+        servicePtr_->HandleBundleRemoveEvent(bundleName);
     }
 }
 
@@ -397,6 +403,12 @@ void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
     }
 }
 
+void AVSessionService::HandleBundleRemoveEvent(const std::string bundleName)
+{
+    int32_t curUserId = GetUsersManager().GetCurrentUserId();
+    DeleteHistoricalRecord(bundleName, curUserId);
+}
+
 bool AVSessionService::SubscribeCommonEvent()
 {
     const std::vector<std::string> events = {
@@ -411,7 +423,8 @@ bool AVSessionService::SubscribeCommonEvent()
         EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED,
         EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
         "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW",
-        "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE"
+        "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE",
+        "usual.event.PACKAGE_REMOVED"
     };
 
     EventFwk::MatchingSkills matchingSkills;
@@ -496,6 +509,11 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         case COMMON_EVENT_SERVICE_ID:
             InitCommonEventService();
             break;
+        case ANCO_BROKER_SA_ID: {
+            std::lock_guard lockGuard(audioBrokerLock_);
+            isAudioBrokerStart_ = true;
+            break;
+        }
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
     }
@@ -504,6 +522,11 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
 void AVSessionService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     SLOGI("remove system ability %{public}d", systemAbilityId);
+    if (systemAbilityId == ANCO_BROKER_SA_ID) {
+        std::lock_guard lockGuard(audioBrokerLock_);
+        isAudioBrokerStart_ = false;
+        ancoMediaSessionListener_ = nullptr;
+    }
 }
 
 void AVSessionService::NotifyProcessStatus(bool isStart)
@@ -718,6 +741,7 @@ bool AVSessionService::InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJ
     cJSON_AddStringToObject(newValue, "bundleName", session->GetBundleName().c_str());
     cJSON_AddStringToObject(newValue, "abilityName", session->GetAbilityName().c_str());
     cJSON_AddStringToObject(newValue, "sessionType", session->GetSessionType().c_str());
+    cJSON_AddStringToObject(newValue, "sessionTag", session->GetSessionTag().c_str());
     if (cJSON_GetArraySize(valuesArray) <= 0) {
         cJSON_AddItemToArray(valuesArray, newValue);
     } else {
@@ -1330,6 +1354,18 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isMediaChange);
     });
 }
+void AVSessionService::AddAncoColdStartServiceCallback(sptr<AVSessionItem>& session)
+{
+    session->SetServiceCallbackForAncoStart([this](std::string sessionId, std::string bundle, std::string ability) {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(sessionItem != nullptr, "session not exist for AncoStartCallback");
+        AppExecFwk::ElementName elementName;
+        elementName.SetBundleName(bundle);
+        elementName.SetBundleName(ability);
+        SaveSessionInfoInFile(sessionItem->GetSessionTag(), sessionId, sessionItem->GetSessionType(), elementName);
+    });
+}
 
 void AVSessionService::AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem)
 {
@@ -1458,6 +1494,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     AddCastCapsuleServiceCallback(sessionItem);
     AddKeyEventServiceCallback(sessionItem);
     AddUpdateTopServiceCallback(sessionItem);
+    AddAncoColdStartServiceCallback(sessionItem);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
@@ -1756,7 +1793,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     std::string profile;
     if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
         SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
-        SaveSessionInfoInFile(session->GetSessionId(), session->GetSessionType(), elementName);
+        SaveSessionInfoInFile(tag, session->GetSessionId(), session->GetSessionType(), elementName);
     }
 
     {
@@ -1795,7 +1832,7 @@ int32_t AVSessionService::CreateSessionInnerWithExtra(const std::string& tag, in
     std::string supportModule;
     std::string profile;
     if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
-        SaveSessionInfoInFile(session->GetSessionId(), session->GetSessionType(), elementName);
+        SaveSessionInfoInFile(tag, session->GetSessionId(), session->GetSessionType(), elementName);
     }
 
     {
@@ -1837,8 +1874,8 @@ bool AVSessionService::IsCapsuleNeeded()
 }
 
 // LCOV_EXCL_START
-bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& sessionId, const std::string& sessionType,
-    const AppExecFwk::ElementName& elementName, cJSON* valuesArray)
+bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& tag, const std::string& sessionId,
+    const std::string& sessionType, const AppExecFwk::ElementName& elementName, cJSON* valuesArray)
 {
     CHECK_AND_RETURN_RET_LOG(valuesArray != nullptr, false, "valuesArray get null");
     cJSON* newValue = cJSON_CreateObject();
@@ -1847,6 +1884,7 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& sessi
     cJSON_AddStringToObject(newValue, "bundleName", elementName.GetBundleName().c_str());
     cJSON_AddStringToObject(newValue, "abilityName", elementName.GetAbilityName().c_str());
     cJSON_AddStringToObject(newValue, "sessionType", sessionType.c_str());
+    cJSON_AddStringToObject(newValue, "sessionTag", tag.c_str());
 
     if (cJSON_GetArraySize(valuesArray) <= 0) {
         cJSON_AddItemToArray(valuesArray, newValue);
@@ -1866,8 +1904,8 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& sessi
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-void AVSessionService::SaveSessionInfoInFile(const std::string& sessionId, const std::string& sessionType,
-                                             const AppExecFwk::ElementName& elementName)
+void AVSessionService::SaveSessionInfoInFile(const std::string& tag, const std::string& sessionId,
+    const std::string& sessionType, const AppExecFwk::ElementName& elementName)
 {
     std::lock_guard sortFileLockGuard(sessionFileLock_);
     SLOGI("refresh sort when session created, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
@@ -1910,7 +1948,7 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& sessionId, const
                 cJSON_DeleteItemFromArray(valuesArray, i);
             }
         }
-        InsertSessionItemToCJSONAndPrint(sessionId, sessionType, elementName, valuesArray);
+        InsertSessionItemToCJSONAndPrint(tag, sessionId, sessionType, elementName, valuesArray);
         cJSON_Delete(valuesArray);
     } else {
         SLOGE("LoadStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
@@ -1980,12 +2018,26 @@ void AVSessionService::ProcessDescriptorsFromCJSON(std::vector<AVSessionDescript
         return;
     }
     std::string abilityName(abilityNameItem->valuestring);
+    cJSON* tagItem = cJSON_GetObjectItem(valueItem, "sessionTag");
+    if (tagItem == nullptr || cJSON_IsInvalid(tagItem) || !cJSON_IsString(tagItem)) {
+        SLOGE("valueItem get sessiontag fail");
+        return;
+    }
+    std::string tag(tagItem->valuestring);
 
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = sessionId;
     descriptor.elementName_.SetBundleName(std::string(bundleNameItem->valuestring));
     descriptor.elementName_.SetAbilityName(std::string(abilityNameItem->valuestring));
-    descriptors.push_back(descriptor);
+    descriptor.sessionTag_ = tag;
+    if (tag == "ancoMediaSession") {
+        std::lock_guard localGuard(audioBrokerLock_);
+        if (isAudioBrokerStart_) {
+            descriptors.push_back(descriptor);
+        }
+    } else {
+        descriptors.push_back(descriptor);
+    }
 }
 
 int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors)
@@ -2295,9 +2347,34 @@ void AVSessionService::DoMetadataImgClean(AVMetaData& data)
     }
 }
 
+bool AVSessionService::CheckStartAncoMediaPlay(const std::string& bundleName, int32_t *result)
+{
+    std::vector<AVSessionDescriptor> tempDescriptors;
+    {
+        std::lock_guard sortFileLockGuard(sessionFileLock_);
+        GetHistoricalSessionDescriptorsFromFile(tempDescriptors);
+    }
+    for (auto iter = tempDescriptors.begin(); iter != tempDescriptors.end(); ++iter) {
+        if (iter->sessionTag_ == "ancoMediaSession" &&
+            iter->elementName_.GetBundleName() == bundleName) {
+            std::lock_guard lockGuard(audioBrokerLock_);
+            CHECK_AND_RETURN_RET_LOG(ancoMediaSessionListener_ != nullptr, true, "anco Listner null");
+            auto res = ancoMediaSessionListener_->OnStartAVPlayback(bundleName);
+            SLOGI("StartAncoMediaPlay for:%{public}s res:%{public}d", bundleName.c_str(), res);
+            *result = res;
+            return true;
+        }
+    }
+    return false;
+}
+
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId,
     const std::string& deviceId)
 {
+    int32_t result = AVSESSION_ERROR;
+    if (CheckStartAncoMediaPlay(bundleName, &result)) {
+        return result;
+    }
     auto uid = GetCallingUid();
     auto CallerBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
     StartPlayType startPlayType = StartPlayType::APP;
@@ -2327,6 +2404,10 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
 
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
 {
+    int32_t result = AVSESSION_ERROR;
+    if (CheckStartAncoMediaPlay(bundleName, &result)) {
+        return result;
+    }
     auto uid = GetCallingUid();
     auto CallerBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
     StartPlayType startPlayType = StartPlayType::APP;
@@ -2354,6 +2435,14 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     }
     SLOGE("StartAVPlayback fail");
     return AVSESSION_ERROR;
+}
+
+int32_t AVSessionService::RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener)
+{
+    CHECK_AND_RETURN_RET_LOG(listener != nullptr, AVSESSION_ERROR, "anco Listner null");
+    std::lock_guard lockGuard(audioBrokerLock_);
+    ancoMediaSessionListener_ = listener;
+    return AVSESSION_SUCCESS;
 }
 
 sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session)
@@ -4186,14 +4275,10 @@ std::string AVSessionService::GetLocalTitle()
         }
         SLOGI("GetLocalTitle description:%{public}s, title:%{public}s", description.c_str(), songName.c_str());
     } else if (isAncoLyric) {
-        std::string ancoTitle = meta.GetArtist();
-        size_t posi = ancoTitle.find("-");
-        if (posi != std::string::npos) {
-            songName = ancoTitle.substr(0, posi);
-        }
+        songName = topSession_->GetLyricTitle();
         SLOGI("GetLocalTitle isAncoLyric title:%{public}s", songName.c_str());
     }
-    std::string localTitle = isTitleLyric || isAncoLyric ? songName : meta.GetTitle();
+    std::string localTitle = (isTitleLyric || isAncoLyric) && !songName.empty() ? songName : meta.GetTitle();
     SLOGI("GetLocalTitle localTitle:%{public}s", localTitle.c_str());
     return localTitle;
 }

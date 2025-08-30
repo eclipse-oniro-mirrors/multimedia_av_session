@@ -255,6 +255,15 @@ public:
     virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) = 0;
 
     /**
+     * @brief Listen for AncoMediaSessionListener callback event.
+     *
+     * @param listener Listen for AncoMediaSessionListener Callback event{@link AncoMediaSessionListener}.
+     * @return Whether to return successful Listener.
+     * @since 20
+    */
+    virtual int32_t RegisterAncoMediaSessionListener(const std::shared_ptr<AncoMediaSessionListener> &listener) = 0;
+
+    /**
      * Close avsession manager, clear resources.
      *
      * @return Returns whether close the avsession manager.

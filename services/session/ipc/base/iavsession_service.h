@@ -22,6 +22,7 @@
 #include "iavsession_service_ipc_interface_code.h"
 #include "iclient_death.h"
 #include "isession_listener.h"
+#include "ianco_media_session_listener.h"
 #include "key_event.h"
 #include "avqueue_info.h"
 
@@ -58,6 +59,8 @@ public:
                                               std::vector<AVQueueInfo>& avQueueInfos) = 0;
     
     virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) = 0;
+
+    virtual int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) = 0;
 
     virtual int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
 
