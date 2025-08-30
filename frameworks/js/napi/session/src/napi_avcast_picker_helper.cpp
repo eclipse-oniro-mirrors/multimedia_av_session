@@ -35,6 +35,7 @@ NapiAVCastPickerHelper::NapiAVCastPickerHelper(Ace::UIContent* uiContent)
     SLOGI("construct");
     uiContent_ = uiContent;
     isValid_ = std::make_shared<bool>(true);
+    audioRoutingMngr_ = AudioStandard::AudioRoutingManager::GetInstance();
 }
 
 NapiAVCastPickerHelper::~NapiAVCastPickerHelper()
@@ -47,6 +48,7 @@ napi_value NapiAVCastPickerHelper::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor descriptors[] = {
         DECLARE_NAPI_FUNCTION("select", SelectAVPicker),
+        DECLARE_NAPI_FUNCTION("restoreDefaultCommunicationDevice", RestoreDefaultCommunicationDevice),
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
     };
@@ -252,6 +254,34 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SelectAVPicker", executor, complete);
+}
+
+napi_value NapiAVCastPickerHelper::RestoreDefaultCommunicationDevice(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        sptr<AudioStandard::AudioRendererFilter> audioRendererFilter;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        CHECK_RETURN_VOID(NapiUtils::GetUndefinedValue(env), "CHECK_RETURN_VOID");
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
+        context->audioRendererFilter = new (std::nothrow) AudioStandard::AudioRendererFilter();
+        CHECK_AND_RETURN_LOG(context->audioRendererFilter != nullptr, "init AudioRendererFilter failed");
+        (context->audioRendererFilter->rendererInfo).streamUsage =
+            AudioStandard::StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION;
+        
+        napiAVCastPickerHelper->audioRoutingMngr_->RestoreOutputDevice(context->audioRendererFilter);
+    };
+
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+
+    return NapiAsyncWork::Enqueue(env, context, "RestoreDefaultCommunicationDevice", executor, complete);
 }
 
 napi_status NapiAVCastPickerHelper::OnPickerStateChange(napi_env env, NapiAVCastPickerHelper* napiAVCastPickerHelper,

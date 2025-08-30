@@ -22,6 +22,7 @@
 #include "napi_async_callback.h"
 #include "ui_content.h"
 #include "ui_extension_context.h"
+#include "audio_routing_manager.h"
 
 namespace OHOS::AVSession {
 
@@ -78,6 +79,7 @@ private:
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
     static napi_value SelectAVPicker(napi_env env, napi_callback_info info);
+    static napi_value RestoreDefaultCommunicationDevice(napi_env env, napi_callback_info info);
 
     static napi_status OnPickerStateChange(napi_env env, NapiAVCastPickerHelper* napiAVPicker, napi_value callback);
     static napi_status OffPickerStateChange(napi_env env, NapiAVCastPickerHelper* napiAVPicker, napi_value callback);
@@ -95,6 +97,8 @@ private:
     Ace::UIContent *uiContent_;
     napi_ref wrapperRef_{};
     int sessionId_ = 0;
+
+    AudioStandard::AudioRoutingManager *audioRoutingMngr_;
 
     static constexpr size_t ARGC_ZERO = 0;
     static constexpr size_t ARGC_ONE = 1;
