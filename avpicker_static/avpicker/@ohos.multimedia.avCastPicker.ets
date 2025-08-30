@@ -21,7 +21,7 @@ import {
   ClickEvent, TouchEvent, CustomBuilder, TerminationInfo, MenuOptions
 } from '@ohos.arkui.component';
 import { State, Watch, PropRef } from '@ohos.arkui.stateManagement'
-import { Callback, ErrorCallback, BusinessError } from '@ohos.base';
+import { Callback, ErrorCallback, BusinessError, RecordData } from '@ohos.base';
 import { AVCastPickerState, AVCastPickerStyle, AVCastPickerColorMode } from '@ohos.multimedia.avCastPickerParam';
 import Want from '@ohos.app.ability.Want'
 
@@ -358,7 +358,7 @@ export struct AVCastPicker {
               'isCustomPicker': isCustomPicker,
               'message': this.restartUECMessage,
               'currentPickerCount': this.pickerCountOnCreation,
-            } as Record<string, Object>
+            } as Record<string, RecordData>
           } as Want)
           .onRemoteReady((proxy: UIExtensionProxy) => {
             console.info(TAG, 'onRemoteReady');
