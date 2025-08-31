@@ -73,6 +73,7 @@ ohos_shared_library("avsession_napi") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",
     "ace_engine:ace_uicontent",
+    "audio_framework:audio_client",
     "audio_framework:audio_foundation",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
