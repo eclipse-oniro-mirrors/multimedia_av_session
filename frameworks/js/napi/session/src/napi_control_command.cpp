@@ -22,7 +22,7 @@
 namespace OHOS::AVSession {
 std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlCommand::SetterType, int32_t>>
     NapiControlCommand::commandMap_ = {
-    { "play", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY } },
+    { "play", { GetPlayParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY } },
     { "pause", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PAUSE } },
     { "stop", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_STOP } },
     { "playNext", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_NEXT } },
@@ -134,6 +134,18 @@ napi_status NapiControlCommand::SetNoneParam(napi_env env, AVControlCommand& in,
     (void)(env);
     (void)(in);
     (void)(out);
+    return napi_ok;
+}
+
+napi_status NapiControlCommand::GetPlayParam(napi_env env, napi_value in, AVControlCommand& out)
+{
+    std::string playParam {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "parameter", playParam);
+    CHECK_AND_RETURN_RET_LOG(status == napi_ok,
+        out.SetPlayParam("") == AVSESSION_SUCCESS ? napi_ok : napi_invalid_arg, "default play param");
+
+    CHECK_AND_RETURN_RET_LOG(out.SetPlayParam(playParam) == AVSESSION_SUCCESS,
+        napi_invalid_arg, "set parameter failed");
     return napi_ok;
 }
 

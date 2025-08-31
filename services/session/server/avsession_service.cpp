@@ -1396,6 +1396,29 @@ void AVSessionService::AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionIt
     });
 }
 
+void AVSessionService::AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionItem)
+{
+    sessionItem->SetServiceCallbackForUpdateTop([this](std::string sessionId) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+        CHECK_AND_RETURN_LOG(err == AVSESSION_SUCCESS, "update top, CheckPermission failed!");
+
+        std::lock_guard lockGuard(sessionServiceLock_);
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(session != nullptr &&
+            AudioAdapter::GetInstance().GetRendererRunning(session->GetUid(), session->GetPid()),
+            "session not valid for updateTop");
+
+        SLOGI("PLAY with param updateTopSession=%{public}s", session->GetBundleName().c_str());
+        UpdateTopSession(session);
+        FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
+        sessionInfo.uid = session->GetUid();
+        sessionInfo.pid = session->GetPid();
+        SelectFocusSession(sessionInfo);
+        NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false);
+    });
+}
+
 void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 {
     if (sessionItem == nullptr) {
@@ -1434,6 +1457,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     AddCapsuleServiceCallback(sessionItem);
     AddCastCapsuleServiceCallback(sessionItem);
     AddKeyEventServiceCallback(sessionItem);
+    AddUpdateTopServiceCallback(sessionItem);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
