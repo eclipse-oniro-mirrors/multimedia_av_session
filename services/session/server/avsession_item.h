@@ -48,22 +48,32 @@ class AVSessionItem : public AVSessionStub {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 class CssListener : public IAVRouterListener {
 public:
-    explicit CssListener(AVSessionItem *ptr)
+    explicit CssListener(wptr<AVSessionItem> ptr)
     {
+        std::lock_guard<std::mutex> lock(mutex_);
         ptr_ = ptr;
     }
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
     {
-        ptr_->OnCastStateChange(castState, deviceInfo, isNeedRemove);
+        std::unique_lock lock(mutex_);
+        sptr<AVSessionItem> sharedPtr = ptr_.promote();
+        lock.unlock();
+        CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "sptr is nullptr in OnCastStateChange");
+        sharedPtr->OnCastStateChange(castState, deviceInfo, isNeedRemove);
     }
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     {
-        ptr_->OnCastEventRecv(errorCode, errorMsg);
+        std::unique_lock lock(mutex_);
+        sptr<AVSessionItem> sharedPtr = ptr_.promote();
+        lock.unlock();
+        CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "sptr is nullptr in OnCastEventRecv");
+        sharedPtr->OnCastEventRecv(errorCode, errorMsg);
     }
 
-    AVSessionItem *ptr_;
+    std::mutex mutex_;
+    wptr<AVSessionItem> ptr_;
 };
 #endif
 public:
@@ -88,6 +98,8 @@ public:
 
     void ListenCollaborationOnStop();
 #endif
+
+    void InitListener();
 
     std::string GetSessionId() override;
 

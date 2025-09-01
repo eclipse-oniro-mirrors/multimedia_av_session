@@ -87,8 +87,13 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t user
         std::lock_guard aliveLockGuard(isAliveLock_);
         isAlivePtr_ = std::make_shared<bool>(true);
     }
+}
+
+void AVSessionItem::InitListener()
+{
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    cssListener_ = std::make_shared<CssListener>(this);
+    SLOGI("session init listener");
+    cssListener_ = std::make_shared<CssListener>(sptr<AVSessionItem>(this));
 #endif
 }
 
@@ -1594,15 +1599,12 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         castState = 6; // 6 is disconnected status of AVSession
         DealDisconnect(deviceInfo, isNeedRemove);
     }
+    HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
-        std::lock_guard aliveLockGuard(isAliveLock_);
-        if (isAlivePtr_ != nullptr && *isAlivePtr_) {
-            HandleOutputDeviceChange(castState, outputDeviceInfo);
-            std::lock_guard controllersLockGuard(controllersLock_);
-            for (const auto& controller : controllers_) {
-                if (!controllers_.empty() && controller.second != nullptr) {
-                    controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
-                }
+        std::lock_guard controllersLockGuard(controllersLock_);
+        for (const auto& controller : controllers_) {
+            if (controller.second != nullptr) {
+                controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
             }
         }
     }
@@ -1610,9 +1612,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
         Destroy();
     } else {
-        AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castState]() {
-            DealLocalState(castState);
-            }, "DealLocalState", 0);
+        DealLocalState(castState);
     }
 }
 
