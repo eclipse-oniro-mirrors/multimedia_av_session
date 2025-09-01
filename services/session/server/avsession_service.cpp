@@ -4312,7 +4312,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         topSession_->ReadMetaDataImg(iPixelMap);
         AVQueueItem item;
         topSession_->GetCurrentCastItem(item);
-        std::string notifyText = item.GetDescription() && item.GetDescription()->GetPcmSrc() ?
+        std::string notifyText = item.GetDescription() && !item.GetDescription()->GetPcmSrc() ?
             item.GetDescription()->GetTitle() : GetLocalTitle();
         AddCapsule(notifyText, isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckCardStateChangeStop");
