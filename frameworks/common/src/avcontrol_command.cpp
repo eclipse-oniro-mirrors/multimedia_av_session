@@ -62,6 +62,9 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
             case SESSION_CMD_PLAY_WITH_ASSETID:
                 result->SetPlayWithAssetId(data.ReadString());
                 break;
+            case SESSION_CMD_PLAY:
+                result->SetPlayParam(data.ReadString());
+                break;
             default:
                 break;
         }
@@ -110,6 +113,10 @@ bool AVControlCommand::Marshalling(Parcel& parcel) const
         case SESSION_CMD_PLAY_WITH_ASSETID:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_) &&
                 parcel.WriteString(std::get<std::string>(param_)), false, "write play with assetId failed");
+            break;
+        case SESSION_CMD_PLAY:
+            CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_) ?
+                parcel.WriteString(std::get<std::string>(param_)) : parcel.WriteString(""), false, "write play fail");
             break;
         default:
             break;
@@ -317,6 +324,23 @@ int32_t AVControlCommand::GetPlayWithAssetId(std::string& playWithAssetId) const
         return AVSESSION_ERROR;
     }
     playWithAssetId = std::get<std::string>(param_);
+    return AVSESSION_SUCCESS;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+int32_t AVControlCommand::SetPlayParam(const std::string& playParam)
+{
+    param_ = playParam;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControlCommand::GetPlayParam(std::string& playParam) const
+{
+    if (!std::holds_alternative<std::string>(param_)) {
+        return AVSESSION_ERROR;
+    }
+    playParam = std::get<std::string>(param_);
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP

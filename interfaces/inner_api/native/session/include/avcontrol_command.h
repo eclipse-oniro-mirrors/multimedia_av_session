@@ -87,6 +87,9 @@ public:
     int32_t SetPlayWithAssetId(const std::string& playWithAssetId);
     int32_t GetPlayWithAssetId(std::string& playWithAssetId) const;
 
+    int32_t SetPlayParam(const std::string& playParam);
+    int32_t GetPlayParam(std::string& playParam) const;
+
     const static inline std::vector<int32_t> localCapability {
         SESSION_CMD_PLAY,
         SESSION_CMD_PAUSE,

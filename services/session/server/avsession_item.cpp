@@ -2154,12 +2154,22 @@ void AVSessionItem::HandleOnAVCallToggleCallMute(const AVControlCommand& cmd)
 void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlay");
-    std::lock_guard callbackLockGuard(callbackLock_);
-    if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlay();
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callbackForMigrate_) {
+            callbackForMigrate_->OnPlay();
+        }
+        CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+        callback_->OnPlay();
     }
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlay();
+
+    std::string playParam = "";
+    auto ret = cmd.GetPlayParam(playParam);
+    SLOGI("handleOnplay with param %{public}s", playParam.c_str());
+    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS && playParam == GetSessionId(), "no need update top");
+    CHECK_AND_RETURN_LOG(serviceCallbackForUpdateTop_, "updateTop callback not found");
+    std::lock_guard updateTopLockGuard(updateTopLock_);
+    serviceCallbackForUpdateTop_(playParam);
 }
 
 void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
@@ -2422,6 +2432,13 @@ void AVSessionItem::SetServiceCallbackForNtfCapsule(const std::function<void(std
 {
     SLOGI("SetServiceCallbackForNtfCapsule in");
     serviceCallbackForNtf_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForUpdateTop(const std::function<void(std::string)>& callback)
+{
+    SLOGI("SetServiceCallbackForUpdateTop in");
+    std::lock_guard updateTopLockGuard(updateTopLock_);
+    serviceCallbackForUpdateTop_ = callback;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

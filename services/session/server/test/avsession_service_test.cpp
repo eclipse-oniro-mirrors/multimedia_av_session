@@ -2917,3 +2917,16 @@ static HWTEST_F(AVSessionServiceTest, SetPlayWithAssetId001, TestSize.Level0)
     EXPECT_EQ(ret, ERR_INVALID_PARAM);
     SLOGD("SetPlayWithAssetId001 end!");
 }
+
+static HWTEST_F(AVSessionServiceTest, PlayParam001, TestSize.Level0)
+{
+    SLOGD("PlayParam001 begin!");
+    std::string paramIn = "test";
+    int32_t ret = avcommand_->SetPlayParam(paramIn);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    std::string paramOut;
+    ret = avcommand_->GetPlayParam(paramOut);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(paramIn, paramOut);
+    SLOGD("PlayParam001 end!");
+}

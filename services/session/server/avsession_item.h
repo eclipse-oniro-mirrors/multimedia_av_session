@@ -237,6 +237,8 @@ public:
     
     void SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback);
 
+    void SetServiceCallbackForUpdateTop(const std::function<void(std::string)>& callback);
+
     bool IsCasting();
 
     void GetCurrentCastItem(AVQueueItem& item);
@@ -451,6 +453,7 @@ private:
     std::function<void(std::string)> serviceCallbackForKeyEvent_;
     std::function<void(std::string)> updateExtrasCallback_;
     std::function<void(std::string, bool)> serviceCallbackForNtf_;
+    std::function<void(std::string)> serviceCallbackForUpdateTop_;
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
     bool isNotShowNotification_ = false;
@@ -497,6 +500,8 @@ private:
     std::recursive_mutex mediaSessionCallbackLock_;
 
     std::shared_mutex writeAndReadImgLock_;
+
+    std::recursive_mutex updateTopLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;

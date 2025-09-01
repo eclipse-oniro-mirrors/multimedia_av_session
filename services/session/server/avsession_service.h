@@ -580,6 +580,8 @@ private:
 
     void AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionItem);
 
+    void AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionItem);
+
     std::string GetLocalTitle();
 
     bool InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray);
