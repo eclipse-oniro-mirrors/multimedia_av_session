@@ -93,6 +93,8 @@ public:
 
     std::string GetSessionType() override;
 
+    std::string GetSessionTag();
+
     int32_t SetAVCallMetaData(const AVCallMetaData& avCallMetaData) override;
 
     int32_t SetAVCallState(const AVCallState& avCallState) override;
@@ -201,6 +203,10 @@ public:
 
     int64_t GetPlayingTime() const;
 
+    void SetLyricTitle(const std::string& title);
+
+    std::string GetLyricTitle() const;
+
     void SetTop(bool top);
 
     std::shared_ptr<RemoteSessionSource> GetRemoteSource();
@@ -238,6 +244,8 @@ public:
     void SetServiceCallbackForNtfCapsule(const std::function<void(std::string, bool)>& callback);
 
     void SetServiceCallbackForUpdateTop(const std::function<void(std::string)>& callback);
+
+    void SetServiceCallbackForAncoStart(const std::function<void(std::string, std::string, std::string)>& callback);
 
     bool IsCasting();
 
@@ -372,6 +380,7 @@ private:
     void UpdateRecommendInfo(bool needRecommend);
     bool SearchSpidInCapability(const std::string& deviceId);
     void CheckIfSendCapsule(const AVPlaybackState& state);
+    void CheckSupportColdStartExtra(const AAFwk::WantParams& extras);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -443,6 +452,7 @@ private:
     std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;
     int64_t playingTime_ = 0;
+    std::string lyricTitle_ = "";
 
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
@@ -454,11 +464,13 @@ private:
     std::function<void(std::string)> updateExtrasCallback_;
     std::function<void(std::string, bool)> serviceCallbackForNtf_;
     std::function<void(std::string)> serviceCallbackForUpdateTop_;
+    std::function<void(std::string, std::string, std::string)> serviceCallbackForAncoStart_;
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
     bool isNotShowNotification_ = false;
     bool isMediaChange_ = true;
     bool isAssetChange_ = false;
+    bool isRecommendMediaChange_ = false;
     bool isRecommend_ = false;
     bool isPlayingState_ = false;
 
@@ -502,6 +514,8 @@ private:
     std::shared_mutex writeAndReadImgLock_;
 
     std::recursive_mutex updateTopLock_;
+
+    std::shared_mutex coldStartCallbackLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;

@@ -19,6 +19,7 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "session_listener_proxy.h"
+#include "anco_media_session_listener_proxy.h"
 #include "client_death_proxy.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
@@ -254,6 +255,30 @@ int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, Message
     std::string asserId = data.ReadString();
     int32_t ret = StartAVPlayback(bundleName, asserId);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleRegisterAncoMediaSessionListener(MessageParcel& data, MessageParcel& reply)
+{
+    if (GetCallingUid() != audioBrokerUid) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    auto remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        SLOGI("read remote object failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    auto listener = iface_cast<AncoMediaSessionListenerProxy>(remoteObject);
+    if (listener == nullptr) {
+        SLOGI("RegisterAncoMediaSessionListener but iface_cast remote object failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    if (!reply.WriteInt32(RegisterAncoMediaSessionListener(listener))) {
+        SLOGI("reply write int32 failed");
+    }
     return ERR_NONE;
 }
 

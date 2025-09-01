@@ -35,6 +35,7 @@ private:
     int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalAVQueueInfos(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStartAVPlayback(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleRegisterAncoMediaSessionListener(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetAVCastControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
@@ -120,7 +121,10 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleClose(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_DISTRIBUTED_SESSION_CONTROLLERS),
             [this](MessageParcel& data, MessageParcel& reply) {
-            return HandleGetDistributedSessionControllersInner(data, reply); }}
+            return HandleGetDistributedSessionControllersInner(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_ANCO_MEDIA_SESSION_LISTENER),
+            [this](MessageParcel& data, MessageParcel& reply) {
+            return HandleRegisterAncoMediaSessionListener(data, reply); }}
     };
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION),
@@ -174,10 +178,13 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
             "HandleClose"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_DISTRIBUTED_SESSION_CONTROLLERS),
-            "HandleGetDistributedSessionControllersInner"}
+            "HandleGetDistributedSessionControllersInner"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_ANCO_MEDIA_SESSION_LISTENER),
+            "HandleRegisterAncoMediaSessionListener"}
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;
+    static constexpr int32_t audioBrokerUid = 5557;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_STUB_H

@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "session_listener_stub.h"
+#include "anco_media_session_listener_stub.h"
 #include "avsession_info.h"
 
 namespace OHOS::AVSession {
@@ -48,6 +49,17 @@ public:
     ErrCode OnDeviceStateChange(const DeviceState& deviceState) override;
 private:
     std::shared_ptr<SessionListener> listener_;
+};
+
+class AncoMediaSessionListenerImpl : public AncoMediaSessionListenerStub {
+public:
+    explicit AncoMediaSessionListenerImpl(const std::shared_ptr<AncoMediaSessionListener>& listener);
+
+    ~AncoMediaSessionListenerImpl();
+
+    ErrCode OnStartAVPlayback(const std::string& bundleName) override;
+private:
+    std::shared_ptr<AncoMediaSessionListener> listener_;
 };
 }
 #endif // OHOS_SESSION_LISTENER_CLIENT_H

@@ -527,11 +527,11 @@ void StartDefaultAbilityByCall001()
     infos.push_back(std::move(info_));
     avsessionService_->SelectSessionByUid(info);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
-    avsessionService_->SaveSessionInfoInFile(avsessionHere_->GetSessionId(),
+    avsessionService_->SaveSessionInfoInFile("tag", avsessionHere_->GetSessionId(),
         "audio", elementName);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     std::string sessionId = GetString();
-    avsessionService_->SaveSessionInfoInFile(avsessionHere_->GetSessionId(),
+    avsessionService_->SaveSessionInfoInFile("tag", avsessionHere_->GetSessionId(),
         "audio", elementName);
     avsessionService_->StartDefaultAbilityByCall(sessionId);
     std::vector<AVQueueInfo> avQueueInfos_;

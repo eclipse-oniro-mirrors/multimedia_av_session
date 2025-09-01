@@ -71,6 +71,11 @@ public:
         return AVSESSION_SUCCESS;
     }
 
+    int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override
     {
         return AVSESSION_SUCCESS;

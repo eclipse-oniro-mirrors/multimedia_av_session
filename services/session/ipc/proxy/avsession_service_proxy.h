@@ -61,6 +61,8 @@ public:
 
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
 
+    int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override;
+
     int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller);
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;

@@ -105,4 +105,24 @@ ErrCode SessionListenerClient::OnDeviceStateChange(const DeviceState& deviceStat
     copiedListener->OnDeviceStateChange(deviceState);
     return AVSESSION_SUCCESS;
 }
+
+AncoMediaSessionListenerImpl::AncoMediaSessionListenerImpl(const std::shared_ptr<AncoMediaSessionListener>& listener)
+    : listener_(listener)
+{
+    SLOGD("construct");
+}
+
+AncoMediaSessionListenerImpl::~AncoMediaSessionListenerImpl()
+{
+    SLOGI("AncoMediaSessionListenerImpl destroy");
+}
+
+ErrCode AncoMediaSessionListenerImpl::OnStartAVPlayback(const std::string& bundleName)
+{
+    auto copiedListener = listener_;
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    SLOGI("on StartAVPlayback for bundle %{public}s", bundleName.c_str());
+    copiedListener->OnStartAVPlayback(bundleName);
+    return AVSESSION_SUCCESS;
+}
 } // namespace OHOS::AVSession
