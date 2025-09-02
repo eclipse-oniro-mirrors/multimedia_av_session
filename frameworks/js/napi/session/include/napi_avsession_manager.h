@@ -35,7 +35,6 @@ public:
 
 private:
     static napi_value CreateAVSession(napi_env env, napi_callback_info info);
-    static napi_value CreateAVSessionWithExtra(napi_env env, napi_callback_info info);
     static napi_value GetAllSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalAVQueueInfos(napi_env env, napi_callback_info info);
@@ -123,12 +122,10 @@ private:
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
     static constexpr size_t ARGC_THREE = 3;
-    static constexpr size_t ARGC_FOUR = 4;
 
     static constexpr size_t ARGV_FIRST = 0;
     static constexpr size_t ARGV_SECOND = 1;
     static constexpr size_t ARGV_THIRD = 2;
-    static constexpr size_t ARGV_FOURTH = 3;
 
     static constexpr size_t HISTORICAL_UNSET_NUM = 3;
     static constexpr size_t HISTORICAL_MIN_NUM = 0;

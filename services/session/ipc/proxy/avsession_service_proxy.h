@@ -37,18 +37,11 @@ public:
     int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                           std::shared_ptr<AVSession>& session);
 
-    int32_t CreateSessionWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
-                                   const AppExecFwk::ElementName& elementName, std::shared_ptr<AVSession>& session);
-
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const AppExecFwk::ElementName& elementName) override;
     
     int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                sptr<IRemoteObject>& session) override;
-
-    int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
-                                        const AppExecFwk::ElementName& elementName,
-                                        sptr<IRemoteObject>& session) override;
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
