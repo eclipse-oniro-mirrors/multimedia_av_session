@@ -39,12 +39,6 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t CreateSessionInnerWithExtra(const std::string& tag, int32_t type, const std::string& extraInfo,
-                               const AppExecFwk::ElementName& elementName, sptr<IRemoteObject>& object) override
-    {
-        return AVSESSION_SUCCESS;
-    }
-
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override
     {
         return AVSESSION_SUCCESS;
