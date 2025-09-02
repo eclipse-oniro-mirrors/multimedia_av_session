@@ -46,7 +46,6 @@ public:
     void OnAVCallToggleCallMute() override {};
     void OnPlayFromAssetId(int64_t assetId) override {};
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
-    void OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) override {};
 
     AVSession_ErrCode SetPlayCallback(OH_AVSession* avsession, AVSession_ControlCommand command,
         OH_AVSessionCallback_OnCommand callback, void* userData);

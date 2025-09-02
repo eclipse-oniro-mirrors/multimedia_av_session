@@ -84,7 +84,6 @@ public:
     ErrCode OnAVCallToggleCallMute() override { return AVSESSION_SUCCESS; };
     ErrCode OnPlayFromAssetId(int64_t assetId) override { return AVSESSION_SUCCESS; };
     ErrCode OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override { return AVSESSION_SUCCESS; };
-    ErrCode OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo) override { return AVSESSION_SUCCESS; };
     sptr<IRemoteObject> AsObject() override { return nullptr; }
     ErrCode OnPlayWithAssetId(const std::string& assetId) override { return AVSESSION_SUCCESS; };
     ErrCode OnCustomData(const OHOS::AAFwk::WantParams& data) override { return AVSESSION_SUCCESS; };

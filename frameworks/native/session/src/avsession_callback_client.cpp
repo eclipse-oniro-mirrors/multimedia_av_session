@@ -268,17 +268,6 @@ ErrCode AVSessionCallbackClient::OnCastDisplayChange(const CastDisplayInfo& cast
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVSessionCallbackClient::OnCastDisplaySizeChange(const CastDisplayInfo& castDisplayInfo)
-{
-    CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback is null");
-
-    auto callback = callback_;
-    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, castDisplayInfo]() { callback->OnCastDisplaySizeChange(castDisplayInfo); },
-        std::string(__FUNCTION__)), "AVSessionCallbackClient handler postTask failed");
-    return AVSESSION_SUCCESS;
-}
-
 ErrCode AVSessionCallbackClient::OnCustomData(const AAFwk::WantParams& data)
 {
     CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
