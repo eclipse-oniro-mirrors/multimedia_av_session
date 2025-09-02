@@ -1524,6 +1524,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     if (result == nullptr) {
         return nullptr;
     }
+    result->InitListener();
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
     ServiceCallback(result);
