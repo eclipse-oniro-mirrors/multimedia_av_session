@@ -1112,7 +1112,7 @@ napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info i
     if (context == nullptr) {
         SLOGE("GetAVCastController failed : no memory");
         NapiUtils::ThrowError(env, "GetAVCastController failed : no memory",
-            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
@@ -1130,16 +1130,17 @@ napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info i
         if (context->castController_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "GetAVCastController failed : native get controller failed";
-            context->errCode = NapiAVSessionManager::errcode_[AVSESSION_ERROR];
+            context->errCode = NapiAVSessionManager::errcode_[ERR_REMOTE_CONNECTION_NOT_EXIST];
         }
     };
     auto complete = [env, context](napi_value& output) {
-        CHECK_STATUS_RETURN_VOID(context, "get controller failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+        CHECK_STATUS_RETURN_VOID(context, "get controller failed",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
         CHECK_ARGS_RETURN_VOID(context, context->castController_ != nullptr, "controller is nullptr",
-            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+            NapiAVSessionManager::errcode_[ERR_REMOTE_CONNECTION_NOT_EXIST]);
         context->status = NapiAVCastController::NewInstance(env, context->castController_, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to js object failed",
-            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+            NapiAVSessionManager::errcode_[ERR_REMOTE_CONNECTION_NOT_EXIST]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetAVCastController", executor, complete);
 #else
