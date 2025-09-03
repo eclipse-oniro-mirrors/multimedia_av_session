@@ -525,6 +525,72 @@ void AVCastControllerImpl::OnPlaybackStateChangeFilter(array_view<string> filter
     }
 }
 
+AVPlaybackState AVCastControllerImpl::GetAVPlaybackStateSync()
+{
+    AVPlaybackState undefinedState = TaihePlaybackState::CreateUndefinedAVPlaybackState();
+    if (castController_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "GetCastAVPlaybackState failed : controller is nullptr");
+        return undefinedState;
+    }
+
+    OHOS::AVSession::AVPlaybackState state;
+    int32_t ret = castController_->GetCastAVPlaybackState(state);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "GetCastAVPlaybackState failed : native server exception, \
+            you are advised to : 1.scheduled retry.\
+            2.destroy the current session or session controller and re-create it.";
+        if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
+            errMessage = "GetCastAVPlaybackState failed : native session not exist";
+        } else if (ret == OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "GetCastAVPlaybackState failed : native controller not exist";
+        } else if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "GetCastAVPlaybackState failed : native no permission";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return undefinedState;
+    }
+
+    AVPlaybackState output = TaihePlaybackState::CreateUndefinedAVPlaybackState();
+    ret = TaihePlaybackState::SetAVPlaybackState(state, output);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
+            "convert native object to ets object failed");
+        return undefinedState;
+    }
+    return output;
+}
+
+array<string> AVCastControllerImpl::GetValidCommandsSync()
+{
+    std::vector<string> emptyCmds;
+    if (castController_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "GetValidCommandsSync failed : controller is nullptr");
+        return array<string>(emptyCmds);
+    }
+
+    std::vector<int32_t> cmds;
+    int32_t ret = castController_->GetValidCommands(cmds);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "GetValidCommands failed : native server exception, \
+            you are advised to : 1.scheduled retry.\
+            2.destroy the current session or session controller and re-create it.";
+        if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
+            errMessage = "GetValidCommands failed : native session not exist";
+        } else if (ret == OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "GetValidCommands failed : native controller not exist";
+        } else if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "GetValidCommands failed : native no permission";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return array<string>(emptyCmds);
+    }
+
+    std::vector<std::string> stringCmds = TaiheCastControlCommand::ConvertCommands(cmds);
+    return array<string>(TaiheUtils::ToTaiheStringArray(stringCmds));
+}
+
 void AVCastControllerImpl::OnPlaybackStateChangeAll(string_view filter,
     callback_view<void(AVPlaybackState const&)> callback)
 {

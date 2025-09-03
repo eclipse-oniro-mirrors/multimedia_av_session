@@ -158,6 +158,14 @@ interface AVCastController {
   @gen_promise("release")
   ReleaseSync(): void;
 
+  @gen_async("getAVPlaybackState")
+  @gen_promise("getAVPlaybackState")
+  GetAVPlaybackStateSync(): AVPlaybackState;
+
+  @gen_async("getValidCommands")
+  @gen_promise("getValidCommands")
+  GetValidCommandsSync(): Array<String>;
+
   @!sts_inject_into_interface("on(type: string, filter: Array<String> | String, callback: (data: object) => void): void;")
   @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
   @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")

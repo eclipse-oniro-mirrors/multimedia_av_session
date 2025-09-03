@@ -47,6 +47,8 @@ public:
     AVQueueItem GetCurrentItemSync();
     void ProcessMediaKeyResponseSync(string_view assetId, array_view<uint8_t> response);
     void ReleaseSync();
+    AVPlaybackState GetAVPlaybackStateSync();
+    array<string> GetValidCommandsSync();
 
     void OnPlaybackStateChangeFilter(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
     void OnPlaybackStateChangeAll(string_view filter, callback_view<void(AVPlaybackState const&)> callback);
