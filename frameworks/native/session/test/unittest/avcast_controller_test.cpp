@@ -1280,8 +1280,7 @@ HWTEST_F(AVCastControllerTest, OnCustomData001, TestSize.Level1)
     std::string dataStr = "test";
     OHOS::AAFwk::WantParams data;
     data.SetParam("customData", OHOS::AAFwk::String::Box(dataStr));
-    castController_->OnCustomData(data);
-    EXPECT_TRUE(castController_->callback_ != nullptr);
+    EXPECT_TRUE(castController_->OnCustomData(data) == AVSESSION_SUCCESS);
 }
 
 /**

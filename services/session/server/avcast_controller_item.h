@@ -56,7 +56,7 @@ public:
 
     void OnValidCommandChange(const std::vector<int32_t> &cmds) override;
 
-    void OnCustomData(const AAFwk::WantParams& data) override;
+    int32_t OnCustomData(const AAFwk::WantParams& data) override;
 
     int32_t onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
                           uint32_t length, int64_t pos, int32_t& result) override;

@@ -82,13 +82,15 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
     }
 }
 
-void AVCastControllerItem::OnCustomData(const AAFwk::WantParams& data)
+int32_t AVCastControllerItem::OnCustomData(const AAFwk::WantParams& data)
 {
     SLOGI("Enter OnCustomData in AVCastControllerItem.");
     std::lock_guard lockGuard(castControllerCallbackLock_);
     if (callback_ != nullptr) {
         callback_->OnCustomData(data);
+        return AVSESSION_SUCCESS;
     }
+    return AVSESSION_ERROR;
 }
 
 void AVCastControllerItem::OnMediaItemChange(const AVQueueItem& avQueueItem)
