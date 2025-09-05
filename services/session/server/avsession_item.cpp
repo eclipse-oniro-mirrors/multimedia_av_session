@@ -1056,9 +1056,9 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
         isMediaKeySupport = false;
         return AVSESSION_SUCCESS;
     }
-    auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
     {
         std::lock_guard lockGuard(avsessionItemLock_);
+        auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
         supportedCmd_.erase(iter, supportedCmd_.end());
     }
     std::string apiParamString = "cmd :" + std::to_string(cmd);
