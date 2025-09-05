@@ -1139,6 +1139,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
         AVRouter::GetInstance().GetRemoteDrmCapabilities(castHandle_, deviceInfo.deviceId_,
             deviceInfo.supportedDrmCapabilities_);
         AVRouter::GetInstance().SetServiceAllConnectState(castHandle_, deviceInfo);
+        mirrorToStreamOnceFlag_ = true;
         InitAVCastControllerProxy();
     } else {
         SetCastHandle(AVRouter::GetInstance().GetMirrorCastHandle());
@@ -1146,9 +1147,11 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
         if (AVRouter::GetInstance().IsInMirrorToStreamState()) {
             SetCastHandle(-1);
             castControllerProxy_ = nullptr;
+            mirrorToStreamOnceFlag_ = false;
             return AVSESSION_ERROR;
         }
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId(), deviceInfo);
+        mirrorToStreamOnceFlag_ = true;
     }
     castHandleDeviceId_ = deviceInfo.deviceId_;
     SLOGI("RegisterListenerStreamToCast check handle set to %{public}lld", (long long)castHandle_);
@@ -1387,6 +1390,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_,
             GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+        mirrorToStreamOnceFlag_ = true;
         DoContinuousTaskRegister();
         SLOGI("RegisterListenerStreamToCast check handle set to %{public}lld", (long long)castHandle_);
         return AVSESSION_SUCCESS;
@@ -1599,6 +1603,25 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         castState = 6; // 6 is disconnected status of AVSession
         DealDisconnect(deviceInfo, isNeedRemove);
     }
+    DealOutputDeviceChange(castState, outputDeviceInfo);
+
+    if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
+        SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
+        Destroy();
+    } else {
+        DealLocalState(castState);
+    }
+}
+
+void AVSessionItem::DealOutputDeviceChange(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo)
+{
+    if (castState == ConnectionState::STATE_CONNECTED && mirrorToStreamOnceFlag_ &&
+        AVRouter::GetInstance().IsInMirrorToStreamState()) {
+        mirrorToStreamOnceFlag_ = false;
+        SLOGI("mirror to stream prevent connection callback from cast caused by app distribute resource");
+        return;
+    }
+    
     HandleOutputDeviceChange(castState, outputDeviceInfo);
     {
         std::lock_guard controllersLockGuard(controllersLock_);
@@ -1607,12 +1630,6 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
                 controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
             }
         }
-    }
-    if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
-        SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
-        Destroy();
-    } else {
-        DealLocalState(castState);
     }
 }
 
