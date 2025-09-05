@@ -185,6 +185,8 @@ public:
 
     void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
 
+    void DealOutputDeviceChange(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo);
+
     void HandleSkipToQueueItem(const int32_t& itemId);
 
     void ExecuteControllerCommand(const AVControlCommand& cmd);
@@ -542,6 +544,7 @@ private:
     bool applyUserResultFlag_ = false;
     bool applyResultFlag_ = false;
     bool waitUserDecisionFlag_ = false;
+    std::atomic<bool> mirrorToStreamOnceFlag_ = false;
     std::string collaborationNeedDeviceId_;
     std::string collaborationNeedNetworkId_;
     std::mutex collaborationApplyResultMutex_;

@@ -65,8 +65,8 @@ bool HwCastProviderSession::AddDevice(const std::string deviceId, uint32_t spid)
     castRemoteDevice.deviceId = deviceId;
     castRemoteDevice.spid = spid;
 
-    int32_t ret = castSession_->AddDevice(castRemoteDevice);
     avToastDeviceState_ = ConnectionState::STATE_CONNECTING;
+    int32_t ret = castSession_->AddDevice(castRemoteDevice);
     SLOGI("AddDevice in HwCastProviderSession with ret %{public}d", static_cast<int32_t>(ret));
     return (ret == 0) ? true : false;
 }
