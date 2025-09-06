@@ -84,10 +84,8 @@ void CollaborationManager::SendCollaborationOnStop(const std::function<void(void
 __attribute__((no_sanitize("cfi")))static int32_t OnStop(const char* peerNetworkId)
 {
     SLOGE("enter onstop");
-    if (CollaborationManager::GetInstance().sendCollaborationOnStop_ == nullptr) {
-        SLOGE("sendCollaborationOnStop_ function ptr is nullptr");
-        return AVSESSION_ERROR;
-    }
+    CHECK_AND_RETURN_RET_LOG(CollaborationManager::GetInstance().sendCollaborationOnStop_ != nullptr,
+        AVSESSION_ERROR, "sendCollaborationOnStop_ function ptr is nullptr");
     CollaborationManager::GetInstance().sendCollaborationOnStop_();
     return AVSESSION_SUCCESS;
 }
@@ -109,10 +107,8 @@ __attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
     if (result == ServiceCollaborationManagerResultCode::REJECT) {
         SLOGE("return connect reject and reson:%{public}s", reason);
     }
-    if (CollaborationManager::GetInstance().sendCollaborationApplyResult_ == nullptr) {
-        SLOGE("sendCollaborationApplyResult_ function ptr is nullptr");
-        return AVSESSION_ERROR;
-    }
+    CHECK_AND_RETURN_RET_LOG(CollaborationManager::GetInstance().sendCollaborationApplyResult_ != nullptr,
+        AVSESSION_ERROR, "sendCollaborationApplyResult_ function ptr is nullptr");
     CollaborationManager::GetInstance().sendCollaborationApplyResult_(result);
     return AVSESSION_SUCCESS;
 }
