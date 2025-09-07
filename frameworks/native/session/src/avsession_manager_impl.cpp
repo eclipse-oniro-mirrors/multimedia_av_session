@@ -51,13 +51,6 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
         SLOGE("failed to get sa mgr");
         return nullptr;
     }
-#ifndef START_STOP_ON_DEMAND_ENABLE
-    auto object = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
-    if (object == nullptr) {
-        SLOGE("failed to get service");
-        return nullptr;
-    }
-#else
     SLOGI("enter check SystemAbility");
     auto object = mgr->CheckSystemAbility(AVSESSION_SERVICE_ID);
     if (object == nullptr) {
@@ -68,7 +61,6 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
             return nullptr;
         }
     }
-#endif
     service_ = iface_cast<AVSessionServiceProxy>(object);
     if (service_ != nullptr) {
         serviceDeathRecipient_ = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDie(); });
@@ -80,7 +72,7 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
         sptr<IAVSessionService> serviceBase = service_;
         serviceBase->AsObject()->AddDeathRecipient(serviceDeathRecipient_);
 
-        SLOGD("get service success");
+        SLOGI("get service done");
         RegisterClientDeathObserver();
         RegisterServiceStateListener(mgr);
     }
