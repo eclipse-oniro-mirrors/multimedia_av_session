@@ -3926,6 +3926,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     string abilityName = DEFAULT_ABILITY_NAME;
     auto uid = -1;
     auto isCustomer = false;
+    bool isAnco = false;
     if (topSession_ != nullptr) {
         bundleName = topSession_->GetBundleName();
         abilityName = topSession_->GetAbilityName();
@@ -3934,6 +3935,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
         auto res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launWantAgent, want);
         isCustomer = (res == AVSESSION_SUCCESS) && (bundleName == want->GetElement().GetBundleName());
         SLOGI("CreateWantAgent GetWant res=%{public}d", res);
+        isAnco = topSession_->GetUid() == audioBrokerUid;
     }
     if (histroyDescriptor != nullptr) {
         SLOGI("CreateWantAgent with historyDescriptor");
@@ -3947,15 +3949,14 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     if (!isCustomer) {
         AppExecFwk::ElementName element("", bundleName, abilityName);
         want->SetElement(element);
+        if (isAnco) {
+            want->SetAction("action.system.home");
+            want->AddEntity("entity.system.home");
+        }
     }
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
-        0,
-        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITY,
-        flags,
-        wants,
-        nullptr
-    );
+        0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITY, flags, wants, nullptr);
     return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
 }
 

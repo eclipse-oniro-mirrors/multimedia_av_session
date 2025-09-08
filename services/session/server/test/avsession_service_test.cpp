@@ -40,6 +40,7 @@
 #include "avsession_info.h"
 #include "params_config_operator.h"
 #include "avcontrol_command.h"
+#include "want_agent_helper.h"
 
 #define private public
 #define protected public
@@ -843,6 +844,26 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlayback002, TestSize.Level0)
     SLOGI("StartAVPlayback002 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, StartAVPlayback003, TestSize.Level1)
+{
+    SLOGI("StartAVPlayback003 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("ancoMediaSession", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->SaveSessionInfoInFile("ancoMediaSession", avsessionHere_->GetSessionId(),
+        "audio", elementName);
+    avservice_->isAudioBrokerStart_ = true;
+    auto ret = avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME");
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    avservice_->isAudioBrokerStart_ = false;
+    avsessionHere_->Destroy();
+    SLOGI("StartAVPlayback003 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, GetSubNode001, TestSize.Level0)
 {
     SLOGI("GetSubNode001 begin!");
@@ -948,6 +969,25 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent002, TestSize.Level0)
     SLOGI("OnReceiveEvent002 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, OnReceiveEvent004, TestSize.Level1)
+{
+    SLOGD("OnReceiveEvent004 begin!");
+    OHOS::EventFwk::CommonEventData eventData;
+    string action = "usual.event.PACKAGE_REMOVED";
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    want.SetElement(elementName);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avservice_);
+    eventSubscriber.OnReceiveEvent(eventData);
+    SLOGD("OnReceiveEvent004 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, UnSubscribeCommonEvent001, TestSize.Level0)
 {
     SLOGI("SubscribeCommonEvent001 begin!");
@@ -985,6 +1025,17 @@ static HWTEST_F(AVSessionServiceTest, OnRemoveSystemAbility002, TestSize.Level0)
     SLOGI("OnRemoveSystemAbility002 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, OnRemoveSystemAbility003, TestSize.Level1)
+{
+    SLOGI("OnRemoveSystemAbility003 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    int32_t systemAbilityId = 66849;
+    std::string deviceId = "";
+    avservice_->OnRemoveSystemAbility(systemAbilityId, deviceId);
+    EXPECT_EQ(avservice_->isAudioBrokerStart_, false);
+    SLOGI("OnRemoveSystemAbility003 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, GetHistoricalSessionDescriptorsFromFile001, TestSize.Level0)
 {
     SLOGI("GetHistoricalSessionDescriptorsFromFile001 begin!");
@@ -992,6 +1043,29 @@ static HWTEST_F(AVSessionServiceTest, GetHistoricalSessionDescriptorsFromFile001
     int32_t ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetHistoricalSessionDescriptorsFromFile001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, GetHistoricalSessionDescriptorsFromFile002, TestSize.Level1)
+{
+    SLOGI("GetHistoricalSessionDescriptorsFromFile002 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("ancoMediaSession", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+    avservice_->SaveSessionInfoInFile("ancoMediaSession", avsessionHere_->GetSessionId(),
+        "audio", elementName);
+    avservice_->isAudioBrokerStart_ = false;
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avservice_->isAudioBrokerStart_ = true;
+    ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avsessionHere_->Destroy();
+    SLOGI("GetHistoricalSessionDescriptorsFromFile002 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, GetHistoricalSessionDescriptors001, TestSize.Level0)
@@ -1771,6 +1845,25 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent004, TestSize.Level0)
 }
 #endif
 
+static HWTEST_F(AVSessionServiceTest, CreateWantAgent005, TestSize.Level1)
+{
+    SLOGD("CreateWantAgent005 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere, nullptr);
+    avsessionHere->SetUid(5557);
+    avservice_->UpdateTopSession(avsessionHere);
+    EXPECT_NE(avservice_->topSession_, nullptr);
+    auto wantAgent = avservice_->CreateWantAgent(nullptr);
+    EXPECT_EQ(wantAgent, nullptr);
+    avsessionHere->Destroy();
+    SLOGD("CreateWantAgent005 end!");
+}
+
 /**
  * @tc.name: UpdateOrder001
  * @tc.desc: Verifying the UpdateOrder.
@@ -2130,11 +2223,12 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle002, TestSize.Level1)
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
+    avsessionHere_->SetUid(5557);
     avservice_->UpdateTopSession(avsessionHere_);
     EXPECT_NE(avservice_->topSession_, nullptr);
-    avsessionHere_->SetUid(5557);
     AVMetaData metadata;
     metadata.SetAssetId("mediaId");
+    metadata.SetTitle("title");
     metadata.SetDescription("title-artist");
     avsessionHere_->SetAVMetaData(g_metaData);
     std::string songName = avservice_->GetLocalTitle();
