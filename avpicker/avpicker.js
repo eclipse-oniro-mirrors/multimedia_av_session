@@ -611,26 +611,27 @@ export class AVCastPicker extends ViewPU {
                 }, Row);
                 this.iconBuilder.bind(this)(x8, false);
 
-                this.observeComponentCreation2((a10, b10) => {
-                    Column.create();
-                    Column.width(this.isPc ? 254 : 144);
-                    Column.padding({
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Start });
+                    Flex.width(this.isPc ? 254 : 144);
+                    Flex.padding({
                         left: 8,
                         top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
                         right: 8,
                         bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
                     });
-                }, Column);
-                this.observeComponentCreation2((m9, n9) => {
-                    Flex.create({ direction: FlexDirection.Row, justifyContent: FlexAlign.Start });
-                    Flex.width('100%');
                 }, Flex);
                 this.textBuilder.bind(this)(x8);
-                this.observeComponentCreation2((m9, n9) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                     If.create();
-                    if (x8.highQualityParams !== undefined && this.showHighQuality(x8)) {
+                    if (x8.fromCall) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((u9, v9) => {
+                            this.subTextBuilder.bind(this)(x8);
+                        });
+                    }
+                    else if (x8.highQualityParams !== undefined && this.showHighQuality(x8)) {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 Flex.create();
                                 Flex.borderRadius(3);
                                 Flex.border({
@@ -638,15 +639,21 @@ export class AVCastPicker extends ViewPU {
                                     color: { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                                         'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
                                 });
-                                Flex.padding({top: 1.5, right: 4, bottom: 1.5, left: 4});
-                                Flex.margin({top: 2});
+                                Flex.padding({
+                                    top: 1.5,
+                                    right: 4,
+                                    bottom: 1.5,
+                                    left: 4
+                                });
+                                Flex.margin({ top: 2 });
                                 Flex.width('auto');
                             }, Flex);
                             this.highQualityIconBuilder.bind(this)(x8.highQualityParams);
                             Flex.pop();
                         });
-                    } else {
-                        this.ifElseBranchUpdateFunction(1, () => {
+                    }
+                    else {
+                        this.ifElseBranchUpdateFunction(2, () => {
                         });
                     }
                 }, If);
