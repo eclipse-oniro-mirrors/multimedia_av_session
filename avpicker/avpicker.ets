@@ -279,7 +279,7 @@ export struct AVCastPicker {
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
         $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
       .textOverflow({ overflow: TextOverflow.Ellipsis })
-      .maxLines(item.fromCall ? 1 : 2);
+      .maxLines(item.fromCall ? 1 : 2)
       .wordBreak(WordBreak.BREAK_WORD)
       .maxFontScale(this.maxFontSizeScale)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
@@ -331,27 +331,22 @@ export struct AVCastPicker {
           }) {
             Row() {
               this.iconBuilder(item, false)
-              Column() {
-                Flex({direction: FlexDirection.Row, justifyContent: FlexAlign.Start}) {
-                  this.textBuilder(item)
-                  if (item.highQualityParams !== undefined && this.showHighQuality(item)) {
-                    Flex() {
-                      this.highQualityIconBuilder(item.highQualityParams)
-                    }
-                    .borderRadius(3)
-                    .border({
-                      width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
-                      color: $r('sys.color.font_secondary')
-                    })
-                    .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
-                    .margin({top: 2})
-                    .width('auto')
-                  }
-                }
-                .width('100%')
-
+              Flex({direction: FlexDirection.Column, justifyContent: FlexAlign.Start}) {
+                this.textBuilder(item)
                 if (item.fromCall) {
                   this.subTextBuilder(item)
+                } else if (item.highQualityParams !== undefined && this.showHighQuality(item)) {
+                  Flex() {
+                    this.highQualityIconBuilder(item.highQualityParams)
+                  }
+                  .borderRadius(3)
+                  .border({
+                    width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
+                    color: $r('sys.color.font_secondary')
+                  })
+                  .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
+                  .margin({top: 2})
+                  .width('auto')
                 }
               }
               .width(this.isPc ? 254 : 144)
