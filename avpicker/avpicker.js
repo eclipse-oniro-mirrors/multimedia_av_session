@@ -660,21 +660,6 @@ export class AVCastPicker extends ViewPU {
                 If.pop();
                 Flex.pop();
 
-                this.observeComponentCreation2((m9, n9) => {
-                    If.create();
-                    if (x8.fromCall) {
-                        this.ifElseBranchUpdateFunction(0, () => {
-                            this.subTextBuilder.bind(this)(x8);
-                        });
-                    }
-                    else {
-                        this.ifElseBranchUpdateFunction(1, () => {
-                        });
-                    }
-                }, If);
-                If.pop();
-                Column.pop();
-
                 Row.pop();
                 this.observeComponentCreation2((m9, n9) => {
                     If.create();
