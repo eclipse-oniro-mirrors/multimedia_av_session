@@ -163,6 +163,15 @@ ohos_unittest("AVSessionUsersManagerTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [
     "../../../../frameworks/common:avsession_common",
     "../../../../frameworks/native/session:avsession_client_static",
@@ -296,6 +305,15 @@ ohos_unittest("AVSessionServiceAddedTest") {
   ]
 
   ldflags = [ "--coverage" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
 
   deps = [
     "../../../../frameworks/common:avsession_common",
@@ -449,6 +467,15 @@ ohos_unittest("AVSessionItemTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [
     "../../../../frameworks/common:avsession_common",
     "../../../../frameworks/native/session:avsession_client_static",
@@ -538,6 +565,15 @@ ohos_unittest("AVControllerItemTest") {
   ]
 
   ldflags = [ "--coverage" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
 
   deps = [
     "../../../../frameworks/common:avsession_common",
@@ -1109,6 +1145,15 @@ ohos_unittest("CollaborationManagerTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = common_deps
 
   deps += [
@@ -1318,6 +1363,15 @@ ohos_unittest("AVSessionStubTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [
     "../../../../frameworks/common:avsession_common",
     "../../../../frameworks/native/session:avsession_client_static",
@@ -1347,6 +1401,15 @@ ohos_unittest("AVSessionServiceStubPermissionTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = common_deps
 
   deps += [
@@ -1374,6 +1437,15 @@ ohos_unittest("AVSessionServiceStubTest") {
   cflags_cc = [ "--coverage" ]
 
   ldflags = [ "--coverage" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
 
   deps = common_deps
 
@@ -1480,6 +1552,15 @@ ohos_unittest("AVSessionControllerStubTest") {
   cflags_cc = [ "--coverage" ]
 
   ldflags = [ "--coverage" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
 
   deps = common_deps
 
@@ -1845,6 +1926,15 @@ ohos_unittest("AVSessionServiceTest") {
   ]
 
   ldflags = [ "--coverage" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
 
   deps = [
     "../../../../frameworks/common:avsession_common",
@@ -2242,6 +2332,15 @@ ohos_unittest("AVRouterImplTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [
     "../../../../frameworks/common:avsession_common",
     "../../../../frameworks/native/session:avsession_client_static",
@@ -2301,6 +2400,15 @@ if (castplus_cast_engine_enable) {
       "-DCASTPLUS_CAST_ENGINE_ENABLE",
     ]
 
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      debug = false
+      integer_overflow = true
+      ubsan = true
+    }
+
     deps = [
       "../../../session:avsession_server_static",
       "./../../../../frameworks/common:avsession_common",
@@ -2349,6 +2457,15 @@ if (castplus_cast_engine_enable) {
     sources = [ "hw_cast_test.cpp" ]
 
     configs = [ ":module_private_config_without_third_party" ]
+
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      debug = false
+      integer_overflow = true
+      ubsan = true
+    }
 
     deps = [
       "../../../session:avsession_server_static",
@@ -2401,6 +2518,15 @@ if (castplus_cast_engine_enable) {
     configs = [ ":module_private_config_without_third_party" ]
 
     cflags_cc = [ "-fno-access-control" ]
+
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      debug = false
+      integer_overflow = true
+      ubsan = true
+    }
 
     deps = [
       "../../../../frameworks/common:avsession_common",
@@ -2486,6 +2612,15 @@ if (castplus_cast_engine_enable) {
       "-fno-access-control",
       "-DCASTPLUS_CAST_ENGINE_ENABLE",
     ]
+
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      debug = false
+      integer_overflow = true
+      ubsan = true
+    }
 
     deps = common_deps_without_third_party
   
