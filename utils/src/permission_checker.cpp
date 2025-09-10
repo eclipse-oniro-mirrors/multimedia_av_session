@@ -91,6 +91,7 @@ bool PermissionChecker::CheckSystemPermissionByUid(int uid)
     std::string bundleName;
     std::string identity = OHOS::IPCSkeleton::ResetCallingIdentity();
     if (client.GetNameForUid(uid, bundleName) != OHOS::ERR_OK) {
+        OHOS::IPCSkeleton::SetCallingIdentity(identity);
         return true;
     }
     OHOS::IPCSkeleton::SetCallingIdentity(identity);

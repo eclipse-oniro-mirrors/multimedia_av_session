@@ -288,7 +288,7 @@ export struct AVCastPicker {
   @Builder
   subTextBuilder(item: AVCastPickerDeviceInfo) {
     Row() {
-      Text(`${item.deviceSubName}...`)
+      Text(item.deviceSubName || '')
         .fontSize($r('sys.float.ohos_id_text_size_body2'))
         .fontColor(item.isConnected ?
           (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
