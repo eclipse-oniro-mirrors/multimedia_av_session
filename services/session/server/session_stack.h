@@ -19,8 +19,13 @@
 #include <string>
 
 #include "session_container.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
+constexpr const char* RECLAIM_MEMORY = "AVSessionReclaimMemory";
+constexpr uint32_t TIME_OF_RECLAIM_MEMORY = 240000;
+constexpr const char* RECLAIM_FILE_STRING = "1";
+
 class SessionStack : public SessionContainer {
 public:
     int32_t AddSession(pid_t pid, const std::string& abilityName, sptr<AVSessionItem>& item) override;
@@ -51,10 +56,17 @@ public:
 
     int32_t getAllSessionNum() override;
 
+    void PostReclaimMemoryTask();
+
+    void ReclaimMem();
+
+    void CheckSessionStateIdle();
+
 private:
     std::map<std::pair<pid_t, std::string>, sptr<AVSessionItem>> sessions_;
     std::list<sptr<AVSessionItem>> stack_;
     std::recursive_mutex sessionStackLock_;
+    std::atomic_bool isActivatedMemReclaimTask_ false;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_SESSION_STACK_H

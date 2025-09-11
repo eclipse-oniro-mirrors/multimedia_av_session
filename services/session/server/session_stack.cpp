@@ -181,4 +181,49 @@ int32_t SessionStack::getAllSessionNum()
 {
     return static_cast<int32_t>(stack_.size());
 }
+
+void SessionStack::PostReclaimMemoryTask()
+{
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    if (isActivatedMemReclaimTask_.load() && !CheckSessionStateIdle()) {
+        SLOGI("clear reclaim memory task");
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask(RECLAIM_MEMORY);
+        isActivatedMemReclaimTask_.store(false);
+        reutrn;
+    }
+    if (!isActivatedMemReclaimTask_.load() && !CheckSessionStateIdle()) {
+        SLOGI("start reclaim memory task");
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+            ReclaimMem();
+            isActivatedMemReclaimTask_.store(false);
+            }, RECLAIM_MEMORY, TIME_OF_RECLAIM_MEMORY);
+        isActivatedMemReclaimTask_.store(true);
+        reutrn;
+    }
+}
+
+void SessionStack::ReclaimMem()
+{
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    std::string reclaimPath = "/proc/" + std::to_string(getPid()) + "/reclaim";
+    std::string reclaimContent = RECLAIM_FILE_STRING;
+    SLOGI("start reclaim file = %{public}s", reclaimPath.c_str());
+    std::ofstream outfile(reclaimPath);
+    if (outfile.is_open()) {
+        outfile << reclaimContent;
+        outfile.close();
+    } else {
+        SLOGE("reclaim cannot open file");
+    }
+}
+
+void SessionStack::CheckSessionStateIdle()
+{
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    if (sessions_.empty()) {
+        SLOGI("there are no sessions");
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::AVSession
