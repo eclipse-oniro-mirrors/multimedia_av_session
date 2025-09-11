@@ -470,8 +470,8 @@ int32_t TaiheMetaData::GetPublishDate(AVMetadata const &in, OHOS::AVSession::AVM
         CHECK_RETURN(env != nullptr, "env is nullptr", OHOS::AVSession::AVSESSION_ERROR);
 
         ani_class cls {};
-        CHECK_RETURN(env->FindClass("Lescompat/Date;", &cls) == ANI_OK,
-            "FindClass Lescompat/Date failed", OHOS::AVSession::AVSESSION_ERROR);
+        CHECK_RETURN(env->FindClass("escompat.Date", &cls) == ANI_OK,
+            "FindClass escompat.Date failed", OHOS::AVSession::AVSESSION_ERROR);
         ani_method method {};
         CHECK_RETURN(env->Class_FindMethod(cls, "valueOf", nullptr, &method) == ANI_OK,
             "Class_FindMethod Date valueOf failed", OHOS::AVSession::AVSESSION_ERROR);
@@ -497,18 +497,18 @@ int32_t TaiheMetaData::SetPublishDate(const OHOS::AVSession::AVMetaData &in, AVM
     }
 
     ani_class cls {};
-    CHECK_RETURN(env->FindClass("Lescompat/Date;", &cls) == ANI_OK,
-        "FindClass Lescompat/Date failed", OHOS::AVSession::AVSESSION_ERROR);
+    CHECK_RETURN(env->FindClass("escompat.Date", &cls) == ANI_OK,
+        "FindClass escompat.Date failed", OHOS::AVSession::AVSESSION_ERROR);
     ani_method ctorMethod {};
     CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "X{C{std.core.Double}C{std.core.String}C{escompat.Date}}",
-        &ctorMethod) == ANI_OK, "Class_FindMethod Lescompat/Date <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
+        &ctorMethod) == ANI_OK, "Class_FindMethod escompat.Date <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
     ani_object aniDoubleObject {};
     int32_t ret = TaiheUtils::ToAniDoubleObject(env, in.GetPublishDate(), aniDoubleObject);
     CHECK_RETURN(ret == OHOS::AVSession::AVSESSION_SUCCESS, "ToAniDoubleObject failed", ret);
 
     ani_object aniDate {};
     CHECK_RETURN(env->Object_New(cls, ctorMethod, &aniDate, aniDoubleObject) == ANI_OK,
-        "Object_New Lescompat/Date failed", OHOS::AVSession::AVSESSION_ERROR);
+        "Object_New escompat.Date failed", OHOS::AVSession::AVSESSION_ERROR);
 
     out.publishDate = optional<uintptr_t>(std::in_place_t {}, reinterpret_cast<uintptr_t>(aniDate));
     return OHOS::AVSession::AVSESSION_SUCCESS;

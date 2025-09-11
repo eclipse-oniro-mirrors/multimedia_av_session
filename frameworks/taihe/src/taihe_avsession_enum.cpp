@@ -41,7 +41,7 @@ bool TaiheAVSessionEnum::ToAniEnumHDRFormat(OHOS::AVSession::HDRFormat format, a
         return false;
     }
     ani_env *env = taihe::get_env();
-    static const std::string enumName = "L@ohos/graphics/hdrCapability/hdrCapability/HDRFormat;";
+    static const std::string enumName = "@ohos.graphics.hdrCapability.hdrCapability.HDRFormat";
     ani_enum aniEnum {};
     if (env == nullptr || env->FindEnum(enumName.c_str(), &aniEnum) != ANI_OK ||
         env->Enum_GetEnumItemByIndex(aniEnum, static_cast<ani_int>(iter->second), &aniEnumItem) != ANI_OK) {
