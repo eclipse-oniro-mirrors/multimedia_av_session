@@ -17,6 +17,7 @@
 #define OHOS_SESSION_STACK_H
 
 #include <string>
+#include <fstream>
 
 #include "session_container.h"
 #include "avsession_event_handler.h"
