@@ -508,7 +508,7 @@ export class AVCastPicker extends ViewPU {
             Row.width('100%');
         }, Row);
         this.observeComponentCreation2((x1, y1) => {
-            Text.create(`${u3.deviceSubName}...`);
+            Text.create(u3.deviceSubName || '');
             Text.fontSize({ 'id': -1, 'type': 10002,
                 params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__' });
