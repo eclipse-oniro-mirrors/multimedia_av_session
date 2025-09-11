@@ -213,14 +213,13 @@ ohos_shared_library("avsession_cast_client") {
     "../../../services/session:avsession_ipc_config",
   ]
 
-  public_deps = [
-    "../../../utils:avsession_utils",
-    "../../common:avsession_common",
-  ]
+  public_deps = []
 
   deps = [
     "../../../services/session:libidl_avsession_service_interface_stub",
     "../../../services/session:libidl_avsession_service_interface_proxy",
+    "../../../utils:avsession_utils",
+    "../../common:avsession_common",
   ]
 
   external_deps = [
