@@ -27,6 +27,7 @@ int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr
     sessions_.insert(std::make_pair(std::make_pair(pid, abilityName), item));
     stack_.push_front(item);
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_CREATE_SESSION);
+    PostReclaimMemoryTask();
     return AVSESSION_SUCCESS;
 }
 
@@ -59,6 +60,7 @@ std::vector<sptr<AVSessionItem>> SessionStack::RemoveSession(pid_t pid)
             it++;
         }
     }
+    PostReclaimMemoryTask();
     return result;
 }
 
@@ -76,6 +78,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(const std::string& sessionId)
             it++;
         }
     }
+    PostReclaimMemoryTask();
     return result;
 }
 
@@ -90,6 +93,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string& ab
     auto result = it->second;
     sessions_.erase(it);
     stack_.remove(result);
+    PostReclaimMemoryTask();
     return result;
 }
 
@@ -189,7 +193,7 @@ void SessionStack::PostReclaimMemoryTask()
         SLOGI("clear reclaim memory task");
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask(RECLAIM_MEMORY);
         isActivatedMemReclaimTask_.store(false);
-        reutrn;
+        return;
     }
     if (!isActivatedMemReclaimTask_.load() && !CheckSessionStateIdle()) {
         SLOGI("start reclaim memory task");
@@ -198,14 +202,14 @@ void SessionStack::PostReclaimMemoryTask()
             isActivatedMemReclaimTask_.store(false);
             }, RECLAIM_MEMORY, TIME_OF_RECLAIM_MEMORY);
         isActivatedMemReclaimTask_.store(true);
-        reutrn;
+        return;
     }
 }
 
 void SessionStack::ReclaimMem()
 {
     std::lock_guard sessionStackLockGuard(sessionStackLock_);
-    std::string reclaimPath = "/proc/" + std::to_string(getPid()) + "/reclaim";
+    std::string reclaimPath = "/proc/" + std::to_string(getpid()) + "/reclaim";
     std::string reclaimContent = RECLAIM_FILE_STRING;
     SLOGI("start reclaim file = %{public}s", reclaimPath.c_str());
     std::ofstream outfile(reclaimPath);
@@ -217,7 +221,7 @@ void SessionStack::ReclaimMem()
     }
 }
 
-void SessionStack::CheckSessionStateIdle()
+bool SessionStack::CheckSessionStateIdle()
 {
     std::lock_guard sessionStackLockGuard(sessionStackLock_);
     if (sessions_.empty()) {
