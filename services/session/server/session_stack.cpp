@@ -211,7 +211,6 @@ void SessionStack::ReclaimMem()
     std::lock_guard sessionStackLockGuard(sessionStackLock_);
     std::string reclaimPath = "/proc/" + std::to_string(getpid()) + "/reclaim";
     std::string reclaimContent = RECLAIM_FILE_STRING;
-    SLOGI("start reclaim file = %{public}s", reclaimPath.c_str());
     std::ofstream outfile(reclaimPath);
     if (outfile.is_open()) {
         outfile << reclaimContent;
