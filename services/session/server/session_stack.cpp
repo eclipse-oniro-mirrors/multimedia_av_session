@@ -27,6 +27,7 @@ int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr
     sessions_.insert(std::make_pair(std::make_pair(pid, abilityName), item));
     stack_.push_front(item);
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_CREATE_SESSION);
+    PostReclaimMemoryTask();
     return AVSESSION_SUCCESS;
 }
 
@@ -59,6 +60,7 @@ std::vector<sptr<AVSessionItem>> SessionStack::RemoveSession(pid_t pid)
             it++;
         }
     }
+    PostReclaimMemoryTask();
     return result;
 }
 
@@ -76,6 +78,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(const std::string& sessionId)
             it++;
         }
     }
+    PostReclaimMemoryTask();
     return result;
 }
 
@@ -90,6 +93,7 @@ sptr<AVSessionItem> SessionStack::RemoveSession(pid_t pid, const std::string& ab
     auto result = it->second;
     sessions_.erase(it);
     stack_.remove(result);
+    PostReclaimMemoryTask();
     return result;
 }
 
@@ -180,5 +184,49 @@ bool SessionStack::IsEmpty()
 int32_t SessionStack::getAllSessionNum()
 {
     return static_cast<int32_t>(stack_.size());
+}
+
+void SessionStack::PostReclaimMemoryTask()
+{
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    if (isActivatedMemReclaimTask_.load() && !CheckSessionStateIdle()) {
+        SLOGI("clear reclaim memory task");
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask(RECLAIM_MEMORY);
+        isActivatedMemReclaimTask_.store(false);
+        return;
+    }
+    if (!isActivatedMemReclaimTask_.load() && !CheckSessionStateIdle()) {
+        SLOGI("start reclaim memory task");
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+            ReclaimMem();
+            isActivatedMemReclaimTask_.store(false);
+            }, RECLAIM_MEMORY, TIME_OF_RECLAIM_MEMORY);
+        isActivatedMemReclaimTask_.store(true);
+        return;
+    }
+}
+
+void SessionStack::ReclaimMem()
+{
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    std::string reclaimPath = "/proc/" + std::to_string(getpid()) + "/reclaim";
+    std::string reclaimContent = RECLAIM_FILE_STRING;
+    std::ofstream outfile(reclaimPath);
+    if (outfile.is_open()) {
+        outfile << reclaimContent;
+        outfile.close();
+    } else {
+        SLOGE("reclaim cannot open file");
+    }
+}
+
+bool SessionStack::CheckSessionStateIdle()
+{
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
+    if (sessions_.empty()) {
+        SLOGI("there are no sessions");
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::AVSession
