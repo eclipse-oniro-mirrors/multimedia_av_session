@@ -108,6 +108,27 @@
               "header_base": "//foundation/multimedia/av_session/frameworks/cj/include"
             },
             "name": "//foundation/multimedia/av_session/frameworks/cj:cj_multimedia_avsession_ffi"
+          },
+          {
+            "header": {
+              "header_files": [],
+              "header_base": "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include"
+            },
+            "name": "//foundation/multimedia/av_session/frameworks/native/session:avsession_cast_client"
+          },
+          {
+            "header": {
+              "header_files": [],
+              "header_base": "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include"
+            },
+            "name": "//foundation/multimedia/av_session/frameworks/common:avsession_common"
+          },
+          {
+            "header": {
+              "header_files": [],
+              "header_base": "//foundation/multimedia/av_session/interfaces/inner_api/native/session/include"
+            },
+            "name": "//foundation/multimedia/av_session/utils:avsession_utils"
           }
         ],
         "test": [
