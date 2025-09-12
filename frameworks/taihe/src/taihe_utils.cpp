@@ -53,11 +53,11 @@ ani_object TaiheUtils::CreateAniEmptyRecord()
 
     ani_class cls {};
     static const std::string className = "escompat.Record";
-    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find Lescompat/Record", aniRecord);
+    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find escompat.Record", aniRecord);
 
     ani_method constructor {};
     CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "C{std.core.Object}:", &constructor) == ANI_OK,
-        "Can't find method <ctor> in Lescompat/Record", aniRecord);
+        "Can't find method <ctor> in escompat.Record", aniRecord);
 
     CHECK_RETURN(env->Object_New(cls, constructor, &aniRecord, nullptr) == ANI_OK,
         "Call method <ctor> fail", aniRecord);
@@ -221,7 +221,7 @@ bool TaiheUtils::IsAniArray(ani_env *env, ani_object obj)
     CHECK_RETURN(env != nullptr && obj != nullptr, "env or obj is nullptr", false);
     ani_class cls {};
     static const std::string className = "escompat.Array";
-    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find Lescompat/Array.", false);
+    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find escompat.Array.", false);
 
     ani_static_method isArrayMethod {};
     CHECK_RETURN(env->Class_FindStaticMethod(cls, "isArray", nullptr, &isArrayMethod) == ANI_OK,
@@ -272,7 +272,7 @@ int32_t TaiheUtils::GetAniOptionalPropertyInt32(ani_env *env, ani_object obj, co
 
     ani_class cls {};
     if (env->FindClass("std.core.Int", &cls) != ANI_OK) {
-        SLOGE("GetAniOptionalPropertyInt32 [%{public}s] find Lstd/core/Int failed", name.c_str());
+        SLOGE("GetAniOptionalPropertyInt32 [%{public}s] find std.core.Int failed", name.c_str());
         return OHOS::AVSession::AVSESSION_ERROR;
     }
     ani_method method {};
@@ -297,11 +297,11 @@ static int32_t GetAniInt32(ani_env *env, ani_object obj, int32_t &value)
     ani_class cls {};
     static const std::string className = "std.core.Int";
     CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK,
-        "Can't find Lstd/core/Int", OHOS::AVSession::AVSESSION_ERROR);
+        "Can't find std.core.Int", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_method method {};
     CHECK_RETURN(env->Class_FindMethod(cls, "unboxed", nullptr, &method) == ANI_OK,
-        "Can't find method unboxed in Lstd/core/Int", OHOS::AVSession::AVSESSION_ERROR);
+        "Can't find method unboxed in std.core.Int", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_int aniInt = 0;
     CHECK_RETURN(env->Object_CallMethod_Int(obj, method, &aniInt) == ANI_OK,
@@ -421,14 +421,14 @@ int32_t TaiheUtils::ToAniDoubleObject(ani_env *env, double in, ani_object &out)
 
     ani_class cls {};
     CHECK_RETURN(env->FindClass("std.core.Double", &cls) == ANI_OK,
-        "FindClass Lstd/core/Double failed", OHOS::AVSession::AVSESSION_ERROR);
+        "FindClass std.core.Double failed", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_method ctorMethod {};
     CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "d:", &ctorMethod) == ANI_OK,
-        "Class_FindMethod Lstd/core/Double <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
+        "Class_FindMethod std.core.Double <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
 
     CHECK_RETURN(env->Object_New(cls, ctorMethod, &out, static_cast<ani_double>(in)) == ANI_OK,
-        "Object_New Lstd/core/Double failed", OHOS::AVSession::AVSESSION_ERROR);
+        "Object_New std.core.Double failed", OHOS::AVSession::AVSESSION_ERROR);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
@@ -1013,7 +1013,7 @@ ani_object TaiheUtils::ToAniKeyEvent(const OHOS::MMI::KeyEvent &in)
 
     ani_namespace scope {};
     CHECK_RETURN(env->FindNamespace("@ohos.multimedia.avsession.avSession", &scope) == ANI_OK,
-        "FindNamespace @ohos/multimedia/avsession/avSession failed", nullptr);
+        "FindNamespace @ohos.multimedia.avsession.avSession failed", nullptr);
 
     ani_function function {};
     CHECK_RETURN(env->Namespace_FindFunction(scope, "createAVKeyEventSync", nullptr, &function) == ANI_OK,

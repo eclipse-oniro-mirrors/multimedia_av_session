@@ -101,7 +101,7 @@ static taihe::optional<AVCastParameterType> ToTaiheParameterPlaybackSpeed(int32_
     CHECK_RETURN(env != nullptr, "env is nullptr", undefinedResult);
 
     ani_enum aniEnum {};
-    CHECK_RETURN(env->FindEnum("L@ohos/multimedia/media/media/PlaybackSpeed;", &aniEnum),
+    CHECK_RETURN(env->FindEnum("@ohos.multimedia.media.media.PlaybackSpeed", &aniEnum),
         "FindEnum PlaybackSpeed Failed", undefinedResult);
 
     ani_int enumIndex = static_cast<ani_int>(in);

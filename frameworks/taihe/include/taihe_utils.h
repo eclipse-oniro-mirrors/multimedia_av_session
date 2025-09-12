@@ -71,7 +71,7 @@ public:
     static constexpr int TIME_OUT_SECOND = 5;
     static constexpr int HTTP_ERROR_CODE = 400;
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
-    static constexpr char CLASS_NAME_BUSINESSERROR[] = "L@ohos/base/BusinessError;";
+    static constexpr char CLASS_NAME_BUSINESSERROR[] = "@ohos.base.BusinessError";
 
     static void ThrowError(int32_t errCode, const std::string &errMsg = "");
     static int32_t ConvertSessionType(const std::string& typeString);
