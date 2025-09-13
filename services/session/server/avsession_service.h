@@ -312,6 +312,8 @@ public:
 private:
     void NotifyProcessStatus(bool isStart);
 
+    void SetCritical(bool isCritical);
+
     static SessionContainer& GetContainer();
     static AVSessionUsersManager& GetUsersManager();
 

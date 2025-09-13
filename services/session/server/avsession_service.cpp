@@ -563,6 +563,36 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
 #endif
 }
 
+void AVSessionService::SetCritical(bool isCritical)
+{
+    int pid = getpid();
+    void *libMemMgrClientHandle = dlopen("libmemmgrclient.z.so", RTLD_NOW);
+    if (!libMemMgrClientHandle) {
+        SLOGE("dlopen libmemmgrclient library failed");
+        return;
+    }
+    void *setCriticalFunc = dlsym(libMemMgrClientHandle, "set_critical");
+    if (!setCriticalFunc) {
+        SLOGE("dlsm set_critical failed");
+#ifndef TEST_COVERAGE
+        if (libMemMgrClientHandle != nullptr) {
+            OPENSSL_thread_stop();
+        }
+        dlclose(libMemMgrClientHandle);
+#endif
+        return;
+    }
+    auto setCritical = reinterpret_cast<int(*)(int, bool, int)>(setCriticalFunc);
+    SLOGI("notify to memmgr as av_session isCritical:%{public}d", isCritical);
+    setCritical(pid, isCritical, AVSESSION_SERVICE_ID); // 1 indicates the service is started
+#ifndef TEST_COVERAGE
+    if (libMemMgrClientHandle != nullptr) {
+        OPENSSL_thread_stop();
+    }
+    dlclose(libMemMgrClientHandle);
+#endif
+}
+
 void AVSessionService::InitKeyEvent()
 {
     SLOGI("enter init keyEvent");
@@ -1614,6 +1644,9 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         SLOGE("session num exceed max");
         return ERR_SESSION_EXCEED_MAX;
     }
+    if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1) {
+        SetCritical(true);
+    }
 
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
@@ -1634,7 +1667,6 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
         ReportSessionState(sessionItem, SessionState::STATE_CREATE);
 #endif
-
     return AVSESSION_SUCCESS;
 }
 
@@ -3182,6 +3214,9 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
                 SLOGI("keyEventList remove %{public}s", sessionItem->GetBundleName().c_str());
                 keyEventList->erase(it);
             }
+        }
+        if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0) {
+            SetCritical(false);
         }
     }
     HandleSessionReleaseInner();
