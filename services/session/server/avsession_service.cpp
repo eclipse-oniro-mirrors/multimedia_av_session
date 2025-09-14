@@ -3964,11 +3964,11 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     bool isAnco = false;
     if (topSession_ != nullptr) {
         bundleName = topSession_->GetBundleName();
-        abilityName = topSession_->GetAbilityName();
         uid = topSession_->GetUid();
         launWantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(topSession_->GetLaunchAbility());
         auto res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launWantAgent, want);
         isCustomer = (res == AVSESSION_SUCCESS) && (bundleName == want->GetElement().GetBundleName());
+        abilityName = isCustomer ? want->GetElement().GetAbilityName() : topSession_->GetAbilityName();
         SLOGI("CreateWantAgent GetWant res=%{public}d", res);
         isAnco = topSession_->GetUid() == audioBrokerUid;
     }
@@ -3979,7 +3979,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
         uid = histroyDescriptor->uid_;
         isCustomer = false;
     }
-    SLOGI("CreateWantAgent bundleName %{public}s, abilityName %{public}s, isCustomer %{public}d",
+    SLOGI("CreateWantAgent bundleName:%{public}s,abilityName:%{public}s,isCustomer:%{public}d",
         bundleName.c_str(), abilityName.c_str(), isCustomer);
     if (!isCustomer) {
         AppExecFwk::ElementName element("", bundleName, abilityName);
@@ -3992,7 +3992,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
         0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITY, flags, wants, nullptr);
-    return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
+    return isCustomer ? launWantAgent : AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
 }
 
 void AVSessionService::RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
