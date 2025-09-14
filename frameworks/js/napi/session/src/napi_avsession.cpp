@@ -718,7 +718,7 @@ std::function<void()> NapiAVSession::AVQueueImgDownloadSyncExecutor(NapiAVSessio
         CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "aft avq download NoSession");
         CHECK_AND_RETURN_LOG(ret && pixelMap != nullptr, "download avqImg fail");
         napiSession->latestDownloadedAVQueueId_ = metaData.GetAVQueueId();
-        info.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        info.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
         info.SetAVQueueId(metaData.GetAVQueueId());
         info.SetAVQueueName(metaData.GetAVQueueName());
         napiSession->session_->UpdateAVQueueInfo(info);
