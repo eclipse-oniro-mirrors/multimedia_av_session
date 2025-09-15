@@ -620,12 +620,19 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
         state.GetState() == AVPlaybackState::PLAYBACK_STATE_STOP) {
         isPlayingState_ = false;
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelAncoMediaCapsule");
+        auto weakSelf = wptr<AVSessionItem>(this);
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
-            [this]() {
-                std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
-                if (serviceCallbackForMediaSession_ && !isPlayingState_) {
-                    SLOGI("anco capsule del for %{public}s", GetBundleName().c_str());
-                    serviceCallbackForMediaSession_(GetSessionId(), false, false);
+            [weakSelf]() {
+                auto shardPtr = weakSelf.promote();
+                CHECK_AND_RETURN_LOG(shardPtr != nullptr, "CheckIfSendCapsule session is null");
+                {
+                    std::lock_guard lockGuard(shardPtr->destroyLock_);
+                    CHECK_AND_RETURN_LOG(!shardPtr->isDestroyed_, "CheckIfSendCapsule session is destroy");
+                }
+                std::lock_guard mediaSessionLockGuard(shardPtr->mediaSessionCallbackLock_);
+                if (shardPtr->serviceCallbackForMediaSession_ && !shardPtr->isPlayingState_) {
+                    SLOGI("anco capsule del for %{public}s", shardPtr->GetBundleName().c_str());
+                    shardPtr->serviceCallbackForMediaSession_(shardPtr->GetSessionId(), false, false);
                 }
             }, "CancelAncoMediaCapsule", cancelTimeout);
     }
