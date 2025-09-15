@@ -1770,7 +1770,12 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& tag, 
     cJSON* newValue = cJSON_CreateObject();
     CHECK_AND_RETURN_RET_LOG(newValue != nullptr, false, "newValue get null");
     cJSON_AddStringToObject(newValue, "sessionId", sessionId.c_str());
-    cJSON_AddStringToObject(newValue, "bundleName", elementName.GetBundleName().c_str());
+    std::string bundleName = elementName.GetBundleName();
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+    if ((session != nullptr) && (session->GetAppIndex() != 0)) {
+        bundleName = bundleName + "_" + std::to_string(session->GetAppIndex());
+    }
+    cJSON_AddStringToObject(newValue, "bundleName", bundleName.c_str());
     cJSON_AddStringToObject(newValue, "abilityName", elementName.GetAbilityName().c_str());
     cJSON_AddStringToObject(newValue, "sessionType", sessionType.c_str());
     cJSON_AddStringToObject(newValue, "sessionTag", tag.c_str());
@@ -1793,6 +1798,22 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& tag, 
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
+void AVSessionService::SubscribeBundleStatusIfNeeded(const std::string& oldSortContent, const std::string& bundleName)
+{
+    if (oldSortContent.find(bundleName) == std::string::npos) {
+        auto callback = [this](std::string bundleName, int32_t userId) {
+            SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
+            DeleteAVQueueInfoRecord(bundleName, userId);
+            DeleteHistoricalRecord(bundleName, userId);
+            NotifyHistoricalRecordChange(bundleName, userId);
+        };
+        if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(bundleName,
+            callback, GetUsersManager().GetCurrentUserId())) {
+            SLOGE("SubscribeBundleStatusEvent failed");
+        }
+    }
+}
+
 void AVSessionService::SaveSessionInfoInFile(const std::string& tag, const std::string& sessionId,
     const std::string& sessionType, const AppExecFwk::ElementName& elementName)
 {
@@ -1809,18 +1830,12 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& tag, const std::
             valuesArray = cJSON_CreateArray();
             CHECK_AND_RETURN_LOG(valuesArray != nullptr, "create array json fail");
         }
-        if (oldSortContent.find(elementName.GetBundleName()) == string::npos) {
-            auto callback = [this](std::string bundleName, int32_t userId) {
-                SLOGI("recv delete bundle:%{public}s at user:%{public}d", bundleName.c_str(), userId);
-                DeleteAVQueueInfoRecord(bundleName, userId);
-                DeleteHistoricalRecord(bundleName, userId);
-                NotifyHistoricalRecordChange(bundleName, userId);
-            };
-            if (!BundleStatusAdapter::GetInstance().SubscribeBundleStatusEvent(elementName.GetBundleName(),
-                callback, GetUsersManager().GetCurrentUserId())) {
-                SLOGE("SubscribeBundleStatusEvent failed");
-            }
+        std::string bundleName = elementName.GetBundleName();
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        if ((session != nullptr) && (session->GetAppIndex() != 0)) {
+            bundleName = bundleName + "_" + std::to_string(session->GetAppIndex());
         }
+        SubscribeBundleStatusIfNeeded(oldSortContent, bundleName);
         int arraySize = cJSON_GetArraySize(valuesArray);
         for (int i = arraySize - 1; i >= 0; i--) {
             cJSON* itemToDelete = cJSON_GetArrayItem(valuesArray, i);
@@ -1832,7 +1847,7 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& tag, const std::
                 SLOGI("not contain bundleName or abilityName, pass");
                 continue;
             }
-            if (strcmp(elementName.GetBundleName().c_str(), bundleNameItem->valuestring) == 0 &&
+            if (strcmp(bundleName.c_str(), bundleNameItem->valuestring) == 0 &&
                 strcmp(elementName.GetAbilityName().c_str(), abilityNameItem->valuestring) == 0) {
                 cJSON_DeleteItemFromArray(valuesArray, i);
             }
@@ -2205,10 +2220,12 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
         DoMetadataImgClean(meta);
         return;
     }
+    if (session.GetAppIndex() != 0) {
+        bundleName = bundleName + "_" + std::to_string(session.GetAppIndex());
+    }
     std::lock_guard avQueueFileLockGuard(avQueueFileLock_);
     std::string oldContent;
     int32_t userId = session.GetUserId();
-    SLOGI("AddAvQueueInfoToFile for bundleName:%{public}s,userId:%{public}d", bundleName.c_str(), userId);
     if (!LoadStringFromFileEx(GetAVQueueDir(userId), oldContent)) {
         SLOGE("AddAvQueueInfoToFile read avqueueinfo fail, Return!");
         DoMetadataImgClean(meta);
@@ -2856,6 +2873,11 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         sptr<IRemoteObject> object;
         int32_t ret = 0;
         std::string bundleName = coldStartDescriptors[0].elementName_.GetBundleName();
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(coldStartDescriptors[0].sessionId_);
+        if ((session != nullptr) && (session->GetAppIndex() != 0)) {
+            bundleName = bundleName + "_" + std::to_string(session->GetAppIndex());
+        }
+
         if (deviceId.length() == 0) {
             ret = StartAVPlayback(bundleName, "");
         } else {

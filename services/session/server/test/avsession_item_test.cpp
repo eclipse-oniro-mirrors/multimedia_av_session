@@ -767,5 +767,53 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_CheckUseAVMetaData_001, TestSize.Level
     EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size(), 0);
     SLOGI("AVSessionItem_CheckUseAVMetaData_001 end!");
 }
+
+/**
+    * @tc.name: AVSessionItem_GetCurrentAppIndexForSession_001
+    * @tc.desc: Test GetCurrentAppIndexForSession sets appIndex_ correctly.
+    * @tc.type: FUNC
+    * @tc.require: #1787
+    */
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetCurrentAppIndexForSession_001, TestSize.Level0)
+{
+    SLOGI("AVSessionItem_GetCurrentAppIndexForSession_001 begin!");
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    g_AVSessionItem->GetCurrentAppIndexForSession();
+    int32_t appIndex = g_AVSessionItem->GetAppIndex();
+    EXPECT_EQ(appIndex, 0);
+    SLOGI("AVSessionItem_GetCurrentAppIndexForSession_001 end!");
+}
+
+/**
+    * @tc.name: AVSessionItem_GetAppIndex_001
+    * @tc.desc: Test GetAppIndex returns appIndex_ value.
+    * @tc.type: FUNC
+    * @tc.require: #1787
+    */
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetAppIndex_001, TestSize.Level0)
+{
+    SLOGI("AVSessionItem_GetAppIndex_001 begin!");
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    g_AVSessionItem->appIndex_ = 1;
+    int32_t appIndex = g_AVSessionItem->GetAppIndex();
+    EXPECT_EQ(appIndex, 1);
+    SLOGI("AVSessionItem_GetAppIndex_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_GetLaunchAbility_001
+ * @tc.desc: Test GetLaunchAbility returns valid launch ability.
+ * @tc.type: FUNC
+ * @tc.require: #1787
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetLaunchAbility_001, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_GetLaunchAbility_001 begin!");
+    g_AVSessionItem->isSetLaunchAbility_= true;
+    g_AVSessionItem->appIndex_= 1;
+    auto launchAbility = g_AVSessionItem->GetLaunchAbility();
+    EXPECT_EQ(launchAbility.IsLocal(), false);
+    SLOGD("AVSessionItem_GetLaunchAbility_001 end!");
+}
 } //AVSession
 } //OHOS

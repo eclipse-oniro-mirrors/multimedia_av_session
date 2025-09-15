@@ -624,6 +624,8 @@ private:
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 
+    void SubscribeBundleStatusIfNeeded(const std::string& oldSortContent, const std::string& bundleName);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;

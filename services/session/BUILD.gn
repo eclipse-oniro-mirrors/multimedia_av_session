@@ -553,6 +553,7 @@ av_session_ohos_library("avsession_item") {
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "ability_runtime:app_context",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",

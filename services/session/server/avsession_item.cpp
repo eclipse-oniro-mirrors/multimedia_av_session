@@ -631,6 +631,57 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
     }
 }
 
+void AVSessionItem::GetCurrentAppIndexForSession()
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_AND_RETURN_LOG(samgr != nullptr, "GetSystemAbilityManager return nullptr");
+    sptr<IRemoteObject> object = samgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    CHECK_AND_RETURN_LOG(object != nullptr, "GetSystemAbility return nullptr");
+    sptr<OHOS::AppExecFwk::IBundleMgr> bms = iface_cast<OHOS::AppExecFwk::IBundleMgr>(object);
+    CHECK_AND_RETURN_LOG(bms != nullptr, "GetBundleMgr return nullptr");
+
+    std::string bundleName;
+    int32_t appIndex = 0;
+    auto ret = bms->GetNameAndIndexForUid(GetUid(), bundleName, appIndex);
+    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "GetNameAndIndexForUid failed");
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        appIndex_ = appIndex;
+    }
+}
+
+AbilityRuntime::WantAgent::WantAgent AVSessionItem::CreateWantAgentWithIndex(
+    const AbilityRuntime::WantAgent::WantAgent& ability, int32_t index)
+{
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> launchWantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(ability);
+    int res = AVSESSION_ERROR;
+    if (want != nullptr && launchWantAgent != nullptr) {
+        res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launchWantAgent, want);
+    }
+    if (res == AVSESSION_SUCCESS && want != nullptr) {
+        want->SetElementName(GetBundleName(), GetAbilityName());
+        AAFwk::WantParams params = want->GetParams();
+        params.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, AAFwk::Integer::Box(index));
+        want->SetParams(params);
+    }
+    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags = {
+        AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG
+    };
+    std::vector<std::shared_ptr<AAFwk::Want>> wants{ want };
+    AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
+        0,
+        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITIES,
+        flags,
+        wants,
+        nullptr
+    );
+    auto launchAbility = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, GetUid());
+    CHECK_AND_RETURN_RET_LOG(launchAbility != nullptr, ability, "CreateWantAgentWithIndex failed");
+    return *launchAbility;
+}
+
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     {
@@ -686,14 +737,29 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
+    {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        isSetLaunchAbility_ = true;
+    }
+    GetCurrentAppIndexForSession();
     launchAbility_ = ability;
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> launWantAgent =
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> launchWantAgent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>(ability);
-    int res = AVSESSION_SUCCESS;
-    if (want != nullptr && launWantAgent != nullptr) {
-        res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launWantAgent, want);
+    int res = AVSESSION_ERROR;
+    if (want != nullptr && launchWantAgent != nullptr) {
+        res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launchWantAgent, want);
+        AAFwk::WantParams params = want->GetParams();
+        if (!params.HasParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
+            launchAbility_ = CreateWantAgentWithIndex(ability, appIndex_);
+        } else {
+            auto appIndex = params.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+            if (appIndex != appIndex_) {
+                launchAbility_ = CreateWantAgentWithIndex(ability, appIndex_);
+            }
+        }
     }
+
     std::string errMsg = "Get want failed.";
     std::string bundleName = "";
     std::string abilityName = "";
@@ -1976,6 +2042,10 @@ void AVSessionItem::ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& a
 {
     std::string avQueueFileDir = AVSessionUtils::GetFixedPathName(userId_);
     std::string avQueueFileName = GetBundleName() + "_" + metaData_.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+    if (appIndex_ != 0) {
+        avQueueFileName = GetBundleName() + "_" + std::to_string(appIndex_) + "_" + metaData_.GetAVQueueId() +
+            AVSessionUtils::GetFileSuffix();
+    }
     AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
 }
 
@@ -2038,8 +2108,36 @@ void AVSessionItem::SetSupportCommand(std::vector<int32_t> cmds)
     }
 }
 
+int32_t AVSessionItem::GetAppIndex()
+{
+    std::lock_guard lockGuard(avsessionItemLock_);
+    return appIndex_;
+}
+
 AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 {
+    if (!isSetLaunchAbility_) {
+        {
+            std::lock_guard lockGuard(avsessionItemLock_);
+            isSetLaunchAbility_ = true;
+        }
+        GetCurrentAppIndexForSession();
+        std::vector<std::shared_ptr<AAFwk::Want>> wants;
+        std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+        want->SetElementName(GetBundleName(), GetAbilityName());
+        AAFwk::WantParams params;
+        params.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, AAFwk::Integer::Box(appIndex_));
+        want->SetParams(params);
+        wants.push_back(want);
+        std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
+        flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
+        auto launchWantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+        AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
+            0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITIES, flags, wants, nullptr);
+        auto launchAbility = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, getuid());
+        CHECK_AND_RETURN_RET_LOG(launchAbility != nullptr, launchAbility_, "GetWantAgent failed");
+        launchAbility_ = *launchAbility;
+    }
     return launchAbility_;
 }
 
