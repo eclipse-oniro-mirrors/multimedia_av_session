@@ -1375,14 +1375,20 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
             return;
         }
         CHECK_AND_RETURN_LOG(isPlaying, "anco media session is not playing");
-        UpdateTopSession(session);
         FocusSessionStrategy::FocusSessionChangeInfo sessionInfo;
         sessionInfo.uid = session->GetUid();
         sessionInfo.pid = session->GetPid();
         SelectFocusSession(sessionInfo);
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+        auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), session);
+        CHECK_AND_RETURN_LOG(it != sessionListForFront->end(), "mediasession not in frontlist");
+        UpdateTopSession(session);
         NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isMediaChange);
     });
 }
+
 void AVSessionService::AddAncoColdStartServiceCallback(sptr<AVSessionItem>& session)
 {
     session->SetServiceCallbackForAncoStart([this](std::string sessionId, std::string bundle, std::string ability) {
