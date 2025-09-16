@@ -83,7 +83,9 @@
             "//foundation/multimedia/av_session/avpicker:avcastpickerparam",
             "//foundation/multimedia/av_session/avvolumepanel:avvolumepanel",
             "//foundation/multimedia/av_session/avinputcastpicker:avinputcastpicker",
-            "//foundation/multimedia/av_session/avpicker_static:avpicker_static"
+            "//foundation/multimedia/av_session/avpicker_static:avpicker_static",
+            "//foundation/multimedia/av_session/avinputcastpicker_static:avinputcastpicker_static",
+            "//foundation/multimedia/av_session/avvolumepanel_static:avvolumepanel_static"
           ],
           "service_group": [
             "//foundation/multimedia/av_session/services/session:avsession_item",
