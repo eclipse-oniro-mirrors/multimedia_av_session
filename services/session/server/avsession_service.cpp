@@ -2996,6 +2996,7 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
     ClearClientResources(pid, true);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVRouter::GetInstance().IsStopCastDiscovery(pid);
+    cacheEnableCastPids_.erase(pid);
     if (BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == MEDIA_CONTROL_BUNDLENAME) {
         SLOGI("mediacontroller on client die");
     }
@@ -3226,6 +3227,10 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         }
     }
     HandleSessionReleaseInner();
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("call disable cast after session release task");
+    checkEnableCast(false);
+#endif
 }
 
 void AVSessionService::HandleSessionReleaseInner()
@@ -3233,14 +3238,6 @@ void AVSessionService::HandleSessionReleaseInner()
 #ifdef START_STOP_ON_DEMAND_ENABLE
     if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0) {
         PublishEvent(mediaPlayStateFalse);
-    }
-#endif
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if ((GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0 ||
-        (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1 &&
-        CheckAncoAudio())) && !is2in1_) {
-        SLOGI("call disable cast for no session alive, after session release task");
-        checkEnableCast(false);
     }
 #endif
 }

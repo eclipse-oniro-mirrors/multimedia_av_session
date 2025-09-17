@@ -54,8 +54,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
             SplitExtraInfo(info);
         }
         NotifyMirrorToStreamCast();
-        int32_t sessionSize = static_cast<int32_t>(GetUsersManager().GetContainerFromAll().GetAllSessions().size());
-        if ((sessionSize == 0 || (sessionSize == 1 && CheckAncoAudio())) && !is2in1_ && state == "IDLE") {
+        if (state == "IDLE") {
             SLOGI("call disable cast for cast idle");
             checkEnableCast(false);
         }
@@ -210,15 +209,18 @@ int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId,
 int32_t AVSessionService::checkEnableCast(bool enable)
 {
     std::lock_guard lockGuard(checkEnableCastLock_);
-    SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d", enable, isInCast_);
+    SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d, calling pid:%{public}d",
+        enable, isInCast_, GetCallingPid());
+    enable ? (void)cacheEnableCastPids_.insert(GetCallingPid()) : (void)cacheEnableCastPids_.erase(GetCallingPid());
     if (enable == true && isInCast_ == false) {
         isInCast_ = AVRouter::GetInstance().Init(this) == AVSESSION_SUCCESS ? true : false;
     } else if (enable == false && isInCast_ == true) {
-        CHECK_AND_RETURN_RET_LOG(!((GetContainer().GetAllSessions().size() > 1 ||
-            (GetContainer().GetAllSessions().size() == 1 && !CheckAncoAudio())) && !is2in1_),
-            AVSESSION_SUCCESS, "can not release cast with session alive");
+        CHECK_AND_RETURN_RET_LOG(!AVRouter::GetInstance().IsRemoteCasting() && !is2in1_,
+            AVSESSION_SUCCESS, "can not release cast with session casting");
         CHECK_AND_RETURN_RET_LOG(castServiceNameStatePair_.second != deviceStateConnection,
             AVSESSION_SUCCESS, "can not release cast with casting");
+        CHECK_AND_RETURN_RET_LOG(cacheEnableCastPids_.empty(),
+            AVSESSION_SUCCESS, "can not release cast with pid still calling");
         isInCast_ = AVRouter::GetInstance().Release();
     } else {
         SLOGD("AVRouter Init in nothing change");
