@@ -237,7 +237,7 @@ export struct AVCastPicker {
         $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
       .width(this.isPc ? 254.0 : 144.0)
       .textOverflow({ overflow: TextOverflow.Ellipsis })
-      .maxLines(2.0)
+      .maxLines(2)
       .wordBreak(WordBreak.BREAK_ALL)
       .maxFontScale(this.maxFontSizeScale)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
