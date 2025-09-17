@@ -1,0 +1,1125 @@
+/*
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.multimedia.avsession", "avSession")
+
+from ohos.multimodalInput.keyEvent use KeyEvent;
+from ohos.multimedia.avCastPickerParam use AVCastPickerState;
+
+@!sts_inject("""
+static { loadLibrary("avsession_taihe.z"); }
+""")
+
+@!sts_inject_into_module("import * as ohos_multimodalInput_keyEvent from './@ohos.multimodalInput.keyEvent';")
+@!sts_inject_into_module("import * as ohos_multimedia_avCastPickerParam from './@ohos.multimedia.avCastPickerParam';")
+
+enum CallState: i32 {
+  CALL_STATE_IDLE = 0,
+  CALL_STATE_INCOMING = 1,
+  CALL_STATE_ACTIVE = 2,
+  CALL_STATE_DIALING = 3,
+  CALL_STATE_WAITING = 4,
+  CALL_STATE_HOLDING = 5,
+  CALL_STATE_DISCONNECTING = 6,
+}
+
+enum AVCastCategory: i32 {
+  CATEGORY_LOCAL = 0,
+  CATEGORY_REMOTE = 1,
+}
+
+struct AVCallState {
+  state: CallState;
+  muted: bool;
+}
+
+enum LoopMode: i32 {
+  LOOP_MODE_SEQUENCE = 0,
+  LOOP_MODE_SINGLE = 1,
+  LOOP_MODE_LIST = 2,
+  LOOP_MODE_SHUFFLE = 3,
+  LOOP_MODE_CUSTOM = 4,
+}
+
+enum ResolutionLevel : i32 {
+  RESOLUTION_480P = 0,
+  RESOLUTION_720P = 1,
+  RESOLUTION_1080P = 2,
+  RESOLUTION_2K = 3,
+  RESOLUTION_4K = 4,
+}
+
+enum DecoderType : String {
+  OH_AVCODEC_MIMETYPE_VIDEO_AVC = "video/avc",
+  OH_AVCODEC_MIMETYPE_VIDEO_HEVC = "video/hevc",
+  OH_AVCODEC_MIMETYPE_AUDIO_VIVID = "audio/av3a",
+}
+
+enum DisplayTag : i32 {
+  TAG_AUDIO_VIVID = 1,
+}
+
+union AVCastParameterType {
+  typeInt32: i32;
+  typeString: String;
+  typeLoopMode: LoopMode;
+  typePlaybackSpeed: @sts_type("media.PlaybackSpeed") Opaque;
+}
+
+struct AVCastControlCommand {
+  command: String;
+  parameter: Optional<AVCastParameterType>;
+}
+
+union AVImageType {
+  typeString: String;
+  typePixelMap: @sts_type("image.PixelMap") Opaque;
+}
+
+struct AVMediaDescription {
+  assetId: String;
+  title: Optional<String>;
+  subtitle: Optional<String>;
+  description: Optional<String>;
+  mediaImage: Optional<AVImageType>;
+  extras: Optional<@sts_type("Record<String, Object>") Opaque>;
+  mediaType: Optional<String>;
+  mediaSize: Optional<i32>;
+  albumTitle: Optional<String>;
+  albumCoverUri: Optional<String>;
+  lyricContent: Optional<String>;
+  lyricUri: Optional<String>;
+  artist: Optional<String>;
+  mediaUri: Optional<String>;
+  fdSrc: Optional<@sts_type("media.AVFileDescriptor") Opaque>;
+  dataSrc: Optional<@sts_type("media.AVDataSrcDescriptor") Opaque>;
+  drmScheme: Optional<String>;
+  duration: Optional<i32>;
+  startPosition: Optional<i32>;
+  creditsPosition: Optional<i32>;
+  appName: Optional<String>;
+  displayTags: Optional<i32>;
+}
+
+struct AVQueueItem {
+  itemId: i32;
+  description: Optional<AVMediaDescription>;
+}
+
+interface AVCastController {
+  @gen_async("setDisplaySurface")
+  @gen_promise("setDisplaySurface")
+  SetDisplaySurfaceSync(surfaceId: String): void;
+
+  @gen_promise("getSupportedDecoders")
+  GetSupportedDecodersSync(): Array<DecoderType>;
+
+  @gen_promise("getRecommendedResolutionLevel")
+  GetRecommendedResolutionLevelSync(decoderType: DecoderType): ResolutionLevel;
+
+  @gen_promise("getSupportedHdrCapabilities")
+  GetSupportedHdrCapabilitiesSync(): Array<@sts_type("hdrCapability.HDRFormat") Opaque>;
+
+  @gen_promise("getSupportedPlaySpeeds")
+  GetSupportedPlaySpeedsSync(): Array<f64>;
+
+  @gen_async("sendControlCommand")
+  @gen_promise("sendControlCommand")
+  SendControlCommandSync(command: AVCastControlCommand): void;
+
+  @gen_async("start")
+  @gen_promise("start")
+  StartSync(item: AVQueueItem): void;
+
+  @gen_async("prepare")
+  @gen_promise("prepare")
+  PrepareSync(item: AVQueueItem): void;
+
+  @gen_async("getCurrentItem")
+  @gen_promise("getCurrentItem")
+  GetCurrentItemSync(): AVQueueItem;
+
+  @gen_promise("processMediaKeyResponse")
+  ProcessMediaKeyResponseSync(assetId: String, response: @arraybuffer Array<u8>): void;
+
+  @gen_async("release")
+  @gen_promise("release")
+  ReleaseSync(): void;
+
+  @gen_async("getAVPlaybackState")
+  @gen_promise("getAVPlaybackState")
+  GetAVPlaybackStateSync(): AVPlaybackState;
+
+  @gen_async("getValidCommands")
+  @gen_promise("getValidCommands")
+  GetValidCommandsSync(): Array<String>;
+
+  @!sts_inject_into_interface("on(type: string, filter: Array<String> | String, callback: (data: object) => void): void;")
+  @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
+  @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")
+  @!sts_inject_into_interface("on(type: string, callback: (data_0: object, data_1: object) => void): void;")
+  @!sts_inject_into_class("""
+    on(type: string, filter: Array<String> | String, callback: object): void {
+      if (type === "playbackStateChange") {
+        if (Array.isArray(filter)) {
+          this.onPlaybackStateChangeFilter(filter as Array<String>, callback as (data: AVPlaybackState) => void);
+        } else if (typeof filter === "string") {
+          this.onPlaybackStateChangeAll(filter as String, callback as (data: AVPlaybackState) => void);
+        }
+      }
+    }
+    on(type: string, callback: object): void {
+      if (type === "mediaItemChange") {
+        this.onMediaItemChange(callback as (data: AVQueueItem) => void);
+      } else if (type === "playNext") {
+        this.onPlayNext(callback as () => void);
+      } else if (type === "playPrevious") {
+        this.onPlayPrevious(callback as () => void);
+      } else if (type === "requestPlay") {
+        this.onRequestPlay(callback as (data: AVQueueItem) => void);
+      } else if (type === "endOfStream") {
+        this.onEndOfStream(callback as () => void);
+      } else if (type === "seekDone") {
+        this.onSeekDone(callback as (data: int) => void);
+      } else if (type === "validCommandChange") {
+        this.onValidCommandChange(callback as (data: Array<String>) => void);
+      } else if (type === "videoSizeChange") {
+        this.onVideoSizeChange(callback as (arg_0: int, arg_1: int) => void);
+      } else if (type === "error") {
+        this.onError(callback as (data: BusinessError<void>) => void);
+      } else if (type === "castControlGenericError") {
+        this.onCastControlGenericError(callback as (data: BusinessError<void>) => void);
+      } else if (type === "castControlIoError") {
+        this.onCastControlIoError(callback as (data: BusinessError<void>) => void);
+      } else if (type === "castControlParsingError") {
+        this.onCastControlParsingError(callback as (data: BusinessError<void>) => void);
+      } else if (type === "castControlDecodingError") {
+        this.onCastControlDecodingError(callback as (data: BusinessError<void>) => void);
+      } else if (type === "castControlAudioRendererError") {
+        this.onCastControlAudioRendererError(callback as (data: BusinessError<void>) => void);
+      } else if (type === "castControlDrmError") {
+        this.onCastControlDrmError(callback as (data: BusinessError<void>) => void);
+      } else if (type === "keyRequest") {
+        this.onKeyRequest(callback as (arg_0: String, arg_1: ArrayBuffer) => void);
+      }
+    }
+  """)
+  OnPlaybackStateChangeFilter(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
+  OnPlaybackStateChangeAll(filter: String, callback: (data: AVPlaybackState) => void): void;
+  OnMediaItemChange(callback: (data: AVQueueItem) => void): void;
+  OnPlayNext(callback: () => void): void;
+  OnPlayPrevious(callback: () => void): void;
+  OnRequestPlay(callback: (data: AVQueueItem) => void): void;
+  OnEndOfStream(callback: () => void): void;
+  OnSeekDone(callback: (data: i32) => void): void;
+  OnValidCommandChange(callback: (data: Array<String>) => void): void;
+  OnVideoSizeChange(callback: (width: i32, height: i32) => void): void;
+  OnError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
+  OnCastControlGenericError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
+  OnCastControlIoError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
+  OnCastControlParsingError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
+  OnCastControlDecodingError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
+  OnCastControlAudioRendererError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
+  OnCastControlDrmError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
+  OnKeyRequest(callback: (assetId: String, requestData: @arraybuffer Array<u8>) => void): void;
+
+  @!sts_inject_into_interface("off(type: string, callback?: () => void): void;")
+  @!sts_inject_into_interface("off(type: string, callback?: (data: object) => void): void;")
+  @!sts_inject_into_interface("off(type: string, callback?: (data_0: object, data_1: object) => void): void;")
+  @!sts_inject_into_class("""
+    off(type: string, callback?: object): void {
+      if (type === "playbackStateChange") {
+        this.offPlaybackStateChange(callback as ((data: AVPlaybackState) => void) | undefined);
+      } else if (type === "mediaItemChange") {
+        this.offMediaItemChange(callback as ((data: AVQueueItem) => void) | undefined);
+      } else if (type === "playNext") {
+        this.offPlayNext(callback as (() => void) | undefined);
+      } else if (type === "playPrevious") {
+        this.offPlayPrevious(callback as (() => void) | undefined);
+      } else if (type === "requestPlay") {
+        this.offRequestPlay(callback as ((data: AVQueueItem) => void) | undefined);
+      } else if (type === "endOfStream") {
+        this.offEndOfStream(callback as (() => void) | undefined);
+      } else if (type === "seekDone") {
+        this.offSeekDone(callback as ((data: int) => void) | undefined);
+      } else if (type === "validCommandChange") {
+        this.offValidCommandChange(callback as ((data: Array<String>) => void) | undefined);
+      } else if (type === "videoSizeChange") {
+        this.offVideoSizeChange(callback as ((arg_0: int, arg_1: int) => void) | undefined);
+      } else if (type === "error") {
+        this.offError(callback as ((data: BusinessError<void>) => void) | undefined);
+      } else if (type === "castControlGenericError") {
+        this.offCastControlGenericError(callback as ((data: BusinessError<void>) => void) | undefined);
+      } else if (type === "castControlIoError") {
+        this.offCastControlIoError(callback as ((data: BusinessError<void>) => void) | undefined);
+      } else if (type === "castControlParsingError") {
+        this.offCastControlParsingError(callback as ((data: BusinessError<void>) => void) | undefined);
+      } else if (type === "castControlDecodingError") {
+        this.offCastControlDecodingError(callback as ((data: BusinessError<void>) => void) | undefined);
+      } else if (type === "castControlAudioRendererError") {
+        this.offCastControlAudioRendererError(callback as ((data: BusinessError<void>) => void) | undefined);
+      } else if (type === "castControlDrmError") {
+        this.offCastControlDrmError(callback as ((data: BusinessError<void>) => void) | undefined);
+      } else if (type === "keyRequest") {
+        this.offKeyRequest(callback as ((arg_0: String, arg_1: ArrayBuffer) => void) | undefined);
+      }
+    }
+  """)
+  OffPlaybackStateChange(callback: Optional<(data: AVPlaybackState) => void>): void;
+  OffMediaItemChange(callback: Optional<(data: AVQueueItem) => void>): void;
+  OffPlayNext(callback: Optional<() => void>): void;
+  OffPlayPrevious(callback: Optional<() => void>): void;
+  OffRequestPlay(callback: Optional<(data: AVQueueItem) => void>): void;
+  OffEndOfStream(callback: Optional<() => void>): void;
+  OffSeekDone(callback: Optional<(data: i32) => void>): void;
+  OffValidCommandChange(callback: Optional<(data: Array<String>) => void>): void;
+  OffVideoSizeChange(callback: Optional<(width: i32, height: i32) => void>): void;
+  OffError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
+  OffCastControlGenericError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
+  OffCastControlIoError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
+  OffCastControlParsingError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
+  OffCastControlDecodingError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
+  OffCastControlAudioRendererError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
+  OffCastControlDrmError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
+  OffKeyRequest(callback: Optional<(assetId: String, requestData: @arraybuffer Array<u8>) => void>): void;
+}
+
+enum SkipIntervals: i32 {
+  SECONDS_10 = 10,
+  SECONDS_15 = 15,
+  SECONDS_30 = 30,
+}
+
+enum ProtocolType: i32 {
+  TYPE_LOCAL = 0,
+  TYPE_CAST_PLUS_MIRROR = 1,
+  TYPE_CAST_PLUS_STREAM = 2,
+  TYPE_DLNA = 4,
+}
+
+struct AVMetadata {
+  assetId: String;
+  title: Optional<String>;
+  artist: Optional<String>;
+  author: Optional<String>;
+  avQueueName: Optional<String>;
+  avQueueId: Optional<String>;
+  avQueueImage: Optional<AVImageType>;
+  album: Optional<String>;
+  writer: Optional<String>;
+  composer: Optional<String>;
+  duration: Optional<i64>;
+  mediaImage: Optional<AVImageType>;
+  @readonly bundleIcon: Optional<@sts_type("image.PixelMap") Opaque>;
+  publishDate: Optional<@sts_type("Date") Opaque>;
+  subtitle: Optional<String>;
+  description: Optional<String>;
+  lyric: Optional<String>;
+  singleLyricText: Optional<String>;
+  previousAssetId: Optional<String>;
+  nextAssetId: Optional<String>;
+  filter: Optional<i32>;
+  drmSchemes: Optional<Array<String>>;
+  skipIntervals: Optional<SkipIntervals>;
+  displayTags: Optional<i32>;
+}
+
+enum PlaybackState: i32 {
+  PLAYBACK_STATE_INITIAL = 0,
+  PLAYBACK_STATE_PREPARE = 1,
+  PLAYBACK_STATE_PLAY = 2,
+  PLAYBACK_STATE_PAUSE = 3,
+  PLAYBACK_STATE_FAST_FORWARD = 4,
+  PLAYBACK_STATE_REWIND = 5,
+  PLAYBACK_STATE_STOP = 6,
+  PLAYBACK_STATE_COMPLETED = 7,
+  PLAYBACK_STATE_RELEASED = 8,
+  PLAYBACK_STATE_ERROR = 9,
+  PLAYBACK_STATE_IDLE = 10,
+  PLAYBACK_STATE_BUFFERING = 11,
+}
+
+struct PlaybackPosition {
+  elapsedTime: i64;
+  updateTime: i64;
+}
+
+struct AVPlaybackState {
+  state: Optional<PlaybackState>;
+  speed: Optional<f64>;
+  position: Optional<PlaybackPosition>;
+  bufferedTime: Optional<i64>;
+  loopMode: Optional<LoopMode>;
+  isFavorite: Optional<bool>;
+  activeItemId: Optional<i32>;
+  volume: Optional<i32>;
+  maxVolume: Optional<i32>;
+  muted: Optional<bool>;
+  duration: Optional<i32>;
+  videoWidth: Optional<i32>;
+  videoHeight: Optional<i32>;
+  extras: Optional<@sts_type("Record<String, Object>") Opaque>;
+}
+
+struct AVQueueInfo {
+  bundleName: String;
+  avQueueName: String;
+  avQueueId: String;
+  avQueueImage: AVImageType;
+  lastPlayedTime: Optional<i64>;
+}
+
+enum DeviceType: i32 {
+  DEVICE_TYPE_LOCAL = 0,
+  DEVICE_TYPE_TV = 2,
+  DEVICE_TYPE_SMART_SPEAKER = 3,
+  DEVICE_TYPE_BLUETOOTH = 10,
+}
+
+struct DeviceInfo {
+  castCategory: AVCastCategory;
+  deviceId: String;
+  deviceName: String;
+  deviceType: DeviceType;
+  manufacturer: Optional<String>;
+  modelName: Optional<String>;
+  networkId: Optional<String>;
+  ipAddress: Optional<String>;
+  providerId: Optional<i32>;
+  supportedProtocols: Optional<i32>;
+  supportedDrmCapabilities: Optional<Array<String>>;
+  authenticationStatus: Optional<i32>;
+  isLegacy: Optional<bool>;
+  mediumTypes: Optional<i32>;
+}
+
+struct CallMetadata {
+  name: Optional<String>;
+  phoneNumber: Optional<String>;
+  avatar: Optional<@sts_type("image.PixelMap") Opaque>;
+}
+
+struct OutputDeviceInfo {
+  devices: Array<DeviceInfo>;
+}
+
+union AVControlParameterType {
+  typeDouble: f64;
+  typeString: String;
+  typeLoopMode: LoopMode;
+}
+
+struct AVControlCommand {
+  command: String;
+  parameter: Optional<AVControlParameterType>;
+}
+
+interface AVSession {
+  @get GetSessionId(): String;
+  @get GetSessionType(): String;
+
+  @gen_async("setAVMetadata")
+  @gen_promise("setAVMetadata")
+  SetAVMetadataSync(data: AVMetadata): void;
+
+  @gen_async("setCallMetadata")
+  @gen_promise("setCallMetadata")
+  SetCallMetadataSync(data: CallMetadata): void;
+
+  @gen_async("setAVPlaybackState")
+  @gen_promise("setAVPlaybackState")
+  SetAVPlaybackStateSync(state: AVPlaybackState): void;
+
+  @gen_async("setAVCallState")
+  @gen_promise("setAVCallState")
+  SetAVCallStateSync(state: AVCallState): void;
+
+  @gen_async("setLaunchAbility")
+  @gen_promise("setLaunchAbility")
+  SetLaunchAbilitySync(ability: @sts_type("WantAgent") Opaque): void;
+
+  @gen_async("dispatchSessionEvent")
+  @gen_promise("dispatchSessionEvent")
+  DispatchSessionEventSync(event: String, args: @sts_type("Record<String, Object>") Opaque): void;
+
+  @gen_async("setAVQueueItems")
+  @gen_promise("setAVQueueItems")
+  SetAVQueueItemsSync(items: Array<AVQueueItem>): void;
+
+  @gen_async("setAVQueueTitle")
+  @gen_promise("setAVQueueTitle")
+  SetAVQueueTitleSync(title: String): void;
+
+  @gen_async("setExtras")
+  @gen_promise("setExtras")
+  SetExtrasSync(extras: @sts_type("Record<String, Object>") Opaque): void;
+
+  @gen_async("getController")
+  @gen_promise("getController")
+  GetControllerSync(): AVSessionController;
+
+  @gen_async("getAVCastController")
+  @gen_promise("getAVCastController")
+  GetAVCastControllerSync(): Optional<AVCastController>;
+
+  @gen_async("getOutputDevice")
+  @gen_promise("getOutputDevice")
+  GetOutputDeviceSync(): OutputDeviceInfo;
+
+  @gen_promise("getAllCastDisplays")
+  GetAllCastDisplaysSync(): Array<CastDisplayInfo>;
+
+  @gen_async("stopCasting")
+  @gen_promise("stopCasting")
+  StopCastingSync(): void;
+
+  @gen_async("activate")
+  @gen_promise("activate")
+  ActivateSync(): void;
+
+  @gen_async("deactivate")
+  @gen_promise("deactivate")
+  DeactivateSync(): void;
+
+  @gen_async("destroy")
+  @gen_promise("destroy")
+  DestroySync(): void;
+
+  @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
+  @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")
+  @!sts_inject_into_interface("on(type: string, callback: (data_0: object, data_1: object) => void): void;")
+  @!sts_inject_into_class("""
+    on(type: string, callback: object): void {
+      if (type === "play") {
+        this.onPlay(callback as () => void);
+      } else if (type === "pause") {
+        this.onPause(callback as () => void);
+      } else if (type === "stop") {
+        this.onStop(callback as () => void);
+      } else if (type === "playNext") {
+        this.onPlayNext(callback as () => void);
+      } else if (type === "playPrevious") {
+        this.onPlayPrevious(callback as () => void);
+      } else if (type === "fastForward") {
+        this.onFastForward(callback as (time: long) => void);
+      } else if (type === "rewind") {
+        this.onRewind(callback as (time: long) => void);
+      } else if (type === "playFromAssetId") {
+        this.onPlayFromAssetId(callback as (assetId: long) => void);
+      } else if (type === "seek") {
+        this.onSeek(callback as (time: long) => void);
+      } else if (type === "setSpeed") {
+        this.onSetSpeed(callback as (speed: double) => void);
+      } else if (type === "setLoopMode") {
+        this.onSetLoopMode(callback as (loopMode: LoopMode) => void);
+      } else if (type === "toggleFavorite") {
+        this.onToggleFavorite(callback as (assetId: String) => void);
+      } else if (type === "handleKeyEvent") {
+        this.onHandleKeyEvent(callback as (event: ohos_multimodalInput_keyEvent.KeyEvent) => void);
+      } else if (type === "outputDeviceChange") {
+        this.onOutputDeviceChange(callback as (arg_0: ConnectionState, arg_1: OutputDeviceInfo) => void);
+      } else if (type === "commonCommand") {
+        this.onCommonCommand(callback as (arg_0: String, arg_1: Record<String, Object>) => void);
+      } else if (type === "skipToQueueItem") {
+        this.onSkipToQueueItem(callback as (itemId: int) => void);
+      } else if (type === "answer") {
+        this.onAnswer(callback as () => void);
+      } else if (type === "hangUp") {
+        this.onHangUp(callback as () => void);
+      } else if (type === "toggleCallMute") {
+        this.onToggleCallMute(callback as () => void);
+      } else if (type === "castDisplayChange") {
+        this.onCastDisplayChange(callback as (data: CastDisplayInfo) => void);
+      }
+    }
+  """)
+  OnPlay(callback: () => void): void;
+  OnPause(callback: () => void): void;
+  OnStop(callback: () => void): void;
+  OnPlayNext(callback: () => void): void;
+  OnPlayPrevious(callback: () => void): void;
+  OnFastForward(callback: (time: i64) => void): void;
+  OnRewind(callback: (time: i64) => void): void;
+  OnPlayFromAssetId(callback: (assetId: i64) => void): void;
+  OnSeek(callback: (time: i64) => void): void;
+  OnSetSpeed(callback: (speed: f64) => void): void;
+  OnSetLoopMode(callback: (loopMode: LoopMode) => void): void;
+  OnToggleFavorite(callback: (assetId: String) => void): void;
+  OnHandleKeyEvent(callback: (event: @sts_type("ohos_multimodalInput_keyEvent.KeyEvent") Opaque) => void): void;
+  OnOutputDeviceChange(callback: (state: ConnectionState, device: OutputDeviceInfo) => void): void;
+  OnCommonCommand(callback: (command: String, args: @sts_type("Record<String, Object>") Opaque) => void): void;
+  OnSkipToQueueItem(callback: (itemId: i32) => void): void;
+  OnAnswer(callback: () => void): void;
+  OnHangUp(callback: () => void): void;
+  OnToggleCallMute(callback: () => void): void;
+  OnCastDisplayChange(callback: (data: CastDisplayInfo) => void): void;
+
+  @!sts_inject_into_interface("off(type: string, callback?: () => void): void;")
+  @!sts_inject_into_interface("off(type: string, callback?: (data: object) => void): void;")
+  @!sts_inject_into_interface("off(type: string, callback?: (data_0: object, data_1: object) => void): void;")
+  @!sts_inject_into_class("""
+    off(type: string, callback?: object): void {
+      if (type === "play") {
+        this.offPlay(callback as (() => void) | undefined);
+      } else if (type === "pause") {
+        this.offPause(callback as (() => void) | undefined);
+      } else if (type === "stop") {
+        this.offStop(callback as (() => void) | undefined);
+      } else if (type === "playNext") {
+        this.offPlayNext(callback as (() => void) | undefined);
+      } else if (type === "playPrevious") {
+        this.offPlayPrevious(callback as (() => void) | undefined);
+      } else if (type === "fastForward") {
+        this.offFastForward(callback as (() => void) | undefined);
+      } else if (type === "rewind") {
+        this.offRewind(callback as (() => void) | undefined);
+      } else if (type === "playFromAssetId") {
+        this.offPlayFromAssetId(callback as ((assetId: long) => void) | undefined);
+      } else if (type === "seek") {
+        this.offSeek(callback as ((time: long) => void) | undefined);
+      } else if (type === "setSpeed") {
+        this.offSetSpeed(callback as ((speed: double) => void) | undefined);
+      } else if (type === "setLoopMode") {
+        this.offSetLoopMode(callback as ((loopMode: LoopMode) => void) | undefined);
+      } else if (type === "toggleFavorite") {
+        this.offToggleFavorite(callback as ((assetId: String) => void) | undefined);
+      } else if (type === "handleKeyEvent") {
+        this.offHandleKeyEvent(callback as ((event: ohos_multimodalInput_keyEvent.KeyEvent) => void) | undefined);
+      } else if (type === "outputDeviceChange") {
+        this.offOutputDeviceChange(callback as ((arg_0: ConnectionState, arg_1: OutputDeviceInfo) => void) | undefined);
+      } else if (type === "commonCommand") {
+        this.offCommonCommand(callback as ((arg_0: String, arg_1: Record<String, Object>) => void) | undefined);
+      } else if (type === "skipToQueueItem") {
+        this.offSkipToQueueItem(callback as ((itemId: int) => void) | undefined);
+      } else if (type === "answer") {
+        this.offAnswer(callback as ((() => void) | undefined));
+      } else if (type === "hangUp") {
+        this.offHangUp(callback as ((() => void) | undefined));
+      } else if (type === "toggleCallMute") {
+        this.offToggleCallMute(callback as ((() => void) | undefined));
+      } else if (type === "castDisplayChange") {
+        this.offCastDisplayChange(callback as (((data: CastDisplayInfo) => void) | undefined) | undefined);
+      }
+    }
+  """)
+  OffPlay(callback: Optional<() => void>): void;
+  OffPause(callback: Optional<() => void>): void;
+  OffStop(callback: Optional<() => void>): void;
+  OffPlayNext(callback: Optional<() => void>): void;
+  OffPlayPrevious(callback: Optional<() => void>): void;
+  OffFastForward(callback: Optional<() => void>): void;
+  OffRewind(callback: Optional<() => void>): void;
+  OffPlayFromAssetId(callback: Optional<(assetId: i64) => void>): void;
+  OffSeek(callback: Optional<(time: i64) => void>): void;
+  OffSetSpeed(callback: Optional<(speed: f64) => void>): void;
+  OffSetLoopMode(callback: Optional<(loopMode: LoopMode) => void>): void;
+  OffToggleFavorite(callback: Optional<(assetId: String) => void>): void;
+  OffHandleKeyEvent(callback: Optional<(event: @sts_type("ohos_multimodalInput_keyEvent.KeyEvent") Opaque) => void>): void;
+  OffOutputDeviceChange(callback: Optional<(state: ConnectionState, device: OutputDeviceInfo) => void>): void;
+  OffCommonCommand(callback: Optional<(command: String, args: @sts_type("Record<String, Object>") Opaque) => void>): void;
+  OffSkipToQueueItem(callback: Optional<(itemId: i32) => void>): void;
+  OffAnswer(callback: Optional<() => void>): void;
+  OffHangUp(callback: Optional<() => void>): void;
+  OffToggleCallMute(callback: Optional<() => void>): void;
+  OffCastDisplayChange(callback: Optional<(data: CastDisplayInfo) => void>): void;
+}
+
+interface AVSessionController {
+  @get GetSessionId(): String;
+
+  @gen_async("getAVPlaybackState")
+  @gen_promise("getAVPlaybackState")
+  GetAVPlaybackStateSync(): AVPlaybackState;
+
+  @gen_async("getAVMetadata")
+  @gen_promise("getAVMetadata")
+  GetAVMetadataSync(): AVMetadata;
+
+  @gen_async("getAVCallState")
+  @gen_promise("getAVCallState")
+  GetAVCallStateSync(): AVCallState;
+
+  @gen_async("getCallMetadata")
+  @gen_promise("getCallMetadata")
+  GetCallMetadataSync(): CallMetadata;
+
+  @gen_async("getAVQueueTitle")
+  @gen_promise("getAVQueueTitle")
+  GetAVQueueTitleSync(): String;
+
+  @gen_async("getAVQueueItems")
+  @gen_promise("getAVQueueItems")
+  GetAVQueueItemsSync(): Array<AVQueueItem>;
+
+  @gen_async("skipToQueueItem")
+  @gen_promise("skipToQueueItem")
+  SkipToQueueItemSync(itemId: i32): void;
+
+  @gen_async("getOutputDevice")
+  @gen_promise("getOutputDevice")
+  GetOutputDeviceSync(): OutputDeviceInfo;
+
+  @gen_async("sendAVKeyEvent")
+  @gen_promise("sendAVKeyEvent")
+  SendAVKeyEventSync(event: KeyEvent): void;
+
+  @gen_async("getLaunchAbility")
+  @gen_promise("getLaunchAbility")
+  GetLaunchAbilitySync(): @sts_type("WantAgent") Opaque;
+
+  GetRealPlaybackPositionSync(): i64;
+
+  @gen_async("isActive")
+  @gen_promise("isActive")
+  IsActiveSync(): bool;
+
+  @gen_async("destroy")
+  @gen_promise("destroy")
+  DestroySync(): void;
+
+  @gen_async("getValidCommands")
+  @gen_promise("getValidCommands")
+  GetValidCommandsSync(): Array<String>;
+
+  @gen_async("sendControlCommand")
+  @gen_promise("sendControlCommand")
+  SendControlCommandSync(command: AVControlCommand): void;
+
+  @gen_async("sendCommonCommand")
+  @gen_promise("sendCommonCommand")
+  SendCommonCommandSync(command: String, args: @sts_type("Record<String, Object>") Opaque): void;
+
+  @gen_async("getExtras")
+  @gen_promise("getExtras")
+  GetExtrasSync(): @sts_type("Record<String, Object>") Opaque;
+
+  @gen_promise("getExtrasWithEvent")
+  GetExtrasWithEventSync(extraEvent: String): @sts_type("Record<String, Object>") Opaque;
+
+  @!sts_inject_into_interface("on(type: string, filter: Array<String> | String, callback: (data: object) => void): void;")
+  @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
+  @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")
+  @!sts_inject_into_interface("on(type: string, callback: (data_0: object, data_1: object) => void): void;")
+  @!sts_inject_into_class("""
+    on(type: string, filter: Array<String> | String, callback: object): void {
+      if (type === "metadataChange") {
+        if (Array.isArray(filter)) {
+          this.onMetadataChangeFilter(filter as Array<String>, callback as (data: AVMetadata) => void);
+        } else if (typeof filter === "string") {
+          this.onMetadataChangeAll(filter as String, callback as (data: AVMetadata) => void);
+        }
+      } else if (type === "playbackStateChange") {
+        if (Array.isArray(filter)) {
+          this.onPlaybackStateChangeFilter(filter as Array<String>, callback as (data: AVPlaybackState) => void);
+        } else if (typeof filter === "string") {
+          this.onPlaybackStateChangeAll(filter as String, callback as (data: AVPlaybackState) => void);
+        }
+      } else if (type === "callMetadataChange") {
+        if (Array.isArray(filter)) {
+          this.onCallMetadataChangeFilter(filter as Array<String>, callback as (data: CallMetadata) => void);
+        } else if (typeof filter === "string") {
+          this.onCallMetadataChangeAll(filter as String, callback as (data: CallMetadata) => void);
+        }
+      } else if (type === "callStateChange") {
+        if (Array.isArray(filter)) {
+          this.onCallStateChangeFilter(filter as Array<String>, callback as (data: AVCallState) => void);
+        } else if (typeof filter === "string") {
+          this.onCallStateChangeAll(filter as String, callback as (data: AVCallState) => void);
+        }
+      }
+    }
+    on(type: string, callback: object): void {
+      if (type === "sessionDestroy") {
+        this.onSessionDestroy(callback as () => void);
+      } else if (type === "activeStateChange") {
+        this.onActiveStateChange(callback as (data: boolean) => void);
+      } else if (type === "validCommandChange") {
+        this.onValidCommandChange(callback as (data: Array<String>) => void);
+      } else if (type === "outputDeviceChange") {
+        this.onOutputDeviceChange(callback as (arg_0: ConnectionState, arg_1: OutputDeviceInfo) => void);
+      } else if (type === "sessionEvent") {
+        this.onSessionEvent(callback as (arg_0: String, arg_1: Record<String, Object>) => void);
+      } else if (type === "queueItemsChange") {
+        this.onQueueItemsChange(callback as (data: Array<AVQueueItem>) => void);
+      } else if (type === "queueTitleChange") {
+        this.onQueueTitleChange(callback as (data: String) => void);
+      } else if (type === "extrasChange") {
+        this.onExtrasChange(callback as (data: Record<String, Object>) => void);
+      }
+    }
+  """)
+  OnMetadataChangeFilter(filter: Array<String>, callback: (data: AVMetadata) => void): void;
+  OnMetadataChangeAll(filter: String, callback: (data: AVMetadata) => void): void;
+  OnPlaybackStateChangeFilter(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
+  OnPlaybackStateChangeAll(filter: String, callback: (data: AVPlaybackState) => void): void;
+  OnCallMetadataChangeFilter(filter: Array<String>, callback: (data: CallMetadata) => void): void;
+  OnCallMetadataChangeAll(filter: String, callback: (data: CallMetadata) => void): void;
+  OnCallStateChangeFilter(filter: Array<String>, callback: (data: AVCallState) => void): void;
+  OnCallStateChangeAll(filter: String, callback: (data: AVCallState) => void): void;
+  OnSessionDestroy(callback: () => void): void;
+  OnActiveStateChange(callback: (data: bool) => void): void;
+  OnValidCommandChange(callback: (data: Array<String>) => void): void;
+  OnOutputDeviceChange(callback: (state: ConnectionState, device: OutputDeviceInfo) => void): void;
+  OnSessionEvent(callback: (sessionEvent: String, args: @sts_type("Record<String, Object>") Opaque) => void): void;
+  OnQueueItemsChange(callback: (data: Array<AVQueueItem>) => void): void;
+  OnQueueTitleChange(callback: (data: String) => void): void;
+  OnExtrasChange(callback: (data: @sts_type("Record<String, Object>") Opaque) => void): void;
+
+  @!sts_inject_into_interface("off(type: string, callback?: () => void): void;")
+  @!sts_inject_into_interface("off(type: string, callback?: (data: object) => void): void;")
+  @!sts_inject_into_interface("off(type: string, callback?: (data_0: object, data_1: object) => void): void;")
+  @!sts_inject_into_class("""
+    off(type: string, callback?: object): void {
+      if (type === "metadataChange") {
+        this.offMetadataChange(callback as ((data: AVMetadata) => void) | undefined);
+      } else if (type === "playbackStateChange") {
+        this.offPlaybackStateChange(callback as ((data: AVPlaybackState) => void) | undefined);
+      } else if (type === "callMetadataChange") {
+        this.offCallMetadataChange(callback as ((data: CallMetadata) => void) | undefined);
+      } else if (type === "callStateChange") {
+        this.offCallStateChange(callback as ((data: AVCallState) => void) | undefined);
+      } else if (type === "sessionDestroy") {
+        this.offSessionDestroy(callback as (() => void) | undefined);
+      } else if (type === "activeStateChange") {
+        this.offActiveStateChange(callback as ((data: boolean) => void) | undefined);
+      } else if (type === "validCommandChange") {
+        this.offValidCommandChange(callback as ((data: Array<String>) => void) | undefined);
+      } else if (type === "outputDeviceChange") {
+        this.offOutputDeviceChange(callback as ((arg_0: ConnectionState, arg_1: OutputDeviceInfo) => void) | undefined);
+      } else if (type === "sessionEvent") {
+        this.offSessionEvent(callback as ((arg_0: String, arg_1: Record<String, Object>) => void) | undefined);
+      } else if (type === "queueItemsChange") {
+        this.offQueueItemsChange(callback as ((data: Array<AVQueueItem>) => void) | undefined);
+      } else if (type === "queueTitleChange") {
+        this.offQueueTitleChange(callback as ((data: String) => void) | undefined);
+      } else if (type === "extrasChange") {
+        this.offExtrasChange(callback as ((data: Record<String, Object>) => void) | undefined);
+      }
+    }
+  """)
+  OffMetadataChange(callback: Optional<(data: AVMetadata) => void>): void;
+  OffPlaybackStateChange(callback: Optional<(data: AVPlaybackState) => void>): void;
+  OffCallMetadataChange(callback: Optional<(data: CallMetadata) => void>): void;
+  OffCallStateChange(callback: Optional<(data: AVCallState) => void>): void;
+  OffSessionDestroy(callback: Optional<() => void>): void;
+  OffActiveStateChange(callback: Optional<(data: bool) => void>): void;
+  OffValidCommandChange(callback: Optional<(data: Array<String>) => void>): void;
+  OffOutputDeviceChange(callback: Optional<(state: ConnectionState, device: OutputDeviceInfo) => void>): void;
+  OffSessionEvent(callback: Optional<(sessionEvent: String, args: @sts_type("Record<String, Object>") Opaque) => void>): void;
+  OffQueueItemsChange(callback: Optional<(data: Array<AVQueueItem>) => void>): void;
+  OffQueueTitleChange(callback: Optional<(data: String) => void>): void;
+  OffExtrasChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
+}
+
+struct AVSessionDescriptor {
+  sessionId: String;
+  type: String;
+  sessionTag: String;
+  elementName: @sts_type("ElementName") Opaque;
+  isActive: bool;
+  isTopSession: bool;
+  outputDevice: OutputDeviceInfo;
+}
+
+enum CastDisplayState: i32 {
+  STATE_OFF = 1,
+  STATE_ON = 2,
+}
+
+struct CastDisplayInfo {
+  id: i64;
+  name: String;
+  state: CastDisplayState;
+  width: i32;
+  height: i32;
+}
+
+enum ConnectionState: i32 {
+  STATE_CONNECTING = 0,
+  STATE_CONNECTED = 1,
+  STATE_DISCONNECTED = 6,
+}
+
+struct SessionToken {
+  sessionId: String;
+  pid: Optional<i64>;
+  uid: Optional<i64>;
+}
+
+struct AVCastPickerOptions {
+  sessionType: Optional<String>;
+}
+
+interface AVCastPickerHelperInner {
+  @gen_promise("select")
+  SelectSync(options: Optional<AVCastPickerOptions>): void;
+
+  OnPickerStateChange(callback: (data: AVCastPickerState) => void): void;
+
+  OffPickerStateChange(callback: Optional<(data: AVCastPickerState) => void>): void;
+}
+
+function CreateAVCastPickerHelperInnerSync(context: @sts_type("Context") Opaque): AVCastPickerHelperInner;
+
+@!sts_inject("""
+function businessError<T = void>(c: int, d?: string): BusinessError<T> {
+  let err: BusinessError<T> = new BusinessError<T>();
+  err.code = c;
+  err.message = d ? d : "";
+  return err;
+}
+class AVCastPickerHelper {
+  private objectInner: AVCastPickerHelperInner | undefined = undefined;
+
+  constructor(context: Context) {
+    this.objectInner = createAVCastPickerHelperInnerSync(context);
+  }
+
+  select(options?: AVCastPickerOptions): Promise<void> | undefined {
+    if (this.objectInner === undefined) {
+      return new Promise<void>((resolve: () => void, reject: (e: BusinessError<void>) => void): void => {
+        let err: BusinessError<void> = businessError(-1, "AVCastPickerHelperInner is not initialized");
+        reject(err);
+      });
+    }
+    return this.objectInner?.select(options);
+  }
+
+  on(type: 'pickerStateChange', callback: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
+      this.objectInner?.onPickerStateChange(callback as ((data: ohos_multimedia_avCastPickerParam.AVCastPickerState) => void));
+  }
+
+  off(type: 'pickerStateChange', callback?: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
+      this.objectInner?.offPickerStateChange(callback as ((data: ohos_multimedia_avCastPickerParam.AVCastPickerState) => void) | undefined);
+  }
+}
+""")
+
+@gen_async("createAVSession")
+@gen_promise("createAVSession")
+function CreateAVSessionSync(context: @sts_type("Context") Opaque, tag: String, type: String): AVSession;
+
+@gen_async("getAllSessionDescriptors")
+@gen_promise("getAllSessionDescriptors")
+function GetAllSessionDescriptorsSync(): Array<AVSessionDescriptor>;
+
+@gen_async("getHistoricalSessionDescriptors")
+function GetHistoricalSessionDescriptorsSync(maxSize: i32): Array<AVSessionDescriptor>;
+
+@gen_promise("getHistoricalSessionDescriptors")
+function GetHistoricalSessionDescriptorsOptionalSync(maxSize: Optional<i32>): Array<AVSessionDescriptor>;
+
+@gen_async("getHistoricalAVQueueInfos")
+@gen_promise("getHistoricalAVQueueInfos")
+function GetHistoricalAVQueueInfosSync(maxSize: i32, maxAppSize: i32): Array<AVQueueInfo>;
+
+@gen_async("createController")
+@gen_promise("createController")
+function CreateControllerSync(sessionId: String): AVSessionController;
+
+@gen_promise("startAVPlayback")
+function StartAVPlaybackSync(bundleName: String, assetId: String): void;
+
+@gen_async("getAVCastController")
+@gen_promise("getAVCastController")
+function GetAVCastControllerSync(sessionId: String): Optional<AVCastController>;
+
+@gen_async("startCasting")
+@gen_promise("startCasting")
+function StartCastingSync(session: SessionToken, device: OutputDeviceInfo): void;
+
+@gen_async("stopCasting")
+@gen_promise("stopCasting")
+function StopCastingSync(session: SessionToken): void;
+
+@gen_async("startCastDeviceDiscovery")
+function StartCastDeviceDiscoverySync(): void;
+
+@gen_async("startCastDeviceDiscovery")
+function StartCastDeviceDiscoveryFilter(filter: i32): void;
+
+@gen_promise("startCastDeviceDiscovery")
+function StartCastDeviceDiscoveryFilterDrm(filter: Optional<i32>, drmSchemes: Optional<Array<String>>): void;
+
+@gen_async("stopCastDeviceDiscovery")
+@gen_promise("stopCastDeviceDiscovery")
+function StopCastDeviceDiscoverySync(): void;
+
+@gen_async("setDiscoverable")
+@gen_promise("setDiscoverable")
+function SetDiscoverableSync(enable: bool): void;
+
+union CastAudioSessionType {
+  typeSessionToken: SessionToken;
+  typeAll: String;
+}
+
+@gen_async("castAudio")
+@gen_promise("castAudio")
+function CastAudioSync(session: CastAudioSessionType, audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
+
+@gen_promise("getDistributedSessionController")
+function GetDistributedSessionControllerSync(distributedSessionType: DistributedSessionType): Array<AVSessionController>;
+
+@gen_async("sendSystemAVKeyEvent")
+@gen_promise("sendSystemAVKeyEvent")
+function SendSystemAVKeyEventSync(event: KeyEvent): void;
+
+@gen_async("sendSystemControlCommand")
+@gen_promise("sendSystemControlCommand")
+function SendSystemControlCommandSync(command: AVControlCommand): void;
+
+@gen_promise("startDeviceLogging")
+function StartDeviceLoggingSync(url: String, maxSize: Optional<i32>): void;
+
+@gen_promise("stopDeviceLogging")
+function StopDeviceLoggingSync(): void;
+
+function CreateAVKeyEventSync(nativePtr: i64): KeyEvent;
+
+enum DistributedSessionType :i32 {
+  TYPE_SESSION_REMOTE = 0,
+  TYPE_SESSION_MIGRATE_IN = 1,
+  TYPE_SESSION_MIGRATE_OUT = 2,
+}
+
+enum DeviceLogEventCode :i32 {
+  DEVICE_LOG_FULL = 1,
+  DEVICE_LOG_EXCEPTION = 2,
+}
+
+struct DeviceState {
+  @readonly deviceId: String;
+  @readonly deviceState: i32;
+  @readonly reasonCode: i32;
+  @readonly radarErrorCode: i32;
+}
+
+@on_off("distributedSessionChange")
+function OnDistributedSessionChange(param: DistributedSessionType, callback: (data: Array<AVSessionController>) => void): void;
+@on_off("distributedSessionChange")
+function OffDistributedSessionChange(param: DistributedSessionType, callback: Optional<(data: Array<AVSessionController>) => void>): void;
+@on_off("sessionServiceDie")
+function OnSessionServiceDie(callback: () => void): void;
+@on_off("sessionServiceDie")
+function OffSessionServiceDie(callback: Optional<() => void>): void;
+
+@!sts_inject("""
+export function on(type: string, cb: (arg_0: Object) => void) {
+  switch(type) {
+    case "sessionCreate": return onSessionCreate(cb);
+    case "sessionDestroy": return onSessionDestroy(cb);
+    case "topSessionChange": return onTopSessionChange(cb);
+    case "deviceAvailable": return onDeviceAvailable(cb);
+    case "deviceLogEvent": return onDeviceLogEvent(cb);
+    case "deviceOffline": return onDeviceOffline(cb);
+    case "deviceStateChanged": return onDeviceStateChange(cb);
+  }
+}
+export function off(type: string, cb: (arg_0: Object) => void) {
+  switch(type) {
+    case "sessionCreate": return offSessionCreate(cb as ((arg_0: AVSessionDescriptor) => void) | undefined);
+    case "sessionDestroy": return offSessionDestroy(cb as ((arg_0: AVSessionDescriptor) => void) | undefined);
+    case "topSessionChange": return offTopSessionChange(cb as ((arg_0: AVSessionDescriptor) => void) | undefined);
+    case "deviceAvailable": return offDeviceAvailable(cb as ((arg_0: OutputDeviceInfo) => void) | undefined);
+    case "deviceLogEvent": return offDeviceLogEvent(cb as ((arg_0: DeviceLogEventCode) => void) | undefined);
+    case "deviceOffline": return offDeviceOffline(cb as ((arg_0: String) => void) | undefined);
+    case "deviceStateChanged": return offDeviceStateChange(cb as ((arg_0: DeviceState) => void) | undefined);
+  }
+}
+""")
+
+function OnSessionCreate(callback: (session: AVSessionDescriptor) => void): void;
+function OnSessionDestroy(callback: (session: AVSessionDescriptor) => void): void;
+function OnTopSessionChange(callback: (session: AVSessionDescriptor) => void): void;
+function OnDeviceAvailable(callback: (device: OutputDeviceInfo) => void): void;
+function OnDeviceLogEvent(callback: (eventCode: DeviceLogEventCode) => void): void;
+function OnDeviceOffline(callback: (deviceId: String) => void): void;
+function OnDeviceStateChange(callback: (deviceState: DeviceState) => void): void;
+
+function OffSessionCreate(callback: Optional<(session: AVSessionDescriptor) => void>): void;
+function OffSessionDestroy(callback: Optional<(session: AVSessionDescriptor) => void>): void;
+function OffTopSessionChange(callback: Optional<(session: AVSessionDescriptor) => void>): void;
+function OffDeviceAvailable(callback: Optional<(device: OutputDeviceInfo) => void>): void;
+function OffDeviceLogEvent(callback: Optional<(eventCode: DeviceLogEventCode) => void>): void;
+function OffDeviceOffline(callback: Optional<(deviceId: String) => void>): void;
+function OffDeviceStateChange(callback: Optional<(deviceState: DeviceState) => void>): void;
+
+enum AVSessionErrorCode : i32 {
+  ERR_CODE_SERVICE_EXCEPTION = 6600101,
+  ERR_CODE_SESSION_NOT_EXIST = 6600102,
+  ERR_CODE_CONTROLLER_NOT_EXIST = 6600103,
+  ERR_CODE_REMOTE_CONNECTION_ERR = 6600104,
+  ERR_CODE_COMMAND_INVALID = 6600105,
+  ERR_CODE_SESSION_INACTIVE = 6600106,
+  ERR_CODE_MESSAGE_OVERLOAD = 6600107,
+  ERR_CODE_DEVICE_CONNECTION_FAILED = 6600108,
+  ERR_CODE_REMOTE_CONNECTION_NOT_EXIST = 6600109,
+  ERR_CODE_CAST_CONTROL_UNSPECIFIED = 6611000,
+  ERR_CODE_CAST_CONTROL_REMOTE_ERROR = 6611001,
+  ERR_CODE_CAST_CONTROL_BEHIND_LIVE_WINDOW = 6611002,
+  ERR_CODE_CAST_CONTROL_TIMEOUT = 6611003,
+  ERR_CODE_CAST_CONTROL_RUNTIME_CHECK_FAILED = 6611004,
+  ERR_CODE_CAST_CONTROL_PLAYER_NOT_WORKING = 6611100,
+  ERR_CODE_CAST_CONTROL_SEEK_MODE_UNSUPPORTED = 6611101,
+  ERR_CODE_CAST_CONTROL_ILLEGAL_SEEK_TARGET = 6611102,
+  ERR_CODE_CAST_CONTROL_PLAY_MODE_UNSUPPORTED = 6611103,
+  ERR_CODE_CAST_CONTROL_PLAY_SPEED_UNSUPPORTED = 6611104,
+  ERR_CODE_CAST_CONTROL_DEVICE_MISSING = 6611105,
+  ERR_CODE_CAST_CONTROL_INVALID_PARAM = 6611106,
+  ERR_CODE_CAST_CONTROL_NO_MEMORY = 6611107,
+  ERR_CODE_CAST_CONTROL_OPERATION_NOT_ALLOWED = 6611108,
+  ERR_CODE_CAST_CONTROL_IO_UNSPECIFIED = 6612000,
+  ERR_CODE_CAST_CONTROL_IO_NETWORK_CONNECTION_FAILED = 6612001,
+  ERR_CODE_CAST_CONTROL_IO_NETWORK_CONNECTION_TIMEOUT = 6612002,
+  ERR_CODE_CAST_CONTROL_IO_INVALID_HTTP_CONTENT_TYPE = 6612003,
+  ERR_CODE_CAST_CONTROL_IO_BAD_HTTP_STATUS = 6612004,
+  ERR_CODE_CAST_CONTROL_IO_FILE_NOT_FOUND = 6612005,
+  ERR_CODE_CAST_CONTROL_IO_NO_PERMISSION = 6612006,
+  ERR_CODE_CAST_CONTROL_IO_CLEARTEXT_NOT_PERMITTED = 6612007,
+  ERR_CODE_CAST_CONTROL_IO_READ_POSITION_OUT_OF_RANGE = 6612008,
+  ERR_CODE_CAST_CONTROL_IO_NO_CONTENTS = 6612100,
+  ERR_CODE_CAST_CONTROL_IO_READ_ERROR = 6612101,
+  ERR_CODE_CAST_CONTROL_IO_CONTENT_BUSY = 6612102,
+  ERR_CODE_CAST_CONTROL_IO_CONTENT_EXPIRED = 6612103,
+  ERR_CODE_CAST_CONTROL_IO_USE_FORBIDDEN = 6612104,
+  ERR_CODE_CAST_CONTROL_IO_NOT_VERIFIED = 6612105,
+  ERR_CODE_CAST_CONTROL_IO_EXHAUSTED_ALLOWED_USES = 6612106,
+  ERR_CODE_CAST_CONTROL_IO_NETWORK_PACKET_SENDING_FAILED = 6612107,
+  ERR_CODE_CAST_CONTROL_PARSING_UNSPECIFIED = 6613000,
+  ERR_CODE_CAST_CONTROL_PARSING_CONTAINER_MALFORMED = 6613001,
+  ERR_CODE_CAST_CONTROL_PARSING_MANIFEST_MALFORMED = 6613002,
+  ERR_CODE_CAST_CONTROL_PARSING_CONTAINER_UNSUPPORTED = 6613003,
+  ERR_CODE_CAST_CONTROL_PARSING_MANIFEST_UNSUPPORTED = 6613004,
+  ERR_CODE_CAST_CONTROL_DECODING_UNSPECIFIED = 6614000,
+  ERR_CODE_CAST_CONTROL_DECODING_INIT_FAILED = 6614001,
+  ERR_CODE_CAST_CONTROL_DECODING_QUERY_FAILED = 6614002,
+  ERR_CODE_CAST_CONTROL_DECODING_FAILED = 6614003,
+  ERR_CODE_CAST_CONTROL_DECODING_FORMAT_EXCEEDS_CAPABILITIES = 6614004,
+  ERR_CODE_CAST_CONTROL_DECODING_FORMAT_UNSUPPORTED = 6614005,
+  ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_UNSPECIFIED = 6615000,
+  ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_INIT_FAILED = 6615001,
+  ERR_CODE_CAST_CONTROL_AUDIO_RENDERER_WRITE_FAILED = 6615002,
+  ERR_CODE_CAST_CONTROL_DRM_UNSPECIFIED = 6616000,
+  ERR_CODE_CAST_CONTROL_DRM_SCHEME_UNSUPPORTED = 6616001,
+  ERR_CODE_CAST_CONTROL_DRM_PROVISIONING_FAILED = 6616002,
+  ERR_CODE_CAST_CONTROL_DRM_CONTENT_ERROR = 6616003,
+  ERR_CODE_CAST_CONTROL_DRM_LICENSE_ACQUISITION_FAILED = 6616004,
+  ERR_CODE_CAST_CONTROL_DRM_DISALLOWED_OPERATION = 6616005,
+  ERR_CODE_CAST_CONTROL_DRM_SYSTEM_ERROR = 6616006,
+  ERR_CODE_CAST_CONTROL_DRM_DEVICE_REVOKED = 6616007,
+  ERR_CODE_CAST_CONTROL_DRM_LICENSE_EXPIRED = 6616008,
+  ERR_CODE_CAST_CONTROL_DRM_PROVIDE_KEY_RESPONSE_ERROR = 6616100,
+}

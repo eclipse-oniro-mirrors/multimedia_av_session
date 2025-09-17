@@ -127,10 +127,13 @@ void TaiheSessionListener::OnDeviceAvailable(const OHOS::AVSession::OutputDevice
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnDeviceAvailable");
     SLOGI("Start handle device found event");
-    OutputDeviceInfo deviceInfoTaihe = TaiheUtils::ToTaiheOutputDeviceInfo(castOutputDeviceInfo);
+    ohos::multimedia::avsession::avSession::OutputDeviceInfo deviceInfoTaihe =
+        TaiheUtils::ToTaiheOutputDeviceInfo(castOutputDeviceInfo);
     auto execute = [this, deviceInfoTaihe](std::shared_ptr<uintptr_t> method) {
-        std::shared_ptr<taihe::callback<void(OutputDeviceInfo const&)>> cacheCallback =
-            std::reinterpret_pointer_cast<taihe::callback<void(OutputDeviceInfo const&)>>(method);
+        std::shared_ptr<taihe::callback<void(
+            ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)>> cacheCallback =
+                std::reinterpret_pointer_cast<taihe::callback<void(
+                ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
         (*cacheCallback)(deviceInfoTaihe);
     };
