@@ -211,8 +211,6 @@ public:
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
 
-    void HandleDisableCast();
-
     void HandleSessionReleaseInner();
 
     void HandleCallStartEvent();
@@ -701,6 +699,7 @@ private:
     const int32_t endDecPos = 4;
     const int32_t typeAddPos = 2;
     std::recursive_mutex checkEnableCastLock_;
+    std::unordered_set<pid_t> cacheEnableCastPids_;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
