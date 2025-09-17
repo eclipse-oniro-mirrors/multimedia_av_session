@@ -199,6 +199,1967 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData004, TestSize.Level0)
     EXPECT_EQ(PUBLISHDATE_INVALID_DATE, metaData.GetPublishDate());
     SLOGI("SetAVMetaData004 End");
 }
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test001, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test001 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    EXPECT_EQ("111", metaData.GetAssetId());
+
+    SLOGI("SetAVMetaData_sequence_test001 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test002, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test002 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetTitle("Black Myth");
+    EXPECT_EQ("Black Myth", metaData.GetTitle());
+
+    SLOGI("SetAVMetaData_sequence_test002 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test003, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test003 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetArtist("zhoujielun1");
+    EXPECT_EQ("zhoujielun1", metaData.GetArtist());
+
+    SLOGI("SetAVMetaData_sequence_test003 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test004, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test004 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAuthor("zhoujielun1");
+    EXPECT_EQ("zhoujielun1", metaData.GetAuthor());
+
+    SLOGI("SetAVMetaData_sequence_test004 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test005, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test005 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAlbum("Jay1");
+    EXPECT_EQ("Jay1", metaData.GetAlbum());
+
+    SLOGI("SetAVMetaData_sequence_test005 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test006, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test006 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetWriter("zhoujielun");
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+
+    SLOGI("SetAVMetaData_sequence_test006 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test007, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test007 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetComposer("zhoujielun1");
+    EXPECT_EQ("zhoujielun1", metaData.GetComposer());
+
+    SLOGI("SetAVMetaData_sequence_test007 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test008, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test008 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    int64_t DURATION1 = 60000;
+    metaData.SetDuration(DURATION1);
+    EXPECT_EQ(DURATION1, metaData.GetDuration());
+
+    SLOGI("SetAVMetaData_sequence_test008 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test009, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test009 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetMediaImageUri("xxxxx_new");
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    SLOGI("SetAVMetaData_sequence_test009 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test010, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test010 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    SLOGI("SetAVMetaData_sequence_test010 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test011, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test011 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetSubTitle("fac1");
+    EXPECT_EQ("fac1", metaData.GetSubTitle());
+
+    SLOGI("SetAVMetaData_sequence_test011 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test012, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test012 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetDescription("for friends1");
+    EXPECT_EQ("for friends1", metaData.GetDescription());
+
+    SLOGI("SetAVMetaData_sequence_test012 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test013, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test013 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetLyric("xxxxx_new");
+    EXPECT_EQ("xxxxx_new", metaData.GetLyric());
+
+    SLOGI("SetAVMetaData_sequence_test013 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test014, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test014 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetPublishDate(PUBLISHDATE_INVALID_DATE);
+    EXPECT_EQ(PUBLISHDATE_INVALID_DATE, metaData.GetPublishDate());
+
+    SLOGI("SetAVMetaData_sequence_test014 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test015, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test015 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("1234");
+    metaData.SetTitle("Black Humor1");
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+
+    SLOGI("SetAVMetaData_sequence_test015 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test016, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test016 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("1234");
+    metaData.SetArtist("zhoujielun1");
+    EXPECT_EQ("zhoujielun1", metaData.GetArtist());
+
+    SLOGI("SetAVMetaData_sequence_test016 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test017, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test017 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetAuthor("zhoujielun1");
+    EXPECT_EQ("zhoujielun1", metaData.GetAuthor());
+
+    SLOGI("SetAVMetaData_sequence_test017 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test018, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test018 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetAlbum("Jay1");
+    EXPECT_EQ("Jay1", metaData.GetAlbum());
+
+    SLOGI("SetAVMetaData_sequence_test018 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test019, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test019 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetWriter("zhoujielun1");
+    EXPECT_EQ("zhoujielun1", metaData.GetWriter());
+
+    SLOGI("SetAVMetaData_sequence_test019 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test020, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test020 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetComposer("zhoujielun1");
+    EXPECT_EQ("zhoujielun1", metaData.GetComposer());
+
+    SLOGI("SetAVMetaData_sequence_test020 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test021, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test021 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    int64_t DURATION1 = 60000;
+    metaData.SetDuration(DURATION1);
+    EXPECT_EQ(DURATION1, metaData.GetDuration());
+
+    SLOGI("SetAVMetaData_sequence_test021 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test022, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test022 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetMediaImageUri("xxxxx_new");
+    EXPECT_EQ("xxxxx_new", metaData.GetMediaImageUri());
+
+    SLOGI("SetAVMetaData_sequence_test022 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test023, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test023 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetPublishDate(PUBLISHDATE_INVALID_DATE);
+    EXPECT_EQ(PUBLISHDATE_INVALID_DATE, metaData.GetPublishDate());
+
+    SLOGI("SetAVMetaData_sequence_test023 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test024, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test024 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetSubTitle("fac1");
+    EXPECT_EQ("fac1", metaData.GetSubTitle());
+
+    SLOGI("SetAVMetaData_sequence_test024 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test025, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test025 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetDescription("for friends1");
+    EXPECT_EQ("for friends1", metaData.GetDescription());
+
+    SLOGI("SetAVMetaData_sequence_test025 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test026, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test026 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("111");
+    metaData.SetLyric("xxxxx_new");
+    EXPECT_EQ("xxxxx_new", metaData.GetLyric());
+
+    SLOGI("SetAVMetaData_sequence_test026 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test027, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test027 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetArtist("zhoujielun1");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun1", metaData.GetArtist());
+
+    SLOGI("SetAVMetaData_sequence_test027 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test028, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test028 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetAuthor("zhoujielun1");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun1", metaData.GetAuthor());
+
+    SLOGI("SetAVMetaData_sequence_test028 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test029, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test029 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetWriter("zhoujielun1");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun1", metaData.GetWriter());
+
+    SLOGI("SetAVMetaData_sequence_test029 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test030, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test030 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetComposer("zhoujielun1");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun1", metaData.GetComposer());
+
+    SLOGI("SetAVMetaData_sequence_test030 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test031, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test031 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetAlbum("Jay1");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("Jay1", metaData.GetAlbum());
+
+    SLOGI("SetAVMetaData_sequence_test031 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test032, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test032 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    int64_t DURATION1 = 60000;
+    metaData.SetDuration(DURATION1);
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ(DURATION1, metaData.GetDuration());
+
+    SLOGI("SetAVMetaData_sequence_test032 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test033, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test033 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetMediaImageUri("xxxxx_new");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("xxxxx_new", metaData.GetMediaImageUri());
+
+    SLOGI("SetAVMetaData_sequence_test033 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test034, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test034 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetPublishDate(PUBLISHDATE_INVALID_DATE);
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ(PUBLISHDATE_INVALID_DATE, metaData.GetPublishDate());
+
+    SLOGI("SetAVMetaData_sequence_test034 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test035, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test035 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetSubTitle("fac1");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("fac1", metaData.GetSubTitle());
+
+    SLOGI("SetAVMetaData_sequence_test035 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test036, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test036 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetDescription("for friends1");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("for friends1", metaData.GetDescription());
+
+    SLOGI("SetAVMetaData_sequence_test036 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test037, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test037 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetLyric("xxxxx_new");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("xxxxx_new", metaData.GetLyric());
+
+    SLOGI("SetAVMetaData_sequence_test037 End");
+}
+
+/**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test038, TestSize.Level0)
+{
+    SLOGI("SetAVMetaData_sequence_test038 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetAlbum("Jay");
+    metaData.SetWriter("zhoujielun");
+    metaData.SetComposer("zhoujielun");
+    metaData.SetDuration(DURATION);
+    metaData.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(CreatePixelMap()));
+    metaData.SetMediaImageUri("xxxxx");
+    metaData.SetPublishDate(PUBLISHDATE);
+    metaData.SetSubTitle("fac");
+    metaData.SetDescription("for friends");
+    metaData.SetLyric("xxxxx");
+
+    EXPECT_EQ("123", metaData.GetAssetId());
+    EXPECT_EQ("Black Humor", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun", metaData.GetArtist());
+    EXPECT_EQ("zhoujielun", metaData.GetAuthor());
+    EXPECT_EQ("Jay", metaData.GetAlbum());
+    EXPECT_EQ("zhoujielun", metaData.GetWriter());
+    EXPECT_EQ("zhoujielun", metaData.GetComposer());
+    EXPECT_EQ("xxxxx", metaData.GetMediaImageUri());
+
+    EXPECT_EQ(DURATION, metaData.GetDuration());
+    EXPECT_EQ(PUBLISHDATE, metaData.GetPublishDate());
+
+    EXPECT_NE(nullptr, metaData.GetMediaImage());
+
+    EXPECT_EQ("fac", metaData.GetSubTitle());
+    EXPECT_EQ("for friends", metaData.GetDescription());
+    EXPECT_EQ("xxxxx", metaData.GetLyric());
+
+    metaData.SetAssetId("112");
+    metaData.SetTitle("Black Humor1");
+    metaData.SetArtist("zhoujielun1");
+
+    EXPECT_EQ("Black Humor1", metaData.GetTitle());
+    EXPECT_EQ("zhoujielun1", metaData.GetArtist());
+
+    SLOGI("SetAVMetaData_sequence_test038 End");
+}
+
 /**
 * @tc.name: GetAVMetaData001
 * @tc.desc: get av meta data result
