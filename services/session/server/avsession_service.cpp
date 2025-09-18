@@ -871,7 +871,6 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             PublishEvent(mediaPlayStateTrue);
         }
     } else {
-        std::lock_guard lockGuard(sessionServiceLock_);
         HandleTopSessionRelease(userId, sessionItem);
         sessionListForFront->remove(sessionItem);
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));

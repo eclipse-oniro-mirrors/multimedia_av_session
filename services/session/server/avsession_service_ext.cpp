@@ -429,10 +429,11 @@ bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
     bool deviceCond = isSupportMirrorToStream_ &&
                       session->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_VIDEO &&
                       !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid());
+    bool appCond = session->IsAppSupportCast();
 
     bool connectCond = !is2in1_ && (castServiceNameStatePair_.second == deviceStateConnection);
 
-    return deviceCond && connectCond;
+    return deviceCond && connectCond && appCond;
 }
 
 __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)

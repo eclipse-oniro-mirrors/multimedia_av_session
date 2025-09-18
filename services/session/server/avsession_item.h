@@ -332,6 +332,8 @@ public:
 
     void SetExtrasInner(AAFwk::IArray* list);
 
+    bool IsAppSupportCast();
+
     void SetSpid(const AAFwk::WantParams& extras);
 
     uint32_t GetSpid();
