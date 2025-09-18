@@ -384,7 +384,7 @@ export struct AVCastPicker {
 
           if (!this.isPc && (index != this.deviceList.length - 1)) {
             Divider()
-              .height(1)
+              .opacity(0.5)
               .color($r('sys.color.comp_divider'))
               .padding({ right: (this.isRTL ? 44 : 12), left: (this.isRTL ? 12 : 44) })
           } else if (this.isPc && (index != this.deviceList.length - 1)) {
