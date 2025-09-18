@@ -687,7 +687,7 @@ export class AVCastPicker extends ViewPU {
                         this.ifElseBranchUpdateFunction(0, () => {
                             this.observeComponentCreation2((k9, l9) => {
                                 Divider.create();
-                                Divider.height(1);
+                                Divider.opacity(0.5);
                                 Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'],
                                     'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                 Divider.padding({ right: (this.isRTL ? 44 : 12), left: (this.isRTL ? 12 : 44) });
