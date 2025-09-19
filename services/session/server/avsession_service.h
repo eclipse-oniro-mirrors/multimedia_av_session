@@ -743,7 +743,7 @@ private:
     const int32_t errorStateTimeout = 3 * 1000;
     const int32_t defMaxHistoryNum = 10;
     const int32_t maxFileLength = 32 * 1024 * 1024;
-    const int32_t maxAVQueueInfoLen = 5;
+    const int32_t maxAVQueueInfoLen = 99;
     const int32_t allocSpace = 2;
     const int32_t avSessionUid = 6700;
     const int32_t ancoUid = 1041;
