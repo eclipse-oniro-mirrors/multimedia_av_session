@@ -623,7 +623,7 @@ export struct AVCastPicker {
       Column() {
         if (this.isShowLoadingProgress) {
           LoadingProgress()
-            .color($r('sys.color.icon_secondary'))
+            .color(this.activeColor === 'liveCardLoadingColor' ? '#FFFFFFFF' : $r('sys.color.icon_secondary'))
             .width('20vp')
             .height('20vp')
         } else {
