@@ -609,6 +609,12 @@ bool AVRouterImpl::IsInMirrorToStreamState()
     return isInMirrorToStream_;
 }
 
+void AVRouterImpl::SetMirrorCastHandle(int64_t castHandle)
+{
+    CHECK_AND_RETURN_LOG(hwProvider_ != nullptr, "hwProvider_ is nullptr");
+    hwProvider_->SetMirrorCastHandle(castHandle);
+}
+
 bool AVRouterImpl::IsRemoteCasting()
 {
     return isRemoteCasting_;

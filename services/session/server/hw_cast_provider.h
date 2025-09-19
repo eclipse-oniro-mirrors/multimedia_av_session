@@ -64,6 +64,8 @@ public:
 
     int GetCastProtocolType(int castCapability);
 
+    void SetMirrorCastHandle(int64_t castHandle);
+
 private:
     std::vector<uint32_t> ParsePullClients(const std::string& str);
     static const int maxCastSessionSize = 256;

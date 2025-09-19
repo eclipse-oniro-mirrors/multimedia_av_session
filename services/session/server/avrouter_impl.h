@@ -104,6 +104,8 @@ public:
 
     int64_t GetMirrorCastHandle() override;
 
+    void SetMirrorCastHandle(int64_t castHandle) override;
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
