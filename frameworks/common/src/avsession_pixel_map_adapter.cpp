@@ -22,7 +22,7 @@ using namespace OHOS::Media;
 namespace OHOS::AVSession {
 namespace {
     constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 1 * 1024 * 1024;
-    constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 500 * 1024; // ipc max 1m at the same time
+    constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 300 * 1024; // ipc max 1m at the same time
     constexpr int32_t MIN_PIXEL_BUFFER_SIZE = 40 * 1024;
     constexpr uint8_t IMAGE_BYTE_SIZE = 2;
     constexpr uint8_t DATA_BYTE_SIZE = 4;
@@ -234,7 +234,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
             sqrt(static_cast<float>(LIMITED_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_));
         pixelMapTemp->scale(scaleRatio, scaleRatio);
         originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
-        SLOGI("imgBufferSize exceeds limitedEX: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
+        SLOGI("imgBufferSize exceeds limitedEx: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = ConvertAndSetInnerImgBuffer(pixelMapTemp);
     free(dataAddr);

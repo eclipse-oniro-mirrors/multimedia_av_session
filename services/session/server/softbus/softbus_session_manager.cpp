@@ -125,8 +125,9 @@ int32_t SoftbusSessionManager::Bind(const std::string &peerNetworkId, const std:
 
 void SoftbusSessionManager::Shutdown(int32_t socket)
 {
-    SLOGI("socket Shutdown");
+    SLOGI("socket Shutdown with mallopt");
     ::Shutdown(socket);
+    mallopt(M_DELAYED_FREE, M_DELAYED_FREE_DISABLE);
 }
 
 int32_t SoftbusSessionManager::SendMessage(int32_t socket, const std::string &data)
