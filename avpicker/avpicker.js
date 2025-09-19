@@ -949,7 +949,9 @@ export class AVCastPicker extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((c7, s7) => {
                         LoadingProgress.create();
-                        LoadingProgress.color({'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'],
+                        LoadingProgress.color(this.activeColor === 'liveCardLoadingColor' 
+                            ? '#FFFFFFFF' 
+                            : {'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'],
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'});
                         LoadingProgress.width('20vp');
                         LoadingProgress.height('20vp');
