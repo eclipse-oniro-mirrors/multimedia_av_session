@@ -138,6 +138,7 @@ private:
     std::string GetBundleName(std::string sessionId);
     bool CompressToJPEG(const AVMetaData &metadata, std::vector<uint8_t> &outputData);
     void DelaySendMetaData();
+    int32_t DelaySendPlaybackState();
     bool GetVehicleRelatingState(std::string playerId);
     void UpdateFrontSessionInfoToRemote(sptr<AVControllerItem> controller);
     void UpdateSessionInfoToRemote(sptr<AVControllerItem> controller);
