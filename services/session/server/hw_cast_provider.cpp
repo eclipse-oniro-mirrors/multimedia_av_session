@@ -357,6 +357,12 @@ int64_t HwCastProvider::GetMirrorCastHandle()
     return mirrorCastHandle;
 }
 
+void HwCastProvider::SetMirrorCastHandle(int64_t castHandle)
+{
+    SLOGI("SetMirrorCastHandle castHandle is %{public}lld", static_cast<long long>(castHandle));
+    mirrorCastHandle = castHandle;
+}
+
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,
     std::shared_ptr<IAVCastSessionStateListener> listener)
 {

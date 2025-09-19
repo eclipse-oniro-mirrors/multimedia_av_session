@@ -1460,6 +1460,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
     if (isNeedRemove) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         AVRouter::GetInstance().StopCastSession(castHandle_);
+        AVRouter::GetInstance().SetMirrorCastHandle(-1);
         DoContinuousTaskUnregister();
     } else {
         // clear pre session cast info in streamplayer to avoid flash when cast compete
