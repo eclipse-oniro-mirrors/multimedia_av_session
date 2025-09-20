@@ -1989,7 +1989,8 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
         }
         std::string sessionId(iterator->sessionId_);
         auto session = GetContainer().GetSessionById(sessionId);
-        if (session != nullptr) {
+        if (session != nullptr && (session->GetSessionTag() != "ancoMediaSession" ||
+            session->GetBundleName() == iterator->elementName_.GetBundleName())) {
             SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
                 AVSessionUtils::GetAnonySessionId(sessionId).c_str());
             continue;
