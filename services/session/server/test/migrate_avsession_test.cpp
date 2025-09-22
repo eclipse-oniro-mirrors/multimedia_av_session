@@ -865,7 +865,7 @@ static HWTEST_F(MigrateAVSessionTest, GetAllControllers001, TestSize.Level1)
 
 /**
 * @tc.name: DelaySendPlaybackState001
-* @tc.desc: 
+* @tc.desc: DelaySendPlaybackState
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -881,7 +881,7 @@ static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState001, TestSize.Level0
 
 /**
 * @tc.name: DelaySendPlaybackState002
-* @tc.desc: 
+* @tc.desc: DelaySendPlaybackState
 * @tc.type: FUNC
 * @tc.require:
 */
