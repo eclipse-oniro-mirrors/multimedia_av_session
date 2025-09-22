@@ -52,6 +52,8 @@ const int32_t KEYCODE_MEDIA_PLAY_PAUSE = 10;
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnTopSessionChange = false;
+static const int32_t CLICK_TIMEOUT = 500;
+static const int32_t MICROSECONDS_PER_MILLISECOND = 1000;
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t REPORT_SIZE = 100;
@@ -1158,6 +1160,7 @@ static HWTEST_F(AVSessionServiceTestSecond, HandleKeyEvent004, TestSize.Level0)
     auto keyEvent = OHOS::MMI::KeyEvent(KEYCODE_MEDIA_PLAY_PAUSE);
     keyEvent.SetKeyCode(KEYCODE_MEDIA_PLAY_PAUSE);
     auto ret = g_AVSessionService->HandleKeyEvent(keyEvent);
+    usleep(CLICK_TIMEOUT * MICROSECONDS_PER_MILLISECOND);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     avsessionHere->Destroy();
     SLOGD("HandleKeyEvent004 end!");

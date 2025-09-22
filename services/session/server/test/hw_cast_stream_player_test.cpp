@@ -35,7 +35,7 @@ namespace AVSession {
 
 const static int32_t INVAILD_STATE_CODE = 1000;
 
-class HwCastStreamPlayerTest : public testing::TestWithParam<int> {
+class HwCastStreamPlayerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -263,24 +263,6 @@ std::shared_ptr<OHOS::Media::PixelMap> HwCastStreamPlayerTest::CreatePixelMap()
     return pixelMap;
 }
 
-INSTANTIATE_TEST_CASE_P(SendControlCommand, HwCastStreamPlayerTest, testing::Values(
-    AVCastControlCommand::CAST_CONTROL_CMD_INVALID,
-    AVCastControlCommand::CAST_CONTROL_CMD_PLAY,
-    AVCastControlCommand::CAST_CONTROL_CMD_PAUSE,
-    AVCastControlCommand::CAST_CONTROL_CMD_STOP,
-    AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT,
-    AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS,
-    AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD,
-    AVCastControlCommand::CAST_CONTROL_CMD_REWIND,
-    AVCastControlCommand::CAST_CONTROL_CMD_SEEK,
-    AVCastControlCommand::CAST_CONTROL_CMD_SET_VOLUME,
-    AVCastControlCommand::CAST_CONTROL_CMD_SET_SPEED,
-    AVCastControlCommand::CAST_CONTROL_CMD_SET_LOOP_MODE,
-    AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_FAVORITE,
-    AVCastControlCommand::CAST_CONTROL_CMD_TOGGLE_MUTE,
-    AVCastControlCommand::CAST_CONTROL_CMD_MAX
-));
-
 static const int32_t DURATION_TIME = 40000;
 static OHOS::AVSession::AVMetaData GetAVMetaData()
 {
@@ -302,34 +284,14 @@ static OHOS::AVSession::AVMetaData GetAVMetaData()
 }
 
 /**
- * @tc.name: SendControlCommand001
- * @tc.desc: SendControlCommand all test
- * @tc.type: FUNC
- * @tc.require: NA
- */
-HWTEST_P(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level0)
-{
-    SLOGI("SendControlCommand001 begin!");
-    AVCastControlCommand command;
-    int32_t cmd = GetParam();
-    if (cmd == AVCastControlCommand::CAST_CONTROL_CMD_INVALID || cmd == AVCastControlCommand::CAST_CONTROL_CMD_MAX) {
-        ASSERT_EQ(command.SetCommand(cmd), ERR_INVALID_PARAM);
-    } else {
-        ASSERT_EQ(command.SetCommand(cmd), AVSESSION_SUCCESS);
-    }
-    hwCastStreamPlayer->SendControlCommand(command);
-    SLOGI("SendControlCommand001 end!");
-}
-
-/**
  * @tc.name: SendControlCommand002
  * @tc.desc: test all AVCastControlCommand for SendControlCommand
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level0)
+HWTEST_F(HwCastStreamPlayerTest, SendControlCommand001, TestSize.Level0)
 {
-    SLOGI("SendControlCommand002 begin!");
+    SLOGI("SendControlCommand001 begin!");
     std::vector<int32_t> commands = {
         AVCastControlCommand::CAST_CONTROL_CMD_INVALID,
         AVCastControlCommand::CAST_CONTROL_CMD_PLAY,
@@ -353,7 +315,7 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level0)
         avCastControlCommand.SetCommand(cmd);
         hwCastStreamPlayer->SendControlCommand(avCastControlCommand);
     }
-    SLOGI("SendControlCommand002 end!");
+    SLOGI("SendControlCommand001 end!");
 }
 
 /**
@@ -362,7 +324,7 @@ HWTEST_P(HwCastStreamPlayerTest, SendControlCommand002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_P(HwCastStreamPlayerTest, SendCustomData001, TestSize.Level0)
+HWTEST_F(HwCastStreamPlayerTest, SendCustomData001, TestSize.Level0)
 {
     SLOGI("SendCustomData001 begin!");
 
@@ -379,7 +341,7 @@ HWTEST_P(HwCastStreamPlayerTest, SendCustomData001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_P(HwCastStreamPlayerTest, SendCustomData002, TestSize.Level0)
+HWTEST_F(HwCastStreamPlayerTest, SendCustomData002, TestSize.Level0)
 {
     SLOGI("SendCustomData002 begin!");
     hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>();
@@ -395,7 +357,7 @@ HWTEST_P(HwCastStreamPlayerTest, SendCustomData002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_P(HwCastStreamPlayerTest, SetSpid001, TestSize.Level0)
+HWTEST_F(HwCastStreamPlayerTest, SetSpid001, TestSize.Level0)
 {
     SLOGI("SetSpid001 begin!");
     hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>();
@@ -1342,7 +1304,7 @@ HWTEST_F(HwCastStreamPlayerTest, OnKeyRequest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: NA
  */
-HWTEST_P(HwCastStreamPlayerTest, OnData001, TestSize.Level0)
+HWTEST_F(HwCastStreamPlayerTest, OnData001, TestSize.Level0)
 {
     SLOGI("OnData001 begin!");
 

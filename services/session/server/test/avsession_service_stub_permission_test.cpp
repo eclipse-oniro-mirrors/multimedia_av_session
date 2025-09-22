@@ -173,7 +173,6 @@ public:
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest001, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest001 begin!");
     uint32_t code = 0;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -181,7 +180,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest001, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_ERROR);
-    SLOGI("OnRemoteRequest001 end!");
 }
 
 /**
@@ -191,7 +189,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest001, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest002, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest002 begin!");
     uint32_t code = 0;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -204,7 +201,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest002, TestSize
     data.WriteParcelable(&want);
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest002 end!");
 }
 
 /**
@@ -214,7 +210,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest002, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest003, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest003 begin!");
     uint32_t code = 0;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -227,7 +222,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest003, TestSize
     data.WriteParcelable(&want);
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest003 end!");
 }
 
 /**
@@ -237,7 +231,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest003, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest004, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest004 begin!");
     uint32_t code = 0;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -247,7 +240,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest004, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest004 end!");
 }
 
 /**
@@ -257,7 +249,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest004, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest005, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest005 begin!");
     uint32_t code = 0;
     AVSessionServiceStubDemo avsessionservicestub;
     avsessionservicestub.isSuccess = false;
@@ -271,7 +262,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest005, TestSize
     data.WriteParcelable(&want);
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest005 end!");
 }
 
 /**
@@ -281,7 +271,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest005, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest006, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest006 begin!");
     uint32_t code = 1;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -291,7 +280,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest006, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest006 end!");
 }
 
 /**
@@ -301,7 +289,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest006, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest007, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest007 begin!");
     uint32_t code = 2;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -311,7 +298,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest007, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest007 end!");
 }
 
 /**
@@ -321,7 +307,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest007, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest008, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest008 begin!");
     uint32_t code = 3;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -331,7 +316,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest008, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest008 end!");
 }
 
 /**
@@ -341,7 +325,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest008, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest009, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest009 begin!");
     uint32_t code = 4;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -351,7 +334,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest009, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest009 end!");
 }
 
 /**
@@ -361,7 +343,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest009, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest010, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest010 begin!");
     uint32_t code = 5;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -371,7 +352,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest010, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest010 end!");
 }
 
 /**
@@ -381,7 +361,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest010, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest011, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest011 begin!");
     uint32_t code = 6;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -391,7 +370,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest011, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest011 end!");
 }
 
 /**
@@ -401,7 +379,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest011, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest012, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest012 begin!");
     uint32_t code = 7;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -411,7 +388,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest012, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest012 end!");
 }
 
 /**
@@ -421,7 +397,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest012, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest013, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest013 begin!");
     uint32_t code = 8;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -431,7 +406,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest013, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest013 end!");
 }
 
 /**
@@ -441,7 +415,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest013, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest014, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest014 begin!");
     uint32_t code = 9;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -451,7 +424,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest014, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest014 end!");
 }
 
 /**
@@ -461,7 +433,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest014, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest015, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest015 begin!");
     uint32_t code = 10;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -471,7 +442,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest015, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest015 end!");
 }
 
 /**
@@ -481,7 +451,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest015, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest016, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest016 begin!");
     uint32_t code = 11;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -491,7 +460,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest016, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest016 end!");
 }
 
 /**
@@ -501,7 +469,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest016, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest017, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest017 begin!");
     uint32_t code = 12;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -511,7 +478,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest017, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest017 end!");
 }
 
 /**
@@ -521,7 +487,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest017, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest018, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest018 begin!");
     uint32_t code = 13;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -531,7 +496,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest018, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest018 end!");
 }
 
 /**
@@ -541,7 +505,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest018, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest019, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest019 begin!");
     uint32_t code = 14;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -551,7 +514,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest019, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest019 end!");
 }
 
 /**
@@ -561,7 +523,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest019, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest020, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest020 begin!");
     uint32_t code = 15;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -571,7 +532,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest020, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest020 end!");
 }
 
 /**
@@ -581,7 +541,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest020, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest021, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest021 begin!");
     uint32_t code = 16;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -591,7 +550,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest021, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest021 end!");
 }
 
 #ifndef CASTPLUS_CAST_ENGINE_ENABLE
@@ -602,7 +560,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest021, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest022, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest022 begin!");
     uint32_t code = 17;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -612,7 +569,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest022, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest022 end!");
 }
 
 /**
@@ -622,7 +578,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest022, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest023, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest023 begin!");
     uint32_t code = 18;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -632,7 +587,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest023, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest023 end!");
 }
 
 /**
@@ -642,7 +596,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest023, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest024, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest024 begin!");
     uint32_t code = 19;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -652,7 +605,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest024, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest024 end!");
 }
 #endif
 
@@ -663,7 +615,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest024, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest025, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest025 begin!");
     uint32_t code = 20;
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -673,7 +624,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest025, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("OnRemoteRequest025 end!");
 }
 
 /**
@@ -683,7 +633,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest025, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest026, TestSize.Level0)
 {
-    SLOGI("OnRemoteRequest026 begin!");
     uint32_t code = static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_MAX);
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
@@ -693,7 +642,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest026, TestSize
     OHOS::MessageOption option;
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::IPC_STUB_UNKNOW_TRANS_ERR);
-    SLOGI("OnRemoteRequest026 end!");
 }
 
 /**
@@ -703,7 +651,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, OnRemoteRequest026, TestSize
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, HandleStartDeviceLogging001, TestSize.Level0)
 {
-    SLOGI("HandleStartDeviceLogging001 begin!");
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
@@ -712,7 +659,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, HandleStartDeviceLogging001,
 
     ret = avsessionservicestub.HandleStopDeviceLogging(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("HandleStartDeviceLogging001 end!");
 }
 
 /**
@@ -722,7 +668,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, HandleStartDeviceLogging001,
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, MarshallingAVQueueInfos001, TestSize.Level0)
 {
-    SLOGI("MarshallingAVQueueInfos001 begin!");
     LOG_SetCallback(MyLogCallback);
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel reply;
@@ -730,7 +675,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, MarshallingAVQueueInfos001, 
     std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
     avsessionservicestub.MarshallingAVQueueInfos(reply, avQueueInfos);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("MarshallingAVQueueInfos001 end!");
 }
 
 /**
@@ -740,7 +684,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, MarshallingAVQueueInfos001, 
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, GetAVQueueInfosImgLength002, TestSize.Level0)
 {
-    SLOGI("GetAVQueueInfosImgLength002 begin!");
     AVSessionServiceStubDemo avsessionservicestub;
     AVQueueInfo aVQueueInfo;
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
@@ -750,7 +693,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, GetAVQueueInfosImgLength002,
     std::vector<AVQueueInfo> avQueueInfos = {aVQueueInfo};
     int ret = avsessionservicestub.GetAVQueueInfosImgLength(avQueueInfos);
     EXPECT_EQ(ret, 3);
-    SLOGI("GetAVQueueInfosImgLength002 end!");
 }
 
 /**
@@ -760,7 +702,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, GetAVQueueInfosImgLength002,
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer001, TestSize.Level0)
 {
-    SLOGI("AVQueueInfoImgToBuffer001 begin!");
     LOG_SetCallback(MyLogCallback);
     AVSessionServiceStubDemo avsessionservicestub;
     AVQueueInfo aVQueueInfo;
@@ -768,7 +709,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer001, T
     unsigned char *buffer = new unsigned char[255];
     avsessionservicestub.AVQueueInfoImgToBuffer(avQueueInfos, buffer);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("AVQueueInfoImgToBuffer001 end!");
 }
 
 /**
@@ -778,7 +718,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer001, T
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer002, TestSize.Level0)
 {
-    SLOGI("AVQueueInfoImgToBuffer002 begin!");
     LOG_SetCallback(MyLogCallback);
     AVSessionServiceStubDemo avsessionservicestub;
     AVQueueInfo aVQueueInfo;
@@ -790,7 +729,6 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer002, T
     unsigned char *buffer = new unsigned char[255];
     avsessionservicestub.AVQueueInfoImgToBuffer(avQueueInfos, buffer);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
-    SLOGI("AVQueueInfoImgToBuffer002 end!");
 }
 
 /**
@@ -800,11 +738,9 @@ static HWTEST_F(AVSessionServiceStubPermissionTest, AVQueueInfoImgToBuffer002, T
  */
 static HWTEST_F(AVSessionServiceStubPermissionTest, HandleClose001, TestSize.Level0)
 {
-    SLOGI("HandleClose001 begin!");
     AVSessionServiceStubDemo avsessionservicestub;
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
     int ret = avsessionservicestub.HandleClose(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
-    SLOGI("HandleClose001 end!");
 }

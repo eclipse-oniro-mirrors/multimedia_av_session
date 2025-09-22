@@ -59,6 +59,7 @@ void MigrateAVSessionServerForNextTest::SetUpTestCase()
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     g_AVSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID, true);
+    g_AVSessionService->InitKeyEvent();
     g_AVSessionItem = g_AVSessionService->CreateSessionInner(g_testSessionTag,
         AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
     g_AVControllerItem = g_AVSessionService->CreateNewControllerForSession(
@@ -69,6 +70,7 @@ void MigrateAVSessionServerForNextTest::TearDownTestCase()
 {
     SLOGI("MigrateAVSessionServerForNextTest TearDownTestCase");
     g_AVSessionService->HandleSessionRelease(g_AVSessionItem->GetSessionId());
+    g_AVSessionService->Close();
     g_AVControllerItem->Destroy();
     g_AVSessionItem->Destroy();
 }
