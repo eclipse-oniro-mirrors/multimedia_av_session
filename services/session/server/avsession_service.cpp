@@ -670,6 +670,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
             UpdateSessionTimestamp(topSession_);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
             MirrorToStreamCast(topSession_);
+            cacheEnableCastPids_.erase(GetCallingPid());
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
         }
         GetUsersManager().SetTopSession(newTopSession, userIdForNewTopSession);

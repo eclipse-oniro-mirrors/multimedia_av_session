@@ -1919,21 +1919,22 @@ void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
 
 bool AVSessionItem::IsAppSupportCast()
 {
-    CHECK_AND_RETURN_RET_LOG(extras_.HasParam("requireAbilityList"), false, "extras not have requireAbilityList");
-    auto value = extras_.GetParam("requireAbilityList");
-    AAFwk::IArray *list = AAFwk::IArray::Quary(value);
+    CHECK_AND_RETURN_RET_LOG(GetExtras().HasParam("requireAbilityList"), false, "extras not have requireAbilityList");
+    auto value = GetExtras().GetParam("requireAbilityList");
+    AAFwk::IArray* list = AAFwk::IArray::Query(value);
     CHECK_AND_RETURN_RET_LOG(list != nullptr && AAFwk::Array::IsStringArray(list), false, "extras have no value");
 
     bool result = false;
-    auto func = [this, &result](AAFwk::IInterface* object) {
+    auto func = [&result](AAFwk::IInterface* object) {
+        CHECK_AND_RETURN(result != true);
         CHECK_AND_RETURN_LOG(object != nullptr, "object is nullptr");
         AAFwk::IString* stringValue = AAFwk::IString::Query(object);
         CHECK_AND_RETURN_LOG(stringValue != nullptr, "stringValue is nullptr");
         result = (AAFwk::String::Unbox(stringValue) == "url-cast");
-        SLOGI("app support url-cast is %{public}d with filter %{public}d", result, metaData_.GetFilter());
     };
     AAFwk::Array::ForEach(list, func);
-    return result & metaData_.GetFilter();
+    SLOGI("app support url-cast is %{public}d with filter %{public}d", result, GetMetaDataWithoutImg().GetFilter());
+    return result & (GetMetaDataWithoutImg().GetFilter() != 0);
 }
 
 void AVSessionItem::SetServiceCallbackForStream(const std::function<void(std::string)>& callback)
@@ -2769,7 +2770,7 @@ bool AVSessionItem::IsCasting()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (descriptor_.sessionTag_ != "RemoteCast" &&
         ((castHandle_ > 0 && castHandle_ != AVRouter::GetInstance().GetMirrorCastHandle()) ||
-        AVRouter::GetInstance().IsInMirrorToStream())) {
+        AVRouter::GetInstance().IsInMirrorToStreamState())) {
         return true;
     }
 #endif
