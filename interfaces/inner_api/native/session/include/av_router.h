@@ -330,6 +330,14 @@ public:
     */
     virtual bool IsRemoteCasting() = 0;
 
+    /**
+     * @brief set mirror castHandle.
+     *
+     * @param castHandle The mirror cast handle.
+     * @since 20
+    */
+    virtual void SetMirrorCastHandle(int64_t castHandle) = 0;
+
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
     std::string sessionId_ = "-1";

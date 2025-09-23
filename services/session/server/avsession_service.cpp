@@ -2058,6 +2058,8 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
         return AVSESSION_ERROR;
     }
 
+    SLOGI("GetHistoricalAVQueueInfos with size:%{public}d limit:%{public}d", maxSize, maxAVQueueInfoLen);
+    maxSize = maxAVQueueInfoLen >= maxSize ? maxSize : maxAVQueueInfoLen;
     cJSON* avQueueValuesArray = cJSON_Parse(oldAVQueueInfoContent.c_str());
     CHECK_AND_RETURN_RET_LOG(avQueueValuesArray != nullptr, AVSESSION_ERROR, "json object is null");
     if (cJSON_IsInvalid(avQueueValuesArray) || !cJSON_IsArray(avQueueValuesArray)) {
@@ -2068,6 +2070,9 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
     cJSON* valueItem = nullptr;
     cJSON_ArrayForEach(valueItem, avQueueValuesArray) {
         ProcessAvQueueInfosFromCJSON(tempAVQueueInfos, valueItem);
+        if (tempAVQueueInfos.size() >= maxSize) {
+            break;
+        }
     }
     for (auto iterator = tempAVQueueInfos.begin(); iterator != tempAVQueueInfos.end(); ++iterator) {
         avQueueInfos.push_back(*iterator);
@@ -2350,10 +2355,6 @@ sptr<AVControllerItem> AVSessionService::CreateNewControllerForSession(pid_t pid
     }
     result->SetServiceCallbackForRelease([this](AVControllerItem& controller) { HandleControllerRelease(controller); });
     session->AddController(pid, result);
-    if (AbilityHasSession(pid)) {
-        SLOGI("set isfromsession for pid %{public}d", static_cast<int>(pid));
-        result->isFromSession_ = true;
-    }
     return result;
 }
 
@@ -4101,7 +4102,7 @@ void AddCapsule(std::string title, bool isCapsuleUpdate, std::shared_ptr<AVSessi
     Notification::NotificationRequest* request)
 {
     const float scaleSize = 0.3;
-    std::shared_ptr<Media::PixelMap> pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(innerPixelMap);
+    std::shared_ptr<Media::PixelMap> pixelMap = AVSessionPixelMapAdapter::ConvertFromInner(innerPixelMap, false);
     if (pixelMap == nullptr) {
         SLOGI("AddCapsule ConvertDefaultImage");
         pixelMap = ConvertDefaultImage();

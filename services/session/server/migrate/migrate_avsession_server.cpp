@@ -527,6 +527,7 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
         SendByteToAll(msg);
     }
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
+        DelaySendPlaybackState();
         DelaySendMetaData();
         }, "DelaySendMetaData", DELAY_TIME);
 }
@@ -538,6 +539,10 @@ void MigrateAVSessionServer::SendRemoteHistorySessionList(const std::string &dev
         return;
     }
 
+    if (servicePtr_ == nullptr) {
+        SLOGI("servicePtr is nullptr");
+        return;
+    }
     std::vector<AVSessionDescriptor> descriptors;
     auto res = servicePtr_->GetAllSessionDescriptors(descriptors);
     if (res != AVSESSION_SUCCESS) {
@@ -725,6 +730,21 @@ void MigrateAVSessionServer::DelaySendMetaData()
             mediaImage->Clear();
         }
     }
+}
+
+int32_t MigrateAVSessionServer::DelaySendPlaybackState()
+{
+    sptr<AVControllerItem> avcontroller{nullptr};
+    GetControllerById(topSessionId_, avcontroller);
+    if (avcontroller != nullptr) {
+        AVPlaybackState state;
+        SLOGI("getPlayBackState");
+        avcontroller->GetAVPlaybackState(state);
+        std::string playerId = avcontroller->GetSessionId();
+        MigrateAVSessionServer::OnPlaybackStateChanged(playerId, state);
+        return AVSESSION_SUCCESS;
+    }
+    return AVSESSION_ERROR;
 }
 
 std::string MigrateAVSessionServer::GenerateClearAVSessionMsg()

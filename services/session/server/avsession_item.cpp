@@ -818,7 +818,7 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     sptr<AVControllerItem> result = new(std::nothrow) AVControllerItem(GetPid(), session, userId_);
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "malloc controller failed");
     result->isFromSession_ = true;
-    SLOGI("New controller from sessionItem when get controller.");
+    SLOGI("New controller from sessionItem:%{public}d when get controller.", static_cast<int>(GetPid()));
     controllers_.insert({GetPid(), result});
     return result;
 }
@@ -1468,6 +1468,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
     if (isNeedRemove) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         AVRouter::GetInstance().StopCastSession(castHandle_);
+        AVRouter::GetInstance().SetMirrorCastHandle(-1);
         DoContinuousTaskUnregister();
     } else {
         // clear pre session cast info in streamplayer to avoid flash when cast compete
@@ -2408,8 +2409,9 @@ void AVSessionItem::HandleOnPlayWithAssetId(const AVControlCommand& cmd)
 int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& controller)
 {
     std::lock_guard controllersLockGuard(controllersLock_);
-    SLOGI("handle controller newup for pid: %{public}d", static_cast<int>(pid));
+    SLOGI("handle controller newup:%{public}d for:%{public}d", static_cast<int>(pid), static_cast<int>(GetPid()));
     controllers_.insert({pid, controller});
+    controller->isFromSession_ = (pid == GetPid()) ? true : false;
     return AVSESSION_SUCCESS;
 }
 

@@ -862,3 +862,36 @@ static HWTEST_F(MigrateAVSessionTest, GetAllControllers001, TestSize.Level1)
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetAllControllers001 end");
 }
+
+/**
+* @tc.name: DelaySendPlaybackState001
+* @tc.desc: DelaySendPlaybackState
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState001, TestSize.Level0)
+{
+    SLOGI("DelaySendPlaybackState001 begin");
+    std::shared_ptr<MigrateAVSessionServer> tempServer;
+    tempServer->topSessionId_ = "1111";
+    int32_t ret = tempServer->DelaySendPlaybackState();
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("DelaySendPlaybackState001 end");
+}
+
+/**
+* @tc.name: DelaySendPlaybackState002
+* @tc.desc: DelaySendPlaybackState
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState002, TestSize.Level0)
+{
+    SLOGI("DelaySendPlaybackState002 begin");
+    std::shared_ptr<MigrateAVSessionServer> tempServer;
+    const std::string sessionId = "1111";
+    tempServer->CreateController(sessionId);
+    int32_t ret = tempServer->DelaySendPlaybackState();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("DelaySendPlaybackState002 end");
+}
