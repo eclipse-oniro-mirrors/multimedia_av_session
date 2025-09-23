@@ -698,8 +698,12 @@ private:
     const int32_t beginAddPos = 3;
     const int32_t endDecPos = 4;
     const int32_t typeAddPos = 2;
+    std::mutex checkEnableCastMutex_;
     std::recursive_mutex checkEnableCastLock_;
     std::unordered_set<pid_t> cacheEnableCastPids_;
+    bool cancelCastRelease_ = false;
+    std::condition_variable enableCastCond_;
+    const int32_t castReleaseTimeOut_ = 40;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";

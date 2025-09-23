@@ -353,7 +353,15 @@ void AVSessionItem::HandleFrontSession()
             GetBundleName().c_str(), isMetaEmpty, isCastMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
             static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     }
-    if ((isMetaEmpty && isCastMetaEmpty) || (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0)) {
+    bool needRemoveNtfInMirror = false;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    // stream to mirror state remove notification
+    needRemoveNtfInMirror = !AVRouter::GetInstance().IsInMirrorToStreamState() &&
+                            (AVRouter::GetInstance().GetMirrorCastHandle() != -1) &&
+                            (isMetaEmpty || (supportedCmd_.size() == 0));
+#endif
+    if ((isMetaEmpty && isCastMetaEmpty) ||
+        (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0) || needRemoveNtfInMirror) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
@@ -1909,6 +1917,26 @@ void AVSessionItem::SetExtrasInner(AAFwk::IArray* list)
     AAFwk::Array::ForEach(list, func);
 }
 
+bool AVSessionItem::IsAppSupportCast()
+{
+    CHECK_AND_RETURN_RET_LOG(GetExtras().HasParam("requireAbilityList"), false, "extras not have requireAbilityList");
+    auto value = GetExtras().GetParam("requireAbilityList");
+    AAFwk::IArray* list = AAFwk::IArray::Query(value);
+    CHECK_AND_RETURN_RET_LOG(list != nullptr && AAFwk::Array::IsStringArray(list), false, "extras have no value");
+
+    bool result = false;
+    auto func = [&result](AAFwk::IInterface* object) {
+        CHECK_AND_RETURN(result != true);
+        CHECK_AND_RETURN_LOG(object != nullptr, "object is nullptr");
+        AAFwk::IString* stringValue = AAFwk::IString::Query(object);
+        CHECK_AND_RETURN_LOG(stringValue != nullptr, "stringValue is nullptr");
+        result = (AAFwk::String::Unbox(stringValue) == "url-cast");
+    };
+    AAFwk::Array::ForEach(list, func);
+    SLOGI("app support url-cast is %{public}d with filter %{public}d", result, GetMetaDataWithoutImg().GetFilter());
+    return result & (GetMetaDataWithoutImg().GetFilter() != 0);
+}
+
 void AVSessionItem::SetServiceCallbackForStream(const std::function<void(std::string)>& callback)
 {
     SLOGI("SetServiceCallbackForStream in");
@@ -2740,7 +2768,9 @@ int32_t AVSessionItem::DoContinuousTaskUnregister()
 bool AVSessionItem::IsCasting()
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+    if (descriptor_.sessionTag_ != "RemoteCast" &&
+        ((castHandle_ > 0 && castHandle_ != AVRouter::GetInstance().GetMirrorCastHandle()) ||
+        AVRouter::GetInstance().IsInMirrorToStreamState())) {
         return true;
     }
 #endif

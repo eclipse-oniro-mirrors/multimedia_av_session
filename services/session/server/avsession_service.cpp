@@ -670,6 +670,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
             UpdateSessionTimestamp(topSession_);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
             MirrorToStreamCast(topSession_);
+            cacheEnableCastPids_.erase(GetCallingPid());
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
         }
         GetUsersManager().SetTopSession(newTopSession, userIdForNewTopSession);
@@ -871,7 +872,6 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             PublishEvent(mediaPlayStateTrue);
         }
     } else {
-        std::lock_guard lockGuard(sessionServiceLock_);
         HandleTopSessionRelease(userId, sessionItem);
         sessionListForFront->remove(sessionItem);
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
