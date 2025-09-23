@@ -1913,12 +1913,13 @@ void AVSessionService::ProcessDescriptorsFromCJSON(std::vector<AVSessionDescript
         return;
     }
     std::string abilityName(abilityNameItem->valuestring);
+    std::string tag("");
     cJSON* tagItem = cJSON_GetObjectItem(valueItem, "sessionTag");
     if (tagItem == nullptr || cJSON_IsInvalid(tagItem) || !cJSON_IsString(tagItem)) {
-        SLOGE("valueItem get sessiontag fail");
-        return;
+        SLOGE("valueItem get sessiontag fail, continue");
+    } else {
+        tag = tagItem->valuestring;
     }
-    std::string tag(tagItem->valuestring);
 
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = sessionId;
