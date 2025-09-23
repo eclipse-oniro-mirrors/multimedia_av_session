@@ -879,7 +879,6 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand014, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, SendControlCommand015, TestSize.Level1)
 {
-    SLOGI("SendControlCommand015 in");
     sleep(1);
     AVControlCommand command;
     EXPECT_EQ(avsession_->AddSupportCommand(AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE), AVSESSION_SUCCESS);
@@ -891,7 +890,6 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand015, TestSize.Level1)
         avsession_->Activate();
     }
     EXPECT_EQ(controller_->SendControlCommand(command), AVSESSION_SUCCESS);
-    SLOGI("SendControlCommand015 end");
 }
 
 /**
@@ -902,7 +900,6 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand015, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
 {
-    SLOGI("SendCommonCommand001 Begin");
     avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
@@ -912,8 +909,6 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
     } else {
         EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_COMMAND_SEND_EXCEED_MAX);
     }
-
-    SLOGI("SendCommonCommand001 End");
 }
 
 /**
@@ -924,7 +919,6 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
 {
-    SLOGI("SendCommonCommand002 Begin");
     avsession_->Activate();
     std::string commonCommand = "common_command";
     OHOS::AAFwk::WantParams commandArgs;
@@ -936,7 +930,6 @@ HWTEST_F(AVSessionControllerTest, SendCommonCommand002, TestSize.Level1)
     }
     EXPECT_EQ(avsession_->Deactivate(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->SendCommonCommand(commonCommand, commandArgs), ERR_SESSION_DEACTIVE);
-    SLOGI("SendCommonCommand002 End");
 }
 
 /**
@@ -1421,7 +1414,6 @@ HWTEST_F(AVSessionControllerTest, HasSession001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetExtrasTest001, TestSize.Level1)
 {
-    SLOGI("GetExtrasTest001 Begin");
     std::shared_ptr<OHOS::AAFwk::WantParams> wantParamsIn = nullptr;
     wantParamsIn = std::make_shared<OHOS::AAFwk::WantParams>();
     std::string keyStr = "1234567";
@@ -1432,7 +1424,6 @@ HWTEST_F(AVSessionControllerTest, GetExtrasTest001, TestSize.Level1)
     OHOS::AAFwk::WantParams resultExtras;
     EXPECT_EQ(controller_->GetExtras(resultExtras), AVSESSION_SUCCESS);
     EXPECT_EQ(resultExtras.HasParam("1234567"), 1);
-    SLOGI("GetExtrasTest001 End");
 }
 
 /**
@@ -1443,11 +1434,9 @@ HWTEST_F(AVSessionControllerTest, GetExtrasTest001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetExtrasTest003, TestSize.Level1)
 {
-    SLOGI("GetExtrasTest003 Begin");
     OHOS::AAFwk::WantParams resultExtras;
     EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetExtras(resultExtras), ERR_SESSION_NOT_EXIST);
-    SLOGI("GetExtrasTest003 End");
 }
 
 /**
@@ -1458,14 +1447,12 @@ HWTEST_F(AVSessionControllerTest, GetExtrasTest003, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetExtrasWithEvent001, TestSize.Level1)
 {
-    SLOGI("GetExtrasWithEvent001 Begin");
     OHOS::AAFwk::WantParams resultExtras;
     const std::string extraEvent = "AUDIO_SET_VOLUME";
     int32_t volumeNum = 0;
     resultExtras.SetParam(extraEvent, OHOS::AAFwk::Integer::Box(volumeNum));
 
     EXPECT_EQ(controller_->GetExtrasWithEvent(extraEvent, resultExtras), AVSESSION_SUCCESS);
-    SLOGI("GetExtrasWithEvent001 End");
 }
 
 /**
@@ -1476,7 +1463,6 @@ HWTEST_F(AVSessionControllerTest, GetExtrasWithEvent001, TestSize.Level1)
 */
 HWTEST_F(AVSessionControllerTest, GetExtrasWithEvent002, TestSize.Level1)
 {
-    SLOGI("GetExtrasWithEvent002 Begin");
     OHOS::AAFwk::WantParams resultExtras;
     const std::string extraEvent = "AUDIO_SET_VOLUME";
     int32_t volumeNum = 0;
@@ -1484,7 +1470,6 @@ HWTEST_F(AVSessionControllerTest, GetExtrasWithEvent002, TestSize.Level1)
 
     EXPECT_EQ(avsession_->Destroy(), AVSESSION_SUCCESS);
     EXPECT_EQ(controller_->GetExtrasWithEvent(extraEvent, resultExtras), ERR_SESSION_NOT_EXIST);
-    SLOGI("GetExtrasWithEvent002 End");
 }
 
 /**
