@@ -699,6 +699,1891 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test055, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test055 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(4);
+    g_playbackState.SetSpeed(2);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test055 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test056, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test056 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(4);
+    g_playbackState.SetSpeed(0.5);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test056 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test057, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test057 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(5);
+    g_playbackState.SetSpeed(0.5);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test057 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test058, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test058 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(5);
+    g_playbackState.SetSpeed(1);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test058 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test059, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test059 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(5);
+    g_playbackState.SetSpeed(2);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test059 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test060, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test060 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(6);
+    g_playbackState.SetSpeed(0.5);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test060 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test061, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test061 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(6);
+    g_playbackState.SetSpeed(1);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test061 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test062, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test062 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(6);
+    g_playbackState.SetSpeed(2);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test062 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test063, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test063 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(7);
+    g_playbackState.SetSpeed(0.5);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test063 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test064, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test064 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(7);
+    g_playbackState.SetSpeed(1);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test064 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test065, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test065 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(8);
+    g_playbackState.SetSpeed(0.5);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test065 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test066, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test066 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(8);
+    g_playbackState.SetSpeed(1);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test066 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test067, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test067 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(8);
+    g_playbackState.SetSpeed(2);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test067 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test068, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test068 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(9);
+    g_playbackState.SetSpeed(0.5);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test068 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test069, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test069 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(9);
+    g_playbackState.SetSpeed(1);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test069 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test070, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test070 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(9);
+    g_playbackState.SetSpeed(2);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test070 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test071, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test071 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(0.5);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test071 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test072, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test072 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(1);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test072 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test073, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test073 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(2);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test073 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test074, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test074 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(11);
+    g_playbackState.SetSpeed(0.5);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test074 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test075, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test075 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(11);
+    g_playbackState.SetSpeed(1);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test075 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test076, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test076 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(2);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test076 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test077, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test077 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(2);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test077 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test078, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test078 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(2);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test078 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test079, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test079 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(3);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test079 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test080, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test080 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(3);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test080 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test081, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test081 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(3);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test081 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test082, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test082 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(4);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test082 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test083, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test083 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(4);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test083 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test084, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test084 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(9);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test084 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test085, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test085 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(9);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test085 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test086, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test086 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test086 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test087, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test087 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test087 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test088, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test088 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test088 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test089, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test089 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(11);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test089 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test090, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test090 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(11);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test090 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test91, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test91 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(11);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test91 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test92, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test92 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(2);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test92 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test093, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test093 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(2);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test093 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test094, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test094 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(2);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test094 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test095, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test095 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(3);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test095 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test096, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test096 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(3);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test096 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test097, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test097 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(3);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test097 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test098, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test098 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(4);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test098 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test099, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test099 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(4);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test099 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test100, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test100 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(4);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test100 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test101, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test101 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(5);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test101 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test102, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test102 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(5);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test102 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test103, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test103 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(5);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test103 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test104, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test104 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(6);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test104 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test105, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test105 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(6);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test105 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test106, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test106 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(6);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test106 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test107, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test107 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(7);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test107 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test108, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test108 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(7);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test108 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test109, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test109 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(7);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test109 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test110, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test110 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(8);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test110 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test111, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test111 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(8);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test111 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test112, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test112 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(8);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test112 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test113, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test113 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(9);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test113 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test114, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test114 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(9);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test114 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test115, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test115 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(9);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test115 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test116, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test116 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test116 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test117, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test117 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test117 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test118, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test118 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(10);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test118 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test119, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test119 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(11);
+    g_playbackState.SetSpeed(0.5);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test119 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test120, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test120 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(11);
+    g_playbackState.SetSpeed(1);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test120 End");
+}
+
+/**
+ * @tc.name: SetAVPlaybackState_sequence_test
+ * @tc.desc: Return the result of set av playback state
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JF
+ */
+HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test121, TestSize.Level1)
+{
+    SLOGE("SetAVPlaybackState_sequence_test121 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("playback");
+    metaData.SetDuration(20);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+    g_playbackState.SetState(1);
+    g_playbackState.SetSpeed(1.5);
+    g_playbackState.SetPosition({80000, 0});
+    g_playbackState.SetBufferedTime(60000);
+    g_playbackState.SetLoopMode(2);
+    g_playbackState.SetFavorite(true);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    g_playbackState.SetState(11);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
+    g_playbackState.SetBufferedTime(40000);
+    EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
+    SLOGE("SetAVPlaybackState_sequence_test121 End");
+}
+
+/**
 * @tc.name: SetSessionEventTest001
 * @tc.desc: Set session event
 * @tc.type: FUNC
