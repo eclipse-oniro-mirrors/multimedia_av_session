@@ -355,6 +355,8 @@ private:
 
     bool IsParamInvalid(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName);
 
+    void AddExtraFrontSession(int32_t type, sptr<AVSessionItem>& sessionItem);
+
     void ServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
