@@ -112,7 +112,7 @@ __attribute__((no_sanitize("cfi"))) bool InsightAdapter::IsSupportPlayIntent(con
         return false;
     }
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     if (bundleMgrProxy == nullptr) {
         return false;
     }

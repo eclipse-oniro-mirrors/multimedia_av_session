@@ -72,8 +72,8 @@ void BundleStatusAdapter::Init()
 
     std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
     CHECK_AND_RETURN_LOG(bundleMgrProxy == nullptr, "bundleMgrProxy alive return");
-    SLOGI("get bundle manager proxy success");
-    bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    SLOGI("get bundle manager proxy success.");
+    bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     bundleResourceProxy = bundleMgrProxy->GetBundleResourceProxy();
 }
 

@@ -122,7 +122,7 @@ private:
     std::string localUdid_;
     std::string localNetId_;
     std::string localDevType_;
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy_;
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_RADAR_H

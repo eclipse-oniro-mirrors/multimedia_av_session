@@ -123,7 +123,7 @@ void AVSessionRadar::InitBMS()
     }
 
     SLOGI("get bundle manager proxy success");
-    bundleMgrProxy_ = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    bundleMgrProxy_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
 }
 
 // LCOV_EXCL_START
