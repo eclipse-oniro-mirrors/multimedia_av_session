@@ -224,7 +224,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         cancelCastRelease_ = false;
         std::thread([this]() {
             std::unique_lock<std::mutex> lock(checkEnableCastMutex_);
-            CHECK_AND_RETURN_LOG(enableCastCond_.wait_for(lock, std::chrono::seconds(castReleaseTimeOut_),
+            CHECK_AND_RETURN_LOG(!enableCastCond_.wait_for(lock, std::chrono::seconds(castReleaseTimeOut_),
                 [this]() { return cancelCastRelease_; }), "cancel cast release");
             std::lock_guard threadLockGuard(checkEnableCastLock_);
             CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsRemoteCasting() && !is2in1_,
@@ -438,10 +438,11 @@ void AVSessionService::NotifyMirrorToStreamCast()
 bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
 {
     CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "session is nullptr");
-
     bool deviceCond = isSupportMirrorToStream_ &&
                       session->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_VIDEO &&
                       !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid());
+    
+    CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "session is nullptr");
     bool appCond = session->IsAppSupportCast();
 
     bool connectCond = !is2in1_ && (castServiceNameStatePair_.second == deviceStateConnection);
@@ -456,6 +457,7 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
         return AVSESSION_SUCCESS;
     }
     checkEnableCast(true);
+    cacheEnableCastPids_.erase(GetCallingPid());
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = castDeviceId_;
     deviceInfo.deviceName_ = castDeviceName_;

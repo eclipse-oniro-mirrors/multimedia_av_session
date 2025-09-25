@@ -1934,7 +1934,7 @@ bool AVSessionItem::IsAppSupportCast()
     };
     AAFwk::Array::ForEach(list, func);
     SLOGI("app support url-cast is %{public}d with filter %{public}d", result, GetMetaDataWithoutImg().GetFilter());
-    return result & (GetMetaDataWithoutImg().GetFilter() != 0);
+    return result && (GetMetaDataWithoutImg().GetFilter() != 0);
 }
 
 void AVSessionItem::SetServiceCallbackForStream(const std::function<void(std::string)>& callback)
