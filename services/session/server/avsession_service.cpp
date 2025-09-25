@@ -719,6 +719,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         CHECK_AND_RETURN_LOG(sessionItem != nullptr, "handle focusession no anco_audio");
         ancoSession_ = sessionItem;
         UpdateSessionTimestamp(ancoSession_);
+        SLOGI("HandleFocusSession updateancoSession");
         return;
     }
     int32_t userId = GetUsersManager().GetCurrentUserId();
@@ -1621,6 +1622,20 @@ void AVSessionService::CheckAndUpdateAncoMediaSession(const AppExecFwk::ElementN
         elementName.GetAbilityName().c_str());
 }
 
+void AVSessionService::AddExtraFrontSession(int32_t type, sptr<AVSessionItem>& sessionItem)
+{
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "AddExtraFrontSession sessionItem nullptr!");
+    std::lock_guard frontLockGuard(sessionFrontLock_);
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "AddExtraFrontSession sessionListForFront ptr nullptr!");
+    auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
+    if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL) &&
+        it == sessionListForFront->end()) {
+        SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
+        sessionListForFront->push_front(sessionItem);
+    }
+}
+
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                              const AppExecFwk::ElementName& elementName,
                                              sptr<AVSessionItem>& sessionItem)
@@ -1659,17 +1674,14 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
 
     NotifySessionCreate(result->GetDescriptor());
     sessionItem = result;
+    AddExtraFrontSession(type, sessionItem);
 
-    std::lock_guard frontLockGuard(sessionFrontLock_);
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
-    CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
-    auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
-    if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL) &&
-        it == sessionListForFront->end()) {
-        SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
-        sessionListForFront->push_front(sessionItem);
+    if (sessionItem->GetUid() == ancoUid &&
+        AudioAdapter::GetInstance().GetRendererRunning(sessionItem->GetUid(), sessionItem->GetPid())) {
+        ancoSession_ = sessionItem;
+        UpdateSessionTimestamp(ancoSession_);
+        SLOGI("CreateSessionInner updateancoSession");
     }
-
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
         ReportSessionState(sessionItem, SessionState::STATE_CREATE);
 #endif
@@ -2887,7 +2899,12 @@ bool AVSessionService::CheckIfOtherAudioPlaying()
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr quit");
     CHECK_AND_RETURN_RET_LOG(!sessionListForFront->empty() || topSession_ != nullptr || IsAncoValid(), true,
         "sessionListForFront and top empty but audio playing, control block");
+    bool isAncoPlaying = false;
+    bool hasAncoMediaSession = false;
     for (int uid : audioPlayingUids) {
+        if (uid == ancoUid) {
+            isAncoPlaying = true;
+        }
         if (GetUsersManager().GetContainerFromAll().UidHasSession(uid)) {
             SLOGI("audioplaying but session alive:%{public}d", uid);
             return false;
@@ -2901,9 +2918,13 @@ bool AVSessionService::CheckIfOtherAudioPlaying()
                 SLOGE("audioplaying but bundle alive:%{public}s", bundleNamePlaying.c_str());
                 return false;
             }
+            if (session->GetSessionTag() == "ancoMediaSession") {
+                hasAncoMediaSession = true;
+            }
         }
         SLOGI("audioPlaying and no session:%{public}d", uid);
     }
+    CHECK_AND_RETURN_RET_LOG(!isAncoPlaying || !hasAncoMediaSession, false, "ancoMediaSession Playing");
     return true;
 }
 
