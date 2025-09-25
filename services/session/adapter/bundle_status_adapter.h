@@ -54,7 +54,7 @@ private:
 
     bool CheckBundleSupport(std::string& profile);
 
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy;
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy;
     sptr<AppExecFwk::IBundleResource> bundleResourceProxy;
 
     std::map<std::pair<std::string, int32_t>, std::function<void(const std::string, const int32_t)>>

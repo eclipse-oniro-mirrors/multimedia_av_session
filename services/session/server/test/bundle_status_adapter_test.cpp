@@ -451,7 +451,7 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon002, testing::ext::TestSiz
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     ASSERT_TRUE(remoteObject != nullptr);
-    BundleStatusAdapter::GetInstance().bundleMgrProxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    BundleStatusAdapter::GetInstance().bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     BundleStatusAdapter::GetInstance().bundleResourceProxy = nullptr;
     std::string bundleName = "test";
     std::string abilityName = "testAbility";
@@ -470,7 +470,7 @@ static HWTEST_F(BundleStatusAdapterTest, GetBundleIcon003, testing::ext::TestSiz
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     ASSERT_TRUE(remoteObject != nullptr);
-    auto proxy = iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
+    auto proxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     BundleStatusAdapter::GetInstance().bundleMgrProxy = proxy;
     BundleStatusAdapter::GetInstance().bundleResourceProxy = proxy->GetBundleResourceProxy();
     std::string bundleName = "test";
