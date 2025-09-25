@@ -1007,7 +1007,7 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test012, TestSize.Level1)
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
     EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
-    g_playbackState.SetState(12);
+    g_playbackState.SetState(7);
     EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
     SLOGE("SetAVPlaybackState_sequence_test012 End");
 }
@@ -1215,7 +1215,9 @@ HWTEST_F(AvsessionTest, SetAVPlaybackState_sequence_test020, TestSize.Level1)
     g_playbackState.SetLoopMode(2);
     g_playbackState.SetFavorite(true);
     EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
-    g_playbackState.SetLoopMode(-1);
+    g_playbackState.SetState(6);
+    g_playbackState.SetSpeed(2);
+    g_playbackState.SetPosition({20000, 0});
     EXPECT_EQ(avsession_->SetAVPlaybackState(g_playbackState), AVSESSION_SUCCESS);
     SLOGE("SetAVPlaybackState_sequence_test020 End");
 }
