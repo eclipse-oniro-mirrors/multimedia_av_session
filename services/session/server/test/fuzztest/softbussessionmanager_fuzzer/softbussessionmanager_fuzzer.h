@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,15 @@ public:
     SoftbusSessionManagerFuzzer() = default;
     ~SoftbusSessionManagerFuzzer() = default;
     void SoftbusSessionManagerFuzzTest(uint8_t* data, size_t size);
+    static void SocketFuzzTest();
+    static void BindFuzzTest();
+    static void SendMessageFuzzTest();
+    static void SendBytesFuzzTest();
+    static void SendBytesForNextFuzzTest();
+    static void OnBindFuzzTest();
+    static void OnShutdownFuzzTest();
+    static void OnMessageFuzzTest();
+    static void OnBytesFuzzTest();
 };
 }
 #endif
