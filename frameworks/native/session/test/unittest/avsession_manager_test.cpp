@@ -242,6 +242,25 @@ HWTEST_F(AVSessionManagerTest, CreatSession004, TestSize.Level1)
 }
 
 /**
+* @tc.name: GetSession001
+* @tc.desc: AVSessionManager can get session
+* @tc.type: FUNC
+* @tc.require: AR000H31JC
+*/
+HWTEST_F(AVSessionManagerTest, GetSession001, TestSize.Level1)
+{
+    SLOGI("GetSession001 begin");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("");
+    elementName.SetAbilityName("");
+    std::shared_ptr<AVSession> sessionGet = nullptr;
+    std::string sessionTag = "";
+    int ret = AVSessionManager::GetInstance().GetSession(elementName, sessionTag, sessionGet);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    SLOGI("GetSession001 end");
+}
+
+/**
 * @tc.name: GetAllSessionDescriptors001
 * @tc.desc: Get all session descriptors
 * @tc.type: FUNC

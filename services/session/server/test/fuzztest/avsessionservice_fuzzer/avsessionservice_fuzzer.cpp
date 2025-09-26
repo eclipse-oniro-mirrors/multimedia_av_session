@@ -1091,6 +1091,10 @@ void AvSessionServiceTest()
     elementName.SetAbilityName(g_testAnotherAbilityName);
     avsessionHere_ = avsessionService_->CreateSessionInner(
         g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    int sessionTagSize = GetData<uint32_t>() % TEST_SESSION_ID + 1;
+    std::string sessionTag = GenerateString(sessionTagSize);
+    sptr<OHOS::IRemoteObject> sessionGet = nullptr;
+    avsessionService_->GetSessionInner(elementName, sessionTag, sessionGet);
     AvSessionServiceSystemAbilityTest(avsessionService_);
     AvSessionServiceGetAVQueueInfosTest(avsessionService_);
     AvSessionServiceGetDescriptorsTest(avsessionService_);

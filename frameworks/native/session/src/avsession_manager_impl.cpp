@@ -136,6 +136,18 @@ void AVSessionManagerImpl::OnServiceDie()
     AVSessionUtils::DeleteCacheFiles(cachePath);
 }
 
+int32_t AVSessionManagerImpl::GetSession(const AppExecFwk::ElementName& elementName,
+    std::string& tag, std::shared_ptr<AVSession>& session)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::GetSession with ret");
+    CHECK_AND_RETURN_RET_LOG(!elementName.GetBundleName().empty() && !elementName.GetAbilityName().empty(),
+        ERR_INVALID_PARAM, "elementName is empty:%{public}s|%{public}s",
+        elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str());
+
+    auto service = GetService();
+    return service ? service->GetSession(elementName, tag, session) : ERR_SERVICE_NOT_EXIST;
+}
+
 std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type,
                                                                const AppExecFwk::ElementName& elementName)
 {

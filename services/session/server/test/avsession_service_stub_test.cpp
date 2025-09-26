@@ -151,6 +151,8 @@ public:
     int32_t Close() override { return 0; };
     int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
         std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return 0; };
+    int32_t GetSessionInner(const OHOS::AppExecFwk::ElementName& elementName,
+        std::string& tag, OHOS::sptr<IRemoteObject>& session) override { return 0; };
     bool isSuccess = true;
 };
 
@@ -687,6 +689,28 @@ static HWTEST_F(AVSessionServiceStubTest, OnRemoteRequest0026, TestSize.Level0)
     int ret = avsessionservicestub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest0026 end!");
+}
+
+/**
+ * @tc.name: HandleGetSessionInner_001
+ * @tc.desc: Test HandleGetSessionInner with GetSessionInner returning AVSESSION_SUCCESS.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleGetSessionInner_001, TestSize.Level0)
+{
+    SLOGD("HandleGetSessionInner_001 begin!");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("TestBundleName");
+    std::u16string interfaceToken = u"AVSessionService";
+    data.WriteInterfaceToken(interfaceToken);
+    data.WriteParcelable(&elementName);
+    AVSessionServiceStubPerDemo stub;
+    int32_t result = stub.HandleGetSessionInner(data, reply);
+    EXPECT_EQ(result, OHOS::ERR_NONE);
+    SLOGD("HandleGetSessionInner_001 end!");
 }
 
 /**

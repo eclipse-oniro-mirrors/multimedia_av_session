@@ -249,7 +249,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
     napiAVSession_->sessionTag_ = tag;
     napiAVSession_->elementName_ = elementName;
-    SLOGI("sessionId=%{public}s***, sessionType:%{public}s",
+    SLOGI("NapiAVSession NewInstance sessionId=%{public}s***, sessionType:%{public}s",
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
 
@@ -261,6 +261,10 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     status = NapiUtils::SetValue(env, napiAVSession_->sessionType_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionType", property), napi_generic_failure);
+
+    status = NapiUtils::SetValue(env, napiAVSession_->sessionTag_, property);
+    CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionTag", property), napi_generic_failure);
     out = instance;
     return napi_ok;
 }

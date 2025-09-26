@@ -163,6 +163,9 @@ public:
 
     int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
         std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return 0; };
+
+    int32_t GetSessionInner(const OHOS::AppExecFwk::ElementName& elementName,
+        std::string& tag, OHOS::sptr<IRemoteObject>& session) override { return 0; };
     bool isSuccess = true;
 };
 

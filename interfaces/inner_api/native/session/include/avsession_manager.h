@@ -326,6 +326,18 @@ public:
     */
     virtual int32_t GetDistributedSessionControllers(const DistributedSessionType& sessionType,
         std::vector<std::shared_ptr<AVSessionController>>& sessionControllers) = 0;
+
+    /**
+     * Get session already alive.
+     *
+     * @param elementName element Name
+     * @param type Session type
+     * @param session wanted session {@link AVSession}
+     * @return Returns result of getting session
+     * @since 21
+    */
+    virtual int32_t GetSession(const AppExecFwk::ElementName& elementName,
+        std::string& tag, std::shared_ptr<AVSession>& session) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

@@ -2412,6 +2412,7 @@ int32_t AVSessionItem::AddController(pid_t pid, sptr<AVControllerItem>& controll
     std::lock_guard controllersLockGuard(controllersLock_);
     SLOGI("handle controller newup:%{public}d for:%{public}d", static_cast<int>(pid), static_cast<int>(GetPid()));
     controllers_.insert({pid, controller});
+    CHECK_AND_RETURN_RET_LOG(controller != nullptr, AVSESSION_SUCCESS, "controller newup nullptr");
     controller->isFromSession_ = (pid == GetPid()) ? true : false;
     return AVSESSION_SUCCESS;
 }

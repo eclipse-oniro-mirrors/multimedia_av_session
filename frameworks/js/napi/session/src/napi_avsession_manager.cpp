@@ -115,6 +115,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("startCasting", StartCast),
         DECLARE_NAPI_STATIC_FUNCTION("stopCasting", StopCast),
         DECLARE_NAPI_STATIC_FUNCTION("getDistributedSessionController", GetDistributedSessionControllers),
+        DECLARE_NAPI_STATIC_FUNCTION("getAVSession", GetAVSession),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
@@ -137,6 +138,50 @@ void processMsg(std::shared_ptr<ContextBase> context, int32_t ret)
         context->status = napi_generic_failure;
         context->errCode = NapiAVSessionManager::errcode_[ret];
     }
+}
+
+napi_value NapiAVSessionManager::GetAVSession(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::GetAVSession");
+    struct ConcreteContext : public ContextBase {
+        std::string tag_;
+        AppExecFwk::ElementName elementName_;
+        std::shared_ptr<AVSession> session_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    context->taskId = NAPI_CREATE_AVSESSION_TASK_ID;
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->elementName_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid context",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        int32_t ret = AVSessionManager::GetInstance().GetSession(context->elementName_,
+            context->tag_, context->session_);
+        CHECK_AND_RETURN_LOG(ret != AVSESSION_SUCCESS, "getAVSession success");
+        if (ret == ERR_SESSION_NOT_EXIST) {
+            context->errMessage = "getAVSession failed:session not exist";
+        } else {
+            context->errMessage = "getAVSession failed:native get session err:" + std::to_string(ret);
+            ret = AVSESSION_ERROR;
+        }
+        context->status = napi_generic_failure;
+        context->errCode = NapiAVSessionManager::errcode_[ret];
+    };
+
+    auto complete = [context](napi_value& output) {
+        context->status = NapiAVSession::NewInstance(context->env, context->session_, output,
+            context->tag_, context->elementName_);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetAVSession", executor, complete);
 }
 
 napi_value NapiAVSessionManager::CreateAVSession(napi_env env, napi_callback_info info)
