@@ -34,6 +34,27 @@ static const uint8_t *RAW_DATA = nullptr;
 static sptr<AVSessionService> service = nullptr;
 static size_t g_dataSize = 0;
 static size_t g_pos = 0;
+constexpr size_t STRING_MAX_LENGTH = 128;
+
+/*
+* describe: get data from FUZZ untrusted data(RAW_DATA) which size is according to sizeof(T)
+* tips: only support basic type
+*/
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_pos += objectSize;
+    return object;
+}
 
 class FuzzExtSessionListener : public SessionListener {
 public:
@@ -232,10 +253,35 @@ void AVSessionServiceExtRemoteRequest(uint8_t* data, size_t size)
     avSessionServiceExt->AVSessionServiceExtFuzzTest(data, size);
 }
 
+void AVSessionServiceExtFuzzer::SucceedSuperLauncherFuzzTest()
+{
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+    CHECK_AND_RETURN(service != nullptr);
+    std::string deviceId = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    std::string extraInfo = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    service->SucceedSuperLauncher(deviceId, extraInfo);
+}
+
+void AVSessionServiceExtFuzzer::NotifyDeviceStateChangeFuzzTest()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CHECK_AND_RETURN(service != nullptr);
+    auto deviceState = OHOS::AVSession::DeviceState();
+    service->NotifyDeviceStateChange(deviceState);
+#endif
+}
+
+typedef void (*TestFuncs[2])();
+
+TestFuncs g_allFuncs = {
+    AVSessionServiceExtFuzzer::SucceedSuperLauncherFuzzTest,
+    AVSessionServiceExtFuzzer::NotifyDeviceStateChangeFuzzTest,
+};
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
-    if (data == nullptr) {
+    if (data == nullptr || (size < MIN_SIZE_NUM)) {
         return 0;
     }
 

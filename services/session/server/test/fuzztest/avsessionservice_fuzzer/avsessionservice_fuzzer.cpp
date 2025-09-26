@@ -51,6 +51,10 @@ static const int32_t MIN_SIZE_NUM = 10;
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_totalSize = 0;
 static size_t g_sizePos;
+static size_t g_dataSize = 0;
+static size_t g_pos;
+constexpr size_t STRING_MAX_LENGTH = 128;
+FuzzedDataProvider provider(RAW_DATA, g_dataSize);
 
 /*
 * describe: get data from FUZZ untrusted data(RAW_DATA) which size is according to sizeof(T)
@@ -122,12 +126,20 @@ uint32_t GetArrLength(T& arr)
     return sizeof(arr) / sizeof(arr[0]);
 }
 
-typedef void (*TestFuncs[3])();
+typedef void (*TestFuncs[11])();
 
 TestFuncs g_allFuncs = {
     MockGetTrustedDeviceList,
     AvSessionServiceTest,
-    AVSessionServiceStubRemoteRequestTest
+    AVSessionServiceStubRemoteRequestTest,
+    AVSessionServiceFuzzer::HandleBundleRemoveEventTest,
+    AVSessionServiceFuzzer::HandleChangeTopSessionTest,
+    AVSessionServiceFuzzer::UpdateOrderTest,
+    AVSessionServiceFuzzer::SelectFocusSessionTest,
+    AVSessionServiceFuzzer::RegisterAncoMediaSessionListenerTest,
+    AVSessionServiceFuzzer::HandleOtherSessionPlayingTest,
+    AVSessionServiceFuzzer::GetOtherPlayingSessionTest,
+    AVSessionServiceFuzzer::ReportSessionControlTest,
 };
 
 bool FuzzTest(const uint8_t* rawData, size_t size)
@@ -1155,12 +1167,101 @@ void AVSessionServiceStubRemoteRequestTest()
     avsessionService_ = nullptr;
 }
 
+void AVSessionServiceFuzzer::HandleBundleRemoveEventTest()
+{
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    std::string bundleName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    avsessionService->HandleBundleRemoveEvent(bundleName);
+}
+
+void AVSessionServiceFuzzer::HandleChangeTopSessionTest()
+{
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    int32_t infoUid = provider.ConsumeIntegral<int32_t>();
+    int32_t infoPid = provider.ConsumeIntegral<int32_t>();
+    int32_t userId = provider.ConsumeIntegral<int32_t>();
+    avsessionService->HandleChangeTopSession(infoUid, infoPid, userId);
+}
+
+void AVSessionServiceFuzzer::UpdateOrderTest()
+{
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    sptr<OHOS::AVSession::AVSessionItem> sessionItem{};
+    avsessionService->UpdateOrder(sessionItem);
+}
+
+void AVSessionServiceFuzzer::SelectFocusSessionTest()
+{
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    FocusSessionStrategy::FocusSessionChangeInfo info;
+    info.uid = provider.ConsumeIntegral<int32_t>();
+    info.pid = provider.ConsumeIntegral<int32_t>();
+    int32_t usage = provider.ConsumeIntegralInRange<int32_t>(0, STREAM_USAGE_MAX);
+    info.streamUsage = static_cast<StreamUsage>(usage);
+    avsessionService->SelectFocusSession(info);
+}
+
+void AVSessionServiceFuzzer::RegisterAncoMediaSessionListenerTest()
+{
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    sptr<OHOS::AVSession::IAncoMediaSessionListener> listener{};
+    avsessionService->RegisterAncoMediaSessionListener(listener);
+}
+
+void AVSessionServiceFuzzer::HandleOtherSessionPlayingTest()
+{
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    sptr<OHOS::AVSession::AVSessionItem> session{};
+    avsessionService->HandleOtherSessionPlaying(session);
+}
+
+void AVSessionServiceFuzzer::GetOtherPlayingSessionTest()
+{
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    int32_t userId = provider.ConsumeIntegral<int32_t>();
+    std::string bundleName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    avsessionService->GetOtherPlayingSession(userId, bundleName);
+}
+
+void AVSessionServiceFuzzer::ReportSessionControlTest()
+{
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    std::string bundleName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    int32_t cmd = provider.ConsumeIntegral<int32_t>();
+    avsessionService->ReportSessionControl(bundleName, cmd);
+#endif
+}
+
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    int32_t systemAbilityId = provider.ConsumeIntegral<int32_t>();
+    OHOS::AVSession::AVSessionService service(systemAbilityId);
+    service.PullMigrateStub();
+    return 0;
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     if (size < MIN_SIZE_NUM) {
         return 0;
     }
+    SLOGI("the maximum length of size should not be verified");
+    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+        return 0;
+    }
+    RAW_DATA = data;
+    g_dataSize = size;
+    g_pos = 0;
     /* Run your code on data */
     FuzzTest(data, size);
     return 0;

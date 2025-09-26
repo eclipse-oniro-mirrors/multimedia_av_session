@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "avsession_errors.h"
 #include "avsession_log.h"
@@ -40,6 +41,10 @@ static const uint8_t* RAW_DATA = nullptr;
 const size_t THRESHOLD = 10;
 static size_t g_dataSize = 0;
 static size_t g_pos;
+constexpr size_t ELEMENTS_MAX_LENGTH = 128;
+const size_t MAX_BUFFER_SIZE = 64 * 1024;
+const size_t MAX_AVQUEUEINFO_SIZE = 512;
+FuzzedDataProvider provider(RAW_DATA, g_dataSize);
 
 /*
 * describe: get data from outside untrusted data(g_data) which size is according to sizeof(T)
@@ -126,6 +131,70 @@ void AvSessionServiceFuzzer::FuzzTests()
     avSessionService->CheckBeforeHandleStartCast(dataMessageParcel, outputDeviceInfo);
 }
 
+void AvSessionServiceStubFuzzer::MarshallingAVQueueInfosFuzzTest()
+{
+    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(avSessionService != nullptr);
+    MessageParcel reply;
+    std::vector<OHOS::AVSession::AVQueueInfo> avQueueInfos;
+    size_t elements = provider.ConsumeIntegralInRange<size_t>(0, ELEMENTS_MAX_LENGTH);
+    for (size_t i = 0; i < elements; ++i) {
+        OHOS::AVSession::AVQueueInfo info;
+        avQueueInfos.push_back(std::move(info));
+    }
+    avSessionService->MarshallingAVQueueInfos(reply, avQueueInfos);
+}
+
+void AvSessionServiceStubFuzzer::AVQueueInfoImgToBufferFuzzTest()
+{
+    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(avSessionService != nullptr);
+    std::vector<OHOS::AVSession::AVQueueInfo> avQueueInfos;
+    size_t elements = provider.ConsumeIntegralInRange<size_t>(0, ELEMENTS_MAX_LENGTH);
+    if (elements > SIZE_MAX / MAX_AVQUEUEINFO_SIZE) {
+        return;
+    }
+    for (size_t i = 0; i < elements; ++i) {
+        OHOS::AVSession::AVQueueInfo info;
+        avQueueInfos.push_back(std::move(info));
+    }
+    size_t requiredBufferSize = elements * MAX_AVQUEUEINFO_SIZE;
+    size_t bufferSize = std::min(requiredBufferSize, MAX_BUFFER_SIZE);
+    if (bufferSize == 0 || bufferSize > MAX_BUFFER_SIZE) {
+        return;
+    }
+    unsigned char* buffer = new unsigned char[bufferSize];
+    avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
+    delete[] buffer;
+}
+
+void AvSessionServiceStubFuzzer::HandleGetHistoricalAVQueueInfosFuzzTest()
+{
+    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(avSessionService != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    avSessionService->HandleGetHistoricalAVQueueInfos(data, reply);
+}
+
+void AvSessionServiceStubFuzzer::HandleSendSystemAVKeyEventFuzzTest()
+{
+    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(avSessionService != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    avSessionService->HandleSendSystemAVKeyEvent(data, reply);
+}
+
+void AvSessionServiceStubFuzzer::HandleGetDistributedSessionControllersInnerFuzzTest()
+{
+    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(avSessionService != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    avSessionService->HandleGetDistributedSessionControllersInner(data, reply);
+}
+
 void OHOS::AVSession::AvSessionServiceOnRemoteRequest()
 {
     auto aVSessionService = std::make_unique<AvSessionServiceFuzzer>();
@@ -140,11 +209,16 @@ void OHOS::AVSession::AvSessionServiceTests()
     aVSessionService->FuzzTests();
 }
 
-typedef void (*TestFuncs[2])();
+typedef void (*TestFuncs[7])();
 
 TestFuncs g_testFuncs = {
     AvSessionServiceOnRemoteRequest,
     AvSessionServiceTests,
+    AvSessionServiceStubFuzzer::MarshallingAVQueueInfosFuzzTest,
+    AvSessionServiceStubFuzzer::AVQueueInfoImgToBufferFuzzTest,
+    AvSessionServiceStubFuzzer::HandleGetHistoricalAVQueueInfosFuzzTest,
+    AvSessionServiceStubFuzzer::HandleSendSystemAVKeyEventFuzzTest,
+    AvSessionServiceStubFuzzer::HandleGetDistributedSessionControllersInnerFuzzTest,
 };
 
 static bool FuzzTest(const uint8_t* rawData, size_t size)

@@ -40,5 +40,19 @@ public:
     int32_t OnRemoteRequest();
     void AvSessionServiceTest001();
 };
+class AVSessionServiceFuzzer {
+public:
+    AVSessionServiceFuzzer() = default;
+    ~AVSessionServiceFuzzer() = default;
+    static void HandleBundleRemoveEventTest();
+    static void HandleChangeTopSessionTest();
+    static void UpdateOrderTest();
+    static void SelectFocusSessionTest();
+    static void RegisterAncoMediaSessionListenerTest();
+    static void HandleOtherSessionPlayingTest();
+    static void GetOtherPlayingSessionTest();
+    static void ReportSessionControlTest();
+};
+
 }
 #endif // OHOS_AVSESSIONSERVICE_FUZZER_H
