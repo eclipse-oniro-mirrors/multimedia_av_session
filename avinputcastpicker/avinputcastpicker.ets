@@ -25,6 +25,7 @@ interface AVInputCastPickerDeviceInfo {
   deviceIconName: string,
   isConnected: boolean,
   selectedIconName: string,
+  highQualityName?: string,
 }
 
 /**
@@ -60,6 +61,18 @@ export struct AVInputCastPicker {
    * Configuration color mode.
    */
   @State isDarkMode: boolean = false;
+  /**
+   * Scale of font size
+   */
+  @State fontSizeScale: number = 1;
+  /**
+   * Max scale of font size.
+   */
+  @State maxFontSizeScale: number = 2;
+  /**
+   * PC or not.
+   */
+  @State isPc: boolean = true;
   /**
    * Mirrored or not.
    */
@@ -100,7 +113,7 @@ export struct AVInputCastPicker {
       .fontSize('24vp')
       .fontColor((isSelected && !this.isDarkMode) ?
         [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
-      .renderingStrategy(SymbolRenderingStrategy.SINGLE)
+      .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_OPACITY)
   }
 
   @Builder
@@ -109,17 +122,30 @@ export struct AVInputCastPicker {
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor(item.isConnected ? (!this.isDarkMode ? $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
         (!this.isDarkMode ? $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
-      .width(254)
-      .padding({
-        left: 8,
-        top: 11,
-        right: 8,
-        bottom: 11
-      })
       .textOverflow({ overflow: TextOverflow.Ellipsis })
       .maxLines(2)
       .wordBreak(WordBreak.BREAK_WORD)
+      .maxFontScale(this.maxFontSizeScale)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
+  }
+
+  @Builder
+  highQualityIconBuilder(highQualityName: string) {
+    Row() {
+      Text(highQualityName)
+        .fontSize(7)
+        .fontWeight(FontWeight.Medium)
+        .fontColor($r('sys.color.font_secondary'))
+        .maxFontScale(this.maxFontSizeScale)
+    }
+    .borderRadius(3)
+    .border({
+      width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
+      color: $r('sys.color.font_secondary')
+    })
+    .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
+    .margin({top: 2})
+    .width('auto')
   }
 
   @Builder
@@ -139,7 +165,19 @@ export struct AVInputCastPicker {
             Row() {
               this.iconBuilder(item, false)
 
-              this.textBuilder(item)
+              Flex({direction: FlexDirection.Column, justifyContent: FlexAlign.Start}) {
+                this.textBuilder(item)
+                if (!!item.highQualityName) {
+                  this.highQualityIconBuilder(item.highQualityName)
+                }
+              }
+              .width(this.isPc ? 254 : 144)
+              .padding({
+                left: 8,
+                top: this.isPc ? 11 : (!item.highQualityName ? 17 : 7),
+                right: 8,
+                bottom: this.isPc ? 11 : (!item.highQualityName ? 17 : 7),
+              })
             }
             .alignItems(VerticalAlign.Center)
 
@@ -150,7 +188,7 @@ export struct AVInputCastPicker {
               .alignItems(VerticalAlign.Center)
             }
           }
-          .constraintSize({ minHeight: 40 })
+          .constraintSize({ minHeight: this.isPc ? 40 : 48 })
           .padding({ left: 12, right: 12 })
           .onTouch((event) => {
             if (event.type === TouchType.Down) {
@@ -160,9 +198,15 @@ export struct AVInputCastPicker {
             }
           })
           .backgroundColor(this.touchMenuItemIndex === index ? $r('sys.color.interactive_click') : '#00FFFFFF')
-          .borderRadius(this.touchMenuItemIndex === index ? $r('sys.float.corner_radius_level2') : 0)
+          .borderRadius(this.touchMenuItemIndex === index ?
+            (this.isPc ? $r('sys.float.corner_radius_level2') : $r('sys.float.corner_radius_level8')) : 0)
 
-          if (index !== this.deviceInfoList.length - 1) {
+          if (!this.isPc && (index != this.deviceInfoList.length - 1)) {
+            Divider()
+              .opacity(0.5)
+              .color($r('sys.color.comp_divider'))
+              .padding({ right: (this.isRTL ? 44 : 12), left: (this.isRTL ? 12 : 44) })
+          } else if (this.isPc && (index != this.deviceInfoList.length - 1)) {
             Row()
               .width('100%')
               .height(2)
@@ -177,8 +221,8 @@ export struct AVInputCastPicker {
         })
       })
     }
-    .width(326)
-    .borderRadius(8)
+    .width(this.isPc ? 326 : 216)
+    .borderRadius(this.isPc ? 8 : 20)
   }
 
   @Builder
@@ -226,6 +270,21 @@ export struct AVInputCastPicker {
         if (JSON.stringify(data['isDarkMode']) !== undefined) {
           console.info(TAG, `isDarkMode : ${JSON.stringify(data['isDarkMode'])}`);
           this.isDarkMode = data['isDarkMode'] as boolean;
+        }
+
+        if (data?.fontSizeScale !== undefined) {
+          console.info(TAG, `fontSizeScale : ${data?.fontSizeScale}`);
+          this.fontSizeScale = data?.fontSizeScale as number;
+        }
+
+        if (data?.maxFontSizeScale !== undefined) {
+          console.info(TAG, `maxFontSizeScale : ${data?.maxFontSizeScale}`);
+          this.maxFontSizeScale = data?.maxFontSizeScale as number;
+        }
+
+        if (data?.isPc !== undefined) {
+          console.info(TAG, `isPc : ${data?.isPc}`);
+          this.isPc = data?.isPc as boolean;
         }
 
         if (JSON.stringify(data['isRTL']) !== undefined) {
