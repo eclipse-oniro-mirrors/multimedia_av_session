@@ -325,17 +325,17 @@ void TaiheAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<
     HandleEvent(EVENT_CAST_VALID_COMMAND_CHANGED, execute);
 }
 
-int32_t TaiheAVCastControllerCallback::onDataSrcRead(std::shared_ptr<OHOS::AVSession::AVSharedMemory> mem,
-    uint32_t length, int64_t pos)
+int32_t TaiheAVCastControllerCallback::onDataSrcRead(const std::shared_ptr<OHOS::AVSession::AVSharedMemoryBase>& mem,
+    uint32_t length, int64_t pos, int32_t& result)
 {
     SLOGI("taihe onDataSrcRead length %{public}d", length);
-    return ReadDataSrc(mem, length, pos);
+    return ReadDataSrc(mem, length, pos, result);
 }
 
-int32_t TaiheAVCastControllerCallback::ReadDataSrc(std::shared_ptr<OHOS::AVSession::AVSharedMemory> mem,
-    uint32_t length, int64_t pos)
+int32_t TaiheAVCastControllerCallback::ReadDataSrc(const std::shared_ptr<OHOS::AVSession::AVSharedMemoryBase>& mem,
+    uint32_t length, int64_t pos, int32_t& result)
 {
-    int32_t result = 0;
+    result = 0;
     SLOGI("ReadDataSrc result %{public}d", result);
     return result;
 }
