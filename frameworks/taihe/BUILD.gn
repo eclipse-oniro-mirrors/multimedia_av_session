@@ -34,7 +34,9 @@ copy_taihe_idl("copy_taihe") {
   ]
   external_deps = [
     "image_framework:copy_image_taihe",
-    "input:key_event_taihe"
+    "input:input_event_taihe",
+    "input:key_code_taihe",
+    "input:key_event_taihe",
   ]
   deps = [":copy_taihe_deps"]
 }
@@ -106,6 +108,7 @@ taihe_shared_library("avsession_taihe") {
     "ability_runtime:ani_common",
     "ability_runtime:ani_wantagent_common",
     "ability_runtime:app_manager",
+    "ability_runtime:extensionkit_native",
     "ability_runtime:ui_extension",
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",
