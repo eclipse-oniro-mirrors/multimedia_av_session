@@ -1583,9 +1583,19 @@ ohos_unittest("AVSessionDumperTest") {
 
   configs = [ ":module_private_config" ]
 
-  cflags_cc = [ "--coverage" ]
+  cflags_cc = [ 
+    "--coverage",
+    "-fno-access-control",
+  ]
 
-  ldflags = [ "--coverage" ]
+  ldflags = [ 
+    "--coverage",
+    "-Wl,--wrap=time",
+    "-Wl,--wrap=localtime",
+    "-Wl,--wrap=strftime",
+    "-Wl,--wrap=clock_gettime",
+    "-Wl,--wrap=__localtime64",
+  ]
 
   deps = common_deps
 

@@ -474,6 +474,60 @@ static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher002, TestSize.Level
 }
 
 /**
+ * @tc.name: SuperLauncher003
+ * @tc.desc: Test SuperLauncher
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher003, TestSize.Level4)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    auto& manager = g_AVSessionService->GetUsersManager();
+    auto sessions = manager.GetContainerFromAll().GetAllSessions();
+    for (auto& session : sessions) {
+        if (session) {
+            g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+            session->Destroy();
+        }
+    }
+
+    g_AVSessionService->is2in1_ = false;
+
+    std::string devId = "***";
+    std::string extraInfo = "a,b";
+    g_AVSessionService->SuperLauncher(devId, "HuaweiCast", extraInfo, "IDLE");
+
+    EXPECT_EQ(g_AVSessionService->castServiceNameStatePair_.first, "HuaweiCast");
+    EXPECT_EQ(g_AVSessionService->castServiceNameStatePair_.second, "IDLE");
+}
+
+/**
+ * @tc.name: SuperLauncher004
+ * @tc.desc: Test SuperLauncher
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher004, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+
+    sptr<AVSessionItem> session =
+        g_AVSessionService->CreateSessionInner("AncoAudio", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    g_AVSessionService->is2in1_ = true;
+    std::string devId = "***";
+    std::string extraInfo = R"({SUPPORT_MIRROR_TO_STREAM: true})";
+    g_AVSessionService->SuperLauncher(devId, "HuaweiCast", extraInfo, "IDLE");
+
+    EXPECT_EQ(g_AVSessionService->castServiceNameStatePair_.first, "HuaweiCast");
+    EXPECT_EQ(g_AVSessionService->castServiceNameStatePair_.second, "IDLE");
+
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+    session->Destroy();
+}
+
+/**
  * @tc.name: SplitExtraInfo001
  * @tc.desc: Test SplitExtraInfo
  * @tc.type: FUNC

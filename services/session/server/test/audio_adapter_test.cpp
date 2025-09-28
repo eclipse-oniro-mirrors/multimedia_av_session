@@ -27,6 +27,9 @@ using namespace OHOS::AVSession;
 using OHOS::AudioStandard::AudioDeviceUsage;
 using OHOS::AudioStandard::AudioRendererChangeInfo;
 using OHOS::AudioStandard::RendererState;
+using OHOS::AudioStandard::AudioStreamManager;
+
+static std::vector<std::shared_ptr<AudioRendererChangeInfo>> g_mockRendererInfos;
 
 class AudioAdapterTest : public testing::Test {
 public:
@@ -228,6 +231,192 @@ static HWTEST(AudioAdapterTest, MuteAudioStream004, TestSize.Level0)
 }
 
 /**
+ * @tc.name: MuteAudioStream005
+ * @tc.desc: mute audio stream for valid uid TEST_CLIENT_UID
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, MuteAudioStream005, TestSize.Level4)
+{
+    SLOGI("MuteAudioStream005 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->clientPid = AudioAdapterTest::TEST_CLIENT_PID;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->backMute = false;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.MuteAudioStream(
+        AudioAdapterTest::TEST_CLIENT_UID,
+        AudioAdapterTest::TEST_CLIENT_PID
+    );
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: MuteAudioStream006
+ * @tc.desc: mute audio stream with invalid UID (UID not match)
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, MuteAudioStream006, TestSize.Level4)
+{
+    SLOGI("MuteAudioStream006 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID + 1;
+    info->clientPid = AudioAdapterTest::TEST_CLIENT_PID;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->backMute = false;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.MuteAudioStream(
+        AudioAdapterTest::TEST_CLIENT_UID,
+        AudioAdapterTest::TEST_CLIENT_PID
+    );
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: MuteAudioStream007
+ * @tc.desc: mute audio stream with invalid PID (PID not match)
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, MuteAudioStream007, TestSize.Level4)
+{
+    SLOGI("MuteAudioStream007 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->clientPid = AudioAdapterTest::TEST_CLIENT_PID + 1;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->backMute = false;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.MuteAudioStream(
+        AudioAdapterTest::TEST_CLIENT_UID,
+        AudioAdapterTest::TEST_CLIENT_PID
+    );
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: MuteAudioStream008
+ * @tc.desc: mute audio stream with renderer state not RUNNING
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, MuteAudioStream008, TestSize.Level4)
+{
+    SLOGI("MuteAudioStream008 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->clientPid = AudioAdapterTest::TEST_CLIENT_PID;
+    info->rendererState = RendererState::RENDERER_STOPPED;
+    info->backMute = false;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.MuteAudioStream(
+        AudioAdapterTest::TEST_CLIENT_UID,
+        AudioAdapterTest::TEST_CLIENT_PID
+    );
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: MuteAudioStream009
+ * @tc.desc: mute audio stream with backMute already true
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, MuteAudioStream009, TestSize.Level4)
+{
+    SLOGI("MuteAudioStream009 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->clientPid = AudioAdapterTest::TEST_CLIENT_PID;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->backMute = true;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.MuteAudioStream(
+        AudioAdapterTest::TEST_CLIENT_UID,
+        AudioAdapterTest::TEST_CLIENT_PID
+    );
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: MuteAudioStream010
+ * @tc.desc: mute audio stream with streamUsage not in BACKGROUND_MUTE_STREAM_USAGE
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, MuteAudioStream010, TestSize.Level4)
+{
+    SLOGI("MuteAudioStream010 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->clientPid = AudioAdapterTest::TEST_CLIENT_PID;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->backMute = false;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_VOICE_COMMUNICATION;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.MuteAudioStream(
+        AudioAdapterTest::TEST_CLIENT_UID,
+        AudioAdapterTest::TEST_CLIENT_PID
+    );
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
 * @tc.name: UnMuteAudioStream001
 * @tc.desc: unmute audio stream for valid uid TEST_CLIENT_UID
 * @tc.type: FUNC
@@ -352,6 +541,173 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream004, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UnMuteAudioStream005
+ * @tc.desc: unmute audio stream for valid uid, all conditions matched
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, UnMuteAudioStream005, TestSize.Level4)
+{
+    SLOGI("UnMuteAudioStream005 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
+    info->backMute = true;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: UnMuteAudioStream006
+ * @tc.desc: unmute audio stream with invalid UID (not match)
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, UnMuteAudioStream006, TestSize.Level4)
+{
+    SLOGI("UnMuteAudioStream006 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID + 1;
+    info->rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
+    info->backMute = true;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: UnMuteAudioStream007
+ * @tc.desc: unmute audio stream with renderer state not RUNNING
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, UnMuteAudioStream007, TestSize.Level4)
+{
+    SLOGI("UnMuteAudioStream007 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->rendererState = OHOS::AudioStandard::RENDERER_STOPPED;
+    info->backMute = true;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: UnMuteAudioStream008
+ * @tc.desc: unmute audio stream with backMute == false (no need unmute)
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, UnMuteAudioStream008, TestSize.Level4)
+{
+    SLOGI("UnMuteAudioStream008 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info->rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
+    info->backMute = false;
+    info->rendererInfo.streamUsage = OHOS::AudioStandard::STREAM_USAGE_MUSIC;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: UnMuteAudioStream009
+ * @tc.desc: unmute with multiple renderers, only one matches UID
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, UnMuteAudioStream009, TestSize.Level4)
+{
+    SLOGI("UnMuteAudioStream009 begin!");
+    auto info1 = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info1 != nullptr);
+    info1->clientUID = AudioAdapterTest::TEST_CLIENT_UID + 1;
+    info1->rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
+    info1->backMute = true;
+
+    auto info2 = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info2 != nullptr);
+    info2->clientUID = AudioAdapterTest::TEST_CLIENT_UID;
+    info2->rendererState = OHOS::AudioStandard::RENDERER_RUNNING;
+    info2->backMute = true;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info1);
+    g_mockRendererInfos.push_back(info2);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: UnMuteAudioStream010
+ * @tc.desc: unmute with no renderer matching any condition
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, UnMuteAudioStream010, TestSize.Level4)
+{
+    SLOGI("UnMuteAudioStream010 begin!");
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info != nullptr);
+    info->clientUID = AudioAdapterTest::TEST_CLIENT_UID + 1;
+    info->rendererState = OHOS::AudioStandard::RENDERER_STOPPED;
+    info->backMute = false;
+
+    g_mockRendererInfos.clear();
+    g_mockRendererInfos.push_back(info);
+
+    auto& adapter = AudioAdapter::GetInstance();
+    adapter.Init();
+    adapter.is2in1_ = false;
+
+    auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: GetRendererRunning001
 * @tc.desc: Test GetRendererRunning
 * @tc.type: FUNC
@@ -421,6 +777,29 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceUpdated001, TestSize.Leve
         std::vector<OHOS::AVSession::AudioAdapter::PreferOutputDeviceChangeListener>();
     audioAdapter.OnPreferredOutputDeviceUpdated(desc);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnPreferredOutputDeviceUpdated002
+ * @tc.desc: Verify that null listeners are safely skipped in OnPreferredOutputDeviceUpdated.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceUpdated002, TestSize.Level4)
+{
+    SLOGD("OnPreferredOutputDeviceUpdated002 begin!");
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    audioAdapter.Init();
+    audioAdapter.deviceChangeListeners_.clear();
+    AudioAdapter::PreferOutputDeviceChangeListener nullListener;
+    audioAdapter.deviceChangeListeners_.push_back(nullListener);
+    audioAdapter.deviceChangeListeners_.push_back([](const AudioDeviceDescriptors&){});
+    AudioDeviceDescriptors desc;
+    EXPECT_FALSE(audioAdapter.deviceChangeListeners_.empty());
+    auto device = std::make_shared<AudioDeviceDescriptor>(OHOS::AudioStandard::DEVICE_TYPE_SPEAKER);
+    desc.push_back(device);
+    audioAdapter.OnPreferredOutputDeviceUpdated(desc);
+    audioAdapter.deviceChangeListeners_.clear();
 }
 
 /**
@@ -510,7 +889,7 @@ static HWTEST(AudioAdapterTest, OnVolumeKeyEvent001, TestSize.Level0)
         [&volume] (int32_t volumeNum) {
         volume = volumeNum;
     });
-    
+
     AudioAdapter::GetInstance().SetVolume(AudioAdapter::GetInstance().GetVolume());
     sleep(1);
     EXPECT_TRUE(volume != -1);

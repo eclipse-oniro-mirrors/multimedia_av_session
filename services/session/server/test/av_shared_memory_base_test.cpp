@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <unistd.h>
+#include <sys/mman.h>
 
 #include "av_shared_memory_base.h"
 #include "avsession_errors.h"
@@ -35,7 +36,11 @@ public:
    void TearDown();
 };
 
-void AVSharedMemoryBaseTest::SetUpTestCase() {}
+void AVSharedMemoryBaseTest::SetUpTestCase()
+{
+    system("killall com.example.himusicdemo");
+    sleep(1);
+}
 
 void AVSharedMemoryBaseTest::TearDownTestCase() {}
 
@@ -89,6 +94,45 @@ static HWTEST(AVSharedMemoryBaseTest, Unmarshalling003, TestSize.Level0)
     parcel.WriteString("test");
     auto unmarshallingPtr = AVSharedMemoryBase::Unmarshalling(parcel);
     EXPECT_EQ(unmarshallingPtr, nullptr);
+}
+
+/**
+ * @tc.name: Unmarshalling004
+ * @tc.desc: Test Unmarshalling with valid ashmem fd
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Unmarshalling004, TestSize.Level4)
+{
+    int fd = AshmemCreate("test_ashmem", 4096);
+    ASSERT_GT(fd, 0) << "AshmemCreate failed";
+
+    OHOS::MessageParcel parcel;
+    parcel.WriteFileDescriptor(fd);
+    parcel.WriteInt32(4096);
+    parcel.WriteUint32(0);
+    parcel.WriteString("test_ashmem");
+    auto unmarshallingPtr = AVSharedMemoryBase::Unmarshalling(parcel);
+    EXPECT_NE(unmarshallingPtr, nullptr);
+    close(fd);
+}
+
+/**
+ * @tc.name: Unmarshalling005
+ * @tc.desc: Test Unmarshalling when ashmem fd size != size in parcel
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Unmarshalling005, TestSize.Level0)
+{
+    SLOGI("Unmarshalling005 begin!");
+    int fd = AshmemCreate("test_ashmem", 4096);
+    ASSERT_GT(fd, 0) << "AshmemCreate failed";
+    OHOS::MessageParcel parcel;
+    parcel.WriteFileDescriptor(fd);
+    parcel.WriteInt32(2048);
+    parcel.WriteUint32(0);
+    parcel.WriteString("test_ashmem");
+    auto memory = AVSharedMemoryBase::Unmarshalling(parcel);
+    EXPECT_EQ(memory, nullptr);
 }
 
 /**
@@ -382,5 +426,337 @@ static HWTEST(AVSharedMemoryBaseTest, Read006, TestSize.Level0)
     delete[] out;
 }
 
+/**
+ * @tc.name: Read007
+ * @tc.desc: set position equal to INVALID_POSITION, read valid data from start
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Read007, TestSize.Level4)
+{
+    SLOGI("Read007 begin!");
+    auto memory = std::make_shared<AVSharedMemoryBase>(10, 0, "test");
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->MapMemory(false);
+    uint8_t testData = 42;
+    memory->Write(&testData, 1, 0);
+    uint8_t out = 0;
+    int32_t ret = memory->Read(&out, 1, AVSharedMemoryBase::INVALID_POSITION);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: CreateFromLocal_Success
+ * @tc.desc: Test CreateFromLocal with valid parameters
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, CreateFromLocal001, TestSize.Level4)
+{
+    SLOGI("CreateFromLocal001 begin!");
+
+    int32_t size = 4096;
+    uint32_t flags = 0;
+    const std::string name = "test_ashmem";
+    auto memory = AVSharedMemoryBase::CreateFromLocal(size, flags, name);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    EXPECT_NE(memory, nullptr);
+    if (memory != nullptr) {
+        EXPECT_EQ(memory->GetSize(), size);
+        EXPECT_NE(memory->GetBase(), nullptr);
+    }
+}
+
+/**
+ * @tc.name: CreateFromLocal002
+ * @tc.desc: Test CreateFromLocal when Init fails due to invalid size
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, CreateFromLocal002, TestSize.Level0)
+{
+    SLOGI("CreateFromLocal002 begin!");
+
+    int32_t size = 0;
+    uint32_t flags = 0;
+    const std::string name = "test_ashmem";
+    auto memory = AVSharedMemoryBase::CreateFromLocal(size, flags, name);
+    EXPECT_EQ(memory, nullptr);
+}
+
+/**
+ * @tc.name: CreateFromRemote001
+ * @tc.desc: Test CreateFromRemote when ashmem fd size != capacity, triggers Init() failure
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, CreateFromRemote001, TestSize.Level4)
+{
+    SLOGI("CreateFromRemote001 begin!");
+    const int realSize = 4096;
+    const std::string ashmem_name = "test_remote_ashmem";
+    int fd = AshmemCreate(ashmem_name.c_str(), realSize);
+    ASSERT_GT(fd, 0);
+    int32_t wrong_size = 2048;
+    uint32_t flags = 0;
+    const std::string name = "remote_memory";
+    auto memory = AVSharedMemoryBase::CreateFromRemote(fd, wrong_size, flags, name);
+    EXPECT_EQ(memory, nullptr);
+    close(fd);
+}
+
+/**
+ * @tc.name: Init001
+ * @tc.desc: Test Init() when capacity_ <= 0, triggers "size is invalid" log and return error
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Init001, TestSize.Level4)
+{
+    SLOGI("Init001 begin!");
+    int32_t size = 0;
+    uint32_t flags = 0;
+    const std::string name = "test_invalid_size";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    int32_t ret = memory->Init();
+    EXPECT_EQ(ret, static_cast<int32_t>(ERR_INVALID_PARAM));
+    EXPECT_LE(memory->capacity_, 0);
+}
+
+/**
+ * @tc.name: Init002
+ * @tc.desc: Test Init() when fd_ > 0 but ashmem size != capacity_
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Init002, TestSize.Level4)
+{
+    SLOGI("Init002 begin!");
+    int fd = AshmemCreate("test_remote", 4096);
+    ASSERT_GT(fd, 0);
+    int32_t wrong_size = 2048;
+    uint32_t flags = 0;
+    const std::string name = "remote_memory";
+    auto memory = std::make_shared<AVSharedMemoryBase>(wrong_size, flags, name);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    EXPECT_GT(memory->fd_, 0);
+    int32_t ret = memory->Init();
+    EXPECT_EQ(ret, static_cast<int32_t>(ERR_INVALID_PARAM));
+    close(fd);
+}
+
+/**
+ * @tc.name: Init003
+ * @tc.desc: Test Init() when fd_ > 0 and ashmem size == capacity_
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Init003, TestSize.Level4)
+{
+    SLOGI("Init003 begin!");
+    int fd = AshmemCreate("test_remote", 4096);
+    ASSERT_GT(fd, 0) << "AshmemCreate failed";
+    int32_t size = 4096;
+    uint32_t flags = 0;
+    const std::string name = "remote_memory";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    EXPECT_GT(memory->fd_, 0);
+    int32_t ret = memory->Init();
+    EXPECT_EQ(ret, static_cast<int32_t>(AVSESSION_SUCCESS));
+    close(fd);
+}
+
+/**
+ * @tc.name: Init004
+ * @tc.desc: Test Init() when isMapVirAddr=true and mmap fails due to closed fd,
+ *           triggers "MapMemory failed" error
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ */
+static HWTEST(AVSharedMemoryBaseTest, Init004, TestSize.Level4)
+{
+    SLOGI("Init004 begin!");
+    int fd = AshmemCreate("test_memory", 4096);
+    ASSERT_GT(fd, 0) << "AshmemCreate failed";
+    close(fd);
+    int32_t size = 4096;
+    uint32_t flags = 0;
+    const std::string name = "closed_fd_memory";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    int32_t ret = memory->Init();
+    EXPECT_EQ(ret, static_cast<int32_t>(ERR_INVALID_PARAM));
+    close(fd);
+}
+
+/**
+ * @tc.name: Init005
+ * @tc.desc: Test Init() when fd_ > 0 and isMapVirAddr=false,
+ *           skips MapMemory call (covers false branch of if (isMapVirAddr))
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Init005, TestSize.Level4)
+{
+    SLOGI("Init005 begin!");
+    const char* ashmemName = "test_ashmem";
+    int32_t capacity_ = 4096;
+    int fd = AshmemCreate(ashmemName, capacity_);
+    ASSERT_GT(fd, 0);
+    uint32_t flags = 0;
+    const std::string name = "skip_map_memory";
+    auto memory = std::make_shared<AVSharedMemoryBase>(capacity_, flags, name);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    EXPECT_EQ(memory->capacity_, capacity_);
+    EXPECT_EQ(memory->fd_, fd);
+    int32_t ret = memory->Init(false);
+    EXPECT_EQ(ret, static_cast<int32_t>(AVSESSION_SUCCESS));
+    EXPECT_EQ(memory->base_, nullptr) << "base_ should be null when not mapped";
+    close(fd);
+}
+
+/**
+ * @tc.name: MapMemory001
+ * @tc.desc: Test MapMemory when isRemote=false, flags_ has no FLAGS_READ_ONLY,
+ *           prot remains PROT_READ | PROT_WRITE
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, MapMemory001, TestSize.Level4)
+{
+    SLOGI("MapMemory001 begin!");
+    int fd = AshmemCreate("test_local", 4096);
+    ASSERT_GT(fd, 0);
+    auto memory = std::make_shared<AVSharedMemoryBase>(4096, 0, "local_rw");
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    memory->capacity_ = 4096;
+    int32_t ret = memory->MapMemory(false);
+    EXPECT_EQ(ret, static_cast<int32_t>(AVSESSION_SUCCESS));
+    EXPECT_NE(memory->base_, nullptr);
+    close(fd);
+}
+
+/**
+ * @tc.name: MapMemory002
+ * @tc.desc: Test MapMemory when isRemote=false, flags_ has FLAGS_READ_ONLY,
+ *           but isRemote=false so prot remains writeable (short-circuit)
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, MapMemory002, TestSize.Level4)
+{
+    SLOGI("MapMemory002 begin!");
+    int fd = AshmemCreate("test_local_ro", 4096);
+    ASSERT_GT(fd, 0);
+    auto memory = std::make_shared<AVSharedMemoryBase>(4096,
+         AVSharedMemory::FLAGS_READ_ONLY, "local_ro");
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    memory->capacity_ = 4096;
+    int32_t ret = memory->MapMemory(false);
+    EXPECT_EQ(ret, static_cast<int32_t>(AVSESSION_SUCCESS));
+    EXPECT_NE(memory->base_, nullptr);
+    if (memory->base_ != nullptr) {
+        munmap(memory->base_, memory->capacity_);
+        memory->base_ = nullptr;
+    }
+    close(fd);
+}
+
+/**
+ * @tc.name: MapMemory003
+ * @tc.desc: Test MapMemory when isRemote=true, flags_ has no FLAGS_READ_ONLY,
+ *           prot remains PROT_READ | PROT_WRITE
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, MapMemory003, TestSize.Level4)
+{
+    SLOGI("MapMemory003 begin!");
+    int fd = AshmemCreate("test_remote", 4096);
+    ASSERT_GT(fd, 0);
+    auto memory = std::make_shared<AVSharedMemoryBase>(4096, 0, "remote_rw");
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    memory->capacity_ = 4096;
+    int32_t ret = memory->MapMemory(true);
+    EXPECT_EQ(ret, static_cast<int32_t>(AVSESSION_SUCCESS));
+    EXPECT_NE(memory->base_, nullptr);
+    close(fd);
+}
+
+/**
+ * @tc.name: MapMemory004
+ * @tc.desc: Test MapMemory when isRemote=true, flags_ has FLAGS_READ_ONLY,
+ *           prot becomes PROT_READ only
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, MapMemory004, TestSize.Level4)
+{
+    SLOGI("MapMemory004 begin!");
+    int fd = AshmemCreate("test_remote_ro", 4096);
+    ASSERT_GT(fd, 0);
+    auto memory = std::make_shared<AVSharedMemoryBase>(4096,
+        AVSharedMemory::FLAGS_READ_ONLY, "remote_ro");
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    memory->capacity_ = 4096;
+    int32_t ret = memory->MapMemory(true);
+    EXPECT_EQ(ret, static_cast<int32_t>(AVSESSION_SUCCESS));
+    EXPECT_NE(memory->base_, nullptr);
+    close(fd);
+}
+
+/**
+ * @tc.name: MapMemory006
+ * @tc.desc: Test MapMemory when fd_ is closed, AshmemSetProt fails
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, MapMemory006, TestSize.Level4)
+{
+    SLOGI("MapMemory006 begin!");
+    int fd = AshmemCreate("test_closed", 4096);
+    ASSERT_GT(fd, 0);
+    auto memory = std::make_shared<AVSharedMemoryBase>(4096, 0, "closed_fd");
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
+    memory->fd_ = fd;
+    memory->capacity_ = 4096;
+    close(fd);
+    int32_t ret = memory->MapMemory(false);
+    EXPECT_EQ(ret, static_cast<int32_t>(AVSESSION_ERROR));
+    EXPECT_EQ(memory->base_, nullptr);
+}
 } //AVSession
 } //OHOS

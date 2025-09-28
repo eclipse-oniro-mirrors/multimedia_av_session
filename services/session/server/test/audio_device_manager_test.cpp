@@ -18,6 +18,7 @@
 #include "audio_device_manager.h"
 #include "avsession_log.h"
 #include "migrate_avsession_server.h"
+#include "avsession_service.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -151,6 +152,119 @@ static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo001, TestSize.Leve
     std::string deviceId = "test";
     AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
     EXPECT_TRUE(AudioDeviceManager::GetInstance().migrateSession_ != nullptr);
+}
+
+/**
+ * @tc.name: ClearRemoteAvSessionInfo002
+ * @tc.desc: test ClearRemoteAvSessionInfo
+ * @tc.type: FUNC
+ */
+static HWTEST(AudioDeviceManagerTest, ClearRemoteAvSessionInfo002, TestSize.Level4)
+{
+    SLOGI("ClearRemoteAvSessionInfo002 begin!");
+    AudioDeviceManager::GetInstance().migrateSession_ = nullptr;
+    std::string deviceId = "test";
+    AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
+    EXPECT_TRUE(AudioDeviceManager::GetInstance().migrateSession_ == nullptr);
+}
+
+/**
+ * @tc.name: OnPreferredOutputDeviceUpdated001
+ * @tc.desc: test OnPreferredOutputDeviceUpdated when device descriptor list is empty
+ * @tc.desc: Test when the device descriptor list is empty.
+ */
+static HWTEST(AudioDeviceManagerTest, OnPreferredOutputDeviceUpdated001, TestSize.Level4)
+{
+    SLOGI("OnPreferredOutputDeviceUpdated001 begin!");
+    auto callback = std::make_shared<OutputDeviceChangeCallback>();
+    CHECK_AND_RETURN(callback != nullptr);
+    std::vector<std::shared_ptr<OHOS::AudioStandard::AudioDeviceDescriptor>> desc;
+    callback->OnPreferredOutputDeviceUpdated(desc);
+    EXPECT_TRUE(desc.empty());
+}
+
+/**
+ * @tc.name  : OnPreferredOutputDeviceUpdated002
+ * @tc.number: OnPreferredOutputDeviceUpdatedTest_002
+ * @tc.desc  : Test when the device descriptor list is not empty but the first element is empty.
+ */
+static HWTEST(AudioDeviceManagerTest, OnPreferredOutputDeviceUpdated002, TestSize.Level4)
+{
+    SLOGI("OnPreferredOutputDeviceUpdated002 begin!");
+    auto callback = std::make_shared<OutputDeviceChangeCallback>();
+    CHECK_AND_RETURN(callback != nullptr);
+    std::vector<std::shared_ptr<OHOS::AudioStandard::AudioDeviceDescriptor>> desc;
+    desc.push_back(nullptr);
+    EXPECT_EQ(desc.size(), 1);
+    EXPECT_EQ(desc[0], nullptr);
+    callback->OnPreferredOutputDeviceUpdated(desc);
+}
+
+/**
+ * @tc.name  : OnPreferredOutputDeviceUpdated003
+ * @tc.number: OnPreferredOutputDeviceUpdatedTest_003
+ * @tc.desc  : Test when the device is a local device and the current status is source,
+ *             The function should return directly without updating the state.
+ */
+static HWTEST(AudioDeviceManagerTest, OnPreferredOutputDeviceUpdated003, TestSize.Level4)
+{
+    SLOGI("OnPreferredOutputDeviceUpdated003 begin!");
+    auto callback = std::make_shared<OutputDeviceChangeCallback>();
+    CHECK_AND_RETURN(callback != nullptr);
+    auto desc = std::make_shared<OHOS::AudioStandard::AudioDeviceDescriptor>();
+    CHECK_AND_RETURN(desc != nullptr);
+    desc->networkId_ = OHOS::AudioStandard::LOCAL_NETWORK_ID;
+    std::vector<std::shared_ptr<OHOS::AudioStandard::AudioDeviceDescriptor>> deviceList;
+    deviceList.push_back(desc);
+    AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SOURCE);
+    EXPECT_EQ(AudioDeviceManager::GetInstance().GetAudioState(), AUDIO_OUTPUT_SOURCE);
+    EXPECT_EQ(deviceList[0]->networkId_, OHOS::AudioStandard::LOCAL_NETWORK_ID);
+    callback->OnPreferredOutputDeviceUpdated(deviceList);
+    EXPECT_EQ(AudioDeviceManager::GetInstance().GetAudioState(), AUDIO_OUTPUT_SOURCE);
+}
+
+/**
+ * @tc.name  : OnPreferredOutputDeviceUpdated004
+ * @tc.number: OnPreferredOutputDeviceUpdatedTest_004
+ * @tc.desc  : Test when the device is a local device and the current state is SINK,
+ *             the function should switch the state to SOURCE and clear remote session information.
+ */
+static HWTEST(AudioDeviceManagerTest, OnPreferredOutputDeviceUpdated004, TestSize.Level4)
+{
+    SLOGI("OnPreferredOutputDeviceUpdated004 begin!");
+    auto callback = std::make_shared<OutputDeviceChangeCallback>();
+    auto desc = std::make_shared<OHOS::AudioStandard::AudioDeviceDescriptor>();
+    desc->networkId_ = OHOS::AudioStandard::LOCAL_NETWORK_ID;
+    std::vector<std::shared_ptr<OHOS::AudioStandard::AudioDeviceDescriptor>> deviceList;
+    deviceList.push_back(desc);
+    auto migrateSession = std::make_shared<MigrateAVSessionServer>();
+    AudioDeviceManager::GetInstance().migrateSession_ = migrateSession;
+    AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SINK);
+    EXPECT_EQ(AudioDeviceManager::GetInstance().GetAudioState(), AUDIO_OUTPUT_SINK);
+    callback->OnPreferredOutputDeviceUpdated(deviceList);
+    EXPECT_EQ(AudioDeviceManager::GetInstance().GetAudioState(), AUDIO_OUTPUT_SOURCE);
+    EXPECT_NE(AudioDeviceManager::GetInstance().migrateSession_, nullptr);
+}
+
+/**
+ * @tc.name  : OnPreferredOutputDeviceUpdated005
+ * @tc.number: OnPreferredOutputDeviceUpdatedTest_005
+ * @tc.desc  : Testing when the device is a remote device and the current status is sink.
+ */
+static HWTEST(AudioDeviceManagerTest, OnPreferredOutputDeviceUpdated005, TestSize.Level4)
+{
+    SLOGI("OnPreferredOutputDeviceUpdated005 begin!");
+    auto callback = std::make_shared<OutputDeviceChangeCallback>();
+    CHECK_AND_RETURN(callback != nullptr);
+    auto desc = std::make_shared<OHOS::AudioStandard::AudioDeviceDescriptor>();
+    CHECK_AND_RETURN(desc != nullptr);
+    desc->networkId_ = "remote_device_123";
+    std::vector<std::shared_ptr<OHOS::AudioStandard::AudioDeviceDescriptor>> deviceList;
+    deviceList.push_back(desc);
+    AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SINK);
+    EXPECT_EQ(AudioDeviceManager::GetInstance().GetAudioState(), AUDIO_OUTPUT_SINK);
+    callback->OnPreferredOutputDeviceUpdated(deviceList);
+    EXPECT_EQ(AudioDeviceManager::GetInstance().GetAudioState(), AUDIO_OUTPUT_SINK);
 }
 
 /**
