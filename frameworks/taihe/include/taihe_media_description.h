@@ -87,6 +87,9 @@ private:
     static int32_t GetPcmSrc(AVMediaDescription const &in, OHOS::AVSession::AVMediaDescription &out);
     static int32_t SetPcmSrc(const OHOS::AVSession::AVMediaDescription &in, AVMediaDescription &out);
 
+    static int32_t GetLaunchClientData(AVMediaDescription const &in, OHOS::AVSession::AVMediaDescription &out);
+    static int32_t SetLaunchClientData(const OHOS::AVSession::AVMediaDescription &in, AVMediaDescription &out);
+
     static int32_t GetDrmScheme(AVMediaDescription const &in, OHOS::AVSession::AVMediaDescription &out);
     static int32_t SetDrmScheme(const OHOS::AVSession::AVMediaDescription &in, AVMediaDescription &out);
 
