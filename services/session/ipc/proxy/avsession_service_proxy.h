@@ -118,6 +118,12 @@ public:
     int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
         std::vector<sptr<IRemoteObject>>& sessionControllers) override;
 
+    int32_t GetSession(const AppExecFwk::ElementName& elementName,
+        std::string& tag, std::shared_ptr<AVSession>& session);
+
+    int32_t GetSessionInner(const AppExecFwk::ElementName& elementName,
+        std::string& tag, sptr<IRemoteObject>& session) override;
+
 private:
     void UnMarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos);
     void BufferToAVQueueInfoImg(const char *buffer, std::vector<AVQueueInfo>& avQueueInfos);

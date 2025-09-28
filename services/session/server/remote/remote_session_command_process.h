@@ -153,6 +153,12 @@ public:
     {
         return AVSESSION_SUCCESS;
     }
+
+    int32_t GetSessionInner(const AppExecFwk::ElementName& elementName,
+        std::string& tag, sptr<IRemoteObject>& session) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 private:
     static sptr<IRemoteObject>& impl_;
     static inline BrokerDelegator<RemoteSessionCommandProcess> delegator_;

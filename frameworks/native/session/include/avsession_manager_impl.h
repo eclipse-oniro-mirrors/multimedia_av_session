@@ -97,6 +97,9 @@ public:
     int32_t GetDistributedSessionControllers(const DistributedSessionType& sessionType,
         std::vector<std::shared_ptr<AVSessionController>>& sessionControllers) override;
 
+    int32_t GetSession(const AppExecFwk::ElementName& elementName,
+        std::string& tag, std::shared_ptr<AVSession>& session) override;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes) override;
 

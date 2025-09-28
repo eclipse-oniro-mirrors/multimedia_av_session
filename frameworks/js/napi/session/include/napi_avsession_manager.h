@@ -34,6 +34,7 @@ public:
     static std::map<int32_t, int32_t> errcode_;
 
 private:
+    static napi_value GetAVSession(napi_env env, napi_callback_info info);
     static napi_value CreateAVSession(napi_env env, napi_callback_info info);
     static napi_value GetAllSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info);

@@ -67,6 +67,22 @@ int32_t AVSessionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
+int32_t AVSessionServiceStub::HandleGetSessionInner(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::GetSession");
+    sptr elementName = data.ReadParcelable<AppExecFwk::ElementName>();
+    CHECK_AND_RETURN_RET_LOG(elementName != nullptr, ERR_NONE,
+        "read element name failed, reply:%{public}d", reply.WriteInt32(ERR_UNMARSHALLING));
+    sptr<IRemoteObject> object;
+    std::string sessionTag = "";
+    auto ret = GetSessionInner(*elementName, sessionTag, object);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "getsessioninner fail:%{public}d", ret);
+    CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");
+    CHECK_AND_PRINT_LOG(reply.WriteString(sessionTag), "write tag failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleCreateSessionInner(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateSessionInner");

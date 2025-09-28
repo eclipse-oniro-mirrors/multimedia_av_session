@@ -1576,6 +1576,19 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     return result;
 }
 
+bool AVSessionService::IsElementNameValid(const AppExecFwk::ElementName& elementName)
+{
+    CHECK_AND_RETURN_RET_LOG(!elementName.GetBundleName().empty() && !elementName.GetAbilityName().empty(),
+        false, "bundleName:%{public}d or abilityName:%{public}d empty",
+        elementName.GetBundleName().empty(), elementName.GetAbilityName().empty());
+    std::regex nameRegex("[A-Za-z\\w\\.]*");
+    CHECK_AND_RETURN_RET_LOG(std::regex_match(elementName.GetBundleName(), nameRegex), false,
+        "err regex when check session, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
+    CHECK_AND_RETURN_RET_LOG(std::regex_match(elementName.GetAbilityName(), nameRegex), false,
+        "err regex when check session, abilityName=%{public}s", (elementName.GetAbilityName()).c_str());
+    return true;
+}
+
 bool AVSessionService::IsParamInvalid(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName)
 {
     if (tag.empty()) {
@@ -1591,19 +1604,8 @@ bool AVSessionService::IsParamInvalid(const std::string& tag, int32_t type, cons
         SLOGE("element is invalid when create session");
         return false;
     }
-    if (GetCallingUid() == audioBrokerUid && tag == "ancoMediaSession") {
-        return true;
-    }
-    std::regex nameRegex("[A-Za-z\\w\\.]*");
-    if (!std::regex_match(elementName.GetBundleName(), nameRegex)) {
-        SLOGE("err regex when create session, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
-        return false;
-    }
-    if (!std::regex_match(elementName.GetAbilityName(), nameRegex)) {
-        SLOGE("err regex when create session, abilityName=%{public}s", (elementName.GetAbilityName()).c_str());
-        return false;
-    }
-
+    CHECK_AND_RETURN_RET_LOG(GetCallingUid() != audioBrokerUid || tag != "ancoMediaSession", true, "anco not check");
+    CHECK_AND_RETURN_RET_LOG(IsElementNameValid(elementName), false, "element is invalid when check session");
     return true;
 }
 
@@ -1633,6 +1635,30 @@ void AVSessionService::AddExtraFrontSession(int32_t type, sptr<AVSessionItem>& s
         SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
         sessionListForFront->push_front(sessionItem);
     }
+}
+
+int32_t AVSessionService::GetSessionInner(const AppExecFwk::ElementName& elementName,
+    std::string& tag, sptr<IRemoteObject>& session)
+{
+    CHECK_AND_RETURN_RET_LOG(IsElementNameValid(elementName), ERR_INVALID_PARAM, "elementName invalid");
+
+    auto pid = GetCallingPid();
+    auto uid = GetCallingUid();
+    std::lock_guard lockGuard(sessionServiceLock_);
+    sptr<AVSessionItem> sessionWanted = GetContainer().GetSessionByUid(uid);
+    CHECK_AND_RETURN_RET_LOG(sessionWanted != nullptr, ERR_SESSION_NOT_EXIST,
+        "process %{public}d:%{public}d has no session", pid, uid);
+    CHECK_AND_RETURN_RET_LOG(sessionWanted->GetPid() == pid, ERR_SESSION_NOT_EXIST,
+        "process pid not fit:%{public}d vs %{public}d", pid, sessionWanted->GetPid());
+    CHECK_AND_RETURN_RET_LOG(sessionWanted->GetBundleName() == elementName.GetBundleName(), ERR_SESSION_NOT_EXIST,
+        "process bundleName not fit:%{public}s vs %{public}s",
+        elementName.GetBundleName().c_str(), sessionWanted->GetBundleName().c_str());
+
+    SLOGI("GetSession success:%{public}d:%{public}d|%{public}s|%{public}s", pid, uid,
+        elementName.GetBundleName().c_str(), sessionWanted->GetSessionTag().c_str());
+    session = sessionWanted;
+    tag = sessionWanted->GetSessionTag();
+    return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,

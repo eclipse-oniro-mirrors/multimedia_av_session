@@ -28,6 +28,7 @@ public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
+    int32_t HandleGetSessionInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateSessionInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
@@ -62,6 +63,8 @@ private:
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
     std::map<uint32_t, HandlerFunc> handlers = {
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSessionInner(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleCreateSessionInner(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS),
@@ -123,6 +126,8 @@ private:
             return HandleRegisterAncoMediaSessionListener(data, reply); }}
     };
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION),
+            "HandleGetSessionInner"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_SESSION),
             "HandleCreateSessionInner"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS),

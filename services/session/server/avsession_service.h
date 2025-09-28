@@ -162,6 +162,9 @@ public:
 
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 
+    int32_t GetSessionInner(const AppExecFwk::ElementName& elementName,
+        std::string& tag, sptr<IRemoteObject>& session) override;
+
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                            const AppExecFwk::ElementName& elementName) override;
 
@@ -352,6 +355,8 @@ private:
 
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
+
+    bool IsElementNameValid(const AppExecFwk::ElementName& elementName);
 
     bool IsParamInvalid(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName);
 

@@ -29,6 +29,42 @@ AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject>& impl)
     SLOGI("constructor");
 }
 
+int32_t AVSessionServiceProxy::GetSession(const AppExecFwk::ElementName& elementName,
+    std::string& tag, std::shared_ptr<AVSession>& session)
+{
+    sptr<IRemoteObject> object = nullptr;
+    int ret = GetSessionInner(elementName, tag, object);
+    CHECK_AND_RETURN_RET_LOG(object != nullptr, ret, "get remoteObjectSession fail");
+    auto sessionObj = iface_cast<AVSessionProxy>(object);
+    CHECK_AND_RETURN_RET_LOG(sessionObj != nullptr, AVSESSION_ERROR, "sessionObj get nullptr");
+    session = std::shared_ptr<AVSession>(sessionObj.GetRefPtr(), [holder = sessionObj](const auto*) {});
+    return ret;
+}
+
+int32_t AVSessionServiceProxy::GetSessionInner(const AppExecFwk::ElementName& elementName,
+    std::string& tag, sptr<IRemoteObject>& session)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+                             ERR_UNMARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&elementName), ERR_UNMARSHALLING, "write element failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_UNMARSHALLING, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION), data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t res = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(res), ERR_UNMARSHALLING, "read res failed");
+    CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, res, "GetSessionInner fail:%{public}d", res);
+    session = reply.ReadRemoteObject();
+    tag = reply.ReadString();
+    return res;
+}
+
 std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::string& tag, int32_t type,
                                                                 const AppExecFwk::ElementName& elementName)
 {
