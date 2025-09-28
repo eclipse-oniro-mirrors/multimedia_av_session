@@ -47,6 +47,7 @@ std::map<std::string, TaiheMediaDescription::GetterType> TaiheMediaDescription::
     {"drmScheme", GetDrmScheme},
     {"dataSrc", GetDataSrc},
     {"pcmSrc", GetPcmSrc},
+    {"launchClientData", GetLaunchClientData},
 };
 
 std::map<int32_t, TaiheMediaDescription::SetterType> TaiheMediaDescription::setterMap_ = {
@@ -73,6 +74,7 @@ std::map<int32_t, TaiheMediaDescription::SetterType> TaiheMediaDescription::sett
     {OHOS::AVSession::AVMediaDescription::MEDIA_DESCRIPTION_KEY_DRM_SCHEME, SetDrmScheme},
     {OHOS::AVSession::AVMediaDescription::MEDIA_DESCRIPTION_KEY_DATA_SRC, SetDataSrc},
     {OHOS::AVSession::AVMediaDescription::MEDIA_DESCRIPTION_KEY_PCM_SRC, SetPcmSrc},
+    {OHOS::AVSession::AVMediaDescription::MEDIA_DESCRIPTION_KEY_LAUNCH_CLIENT_DATA, SetLaunchClientData},
 };
 
 int32_t TaiheMediaDescription::GetAVMediaDescription(
@@ -439,6 +441,22 @@ int32_t TaiheMediaDescription::GetPcmSrc(AVMediaDescription const &in, OHOS::AVS
 }
 
 int32_t TaiheMediaDescription::SetPcmSrc(const OHOS::AVSession::AVMediaDescription &in, AVMediaDescription &out)
+{
+    (void)in;
+    (void)out;
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheMediaDescription::GetLaunchClientData(AVMediaDescription const &in,
+    OHOS::AVSession::AVMediaDescription &out)
+{
+    (void)in;
+    (void)out;
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheMediaDescription::SetLaunchClientData(const OHOS::AVSession::AVMediaDescription &in,
+    AVMediaDescription &out)
 {
     (void)in;
     (void)out;
