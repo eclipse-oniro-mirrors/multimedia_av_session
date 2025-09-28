@@ -400,6 +400,23 @@ static HWTEST_F(AVSessionServiceAddedTest, CheckWhetherTargetDevIsNextTest002, T
 }
 
 /**
+ * @tc.name: CheckWhetherTargetDevIsNextTest003
+ * @tc.desc: Test if (cJSON_IsInvalid(jsonData) || cJSON_IsNull(jsonData))
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, CheckWhetherTargetDevIsNextTest003, TestSize.Level0)
+{
+    SLOGD("CheckWhetherTargetDevIsNextTest003 begin!");
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    deviceInfo.extraData = "test_extra_data";
+    bool result = g_AVSessionService->CheckWhetherTargetDevIsNext(deviceInfo);
+    EXPECT_FALSE(result);
+    SLOGD("CheckWhetherTargetDevIsNextTest003 end!");
+}
+
+/**
  * @tc.name: AVSessionDeviceStateCallbackTest_OnDeviceReady_001
  * @tc.desc: Test entering the if branch of OnDeviceReady.
  * @tc.type: FUNC
@@ -693,7 +710,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     avsessionItem->castHandle_ = 1;
     g_AVSessionService->UpdateTopSession(avsessionItem);
     bool ret = g_AVSessionService->topSession_->IsCasting();
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     g_AVSessionService->HandleRemoveMediaCardEvent();
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();

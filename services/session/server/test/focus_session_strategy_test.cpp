@@ -26,7 +26,7 @@ using OHOS::AudioStandard::AudioRendererChangeInfo;
 using OHOS::AudioStandard::RendererState;
 
 static std::string g_errLog;
-
+constexpr auto USAGE_INVALID = static_cast<AudioStandard::StreamUsage>(999);
 static void MyLogCallback(const LogType type, const LogLevel level,
     const unsigned int domain, const char *tag, const char *msg)
 {
@@ -438,4 +438,423 @@ static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange002, testing::ext
         static_cast<int>(focusSessionStrategy.audioPlayingUids_.size()));
     EXPECT_TRUE(focusSessionStrategy.audioPlayingUids_.size() == 0);
     SLOGI("ProcAudioRenderChange002 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange003
+ * @tc.desc: Test non-ANCO uid, allowed usage, RUNNING, enter state machine (playingKey == key).
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange003, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange003 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.currentStates_.clear();
+    int32_t notAnco = focusSessionStrategy.ancoUid + 1;
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = notAnco;
+    info->clientPid = 101;
+    info->sessionId = 1;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { notAnco, 101 };
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 1);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange003 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange004
+ * @tc.desc: Test non-ANCO uid, invalid usage (not in whitelist), RUNNING, state machine not updated.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange004, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange004 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.currentStates_.clear();
+    int32_t notAnco = focusSessionStrategy.ancoUid + 2;
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = notAnco;
+    info->clientPid = 102;
+    info->sessionId = 2;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->rendererInfo.streamUsage = USAGE_INVALID;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { notAnco, 102 };
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 0);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) == focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange004 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange005
+ * @tc.desc: Test ANCO uid, allowed usage, RUNNING; not continue and enter state machine (playingKey == key).
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange005, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange005 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.currentStates_.clear();
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = focusSessionStrategy.ancoUid;
+    info->clientPid = 103;
+    info->sessionId = 3;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { focusSessionStrategy.ancoUid, 103 };
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 1);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange005 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange006
+ * @tc.desc: Test ANCO uid and invalid usage, RUNNING; should continue early and skip state machine updates.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange006, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange006 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.currentStates_.clear();
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = focusSessionStrategy.ancoUid;
+    info->clientPid = 104;
+    info->sessionId = 4;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->rendererInfo.streamUsage = USAGE_INVALID;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { focusSessionStrategy.ancoUid, 104 };
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 0);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) == focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange006 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange007
+ * @tc.desc: Test Non-ANCO uid, allowed usage, RELEASED, pass guards and update state machine (playingKey != key).
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange007, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange007 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.currentStates_.clear();
+    int32_t notAnco = focusSessionStrategy.ancoUid + 5;
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = notAnco;
+    info->clientPid = 105;
+    info->sessionId = 5;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { notAnco, 105 };
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 0);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange007 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange008
+ * @tc.desc: Test noANCO uid with invalid usage, RELEASED; rejected by media whitelist; no state machine updates.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange008, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange008 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.currentStates_.clear();
+    int32_t notAnco = focusSessionStrategy.ancoUid + 6;
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = notAnco;
+    info->clientPid = 106;
+    info->sessionId = 6;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    info->rendererInfo.streamUsage = USAGE_INVALID;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { notAnco, 106 };
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 0);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) == focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange008 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange009
+ * @tc.desc: Test ANCO uid with allowed usage, RELEASED; passes guards and writes state (non-RUNNING path).
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange009, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange009 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.currentStates_.clear();
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = focusSessionStrategy.ancoUid;
+    info->clientPid = 107;
+    info->sessionId = 7;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { focusSessionStrategy.ancoUid, 107 };
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 0);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange009 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange010
+ * @tc.desc: Test ANCO uid with invalid usage, RELEASED; continue early due to ANCO guard; no state machine updates.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange010, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange010 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    focusSessionStrategy.currentStates_.clear();
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = focusSessionStrategy.ancoUid;
+    info->clientPid = 108;
+    info->sessionId = 8;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    info->rendererInfo.streamUsage = USAGE_INVALID;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { focusSessionStrategy.ancoUid, 108 };
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 0);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) == focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange010 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange011
+ * @tc.desc: Test it == currentStates_.end() true.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange011, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange011 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.currentStates_.clear();
+    int32_t uid = focusSessionStrategy.ancoUid + 9;
+    int32_t pid = 109;
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = uid;
+    info->clientPid = pid;
+    info->sessionId = 9;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { uid, pid };
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange011 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange012
+ * @tc.desc: Test it == currentStates_.end() false (key already exists).
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange012, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange012 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.currentStates_.clear();
+    int32_t uid = focusSessionStrategy.ancoUid + 10;
+    int32_t pid = 110;
+    std::pair<int32_t, int32_t> key = { uid, pid };
+    focusSessionStrategy.currentStates_.insert({ key, 0 });
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = uid;
+    info->clientPid = pid;
+    info->sessionId = 10;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    size_t before = focusSessionStrategy.currentStates_.size();
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+    size_t after = focusSessionStrategy.currentStates_.size();
+
+    EXPECT_EQ(before, after);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange012 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange013
+ * @tc.desc: Test info->rendererState == RENDERER_RUNNING is true.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange013, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange013 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    int32_t uid = focusSessionStrategy.ancoUid + 11;
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = uid;
+    info->clientPid = 111;
+    info->sessionId = 11;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 1);
+    SLOGI("ProcAudioRenderChange013 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange014
+ * @tc.desc: Test info->rendererState == RENDERER_RUNNING is false.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange014, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange014 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.audioPlayingUids_.clear();
+    int32_t uid = focusSessionStrategy.ancoUid + 12;
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = uid;
+    info->clientPid = 112;
+    info->sessionId = 12;
+    info->rendererState = RendererState::RENDERER_RELEASED;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    EXPECT_EQ(focusSessionStrategy.audioPlayingUids_.size(), 0);
+    SLOGI("ProcAudioRenderChange014 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange015
+ * @tc.desc: Test playingKey != key is false.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange015, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange015 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.currentStates_.clear();
+    int32_t uid = focusSessionStrategy.ancoUid + 13;
+
+    auto info = std::make_shared<AudioRendererChangeInfo>();
+    info->clientUID = uid;
+    info->clientPid = 113;
+    info->sessionId = 13;
+    info->rendererState = RendererState::RENDERER_RUNNING;
+    info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key = { uid, 113 };
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange015 end!");
+}
+
+/**
+ * @tc.name: ProcAudioRenderChange016
+ * @tc.desc: Test playingKey != key is true.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange016, testing::ext::TestSize.Level4)
+{
+    SLOGI("ProcAudioRenderChange016 begin!");
+    FocusSessionStrategy focusSessionStrategy;
+    focusSessionStrategy.currentStates_.clear();
+
+    auto info1 = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info1 != nullptr);
+    info1->clientUID = focusSessionStrategy.ancoUid + 14;
+    info1->clientPid = 114;
+    info1->sessionId = 14;
+    info1->rendererState = RendererState::RENDERER_RUNNING;
+    info1->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    auto info2 = std::make_shared<AudioRendererChangeInfo>();
+    CHECK_AND_RETURN(info2 != nullptr);
+    info2->clientUID = focusSessionStrategy.ancoUid + 15;
+    info2->clientPid = 115;
+    info2->sessionId = 15;
+    info2->rendererState = RendererState::RENDERER_RELEASED;
+    info2->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
+
+    AudioRendererChangeInfos infos;
+    infos.push_back(info1);
+    infos.push_back(info2);
+    focusSessionStrategy.ProcAudioRenderChange(infos);
+
+    std::pair<int32_t, int32_t> key1 = { info1->clientUID, info1->clientPid };
+    std::pair<int32_t, int32_t> key2 = { info2->clientUID, info2->clientPid };
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key1) != focusSessionStrategy.currentStates_.end());
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key2) != focusSessionStrategy.currentStates_.end());
+    SLOGI("ProcAudioRenderChange016 end!");
 }

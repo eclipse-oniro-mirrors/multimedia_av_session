@@ -250,6 +250,58 @@ static HWTEST(JsonUtilsTest, SetSessionDescriptors003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetSessionDescriptors004
+ * @tc.desc: test SetSessionDescriptors
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, SetSessionDescriptors004, TestSize.Level0)
+{
+    SLOGI("SetSessionDescriptors004 begin!");
+    std::string sessionInfo = R"({
+        "data": {
+            "systemTime": 123456789,
+            "extend": ["extend1", "extend2"]
+        }
+    })";
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = JsonUtils::SetSessionDescriptors(sessionInfo, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("SetSessionDescriptors004 end!");
+}
+
+/**
+ * @tc.name: SetSessionDescriptors005
+ * @tc.desc: test SetSessionDescriptors
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, SetSessionDescriptors005, TestSize.Level0)
+{
+    SLOGI("SetSessionDescriptors005 begin!");
+    std::string sessionInfo = R"({
+        "data": {
+            "systemTime": 123456789,
+            "extend": ["extend1", "extend2"]
+        },
+        "sessionDescriptors": {
+            "sessionId": "session1",
+            "type": "audio",
+            "bundleName": "com.example.app1",
+            "abilityName": "MainAbility1",
+            "tag": "tag1",
+            "isThirdPartyApp": true
+        }
+    })";
+    AVSessionDescriptor descriptor;
+    std::vector<AVSessionDescriptor> descriptors;
+    descriptors.push_back(descriptor);
+    int32_t ret = JsonUtils::SetSessionDescriptors(sessionInfo, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("SetSessionDescriptors005 end!");
+}
+
+/**
 * @tc.name: SetSessionDescriptor001
 * @tc.desc: test SetSessionDescriptor
 * @tc.type: FUNC
@@ -281,6 +333,26 @@ static HWTEST(JsonUtilsTest, SetSessionDescriptor002, TestSize.Level0)
     int32_t ret = JsonUtils::SetSessionDescriptor(jsonStr, descriptor);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SetSessionDescriptor002 end!");
+}
+
+/**
+ * @tc.name: SetSessionDescriptor003
+ * @tc.desc: test SetSessionDescriptor
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, SetSessionDescriptor003, TestSize.Level0)
+{
+    SLOGI("SetSessionDescriptor003 begin!");
+    std::string sessionInfo = R"({
+        "data": {
+            "sessionDescriptor": 123456789
+        }
+    })";
+    AVSessionDescriptor descriptor;
+    int32_t ret = JsonUtils::SetSessionDescriptor(sessionInfo, descriptor);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("SetSessionDescriptor003 end!");
 }
 
 /**
@@ -413,6 +485,26 @@ static HWTEST(JsonUtilsTest, GetVectorCapability004, TestSize.Level0)
     int32_t ret = JsonUtils::GetVectorCapability(sinkCapability, value);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetVectorCapability004 end!");
+}
+
+/**
+ * @tc.name: GetVectorCapability005
+ * @tc.desc: test GetVectorCapability
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, GetVectorCapability005, TestSize.Level0)
+{
+    SLOGI("GetVectorCapability005 begin!");
+    std::string sinkCapability = R"({
+        "metaData": [1, 2, 3],
+        "playbackState": [1, 2, 3],
+        "controlCommand": [1, 2, 3]
+    )";
+    std::vector<std::vector<int32_t>> value(3);
+    int32_t ret = JsonUtils::GetVectorCapability(sinkCapability, value);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetVectorCapability005 end!");
 }
 
 /**
@@ -871,6 +963,28 @@ static HWTEST(JsonUtilsTest, SetSessionData003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetSessionData004
+ * @tc.desc: test SetSessionData
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, SetSessionData004, TestSize.Level0)
+{
+    SLOGI("SetSessionData004 begin!");
+    AVSessionBasicInfo basicInfo;
+    std::string sessionInfoStr = R"({
+        "data": "123"
+    })";
+    cJSON* jsonObj = cJSON_Parse(sessionInfoStr.c_str());
+    CHECK_AND_RETURN(jsonObj != nullptr);
+    int32_t ret = JsonUtils::SetSessionData(jsonObj, basicInfo);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    cJSON_Delete(jsonObj);
+    SLOGI("SetSessionData004 end!");
+}
+
+/**
 * @tc.name: SetSessionBasicInfo002
 * @tc.desc: test SetSessionBasicInfo
 * @tc.type: FUNC
@@ -1016,6 +1130,139 @@ static HWTEST(JsonUtilsTest, GetSessionBasicInfo001, TestSize.Level0)
 
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetSessionBasicInfo001 end!");
+}
+
+/**
+ * @tc.name: GetSessionBasicInfo002
+ * @tc.desc: test GetSessionBasicInfo
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, GetSessionBasicInfo002, TestSize.Level0)
+{
+    SLOGI("GetSessionBasicInfo002 begin!");
+    const std::string sessionInfo = R"({
+        "compatibility_test": {
+            "networkId": "network123",
+            "vendorId": "vendor456",
+            "deviceType": "type789",
+            "systemVersion": "versionXYZ",
+            "avsessionVersion": 1,
+            "reserve": ["reserve1", "reserve2"],
+            "features": ["feature1", "feature2"],
+            "capabilitySet": {
+                "metaData": [1, 2, 3],
+                "playbackState": [1, 2, 3],
+                "controlCommand": [1, 2, 3]
+            },
+            "extendCapability": ["extend1", "extend2"]
+        },
+        "data": {
+            "systemTime": 123456789,
+            "extend": ["extend1", "extend2"]
+        }
+    })";
+
+    AVSessionBasicInfo basicInfo;
+    int32_t ret = JsonUtils::GetSessionBasicInfo(sessionInfo, basicInfo);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionBasicInfo002 end!");
+}
+
+/**
+ * @tc.name: GetSessionBasicInfo003
+ * @tc.desc: test GetSessionBasicInfo
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, GetSessionBasicInfo003, TestSize.Level0)
+{
+    SLOGI("GetSessionBasicInfo003 begin!");
+    const std::string sessionInfo = R"({
+        "compatibility": {
+            "vendorId": "vendor456",
+            "deviceType": "type789",
+            "systemVersion": "versionXYZ",
+            "avsessionVersion": 1,
+            "reserve": ["reserve1", "reserve2"],
+            "features": ["feature1", "feature2"],
+            "capabilitySet": {
+                "metaData": [1, 2, 3],
+                "playbackState": [1, 2, 3],
+                "controlCommand": [1, 2, 3]
+            },
+            "extendCapability": ["extend1", "extend2"]
+        },
+        "data": {
+            "systemTime": 123456789,
+            "extend": ["extend1", "extend2"]
+        }
+    })";
+
+    AVSessionBasicInfo basicInfo;
+    int32_t ret = JsonUtils::GetSessionBasicInfo(sessionInfo, basicInfo);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionBasicInfo003 end!");
+}
+
+/**
+ * @tc.name: GetSessionBasicInfo004
+ * @tc.desc: test GetSessionBasicInfo
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, GetSessionBasicInfo004, TestSize.Level0)
+{
+    SLOGI("GetSessionBasicInfo004 begin!");
+    const std::string sessionInfo = R"({
+        "compatibility": {
+            "networkId": "network123",
+            "vendorId": "vendor456",
+            "deviceType": "type789",
+            "systemVersion": "versionXYZ",
+            "avsessionVersion": 1,
+            "reserve": ["reserve1", "reserve2"],
+            "features": ["feature1", "feature2"],
+            "capabilitySet": {
+                "metaData": [1, 2, 3],
+                "playbackState": [1, 2, 3],
+                "controlCommand": [1, 2, 3]
+            },
+            "extendCapability": ["extend1", "extend2"]
+        },
+        "data": {
+            "extend": ["extend1", "extend2"]
+        }
+    })";
+
+    AVSessionBasicInfo basicInfo;
+    int32_t ret = JsonUtils::GetSessionBasicInfo(sessionInfo, basicInfo);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionBasicInfo004 end!");
+}
+
+/**
+ * @tc.name: GetSessionBasicInfo005
+ * @tc.desc: test GetSessionBasicInfo
+ * @tc.type: FUNC
+ * @tc.require: #I62OZV
+ */
+static HWTEST(JsonUtilsTest, GetSessionBasicInfo005, TestSize.Level0)
+{
+    SLOGI("GetSessionBasicInfo005 begin!");
+    const std::string sessionInfo = R"({
+        "compatibility": {
+            "networkId": "network123"
+        },
+        "data_test": {
+            "systemTime": 123456789,
+            "extend": ["extend1", "extend2"]
+        }
+    })";
+    AVSessionBasicInfo basicInfo;
+    int32_t ret = JsonUtils::GetSessionBasicInfo(sessionInfo, basicInfo);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("GetSessionBasicInfo005 end!");
 }
 
 /**

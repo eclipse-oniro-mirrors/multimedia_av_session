@@ -33,7 +33,7 @@ public:
 void CollaborationManagerTest::SetUpTestCase()
 {
 }
- 
+
 void CollaborationManagerTest::TearDownTestCase()
 {
 }
@@ -271,4 +271,104 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource003, testing::ext
     int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("ApplyAdvancedResource003, end");
+}
+
+/**
+ * @tc.name: ApplyAdvancedResource004
+ * @tc.desc: Test ApplyAdvancedResource when resourceRequest_ is nullptr.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource004, testing::ext::TestSize.Level1)
+{
+    SLOGI("ApplyAdvancedResource004, start");
+    auto& instance = CollaborationManager::GetInstance();
+    auto originalResourceRequest = instance.resourceRequest_;
+    const char* peerNetworkId = "";
+    auto applyAdvancedResource = [](const char* networkId, const char* serviceName,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
+        ServiceCollaborationManager_Callback* callback) {
+            return static_cast<int32_t>(1);
+    };
+    instance.exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = applyAdvancedResource;
+    instance.resourceRequest_ = nullptr;
+    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    instance.resourceRequest_ = originalResourceRequest;
+    SLOGI("ApplyAdvancedResource004, end");
+}
+
+/**
+ * @tc.name: SendCollaborationOnStop001
+ * @tc.desc: Test SendCollaborationOnStop with null callback.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop001, testing::ext::TestSize.Level4)
+{
+    SLOGI("SendCollaborationOnStop001, start");
+    CollaborationManager::GetInstance().SendCollaborationOnStop(nullptr);
+    auto& sendCallback = CollaborationManager::GetInstance().sendCollaborationOnStop_;
+    EXPECT_EQ(sendCallback, nullptr);
+    SLOGI("SendCollaborationOnStop001, end");
+}
+
+/**
+ * @tc.name: SendCollaborationOnStop002
+ * @tc.desc: Test SendCollaborationOnStop with valid callback and OnStop invocation.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop002, testing::ext::TestSize.Level4)
+{
+    SLOGI("SendCollaborationOnStop002, start");
+    bool callbackCalled = false;
+    CollaborationManager::GetInstance().SendCollaborationOnStop([&callbackCalled]() {
+        callbackCalled = true;
+    });
+    auto& saved = CollaborationManager::GetInstance().sendCollaborationOnStop_;
+    EXPECT_NE(saved, nullptr);
+    saved();
+    EXPECT_TRUE(callbackCalled);
+    SLOGI("SendCollaborationOnStop002, end");
+}
+
+/**
+ * @tc.name: SendCollaborationApplyResult001
+ * @tc.desc: Test SendCollaborationApplyResult with null callback.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult001, testing::ext::TestSize.Level4)
+{
+    SLOGI("SendCollaborationApplyResult001, start");
+    CollaborationManager::GetInstance().SendCollaborationApplyResult(nullptr);
+    auto& callback = CollaborationManager::GetInstance().sendCollaborationApplyResult_;
+    EXPECT_EQ(callback, nullptr);
+    SLOGI("SendCollaborationApplyResult001, end");
+}
+
+/**
+ * @tc.name: SendCollaborationApplyResult002
+ * @tc.desc: Test SendCollaborationApplyResult with valid callback.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult002, testing::ext::TestSize.Level4)
+{
+    SLOGI("SendCollaborationApplyResult002, start");
+    auto& callbackRef = CollaborationManager::GetInstance().sendCollaborationApplyResult_;
+    auto originalCallback = callbackRef;
+
+    bool callbackCalled = false;
+    int32_t receivedCode = -1;
+    auto mockCallback = [&callbackCalled, &receivedCode](const int32_t code) {
+        SLOGI("Mock SendCollaborationApplyResult callback invoked with code: %{public}d", code);
+        callbackCalled = true;
+        receivedCode = code;
+    };
+    callbackRef = mockCallback;
+    CollaborationManager::GetInstance().SendCollaborationApplyResult(mockCallback);
+    if (callbackRef) {
+        callbackRef(AVSESSION_SUCCESS);
+    }
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(receivedCode, AVSESSION_SUCCESS);
+    callbackRef = originalCallback;
+    SLOGI("SendCollaborationApplyResult002, end");
 }

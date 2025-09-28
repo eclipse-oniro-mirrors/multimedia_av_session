@@ -19,11 +19,69 @@
 #include "avsession_dumper.h"
 #include "avsession_proxy.h"
 #include "av_session.h"
+#include "avsession_item.h"
+#include "avsession_service.h"
 
 using namespace testing::ext;
 // using namespace OHOS;
 // using namespace OHOS::AVSession;
 namespace OHOS::AVSession {
+static int g_timeFail = 0;
+static int g_localtimeFail = 0;
+static int g_strftimeFail = 0;
+
+extern "C" int RealClockGettime(clockid_t, struct timespec*) asm("__real_clock_gettime");
+extern "C" time_t RealTime(time_t*) asm("__real_time");
+extern "C" struct time* RealLocaltime(const time_t*) asm("__real_localtime");
+extern "C" struct time* RealLocaltime64(const time_t*) asm("__real___localtime64");
+extern "C" size_t RealStrftime(char*, size_t, const char*, const struct time*) asm("__real_strftime");
+
+extern "C" int WrapClockGettime(clockid_t clk, struct timespec* ts) asm("__wrap_clock_gettime");
+extern "C" time_t WrapTime(time_t* t) asm("__wrap_time");
+extern "C" struct time* WrapLocaltime64(const time_t* t) asm("__wrap___localtime64");
+extern "C" struct time* WrapLocaltime(const time_t* t) asm("__wrap_localtime");
+extern "C" size_t WrapStrftime(char* s, size_t max, const char* fmt, const struct time* tm) asm("__wrap_strftime");
+
+extern "C" int WrapClockGettime(clockid_t clk, struct timespec* ts)
+{
+    if (g_timeFail) {
+        errno = EINVAL;
+        return -1;
+    }
+    return RealClockGettime(clk, ts);
+}
+
+extern "C" time_t WrapTime(time_t* t)
+{
+    if (g_timeFail) {
+        return static_cast<time_t>(-1);
+    }
+    return RealTime(t);
+}
+
+extern "C" struct time* WrapLocaltime64(const time_t* t)
+{
+    if (g_localtimeFail) {
+        return nullptr;
+    }
+    return RealLocaltime64(t);
+}
+
+extern "C" struct time* WrapLocaltime(const time_t* t)
+{
+    if (g_localtimeFail) {
+        return nullptr;
+    }
+    return RealLocaltime(t);
+}
+
+extern "C" size_t WrapStrftime(char* s, size_t max, const char* fmt, const struct time* tm)
+{
+    if (g_strftimeFail) {
+        return 0;
+    }
+    return RealStrftime(s, max, fmt, tm);
+}
 
 static const std::string ARGS_HELP = "-h";
 static const std::string ILLEGAL_INFORMATION = "AVSession service, enter '-h' for usage.\n";
@@ -160,15 +218,28 @@ static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_
 static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VIDEO, TestSize.Level1)
 {
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VIDEO begin!");
+    sptr<AVSessionService> service = new AVSessionService(101, true);
+    CHECK_AND_RETURN(service != nullptr);
+    service->OnStart();
 
-    std::vector<std::string> args = { ARGS_SHOW_SESSION_INFO };
-    std::string result = "";
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName("test.ohos.avsession");
     elementName.SetAbilityName("test.ability");
-    auto obj = g_AVSessionService->CreateSessionInner("test", AVSession::SESSION_TYPE_VIDEO, elementName);
-    g_AVSessionDumper->Dump(args, result, *g_AVSessionService);
+    service->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, elementName);
+
+    auto sessions = service->GetContainer().GetAllSessions();
+    for (auto& session : sessions) {
+        if (session != nullptr) {
+            session->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VIDEO;
+        }
+    }
+
+    std::vector<std::string> args = { ARGS_SHOW_SESSION_INFO };
+    std::string result;
+    CHECK_AND_RETURN(g_AVSessionDumper != nullptr);
+    g_AVSessionDumper->Dump(args, result, *service);
     EXPECT_NE(result.size(), 0);
+    service->OnStop();
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VIDEO end!");
 }
 
@@ -180,14 +251,27 @@ static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_
 static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VOICE_CALL, TestSize.Level1)
 {
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VOICE_CALL begin!");
-    std::vector<std::string> args = { ARGS_SHOW_SESSION_INFO };
-    std::string result = "";
+    sptr<AVSessionService> service = new AVSessionService(102, true);
+    service->OnStart();
+
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName("test.ohos.avsession");
     elementName.SetAbilityName("test.ability");
-    auto obj = g_AVSessionService->CreateSessionInner("test", AVSession::SESSION_TYPE_VOICE_CALL, elementName);
-    g_AVSessionDumper->Dump(args, result, *g_AVSessionService);
+    service->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, elementName);
+
+    auto sessions = service->GetContainer().GetAllSessions();
+    for (auto& session : sessions) {
+        if (session != nullptr) {
+            session->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VOICE_CALL;
+        }
+    }
+
+    std::vector<std::string> args = { ARGS_SHOW_SESSION_INFO };
+    std::string result;
+    CHECK_AND_RETURN(g_AVSessionDumper != nullptr);
+    g_AVSessionDumper->Dump(args, result, *service);
     EXPECT_NE(result.size(), 0);
+    service->OnStop();
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VOICE_CALL end!");
 }
 
@@ -199,15 +283,62 @@ static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_
 static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_VIDEO_CALL, TestSize.Level1)
 {
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VIDEO_CALL begin!");
-    std::vector<std::string> args = { ARGS_SHOW_SESSION_INFO };
-    std::string result = "";
+    sptr<AVSessionService> service = new AVSessionService(103, true);
+    CHECK_AND_RETURN(service != nullptr);
+    service->OnStart();
+
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName("test.ohos.avsession");
     elementName.SetAbilityName("test.ability");
-    auto obj = g_AVSessionService->CreateSessionInner("test", AVSession::SESSION_TYPE_VIDEO_CALL, elementName);
-    g_AVSessionDumper->Dump(args, result, *g_AVSessionService);
+    (void)service->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, elementName);
+
+    auto sessions = service->GetContainer().GetAllSessions();
+    for (auto& session : sessions) {
+        if (session != nullptr) {
+            session->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VIDEO_CALL;
+        }
+    }
+
+    std::vector<std::string> args = { ARGS_SHOW_SESSION_INFO };
+    std::string result;
+    CHECK_AND_RETURN(g_AVSessionDumper != nullptr);
+    g_AVSessionDumper->Dump(args, result, *service);
     EXPECT_NE(result.size(), 0);
+    service->OnStop();
     SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_VIDEO_CALL end!");
+}
+
+/**
+ * @tc.name: Dump__ShowSessionInfo__SESSION_TYPE_INVALID
+ * @tc.desc: Test ShowSessionInfo by SESSION_TYPE_INVALID
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowSessionInfo__SESSION_TYPE_INVALID, TestSize.Level1)
+{
+    SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_INVALID begin!");
+    sptr<AVSessionService> service = new AVSessionService(104, true);
+    CHECK_AND_RETURN(service != nullptr);
+    service->OnStart();
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession");
+    elementName.SetAbilityName("test.ability");
+    service->CreateSessionInner("dump_invalid_tag", AVSession::SESSION_TYPE_AUDIO, elementName);
+
+    auto sessions = service->GetContainer().GetAllSessions();
+    for (auto& session : sessions) {
+        if (session != nullptr) {
+            session->descriptor_.sessionType_ = 999;
+        }
+    }
+
+    std::vector<std::string> args = { ARGS_SHOW_SESSION_INFO };
+    std::string result;
+    CHECK_AND_RETURN(g_AVSessionDumper != nullptr);
+    g_AVSessionDumper->Dump(args, result, *service);
+    EXPECT_NE(result.size(), 0);
+    service->OnStop();
+    SLOGI("Dump__ShowSessionInfo__SESSION_TYPE_INVALID end!");
 }
 
 /**
@@ -254,6 +385,79 @@ static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowErrorInfo002, TestSize.Lev
     g_AVSessionDumper->Dump(args, result, *g_AVSessionService);
     EXPECT_NE(result.size(), 0);
     SLOGI("Dump__ShowErrorInfo002 end!");
+}
+
+/**
+ * @tc.name: Dump__ShowErrorInfo003
+ * @tc.desc: Test ShowErrorInfo
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowErrorInfo003, TestSize.Level4)
+{
+    SLOGI("Dump__ShowErrorInfo003 begin!");
+    AVSessionDumper::errMessage_.clear();
+    g_timeFail = 0;
+    g_localtimeFail = 1;
+    g_strftimeFail = 0;
+
+    std::vector<std::string> args = { ARGS_SHOW_ERROR_INFO };
+    std::string result;
+    CHECK_AND_RETURN(g_AVSessionDumper != nullptr);
+    g_AVSessionDumper->SetErrorInfo("[localtime_fail]");
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionDumper->Dump(args, result, *g_AVSessionService);
+
+    EXPECT_NE(result.size(), 0);
+    g_localtimeFail = 0;
+    SLOGI("Dump__ShowErrorInfo003 end!");
+}
+
+/**
+ * @tc.name: Dump__ShowErrorInfo004
+ * @tc.desc: Test ShowErrorInfo
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowErrorInfo004, TestSize.Level4)
+{
+    SLOGI("Dump__ShowErrorInfo004 begin!");
+    AVSessionDumper::errMessage_.clear();
+    g_timeFail = 0;
+    g_localtimeFail = 0;
+    g_strftimeFail = 1;
+
+    std::vector<std::string> args = { ARGS_SHOW_ERROR_INFO };
+    std::string result;
+    CHECK_AND_RETURN(g_AVSessionDumper != nullptr);
+    g_AVSessionDumper->SetErrorInfo("[strftime_fail]");
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionDumper->Dump(args, result, *g_AVSessionService);
+
+    EXPECT_NE(result.size(), 0);
+    g_strftimeFail = 0;
+    SLOGI("Dump__ShowErrorInfo004 end!");
+}
+
+/**
+ * @tc.name: Dump__ShowErrorInfo005
+ * @tc.desc: Test ShowErrorInfo
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionDumperAnotherTest, Dump__ShowErrorInfo005, TestSize.Level4)
+{
+    SLOGI("Dump__ShowErrorInfo005 begin!");
+    AVSessionDumper::errMessage_.clear();
+    g_timeFail = 0;
+    g_localtimeFail = 0;
+    g_strftimeFail = 0;
+
+    std::vector<std::string> args = { ARGS_SHOW_ERROR_INFO };
+    std::string result;
+    CHECK_AND_RETURN(g_AVSessionDumper != nullptr);
+    g_AVSessionDumper->SetErrorInfo("[ok_marker]");
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionDumper->Dump(args, result, *g_AVSessionService);
+    EXPECT_NE(result.size(), 0);
+    SLOGI("Dump__ShowErrorInfo005 end!");
 }
 
 /**
