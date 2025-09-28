@@ -289,98 +289,8 @@ export class AVInputCastPicker extends ViewPU {
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.maxFontScale(this.maxFontSizeScale);
-            Text.margin({left: 2 * (Math.min(this.maxFontSizeScale, this.fontSizeScale))});
         }, Text);
         Text.pop();
-        Row.pop();
-    }
-    
-    deviceItemRow(item, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Flex.create({
-                direction: FlexDirection.Row,
-                justifyContent: FlexAlign.SpaceBetween,
-                alignItems: ItemAlign.Center
-            });
-            Flex.constraintSize({ minHeight: this.isPc ? 40 : 48 });
-            Flex.padding({ left: 12, right: 12 });
-            Flex.onTouch((event) => {
-                if (event.type === TouchType.Down) {
-                    this.touchMenuItemIndex = index;
-                } else if (event.type === TouchType.Up) {
-                    this.touchMenuItemIndex = -1;
-                }
-            });
-            Flex.backgroundColor(this.touchMenuItemIndex === index ? {
-                'id': -1,
-                'type': 10001,
-                params: ['sys.color.interactive_click'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            } : '#00FFFFFF');
-            Flex.borderRadius(this.touchMenuItemIndex === index ? {
-                'id': -1,
-                'type': 10002,
-                params: this.isPc ? ['sys.float.corner_radius_level2'] : ['sys.float.corner_radius_level8'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            } : 0);
-        }, Flex);
-        this.deviceItem.bind(this)(item);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            If.create();
-            if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.deviceItemSelectIcon.bind(this)(item);
-                });
-            } else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                });
-            }
-        }, If);
-        If.pop();
-        Flex.pop();
-    }
-
-    deviceItemSelectIcon(item, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.alignItems(VerticalAlign.Center);
-        }, Row);
-        this.iconBuilder.bind(this)(item, true);
-        Row.pop();
-    }
-
-    deviceItem(item, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
-            Row.alignItems(VerticalAlign.Center);
-        }, Row);
-        this.iconBuilder.bind(this)(item, false);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Start });
-            Flex.width(this.isPc ? 254 : 144);
-            Flex.padding({
-                left: 8,
-                top: this.isPc ? 11 : (!this.highQualityName ? 17 : 7),
-                right: 8,
-                bottom: this.isPc ? 11 : (!this.highQualityName ? 17 : 7),
-            });
-        }, Flex);
-        this.textBuilder.bind(this)(item);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            If.create();
-            if (!!item.highQualityName) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.highQualityIconBuilder.bind(this)(item.highQualityName);
-                });
-            } else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                });
-            }
-        }, If);
-        If.pop();
-        Flex.pop();
         Row.pop();
     }
 
@@ -408,7 +318,84 @@ export class AVInputCastPicker extends ViewPU {
                         }
                     });
                 }, Flex);
-                this.deviceItemRow.bind(this)(item);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    Flex.create({
+                        direction: FlexDirection.Row,
+                        justifyContent: FlexAlign.SpaceBetween,
+                        alignItems: ItemAlign.Center
+                    });
+                    Flex.constraintSize({ minHeight: this.isPc ? 40 : 48 });
+                    Flex.padding({ left: 12, right: 12 });
+                    Flex.onTouch((event) => {
+                        if (event.type === TouchType.Down) {
+                            this.touchMenuItemIndex = index;
+                        } else if (event.type === TouchType.Up) {
+                            this.touchMenuItemIndex = -1;
+                        }
+                    });
+                    Flex.backgroundColor(this.touchMenuItemIndex === index ? {
+                        'id': -1,
+                        'type': 10001,
+                        params: ['sys.color.interactive_click'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    } : '#00FFFFFF');
+                    Flex.borderRadius(this.touchMenuItemIndex === index ? {
+                        'id': -1,
+                        'type': 10002,
+                        params: this.isPc ? ['sys.float.corner_radius_level2'] : ['sys.float.corner_radius_level8'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    } : 0);
+                }, Flex);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    Row.create();
+                    Row.alignItems(VerticalAlign.Center);
+                }, Row);
+                this.iconBuilder.bind(this)(item, false);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Start });
+                    Flex.width(this.isPc ? 254 : 144);
+                    Flex.padding({
+                        left: 8,
+                        top: this.isPc ? 11 : (!this.highQualityName ? 17 : 7),
+                        right: 8,
+                        bottom: this.isPc ? 11 : (!this.highQualityName ? 17 : 7),
+                    });
+                }, Flex);
+                this.textBuilder.bind(this)(item);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    If.create();
+                    if (!!item.highQualityName) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.highQualityIconBuilder.bind(this)(item.highQualityName);
+                        });
+                    } else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                        });
+                    }
+                }, If);
+                If.pop();
+                Flex.pop();
+                Row.pop();
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    If.create();
+                    if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                Row.create();
+                                Row.alignItems(VerticalAlign.Center);
+                            }, Row);
+                            this.iconBuilder.bind(this)(item, true);
+                            Row.pop();
+                        });
+                    } else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                        });
+                    }
+                }, If);
+                If.pop();
+                Flex.pop();
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     If.create();
                     if (!this.isPc && (index !== this.deviceInfoList.length - 1)) {
@@ -493,17 +480,17 @@ export class AVInputCastPicker extends ViewPU {
                     console.info(TAG, `isDarkMode : ${JSON.stringify(data['isDarkMode'])}`);
                     this.isDarkMode = data['isDarkMode'];
                 }
-                if (data?.fontSizeScale !== undefined) {
-                    console.info(TAG, `fontSizeScale : ${data?.fontSizeScale}`);
-                    this.fontSizeScale = data?.fontSizeScale;
+                if (data.fontSizeScale !== undefined) {
+                    console.info(TAG, `fontSizeScale : ${data.fontSizeScale}`);
+                    this.fontSizeScale = data.fontSizeScale;
                 }
-                if (data?.maxFontSizeScale !== undefined) {
-                    console.info(TAG, `maxFontSizeScale : ${data?.maxFontSizeScale}`);
-                    this.maxFontSizeScale = data?.maxFontSizeScale;
+                if (data.maxFontSizeScale !== undefined) {
+                    console.info(TAG, `maxFontSizeScale : ${data.maxFontSizeScale}`);
+                    this.maxFontSizeScale = data.maxFontSizeScale;
                 }
-                if (data?.isPc !== undefined) {
-                    console.info(TAG, `isPc : ${data?.isPc}`);
-                    this.isPc = data?.isPc;
+                if (data.isPc !== undefined) {
+                    console.info(TAG, `isPc : ${data.isPc}`);
+                    this.isPc = data.isPc;
                 }
                 if (JSON.stringify(data['isRTL']) !== undefined) {
                     console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);

@@ -272,19 +272,19 @@ export struct AVInputCastPicker {
           this.isDarkMode = data['isDarkMode'] as boolean;
         }
 
-        if (data?.fontSizeScale !== undefined) {
-          console.info(TAG, `fontSizeScale : ${data?.fontSizeScale}`);
-          this.fontSizeScale = data?.fontSizeScale as number;
+        if (data.fontSizeScale !== undefined) {
+          console.info(TAG, `fontSizeScale : ${data.fontSizeScale}`);
+          this.fontSizeScale = data.fontSizeScale as number;
         }
 
-        if (data?.maxFontSizeScale !== undefined) {
-          console.info(TAG, `maxFontSizeScale : ${data?.maxFontSizeScale}`);
-          this.maxFontSizeScale = data?.maxFontSizeScale as number;
+        if (data.maxFontSizeScale !== undefined) {
+          console.info(TAG, `maxFontSizeScale : ${data.maxFontSizeScale}`);
+          this.maxFontSizeScale = data.maxFontSizeScale as number;
         }
 
-        if (data?.isPc !== undefined) {
-          console.info(TAG, `isPc : ${data?.isPc}`);
-          this.isPc = data?.isPc as boolean;
+        if (data.isPc !== undefined) {
+          console.info(TAG, `isPc : ${data.isPc}`);
+          this.isPc = data.isPc as boolean;
         }
 
         if (JSON.stringify(data['isRTL']) !== undefined) {
