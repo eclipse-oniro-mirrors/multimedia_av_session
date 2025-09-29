@@ -16,6 +16,7 @@
 #include "audio_device_manager.h"
 #include "avsession_service.h"
 #include "migrate_avsession_manager.h"
+#include "cast_engine_common.h"
 
 namespace OHOS::AVSession {
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
@@ -447,7 +448,11 @@ bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
 
     bool connectCond = !is2in1_ && (castServiceNameStatePair_.second == deviceStateConnection);
 
-    return deviceCond && connectCond && appCond;
+    std::string bundleName = session->GetBundleName();
+    bool isWhiteApp = std::find(CastEngine::MIRROR_TO_STREAM_APP_LIST.begin(),
+        CastEngine::MIRROR_TO_STREAM_APP_LIST.end(), bundleName) != CastEngine::MIRROR_TO_STREAM_APP_LIST.end();
+
+    return deviceCond && connectCond && appCond && isWhiteApp;
 }
 
 __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
