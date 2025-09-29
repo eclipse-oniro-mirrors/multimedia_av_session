@@ -589,6 +589,7 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
 
 void NapiAVSession::DoLastMetaDataRefresh(NapiAVSession* napiAVSession)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CHECK_AND_RETURN_LOG(napiAVSession != nullptr, "context nullptr!");
     napiAVSession->latestDownloadedAssetId_ = (napiAVSession->metaData_.GetAssetId() !=
         napiAVSession->latestMetadataAssetId_) ? "" : napiAVSession->latestDownloadedAssetId_;
@@ -722,7 +723,7 @@ std::function<void()> NapiAVSession::AVQueueImgDownloadSyncExecutor(NapiAVSessio
         CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "aft avq download NoSession");
         CHECK_AND_RETURN_LOG(ret && pixelMap != nullptr, "download avqImg fail");
         napiSession->latestDownloadedAVQueueId_ = metaData.GetAVQueueId();
-        info.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
+        info.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap, true));
         info.SetAVQueueId(metaData.GetAVQueueId());
         info.SetAVQueueName(metaData.GetAVQueueName());
         napiSession->session_->UpdateAVQueueInfo(info);

@@ -31,7 +31,7 @@ public:
     static std::shared_ptr<AVSessionPixelMap> ConvertAndSetInnerImgBuffer(
         const std::shared_ptr<Media::PixelMap>& pixelMapTemp);
     static std::shared_ptr<AVSessionPixelMap>
-        ConvertToInnerWithLimitedSize(const std::shared_ptr<Media::PixelMap>& pixelMap);
+        ConvertToInnerWithLimitedSize(const std::shared_ptr<Media::PixelMap>& pixelMap, bool isAVQueueImg = false);
     static std::shared_ptr<AVSessionPixelMap>
         ConvertToInnerWithMinSize(const std::shared_ptr<Media::PixelMap>& pixelMap);
     static bool CopyPixMapToDst(Media::PixelMap &source, void* dstPixels, uint32_t bufferSize);

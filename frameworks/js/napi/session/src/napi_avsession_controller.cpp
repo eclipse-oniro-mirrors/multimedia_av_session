@@ -148,11 +148,10 @@ napi_status NapiAVSessionController::NewInstance(
     napiController->controller_ = std::move(nativeController);
     napiController->sessionId_ = napiController->controller_->GetSessionId();
 
-    CHECK_RETURN(DoRegisterCallback(env, napiController) == napi_ok, "add callback failed", napi_generic_failure);
     SLOGD("add napiController instance prelock for sessionId: %{public}s***",
         napiController->sessionId_.substr(0, ARGC_THREE).c_str());
     std::lock_guard<std::mutex> lock(controllerListMutex_);
-    SLOGI("add napiController instance aftlock for sessionId: %{public}s***",
+    SLOGI("add napiController without register sessionId: %{public}s***",
         napiController->sessionId_.substr(0, ARGC_THREE).c_str());
     ControllerList_[napiController->sessionId_] = *napiController;
     napi_value property {};
@@ -174,7 +173,7 @@ napi_status NapiAVSessionController::RepeatedInstance(napi_env env, const std::s
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiController)), napi_generic_failure);
     SLOGD("check repeat controller prelock with sessionId %{public}s", controllerId.substr(0, ARGC_THREE).c_str());
     std::lock_guard<std::mutex> lock(controllerListMutex_);
-    SLOGI("check repeat controller aftlock with sessionId %{public}s", controllerId.substr(0, ARGC_THREE).c_str());
+    SLOGI("check repeat controller sessionId %{public}s", controllerId.substr(0, ARGC_THREE).c_str());
     if (ControllerList_.count(controllerId) <= 0) {
         SLOGE("check repeat without cur session");
         return napi_generic_failure;
@@ -1306,8 +1305,8 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
         std::lock_guard<std::mutex> lock(controllerListMutex_);
         SLOGI("repeat list check for controller destory");
         if (!ControllerList_.empty() && ControllerList_.find(napiController->sessionId_) != ControllerList_.end()) {
-            SLOGI("repeat list erase for controller destory");
-            ControllerList_.erase(napiController->sessionId_);
+            SLOGI("repeat list should erase for controller destory:%{public}s",
+                napiController->sessionId_.substr(0, ARGC_THREE).c_str());
         }
         output = NapiUtils::GetUndefinedValue(env);
     };
@@ -1488,9 +1487,8 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
                 registerControllerId.substr(0, ARGC_THREE).c_str());
             std::lock_guard<std::mutex> lock(controllerListMutex_);
             if (!ControllerList_.empty() && ControllerList_.find(registerControllerId) != ControllerList_.end()) {
-                SLOGI("repeat list erase controller for session destory: %{public}s",
+                SLOGI("repeat list should erase for sessionDestory: %{public}s",
                     registerControllerId.substr(0, ARGC_THREE).c_str());
-                ControllerList_.erase(registerControllerId);
             } else {
                 SLOGI("repeat list erase fail for session not in list: %{public}s",
                     registerControllerId.substr(0, ARGC_THREE).c_str());

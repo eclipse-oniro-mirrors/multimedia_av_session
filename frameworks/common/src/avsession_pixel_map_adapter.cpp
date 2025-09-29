@@ -22,7 +22,8 @@ using namespace OHOS::Media;
 namespace OHOS::AVSession {
 namespace {
     constexpr int32_t MAX_PIXEL_BUFFER_SIZE = 1 * 1024 * 1024;
-    constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 300 * 1024; // ipc max 1m at the same time
+    constexpr int32_t LIMITED_PIXEL_BUFFER_SIZE = 500 * 1024; // ipc max 1m at the same time
+    constexpr int32_t AVQUEUE_PIXEL_BUFFER_SIZE = 300 * 1024;
     constexpr int32_t MIN_PIXEL_BUFFER_SIZE = 40 * 1024;
     constexpr uint8_t IMAGE_BYTE_SIZE = 2;
     constexpr uint8_t DATA_BYTE_SIZE = 4;
@@ -206,7 +207,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
 }
 
 std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(
-    const std::shared_ptr<Media::PixelMap>& pixelMap)
+    const std::shared_ptr<Media::PixelMap>& pixelMap, bool isAVQueueImg)
 {
     std::lock_guard<std::mutex> lockGuard(pixelMapLock_);
     CHECK_AND_RETURN_RET_LOG(pixelMap != nullptr, nullptr, "invalid parameter");
@@ -227,13 +228,15 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
         return nullptr;
     }
     pixelMapTemp->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
-    if (originalPixelMapBytes_ > LIMITED_PIXEL_BUFFER_SIZE) {
+    int limitedSize = isAVQueueImg ? AVQUEUE_PIXEL_BUFFER_SIZE : LIMITED_PIXEL_BUFFER_SIZE;
+    if (originalPixelMapBytes_ > limitedSize) {
         int32_t originSize = originalPixelMapBytes_;
         float scaleRatio =
-            sqrt(static_cast<float>(LIMITED_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_));
+            sqrt(static_cast<float>(limitedSize) / static_cast<float>(originalPixelMapBytes_));
         pixelMapTemp->scale(scaleRatio, scaleRatio);
         originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
-        SLOGI("imgBufferSize exceeds limitedEx: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
+        SLOGI("imgBufferSize exceeds limitedEx %{public}d: %{public}d scaled to %{public}d",
+            limitedSize, originSize, originalPixelMapBytes_);
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = ConvertAndSetInnerImgBuffer(pixelMapTemp);
     free(dataAddr);
