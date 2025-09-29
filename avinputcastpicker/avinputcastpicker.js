@@ -44,6 +44,9 @@ export class AVInputCastPicker extends ViewPU {
         this.__deviceInfoList = new ObservedPropertyObjectPU([], this, 'deviceInfoList');
         this.__touchMenuItemIndex = new ObservedPropertySimplePU(-1, this, 'touchMenuItemIndex');
         this.__isDarkMode = new ObservedPropertySimplePU(false, this, 'isDarkMode');
+        this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
+        this.__maxFontSizeScale = new ObservedPropertySimplePU(2, this, 'maxFontSizeScale');
+        this.__isPc = new ObservedPropertySimplePU(true, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
         this.onStateChange = undefined;
         this.extensionProxy = null;
@@ -65,6 +68,15 @@ export class AVInputCastPicker extends ViewPU {
         }
         if (params.isDarkMode !== undefined) {
             this.isDarkMode = params.isDarkMode;
+        }
+        if (params.fontSizeScale !== undefined) {
+            this.fontSizeScale = params.fontSizeScale;
+        }
+        if (params.maxFontSizeScale !== undefined) {
+            this.maxFontSizeScale = params.maxFontSizeScale;
+        }
+        if (params.isPc !== undefined) {
+            this.isPc = params.isPc;
         }
         if (params.isRTL !== undefined) {
             this.isRTL = params.isRTL;
@@ -90,6 +102,9 @@ export class AVInputCastPicker extends ViewPU {
         this.__deviceInfoList.purgeDependencyOnElmtId(rmElmtId);
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(rmElmtId);
         this.__isDarkMode.purgeDependencyOnElmtId(rmElmtId);
+        this.__fontSizeScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__maxFontSizeScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__isPc.purgeDependencyOnElmtId(rmElmtId);
         this.__isRTL.purgeDependencyOnElmtId(rmElmtId);
     }
 
@@ -97,6 +112,9 @@ export class AVInputCastPicker extends ViewPU {
         this.__deviceInfoList.aboutToBeDeleted();
         this.__touchMenuItemIndex.aboutToBeDeleted();
         this.__isDarkMode.aboutToBeDeleted();
+        this.__fontSizeScale.aboutToBeDeleted();
+        this.__maxFontSizeScale.aboutToBeDeleted();
+        this.__isPc.aboutToBeDeleted();
         this.__isRTL.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -124,6 +142,30 @@ export class AVInputCastPicker extends ViewPU {
 
     set isDarkMode(newValue) {
         this.__isDarkMode.set(newValue);
+    }
+
+    get fontSizeScale() {
+        return this.__fontSizeScale.get();
+    }
+
+    set fontSizeScale(newValue) {
+        this.__fontSizeScale.set(newValue);
+    }
+
+    get maxFontSizeScale() {
+        return this.__maxFontSizeScale.get();
+    }
+
+    set maxFontSizeScale(newValue) {
+        this.__maxFontSizeScale.set(newValue);
+    }
+
+    get isPc() {
+        return this.__isPc.get();
+    }
+
+    set isPc(newValue) {
+        this.__isPc.set(newValue);
     }
 
     get isRTL() {
@@ -173,7 +215,7 @@ export class AVInputCastPicker extends ViewPU {
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
                 }]);
-            SymbolGlyph.renderingStrategy(SymbolRenderingStrategy.SINGLE);
+            SymbolGlyph.renderingStrategy(SymbolRenderingStrategy.MULTIPLE_OPACITY);
         }, SymbolGlyph);
     }
 
@@ -213,26 +255,50 @@ export class AVInputCastPicker extends ViewPU {
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
                 }));
-            Text.width(254);
-            Text.padding({
-                left: 8,
-                top: 11,
-                right: 8,
-                bottom: 11
-            });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
             Text.wordBreak(WordBreak.BREAK_WORD);
+            Text.maxFontScale(this.maxFontSizeScale);
             Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
         }, Text);
         Text.pop();
     }
 
+    highQualityIconBuilder(item, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Row.borderRadius(3);
+            Row.border({
+                width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
+                color: { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
+            });
+            Row.padding({
+                top: 1.5,
+                right: 4,
+                bottom: 1.5,
+                left: 4
+            });
+            Row.margin({ top: 2 });
+            Row.width('auto');
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(item);
+            Text.fontSize(7);
+            Text.fontWeight(FontWeight.Medium);
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.maxFontScale(this.maxFontSizeScale);
+        }, Text);
+        Text.pop();
+        Row.pop();
+    }
+
     deviceMenu(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.width(326);
-            Column.borderRadius(8);
+            Column.width(this.isPc ? 326 : 216);
+            Column.borderRadius(this.isPc ? 8 : 20);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
@@ -258,7 +324,7 @@ export class AVInputCastPicker extends ViewPU {
                         justifyContent: FlexAlign.SpaceBetween,
                         alignItems: ItemAlign.Center
                     });
-                    Flex.constraintSize({ minHeight: 40 });
+                    Flex.constraintSize({ minHeight: this.isPc ? 40 : 48 });
                     Flex.padding({ left: 12, right: 12 });
                     Flex.onTouch((event) => {
                         if (event.type === TouchType.Down) {
@@ -277,7 +343,7 @@ export class AVInputCastPicker extends ViewPU {
                     Flex.borderRadius(this.touchMenuItemIndex === index ? {
                         'id': -1,
                         'type': 10002,
-                        params: ['sys.float.corner_radius_level2'],
+                        params: this.isPc ? ['sys.float.corner_radius_level2'] : ['sys.float.corner_radius_level8'],
                         'bundleName': '__harDefaultBundleName__',
                         'moduleName': '__harDefaultModuleName__'
                     } : 0);
@@ -287,7 +353,30 @@ export class AVInputCastPicker extends ViewPU {
                     Row.alignItems(VerticalAlign.Center);
                 }, Row);
                 this.iconBuilder.bind(this)(item, false);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Start });
+                    Flex.width(this.isPc ? 254 : 144);
+                    Flex.padding({
+                        left: 8,
+                        top: this.isPc ? 11 : (!this.highQualityName ? 17 : 7),
+                        right: 8,
+                        bottom: this.isPc ? 11 : (!this.highQualityName ? 17 : 7),
+                    });
+                }, Flex);
                 this.textBuilder.bind(this)(item);
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    If.create();
+                    if (!!item.highQualityName) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.highQualityIconBuilder.bind(this)(item.highQualityName);
+                        });
+                    } else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                        });
+                    }
+                }, If);
+                If.pop();
+                Flex.pop();
                 Row.pop();
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     If.create();
@@ -309,8 +398,18 @@ export class AVInputCastPicker extends ViewPU {
                 Flex.pop();
                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                     If.create();
-                    if (index !== this.deviceInfoList.length - 1) {
+                    if (!this.isPc && (index !== this.deviceInfoList.length - 1)) {
                         this.ifElseBranchUpdateFunction(0, () => {
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                Divider.create();
+                                Divider.opacity(0.5);
+                                Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'],
+                                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                Divider.padding({ right: (this.isRTL ? 44 : 12), left: (this.isRTL ? 12 : 44) });
+                            }, Divider);
+                        });
+                    } else if (this.isPc && (index !== this.deviceInfoList.length - 1)) {
+                        this.ifElseBranchUpdateFunction(1, () => {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 Row.create();
                                 Row.width('100%');
@@ -319,7 +418,7 @@ export class AVInputCastPicker extends ViewPU {
                             Row.pop();
                         });
                     } else {
-                        this.ifElseBranchUpdateFunction(1, () => {
+                        this.ifElseBranchUpdateFunction(2, () => {
                         });
                     }
                 }, If);
@@ -380,6 +479,18 @@ export class AVInputCastPicker extends ViewPU {
                 if (JSON.stringify(data['isDarkMode']) !== undefined) {
                     console.info(TAG, `isDarkMode : ${JSON.stringify(data['isDarkMode'])}`);
                     this.isDarkMode = data['isDarkMode'];
+                }
+                if (data.fontSizeScale !== undefined) {
+                    console.info(TAG, `fontSizeScale : ${data.fontSizeScale}`);
+                    this.fontSizeScale = data.fontSizeScale;
+                }
+                if (data.maxFontSizeScale !== undefined) {
+                    console.info(TAG, `maxFontSizeScale : ${data.maxFontSizeScale}`);
+                    this.maxFontSizeScale = data.maxFontSizeScale;
+                }
+                if (data.isPc !== undefined) {
+                    console.info(TAG, `isPc : ${data.isPc}`);
+                    this.isPc = data.isPc;
                 }
                 if (JSON.stringify(data['isRTL']) !== undefined) {
                     console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);
