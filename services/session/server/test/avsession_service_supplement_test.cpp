@@ -490,7 +490,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher003, TestSize.Level
         }
     }
 
-    g_AVSessionService->is2in1_ = false;
+    g_AVSessionService->isCastableDevice_ = false;
 
     std::string devId = "***";
     std::string extraInfo = "a,b";
@@ -515,7 +515,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, SuperLauncher004, TestSize.Level
     sptr<AVSessionItem> session =
         g_AVSessionService->CreateSessionInner("AncoAudio", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     CHECK_AND_RETURN(session != nullptr);
-    g_AVSessionService->is2in1_ = true;
+    g_AVSessionService->isCastableDevice_ = true;
     std::string devId = "***";
     std::string extraInfo = R"({SUPPORT_MIRROR_TO_STREAM: true})";
     g_AVSessionService->SuperLauncher(devId, "HuaweiCast", extraInfo, "IDLE");

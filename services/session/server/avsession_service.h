@@ -730,7 +730,7 @@ private:
     int32_t maxHistoryNums_ = 10;
     bool isFirstPress_ = true;
     bool isInCast_ = false;
-    bool is2in1_ = false;
+    bool isCastableDevice_ = false;
     bool isAudioBrokerStart_ = true;
 
     void *migrateStubFuncHandle_ = nullptr;

@@ -50,6 +50,7 @@ void HwCastProviderSession::Release()
         SLOGE("castSession_ is not exist");
         return;
     }
+    avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
     castSession_->Release();
     castSession_ = nullptr;
 }

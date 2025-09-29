@@ -113,7 +113,7 @@ private:
         AudioStandard::STREAM_USAGE_AUDIOBOOK
     };
     std::recursive_mutex listenersLock_;
-    bool is2in1_ {false};
+    bool isCastableDevice_ {false};
 
     int32_t volumeMax_ = 0;
     int32_t volumeMin_ = 0;

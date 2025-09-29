@@ -228,7 +228,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
             CHECK_AND_RETURN_LOG(!enableCastCond_.wait_for(lock, std::chrono::seconds(castReleaseTimeOut_),
                 [this]() { return cancelCastRelease_; }), "cancel cast release");
             std::lock_guard threadLockGuard(checkEnableCastLock_);
-            CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsRemoteCasting() && !is2in1_,
+            CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsRemoteCasting(),
                 "can not release cast with session casting");
             CHECK_AND_RETURN_LOG(castServiceNameStatePair_.second != deviceStateConnection,
                 "can not release cast with casting");
@@ -446,7 +446,7 @@ bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
     CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "session is nullptr");
     bool appCond = session->IsAppSupportCast();
 
-    bool connectCond = !is2in1_ && (castServiceNameStatePair_.second == deviceStateConnection);
+    bool connectCond = !isCastableDevice_ && (castServiceNameStatePair_.second == deviceStateConnection);
 
     std::string bundleName = session->GetBundleName();
     bool isWhiteApp = std::find(CastEngine::MIRROR_TO_STREAM_APP_LIST.begin(),
@@ -566,7 +566,8 @@ int32_t AVSessionService::GetLocalDeviceType()
 void AVSessionService::DoTargetDevListenWithDM()
 {
     localDeviceType_ = GetLocalDeviceType();
-    is2in1_ = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
+    isCastableDevice_ = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
+               localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_TV);
     targetDeviceType_ = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) ?
         DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE : DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
     SLOGI("get localDeviceType:%{public}d", localDeviceType_);

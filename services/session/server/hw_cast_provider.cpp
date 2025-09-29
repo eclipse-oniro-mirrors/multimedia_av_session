@@ -494,6 +494,49 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
     }
 }
 
+void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
+{
+    std::shared_ptr<ICastSession> castSession = nullptr;
+    CastSessionManager::GetInstance().GetCastSession(castSessionId, castSession);
+    CHECK_AND_RETURN_LOG(castSession != nullptr, "get cast session failed");
+    SLOGI("Cast provider received session create common event");
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, castSession]() {
+        SLOGI("Cast pvd received session create event and create task thread");
+        for (auto listener : castStateListenerList_) {
+            listener->OnSessionNeedDestroy();
+            SLOGI("Cast pvd received session create event and session destroy check done");
+        }
+        int32_t castId;
+        {
+            std::lock_guard lockGuard(mutexLock_);
+            std::vector<bool>::iterator iter = find(castFlag_.begin(), castFlag_.end(), false);
+            if (iter == castFlag_.end()) {
+                SLOGE("Do not trigger callback due to the castFlag_ used up.");
+                return;
+            }
+            *iter = true;
+            castId = iter - castFlag_.begin();
+            SLOGI("Cast task thread to find flag");
+        }
+        auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
+        hwCastProviderSession->Init();
+        {
+            std::lock_guard lockGuard(mutexLock_);
+            hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+            SLOGI("Cast task thread to create player");
+            std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
+            std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);
+            hwCastStreamPlayer->Init();
+            avCastControllerMap_[castId] = hwCastStreamPlayer;
+        }
+        SLOGI("Create streamPlayer finished %{public}d", castId);
+        for (auto listener : castStateListenerList_) {
+            listener->OnSessionCreated(castId);
+        }
+        SLOGI("do session create notify finished %{public}d", castId);
+        }, "OnSessionCreated", 0);
+}
+
 void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)
 {
     SLOGI("Cast provider received session create event");

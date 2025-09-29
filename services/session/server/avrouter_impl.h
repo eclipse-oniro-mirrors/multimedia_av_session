@@ -75,6 +75,8 @@ public:
 
     int32_t OnCastSessionCreated(const int32_t castId) override;
 
+    void NotifyCastSessionCreated(const std::string castSessionId) override;
+
     int32_t OnCastServerDied(int32_t providerNumber) override;
 
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(const int64_t castHandle) override;

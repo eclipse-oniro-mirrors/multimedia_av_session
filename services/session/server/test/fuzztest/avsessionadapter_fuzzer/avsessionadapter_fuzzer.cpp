@@ -161,7 +161,7 @@ void AVSessionUsersManagerTest()
 void AVSessionAudioAdapterTest()
 {
     AudioAdapter audioAdapter;
-    audioAdapter.is2in1_ = GetData<bool>();
+    audioAdapter.isCastableDevice_ = GetData<bool>();
 
     audioAdapter.MuteAudioStream(GetData<int32_t>(), GetData<int32_t>());
     audioAdapter.UnMuteAudioStream(GetData<int32_t>());

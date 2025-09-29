@@ -678,7 +678,7 @@ static HWTEST_F(AVSessionServiceTest, MirrorToStreamCast001, TestSize.Level0)
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-    avservice_->is2in1_ = true;
+    avservice_->isCastableDevice_ = true;
     avservice_->MirrorToStreamCast(avsessionHere_);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
@@ -697,7 +697,7 @@ static HWTEST_F(AVSessionServiceTest, MirrorToStreamCast002, TestSize.Level0)
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-    avservice_->is2in1_ = false;
+    avservice_->isCastableDevice_ = false;
     avservice_->MirrorToStreamCast(avsessionHere_);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
@@ -716,7 +716,7 @@ static HWTEST_F(AVSessionServiceTest, MirrorToStreamCast003, TestSize.Level0)
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
-    avservice_->is2in1_ = true;
+    avservice_->isCastableDevice_ = true;
     avservice_->MirrorToStreamCast(avsessionHere_);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
@@ -986,6 +986,22 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent004, TestSize.Level1)
     EventSubscriber eventSubscriber(subscriberInfo, avservice_);
     eventSubscriber.OnReceiveEvent(eventData);
     SLOGD("OnReceiveEvent004 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, OnReceiveEvent005, TestSize.Level1)
+{
+    SLOGD("OnReceiveEvent005 begin!");
+    OHOS::EventFwk::CommonEventData eventData;
+    string action = "usual.event.CAST_SESSION_CREATE";
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avservice_);
+    eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_TRUE(avservice_ != nullptr);
+    SLOGD("OnReceiveEvent005 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, UnSubscribeCommonEvent001, TestSize.Level0)
