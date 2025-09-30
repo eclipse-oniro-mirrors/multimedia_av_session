@@ -150,7 +150,7 @@ public:
                 "video": "123",
                 "speed": "100",
             })";
-        return 0; 
+        return 0;
     }
 
     int GetPlaySpeed(OHOS::CastEngine::PlaybackSpeed &speed) override
