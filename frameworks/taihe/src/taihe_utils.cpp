@@ -300,12 +300,12 @@ static int32_t GetAniInt32(ani_env *env, ani_object obj, int32_t &value)
         "Can't find std.core.Int", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_method method {};
-    CHECK_RETURN(env->Class_FindMethod(cls, "unboxed", nullptr, &method) == ANI_OK,
-        "Can't find method unboxed in std.core.Int", OHOS::AVSession::AVSESSION_ERROR);
+    CHECK_RETURN(env->Class_FindMethod(cls, "toInt", nullptr, &method) == ANI_OK,
+        "Can't find method toInt in std.core.Int", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_int aniInt = 0;
     CHECK_RETURN(env->Object_CallMethod_Int(obj, method, &aniInt) == ANI_OK,
-        "Call method unboxed failed.", OHOS::AVSession::AVSESSION_ERROR);
+        "Call method toInt failed.", OHOS::AVSession::AVSESSION_ERROR);
     value = static_cast<int32_t>(aniInt);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
