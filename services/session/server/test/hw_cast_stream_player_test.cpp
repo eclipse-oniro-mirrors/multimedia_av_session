@@ -143,7 +143,15 @@ public:
         return 0;
     }
 
-    int GetMediaCapabilities(std::string &jsonCapabilities) override { return 0; }
+    int GetMediaCapabilities(std::string &jsonCapabilities) override
+    {
+        jsonCapabilities = R"(
+            {
+                "video": "123",
+                "speed": "100",
+            })";
+        return 0;
+    }
 
     int GetPlaySpeed(OHOS::CastEngine::PlaybackSpeed &speed) override
     {
@@ -281,6 +289,205 @@ static OHOS::AVSession::AVMetaData GetAVMetaData()
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("xxxxx");
     return g_metaData;
+}
+
+/**
+ * @tc.name: RepeatPrepare002
+ * @tc.desc: test RepeatPrepare
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, RepeatPrepare002, TestSize.Level0)
+{
+    SLOGI("RepeatPrepare002 begin!");
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 0, 0, 0, 1};
+    mediaPixelMap->SetInnerImgBuffer(imgBuffer);
+
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->RefreshCurrentAVQueueItem(avQueueItem);
+    description->SetIconUri("URI_CACHE");
+    description->SetIcon(mediaPixelMap);
+    hwCastStreamPlayer->SetSessionCallbackForCastCap([](bool, bool){});
+    hwCastStreamPlayer->isPlayingState_ = true;
+    auto ret = hwCastStreamPlayer->RepeatPrepare(description);
+    EXPECT_EQ(ret, true);
+
+    auto ret2 = hwCastStreamPlayer->Prepare(avQueueItem);
+    EXPECT_EQ(ret2, AVSESSION_SUCCESS);
+    SLOGI("RepeatPrepare002 end!");
+}
+
+/**
+ * @tc.name: buildCastInfo001
+ * @tc.desc: test RepeatPrepare
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, buildCastInfo001, TestSize.Level0)
+{
+    SLOGI("buildCastInfo001 begin!");
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 0, 0, 0, 1};
+    mediaPixelMap->SetInnerImgBuffer(imgBuffer);
+
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetIconUri("");
+    description->SetIcon(mediaPixelMap);
+    description->SetMediaUri("");
+    AVFileDescriptor avFd;
+    avFd.fd_ = 123;
+    description->SetFdSrc(avFd);
+    hwCastStreamPlayer->spid_ = 123;
+    description->SetLaunchClientData("test");
+    description->SetPcmSrc(true);
+    auto castInfo = std::make_shared<AVCastInfo>();
+    description->SetCastInfo(castInfo);
+    CastEngine::MediaInfo mediaInfo;
+    hwCastStreamPlayer->buildCastInfo(description, mediaInfo);
+    EXPECT_NE(nullptr, description);
+    SLOGI("buildCastInfo001 end!");
+}
+
+/**
+* @tc.name: GetMediaDecodeOfVideoFromCJSON001
+* @tc.desc: json contains needed data
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(HwCastStreamPlayerTest, GetMediaDecodeOfVideoFromCJSON001, TestSize.Level0)
+{
+    string capabilities = R"(
+    {
+        "decoderType": ["H264", "H265"],
+        "decoderSupportResolution": {"video/avc": 1},
+        "HDRFormat": 1,
+        "speed": 1
+    })";
+
+    cJSON* value = cJSON_Parse(capabilities.c_str());
+    EXPECT_NE(value == nullptr, true);
+    EXPECT_NE(cJSON_IsInvalid(value), true);
+    hwCastStreamPlayer->GetMediaDecodeOfVideoFromCJSON(value);
+    if (value != nullptr) {
+        cJSON_Delete(value);
+    }
+    auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
+    EXPECT_EQ(std::find(vec.begin(), vec.end(), "H264"), vec.end());
+}
+
+/**
+* @tc.name: GetMediaDecodeOfVideoFromCJSON002
+* @tc.desc: json contains needed data
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(HwCastStreamPlayerTest, GetMediaDecodeOfVideoFromCJSON002, TestSize.Level0)
+{
+    string capabilities = R"(
+    {
+        "decoderType": ["H264", "H265"],
+        "decoderSupportResolution": {},
+        "HDRFormat": 1,
+        "speed": 1
+    })";
+
+    cJSON* value = cJSON_Parse(capabilities.c_str());
+    EXPECT_NE(value == nullptr, true);
+    EXPECT_NE(cJSON_IsInvalid(value), true);
+    hwCastStreamPlayer->GetMediaDecodeOfVideoFromCJSON(value);
+    if (value != nullptr) {
+        cJSON_Delete(value);
+    }
+    auto vec = hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_;
+    EXPECT_EQ(std::find(vec.begin(), vec.end(), "H264"), vec.end());
+}
+
+/**
+ * @tc.name: GetMediaCapabilities001
+ * @tc.desc: failed to data from map
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetMediaCapabilities001, TestSize.Level0)
+{
+    SLOGI("GetMediaCapabilities001 begin!");
+    ASSERT_NE(nullptr, hwCastStreamPlayer->streamPlayer_);
+    auto ret = hwCastStreamPlayer->GetMediaCapabilities();
+    EXPECT_EQ(AVSESSION_ERROR, ret);
+    SLOGI("GetMediaCapabilities001 end!");
+}
+
+/**
+ * @tc.name: GetSupportedDecoders001
+ * @tc.desc: failed to data from map
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetSupportedDecoders001, TestSize.Level0)
+{
+    SLOGI("GetSupportedDecoders001 begin!");
+    ASSERT_NE(nullptr, hwCastStreamPlayer->jsonCapabilitiesSptr_);
+    hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderTypes_.clear();
+    std::vector<std::string> decoderTypes;
+    auto ret = hwCastStreamPlayer->GetSupportedDecoders(decoderTypes);
+    EXPECT_EQ(AVSESSION_SUCCESS, ret);
+    SLOGI("GetSupportedDecoders001 end!");
+}
+
+/**
+ * @tc.name: GetRecommendedResolutionLevel001
+ * @tc.desc: failed to data from map
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetRecommendedResolutionLevel001, TestSize.Level0)
+{
+    SLOGI("GetRecommendedResolutionLevel001 begin!");
+    ASSERT_NE(nullptr, hwCastStreamPlayer->jsonCapabilitiesSptr_);
+    std::string decoderType = "test";
+    std::vector<ResolutionLevel> resolutionLevels {RESOLUTION_480P };
+    hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderSupportResolutions_[decoderType] = resolutionLevels;
+    ResolutionLevel resolutionLevel = RESOLUTION_2K;
+    auto ret = hwCastStreamPlayer->GetRecommendedResolutionLevel(decoderType, resolutionLevel);
+    EXPECT_EQ(AVSESSION_SUCCESS, ret);
+    SLOGI("GetRecommendedResolutionLevel001 end!");
+}
+
+/**
+ * @tc.name: GetSupportedHdrCapabilities001
+ * @tc.desc: failed to data from map
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetSupportedHdrCapabilities001, TestSize.Level0)
+{
+    SLOGI("GetSupportedHdrCapabilities001 begin!");
+    ASSERT_NE(nullptr, hwCastStreamPlayer->jsonCapabilitiesSptr_);
+    hwCastStreamPlayer->jsonCapabilitiesSptr_->hdrFormats_.clear();
+    std::vector<HDRFormat> hdrFormats;
+    auto ret = hwCastStreamPlayer->GetSupportedHdrCapabilities(hdrFormats);
+    EXPECT_EQ(AVSESSION_SUCCESS, ret);
+    SLOGI("GetSupportedHdrCapabilities001 end!");
+}
+
+/**
+ * @tc.name: GetSupportedPlaySpeeds001
+ * @tc.desc: failed to data from map
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetSupportedPlaySpeeds001, TestSize.Level0)
+{
+    SLOGI("GetSupportedPlaySpeeds001 begin!");
+    ASSERT_NE(nullptr, hwCastStreamPlayer->jsonCapabilitiesSptr_);
+    hwCastStreamPlayer->jsonCapabilitiesSptr_->playSpeeds_.clear();
+    std::vector<float> playSpeeds;
+    auto ret = hwCastStreamPlayer->GetSupportedPlaySpeeds(playSpeeds);
+    EXPECT_EQ(AVSESSION_SUCCESS, ret);
+    SLOGI("GetSupportedPlaySpeeds001 end!");
 }
 
 /**
