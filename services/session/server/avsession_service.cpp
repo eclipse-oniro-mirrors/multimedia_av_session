@@ -91,7 +91,6 @@ namespace OHOS::AVSession {
 
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
     
-static const int32_t CAST_ENGINE_SA_ID = 65546;
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t ANCO_BROKER_SA_ID = 66849;
 static const int32_t AVSESSION_CONTINUE = 1;
@@ -190,7 +189,6 @@ void AVSessionService::OnStartProcess()
     AddSystemAbilityListener(APP_MGR_SERVICE_ID);
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    AddSystemAbilityListener(CAST_ENGINE_SA_ID);
     AddSystemAbilityListener(COLLABORATION_SA_ID);
     AddSystemAbilityListener(MEMORY_MANAGER_SA_ID);
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
@@ -305,6 +303,13 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         std::string bundleName = want.GetElement().GetBundleName();
         SLOGI("package remove %{public}s", bundleName.c_str());
         servicePtr_->HandleBundleRemoveEvent(bundleName);
+    } else if (action.compare("usual.event.CAST_SESSION_CREATE") == 0) {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        std::string sessionId = want.GetStringParam("sessionId");
+        SLOGI("Cast Session Create success with sessionId length %{public}d", static_cast<int32_t>(sessionId.size()));
+        servicePtr_->checkEnableCast(true);
+        AVRouter::GetInstance().NotifyCastSessionCreated(sessionId);
+#endif
     }
 }
 
@@ -423,7 +428,8 @@ bool AVSessionService::SubscribeCommonEvent()
         EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
         "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW",
         "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE",
-        "usual.event.PACKAGE_REMOVED"
+        "usual.event.PACKAGE_REMOVED",
+        "usual.event.CAST_SESSION_CREATE"
     };
 
     EventFwk::MatchingSkills matchingSkills;
@@ -487,13 +493,6 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
             InitBMS();
             InitRadarBMS();
-            break;
-        case CAST_ENGINE_SA_ID:
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-            if (is2in1_) {
-                checkEnableCast(true);
-            }
-#endif
             break;
         case COLLABORATION_SA_ID:
             InitCollaboration();
@@ -999,7 +998,7 @@ void AVSessionService::InitCastEngineService()
 {
     SLOGI("InitCastEngineService in");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(is2in1_));
+    SLOGI("GetDeviceEnableCast, Prop=%{public}d", static_cast<int>(isCastableDevice_));
 #endif
 }
 
@@ -4232,7 +4231,7 @@ std::string AVSessionService::GetLocalTitle()
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession,
     bool addCapsule, bool isCapsuleUpdate)
 {
-    CHECK_AND_RETURN_LOG(!is2in1_, "2in1 not support.");
+    CHECK_AND_RETURN_LOG(!isCastableDevice_, "2in1 not support.");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
     SLOGI("NotifySystemUI isActiveNtf %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d",

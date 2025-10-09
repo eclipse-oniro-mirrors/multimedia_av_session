@@ -338,6 +338,14 @@ public:
     */
     virtual void SetMirrorCastHandle(int64_t castHandle) = 0;
 
+    /**
+     * @brief notify cast session created.
+     *
+     * @param castSessionId The cast session id.
+     * @since 20
+    */
+    virtual void NotifyCastSessionCreated(const std::string castSessionId) = 0;
+
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
     std::string sessionId_ = "-1";

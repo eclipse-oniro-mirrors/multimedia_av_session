@@ -164,7 +164,7 @@ static HWTEST_F(AVSessionServiceAddedTest, SuperLauncherTest004, TestSize.Level0
     const std::string& state = "CONNECT_SUCC";
     g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, state);
     g_AVSessionService->migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
-    g_AVSessionService->is2in1_ = true;
+    g_AVSessionService->isCastableDevice_ = true;
     #endif
     ASSERT_TRUE(g_AVSessionService != nullptr);
     SLOGD("SuperLauncherTest004 end!");

@@ -524,7 +524,7 @@ void StartDefaultAbilityByCall001()
     avsessionService_->UpdateTopSession(avsessionHere_);
     avsessionService_->NotifyMirrorToStreamCast();
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
-    avsessionService_->is2in1_ = true;
+    avsessionService_->isCastableDevice_ = true;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
@@ -556,7 +556,7 @@ void StartAVPlayback001()
 {
     SLOGI("StartAVPlayback001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    avsessionService_->is2in1_ = true;
+    avsessionService_->isCastableDevice_ = true;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif
@@ -594,7 +594,7 @@ void ReportStartCastBegin001()
 {
     SLOGI("ReportStartCastBegin001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    avsessionService_->is2in1_ = false;
+    avsessionService_->isCastableDevice_ = false;
     avsessionService_->MirrorToStreamCast(avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
 #endif

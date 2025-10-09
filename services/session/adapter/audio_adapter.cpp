@@ -55,7 +55,7 @@ void AudioAdapter::Init()
     ret = AudioStandard::AudioRoutingManager::GetInstance()->SetPreferredOutputDeviceChangeCallback(
         rendererInfo, shared_from_this());
     CHECK_AND_PRINT_LOG(ret == 0, "register audio device changed event listener failed!");
-    is2in1_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
+    isCastableDevice_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
 
     AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
     volumeMax_ = AudioStandard::AudioSystemManager::GetInstance()->GetMaxVolume(streamType);
@@ -75,7 +75,7 @@ void AudioAdapter::AddDeviceChangeListener(const PreferOutputDeviceChangeListene
 
 int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
 {
-    if (is2in1_) {
+    if (isCastableDevice_) {
         SLOGI("PC no need mute");
         return AVSESSION_ERROR;
     }
@@ -101,7 +101,7 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
 
 int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
 {
-    if (is2in1_) {
+    if (isCastableDevice_) {
         SLOGI("PC no need unmute");
         return AVSESSION_ERROR;
     }
@@ -122,7 +122,7 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid)
 
 int32_t AudioAdapter::UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
 {
-    if (is2in1_) {
+    if (isCastableDevice_) {
         SLOGI("PC no need unmute");
         return AVSESSION_ERROR;
     }
@@ -135,7 +135,7 @@ int32_t AudioAdapter::UnMuteAudioStream(int32_t uid, AudioStandard::StreamUsage 
 
 int32_t AudioAdapter::MuteAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
 {
-    if (is2in1_) {
+    if (isCastableDevice_) {
         SLOGI("PC no need mute");
         return AVSESSION_ERROR;
     }

@@ -191,7 +191,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream003, TestSize.Level0)
         SLOGI("AddStreamRendererStateListener end!");
     });
     auto& audioAdapter = AudioAdapter::GetInstance();
-    audioAdapter.is2in1_ = true;
+    audioAdapter.isCastableDevice_ = true;
     auto ret = audioAdapter.MuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID,
         OHOS::AudioStandard::StreamUsage::STREAM_USAGE_INVALID);
     EXPECT_EQ(ret, AVSESSION_ERROR);
@@ -224,7 +224,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream004, TestSize.Level0)
         SLOGI("AddStreamRendererStateListener end!");
     });
     auto& audioAdapter = AudioAdapter::GetInstance();
-    audioAdapter.is2in1_ = true;
+    audioAdapter.isCastableDevice_ = true;
     auto ret = audioAdapter.MuteAudioStream(AudioAdapterTest::TEST_SESSION_FAIL_ID,
         AudioAdapterTest::TEST_SESSION_FAIL_ID);
     EXPECT_EQ(ret, AVSESSION_ERROR);
@@ -252,7 +252,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream005, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.MuteAudioStream(
         AudioAdapterTest::TEST_CLIENT_UID,
@@ -283,7 +283,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream006, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.MuteAudioStream(
         AudioAdapterTest::TEST_CLIENT_UID,
@@ -314,7 +314,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream007, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.MuteAudioStream(
         AudioAdapterTest::TEST_CLIENT_UID,
@@ -345,7 +345,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream008, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.MuteAudioStream(
         AudioAdapterTest::TEST_CLIENT_UID,
@@ -376,7 +376,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream009, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.MuteAudioStream(
         AudioAdapterTest::TEST_CLIENT_UID,
@@ -407,7 +407,7 @@ static HWTEST(AudioAdapterTest, MuteAudioStream010, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.MuteAudioStream(
         AudioAdapterTest::TEST_CLIENT_UID,
@@ -471,7 +471,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream002, TestSize.Level0)
         SLOGI("AddStreamRendererStateListener end!");
     });
     auto& audioAdapter = AudioAdapter::GetInstance();
-    audioAdapter.is2in1_ = true;
+    audioAdapter.isCastableDevice_ = true;
     auto ret = audioAdapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID,
         OHOS::AudioStandard::StreamUsage::STREAM_USAGE_INVALID);
     EXPECT_EQ(ret, AVSESSION_ERROR);
@@ -503,7 +503,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream003, TestSize.Level0)
         SLOGI("AddStreamRendererStateListener end!");
     });
     auto& audioAdapter = AudioAdapter::GetInstance();
-    audioAdapter.is2in1_ = true;
+    audioAdapter.isCastableDevice_ = true;
     auto ret = audioAdapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("UnMuteAudioStream003 done!");
@@ -561,7 +561,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream005, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
@@ -588,7 +588,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream006, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
@@ -615,7 +615,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream007, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
@@ -642,7 +642,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream008, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
@@ -675,7 +675,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream009, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
@@ -701,7 +701,7 @@ static HWTEST(AudioAdapterTest, UnMuteAudioStream010, TestSize.Level4)
 
     auto& adapter = AudioAdapter::GetInstance();
     adapter.Init();
-    adapter.is2in1_ = false;
+    adapter.isCastableDevice_ = false;
 
     auto ret = adapter.UnMuteAudioStream(AudioAdapterTest::TEST_CLIENT_UID);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);

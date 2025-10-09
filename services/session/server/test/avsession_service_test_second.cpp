@@ -825,7 +825,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility011, TestSize.Leve
 
 /**
 * @tc.name: OnAddSystemAbility012
-* @tc.desc: Verifying the OnAddSystemAbility method with systemAbilityId is CAST_ENGINE_SA_ID and is2in1_ is true.
+* @tc.desc: Verifying OnAddSystemAbility method with systemAbilityId CAST_ENGINE_SA_ID and isCastableDevice_ is true.
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
@@ -835,7 +835,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility012, TestSize.Leve
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t systemAbilityId = CAST_ENGINE_SA_ID;
     const std::string deviceId = "AUDIO";
-    g_AVSessionService->is2in1_ = true;
+    g_AVSessionService->isCastableDevice_ = true;
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
     EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
 #else
@@ -1524,7 +1524,7 @@ static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher002, TestSize.Level0)
 */
 static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher003, TestSize.Level0)
 {
-    g_AVSessionService->is2in1_ = true;
+    g_AVSessionService->isCastableDevice_ = true;
     g_AVSessionService->SuperLauncher("adcdef", "HuaweiCast", "a, b, c", "IDLE");
     EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
 }
@@ -1627,7 +1627,7 @@ static HWTEST_F(AVSessionServiceTestSecond, MirrorToStreamCast001, TestSize.Leve
     ASSERT_TRUE(avsessionHere != nullptr);
     g_AVSessionService->isSupportMirrorToStream_ = true;
     g_AVSessionService->castServiceNameStatePair_.second = "CONNECT_SUCC";
-    g_AVSessionService->is2in1_ = false;
+    g_AVSessionService->isCastableDevice_ = false;
     auto ret = g_AVSessionService->MirrorToStreamCast(avsessionHere);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     avsessionHere->Destroy();

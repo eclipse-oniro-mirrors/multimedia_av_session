@@ -604,15 +604,21 @@ int64_t AVRouterImpl::GetMirrorCastHandle()
     return providerManagerMap_[providerNumberEnableDefault_]->provider_->GetMirrorCastHandle();
 }
 
-bool AVRouterImpl::IsInMirrorToStreamState()
-{
-    return isInMirrorToStream_;
-}
-
 void AVRouterImpl::SetMirrorCastHandle(int64_t castHandle)
 {
     CHECK_AND_RETURN_LOG(hwProvider_ != nullptr, "hwProvider_ is nullptr");
     hwProvider_->SetMirrorCastHandle(castHandle);
+}
+
+void AVRouterImpl::NotifyCastSessionCreated(const std::string castSessionId)
+{
+    CHECK_AND_RETURN_LOG(hwProvider_ != nullptr, "hwProvider_ is nullptr");
+    hwProvider_->NotifyCastSessionCreated(castSessionId);
+}
+
+bool AVRouterImpl::IsInMirrorToStreamState()
+{
+    return isInMirrorToStream_;
 }
 
 bool AVRouterImpl::IsRemoteCasting()
