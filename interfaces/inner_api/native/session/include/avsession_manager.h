@@ -331,7 +331,7 @@ public:
      * Get session already alive.
      *
      * @param elementName element Name
-     * @param type Session type
+     * @param tag Custom name of the session
      * @param session wanted session {@link AVSession}
      * @return Returns result of getting session
      * @since 21

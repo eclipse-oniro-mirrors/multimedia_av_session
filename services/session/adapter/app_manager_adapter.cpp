@@ -104,6 +104,7 @@ void AppManagerAdapter::RemoveObservedApp(int32_t uid)
 void AppManagerAdapter::SetServiceCallbackForAppStateChange(const std::function<void(int uid, int state)>& callback)
 {
     serviceCallbackForAppStateChange_ = callback;
+    SLOGI("appStateChangeCallback set done");
 }
 
 // LCOV_EXCL_START
@@ -114,6 +115,7 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
         if (appProcessData.appState == ApplicationState::APP_STATE_FOREGROUND ||
             appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
             for (const auto& appData : appProcessData.appDatas) {
+                CHECK_AND_CONTINUE(serviceCallbackForAppStateChange_ != nullptr);
                 serviceCallbackForAppStateChange_(appData.uid, static_cast<int>(appProcessData.appState));
             }
         }

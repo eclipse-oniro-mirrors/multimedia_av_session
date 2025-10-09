@@ -2097,7 +2097,7 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
         return AVSESSION_ERROR;
     }
 
-    SLOGI("GetHistoricalAVQueueInfos with size:%{public}d limit:%{public}d", maxSize, maxAVQueueInfoLen);
+    SLOGD("GetHistoricalAVQueueInfos with size:%{public}d limit:%{public}d", maxSize, maxAVQueueInfoLen);
     maxSize = maxAVQueueInfoLen >= maxSize ? maxSize : maxAVQueueInfoLen;
     cJSON* avQueueValuesArray = cJSON_Parse(oldAVQueueInfoContent.c_str());
     CHECK_AND_RETURN_RET_LOG(avQueueValuesArray != nullptr, AVSESSION_ERROR, "json object is null");
@@ -2109,13 +2109,14 @@ int32_t AVSessionService::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t max
     cJSON* valueItem = nullptr;
     cJSON_ArrayForEach(valueItem, avQueueValuesArray) {
         ProcessAvQueueInfosFromCJSON(tempAVQueueInfos, valueItem);
-        if (tempAVQueueInfos.size() >= maxSize) {
+        if (static_cast<int>(tempAVQueueInfos.size()) >= maxSize) {
             break;
         }
     }
     for (auto iterator = tempAVQueueInfos.begin(); iterator != tempAVQueueInfos.end(); ++iterator) {
         avQueueInfos.push_back(*iterator);
     }
+    SLOGI("GetHistoricalAVQueue size:%{public}d Limit:%{public}d", static_cast<int>(avQueueInfos.size()), maxSize);
     cJSON_Delete(avQueueValuesArray);
     return AVSESSION_SUCCESS;
 }
@@ -3917,11 +3918,12 @@ bool AVSessionService::LoadStringFromFileEx(const string& filePath, string& cont
 
 bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std::string& content)
 {
-    SLOGI("file save in for path:%{public}s, content:%{public}s", filePath.c_str(), content.c_str());
+    SLOGD("file save in for path:%{public}s, content size:%{public}d", filePath.c_str(),
+        static_cast<int>(content.size()));
     cJSON* checkValuesItem = cJSON_Parse(content.c_str());
     CHECK_AND_RETURN_RET_LOG(checkValuesItem != nullptr, false, "cjson parse nullptr");
     if (cJSON_IsInvalid(checkValuesItem)) {
-        SLOGE("cjson parse invalid");
+        SLOGE("cjson parse invalid for path:%{public}s", filePath.c_str());
         cJSON_Delete(checkValuesItem);
         return false;
     }
@@ -3930,17 +3932,17 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
     ofstream file;
     file.open(filePath.c_str(), ios::out | ios::trunc);
     if (!file.is_open()) {
-        SLOGE("open file in save failed!");
+        SLOGE("open file in save failed for path:%{public}s", filePath.c_str());
         return false;
     }
     if (content.empty()) {
-        SLOGE("write content is empty, no need to do write!");
+        SLOGE("write content is empty, no need to do write for path:%{public}s", filePath.c_str());
         file.close();
         return true;
     }
     file.write(content.c_str(), content.length());
     if (file.fail()) {
-        SLOGE("write content to file failed!");
+        SLOGE("write content to file failed for path:%{public}s", filePath.c_str());
         file.close();
         return false;
     }
