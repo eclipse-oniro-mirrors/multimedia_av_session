@@ -572,7 +572,7 @@ export struct AVCastPicker {
       .alignItems(HorizontalAlign.Center)
       .justifyContent(FlexAlign.Center)
       .size({ width: '100%', height: '100%' })
-      .zIndex(1.0)
+      .zIndex(1)
     }
     .size({ width: '100%', height: '100%' })
   }
