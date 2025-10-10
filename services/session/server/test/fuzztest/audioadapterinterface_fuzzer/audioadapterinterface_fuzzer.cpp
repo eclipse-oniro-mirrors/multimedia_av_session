@@ -343,6 +343,29 @@ void AudioAdapterTest011()
     audioAdapter.UnMuteAudioStream(uid);
 }
 
+void AudioAdapterTest012()
+{
+    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
+    auto& audioAdapter = AudioAdapter::GetInstance();
+
+    audioAdapter.SetAvailableDeviceChangeCallback([](const OHOS::AVSession::AudioDeviceDescriptors& devices) {});
+
+    AudioStandard::DeviceChangeAction actionConnect{};
+    actionConnect.type = AudioStandard::DeviceChangeType::CONNECT;
+    auto usage1 = static_cast<AudioStandard::AudioDeviceUsage>(provider.ConsumeIntegral<int32_t>());
+    audioAdapter.OnAvailableDeviceChange(usage1, actionConnect);
+
+    AudioStandard::DeviceChangeAction actionNonConnect{};
+    if (provider.ConsumeBool()) {
+        actionNonConnect.type = AudioStandard::DeviceChangeType::DISCONNECT;
+    } else {
+        actionNonConnect.type = static_cast<AudioStandard::DeviceChangeType>(provider.ConsumeIntegral<int32_t>());
+    }
+    auto usage2 = static_cast<AudioStandard::AudioDeviceUsage>(provider.ConsumeIntegral<int32_t>());
+    audioAdapter.OnAvailableDeviceChange(usage2, actionNonConnect);
+    audioAdapter.UnsetAvailableDeviceChangeCallback();
+}
+
 bool FuzzTest(const uint8_t* rawData, size_t size)
 {
     if (rawData == nullptr) {
@@ -364,7 +387,8 @@ bool FuzzTest(const uint8_t* rawData, size_t size)
         AudioAdapterTest008,
         AudioAdapterTest009,
         AudioAdapterTest010,
-        AudioAdapterTest011
+        AudioAdapterTest011,
+        AudioAdapterTest012
     };
 
     uint32_t code = provider.ConsumeIntegral<uint32_t>();

@@ -122,6 +122,7 @@ void TestAudioDeviceManager()
     AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(deviceId);
     AudioDeviceManager::GetInstance().GetDeviceId();
     AudioDeviceManager::GetInstance().GetAudioState();
+    AudioDeviceManager::GetInstance().GetSessionInfoSyncState();
     AudioDeviceManager::GetInstance().SetAudioState(GetData<int32_t>());
 
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> desc;

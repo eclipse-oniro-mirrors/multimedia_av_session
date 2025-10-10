@@ -173,6 +173,7 @@ void AvSessionItemTest()
         return;
     }
     AvSessionItemTestImpl(avSessionItem);
+    AvSessionItemTestAdded(avSessionItem);
     AvSessionCallItemTest(avSessionItem);
     AvSessionItemTestImplExtension(avSessionItem);
     AvSessionCallItemTestExtension(avSessionItem);
@@ -234,6 +235,18 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     avSessionItem->RegisterListenerStreamToCast(std::make_pair(GetString(), GetString()), deviceInfo);
 #endif
+}
+
+void AvSessionItemTestAdded(sptr<AVSessionItem> avSessionItem)
+{
+    AppExecFwk::ElementName newElement;
+    newElement.SetBundleName(GetString());
+    newElement.SetAbilityName(GetString());
+    avSessionItem->UpdateSessionElement(newElement);
+    avSessionItem->GetDescriptor();
+    avSessionItem->GetPlayingTime();
+    avSessionItem->SetLyricTitle(GetString());
+    avSessionItem->GetLyricTitle();
 }
 
 void AvSessionItemTestCustomData(sptr<AVSessionItem> avSessionItem)

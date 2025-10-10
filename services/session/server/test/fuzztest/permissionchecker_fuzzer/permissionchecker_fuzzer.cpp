@@ -17,6 +17,7 @@
 #include "permissionchecker_fuzzer.h"
 #include "ipc_skeleton.h"
 #include "permission_checker.h"
+#include "mock_token_flag.h"
 
 using namespace std;
 using namespace OHOS;
@@ -40,10 +41,25 @@ void OHOS::AVSession::CheckPermissionTest003()
     PermissionChecker::GetInstance().CheckPermission(CHECK_PERMISSION);
 }
 
+void OHOS::AVSession::CheckPermissionTest004(uint8_t* data, size_t size)
+{
+    Notification::MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    int32_t invalidType = *reinterpret_cast<const int32_t*>(data);
+    PermissionChecker::GetInstance().CheckPermission(invalidType);
+}
+
 void OHOS::AVSession::CheckSystemPermissionTest001()
 {
     Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     PermissionChecker::GetInstance().CheckSystemPermission(tokenId);
+}
+
+void OHOS::AVSession::CheckSystemPermissionTest002(uint8_t* data, size_t size)
+{
+    Notification::MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    uint32_t tokenId = *reinterpret_cast<const uint32_t*>(data);
+    PermissionChecker::GetInstance().CheckSystemPermission(tokenId);
+    OHOS::Notification::MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_INVALID);
 }
 
 void OHOS::AVSession::CheckMediaResourcePermissionTest001(uint8_t* data, size_t size)

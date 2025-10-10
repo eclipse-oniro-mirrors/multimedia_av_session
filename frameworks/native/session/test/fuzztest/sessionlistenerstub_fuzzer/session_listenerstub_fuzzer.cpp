@@ -14,24 +14,33 @@
  */
 
 #include <iostream>
-
+#include <string>
+#include <vector>
+#include <fuzzer/FuzzedDataProvider.h>
+#include "session_listenerstub_fuzzer.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "session_listener_client.h"
-#include "session_listenerstub_fuzzer.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t MAX_CODE_NUM = 6;
-static constexpr int32_t MIN_SIZE_NUM = 4;
+static constexpr size_t MAX_PARCEL_BUF_LEN = 2048;
+static constexpr size_t MAX_STR_LEN = 256;
+
 std::shared_ptr<SessionListenerClient> g_SessionListenerStubClient(nullptr);
 
 void SessionListenerStubFuzzer::OnRemoteRequest(int32_t code, uint8_t* data, size_t size)
 {
-    size -= sizeof(uint32_t);
-    
+    FuzzedDataProvider fdp(data, size);
+
     MessageParcel dataMessageParcel;
     dataMessageParcel.WriteInterfaceToken(ISessionListener::GetDescriptor());
-    dataMessageParcel.WriteBuffer(data + sizeof(uint32_t), size);
+
+    size_t payloadLen = fdp.ConsumeIntegralInRange<size_t>(0, MAX_PARCEL_BUF_LEN);
+    std::vector<uint8_t> payload = fdp.ConsumeBytes<uint8_t>(payloadLen);
+    if (!payload.empty()) {
+        dataMessageParcel.WriteBuffer(payload.data(), payload.size());
+    }
     dataMessageParcel.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
@@ -40,21 +49,34 @@ void SessionListenerStubFuzzer::OnRemoteRequest(int32_t code, uint8_t* data, siz
 
 void SessionListenerStubFuzzer::FuzzTests(const uint8_t* data, size_t size)
 {
-    int32_t uid = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t uid = fdp.ConsumeIntegral<int32_t>();
     g_SessionListenerStubClient->OnAudioSessionChecked(uid);
 
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = 1;
-    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.castCategory_ = fdp.ConsumeIntegral<int32_t>();
+    deviceInfo.deviceId_ = fdp.ConsumeRandomLengthString(MAX_STR_LEN);
+    if (deviceInfo.deviceId_.empty()) {
+        deviceInfo.deviceId_ = "deviceId";
+    }
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     g_SessionListenerStubClient->OnDeviceAvailable(outputDeviceInfo);
 
-    std::string deviceId(reinterpret_cast<const char *>(data), size);
+    std::string deviceId = fdp.ConsumeRandomLengthString(MAX_STR_LEN);
     g_SessionListenerStubClient->OnDeviceOffline(deviceId);
 
     std::vector<sptr<IRemoteObject>> sessionControllers;
     g_SessionListenerStubClient->OnRemoteDistributedSessionChange(sessionControllers);
+    DeviceState deviceState{};
+    g_SessionListenerStubClient->OnDeviceStateChange(deviceState);
+
+    std::string bundleName = fdp.ConsumeRandomLengthString(MAX_STR_LEN);
+    if (bundleName.empty()) {
+        bundleName = "bundleFuzz";
+    }
+    AncoMediaSessionListenerImpl ancoImpl(nullptr);
+    ancoImpl.OnStartAVPlayback(bundleName);
 }
 
 void SessionListenerStubTest(uint8_t* data, size_t size)
@@ -74,14 +96,14 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
     /* Run your code on data */
     SLOGI("the maximum length of size should not be verified");
-    if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
+    if (data == nullptr) {
         return 0;
     }
-    
+
     std::shared_ptr<TestSessionListener> testSessionListener = std::make_shared<TestSessionListener>();
     g_SessionListenerStubClient = std::make_shared<SessionListenerClient>(testSessionListener);
 
     SessionListenerStubTest(data, size);
     return 0;
 }
-}
+} // namespace OHOS::AVSession
