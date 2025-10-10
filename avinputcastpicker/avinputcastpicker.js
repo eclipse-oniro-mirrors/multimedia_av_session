@@ -257,6 +257,7 @@ export class AVInputCastPicker extends ViewPU {
                 }));
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
+            Text.lineHeight(20);
             Text.wordBreak(WordBreak.BREAK_WORD);
             Text.maxFontScale(this.maxFontSizeScale);
             Text.direction(this.isRTL ? Direction.Rtl : Direction.Ltr);
@@ -358,9 +359,9 @@ export class AVInputCastPicker extends ViewPU {
                     Flex.width(this.isPc ? 254 : 144);
                     Flex.padding({
                         left: 8,
-                        top: this.isPc ? 11 : (!this.highQualityName ? 17 : 7),
+                        top: 11,
                         right: 8,
-                        bottom: this.isPc ? 11 : (!this.highQualityName ? 17 : 7),
+                        bottom: 11,
                     });
                 }, Flex);
                 this.textBuilder.bind(this)(item);

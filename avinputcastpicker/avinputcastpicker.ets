@@ -124,6 +124,7 @@ export struct AVInputCastPicker {
         (!this.isDarkMode ? $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
       .textOverflow({ overflow: TextOverflow.Ellipsis })
       .maxLines(2)
+      .lineHeight(20)
       .wordBreak(WordBreak.BREAK_WORD)
       .maxFontScale(this.maxFontSizeScale)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)
@@ -174,9 +175,9 @@ export struct AVInputCastPicker {
               .width(this.isPc ? 254 : 144)
               .padding({
                 left: 8,
-                top: this.isPc ? 11 : (!item.highQualityName ? 17 : 7),
+                top: 11,
                 right: 8,
-                bottom: this.isPc ? 11 : (!item.highQualityName ? 17 : 7),
+                bottom: 11,
               })
             }
             .alignItems(VerticalAlign.Center)
