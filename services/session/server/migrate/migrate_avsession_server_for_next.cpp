@@ -50,8 +50,9 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
     SLOGI("LocalFrontSessionArrive in:%{public}s.", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     MigratePostTask(
         [this, sessionId]() {
-            SLOGI("LocalFrontSessionArrive with sessionId:%{public}s.",
+            SLOGI("LocalFrontSessionArrive with sessionId:%{public}s in",
                 AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+            std::weak_ptr<MigrateAVSessionServer> migrageServerWeak(shared_from_this());
             CreateController(sessionId);
             sptr<AVControllerItem> controller = nullptr;
             {
@@ -100,6 +101,7 @@ void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
     lastSessionId_ = "";
     MigratePostTask(
         [this, sessionId]() {
+            std::weak_ptr<MigrateAVSessionServer> migrageServerWeak(shared_from_this());
             std::lock_guard lockGuard(migrateControllerLock_);
             sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
             if (controller != nullptr) {

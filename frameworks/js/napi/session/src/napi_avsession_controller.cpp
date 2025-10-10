@@ -1472,16 +1472,21 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
 
 napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSessionController* napiController)
 {
-    SLOGI("do register callback with for sessionId: %{public}s***",
+    CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "napiController null");
+    SLOGI("DoRegisterCallback with for sessionId: %{public}s***",
         napiController->sessionId_.substr(0, ARGC_THREE).c_str());
+    std::string registerControllerId = napiController->sessionId_;
+    NapiAVSessionController* repeatedNapiController = &(ControllerList_[registerControllerId]);
+    CHECK_AND_RETURN_RET_LOG(repeatedNapiController != nullptr, napi_generic_failure, "repeatedNapiController null");
+    napiController->callback_ = repeatedNapiController->callback_;
     if (napiController->callback_ == nullptr) {
         napiController->callback_ = std::make_shared<NapiAVControllerCallback>();
+        repeatedNapiController->callback_ = napiController->callback_;
         if (napiController->callback_ == nullptr) {
             SLOGE("OnEvent failed : no memory");
             NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
             return napi_generic_failure;
         }
-        std::string registerControllerId = napiController->sessionId_;
         napiController->callback_->AddCallbackForSessionDestroy([registerControllerId]() {
             SLOGI("repeat list check for session destory: %{public}s",
                 registerControllerId.substr(0, ARGC_THREE).c_str());

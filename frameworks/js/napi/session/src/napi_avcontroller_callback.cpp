@@ -290,7 +290,8 @@ void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& stat
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnPlaybackStateChange");
     SLOGD("OnPlaybackStateChange %{public}d", state.GetState());
-    HandleEventWithThreadSafe(EVENT_PLAYBACK_STATE_CHANGE, state.GetState(), state);
+    HandleEventWithThreadSafe(EVENT_PLAYBACK_STATE_CHANGE,
+        state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_STATE) ? state.GetState() : -1, state);
 }
 
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
