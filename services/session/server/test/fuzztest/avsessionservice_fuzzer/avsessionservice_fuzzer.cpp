@@ -17,11 +17,14 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fcntl.h>
+#include <unistd.h>
 #include <fuzzer/FuzzedDataProvider.h>
 
 #include "securec.h"
 #include "avsession_item.h"
 #include "avsession_errors.h"
+#include "avsession_service_proxy.h"
 #include "system_ability_definition.h"
 #include "audio_info.h"
 #include "avsession_service.h"
@@ -54,6 +57,18 @@ static size_t g_sizePos;
 static size_t g_dataSize = 0;
 static size_t g_pos;
 constexpr size_t STRING_MAX_LENGTH = 128;
+constexpr uint32_t AVQ_ITEM_COUNT = 2;
+constexpr uint32_t LEN_ITEM0 = 3;
+constexpr uint32_t LEN_ITEM1 = 2;
+constexpr uint32_t IMG_TOTAL_LEN = 5;
+constexpr const char DEV_NULL[] = "/dev/null";
+constexpr uint32_t LOG_SIZE_PRIM = 4096;
+constexpr uint32_t LOG_SIZE_FALL = 2048;
+constexpr int PIPE_FD_COUNT = 2;
+constexpr int FD_INVALID = -1;
+constexpr int PIPE_SUCCESS = 0;
+constexpr size_t PIPE_READ_END = 0;
+constexpr size_t PIPE_WRITE_END = 1;
 FuzzedDataProvider provider(RAW_DATA, g_dataSize);
 
 /*
@@ -1089,6 +1104,84 @@ void AvSessionServiceTest002(sptr<AVSessionService> service)
     GetPresentControllerTest(service);
 }
 
+static void AVSessionServiceProxyTest001()
+{
+    if (avsessionService_ == nullptr) {
+        avsessionService_ = new AVSessionService(AVSESSION_SERVICE_ID);
+    }
+    sptr<IRemoteObject> remote = avsessionService_->AsObject();
+    if (remote == nullptr) {
+        return;
+    }
+    sptr<AVSessionServiceProxy> proxy = new AVSessionServiceProxy(remote);
+    if (proxy == nullptr) {
+        return;
+    }
+
+    MessageParcel reply;
+    reply.WriteUint32(AVQ_ITEM_COUNT);
+
+    reply.WriteString(GetString());
+    reply.WriteString(GetString());
+    reply.WriteString(GetString());
+    reply.WriteString(GetString());
+    reply.WriteUint32(LEN_ITEM0);
+
+    reply.WriteString(GetString());
+    reply.WriteString(GetString());
+    reply.WriteString(GetString());
+    reply.WriteString(GetString());
+    reply.WriteUint32(LEN_ITEM1);
+
+    std::vector<AVQueueInfo> infos;
+    proxy->UnMarshallingAVQueueInfos(reply, infos);
+
+    std::vector<char> imgBuf(IMG_TOTAL_LEN);
+    for (uint32_t i = 0; i < IMG_TOTAL_LEN; ++i) {
+        imgBuf[i] = static_cast<char>(GetData<uint8_t>());
+    }
+    if (infos.size() < AVQ_ITEM_COUNT) {
+        infos.resize(AVQ_ITEM_COUNT);
+        infos[0].SetAVQueueLength(LEN_ITEM0);
+        infos[1].SetAVQueueLength(LEN_ITEM1);
+    }
+    proxy->BufferToAVQueueInfoImg(imgBuf.data(), infos);
+}
+
+static void AVSessionServiceProxyTest002()
+{
+    if (avsessionService_ == nullptr) {
+        avsessionService_ = new AVSessionService(AVSESSION_SERVICE_ID);
+    }
+    sptr<IRemoteObject> remote = avsessionService_->AsObject();
+    if (remote == nullptr) {
+        return;
+    }
+    sptr<AVSessionServiceProxy> proxy = new AVSessionServiceProxy(remote);
+    if (proxy == nullptr) {
+        return;
+    }
+    sptr<IAncoMediaSessionListener> ancoMediaSessionListener_;
+    if (ancoMediaSessionListener_ != nullptr) {
+        proxy->RegisterAncoMediaSessionListener(ancoMediaSessionListener_);
+    }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    int fd = open(DEV_NULL, O_RDONLY);
+    if (fd >= 0) {
+        proxy->StartDeviceLogging(fd, LOG_SIZE_PRIM);
+        close(fd);
+    } else {
+        std::array<int, PIPE_FD_COUNT> fds = { FD_INVALID, FD_INVALID };
+        if (pipe(fds.data()) == PIPE_SUCCESS) {
+            proxy->StartDeviceLogging(fds[PIPE_READ_END], LOG_SIZE_FALL);
+            close(fds[PIPE_READ_END]);
+            close(fds[PIPE_WRITE_END]);
+        }
+    }
+#endif
+}
+
 void AvSessionServiceTest()
 {
     if (avsessionService_ == nullptr) {
@@ -1122,6 +1215,8 @@ void AvSessionServiceTest()
     OnReceiveEventTest(avsessionService_);
     AvSessionServiceTest001();
     AvSessionServiceTest002(avsessionService_);
+    AVSessionServiceProxyTest001();
+    AVSessionServiceProxyTest002();
     avsessionService_->OnStop();
     SLOGI("AvSessionServiceTest done");
 }

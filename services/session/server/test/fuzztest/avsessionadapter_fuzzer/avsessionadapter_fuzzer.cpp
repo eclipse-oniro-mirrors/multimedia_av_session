@@ -135,6 +135,9 @@ void AVSessionUsersManagerTest()
     std::string abilityName = provider.ConsumeRandomLengthString();
     sptr<AVSessionItem> item;
     usersManager.AddSessionForCurrentUser(pid, abilityName, item);
+
+    std::string newAbilityName = provider.ConsumeRandomLengthString();
+    usersManager.UpdateSessionForCurrentUser(pid, abilityName, newAbilityName, item);
     usersManager.RemoveSessionForAllUser(pid, abilityName);
 
     std::string sessionId = provider.ConsumeRandomLengthString();
@@ -240,6 +243,7 @@ void SessionStackTest()
     sessionStack.RemoveSession(descriptor.pid_ + 1);
     sessionStack.RemoveSession("");
     sessionStack.RemoveSession(descriptor.sessionId_);
+    sessionStack.ReclaimMem();
 }
 
 /* Fuzzer entry point */

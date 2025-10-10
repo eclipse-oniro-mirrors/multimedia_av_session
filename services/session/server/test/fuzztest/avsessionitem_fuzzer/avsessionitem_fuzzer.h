@@ -25,6 +25,7 @@ namespace OHOS::AVSession {
 void AvSessionItemOnRemoteRequest();
 void AvSessionItemTest();
 void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem);
+void AvSessionItemTestAdded(sptr<AVSessionItem> avSessionItem);
 void AvSessionCallItemTest(sptr<AVSessionItem> avSessionItem);
 void AvSessionItemTestImplExtension(sptr<AVSessionItem> avSessionItem);
 void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem);

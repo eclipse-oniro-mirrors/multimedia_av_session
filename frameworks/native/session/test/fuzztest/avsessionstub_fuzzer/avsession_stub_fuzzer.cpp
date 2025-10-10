@@ -106,6 +106,24 @@ void AvSessionFuzzer::FuzzOnRemoteRequest(int32_t code, const uint8_t* data, siz
     g_AVSessionStubDemo->Destroy();
 }
 
+void FuzzHandleSendCustomData(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
+        return;
+    }
+    auto stub = std::make_shared<AVSessionStubDemo>();
+    if (stub == nullptr) {
+        return;
+    }
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    dataParcel.WriteInterfaceToken(IAVSession::GetDescriptor());
+    size -= sizeof(uint32_t);
+    dataParcel.WriteBuffer(data + sizeof(uint32_t), size);
+    dataParcel.RewindRead(0);
+    stub->HandleSendCustomData(dataParcel, reply);
+}
+
 void OHOS::AVSession::AvSessionOnRemoteRequest(int32_t code, const uint8_t* data, size_t size)
 {
     auto aVSession = std::make_unique<AvSessionFuzzer>();
@@ -120,11 +138,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < MIN_SIZE_NUM)) {
         return 0;
     }
-    
+
     g_AVSessionStubDemo = make_shared<AVSessionStubDemo>();
 
     for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
         OHOS::AVSession::AvSessionOnRemoteRequest(i, data, size);
     }
+    FuzzHandleSendCustomData(data, size);
     return 0;
 }

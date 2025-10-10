@@ -133,6 +133,7 @@ void FocusSessionStrategyFuzzer::FocusSessionStrategyFuzzTestSecond(uint8_t* dat
     focusSessionStrategy.lastStates_[state] = AudioStandard::RendererState::RENDERER_RUNNING;
     focusSessionStrategy.HandleAudioRenderStateChangeEvent(infos);
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckFocusStop" + std::to_string(state.second));
+    AVSessionEventHandler::GetInstance().AVSessionRemoveHandler();
 }
 
 void Func1(const FocusSessionStrategy::FocusSessionChangeInfo &info, bool isPlaying)

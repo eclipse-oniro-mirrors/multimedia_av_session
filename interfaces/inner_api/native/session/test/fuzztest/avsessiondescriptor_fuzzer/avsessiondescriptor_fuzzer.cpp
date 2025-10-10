@@ -13,30 +13,52 @@
  * limitations under the License.
  */
 
+#include <fuzzer/FuzzedDataProvider.h>
+#include <vector>
+#include "av_data_src_descriptor.h"
 #include "avsessiondescriptor_fuzzer.h"
 #include "avsession_descriptor.h"
 #include "parcel.h"
 
-void OHOS::AVSession::AVSessionDescriptorTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
+namespace OHOS {
+namespace AVSession {
+constexpr size_t MAX_PARCEL_BUFFER_LEN = 2048;
 
+void AVSessionDescriptorTest(FuzzedDataProvider& fdp)
+{
     Parcel dataParcel;
-    dataParcel.WriteBuffer(data, size);
+    size_t bufferLen = fdp.ConsumeIntegralInRange<size_t>(0, MAX_PARCEL_BUFFER_LEN);
+    std::vector<uint8_t> buffer = fdp.ConsumeBytes<uint8_t>(bufferLen);
+    if (!buffer.empty()) {
+        dataParcel.WriteBuffer(buffer.data(), buffer.size());
+    }
     dataParcel.RewindRead(0);
 
     AVSessionDescriptor avSessionDescriptor;
 
     avSessionDescriptor.Unmarshalling(dataParcel);
     avSessionDescriptor.Marshalling(dataParcel);
+
+    AVDataSrcDescriptor avDataSrcDescriptorOut;
+    avDataSrcDescriptorOut.fileSize = fdp.ConsumeIntegral<int64_t>();
+    avDataSrcDescriptorOut.hasCallback = fdp.ConsumeBool();
+
+    Parcel dataSrcParcel;
+    avDataSrcDescriptorOut.WriteToParcel(dataSrcParcel);
+    dataSrcParcel.RewindRead(0);
+
+    AVDataSrcDescriptor avDataSrcDescriptorIn;
+    avDataSrcDescriptorIn.ReadFromParcel(dataSrcParcel);
 }
+
+} // namespace AVSession
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::AVSession::AVSessionDescriptorTest(data, size);
+    FuzzedDataProvider fdp(data, size);
+    OHOS::AVSession::AVSessionDescriptorTest(fdp);
     return 0;
 }
