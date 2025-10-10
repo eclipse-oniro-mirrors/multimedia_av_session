@@ -213,8 +213,8 @@ export struct AVCastPicker {
       SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
         .fontSize('24vp')
         .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-          [$r('sys.color.comp_background_emphasize')] as Array<Color|Double|String|Resource> :
-          [$r('sys.color.icon_primary')] as Array<Color|Double|String|Resource>)
+          [$r('sys.color.comp_background_emphasize')] as Array<Color|int|String|Resource> :
+          [$r('sys.color.icon_primary')] as Array<Color|int|String|Resource>)
         .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_OPACITY)
     } else {
       Image(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
