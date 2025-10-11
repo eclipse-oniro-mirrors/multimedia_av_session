@@ -221,6 +221,7 @@ int32_t AVSessionService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
         SLOGI("IPC is not used for a long time, there are %{public}d sessions.", ret);
         return -1;
     }
+    std::lock_guard lockGuard(migrateProxyMapLock_);
     for (const auto& pair : migrateAVSessionProxyMap_) {
         std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
             std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
@@ -1340,6 +1341,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
     sessionItem->SetServiceCallbackForNtfCapsule([this](std::string sessionId, bool isMediaChange) {
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(hasMediaCapsule_.load(), "notifysystemui but no capsule here");
         if (session && topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
             SLOGI("MediaCapsule topsession %{public}s updateImage", topSession_->GetBundleName().c_str());
             NotifySystemUI(nullptr, true, IsCapsuleNeeded() && hasMediaCapsule_.load(), isMediaChange);

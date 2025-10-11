@@ -744,6 +744,7 @@ private:
     bool isMigrateTargetFound_ = false;
     std::map<std::string, std::shared_ptr<MigrateAVSessionServer>> migrateAVSessionServerMap_;
     std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
+    std::recursive_mutex migrateProxyMapLock_;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;
