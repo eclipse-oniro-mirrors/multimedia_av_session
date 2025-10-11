@@ -52,7 +52,7 @@ const int32_t KEYCODE_MEDIA_PLAY_PAUSE = 10;
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnTopSessionChange = false;
-static const int32_t CLICK_TIMEOUT = 500;
+static const int32_t CLICK_TIMEOUT = 500 * 2;
 static const int32_t MICROSECONDS_PER_MILLISECOND = 1000;
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
@@ -117,6 +117,7 @@ class TestSessionListener : public SessionListener {
     void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {};
     void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
     void OnDeviceOffline(const std::string& deviceId) override {};
+    void OnDeviceStateChange(const DeviceState& deviceState) override {};
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override {};
 };
