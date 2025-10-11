@@ -575,6 +575,33 @@ HWTEST_F(AvsessionTest, SetAVMetaData002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAVMetaData003
+ * @tc.desc: Return the result of set av meta data
+ * @tc.type: FUNC
+ * @tc.require: 1820
+ */
+HWTEST_F(AvsessionTest, SetAVMetaData003, TestSize.Level1)
+{
+    SLOGE("SetAVMetaData003 Begin");
+    g_metaData.Reset();
+    g_metaData.SetAssetId("123");
+    g_metaData.SetTitle("Black Humor");
+    g_metaData.SetMediaImageUri("xxxxx");
+    std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer1 = {1, 2, 3, 4};
+    pixelMap->SetInnerImgBuffer(imgBuffer1);
+    g_metaData.SetMediaImage(pixelMap);
+    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
+    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
+    std::vector<uint8_t> imgBuffer2 = {4, 3, 2, 1};
+    pixelMap->SetInnerImgBuffer(imgBuffer2);
+    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
+    g_metaData.SetMediaImageUri("");
+    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
+    SLOGE("SetAVMetaData003 End");
+}
+
+/**
 * @tc.name: GetAVMetaData001
 * @tc.desc: Return get av meta data result
 * @tc.type: FUNC
