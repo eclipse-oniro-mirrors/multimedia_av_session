@@ -78,6 +78,9 @@ ohos_unittest("AVSessionManagerTest") {
   deps = common_deps
 
   external_deps = common_external_deps
+  if (castplus_cast_engine_enable) {
+    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+  }
 }
 
 ohos_unittest("MediaInfoHolderTest") {
