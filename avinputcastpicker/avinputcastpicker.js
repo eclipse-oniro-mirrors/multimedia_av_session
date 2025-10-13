@@ -449,6 +449,7 @@ export class AVInputCastPicker extends ViewPU {
                     this.deviceMenu.call(this);
                 }
             }, {
+                placement: !this.isPc ? Placement.BottomRight : undefined,
                 showInSubWindow: false,
                 onDisappear: () => {
                     this.touchMenuItemIndex = -1;
