@@ -469,6 +469,8 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
     std::lock_guard callbackLockGuard(callbackMutex_);
     AVMetaData metaOut;
     std::lock_guard metaMaskLockGuard(metaMaskMutex_);
+    CHECK_AND_PRINT_LOG(data.CopyToByMask(metaMask_, metaOut), "controller:%{public}d no mask",
+        static_cast<int>(pid_));
     if (data.CopyToByMask(metaMask_, metaOut)) {
         if ((metaMask_.test(AVMetaData::META_KEY_MEDIA_IMAGE)) && (metaOut.GetMediaImage() != nullptr)) {
             CHECK_AND_RETURN_LOG(session_ != nullptr, "Session not exist");

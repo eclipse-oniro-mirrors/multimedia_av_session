@@ -1473,10 +1473,11 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
 napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSessionController* napiController)
 {
     CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "napiController null");
-    SLOGI("DoRegisterCallback with for sessionId: %{public}s***",
-        napiController->sessionId_.substr(0, ARGC_THREE).c_str());
-    std::string registerControllerId = napiController->sessionId_;
-    NapiAVSessionController* repeatedNapiController = &(ControllerList_[registerControllerId]);
+    std::string controllerId = napiController->sessionId_;
+    SLOGI("DoRegisterCallback with sessionId: %{public}s***", controllerId.substr(0, ARGC_THREE).c_str());
+    CHECK_AND_RETURN_RET_LOG(ControllerList_.find(controllerId) != ControllerList_.end(),
+        napi_generic_failure, "repeatedNapiController null");
+    NapiAVSessionController* repeatedNapiController = &(ControllerList_[controllerId]);
     CHECK_AND_RETURN_RET_LOG(repeatedNapiController != nullptr, napi_generic_failure, "repeatedNapiController null");
     napiController->callback_ = repeatedNapiController->callback_;
     if (napiController->callback_ == nullptr) {
@@ -1487,17 +1488,10 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
             NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
             return napi_generic_failure;
         }
-        napiController->callback_->AddCallbackForSessionDestroy([registerControllerId]() {
-            SLOGI("repeat list check for session destory: %{public}s",
-                registerControllerId.substr(0, ARGC_THREE).c_str());
+        napiController->callback_->AddCallbackForSessionDestroy([controllerId]() {
             std::lock_guard<std::mutex> lock(controllerListMutex_);
-            if (!ControllerList_.empty() && ControllerList_.find(registerControllerId) != ControllerList_.end()) {
-                SLOGI("repeat list should erase for sessionDestory: %{public}s",
-                    registerControllerId.substr(0, ARGC_THREE).c_str());
-            } else {
-                SLOGI("repeat list erase fail for session not in list: %{public}s",
-                    registerControllerId.substr(0, ARGC_THREE).c_str());
-            }
+            SLOGI("check for session destory: %{public}s|%{public}d", controllerId.substr(0, ARGC_THREE).c_str(),
+                ControllerList_.find(controllerId) != ControllerList_.end());
         });
         auto ret = napiController->controller_->RegisterCallback(napiController->callback_);
         if (ret != AVSESSION_SUCCESS) {
