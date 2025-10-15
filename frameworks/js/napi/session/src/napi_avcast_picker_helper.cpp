@@ -48,7 +48,7 @@ napi_value NapiAVCastPickerHelper::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor descriptors[] = {
         DECLARE_NAPI_FUNCTION("select", SelectAVPicker),
-        DECLARE_NAPI_FUNCTION("restoreDefaultCommunicationDevice", RestoreDefaultCommunicationDevice),
+        DECLARE_NAPI_FUNCTION("resetCommunicationDevice", ResetCommunicationDevice),
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
     };
@@ -256,7 +256,7 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
     return NapiAsyncWork::Enqueue(env, context, "SelectAVPicker", executor, complete);
 }
 
-napi_value NapiAVCastPickerHelper::RestoreDefaultCommunicationDevice(napi_env env, napi_callback_info info)
+napi_value NapiAVCastPickerHelper::ResetCommunicationDevice(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         sptr<AudioStandard::AudioRendererFilter> audioRendererFilter;
@@ -281,7 +281,7 @@ napi_value NapiAVCastPickerHelper::RestoreDefaultCommunicationDevice(napi_env en
 
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
 
-    return NapiAsyncWork::Enqueue(env, context, "RestoreDefaultCommunicationDevice", executor, complete);
+    return NapiAsyncWork::Enqueue(env, context, "ResetCommunicationDevice", executor, complete);
 }
 
 napi_status NapiAVCastPickerHelper::OnPickerStateChange(napi_env env, NapiAVCastPickerHelper* napiAVCastPickerHelper,

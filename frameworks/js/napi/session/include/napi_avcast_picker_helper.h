@@ -79,7 +79,7 @@ private:
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
     static napi_value SelectAVPicker(napi_env env, napi_callback_info info);
-    static napi_value RestoreDefaultCommunicationDevice(napi_env env, napi_callback_info info);
+    static napi_value ResetCommunicationDevice(napi_env env, napi_callback_info info);
 
     static napi_status OnPickerStateChange(napi_env env, NapiAVCastPickerHelper* napiAVPicker, napi_value callback);
     static napi_status OffPickerStateChange(napi_env env, NapiAVCastPickerHelper* napiAVPicker, napi_value callback);
