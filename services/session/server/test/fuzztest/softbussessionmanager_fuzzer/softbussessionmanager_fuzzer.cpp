@@ -23,6 +23,8 @@ using namespace std;
 namespace OHOS::AVSession {
 static const int32_t MIN_SIZE_NUM = 4;
 static const uint8_t *RAW_DATA = nullptr;
+static size_t g_totalSize = 0;
+static size_t g_sizePos;
 static size_t g_dataSize = 0;
 static size_t g_pos;
 constexpr size_t STRING_MAX_LENGTH = 128;
@@ -227,6 +229,16 @@ void SoftbusSessionManagerFuzzer::OnBytesFuzzTest()
     softbusSessionManager->OnBytes(socket, &data, dataLen);
 }
 
+template<class T>
+uint32_t GetArrLength(T& arr)
+{
+    if (arr == nullptr) {
+        SLOGE("%{public}s: The array length is equal to 0", __func__);
+        return 0;
+    }
+    return sizeof(arr) / sizeof(arr[0]);
+}
+
 typedef void (*TestFuncs[9])();
 
 TestFuncs g_allFuncs = {
@@ -241,6 +253,28 @@ TestFuncs g_allFuncs = {
     SoftbusSessionManagerFuzzer::OnBytesFuzzTest,
 };
 
+bool FuzzTest(const uint8_t* rawData, size_t size)
+{
+    if (rawData == nullptr) {
+        return false;
+    }
+
+    // initialize data
+    RAW_DATA = rawData;
+    g_totalSize = size;
+    g_sizePos = 0;
+
+    uint32_t code = GetData<uint32_t>();
+    uint32_t len = GetArrLength(g_allFuncs);
+    if (len > 0) {
+        g_allFuncs[code % len]();
+    } else {
+        SLOGE("%{public}s: The len length is equal to 0", __func__);
+    }
+
+    return true;
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
@@ -253,6 +287,7 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
     g_pos = 0;
     /* Run your code on data */
     SoftbusSessionManagerOnRemoteRequest(data, size);
+    FuzzTest(data, size);
     return 0;
 }
 }

@@ -17,7 +17,6 @@
 #define OHOS_SOFTBUS_SESSIONPROXY_FUZZER_H
 
 #include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "migrate_avsession_server.h"
 
