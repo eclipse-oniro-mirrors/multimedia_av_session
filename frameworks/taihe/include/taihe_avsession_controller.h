@@ -61,14 +61,14 @@ public:
     uintptr_t GetExtrasSync();
     uintptr_t GetExtrasWithEventSync(string_view extraEvent);
 
-    void OnMetadataChangeFilter(array_view<string> filter, callback_view<void(AVMetadata const&)> callback);
-    void OnMetadataChangeAll(string_view filter, callback_view<void(AVMetadata const&)> callback);
-    void OnPlaybackStateChangeFilter(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
-    void OnPlaybackStateChangeAll(string_view filter, callback_view<void(AVPlaybackState const&)> callback);
-    void OnCallMetadataChangeFilter(array_view<string> filter, callback_view<void(CallMetadata const&)> callback);
-    void OnCallMetadataChangeAll(string_view filter, callback_view<void(CallMetadata const&)> callback);
-    void OnCallStateChangeFilter(array_view<string> filter, callback_view<void(AVCallState const&)> callback);
-    void OnCallStateChangeAll(string_view filter, callback_view<void(AVCallState const&)> callback);
+    void OnMetadataChange(array_view<string> filter, callback_view<void(AVMetadata const&)> callback);
+    void OnMetadataChangeAll(callback_view<void(AVMetadata const&)> callback);
+    void OnPlaybackStateChange(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
+    void OnPlaybackStateChangeAll(callback_view<void(AVPlaybackState const&)> callback);
+    void OnCallMetadataChange(array_view<string> filter, callback_view<void(CallMetadata const&)> callback);
+    void OnCallMetadataChangeAll(callback_view<void(CallMetadata const&)> callback);
+    void OnCallStateChange(array_view<string> filter, callback_view<void(AVCallState const&)> callback);
+    void OnCallStateChangeAll(callback_view<void(AVCallState const&)> callback);
     void OnSessionDestroy(callback_view<void()> callback);
     void OnActiveStateChange(callback_view<void(bool)> callback);
     void OnValidCommandChange(callback_view<void(array_view<string>)> callback);

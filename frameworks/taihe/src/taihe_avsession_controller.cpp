@@ -707,7 +707,7 @@ uintptr_t AVSessionControllerImpl::GetExtrasWithEventSync(string_view extraEvent
     return reinterpret_cast<uintptr_t>(result);
 }
 
-void AVSessionControllerImpl::OnMetadataChangeFilter(array_view<string> filter,
+void AVSessionControllerImpl::OnMetadataChange(array_view<string> filter,
     callback_view<void(AVMetadata const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
@@ -719,18 +719,20 @@ void AVSessionControllerImpl::OnMetadataChangeFilter(array_view<string> filter,
     }
 }
 
-void AVSessionControllerImpl::OnMetadataChangeAll(string_view filter, callback_view<void(AVMetadata const&)> callback)
+void AVSessionControllerImpl::OnMetadataChangeAll(callback_view<void(AVMetadata const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("metadataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
         CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        int32_t status = SetMetaFilter(this, filter);
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetMetaFilter(this, filterView);
         CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetMetaFilter failed");
         callback_->AddCallback(TaiheAVControllerCallback::EVENT_META_DATA_CHANGE, cacheCallback);
     }
 }
 
-void AVSessionControllerImpl::OnPlaybackStateChangeFilter(array_view<string> filter,
+void AVSessionControllerImpl::OnPlaybackStateChange(array_view<string> filter,
     callback_view<void(AVPlaybackState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
@@ -742,19 +744,20 @@ void AVSessionControllerImpl::OnPlaybackStateChangeFilter(array_view<string> fil
     }
 }
 
-void AVSessionControllerImpl::OnPlaybackStateChangeAll(string_view filter,
-    callback_view<void(AVPlaybackState const&)> callback)
+void AVSessionControllerImpl::OnPlaybackStateChangeAll(callback_view<void(AVPlaybackState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("playbackStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
         CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        int32_t status = SetPlaybackStateFilter(this, filter);
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetPlaybackStateFilter(this, filterView);
         CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetPlaybackStateFilter failed");
         callback_->AddCallback(TaiheAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE, cacheCallback);
     }
 }
 
-void AVSessionControllerImpl::OnCallMetadataChangeFilter(array_view<string> filter,
+void AVSessionControllerImpl::OnCallMetadataChange(array_view<string> filter,
     callback_view<void(CallMetadata const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
@@ -766,19 +769,20 @@ void AVSessionControllerImpl::OnCallMetadataChangeFilter(array_view<string> filt
     }
 }
 
-void AVSessionControllerImpl::OnCallMetadataChangeAll(string_view filter,
-    callback_view<void(CallMetadata const&)> callback)
+void AVSessionControllerImpl::OnCallMetadataChangeAll(callback_view<void(CallMetadata const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("callMetadataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
         CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        int32_t status = SetAVCallMetaFilter(this, filter);
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetAVCallMetaFilter(this, filterView);
         CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallMetaFilter failed");
         callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, cacheCallback);
     }
 }
 
-void AVSessionControllerImpl::OnCallStateChangeFilter(array_view<string> filter,
+void AVSessionControllerImpl::OnCallStateChange(array_view<string> filter,
     callback_view<void(AVCallState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
@@ -790,13 +794,14 @@ void AVSessionControllerImpl::OnCallStateChangeFilter(array_view<string> filter,
     }
 }
 
-void AVSessionControllerImpl::OnCallStateChangeAll(string_view filter,
-    callback_view<void(AVCallState const&)> callback)
+void AVSessionControllerImpl::OnCallStateChangeAll(callback_view<void(AVCallState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("callStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
         CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        int32_t status = SetAVCallStateFilter(this, filter);
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetAVCallStateFilter(this, filterView);
         CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallStateFilter failed");
         callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, cacheCallback);
     }
