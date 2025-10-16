@@ -566,7 +566,7 @@ export class AVCastPicker extends ViewPU {
                         }
                     });
                     Flex.accessibilityGroup(true);
-                    Flex.accessibilitySelected(item.isConnected);
+                    Flex.accessibilitySelected(x8.isConnected);
                 }, Flex);
                 this.observeComponentCreation2((c10, d10) => {
                     Flex.create({
