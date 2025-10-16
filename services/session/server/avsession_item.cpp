@@ -476,29 +476,40 @@ int32_t AVSessionItem::UpdateAVQueueInfo(const AVQueueInfo& info)
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionItem::UpdateMetaData(const AVMetaData& meta)
+{
+    std::lock_guard lockGuard(avsessionItemLock_);
+    SessionXCollie sessionXCollie("avsession::SetAVMetaData");
+    ReportSetAVMetaDataInfo(meta);
+    if (metaData_.GetAssetId() != meta.GetAssetId()) {
+        isAssetChange_ = true;
+    }
+    if ((metaData_.GetAssetId() != meta.GetAssetId()) || CheckTitleChange(meta)) {
+        isMediaChange_ = true;
+        isRecommendMediaChange_ = true;
+    }
+    std::string oldImageUri = metaData_.GetMediaImageUri();
+    CHECK_AND_RETURN_LOG(metaData_.CopyFrom(meta), "AVMetaData set error");
+    std::unique_lock<std::shared_mutex> lock(writeAndReadImgLock_);
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
+    if (innerPixelMap != nullptr) {
+        std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+        std::shared_ptr<AVSessionPixelMap> oldPixelMap = std::make_shared<AVSessionPixelMap>();
+        std::string fileName = GetSessionId() + AVSessionUtils::GetFileSuffix();
+        AVSessionUtils::ReadImageFromFile(oldPixelMap, fileDir, fileName);
+        if (oldPixelMap == nullptr || oldImageUri != metaData_.GetMediaImageUri() ||
+            oldPixelMap->GetInnerImgBuffer() != innerPixelMap->GetInnerImgBuffer()) {
+            isMediaChange_ = true;
+        }
+        AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
+        innerPixelMap->Clear();
+        metaData_.SetMediaImage(innerPixelMap);
+    }
+}
+
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
-    {
-        std::lock_guard lockGuard(avsessionItemLock_);
-        SessionXCollie sessionXCollie("avsession::SetAVMetaData");
-        ReportSetAVMetaDataInfo(meta);
-        if (metaData_.GetAssetId() != meta.GetAssetId()) {
-            isAssetChange_ = true;
-        }
-        if ((metaData_.GetAssetId() != meta.GetAssetId()) || CheckTitleChange(meta)) {
-            isMediaChange_ = true;
-            isRecommendMediaChange_ = true;
-        }
-        CHECK_AND_RETURN_RET_LOG(metaData_.CopyFrom(meta), AVSESSION_ERROR, "AVMetaData set error");
-        std::unique_lock<std::shared_mutex> lock(writeAndReadImgLock_);
-        std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaData_.GetMediaImage();
-        if (innerPixelMap != nullptr) {
-            std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-            AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, GetSessionId() + AVSessionUtils::GetFileSuffix());
-            innerPixelMap->Clear();
-            metaData_.SetMediaImage(innerPixelMap);
-        }
-    }
+    UpdateMetaData(meta);
     CheckUseAVMetaData(meta);
     SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d, isAlive:%{public}d",
         meta.GetTitle().c_str(), static_cast<int>(GetPid()), (isAlivePtr_ == nullptr) ? -1 : *isAlivePtr_);

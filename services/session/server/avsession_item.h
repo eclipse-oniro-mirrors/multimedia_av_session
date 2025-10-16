@@ -393,6 +393,7 @@ private:
     void CheckUseAVMetaData(const AVMetaData& meta);
     void PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo);
     void DelRecommend();
+    void UpdateMetaData(const AVMetaData& meta);
     void UpdateRecommendInfo(bool needRecommend);
     bool SearchSpidInCapability(const std::string& deviceId);
     void CheckIfSendCapsule(const AVPlaybackState& state);
