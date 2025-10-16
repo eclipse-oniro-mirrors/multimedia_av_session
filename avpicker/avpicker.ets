@@ -200,7 +200,6 @@ export struct AVCastPicker {
   /**
    * Accessibility Strings
    */
-  @State accessibilityConnectedStr: string = '已连接';
   @State accessibilityAudioControlStr: string = '音视频投播';
 
   @State isPc: boolean = false;
@@ -364,8 +363,6 @@ export struct AVCastPicker {
                 this.iconBuilder(item, true)
               }
               .alignItems(VerticalAlign.Center)
-              .accessibilityLevel('yes')
-              .accessibilityText(this.accessibilityConnectedStr)
             }
           }
           .constraintSize({ minHeight: this.isPc ? 40 : 48 })
@@ -399,6 +396,8 @@ export struct AVCastPicker {
             this.extensionProxy.send({ 'selectedDeviceInfo': item })
           }
         })
+        .accessibilityGroup(true)
+        .accessibilitySelected(item.isConnected)
       })
     }
     .width(this.isPc ? 326 : 216)
@@ -497,11 +496,6 @@ export struct AVCastPicker {
           if (data['configurationColorMode'] !== undefined) {
             console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
             this.configurationColorMode = data['configurationColorMode'] as number;
-          }
-
-          if (data['accessConnected'] !== undefined) {
-            console.info(TAG, `accessConnected : ${JSON.stringify(data['accessConnected'])}`);
-            this.accessibilityConnectedStr = data['accessConnected'] as string;
           }
 
           if (data['accessAudioControl'] !== undefined) {

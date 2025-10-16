@@ -78,7 +78,6 @@ export class AVCastPicker extends ViewPU {
             new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.__deviceInfoType = new ObservedPropertySimplePU('', this, 'deviceInfoType');
         this.__maxFontSizeScale = new ObservedPropertySimplePU(1, this, 'maxFontSizeScale');
-        this.__accessibilityConnectedStr = new ObservedPropertySimplePU('已连接', this, 'accessibilityConnectedStr');
         this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('音视频投播', this, 'accessibilityAudioControlStr');
         this.__isPc = new ObservedPropertySimplePU(false, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
@@ -144,9 +143,6 @@ export class AVCastPicker extends ViewPU {
         if (c11.maxFontSizeScale !== undefined) {
             this.maxFontSizeScale = c11.maxFontSizeScale;
         }
-        if (c11.accessibilityConnectedStr !== undefined) {
-            this.accessibilityConnectedStr = c11.accessibilityConnectedStr;
-        }
         if (c11.accessibilityAudioControlStr !== undefined) {
             this.accessibilityAudioControlStr = c11.accessibilityAudioControlStr;
         }
@@ -190,7 +186,6 @@ export class AVCastPicker extends ViewPU {
         this.__configurationColorMode.purgeDependencyOnElmtId(a11);
         this.__deviceInfoType.purgeDependencyOnElmtId(a11);
         this.__maxFontSizeScale.purgeDependencyOnElmtId(a11);
-        this.__accessibilityConnectedStr.purgeDependencyOnElmtId(a11);
         this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(a11);
         this.__isPc.purgeDependencyOnElmtId(a11);
         this.__isRTL.purgeDependencyOnElmtId(a11);
@@ -213,7 +208,6 @@ export class AVCastPicker extends ViewPU {
         this.__configurationColorMode.aboutToBeDeleted();
         this.__deviceInfoType.aboutToBeDeleted();
         this.__maxFontSizeScale.aboutToBeDeleted();
-        this.__accessibilityConnectedStr.aboutToBeDeleted();
         this.__accessibilityAudioControlStr.aboutToBeDeleted();
         this.__isPc.aboutToBeDeleted();
         this.__isRTL.aboutToBeDeleted();
@@ -326,14 +320,6 @@ export class AVCastPicker extends ViewPU {
 
     set maxFontSizeScale(e1) {
         this.__maxFontSizeScale.set(e1);
-    }
-
-    get accessibilityConnectedStr() {
-        return this.__accessibilityConnectedStr.get();
-    }
-
-    set accessibilityConnectedStr(c1) {
-        this.__accessibilityConnectedStr.set(c1);
     }
 
     get accessibilityAudioControlStr() {
@@ -579,6 +565,8 @@ export class AVCastPicker extends ViewPU {
                             this.extensionProxy.send({ 'selectedDeviceInfo': x8 });
                         }
                     });
+                    Flex.accessibilityGroup(true);
+                    Flex.accessibilitySelected(item.isConnected);
                 }, Flex);
                 this.observeComponentCreation2((c10, d10) => {
                     Flex.create({
@@ -668,8 +656,6 @@ export class AVCastPicker extends ViewPU {
                             this.observeComponentCreation2((u9, v9) => {
                                 Row.create();
                                 Row.alignItems(VerticalAlign.Center);
-                                Row.accessibilityLevel('yes');
-                                Row.accessibilityText(this.accessibilityConnectedStr);
                             }, Row);
                             this.iconBuilder.bind(this)(x8, true);
                             Row.pop();
@@ -848,10 +834,6 @@ export class AVCastPicker extends ViewPU {
                     this.configurationColorMode = l8.configurationColorMode;
                 }
 
-                if (l8.accessConnected !== undefined) {
-                    console.info(TAG, `accessibilityConnectedStr : ${l8.accessConnected}`);
-                    this.accessibilityConnectedStr = l8.accessConnected;
-                }
 
                 if (l8.accessAudioControl !== undefined) {
                     console.info(TAG, `accessibilityAudioControlStr : ${l8.accessAudioControl}`);
