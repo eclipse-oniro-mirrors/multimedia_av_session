@@ -275,6 +275,8 @@ public:
 
     void SetSupportCommand(std::vector<int32_t> cmds);
 
+    int32_t GetAppIndex();
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t RegisterListenerStreamToCast(const std::pair<std::string, std::string>& serviceNameStatePair,
         DeviceInfo deviceInfo);
@@ -398,6 +400,9 @@ private:
     bool SearchSpidInCapability(const std::string& deviceId);
     void CheckIfSendCapsule(const AVPlaybackState& state);
     void CheckSupportColdStartExtra(const AAFwk::WantParams& extras);
+    void GetCurrentAppIndexForSession();
+    AbilityRuntime::WantAgent::WantAgent CreateWantAgentWithIndex(const AbilityRuntime::WantAgent::WantAgent& ability,
+        int32_t index);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -470,6 +475,7 @@ private:
     friend class AVSessionDumper;
     int64_t playingTime_ = 0;
     std::string lyricTitle_ = "";
+    int32_t appIndex_ = 0;
 
     std::shared_ptr<RemoteSessionSource> remoteSource_;
     std::shared_ptr<RemoteSessionSink> remoteSink_;
@@ -490,6 +496,7 @@ private:
     bool isRecommendMediaChange_ = false;
     bool isRecommend_ = false;
     bool isPlayingState_ = false;
+    bool isSetLaunchAbility_ = false;
 
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
