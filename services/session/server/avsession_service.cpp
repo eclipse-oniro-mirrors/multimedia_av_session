@@ -336,7 +336,7 @@ void AVSessionService::HandleUserEvent(const std::string &type, const int &userI
     }
     GetUsersManager().NotifyAccountsEvent(type, userId);
     if (type == AVSessionUsersManager::accountEventSwitched) {
-        SLOGD("userSwitch and updateTopSession for userId:%{public}d", userId);
+        SLOGI("userSwitch and updateTopSession for userId:%{public}d", userId);
         UpdateTopSession(GetUsersManager().GetTopSession(), userId);
     }
 }
@@ -1662,6 +1662,17 @@ int32_t AVSessionService::GetSessionInner(const AppExecFwk::ElementName& element
     return AVSESSION_SUCCESS;
 }
 
+void AVSessionService::RefreshUserFromAnco(const std::string& tag, const AppExecFwk::ElementName& elementName)
+{
+    bool isBroker = (tag == "ancoMediaSession") && (GetCallingUid() == audioBrokerUid);
+    bool isAnco = (tag == "anco_audio") && (GetCallingUid() == ancoUid);
+    CHECK_AND_RETURN_LOG((isBroker || isAnco) && !elementName.GetDeviceID().empty(), "RefreshUserFromAnco return");
+    int32_t ancoUserId = std::stoi(elementName.GetDeviceID());
+    CHECK_AND_RETURN_LOG(GetUsersManager().GetCurrentUserId() != ancoUserId, "RefreshUserFromAnco same user, return");
+    SLOGI("RefreshUserFromAnco to: %{public}d", ancoUserId);
+    HandleUserEvent(AVSessionUsersManager::accountEventSwitched, ancoUserId);
+}
+
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                              const AppExecFwk::ElementName& elementName,
                                              sptr<AVSessionItem>& sessionItem)
@@ -1669,6 +1680,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     if (!IsParamInvalid(tag, type, elementName)) {
         return ERR_INVALID_PARAM;
     }
+    RefreshUserFromAnco(tag, elementName);
     auto pid = GetCallingPid();
     std::lock_guard lockGuard(sessionServiceLock_);
     if (AbilityHasSession(pid)) {
@@ -3273,6 +3285,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         NotifySessionRelease(sessionItem->GetDescriptor());
         if (sessionItem->GetUid() == ancoUid) {
             ancoSession_ = nullptr;
+            SLOGI("ancoSession release in user:%{public}d", userId);
         }
         sessionItem->DestroyTask(continuePlay);
         HandleTopSessionRelease(userId, sessionItem);
@@ -4304,7 +4317,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     request.SetOwnerUid(uid);
     request.SetIsAgentNotification(true);
     if (isBroker) {
-        request.SetOwnerUserId(defaultUserId);
+        request.SetOwnerUserId(userId);
     }
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");

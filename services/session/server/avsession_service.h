@@ -362,6 +362,8 @@ private:
 
     void AddExtraFrontSession(int32_t type, sptr<AVSessionItem>& sessionItem);
 
+    void RefreshUserFromAnco(const std::string& tag, const AppExecFwk::ElementName& elementName);
+
     void ServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
