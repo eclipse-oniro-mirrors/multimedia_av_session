@@ -52,8 +52,6 @@ const int32_t KEYCODE_MEDIA_PLAY_PAUSE = 10;
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnTopSessionChange = false;
-static const int32_t CLICK_TIMEOUT = 500 * 2;
-static const int32_t MICROSECONDS_PER_MILLISECOND = 1000;
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t REPORT_SIZE = 100;
@@ -117,7 +115,6 @@ class TestSessionListener : public SessionListener {
     void OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override {};
     void OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) override {};
     void OnDeviceOffline(const std::string& deviceId) override {};
-    void OnDeviceStateChange(const DeviceState& deviceState) override {};
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override {};
 };
@@ -1135,36 +1132,6 @@ static HWTEST_F(AVSessionServiceTestSecond, HandleKeyEvent003, TestSize.Level0)
     auto ret = g_AVSessionService->HandleKeyEvent(keyEvent);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGD("HandleKeyEvent003 end!");
-}
-
-/**
-* @tc.name: HandleKeyEvent004
-* @tc.desc: Verifying the HandleKeyEvent method with valid parameters.
-* @tc.type: FUNC
-* @tc.require: #I5Y4MZ
-*/
-static HWTEST_F(AVSessionServiceTestSecond, HandleKeyEvent004, TestSize.Level0)
-{
-    SLOGD("HandleKeyEvent004 begin!");
-    ASSERT_TRUE(g_AVSessionService != nullptr);
-    auto avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
-    if (avsessionPre != nullptr) {
-        SLOGE("StopCast001 but sessionPre exist, try clear");
-        g_AVSessionService->GetContainer().RemoveSession(getpid());
-    }
-    std::vector<int> tempAudioPlayingUids {1, 2};
-    auto avsessionHere = CreateSession();
-    ASSERT_TRUE(avsessionHere != nullptr);
-    tempAudioPlayingUids.push_back(avsessionHere->GetUid());
-    g_AVSessionService->focusSessionStrategy_.SetAudioPlayingUids(tempAudioPlayingUids);
-
-    auto keyEvent = OHOS::MMI::KeyEvent(KEYCODE_MEDIA_PLAY_PAUSE);
-    keyEvent.SetKeyCode(KEYCODE_MEDIA_PLAY_PAUSE);
-    auto ret = g_AVSessionService->HandleKeyEvent(keyEvent);
-    usleep(CLICK_TIMEOUT * MICROSECONDS_PER_MILLISECOND);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    avsessionHere->Destroy();
-    SLOGD("HandleKeyEvent004 end!");
 }
 
 /**

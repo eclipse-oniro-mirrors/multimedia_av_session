@@ -288,6 +288,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_001, TestSize.Level0)
     OHOS::sptr<AVControllerItem> controller = g_AVControllerItem;
     g_AVSessionItem->controllers_[controller->GetPid()] = controller;
     int32_t result = g_AVSessionItem->Activate();
+    g_AVSessionItem->descriptor_.isActive_ = false;
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_Activate_001 end!");
 }
@@ -303,6 +304,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_002, TestSize.Level0)
     SLOGD("AVSessionItem_Activate_002 begin!");
     g_AVSessionItem->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VOICE_CALL;
     int32_t result = g_AVSessionItem->Activate();
+    g_AVSessionItem->descriptor_.isActive_ = false;
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_Activate_002 end!");
 }
@@ -318,6 +320,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Activate_003, TestSize.Level0)
     SLOGD("AVSessionItem_Activate_003 begin!");
     g_AVSessionItem->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VIDEO_CALL;
     int32_t result = g_AVSessionItem->Activate();
+    g_AVSessionItem->descriptor_.isActive_ = false;
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_Activate_003 end!");
 }
