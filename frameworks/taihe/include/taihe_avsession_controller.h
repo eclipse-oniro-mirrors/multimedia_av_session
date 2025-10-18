@@ -58,17 +58,18 @@ public:
     array<string> GetValidCommandsSync();
     void SendControlCommandSync(AVControlCommand const &command);
     void SendCommonCommandSync(string_view command, uintptr_t args);
+    void SendCustomDataSync(uintptr_t data);
     uintptr_t GetExtrasSync();
     uintptr_t GetExtrasWithEventSync(string_view extraEvent);
 
-    void OnMetadataChangeFilter(array_view<string> filter, callback_view<void(AVMetadata const&)> callback);
-    void OnMetadataChangeAll(string_view filter, callback_view<void(AVMetadata const&)> callback);
-    void OnPlaybackStateChangeFilter(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
-    void OnPlaybackStateChangeAll(string_view filter, callback_view<void(AVPlaybackState const&)> callback);
-    void OnCallMetadataChangeFilter(array_view<string> filter, callback_view<void(CallMetadata const&)> callback);
-    void OnCallMetadataChangeAll(string_view filter, callback_view<void(CallMetadata const&)> callback);
-    void OnCallStateChangeFilter(array_view<string> filter, callback_view<void(AVCallState const&)> callback);
-    void OnCallStateChangeAll(string_view filter, callback_view<void(AVCallState const&)> callback);
+    void OnMetadataChange(array_view<string> filter, callback_view<void(AVMetadata const&)> callback);
+    void OnMetadataChangeAll(callback_view<void(AVMetadata const&)> callback);
+    void OnPlaybackStateChange(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
+    void OnPlaybackStateChangeAll(callback_view<void(AVPlaybackState const&)> callback);
+    void OnCallMetadataChange(array_view<string> filter, callback_view<void(CallMetadata const&)> callback);
+    void OnCallMetadataChangeAll(callback_view<void(CallMetadata const&)> callback);
+    void OnCallStateChange(array_view<string> filter, callback_view<void(AVCallState const&)> callback);
+    void OnCallStateChangeAll(callback_view<void(AVCallState const&)> callback);
     void OnSessionDestroy(callback_view<void()> callback);
     void OnActiveStateChange(callback_view<void(bool)> callback);
     void OnValidCommandChange(callback_view<void(array_view<string>)> callback);
@@ -77,6 +78,7 @@ public:
     void OnQueueItemsChange(callback_view<void(array_view<AVQueueItem>)> callback);
     void OnQueueTitleChange(callback_view<void(string_view)> callback);
     void OnExtrasChange(callback_view<void(uintptr_t)> callback);
+    void OnCustomDataChange(callback_view<void(uintptr_t)> callback);
 
     void OffMetadataChange(optional_view<callback<void(AVMetadata const&)>> callback);
     void OffPlaybackStateChange(optional_view<callback<void(AVPlaybackState const&)>> callback);
@@ -90,6 +92,7 @@ public:
     void OffQueueItemsChange(optional_view<callback<void(array_view<AVQueueItem>)>> callback);
     void OffQueueTitleChange(optional_view<callback<void(string_view)>> callback);
     void OffExtrasChange(optional_view<callback<void(uintptr_t)>> callback);
+    void OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback);
 
 private:
     static int32_t DoRegisterCallback(std::shared_ptr<AVSessionControllerImpl> &taiheController);

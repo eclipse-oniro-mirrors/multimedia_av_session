@@ -42,6 +42,8 @@ std::map<std::string, std::tuple<TaiheControlCommand::GetterType, TaiheControlCo
     {"toggleFavorite", {GetAssetId, SetAssetId, OHOS::AVSession::AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE}},
     {"playFromAssetId",
         {GetPlayFromAssetId, SetPlayFromAssetId, OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID}},
+    {"playWithAssetId",
+        {GetPlayWithAssetId, SetPlayWithAssetId, OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID}},
     {"answer", {GetNoneParam, SetNoneParam, OHOS::AVSession::AVControlCommand::SESSION_CMD_AVCALL_ANSWER}},
     {"hangUp", {GetNoneParam, SetNoneParam, OHOS::AVSession::AVControlCommand::SESSION_CMD_AVCALL_HANG_UP}},
     {"toggleCallMute",
@@ -388,6 +390,30 @@ int32_t TaiheControlCommand::SetPlayFromAssetId(OHOS::AVSession::AVControlComman
         OHOS::AVSession::ERR_INVALID_PARAM, "get playFromAssetId failed");
 
     out.parameter = ToTaiheParameter(playFromAssetId);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheControlCommand::GetPlayWithAssetId(const AVControlCommand &in, OHOS::AVSession::AVControlCommand &out)
+{
+    std::string playWithAssetId;
+    int32_t status = GetParameter(in.parameter, playWithAssetId);
+    if (status != OHOS::AVSession::AVSESSION_SUCCESS) {
+        SLOGE("get playWithAssetId failed");
+        return status;
+    }
+
+    CHECK_AND_RETURN_RET_LOG(out.SetPlayWithAssetId(playWithAssetId) == OHOS::AVSession::AVSESSION_SUCCESS,
+        OHOS::AVSession::ERR_INVALID_PARAM, "set playWithAssetId failed");
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheControlCommand::SetPlayWithAssetId(OHOS::AVSession::AVControlCommand &in, AVControlCommand &out)
+{
+    std::string playWithAssetId;
+    CHECK_AND_RETURN_RET_LOG(in.GetPlayWithAssetId(playWithAssetId) == OHOS::AVSession::AVSESSION_SUCCESS,
+        OHOS::AVSession::ERR_INVALID_PARAM, "get playWithAssetId failed");
+
+    out.parameter = ToTaiheParameter(playWithAssetId);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 } // namespace ANI::AVSession

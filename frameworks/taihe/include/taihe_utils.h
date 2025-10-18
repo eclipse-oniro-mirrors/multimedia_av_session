@@ -61,6 +61,24 @@
         }                                                \
     } while (0)
 
+#define CHECK_RETURN_VOID_THROW_ON_ERR(condition, message)   \
+    do {                                                     \
+        if (!(condition)) {                                  \
+            SLOGE("test (" #condition ") failed: " message); \
+            TaiheUtils::ThrowAddCallbackError();             \
+            return;                                          \
+        }                                                    \
+    } while (0)
+
+#define CHECK_RETURN_VOID_THROW_OFF_ERR(condition, message)  \
+    do {                                                     \
+        if (!(condition)) {                                  \
+            SLOGE("test (" #condition ") failed: " message); \
+            TaiheUtils::ThrowRemoveCallbackError();          \
+            return;                                          \
+        }                                                    \
+    } while (0)
+
 namespace ANI::AVSession {
 using namespace taihe;
 using namespace ohos::multimedia::avsession::avSession;
@@ -74,6 +92,8 @@ public:
     static constexpr char CLASS_NAME_BUSINESSERROR[] = "@ohos.base.BusinessError";
 
     static void ThrowError(int32_t errCode, const std::string &errMsg = "");
+    static void ThrowAddCallbackError();
+    static void ThrowRemoveCallbackError();
     static int32_t ConvertSessionType(const std::string& typeString);
     static std::string ConvertSessionType(int32_t type);
 
@@ -97,6 +117,7 @@ public:
     static int32_t GetString(string in, std::string &out);
     static int32_t GetOptionalString(optional<string> in, std::string &out);
     static int32_t GetStringArray(const array<string> &in, std::vector<std::string> &out);
+    static int32_t GetUIntArray(const array<uint32_t> &in, std::vector<uint32_t> &out);
     static int32_t GetSessionToken(SessionToken const &in, OHOS::AVSession::SessionToken &out);
     static int32_t GetDeviceInfo(DeviceInfo const &in, OHOS::AVSession::DeviceInfo &out);
     static int32_t GetOutputDeviceInfo(ohos::multimedia::avsession::avSession::OutputDeviceInfo const &in,
@@ -109,6 +130,7 @@ public:
     static int32_t GetAudioDeviceDescriptor(uintptr_t in, OHOS::AudioStandard::AudioDeviceDescriptor &out);
     static int32_t GetAudioDeviceDescriptors(array_view<uintptr_t> in,
         std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> &out);
+    static int32_t GetAudioCapabilities(AudioCapabilities const &in, OHOS::AVSession::AudioCapabilities &out);
     static int32_t GetKeyEvent(keyEvent::KeyEvent const &in, OHOS::MMI::KeyEvent &out);
     static int32_t GetAVCallState(const ohos::multimedia::avsession::avSession::AVCallState &in,
         OHOS::AVSession::AVCallState &out);
@@ -124,6 +146,7 @@ public:
     static ani_object ToAniWantAgent(OHOS::AbilityRuntime::WantAgent::WantAgent* &in);
     static ani_object ToAniAVFileDescriptor(const OHOS::AVSession::AVFileDescriptor &in);
     static ani_object ToAniAVDataSrcDescriptor(const OHOS::AVSession::AVDataSrcDescriptor &in);
+    static ani_object ToAniAudioStreamInfo(const OHOS::AVSession::AudioStreamInfo &in);
     static ani_object ToAniImagePixelMap(std::shared_ptr<OHOS::Media::PixelMap> &in);
     static ani_object ToAniKeyEvent(const OHOS::MMI::KeyEvent &in);
 
@@ -160,6 +183,7 @@ public:
         const std::vector<std::shared_ptr<OHOS::AVSession::AVSessionController>> &in);
     static taihe::array<DecoderType> ToTaiheDecoderTypeArray(const std::vector<std::string> &in);
     static keyEvent::KeyEvent ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in);
+    static AudioCapabilities ToTaiheAudioCapabilities(const OHOS::AVSession::AudioCapabilities &in);
 
     static ohos::multimedia::avsession::avSession::OutputDeviceInfo CreateUndefinedOutputDeviceInfo();
 

@@ -51,7 +51,9 @@ public:
         EVENT_AVCALL_HANG_UP,
         EVENT_AVCALL_TOGGLE_CALL_MUTE,
         EVENT_PLAY_FROM_ASSETID,
+        EVENT_PLAY_WITH_ASSETID,
         EVENT_DISPLAY_CHANGE,
+        EVENT_CUSTOM_DATA_CHANGE,
         EVENT_SET_TARGET_LOOP_MODE,
         EVENT_TYPE_MAX
     };
@@ -80,7 +82,9 @@ public:
     void OnAVCallHangUp() override;
     void OnAVCallToggleCallMute() override;
     void OnPlayFromAssetId(int64_t assetId) override;
+    void OnPlayWithAssetId(const std::string &assetId) override;
     void OnCastDisplayChange(const OHOS::AVSession::CastDisplayInfo &castDisplayInfo) override;
+    void OnCustomData(const OHOS::AAFwk::WantParams &customData) override;
 
     int32_t AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback);
     int32_t RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> callback);
@@ -94,6 +98,7 @@ private:
 
     struct DataContext {
         string assetId;
+        string playAssetId;
         string commonCommand;
     };
 

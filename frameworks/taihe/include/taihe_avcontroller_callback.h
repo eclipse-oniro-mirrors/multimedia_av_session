@@ -44,6 +44,7 @@ public:
         EVENT_QUEUE_ITEMS_CHANGE,
         EVENT_QUEUE_TITLE_CHANGE,
         EVENT_EXTRAS_CHANGE,
+        EVENT_CUSTOM_DATA_CHANGE,
         EVENT_AVCALL_META_DATA_CHANGE,
         EVENT_AVCALL_STATE_CHANGE,
         EVENT_TYPE_MAX,
@@ -64,6 +65,7 @@ public:
     void OnQueueItemsChange(const std::vector<OHOS::AVSession::AVQueueItem> &items) override;
     void OnQueueTitleChange(const std::string &title) override;
     void OnExtrasChange(const OHOS::AAFwk::WantParams &extras) override;
+    void OnCustomData(const OHOS::AAFwk::WantParams &customData) override;
 
     int32_t AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback);
     int32_t RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> callback);

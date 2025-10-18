@@ -42,6 +42,7 @@ public:
     array<uintptr_t> GetSupportedHdrCapabilitiesSync();
     array<double> GetSupportedPlaySpeedsSync();
     void SendControlCommandSync(AVCastControlCommand const &command);
+    void SendCustomDataSync(uintptr_t data);
     void StartSync(AVQueueItem const& item);
     void PrepareSync(AVQueueItem const& item);
     AVQueueItem GetCurrentItemSync();
@@ -50,8 +51,8 @@ public:
     AVPlaybackState GetAVPlaybackStateSync();
     array<string> GetValidCommandsSync();
 
-    void OnPlaybackStateChangeFilter(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
-    void OnPlaybackStateChangeAll(string_view filter, callback_view<void(AVPlaybackState const&)> callback);
+    void OnPlaybackStateChange(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
+    void OnPlaybackStateChangeAll(callback_view<void(AVPlaybackState const&)> callback);
     void OnMediaItemChange(callback_view<void(AVQueueItem const&)> callback);
     void OnPlayNext(callback_view<void()> callback);
     void OnPlayPrevious(callback_view<void()> callback);
@@ -68,6 +69,7 @@ public:
     void OnCastControlAudioRendererError(callback_view<void(uintptr_t)> callback);
     void OnCastControlDrmError(callback_view<void(uintptr_t)> callback);
     void OnKeyRequest(callback_view<void(string_view, array_view<uint8_t>)> callback);
+    void OnCustomDataChange(callback_view<void(uintptr_t)> callback);
 
     void OffPlaybackStateChange(optional_view<callback<void(AVPlaybackState const&)>> callback);
     void OffMediaItemChange(optional_view<callback<void(AVQueueItem const&)>> callback);
@@ -87,7 +89,7 @@ public:
     void OffCastControlDrmError(optional_view<callback<void(uintptr_t)>> callback);
     void OffKeyRequest(optional_view<callback<void(string_view,
         array_view<uint8_t>)>> callback);
-
+    void OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback);
 private:
     static void ReportStartFailInfo(int32_t error);
     static void ReportSendControlCommandFailInfo(int32_t error);

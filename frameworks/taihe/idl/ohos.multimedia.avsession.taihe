@@ -54,4 +54,20 @@ class MediaAVDataSrcDescriptorImpl implements media.AVDataSrcDescriptor {
     }
   }
 }
+
+class AudioStreamInfoImpl implements audio.AudioStreamInfo {
+  samplingRate: audio.AudioSamplingRate;
+  channels: audio.AudioChannel;
+  sampleFormat: audio.AudioSampleFormat;
+  encodingType: audio.AudioEncodingType;
+  channelLayout: (audio.AudioChannelLayout | undefined);
+
+  constructor(samplingRate: audio.AudioSamplingRate, channels: audio.AudioChannel, sampleFormat: audio.AudioSampleFormat, encodingType: audio.AudioEncodingType, channelLayout: audio.AudioChannelLayout) {
+    this.samplingRate = samplingRate;
+    this.channels = channels;
+    this.sampleFormat = sampleFormat;
+    this.encodingType = encodingType;
+    this.channelLayout = channelLayout;
+  }
+}
 """)

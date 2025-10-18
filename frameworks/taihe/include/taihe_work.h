@@ -39,5 +39,5 @@ struct AutoRef {
     ani_env *env_;
     std::shared_ptr<uintptr_t> cb_;
 };
-} // namespace ANI::Audio
+} // namespace ANI::AVSession
 #endif // TAIHE_WORK_H

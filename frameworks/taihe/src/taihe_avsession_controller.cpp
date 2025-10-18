@@ -43,6 +43,7 @@ std::set<std::string> AVSessionControllerImpl::eventHandlers_ = {
     "queueItemsChange",
     "queueTitleChange",
     "extrasChange",
+    "customDataChange",
 };
 std::map<std::string, std::shared_ptr<AVSessionControllerImpl>> AVSessionControllerImpl::controllerList_ = {};
 std::mutex AVSessionControllerImpl::uvMutex_;
@@ -630,6 +631,37 @@ void AVSessionControllerImpl::SendCommonCommandSync(string_view command, uintptr
     }
 }
 
+void AVSessionControllerImpl::SendCustomDataSync(uintptr_t data)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::SendCustomData");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "SendCustomDataSync failed : controller is nullptr");
+        return;
+    }
+    OHOS::AAFwk::WantParams dataArgs;
+    if (TaiheUtils::GetWantParams(data, dataArgs) != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "SendCustomDataSync failed : invalid command args");
+        return;
+    }
+    int32_t ret = controller_->SendCustomData(dataArgs);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "SendCustomDataSync failed : native server exception";
+        if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
+            errMessage = "SendCustomDataSync failed : native session not exist";
+        } else if (ret == OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "SendCustomDataSync failed : native controller not exist";
+        } else if (ret == OHOS::AVSession::ERR_SESSION_DEACTIVE) {
+            errMessage = "SendCustomDataSync failed : native session is not active";
+        } else if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "SendCustomDataSync failed : native no permission";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+}
+
 uintptr_t AVSessionControllerImpl::GetExtrasSync()
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::GetExtrasSync");
@@ -707,98 +739,111 @@ uintptr_t AVSessionControllerImpl::GetExtrasWithEventSync(string_view extraEvent
     return reinterpret_cast<uintptr_t>(result);
 }
 
-void AVSessionControllerImpl::OnMetadataChangeFilter(array_view<string> filter,
+void AVSessionControllerImpl::OnMetadataChange(array_view<string> filter,
     callback_view<void(AVMetadata const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("metadataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         int32_t status = SetMetaFilter(this, filter);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetMetaFilter failed");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetMetaFilter failed");
+        status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
-void AVSessionControllerImpl::OnMetadataChangeAll(string_view filter, callback_view<void(AVMetadata const&)> callback)
+void AVSessionControllerImpl::OnMetadataChangeAll(callback_view<void(AVMetadata const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("metadataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        int32_t status = SetMetaFilter(this, filter);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetMetaFilter failed");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetMetaFilter(this, filterView);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetMetaFilter failed");
+        status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
-void AVSessionControllerImpl::OnPlaybackStateChangeFilter(array_view<string> filter,
+void AVSessionControllerImpl::OnPlaybackStateChange(array_view<string> filter,
     callback_view<void(AVPlaybackState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("playbackStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         int32_t status = SetPlaybackStateFilter(this, filter);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetPlaybackStateFilter failed");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetPlaybackStateFilter failed");
+        status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
-void AVSessionControllerImpl::OnPlaybackStateChangeAll(string_view filter,
-    callback_view<void(AVPlaybackState const&)> callback)
+void AVSessionControllerImpl::OnPlaybackStateChangeAll(callback_view<void(AVPlaybackState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("playbackStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        int32_t status = SetPlaybackStateFilter(this, filter);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetPlaybackStateFilter failed");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetPlaybackStateFilter(this, filterView);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetPlaybackStateFilter failed");
+        status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
-void AVSessionControllerImpl::OnCallMetadataChangeFilter(array_view<string> filter,
+void AVSessionControllerImpl::OnCallMetadataChange(array_view<string> filter,
     callback_view<void(CallMetadata const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("callMetadataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         int32_t status = SetAVCallMetaFilter(this, filter);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallMetaFilter failed");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallMetaFilter failed");
+        status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
-void AVSessionControllerImpl::OnCallMetadataChangeAll(string_view filter,
-    callback_view<void(CallMetadata const&)> callback)
+void AVSessionControllerImpl::OnCallMetadataChangeAll(callback_view<void(CallMetadata const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("callMetadataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        int32_t status = SetAVCallMetaFilter(this, filter);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallMetaFilter failed");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetAVCallMetaFilter(this, filterView);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallMetaFilter failed");
+        status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
-void AVSessionControllerImpl::OnCallStateChangeFilter(array_view<string> filter,
+void AVSessionControllerImpl::OnCallStateChange(array_view<string> filter,
     callback_view<void(AVCallState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("callStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         int32_t status = SetAVCallStateFilter(this, filter);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallStateFilter failed");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallStateFilter failed");
+        status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
-void AVSessionControllerImpl::OnCallStateChangeAll(string_view filter,
-    callback_view<void(AVCallState const&)> callback)
+void AVSessionControllerImpl::OnCallStateChangeAll(callback_view<void(AVCallState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("callStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        int32_t status = SetAVCallStateFilter(this, filter);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallStateFilter failed");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetAVCallStateFilter(this, filterView);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "SetAVCallStateFilter failed");
+        status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -806,8 +851,9 @@ void AVSessionControllerImpl::OnSessionDestroy(callback_view<void()> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("sessionDestroy", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_SESSION_DESTROY, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_SESSION_DESTROY, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -815,8 +861,9 @@ void AVSessionControllerImpl::OnActiveStateChange(callback_view<void(bool)> call
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("activeStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -824,8 +871,9 @@ void AVSessionControllerImpl::OnValidCommandChange(callback_view<void(array_view
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("validCommandChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_VALID_COMMAND_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_VALID_COMMAND_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -834,8 +882,9 @@ void AVSessionControllerImpl::OnOutputDeviceChange(
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("outputDeviceChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -843,8 +892,9 @@ void AVSessionControllerImpl::OnSessionEvent(callback_view<void(string_view, uin
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("sessionEvent", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_SESSION_EVENT_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_SESSION_EVENT_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -852,8 +902,9 @@ void AVSessionControllerImpl::OnQueueItemsChange(callback_view<void(array_view<A
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("queueItemsChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_QUEUE_ITEMS_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_QUEUE_ITEMS_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -861,8 +912,9 @@ void AVSessionControllerImpl::OnQueueTitleChange(callback_view<void(string_view)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("queueTitleChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -870,8 +922,19 @@ void AVSessionControllerImpl::OnExtrasChange(callback_view<void(uintptr_t)> call
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("extrasChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->AddCallback(TaiheAVControllerCallback::EVENT_EXTRAS_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_EXTRAS_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+    }
+}
+
+void AVSessionControllerImpl::OnCustomDataChange(callback_view<void(uintptr_t)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("customDataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_CUSTOM_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -882,8 +945,9 @@ void AVSessionControllerImpl::OffMetadataChange(optional_view<callback<void(AVMe
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("metadataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -894,8 +958,10 @@ void AVSessionControllerImpl::OffPlaybackStateChange(optional_view<callback<void
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("playbackStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_PLAYBACK_STATE_CHANGE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -906,8 +972,10 @@ void AVSessionControllerImpl::OffCallMetadataChange(optional_view<callback<void(
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("callMetadataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_AVCALL_META_DATA_CHANGE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -918,8 +986,9 @@ void AVSessionControllerImpl::OffCallStateChange(optional_view<callback<void(AVC
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("callStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_AVCALL_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -930,8 +999,9 @@ void AVSessionControllerImpl::OffSessionDestroy(optional_view<callback<void()>> 
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("sessionDestroy", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_SESSION_DESTROY, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_SESSION_DESTROY, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -942,8 +1012,9 @@ void AVSessionControllerImpl::OffActiveStateChange(optional_view<callback<void(b
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("activeStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_ACTIVE_STATE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -954,8 +1025,10 @@ void AVSessionControllerImpl::OffValidCommandChange(optional_view<callback<void(
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("validCommandChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_VALID_COMMAND_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_VALID_COMMAND_CHANGE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -967,8 +1040,10 @@ void AVSessionControllerImpl::OffOutputDeviceChange(
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("outputDeviceChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_OUTPUT_DEVICE_CHANGE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -979,8 +1054,10 @@ void AVSessionControllerImpl::OffSessionEvent(optional_view<callback<void(string
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("sessionEvent", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_SESSION_EVENT_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_SESSION_EVENT_CHANGE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -991,8 +1068,9 @@ void AVSessionControllerImpl::OffQueueItemsChange(optional_view<callback<void(ar
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("queueItemsChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_QUEUE_ITEMS_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_QUEUE_ITEMS_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -1003,8 +1081,9 @@ void AVSessionControllerImpl::OffQueueTitleChange(optional_view<callback<void(st
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("queueTitleChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_QUEUE_TITLE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -1015,8 +1094,22 @@ void AVSessionControllerImpl::OffExtrasChange(optional_view<callback<void(uintpt
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("extrasChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_EXTRAS_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_EXTRAS_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    }
+}
+
+void AVSessionControllerImpl::OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("customDataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_CUSTOM_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 

@@ -63,7 +63,9 @@ std::set<std::string> AVSessionImpl::onEventHandlers_ = {
     "hangUp",
     "toggleCallMute",
     "playFromAssetId",
+    "playWithAssetId",
     "castDisplayChange",
+    "customDataChange",
 };
 std::set<std::string> AVSessionImpl::offEventHandlers_ = {
     "play",
@@ -86,7 +88,9 @@ std::set<std::string> AVSessionImpl::offEventHandlers_ = {
     "hangUp",
     "toggleCallMute",
     "playFromAssetId",
+    "playWithAssetId",
     "castDisplayChange",
+    "customDataChange",
 };
 std::map<std::string, int32_t> convertEventType_ = {
     { "play", OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY },
@@ -101,7 +105,8 @@ std::map<std::string, int32_t> convertEventType_ = {
     { "setLoopMode", OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_LOOP_MODE },
     { "toggleFavorite", OHOS::AVSession::AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE },
     { "handleKeyEvent", OHOS::AVSession::AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT },
-    { "playFromAssetId", OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID }
+    { "playFromAssetId", OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID },
+    { "playWithAssetId", OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID }
 };
 
 int32_t AVSessionImpl::NewInstance(std::shared_ptr<OHOS::AVSession::AVSession> &nativeSession,
@@ -817,6 +822,37 @@ void AVSessionImpl::DestroySync()
     }
 }
 
+void AVSessionImpl::SendCustomDataSync(uintptr_t data)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::SendCustomData");
+    if (session_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_SESSION_NOT_EXIST],
+            "SendCustomDataSync failed : session is nullptr");
+        return;
+    }
+    OHOS::AAFwk::WantParams dataArgs;
+    if (TaiheUtils::GetWantParams(data, dataArgs) != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "SendCustomDataSync failed : invalid command args");
+        return;
+    }
+    int32_t ret = session_->SendCustomData(dataArgs);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "SendCustomData failed : native server exception, \
+            you are advised to : 1.scheduled retry.\
+            2.destroy the current session or session controller and re-create it.";
+        if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
+            errMessage = "SendCustomDataSync failed : native session not exist";
+        } else if (ret == OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "SendCustomDataSync failed : native controller not exist";
+        } else if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "SendCustomDataSync failed : native no permission";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+}
+
 void AddRegisterEvent(std::string eventName)
 {
     std::lock_guard lockGuard(registerEventLock_);
@@ -834,11 +870,12 @@ void AVSessionImpl::OnPlay(callback_view<void()> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "play";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -848,11 +885,12 @@ void AVSessionImpl::OnPause(callback_view<void()> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "pause";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PAUSE);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_PAUSE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PAUSE);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_PAUSE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -862,11 +900,12 @@ void AVSessionImpl::OnStop(callback_view<void()> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "stop";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_STOP);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_STOP, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_STOP);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_STOP, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -876,11 +915,12 @@ void AVSessionImpl::OnPlayNext(callback_view<void()> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "playNext";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_NEXT);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY_NEXT, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_NEXT);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY_NEXT, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -890,11 +930,12 @@ void AVSessionImpl::OnPlayPrevious(callback_view<void()> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "playPrevious";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY_PREVIOUS, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY_PREVIOUS, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -904,11 +945,12 @@ void AVSessionImpl::OnFastForward(callback_view<void(int64_t)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "fastForward";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_FAST_FORWARD);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_FAST_FORWARD, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_FAST_FORWARD);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_FAST_FORWARD, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -918,11 +960,12 @@ void AVSessionImpl::OnRewind(callback_view<void(int64_t)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "rewind";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_REWIND);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_REWIND, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_REWIND);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_REWIND, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -932,11 +975,27 @@ void AVSessionImpl::OnPlayFromAssetId(callback_view<void(int64_t)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "playFromAssetId";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY_FROM_ASSETID, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY_FROM_ASSETID, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
+        AddRegisterEvent(eventName);
+    }
+}
+
+void AVSessionImpl::OnPlayWithAssetId(callback_view<void(string_view)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    const std::string eventName = "playWithAssetId";
+    if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_PLAY_WITH_ASSETID, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -946,11 +1005,12 @@ void AVSessionImpl::OnSeek(callback_view<void(int64_t)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "seek";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SEEK);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_SEEK, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SEEK);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_SEEK, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -960,11 +1020,12 @@ void AVSessionImpl::OnSetSpeed(callback_view<void(double)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "setSpeed";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_SPEED);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_SET_SPEED, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_SPEED);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_SET_SPEED, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -974,11 +1035,12 @@ void AVSessionImpl::OnSetLoopMode(callback_view<void(LoopMode)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "setLoopMode";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_SET_LOOP_MODE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_SET_LOOP_MODE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -988,11 +1050,12 @@ void AVSessionImpl::OnToggleFavorite(callback_view<void(string_view)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "toggleFavorite";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_TOGGLE_FAVORITE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_TOGGLE_FAVORITE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -1002,11 +1065,12 @@ void AVSessionImpl::OnHandleKeyEvent(callback_view<void(uintptr_t)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "handleKeyEvent";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_MEDIA_KEY_EVENT, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_MEDIA_KEY_EVENT, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -1016,8 +1080,9 @@ void AVSessionImpl::OnOutputDeviceChange(callback_view<void(ConnectionState, Out
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "outputDeviceChange";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -1027,8 +1092,9 @@ void AVSessionImpl::OnCommonCommand(callback_view<void(string_view, uintptr_t)> 
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "commonCommand";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_SEND_COMMON_COMMAND, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_SEND_COMMON_COMMAND, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -1038,8 +1104,9 @@ void AVSessionImpl::OnSkipToQueueItem(callback_view<void(int32_t)> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "skipToQueueItem";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -1049,11 +1116,12 @@ void AVSessionImpl::OnAnswer(callback_view<void()> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "answer";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_AVCALL_ANSWER);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_AVCALL_ANSWER, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_AVCALL_ANSWER);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_AVCALL_ANSWER, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -1063,11 +1131,12 @@ void AVSessionImpl::OnHangUp(callback_view<void()> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "hangUp";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_AVCALL_HANG_UP);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_AVCALL_HANG_UP, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_AVCALL_HANG_UP);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_AVCALL_HANG_UP, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -1077,12 +1146,13 @@ void AVSessionImpl::OnToggleCallMute(callback_view<void()> callback)
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "toggleCallMute";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(session_ != nullptr, "session_ is nullptr");
-        int32_t ret = session_->AddSupportCommand(
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status = session_->AddSupportCommand(
             OHOS::AVSession::AVControlCommand::SESSION_CMD_AVCALL_TOGGLE_CALL_MUTE);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->AddCallback(TaiheAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
         AddRegisterEvent(eventName);
     }
 }
@@ -1093,13 +1163,23 @@ void AVSessionImpl::OnCastDisplayChange(callback_view<void(CastDisplayInfo const
     const std::string eventName = "castDisplayChange";
     if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_DISPLAY_CHANGE, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
-        CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
         session_->StartCastDisplayListener();
         AddRegisterEvent(eventName);
 #endif
+    }
+}
+
+void AVSessionImpl::OnCustomDataChange(callback_view<void(uintptr_t)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("customDataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_CUSTOM_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
     }
 }
 
@@ -1111,13 +1191,13 @@ void AVSessionImpl::OffPlay(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "play";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_PLAY, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_PLAY)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1131,13 +1211,13 @@ void AVSessionImpl::OffPause(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "pause";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_PAUSE, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_PAUSE)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PAUSE);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1151,13 +1231,13 @@ void AVSessionImpl::OffStop(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "stop";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_STOP, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_STOP)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_STOP);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1171,13 +1251,13 @@ void AVSessionImpl::OffPlayNext(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "playNext";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_PLAY_NEXT, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_PLAY_NEXT)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_NEXT);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1191,13 +1271,13 @@ void AVSessionImpl::OffPlayPrevious(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "playPrevious";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_PLAY_PREVIOUS, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_PLAY_PREVIOUS)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1211,13 +1291,13 @@ void AVSessionImpl::OffFastForward(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "fastForward";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_FAST_FORWARD, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_FAST_FORWARD)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_FAST_FORWARD);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1231,13 +1311,13 @@ void AVSessionImpl::OffRewind(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "rewind";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_REWIND, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_REWIND)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_REWIND);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1251,16 +1331,36 @@ void AVSessionImpl::OffPlayFromAssetId(optional_view<callback<void(int64_t)>> ca
     }
     const std::string eventName = "playFromAssetId";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_PLAY_FROM_ASSETID, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_PLAY_FROM_ASSETID)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(
                 OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
-        callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_PLAY_FROM_ASSETID, cacheCallback);
+        RemoveRegisterEvent(eventName);
+    }
+}
+
+void AVSessionImpl::OffPlayWithAssetId(optional_view<callback<void(string_view)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    const std::string eventName = "playWithAssetId";
+    if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_PLAY_WITH_ASSETID, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_PLAY_WITH_ASSETID)) {
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
+            int32_t ret = session_->DeleteSupportCommand(
+                OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID);
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+        }
         RemoveRegisterEvent(eventName);
     }
 }
@@ -1273,13 +1373,13 @@ void AVSessionImpl::OffSeek(optional_view<callback<void(int64_t)>> callback)
     }
     const std::string eventName = "seek";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_SEEK, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_SEEK)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SEEK);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1293,13 +1393,13 @@ void AVSessionImpl::OffSetSpeed(optional_view<callback<void(double)>> callback)
     }
     const std::string eventName = "setSpeed";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_SET_SPEED, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_SET_SPEED)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_SPEED);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1313,13 +1413,13 @@ void AVSessionImpl::OffSetLoopMode(optional_view<callback<void(LoopMode)>> callb
     }
     const std::string eventName = "setLoopMode";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_SET_LOOP_MODE, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_SET_LOOP_MODE)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1333,14 +1433,14 @@ void AVSessionImpl::OffToggleFavorite(optional_view<callback<void(string_view)>>
     }
     const std::string eventName = "toggleFavorite";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_TOGGLE_FAVORITE, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_TOGGLE_FAVORITE)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(
                 OHOS::AVSession::AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1354,14 +1454,14 @@ void AVSessionImpl::OffHandleKeyEvent(optional_view<callback<void(uintptr_t)>> c
     }
     const std::string eventName = "handleKeyEvent";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_MEDIA_KEY_EVENT, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_MEDIA_KEY_EVENT)) {
-            CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(
                 OHOS::AVSession::AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);
     }
@@ -1376,8 +1476,9 @@ void AVSessionImpl::OffOutputDeviceChange(
     }
     const std::string eventName = "outputDeviceChange";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
         RemoveRegisterEvent(eventName);
     }
 }
@@ -1390,8 +1491,9 @@ void AVSessionImpl::OffCommonCommand(optional_view<callback<void(string_view, ui
     }
     const std::string eventName = "commonCommand";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_SEND_COMMON_COMMAND, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_SEND_COMMON_COMMAND, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
         RemoveRegisterEvent(eventName);
     }
 }
@@ -1404,8 +1506,9 @@ void AVSessionImpl::OffSkipToQueueItem(optional_view<callback<void(int32_t)>> ca
     }
     const std::string eventName = "skipToQueueItem";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_SKIP_TO_QUEUE_ITEM, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
         RemoveRegisterEvent(eventName);
     }
 }
@@ -1418,8 +1521,9 @@ void AVSessionImpl::OffAnswer(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "answer";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_AVCALL_ANSWER, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_AVCALL_ANSWER, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
         RemoveRegisterEvent(eventName);
     }
 }
@@ -1432,8 +1536,9 @@ void AVSessionImpl::OffHangUp(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "hangUp";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_AVCALL_HANG_UP, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_AVCALL_HANG_UP, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
         RemoveRegisterEvent(eventName);
     }
 }
@@ -1446,8 +1551,10 @@ void AVSessionImpl::OffToggleCallMute(optional_view<callback<void()>> callback)
     }
     const std::string eventName = "toggleCallMute";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
-        callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_AVCALL_TOGGLE_CALL_MUTE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
         RemoveRegisterEvent(eventName);
     }
 }
@@ -1461,13 +1568,26 @@ void AVSessionImpl::OffCastDisplayChange(optional_view<callback<void(CastDisplay
     const std::string eventName = "castDisplayChange";
     if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
         auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_DISPLAY_CHANGE, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
-        CHECK_RETURN_VOID(session_ != nullptr, "TaiheAVSession object is nullptr");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
         session_->StopCastDisplayListener();
         RemoveRegisterEvent(eventName);
 #endif
+    }
+}
+
+void AVSessionImpl::OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("customDataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_CUSTOM_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
     }
 }
 

@@ -105,17 +105,23 @@ struct AVMediaDescription {
   mediaUri: Optional<String>;
   fdSrc: Optional<@sts_type("media.AVFileDescriptor") Opaque>;
   dataSrc: Optional<@sts_type("media.AVDataSrcDescriptor") Opaque>;
+  pcmSrc: Optional<bool>;
   drmScheme: Optional<String>;
   duration: Optional<i32>;
   startPosition: Optional<i32>;
   creditsPosition: Optional<i32>;
   appName: Optional<String>;
   displayTags: Optional<i32>;
+  launchClientData: Optional<String>;
 }
 
 struct AVQueueItem {
   itemId: i32;
   description: Optional<AVMediaDescription>;
+}
+
+struct AudioCapabilities {
+  @readonly streamInfos: Array<@sts_type("audio.AudioStreamInfo") Opaque>;
 }
 
 interface AVCastController {
@@ -166,58 +172,11 @@ interface AVCastController {
   @gen_promise("getValidCommands")
   GetValidCommandsSync(): Array<String>;
 
-  @!sts_inject_into_interface("on(type: string, filter: Array<String> | String, callback: (data: object) => void): void;")
-  @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
-  @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")
-  @!sts_inject_into_interface("on(type: string, callback: (data_0: object, data_1: object) => void): void;")
-  @!sts_inject_into_class("""
-    on(type: string, filter: Array<String> | String, callback: object): void {
-      if (type === "playbackStateChange") {
-        if (Array.isArray(filter)) {
-          this.onPlaybackStateChangeFilter(filter as Array<String>, callback as (data: AVPlaybackState) => void);
-        } else if (typeof filter === "string") {
-          this.onPlaybackStateChangeAll(filter as String, callback as (data: AVPlaybackState) => void);
-        }
-      }
-    }
-    on(type: string, callback: object): void {
-      if (type === "mediaItemChange") {
-        this.onMediaItemChange(callback as (data: AVQueueItem) => void);
-      } else if (type === "playNext") {
-        this.onPlayNext(callback as () => void);
-      } else if (type === "playPrevious") {
-        this.onPlayPrevious(callback as () => void);
-      } else if (type === "requestPlay") {
-        this.onRequestPlay(callback as (data: AVQueueItem) => void);
-      } else if (type === "endOfStream") {
-        this.onEndOfStream(callback as () => void);
-      } else if (type === "seekDone") {
-        this.onSeekDone(callback as (data: int) => void);
-      } else if (type === "validCommandChange") {
-        this.onValidCommandChange(callback as (data: Array<String>) => void);
-      } else if (type === "videoSizeChange") {
-        this.onVideoSizeChange(callback as (arg_0: int, arg_1: int) => void);
-      } else if (type === "error") {
-        this.onError(callback as (data: BusinessError<void>) => void);
-      } else if (type === "castControlGenericError") {
-        this.onCastControlGenericError(callback as (data: BusinessError<void>) => void);
-      } else if (type === "castControlIoError") {
-        this.onCastControlIoError(callback as (data: BusinessError<void>) => void);
-      } else if (type === "castControlParsingError") {
-        this.onCastControlParsingError(callback as (data: BusinessError<void>) => void);
-      } else if (type === "castControlDecodingError") {
-        this.onCastControlDecodingError(callback as (data: BusinessError<void>) => void);
-      } else if (type === "castControlAudioRendererError") {
-        this.onCastControlAudioRendererError(callback as (data: BusinessError<void>) => void);
-      } else if (type === "castControlDrmError") {
-        this.onCastControlDrmError(callback as (data: BusinessError<void>) => void);
-      } else if (type === "keyRequest") {
-        this.onKeyRequest(callback as (arg_0: String, arg_1: ArrayBuffer) => void);
-      }
-    }
-  """)
-  OnPlaybackStateChangeFilter(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
-  OnPlaybackStateChangeAll(filter: String, callback: (data: AVPlaybackState) => void): void;
+  @gen_promise("sendCustomData")
+  SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
+
+  OnPlaybackStateChange(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
+  OnPlaybackStateChangeAll(callback: (data: AVPlaybackState) => void): void;
   OnMediaItemChange(callback: (data: AVQueueItem) => void): void;
   OnPlayNext(callback: () => void): void;
   OnPlayPrevious(callback: () => void): void;
@@ -234,49 +193,8 @@ interface AVCastController {
   OnCastControlAudioRendererError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
   OnCastControlDrmError(callback: (err: @sts_type("BusinessError<void>") Opaque )=> void): void;
   OnKeyRequest(callback: (assetId: String, requestData: @arraybuffer Array<u8>) => void): void;
+  OnCustomDataChange(callback: (data: @sts_type("Record<String, Object>") Opaque) =>void): void;
 
-  @!sts_inject_into_interface("off(type: string, callback?: () => void): void;")
-  @!sts_inject_into_interface("off(type: string, callback?: (data: object) => void): void;")
-  @!sts_inject_into_interface("off(type: string, callback?: (data_0: object, data_1: object) => void): void;")
-  @!sts_inject_into_class("""
-    off(type: string, callback?: object): void {
-      if (type === "playbackStateChange") {
-        this.offPlaybackStateChange(callback as ((data: AVPlaybackState) => void) | undefined);
-      } else if (type === "mediaItemChange") {
-        this.offMediaItemChange(callback as ((data: AVQueueItem) => void) | undefined);
-      } else if (type === "playNext") {
-        this.offPlayNext(callback as (() => void) | undefined);
-      } else if (type === "playPrevious") {
-        this.offPlayPrevious(callback as (() => void) | undefined);
-      } else if (type === "requestPlay") {
-        this.offRequestPlay(callback as ((data: AVQueueItem) => void) | undefined);
-      } else if (type === "endOfStream") {
-        this.offEndOfStream(callback as (() => void) | undefined);
-      } else if (type === "seekDone") {
-        this.offSeekDone(callback as ((data: int) => void) | undefined);
-      } else if (type === "validCommandChange") {
-        this.offValidCommandChange(callback as ((data: Array<String>) => void) | undefined);
-      } else if (type === "videoSizeChange") {
-        this.offVideoSizeChange(callback as ((arg_0: int, arg_1: int) => void) | undefined);
-      } else if (type === "error") {
-        this.offError(callback as ((data: BusinessError<void>) => void) | undefined);
-      } else if (type === "castControlGenericError") {
-        this.offCastControlGenericError(callback as ((data: BusinessError<void>) => void) | undefined);
-      } else if (type === "castControlIoError") {
-        this.offCastControlIoError(callback as ((data: BusinessError<void>) => void) | undefined);
-      } else if (type === "castControlParsingError") {
-        this.offCastControlParsingError(callback as ((data: BusinessError<void>) => void) | undefined);
-      } else if (type === "castControlDecodingError") {
-        this.offCastControlDecodingError(callback as ((data: BusinessError<void>) => void) | undefined);
-      } else if (type === "castControlAudioRendererError") {
-        this.offCastControlAudioRendererError(callback as ((data: BusinessError<void>) => void) | undefined);
-      } else if (type === "castControlDrmError") {
-        this.offCastControlDrmError(callback as ((data: BusinessError<void>) => void) | undefined);
-      } else if (type === "keyRequest") {
-        this.offKeyRequest(callback as ((arg_0: String, arg_1: ArrayBuffer) => void) | undefined);
-      }
-    }
-  """)
   OffPlaybackStateChange(callback: Optional<(data: AVPlaybackState) => void>): void;
   OffMediaItemChange(callback: Optional<(data: AVQueueItem) => void>): void;
   OffPlayNext(callback: Optional<() => void>): void;
@@ -294,6 +212,7 @@ interface AVCastController {
   OffCastControlAudioRendererError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
   OffCastControlDrmError(callback: Optional<(err: @sts_type("BusinessError<void>") Opaque )=> void>): void;
   OffKeyRequest(callback: Optional<(assetId: String, requestData: @arraybuffer Array<u8>) => void>): void;
+  OffCustomDataChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
 }
 
 enum SkipIntervals: i32 {
@@ -307,6 +226,7 @@ enum ProtocolType: i32 {
   TYPE_CAST_PLUS_MIRROR = 1,
   TYPE_CAST_PLUS_STREAM = 2,
   TYPE_DLNA = 4,
+  TYPE_CAST_PLUS_AUDIO = 8,
 }
 
 struct AVMetadata {
@@ -400,9 +320,12 @@ struct DeviceInfo {
   providerId: Optional<i32>;
   supportedProtocols: Optional<i32>;
   supportedDrmCapabilities: Optional<Array<String>>;
+  supportedPullClients: Optional<Array<u32>>;
   authenticationStatus: Optional<i32>;
   isLegacy: Optional<bool>;
   mediumTypes: Optional<i32>;
+  audioCapabilities: Optional<AudioCapabilities>;
+  remoteDeviceType: Optional<i32>;
 }
 
 struct CallMetadata {
@@ -497,54 +420,9 @@ interface AVSession {
   @gen_promise("destroy")
   DestroySync(): void;
 
-  @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
-  @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")
-  @!sts_inject_into_interface("on(type: string, callback: (data_0: object, data_1: object) => void): void;")
-  @!sts_inject_into_class("""
-    on(type: string, callback: object): void {
-      if (type === "play") {
-        this.onPlay(callback as () => void);
-      } else if (type === "pause") {
-        this.onPause(callback as () => void);
-      } else if (type === "stop") {
-        this.onStop(callback as () => void);
-      } else if (type === "playNext") {
-        this.onPlayNext(callback as () => void);
-      } else if (type === "playPrevious") {
-        this.onPlayPrevious(callback as () => void);
-      } else if (type === "fastForward") {
-        this.onFastForward(callback as (time: long) => void);
-      } else if (type === "rewind") {
-        this.onRewind(callback as (time: long) => void);
-      } else if (type === "playFromAssetId") {
-        this.onPlayFromAssetId(callback as (assetId: long) => void);
-      } else if (type === "seek") {
-        this.onSeek(callback as (time: long) => void);
-      } else if (type === "setSpeed") {
-        this.onSetSpeed(callback as (speed: double) => void);
-      } else if (type === "setLoopMode") {
-        this.onSetLoopMode(callback as (loopMode: LoopMode) => void);
-      } else if (type === "toggleFavorite") {
-        this.onToggleFavorite(callback as (assetId: String) => void);
-      } else if (type === "handleKeyEvent") {
-        this.onHandleKeyEvent(callback as (event: ohos_multimodalInput_keyEvent.KeyEvent) => void);
-      } else if (type === "outputDeviceChange") {
-        this.onOutputDeviceChange(callback as (arg_0: ConnectionState, arg_1: OutputDeviceInfo) => void);
-      } else if (type === "commonCommand") {
-        this.onCommonCommand(callback as (arg_0: String, arg_1: Record<String, Object>) => void);
-      } else if (type === "skipToQueueItem") {
-        this.onSkipToQueueItem(callback as (itemId: int) => void);
-      } else if (type === "answer") {
-        this.onAnswer(callback as () => void);
-      } else if (type === "hangUp") {
-        this.onHangUp(callback as () => void);
-      } else if (type === "toggleCallMute") {
-        this.onToggleCallMute(callback as () => void);
-      } else if (type === "castDisplayChange") {
-        this.onCastDisplayChange(callback as (data: CastDisplayInfo) => void);
-      }
-    }
-  """)
+  @gen_promise("sendCustomData")
+  SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
+
   OnPlay(callback: () => void): void;
   OnPause(callback: () => void): void;
   OnStop(callback: () => void): void;
@@ -552,7 +430,7 @@ interface AVSession {
   OnPlayPrevious(callback: () => void): void;
   OnFastForward(callback: (time: i64) => void): void;
   OnRewind(callback: (time: i64) => void): void;
-  OnPlayFromAssetId(callback: (assetId: i64) => void): void;
+  OnPlayWithAssetId(callback: (assetId: String) => void): void;
   OnSeek(callback: (time: i64) => void): void;
   OnSetSpeed(callback: (speed: f64) => void): void;
   OnSetLoopMode(callback: (loopMode: LoopMode) => void): void;
@@ -565,55 +443,8 @@ interface AVSession {
   OnHangUp(callback: () => void): void;
   OnToggleCallMute(callback: () => void): void;
   OnCastDisplayChange(callback: (data: CastDisplayInfo) => void): void;
+  OnCustomDataChange(callback: (data: @sts_type("Record<String, Object>") Opaque) =>void): void;
 
-  @!sts_inject_into_interface("off(type: string, callback?: () => void): void;")
-  @!sts_inject_into_interface("off(type: string, callback?: (data: object) => void): void;")
-  @!sts_inject_into_interface("off(type: string, callback?: (data_0: object, data_1: object) => void): void;")
-  @!sts_inject_into_class("""
-    off(type: string, callback?: object): void {
-      if (type === "play") {
-        this.offPlay(callback as (() => void) | undefined);
-      } else if (type === "pause") {
-        this.offPause(callback as (() => void) | undefined);
-      } else if (type === "stop") {
-        this.offStop(callback as (() => void) | undefined);
-      } else if (type === "playNext") {
-        this.offPlayNext(callback as (() => void) | undefined);
-      } else if (type === "playPrevious") {
-        this.offPlayPrevious(callback as (() => void) | undefined);
-      } else if (type === "fastForward") {
-        this.offFastForward(callback as (() => void) | undefined);
-      } else if (type === "rewind") {
-        this.offRewind(callback as (() => void) | undefined);
-      } else if (type === "playFromAssetId") {
-        this.offPlayFromAssetId(callback as ((assetId: long) => void) | undefined);
-      } else if (type === "seek") {
-        this.offSeek(callback as ((time: long) => void) | undefined);
-      } else if (type === "setSpeed") {
-        this.offSetSpeed(callback as ((speed: double) => void) | undefined);
-      } else if (type === "setLoopMode") {
-        this.offSetLoopMode(callback as ((loopMode: LoopMode) => void) | undefined);
-      } else if (type === "toggleFavorite") {
-        this.offToggleFavorite(callback as ((assetId: String) => void) | undefined);
-      } else if (type === "handleKeyEvent") {
-        this.offHandleKeyEvent(callback as ((event: ohos_multimodalInput_keyEvent.KeyEvent) => void) | undefined);
-      } else if (type === "outputDeviceChange") {
-        this.offOutputDeviceChange(callback as ((arg_0: ConnectionState, arg_1: OutputDeviceInfo) => void) | undefined);
-      } else if (type === "commonCommand") {
-        this.offCommonCommand(callback as ((arg_0: String, arg_1: Record<String, Object>) => void) | undefined);
-      } else if (type === "skipToQueueItem") {
-        this.offSkipToQueueItem(callback as ((itemId: int) => void) | undefined);
-      } else if (type === "answer") {
-        this.offAnswer(callback as ((() => void) | undefined));
-      } else if (type === "hangUp") {
-        this.offHangUp(callback as ((() => void) | undefined));
-      } else if (type === "toggleCallMute") {
-        this.offToggleCallMute(callback as ((() => void) | undefined));
-      } else if (type === "castDisplayChange") {
-        this.offCastDisplayChange(callback as (((data: CastDisplayInfo) => void) | undefined) | undefined);
-      }
-    }
-  """)
   OffPlay(callback: Optional<() => void>): void;
   OffPause(callback: Optional<() => void>): void;
   OffStop(callback: Optional<() => void>): void;
@@ -621,7 +452,7 @@ interface AVSession {
   OffPlayPrevious(callback: Optional<() => void>): void;
   OffFastForward(callback: Optional<() => void>): void;
   OffRewind(callback: Optional<() => void>): void;
-  OffPlayFromAssetId(callback: Optional<(assetId: i64) => void>): void;
+  OffPlayWithAssetId(callback: Optional<(assetId: String) => void>): void;
   OffSeek(callback: Optional<(time: i64) => void>): void;
   OffSetSpeed(callback: Optional<(speed: f64) => void>): void;
   OffSetLoopMode(callback: Optional<(loopMode: LoopMode) => void>): void;
@@ -634,6 +465,7 @@ interface AVSession {
   OffHangUp(callback: Optional<() => void>): void;
   OffToggleCallMute(callback: Optional<() => void>): void;
   OffCastDisplayChange(callback: Optional<(data: CastDisplayInfo) => void>): void;
+  OffCustomDataChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
 }
 
 interface AVSessionController {
@@ -708,66 +540,17 @@ interface AVSessionController {
   @gen_promise("getExtrasWithEvent")
   GetExtrasWithEventSync(extraEvent: String): @sts_type("Record<String, Object>") Opaque;
 
-  @!sts_inject_into_interface("on(type: string, filter: Array<String> | String, callback: (data: object) => void): void;")
-  @!sts_inject_into_interface("on(type: string, callback: () => void): void;")
-  @!sts_inject_into_interface("on(type: string, callback: (data: object) => void): void;")
-  @!sts_inject_into_interface("on(type: string, callback: (data_0: object, data_1: object) => void): void;")
-  @!sts_inject_into_class("""
-    on(type: string, filter: Array<String> | String, callback: object): void {
-      if (type === "metadataChange") {
-        if (Array.isArray(filter)) {
-          this.onMetadataChangeFilter(filter as Array<String>, callback as (data: AVMetadata) => void);
-        } else if (typeof filter === "string") {
-          this.onMetadataChangeAll(filter as String, callback as (data: AVMetadata) => void);
-        }
-      } else if (type === "playbackStateChange") {
-        if (Array.isArray(filter)) {
-          this.onPlaybackStateChangeFilter(filter as Array<String>, callback as (data: AVPlaybackState) => void);
-        } else if (typeof filter === "string") {
-          this.onPlaybackStateChangeAll(filter as String, callback as (data: AVPlaybackState) => void);
-        }
-      } else if (type === "callMetadataChange") {
-        if (Array.isArray(filter)) {
-          this.onCallMetadataChangeFilter(filter as Array<String>, callback as (data: CallMetadata) => void);
-        } else if (typeof filter === "string") {
-          this.onCallMetadataChangeAll(filter as String, callback as (data: CallMetadata) => void);
-        }
-      } else if (type === "callStateChange") {
-        if (Array.isArray(filter)) {
-          this.onCallStateChangeFilter(filter as Array<String>, callback as (data: AVCallState) => void);
-        } else if (typeof filter === "string") {
-          this.onCallStateChangeAll(filter as String, callback as (data: AVCallState) => void);
-        }
-      }
-    }
-    on(type: string, callback: object): void {
-      if (type === "sessionDestroy") {
-        this.onSessionDestroy(callback as () => void);
-      } else if (type === "activeStateChange") {
-        this.onActiveStateChange(callback as (data: boolean) => void);
-      } else if (type === "validCommandChange") {
-        this.onValidCommandChange(callback as (data: Array<String>) => void);
-      } else if (type === "outputDeviceChange") {
-        this.onOutputDeviceChange(callback as (arg_0: ConnectionState, arg_1: OutputDeviceInfo) => void);
-      } else if (type === "sessionEvent") {
-        this.onSessionEvent(callback as (arg_0: String, arg_1: Record<String, Object>) => void);
-      } else if (type === "queueItemsChange") {
-        this.onQueueItemsChange(callback as (data: Array<AVQueueItem>) => void);
-      } else if (type === "queueTitleChange") {
-        this.onQueueTitleChange(callback as (data: String) => void);
-      } else if (type === "extrasChange") {
-        this.onExtrasChange(callback as (data: Record<String, Object>) => void);
-      }
-    }
-  """)
-  OnMetadataChangeFilter(filter: Array<String>, callback: (data: AVMetadata) => void): void;
-  OnMetadataChangeAll(filter: String, callback: (data: AVMetadata) => void): void;
-  OnPlaybackStateChangeFilter(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
-  OnPlaybackStateChangeAll(filter: String, callback: (data: AVPlaybackState) => void): void;
-  OnCallMetadataChangeFilter(filter: Array<String>, callback: (data: CallMetadata) => void): void;
-  OnCallMetadataChangeAll(filter: String, callback: (data: CallMetadata) => void): void;
-  OnCallStateChangeFilter(filter: Array<String>, callback: (data: AVCallState) => void): void;
-  OnCallStateChangeAll(filter: String, callback: (data: AVCallState) => void): void;
+  @gen_promise("sendCustomData")
+  SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
+
+  OnMetadataChange(filter: Array<String>, callback: (data: AVMetadata) => void): void;
+  OnMetadataChangeAll(callback: (data: AVMetadata) => void): void;
+  OnPlaybackStateChange(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
+  OnPlaybackStateChangeAll(callback: (data: AVPlaybackState) => void): void;
+  OnCallMetadataChange(filter: Array<String>, callback: (data: CallMetadata) => void): void;
+  OnCallMetadataChangeAll(callback: (data: CallMetadata) => void): void;
+  OnCallStateChange(filter: Array<String>, callback: (data: AVCallState) => void): void;
+  OnCallStateChangeAll(callback: (data: AVCallState) => void): void;
   OnSessionDestroy(callback: () => void): void;
   OnActiveStateChange(callback: (data: bool) => void): void;
   OnValidCommandChange(callback: (data: Array<String>) => void): void;
@@ -776,39 +559,8 @@ interface AVSessionController {
   OnQueueItemsChange(callback: (data: Array<AVQueueItem>) => void): void;
   OnQueueTitleChange(callback: (data: String) => void): void;
   OnExtrasChange(callback: (data: @sts_type("Record<String, Object>") Opaque) => void): void;
+  OnCustomDataChange(callback: (data: @sts_type("Record<String, Object>") Opaque) => void): void;
 
-  @!sts_inject_into_interface("off(type: string, callback?: () => void): void;")
-  @!sts_inject_into_interface("off(type: string, callback?: (data: object) => void): void;")
-  @!sts_inject_into_interface("off(type: string, callback?: (data_0: object, data_1: object) => void): void;")
-  @!sts_inject_into_class("""
-    off(type: string, callback?: object): void {
-      if (type === "metadataChange") {
-        this.offMetadataChange(callback as ((data: AVMetadata) => void) | undefined);
-      } else if (type === "playbackStateChange") {
-        this.offPlaybackStateChange(callback as ((data: AVPlaybackState) => void) | undefined);
-      } else if (type === "callMetadataChange") {
-        this.offCallMetadataChange(callback as ((data: CallMetadata) => void) | undefined);
-      } else if (type === "callStateChange") {
-        this.offCallStateChange(callback as ((data: AVCallState) => void) | undefined);
-      } else if (type === "sessionDestroy") {
-        this.offSessionDestroy(callback as (() => void) | undefined);
-      } else if (type === "activeStateChange") {
-        this.offActiveStateChange(callback as ((data: boolean) => void) | undefined);
-      } else if (type === "validCommandChange") {
-        this.offValidCommandChange(callback as ((data: Array<String>) => void) | undefined);
-      } else if (type === "outputDeviceChange") {
-        this.offOutputDeviceChange(callback as ((arg_0: ConnectionState, arg_1: OutputDeviceInfo) => void) | undefined);
-      } else if (type === "sessionEvent") {
-        this.offSessionEvent(callback as ((arg_0: String, arg_1: Record<String, Object>) => void) | undefined);
-      } else if (type === "queueItemsChange") {
-        this.offQueueItemsChange(callback as ((data: Array<AVQueueItem>) => void) | undefined);
-      } else if (type === "queueTitleChange") {
-        this.offQueueTitleChange(callback as ((data: String) => void) | undefined);
-      } else if (type === "extrasChange") {
-        this.offExtrasChange(callback as ((data: Record<String, Object>) => void) | undefined);
-      }
-    }
-  """)
   OffMetadataChange(callback: Optional<(data: AVMetadata) => void>): void;
   OffPlaybackStateChange(callback: Optional<(data: AVPlaybackState) => void>): void;
   OffCallMetadataChange(callback: Optional<(data: CallMetadata) => void>): void;
@@ -821,6 +573,7 @@ interface AVSessionController {
   OffQueueItemsChange(callback: Optional<(data: Array<AVQueueItem>) => void>): void;
   OffQueueTitleChange(callback: Optional<(data: String) => void>): void;
   OffExtrasChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
+  OffCustomDataChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
 }
 
 struct AVSessionDescriptor {
@@ -897,11 +650,11 @@ class AVCastPickerHelper {
     return this.objectInner?.select(options);
   }
 
-  on(type: 'pickerStateChange', callback: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
+  onPickerStateChange(callback: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
       this.objectInner?.onPickerStateChange(callback as ((data: ohos_multimedia_avCastPickerParam.AVCastPickerState) => void));
   }
 
-  off(type: 'pickerStateChange', callback?: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
+  offPickerStateChange(callback?: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
       this.objectInner?.offPickerStateChange(callback as ((data: ohos_multimedia_avCastPickerParam.AVCastPickerState) => void) | undefined);
   }
 }
@@ -961,14 +714,12 @@ function StopCastDeviceDiscoverySync(): void;
 @gen_promise("setDiscoverable")
 function SetDiscoverableSync(enable: bool): void;
 
-union CastAudioSessionType {
-  typeSessionToken: SessionToken;
-  typeAll: String;
-}
+@gen_async("castAudioSession")
+@gen_promise("castAudioSession")
+function CastAudioSync(session: SessionToken, audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
 
-@gen_async("castAudio")
-@gen_promise("castAudio")
-function CastAudioSync(session: CastAudioSessionType, audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
+@gen_promise("castAudioSessionAll")
+function CastAudioAllSync(audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
 
 @gen_promise("getDistributedSessionController")
 function GetDistributedSessionControllerSync(distributedSessionType: DistributedSessionType): Array<AVSessionController>;
@@ -1007,39 +758,10 @@ struct DeviceState {
   @readonly radarErrorCode: i32;
 }
 
-@on_off("distributedSessionChange")
 function OnDistributedSessionChange(param: DistributedSessionType, callback: (data: Array<AVSessionController>) => void): void;
-@on_off("distributedSessionChange")
 function OffDistributedSessionChange(param: DistributedSessionType, callback: Optional<(data: Array<AVSessionController>) => void>): void;
-@on_off("sessionServiceDie")
 function OnSessionServiceDie(callback: () => void): void;
-@on_off("sessionServiceDie")
 function OffSessionServiceDie(callback: Optional<() => void>): void;
-
-@!sts_inject("""
-export function on(type: string, cb: (arg_0: Object) => void) {
-  switch(type) {
-    case "sessionCreate": return onSessionCreate(cb);
-    case "sessionDestroy": return onSessionDestroy(cb);
-    case "topSessionChange": return onTopSessionChange(cb);
-    case "deviceAvailable": return onDeviceAvailable(cb);
-    case "deviceLogEvent": return onDeviceLogEvent(cb);
-    case "deviceOffline": return onDeviceOffline(cb);
-    case "deviceStateChanged": return onDeviceStateChange(cb);
-  }
-}
-export function off(type: string, cb: (arg_0: Object) => void) {
-  switch(type) {
-    case "sessionCreate": return offSessionCreate(cb as ((arg_0: AVSessionDescriptor) => void) | undefined);
-    case "sessionDestroy": return offSessionDestroy(cb as ((arg_0: AVSessionDescriptor) => void) | undefined);
-    case "topSessionChange": return offTopSessionChange(cb as ((arg_0: AVSessionDescriptor) => void) | undefined);
-    case "deviceAvailable": return offDeviceAvailable(cb as ((arg_0: OutputDeviceInfo) => void) | undefined);
-    case "deviceLogEvent": return offDeviceLogEvent(cb as ((arg_0: DeviceLogEventCode) => void) | undefined);
-    case "deviceOffline": return offDeviceOffline(cb as ((arg_0: String) => void) | undefined);
-    case "deviceStateChanged": return offDeviceStateChange(cb as ((arg_0: DeviceState) => void) | undefined);
-  }
-}
-""")
 
 function OnSessionCreate(callback: (session: AVSessionDescriptor) => void): void;
 function OnSessionDestroy(callback: (session: AVSessionDescriptor) => void): void;
@@ -1047,7 +769,7 @@ function OnTopSessionChange(callback: (session: AVSessionDescriptor) => void): v
 function OnDeviceAvailable(callback: (device: OutputDeviceInfo) => void): void;
 function OnDeviceLogEvent(callback: (eventCode: DeviceLogEventCode) => void): void;
 function OnDeviceOffline(callback: (deviceId: String) => void): void;
-function OnDeviceStateChange(callback: (deviceState: DeviceState) => void): void;
+function OnDeviceStateChanged(callback: (deviceState: DeviceState) => void): void;
 
 function OffSessionCreate(callback: Optional<(session: AVSessionDescriptor) => void>): void;
 function OffSessionDestroy(callback: Optional<(session: AVSessionDescriptor) => void>): void;
@@ -1055,7 +777,7 @@ function OffTopSessionChange(callback: Optional<(session: AVSessionDescriptor) =
 function OffDeviceAvailable(callback: Optional<(device: OutputDeviceInfo) => void>): void;
 function OffDeviceLogEvent(callback: Optional<(eventCode: DeviceLogEventCode) => void>): void;
 function OffDeviceOffline(callback: Optional<(deviceId: String) => void>): void;
-function OffDeviceStateChange(callback: Optional<(deviceState: DeviceState) => void>): void;
+function OffDeviceStateChanged(callback: Optional<(deviceState: DeviceState) => void>): void;
 
 enum AVSessionErrorCode : i32 {
   ERR_CODE_SERVICE_EXCEPTION = 6600101,

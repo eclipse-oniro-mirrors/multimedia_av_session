@@ -63,6 +63,7 @@ int32_t TaiheAVCallState::ConvertFilter(array<string> filter, OHOS::AVSession::A
             }
         }
     }
+    CHECK_RETURN(!mask.none(), "array element invalid.", OHOS::AVSession::ERR_INVALID_PARAM);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
