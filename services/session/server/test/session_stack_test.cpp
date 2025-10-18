@@ -252,5 +252,36 @@ HWTEST_F(SessionStackTest, GetSessionByUid001, TestSize.Level0)
     avSessionService_->HandleSessionRelease(sessionId);
     sessionStack.sessions_.clear();
 }
+
+/**
+ * @tc.name: UpdateSessionForCurrentUser001
+ * @tc.desc: verifying users manager update session for current user
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStackTest, UpdateSessionForCurrentUser001, TestSize.Level1)
+{
+    auto avSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
+    ASSERT_TRUE(avSessionService != nullptr);
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession");
+    elementName.SetAbilityName("test.ability");
+    OHOS::sptr <AVSessionItem> item = avSessionService->CreateSessionInner(
+        "test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(item != nullptr);
+    item->SetPid(getpid());
+
+    auto& manager = AVSessionUsersManager::GetInstance();
+    std::string oldAbility = "oldAbilityName";
+    std::string newAbility = "newAbilityName";
+    auto res = manager.AddSessionForCurrentUser(getpid(), oldAbility, item);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    res = manager.UpdateSessionForCurrentUser(getpid(), oldAbility, newAbility, item);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+
+    sptr<AVSessionItem> result = manager.GetContainerFromAll().GetSession(getpid(), newAbility);
+    EXPECT_NE(result, nullptr);
+    avSessionService->HandleSessionRelease(item->GetSessionId());
+}
 } //AVSession
 } //OHOS
