@@ -712,7 +712,7 @@ private:
     std::unordered_set<pid_t> cacheEnableCastPids_;
     bool cancelCastRelease_ = false;
     std::condition_variable enableCastCond_;
-    const int32_t castReleaseTimeOut_ = 40;
+    const int32_t castReleaseTimeOut_ = 120;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";

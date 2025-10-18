@@ -446,7 +446,7 @@ bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
     CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "session is nullptr");
     bool appCond = session->IsAppSupportCast();
 
-    bool connectCond = !isCastableDevice_ && (castServiceNameStatePair_.second == deviceStateConnection);
+    bool connectCond = castServiceNameStatePair_.second == deviceStateConnection;
 
     std::string bundleName = session->GetBundleName();
     bool isWhiteApp = std::find(CastEngine::MIRROR_TO_STREAM_APP_LIST.begin(),
