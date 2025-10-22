@@ -503,7 +503,7 @@ void AVCastControllerImpl::ReleaseSync()
     }
 }
 
-void AVCastControllerImpl::OnPlaybackStateChangeFilter(array_view<string> filter,
+void AVCastControllerImpl::OnPlaybackStateChange(array_view<string> filter,
     callback_view<void(AVPlaybackState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
@@ -591,13 +591,14 @@ array<string> AVCastControllerImpl::GetValidCommandsSync()
     return array<string>(TaiheUtils::ToTaiheStringArray(stringCmds));
 }
 
-void AVCastControllerImpl::OnPlaybackStateChangeAll(string_view filter,
-    callback_view<void(AVPlaybackState const&)> callback)
+void AVCastControllerImpl::OnPlaybackStateChangeAll(callback_view<void(AVPlaybackState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("playbackStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
         CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
-        int32_t status = SetCastPlaybackStateFilter(this, filter);
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetCastPlaybackStateFilter(this, filterView);
         if (status != OHOS::AVSession::AVSESSION_SUCCESS) {
             SLOGE("SetCastPlaybackStateFilter failed");
             return;

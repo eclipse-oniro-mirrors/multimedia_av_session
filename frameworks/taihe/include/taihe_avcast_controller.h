@@ -50,8 +50,8 @@ public:
     AVPlaybackState GetAVPlaybackStateSync();
     array<string> GetValidCommandsSync();
 
-    void OnPlaybackStateChangeFilter(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
-    void OnPlaybackStateChangeAll(string_view filter, callback_view<void(AVPlaybackState const&)> callback);
+    void OnPlaybackStateChange(array_view<string> filter, callback_view<void(AVPlaybackState const&)> callback);
+    void OnPlaybackStateChangeAll(callback_view<void(AVPlaybackState const&)> callback);
     void OnMediaItemChange(callback_view<void(AVQueueItem const&)> callback);
     void OnPlayNext(callback_view<void()> callback);
     void OnPlayPrevious(callback_view<void()> callback);
