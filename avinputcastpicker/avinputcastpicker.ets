@@ -70,6 +70,10 @@ export struct AVInputCastPicker {
    */
   @State maxFontSizeScale: number = 2;
   /**
+   * Accessibility Strings
+   */
+  @State accessibilityAudioControlStr: string = '切换麦克风';
+  /**
    * PC or not.
    */
   @State isPc: boolean = true;
@@ -228,78 +232,95 @@ export struct AVInputCastPicker {
 
   @Builder
   private buildDefaultPicker(isCustomPicker: boolean) {
-    UIExtensionComponent({
-      abilityName: 'AVInputCastPickerAbility',
-      bundleName: 'com.hmos.mediacontroller',
-      parameters: {
-        'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
-        'isCustomPicker': isCustomPicker,
-        'currentPickerCount': this.pickerCountOnCreation,
+    Button() {
+      Column() {
+        UIExtensionComponent({
+          abilityName: 'AVInputCastPickerAbility',
+          bundleName: 'com.hmos.mediacontroller',
+          parameters: {
+            'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
+            'isCustomPicker': isCustomPicker,
+            'currentPickerCount': this.pickerCountOnCreation,
+          }
+        })
+          .size({ width: '100%', height: '100%' })
+          .bindMenu(this.deviceMenu(), {
+            placement: !this.isPc ? Placement.BottomRight : undefined,
+            showInSubWindow: false,
+            onDisappear: () => {
+              this.touchMenuItemIndex = -1;
+              if (this.onStateChange !== null && this.onStateChange !== undefined) {
+                this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
+              }
+            },
+            onAppear: () => {
+              if (this.onStateChange !== null && this.onStateChange !== undefined) {
+                this.onStateChange(AVCastPickerState.STATE_APPEARING);
+              }
+              if (this.extensionProxy !== null && this.pickerClickTime !== -1) {
+                this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
+                this.pickerClickTime = -1;
+              }
+            }
+          })
+          .onRemoteReady((proxy: UIExtensionProxy) => {
+            console.info(TAG, 'onRemoteReady');
+            this.extensionProxy = proxy;
+          })
+          .onReceive((data) => {
+            if (JSON.stringify(data['deviceInfoList']) !== undefined) {
+              this.deviceInfoList = JSON.parse(JSON.stringify(data['deviceInfoList']));
+            }
+
+            if (JSON.stringify(data['isDarkMode']) !== undefined) {
+              console.info(TAG, `isDarkMode : ${JSON.stringify(data['isDarkMode'])}`);
+              this.isDarkMode = data['isDarkMode'] as boolean;
+            }
+
+            if (data.fontSizeScale !== undefined) {
+              console.info(TAG, `fontSizeScale : ${data.fontSizeScale}`);
+              this.fontSizeScale = data.fontSizeScale as number;
+            }
+
+            if (data.maxFontSizeScale !== undefined) {
+              console.info(TAG, `maxFontSizeScale : ${data.maxFontSizeScale}`);
+              this.maxFontSizeScale = data.maxFontSizeScale as number;
+            }
+
+            if (data.accessAudioControl !== undefined) {
+              console.info(TAG, `accessibilityAudioControlStr : ${data.accessAudioControl}`);
+              this.accessibilityAudioControlStr = data.accessAudioControl as string;
+            }
+
+            if (data.isPc !== undefined) {
+              console.info(TAG, `isPc : ${data.isPc}`);
+              this.isPc = data.isPc as boolean;
+            }
+
+            if (JSON.stringify(data['isRTL']) !== undefined) {
+              console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);
+              this.isRTL = data['isRTL'] as boolean;
+            }
+          })
+          .onTerminated((info) => {
+            console.info(TAG, ` onTerminated code: ${info?.code}`);
+          })
+          .onError((error) => {
+            console.info(TAG, ` onError code: ${error?.code} message: ${error?.message}`);
+          })
       }
-    })
+      .accessibilityLevel('no-hide-descendants')
       .size({ width: '100%', height: '100%' })
-      .bindMenu(this.deviceMenu(), {
-        placement: !this.isPc ? Placement.BottomRight : undefined,
-        showInSubWindow: false,
-        onDisappear: () => {
-          this.touchMenuItemIndex = -1;
-          if (this.onStateChange !== null && this.onStateChange !== undefined) {
-            this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
-          }
-        },
-        onAppear: () => {
-          if (this.onStateChange !== null && this.onStateChange !== undefined) {
-            this.onStateChange(AVCastPickerState.STATE_APPEARING);
-          }
-          if (this.extensionProxy !== null && this.pickerClickTime !== -1) {
-            this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
-            this.pickerClickTime = -1;
-          }
-        }
-      })
-      .onClick(() => {
-        this.pickerClickTime = new Date().getTime();
-      })
-      .onRemoteReady((proxy: UIExtensionProxy) => {
-        console.info(TAG, 'onRemoteReady');
-        this.extensionProxy = proxy;
-      })
-      .onReceive((data) => {
-        if (JSON.stringify(data['deviceInfoList']) !== undefined) {
-          this.deviceInfoList = JSON.parse(JSON.stringify(data['deviceInfoList']));
-        }
-
-        if (JSON.stringify(data['isDarkMode']) !== undefined) {
-          console.info(TAG, `isDarkMode : ${JSON.stringify(data['isDarkMode'])}`);
-          this.isDarkMode = data['isDarkMode'] as boolean;
-        }
-
-        if (data.fontSizeScale !== undefined) {
-          console.info(TAG, `fontSizeScale : ${data.fontSizeScale}`);
-          this.fontSizeScale = data.fontSizeScale as number;
-        }
-
-        if (data.maxFontSizeScale !== undefined) {
-          console.info(TAG, `maxFontSizeScale : ${data.maxFontSizeScale}`);
-          this.maxFontSizeScale = data.maxFontSizeScale as number;
-        }
-
-        if (data.isPc !== undefined) {
-          console.info(TAG, `isPc : ${data.isPc}`);
-          this.isPc = data.isPc as boolean;
-        }
-
-        if (JSON.stringify(data['isRTL']) !== undefined) {
-          console.info(TAG, `isRTL : ${JSON.stringify(data['isRTL'])}`);
-          this.isRTL = data['isRTL'] as boolean;
-        }
-      })
-      .onTerminated((info) => {
-        console.info(TAG, ` onTerminated code: ${info?.code}`);
-      })
-      .onError((error) => {
-        console.info(TAG, ` onError code: ${error?.code} message: ${error?.message}`);
-      })
+    }
+    .hoverEffect(HoverEffect.None)
+    .backgroundColor(Color.Transparent)
+    .stateEffect(false)
+    .size({ width: '100%', height: '100%' })
+    .accessibilityLevel('yes')
+    .accessibilityText(this.accessibilityAudioControlStr)
+    .onClick(() => {
+      this.pickerClickTime = new Date().getTime();
+    })
   }
 
   @Builder

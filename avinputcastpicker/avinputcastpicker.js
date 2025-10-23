@@ -46,6 +46,7 @@ export class AVInputCastPicker extends ViewPU {
         this.__isDarkMode = new ObservedPropertySimplePU(false, this, 'isDarkMode');
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__maxFontSizeScale = new ObservedPropertySimplePU(2, this, 'maxFontSizeScale');
+        this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('切换麦克风', this, 'accessibilityAudioControlStr');
         this.__isPc = new ObservedPropertySimplePU(true, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
         this.onStateChange = undefined;
@@ -74,6 +75,9 @@ export class AVInputCastPicker extends ViewPU {
         }
         if (params.maxFontSizeScale !== undefined) {
             this.maxFontSizeScale = params.maxFontSizeScale;
+        }
+        if (params.accessibilityAudioControlStr !== undefined) {
+            this.accessibilityAudioControlStr = params.accessibilityAudioControlStr;
         }
         if (params.isPc !== undefined) {
             this.isPc = params.isPc;
@@ -104,6 +108,7 @@ export class AVInputCastPicker extends ViewPU {
         this.__isDarkMode.purgeDependencyOnElmtId(rmElmtId);
         this.__fontSizeScale.purgeDependencyOnElmtId(rmElmtId);
         this.__maxFontSizeScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(rmElmtId);
         this.__isPc.purgeDependencyOnElmtId(rmElmtId);
         this.__isRTL.purgeDependencyOnElmtId(rmElmtId);
     }
@@ -114,6 +119,7 @@ export class AVInputCastPicker extends ViewPU {
         this.__isDarkMode.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
         this.__maxFontSizeScale.aboutToBeDeleted();
+        this.__accessibilityAudioControlStr.aboutToBeDeleted();
         this.__isPc.aboutToBeDeleted();
         this.__isRTL.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
@@ -158,6 +164,14 @@ export class AVInputCastPicker extends ViewPU {
 
     set maxFontSizeScale(newValue) {
         this.__maxFontSizeScale.set(newValue);
+    }
+
+    get accessibilityAudioControlStr() {
+        return this.__accessibilityAudioControlStr.get();
+    }
+
+    set accessibilityAudioControlStr(newValue) {
+        this.__accessibilityAudioControlStr.set(newValue);
     }
 
     get isPc() {
@@ -434,6 +448,23 @@ export class AVInputCastPicker extends ViewPU {
 
     buildDefaultPicker(isCustomPicker, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithChild();
+            Button.size({ width: '100%', height: '100%' });
+            Button.hoverEffect(HoverEffect.None);
+            Button.stateEffect(false);
+            Button.backgroundColor('#00000000');
+            Button.accessibilityLevel('yes');
+            Button.accessibilityText(this.accessibilityAudioControlStr);
+            Button.onClick(() => {
+                this.pickerClickTime = new Date().getTime();
+            });
+        }, Button);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.accessibilityLevel('no-hide-descendants');
+            Column.size({ width: '100%', height: '100%' });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             UIExtensionComponent.create({
                 abilityName: 'AVInputCastPickerAbility',
                 bundleName: 'com.hmos.mediacontroller',
@@ -443,6 +474,9 @@ export class AVInputCastPicker extends ViewPU {
                     'currentPickerCount': this.pickerCountOnCreation,
                 }
             });
+            UIExtensionComponent.accessibilityRole(AccessibilityRoleType.BUTTON)
+            UIExtensionComponent.accessibilityLevel('yes')
+            UIExtensionComponent.accessibilityText(this.accessibilityAudioControlStr)
             UIExtensionComponent.size({ width: '100%', height: '100%' });
             UIExtensionComponent.bindMenu({
                 builder: () => {
@@ -467,9 +501,6 @@ export class AVInputCastPicker extends ViewPU {
                     }
                 }
             });
-            UIExtensionComponent.onClick(() => {
-                this.pickerClickTime = new Date().getTime();
-            });
             UIExtensionComponent.onRemoteReady((proxy) => {
                 console.info(TAG, 'onRemoteReady');
                 this.extensionProxy = proxy;
@@ -490,6 +521,10 @@ export class AVInputCastPicker extends ViewPU {
                     console.info(TAG, `maxFontSizeScale : ${data.maxFontSizeScale}`);
                     this.maxFontSizeScale = data.maxFontSizeScale;
                 }
+                if (data.accessAudioControl !== undefined) {
+                    console.info(TAG, `accessibilityAudioControlStr : ${data.accessAudioControl}`);
+                    this.accessibilityAudioControlStr = data.accessAudioControl;
+                }
                 if (data.isPc !== undefined) {
                     console.info(TAG, `isPc : ${data.isPc}`);
                     this.isPc = data.isPc;
@@ -505,7 +540,12 @@ export class AVInputCastPicker extends ViewPU {
             UIExtensionComponent.onError((error) => {
                 console.info(TAG, ` onError code: ${error?.code} message: ${error?.message}`);
             });
+            UIExtensionComponent.accessibilityLevel('yes');
+            UIExtensionComponent.accessibilityText(this.__accessibilityAudioControlStr);
+            UIExtensionComponent.accessibilityUseSamePage(AccessibilitySamePageMode.FULL_SILENT);
         }, UIExtensionComponent);
+        Column.pop();
+        Button.pop();
     }
 
     buildCustomPicker(parent = null) {
