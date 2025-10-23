@@ -583,6 +583,8 @@ private:
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";
+    const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
+    const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
 #endif
 };
 } // namespace OHOS::AVSession
