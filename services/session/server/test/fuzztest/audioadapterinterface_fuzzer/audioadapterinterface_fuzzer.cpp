@@ -32,12 +32,10 @@ using namespace OHOS::AVSession;
 static const int32_t MIN_SIZE_NUM = 10;
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_totalSize = 0;
-using TestFunc = function<void()>;
+using TestFunc = function<void(FuzzedDataProvider&)>;
 
-void AudioAdapterTest001()
+void AudioAdapterTest001(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     auto &audioAdapter = AudioAdapter::GetInstance();
 
     int32_t volume = provider.ConsumeIntegral<int32_t>();
@@ -53,10 +51,8 @@ void AudioAdapterTest001()
     audioAdapter.UnsetDeviceChangeCallback();
 }
 
-void AudioAdapterTest002()
+void AudioAdapterTest002(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     OHOS::AudioStandard::VolumeEvent volumeEvent;
     volumeEvent.volumeType = static_cast<OHOS::AudioStandard::AudioVolumeType>(
         provider.ConsumeIntegralInRange<int>(0, AudioStandard::AudioVolumeType::STREAM_APP));
@@ -81,10 +77,8 @@ void AudioAdapterTest002()
     audioAdapter.UnsetPreferredOutputDeviceChangeCallback();
 }
 
-void AudioAdapterTest003()
+void AudioAdapterTest003(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     auto &audioAdapter = AudioAdapter::GetInstance();
     audioAdapter.SetDeviceChangeCallback();
     audioAdapter.UnregisterVolumeKeyEventCallback();
@@ -99,10 +93,8 @@ void AudioAdapterTest003()
     audioAdapter.UnsetPreferredOutputDeviceChangeCallback();
 }
 
-void AudioAdapterTest004()
+void AudioAdapterTest004(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     int32_t uid = provider.ConsumeIntegral<int32_t>();
     int32_t pid = provider.ConsumeIntegral<int32_t>();
     int32_t muteUid = provider.ConsumeIntegral<int32_t>();
@@ -138,10 +130,8 @@ void AudioAdapterTest004()
     audioAdapter.UnMuteAudioStream(unmuteUid, unmuteUsage);
 }
 
-void AudioAdapterTest005()
+void AudioAdapterTest005(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     int32_t uid = provider.ConsumeIntegral<int32_t>();
     OHOS::AudioStandard::StreamUsage usage = static_cast<OHOS::AudioStandard::StreamUsage>(
         provider.ConsumeIntegralInRange<int32_t>(0, OHOS::AudioStandard::STREAM_USAGE_MAX));
@@ -158,9 +148,8 @@ void AudioAdapterTest005()
     audioAdapter.AddDeviceChangeListener(listener);
 }
 
-void AudioAdapterTest006()
+void AudioAdapterTest006(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
     auto &audioAdapter = AudioAdapter::GetInstance();
     int32_t volume = provider.ConsumeIntegral<int32_t>();
     audioAdapter.SetVolume(volume);
@@ -177,10 +166,8 @@ void AudioAdapterTest006()
     audioAdapter.UnsetAvailableDeviceChangeCallback();
 }
 
-void AudioAdapterTest007()
+void AudioAdapterTest007(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     constexpr int maxRange = 10;
     auto deviceCount = provider.ConsumeIntegralInRange(0, maxRange);
     AudioDeviceDescriptors deviceDescriptors;
@@ -207,10 +194,8 @@ void AudioAdapterTest007()
     audioAdapter.FindRenderDeviceForUsage(deviceDescriptors, desc);
 }
 
-void AudioAdapterTest008()
+void AudioAdapterTest008(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     auto& audioAdapter = AudioAdapter::GetInstance();
     auto preferredDevices = audioAdapter.GetPreferredOutputDeviceForRendererInfo();
 
@@ -237,10 +222,8 @@ void AudioAdapterTest008()
     auto foundDevice = audioAdapter.FindRenderDeviceForUsage(availableDevices, targetDescriptor);
 }
 
-void AudioAdapterTest009()
+void AudioAdapterTest009(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     AudioDeviceDescriptor deviceDescriptor;
     deviceDescriptor.deviceRole_ = static_cast<AudioStandard::DeviceRole>(
         provider.ConsumeIntegralInRange<int>(0, AudioStandard::DEVICE_ROLE_MAX));
@@ -293,10 +276,8 @@ void AudioAdapterTest009()
     audioAdapter.OnRendererStateChange(rendererChangeInfos);
 }
 
-void AudioAdapterTest010()
+void AudioAdapterTest010(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     int32_t volume = provider.ConsumeIntegral<int32_t>();
     int32_t uid = provider.ConsumeIntegral<int32_t>();
     int32_t pid = provider.ConsumeIntegral<int32_t>();
@@ -312,10 +293,8 @@ void AudioAdapterTest010()
     audioAdapter.UnsetDeviceChangeCallback();
 }
 
-void AudioAdapterTest011()
+void AudioAdapterTest011(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
-
     auto descriptor = std::make_shared<AudioStandard::AudioDeviceDescriptor>();
     descriptor->deviceType_ = static_cast<AudioStandard::DeviceType>(
         provider.ConsumeIntegralInRange<int>(0, AudioStandard::DEVICE_TYPE_MAX));
@@ -343,9 +322,8 @@ void AudioAdapterTest011()
     audioAdapter.UnMuteAudioStream(uid);
 }
 
-void AudioAdapterTest012()
+void AudioAdapterTest012(FuzzedDataProvider& provider)
 {
-    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
     auto& audioAdapter = AudioAdapter::GetInstance();
 
     audioAdapter.SetAvailableDeviceChangeCallback([](const OHOS::AVSession::AudioDeviceDescriptors& devices) {});
@@ -394,7 +372,7 @@ bool FuzzTest(const uint8_t* rawData, size_t size)
     uint32_t code = provider.ConsumeIntegral<uint32_t>();
     uint32_t len = allFuncs.size();
     if (len > 0) {
-        allFuncs[code % len]();
+        allFuncs[code % len](provider);
     } else {
         SLOGE("%{public}s: The len length is equal to 0", __func__);
     }
