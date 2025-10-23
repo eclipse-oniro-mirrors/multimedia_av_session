@@ -82,6 +82,8 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
             CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false,
                 "write supportedPullClient failed");
         }
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.bleMac_), false, "write bleMac failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.triggerType_), false, "write triggerType failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -153,6 +155,8 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
         supportedPullClients.emplace_back(supportedPullClient);
     }
     deviceInfo.supportedPullClients_ = supportedPullClients;
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.bleMac_), false, "Read bleMac failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.triggerType_), false, "Read triggerType failed");
     outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
@@ -214,6 +218,8 @@ bool DeviceInfo::Marshalling(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false,
             "write supportedPullClient failed");
     }
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(bleMac_), false, "write bleMac failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(triggerType_), false, "write triggerType failed");
     return true;
 }
 
@@ -271,6 +277,8 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
         supportedPullClients.emplace_back(supportedPullClient);
     }
     supportedPullClients_ = supportedPullClients;
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(bleMac_), false, "Read bleMac failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(triggerType_), false, "Read triggerType failed");
     return true;
 }
 

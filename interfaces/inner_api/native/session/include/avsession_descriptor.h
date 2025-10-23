@@ -53,6 +53,8 @@ public:
     bool isLegacy_ = false;
     int32_t mediumTypes_ = 2;
     AudioCapabilities audioCapabilities_;
+    std::string bleMac_;
+    int32_t triggerType_ {};
 };
 
 class OutputDeviceInfo : public Parcelable {

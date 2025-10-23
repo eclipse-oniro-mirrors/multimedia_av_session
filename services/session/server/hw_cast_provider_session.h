@@ -35,7 +35,7 @@ public:
 
     int32_t Init();
     void Release();
-    bool AddDevice(const std::string deviceId, uint32_t spid);
+    bool AddDevice(const DeviceInfo deviceInfo, uint32_t spid);
     bool RemoveDevice(std::string deviceId, bool continuePlay = false);
     std::shared_ptr<CastEngine::IStreamPlayer> CreateStreamPlayer();
     bool RegisterCastSessionStateListener(std::shared_ptr<IAVCastSessionStateListener> listener);

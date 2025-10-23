@@ -1213,12 +1213,14 @@ static HWTEST(HwCastTest, HwCastSessonToast001, TestSize.Level1)
     auto provideSession = std::make_shared<HwCastProviderSession>(session);
     EXPECT_EQ(provideSession != nullptr, true);
     OHOS::CastEngine::DeviceStateInfo stateInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
     stateInfo.deviceId = "testDeviceId";
     stateInfo.deviceState = OHOS::CastEngine::DeviceState::DISCONNECTED;
     provideSession->OnDeviceState(stateInfo);
     stateInfo.deviceState = OHOS::CastEngine::DeviceState::AUTHING;
     provideSession->OnDeviceState(stateInfo);
-    provideSession->AddDevice("testDeviceId", 0);
+    provideSession->AddDevice(deviceInfo, 0);
     stateInfo.deviceState = OHOS::CastEngine::DeviceState::DISCONNECTED;
     provideSession->OnDeviceState(stateInfo);
     stateInfo.deviceState = OHOS::CastEngine::DeviceState::STREAM;

@@ -728,35 +728,7 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
     int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfoSize), ERR_MARSHALLING, "write deviceInfoSize failed");
     for (const DeviceInfo& deviceInfo : outputDeviceInfo.deviceInfos_) {
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.castCategory_),
-            ERR_MARSHALLING, "write castCategory failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceId_), ERR_MARSHALLING, "write deviceId failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.deviceName_), ERR_MARSHALLING, "write deviceName failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.deviceType_), ERR_MARSHALLING, "write deviceType failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.ipAddress_), ERR_MARSHALLING, "write ipAddress failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.networkId_), ERR_MARSHALLING, "write networkId failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.manufacturer_),
-            ERR_MARSHALLING, "write manufacturer failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteString(deviceInfo.modelName_), ERR_MARSHALLING, "write modelName failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.providerId_), ERR_MARSHALLING, "write providerId failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedProtocols_), ERR_MARSHALLING,
-            "write supportedProtocols failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.authenticationStatus_), ERR_MARSHALLING,
-            "write authenticationStatus failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedDrmCapabilities_.size()), ERR_MARSHALLING,
-            "write supportedDrmCapabilities size failed");
-        for (auto supportedDrmCapability : deviceInfo.supportedDrmCapabilities_) {
-            CHECK_AND_RETURN_RET_LOG(data.WriteString(supportedDrmCapability), ERR_MARSHALLING,
-                "write supportedDrmCapability failed");
-        }
-        CHECK_AND_RETURN_RET_LOG(data.WriteBool(deviceInfo.isLegacy_), ERR_MARSHALLING, "write isLegacy failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.mediumTypes_), ERR_MARSHALLING,
-            "write mediumTypes failed");
-        CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfo.supportedPullClients_.size()), ERR_MARSHALLING,
-            "write supportedPullClients size failed");
-        for (auto supportedPullClient : deviceInfo.supportedPullClients_) {
-            CHECK_AND_RETURN_RET_LOG(data.WriteUint32(supportedPullClient), ERR_MARSHALLING, "write client failed");
-        }
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.Marshalling(data), ERR_MARSHALLING, "write deviceInfo failed");
     }
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
