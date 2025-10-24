@@ -1367,9 +1367,10 @@ static HWTEST(HwCastTest, HwCastProviderSessionAddDevice001, TestSize.Level0)
     std::shared_ptr<HwCastProviderSession> provideSession = std::make_shared<HwCastProviderSession>(nullptr);
     EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
-    std::string deviceId = "deviceId";
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
     uint32_t spid = 33;
-    EXPECT_EQ(provideSession->AddDevice(deviceId, spid), false);
+    EXPECT_EQ(provideSession->AddDevice(deviceInfo, spid), false);
     SLOGI("HwCastProviderSessionAddDevice001 end!");
 }
 

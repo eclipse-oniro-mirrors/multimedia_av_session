@@ -55,7 +55,7 @@ void HwCastProviderSession::Release()
     castSession_ = nullptr;
 }
 
-bool HwCastProviderSession::AddDevice(const std::string deviceId, uint32_t spid)
+bool HwCastProviderSession::AddDevice(const DeviceInfo deviceInfo, uint32_t spid)
 {
     SLOGI("AddDevice in HwCastProviderSession");
     if (!castSession_) {
@@ -63,7 +63,7 @@ bool HwCastProviderSession::AddDevice(const std::string deviceId, uint32_t spid)
         return false;
     }
     CastRemoteDevice castRemoteDevice = {};
-    castRemoteDevice.deviceId = deviceId;
+    castRemoteDevice.deviceId = deviceInfo.deviceId_;
     castRemoteDevice.spid = spid;
 
     avToastDeviceState_ = ConnectionState::STATE_CONNECTING;

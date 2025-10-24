@@ -1218,6 +1218,16 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
         CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
     }
 
+    status = SetValue(env, in.bleMac_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "bleMac", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.triggerType_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "triggerType", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
     return napi_ok;
 }
 
@@ -1729,6 +1739,20 @@ napi_status NapiUtils::ProcessDeviceInfoParamsExtra(napi_env env, napi_value in,
         CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedPullClients failed", status);
         status = GetValue(env, value, out.supportedPullClients_);
         CHECK_RETURN(status == napi_ok, "get DeviceInfo supportedPullClients value failed", status);
+    }
+    napi_has_named_property(env, in, "bleMac", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "bleMac", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo bleMac failed", status);
+        status = GetValue(env, value, out.bleMac_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo bleMac value failed", status);
+    }
+    napi_has_named_property(env, in, "triggerType", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "triggerType", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo triggerType failed", status);
+        status = GetValue(env, value, out.triggerType_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo triggerType value failed", status);
     }
     return napi_ok;
 }

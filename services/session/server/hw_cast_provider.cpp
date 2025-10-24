@@ -208,7 +208,7 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t s
         return false;
     }
 
-    return hwCastProviderSession->AddDevice(deviceInfo.deviceId_, spid);
+    return hwCastProviderSession->AddDevice(deviceInfo, spid);
 }
 
 bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo, bool continuePlay)
