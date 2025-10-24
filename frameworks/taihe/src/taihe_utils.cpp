@@ -220,12 +220,12 @@ bool TaiheUtils::IsAniArray(ani_env *env, ani_object obj)
 {
     CHECK_RETURN(env != nullptr && obj != nullptr, "env or obj is nullptr", false);
     ani_class cls {};
-    static const std::string className = "escompat.Array";
-    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find escompat.Array.", false);
+    static const std::string className = "std.core.Array";
+    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find std.core.Array.", false);
 
     ani_static_method isArrayMethod {};
     CHECK_RETURN(env->Class_FindStaticMethod(cls, "isArray", nullptr, &isArrayMethod) == ANI_OK,
-        "Can't find method isArray in Lescompat/Array.", false);
+        "Can't find method isArray in Lstd/core/Array.", false);
 
     ani_boolean isArray = ANI_FALSE;
     CHECK_RETURN(env->Class_CallStaticMethod_Boolean(cls, isArrayMethod, &isArray, obj) == ANI_OK,
