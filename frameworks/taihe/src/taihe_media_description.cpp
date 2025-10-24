@@ -122,12 +122,14 @@ AVMediaDescription TaiheMediaDescription::CreateUndefinedAVMediaDescription()
         .mediaUri = optional<string>(std::nullopt),
         .fdSrc = optional<uintptr_t>(std::nullopt),
         .dataSrc = optional<uintptr_t>(std::nullopt),
+        .pcmSrc = optional<bool>(std::nullopt),
         .drmScheme = optional<string>(std::nullopt),
         .duration = optional<int32_t>(std::nullopt),
         .startPosition = optional<int32_t>(std::nullopt),
         .creditsPosition = optional<int32_t>(std::nullopt),
         .appName = optional<string>(std::nullopt),
         .displayTags = optional<int32_t>(std::nullopt),
+        .launchClientData = optional<string>(std::nullopt),
     };
     return description;
 }
@@ -435,31 +437,33 @@ int32_t TaiheMediaDescription::SetDataSrc(const OHOS::AVSession::AVMediaDescript
 
 int32_t TaiheMediaDescription::GetPcmSrc(AVMediaDescription const &in, OHOS::AVSession::AVMediaDescription &out)
 {
-    (void)in;
-    (void)out;
+    bool property = in.pcmSrc.has_value() ? in.pcmSrc.value() : false;
+    SLOGD("GetPcmSrc %{public}d", property);
+    out.SetPcmSrc(property);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
 int32_t TaiheMediaDescription::SetPcmSrc(const OHOS::AVSession::AVMediaDescription &in, AVMediaDescription &out)
 {
-    (void)in;
-    (void)out;
+    SLOGD("SetPcmSrc %{public}d", in.GetPcmSrc());
+    out.pcmSrc = optional<bool>(std::in_place_t {}, in.GetPcmSrc());
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
 int32_t TaiheMediaDescription::GetLaunchClientData(AVMediaDescription const &in,
     OHOS::AVSession::AVMediaDescription &out)
 {
-    (void)in;
-    (void)out;
+    std::string property;
+    int32_t status = TaiheUtils::GetOptionalString(in.launchClientData, property);
+    CheckAndSetDefaultString(status, property);
+    out.SetLaunchClientData(property);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
 int32_t TaiheMediaDescription::SetLaunchClientData(const OHOS::AVSession::AVMediaDescription &in,
     AVMediaDescription &out)
 {
-    (void)in;
-    (void)out;
+    out.launchClientData = optional<string>(std::in_place_t {}, string(in.GetLaunchClientData()));
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 

@@ -51,6 +51,7 @@ std::set<std::string> AVCastControllerImpl::eventHandlers_ = {
     "endOfStream",
     "requestPlay",
     "keyRequest",
+    "customDataChange",
 };
 
 static const int32_t ERROR = -1;
@@ -300,6 +301,28 @@ void AVCastControllerImpl::SendControlCommandSync(AVCastControlCommand const &co
     }
 }
 
+void AVCastControllerImpl::SendCustomDataSync(uintptr_t data)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVCastControllerImpl::SendCustomData");
+    if (castController_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "SendCustomDataSync failed : controller is nullptr");
+        return;
+    }
+    OHOS::AAFwk::WantParams dataArgs;
+    if (TaiheUtils::GetWantParams(data, dataArgs) != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "SendCustomDataSync failed : invalid command args");
+        return;
+    }
+    int32_t ret = castController_->SendCustomData(dataArgs);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "SendCustomData error";
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+}
+
 static void ErrCodeToMessage(int32_t errCode, std::string& message)
 {
     switch (errCode) {
@@ -503,12 +526,12 @@ void AVCastControllerImpl::ReleaseSync()
     }
 }
 
-void AVCastControllerImpl::OnPlaybackStateChangeFilter(array_view<string> filter,
+void AVCastControllerImpl::OnPlaybackStateChange(array_view<string> filter,
     callback_view<void(AVPlaybackState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("playbackStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
         int32_t status = SetCastPlaybackStateFilter(this, filter);
         if (status != OHOS::AVSession::AVSESSION_SUCCESS) {
             SLOGE("SetCastPlaybackStateFilter failed");
@@ -516,12 +539,14 @@ void AVCastControllerImpl::OnPlaybackStateChangeFilter(array_view<string> filter
         }
         auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_PLAYBACK_STATE_CHANGE,
             cacheCallback);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "OnPlaybackStateChange AddCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS,
+            "OnPlaybackStateChange AddCallback failed");
 
-        CHECK_RETURN_VOID(castController_ != nullptr, "castController_ is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(castController_ != nullptr, "castController_ is nullptr");
         ret = castController_->AddAvailableCommand(
             OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "OnPlaybackStateChange add cmd failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS,
+            "OnPlaybackStateChange add cmd failed");
     }
 }
 
@@ -591,25 +616,27 @@ array<string> AVCastControllerImpl::GetValidCommandsSync()
     return array<string>(TaiheUtils::ToTaiheStringArray(stringCmds));
 }
 
-void AVCastControllerImpl::OnPlaybackStateChangeAll(string_view filter,
-    callback_view<void(AVPlaybackState const&)> callback)
+void AVCastControllerImpl::OnPlaybackStateChangeAll(callback_view<void(AVPlaybackState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("playbackStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
-        int32_t status = SetCastPlaybackStateFilter(this, filter);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        string filter("all");
+        string_view filterView = filter;
+        int32_t status = SetCastPlaybackStateFilter(this, filterView);
         if (status != OHOS::AVSession::AVSESSION_SUCCESS) {
             SLOGE("SetCastPlaybackStateFilter failed");
             return;
         }
         auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_PLAYBACK_STATE_CHANGE,
             cacheCallback);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "OnPlaybackStateChange AddCallback failed");
-
-        CHECK_RETURN_VOID(castController_ != nullptr, "castController_ is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS,
+            "OnPlaybackStateChange AddCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(castController_ != nullptr, "castController_ is nullptr");
         ret = castController_->AddAvailableCommand(
             OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "OnPlaybackStateChange add cmd failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS,
+            "OnPlaybackStateChange add cmd failed");
     }
 }
 
@@ -617,8 +644,9 @@ void AVCastControllerImpl::OnMediaItemChange(callback_view<void(AVQueueItem cons
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("mediaItemChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -626,13 +654,13 @@ void AVCastControllerImpl::OnPlayNext(callback_view<void()> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("playNext", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
         auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_PLAY_NEXT, cacheCallback);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
 
-        CHECK_RETURN_VOID(castController_ != nullptr, "castController_ is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(castController_ != nullptr, "castController_ is nullptr");
         ret = castController_->AddAvailableCommand(OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add cmd failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add cmd failed");
     }
 }
 
@@ -640,14 +668,14 @@ void AVCastControllerImpl::OnPlayPrevious(callback_view<void()> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("playPrevious", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
         auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_PLAY_PREVIOUS, cacheCallback);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
 
-        CHECK_RETURN_VOID(castController_ != nullptr, "castController_ is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(castController_ != nullptr, "castController_ is nullptr");
         ret = castController_
             ->AddAvailableCommand(OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add cmd failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add cmd failed");
     }
 }
 
@@ -661,8 +689,9 @@ void AVCastControllerImpl::OnEndOfStream(callback_view<void()> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("endOfStream", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_END_OF_STREAM, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_END_OF_STREAM, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -670,9 +699,9 @@ void AVCastControllerImpl::OnSeekDone(callback_view<void(int32_t)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("seekDone", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
         auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_SEEK_DONE, cacheCallback);
-        CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -681,8 +710,10 @@ void AVCastControllerImpl::OnValidCommandChange(callback_view<void(array_view<st
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("validCommandChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
         SLOGI("OnValidCommandChange");
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_VALID_COMMAND_CHANGED, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_VALID_COMMAND_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -690,8 +721,9 @@ void AVCastControllerImpl::OnVideoSizeChange(callback_view<void(int32_t, int32_t
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("videoSizeChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -699,8 +731,9 @@ void AVCastControllerImpl::OnError(callback_view<void(uintptr_t)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("error", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_ERROR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVCastControllerCallback object is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_ERROR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -708,9 +741,10 @@ void AVCastControllerImpl::OnCastControlGenericError(callback_view<void(uintptr_
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("castControlGenericError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(cacheCallback != nullptr, "callback is nullptr");
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback_ is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_GENERIC_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(cacheCallback != nullptr, "callback is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback_ is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_GENERIC_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -718,9 +752,10 @@ void AVCastControllerImpl::OnCastControlIoError(callback_view<void(uintptr_t)> c
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("castControlIoError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(cacheCallback != nullptr, "callback is nullptr");
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback_ is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_IO_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(cacheCallback != nullptr, "callback is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback_ is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_IO_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -728,9 +763,10 @@ void AVCastControllerImpl::OnCastControlParsingError(callback_view<void(uintptr_
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("castControlParsingError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(cacheCallback != nullptr, "callback is nullptr");
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback_ is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_PARSING_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(cacheCallback != nullptr, "callback is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback_ is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_PARSING_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -738,9 +774,10 @@ void AVCastControllerImpl::OnCastControlDecodingError(callback_view<void(uintptr
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("castControlDecodingError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(cacheCallback != nullptr, "callback is nullptr");
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback_ is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_DECOD_EERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(cacheCallback != nullptr, "callback is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback_ is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_DECOD_EERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -748,9 +785,10 @@ void AVCastControllerImpl::OnCastControlAudioRendererError(callback_view<void(ui
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("castControlAudioRendererError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(cacheCallback != nullptr, "callback is nullptr");
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback_ is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_RENDER_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(cacheCallback != nullptr, "callback is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback_ is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_RENDER_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -758,9 +796,10 @@ void AVCastControllerImpl::OnCastControlDrmError(callback_view<void(uintptr_t)> 
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("castControlDrmError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(cacheCallback != nullptr, "callback is nullptr");
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback_ is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_DRM_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(cacheCallback != nullptr, "callback is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback_ is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_DRM_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -769,9 +808,20 @@ void AVCastControllerImpl::OnKeyRequest(callback_view<void(string_view,
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("keyRequest", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(cacheCallback != nullptr, "callback is nullptr");
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback_ is nullptr");
-        callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_KEY_REQUEST, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(cacheCallback != nullptr, "callback is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback_ is nullptr");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_KEY_REQUEST, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+    }
+}
+
+void AVCastControllerImpl::OnCustomDataChange(callback_view<void(uintptr_t)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("customDataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        auto ret = callback_->AddCallback(TaiheAVCastControllerCallback::EVENT_CAST_CUSTOM_DATA_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
     }
 }
 
@@ -782,16 +832,16 @@ void AVCastControllerImpl::OffPlaybackStateChange(optional_view<callback<void(AV
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("playbackStateChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         auto status = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_PLAYBACK_STATE_CHANGE,
             cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
 
         if (callback_->IsCallbacksEmpty(TaiheAVCastControllerCallback::EVENT_CAST_PLAYBACK_STATE_CHANGE)) {
-            CHECK_RETURN_VOID(castController_ != nullptr, "castController_ is nullptr");
+            CHECK_RETURN_VOID_THROW_ON_ERR(castController_ != nullptr, "castController_ is nullptr");
             int32_t ret = castController_->RemoveAvailableCommand(
                 OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "remove stateChange cmd failed");
+            CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "remove stateChange cmd failed");
         }
     }
 }
@@ -803,8 +853,10 @@ void AVCastControllerImpl::OffMediaItemChange(optional_view<callback<void(AVQueu
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("mediaItemChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -815,15 +867,15 @@ void AVCastControllerImpl::OffPlayNext(optional_view<callback<void()>> callback)
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("playNext", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         auto status = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_PLAY_NEXT, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
 
         if (callback_->IsCallbacksEmpty(TaiheAVCastControllerCallback::EVENT_CAST_PLAY_NEXT)) {
-            CHECK_RETURN_VOID(castController_ != nullptr, "castController_ is nullptr");
+            CHECK_RETURN_VOID_THROW_ON_ERR(castController_ != nullptr, "castController_ is nullptr");
             int32_t ret = castController_->RemoveAvailableCommand(
                 OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add cmd failed");
+            CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "add cmd failed");
         }
     }
 }
@@ -835,15 +887,15 @@ void AVCastControllerImpl::OffPlayPrevious(optional_view<callback<void()>> callb
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("playPrevious", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         auto status = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_PLAY_PREVIOUS, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
 
         if (callback_->IsCallbacksEmpty(TaiheAVCastControllerCallback::EVENT_CAST_PLAY_PREVIOUS)) {
-            CHECK_RETURN_VOID(castController_ != nullptr, "castController_ is nullptr");
+            CHECK_RETURN_VOID_THROW_ON_ERR(castController_ != nullptr, "castController_ is nullptr");
             int32_t ret = castController_->RemoveAvailableCommand(
                 OHOS::AVSession::AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
-            CHECK_RETURN_VOID(ret == OHOS::AVSession::AVSESSION_SUCCESS, "remove cmd failed");
+            CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "remove cmd failed");
         }
     }
 }
@@ -861,8 +913,9 @@ void AVCastControllerImpl::OffEndOfStream(optional_view<callback<void()>> callba
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("endOfStream", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_END_OF_STREAM, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_END_OF_STREAM, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -873,9 +926,9 @@ void AVCastControllerImpl::OffSeekDone(optional_view<callback<void(int32_t)>> ca
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("seekDone", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         auto status = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_SEEK_DONE, cacheCallback);
-        CHECK_RETURN_VOID(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -886,8 +939,10 @@ void AVCastControllerImpl::OffValidCommandChange(optional_view<callback<void(arr
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("validCommandChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_VALID_COMMAND_CHANGED, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_VALID_COMMAND_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -898,8 +953,10 @@ void AVCastControllerImpl::OffVideoSizeChange(optional_view<callback<void(int32_
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("videoSizeChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_VIDEO_SIZE_CHANGE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -910,8 +967,9 @@ void AVCastControllerImpl::OffError(optional_view<callback<void(uintptr_t)>> cal
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("error", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_ERROR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_ERROR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -922,8 +980,9 @@ void AVCastControllerImpl::OffCastControlGenericError(optional_view<callback<voi
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("castControlGenericError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_GENERIC_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_GENERIC_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -934,8 +993,9 @@ void AVCastControllerImpl::OffCastControlIoError(optional_view<callback<void(uin
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("castControlIoError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_IO_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_IO_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -946,8 +1006,9 @@ void AVCastControllerImpl::OffCastControlParsingError(optional_view<callback<voi
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("castControlParsingError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_PARSING_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_PARSING_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -958,8 +1019,9 @@ void AVCastControllerImpl::OffCastControlDecodingError(optional_view<callback<vo
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("castControlDecodingError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_DECOD_EERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_DECOD_EERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -970,8 +1032,9 @@ void AVCastControllerImpl::OffCastControlAudioRendererError(optional_view<callba
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("castControlAudioRendererError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_RENDER_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_RENDER_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -982,8 +1045,9 @@ void AVCastControllerImpl::OffCastControlDrmError(optional_view<callback<void(ui
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("castControlDrmError", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback has not been registered");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_DRM_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_DRM_ERR, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 
@@ -995,9 +1059,24 @@ void AVCastControllerImpl::OffKeyRequest(optional_view<callback<void(string_view
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     if (OffEvent("keyRequest", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
-        CHECK_RETURN_VOID(cacheCallback != nullptr, "callback is nullptr");
-        CHECK_RETURN_VOID(callback_ != nullptr, "callback_ is nullptr");
-        callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_KEY_REQUEST, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(cacheCallback != nullptr, "callback is nullptr");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback_ is nullptr");
+        int32_t ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_KEY_REQUEST, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    }
+}
+
+void AVCastControllerImpl::OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("customDataChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        auto ret = callback_->RemoveCallback(TaiheAVCastControllerCallback::EVENT_CAST_CUSTOM_DATA_CHANGE,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
     }
 }
 

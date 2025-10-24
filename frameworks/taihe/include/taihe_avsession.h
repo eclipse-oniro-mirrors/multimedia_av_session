@@ -71,6 +71,7 @@ public:
     void ActivateSync();
     void DeactivateSync();
     void DestroySync();
+    void SendCustomDataSync(uintptr_t data);
 
     void OnPlay(callback_view<void()> callback);
     void OnPause(callback_view<void()> callback);
@@ -80,6 +81,7 @@ public:
     void OnFastForward(callback_view<void(int64_t)> callback);
     void OnRewind(callback_view<void(int64_t)> callback);
     void OnPlayFromAssetId(callback_view<void(int64_t)> callback);
+    void OnPlayWithAssetId(callback_view<void(string_view)> callback);
     void OnSeek(callback_view<void(int64_t)> callback);
     void OnSetSpeed(callback_view<void(double)> callback);
     void OnSetLoopMode(callback_view<void(LoopMode)> callback);
@@ -92,6 +94,7 @@ public:
     void OnHangUp(callback_view<void()> callback);
     void OnToggleCallMute(callback_view<void()> callback);
     void OnCastDisplayChange(callback_view<void(CastDisplayInfo const&)> callback);
+    void OnCustomDataChange(callback_view<void(uintptr_t)> callback);
 
     void OffPlay(optional_view<callback<void()>> callback);
     void OffPause(optional_view<callback<void()>> callback);
@@ -101,6 +104,7 @@ public:
     void OffFastForward(optional_view<callback<void()>> callback);
     void OffRewind(optional_view<callback<void()>> callback);
     void OffPlayFromAssetId(optional_view<callback<void(int64_t)>> callback);
+    void OffPlayWithAssetId(optional_view<callback<void(string_view)>> callback);
     void OffSeek(optional_view<callback<void(int64_t)>> callback);
     void OffSetSpeed(optional_view<callback<void(double)>> callback);
     void OffSetLoopMode(optional_view<callback<void(LoopMode)>> callback);
@@ -113,6 +117,7 @@ public:
     void OffHangUp(optional_view<callback<void()>> callback);
     void OffToggleCallMute(optional_view<callback<void()>> callback);
     void OffCastDisplayChange(optional_view<callback<void(CastDisplayInfo const&)>> callback);
+    void OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback);
 
     std::string GetSessionIdInner();
     void SetSessionIdInner(std::string sessionId);

@@ -331,6 +331,23 @@ void TaiheAVControllerCallback::OnExtrasChange(const OHOS::AAFwk::WantParams &ex
     HandleEvent(EVENT_EXTRAS_CHANGE, execute);
 }
 
+void TaiheAVControllerCallback::OnCustomData(const OHOS::AAFwk::WantParams &customData)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnCustomData");
+    auto execute = [this, customData](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        auto customDataAni = TaiheUtils::ToAniWantParams(customData);
+        CHECK_RETURN_VOID(customDataAni != nullptr, "convert WantParams to ani object failed");
+        uintptr_t customDataTaihe = reinterpret_cast<uintptr_t>(customDataAni);
+        std::shared_ptr<taihe::callback<void(uintptr_t)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(uintptr_t)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(customDataTaihe);
+    };
+    HandleEvent(EVENT_CUSTOM_DATA_CHANGE, execute);
+}
+
 int32_t TaiheAVControllerCallback::AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

@@ -41,6 +41,7 @@
 #include "taihe_avcall_meta_data.h"
 #include "taihe_avcall_state.h"
 #include "taihe_queue_item.h"
+#include "taihe_avsession_manager.h"
 
 namespace ANI::AVSession {
 static constexpr size_t STR_MAX_LENGTH = 40960;
@@ -68,6 +69,18 @@ void TaiheUtils::ThrowError(int32_t errCode, const std::string &errMsg)
 {
     SLOGE("ThrowError errCode: %{public}d, errMsg: %{public}s", errCode, errMsg.c_str());
     taihe::set_business_error(errCode, errMsg);
+}
+
+void TaiheUtils::ThrowAddCallbackError()
+{
+    TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
+        "add event callback failed");
+}
+
+void TaiheUtils::ThrowRemoveCallbackError()
+{
+    TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
+        "remove event callback failed");
 }
 
 size_t TaiheUtils::WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer)
@@ -540,6 +553,17 @@ int32_t TaiheUtils::GetStringArray(const array<string> &in, std::vector<std::str
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
+int32_t TaiheUtils::GetUIntArray(const array<uint32_t> &in, std::vector<uint32_t> &out)
+{
+    std::vector<uint32_t> intVec;
+    for (const auto &item : in) {
+        uint32_t ele = static_cast<uint32_t>(item);
+        intVec.emplace_back(ele);
+    }
+    out = std::move(intVec);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
 int32_t TaiheUtils::GetSessionToken(SessionToken const &in, OHOS::AVSession::SessionToken &out)
 {
     int32_t status = TaiheUtils::GetString(in.sessionId, out.sessionId);
@@ -575,6 +599,15 @@ int32_t TaiheUtils::GetDeviceInfo(DeviceInfo const &in, OHOS::AVSession::DeviceI
     out.authenticationStatus_ = in.authenticationStatus.has_value() ? in.authenticationStatus.value() : 0;
     out.isLegacy_ = in.isLegacy.has_value() ? in.isLegacy.value() : false;
     out.mediumTypes_ = in.mediumTypes.has_value() ? in.mediumTypes.value() : COAP;
+
+    if (in.supportedPullClients.has_value()) {
+        status = GetUIntArray(in.supportedPullClients.value(), out.supportedPullClients_);
+        CHECK_RETURN(status == OHOS::AVSession::AVSESSION_SUCCESS, "Get supportedPullClients failed", status);
+    }
+    if (in.audioCapabilities.has_value()) {
+        status = GetAudioCapabilities(in.audioCapabilities.value(), out.audioCapabilities_);
+        CHECK_RETURN(status == OHOS::AVSession::AVSESSION_SUCCESS, "Get audioCapabilities failed", status);
+    }
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
@@ -760,6 +793,38 @@ int32_t TaiheUtils::GetAudioDeviceDescriptors(array_view<uintptr_t> in,
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
+int32_t TaiheUtils::GetAudioCapabilities(AudioCapabilities const &in, OHOS::AVSession::AudioCapabilities &out)
+{
+    taihe::array<uintptr_t> streamInfos = in.streamInfos;
+    std::vector<OHOS::AVSession::AudioStreamInfo> outStreamInfos {};
+    for (const auto &info : streamInfos) {
+        ani_env *env = taihe::get_env();
+        ani_object aniObj = reinterpret_cast<ani_object>(info);
+        int32_t valInt = 0;
+        OHOS::AVSession::AudioStreamInfo streamInfo {};
+        CHECK_RETURN(GetAniPropertyEnumInt32(env, aniObj, "samplingRate", valInt) == OHOS::AVSession::AVSESSION_SUCCESS,
+            "GetAudioCapabilities get samplingRate failed", OHOS::AVSession::ERR_INVALID_PARAM);
+        streamInfo.samplingRate = static_cast<OHOS::AVSession::AudioSamplingRate>(valInt);
+        CHECK_RETURN(GetAniPropertyEnumInt32(env, aniObj, "channels", valInt) == OHOS::AVSession::AVSESSION_SUCCESS,
+            "GetAudioCapabilities get channels failed", OHOS::AVSession::ERR_INVALID_PARAM);
+        streamInfo.channels = static_cast<OHOS::AVSession::AudioChannel>(valInt);
+        CHECK_RETURN(GetAniPropertyEnumInt32(env, aniObj, "sampleFormat", valInt) == OHOS::AVSession::AVSESSION_SUCCESS,
+            "GetAudioCapabilities get sampleFormat failed", OHOS::AVSession::ERR_INVALID_PARAM);
+        streamInfo.format = static_cast<OHOS::AVSession::AudioSampleFormat>(valInt);
+        CHECK_RETURN(GetAniPropertyEnumInt32(env, aniObj, "encodingType", valInt) == OHOS::AVSession::AVSESSION_SUCCESS,
+            "GetAudioCapabilities get encodingType failed", OHOS::AVSession::ERR_INVALID_PARAM);
+        streamInfo.encoding = static_cast<OHOS::AVSession::AudioEncodingType>(valInt);
+        CHECK_RETURN(
+            GetAniPropertyEnumInt32(env, aniObj, "channelLayout", valInt) == OHOS::AVSession::AVSESSION_SUCCESS,
+            "GetAudioCapabilities get channelLayout failed", OHOS::AVSession::ERR_INVALID_PARAM);
+        streamInfo.channelLayout = static_cast<OHOS::AVSession::AudioChannelLayout>(valInt);
+        outStreamInfos.emplace_back(streamInfo);
+    }
+
+    out.streamInfos_ = std::move(outStreamInfos);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
 static void GetKeyItem(keyEvent::Key const &in, OHOS::MMI::KeyEvent::KeyItem &out)
 {
     int32_t code = in.code.get_value();
@@ -853,6 +918,8 @@ DeviceInfo TaiheUtils::ToTaiheDeviceInfo(const OHOS::AVSession::DeviceInfo &in)
         .authenticationStatus = optional<int32_t>(std::in_place_t {}, in.authenticationStatus_),
         .isLegacy = optional<bool>(std::in_place_t {}, in.isLegacy_),
         .mediumTypes = optional<int32_t>(std::in_place_t {}, in.mediumTypes_),
+        .audioCapabilities = optional<AudioCapabilities>(
+            std::in_place_t {}, ToTaiheAudioCapabilities(in.audioCapabilities_)),
     };
     return deviceInfo;
 }
@@ -1009,6 +1076,30 @@ ani_object TaiheUtils::ToAniAVDataSrcDescriptor(const OHOS::AVSession::AVDataSrc
     ani_object result {};
     CHECK_RETURN(env->Object_New(cls, ctorMethod, &result, aniFileSize) == ANI_OK,
         "Object_New MediaAVDataSrcDescriptorImpl failed", nullptr);
+    return result;
+}
+
+ani_object TaiheUtils::ToAniAudioStreamInfo(const OHOS::AVSession::AudioStreamInfo &in)
+{
+    ani_env *env = taihe::get_env();
+    CHECK_RETURN(env != nullptr, "env is nullptr", nullptr);
+
+    ani_class cls {};
+    CHECK_RETURN(env->FindClass("@ohos.multimedia.avsession.AudioStreamInfoImpl", &cls) == ANI_OK,
+        "FindClass AudioStreamInfoImpl failed", nullptr);
+    ani_method ctorMethod {};
+    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", nullptr, &ctorMethod) == ANI_OK,
+        "Class_FindMethod AudioStreamInfoImpl <ctor> failed", nullptr);
+
+    ani_enum_item aniSamplingRate = reinterpret_cast<ani_enum_item>(in.samplingRate);
+    ani_enum_item aniChannels = reinterpret_cast<ani_enum_item>(in.channels);
+    ani_enum_item aniFormat = reinterpret_cast<ani_enum_item>(in.format);
+    ani_enum_item aniEncoding = reinterpret_cast<ani_enum_item>(in.encoding);
+    auto aniChannelLayout = reinterpret_cast<ani_enum_item>(in.channelLayout);
+    ani_object result {};
+    CHECK_RETURN(env->Object_New(cls, ctorMethod, &result, aniSamplingRate, aniChannels, aniFormat,
+        aniEncoding, aniChannelLayout) == ANI_OK,
+        "Object_New AudioStreamInfoImpl failed", nullptr);
     return result;
 }
 
@@ -1250,6 +1341,18 @@ keyEvent::KeyEvent TaiheUtils::ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in)
         .numLock = in.GetFunctionKey(OHOS::MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY),
         .scrollLock = in.GetFunctionKey(OHOS::MMI::KeyEvent::SCROLL_LOCK_FUNCTION_KEY),
     };
+    return out;
+}
+
+AudioCapabilities TaiheUtils::ToTaiheAudioCapabilities(const OHOS::AVSession::AudioCapabilities &in)
+{
+    AudioCapabilities out {};
+    std::vector<uintptr_t> streamInfos {};
+    for (const auto &item : in.streamInfos_) {
+        ani_object aniObj = ToAniAudioStreamInfo(item);
+        streamInfos.emplace_back(reinterpret_cast<uintptr_t>(aniObj));
+    }
+    out.streamInfos = taihe::array<uintptr_t>(streamInfos);
     return out;
 }
 } // namespace ANI::AVSession

@@ -69,6 +69,7 @@ int32_t TaiheAVCallMetaData::ConvertFilter(
             }
         }
     }
+    CHECK_RETURN(!mask.none(), "array element invalid.", OHOS::AVSession::ERR_INVALID_PARAM);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 

@@ -325,6 +325,23 @@ void TaiheAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<
     HandleEvent(EVENT_CAST_VALID_COMMAND_CHANGED, execute);
 }
 
+void TaiheAVCastControllerCallback::OnCustomData(const OHOS::AAFwk::WantParams &customData)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnCustomData");
+    auto execute = [this, customData](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        auto customDataAni = TaiheUtils::ToAniWantParams(customData);
+        CHECK_RETURN_VOID(customDataAni != nullptr, "convert WantParams to ani object failed");
+        uintptr_t customDataTaihe = reinterpret_cast<uintptr_t>(customDataAni);
+        std::shared_ptr<taihe::callback<void(uintptr_t)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(uintptr_t)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(customDataTaihe);
+    };
+    HandleEvent(EVENT_CAST_CUSTOM_DATA_CHANGE, execute);
+}
+
 int32_t TaiheAVCastControllerCallback::onDataSrcRead(const std::shared_ptr<OHOS::AVSession::AVSharedMemoryBase>& mem,
     uint32_t length, int64_t pos, int32_t& result)
 {

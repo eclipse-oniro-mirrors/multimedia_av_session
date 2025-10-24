@@ -47,6 +47,7 @@ public:
     static int32_t GetTargetLoopMode(AVControlCommand in, OHOS::AVSession::AVControlCommand &out);
     static int32_t GetAssetId(AVControlCommand in, OHOS::AVSession::AVControlCommand &out);
     static int32_t GetPlayFromAssetId(AVControlCommand in, OHOS::AVSession::AVControlCommand &out);
+    static int32_t GetPlayWithAssetId(const AVControlCommand &in, OHOS::AVSession::AVControlCommand &out);
 
     static int32_t SetNoneParam(OHOS::AVSession::AVControlCommand &in, AVControlCommand &out);
     static int32_t SetSpeed(OHOS::AVSession::AVControlCommand &in, AVControlCommand &out);
@@ -57,6 +58,7 @@ public:
     static int32_t SetTargetLoopMode(OHOS::AVSession::AVControlCommand &in, AVControlCommand &out);
     static int32_t SetAssetId(OHOS::AVSession::AVControlCommand &in, AVControlCommand &out);
     static int32_t SetPlayFromAssetId(OHOS::AVSession::AVControlCommand &in, AVControlCommand &out);
+    static int32_t SetPlayWithAssetId(OHOS::AVSession::AVControlCommand &in, AVControlCommand &out);
 
 private:
     static std::map<std::string, std::tuple<GetterType, SetterType, int32_t>> commandMap_;

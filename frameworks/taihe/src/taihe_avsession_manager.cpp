@@ -49,7 +49,7 @@ std::map<std::string, std::pair<TaiheAVSessionManager::OnEventHandlerType, Taihe
     { "deviceAvailable", { OnDeviceAvailable, OffDeviceAvailable } },
     { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
-    { "deviceStateChange", { OnDeviceStateChange, OffDeviceStateChange } },
+    { "deviceStateChange", { OnDeviceStateChanged, OffDeviceStateChanged } },
 };
 
 std::map<OHOS::AVSession::DistributedSessionType, std::pair<TaiheAVSessionManager::OnEventHandlerType,
@@ -378,7 +378,7 @@ int32_t TaiheAVSessionManager::OnDeviceOffline(std::shared_ptr<uintptr_t> &callb
     return listener_->AddCallback(TaiheSessionListener::EVENT_DEVICE_OFFLINE, callback);
 }
 
-int32_t TaiheAVSessionManager::OnDeviceStateChange(std::shared_ptr<uintptr_t> &callback)
+int32_t TaiheAVSessionManager::OnDeviceStateChanged(std::shared_ptr<uintptr_t> &callback)
 {
     std::lock_guard lockGuard(listenerMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
@@ -469,7 +469,7 @@ int32_t TaiheAVSessionManager::OffDeviceOffline(std::shared_ptr<uintptr_t> &call
     return listener_->RemoveCallback(TaiheSessionListener::EVENT_DEVICE_OFFLINE, callback);
 }
 
-int32_t TaiheAVSessionManager::OffDeviceStateChange(std::shared_ptr<uintptr_t> &callback)
+int32_t TaiheAVSessionManager::OffDeviceStateChanged(std::shared_ptr<uintptr_t> &callback)
 {
     std::lock_guard lockGuard(listenerMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
@@ -918,36 +918,24 @@ void SetDiscoverableSync(bool enable)
 #endif
 }
 
-static bool ParseCastAudioSessionType(CastAudioSessionType const& session,
-    OHOS::AVSession::SessionToken &sessionToken, bool &isAll)
+static bool ParseCastAudioSessionToken(SessionToken const& session,
+    OHOS::AVSession::SessionToken &sessionToken)
 {
     int32_t ret = OHOS::AVSession::AVSESSION_ERROR;
-    if (session.get_tag() == CastAudioSessionType::tag_t::typeAll) {
-        std::string flag;
-        ret = TaiheUtils::GetString(session.get_typeAll_ref(), flag);
-        if (ret != OHOS::AVSession::AVSESSION_SUCCESS || flag != "all") {
-            TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
-                "CastAudioSync invalid argument");
-            return false;
-        }
-        isAll = true;
-    } else if (session.get_tag() == CastAudioSessionType::tag_t::typeSessionToken) {
-        ret = TaiheUtils::GetSessionToken(session.get_typeSessionToken_ref(), sessionToken);
-        if (ret != OHOS::AVSession::AVSESSION_SUCCESS || sessionToken.sessionId.empty()) {
-            TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
-                "CastAudioSync invalid session token");
-            return false;
-        }
+    ret = TaiheUtils::GetSessionToken(session, sessionToken);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS || sessionToken.sessionId.empty()) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "CastAudioSync invalid session token");
+        return false;
     }
     return true;
 }
 
-void CastAudioSync(CastAudioSessionType const& session, array_view<uintptr_t> audioDevices)
+void CastAudioSync(SessionToken const& session, array_view<uintptr_t> audioDevices)
 {
     OHOS::AVSession::AVSessionTrace trace("CastAudioSync");
     OHOS::AVSession::SessionToken sessionToken {};
-    bool isAll = false;
-    if (!ParseCastAudioSessionType(session, sessionToken, isAll)) {
+    if (!ParseCastAudioSessionToken(session, sessionToken)) {
         SLOGE("CastAudioSync ParseCastAudioSessionType failed");
         return;
     }
@@ -960,12 +948,7 @@ void CastAudioSync(CastAudioSessionType const& session, array_view<uintptr_t> au
         return;
     }
 
-    ret = OHOS::AVSession::AVSESSION_ERROR;
-    if (isAll) {
-        ret = OHOS::AVSession::AVSessionManager::GetInstance().CastAudioForAll(audioDeviceDescriptors);
-    } else {
-        ret = OHOS::AVSession::AVSessionManager::GetInstance().CastAudio(sessionToken, audioDeviceDescriptors);
-    }
+    ret = OHOS::AVSession::AVSessionManager::GetInstance().CastAudio(sessionToken, audioDeviceDescriptors);
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
         std::string errMessage = "CastAudioSync failed : native server exception";
         if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
@@ -976,6 +959,36 @@ void CastAudioSync(CastAudioSessionType const& session, array_view<uintptr_t> au
             errMessage = "CastAudioSync failed : native no permission";
         } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
             errMessage = "CastAudioSync failed : native permission denied";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+}
+
+void CastAudioAllSync(array_view<uintptr_t> audioDevices)
+{
+    OHOS::AVSession::AVSessionTrace trace("CastAudioAllSync");
+    OHOS::AVSession::SessionToken sessionToken {};
+
+    std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> audioDeviceDescriptors;
+    int32_t ret = TaiheUtils::GetAudioDeviceDescriptors(audioDevices, audioDeviceDescriptors);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS || audioDeviceDescriptors.size() == 0) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "CastAudioAllSync invalid AudioDeviceDescriptor");
+        return;
+    }
+
+    ret = OHOS::AVSession::AVSessionManager::GetInstance().CastAudioForAll(audioDeviceDescriptors);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "CastAudioAllSync failed : native server exception";
+        if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
+            errMessage = "CastAudioAllSync failed : native session not exist";
+        } else if (ret == OHOS::AVSession::ERR_INVALID_PARAM) {
+            errMessage = "CastAudioAllSync failed : native invalid parameters";
+        } else if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "CastAudioAllSync failed : native no permission";
+        } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
+            errMessage = "CastAudioAllSync failed : native permission denied";
         }
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
         return;
@@ -1237,7 +1250,7 @@ void OnDeviceOffline(callback_view<void(string_view)> callback)
     TaiheAVSessionManager::OnEvent("deviceOffline", cacheCallback);
 }
 
-void OnDeviceStateChange(callback_view<void(DeviceState const&)> callback)
+void OnDeviceStateChanged(callback_view<void(DeviceState const&)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     TaiheAVSessionManager::OnEvent("deviceStateChange", cacheCallback);
@@ -1317,7 +1330,7 @@ void OffDeviceOffline(optional_view<callback<void(string_view)>> callback)
     TaiheAVSessionManager::OffEvent("deviceOffline", cacheCallback);
 }
 
-void OffDeviceStateChange(optional_view<callback<void(DeviceState const&)>> callback)
+void OffDeviceStateChanged(optional_view<callback<void(DeviceState const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1359,6 +1372,7 @@ TH_EXPORT_CPP_API_StartCastDeviceDiscoveryFilterDrm(ANI::AVSession::StartCastDev
 TH_EXPORT_CPP_API_StopCastDeviceDiscoverySync(ANI::AVSession::StopCastDeviceDiscoverySync);
 TH_EXPORT_CPP_API_SetDiscoverableSync(ANI::AVSession::SetDiscoverableSync);
 TH_EXPORT_CPP_API_CastAudioSync(ANI::AVSession::CastAudioSync);
+TH_EXPORT_CPP_API_CastAudioAllSync(ANI::AVSession::CastAudioAllSync);
 TH_EXPORT_CPP_API_GetDistributedSessionControllerSync(ANI::AVSession::GetDistributedSessionControllerSync);
 TH_EXPORT_CPP_API_SendSystemAVKeyEventSync(ANI::AVSession::SendSystemAVKeyEventSync);
 TH_EXPORT_CPP_API_SendSystemControlCommandSync(ANI::AVSession::SendSystemControlCommandSync);
@@ -1373,7 +1387,7 @@ TH_EXPORT_CPP_API_OnSessionServiceDie(ANI::AVSession::OnSessionServiceDie);
 TH_EXPORT_CPP_API_OnDeviceAvailable(ANI::AVSession::OnDeviceAvailable);
 TH_EXPORT_CPP_API_OnDeviceLogEvent(ANI::AVSession::OnDeviceLogEvent);
 TH_EXPORT_CPP_API_OnDeviceOffline(ANI::AVSession::OnDeviceOffline);
-TH_EXPORT_CPP_API_OnDeviceStateChange(ANI::AVSession::OnDeviceStateChange);
+TH_EXPORT_CPP_API_OnDeviceStateChanged(ANI::AVSession::OnDeviceStateChanged);
 TH_EXPORT_CPP_API_OffDistributedSessionChange(ANI::AVSession::OffDistributedSessionChange);
 TH_EXPORT_CPP_API_OffSessionCreate(ANI::AVSession::OffSessionCreate);
 TH_EXPORT_CPP_API_OffSessionDestroy(ANI::AVSession::OffSessionDestroy);
@@ -1382,4 +1396,4 @@ TH_EXPORT_CPP_API_OffSessionServiceDie(ANI::AVSession::OffSessionServiceDie);
 TH_EXPORT_CPP_API_OffDeviceAvailable(ANI::AVSession::OffDeviceAvailable);
 TH_EXPORT_CPP_API_OffDeviceLogEvent(ANI::AVSession::OffDeviceLogEvent);
 TH_EXPORT_CPP_API_OffDeviceOffline(ANI::AVSession::OffDeviceOffline);
-TH_EXPORT_CPP_API_OffDeviceStateChange(ANI::AVSession::OffDeviceStateChange);
+TH_EXPORT_CPP_API_OffDeviceStateChanged(ANI::AVSession::OffDeviceStateChanged);

@@ -48,6 +48,7 @@ public:
         EVENT_CAST_END_OF_STREAM,
         EVENT_CAST_PLAY_REQUEST,
         EVENT_CAST_KEY_REQUEST,
+        EVENT_CAST_CUSTOM_DATA_CHANGE,
         EVENT_CAST_VALID_COMMAND_CHANGED,
         EVENT_CAST_TYPE_MAX,
     };
@@ -508,6 +509,7 @@ public:
     void OnPlayRequest(const OHOS::AVSession::AVQueueItem &avQueueItem) override;
     void OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData) override;
     void OnCastValidCommandChanged(const std::vector<int32_t> &cmds) override;
+    void OnCustomData(const OHOS::AAFwk::WantParams &customData) override;
     int32_t onDataSrcRead(const std::shared_ptr<OHOS::AVSession::AVSharedMemoryBase>& mem, uint32_t length, int64_t pos,
         int32_t& result) override;
 
