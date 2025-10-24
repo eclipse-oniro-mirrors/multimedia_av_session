@@ -86,6 +86,10 @@ export struct AVInputCastPicker {
    */
   private onStateChange?: (state: AVCastPickerState) => void;
   /**
+   * Whether to display the menu.
+   */
+  @State isMenuShow: boolean = false;
+  /**
    * UIExtensionProxy.
    */
   private extensionProxy: UIExtensionProxy | null = null;
@@ -244,7 +248,7 @@ export struct AVInputCastPicker {
           }
         })
           .size({ width: '100%', height: '100%' })
-          .bindMenu(this.deviceMenu(), {
+          .bindMenu(this.isMenuShow, this.deviceMenu(), {
             placement: !this.isPc ? Placement.BottomRight : undefined,
             showInSubWindow: false,
             onDisappear: () => {
@@ -252,6 +256,7 @@ export struct AVInputCastPicker {
               if (this.onStateChange !== null && this.onStateChange !== undefined) {
                 this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
               }
+              this.isMenuShow = false;
             },
             onAppear: () => {
               if (this.onStateChange !== null && this.onStateChange !== undefined) {
@@ -287,6 +292,11 @@ export struct AVInputCastPicker {
               this.maxFontSizeScale = data.maxFontSizeScale as number;
             }
 
+            if (data.isShowMenu !== undefined) {
+              console.info(TAG, `isShowMenu : ${data.isShowMenu}`);
+              this.isMenuShow = data.isShowMenu as boolean;
+            }
+
             if (data.accessAudioControl !== undefined) {
               console.info(TAG, `accessibilityAudioControlStr : ${data.accessAudioControl}`);
               this.accessibilityAudioControlStr = data.accessAudioControl as string;
@@ -319,6 +329,7 @@ export struct AVInputCastPicker {
     .accessibilityLevel('yes')
     .accessibilityText(this.accessibilityAudioControlStr)
     .onClick(() => {
+      this.isMenuShow = !this.isMenuShow;
       this.pickerClickTime = new Date().getTime();
     })
   }

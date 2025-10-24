@@ -46,6 +46,7 @@ export class AVInputCastPicker extends ViewPU {
         this.__isDarkMode = new ObservedPropertySimplePU(false, this, 'isDarkMode');
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__maxFontSizeScale = new ObservedPropertySimplePU(2, this, 'maxFontSizeScale');
+        this.__isMenuShow = new ObservedPropertySimplePU(false, this, 'isMenuShow');
         this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('切换麦克风', this, 'accessibilityAudioControlStr');
         this.__isPc = new ObservedPropertySimplePU(true, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
@@ -75,6 +76,9 @@ export class AVInputCastPicker extends ViewPU {
         }
         if (params.maxFontSizeScale !== undefined) {
             this.maxFontSizeScale = params.maxFontSizeScale;
+        }
+        if (params.isMenuShow !== undefined) {
+            this.isMenuShow = params.isMenuShow;
         }
         if (params.accessibilityAudioControlStr !== undefined) {
             this.accessibilityAudioControlStr = params.accessibilityAudioControlStr;
@@ -108,6 +112,7 @@ export class AVInputCastPicker extends ViewPU {
         this.__isDarkMode.purgeDependencyOnElmtId(rmElmtId);
         this.__fontSizeScale.purgeDependencyOnElmtId(rmElmtId);
         this.__maxFontSizeScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__isMenuShow.purgeDependencyOnElmtId(rmElmtId);
         this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(rmElmtId);
         this.__isPc.purgeDependencyOnElmtId(rmElmtId);
         this.__isRTL.purgeDependencyOnElmtId(rmElmtId);
@@ -119,6 +124,7 @@ export class AVInputCastPicker extends ViewPU {
         this.__isDarkMode.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
         this.__maxFontSizeScale.aboutToBeDeleted();
+        this.__isMenuShow.aboutToBeDeleted();
         this.__accessibilityAudioControlStr.aboutToBeDeleted();
         this.__isPc.aboutToBeDeleted();
         this.__isRTL.aboutToBeDeleted();
@@ -164,6 +170,14 @@ export class AVInputCastPicker extends ViewPU {
 
     set maxFontSizeScale(newValue) {
         this.__maxFontSizeScale.set(newValue);
+    }
+
+    get isMenuShow() {
+        return this.__isMenuShow.get();
+    }
+
+    set isMenuShow(newValue) {
+        this.__isMenuShow.set(newValue);
     }
 
     get accessibilityAudioControlStr() {
@@ -456,6 +470,7 @@ export class AVInputCastPicker extends ViewPU {
             Button.accessibilityLevel('yes');
             Button.accessibilityText(this.accessibilityAudioControlStr);
             Button.onClick(() => {
+                this.isMenuShow = !this.isMenuShow;
                 this.pickerClickTime = new Date().getTime();
             });
         }, Button);
@@ -474,14 +489,9 @@ export class AVInputCastPicker extends ViewPU {
                     'currentPickerCount': this.pickerCountOnCreation,
                 }
             });
-            UIExtensionComponent.accessibilityRole(AccessibilityRoleType.BUTTON)
-            UIExtensionComponent.accessibilityLevel('yes')
-            UIExtensionComponent.accessibilityText(this.accessibilityAudioControlStr)
             UIExtensionComponent.size({ width: '100%', height: '100%' });
-            UIExtensionComponent.bindMenu({
-                builder: () => {
-                    this.deviceMenu.call(this);
-                }
+            UIExtensionComponent.bindMenu(this.isMenuShow, {
+                builder: () => { this.deviceMenu.call(this); }
             }, {
                 placement: !this.isPc ? Placement.BottomRight : undefined,
                 showInSubWindow: false,
@@ -490,6 +500,7 @@ export class AVInputCastPicker extends ViewPU {
                     if (this.onStateChange !== null && this.onStateChange !== undefined) {
                         this.onStateChange(AVCastPickerState.STATE_DISAPPEARING);
                     }
+                    this.isMenuShow = false;
                 },
                 onAppear: () => {
                     if (this.onStateChange !== null && this.onStateChange !== undefined) {
@@ -502,7 +513,6 @@ export class AVInputCastPicker extends ViewPU {
                 }
             });
             UIExtensionComponent.onRemoteReady((proxy) => {
-                console.info(TAG, 'onRemoteReady');
                 this.extensionProxy = proxy;
             });
             UIExtensionComponent.onReceive((data) => {
@@ -520,6 +530,10 @@ export class AVInputCastPicker extends ViewPU {
                 if (data.maxFontSizeScale !== undefined) {
                     console.info(TAG, `maxFontSizeScale : ${data.maxFontSizeScale}`);
                     this.maxFontSizeScale = data.maxFontSizeScale;
+                }
+                if (data.isShowMenu !== undefined) {
+                    console.info(TAG, `isShowMenu : ${data.isShowMenu}`);
+                    this.isMenuShow = data.isShowMenu;
                 }
                 if (data.accessAudioControl !== undefined) {
                     console.info(TAG, `accessibilityAudioControlStr : ${data.accessAudioControl}`);
