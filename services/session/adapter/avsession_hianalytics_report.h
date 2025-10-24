@@ -17,6 +17,7 @@
 #define AVSESSION_HIANALYTICS_REPORT_H
 
 #include <string>
+#include <mutex>
 
 #include "avsession_descriptor.h"
 
@@ -30,6 +31,7 @@ public:
     static void PublishCastRecord(const std::string &bundleName, const DeviceInfo deviceInfo);
 private:
     static void ConnectHAClient(std::string eventId, std::unordered_map<std::string, std::string> properties);
+    static std::recursive_mutex connectLock_;
 };
 
 struct HaResponseLite {

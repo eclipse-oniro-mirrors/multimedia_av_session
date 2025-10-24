@@ -52,6 +52,7 @@ const char *ON_EVENT = "_ZN4OHOS7HaCloud15HaClientLiteApi7OnEventERKNSt3__h12bas
     "9allocatorIcEEEENS0_13EventTypeLiteESA_RKNS2_13unordered_mapIS8_S8_NS2_4hashIS8_EENS2_8equal_toIS8_EENS6_INS2"
     "_4pairIS9_S8_EEEEEE";
 const char *RELEASE = "_ZN4OHOS7HaCloud15HaClientLiteApi7ReleaseEv";
+std::recursive_mutex AVSessionHiAnalyticsReport::connectLock_;
 
 std::string GetProtocol(int supportProtocol)
 {
@@ -70,6 +71,7 @@ void AVSessionHiAnalyticsReport::ConnectHAClient(std::string eventId,
     std::unordered_map<std::string, std::string> properties)
 {
     SLOGI("ConnectHAClient start");
+    std::lock_guard connectLockGuard(connectLock_);
     void *haClientHandle = dlopen("libha_client_lite.z.so", RTLD_NOW);
     CHECK_AND_RETURN_LOG(haClientHandle != nullptr, "dlopen ha_client failed, reason:%{public}sn", dlerror());
     // get release func
