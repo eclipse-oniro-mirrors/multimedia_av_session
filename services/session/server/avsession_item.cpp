@@ -1498,8 +1498,6 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             isSwitchNewDevice_ = true;
             newOutputDeviceInfo_ = outputDeviceInfo;
             StopCast();
-            int32_t flag = CastAddToCollaboration(outputDeviceInfo);
-            CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, flag, "collaboration to start cast fail");
             return AVSESSION_SUCCESS;
         }
     } else {
@@ -1507,6 +1505,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             return SubStartCast(outputDeviceInfo);
         }
         int32_t flag = CastAddToCollaboration(outputDeviceInfo);
+        flag != AVSESSION_SUCCESS ? AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR) : static_cast<int32_t>(0);
         CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, flag, "collaboration to start cast fail");
     }
     return SubStartCast(outputDeviceInfo);
@@ -1607,20 +1606,25 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
 void AVSessionItem::DealLocalState(int32_t castState)
 {
     if (castState == static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED)) {
+        OutputDeviceInfo localDeviceInfo;
+        DeviceInfo deviceInfo;
+        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+        deviceInfo.deviceId_ = "0";
+        deviceInfo.deviceName_ = "LocalDevice";
+        localDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
         if (!isSwitchNewDevice_) {
-            OutputDeviceInfo outputDeviceInfo;
-            DeviceInfo deviceInfo;
-            deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-            deviceInfo.deviceId_ = "0";
-            deviceInfo.deviceName_ = "LocalDevice";
-            outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-            SetOutputDevice(outputDeviceInfo);
+            SetOutputDevice(localDeviceInfo);
         } else {
-            if (newOutputDeviceInfo_.deviceInfos_.size() > 0) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(SWITCH_WAIT_TIME));
-                SubStartCast(newOutputDeviceInfo_);
-            }
             isSwitchNewDevice_ = false;
+            CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
+            std::this_thread::sleep_for(std::chrono::milliseconds(SWITCH_WAIT_TIME));
+            int32_t flag = CastAddToCollaboration(newOutputDeviceInfo_);
+            if (flag == AVSESSION_SUCCESS) {
+                SubStartCast(newOutputDeviceInfo_);
+            } else {
+                OnCastStateChange(disconnectStateFromCast_, newOutputDeviceInfo_.deviceInfos_[0], false);
+                AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
+            }
         }
     }
 }

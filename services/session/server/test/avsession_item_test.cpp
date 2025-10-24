@@ -818,5 +818,50 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetLaunchAbility_001, TestSize.Level0)
     EXPECT_EQ(launchAbility.IsLocal(), false);
     SLOGD("AVSessionItem_GetLaunchAbility_001 end!");
 }
+
+/**
+ * @tc.name: AVSessionItem_StartCast_001
+ * @tc.desc: Test StartCast.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_StartCast_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_StartCast_001 begin!");
+    OutputDeviceInfo info;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "DeviceId1forTest";
+    deviceInfo.deviceName_ = "DeviceName1forTest";
+    deviceInfo.deviceType_ = 1;
+    info.deviceInfos_.push_back(deviceInfo);
+    g_AVSessionItem->castHandle_ = 0;
+    int32_t result = g_AVSessionItem->StartCast(info);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGI("AVSessionItem_StartCast_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_DealLocalState_001
+ * @tc.desc: Test DealLocalState.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_DealLocalState_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_DealLocalState_001 begin!");
+    OutputDeviceInfo info;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "DeviceId1forTest";
+    deviceInfo.deviceName_ = "DeviceName1forTest";
+    deviceInfo.deviceType_ = 1;
+    info.deviceInfos_.push_back(deviceInfo);
+    g_AVSessionItem->newOutputDeviceInfo_ = info;
+    int32_t castState = static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED);
+    g_AVSessionItem->isSwitchNewDevice_ = true;
+    g_AVSessionItem->DealLocalState(castState);
+    auto deviceName = g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_;
+    EXPECT_EQ(deviceName, "LocalDevice");
+    SLOGI("AVSessionItem_DealLocalState_001 end!");
+}
 } //AVSession
 } //OHOS
