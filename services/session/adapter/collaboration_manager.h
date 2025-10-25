@@ -36,7 +36,7 @@ public:
     int32_t RegisterLifecycleCallback();
     int32_t UnRegisterLifecycleCallback();
     int32_t PublishServiceState(const char* peerNetworkId, ServiceCollaborationManagerBussinessStatus state);
-    int32_t ApplyAdvancedResource(const char* peerNetworkId);
+    int32_t ApplyAdvancedResource(const char* peerNetworkId, bool checkLinkConflict = true);
 
     std::function<void(const int32_t code)> sendCollaborationApplyResult_;
     std::function<void(void)> sendCollaborationOnStop_;

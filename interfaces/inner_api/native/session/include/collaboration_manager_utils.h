@@ -45,6 +45,12 @@ typedef enum ServiceCollaborationManagerResultCode {
     USERAGREE = 1004720004
 } ServiceCollaborationManagerResultCode;
 
+typedef enum ServiceCollaborationManagerCheckConflictType {
+    ALL = 0,
+    BUSINESS_AND_HARDWARE_CONFLICT = 1,
+    ONLY_LINK_CONFLICT = 2 // reservation param, not implementation
+} ServiceCollaborationManagerCheckConflictType;
+
 typedef struct ServiceCollaborationManager_HardwareRequestInfo {
     ServiceCollaborationManagerHardwareType hardWareType;
     bool canShare;
@@ -64,6 +70,7 @@ typedef struct ServiceCollaborationManager_ResourceRequestInfoSets {
     uint32_t localHardwareListSize;
     ServiceCollaborationManager_HardwareRequestInfo *localHardwareList;
     ServiceCollaborationManager_CommunicationRequestInfo *communicationRequest;
+    ServiceCollaborationManagerCheckConflictType checkConflictType;
 } ServiceCollaborationManager_ResourceRequestInfoSets;
 
 typedef struct ServiceCollaborationManager_Callback {

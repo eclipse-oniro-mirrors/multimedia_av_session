@@ -174,7 +174,7 @@ int32_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
     return AVSESSION_SUCCESS;
 }
 
-int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId)
+int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId, bool checkLinkConflict)
 {
     SLOGI("enter ApplyAdvancedResource");
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource == nullptr) {
@@ -190,6 +190,8 @@ int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId)
     resourceRequest_->remoteHardwareListSize = remoteHardwareListSize_;
     resourceRequest_->remoteHardwareList = remoteHardwareList_;
     resourceRequest_->communicationRequest = &communicationRequest_;
+    resourceRequest_->checkConflictType = checkLinkConflict ? ServiceCollaborationManagerCheckConflictType::ALL :
+        ServiceCollaborationManagerCheckConflictType::BUSINESS_AND_HARDWARE_CONFLICT;
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource(peerNetworkId,
         serviceName_.c_str(), resourceRequest_, &serviceCollaborationCallback)) {
         return AVSESSION_ERROR;
