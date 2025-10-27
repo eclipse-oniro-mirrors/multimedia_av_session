@@ -523,11 +523,7 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
         {
             std::lock_guard lockGuard(mutexLock_);
             hwCastProviderSessionMap_[castId] = hwCastProviderSession;
-            SLOGI("Cast task thread to create player");
-            std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
-            std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);
-            hwCastStreamPlayer->Init();
-            avCastControllerMap_[castId] = hwCastStreamPlayer;
+            SLOGI("Cast task thread not to create player");
         }
         SLOGI("Create streamPlayer finished %{public}d", castId);
         for (auto listener : castStateListenerList_) {
