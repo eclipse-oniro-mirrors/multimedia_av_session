@@ -261,7 +261,7 @@ public:
 
     bool IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session);
 
-    __attribute__((no_sanitize("cfi"))) int32_t MirrorToStreamCast(sptr<AVSessionItem>& session);
+    __attribute__((no_sanitize("cfi"))) int32_t MirrorToStreamCast(sptr<AVSessionItem> session);
 
     void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) override;
 
@@ -703,6 +703,7 @@ private:
     const std::string seperator = ",";
     int appState = -1;
     std::atomic<bool> isSupportMirrorToStream_ = false;
+    std::atomic<bool> appCastExit_ = false;
     std::string castDeviceId_ = "0";
     std::string castDeviceName_ = " ";
     int32_t castDeviceType_ = 0;
