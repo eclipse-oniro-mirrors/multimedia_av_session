@@ -46,8 +46,8 @@ std::map<std::string, std::tuple<TaiheCastControlCommand::GetterType, TaiheCastC
 
 static int32_t GetParameter(const taihe::optional<AVCastParameterType> &in, int32_t &out)
 {
-    if (in.has_value() && in.value().get_tag() == AVCastParameterType::tag_t::typeInt32) {
-        out = in.value().get_typeInt32_ref();
+    if (in.has_value() && in.value().get_tag() == AVCastParameterType::tag_t::typeDouble) {
+        out = static_cast<int>(in.value().get_typeDouble_ref());
         return OHOS::AVSession::AVSESSION_SUCCESS;
     }
     return OHOS::AVSession::ERR_INVALID_PARAM;
@@ -55,7 +55,7 @@ static int32_t GetParameter(const taihe::optional<AVCastParameterType> &in, int3
 
 static taihe::optional<AVCastParameterType> ToTaiheParameter(int32_t in)
 {
-    AVCastParameterType parameter = AVCastParameterType::make_typeInt32(in);
+    AVCastParameterType parameter = AVCastParameterType::make_typeDouble(in);
     return taihe::optional<AVCastParameterType>(std::in_place_t {}, parameter);
 }
 
