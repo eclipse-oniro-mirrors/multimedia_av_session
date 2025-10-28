@@ -307,9 +307,9 @@ export struct AVCastPicker {
   highQualityIconBuilder(params: HighQualityParams) {
     Row() {
       Text(params.iconLeft)
-        .highQualityStyles()
+        .highQualityStyles(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale))
       Text(params.iconRight)
-        .highQualityStyles()
+        .highQualityStyles(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale))
         .margin({left: 2 * (Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))})
     }
     .direction(Direction.Ltr)
@@ -642,10 +642,10 @@ export struct AVCastPicker {
   }
 }
 
-@Extend(Text) function highQualityStyles() {
+@Extend(Text) function highQualityStyles(maxScale: number) {
   .fontFamily('HarmonyOS Sans SC 2025')
   .fontSize(10)
   .fontWeight(FontWeight.Medium)
   .fontColor($r('sys.color.font_secondary'))
-  .maxFontScale(HIGH_QUALITY_MAX_SCALE)
+  .maxFontScale(maxScale)
 }

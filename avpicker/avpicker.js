@@ -529,7 +529,7 @@ export class AVCastPicker extends ViewPU {
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.maxFontScale(HIGH_QUALITY_MAX_SCALE);
+            Text.maxFontScale(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale));
         }, Text);
         Text.pop();
         this.observeComponentCreation2((x1, y1) => {
@@ -539,7 +539,7 @@ export class AVCastPicker extends ViewPU {
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.maxFontScale(HIGH_QUALITY_MAX_SCALE);
+            Text.maxFontScale(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale));
             Text.margin({left: 2 * (Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))});
         }, Text);
         Text.pop();
