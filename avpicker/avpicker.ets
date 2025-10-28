@@ -16,6 +16,7 @@
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
 const MAX_PICKER_LIMIT = 20;
+const HIGH_QUALITY_MAX_SCALE = 1.5;
 
 /**
  * Definition of av cast picker state.
@@ -306,10 +307,10 @@ export struct AVCastPicker {
   highQualityIconBuilder(params: HighQualityParams) {
     Row() {
       Text(params.iconLeft)
-        .highQualityStyles(this.maxFontSizeScale)
+        .highQualityStyles()
       Text(params.iconRight)
-        .highQualityStyles(this.maxFontSizeScale)
-        .margin({left: 2 * (Math.min(this.maxFontSizeScale, this.fontSizeScale))})
+        .highQualityStyles()
+        .margin({left: 2 * (Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))})
     }
     .direction(Direction.Ltr)
   }
@@ -338,13 +339,13 @@ export struct AVCastPicker {
                   Flex() {
                     this.highQualityIconBuilder(item.highQualityParams)
                   }
-                  .borderRadius(3)
+                  .borderRadius(4)
                   .border({
-                    width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
+                    width: Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale),
                     color: $r('sys.color.font_secondary')
                   })
-                  .padding({top: 1.5, right: 4, bottom: 1.5, left: 4})
-                  .margin({top: 2})
+                  .padding({top: 2.5, right: 4, bottom: 2.5, left: 4})
+                  .margin({top: 4})
                   .width('auto')
                 }
               }
@@ -641,9 +642,10 @@ export struct AVCastPicker {
   }
 }
 
-@Extend(Text) function highQualityStyles(maxScale: number) {
-  .fontSize(7)
+@Extend(Text) function highQualityStyles() {
+  .fontFamily('HarmonyOS Sans SC 2025')
+  .fontSize(10)
   .fontWeight(FontWeight.Medium)
   .fontColor($r('sys.color.font_secondary'))
-  .maxFontScale(maxScale)
+  .maxFontScale(HIGH_QUALITY_MAX_SCALE)
 }
