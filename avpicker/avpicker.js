@@ -20,6 +20,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
 const t = 20;
+const HIGH_QUALITY_MAX_SCALE = 1.5;
 
 export let AVCastPickerState;
 (function(l11) {
@@ -523,21 +524,23 @@ export class AVCastPicker extends ViewPU {
         Row.direction(Direction.Ltr);
         this.observeComponentCreation2((x1, y1) => {
             Text.create(u2 ? u2.iconLeft : '');
-            Text.fontSize(7);
+            Text.fontFamily('HarmonyOS Sans SC 2025');
+            Text.fontSize(10);
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.maxFontScale(this.maxFontSizeScale);
+            Text.maxFontScale(HIGH_QUALITY_MAX_SCALE);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((x1, y1) => {
             Text.create(u2 ? u2.iconRight : '');
-            Text.fontSize(7);
+            Text.fontFamily('HarmonyOS Sans SC 2025');
+            Text.fontSize(10);
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.maxFontScale(this.maxFontSizeScale);
-            Text.margin({left: 2 * (Math.min(this.maxFontSizeScale, this.fontSizeScale))});
+            Text.maxFontScale(HIGH_QUALITY_MAX_SCALE);
+            Text.margin({left: 2 * (Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))});
         }, Text);
         Text.pop();
         Row.pop();
@@ -621,19 +624,19 @@ export class AVCastPicker extends ViewPU {
                         this.ifElseBranchUpdateFunction(1, () => {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 Flex.create();
-                                Flex.borderRadius(3);
+                                Flex.borderRadius(4);
                                 Flex.border({
-                                    width: 0.5 * (Math.min(this.maxFontSizeScale, this.fontSizeScale)),
+                                    width: Math.min(this.maxFontSizeScale, this.fontSizeScale),
                                     color: { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                                         'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
                                 });
                                 Flex.padding({
-                                    top: 1.5,
+                                    top: 2.5,
                                     right: 4,
-                                    bottom: 1.5,
+                                    bottom: 2.5,
                                     left: 4
                                 });
-                                Flex.margin({ top: 2 });
+                                Flex.margin({ top: 4 });
                                 Flex.width('auto');
                             }, Flex);
                             this.highQualityIconBuilder.bind(this)(x8.highQualityParams);
