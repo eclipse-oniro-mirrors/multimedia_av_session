@@ -38,6 +38,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         (state == "IDLE" || state == "CONNECT_SUCC")) {
         castServiceNameStatePair_ = std::make_pair(serviceName, state);
         isSupportMirrorToStream_ = false;
+        appCastExit_ = false;
         castDeviceId_ = "0";
         castDeviceName_ = " ";
         castDeviceType_ = 0;
@@ -109,6 +110,9 @@ void AVSessionService::SplitExtraInfo(std::string info)
 {
     if (info.find("SUPPORT_MIRROR_TO_STREAM") != std::string::npos && info.find("true") != std::string::npos) {
         isSupportMirrorToStream_ = true;
+    }
+    if (info.find("appCastExit") != std::string::npos && info.find("true") != std::string::npos) {
+        appCastExit_ = true;
     }
     if (info.find("deviceId") != std::string::npos && info.find(":") != std::string::npos) {
         std::string::size_type idBeginPos = info.find(":");
@@ -439,26 +443,27 @@ void AVSessionService::NotifyMirrorToStreamCast()
 bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
 {
     CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "session is nullptr");
-    bool deviceCond = isSupportMirrorToStream_ &&
-                      session->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_VIDEO &&
-                      !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid());
+    bool deviceCond = isSupportMirrorToStream_ && !appCastExit_;
     
-    CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "session is nullptr");
-    bool appCond = session->IsAppSupportCast();
-
+    CHECK_AND_RETURN_RET_LOG(deviceCond, false, "deviceCond is false");
     bool connectCond = castServiceNameStatePair_.second == deviceStateConnection;
 
+    CHECK_AND_RETURN_RET_LOG(deviceCond && connectCond, false, "connectCond is false");
     std::string bundleName = session->GetBundleName();
     bool isWhiteApp = std::find(CastEngine::MIRROR_TO_STREAM_APP_LIST.begin(),
         CastEngine::MIRROR_TO_STREAM_APP_LIST.end(), bundleName) != CastEngine::MIRROR_TO_STREAM_APP_LIST.end();
+    bool appCond = session->IsAppSupportCast() && isWhiteApp &&
+                   session->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_VIDEO &&
+                   !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid());
 
-    return deviceCond && connectCond && appCond && isWhiteApp;
+    return deviceCond && connectCond && appCond;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem>& session)
+__attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast(sptr<AVSessionItem> session)
 {
     SLOGI("enter MirrorToStreamCast");
     if (!IsMirrorToStreamCastAllowed(session)) {
+        appCastExit_ = false;
         return AVSESSION_SUCCESS;
     }
     checkEnableCast(true);
