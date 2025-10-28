@@ -905,6 +905,9 @@ void AVSessionItem::InitAVCastControllerProxy()
 {
     if (castControllerProxy_ == nullptr) {
         SLOGI("CastControllerProxy is null, start get new proxy");
+        if (descriptor_.sessionTag_ == "RemoteCast") {
+            CHECK_AND_RETURN_LOG(AVRouter::GetInstance().IsRemoteCasting(), "get remote controller till connected");
+        }
         {
             std::lock_guard lockGuard(castLock_);
             castControllerProxy_ = AVRouter::GetInstance().GetRemoteController(castHandle_);
