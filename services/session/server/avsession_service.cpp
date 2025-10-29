@@ -4270,9 +4270,10 @@ std::string AVSessionService::GetLocalTitle()
 void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession,
     bool addCapsule, bool isCapsuleUpdate)
 {
+    bool is2in1 = (GetLocalDeviceType() == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
     bool ispcmode = system::GetParameter("const.window.support_window_pcmode_switch", "false") == "true" &&
      (system::GetParameter("persist.sceneboard.ispcmode", "false") == "true");
-    CHECK_AND_RETURN_LOG(!isCastableDevice_ && !ispcmode, "2in1 not support.");
+    CHECK_AND_RETURN_LOG(!is2in1 && !ispcmode, "2in1 not support.");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
     SLOGI("NotifySystemUI isActiveNtf %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d",
