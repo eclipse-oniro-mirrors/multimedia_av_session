@@ -97,15 +97,15 @@ void AudioDeviceManager::RegisterAudioDeviceChangeCallback()
         AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG, audioDeviceChangeCallback_);
 }
  
-void AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
+int32_t AudioDeviceManager::UnRegisterAudioDeviceChangeCallback()
 {
     SLOGI("enter UnRegisterAudioDeviceChangeCallback");
     AudioStandard::AudioSystemManager *audioSystemManager = AudioStandard::AudioSystemManager::GetInstance();
     if (audioSystemManager == nullptr) {
         SLOGE("audioSystemManager is null");
-        return;
+        return AVSESSION_ERROR;
     }
-    audioSystemManager->UnsetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
+    return audioSystemManager->UnsetDeviceChangeCallback(AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
 }
 
 void AudioDeviceManager::SendRemoteAvSessionInfo(const std::string &deviceId)
