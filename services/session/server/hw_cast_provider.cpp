@@ -151,6 +151,7 @@ int HwCastProvider::StartCastSession(bool isHiStream)
         auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
         if (hwCastProviderSession) {
             if (hwCastProviderSession->Init() != AVSESSION_ERROR) {
+                hwCastProviderSession->SetCastSource(true);
                 SLOGI("CastSession init successed");
             } else {
                 hwCastProviderSession->Release();
@@ -520,6 +521,7 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
         }
         auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
         hwCastProviderSession->Init();
+        hwCastProviderSession->SetCastSource(false);
         {
             std::lock_guard lockGuard(mutexLock_);
             hwCastProviderSessionMap_[castId] = hwCastProviderSession;

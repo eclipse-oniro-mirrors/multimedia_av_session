@@ -45,6 +45,7 @@ public:
     bool GetRemoteDrmCapabilities(std::string deviceId, std::vector<std::string> &drmCapabilities);
     void SetProtocolType(CastEngine::ProtocolType);
     void OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo);
+    void SetCastSource(bool isCastSource);
 
 private:
     void computeToastOnDeviceState(CastEngine::DeviceState state);
@@ -56,6 +57,7 @@ private:
     std::string stashDeviceId_;
     CastEngine::ProtocolType protocolType_ = CastEngine::ProtocolType::CAST_PLUS_STREAM;
     int32_t avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
+    std::atomic<bool> isCastSource_ = false;
 
     const int32_t deviceStateConnection = 6;
     const int32_t eventIdStart = 2000;
