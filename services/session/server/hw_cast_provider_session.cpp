@@ -43,6 +43,12 @@ void HwCastProviderSession::SetProtocolType(CastEngine::ProtocolType protocolTyp
     protocolType_ = protocolType;
 }
 
+void HwCastProviderSession::SetCastSource(bool isCastSource)
+{
+    SLOGI("SetCastSource %{public}d", isCastSource);
+    isCastSource_ = isCastSource;
+}
+
 void HwCastProviderSession::Release()
 {
     SLOGI("release the HwCastProviderSession");
@@ -201,7 +207,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
 
-    computeToastOnDeviceState(stateInfo.deviceState);
+    isCastSource_ ? computeToastOnDeviceState(stateInfo.deviceState) : (void)0;
     {
         std::lock_guard lockGuard(mutex_);
         if (castSessionStateListenerList_.size() == 0) {
