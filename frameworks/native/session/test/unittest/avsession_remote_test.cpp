@@ -175,13 +175,13 @@ void AVSessionRemoteTest::TearDown()
 
 class AVSessionCastAudioCallbackImpl : public AVSessionCallback {
 public:
-    void OnPlay() override;
+    void OnPlay(const AVControlCommand& cmd) override;
     void OnPause() override;
     void OnStop() override;
-    void OnPlayNext() override;
-    void OnPlayPrevious() override;
-    void OnFastForward(int64_t time) override;
-    void OnRewind(int64_t time) override;
+    void OnPlayNext(const AVControlCommand& cmd) override;
+    void OnPlayPrevious(const AVControlCommand& cmd) override;
+    void OnFastForward(int64_t time, const AVControlCommand& cmd) override;
+    void OnRewind(int64_t time, const AVControlCommand& cmd) override;
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
@@ -201,7 +201,7 @@ public:
     ~AVSessionCastAudioCallbackImpl() override;
 };
 
-void AVSessionCastAudioCallbackImpl::OnPlay()
+void AVSessionCastAudioCallbackImpl::OnPlay(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlay %{public}d", g_onCall);
@@ -219,25 +219,25 @@ void AVSessionCastAudioCallbackImpl::OnStop()
     SLOGE("OnStop %{public}d", g_onCall);
 }
 
-void AVSessionCastAudioCallbackImpl::OnPlayNext()
+void AVSessionCastAudioCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayNext %{public}d", g_onCall);
 }
 
-void AVSessionCastAudioCallbackImpl::OnPlayPrevious()
+void AVSessionCastAudioCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayPrevious %{public}d", g_onCall);
 }
 
-void AVSessionCastAudioCallbackImpl::OnFastForward(int64_t time)
+void AVSessionCastAudioCallbackImpl::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnFastForward %{public}d", g_onCall);
 }
 
-void AVSessionCastAudioCallbackImpl::OnRewind(int64_t time)
+void AVSessionCastAudioCallbackImpl::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnRewind %{public}d", g_onCall);

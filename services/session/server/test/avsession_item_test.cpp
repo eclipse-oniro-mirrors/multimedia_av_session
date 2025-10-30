@@ -61,13 +61,13 @@ public:
 
 class AVSessionCallbackImpl : public IAVSessionCallback {
 public:
-    ErrCode OnPlay() override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlay(const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
     ErrCode OnPause() override { return AVSESSION_SUCCESS; };
     ErrCode OnStop() override { return AVSESSION_SUCCESS; };
-    ErrCode OnPlayNext() override { return AVSESSION_SUCCESS; };
-    ErrCode OnPlayPrevious() override { return AVSESSION_SUCCESS; };
-    ErrCode OnFastForward(int64_t time) override { return AVSESSION_SUCCESS; };
-    ErrCode OnRewind(int64_t time) override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlayNext(const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
+    ErrCode OnPlayPrevious(const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
+    ErrCode OnFastForward(int64_t time, const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
+    ErrCode OnRewind(int64_t time, const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
     ErrCode OnSeek(int64_t time) override { return AVSESSION_SUCCESS; };
     ErrCode OnSetSpeed(double speed) override { return AVSESSION_SUCCESS; };
     ErrCode OnSetLoopMode(int32_t loopMode) override { return AVSESSION_SUCCESS; };

@@ -112,7 +112,8 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnAVCallToggleCallMute001, testing::
 static HWTEST_F(AVSessionCallbackProxyTest, OnPlay001, testing::ext::TestSize.Level0)
 {
     LOG_SetCallback(MyLogCallback);
-    aVSessionCallbackProxy->OnPlay();
+    AVControlCommand cmd;
+    aVSessionCallbackProxy->OnPlay(cmd);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
@@ -148,7 +149,8 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnStop001, testing::ext::TestSize.Le
 static HWTEST_F(AVSessionCallbackProxyTest, OnPlayNext001, testing::ext::TestSize.Level0)
 {
     LOG_SetCallback(MyLogCallback);
-    aVSessionCallbackProxy->OnPlayNext();
+    AVControlCommand cmd;
+    aVSessionCallbackProxy->OnPlayNext(cmd);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
@@ -160,7 +162,8 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnPlayNext001, testing::ext::TestSiz
 static HWTEST_F(AVSessionCallbackProxyTest, OnPlayPrevious001, testing::ext::TestSize.Level0)
 {
     LOG_SetCallback(MyLogCallback);
-    aVSessionCallbackProxy->OnPlayPrevious();
+    AVControlCommand cmd;
+    aVSessionCallbackProxy->OnPlayPrevious(cmd);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
@@ -173,7 +176,8 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnFastForward001, testing::ext::Test
 {
     LOG_SetCallback(MyLogCallback);
     int64_t time = 0;
-    aVSessionCallbackProxy->OnFastForward(time);
+    AVControlCommand cmd;
+    aVSessionCallbackProxy->OnFastForward(time, cmd);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 
@@ -186,7 +190,8 @@ static HWTEST_F(AVSessionCallbackProxyTest, OnRewind001, testing::ext::TestSize.
 {
     LOG_SetCallback(MyLogCallback);
     int64_t time = 0;
-    aVSessionCallbackProxy->OnRewind(time);
+    AVControlCommand cmd;
+    aVSessionCallbackProxy->OnRewind(time, cmd);
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
 }
 

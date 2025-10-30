@@ -2339,7 +2339,7 @@ bool AVSessionService::CheckStartAncoMediaPlay(const std::string& bundleName, in
 }
 
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId,
-    const std::string& deviceId)
+    const std::string& moduleName, const std::string& deviceId)
 {
     int32_t result = AVSESSION_ERROR;
     if (CheckStartAncoMediaPlay(bundleName, &result)) {
@@ -2354,6 +2354,7 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     StartPlayInfo startPlayInfo;
     startPlayInfo.setBundleName(CallerBundleName);
     startPlayInfo.setDeviceId(deviceId);
+    startPlayInfo.SetModuleName(moduleName);
 
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
 
@@ -2372,7 +2373,8 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     return AVSESSION_ERROR;
 }
 
-int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
+int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+    const std::string& moduleName)
 {
     int32_t result = AVSESSION_ERROR;
     if (CheckStartAncoMediaPlay(bundleName, &result)) {
@@ -2386,6 +2388,8 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     }
     StartPlayInfo startPlayInfo;
     startPlayInfo.setBundleName(CallerBundleName);
+    startPlayInfo.SetModuleName(moduleName);
+
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
     if (dynamicLoader == nullptr) {
         SLOGI("dynamicLoader is null");
@@ -2939,9 +2943,9 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         }
 
         if (deviceId.length() == 0) {
-            ret = StartAVPlayback(bundleName, "");
+            ret = StartAVPlayback(bundleName, "", "");
         } else {
-            ret = StartAVPlayback(bundleName, "", deviceId);
+            ret = StartAVPlayback(bundleName, "", "", deviceId);
         }
         SLOGI("Cold play %{public}s ret=%{public}d", bundleName.c_str(), ret);
     } else {

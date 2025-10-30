@@ -30,6 +30,7 @@
 #include "key_event.h"
 #include "want_params.h"
 #include "av_shared_memory.h"
+#include "avcontrol_command.h"
 
 /**
  * @brief Listening events for the creation and destruction of sessions
@@ -164,7 +165,7 @@ public:
      * @brief playback.
      * @since 9
     */
-    virtual void OnPlay() = 0;
+    virtual void OnPlay(const AVControlCommand& cmd) = 0;
 
     /**
      * @brief Pause playback.
@@ -182,13 +183,13 @@ public:
      * @brief play next.
      * @since 9
     */
-    virtual void OnPlayNext() = 0;
+    virtual void OnPlayNext(const AVControlCommand& cmd) = 0;
 
     /**
      * @brief Play the previous song.
      * @since 9
     */
-    virtual void OnPlayPrevious() = 0;
+    virtual void OnPlayPrevious(const AVControlCommand& cmd) = 0;
 
     /**
      * @brief Fast forward.
@@ -196,7 +197,7 @@ public:
      * @param time fastforward skip intervals
      * @since 11
     */
-    virtual void OnFastForward(int64_t time) = 0;
+    virtual void OnFastForward(int64_t time, const AVControlCommand& cmd) = 0;
 
     /**
      * @brief Fast rewind.
@@ -204,7 +205,7 @@ public:
      * @param time rewind skip intervals
      * @since 11
     */
-    virtual void OnRewind(int64_t time) = 0;
+    virtual void OnRewind(int64_t time, const AVControlCommand& cmd) = 0;
 
     /**
      * @brief Seek to the specified time.

@@ -122,6 +122,9 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, std::shared_ptr<MMI::KeyEvent>& out);
     static napi_status SetValue(napi_env env, const std::shared_ptr<MMI::KeyEvent>& in, napi_value& out);
 
+    /* napi_value <-> AVControlCommand */
+    static napi_status SetValue(napi_env env, const std::shared_ptr<CommandInfo>& in, napi_value& out);
+
     /* napi_value <-> AbilityRuntime::WantAgent::WantAgent */
     static napi_status GetValue(napi_env env, napi_value in, AbilityRuntime::WantAgent::WantAgent*& out);
     static napi_status SetValue(napi_env env, AbilityRuntime::WantAgent::WantAgent& in, napi_value& out);
@@ -296,6 +299,7 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, AudioStandard::DeviceType& out);
     static napi_status GetValue(napi_env env, napi_value in, AudioStandard::AudioDeviceDescriptor& out);
     static napi_status GetValue(napi_env env, napi_value in, std::vector<AudioStandard::AudioDeviceDescriptor>& out);
+    static napi_status GetValue(napi_env env, napi_value in, napi_value& out);
     static napi_status GetSampleRate(napi_env env, napi_value in, AudioStandard::AudioSamplingRate& out);
     static napi_status GetChannels(napi_env env, napi_value in, AudioStandard::AudioChannel& out);
     static napi_status GetChannelMasks(napi_env env, napi_value in, int32_t& out);

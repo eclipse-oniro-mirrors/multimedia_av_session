@@ -25,8 +25,8 @@ std::map<std::string, std::tuple<NapiControlCommand::GetterType, NapiControlComm
     { "play", { GetPlayParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY } },
     { "pause", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PAUSE } },
     { "stop", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_STOP } },
-    { "playNext", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_NEXT } },
-    { "playPrevious", { GetNoneParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_PREVIOUS } },
+    { "playNext", { GetPlayNextParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_NEXT } },
+    { "playPrevious", { GetPlayPreviousParam, SetNoneParam, AVControlCommand::SESSION_CMD_PLAY_PREVIOUS } },
     { "fastForward", { GetForwardTime, SetForwardTime, AVControlCommand::SESSION_CMD_FAST_FORWARD } },
     { "rewind", { GetRewindTime, SetRewindTime, AVControlCommand::SESSION_CMD_REWIND } },
     { "seek", { GetSeekTime, SetSeekTime, AVControlCommand::SESSION_CMD_SEEK } },
@@ -76,6 +76,7 @@ std::vector<std::string> NapiControlCommand::ConvertCommands(const std::vector<i
 
 napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlCommand& out)
 {
+    // Retrieve the command property from the input parameters
     std::string cmd;
     auto status = NapiUtils::GetNamedProperty(env, in, "command", cmd);
     if (status != napi_ok) {
@@ -83,6 +84,7 @@ napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlC
         return status;
     }
 
+    // Command validation and corresponding getter/setter implementation
     SLOGI("cmd=%{public}s", cmd.c_str());
     auto it = commandMap_.find(cmd);
     if (it == commandMap_.end()) {
@@ -93,6 +95,8 @@ napi_status NapiControlCommand::GetValue(napi_env env, napi_value in, AVControlC
         SLOGE("native set command failed");
         return napi_invalid_arg;
     }
+
+    // Handling optional parameters
     auto getter = std::get<GETTER_INDEX>(it->second);
     return getter(env, in, out);
 }
@@ -139,13 +143,62 @@ napi_status NapiControlCommand::SetNoneParam(napi_env env, AVControlCommand& in,
 
 napi_status NapiControlCommand::GetPlayParam(napi_env env, napi_value in, AVControlCommand& out)
 {
+    // Processing optional parameter
     std::string playParam {};
     auto status = NapiUtils::GetNamedProperty(env, in, "parameter", playParam);
-    CHECK_AND_RETURN_RET_LOG(status == napi_ok,
-        out.SetPlayParam("") == AVSESSION_SUCCESS ? napi_ok : napi_invalid_arg, "default play param");
+    if (status == napi_ok) {
+        out.SetPlayParam(playParam);
+    }
 
-    CHECK_AND_RETURN_RET_LOG(out.SetPlayParam(playParam) == AVSESSION_SUCCESS,
-        napi_invalid_arg, "set parameter failed");
+    // Processing optional playInfo
+    napi_value playInfo;
+    status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    if (status == napi_ok) {
+        std::string moduleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        if (status == napi_ok) {
+            CommandInfo cmdInfo;
+            cmdInfo.SetModuleName(moduleName);
+            out.SetCommandInfo(cmdInfo);
+        }
+    }
+
+    return napi_ok;
+}
+
+napi_status NapiControlCommand::GetPlayNextParam(napi_env env, napi_value in, AVControlCommand& out)
+{
+    // Processing optional playInfo
+    napi_value playInfo;
+    auto status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    if (status == napi_ok) {
+        std::string moduleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        if (status == napi_ok) {
+            CommandInfo cmdInfo;
+            cmdInfo.SetModuleName(moduleName);
+            out.SetCommandInfo(cmdInfo);
+        }
+    }
+
+    return napi_ok;
+}
+
+napi_status NapiControlCommand::GetPlayPreviousParam(napi_env env, napi_value in, AVControlCommand& out)
+{
+    // Processing optional playInfo
+    napi_value playInfo;
+    auto status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    if (status == napi_ok) {
+        std::string moduleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        if (status == napi_ok) {
+            CommandInfo cmdInfo;
+            cmdInfo.SetModuleName(moduleName);
+            out.SetCommandInfo(cmdInfo);
+        }
+    }
+
     return napi_ok;
 }
 
@@ -191,7 +244,21 @@ napi_status NapiControlCommand::GetForwardTime(napi_env env, napi_value in, AVCo
 
     SLOGD("GetForwardTime with time %{public}jd", static_cast<int64_t>(time));
     CHECK_AND_RETURN_RET_LOG(out.SetForwardTime(time) == AVSESSION_SUCCESS, napi_invalid_arg, "set parameter failed");
-    return status;
+
+    // Processing optional playInfo
+    napi_value playInfo;
+    status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    if (status == napi_ok) {
+        std::string moduleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        if (status == napi_ok) {
+            CommandInfo cmdInfo;
+            cmdInfo.SetModuleName(moduleName);
+            out.SetCommandInfo(cmdInfo);
+        }
+    }
+
+    return napi_ok;
 }
 
 napi_status NapiControlCommand::SetForwardTime(napi_env env, AVControlCommand& in, napi_value& out)
@@ -224,7 +291,21 @@ napi_status NapiControlCommand::GetRewindTime(napi_env env, napi_value in, AVCon
 
     SLOGD("GetRewindTime with time %{public}jd", static_cast<int64_t>(time));
     CHECK_AND_RETURN_RET_LOG(out.SetRewindTime(time) == AVSESSION_SUCCESS, napi_invalid_arg, "set parameter failed");
-    return status;
+
+    // Processing optional playInfo
+    napi_value playInfo;
+    status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    if (status == napi_ok) {
+        std::string moduleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        if (status == napi_ok) {
+            CommandInfo cmdInfo;
+            cmdInfo.SetModuleName(moduleName);
+            out.SetCommandInfo(cmdInfo);
+        }
+    }
+
+    return napi_ok;
 }
 
 napi_status NapiControlCommand::SetRewindTime(napi_env env, AVControlCommand& in, napi_value& out)

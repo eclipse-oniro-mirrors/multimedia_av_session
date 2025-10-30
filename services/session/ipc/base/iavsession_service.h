@@ -54,7 +54,8 @@ public:
     virtual int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                               std::vector<AVQueueInfo>& avQueueInfos) = 0;
     
-    virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) = 0;
+    virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+        const std::string& moduleName) = 0;
 
     virtual int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) = 0;
 

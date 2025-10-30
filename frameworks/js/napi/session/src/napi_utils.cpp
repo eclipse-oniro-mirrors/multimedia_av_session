@@ -226,6 +226,13 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
     return status;
 }
 
+/* napi_value <-> napi_value */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, napi_value& out)
+{
+    out = in;
+    return napi_ok;
+}
+
 napi_status NapiUtils::SetValue(napi_env env, const std::string& in, napi_value& out)
 {
     return napi_create_string_utf8(env, in.c_str(), in.size(), &out);
@@ -533,6 +540,46 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<MMI::KeyEven
 
     status = napi_set_named_property(env, out, "keys", keys);
     CHECK_RETURN(status == napi_ok, "set keys property failed", status);
+    return status;
+}
+
+/* napi_value <-> CommandInfo */
+napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<CommandInfo>& in, napi_value& out)
+{
+    CHECK_RETURN(in != nullptr, "CommandInfo is nullptr", napi_generic_failure);
+
+    auto status = napi_create_object(env, &out);
+    CHECK_RETURN(status == napi_ok, "create object failed", status);
+
+    napi_value property = nullptr;
+    std::string callerBundleName {};
+    in->GetBundleName(callerBundleName);
+    status = SetValue(env, callerBundleName, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "callerBundleName", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    std::string callerModuleName {};
+    in->GetModuleName(callerModuleName);
+    status = SetValue(env, callerModuleName, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "callerModuleName", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    std::string callerDeviceId {};
+    in->GetDeviceId(callerDeviceId);
+    status = SetValue(env, callerDeviceId, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "callerDeviceId", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    std::string callerType {};
+    in->GetPlayType(callerType);
+    status = SetValue(env, callerType, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "callerType", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
     return status;
 }
 

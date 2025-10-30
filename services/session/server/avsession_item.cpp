@@ -2249,8 +2249,20 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
         static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()));
     if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
         AVControlCommand cmd;
-        cmd.SetRewindTime(metaData_.GetSkipIntervals());
-        cmd.SetForwardTime(metaData_.GetSkipIntervals());
+        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+
+        CommandInfo cmdInfo;
+        cmd.GetCommandInfo(cmdInfo);
+        cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
+
+        // deviceId
+        auto deviceInfos = descriptor_.outputDeviceInfo_.deviceInfos_;
+        if (deviceInfos.size() > 0) {
+            auto castDeviceId = deviceInfos[0].deviceId_;
+            cmdInfo.SetDeviceId(castDeviceId);
+        }
+        cmd.SetCommandInfo(cmdInfo);
+
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
     } else {
         std::lock_guard callbackLockGuard(callbackLock_);
@@ -2268,27 +2280,48 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
         SLOGE("controlCommand invalid");
         return;
     }
+    auto cmdBack = cmd;
+    CommandInfo cmdInfo;
+    cmdBack.GetCommandInfo(cmdInfo);
+
+    auto callingUid = GetCallingUid();
+    if (callingUid == CAST_STATIC_UID) {
+        auto deviceInfos = descriptor_.outputDeviceInfo_.deviceInfos_;
+        if (deviceInfos.size() > 0) {
+            auto castDeviceId = deviceInfos[0].deviceId_;
+            cmdInfo.SetDeviceId(castDeviceId);
+        }
+    } else {
+        std::string callerBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(callingUid);
+        cmdInfo.SetBundleName(callerBundleName);
+    }
+
+    cmdInfo.SetPlayType(callingUid == CAST_STATIC_UID ?
+        PlayTypeToString.at(PlayType::CAST) : PlayTypeToString.at(PlayType::APP));
+    cmdBack.SetCommandInfo(cmdInfo);
+
     SLOGI("ExecuteControllerCommand code %{public}d from pid %{public}d to pid %{public}d",
         code, static_cast<int>(GetCallingPid()), static_cast<int>(GetPid()));
     {
         std::lock_guard remoteSinkLockGuard(remoteSinkLock_);
         if (remoteSink_ != nullptr) {
             SLOGI("set remote ControlCommand");
-            CHECK_AND_RETURN_LOG(remoteSink_->SetControlCommand(cmd) == AVSESSION_SUCCESS, "SetControlCommand failed");
+            CHECK_AND_RETURN_LOG(remoteSink_->SetControlCommand(cmdBack) == AVSESSION_SUCCESS,
+                "SetControlCommand failed");
         }
     }
     CHECK_AND_RETURN_LOG(callback_ != nullptr || callbackForMigrate_ != nullptr,
         "callback_ or callbackForMigrate_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactivate");
 
-    HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmd.GetCommand()));
+    HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmdBack.GetCommand()));
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_SUCCESS_CTRL_COMMAND);
     HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(descriptor_.elementName_.GetBundleName(), GetPid(),
-        cmd.GetCommand(), descriptor_.sessionType_);
+        cmdBack.GetCommand(), descriptor_.sessionType_);
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    ReportSessionControl(descriptor_.elementName_.GetBundleName(), cmd.GetCommand());
+    ReportSessionControl(descriptor_.elementName_.GetBundleName(), cmdBack.GetCommand());
 #endif
-    return cmdHandlers[code](cmd);
+    return cmdHandlers[code](cmdBack);
 
     HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");
@@ -2363,10 +2396,10 @@ void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)
     {
         std::lock_guard callbackLockGuard(callbackLock_);
         if (callbackForMigrate_) {
-            callbackForMigrate_->OnPlay();
+            callbackForMigrate_->OnPlay(cmd);
         }
         CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-        callback_->OnPlay();
+        callback_->OnPlay(cmd);
     }
 
     std::string playParam = "";
@@ -2413,10 +2446,10 @@ void AVSessionItem::HandleOnPlayNext(const AVControlCommand& cmd)
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayNext");
     std::lock_guard callbackLockGuard(callbackLock_);
     if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlayNext();
+        callbackForMigrate_->OnPlayNext(cmd);
     }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlayNext();
+    callback_->OnPlayNext(cmd);
 }
 
 void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand& cmd)
@@ -2424,10 +2457,10 @@ void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand& cmd)
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayPrevious");
     std::lock_guard callbackLockGuard(callbackLock_);
     if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlayPrevious();
+        callbackForMigrate_->OnPlayPrevious((cmd));
     }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlayPrevious();
+    callback_->OnPlayPrevious((cmd));
 }
 
 void AVSessionItem::HandleOnFastForward(const AVControlCommand& cmd)
@@ -2437,7 +2470,7 @@ void AVSessionItem::HandleOnFastForward(const AVControlCommand& cmd)
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int64_t time = 0;
     CHECK_AND_RETURN_LOG(cmd.GetForwardTime(time) == AVSESSION_SUCCESS, "GetForwardTime failed");
-    callback_->OnFastForward(time);
+    callback_->OnFastForward(time, cmd);
 }
 
 void AVSessionItem::HandleOnRewind(const AVControlCommand& cmd)
@@ -2446,8 +2479,8 @@ void AVSessionItem::HandleOnRewind(const AVControlCommand& cmd)
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int64_t time = 0;
-    CHECK_AND_RETURN_LOG(cmd.GetRewindTime(time) == AVSESSION_SUCCESS, "GetForwardTime failed");
-    callback_->OnRewind(time);
+    CHECK_AND_RETURN_LOG(cmd.GetRewindTime(time) == AVSESSION_SUCCESS, "GetRewindTime failed");
+    callback_->OnRewind(time, cmd);
 }
 
 void AVSessionItem::HandleOnSeek(const AVControlCommand& cmd)

@@ -52,7 +52,8 @@ public:
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                       std::vector<AVQueueInfo>& avQueueInfos) override;
 
-    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+        const std::string& moduleName) override;
 
     int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override;
 

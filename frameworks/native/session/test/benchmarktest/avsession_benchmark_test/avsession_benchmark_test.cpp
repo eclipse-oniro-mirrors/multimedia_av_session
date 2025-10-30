@@ -88,13 +88,13 @@ protected:
 
 class AVSessionCallbackImpl : public AVSessionCallback {
 public:
-    void OnPlay() override;
+    void OnPlay(const AVControlCommand& cmd) override;
     void OnPause() override;
     void OnStop() override;
-    void OnPlayNext() override;
-    void OnPlayPrevious() override;
-    void OnFastForward(int64_t time) override;
-    void OnRewind(int64_t time) override;
+    void OnPlayNext(const AVControlCommand& cmd) override;
+    void OnPlayPrevious(const AVControlCommand& cmd) override;
+    void OnFastForward(int64_t time, const AVControlCommand& cmd) override;
+    void OnRewind(int64_t time, const AVControlCommand& cmd) override;
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
@@ -114,7 +114,7 @@ public:
     ~AVSessionCallbackImpl() override;
 };
 
-void AVSessionCallbackImpl::OnPlay()
+void AVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGI("OnPlay %{public}d", g_onCall);
@@ -131,24 +131,24 @@ void AVSessionCallbackImpl::OnStop()
     SLOGI("OnStop %{public}d", g_onCall);
 }
 
-void AVSessionCallbackImpl::OnPlayNext()
+void AVSessionCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGI("OnPlayNext %{public}d", g_onCall);
 }
 
-void AVSessionCallbackImpl::OnPlayPrevious()
+void AVSessionCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGI("OnPlayPrevious %{public}d", g_onCall);
 }
 
-void AVSessionCallbackImpl::OnFastForward(int64_t time)
+void AVSessionCallbackImpl::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGI("OnFastForward %{public}d", g_onCall);
 }
-void AVSessionCallbackImpl::OnRewind(int64_t time)
+void AVSessionCallbackImpl::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGI("OnRewind %{public}d", g_onCall);

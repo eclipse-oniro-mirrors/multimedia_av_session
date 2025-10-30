@@ -21,7 +21,7 @@ OHAVSessionCallbackImpl::~OHAVSessionCallbackImpl()
 {
 }
 
-void OHAVSessionCallbackImpl::OnPlay()
+void OHAVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 {
     for (auto it = playCallbacks_.begin(); it != playCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY, it->second);
@@ -42,28 +42,28 @@ void OHAVSessionCallbackImpl::OnStop()
     }
 }
 
-void OHAVSessionCallbackImpl::OnPlayNext()
+void OHAVSessionCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 {
     for (auto it = playNextCallbacks_.begin(); it != playNextCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY_NEXT, it->second);
     }
 }
 
-void OHAVSessionCallbackImpl::OnPlayPrevious()
+void OHAVSessionCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 {
     for (auto it = playPreviousCallbacks_.begin(); it != playPreviousCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY_PREVIOUS, it->second);
     }
 }
 
-void OHAVSessionCallbackImpl::OnFastForward(int64_t time)
+void OHAVSessionCallbackImpl::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     for (auto it = forwardCallbacks_.begin(); it != forwardCallbacks_.end(); ++it) {
         it->first(avsession_, time, it->second);
     }
 }
 
-void OHAVSessionCallbackImpl::OnRewind(int64_t time)
+void OHAVSessionCallbackImpl::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     for (auto it = rewindCallbacks_.begin(); it != rewindCallbacks_.end(); ++it) {
         it->first(avsession_, time, it->second);

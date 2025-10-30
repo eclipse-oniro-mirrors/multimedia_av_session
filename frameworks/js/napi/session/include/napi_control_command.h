@@ -36,6 +36,8 @@ public:
 
     static napi_status GetNoneParam(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status GetPlayParam(napi_env env, napi_value in, AVControlCommand& out);
+    static napi_status GetPlayNextParam(napi_env env, napi_value in, AVControlCommand& out);
+    static napi_status GetPlayPreviousParam(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status GetSpeed(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status GetForwardTime(napi_env env, napi_value in, AVControlCommand& out);
     static napi_status GetRewindTime(napi_env env, napi_value in, AVControlCommand& out);

@@ -248,7 +248,8 @@ int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, Message
     }
     std::string bundleName = data.ReadString();
     std::string asserId = data.ReadString();
-    int32_t ret = StartAVPlayback(bundleName, asserId);
+    std::string moduleName = data.ReadString();
+    int32_t ret = StartAVPlayback(bundleName, asserId, moduleName);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     return ERR_NONE;
 }

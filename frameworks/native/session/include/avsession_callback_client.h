@@ -30,13 +30,13 @@ public:
     ErrCode OnAVCallAnswer() override;
     ErrCode OnAVCallHangUp() override;
     ErrCode OnAVCallToggleCallMute() override;
-    ErrCode OnPlay() override;
+    ErrCode OnPlay(const AVControlCommand& cmd) override;
     ErrCode OnPause() override;
     ErrCode OnStop() override;
-    ErrCode OnPlayNext() override;
-    ErrCode OnPlayPrevious() override;
-    ErrCode OnFastForward(int64_t time) override;
-    ErrCode OnRewind(int64_t time) override;
+    ErrCode OnPlayNext(const AVControlCommand& cmd) override;
+    ErrCode OnPlayPrevious(const AVControlCommand& cmd) override;
+    ErrCode OnFastForward(int64_t time, const AVControlCommand& cmd) override;
+    ErrCode OnRewind(int64_t time, const AVControlCommand& cmd) override;
     ErrCode OnSeek(int64_t time) override;
     ErrCode OnSetSpeed(double speed) override;
     ErrCode OnSetLoopMode(int32_t loopMode) override;

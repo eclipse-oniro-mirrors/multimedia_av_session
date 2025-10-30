@@ -60,7 +60,8 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+        const std::string& moduleName) override
     {
         return AVSESSION_SUCCESS;
     }
