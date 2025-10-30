@@ -56,7 +56,6 @@ void AVSessionUsersManager::HandleUserRemoved(int32_t userId)
         for (auto& sessionItem : allSession) {
             CHECK_AND_RETURN_LOG(sessionItem != nullptr, "HandleUserRemoved session null");
             std::string sessionId = sessionItem->GetSessionId();
-            stackPtr->RemoveSession(sessionId);
             GetContainerFromAll().RemoveSession(sessionId);
         }
         sessionStackMapByUserId_.erase(iterForStack);
