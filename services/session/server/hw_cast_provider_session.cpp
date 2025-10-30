@@ -70,6 +70,8 @@ bool HwCastProviderSession::AddDevice(const DeviceInfo deviceInfo, uint32_t spid
     }
     CastRemoteDevice castRemoteDevice = {};
     castRemoteDevice.deviceId = deviceInfo.deviceId_;
+    castRemoteDevice.bleMac = deviceInfo.bleMac_;
+    castRemoteDevice.triggerType = static_cast<CastEngine::TriggerType>(deviceInfo.triggerType_);
     castRemoteDevice.spid = spid;
 
     avToastDeviceState_ = ConnectionState::STATE_CONNECTING;

@@ -458,6 +458,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
         SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
         deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
+        deviceInfo.bleMac_ = castRemoteDevice.bleMac;
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {
