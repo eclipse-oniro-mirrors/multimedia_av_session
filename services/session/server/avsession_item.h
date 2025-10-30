@@ -181,7 +181,7 @@ public:
 
     AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
 
-    void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
+    void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const CommandInfo& cmdInfo = CommandInfo{});
 
     void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
 

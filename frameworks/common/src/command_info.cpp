@@ -43,7 +43,7 @@ bool CommandInfo::Marshalling(Parcel& parcel) const
                parcel.WriteString(playType_);
     };
 
-    CHECK_AND_RETURN_RET_LOG(WriteCommonSessionParams(), false, "x-> write common info failed");
+    CHECK_AND_RETURN_RET_LOG(WriteCommonSessionParams(), false, "write common info failed");
     return true;
 }
 

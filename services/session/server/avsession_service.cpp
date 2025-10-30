@@ -2790,7 +2790,7 @@ bool AVSessionService::IsAncoValid()
 }
 
 bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd,
-    const MMI::KeyEvent& keyEvent, sptr<AVSessionItem> session)
+    const MMI::KeyEvent& keyEvent, sptr<AVSessionItem> session, const std::string& deviceId)
 {
     CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "handlevent session is null");
     sptr<AVSessionItem> procSession = nullptr;
@@ -2805,13 +2805,16 @@ bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand
         procSession->ExecuteControllerCommand(cmd);
         SLOGI("CheckSessionHandleKeyEvent proc cmd:%{public}d", cmd.GetCommand());
     } else {
-        procSession->HandleMediaKeyEvent(keyEvent);
+        CommandInfo cmdInfo;
+        cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
+        cmdInfo.SetDeviceId(deviceId);
+        procSession->HandleMediaKeyEvent(keyEvent, cmdInfo);
         SLOGI("CheckSessionHandleKeyEvent proc event:%{public}d", keyEvent.GetKeyCode());
     }
     return true;
 }
 
-int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
+int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId)
 {
     if (keyEvent.GetKeyCode() != MMI::KeyEvent::KEYCODE_HEADSETHOOK &&
         keyEvent.GetKeyCode() != MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
@@ -2819,7 +2822,10 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
         std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
         CHECK_AND_RETURN_RET_LOG(keyEventList != nullptr, AVSESSION_ERROR, "keyEventList ptr nullptr!");
         for (const auto& session : *keyEventList) {
-            session->HandleMediaKeyEvent(keyEvent);
+            CommandInfo cmdInfo;
+            cmdInfo.SetDeviceId(deviceId);
+            cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
+            session->HandleMediaKeyEvent(keyEvent, cmdInfo);
             return AVSESSION_SUCCESS;
         }
     }
@@ -2847,7 +2853,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         AVControlCommand cmd;
-        if (topSession_ != nullptr && CheckSessionHandleKeyEvent(false, cmd, keyEvent, topSession_)) {
+        if (topSession_ != nullptr && CheckSessionHandleKeyEvent(false, cmd, keyEvent, topSession_, deviceId)) {
             return AVSESSION_SUCCESS;
         }
     }
@@ -2858,7 +2864,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, co
 {
     SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
     std::string deviceId = wantParam.GetStringParam("deviceId");
-    int32_t ret = HandleKeyEvent(keyEvent);
+    int32_t ret = HandleKeyEvent(keyEvent, deviceId);
     if (ret != AVSESSION_CONTINUE) {
         return ret;
     }

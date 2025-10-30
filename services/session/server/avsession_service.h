@@ -190,7 +190,7 @@ public:
 
     int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override;
 
-    int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent);
+    int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId = "");
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
@@ -618,7 +618,7 @@ private:
     void UpdateSessionTimestamp(sptr<AVSessionItem> session);
 
     bool CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd, const MMI::KeyEvent& keyEvent,
-        sptr<AVSessionItem> session);
+        sptr<AVSessionItem> session, const std::string& deviceId = "");
 
     bool IsAncoValid();
 

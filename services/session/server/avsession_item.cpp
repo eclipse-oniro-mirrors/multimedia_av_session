@@ -2241,7 +2241,7 @@ bool AVSessionItem::IsNotShowNotification()
     return isNotShowNotification_;
 }
 
-void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
+void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const CommandInfo& cmdInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
@@ -2250,19 +2250,7 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
         AVControlCommand cmd;
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-
-        CommandInfo cmdInfo;
-        cmd.GetCommandInfo(cmdInfo);
-        cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
-
-        // deviceId
-        auto deviceInfos = descriptor_.outputDeviceInfo_.deviceInfos_;
-        if (deviceInfos.size() > 0) {
-            auto castDeviceId = deviceInfos[0].deviceId_;
-            cmdInfo.SetDeviceId(castDeviceId);
-        }
         cmd.SetCommandInfo(cmdInfo);
-
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
     } else {
         std::lock_guard callbackLockGuard(callbackLock_);
