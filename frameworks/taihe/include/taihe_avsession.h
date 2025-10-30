@@ -85,6 +85,7 @@ public:
     void OnSeek(callback_view<void(int64_t)> callback);
     void OnSetSpeed(callback_view<void(double)> callback);
     void OnSetLoopMode(callback_view<void(LoopMode)> callback);
+    void OnSetTargetLoopMode(callback_view<void(LoopMode)> callback);
     void OnToggleFavorite(callback_view<void(string_view)> callback);
     void OnHandleKeyEvent(callback_view<void(uintptr_t)> callback);
     void OnOutputDeviceChange(callback_view<void(ConnectionState, OutputDeviceInfo const&)> callback);
@@ -108,6 +109,7 @@ public:
     void OffSeek(optional_view<callback<void(int64_t)>> callback);
     void OffSetSpeed(optional_view<callback<void(double)>> callback);
     void OffSetLoopMode(optional_view<callback<void(LoopMode)>> callback);
+    void OffSetTargetLoopMode(optional_view<callback<void(LoopMode)>> callback);
     void OffToggleFavorite(optional_view<callback<void(string_view)>> callback);
     void OffHandleKeyEvent(optional_view<callback<void(uintptr_t)>> callback);
     void OffOutputDeviceChange(optional_view<callback<void(ConnectionState, OutputDeviceInfo const&)>> callback);

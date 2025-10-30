@@ -1045,6 +1045,22 @@ void AVSessionImpl::OnSetLoopMode(callback_view<void(LoopMode)> callback)
     }
 }
 
+void AVSessionImpl::OnSetTargetLoopMode(callback_view<void(LoopMode)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    const std::string eventName = "setTargetLoopMode";
+    if (OnEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(session_ != nullptr, "session_ is nullptr");
+        int32_t status =
+            session_->AddSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add command failed");
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_SET_TARGET_LOOP_MODE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
+        AddRegisterEvent(eventName);
+    }
+}
+
 void AVSessionImpl::OnToggleFavorite(callback_view<void(string_view)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
@@ -1419,6 +1435,27 @@ void AVSessionImpl::OffSetLoopMode(optional_view<callback<void(LoopMode)>> callb
         if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_SET_LOOP_MODE)) {
             CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
             int32_t ret = session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_LOOP_MODE);
+            CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
+        }
+        RemoveRegisterEvent(eventName);
+    }
+}
+
+void AVSessionImpl::OffSetTargetLoopMode(optional_view<callback<void(LoopMode)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    const std::string eventName = "setTargetLoopMode";
+    if (OffEvent(eventName, this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "TaiheAVSessionCallback object is nullptr");
+        auto status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_SET_TARGET_LOOP_MODE, cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+        if (callback_ && callback_->IsCallbacksEmpty(TaiheAVSessionCallback::EVENT_SET_TARGET_LOOP_MODE)) {
+            CHECK_RETURN_VOID_THROW_OFF_ERR(session_ != nullptr, "TaiheAVSession object is nullptr");
+            int32_t ret =
+                session_->DeleteSupportCommand(OHOS::AVSession::AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE);
             CHECK_RETURN_VOID_THROW_OFF_ERR(ret == OHOS::AVSession::AVSESSION_SUCCESS, "delete cmd failed");
         }
         RemoveRegisterEvent(eventName);

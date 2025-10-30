@@ -72,7 +72,7 @@ enum DisplayTag : i32 {
 }
 
 union AVCastParameterType {
-  typeInt32: i32;
+  typeDouble: f64;
   typeString: String;
   typeLoopMode: LoopMode;
   typePlaybackSpeed: @sts_type("media.PlaybackSpeed") Opaque;
@@ -434,6 +434,7 @@ interface AVSession {
   OnSeek(callback: (time: i64) => void): void;
   OnSetSpeed(callback: (speed: f64) => void): void;
   OnSetLoopMode(callback: (loopMode: LoopMode) => void): void;
+  OnSetTargetLoopMode(callback: (loopMode: LoopMode) => void): void;
   OnToggleFavorite(callback: (assetId: String) => void): void;
   OnHandleKeyEvent(callback: (event: @sts_type("ohos_multimodalInput_keyEvent.KeyEvent") Opaque) => void): void;
   OnOutputDeviceChange(callback: (state: ConnectionState, device: OutputDeviceInfo) => void): void;
@@ -456,6 +457,7 @@ interface AVSession {
   OffSeek(callback: Optional<(time: i64) => void>): void;
   OffSetSpeed(callback: Optional<(speed: f64) => void>): void;
   OffSetLoopMode(callback: Optional<(loopMode: LoopMode) => void>): void;
+  OffSetTargetLoopMode(callback: Optional<(loopMode: LoopMode) => void>): void;
   OffToggleFavorite(callback: Optional<(assetId: String) => void>): void;
   OffHandleKeyEvent(callback: Optional<(event: @sts_type("ohos_multimodalInput_keyEvent.KeyEvent") Opaque) => void>): void;
   OffOutputDeviceChange(callback: Optional<(state: ConnectionState, device: OutputDeviceInfo) => void>): void;
