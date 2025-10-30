@@ -685,11 +685,14 @@ void HwCastStreamPlayer::CheckIfCancelCastCapsule()
 {
     isPlayingState_ = false;
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelCastCapsule");
+    std::weak_ptr<HwCastStreamPlayer> weakSelf = shared_from_this();
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
-        [this]() {
-            if (sessionCallbackForCastNtf_ && !isPlayingState_) {
-                SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", isPlayingState_);
-                sessionCallbackForCastNtf_(false, false);
+        [weakSelf]() {
+            auto shardPtr = weakSelf.lock();
+            CHECK_AND_RETURN_LOG(shardPtr != nullptr, "CheckIfCancelCastCapsule player is null");
+            if (shardPtr->sessionCallbackForCastNtf_ && !shardPtr->isPlayingState_) {
+                SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", shardPtr->isPlayingState_);
+                shardPtr->sessionCallbackForCastNtf_(false, false);
             }
         }, "CancelCastCapsule", cancelTimeout);
 }
