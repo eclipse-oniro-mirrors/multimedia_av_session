@@ -23,13 +23,16 @@
 #include "avqueue_item.h"
 #include "avcontrol_command.h"
 #include "remote_session_syncer.h"
+#ifdef DATA_OBJECT_ENABLE
 #include "distributed_object.h"
 #include "distributed_objectstore.h"
 #include "objectstore_errors.h"
 #include "avsession_errors.h"
+#endif
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
+#ifdef DATA_OBJECT_ENABLE
 using namespace ObjectStore;
 class RemoteSessionSyncerImpl : public RemoteSessionSyncer, public ObjectWatcher, public StatusNotifier,
     public std::enable_shared_from_this<RemoteSessionSyncerImpl> {
@@ -117,5 +120,6 @@ private:
     std::string sourceDevice_;
     std::string sinkDevice_;
 };
+#endif
 } // namespace OHOS::AVSession
 #endif // OHOS_REMOTE_SESSION_SYNCER_IMPL_H

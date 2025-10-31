@@ -14,6 +14,7 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("../../../../../../config.gni")
 module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
@@ -48,8 +49,6 @@ ohos_fuzztest("AudioAdapterInterfaceFuzzTest") {
     "audio_framework:audio_client",
     "audio_framework:audio_foundation",
     "c_utils:utils",
-    "data_object:distributeddataobject_impl",
-    "device_manager:devicemanagersdk",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -58,5 +57,12 @@ ohos_fuzztest("AudioAdapterInterfaceFuzzTest") {
     "samgr:samgr_proxy",
   ]
   public_configs = ["./../../../../../session:avsession_ipc_config"]
+  if (multimedia_av_session_enable_data_object) {
+    external_deps += [ "data_object:distributeddataobject_impl" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 }
 ###############################################################################

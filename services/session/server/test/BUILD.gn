@@ -95,8 +95,6 @@ common_external_deps = [
   "bounds_checking_function:libsec_shared",
   "cJSON:cjson",
   "c_utils:utils",
-  "device_manager:devicemanagersdk",
-  "dsoftbus:softbus_client",
   "hilog:libhilog",
   "image_framework:image_native",
   "input:libmmi-client",
@@ -109,6 +107,14 @@ common_external_deps = [
   "window_manager:libdm_lite",
 ]
 
+if (multimedia_av_session_enable_dsoftbus) {
+  common_external_deps += [ "dsoftbus:softbus_client" ]
+}
+
+if (multimedia_av_session_enable_device_manager) {
+  common_external_deps += [ "device_manager:devicemanagersdk" ]
+}
+
 common_external_deps_with_third_party = [
   "ability_base:want",
   "ability_runtime:wantagent_innerkits",
@@ -120,8 +126,6 @@ common_external_deps_with_third_party = [
   "bounds_checking_function:libsec_shared",
   "cJSON:cjson",
   "c_utils:utils",
-  "device_manager:devicemanagersdk",
-  "dsoftbus:softbus_client",
   "googletest:gtest_main",
   "hilog:libhilog",
   "image_framework:image_native",
@@ -132,6 +136,14 @@ common_external_deps_with_third_party = [
   "samgr:samgr_proxy",
   "window_manager:libdm_lite",
 ]
+
+if (multimedia_av_session_enable_dsoftbus) {
+  common_external_deps_with_third_party += [ "dsoftbus:softbus_client" ]
+}
+
+if (multimedia_av_session_enable_device_manager) {
+  common_external_deps_with_third_party += [ "device_manager:devicemanagersdk" ]
+}
 
 ohos_unittest("AVSessionUsersManagerTest") {
   module_out_path = module_output_path
@@ -193,8 +205,6 @@ ohos_unittest("AVSessionUsersManagerTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -205,6 +215,14 @@ ohos_unittest("AVSessionUsersManagerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   public_configs = ["../../../session:avsession_ipc_config"]
 }
@@ -260,8 +278,6 @@ ohos_unittest("AVSharedMemoryBaseTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -272,6 +288,14 @@ ohos_unittest("AVSharedMemoryBaseTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   public_configs = ["../../../session:avsession_ipc_config"]
 }
@@ -336,8 +360,6 @@ ohos_unittest("AVSessionServiceAddedTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -348,6 +370,14 @@ ohos_unittest("AVSessionServiceAddedTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -419,8 +449,6 @@ ohos_unittest("AudioDeviceManagerTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -431,6 +459,14 @@ ohos_unittest("AudioDeviceManagerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   public_configs = ["../../../session:avsession_ipc_config"]
 }
@@ -498,8 +534,6 @@ ohos_unittest("AVSessionItemTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -510,6 +544,14 @@ ohos_unittest("AVSessionItemTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -597,8 +639,6 @@ ohos_unittest("AVControllerItemTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -609,6 +649,14 @@ ohos_unittest("AVControllerItemTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -679,8 +727,6 @@ ohos_unittest("MigrateAVSessionProxyTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -691,6 +737,14 @@ ohos_unittest("MigrateAVSessionProxyTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -761,8 +815,6 @@ ohos_unittest("MigrateAVSessionManagerTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -773,6 +825,14 @@ ohos_unittest("MigrateAVSessionManagerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -843,8 +903,6 @@ ohos_unittest("SoftbusSessionManagerSupplementTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -855,6 +913,14 @@ ohos_unittest("SoftbusSessionManagerSupplementTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -926,8 +992,6 @@ ohos_unittest("MigrateAVSessionServerForNextTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -938,6 +1002,14 @@ ohos_unittest("MigrateAVSessionServerForNextTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -1831,8 +1903,6 @@ ohos_unittest("MigrateAVSessionTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -1841,6 +1911,14 @@ ohos_unittest("MigrateAVSessionTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   cflags = []
 
@@ -1906,8 +1984,6 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -1916,6 +1992,14 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   public_configs = ["../../../session:avsession_ipc_config"]
 }
@@ -1968,8 +2052,6 @@ ohos_unittest("AVSessionServiceTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -1980,7 +2062,26 @@ ohos_unittest("AVSessionServiceTest") {
     "window_manager:libdm_lite",
   ]
 
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
   cflags = []
+
+  defines = []
+  if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
@@ -2119,6 +2220,10 @@ ohos_unittest("AppManagerAdapterTest") {
     "window_manager:libdm_lite",
   ]
 
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
   public_configs = ["./../../../session:avsession_ipc_config"]
 }
 
@@ -2194,7 +2299,6 @@ ohos_unittest("BkGrAudioControllerTest") {
     "bounds_checking_function:libsec_shared",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -2296,7 +2400,6 @@ ohos_unittest("SessionStackTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -2306,6 +2409,10 @@ ohos_unittest("SessionStackTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   cflags = []
 
@@ -2373,8 +2480,6 @@ ohos_unittest("AVRouterTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "data_object:distributeddataobject_impl",
-    "device_manager:devicemanagersdk",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -2383,6 +2488,14 @@ ohos_unittest("AVRouterTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (multimedia_av_session_enable_data_object) {
+    external_deps += [ "data_object:distributeddataobject_impl" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -2455,8 +2568,6 @@ ohos_unittest("AVRouterImplTest") {
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
-    "data_object:distributeddataobject_impl",
-    "device_manager:devicemanagersdk",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -2464,6 +2575,14 @@ ohos_unittest("AVRouterImplTest") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (multimedia_av_session_enable_data_object) {
+    external_deps += [ "data_object:distributeddataobject_impl" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -2527,8 +2646,6 @@ if (castplus_cast_engine_enable) {
       "cJSON:cjson",
       "c_utils:utils",
       "cast_engine:cast_engine_client",
-      "data_object:distributeddataobject_impl",
-      "device_manager:devicemanagersdk",
       "googletest:gtest_main",
       "hilog:libhilog",
       "image_framework:image_native",
@@ -2539,6 +2656,15 @@ if (castplus_cast_engine_enable) {
       "samgr:samgr_proxy",
       "window_manager:libdm_lite",
     ]
+
+    if (multimedia_av_session_enable_device_manager) {
+      external_deps += [ "device_manager:devicemanagersdk" ]
+    }
+
+    if (multimedia_av_session_enable_data_object) {
+      external_deps += [ "data_object:distributeddataobject_impl" ]
+    }
+
     public_configs = ["./../../../session:avsession_ipc_config"]
   }
 
@@ -2583,8 +2709,6 @@ if (castplus_cast_engine_enable) {
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "cast_engine:cast_engine_client",
-      "data_object:distributeddataobject_impl",
-      "device_manager:devicemanagersdk",
       "googletest:gtest_main",
       "hilog:libhilog",
       "image_framework:image_native",
@@ -2596,6 +2720,15 @@ if (castplus_cast_engine_enable) {
       "window_manager:libdm_lite",
       "window_manager:libwmutil_base",
     ]
+
+    if (multimedia_av_session_enable_device_manager) {
+      external_deps += [ "device_manager:devicemanagersdk" ]
+    }
+
+    if (multimedia_av_session_enable_data_object) {
+      external_deps += [ "data_object:distributeddataobject_impl" ]
+    }
+
     public_configs = ["./../../../session:avsession_ipc_config"]
   }
 }
@@ -2642,8 +2775,6 @@ if (castplus_cast_engine_enable) {
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "cast_engine:cast_engine_client",
-      "data_object:distributeddataobject_impl",
-      "device_manager:devicemanagersdk",
       "googletest:gtest_main",
       "hilog:libhilog",
       "image_framework:image_native",
@@ -2653,6 +2784,14 @@ if (castplus_cast_engine_enable) {
       "samgr:samgr_proxy",
       "window_manager:libdm_lite",
     ]
+
+    if (multimedia_av_session_enable_device_manager) {
+      external_deps += [ "device_manager:devicemanagersdk" ]
+    }
+
+    if (multimedia_av_session_enable_data_object) {
+      external_deps += [ "data_object:distributeddataobject_impl" ]
+    }
 
     public_configs = ["../../../session:avsession_ipc_config"]
   }
@@ -2677,7 +2816,6 @@ if (castplus_cast_engine_enable) {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
-      "device_manager:devicemanagersdk",
       "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_single",
@@ -2686,6 +2824,10 @@ if (castplus_cast_engine_enable) {
       "samgr:samgr_proxy",
       "window_manager:libdm_lite",
     ]
+
+    if (multimedia_av_session_enable_device_manager) {
+      external_deps += [ "device_manager:devicemanagersdk" ]
+    }
 
     public_configs = ["../../../../services/session:avsession_ipc_config"]
   }

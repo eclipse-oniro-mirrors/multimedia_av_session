@@ -17,9 +17,24 @@ declare_args() {
   multimedia_av_session_enable_trace_control = true
   multimedia_av_session_enable_sysevent_control = true
   multimedia_av_session_enable_hicollie = true
+  multimedia_av_session_enable_data_object = false
+  multimedia_av_session_enable_device_manager = false
+  multimedia_av_session_enable_dsoftbus = false
   if (defined(global_parts_info) &&
       !defined(global_parts_info.hiviewdfx_hicollie)) {
     multimedia_av_session_enable_hicollie = false
+  }
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.distributeddatamgr_data_object)) {
+    multimedia_av_session_enable_data_object = true
+  }
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.distributedhardware_device_manager)) {
+    multimedia_av_session_enable_device_manager = true
+  }
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.communication_dsfotbus)) {
+    multimedia_av_session_enable_dsoftbus = true
   }
 }
 

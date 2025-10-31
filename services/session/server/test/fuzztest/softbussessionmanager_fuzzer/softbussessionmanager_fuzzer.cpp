@@ -48,8 +48,10 @@ T GetData()
 
 class SoftbusSessionListenerDemo : public SoftbusSessionListener {
 public:
+#ifdef DSOFTBUS_ENABLE
     void OnBind(int32_t socket, PeerSocketInfo info) override {};
     void OnShutdown(int32_t socket, ShutdownReason reason) override {};
+#endif
     void OnBytes(int32_t socket, const void *data, int32_t dataLen) override {};
     void OnMessage(int32_t socket, const void *data, int32_t dataLen) override {};
 };
@@ -64,6 +66,7 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     std::string infoName = std::to_string(GetData<uint8_t>());
     std::string infoNetworkId = std::to_string(GetData<uint8_t>());
     std::string infoPkgName = std::to_string(GetData<uint8_t>());
+#ifdef DSOFTBUS_ENABLE
     PeerSocketInfo info = {
         .name = const_cast<char *>(infoName.c_str()),
         .networkId = const_cast<char *>(infoNetworkId.c_str()),
@@ -72,6 +75,7 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     };
     manager_->OnBind(socket, info);
     manager_->OnShutdown(socket, ShutdownReason::SHUTDOWN_REASON_LOCAL);
+#endif
 
     MessageParcel data_;
     data_.WriteRawData(data, size);
@@ -93,9 +97,11 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     if (!isNUll) {
         pkg = to_string(GetData<uint8_t>());
     }
+#ifdef DSOFTBUS_ENABLE
     auto ret = manager_->Socket(pkg);
     manager_->Bind("localhost", pkg);
     manager_->Shutdown(ret);
+#endif
 
     std::string inforOne = std::to_string(GetData<uint8_t>());
     std::string inforTwo = std::to_string(GetData<uint8_t>());
@@ -104,8 +110,10 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     manager_->SendBytes(socket, inforOne);
     manager_->SendBytes(socket, inforTwo);
 
+#ifdef DSOFTBUS_ENABLE
     info.networkId = nullptr;
     manager_->OnBind(socket, info);
+#endif
 
     manager_->AddSessionListener(nullptr);
     std::string sendData = provider.ConsumeRandomLengthString();
@@ -136,16 +144,22 @@ void SoftbusSessionManagerFuzzer::BindFuzzTest()
     CHECK_AND_RETURN(softbusSessionManager != nullptr);
     std::string peerNetworkId = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     std::string pKgName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+#ifdef DSOFTBUS_ENABLE
     softbusSessionManager->Bind(peerNetworkId, pKgName);
+#endif
 }
 
 void SoftbusSessionManagerFuzzer::SendMessageFuzzTest()
 {
     auto softbusSessionManager = std::make_unique<SoftbusSessionManager>();
     CHECK_AND_RETURN(softbusSessionManager != nullptr);
+#ifdef DSOFTBUS_ENABLE
     int32_t socket = provider.ConsumeIntegral<int32_t>();
+#endif
     std::string data = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+#ifdef DSOFTBUS_ENABLE
     softbusSessionManager->SendMessage(socket, data);
+#endif
 }
 
 void SoftbusSessionManagerFuzzer::SendBytesFuzzTest()
@@ -170,34 +184,44 @@ void SoftbusSessionManagerFuzzer::OnBindFuzzTest()
 {
     auto softbusSessionManager = std::make_unique<SoftbusSessionManager>();
     CHECK_AND_RETURN(softbusSessionManager != nullptr);
+#ifdef DSOFTBUS_ENABLE
     int32_t socket = provider.ConsumeIntegral<int32_t>();
+#endif
     std::string infoName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     std::string infoNetworkId = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     std::string infoPkgName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     std::string infoDataType = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+#ifdef DSOFTBUS_ENABLE
     PeerSocketInfo info = {
         .name = const_cast<char *>(infoName.c_str()),
         .networkId = const_cast<char *>(infoNetworkId.c_str()),
         .pkgName = const_cast<char *>(infoPkgName.c_str()),
         .dataType = DATA_TYPE_BYTES,
     };
+#endif
     auto softbusSessionListener = std::make_shared<SoftbusSessionListenerDemo>();
     CHECK_AND_RETURN(softbusSessionListener != nullptr);
     softbusSessionManager->AddSessionListener(softbusSessionListener);
+#ifdef DSOFTBUS_ENABLE
     softbusSessionManager->OnBind(socket, info);
+#endif
 }
 
 void SoftbusSessionManagerFuzzer::OnShutdownFuzzTest()
 {
     auto softbusSessionManager = std::make_unique<SoftbusSessionManager>();
     CHECK_AND_RETURN(softbusSessionManager != nullptr);
+#ifdef DSOFTBUS_ENABLE
     int32_t socket = provider.ConsumeIntegral<int32_t>();
     int32_t reason = provider.ConsumeIntegralInRange<int32_t>(0, STRING_MAX_LENGTH);
     ShutdownReason Reason = static_cast<ShutdownReason>(reason);
+#endif
     auto softbusSessionListener = std::make_shared<SoftbusSessionListenerDemo>();
     CHECK_AND_RETURN(softbusSessionListener != nullptr);
     softbusSessionManager->AddSessionListener(softbusSessionListener);
+#ifdef DSOFTBUS_ENABLE
     softbusSessionManager->OnShutdown(socket, Reason);
+#endif
 }
 
 void SoftbusSessionManagerFuzzer::OnMessageFuzzTest()

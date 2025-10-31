@@ -522,6 +522,7 @@ void AVSessionSystemAbilityLoadCallback::OnLoadSACompleteForRemote(const std::st
         systemAbilityId, static_cast<int>(remoteObject != nullptr));
 }
 
+#ifdef DEVICE_MANAGER_ENABLE
 AVSessionDeviceStateCallback::AVSessionDeviceStateCallback(AVSessionService *ptr)
 {
     SLOGI("AVSessionDeviceStateCallback construct");
@@ -559,17 +560,21 @@ void AVSessionDeviceStateCallback::OnDeviceChanged(const OHOS::DistributedHardwa
 {
     SLOGD("AVSessionDeviceStateCallback OnDeviceChanged %{public}d", static_cast<int>(deviceInfo.deviceTypeId));
 }
+#endif
 
 int32_t AVSessionService::GetLocalDeviceType()
 {
     int32_t deviceType = -1;
+#ifdef DEVICE_MANAGER_ENABLE
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceType(serviceName, deviceType);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "get local device type failed with ret:%{public}d", ret);
+#endif
     return deviceType;
 }
 
 void AVSessionService::DoTargetDevListenWithDM()
 {
+#ifdef DEVICE_MANAGER_ENABLE
     localDeviceType_ = GetLocalDeviceType();
     isCastableDevice_ = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
                localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_TV);
@@ -590,8 +595,10 @@ void AVSessionService::DoTargetDevListenWithDM()
     ret = DistributedHardware::DeviceManager::GetInstance().
         RegisterDevStateCallback(serviceName, "extra", deviceStateCallback_);
     SLOGE("RegisterDevStateCallback with ret:%{public}d", ret);
+#endif
 }
 
+#ifdef DEVICE_MANAGER_ENABLE
 bool AVSessionService::ProcessTargetMigrate(bool isOnline, const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
 {
     if (deviceInfo.deviceTypeId != targetDeviceType_ || !CheckWhetherTargetDevIsNext(deviceInfo)) {
@@ -612,6 +619,7 @@ bool AVSessionService::ProcessTargetMigrate(bool isOnline, const OHOS::Distribut
     }
     return true;
 }
+#endif
 
 void AVSessionService::DoRemoteAVSessionLoad(std::string remoteDeviceId)
 {
@@ -639,6 +647,7 @@ void AVSessionService::DoRemoteAVSessionLoad(std::string remoteDeviceId)
     }).detach();
 }
 
+#ifdef DEVICE_MANAGER_ENABLE
 void AVSessionService::DoConnectProcessWithMigrate(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
 {
     if (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
@@ -736,6 +745,7 @@ void AVSessionService::DoDisconnectProcessWithMigrateProxy(const OHOS::Distribut
         SLOGE("DoDisconnectProcessWithMigrateProxy find networkId not exist");
     }
 }
+#endif
 
 int32_t AVSessionService::DoHisMigrateServerTransform(std::string networkId)
 {
@@ -811,6 +821,7 @@ void AVSessionService::NotifyLocalFrontSessionChangeForMigrate(std::string local
     localFrontSessionId_ = localFrontSessionIdUpdate;
 }
 
+#ifdef DEVICE_MANAGER_ENABLE
 bool AVSessionService::CheckWhetherTargetDevIsNext(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
 {
     cJSON* jsonData = cJSON_Parse(deviceInfo.extraData.c_str());
@@ -836,6 +847,7 @@ bool AVSessionService::CheckWhetherTargetDevIsNext(const OHOS::DistributedHardwa
     cJSON_Delete(jsonData);
     return false;
 }
+#endif
 
 int32_t AVSessionService::GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
     std::vector<sptr<IRemoteObject>>& sessionControllers)

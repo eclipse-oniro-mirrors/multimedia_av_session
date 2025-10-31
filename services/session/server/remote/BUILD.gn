@@ -39,7 +39,6 @@ common_external_deps = [
   "audio_framework:audio_client",
   "cJSON:cjson",
   "c_utils:utils",
-  "data_object:distributeddataobject_impl",
   "graphic_surface:surface",
   "hilog:libhilog",
   "input:libmmi-client",
@@ -51,6 +50,13 @@ common_external_deps = [
 ]
 
 common_cflags = []
+
+defines = []
+
+if (multimedia_av_session_enable_data_object) {
+  defines += [ "DATA_OBJECT_ENABLE" ]
+  common_external_deps += [  "data_object:distributeddataobject_impl" ]
+}
 
 if (castplus_cast_engine_enable) {
   common_cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -80,11 +86,21 @@ ohos_shared_library("remote_session_source") {
   }
   source_sources = [ "remote_session_source_impl.cpp" ]
 
-  syncers = [
-    "remote_session_syncer_impl.cpp",
-    "remote_session_capability_set.cpp",
-    "json_utils.cpp",
-  ]
+  defines = []
+
+  if (multimedia_av_session_enable_data_object) {
+    defines += [ "DATA_OBJECT_ENABLE" ]
+    syncers = [
+      "remote_session_syncer_impl.cpp",
+      "remote_session_capability_set.cpp",
+      "json_utils.cpp",
+    ]
+  } else {
+    syncers = [
+      "remote_session_capability_set.cpp",
+      "json_utils.cpp",
+    ]
+  }
 
   sources = source_sources + syncers
 
@@ -105,11 +121,21 @@ ohos_shared_library("remote_session_sink") {
   }
   sink_sources = [ "remote_session_sink_impl.cpp" ]
 
-  syncers = [
-    "remote_session_syncer_impl.cpp",
-    "remote_session_capability_set.cpp",
-    "json_utils.cpp",
-  ]
+  defines = []
+
+  if (multimedia_av_session_enable_data_object) {
+    defines += [ "DATA_OBJECT_ENABLE" ]
+    syncers = [
+      "remote_session_syncer_impl.cpp",
+      "remote_session_capability_set.cpp",
+      "json_utils.cpp",
+    ]
+  } else {
+    syncers = [
+      "remote_session_capability_set.cpp",
+      "json_utils.cpp",
+    ]
+  }
 
   sources = sink_sources + syncers
 

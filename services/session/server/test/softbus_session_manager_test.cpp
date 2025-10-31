@@ -104,6 +104,7 @@ static HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.L
     EXPECT_EQ(distributed_->serverMap_.size() > 0, true);
 
     int32_t sessionId = 1;
+#ifdef DSOFTBUS_ENABLE
     char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
@@ -115,6 +116,7 @@ static HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.L
     };
     distributed_->SessionOpened(sessionId, info);
     distributed_->SessionClosed(sessionId);
+#endif
     std::string data = "111";
     int32_t socket = 1;
     distributed_->MessageReceived(sessionId, data);
@@ -131,6 +133,7 @@ static HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.L
     SLOGI("SoftbusDistributedTest001 end");
 }
 
+#ifdef DSOFTBUS_ENABLE
 /**
 * @tc.name: CreateSessionServer001
 * @tc.desc:
@@ -194,6 +197,7 @@ static HWTEST_F(SoftbusSessionManagerTest, SendByte001, TestSize.Level0)
     EXPECT_EQ(ret, -1);
     SLOGI("SendByte001 end");
 }
+#endif
 
 /**
 * @tc.name: ObtainPeerDeviceId001
@@ -220,6 +224,7 @@ static HWTEST_F(SoftbusSessionManagerTest, ObtainPeerDeviceId001, TestSize.Level
 static HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level0)
 {
     SLOGI("OnSessionOpened001 begin");
+#ifdef DSOFTBUS_ENABLE
     int32_t sessionId = 123;
     char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
@@ -232,10 +237,11 @@ static HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level0)
     };
     EXPECT_TRUE(manager_ != nullptr);
     manager_->OnBind(sessionId, info);
+#endif
     SLOGI("OnSessionOpened001 end");
 }
 
-
+#ifdef DSOFTBUS_ENABLE
 /**
 * @tc.name: SendMessage002
 * @tc.desc: test SendMessage
@@ -283,6 +289,7 @@ static HWTEST_F(SoftbusSessionManagerTest, SendMessage004, TestSize.Level0)
     EXPECT_EQ(ret, -1);
     SLOGI("SendMessage004 end");
 }
+#endif
 
 /**
 * @tc.name: SendByte002
@@ -363,6 +370,7 @@ static HWTEST_F(SoftbusSessionManagerTest, AddSessionListener001, TestSize.Level
     SLOGI("AddSessionListener001 end");
 }
 
+#ifdef DSOFTBUS_ENABLE
 /**
 * @tc.name: OnBind001
 * @tc.desc: test OnBind
@@ -413,6 +421,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnMessage002, TestSize.Level0)
     manager_->OnMessage(socket, data, dataLen);
     SLOGI("OnMessage002 end");
 }
+#endif
 
 /**
 * @tc.name: CreateServer001
@@ -453,6 +462,7 @@ static HWTEST_F(SoftbusSessionManagerTest, ReleaseServer001, TestSize.Level0)
     SLOGI("ReleaseServer001 end");
 }
 
+#ifdef DSOFTBUS_ENABLE
 /**
 * @tc.name: OnBytes001
 * @tc.desc: set data to nullptr
@@ -549,3 +559,4 @@ static HWTEST_F(SoftbusSessionManagerTest, SendBytesForNext003, TestSize.Level0)
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SendBytesForNext003 end");
 }
+#endif

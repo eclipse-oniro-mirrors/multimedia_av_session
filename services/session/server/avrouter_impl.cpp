@@ -21,7 +21,9 @@
 #include "permission_checker.h"
 #include "avcast_provider_manager.h"
 #include "avsession_sysevent.h"
+#ifdef DEVICE_MANAGER_ENABLE
 #include "device_manager.h"
+#endif
 
 namespace OHOS::AVSession {
 AVRouterImpl::AVRouterImpl()
@@ -32,8 +34,10 @@ AVRouterImpl::AVRouterImpl()
 int32_t AVRouterImpl::GetLocalDeviceType()
 {
     int32_t deviceType = -1;
+#ifdef DEVICE_MANAGER_ENABLE
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceType("av_session", deviceType);
     CHECK_AND_RETURN_RET_LOG(ret == 0, deviceType, "get local device type failed with ret:%{public}d", ret);
+#endif
     return deviceType;
 }
 
@@ -319,6 +323,7 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
     OnCastStateChange(disconnectStateFromCast_, deviceInfo);
     castHandleToInfoMap_.clear();
 
+#ifdef DEVICE_MANAGER_ENABLE
     if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         std::this_thread::sleep_for(std::chrono::milliseconds(castEngineServiceRestartWaitTime));
         StartCastDiscovery(cacheCastDeviceCapability_, cacheDrmSchemes_);
@@ -327,6 +332,7 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
             servicePtr_->checkEnableCast(true);
         }
     }
+#endif
 
     return AVSESSION_SUCCESS;
 }

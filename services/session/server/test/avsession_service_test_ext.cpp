@@ -734,6 +734,7 @@ static HWTEST_F(AVSessionServiceTestExt, ReportStartCastEnd001, TestSize.Level0)
  */
 static HWTEST_F(AVSessionServiceTestExt, ProcessTargetMigrate001, TestSize.Level0)
 {
+#ifdef DEVICE_MANAGER_ENABLE
     bool isOnline = true;
     OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
     deviceInfo.deviceTypeId = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
@@ -742,6 +743,7 @@ static HWTEST_F(AVSessionServiceTestExt, ProcessTargetMigrate001, TestSize.Level
     g_AVSessionService->localDeviceType_ = DistributedHardware::DmDeviceType::DEVICE_TYPE_TV;
     bool ret = g_AVSessionService->ProcessTargetMigrate(isOnline, deviceInfo);
     EXPECT_TRUE(ret);
+#endif
 }
 
 /**
@@ -753,6 +755,7 @@ static HWTEST_F(AVSessionServiceTestExt, ProcessTargetMigrate001, TestSize.Level
  */
 static HWTEST_F(AVSessionServiceTestExt, DoConnectProcessWithMigrateServer001, TestSize.Level0)
 {
+#ifdef DEVICE_MANAGER_ENABLE
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
     OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
     std::string networkId = "test_networkId";
@@ -762,6 +765,7 @@ static HWTEST_F(AVSessionServiceTestExt, DoConnectProcessWithMigrateServer001, T
     g_AVSessionService->migrateAVSessionServerMap_[networkId] = migrateAVSessionServer;
     g_AVSessionService->DoConnectProcessWithMigrateServer(deviceInfo);
     EXPECT_FALSE(g_AVSessionService->migrateAVSessionServerMap_.empty());
+#endif
 }
 
 /**

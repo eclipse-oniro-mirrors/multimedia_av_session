@@ -14,6 +14,7 @@
 # #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("../../../../../../config.gni")
 module_output_path = "av_session/av_session"
 
 # ##############################fuzztest##########################################
@@ -55,9 +56,6 @@ ohos_fuzztest("SoftbusSessionProxyFuzzTest") {
     "background_task_mgr:bgtaskmgr_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
-    "data_object:distributeddataobject_impl",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -67,6 +65,19 @@ ohos_fuzztest("SoftbusSessionProxyFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (multimedia_av_session_enable_data_object) {
+    external_deps += ["data_object:distributeddataobject_impl"]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += ["device_manager:devicemanagersdk"]
+  }
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += ["dsoftbus:softbus_client"]
+  }
+
   public_configs = ["./../../../../../session:avsession_ipc_config"]
 }
 # ###############################################################################

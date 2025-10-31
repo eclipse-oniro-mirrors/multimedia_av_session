@@ -145,7 +145,9 @@ private:
     std::shared_ptr<CastSessionListener> castSessionListener_;
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
+#ifdef DEVICE_MANAGER_ENABLE
     const int32_t castEngineServiceRestartWaitTime = 100;
+#endif
     int32_t deviceType_ = -1;
     std::atomic<bool> isInMirrorToStream_ = false;
     std::atomic<bool> isRemoteCasting_ = false;

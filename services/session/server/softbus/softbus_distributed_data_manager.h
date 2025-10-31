@@ -31,6 +31,7 @@ class SoftbusDistributedDataManager : public std::enable_shared_from_this<Softbu
             ptr_ = ptr;
         }
 
+#ifdef DSOFTBUS_ENABLE
         void OnBind(int32_t socket, PeerSocketInfo info) override
         {
             std::shared_ptr<SoftbusDistributedDataManager> manager = ptr_.lock();
@@ -46,6 +47,7 @@ class SoftbusDistributedDataManager : public std::enable_shared_from_this<Softbu
                 manager->SessionClosed(socket);
             }
         }
+#endif
 
         void OnMessage(int32_t socket, const void *data, int32_t dataLen) override
         {
@@ -89,8 +91,10 @@ public:
     bool ReleaseProxy(const std::shared_ptr<SoftbusSessionProxy> &proxy, const std::string &peerNetworkId);
 
 private:
+#ifdef DSOFTBUS_ENABLE
     void SessionOpened(int32_t socket, PeerSocketInfo info);
     void SessionClosed(int32_t socket);
+#endif
     void MessageReceived(int32_t socket, const std::string &data);
     void BytesReceived(int32_t socket, const std::string &data);
     void OnSessionServerOpened();
@@ -110,12 +114,14 @@ private:
 
     static constexpr const int MESSAGE_CODE_CONNECT_SERVER = 1;
 
+#ifdef DSOFTBUS_ENABLE
     PeerSocketInfo peerSocketInfo = {
         .name = nullptr,
         .networkId = nullptr,
         .pkgName = nullptr,
         .dataType = DATA_TYPE_BYTES,
     };
+#endif
     std::string socketNameCache_;
 
     bool isServer_ = true;

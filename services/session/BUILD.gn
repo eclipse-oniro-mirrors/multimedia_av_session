@@ -217,9 +217,7 @@ av_session_ohos_library("avsession_service") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "distributed_notification_service:ans_innerkits",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "init:libbegetutil",
@@ -229,6 +227,16 @@ av_session_ohos_library("avsession_service") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    defines += [ "DSOFTBUS_ENABLE" ]
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -273,11 +281,15 @@ av_session_ohos_library("avsession_service") {
   }
 
   public_external_deps = [
-    "data_object:distributeddataobject_impl",
     "cJSON:cjson",
     "openssl:libcrypto_shared",
     "relational_store:native_rdb",
   ]
+
+  if (multimedia_av_session_enable_data_object) {
+    defines += [ "DATA_OBJECT_ENABLE" ]
+    public_external_deps += [ "data_object:distributeddataobject_impl" ]
+  }
 
   subsystem_name = "multimedia"
   part_name = "av_session"
@@ -368,8 +380,6 @@ if (castplus_cast_engine_enable) {
       "bundle_framework:appexecfwk_core",
       "cJSON:cjson",
       "c_utils:utils",
-      "data_object:distributeddataobject_impl",
-      "device_manager:devicemanagersdk",
       "graphic_surface:surface",
       "hilog:libhilog",
       "image_framework:image_native",
@@ -378,6 +388,16 @@ if (castplus_cast_engine_enable) {
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
+
+    if (multimedia_av_session_enable_device_manager) {
+      defines += [ "DEVICE_MANAGER_ENABLE" ]
+      external_deps += [ "device_manager:devicemanagersdk" ]
+    }
+
+    if (multimedia_av_session_enable_data_object) {
+      defines += [ "DATA_OBJECT_ENABLE" ]
+      external_deps += [ "data_object:distributeddataobject_impl" ]
+    }
 
     if (castplus_cast_engine_enable) {
       cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -565,7 +585,6 @@ av_session_ohos_library("avsession_item") {
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "graphic_surface:surface",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -574,6 +593,11 @@ av_session_ohos_library("avsession_item") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
@@ -613,11 +637,15 @@ av_session_ohos_library("avsession_item") {
   }
 
   public_external_deps = [
-    "data_object:distributeddataobject_impl",
     "cJSON:cjson",
     "openssl:libcrypto_shared",
     "relational_store:native_rdb",
   ]
+
+  if (multimedia_av_session_enable_data_object) {
+    defines += [ "DATA_OBJECT_ENABLE" ]
+    public_external_deps += [ "data_object:distributeddataobject_impl" ]
+  }
 
   subsystem_name = "multimedia"
   part_name = "av_session"
@@ -711,8 +739,6 @@ av_session_ohos_library("avsession_cast_item") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "data_object:distributeddataobject_impl",
-    "device_manager:devicemanagersdk",
     "graphic_surface:surface",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -720,6 +746,16 @@ av_session_ohos_library("avsession_cast_item") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (multimedia_av_session_enable_data_object) {
+    defines += [ "DATA_OBJECT_ENABLE" ]
+    external_deps += [ "data_object:distributeddataobject_impl" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
