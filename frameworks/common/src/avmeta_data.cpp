@@ -108,7 +108,7 @@ bool AVMetaData::ReadFromParcel(MessageParcel& in, int32_t twoImageLength)
         mediaImageBuffer.push_back((uint8_t)buffer[i]);
     }
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    SetMediaImage(mediaPixelMap);
+    (mediaImageLength > 0) ? SetMediaImage(mediaPixelMap) : (void)0;
 
     CHECK_AND_RETURN_RET_LOG(twoImageLength > mediaImageLength, true,
                              "twoImageLength <= mediaImageLength");

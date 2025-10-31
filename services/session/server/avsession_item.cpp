@@ -185,16 +185,16 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
 {
     {
         std::lock_guard lockGuard(destroyLock_);
-        if (isDestroyed_) {
-            SLOGI("session is already destroyed");
-            return AVSESSION_SUCCESS;
-        }
+        CHECK_AND_RETURN_RET_LOG(!isDestroyed_, AVSESSION_SUCCESS, "session is already destroyed.");
         isDestroyed_ = true;
     }
 
     std::string sessionId = descriptor_.sessionId_;
-    std::string fileName = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
-    AVSessionUtils::DeleteFile(fileName);
+    std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileNameLocal);
+    std::string fileNameCast =
+        AVSessionUtils::GetCachePathNameForCast(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileNameCast);
     DelRecommend();
     std::list<sptr<AVControllerItem>> controllerList;
     {
@@ -2085,11 +2085,12 @@ AVMetaData AVSessionItem::GetMetaData()
     return metaData_;
 }
 
-void AVSessionItem::ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap)
+void AVSessionItem::ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap, bool isCast)
 {
     std::shared_lock<std::shared_mutex> lock(writeAndReadImgLock_);
     std::string sessionId = GetSessionId();
-    std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+    std::string fileDir = isCast ?
+        AVSessionUtils::GetCachePathNameForCast(userId_) : AVSessionUtils::GetCachePathName(userId_);
     std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
 }

@@ -352,7 +352,7 @@ public:
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 
-    void ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap);
+    void ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap, bool isCast = false);
     void ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& avQueuePixelMap);
 
 protected:

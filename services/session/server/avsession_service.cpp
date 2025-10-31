@@ -4295,11 +4295,11 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         static_cast<int>(historyDescriptor != nullptr), userId);
     if (addCapsule && topSession_) {
         std::shared_ptr<AVSessionPixelMap> iPixelMap = std::make_shared<AVSessionPixelMap>();
-        topSession_->ReadMetaDataImg(iPixelMap);
         AVQueueItem item;
         topSession_->GetCurrentCastItem(item);
-        std::string notifyText = item.GetDescription() && !item.GetDescription()->GetPcmSrc() ?
-            item.GetDescription()->GetTitle() : GetLocalTitle();
+        bool isCast = item.GetDescription() && !item.GetDescription()->GetPcmSrc();
+        topSession_->ReadMetaDataImg(iPixelMap, isCast);
+        std::string notifyText = isCast ? item.GetDescription()->GetTitle() : GetLocalTitle();
         AddCapsule(notifyText, isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckCardStateChangeStop");
         hasCardStateChangeStopTask_ = false;
