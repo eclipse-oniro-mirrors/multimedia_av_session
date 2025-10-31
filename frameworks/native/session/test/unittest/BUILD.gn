@@ -227,6 +227,8 @@ ohos_unittest("AVPlaybackStateTest") {
 
   configs = [ ":module_private_config" ]
 
+  cflags_cc = [ "-fno-access-control" ]
+
   deps = common_deps
 
   external_deps = common_external_deps

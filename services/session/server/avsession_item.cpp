@@ -507,13 +507,55 @@ void AVSessionItem::UpdateMetaData(const AVMetaData& meta)
     }
 }
 
+void AVSessionItem::ReadMediaAndAVQueueImg(AVMetaData::MetaMaskType recordFilter, AVMetaData& oldData,
+    AVMetaData newData)
+{
+    if (recordFilter.test(AVMetaData::META_KEY_AVQUEUE_IMAGE) && newData.GetAVQueueImage() != nullptr &&
+            newData.GetAVQueueImage()->GetInnerImgBuffer().size() > 0 && !newData.GetAVQueueName().empty() &&
+            !newData.GetAVQueueId().empty()) {
+        std::shared_ptr<AVSessionPixelMap> avQueueImage = oldData.GetAVQueueImage();
+        ReadMetaDataAVQueueImg(avQueueImage);
+        if (avQueueImage != nullptr && avQueueImage->GetInnerImgBuffer().size() > 0) {
+            oldData.SetAVQueueImage(avQueueImage);
+        }
+    }
+
+    if (recordFilter.test(AVMetaData::META_KEY_MEDIA_IMAGE) && newData.GetMediaImage() != nullptr &&
+        newData.GetMediaImage()->GetInnerImgBuffer().size() > 0) {
+        std::shared_ptr<AVSessionPixelMap> mediaImage = oldData.GetMediaImage();
+        ReadMetaDataImg(mediaImage);
+        if (mediaImage != nullptr && mediaImage->GetInnerImgBuffer().size() > 0) {
+            oldData.SetMediaImage(mediaImage);
+        }
+    }
+}
+
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
+    AVMetaData::MetaMaskType recordFilter;
+    AVMetaData::MetaMaskType changedDataMask;
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                AVMetaData::MetaMaskType controllerFilter;
+                controller->GetMetaFilter(controllerFilter);
+                if (!controllerFilter.all()) {
+                    recordFilter |= controllerFilter;
+                }
+            }
+        }
+    }
+    if (recordFilter.any()) {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        ReadMediaAndAVQueueImg(recordFilter, metaData_, meta);
+        changedDataMask = metaData_.GetChangedDataMask(recordFilter, meta);
+    }
     UpdateMetaData(meta);
     CheckUseAVMetaData(meta);
     SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d, isAlive:%{public}d",
         meta.GetTitle().c_str(), static_cast<int>(GetPid()), (isAlivePtr_ == nullptr) ? -1 : *isAlivePtr_);
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_]() {
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_, changedDataMask]() {
         std::lock_guard aliveLockGuard(isAliveLock_);
         CHECK_AND_RETURN_LOG(isAlivePtr != nullptr && *isAlivePtr, "handle metadatachange with session gone, return");
         SLOGI("HandleMetaDataChange in postTask with title %{public}s and size %{public}d",
@@ -522,7 +564,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");
         for (const auto& [pid, controller] : controllers_) {
             if (controller != nullptr) {
-                controller->HandleMetaDataChange(meta);
+                controller->HandleMetaDataChange(meta, changedDataMask);
             }
         }
         }, "HandleMetaDataChange", 0);
@@ -708,10 +750,31 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::CreateWantAgentWithIndex(
     return *launchAbility;
 }
 
+AVPlaybackState::PlaybackStateMaskType AVSessionItem::GetControlItemsPlaybackFilter()
+{
+    AVPlaybackState::PlaybackStateMaskType recordFilter;
+    std::lock_guard controllerLockGuard(controllersLock_);
+    for (const auto& [pid, controller] : controllers_) {
+        if (controller != nullptr) {
+            AVPlaybackState::PlaybackStateMaskType controllerFilter;
+            controller->GetPlaybackFilter(controllerFilter);
+            if (!controllerFilter.all()) {
+                recordFilter |= controllerFilter;
+            }
+        }
+    }
+    return recordFilter;
+}
+
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
+    AVPlaybackState::PlaybackStateMaskType recordFilter = GetControlItemsPlaybackFilter();
+    AVPlaybackState::PlaybackStateMaskType changedStateMask;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
+        if (recordFilter.any()) {
+            changedStateMask = playbackState_.GetChangedStateMask(recordFilter, state);
+        }
         CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
     }
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
@@ -725,7 +788,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
         if (controllers_.size() > 0) {
             for (const auto& [pid, controller] : controllers_) {
                 if (controller != nullptr) {
-                    controller->HandlePlaybackStateChange(state);
+                    controller->HandlePlaybackStateChange(state, changedStateMask);
                 }
             }
         }

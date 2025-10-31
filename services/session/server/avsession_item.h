@@ -153,6 +153,8 @@ public:
 
     AVSessionDescriptor GetDescriptor();
 
+    AVPlaybackState::PlaybackStateMaskType GetControlItemsPlaybackFilter();
+
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
 
     AVCallState GetAVCallState();
@@ -395,6 +397,7 @@ private:
     void CheckUseAVMetaData(const AVMetaData& meta);
     void PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo);
     void DelRecommend();
+    void ReadMediaAndAVQueueImg(AVMetaData::MetaMaskType recordFilter, AVMetaData& oldData, AVMetaData newData);
     void UpdateMetaData(const AVMetaData& meta);
     void UpdateRecommendInfo(bool needRecommend);
     bool SearchSpidInCapability(const std::string& deviceId);
