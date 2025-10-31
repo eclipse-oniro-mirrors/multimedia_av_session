@@ -56,7 +56,7 @@ ani_object TaiheUtils::CreateAniEmptyRecord()
     CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find escompat.Record", aniRecord);
 
     ani_method constructor {};
-    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "C{std.core.Object}:", &constructor) == ANI_OK,
+    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "Y:", &constructor) == ANI_OK,
         "Can't find method <ctor> in escompat.Record", aniRecord);
 
     CHECK_RETURN(env->Object_New(cls, constructor, &aniRecord, nullptr) == ANI_OK,
@@ -325,7 +325,7 @@ int32_t TaiheUtils::GetAniPropertyInt32Array(ani_env *env, ani_object obj, const
         "Call method <get>length failed", OHOS::AVSession::AVSESSION_ERROR);
     for (ani_int i = 0; i < static_cast<ani_int>(length); i++) {
         ani_ref ref;
-        CHECK_RETURN(env->Object_CallMethodByName_Ref(valueObj, "$_get", "i:C{std.core.Object}", &ref, i) == ANI_OK,
+        CHECK_RETURN(env->Object_CallMethodByName_Ref(valueObj, "$_get", "i:Y", &ref, i) == ANI_OK,
             "Call method $_get failed.", OHOS::AVSession::AVSESSION_ERROR);
 
         int32_t value = 0;
