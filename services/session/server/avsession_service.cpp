@@ -439,6 +439,7 @@ bool AVSessionService::SubscribeCommonEvent()
     }
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
+    CHECK_AND_RETURN_RET_LOG(subscriber_ == nullptr, true, "already have subscriber");
     subscriber_ = std::make_shared<EventSubscriber>(subscribeInfo, this);
     return EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
