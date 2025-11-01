@@ -148,6 +148,7 @@ napi_status NapiAVSessionController::NewInstance(
     napiController->controller_ = std::move(nativeController);
     napiController->sessionId_ = napiController->controller_->GetSessionId();
 
+    CHECK_RETURN(DoRegisterCallback(env, napiController) == napi_ok, "add callback failed", napi_generic_failure);
     SLOGD("add napiController instance prelock for sessionId: %{public}s***",
         napiController->sessionId_.substr(0, ARGC_THREE).c_str());
     std::lock_guard<std::mutex> lock(controllerListMutex_);
@@ -1475,14 +1476,8 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
     CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "napiController null");
     std::string controllerId = napiController->sessionId_;
     SLOGI("DoRegisterCallback with sessionId: %{public}s***", controllerId.substr(0, ARGC_THREE).c_str());
-    CHECK_AND_RETURN_RET_LOG(ControllerList_.find(controllerId) != ControllerList_.end(),
-        napi_generic_failure, "repeatedNapiController null");
-    NapiAVSessionController* repeatedNapiController = &(ControllerList_[controllerId]);
-    CHECK_AND_RETURN_RET_LOG(repeatedNapiController != nullptr, napi_generic_failure, "repeatedNapiController null");
-    napiController->callback_ = repeatedNapiController->callback_;
     if (napiController->callback_ == nullptr) {
         napiController->callback_ = std::make_shared<NapiAVControllerCallback>();
-        repeatedNapiController->callback_ = napiController->callback_;
         if (napiController->callback_ == nullptr) {
             SLOGE("OnEvent failed : no memory");
             NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
