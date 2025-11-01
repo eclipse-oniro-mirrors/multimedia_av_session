@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "int_wrapper.h"
 #include "securec.h"
 #include "string_wrapper.h"
 #include "avsession_item.h"
@@ -313,6 +314,7 @@ void AvControllerItemTest()
     ResourceAutoDestroy<sptr<AVControllerItem>> avControllerItemRelease(avControllerItem);
     AvControllerItemTestImpl(avControllerItem);
     AvControllerItemTestImplSecond(avControllerItem);
+    AvControllerItemTestImplThird(avControllerItem);
     service->OnStop();
     SLOGI("AvControllerItemTest done");
 }
@@ -322,11 +324,17 @@ void AvControllerItemTestImpl(sptr<AVControllerItem> avControllerItem)
     std::string deviceId = GetString();
     AVPlaybackState controllerBackState;
     controllerBackState.SetState(GetData<int32_t>());
-    avControllerItem->HandlePlaybackStateChange(controllerBackState);
+    auto controllerBackStateCopy = std::make_shared<AVPlaybackState>();
+    controllerBackStateCopy->CopyFrom(controllerBackState);
+    AVPlaybackState::PlaybackStateMaskType playbackStateMaskType = {};
+    avControllerItem->HandlePlaybackStateChange(controllerBackState, playbackStateMaskType);
     AVMetaData controllerMetaData;
     controllerMetaData.Reset();
     controllerMetaData.SetAssetId(deviceId);
-    avControllerItem->HandleMetaDataChange(controllerMetaData);
+    auto metadataCopy = std::make_shared<AVMetaData>();
+    metadataCopy->CopyFrom(controllerMetaData);
+    AVMetaData::MetaMaskType metaDataMaskType = {};
+    avControllerItem->HandleMetaDataChange(controllerMetaData, metaDataMaskType);
     avControllerItem->HandleActiveStateChange(GetData<bool>());
     std::vector<int32_t> controlCmds;
     controlCmds.push_back(GetData<int32_t>());
@@ -390,6 +398,89 @@ void AvControllerItemTestImplSecond(sptr<AVControllerItem> avControllerItem)
     avMetaData.SetAVQueueImage(mediaPixelMap);
     avControllerItem->DoMetadataImgClean(avMetaData);
     avControllerItem->GetElementOfSession();
+}
+
+void CreateAVPlaybackState(AVPlaybackState& state)
+{
+    std::shared_ptr<AAFwk::WantParams> wantParams1 = std::make_shared<AAFwk::WantParams>();
+    wantParams1->SetParam("customData1", AAFwk::String::Box(GetString()));
+    std::shared_ptr<AAFwk::WantParams> wantParams2 = std::make_shared<AAFwk::WantParams>();
+    wantParams2->SetParam("customData2", AAFwk::Integer::Box(GetData<uint8_t>()));
+    std::vector<std::shared_ptr<AAFwk::WantParams>> wantParamsVec = { wantParams1, wantParams2, nullptr};
+
+    state.SetState(GetData<int32_t>());
+    state.SetSpeed(GetData<int64_t>());
+    state.SetPosition({GetData<int64_t>(), GetData<int64_t>()});
+    state.SetBufferedTime(GetData<int64_t>());
+    state.SetLoopMode(GetData<int32_t>());
+    state.SetFavorite(GetData<bool>());
+    state.SetActiveItemId(GetData<int32_t>());
+    state.SetVolume(GetData<int32_t>());
+    state.SetMaxVolume(GetData<int32_t>());
+    state.SetMuted(GetData<bool>());
+    state.SetDuration(GetData<int32_t>());
+    state.SetVideoWidth(GetData<int32_t>());
+    state.SetVideoHeight(GetData<int32_t>());
+    state.SetExtras(wantParamsVec[GetData<uint32_t>() % wantParamsVec.size()]);
+}
+
+void CreateAVMetaData(AVMetaData& metaData)
+{
+    std::shared_ptr<AVSessionPixelMap> pixelMap1 = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5, 6, 7, 8};
+    pixelMap1->SetInnerImgBuffer(imgBuffer);
+    std::shared_ptr<AVSessionPixelMap> pixelMap2 = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer3 = {8, 7, 6, 5, 4, 3, 2, 1};
+    pixelMap2->SetInnerImgBuffer(imgBuffer3);
+    std::shared_ptr<AVSessionPixelMap> pixelMap3 = std::make_shared<AVSessionPixelMap>();
+    std::vector<std::shared_ptr<AVSessionPixelMap>> pixelMapVec = { pixelMap1, pixelMap2, pixelMap3, nullptr};
+
+    metaData.SetAssetId(GetString());
+    metaData.SetTitle(GetString());
+    metaData.SetArtist(GetString());
+    metaData.SetAuthor(GetString());
+    metaData.SetAlbum(GetString());
+    metaData.SetWriter(GetString());
+    metaData.SetComposer(GetString());
+    metaData.SetDuration(GetData<int64_t>());
+    metaData.SetMediaImage(pixelMapVec[GetData<uint32_t>() % pixelMapVec.size()]);
+    metaData.SetMediaImageUri(GetString());
+    metaData.SetPublishDate(GetData<double>());
+    metaData.SetSubTitle(GetString());
+    metaData.SetDescription(GetString());
+    metaData.SetLyric(GetString());
+    metaData.SetSingleLyricText(GetString());
+    metaData.SetPreviousAssetId(GetString());
+    metaData.SetNextAssetId(GetString());
+    metaData.SetSkipIntervals(GetData<int32_t>());
+    metaData.SetFilter(GetData<int32_t>());
+    metaData.SetMediaLength(GetData<int32_t>());
+    metaData.SetAVQueueLength(GetData<int32_t>());
+    metaData.SetDisplayTags(GetData<int32_t>());
+    metaData.SetDrmSchemes({GetString(), GetString()});
+}
+
+void AvControllerItemTestImplThird(sptr<AVControllerItem> avControllerItem)
+{
+    AVMetaData::MetaMaskType filter;
+    for (int32_t i = 0; i < AVMetaData::META_KEY_MAX; i++) {
+        filter.set(GetData<bool>());
+    }
+    avControllerItem->SetMetaFilter(filter);
+    AVPlaybackState::PlaybackStateMaskType playFilter;
+    for (int32_t i = 0; i < AVPlaybackState::PLAYBACK_KEY_MAX; i++) {
+        playFilter.set(GetData<bool>());
+    }
+    avControllerItem->SetPlaybackFilter(playFilter);
+
+    std::string deviceId = GetString();
+    AVPlaybackState newPlayBackState = {};
+    CreateAVPlaybackState(newPlayBackState);
+    avControllerItem->HandlePlaybackStateChange(newPlayBackState, playFilter);
+
+    AVMetaData newAVMetaData;
+    CreateAVMetaData(newAVMetaData);
+    avControllerItem->HandleMetaDataChange(newAVMetaData, filter);
 }
 
 /* Fuzzer entry point */

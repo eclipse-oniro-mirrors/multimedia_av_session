@@ -35,6 +35,10 @@ public:
 
     bool Marshalling(Parcel& parcel) const override;
     static AVSessionPixelMap* Unmarshalling(Parcel& data);
+    AVSessionPixelMap(AVSessionPixelMap& other)
+    {
+        SetInnerImgBuffer(other.GetInnerImgBuffer());
+    }
 
     void Clear()
     {
@@ -54,6 +58,14 @@ public:
         std::lock_guard lockGuard(bufferLock_);
         innerImgBuffer_.clear();
         innerImgBuffer_ = imgBuffer;
+    }
+
+    bool Equals(AVSessionPixelMap& other)
+    {
+        std::unique_lock lock1(bufferLock_, std::defer_lock);
+        std::unique_lock lock2(other.bufferLock_, std::defer_lock);
+        std::lock(lock1, lock2);
+        return innerImgBuffer_ == other.innerImgBuffer_;
     }
 
 private:

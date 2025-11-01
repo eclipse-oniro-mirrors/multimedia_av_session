@@ -575,29 +575,38 @@ HWTEST_F(AvsessionTest, SetAVMetaData002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetAVMetaData003
- * @tc.desc: Return the result of set av meta data
- * @tc.type: FUNC
- * @tc.require: 1820
- */
+* @tc.name: SetAVMetaData003
+* @tc.desc: Return the result of set av meta data
+* @tc.type: FUNC
+* @tc.require: 1810
+*/
 HWTEST_F(AvsessionTest, SetAVMetaData003, TestSize.Level1)
 {
     SLOGE("SetAVMetaData003 Begin");
-    g_metaData.Reset();
-    g_metaData.SetAssetId("123");
-    g_metaData.SetTitle("Black Humor");
-    g_metaData.SetMediaImageUri("xxxxx");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetMediaImage(nullptr);
+    metaData.SetAVQueueImage(nullptr);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+
+    metaData.SetAVQueueId("123");
+    metaData.SetAVQueueName("queue_name");
     std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
-    std::vector<uint8_t> imgBuffer1 = {1, 2, 3, 4};
-    pixelMap->SetInnerImgBuffer(imgBuffer1);
-    g_metaData.SetMediaImage(pixelMap);
-    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
-    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
-    std::vector<uint8_t> imgBuffer2 = {4, 3, 2, 1};
-    pixelMap->SetInnerImgBuffer(imgBuffer2);
-    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
-    g_metaData.SetMediaImageUri("");
-    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5, 6, 7, 8};
+    pixelMap->SetInnerImgBuffer(imgBuffer);
+    metaData.SetMediaImage(pixelMap);
+    metaData.SetAVQueueImage(pixelMap);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+
+    std::shared_ptr<AVSessionPixelMap> emptyPixelMap = std::make_shared<AVSessionPixelMap>();
+    emptyPixelMap->SetInnerImgBuffer(imgBuffer);
+    metaData.SetMediaImage(emptyPixelMap);
+    metaData.SetAVQueueImage(emptyPixelMap);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     SLOGE("SetAVMetaData003 End");
 }
 
