@@ -132,7 +132,7 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     int32_t ret = ReadImgForMetaData(data);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ReadImgForMetaData with ret:%{public}d", ret);
     if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
-        SLOGD("isFromSession %{public}d in metaGet", isFromSession_);
+        SLOGI("isFromSession %{public}d", isFromSession_);
         if (isFromSession_) {
             data.GetMediaImage()->Clear();
         } else {

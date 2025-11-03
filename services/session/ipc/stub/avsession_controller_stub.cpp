@@ -21,6 +21,9 @@
 #include "session_xcollie.h"
 
 namespace OHOS::AVSession {
+
+std::recursive_mutex AVSessionControllerStub::getMetadataLock_;
+
 bool AVSessionControllerStub::CheckInterfaceToken(MessageParcel& data)
 {
     auto localDescriptor = IAVSessionController::GetDescriptor();
@@ -150,8 +153,6 @@ int32_t AVSessionControllerStub::HandleGetAVMetaData(MessageParcel& data, Messag
         SLOGD("ImgSetLoop get controller isFromSession true");
     } else {
         ret = AVSESSION_SUCCESS;
-        SLOGD("ImgSetLoop get controller isFromSession false, set empty");
-        metaData.SetMediaImageUri("");
     }
     reply.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");

@@ -347,7 +347,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     }
     if (avQueueItem.GetDescription() != nullptr && (avQueueItem.GetDescription()->GetIcon() != nullptr &&
         avQueueItem.GetDescription()->GetIconUri() == "URI_CACHE")) {
-        std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+        std::string fileDir = AVSessionUtils::GetCachePathNameForCast(userId_);
         AVSessionUtils::WriteImageToFile(avQueueItem.GetDescription()->GetIcon(),
             fileDir, sessionId_ + AVSessionUtils::GetFileSuffix());
     }
