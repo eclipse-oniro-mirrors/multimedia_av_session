@@ -2249,6 +2249,7 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const Com
         static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()));
     if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
         AVControlCommand cmd;
+        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
         cmd.SetRewindTime(metaData_.GetSkipIntervals());
         cmd.SetForwardTime(metaData_.GetSkipIntervals());
         cmd.SetCommandInfo(cmdInfo);

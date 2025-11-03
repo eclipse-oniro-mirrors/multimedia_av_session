@@ -2801,13 +2801,16 @@ bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand
     }
     CHECK_AND_RETURN_RET_LOG(procSession != nullptr, false, "handlevent session is null");
     SLOGI("CheckSessionHandleKeyEvent procSession:%{public}s", procSession->GetBundleName().c_str());
+    CommandInfo cmdInfo;
+    if (deviceId != "") {
+        cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
+        cmdInfo.SetDeviceId(deviceId);
+    }
     if (procCmd) {
+        cmd.SetCommandInfo(cmdInfo);
         procSession->ExecuteControllerCommand(cmd);
         SLOGI("CheckSessionHandleKeyEvent proc cmd:%{public}d", cmd.GetCommand());
     } else {
-        CommandInfo cmdInfo;
-        cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
-        cmdInfo.SetDeviceId(deviceId);
         procSession->HandleMediaKeyEvent(keyEvent, cmdInfo);
         SLOGI("CheckSessionHandleKeyEvent proc event:%{public}d", keyEvent.GetKeyCode());
     }
@@ -2919,7 +2922,7 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
             if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
                 auto keyEvent = MMI::KeyEvent::Create();
                 CHECK_AND_RETURN_LOG(keyEvent != nullptr, "handle event keyevent is null");
-                CheckSessionHandleKeyEvent(true, command, *keyEvent, session);
+                CheckSessionHandleKeyEvent(true, command, *keyEvent, session, deviceId);
                 SLOGI("ExecuteCommand %{public}d for front session: %{public}s", command.GetCommand(),
                       session->GetBundleName().c_str());
                 return;
