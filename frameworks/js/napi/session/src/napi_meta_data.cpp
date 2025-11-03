@@ -519,6 +519,13 @@ napi_status NapiMetaData::SetMediaImageUri(napi_env env, const AVMetaData& in, n
         SLOGI("mediaImage uri empty");
         return napi_ok;
     }
+    napi_value propertyGet {};
+    napi_valuetype type = napi_undefined;
+    auto statusGet = napi_get_named_property(env, out, "mediaImage", &propertyGet);
+    if ((statusGet == napi_ok) && (propertyGet != nullptr)) {
+        statusGet = napi_typeof(env, propertyGet, &type);
+        CHECK_AND_RETURN_RET_LOG(!(statusGet == napi_ok && type == napi_object), statusGet, "mediaImg is pixel");
+    }
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, uri, property);
