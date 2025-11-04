@@ -1064,6 +1064,7 @@ void HwCastStreamPlayer::OnAvailableCapabilityChanged(const CastEngine::StreamCa
     SLOGE("Received OnAvailableCapabilityChanged callback");
     std::vector<int32_t> supportedCastCmds;
     checkCmdsFromAbility(streamCapability, supportedCastCmds);
+    std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
     for (auto listener : streamPlayerListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnValidCommandChange for registered listeners");
