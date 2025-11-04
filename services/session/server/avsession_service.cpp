@@ -4257,13 +4257,15 @@ std::string AVSessionService::GetLocalTitle()
         if (pos != std::string::npos) {
             songName = description.substr(0, pos);
         }
-        SLOGI("GetLocalTitle description:%{public}s, title:%{public}s", description.c_str(), songName.c_str());
+        SLOGI("GetLocalTitle description:%{public}s, title:%{public}s", description.c_str(),
+            AVSessionUtils::GetAnonyTitle(songName.c_str()).c_str());
     } else if (isAncoLyric) {
         songName = topSession_->GetLyricTitle();
-        SLOGI("GetLocalTitle isAncoLyric title:%{public}s", songName.c_str());
+        SLOGI("GetLocalTitle isAncoLyric title:%{public}s",
+            AVSessionUtils::GetAnonyTitle(songName.c_str()).c_str());
     }
     std::string localTitle = (isTitleLyric || isAncoLyric) && !songName.empty() ? songName : meta.GetTitle();
-    SLOGI("GetLocalTitle localTitle:%{public}s", localTitle.c_str());
+    SLOGI("GetLocalTitle localTitle:%{public}s", AVSessionUtils::GetAnonyTitle(songName.c_str()).c_str());
     return localTitle;
 }
 

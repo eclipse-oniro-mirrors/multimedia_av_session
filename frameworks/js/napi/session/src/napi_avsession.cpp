@@ -17,6 +17,7 @@
 
 #include "napi_avsession.h"
 #include "avsession_controller.h"
+#incldue "avsession_utils.h"
 #include "napi_utils.h"
 #include "napi_avcall_meta_data.h"
 #include "napi_avcall_state.h"
@@ -523,7 +524,8 @@ napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
 
 int32_t DoDownload(AVMetaData& meta, const std::string uri)
 {
-    SLOGI("DoDownload with title %{public}s", meta.GetTitle().c_str());
+    SLOGI("DoDownload with title %{public}s",
+        AVSessionUtils::GetAnonyTitle(meta.GetTitle().c_str()).c_str());
 
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);

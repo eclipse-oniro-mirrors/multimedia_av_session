@@ -188,6 +188,70 @@ public:
         return ret;
     }
 
+    static std::string GetAnonyTitle(const std::string& title, double ratio = 0.3)
+    {
+        if (title.empty()) return "";
+        // UTF-8字符边界常量
+        const unsigned char UTF8_CONTINUATION_BYTE_MASK = 0xC0;    // 11000000
+        const unsigned char UTF8_CONTINUATION_BYTE_VALUE = 0x80;   // 10000000
+        const unsigned char UTF8_3BYTE_START_MIN = 0xE0;           // 11100000
+        const unsigned char UTF8_3BYTE_START_MAX = 0xEF;           // 11101111
+        // 统计字符位置（处理UTF-8多字节字符）
+        std::vector<int> char_positions;
+        for (size_t i = 0; i < title.size(); ++i) {
+            if ((static_cast<unsigned char>(title[i]) & UTF8_CONTINUATION_BYTE_MASK) != UTF8_CONTINUATION_BYTE_VALUE) {
+                char_positions.push_back(i);
+            }
+        }
+        const int char_count = char_positions.size();
+        // 特殊处理短字符串
+        const int VERY_SHORT_TEXT_LENGTH = 3;
+        if (char_count <= VERY_SHORT_TEXT_LENGTH) {
+            // 3字节UTF-8字符的特殊处理
+            if (char_count == 3) {
+                const unsigned char first_byte = static_cast<unsigned char>(title[0]);
+                if (first_byte >= UTF8_3BYTE_START_MIN && first_byte <= UTF8_3BYTE_START_MAX) {
+                    return "*" + title + "*";
+                }
+            }
+            // 2字符文本的处理
+            if (char_count == 2) {
+                return std::string(1, title[0]) + "***";
+            }
+            // 单字符直接返回
+            return "*" + title + "*";
+        }
+        // 掩码参数配置
+        const int SHORT_TEXT_THRESHOLD = 7;                              // 短文本阈值
+        const int LONG_TEXT_FRONT_KEEP = 2;                              // 长文本前保留字符数
+        const int LONG_TEXT_BACK_KEEP = 2;                               // 长文本后保留字符数
+        const int MIN_KEEP_COUNT = 1;                                    // 最少保留字符数
+        int keep_front = 0;
+        int keep_back = 0;
+
+        if (char_count <= SHORT_TEXT_THRESHOLD) {
+            // 短文本：按比例计算掩码长度
+            const int mask_len = static_cast<int>(std::ceil(char_count * ratio));
+            const int DIVISOR_FOR_HALF_CALCULATION = 2;  // 用于计算一半的除数
+            keep_front = (char_count - mask_len) / DIVISOR_FOR_HALF_CALCULATION;
+            keep_back = char_count - mask_len - keep_front;
+            // 确保前后至少保留1个字符
+            keep_front = std::max(keep_front, MIN_KEEP_COUNT);
+            keep_back = std::max(keep_back, MIN_KEEP_COUNT);
+        } else {
+            // 长文本：固定保留前后2个字符
+            keep_front = LONG_TEXT_FRONT_KEEP;
+            keep_back = LONG_TEXT_BACK_KEEP;
+        }
+        // 边界安全检查：如果保留字符数超过总字符数
+        if (keep_front + keep_back >= char_count) return std::string(1, title[0]) + "***";
+        // 构建匿名化字符串
+        const int start_idx = char_positions[keep_front];                    // 掩码开始位置
+        const int end_idx = char_positions[char_count - keep_back];          // 掩码结束位置
+
+        return title.substr(0, start_idx) + "***" + title.substr(end_idx);
+    }
+
 private:
     static constexpr const char* DATA_PATH_NAME = "/data/service/el2/";
     static constexpr const char* CACHE_PATH_NAME = "/av_session/cache/";
