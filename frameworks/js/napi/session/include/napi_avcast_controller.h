@@ -130,7 +130,7 @@ private:
     static napi_status OffKeyRequest(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
     static napi_status OffCustomData(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
 
-    static std::function<void()> PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
+    static void PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
         AVQueueItem& avQueueItem);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
@@ -150,6 +150,7 @@ private:
     napi_ref wrapperRef_ {};
     std::shared_ptr<AVCastController> castController_;
     std::shared_ptr<NapiAVCastControllerCallback> callback_;
+    static std::mutex downloadPrepareMutex_;
 
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;

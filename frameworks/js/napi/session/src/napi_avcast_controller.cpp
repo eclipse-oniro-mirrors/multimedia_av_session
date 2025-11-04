@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <thread>
+
 #include "key_event.h"
 #include "napi_async_work.h"
 #include "napi_avcast_controller_callback.h"
@@ -61,6 +63,8 @@ std::map<std::string, std::pair<NapiAVCastController::OnEventHandlerType,
     { "keyRequest", { OnKeyRequest, OffKeyRequest } },
     { "customDataChange", { OnCustomData, OffCustomData } },
 };
+
+std::mutex NapiAVCastController::downloadPrepareMutex_;
 
 NapiAVCastController::NapiAVCastController()
 {
@@ -302,38 +306,34 @@ int32_t NapiAVCastController::DownloadCastImg(std::shared_ptr<AVMediaDescription
     return AVSESSION_ERROR;
 }
 
-std::function<void()> NapiAVCastController::PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
+void NapiAVCastController::PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
     AVQueueItem& data)
 {
-    return [castController_, data]() {
-        if (castController_ == nullptr) {
-            return;
-        }
-        SLOGI("do prepare set with online download prepare with uri alive");
-        std::shared_ptr<AVMediaDescription> description = data.GetDescription();
-        if (description == nullptr) {
-            SLOGE("do prepare download image description is null");
-            return;
-        }
-        auto uri = description->GetIconUri() == "" ?
-            description->GetAlbumCoverUri() : description->GetIconUri();
-        AVQueueItem item;
-        if (description->GetIcon() == nullptr && !uri.empty()) {
-            auto ret = DownloadCastImg(description, uri);
-            SLOGI("DownloadCastImg complete with ret %{public}d", ret);
-            if (ret != AVSESSION_SUCCESS) {
-                SLOGE("DownloadCastImg failed but not repeat setmetadata again");
-            } else {
-                description->SetIconUri("URI_CACHE");
-                item.SetDescription(description);
-                if (castController_ == nullptr) {
-                    return;
-                }
-                auto ret = castController_->Prepare(item);
-                SLOGI("do prepare set second with ret %{public}d", ret);
+    CHECK_AND_RETURN_LOG(castController_ != nullptr, "prepare download but no castcontroller");
+    SLOGI("do prepare set download");
+    std::shared_ptr<AVMediaDescription> description = data.GetDescription();
+    if (description == nullptr) {
+        SLOGE("do prepare download image description is null");
+        return;
+    }
+    auto uri = description->GetIconUri() == "" ?
+        description->GetAlbumCoverUri() : description->GetIconUri();
+    AVQueueItem item;
+    if (description->GetIcon() == nullptr && !uri.empty()) {
+        auto ret = DownloadCastImg(description, uri);
+        SLOGI("DownloadCastImg complete with ret %{public}d", ret);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("DownloadCastImg failed but not repeat setmetadata again");
+        } else {
+            description->SetIconUri("URI_CACHE");
+            item.SetDescription(description);
+            if (castController_ == nullptr) {
+                return;
             }
+            auto ret = castController_->Prepare(item);
+            SLOGI("do prepare set second with ret %{public}d", ret);
         }
-    };
+    }
 }
 
 napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
@@ -384,11 +384,11 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
 
     auto complete = [env, context](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
-        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        auto asyncExecutor = PrepareAsyncExecutor(napiCastController->castController_, context->avQueueItem_);
-        CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-            .AVSessionPostTask(asyncExecutor, "PrepareAsync"),
-            "NapiAVCastController PrepareAsync handler postTask failed");
+        std::thread([context]() {
+            std::lock_guard lockGuard(downloadPrepareMutex_);
+            auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+            PrepareAsyncExecutor(napiCastController->castController_, context->avQueueItem_);
+        }).detach();
     };
     return NapiAsyncWork::Enqueue(env, context, "Prepare", executor, complete);
 }

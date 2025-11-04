@@ -79,7 +79,7 @@ private:
     static std::function<void()> PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
         AVPlaybackState playBackState);
     static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context);
-    static std::function<void()> AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
+    static void AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
         OHOS::AVSession::AVMetaData metaData);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
