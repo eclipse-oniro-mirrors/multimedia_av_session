@@ -160,6 +160,16 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getAVCastController", GetAVCastController),
         DECLARE_NAPI_FUNCTION("stopCasting", ReleaseCast),
         DECLARE_NAPI_FUNCTION("getAllCastDisplays", GetAllCastDisplays),
+        DECLARE_NAPI_FUNCTION("onPlay", OnEventPlay),
+        DECLARE_NAPI_FUNCTION("offPlay", OffEventPlay),
+        DECLARE_NAPI_FUNCTION("onPlayNext", OnEventPlayNext),
+        DECLARE_NAPI_FUNCTION("offPlayNext", OffEventPlayNext),
+        DECLARE_NAPI_FUNCTION("onPlayPrevious", OnEventPlayPrevious),
+        DECLARE_NAPI_FUNCTION("offPlayPrevious", OffEventPlayPrevious),
+        DECLARE_NAPI_FUNCTION("onFastForward", OnEventFastForward),
+        DECLARE_NAPI_FUNCTION("offFastForward", OffEventFastForward),
+        DECLARE_NAPI_FUNCTION("onRewind", OnEventRewind),
+        DECLARE_NAPI_FUNCTION("offRewind", OffEventRewind),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor {};
@@ -343,6 +353,266 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     return NapiUtils::GetUndefinedValue(env);
 }
 
+napi_value NapiAVSession::OnEventPlay(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEventPlay failed : no memory");
+        return ThrowErrorAndReturn(env, "OnEventPlay failed : no memory", ERR_NO_MEMORY);
+    }
+
+    napi_value callback {};
+    auto input = [&callback, env, &context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        SLOGE("OnEventPlay failed : session is nullptr");
+        return ThrowErrorAndReturn(env, "OnEventPlay failed : session is nullptr", ERR_SESSION_NOT_EXIST);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+        if (napiSession->callback_ == nullptr) {
+            return ThrowErrorAndReturn(env, "OnEventPlay failed : no memory", ERR_NO_MEMORY);
+        }
+        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            return ThrowErrorAndReturnByErrCode(env, "OnEventPlay", ret);
+        }
+    }
+
+    if (OnPlay(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.push_back(AVControlCommand::SESSION_CMD_PLAY);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OnEventPlayNext(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEventPlayNext failed : no memory");
+        return ThrowErrorAndReturn(env, "OnEventPlayNext failed : no memory", ERR_NO_MEMORY);
+    }
+
+    napi_value callback {};
+    auto input = [&callback, env, &context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        SLOGE("OnEventPlayNext failed : session is nullptr");
+        return ThrowErrorAndReturn(env, "OnEventPlayNext failed : session is nullptr", ERR_SESSION_NOT_EXIST);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+        if (napiSession->callback_ == nullptr) {
+            return ThrowErrorAndReturn(env, "OnEventPlayNext failed : no memory", ERR_NO_MEMORY);
+        }
+        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            return ThrowErrorAndReturnByErrCode(env, "OnEventPlayNext", ret);
+        }
+    }
+
+    if (OnPlayNext(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.push_back(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OnEventPlayPrevious(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEventPlayPrevious failed : no memory");
+        return ThrowErrorAndReturn(env, "OnEventPlayPrevious failed : no memory", ERR_NO_MEMORY);
+    }
+
+    napi_value callback {};
+    auto input = [&callback, env, &context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        SLOGE("OnEventPlayPrevious failed : session is nullptr");
+        return ThrowErrorAndReturn(env, "OnEventPlayPrevious failed : session is nullptr", ERR_SESSION_NOT_EXIST);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+        if (napiSession->callback_ == nullptr) {
+            return ThrowErrorAndReturn(env, "OnEventPlayPrevious failed : no memory", ERR_NO_MEMORY);
+        }
+        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            return ThrowErrorAndReturnByErrCode(env, "OnEventPlayPrevious", ret);
+        }
+    }
+
+    if (OnPlayPrevious(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.push_back(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OnEventFastForward(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEventFastForward failed : no memory");
+        return ThrowErrorAndReturn(env, "OnEventFastForward failed : no memory", ERR_NO_MEMORY);
+    }
+
+    napi_value callback {};
+    auto input = [&callback, env, &context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        SLOGE("OnEventFastForward failed : session is nullptr");
+        return ThrowErrorAndReturn(env, "OnEventFastForward failed : session is nullptr", ERR_SESSION_NOT_EXIST);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+        if (napiSession->callback_ == nullptr) {
+            return ThrowErrorAndReturn(env, "OnEventFastForward failed : no memory", ERR_NO_MEMORY);
+        }
+        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            return ThrowErrorAndReturnByErrCode(env, "OnEventFastForward", ret);
+        }
+    }
+
+    if (OnFastForward(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.push_back(AVControlCommand::SESSION_CMD_FAST_FORWARD);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OnEventRewind(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnEventRewind failed : no memory");
+        return ThrowErrorAndReturn(env, "OnEventRewind failed : no memory", ERR_NO_MEMORY);
+    }
+
+    napi_value callback {};
+    auto input = [&callback, env, &context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        SLOGE("OnEventRewind failed : session is nullptr");
+        return ThrowErrorAndReturn(env, "OnEventRewind failed : session is nullptr", ERR_SESSION_NOT_EXIST);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+        if (napiSession->callback_ == nullptr) {
+            return ThrowErrorAndReturn(env, "OnEventRewind failed : no memory", ERR_NO_MEMORY);
+        }
+        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            return ThrowErrorAndReturnByErrCode(env, "OnEventRewind", ret);
+        }
+    }
+
+    if (OnRewind(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.push_back(AVControlCommand::SESSION_CMD_REWIND);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
 napi_value NapiAVSession::ThrowErrorAndReturn(napi_env env, const std::string& message, int32_t errCode)
 {
     std::string tempMessage = message;
@@ -414,6 +684,253 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
     RemoveRegisterEvent(eventName);
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OffEventPlay(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffEventPlay failed : no memory");
+        NapiUtils::ThrowError(env, "OffEventPlay failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffEventPlay failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffEventPlay failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->session_ == nullptr) {
+        SLOGE("OffEventPlay failed : session is nullptr");
+        NapiUtils::ThrowError(env, "OffEventPlay failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (OffPlay(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.remove(AVControlCommand::SESSION_CMD_PLAY);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OffEventPlayNext(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffEventPlayNext failed : no memory");
+        NapiUtils::ThrowError(env, "OffEventPlayNext failed: no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffEventPlayNext failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffEventPlayNext failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->session_ == nullptr) {
+        SLOGE("OffEventPlayNext failed : session is nullptr");
+        NapiUtils::ThrowError(env, "OffEventPlayNext failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession != nullptr && OffPlayNext(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.remove(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OffEventPlayPrevious(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffEventPlayPrevious failed : no memory");
+        NapiUtils::ThrowError(env, "OffEventPlayPrevious failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
+            "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffEventPlayPrevious failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffEventPlayPrevious failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->session_ == nullptr) {
+        SLOGE("OffEventPlayPrevious failed : session is nullptr");
+        NapiUtils::ThrowError(env, "OffEventPlayPrevious failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession != nullptr && OffPlayPrevious(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.remove(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OffEventFastForward(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffEventFastForward failed : no memory");
+        NapiUtils::ThrowError(env, "OffEventFastForward failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffEventFastForward failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffEventFastForward failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->session_ == nullptr) {
+        SLOGE("OffEventFastForward failed : session is nullptr");
+        NapiUtils::ThrowError(env, "OffEventFastForward failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession != nullptr && OffFastForward(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.remove(AVControlCommand::SESSION_CMD_FAST_FORWARD);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OffEventRewind(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffEventRewind failed : no memory");
+        NapiUtils::ThrowError(env, "OffEventRewind failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffEventRewind failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffEventRewind failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->session_ == nullptr) {
+        SLOGE("OffEventRewind failed : session is nullptr");
+        NapiUtils::ThrowError(env, "OffEventRewind failed : session is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession != nullptr && OffRewind(env, napiSession, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.remove(AVControlCommand::SESSION_CMD_REWIND);
+    }
     return NapiUtils::GetUndefinedValue(env);
 }
 

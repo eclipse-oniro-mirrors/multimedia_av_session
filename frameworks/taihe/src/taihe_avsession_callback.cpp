@@ -70,7 +70,7 @@ void TaiheAVSessionCallback::HandleEvent(int32_t event, TaiheFuncExecute execute
     }
 }
 
-void TaiheAVSessionCallback::OnPlay()
+void TaiheAVSessionCallback::OnPlay(const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnPlay");
     auto execute = [](std::shared_ptr<uintptr_t> method) {
@@ -106,7 +106,7 @@ void TaiheAVSessionCallback::OnStop()
     HandleEvent(EVENT_STOP, execute);
 }
 
-void TaiheAVSessionCallback::OnPlayNext()
+void TaiheAVSessionCallback::OnPlayNext(const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnPlayNext");
     auto execute = [](std::shared_ptr<uintptr_t> method) {
@@ -118,7 +118,7 @@ void TaiheAVSessionCallback::OnPlayNext()
     HandleEvent(EVENT_PLAY_NEXT, execute);
 }
 
-void TaiheAVSessionCallback::OnPlayPrevious()
+void TaiheAVSessionCallback::OnPlayPrevious(const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnPlayPrevious");
     auto execute = [](std::shared_ptr<uintptr_t> method) {
@@ -130,7 +130,7 @@ void TaiheAVSessionCallback::OnPlayPrevious()
     HandleEvent(EVENT_PLAY_PREVIOUS, execute);
 }
 
-void TaiheAVSessionCallback::OnFastForward(int64_t time)
+void TaiheAVSessionCallback::OnFastForward(int64_t time, const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnFastForward");
     auto execute = [time](std::shared_ptr<uintptr_t> method) {
@@ -142,7 +142,7 @@ void TaiheAVSessionCallback::OnFastForward(int64_t time)
     HandleEvent(EVENT_FAST_FORWARD, execute);
 }
 
-void TaiheAVSessionCallback::OnRewind(int64_t time)
+void TaiheAVSessionCallback::OnRewind(int64_t time, const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnRewind");
     auto execute = [time](std::shared_ptr<uintptr_t> method) {

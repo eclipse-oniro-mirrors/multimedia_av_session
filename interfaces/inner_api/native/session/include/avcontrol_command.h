@@ -19,11 +19,28 @@
 #include <cinttypes>
 #include <functional>
 #include <string>
+#include <unordered_map>
 #include <variant>
 
 #include "parcel.h"
+#include "command_info.h"
 
 namespace OHOS::AVSession {
+
+constexpr int32_t CAST_STATIC_UID = 5226;
+
+enum class PlayType {
+    APP = 0,
+    BLUETOOTH = 1,
+    CAST = 2
+};
+
+const std::unordered_map<PlayType, std::string> PlayTypeToString = {
+    {PlayType::APP, "app"},
+    {PlayType::BLUETOOTH, "bluetooth"},
+    {PlayType::CAST, "cast"}
+};
+
 class AVControlCommand : public Parcelable {
 public:
     enum {
@@ -52,6 +69,7 @@ public:
     AVControlCommand();
     ~AVControlCommand() override;
 
+    static void UnmarshalCommonInfo(AVControlCommand* cmd, Parcel& data);
     static AVControlCommand* Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const override;
 
@@ -90,6 +108,9 @@ public:
     int32_t SetPlayParam(const std::string& playParam);
     int32_t GetPlayParam(std::string& playParam) const;
 
+    int32_t SetCommandInfo(const CommandInfo& commandInfo);
+    int32_t GetCommandInfo(CommandInfo& commandInfo) const;
+
     const static inline std::vector<int32_t> localCapability {
         SESSION_CMD_PLAY,
         SESSION_CMD_PAUSE,
@@ -114,6 +135,7 @@ public:
 private:
     int32_t cmd_ = SESSION_CMD_INVALID;
     std::variant<int32_t, double, int64_t, bool, std::string> param_;
+    CommandInfo commandInfo_;
 };
 }
 #endif // OHOS_AVCONTROL_COMMAND_H

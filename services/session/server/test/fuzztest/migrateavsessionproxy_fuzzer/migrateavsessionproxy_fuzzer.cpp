@@ -94,10 +94,11 @@ void HandlePlayStateCbTest()
     if (cb == nullptr) {
         return;
     }
-    cb->OnPlay();
+    AVControlCommand cmd;
+    cb->OnPlay(cmd);
     cb->OnPause();
-    cb->OnPlayNext();
-    cb->OnPlayPrevious();
+    cb->OnPlayNext(cmd);
+    cb->OnPlayPrevious(cmd);
     std::string mediaId = std::to_string(GetData<uint8_t>());
     cb->OnToggleFavorite(mediaId);
     std::string commonCommand = std::to_string(GetData<uint8_t>());

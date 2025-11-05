@@ -103,7 +103,7 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskOne(std::shared_ptr<AVSessionSe
     avServiceProxy->GetSessionDescriptorsBySessionId(GetString(), descriptor);
     avServiceProxy->GetHistoricalSessionDescriptors(GetData<int32_t>(), descriptors);
 
-    avServiceProxy->StartAVPlayback(GetString(), GetString());
+    avServiceProxy->StartAVPlayback(GetString(), GetString(), GetString());
     avServiceProxy->CreateController(GetString(), controller);
     avServiceProxy->CreateControllerInner(GetString(), object);
     avServiceProxy->Close();

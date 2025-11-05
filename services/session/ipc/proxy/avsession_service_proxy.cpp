@@ -308,13 +308,15 @@ int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_
 }
 // LCOV_EXCL_STOP
 
-int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
+int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+    const std::string& moduleName)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteString(bundleName), ERR_MARSHALLING, "write bundleName failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteString(assetId), ERR_MARSHALLING, "write assetId failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(moduleName), ERR_MARSHALLING, "write moduleName failed");
     
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");

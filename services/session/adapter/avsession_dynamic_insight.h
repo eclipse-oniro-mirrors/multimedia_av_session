@@ -62,6 +62,16 @@ public:
         deviceId = id;
     }
 
+    void SetModuleName(const std::string& name)
+    {
+        moduleName = name;
+    }
+
+    std::string GetModuleName() const
+    {
+        return moduleName;
+    }
+
     cJSON* startPlayInfoToJson() const
     {
         cJSON* j = cJSON_CreateObject();
@@ -70,6 +80,7 @@ public:
         }
         cJSON_AddStringToObject(j, "deviceId", deviceId.c_str());
         cJSON_AddStringToObject(j, "startPlayBundleName", bundleName.c_str());
+        cJSON_AddStringToObject(j, "startPlayModuleName", moduleName.c_str());
         return j;
     }
 
@@ -77,6 +88,8 @@ private:
     std::string bundleName;
 
     std::string deviceId;
+
+    std::string moduleName;
 };
 class InsightAdapter {
 public:

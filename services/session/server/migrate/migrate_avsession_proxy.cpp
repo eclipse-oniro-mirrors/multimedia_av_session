@@ -821,7 +821,7 @@ AVSessionObserver::AVSessionObserver(const std::string &playerId, std::weak_ptr<
     migrateProxy_ = migrateProxy;
 }
 
-void AVSessionObserver::OnPlay()
+void AVSessionObserver::OnPlay(const AVControlCommand& cmd)
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
     CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");
@@ -835,14 +835,14 @@ void AVSessionObserver::OnPause()
     proxy->HandlePause();
 }
 
-void AVSessionObserver::OnPlayNext()
+void AVSessionObserver::OnPlayNext(const AVControlCommand& cmd)
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
     CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");
     proxy->HandlePlayNext();
 }
 
-void AVSessionObserver::OnPlayPrevious()
+void AVSessionObserver::OnPlayPrevious(const AVControlCommand& cmd)
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
     CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");

@@ -27,6 +27,13 @@ AVControlCommand::AVControlCommand()
 AVControlCommand::~AVControlCommand()
 {
 }
+    
+void AVControlCommand::UnmarshalCommonInfo(AVControlCommand* cmd, Parcel& data)
+{
+    CommandInfo commandInfo;
+    commandInfo.Unmarshalling(data);
+    cmd->SetCommandInfo(commandInfo);
+}
 
 AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
 {
@@ -37,9 +44,11 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
         switch (cmd) {
             case SESSION_CMD_FAST_FORWARD:
                 result->SetForwardTime(data.ReadInt64());
+                AVControlCommand::UnmarshalCommonInfo(result, data);
                 break;
             case SESSION_CMD_REWIND:
                 result->SetRewindTime(data.ReadInt64());
+                AVControlCommand::UnmarshalCommonInfo(result, data);
                 break;
             case SESSION_CMD_SEEK:
                 result->SetSeekTime(data.ReadInt64());
@@ -64,6 +73,11 @@ AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
                 break;
             case SESSION_CMD_PLAY:
                 result->SetPlayParam(data.ReadString());
+                AVControlCommand::UnmarshalCommonInfo(result, data);
+                break;
+            case SESSION_CMD_PLAY_NEXT:
+            case SESSION_CMD_PLAY_PREVIOUS:
+                AVControlCommand::UnmarshalCommonInfo(result, data);
                 break;
             default:
                 break;
@@ -81,10 +95,12 @@ bool AVControlCommand::Marshalling(Parcel& parcel) const
         case SESSION_CMD_FAST_FORWARD:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_) &&
                 parcel.WriteInt64(std::get<int64_t>(param_)), false, "write fast forward time failed");
+            CHECK_AND_RETURN_RET_LOG(commandInfo_.Marshalling(parcel), false, "write common info failed");
             break;
         case SESSION_CMD_REWIND:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_) &&
                 parcel.WriteInt64(std::get<int64_t>(param_)), false, "write rewind time failed");
+            CHECK_AND_RETURN_RET_LOG(commandInfo_.Marshalling(parcel), false, "write common info failed");
             break;
         case SESSION_CMD_SEEK:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int64_t>(param_) &&
@@ -117,6 +133,11 @@ bool AVControlCommand::Marshalling(Parcel& parcel) const
         case SESSION_CMD_PLAY:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<std::string>(param_) ?
                 parcel.WriteString(std::get<std::string>(param_)) : parcel.WriteString(""), false, "write play fail");
+            CHECK_AND_RETURN_RET_LOG(commandInfo_.Marshalling(parcel), false, "write common info failed");
+            break;
+        case SESSION_CMD_PLAY_NEXT:
+        case SESSION_CMD_PLAY_PREVIOUS:
+            CHECK_AND_RETURN_RET_LOG(commandInfo_.Marshalling(parcel), false, "write common info failed");
             break;
         default:
             break;
@@ -341,6 +362,22 @@ int32_t AVControlCommand::GetPlayParam(std::string& playParam) const
         return AVSESSION_ERROR;
     }
     playParam = std::get<std::string>(param_);
+    return AVSESSION_SUCCESS;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+int32_t AVControlCommand::SetCommandInfo(const CommandInfo& commandInfo)
+{
+    commandInfo_ = commandInfo;
+    return AVSESSION_SUCCESS;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+int32_t AVControlCommand::GetCommandInfo(CommandInfo& commandInfo) const
+{
+    commandInfo = commandInfo_;
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP

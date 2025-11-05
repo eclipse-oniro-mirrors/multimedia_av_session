@@ -333,7 +333,7 @@ void CJAVSessionCallback::InitCastDisplayChange(int64_t id)
 }
 
 
-void CJAVSessionCallback::OnPlay()
+void CJAVSessionCallback::OnPlay(const AVControlCommand& cmd)
 {
     std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[PLAY]);
     if (play) {
@@ -360,7 +360,7 @@ void CJAVSessionCallback::OnStop()
     }
 }
 
-void CJAVSessionCallback::OnPlayNext()
+void CJAVSessionCallback::OnPlayNext(const AVControlCommand& cmd)
 {
     std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[PLAY_NEXT]);
     if (playNext) {
@@ -369,7 +369,7 @@ void CJAVSessionCallback::OnPlayNext()
     }
 }
 
-void CJAVSessionCallback::OnPlayPrevious()
+void CJAVSessionCallback::OnPlayPrevious(const AVControlCommand& cmd)
 {
     std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[PLAY_PREVIOUS]);
     if (playPrevious) {
@@ -378,7 +378,7 @@ void CJAVSessionCallback::OnPlayPrevious()
     }
 }
 
-void CJAVSessionCallback::OnFastForward(int64_t time)
+void CJAVSessionCallback::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[FAST_FORWARD]);
     if (fastForward) {
@@ -387,7 +387,7 @@ void CJAVSessionCallback::OnFastForward(int64_t time)
     }
 }
 
-void CJAVSessionCallback::OnRewind(int64_t time)
+void CJAVSessionCallback::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[REWIND]);
     if (rewind) {

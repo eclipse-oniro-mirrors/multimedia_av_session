@@ -236,7 +236,8 @@ public:
      * @return Returns whether to Start media playback successfully.
      * @since 11
     */
-    virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) = 0;
+    virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+        const std::string& moduleName = "") = 0;
 
     /**
      * @brief Listen for AncoMediaSessionListener callback event.

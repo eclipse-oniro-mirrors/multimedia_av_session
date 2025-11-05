@@ -146,6 +146,7 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
 {
     AppExecFwk::WantParams startPlayInfoParam;
     startPlayInfoParam.SetParam("startPlayBundleName", OHOS::AAFwk::String::Box(startPlayInfo.getBundleName()));
+    startPlayInfoParam.SetParam("startPlayModuleName", OHOS::AAFwk::String::Box(startPlayInfo.GetModuleName()));
     startPlayInfoParam.SetParam("deviceId", OHOS::AAFwk::String::Box(startPlayInfo.getDeviceId()));
         
     if (wantParam == nullptr) {

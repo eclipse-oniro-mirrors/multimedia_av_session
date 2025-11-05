@@ -90,13 +90,13 @@ class TestAVSessionCallback : public AVSessionCallback {
     void OnAVCallAnswer() override;
     void OnAVCallHangUp() override;
     void OnAVCallToggleCallMute() override;
-    void OnPlay() override;
+    void OnPlay(const AVControlCommand& cmd) override;
     void OnPause() override;
     void OnStop() override;
-    void OnPlayNext() override;
-    void OnPlayPrevious() override;
-    void OnFastForward(int64_t time) override;
-    void OnRewind(int64_t time) override;
+    void OnPlayNext(const AVControlCommand& cmd) override;
+    void OnPlayPrevious(const AVControlCommand& cmd) override;
+    void OnFastForward(int64_t time, const AVControlCommand& cmd) override;
+    void OnRewind(int64_t time, const AVControlCommand& cmd) override;
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
@@ -127,7 +127,7 @@ void TestAVSessionCallback::OnAVCallToggleCallMute()
     SLOGI("Enter into TestAVSessionCallback::OnAVCallToggleCallMute.");
 }
 
-void TestAVSessionCallback::OnPlay()
+void TestAVSessionCallback::OnPlay(const AVControlCommand& cmd)
 {
     SLOGI("Enter into TestAVSessionCallback::OnPlay.");
 }
@@ -142,22 +142,22 @@ void TestAVSessionCallback::OnStop()
     SLOGI("Enter into TestAVSessionCallback::OnStop.");
 }
 
-void TestAVSessionCallback::OnPlayNext()
+void TestAVSessionCallback::OnPlayNext(const AVControlCommand& cmd)
 {
     SLOGI("Enter into TestAVSessionCallback::OnPlayNext.");
 }
 
-void TestAVSessionCallback::OnPlayPrevious()
+void TestAVSessionCallback::OnPlayPrevious(const AVControlCommand& cmd)
 {
     SLOGI("Enter into TestAVSessionCallback::OnPlayPrevious.");
 }
 
-void TestAVSessionCallback::OnFastForward(int64_t time)
+void TestAVSessionCallback::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     SLOGI("Enter into TestAVSessionCallback::OnFastForward.");
 }
 
-void TestAVSessionCallback::OnRewind(int64_t time)
+void TestAVSessionCallback::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     SLOGI("Enter into TestAVSessionCallback::OnRewind.");
 }
@@ -277,22 +277,23 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner1()
         SLOGI("testAVSessionCallback is null");
         return;
     }
+    AVControlCommand cmd;
     AVSessionCallbackClient aVSessionCallbackClient(testAVSessionCallback);
     aVSessionCallbackClient.OnAVCallAnswer();
     aVSessionCallbackClient.OnAVCallHangUp();
     aVSessionCallbackClient.OnAVCallToggleCallMute();
-    aVSessionCallbackClient.OnPlay();
+    aVSessionCallbackClient.OnPlay(cmd);
     aVSessionCallbackClient.OnPause();
     aVSessionCallbackClient.OnStop();
-    aVSessionCallbackClient.OnPlayNext();
-    aVSessionCallbackClient.OnPlayPrevious();
+    aVSessionCallbackClient.OnPlayNext(cmd);
+    aVSessionCallbackClient.OnPlayPrevious(cmd);
 
     auto speed = GetData<double>();
     auto time = GetData<int64_t>();
     auto loopMode = GetData<int32_t>();
     auto targetLoopMode = GetData<int32_t>();
-    aVSessionCallbackClient.OnFastForward(time);
-    aVSessionCallbackClient.OnRewind(time);
+    aVSessionCallbackClient.OnFastForward(time, cmd);
+    aVSessionCallbackClient.OnRewind(time, cmd);
     aVSessionCallbackClient.OnSeek(time);
     aVSessionCallbackClient.OnSetSpeed(speed);
     aVSessionCallbackClient.OnSetLoopMode(loopMode);

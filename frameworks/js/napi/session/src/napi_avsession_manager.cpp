@@ -374,28 +374,39 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
     struct ConcreteContext : public ContextBase {
         std::string bundleName_ {};
         std::string assetId_ {};
+        std::string moduleName_ {};
     };
     auto context = std::make_shared<ConcreteContext>();
-
     auto input = [env, context](size_t argc, napi_value* argv) {
-        if (argc == ARGC_TWO && (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
-            && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)
-            && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_undefined)
-            && !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null))) {
+        if (argc != ARGC_TWO && argc != ARGC_THREE) {
+            return;
+        }
+
+        if (!NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined) &&
+            !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null) &&
+            !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_undefined) &&
+            !NapiUtils::TypeCheck(env, argv[ARGV_SECOND], napi_null)) {
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->bundleName_);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
               " StartAVPlayback invalid bundlename", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-            
             context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->assetId_);
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, " StartAVPlayback invalid assetId",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         }
+
+        if (argc == ARGC_THREE && !NapiUtils::TypeCheck(env, argv[ARGV_THIRD], napi_undefined) &&
+            !NapiUtils::TypeCheck(env, argv[ARGV_THIRD], napi_null)) {
+            std::string moduleName {};
+            if (NapiUtils::GetNamedProperty(env, argv[ARGV_THIRD], "moduleName", moduleName) == napi_ok) {
+                context->moduleName_ = moduleName;
+            }
+        }
     };
 
     context->GetCbInfo(env, info, input);
-
     auto executor = [context]() {
-        int32_t ret = AVSessionManager::GetInstance().StartAVPlayback(context->bundleName_, context->assetId_);
+        int32_t ret = AVSessionManager::GetInstance().StartAVPlayback(context->bundleName_, context->assetId_,
+            context->moduleName_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_NO_PERMISSION) {
                 context->errMessage = "StartAVPlayback failed : native no permission";
@@ -408,7 +419,6 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
-
     return NapiAsyncWork::Enqueue(env, context, "StartAVPlayback", executor);
 }
 
