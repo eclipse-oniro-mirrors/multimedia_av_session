@@ -329,13 +329,11 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
         std::this_thread::sleep_for(std::chrono::milliseconds(castEngineServiceRestartWaitTime));
         StartCastDiscovery(cacheCastDeviceCapability_, cacheDrmSchemes_);
     }
-
     std::lock_guard lockGuard(servicePtrLock_);
     if (servicePtr_ != nullptr) {
         servicePtr_->checkEnableCast(true);
     }
 #endif
-
     return AVSESSION_SUCCESS;
 }
 
