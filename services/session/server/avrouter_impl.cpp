@@ -311,23 +311,23 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
         }
         validDeviceInfoMap_.clear();
     }
-    std::lock_guard lockGuard(providerManagerLock_);
-    providerNumber_ = providerNumberDisable_;
-    providerManagerMap_.clear();
+    {
+        std::lock_guard lockGuard(providerManagerLock_);
+        providerNumber_ = providerNumberDisable_;
+        providerManagerMap_.clear();
 
-    DeviceInfo deviceInfo(AVCastCategory::CATEGORY_LOCAL, "-1", "RemoteCast");
-    OnCastStateChange(disconnectStateFromCast_, deviceInfo);
-    castHandleToInfoMap_.clear();
+        DeviceInfo deviceInfo(AVCastCategory::CATEGORY_LOCAL, "-1", "RemoteCast");
+        OnCastStateChange(disconnectStateFromCast_, deviceInfo);
+        castHandleToInfoMap_.clear();
 
-    if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        CHECK_AND_RETURN_RET(deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE, AVSESSION_SUCCESS);
         std::this_thread::sleep_for(std::chrono::milliseconds(castEngineServiceRestartWaitTime));
         StartCastDiscovery(cacheCastDeviceCapability_, cacheDrmSchemes_);
-        std::lock_guard lockGuard(servicePtrLock_);
-        if (servicePtr_ != nullptr) {
-            servicePtr_->checkEnableCast(true);
-        }
     }
-
+    std::lock_guard lockGuard(servicePtrLock_);
+    if (servicePtr_ != nullptr) {
+        servicePtr_->checkEnableCast(true);
+    }
     return AVSESSION_SUCCESS;
 }
 
