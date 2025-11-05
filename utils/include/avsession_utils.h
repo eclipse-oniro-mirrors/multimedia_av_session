@@ -216,7 +216,8 @@ public:
             }
             // 2字符文本的处理
             if (char_count == 2) {
-                return std::string(1, title[0]) + "***";
+                std::string first_char = title.substr(char_positions[0], 3);
+                return first_char + "***";
             }
             // 单字符直接返回
             return "*" + title + "*";
