@@ -75,11 +75,21 @@ private:
     static napi_value ReleaseCast(napi_env env, napi_callback_info info);
     static napi_value GetAllCastDisplays(napi_env env, napi_callback_info info);
     static napi_value SendCustomData(napi_env env, napi_callback_info info);
+    static napi_value OnEventPlay(napi_env env, napi_callback_info info);
+    static napi_value OffEventPlay(napi_env env, napi_callback_info info);
+    static napi_value OnEventPlayNext(napi_env env, napi_callback_info info);
+    static napi_value OffEventPlayNext(napi_env env, napi_callback_info info);
+    static napi_value OnEventPlayPrevious(napi_env env, napi_callback_info info);
+    static napi_value OffEventPlayPrevious(napi_env env, napi_callback_info info);
+    static napi_value OnEventFastForward(napi_env env, napi_callback_info info);
+    static napi_value OffEventFastForward(napi_env env, napi_callback_info info);
+    static napi_value OnEventRewind(napi_env env, napi_callback_info info);
+    static napi_value OffEventRewind(napi_env env, napi_callback_info info);
 
     static std::function<void()> PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
         AVPlaybackState playBackState);
     static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context);
-    static std::function<void()> AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
+    static void AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
         OHOS::AVSession::AVMetaData metaData);
 
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -166,6 +176,7 @@ private:
     static std::map<std::string, OnEventHandlerType> onEventHandlers_;
     static std::map<std::string, OffEventHandlerType> offEventHandlers_;
 
+    static constexpr size_t ARGC_ZERO = 0;
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
     static constexpr size_t ARGC_THREE = 3;

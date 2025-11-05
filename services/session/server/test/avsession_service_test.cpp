@@ -104,13 +104,13 @@ void AVSessionServiceTest::TearDown()
 
 class AVSessionCallbackImpl : public AVSessionCallback {
 public:
-    void OnPlay() override;
+    void OnPlay(const AVControlCommand& cmd) override;
     void OnPause() override;
     void OnStop() override {};
-    void OnPlayNext() override;
-    void OnPlayPrevious() override;
-    void OnFastForward(int64_t time) override {};
-    void OnRewind(int64_t time) override {};
+    void OnPlayNext(const AVControlCommand& cmd) override;
+    void OnPlayPrevious(const AVControlCommand& cmd) override;
+    void OnFastForward(int64_t time, const AVControlCommand& cmd) override {};
+    void OnRewind(int64_t time, const AVControlCommand& cmd) override {};
     void OnSeek(int64_t time) override {};
     void OnSetSpeed(double speed) override {};
     void OnSetLoopMode(int32_t loopMode) override {};
@@ -131,7 +131,7 @@ public:
     ~AVSessionCallbackImpl() override;
 };
 
-void AVSessionCallbackImpl::OnPlay()
+void AVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 {
     g_playOnCall = AVSESSION_SUCCESS;
     SLOGI("OnPlay %{public}d", g_playOnCall);
@@ -143,13 +143,13 @@ void AVSessionCallbackImpl::OnPause()
     SLOGI("OnPause %{public}d", g_pauseOnCall);
 }
 
-void AVSessionCallbackImpl::OnPlayNext()
+void AVSessionCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 {
     g_nextOnCall = AVSESSION_SUCCESS;
     SLOGI("OnPlayNext %{public}d", g_nextOnCall);
 }
 
-void AVSessionCallbackImpl::OnPlayPrevious()
+void AVSessionCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 {
     g_previousOnCall = AVSESSION_SUCCESS;
     SLOGI("OnPlayPrevious %{public}d", g_previousOnCall);
@@ -830,7 +830,8 @@ static HWTEST_F(AVSessionServiceTest, AddAvQueueInfoToFile001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTest, StartAVPlayback001, TestSize.Level0)
 {
     SLOGI("StartAVPlayback001 begin!");
-    avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME");
+    std::string moduleName = "moduleName";
+    avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME", moduleName);
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("StartAVPlayback001 end!");
 }
@@ -839,7 +840,8 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlayback002, TestSize.Level0)
 {
     SLOGI("StartAVPlayback002 begin!");
     std::string deviceId = "123";
-    avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME", deviceId);
+    std::string moduleName = "moduleName";
+    avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME", moduleName, deviceId);
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("StartAVPlayback002 end!");
 }
@@ -857,7 +859,8 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlayback003, TestSize.Level1)
     avservice_->SaveSessionInfoInFile("ancoMediaSession", avsessionHere_->GetSessionId(),
         "audio", elementName);
     avservice_->isAudioBrokerStart_ = true;
-    auto ret = avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME");
+    std::string moduleName = "moduleName";
+    auto ret = avservice_->StartAVPlayback(g_testAnotherBundleName, "FAKE_ASSET_NAME", moduleName);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     avservice_->isAudioBrokerStart_ = false;
     avsessionHere_->Destroy();

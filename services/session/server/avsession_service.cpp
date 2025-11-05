@@ -439,6 +439,7 @@ bool AVSessionService::SubscribeCommonEvent()
     }
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
 
+    CHECK_AND_RETURN_RET_LOG(subscriber_ == nullptr, true, "already have subscriber");
     subscriber_ = std::make_shared<EventSubscriber>(subscribeInfo, this);
     return EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
@@ -2343,7 +2344,7 @@ bool AVSessionService::CheckStartAncoMediaPlay(const std::string& bundleName, in
 }
 
 int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId,
-    const std::string& deviceId)
+    const std::string& moduleName, const std::string& deviceId)
 {
     int32_t result = AVSESSION_ERROR;
     if (CheckStartAncoMediaPlay(bundleName, &result)) {
@@ -2358,6 +2359,7 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     StartPlayInfo startPlayInfo;
     startPlayInfo.setBundleName(CallerBundleName);
     startPlayInfo.setDeviceId(deviceId);
+    startPlayInfo.SetModuleName(moduleName);
 
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
 
@@ -2376,7 +2378,8 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     return AVSESSION_ERROR;
 }
 
-int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
+int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+    const std::string& moduleName)
 {
     int32_t result = AVSESSION_ERROR;
     if (CheckStartAncoMediaPlay(bundleName, &result)) {
@@ -2390,6 +2393,8 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     }
     StartPlayInfo startPlayInfo;
     startPlayInfo.setBundleName(CallerBundleName);
+    startPlayInfo.SetModuleName(moduleName);
+
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
     if (dynamicLoader == nullptr) {
         SLOGI("dynamicLoader is null");
@@ -2790,7 +2795,7 @@ bool AVSessionService::IsAncoValid()
 }
 
 bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd,
-    const MMI::KeyEvent& keyEvent, sptr<AVSessionItem> session)
+    const MMI::KeyEvent& keyEvent, sptr<AVSessionItem> session, const std::string& deviceId)
 {
     CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "handlevent session is null");
     sptr<AVSessionItem> procSession = nullptr;
@@ -2801,17 +2806,23 @@ bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand
     }
     CHECK_AND_RETURN_RET_LOG(procSession != nullptr, false, "handlevent session is null");
     SLOGI("CheckSessionHandleKeyEvent procSession:%{public}s", procSession->GetBundleName().c_str());
+    CommandInfo cmdInfo;
+    if (deviceId != "") {
+        cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
+        cmdInfo.SetDeviceId(deviceId);
+    }
     if (procCmd) {
+        cmd.SetCommandInfo(cmdInfo);
         procSession->ExecuteControllerCommand(cmd);
         SLOGI("CheckSessionHandleKeyEvent proc cmd:%{public}d", cmd.GetCommand());
     } else {
-        procSession->HandleMediaKeyEvent(keyEvent);
+        procSession->HandleMediaKeyEvent(keyEvent, cmdInfo);
         SLOGI("CheckSessionHandleKeyEvent proc event:%{public}d", keyEvent.GetKeyCode());
     }
     return true;
 }
 
-int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
+int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId)
 {
     if (keyEvent.GetKeyCode() != MMI::KeyEvent::KEYCODE_HEADSETHOOK &&
         keyEvent.GetKeyCode() != MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
@@ -2819,7 +2830,10 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
         std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
         CHECK_AND_RETURN_RET_LOG(keyEventList != nullptr, AVSESSION_ERROR, "keyEventList ptr nullptr!");
         for (const auto& session : *keyEventList) {
-            session->HandleMediaKeyEvent(keyEvent);
+            CommandInfo cmdInfo;
+            cmdInfo.SetDeviceId(deviceId);
+            cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
+            session->HandleMediaKeyEvent(keyEvent, cmdInfo);
             return AVSESSION_SUCCESS;
         }
     }
@@ -2847,7 +2861,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent)
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         AVControlCommand cmd;
-        if (topSession_ != nullptr && CheckSessionHandleKeyEvent(false, cmd, keyEvent, topSession_)) {
+        if (topSession_ != nullptr && CheckSessionHandleKeyEvent(false, cmd, keyEvent, topSession_, deviceId)) {
             return AVSESSION_SUCCESS;
         }
     }
@@ -2858,7 +2872,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, co
 {
     SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
     std::string deviceId = wantParam.GetStringParam("deviceId");
-    int32_t ret = HandleKeyEvent(keyEvent);
+    int32_t ret = HandleKeyEvent(keyEvent, deviceId);
     if (ret != AVSESSION_CONTINUE) {
         return ret;
     }
@@ -2913,7 +2927,7 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
             if (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call") {
                 auto keyEvent = MMI::KeyEvent::Create();
                 CHECK_AND_RETURN_LOG(keyEvent != nullptr, "handle event keyevent is null");
-                CheckSessionHandleKeyEvent(true, command, *keyEvent, session);
+                CheckSessionHandleKeyEvent(true, command, *keyEvent, session, deviceId);
                 SLOGI("ExecuteCommand %{public}d for front session: %{public}s", command.GetCommand(),
                       session->GetBundleName().c_str());
                 return;
@@ -2943,9 +2957,9 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         }
 
         if (deviceId.length() == 0) {
-            ret = StartAVPlayback(bundleName, "");
+            ret = StartAVPlayback(bundleName, "", "");
         } else {
-            ret = StartAVPlayback(bundleName, "", deviceId);
+            ret = StartAVPlayback(bundleName, "", "", deviceId);
         }
         SLOGI("Cold play %{public}s ret=%{public}d", bundleName.c_str(), ret);
     } else {
@@ -4310,11 +4324,11 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         static_cast<int>(historyDescriptor != nullptr), userId);
     if (addCapsule && topSession_) {
         std::shared_ptr<AVSessionPixelMap> iPixelMap = std::make_shared<AVSessionPixelMap>();
-        topSession_->ReadMetaDataImg(iPixelMap);
         AVQueueItem item;
         topSession_->GetCurrentCastItem(item);
-        std::string notifyText = item.GetDescription() && !item.GetDescription()->GetPcmSrc() ?
-            item.GetDescription()->GetTitle() : GetLocalTitle();
+        bool isCast = item.GetDescription() && !item.GetDescription()->GetPcmSrc();
+        topSession_->ReadMetaDataImg(iPixelMap, isCast);
+        std::string notifyText = isCast ? item.GetDescription()->GetTitle() : GetLocalTitle();
         AddCapsule(notifyText, isCapsuleUpdate, iPixelMap, localLiveViewContent, &(request));
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckCardStateChangeStop");
         hasCardStateChangeStopTask_ = false;

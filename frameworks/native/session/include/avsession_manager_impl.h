@@ -88,7 +88,8 @@ public:
 
     int32_t CastAudioForAll(const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;
 
-    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+        const std::string& moduleName) override;
 
     int32_t RegisterAncoMediaSessionListener(const std::shared_ptr<AncoMediaSessionListener> &listener) override;
 

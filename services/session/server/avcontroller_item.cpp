@@ -132,7 +132,7 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     int32_t ret = ReadImgForMetaData(data);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ReadImgForMetaData with ret:%{public}d", ret);
     if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
-        SLOGD("isFromSession %{public}d in metaGet", isFromSession_);
+        SLOGI("isFromSession %{public}d", isFromSession_);
         if (isFromSession_) {
             data.GetMediaImage()->Clear();
         } else {
@@ -303,10 +303,24 @@ int32_t AVControllerItem::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVControllerItem::GetMetaFilter(AVMetaData::MetaMaskType& filter)
+{
+    std::lock_guard lockGuard(metaMaskMutex_);
+    filter = metaMask_;
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVControllerItem::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
     std::lock_guard lockGuard(playbackMaskMutex_);
     playbackMask_ = filter;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControllerItem::GetPlaybackFilter(AVPlaybackState::PlaybackStateMaskType& filter)
+{
+    std::lock_guard lockGuard(playbackMaskMutex_);
+    filter = playbackMask_;
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
@@ -448,12 +462,15 @@ void AVControllerItem::HandleAVCallMetaDataChange(const AVCallMetaData& avCallMe
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnAVCallMetaDataChange");
 }
 
-void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
+void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state,
+    const AVPlaybackState::PlaybackStateMaskType& changedStateMask)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
     AVPlaybackState stateOut;
     std::lock_guard playbackLockGuard(playbackMaskMutex_);
-    if (state.CopyToByMask(playbackMask_, stateOut)) {
+    AVPlaybackState::PlaybackStateMaskType validMask = playbackMask_.all() ? playbackMask_ :
+        changedStateMask & playbackMask_;
+    if (state.CopyToByMask(validMask, stateOut)) {
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnPlaybackStateChange");
         if (callback_ != nullptr) {
             callback_->OnPlaybackStateChange(stateOut);
@@ -464,14 +481,15 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state)
     }
 }
 
-void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
+void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMetaData::MetaMaskType& changedDataMask)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
     AVMetaData metaOut;
     std::lock_guard metaMaskLockGuard(metaMaskMutex_);
-    CHECK_AND_PRINT_LOG(data.CopyToByMask(metaMask_, metaOut), "controller:%{public}d no mask",
-        static_cast<int>(pid_));
-    if (data.CopyToByMask(metaMask_, metaOut)) {
+    AVMetaData::MetaMaskType validMask = metaMask_.all() ? metaMask_ : changedDataMask & metaMask_;
+    bool copyResult = data.CopyToByMask(validMask, metaOut);
+    CHECK_AND_PRINT_LOG(copyResult, "controller:%{public}d no mask", static_cast<int>(pid_));
+    if (copyResult) {
         if ((metaMask_.test(AVMetaData::META_KEY_MEDIA_IMAGE)) && (metaOut.GetMediaImage() != nullptr)) {
             CHECK_AND_RETURN_LOG(session_ != nullptr, "Session not exist");
             std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaOut.GetMediaImage();
@@ -484,9 +502,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data)
             session_->ReadMetaDataAVQueueImg(avQueuePixelMap);
             metaOut.SetAVQueueImage(avQueuePixelMap);
         }
-        if (!metaMask_.test(AVMetaData::META_KEY_ASSET_ID)) {
-            metaOut.SetAssetId(data.GetAssetId());
-        }
+        metaOut.SetAssetId(data.GetAssetId());
         SLOGI("update metaData pid %{public}d, title %{public}s", static_cast<int>(pid_), metaOut.GetTitle().c_str());
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         if (metaOut.GetMediaImage() != nullptr && !metaOut.GetMediaImageUri().empty()) {

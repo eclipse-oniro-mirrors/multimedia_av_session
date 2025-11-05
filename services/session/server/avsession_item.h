@@ -153,6 +153,8 @@ public:
 
     AVSessionDescriptor GetDescriptor();
 
+    AVPlaybackState::PlaybackStateMaskType GetControlItemsPlaybackFilter();
+
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
 
     AVCallState GetAVCallState();
@@ -181,7 +183,7 @@ public:
 
     AbilityRuntime::WantAgent::WantAgent GetLaunchAbility();
 
-    void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent);
+    void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const CommandInfo& cmdInfo = CommandInfo{});
 
     void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
 
@@ -352,7 +354,7 @@ public:
     void ReportSessionControl(const std::string& bundleName, int32_t cmd);
 #endif
 
-    void ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap);
+    void ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap, bool isCast = false);
     void ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& avQueuePixelMap);
 
 protected:
@@ -395,6 +397,7 @@ private:
     void CheckUseAVMetaData(const AVMetaData& meta);
     void PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo);
     void DelRecommend();
+    void ReadMediaAndAVQueueImg(AVMetaData::MetaMaskType recordFilter, AVMetaData& oldData, AVMetaData newData);
     void UpdateMetaData(const AVMetaData& meta);
     void UpdateRecommendInfo(bool needRecommend);
     bool SearchSpidInCapability(const std::string& deviceId);

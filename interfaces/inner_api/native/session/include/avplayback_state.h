@@ -126,6 +126,8 @@ public:
     PlaybackStateMaskType GetMask() const;
 
     bool CopyToByMask(PlaybackStateMaskType& mask, AVPlaybackState& out) const;
+    PlaybackStateMaskType GetChangedStateMask(const PlaybackStateMaskType& filter,
+        const AVPlaybackState& newState) const;
     bool CopyFrom(const AVPlaybackState& in);
 
     const static inline std::vector<int32_t> localCapability {
@@ -161,6 +163,38 @@ private:
     int32_t videoWidth_ = 0;
     int32_t videoHeight_ = 0;
     std::shared_ptr<AAFwk::WantParams> extras_ = nullptr;
+    static bool CheckStateChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckSpeedChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckPositionChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckBufferedTimeChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckLoopModeChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckIsFavoriteChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckActiveItemIdChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckVolumeChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckMaxVolumeChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckMutedChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckDurationChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckVideoWidthChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckVideoHeightChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static bool CheckExtrasChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+
+    using CheckActionType = bool(*)(const AVPlaybackState& newState, const AVPlaybackState& oldState);
+    static inline CheckActionType checkActions[PLAYBACK_KEY_MAX] = {
+        &AVPlaybackState::CheckStateChange,
+        &AVPlaybackState::CheckSpeedChange,
+        &AVPlaybackState::CheckPositionChange,
+        &AVPlaybackState::CheckBufferedTimeChange,
+        &AVPlaybackState::CheckLoopModeChange,
+        &AVPlaybackState::CheckIsFavoriteChange,
+        &AVPlaybackState::CheckActiveItemIdChange,
+        &AVPlaybackState::CheckVolumeChange,
+        &AVPlaybackState::CheckMaxVolumeChange,
+        &AVPlaybackState::CheckMutedChange,
+        &AVPlaybackState::CheckDurationChange,
+        &AVPlaybackState::CheckVideoWidthChange,
+        &AVPlaybackState::CheckVideoHeightChange,
+        &AVPlaybackState::CheckExtrasChange,
+    };
 
     static void CloneState(const AVPlaybackState& from, AVPlaybackState& to);
     static void CloneSpeed(const AVPlaybackState& from, AVPlaybackState& to);

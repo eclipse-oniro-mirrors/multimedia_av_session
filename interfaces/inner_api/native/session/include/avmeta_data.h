@@ -182,6 +182,9 @@ public:
     MetaMaskType GetMetaMask() const;
 
     bool CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const;
+
+    MetaMaskType GetChangedDataMask(const MetaMaskType& filter, const AVMetaData& newData) const;
+
     bool CopyFrom(const AVMetaData& metaIn);
 
     bool EqualWithUri(const AVMetaData& metaData);
@@ -248,6 +251,62 @@ private:
     std::vector<std::string> drmSchemes_;
     std::shared_ptr<AVSessionPixelMap> bundleIcon_ = nullptr;
     std::string singleLyricText_ = "";
+
+    static bool CheckAssetIdChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckTitleChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckArtistChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckAuthorChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckAVQueueNameChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckAVQueueIdChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckAVQueueImageChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckAVQueueImageUriChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckAlbumChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckWriterChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckComposerChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckDurationChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckMediaImageChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckMediaImageUriChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckPublishDataChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckSubTitleChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckDescriptionChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckLyricChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckPreviousAssetIdChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckNextAssetIdChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckSkipIntervalsChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckFilterChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckDisplayTagsChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckDrmSchemesChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckBundleIconChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckSingleLyricTextChange(const AVMetaData& from, const AVMetaData& to);
+    using CheckActionType = bool(*)(const AVMetaData& from, const AVMetaData& to);
+    static inline CheckActionType checkActions[META_KEY_MAX] = {
+        &AVMetaData::CheckAssetIdChange,
+        &AVMetaData::CheckTitleChange,
+        &AVMetaData::CheckArtistChange,
+        &AVMetaData::CheckAuthorChange,
+        &AVMetaData::CheckAVQueueNameChange,
+        &AVMetaData::CheckAVQueueIdChange,
+        &AVMetaData::CheckAVQueueImageChange,
+        &AVMetaData::CheckAVQueueImageUriChange,
+        &AVMetaData::CheckAlbumChange,
+        &AVMetaData::CheckWriterChange,
+        &AVMetaData::CheckComposerChange,
+        &AVMetaData::CheckDurationChange,
+        &AVMetaData::CheckMediaImageChange,
+        &AVMetaData::CheckMediaImageUriChange,
+        &AVMetaData::CheckPublishDataChange,
+        &AVMetaData::CheckSubTitleChange,
+        &AVMetaData::CheckDescriptionChange,
+        &AVMetaData::CheckLyricChange,
+        &AVMetaData::CheckPreviousAssetIdChange,
+        &AVMetaData::CheckNextAssetIdChange,
+        &AVMetaData::CheckSkipIntervalsChange,
+        &AVMetaData::CheckFilterChange,
+        &AVMetaData::CheckDisplayTagsChange,
+        &AVMetaData::CheckDrmSchemesChange,
+        &AVMetaData::CheckBundleIconChange,
+        &AVMetaData::CheckSingleLyricTextChange
+    };
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
     static void CloneTitle(const AVMetaData& from, AVMetaData& to);

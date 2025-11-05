@@ -202,8 +202,11 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(pid_t pid, co
     std::string sessionId = result->GetSessionId();
     int32_t userId = result->GetUserId();
     GetContainerFromUser(userId).RemoveSession(pid, abilityName);
-    std::string fileName = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
-    AVSessionUtils::DeleteFile(fileName);
+    std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileNameLocal);
+    std::string fileNameCast =
+        AVSessionUtils::GetCachePathNameForCast(userId) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileNameCast);
     return result;
 }
 
@@ -216,8 +219,11 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(const std::st
     CHECK_AND_RETURN_RET_LOG(result != nullptr, result, "remove session from all get nullptr");
     int32_t userId = result->GetUserId();
     GetContainerFromUser(userId).RemoveSession(sessionId);
-    std::string fileName = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
-    AVSessionUtils::DeleteFile(fileName);
+    std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileNameLocal);
+    std::string fileNameCast =
+        AVSessionUtils::GetCachePathNameForCast(userId) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileNameCast);
     return result;
 }
 

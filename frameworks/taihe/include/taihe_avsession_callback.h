@@ -61,13 +61,13 @@ public:
     TaiheAVSessionCallback(ani_env* env);
     ~TaiheAVSessionCallback() override;
 
-    void OnPlay() override;
+    void OnPlay(const OHOS::AVSession::AVControlCommand& cmd) override;
     void OnPause() override;
     void OnStop() override;
-    void OnPlayNext() override;
-    void OnPlayPrevious() override;
-    void OnFastForward(int64_t time) override;
-    void OnRewind(int64_t time) override;
+    void OnPlayNext(const OHOS::AVSession::AVControlCommand& cmd) override;
+    void OnPlayPrevious(const OHOS::AVSession::AVControlCommand& cmd) override;
+    void OnFastForward(int64_t time, const OHOS::AVSession::AVControlCommand& cmd) override;
+    void OnRewind(int64_t time, const OHOS::AVSession::AVControlCommand& cmd) override;
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;

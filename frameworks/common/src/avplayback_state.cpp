@@ -264,6 +264,18 @@ bool AVPlaybackState::CopyToByMask(PlaybackStateMaskType& mask, AVPlaybackState&
     return result;
 }
 
+AVPlaybackState::PlaybackStateMaskType AVPlaybackState::GetChangedStateMask(
+    const AVPlaybackState::PlaybackStateMaskType& filter, const AVPlaybackState& newState) const
+{
+    PlaybackStateMaskType result;
+    for (int i = 0; i < PLAYBACK_KEY_MAX; i++) {
+        if (filter.test(i) && checkActions[i](newState, *this)) {
+            result.set(i);
+        }
+    }
+    return result;
+}
+
 bool AVPlaybackState::CopyFrom(const AVPlaybackState& in)
 {
     bool result = false;
@@ -276,6 +288,83 @@ bool AVPlaybackState::CopyFrom(const AVPlaybackState& in)
     }
 
     return result;
+}
+
+bool AVPlaybackState::CheckStateChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.state_ != oldState.state_;
+}
+
+bool AVPlaybackState::CheckSpeedChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.speed_ != oldState.speed_;
+}
+
+bool AVPlaybackState::CheckPositionChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.position_.elapsedTime_ != oldState.position_.elapsedTime_ ||
+        newState.position_.updateTime_ != oldState.position_.updateTime_;
+}
+
+bool AVPlaybackState::CheckBufferedTimeChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.bufferedTime_ != oldState.bufferedTime_;
+}
+
+bool AVPlaybackState::CheckLoopModeChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.loopMode_ != oldState.loopMode_;
+}
+
+bool AVPlaybackState::CheckIsFavoriteChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.isFavorite_ != oldState.isFavorite_;
+}
+
+bool AVPlaybackState::CheckActiveItemIdChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.activeItemId_ != oldState.activeItemId_;
+}
+
+bool AVPlaybackState::CheckVolumeChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.volume_ != oldState.volume_;
+}
+
+bool AVPlaybackState::CheckMaxVolumeChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.maxVolume_ != oldState.maxVolume_;
+}
+
+bool AVPlaybackState::CheckMutedChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.muted_ != oldState.muted_;
+}
+
+bool AVPlaybackState::CheckDurationChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.duration_ != oldState.duration_;
+}
+
+bool AVPlaybackState::CheckVideoWidthChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.videoWidth_ != oldState.videoWidth_;
+}
+
+bool AVPlaybackState::CheckVideoHeightChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    return newState.videoHeight_ != oldState.videoHeight_;
+}
+
+bool AVPlaybackState::CheckExtrasChange(const AVPlaybackState& newState, const AVPlaybackState& oldState)
+{
+    if (!newState.extras_ && !oldState.extras_) {
+        return false;
+    }
+    if (!newState.extras_ || !oldState.extras_) {
+        return true;
+    }
+    return !(*newState.extras_ == *oldState.extras_);
 }
 
 void AVPlaybackState::CloneState(const AVPlaybackState& from, AVPlaybackState& to)

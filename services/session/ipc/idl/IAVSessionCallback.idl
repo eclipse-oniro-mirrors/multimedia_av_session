@@ -18,6 +18,7 @@ sequenceable AvsessionDescriptor..OHOS.AVSession.OutputDeviceInfo;
 sequenceable KeyEvent..OHOS.MMI.KeyEvent;
 sequenceable WantParams..OHOS.AAFwk.WantParams;
 sequenceable OHOS.IRemoteObject;
+sequenceable AvcontrolCommand..OHOS.AVSession.AVControlCommand;
 
 interface OHOS.AVSession.IAVSessionCallback {
     [oneway] void OnAVCallAnswer();
@@ -26,19 +27,19 @@ interface OHOS.AVSession.IAVSessionCallback {
 
     [oneway] void OnAVCallToggleCallMute();
 
-    [oneway] void OnPlay();
+    [oneway] void OnPlay([in] AVControlCommand cmd);
 
     [oneway] void OnPause();
 
     [oneway] void OnStop();
 
-    [oneway] void OnPlayNext();
+    [oneway] void OnPlayNext([in] AVControlCommand cmd);
 
-    [oneway] void OnPlayPrevious();
+    [oneway] void OnPlayPrevious([in] AVControlCommand cmd);
 
-    [oneway] void OnFastForward([in] long time);
+    [oneway] void OnFastForward([in] long time, [in] AVControlCommand cmd);
 
-    [oneway] void OnRewind([in] long time);
+    [oneway] void OnRewind([in] long time, [in] AVControlCommand cmd);
 
     [oneway] void OnSeek([in] long time);
 

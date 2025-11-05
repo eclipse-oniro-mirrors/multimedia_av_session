@@ -156,10 +156,12 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, const int32_t firstParam,
     }
 }
 
-void NapiAVSessionCallback::OnPlay()
+void NapiAVSessionCallback::OnPlay(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlay");
-    HandleEvent(EVENT_PLAY);
+    CommandInfo cmdInfo;
+    cmd.GetCommandInfo(cmdInfo);
+    HandleEvent(EVENT_PLAY, std::make_shared<CommandInfo>(cmdInfo));
 }
 
 void NapiAVSessionCallback::OnPause()
@@ -174,28 +176,36 @@ void NapiAVSessionCallback::OnStop()
     HandleEvent(EVENT_STOP);
 }
 
-void NapiAVSessionCallback::OnPlayNext()
+void NapiAVSessionCallback::OnPlayNext(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlayNext");
-    HandleEvent(EVENT_PLAY_NEXT);
+    CommandInfo cmdInfo;
+    cmd.GetCommandInfo(cmdInfo);
+    HandleEvent(EVENT_PLAY_NEXT, std::make_shared<CommandInfo>(cmdInfo));
 }
 
-void NapiAVSessionCallback::OnPlayPrevious()
+void NapiAVSessionCallback::OnPlayPrevious(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnPlayPrevious");
-    HandleEvent(EVENT_PLAY_PREVIOUS);
+    CommandInfo cmdInfo;
+    cmd.GetCommandInfo(cmdInfo);
+    HandleEvent(EVENT_PLAY_PREVIOUS, std::make_shared<CommandInfo>(cmdInfo));
 }
 
-void NapiAVSessionCallback::OnFastForward(int64_t time)
+void NapiAVSessionCallback::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnFastForward");
-    HandleEvent(EVENT_FAST_FORWARD, time);
+    CommandInfo cmdInfo;
+    cmd.GetCommandInfo(cmdInfo);
+    HandleEvent(EVENT_FAST_FORWARD, time, std::make_shared<CommandInfo>(cmdInfo));
 }
 
-void NapiAVSessionCallback::OnRewind(int64_t time)
+void NapiAVSessionCallback::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnRewind");
-    HandleEvent(EVENT_REWIND, time);
+    CommandInfo cmdInfo;
+    cmd.GetCommandInfo(cmdInfo);
+    HandleEvent(EVENT_REWIND, time, std::make_shared<CommandInfo>(cmdInfo));
 }
 
 void NapiAVSessionCallback::OnSeek(int64_t time)

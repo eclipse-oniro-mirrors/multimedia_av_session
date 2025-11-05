@@ -231,10 +231,11 @@ int32_t AVSessionManagerImpl::GetHistoricalAVQueueInfos(int32_t maxSize, int32_t
     return service ? service->GetHistoricalAVQueueInfos(maxSize, maxAppSize, avQueueInfos) : ERR_SERVICE_NOT_EXIST;
 }
 
-int32_t AVSessionManagerImpl::StartAVPlayback(const std::string& bundleName, const std::string& assetId)
+int32_t AVSessionManagerImpl::StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+    const std::string& moduleName)
 {
     auto service = GetService();
-    return service ? service->StartAVPlayback(bundleName, assetId) : ERR_SERVICE_NOT_EXIST;
+    return service ? service->StartAVPlayback(bundleName, assetId, moduleName) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::RegisterAncoMediaSessionListener(

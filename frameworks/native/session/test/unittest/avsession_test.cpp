@@ -323,13 +323,13 @@ int32_t AVSessionDemo::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
 
 class AVSessionCallbackImpl : public AVSessionCallback {
 public:
-    void OnPlay() override;
+    void OnPlay(const AVControlCommand& cmd) override;
     void OnPause() override;
     void OnStop() override;
-    void OnPlayNext() override;
-    void OnPlayPrevious() override;
-    void OnFastForward(int64_t time) override;
-    void OnRewind(int64_t time) override;
+    void OnPlayNext(const AVControlCommand& cmd) override;
+    void OnPlayPrevious(const AVControlCommand& cmd) override;
+    void OnFastForward(int64_t time, const AVControlCommand& cmd) override;
+    void OnRewind(int64_t time, const AVControlCommand& cmd) override;
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override;
     void OnSetLoopMode(int32_t loopMode) override;
@@ -350,7 +350,7 @@ public:
     ~AVSessionCallbackImpl() override;
 };
 
-void AVSessionCallbackImpl::OnPlay()
+void AVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlay %{public}d", g_onCall);
@@ -368,25 +368,25 @@ void AVSessionCallbackImpl::OnStop()
     SLOGE("OnStop %{public}d", g_onCall);
 }
 
-void AVSessionCallbackImpl::OnPlayNext()
+void AVSessionCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayNext %{public}d", g_onCall);
 }
 
-void AVSessionCallbackImpl::OnPlayPrevious()
+void AVSessionCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnPlayPrevious %{public}d", g_onCall);
 }
 
-void AVSessionCallbackImpl::OnFastForward(int64_t time)
+void AVSessionCallbackImpl::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnFastForward %{public}d", g_onCall);
 }
 
-void AVSessionCallbackImpl::OnRewind(int64_t time)
+void AVSessionCallbackImpl::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     g_onCall = AVSESSION_SUCCESS;
     SLOGE("OnRewind %{public}d", g_onCall);
@@ -575,29 +575,38 @@ HWTEST_F(AvsessionTest, SetAVMetaData002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetAVMetaData003
- * @tc.desc: Return the result of set av meta data
- * @tc.type: FUNC
- * @tc.require: 1820
- */
+* @tc.name: SetAVMetaData003
+* @tc.desc: Return the result of set av meta data
+* @tc.type: FUNC
+* @tc.require: 1810
+*/
 HWTEST_F(AvsessionTest, SetAVMetaData003, TestSize.Level1)
 {
     SLOGE("SetAVMetaData003 Begin");
-    g_metaData.Reset();
-    g_metaData.SetAssetId("123");
-    g_metaData.SetTitle("Black Humor");
-    g_metaData.SetMediaImageUri("xxxxx");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("123");
+    metaData.SetTitle("Black Humor");
+    metaData.SetArtist("zhoujielun");
+    metaData.SetAuthor("zhoujielun");
+    metaData.SetMediaImage(nullptr);
+    metaData.SetAVQueueImage(nullptr);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+
+    metaData.SetAVQueueId("123");
+    metaData.SetAVQueueName("queue_name");
     std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
-    std::vector<uint8_t> imgBuffer1 = {1, 2, 3, 4};
-    pixelMap->SetInnerImgBuffer(imgBuffer1);
-    g_metaData.SetMediaImage(pixelMap);
-    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
-    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
-    std::vector<uint8_t> imgBuffer2 = {4, 3, 2, 1};
-    pixelMap->SetInnerImgBuffer(imgBuffer2);
-    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
-    g_metaData.SetMediaImageUri("");
-    EXPECT_EQ(avsession_->SetAVMetaData(g_metaData), AVSESSION_SUCCESS);
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5, 6, 7, 8};
+    pixelMap->SetInnerImgBuffer(imgBuffer);
+    metaData.SetMediaImage(pixelMap);
+    metaData.SetAVQueueImage(pixelMap);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
+
+    std::shared_ptr<AVSessionPixelMap> emptyPixelMap = std::make_shared<AVSessionPixelMap>();
+    emptyPixelMap->SetInnerImgBuffer(imgBuffer);
+    metaData.SetMediaImage(emptyPixelMap);
+    metaData.SetAVQueueImage(emptyPixelMap);
+    EXPECT_EQ(avsession_->SetAVMetaData(metaData), AVSESSION_SUCCESS);
     SLOGE("SetAVMetaData003 End");
 }
 

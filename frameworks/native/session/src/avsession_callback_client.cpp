@@ -57,13 +57,13 @@ ErrCode AVSessionCallbackClient::OnAVCallToggleCallMute()
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVSessionCallbackClient::OnPlay()
+ErrCode AVSessionCallbackClient::OnPlay(const AVControlCommand& cmd)
 {
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnPlay(); }, std::string(__FUNCTION__)),
+        .AVSessionPostTask([callback, cmd]() { callback->OnPlay(cmd); }, std::string(__FUNCTION__)),
         "AVSessionCallbackClient handler postTask failed");
     return AVSESSION_SUCCESS;
 }
@@ -90,46 +90,46 @@ ErrCode AVSessionCallbackClient::OnStop()
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVSessionCallbackClient::OnPlayNext()
+ErrCode AVSessionCallbackClient::OnPlayNext(const AVControlCommand& cmd)
 {
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnPlayNext(); }, std::string(__FUNCTION__)),
+        .AVSessionPostTask([callback, cmd]() { callback->OnPlayNext(cmd); }, std::string(__FUNCTION__)),
         "AVSessionCallbackClient handler postTask failed");
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVSessionCallbackClient::OnPlayPrevious()
+ErrCode AVSessionCallbackClient::OnPlayPrevious(const AVControlCommand& cmd)
 {
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnPlayPrevious(); }, std::string(__FUNCTION__)),
+        .AVSessionPostTask([callback, cmd]() { callback->OnPlayPrevious(cmd); }, std::string(__FUNCTION__)),
         "AVSessionCallbackClient handler postTask failed");
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVSessionCallbackClient::OnFastForward(int64_t time)
+ErrCode AVSessionCallbackClient::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, time]() { callback->OnFastForward(time); }, std::string(__FUNCTION__)),
+        .AVSessionPostTask([callback, time, cmd]() { callback->OnFastForward(time, cmd); }, std::string(__FUNCTION__)),
         "AVSessionCallbackClient handler postTask failed");
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVSessionCallbackClient::OnRewind(int64_t time)
+ErrCode AVSessionCallbackClient::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback, time]() { callback->OnRewind(time); }, std::string(__FUNCTION__)),
+        .AVSessionPostTask([callback, time, cmd]() { callback->OnRewind(time, cmd); }, std::string(__FUNCTION__)),
         "AVSessionCallbackClient handler postTask failed");
     return AVSESSION_SUCCESS;
 }

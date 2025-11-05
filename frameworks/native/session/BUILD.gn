@@ -61,6 +61,7 @@ ohos_shared_library("avsession_client") {
     "../../../frameworks/common/src/avsession_pixel_map.cpp",
     "../../../frameworks/common/src/media_info.cpp",
     "../../../frameworks/common/src/media_info_holder.cpp",
+    "../../../frameworks/common/src/command_info.cpp"
   ]
 
   sanitize = {

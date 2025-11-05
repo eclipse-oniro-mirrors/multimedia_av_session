@@ -124,7 +124,8 @@ public:
     };
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
         std::vector<AVQueueInfo> &avQueueInfos) override { return 0; };
-    int32_t StartAVPlayback(const std::string &bundleName, const std::string &assetId) override { return 0; };
+    int32_t StartAVPlayback(const std::string &bundleName, const std::string &assetId,
+        const std::string& moduleName) override { return 0; };
     int32_t RegisterAncoMediaSessionListener(const OHOS::sptr<IAncoMediaSessionListener> &listener) override
     {
         return 0;

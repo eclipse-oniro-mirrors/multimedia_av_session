@@ -352,9 +352,10 @@ void AvSessionServiceAVPlaybackTest(sptr<AVSessionService> service)
 {
     std::string bundleName = GetString();
     std::string assetId = GetString();
+    std::string moduleName = GetString();
     AVMetaData meta = avsessionHere_->GetMetaData();
 
-    service->StartAVPlayback(bundleName, assetId);
+    service->StartAVPlayback(bundleName, assetId, moduleName);
     service->DoMetadataImgClean(meta);
 }
 
@@ -586,9 +587,11 @@ void StartAVPlayback001()
     avsessionService_->AddAvQueueInfoToFile(*avsessionHere_);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
     vector<string> assetNames { "FAKE_ASSET_NAME1", "FAKE_ASSET_NAME2" };
+    vector<string> moduleNames { "FAKE_MODULE_NAME1", "FAKE_MODULE_NAME2" };
     auto randomNumber = GetData<uint32_t>();
     std::string assetName = assetNames[randomNumber % assetNames.size()];
-    avsessionService_->StartAVPlayback(g_testAnotherBundleName, assetName);
+    std::string moduleName = moduleNames[randomNumber % moduleNames.size()];
+    avsessionService_->StartAVPlayback(g_testAnotherBundleName, assetName, moduleName);
 
     cJSON* value = cJSON_CreateObject();
     if (value == nullptr) {

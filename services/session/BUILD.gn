@@ -76,6 +76,7 @@ idl_gen_interface("idl_avsession_service_interface") {
     "../../frameworks/common/src/avcontrol_command.cpp",
     "../../frameworks/common/src/avqueue_info.cpp",
     "../../frameworks/common/src/av_shared_memory_base.cpp",
+    "../../frameworks/common/src/command_info.cpp"
   ]
 
   sequenceable_ext_deps = [

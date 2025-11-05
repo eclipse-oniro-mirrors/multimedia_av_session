@@ -72,7 +72,7 @@ public:
         const std::string& fileDir, const std::string& fileName)
     {
         if (innerPixelMap == nullptr) {
-            SLOGE("PixelMap nullptr");
+            SLOGE("PixelNull:%{public}s", fileDir.c_str());
             return;
         }
 
@@ -135,6 +135,11 @@ public:
         return std::string(DATA_PATH_NAME) + std::to_string(userId) + CACHE_PATH_NAME;
     }
 
+    static std::string GetCachePathNameForCast(int32_t userId)
+    {
+        return std::string(DATA_PATH_NAME) + std::to_string(userId) + CACHE_PATH_NAME + CAST_PREFIX;
+    }
+
     static std::string GetFixedPathName()
     {
         return std::string(DATA_PATH_NAME) + PUBLIC_PATH_NAME + FIXED_PATH_NAME;
@@ -189,6 +194,7 @@ private:
     static constexpr const char* FIXED_PATH_NAME = "/av_session/";
     static constexpr const char* PUBLIC_PATH_NAME = "public";
     static constexpr const char* FILE_SUFFIX = ".image.dat";
+    static constexpr const char* CAST_PREFIX = "cast_";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_UTILS_H

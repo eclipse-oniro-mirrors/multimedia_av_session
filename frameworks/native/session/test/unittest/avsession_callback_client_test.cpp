@@ -35,13 +35,13 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
  
 class AVSessionCallbackImpl : public AVSessionCallback {
 public:
-    void OnPlay() override {};
+    void OnPlay(const AVControlCommand& cmd) override {};
     void OnPause() override {};
     void OnStop() override {};
-    void OnPlayNext() override {};
-    void OnPlayPrevious() override {};
-    void OnFastForward(int64_t time) override {};
-    void OnRewind(int64_t time) override {};
+    void OnPlayNext(const AVControlCommand& cmd) override {};
+    void OnPlayPrevious(const AVControlCommand& cmd) override {};
+    void OnFastForward(int64_t time, const AVControlCommand& cmd) override {};
+    void OnRewind(int64_t time, const AVControlCommand& cmd) override {};
     void OnSeek(int64_t time) override {};
     void OnSetSpeed(double speed) override {};
     void OnSetLoopMode(int32_t loopMode) override {};
@@ -146,7 +146,8 @@ HWTEST_F(AVSessionCallbackClientTest, OnPlay001, TestSize.Level0)
     std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
         std::make_shared<AVSessionCallbackClient>(sessionCallback);
     EXPECT_NE(sessionCallbackClient, nullptr);
-    ErrCode ret = sessionCallbackClient->OnPlay();
+    AVControlCommand cmd;
+    ErrCode ret = sessionCallbackClient->OnPlay(cmd);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
  
@@ -197,7 +198,8 @@ HWTEST_F(AVSessionCallbackClientTest, OnPlayNext001, TestSize.Level0)
     std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
         std::make_shared<AVSessionCallbackClient>(sessionCallback);
     EXPECT_NE(sessionCallbackClient, nullptr);
-    ErrCode ret = sessionCallbackClient->OnPlayNext();
+    AVControlCommand cmd;
+    ErrCode ret = sessionCallbackClient->OnPlayNext(cmd);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
  
@@ -214,7 +216,8 @@ HWTEST_F(AVSessionCallbackClientTest, OnPlayPrevious001, TestSize.Level0)
     std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
         std::make_shared<AVSessionCallbackClient>(sessionCallback);
     EXPECT_NE(sessionCallbackClient, nullptr);
-    ErrCode ret = sessionCallbackClient->OnPlayPrevious();
+    AVControlCommand cmd;
+    ErrCode ret = sessionCallbackClient->OnPlayPrevious(cmd);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
  
@@ -232,7 +235,8 @@ HWTEST_F(AVSessionCallbackClientTest, OnFastForward001, TestSize.Level0)
         std::make_shared<AVSessionCallbackClient>(sessionCallback);
     EXPECT_NE(sessionCallbackClient, nullptr);
     int64_t time = 100;
-    ErrCode ret = sessionCallbackClient->OnFastForward(time);
+    AVControlCommand cmd;
+    ErrCode ret = sessionCallbackClient->OnFastForward(time, cmd);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
  
@@ -250,7 +254,8 @@ HWTEST_F(AVSessionCallbackClientTest, OnRewind001, TestSize.Level0)
         std::make_shared<AVSessionCallbackClient>(sessionCallback);
     EXPECT_NE(sessionCallbackClient, nullptr);
     int64_t time = 100;
-    ErrCode ret = sessionCallbackClient->OnRewind(time);
+    AVControlCommand cmd;
+    ErrCode ret = sessionCallbackClient->OnRewind(time, cmd);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
  

@@ -188,13 +188,15 @@ public:
     int32_t GetHistoricalAVQueueInfos(int32_t maxSize, int32_t maxAppSize,
                                       std::vector<AVQueueInfo>& avQueueInfos) override;
 
-    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId) override;
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+        const std::string& moduleName) override;
 
-    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId, const std::string& deviceId);
+    int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
+        const std::string& moduleName, const std::string& deviceId);
 
     int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override;
 
-    int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent);
+    int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId = "");
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
@@ -630,7 +632,7 @@ private:
     void UpdateSessionTimestamp(sptr<AVSessionItem> session);
 
     bool CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand cmd, const MMI::KeyEvent& keyEvent,
-        sptr<AVSessionItem> session);
+        sptr<AVSessionItem> session, const std::string& deviceId = "");
 
     bool IsAncoValid();
 

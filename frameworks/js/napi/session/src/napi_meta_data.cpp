@@ -60,8 +60,8 @@ std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
     { AVMetaData::META_KEY_WRITER, SetWriter },
     { AVMetaData::META_KEY_COMPOSER, SetComposer },
     { AVMetaData::META_KEY_DURATION, SetDuration },
-    { AVMetaData::META_KEY_MEDIA_IMAGE, SetMediaImage },
     { AVMetaData::META_KEY_MEDIA_IMAGE_URI, SetMediaImageUri },
+    { AVMetaData::META_KEY_MEDIA_IMAGE, SetMediaImage },
     { AVMetaData::META_KEY_PUBLISH_DATE, SetPublishDate },
     { AVMetaData::META_KEY_SUBTITLE, SetSubtitle },
     { AVMetaData::META_KEY_DESCRIPTION, SetDescription },
@@ -501,7 +501,7 @@ napi_status NapiMetaData::SetMediaImage(napi_env env, const AVMetaData& in, napi
 {
     auto pixelMap = in.GetMediaImage();
     if (pixelMap == nullptr) {
-        SLOGI("media image is none");
+        SLOGI("mediaImage is none");
         return napi_ok;
     }
 
@@ -516,8 +516,15 @@ napi_status NapiMetaData::SetMediaImageUri(napi_env env, const AVMetaData& in, n
 {
     auto uri = in.GetMediaImageUri();
     if (uri.empty()) {
-        SLOGI("media image uri empty");
+        SLOGI("mediaImage uri empty");
         return napi_ok;
+    }
+    napi_value propertyGet {};
+    napi_valuetype type = napi_undefined;
+    auto statusGet = napi_get_named_property(env, out, "mediaImage", &propertyGet);
+    if ((statusGet == napi_ok) && (propertyGet != nullptr)) {
+        statusGet = napi_typeof(env, propertyGet, &type);
+        CHECK_AND_RETURN_RET_LOG(!(statusGet == napi_ok && type == napi_object), statusGet, "mediaImg is pixel");
     }
 
     napi_value property {};

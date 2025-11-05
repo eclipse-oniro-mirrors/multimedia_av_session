@@ -2420,6 +2420,33 @@ HWTEST_F(AVMetaDataTest, AVMetaDataCopyDataByMask001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: AVMetaDataGetChangedDataMask001
+ * @tc.desc: get changed data mask.
+ * @tc.type: FUNC
+ * @tc.require: 1810
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataGetChangedDataMask001, TestSize.Level4)
+{
+    SLOGI("AVMetaDataCopyChangeDataToByMask001 Begin");
+    AVMetaData newData;
+    newData.SetAssetId("a");
+    newData.SetWriter("b");
+    newData.SetDuration(1);
+
+    g_metaDataCloneTest.SetAssetId("1118");
+    g_metaDataCloneTest.SetWriter("Jay Chou");
+    g_metaDataCloneTest.SetDuration(1);
+    AVMetaData metaOut;
+    AVMetaData::MetaMaskType mask = newData.GetMetaMask();
+
+    auto changedMask = g_metaDataCloneTest.GetChangedDataMask(mask, newData);
+    EXPECT_EQ(changedMask.test(AVMetaData::META_KEY_ASSET_ID), true);
+    EXPECT_EQ(changedMask.test(AVMetaData::META_KEY_WRITER), true);
+    EXPECT_EQ(changedMask.test(AVMetaData::META_KEY_DURATION), false);
+    SLOGI("AVMetaDataGetChangedDataMask001 End");
+}
+
+/**
  * @tc.name: SetPreviousAssetId001
  * @tc.desc: set previous asset id.
  * @tc.type: FUNC
@@ -2580,6 +2607,114 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg005, TestSize.Level0)
     metaOut.metaMask_ = bits;
     bool ret = metaOut.UnmarshallingExceptImg(data);
     EXPECT_TRUE(ret != false);
+}
+
+/**
+ * @tc.name: AVMetaDataCheckMediaImageChange001
+ * @tc.desc: Test CheckMediaImageChange function
+ * @tc.type: FUNC
+ * @tc.require: 1810
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataCheckMediaImageChange001, TestSize.Level4)
+{
+    SLOGI("AVMetaDataCheckMediaImageChange001 Begin");
+    AVMetaData newData;
+    newData.SetAssetId("a");
+    newData.SetWriter("b");
+    newData.SetMediaImage(nullptr);
+    AVMetaData oldData;
+    oldData.SetAssetId("a");
+    oldData.SetWriter("b");
+    oldData.SetMediaImage(nullptr);
+    bool ret = AVMetaData::CheckMediaImageChange(newData, oldData);
+    EXPECT_EQ(ret, false);
+
+    std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> vec = {0, 1, 0, 1};
+    pixelMap->SetInnerImgBuffer(vec);
+    newData.SetMediaImage(pixelMap);
+    ret = AVMetaData::CheckMediaImageChange(newData, oldData);
+    EXPECT_EQ(ret, true);
+
+    ret = AVMetaData::CheckMediaImageChange(oldData, newData);
+    EXPECT_EQ(ret, true);
+
+    oldData.SetMediaImage(pixelMap);
+    ret = AVMetaData::CheckMediaImageChange(oldData, newData);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVMetaDataCheckMediaImageChange001 End");
+}
+
+/**
+ * @tc.name: AVMetaDataCheckAVQueueIdChange001
+ * @tc.desc: Test CheckAVQueueIdChange function
+ * @tc.type: FUNC
+ * @tc.require: 1810
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataCheckAVQueueImageChange001, TestSize.Level4)
+{
+    SLOGI("AVMetaDataCheckAVQueueImageChange001 Begin");
+    AVMetaData newData;
+    newData.SetAssetId("a");
+    newData.SetWriter("b");
+    newData.SetAVQueueImage(nullptr);
+    AVMetaData oldData;
+    oldData.SetAssetId("a");
+    oldData.SetWriter("b");
+    oldData.SetAVQueueImage(nullptr);
+    bool ret = AVMetaData::CheckAVQueueImageChange(newData, oldData);
+    EXPECT_EQ(ret, false);
+
+    std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> vec = {0, 1, 0, 1};
+    pixelMap->SetInnerImgBuffer(vec);
+    newData.SetAVQueueImage(pixelMap);
+    ret = AVMetaData::CheckAVQueueImageChange(newData, oldData);
+    EXPECT_EQ(ret, true);
+
+    ret = AVMetaData::CheckAVQueueImageChange(oldData, newData);
+    EXPECT_EQ(ret, true);
+
+    oldData.SetAVQueueImage(pixelMap);
+    ret = AVMetaData::CheckAVQueueImageChange(oldData, newData);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVMetaDataCheckAVQueueImageChange001 End");
+}
+
+/**
+ * @tc.name: AVMetaDataCheckBundleIconChange001
+ * @tc.desc: Test CheckBundleIconChange function
+ * @tc.type: FUNC
+ * @tc.require: 1810
+ */
+HWTEST_F(AVMetaDataTest, AVMetaDataCheckBundleIconChange001, TestSize.Level4)
+{
+    SLOGI("AVMetaDataCheckBundleIconChange001 Begin");
+    AVMetaData newData;
+    newData.SetAssetId("a");
+    newData.SetWriter("b");
+    newData.SetBundleIcon(nullptr);
+    AVMetaData oldData;
+    oldData.SetAssetId("a");
+    oldData.SetWriter("b");
+    oldData.SetBundleIcon(nullptr);
+    bool ret = AVMetaData::CheckBundleIconChange(newData, oldData);
+    EXPECT_EQ(ret, false);
+
+    std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> vec = {0, 1, 0, 1};
+    pixelMap->SetInnerImgBuffer(vec);
+    newData.SetBundleIcon(pixelMap);
+    ret = AVMetaData::CheckBundleIconChange(newData, oldData);
+    EXPECT_EQ(ret, true);
+
+    ret = AVMetaData::CheckBundleIconChange(oldData, newData);
+    EXPECT_EQ(ret, true);
+
+    oldData.SetBundleIcon(pixelMap);
+    ret = AVMetaData::CheckBundleIconChange(oldData, newData);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVMetaDataCheckBundleIconChange001 End");
 }
 } // namespace AVSession
 } // namespace OHOS

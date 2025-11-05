@@ -108,7 +108,7 @@ bool AVMetaData::ReadFromParcel(MessageParcel& in, int32_t twoImageLength)
         mediaImageBuffer.push_back((uint8_t)buffer[i]);
     }
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
-    SetMediaImage(mediaPixelMap);
+    (mediaImageLength > 0) ? SetMediaImage(mediaPixelMap) : (void)0;
 
     CHECK_AND_RETURN_RET_LOG(twoImageLength > mediaImageLength, true,
                              "twoImageLength <= mediaImageLength");
@@ -653,6 +653,166 @@ bool AVMetaData::CopyToByMask(MetaMaskType& mask, AVMetaData& metaOut) const
     }
 
     return result;
+}
+
+AVMetaData::MetaMaskType AVMetaData::GetChangedDataMask(const AVMetaData::MetaMaskType& filter,
+    const AVMetaData& newData) const
+{
+    MetaMaskType result;
+    for (size_t i = 0; i < META_KEY_MAX; i++) {
+        if (filter.test(i) && checkActions[i](*this, newData)) {
+            result.set(i);
+        }
+    }
+    return result;
+}
+
+bool AVMetaData::CheckAssetIdChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.assetId_ != to.assetId_;
+}
+
+bool AVMetaData::CheckTitleChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.title_ != to.title_;
+}
+
+bool AVMetaData::CheckArtistChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.artist_ != to.artist_;
+}
+
+bool AVMetaData::CheckAuthorChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.author_ != to.author_;
+}
+
+bool AVMetaData::CheckAVQueueNameChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.avQueueName_ != to.avQueueName_;
+}
+
+bool AVMetaData::CheckAVQueueIdChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.avQueueId_ != to.avQueueId_;
+}
+
+bool AVMetaData::CheckAVQueueImageChange(const AVMetaData& from, const AVMetaData& to)
+{
+    if (!from.avQueueImage_ && !to.avQueueImage_) {
+        return false;
+    }
+    if (!from.avQueueImage_ || !to.avQueueImage_) {
+        return true;
+    }
+    return !(from.avQueueImage_->Equals(*to.avQueueImage_));
+}
+
+bool AVMetaData::CheckAVQueueImageUriChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.avQueueImageUri_ != to.avQueueImageUri_;
+}
+
+bool AVMetaData::CheckAlbumChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.album_ != to.album_;
+}
+
+bool AVMetaData::CheckWriterChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.writer_ != to.writer_;
+}
+
+bool AVMetaData::CheckComposerChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.composer_ != to.composer_;
+}
+
+bool AVMetaData::CheckDurationChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.duration_ != to.duration_;
+}
+
+bool AVMetaData::CheckMediaImageChange(const AVMetaData& from, const AVMetaData& to)
+{
+    if (!from.mediaImage_ && !to.mediaImage_) {
+        return false;
+    }
+    if (!from.mediaImage_ || !to.mediaImage_) {
+        return true;
+    }
+    return !(from.mediaImage_->Equals(*to.mediaImage_));
+}
+
+bool AVMetaData::CheckMediaImageUriChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.mediaImageUri_ != to.mediaImageUri_;
+}
+
+bool AVMetaData::CheckPublishDataChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.publishDate_ != to.publishDate_;
+}
+
+bool AVMetaData::CheckSubTitleChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.subTitle_ != to.subTitle_;
+}
+
+bool AVMetaData::CheckDescriptionChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.description_ != to.description_;
+}
+
+bool AVMetaData::CheckLyricChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.lyric_ != to.lyric_;
+}
+
+bool AVMetaData::CheckPreviousAssetIdChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.previousAssetId_ != to.previousAssetId_;
+}
+
+bool AVMetaData::CheckNextAssetIdChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.nextAssetId_ != to.nextAssetId_;
+}
+
+bool AVMetaData::CheckSkipIntervalsChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.skipIntervals_ != to.skipIntervals_;
+}
+
+bool AVMetaData::CheckFilterChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.filter_ != to.filter_;
+}
+
+bool AVMetaData::CheckDisplayTagsChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.displayTags_ != to.displayTags_;
+}
+
+bool AVMetaData::CheckDrmSchemesChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.drmSchemes_ != to.drmSchemes_;
+}
+
+bool AVMetaData::CheckBundleIconChange(const AVMetaData& from, const AVMetaData& to)
+{
+    if (!from.bundleIcon_ && !to.bundleIcon_) {
+        return false;
+    }
+    if (!from.bundleIcon_ || !to.bundleIcon_) {
+        return true;
+    }
+    return !(from.bundleIcon_->Equals(*to.bundleIcon_));
+}
+
+bool AVMetaData::CheckSingleLyricTextChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.singleLyricText_ != to.singleLyricText_;
 }
 
 bool AVMetaData::CopyFrom(const AVMetaData& metaIn)

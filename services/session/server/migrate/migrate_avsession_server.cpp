@@ -343,7 +343,7 @@ void MigrateAVSessionServer::StartConfigHistorySession(const std::string &data)
         playerId = "ERROR_PLAYER_ID";
     }
 
-    int32_t ret = servicePtr_->StartAVPlayback(playerId, "");
+    int32_t ret = servicePtr_->StartAVPlayback(playerId, "", "");
     SLOGI("StartConfigHistorySession StartAVPlayback %{public}s, ret=%{public}d",
         SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str(), ret);
     cJSON_Delete(jsonData);

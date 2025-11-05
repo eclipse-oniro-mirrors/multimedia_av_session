@@ -71,7 +71,11 @@ public:
 
     int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
 
+    int32_t GetMetaFilter(AVMetaData::MetaMaskType& filter);
+
     int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
+
+    int32_t GetPlaybackFilter(AVPlaybackState::PlaybackStateMaskType& filter);
 
     void DoMetadataImgClean(AVMetaData& data) override;
 
@@ -91,9 +95,10 @@ public:
 
     void HandleAVCallMetaDataChange(const AVCallMetaData& avCallMetaData);
 
-    void HandlePlaybackStateChange(const AVPlaybackState& state);
+    void HandlePlaybackStateChange(const AVPlaybackState& newState,
+        const AVPlaybackState::PlaybackStateMaskType& changedStateMask);
 
-    void HandleMetaDataChange(const AVMetaData& data);
+    void HandleMetaDataChange(const AVMetaData& data, const AVMetaData::MetaMaskType& changedDataMask);
 
     void HandleActiveStateChange(bool isActive);
 

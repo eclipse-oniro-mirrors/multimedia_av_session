@@ -242,5 +242,58 @@ HWTEST_F(AVPlaybackStateTest, CopyFrom002, TestSize.Level0)
     auto ret = stateTest.CopyFrom(stateOut);
     EXPECT_EQ(ret, false);
 }
+
+
+/**
+ * @tc.name: GetChangedStateMask001
+ * @tc.desc: get changed state mask.
+ * @tc.type: FUNC
+ * @tc.require: 1810
+ */
+HWTEST_F(AVPlaybackStateTest, GetChangedStateMask001, TestSize.Level0)
+{
+    AVPlaybackState state;
+    state.SetState(1);
+    state.SetSpeed(3.0);
+    state.SetFavorite(true);
+
+    AVPlaybackState stateTest;
+    stateTest.SetState(1);
+    stateTest.SetSpeed(2.0);
+    stateTest.SetFavorite(false);
+    AVPlaybackState::PlaybackStateMaskType filter = stateTest.GetMask();
+    AVPlaybackState::PlaybackStateMaskType changedStateMask = stateTest.GetChangedStateMask(filter, state);
+    EXPECT_EQ(changedStateMask.test(AVPlaybackState::PLAYBACK_KEY_STATE), false);
+    EXPECT_EQ(changedStateMask.test(AVPlaybackState::PLAYBACK_KEY_SPEED), true);
+    EXPECT_EQ(changedStateMask.test(AVPlaybackState::PLAYBACK_KEY_IS_FAVORITE), true);
+}
+
+/**
+ * @tc.name: AVPlaybackStateCheckExtrasChange001
+ * @tc.desc: check extras change
+ * @tc.type: FUNC
+ * @tc.require: 1810
+ */
+HWTEST_F(AVPlaybackStateTest, AVPlaybackStateCheckExtrasChange001, TestSize.Level4)
+{
+    AVPlaybackState newState;
+    newState.SetExtras(nullptr);
+    AVPlaybackState oldState;
+    oldState.SetExtras(nullptr);
+    bool ret = AVPlaybackState::CheckExtrasChange(newState, oldState);
+    EXPECT_EQ(ret, false);
+
+    std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
+    newState.SetExtras(wantParams);
+    ret = AVPlaybackState::CheckExtrasChange(newState, oldState);
+    EXPECT_EQ(ret, true);
+
+    ret = AVPlaybackState::CheckExtrasChange(oldState, newState);
+    EXPECT_EQ(ret, true);
+
+    oldState.SetExtras(wantParams);
+    ret = AVPlaybackState::CheckExtrasChange(oldState, newState);
+    EXPECT_EQ(ret, false);
+}
 } // namespace AVSession
 } // namespace OHOS

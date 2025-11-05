@@ -185,16 +185,16 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
 {
     {
         std::lock_guard lockGuard(destroyLock_);
-        if (isDestroyed_) {
-            SLOGI("session is already destroyed");
-            return AVSESSION_SUCCESS;
-        }
+        CHECK_AND_RETURN_RET_LOG(!isDestroyed_, AVSESSION_SUCCESS, "session is already destroyed.");
         isDestroyed_ = true;
     }
 
     std::string sessionId = descriptor_.sessionId_;
-    std::string fileName = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
-    AVSessionUtils::DeleteFile(fileName);
+    std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileNameLocal);
+    std::string fileNameCast =
+        AVSessionUtils::GetCachePathNameForCast(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
+    AVSessionUtils::DeleteFile(fileNameCast);
     DelRecommend();
     std::list<sptr<AVControllerItem>> controllerList;
     {
@@ -507,13 +507,55 @@ void AVSessionItem::UpdateMetaData(const AVMetaData& meta)
     }
 }
 
+void AVSessionItem::ReadMediaAndAVQueueImg(AVMetaData::MetaMaskType recordFilter, AVMetaData& oldData,
+    AVMetaData newData)
+{
+    if (recordFilter.test(AVMetaData::META_KEY_AVQUEUE_IMAGE) && newData.GetAVQueueImage() != nullptr &&
+            newData.GetAVQueueImage()->GetInnerImgBuffer().size() > 0 && !newData.GetAVQueueName().empty() &&
+            !newData.GetAVQueueId().empty()) {
+        std::shared_ptr<AVSessionPixelMap> avQueueImage = oldData.GetAVQueueImage();
+        ReadMetaDataAVQueueImg(avQueueImage);
+        if (avQueueImage != nullptr && avQueueImage->GetInnerImgBuffer().size() > 0) {
+            oldData.SetAVQueueImage(avQueueImage);
+        }
+    }
+
+    if (recordFilter.test(AVMetaData::META_KEY_MEDIA_IMAGE) && newData.GetMediaImage() != nullptr &&
+        newData.GetMediaImage()->GetInnerImgBuffer().size() > 0) {
+        std::shared_ptr<AVSessionPixelMap> mediaImage = oldData.GetMediaImage();
+        ReadMetaDataImg(mediaImage);
+        if (mediaImage != nullptr && mediaImage->GetInnerImgBuffer().size() > 0) {
+            oldData.SetMediaImage(mediaImage);
+        }
+    }
+}
+
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
+    AVMetaData::MetaMaskType recordFilter;
+    AVMetaData::MetaMaskType changedDataMask;
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                AVMetaData::MetaMaskType controllerFilter;
+                controller->GetMetaFilter(controllerFilter);
+                if (!controllerFilter.all()) {
+                    recordFilter |= controllerFilter;
+                }
+            }
+        }
+    }
+    if (recordFilter.any()) {
+        std::lock_guard lockGuard(avsessionItemLock_);
+        ReadMediaAndAVQueueImg(recordFilter, metaData_, meta);
+        changedDataMask = metaData_.GetChangedDataMask(recordFilter, meta);
+    }
     UpdateMetaData(meta);
     CheckUseAVMetaData(meta);
     SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d, isAlive:%{public}d",
         meta.GetTitle().c_str(), static_cast<int>(GetPid()), (isAlivePtr_ == nullptr) ? -1 : *isAlivePtr_);
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_]() {
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_, changedDataMask]() {
         std::lock_guard aliveLockGuard(isAliveLock_);
         CHECK_AND_RETURN_LOG(isAlivePtr != nullptr && *isAlivePtr, "handle metadatachange with session gone, return");
         SLOGI("HandleMetaDataChange in postTask with title %{public}s and size %{public}d",
@@ -522,7 +564,7 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
         CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");
         for (const auto& [pid, controller] : controllers_) {
             if (controller != nullptr) {
-                controller->HandleMetaDataChange(meta);
+                controller->HandleMetaDataChange(meta, changedDataMask);
             }
         }
         }, "HandleMetaDataChange", 0);
@@ -708,10 +750,31 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::CreateWantAgentWithIndex(
     return *launchAbility;
 }
 
+AVPlaybackState::PlaybackStateMaskType AVSessionItem::GetControlItemsPlaybackFilter()
+{
+    AVPlaybackState::PlaybackStateMaskType recordFilter;
+    std::lock_guard controllerLockGuard(controllersLock_);
+    for (const auto& [pid, controller] : controllers_) {
+        if (controller != nullptr) {
+            AVPlaybackState::PlaybackStateMaskType controllerFilter;
+            controller->GetPlaybackFilter(controllerFilter);
+            if (!controllerFilter.all()) {
+                recordFilter |= controllerFilter;
+            }
+        }
+    }
+    return recordFilter;
+}
+
 int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
+    AVPlaybackState::PlaybackStateMaskType recordFilter = GetControlItemsPlaybackFilter();
+    AVPlaybackState::PlaybackStateMaskType changedStateMask;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
+        if (recordFilter.any()) {
+            changedStateMask = playbackState_.GetChangedStateMask(recordFilter, state);
+        }
         CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
     }
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
@@ -725,7 +788,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
         if (controllers_.size() > 0) {
             for (const auto& [pid, controller] : controllers_) {
                 if (controller != nullptr) {
-                    controller->HandlePlaybackStateChange(state);
+                    controller->HandlePlaybackStateChange(state, changedStateMask);
                 }
             }
         }
@@ -2085,11 +2148,12 @@ AVMetaData AVSessionItem::GetMetaData()
     return metaData_;
 }
 
-void AVSessionItem::ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap)
+void AVSessionItem::ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap, bool isCast)
 {
     std::shared_lock<std::shared_mutex> lock(writeAndReadImgLock_);
     std::string sessionId = GetSessionId();
-    std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
+    std::string fileDir = isCast ?
+        AVSessionUtils::GetCachePathNameForCast(userId_) : AVSessionUtils::GetCachePathName(userId_);
     std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::ReadImageFromFile(innerPixelMap, fileDir, fileName);
 }
@@ -2241,7 +2305,7 @@ bool AVSessionItem::IsNotShowNotification()
     return isNotShowNotification_;
 }
 
-void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
+void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const CommandInfo& cmdInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
@@ -2249,8 +2313,10 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent)
         static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()));
     if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
         AVControlCommand cmd;
+        cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
         cmd.SetRewindTime(metaData_.GetSkipIntervals());
         cmd.SetForwardTime(metaData_.GetSkipIntervals());
+        cmd.SetCommandInfo(cmdInfo);
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
     } else {
         std::lock_guard callbackLockGuard(callbackLock_);
@@ -2268,27 +2334,48 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
         SLOGE("controlCommand invalid");
         return;
     }
+    auto cmdBack = cmd;
+    CommandInfo cmdInfo;
+    cmdBack.GetCommandInfo(cmdInfo);
+
+    auto callingUid = GetCallingUid();
+    if (callingUid == CAST_STATIC_UID) {
+        auto deviceInfos = descriptor_.outputDeviceInfo_.deviceInfos_;
+        if (deviceInfos.size() > 0) {
+            auto castDeviceId = deviceInfos[0].deviceId_;
+            cmdInfo.SetDeviceId(castDeviceId);
+        }
+    } else {
+        std::string callerBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(callingUid);
+        cmdInfo.SetBundleName(callerBundleName);
+    }
+
+    cmdInfo.SetPlayType(callingUid == CAST_STATIC_UID ?
+        PlayTypeToString.at(PlayType::CAST) : PlayTypeToString.at(PlayType::APP));
+    cmdBack.SetCommandInfo(cmdInfo);
+
     SLOGI("ExecuteControllerCommand code %{public}d from pid %{public}d to pid %{public}d",
         code, static_cast<int>(GetCallingPid()), static_cast<int>(GetPid()));
     {
         std::lock_guard remoteSinkLockGuard(remoteSinkLock_);
         if (remoteSink_ != nullptr) {
             SLOGI("set remote ControlCommand");
-            CHECK_AND_RETURN_LOG(remoteSink_->SetControlCommand(cmd) == AVSESSION_SUCCESS, "SetControlCommand failed");
+            CHECK_AND_RETURN_LOG(remoteSink_->SetControlCommand(cmdBack) == AVSESSION_SUCCESS,
+                "SetControlCommand failed");
         }
     }
     CHECK_AND_RETURN_LOG(callback_ != nullptr || callbackForMigrate_ != nullptr,
         "callback_ or callbackForMigrate_ is nullptr");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactivate");
 
-    HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmd.GetCommand()));
+    HISYSEVENT_ADD_OPERATION_COUNT(static_cast<Operation>(cmdBack.GetCommand()));
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_SUCCESS_CTRL_COMMAND);
     HISYSEVENT_ADD_CONTROLLER_COMMAND_INFO(descriptor_.elementName_.GetBundleName(), GetPid(),
-        cmd.GetCommand(), descriptor_.sessionType_);
+        cmdBack.GetCommand(), descriptor_.sessionType_);
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    ReportSessionControl(descriptor_.elementName_.GetBundleName(), cmd.GetCommand());
+    ReportSessionControl(descriptor_.elementName_.GetBundleName(), cmdBack.GetCommand());
 #endif
-    return cmdHandlers[code](cmd);
+    return cmdHandlers[code](cmdBack);
 
     HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "CMD", code,
         "ERROR_INFO", "avsessionitem executecontrollercommand, invaild command");
@@ -2363,10 +2450,10 @@ void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)
     {
         std::lock_guard callbackLockGuard(callbackLock_);
         if (callbackForMigrate_) {
-            callbackForMigrate_->OnPlay();
+            callbackForMigrate_->OnPlay(cmd);
         }
         CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-        callback_->OnPlay();
+        callback_->OnPlay(cmd);
     }
 
     std::string playParam = "";
@@ -2413,10 +2500,10 @@ void AVSessionItem::HandleOnPlayNext(const AVControlCommand& cmd)
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayNext");
     std::lock_guard callbackLockGuard(callbackLock_);
     if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlayNext();
+        callbackForMigrate_->OnPlayNext(cmd);
     }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlayNext();
+    callback_->OnPlayNext(cmd);
 }
 
 void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand& cmd)
@@ -2424,10 +2511,10 @@ void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand& cmd)
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayPrevious");
     std::lock_guard callbackLockGuard(callbackLock_);
     if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlayPrevious();
+        callbackForMigrate_->OnPlayPrevious((cmd));
     }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlayPrevious();
+    callback_->OnPlayPrevious((cmd));
 }
 
 void AVSessionItem::HandleOnFastForward(const AVControlCommand& cmd)
@@ -2437,7 +2524,7 @@ void AVSessionItem::HandleOnFastForward(const AVControlCommand& cmd)
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int64_t time = 0;
     CHECK_AND_RETURN_LOG(cmd.GetForwardTime(time) == AVSESSION_SUCCESS, "GetForwardTime failed");
-    callback_->OnFastForward(time);
+    callback_->OnFastForward(time, cmd);
 }
 
 void AVSessionItem::HandleOnRewind(const AVControlCommand& cmd)
@@ -2446,8 +2533,8 @@ void AVSessionItem::HandleOnRewind(const AVControlCommand& cmd)
     std::lock_guard callbackLockGuard(callbackLock_);
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int64_t time = 0;
-    CHECK_AND_RETURN_LOG(cmd.GetRewindTime(time) == AVSESSION_SUCCESS, "GetForwardTime failed");
-    callback_->OnRewind(time);
+    CHECK_AND_RETURN_LOG(cmd.GetRewindTime(time) == AVSESSION_SUCCESS, "GetRewindTime failed");
+    callback_->OnRewind(time, cmd);
 }
 
 void AVSessionItem::HandleOnSeek(const AVControlCommand& cmd)
