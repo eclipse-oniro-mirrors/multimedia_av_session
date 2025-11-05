@@ -289,7 +289,6 @@ static HWTEST_F(SoftbusSessionManagerTest, SendMessage004, TestSize.Level0)
     EXPECT_EQ(ret, -1);
     SLOGI("SendMessage004 end");
 }
-#endif
 
 /**
 * @tc.name: SendByte002
@@ -338,6 +337,7 @@ static HWTEST_F(SoftbusSessionManagerTest, SendByte004, TestSize.Level0)
     EXPECT_EQ(ret, -1);
     SLOGI("SendByte004 end");
 }
+#endif
 
 /**
 * @tc.name: ObtainPeerDeviceId002

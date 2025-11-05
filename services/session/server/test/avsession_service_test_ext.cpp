@@ -776,6 +776,7 @@ static HWTEST_F(AVSessionServiceTestExt, DoConnectProcessWithMigrateServer001, T
  */
 static HWTEST_F(AVSessionServiceTestExt, DoDisconnectProcessWithMigrateServer001, TestSize.Level0)
 {
+#ifdef DEVICE_MANAGER_ENABLE
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
     OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
     std::string networkId = "test_networkId";
@@ -785,6 +786,7 @@ static HWTEST_F(AVSessionServiceTestExt, DoDisconnectProcessWithMigrateServer001
     g_AVSessionService->migrateAVSessionServerMap_[networkId] = migrateAVSessionServer;
     g_AVSessionService->DoDisconnectProcessWithMigrateServer(deviceInfo);
     EXPECT_TRUE(g_AVSessionService->migrateAVSessionServerMap_.empty());
+#endif
 }
 
 /**

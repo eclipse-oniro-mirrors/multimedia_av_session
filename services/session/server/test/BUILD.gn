@@ -2072,16 +2072,6 @@ ohos_unittest("AVSessionServiceTest") {
 
   cflags = []
 
-  defines = []
-  if (multimedia_av_session_enable_device_manager) {
-    defines += [ "DEVICE_MANAGER_ENABLE" ]
-    external_deps += [ "device_manager:devicemanagersdk" ]
-  }
-
-  if (multimedia_av_session_enable_dsoftbus) {
-    external_deps += [ "dsoftbus:softbus_client" ]
-  }
-
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
@@ -2150,8 +2140,6 @@ ohos_unittest("AVSessionServiceExtTest") {
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -2163,6 +2151,17 @@ ohos_unittest("AVSessionServiceExtTest") {
   ]
 
   cflags = []
+
+  defines = []
+  if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     deps += [
