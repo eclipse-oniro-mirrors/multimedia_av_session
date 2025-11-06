@@ -2542,6 +2542,7 @@ int32_t AVSessionService::StartDefaultAbilityByCall(std::string& sessionId)
     }
     int32_t ret = ability->StartAbilityByCall(sessionId);
     if (ret != ERR_START_ABILITY_IS_RUNNING) {
+        std::lock_guard lockGuard(abilityManagerLock_);
         abilityManager_.erase(bundleName + abilityName);
     }
     return ret;
@@ -2625,6 +2626,7 @@ int32_t AVSessionService::StartAbilityByCall(const std::string& sessionIdNeeded,
     }
     int32_t ret = ability->StartAbilityByCall(sessionId);
     if (ret != ERR_START_ABILITY_IS_RUNNING) {
+        std::lock_guard lockGuard(abilityManagerLock_);
         abilityManager_.erase(bundleName + abilityName);
     }
     return ret;
@@ -3069,7 +3071,10 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
     ClearClientResources(pid, true);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVRouter::GetInstance().IsStopCastDiscovery(pid);
-    cacheEnableCastPids_.erase(pid);
+    {
+        std::lock_guard lockGuard(checkEnableCastLock_);
+        cacheEnableCastPids_.erase(pid);
+    }
     if (BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == MEDIA_CONTROL_BUNDLENAME) {
         SLOGI("mediacontroller on client die");
     }

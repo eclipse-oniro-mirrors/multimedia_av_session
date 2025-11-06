@@ -462,7 +462,10 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
         return AVSESSION_SUCCESS;
     }
     checkEnableCast(true);
-    cacheEnableCastPids_.erase(GetCallingPid());
+    {
+        std::lock_guard lockGuard(checkEnableCastLock_);
+        cacheEnableCastPids_.erase(GetCallingPid());
+    }
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = castDeviceId_;
     deviceInfo.deviceName_ = castDeviceName_;
