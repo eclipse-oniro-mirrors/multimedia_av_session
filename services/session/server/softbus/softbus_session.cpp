@@ -99,7 +99,9 @@ void SoftbusSession::SendByteForNext(const std::string &deviceId, const std::str
 void SoftbusSession::SendByte(int32_t sessionId, const std::string &data)
 {
     SLOGI("SendByteLength: %{public}d", static_cast<int>(data.size()));
+#ifdef DSOFTBUS_ENABLE
     SoftbusSessionManager::GetInstance().SendBytes(sessionId, data);
+#endif
 }
 
 void SoftbusSession::SendByteForNext(int32_t sessionId, const std::string &data)
@@ -116,17 +118,21 @@ void SoftbusSession::SendByteForNext(int32_t sessionId, const std::string &data)
 void SoftbusSession::SendMessage(const std::string &deviceId, const std::string &data)
 {
     SLOGI("SendMessageLength: %{public}d", static_cast<int>(data.size()));
+#ifdef DSOFTBUS_ENABLE
     std::lock_guard lockGuard(deviceMapLock_);
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {
         SoftbusSessionManager::GetInstance().SendMessage(iter->second, data);
     }
+#endif
 }
 
 void SoftbusSession::SendMessage(int32_t sessionId, const std::string &data)
 {
     SLOGI("SendMessageLength: %{public}d", static_cast<int>(data.size()));
+#ifdef DSOFTBUS_ENABLE
     SoftbusSessionManager::GetInstance().SendMessage(sessionId, data);
+#endif
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

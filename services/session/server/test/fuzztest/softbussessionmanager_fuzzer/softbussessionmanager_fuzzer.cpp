@@ -105,19 +105,20 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
 
     std::string inforOne = std::to_string(GetData<uint8_t>());
     std::string inforTwo = std::to_string(GetData<uint8_t>());
+#ifdef DSOFTBUS_ENABLE
     manager_->SendMessage(socket, inforOne);
     manager_->SendMessage(socket, inforTwo);
     manager_->SendBytes(socket, inforOne);
     manager_->SendBytes(socket, inforTwo);
-
-#ifdef DSOFTBUS_ENABLE
     info.networkId = nullptr;
     manager_->OnBind(socket, info);
 #endif
 
     manager_->AddSessionListener(nullptr);
     std::string sendData = provider.ConsumeRandomLengthString();
+#ifdef DSOFTBUS_ENABLE
     manager_->SendBytesForNext(socket, sendData);
+#endif
 }
 
 void SoftbusSessionManagerOnRemoteRequest(uint8_t* data, size_t size)
@@ -130,6 +131,7 @@ void SoftbusSessionManagerOnRemoteRequest(uint8_t* data, size_t size)
     softbusSessionManager->SoftbusSessionManagerFuzzTest(data, size);
 }
 
+#ifdef DSOFTBUS_ENABLE
 void SoftbusSessionManagerFuzzer::SocketFuzzTest()
 {
     auto softbusSessionManager = std::make_unique<SoftbusSessionManager>();
@@ -144,22 +146,16 @@ void SoftbusSessionManagerFuzzer::BindFuzzTest()
     CHECK_AND_RETURN(softbusSessionManager != nullptr);
     std::string peerNetworkId = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     std::string pKgName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-#ifdef DSOFTBUS_ENABLE
     softbusSessionManager->Bind(peerNetworkId, pKgName);
-#endif
 }
 
 void SoftbusSessionManagerFuzzer::SendMessageFuzzTest()
 {
     auto softbusSessionManager = std::make_unique<SoftbusSessionManager>();
     CHECK_AND_RETURN(softbusSessionManager != nullptr);
-#ifdef DSOFTBUS_ENABLE
     int32_t socket = provider.ConsumeIntegral<int32_t>();
-#endif
     std::string data = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-#ifdef DSOFTBUS_ENABLE
     softbusSessionManager->SendMessage(socket, data);
-#endif
 }
 
 void SoftbusSessionManagerFuzzer::SendBytesFuzzTest()
@@ -179,6 +175,7 @@ void SoftbusSessionManagerFuzzer::SendBytesForNextFuzzTest()
     std::string data = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     softbusSessionManager->SendBytesForNext(socket, data);
 }
+#endif
 
 void SoftbusSessionManagerFuzzer::OnBindFuzzTest()
 {
