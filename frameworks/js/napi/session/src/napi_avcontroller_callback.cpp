@@ -16,6 +16,7 @@
 #include "napi_avcontroller_callback.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
+#include "avsession_utils.h"
 #include "napi_control_command.h"
 #include "napi_meta_data.h"
 #include "napi_playback_state.h"
@@ -297,7 +298,8 @@ void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& stat
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnMetaDataChange");
-    SLOGI("do metadata change notify with title %{public}s", data.GetTitle().c_str());
+    SLOGI("do metadata change notify with title %{public}s",
+        AVSessionUtils::GetAnonyTitle(data.GetTitle().c_str()).c_str());
     HandleEventWithThreadSafe(EVENT_META_DATA_CHANGE, -1, data);
 }
 

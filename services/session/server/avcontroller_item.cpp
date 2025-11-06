@@ -17,6 +17,7 @@
 #include "ipc_skeleton.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_utils.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_trace.h"
 #include "command_send_limit.h"
@@ -503,7 +504,8 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMeta
             metaOut.SetAVQueueImage(avQueuePixelMap);
         }
         metaOut.SetAssetId(data.GetAssetId());
-        SLOGI("update metaData pid %{public}d, title %{public}s", static_cast<int>(pid_), metaOut.GetTitle().c_str());
+        SLOGI("update metaData pid %{public}d, title %{public}s", static_cast<int>(pid_),
+            AVSessionUtils::GetAnonyTitle(metaOut.GetTitle().c_str()).c_str());
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         if (metaOut.GetMediaImage() != nullptr && !metaOut.GetMediaImageUri().empty()) {
             SLOGI("isFromSession %{public}d in metaChange", isFromSession_);
