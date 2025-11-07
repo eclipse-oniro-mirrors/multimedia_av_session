@@ -263,11 +263,13 @@ uint32_t GetArrLength(T& arr)
 typedef void (*TestFuncs[9])();
 
 TestFuncs g_allFuncs = {
+#ifdef DSOFTBUS_ENABLE
     SoftbusSessionManagerFuzzer::SocketFuzzTest,
     SoftbusSessionManagerFuzzer::BindFuzzTest,
     SoftbusSessionManagerFuzzer::SendMessageFuzzTest,
     SoftbusSessionManagerFuzzer::SendBytesFuzzTest,
     SoftbusSessionManagerFuzzer::SendBytesForNextFuzzTest,
+#endif
     SoftbusSessionManagerFuzzer::OnBindFuzzTest,
     SoftbusSessionManagerFuzzer::OnShutdownFuzzTest,
     SoftbusSessionManagerFuzzer::OnMessageFuzzTest,
