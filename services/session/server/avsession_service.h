@@ -738,7 +738,8 @@ private:
     bool isFirstPress_ = true;
     bool isInCast_ = false;
     bool isCastableDevice_ = false;
-    bool isAudioBrokerStart_ = true;
+    bool isAudioBrokerStart_ = false;
+    bool isAncoMediaSessionChange_ = false;
 
     void *migrateStubFuncHandle_ = nullptr;
 
@@ -777,6 +778,7 @@ private:
     const int32_t cancelTimeout = 5000;
     const uint8_t doRemoteLoadRetryTime = 5;
     const int32_t defaultUserId = 100;
+    const int32_t mediaControlAncoParam = 52225;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

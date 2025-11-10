@@ -1621,6 +1621,7 @@ void AVSessionService::CheckAndUpdateAncoMediaSession(const AppExecFwk::ElementN
         elementName.GetAbilityName(), session);
     CHECK_AND_RETURN_LOG(res == AVSESSION_SUCCESS, "update media session fail");
     session->UpdateSessionElement(elementName);
+    isAncoMediaSessionChange_ = true;
     SLOGI("updatenewsession %{public}s %{public}s", elementName.GetBundleName().c_str(),
         elementName.GetAbilityName().c_str());
 }
@@ -2047,6 +2048,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
     std::lock_guard sortFileLockGuard(sessionFileLock_);
     std::vector<AVSessionDescriptor> tempDescriptors;
     GetHistoricalSessionDescriptorsFromFile(tempDescriptors);
+    bool isNeedAllAnco = maxSize == mediaControlAncoParam;
     if (maxSize < 0 || maxSize > maxHistoryNums_) {
         maxSize = unSetHistoryNum;
     }
@@ -2056,8 +2058,10 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
         }
         std::string sessionId(iterator->sessionId_);
         auto session = GetContainer().GetSessionById(sessionId);
-        if (session != nullptr && (session->GetSessionTag() != "ancoMediaSession" ||
-            session->GetBundleName() == iterator->elementName_.GetBundleName())) {
+        bool checkIfContinue = session != nullptr &&
+            (!isNeedAllAnco || (session->GetSessionTag() != "ancoMediaSession" ||
+            session->GetBundleName() == iterator->elementName_.GetBundleName()));
+        if (checkIfContinue) {
             SLOGE("GetHistoricalSessionDescriptorsFromFile find session alive, sessionId=%{public}s",
                 AVSessionUtils::GetAnonySessionId(sessionId).c_str());
             continue;
