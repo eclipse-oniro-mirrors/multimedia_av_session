@@ -30,23 +30,23 @@ public:
     void Unmarshalling(Parcel& data);
     bool Marshalling(Parcel& parcel) const override;
 
-    int32_t SetDeviceId(const std::string& deviceId);
-    int32_t GetDeviceId(std::string& deviceId) const;
+    int32_t SetCallerDeviceId(const std::string& callerDeviceId);
+    int32_t GetCallerDeviceId(std::string& callerDeviceId) const;
 
-    int32_t SetBundleName(const std::string& bundleName);
-    int32_t GetBundleName(std::string& bundleName) const;
+    int32_t SetCallerBundleName(const std::string& callerBundleName);
+    int32_t GetCallerBundleName(std::string& callerBundleName) const;
 
-    int32_t SetModuleName(const std::string& moduleName);
-    int32_t GetModuleName(std::string& moduleName) const;
+    int32_t SetCallerModuleName(const std::string& callerModuleName);
+    int32_t GetCallerModuleName(std::string& callerModuleName) const;
 
-    int32_t SetPlayType(const std::string& playType);
-    int32_t GetPlayType(std::string& playType) const;
+    int32_t SetCallerType(const std::string& callerType);
+    int32_t GetCallerType(std::string& callerType) const;
 
 private:
-    std::string deviceId_;
-    std::string bundleName_;
-    std::string moduleName_;
-    std::string playType_;
+    std::string callerDeviceId_;
+    std::string callerBundleName_;
+    std::string callerModuleName_;
+    std::string callerType_;
 };
 }
 #endif // OHOS_COMMAND_INFO_H

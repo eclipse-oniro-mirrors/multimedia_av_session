@@ -2806,8 +2806,9 @@ bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand
     SLOGI("CheckSessionHandleKeyEvent procSession:%{public}s", procSession->GetBundleName().c_str());
     CommandInfo cmdInfo;
     if (deviceId != "") {
-        cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
-        cmdInfo.SetDeviceId(deviceId);
+        // The current scenario treats all device IDs as Bluetooth type by default
+        cmdInfo.SetCallerType(PlayTypeToString.at(PlayType::BLUETOOTH));
+        cmdInfo.SetCallerDeviceId(deviceId);
     }
     if (procCmd) {
         cmd.SetCommandInfo(cmdInfo);
@@ -2828,10 +2829,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const st
         std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
         CHECK_AND_RETURN_RET_LOG(keyEventList != nullptr, AVSESSION_ERROR, "keyEventList ptr nullptr!");
         for (const auto& session : *keyEventList) {
-            CommandInfo cmdInfo;
-            cmdInfo.SetDeviceId(deviceId);
-            cmdInfo.SetPlayType(PlayTypeToString.at(PlayType::BLUETOOTH));
-            session->HandleMediaKeyEvent(keyEvent, cmdInfo);
+            session->HandleMediaKeyEvent(keyEvent);
             return AVSESSION_SUCCESS;
         }
     }

@@ -152,13 +152,13 @@ napi_status NapiControlCommand::GetPlayParam(napi_env env, napi_value in, AVCont
 
     // Processing optional playInfo
     napi_value playInfo;
-    status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    status = NapiUtils::GetNamedProperty(env, in, "commandInfo", playInfo);
     if (status == napi_ok) {
-        std::string moduleName {};
-        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        std::string callerModuleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "callerModuleName", callerModuleName);
         if (status == napi_ok) {
             CommandInfo cmdInfo;
-            cmdInfo.SetModuleName(moduleName);
+            cmdInfo.SetCallerModuleName(callerModuleName);
             out.SetCommandInfo(cmdInfo);
         }
     }
@@ -170,13 +170,13 @@ napi_status NapiControlCommand::GetPlayNextParam(napi_env env, napi_value in, AV
 {
     // Processing optional playInfo
     napi_value playInfo;
-    auto status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    auto status = NapiUtils::GetNamedProperty(env, in, "commandInfo", playInfo);
     if (status == napi_ok) {
-        std::string moduleName {};
-        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        std::string callerModuleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "callerModuleName", callerModuleName);
         if (status == napi_ok) {
             CommandInfo cmdInfo;
-            cmdInfo.SetModuleName(moduleName);
+            cmdInfo.SetCallerModuleName(callerModuleName);
             out.SetCommandInfo(cmdInfo);
         }
     }
@@ -188,13 +188,13 @@ napi_status NapiControlCommand::GetPlayPreviousParam(napi_env env, napi_value in
 {
     // Processing optional playInfo
     napi_value playInfo;
-    auto status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    auto status = NapiUtils::GetNamedProperty(env, in, "commandInfo", playInfo);
     if (status == napi_ok) {
-        std::string moduleName {};
-        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        std::string callerModuleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "callerModuleName", callerModuleName);
         if (status == napi_ok) {
             CommandInfo cmdInfo;
-            cmdInfo.SetModuleName(moduleName);
+            cmdInfo.SetCallerModuleName(callerModuleName);
             out.SetCommandInfo(cmdInfo);
         }
     }
@@ -247,13 +247,13 @@ napi_status NapiControlCommand::GetForwardTime(napi_env env, napi_value in, AVCo
 
     // Processing optional playInfo
     napi_value playInfo;
-    status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    status = NapiUtils::GetNamedProperty(env, in, "commandInfo", playInfo);
     if (status == napi_ok) {
-        std::string moduleName {};
-        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        std::string callerModuleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "callerModuleName", callerModuleName);
         if (status == napi_ok) {
             CommandInfo cmdInfo;
-            cmdInfo.SetModuleName(moduleName);
+            cmdInfo.SetCallerModuleName(callerModuleName);
             out.SetCommandInfo(cmdInfo);
         }
     }
@@ -294,13 +294,13 @@ napi_status NapiControlCommand::GetRewindTime(napi_env env, napi_value in, AVCon
 
     // Processing optional playInfo
     napi_value playInfo;
-    status = NapiUtils::GetNamedProperty(env, in, "playInfo", playInfo);
+    status = NapiUtils::GetNamedProperty(env, in, "commandInfo", playInfo);
     if (status == napi_ok) {
-        std::string moduleName {};
-        status = NapiUtils::GetNamedProperty(env, playInfo, "moduleName", moduleName);
+        std::string callerModuleName {};
+        status = NapiUtils::GetNamedProperty(env, playInfo, "callerModuleName", callerModuleName);
         if (status == napi_ok) {
             CommandInfo cmdInfo;
-            cmdInfo.SetModuleName(moduleName);
+            cmdInfo.SetCallerModuleName(callerModuleName);
             out.SetCommandInfo(cmdInfo);
         }
     }
