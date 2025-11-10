@@ -28,19 +28,19 @@ CommandInfo::~CommandInfo()
 
 void CommandInfo::Unmarshalling(Parcel& data)
 {
-    SetDeviceId(data.ReadString());
-    SetBundleName(data.ReadString());
-    SetModuleName(data.ReadString());
-    SetPlayType(data.ReadString());
+    SetCallerDeviceId(data.ReadString());
+    SetCallerBundleName(data.ReadString());
+    SetCallerModuleName(data.ReadString());
+    SetCallerType(data.ReadString());
 }
 
 bool CommandInfo::Marshalling(Parcel& parcel) const
 {
     auto WriteCommonSessionParams = [&parcel, this]() -> bool {
-        return parcel.WriteString(deviceId_) &&
-               parcel.WriteString(bundleName_) &&
-               parcel.WriteString(moduleName_) &&
-               parcel.WriteString(playType_);
+        return parcel.WriteString(callerDeviceId_) &&
+               parcel.WriteString(callerBundleName_) &&
+               parcel.WriteString(callerModuleName_) &&
+               parcel.WriteString(callerType_);
     };
 
     CHECK_AND_RETURN_RET_LOG(WriteCommonSessionParams(), false, "write common info failed");
@@ -48,57 +48,57 @@ bool CommandInfo::Marshalling(Parcel& parcel) const
 }
 
 // LCOV_EXCL_START
-int32_t CommandInfo::SetDeviceId(const std::string& deviceId)
+int32_t CommandInfo::SetCallerDeviceId(const std::string& callerDeviceId)
 {
-    deviceId_ = deviceId;
+    callerDeviceId_ = callerDeviceId;
     return AVSESSION_SUCCESS;
 }
 
-int32_t CommandInfo::GetDeviceId(std::string& deviceId) const
+int32_t CommandInfo::GetCallerDeviceId(std::string& callerDeviceId) const
 {
-    deviceId = deviceId_;
-    return AVSESSION_SUCCESS;
-}
-// LCOV_EXCL_STOP
-
-// LCOV_EXCL_START
-int32_t CommandInfo::SetBundleName(const std::string& bundleName)
-{
-    bundleName_ = bundleName;
-    return AVSESSION_SUCCESS;
-}
-
-int32_t CommandInfo::GetBundleName(std::string& bundleName) const
-{
-    bundleName = bundleName_;
+    callerDeviceId = callerDeviceId_;
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-int32_t CommandInfo::SetModuleName(const std::string& moduleName)
+int32_t CommandInfo::SetCallerBundleName(const std::string& callerBundleName)
 {
-    moduleName_ = moduleName;
+    callerBundleName_ = callerBundleName;
     return AVSESSION_SUCCESS;
 }
 
-int32_t CommandInfo::GetModuleName(std::string& moduleName) const
+int32_t CommandInfo::GetCallerBundleName(std::string& callerBundleName) const
 {
-    moduleName = moduleName_;
+    callerBundleName = callerBundleName_;
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-int32_t CommandInfo::SetPlayType(const std::string& playType)
+int32_t CommandInfo::SetCallerModuleName(const std::string& callerModuleName)
 {
-    playType_ = playType;
+    callerModuleName_ = callerModuleName;
     return AVSESSION_SUCCESS;
 }
 
-int32_t CommandInfo::GetPlayType(std::string& playType) const
+int32_t CommandInfo::GetCallerModuleName(std::string& callerModuleName) const
 {
-    playType = playType_;
+    callerModuleName = callerModuleName_;
+    return AVSESSION_SUCCESS;
+}
+// LCOV_EXCL_STOP
+
+// LCOV_EXCL_START
+int32_t CommandInfo::SetCallerType(const std::string& callerType)
+{
+    callerType_ = callerType;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t CommandInfo::GetCallerType(std::string& callerType) const
+{
+    callerType = callerType_;
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP

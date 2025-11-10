@@ -553,28 +553,28 @@ napi_status NapiUtils::SetValue(napi_env env, const std::shared_ptr<CommandInfo>
 
     napi_value property = nullptr;
     std::string callerBundleName {};
-    in->GetBundleName(callerBundleName);
+    in->GetCallerBundleName(callerBundleName);
     status = SetValue(env, callerBundleName, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "callerBundleName", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
     std::string callerModuleName {};
-    in->GetModuleName(callerModuleName);
+    in->GetCallerModuleName(callerModuleName);
     status = SetValue(env, callerModuleName, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "callerModuleName", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
     std::string callerDeviceId {};
-    in->GetDeviceId(callerDeviceId);
+    in->GetCallerDeviceId(callerDeviceId);
     status = SetValue(env, callerDeviceId, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "callerDeviceId", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
     std::string callerType {};
-    in->GetPlayType(callerType);
+    in->GetCallerType(callerType);
     status = SetValue(env, callerType, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "callerType", property);

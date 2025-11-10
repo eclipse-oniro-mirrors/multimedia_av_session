@@ -2345,16 +2345,23 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
         auto deviceInfos = descriptor_.outputDeviceInfo_.deviceInfos_;
         if (deviceInfos.size() > 0) {
             auto castDeviceId = deviceInfos[0].deviceId_;
-            cmdInfo.SetDeviceId(castDeviceId);
+            cmdInfo.SetCallerDeviceId(castDeviceId);
         }
     } else {
         std::string callerBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(callingUid);
-        cmdInfo.SetBundleName(callerBundleName);
+        cmdInfo.SetCallerBundleName(callerBundleName);
     }
 
-    cmdInfo.SetPlayType(callingUid == CAST_STATIC_UID ?
+    cmdInfo.SetCallerType(callingUid == CAST_STATIC_UID ?
         PlayTypeToString.at(PlayType::CAST) : PlayTypeToString.at(PlayType::APP));
-    cmdBack.SetCommandInfo(cmdInfo);
+
+    // Existing commandInfo data cannot be overwritten
+    std::string callerModuleName {};
+    cmdInfo.GetCallerModuleName(callerModuleName);
+    if (!callerModuleName.empty()) {
+        cmdBack.SetCommandInfo(cmdInfo);
+        SLOGI("ExecuteControllerCommand has moduleName do set CommandInfo");
+    }
 
     SLOGI("ExecuteControllerCommand code %{public}d from pid %{public}d to pid %{public}d",
         code, static_cast<int>(GetCallingPid()), static_cast<int>(GetPid()));
