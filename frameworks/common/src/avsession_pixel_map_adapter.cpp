@@ -16,6 +16,7 @@
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_log.h"
 #include "securec.h"
+#include "pixel_astc.h"
 
 using namespace OHOS::Media;
 
@@ -177,18 +178,34 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
 {
     std::lock_guard<std::mutex> lockGuard(pixelMapLock_);
     CHECK_AND_RETURN_RET_LOG(pixelMap != nullptr, nullptr, "invalid parameter");
-    originalPixelMapBytes_ = pixelMap->GetByteCount();
-    originalWidth_ = pixelMap->GetWidth();
-    originalHeight_ = pixelMap->GetHeight();
+
+    Media::ImageInfo imageInfoForAstcConv;
+    pixelMap->GetImageInfo(imageInfoForAstcConv);
+    std::shared_ptr<Media::PixelMap> pixelMapExlAstc;
+    if (imageInfoForAstcConv.pixelFormat == Media::PixelFormat::ASTC_4x4 ||
+        imageInfoForAstcConv.pixelFormat == Media::PixelFormat::ASTC_6x6 ||
+        imageInfoForAstcConv.pixelFormat == Media::PixelFormat::ASTC_8x8) {
+        uint32_t code;
+        auto pixelMapFromAstc = Media::PixelMap::ConvertFromAstc(pixelMap.get(), code, Media::PixelFormat::RGBA_8888);
+        CHECK_AND_RETURN_RET_LOG(code == 0 && pixelMapFromAstc != nullptr, nullptr, "ConvertFromAstc fail");
+        pixelMapExlAstc = std::move(pixelMapFromAstc);
+        SLOGI("ConvertFromAstc done");
+    } else {
+        pixelMapExlAstc = pixelMap;
+    }
+
+    originalPixelMapBytes_ = pixelMapExlAstc->GetByteCount();
+    originalWidth_ = pixelMapExlAstc->GetWidth();
+    originalHeight_ = pixelMapExlAstc->GetHeight();
     Media::ImageInfo imageInfoTemp;
-    pixelMap->GetImageInfo(imageInfoTemp);
+    pixelMapExlAstc->GetImageInfo(imageInfoTemp);
     const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
     pixelMapTemp->SetImageInfo(imageInfoTemp);
     uint32_t dataSize = static_cast<uint32_t>(originalPixelMapBytes_);
     void* dataAddr = malloc(dataSize);
     CHECK_AND_RETURN_RET_LOG(dataAddr != nullptr, nullptr, "create dataSize with null, return");
 
-    if (!CopyPixMapToDst(*pixelMap, dataAddr, dataSize)) {
+    if (!CopyPixMapToDst(*pixelMapExlAstc, dataAddr, dataSize)) {
         SLOGE("CopyPixMapToDst failed");
         free(dataAddr);
         return nullptr;
