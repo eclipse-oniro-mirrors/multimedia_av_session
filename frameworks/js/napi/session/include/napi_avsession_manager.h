@@ -131,6 +131,7 @@ private:
     static constexpr size_t HISTORICAL_UNSET_NUM = 3;
     static constexpr size_t HISTORICAL_MIN_NUM = 0;
     static constexpr size_t HISTORICAL_MAX_NUM = 10;
+    static constexpr size_t MEDIACONTROL_HISTORICAL_NUM = 52225;
 
     static const std::string DISTRIBUTED_SESSION_CHANGE_EVENT;
 };
