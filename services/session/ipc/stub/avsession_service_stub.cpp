@@ -671,11 +671,9 @@ int32_t AVSessionServiceStub::HandleStartDeviceLogging(MessageParcel& data, Mess
     int32_t fd = data.ReadFileDescriptor();
     uint32_t maxSize = data.ReadUint32();
     int32_t ret = AVRouter::GetInstance().StartDeviceLogging(fd, maxSize);
-    if (fd < 0) {
-        SLOGE("HandleStartDeviceLogging read fd is invalid");
-    } else {
-        close(fd);
-    }
+    CHECK_AND_PRINT_LOG(fd >= 0, "HandleStartDeviceLogging read fd is invalid");
+    CHECK_AND_PRINT_LOG(fd >= 0 && !(close(fd)),
+        "if no previous log HandleStartDeviceLogging read fd is invalid, close fd failed is logged");
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStartDeviceLogging failed");
 #else
