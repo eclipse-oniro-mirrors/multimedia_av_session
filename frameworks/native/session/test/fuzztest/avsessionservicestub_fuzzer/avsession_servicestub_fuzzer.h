@@ -35,6 +35,7 @@ public:
     ~AvSessionServiceStubFuzzer() = default;
     static void MarshallingAVQueueInfosFuzzTest();
     static void AVQueueInfoImgToBufferFuzzTest();
+    static void HandleCastAudioForAllFuzzTest();
     static void HandleGetHistoricalAVQueueInfosFuzzTest();
     static void HandleSendSystemAVKeyEventFuzzTest();
     static void HandleGetDistributedSessionControllersInnerFuzzTest();

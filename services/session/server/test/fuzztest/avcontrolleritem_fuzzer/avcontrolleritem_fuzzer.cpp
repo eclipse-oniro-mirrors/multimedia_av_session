@@ -81,12 +81,13 @@ uint32_t GetArrLength(T& arr)
     return sizeof(arr) / sizeof(arr[0]);
 }
 
-typedef void (*TestFuncs[3])();
+typedef void (*TestFuncs[4])();
 
 TestFuncs g_allFuncs = {
     AvControllerItemRemoteRequestTest,
     AvControllerItemDataTest,
-    AvControllerItemTest
+    AvControllerItemTest,
+    SendCommonCommandTest,
 };
 
 bool FuzzTest(const uint8_t* rawData, size_t size)
@@ -127,6 +128,24 @@ public:
 
 private:
     T ptr_;
+};
+
+class AVControllerCallbackFuzz : public AVControllerCallback {
+public:
+    void OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData) override {}
+    void OnAVCallStateChange(const AVCallState& avCallState) override {}
+    void OnSessionDestroy() override {}
+    void OnPlaybackStateChange(const AVPlaybackState& state) override {}
+    void OnMetaDataChange(const AVMetaData& data) override {}
+    void OnActiveStateChange(bool isActive) override {}
+    void OnValidCommandChange(const std::vector<int32_t>& cmds) override {}
+    void OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo) override {}
+    void OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args) override {}
+    void OnQueueItemsChange(const std::vector<AVQueueItem>& items) override {}
+    void OnQueueTitleChange(const std::string& title) override {}
+    void OnExtrasChange(const AAFwk::WantParams& extras) override {}
+    void OnCustomData(const AAFwk::WantParams& data) override {};
+    ~AVControllerCallbackFuzz() = default;
 };
 
 void AvControllerItemFuzzer::FuzzOnRemoteRequest()
@@ -319,6 +338,19 @@ void AvControllerItemTest()
     SLOGI("AvControllerItemTest done");
 }
 
+void SendCommonCommandTest()
+{
+    pid_t pid = GetData<pid_t>();
+    sptr<AVSessionItem> session;
+    AVControllerItem avControllerItem(pid, session);
+    AAFwk::WantParams extras;
+    avControllerItem.GetExtras(extras);
+    std::string commonCommand = GetString();
+    std::function<int32_t(string, AAFwk::WantParams)> callBack = [](string, AAFwk::WantParams) { return 0; };
+    avControllerItem.RegisterMigrateAVSessionProxyCallback(callBack);
+    avControllerItem.SendCommonCommand(commonCommand, extras);
+}
+
 void AvControllerItemTestImpl(sptr<AVControllerItem> avControllerItem)
 {
     std::string deviceId = GetString();
@@ -346,6 +378,20 @@ void AvControllerItemTestImpl(sptr<AVControllerItem> avControllerItem)
     deviceInfo.deviceId_ = deviceId;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     avControllerItem->HandleOutputDeviceChange(connectionState, outputDeviceInfo);
+    std::string tag = GetString();
+    int32_t type = GetData<int8_t>();
+    AppExecFwk::ElementName elementName;
+    std::string bundleName = GetString();
+    std::string abilityName = GetString();
+    elementName.SetBundleName(bundleName);
+    elementName.SetAbilityName(abilityName);
+    sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(service != nullptr);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(tag, type % MIN_SIZE_NUM, elementName);
+    avControllerItem->RegisterCallbackInner(avSessionItemObj);
+    std::shared_ptr<AVControllerCallbackFuzz> callback = std::make_shared<AVControllerCallbackFuzz>();
+    CHECK_AND_RETURN(callback != nullptr);
+    avControllerItem->RegisterAVControllerCallback(callback);
     avControllerItem->HandleSessionDestroy();
 }
 
@@ -358,18 +404,22 @@ void AvControllerItemTestImplSecond(sptr<AVControllerItem> avControllerItem)
     callMetaData.SetName(strCallMetaData);
     callMetaData.SetPhoneNumber(strCallMetaData);
     avControllerItem->HandleAVCallMetaDataChange(callMetaData);
-
     AVCallState avCallState;
     int32_t callState = std::stoi(dataToS);
     avCallState.SetAVCallState(callState);
     bool mute = std::stoi(dataToS);
     avCallState.SetAVCallMuted(mute);
     avControllerItem->HandleAVCallStateChange(avCallState);
-
     const std::string event = GetString();
     const std::string title = GetString();
     AAFwk::WantParams wantParams;
     vector<AVQueueItem> items;
+    int32_t type = GetData<int32_t>();
+    AppExecFwk::ElementName elementName;
+    sptr<AVSessionService> service = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(service != nullptr);
+    sptr<IRemoteObject> avSessionItemObj = service->CreateSessionInner(GetString(), type % MIN_SIZE_NUM, elementName);
+    avControllerItem->RegisterCallbackInner(avSessionItemObj);
     avControllerItem->HandleSetSessionEvent(event, wantParams);
     avControllerItem->HandleQueueItemsChange(items);
     avControllerItem->HandleQueueTitleChange(title);
@@ -377,10 +427,8 @@ void AvControllerItemTestImplSecond(sptr<AVControllerItem> avControllerItem)
     wantParams.SetParam("customData", AAFwk::String::Box(GetString()));
     avControllerItem->SendCustomData(wantParams);
     avControllerItem->HandleCustomData(wantParams);
-
-    std::string sessionId = GetString();
     auto releaseCallback = [](AVControllerItem& item) {};
-    auto avControllerCallback = std::make_shared<AVControllerObserver>(sessionId);
+    auto avControllerCallback = std::make_shared<AVControllerObserver>(GetString());
     avControllerItem->SetServiceCallbackForRelease(releaseCallback);
     avControllerItem->RegisterAVControllerCallback(avControllerCallback);
     std::shared_ptr<AVControllerCallback> callback;
@@ -389,7 +437,6 @@ void AvControllerItemTestImplSecond(sptr<AVControllerItem> avControllerItem)
     avControllerItem->RegisterMigrateAVSessionProxyCallback([](const std::string&, AAFwk::WantParams&)->int32_t {
         return 0;
     });
-
     AVMetaData avMetaData;
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> imgBuffer = {1, 0, 0, 0, 1};

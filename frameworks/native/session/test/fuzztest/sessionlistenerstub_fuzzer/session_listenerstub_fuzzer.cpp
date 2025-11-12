@@ -28,6 +28,14 @@ static constexpr size_t MAX_PARCEL_BUF_LEN = 2048;
 static constexpr size_t MAX_STR_LEN = 256;
 
 std::shared_ptr<SessionListenerClient> g_SessionListenerStubClient(nullptr);
+class AncoMediaSessionListenerFuzz : public AncoMediaSessionListener {
+public:
+    int32_t OnStartAVPlayback(const std::string &bundleName) override
+    {
+        return 0;
+    }
+    ~AncoMediaSessionListenerFuzz() override = default;
+};
 
 void SessionListenerStubFuzzer::OnRemoteRequest(int32_t code, uint8_t* data, size_t size)
 {
@@ -75,7 +83,9 @@ void SessionListenerStubFuzzer::FuzzTests(const uint8_t* data, size_t size)
     if (bundleName.empty()) {
         bundleName = "bundleFuzz";
     }
-    AncoMediaSessionListenerImpl ancoImpl(nullptr);
+    std::shared_ptr<AncoMediaSessionListenerFuzz> listener = std::make_shared<AncoMediaSessionListenerFuzz>();
+    CHECK_AND_RETURN(listener != nullptr);
+    AncoMediaSessionListenerImpl ancoImpl(listener);
     ancoImpl.OnStartAVPlayback(bundleName);
 }
 

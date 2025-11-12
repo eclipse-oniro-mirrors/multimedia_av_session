@@ -24,6 +24,7 @@ void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem);
 void AvControllerItemDataTestThird(sptr<AVControllerItem> avControllerItem);
 
 void AvControllerItemTest();
+void SendCommonCommandTest();
 void CreateAVPlaybackState(AVPlaybackState& state);
 void CreateAVMetaData(AVMetaData& metaData);
 void AvControllerItemTestImpl(sptr<AVControllerItem> avControllerItem);

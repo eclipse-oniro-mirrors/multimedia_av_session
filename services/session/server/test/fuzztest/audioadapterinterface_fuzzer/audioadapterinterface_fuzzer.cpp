@@ -344,6 +344,17 @@ void AudioAdapterTest012(FuzzedDataProvider& provider)
     audioAdapter.UnsetAvailableDeviceChangeCallback();
 }
 
+void AudioAdapterTest013(FuzzedDataProvider& provider)
+{
+    std::function<bool(int32_t, int32_t)> allowedPlaybackCallback = [](int32_t, int32_t) { return true; };
+    std::shared_ptr<AudioAllowedPlaybackCallback> audioAllowedPlaybackCallback =
+        std::make_shared<AudioAllowedPlaybackCallback>(allowedPlaybackCallback);
+    CHECK_AND_RETURN(audioAllowedPlaybackCallback != nullptr);
+    int32_t uid = provider.ConsumeIntegral<int32_t>();
+    int32_t pid = provider.ConsumeIntegral<int32_t>();
+    audioAllowedPlaybackCallback->OnQueryAllowedPlayback(uid, pid);
+}
+
 bool FuzzTest(const uint8_t* rawData, size_t size)
 {
     if (rawData == nullptr) {
@@ -366,7 +377,8 @@ bool FuzzTest(const uint8_t* rawData, size_t size)
         AudioAdapterTest009,
         AudioAdapterTest010,
         AudioAdapterTest011,
-        AudioAdapterTest012
+        AudioAdapterTest012,
+        AudioAdapterTest013,
     };
 
     uint32_t code = provider.ConsumeIntegral<uint32_t>();

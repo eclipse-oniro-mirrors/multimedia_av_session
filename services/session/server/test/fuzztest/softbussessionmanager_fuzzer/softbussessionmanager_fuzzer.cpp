@@ -126,7 +126,7 @@ void SoftbusSessionManagerFuzzer::SocketFuzzTest()
 {
     auto softbusSessionManager = std::make_unique<SoftbusSessionManager>();
     CHECK_AND_RETURN(softbusSessionManager != nullptr);
-    std::string pKgName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    std::string pKgName = GetData<bool>() == 0 ? provider.ConsumeRandomLengthString(STRING_MAX_LENGTH) : nullptr;
     softbusSessionManager->Socket(pKgName);
 }
 

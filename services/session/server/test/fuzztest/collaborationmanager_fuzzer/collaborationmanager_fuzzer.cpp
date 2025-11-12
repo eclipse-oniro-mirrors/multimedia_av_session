@@ -25,6 +25,7 @@
 #include "collaborationmanager_fuzzer.h"
 #include "collaboration_manager.h"
 #include "securec.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 using namespace std;
 namespace OHOS::AVSession {
@@ -33,7 +34,9 @@ static const int32_t MIN_SIZE_NUM = 4;
 
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_dataSize = 0;
+static size_t g_totalSize = 0;
 static size_t g_pos;
+using TestFunc = function<void(FuzzedDataProvider&)>;
 
 template<class T>
 T GetData()
@@ -93,14 +96,55 @@ void CollaborationManagerRemoteRequest(uint8_t* data, size_t size)
     collaborationManager->CollaborationManagerFuzzTest(data, size);
 }
 
+void SendCollaborationOnStopFuzzTest(FuzzedDataProvider& provider)
+{
+    auto collaborationManager = std::make_unique<CollaborationManager>();
+    CHECK_AND_RETURN(collaborationManager != nullptr);
+    collaborationManager->SendCollaborationOnStop(nullptr);
+}
+
+void SendCollaborationApplyResultFuzzTest(FuzzedDataProvider& provider)
+{
+    auto collaborationManager = std::make_unique<CollaborationManager>();
+    CHECK_AND_RETURN(collaborationManager != nullptr);
+    collaborationManager->SendCollaborationApplyResult(nullptr);
+}
+
+bool FuzzTest(const uint8_t* rawData, size_t size)
+{
+    if (rawData == nullptr) {
+        return false;
+    }
+
+    // initialize data
+    RAW_DATA = rawData;
+    g_totalSize = size;
+    FuzzedDataProvider provider(RAW_DATA, g_totalSize);
+    std::vector<TestFunc> allFuncs = {
+        SendCollaborationOnStopFuzzTest,
+        SendCollaborationApplyResultFuzzTest,
+    };
+
+    uint32_t code = provider.ConsumeIntegral<uint32_t>();
+    uint32_t len = allFuncs.size();
+    if (len > 0) {
+        allFuncs[code % len](provider);
+    } else {
+        SLOGE("%{public}s: The len length is equal to 0", __func__);
+    }
+
+    return true;
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(uint8_t* data, size_t size)
 {
-    RAW_DATA = data;
-    g_dataSize = size;
-    g_pos = 0;
+    if (size < MIN_SIZE_NUM) {
+        return 0;
+    }
     /* Run your code on data */
     CollaborationManagerRemoteRequest(data, size);
+    FuzzTest(data, size);
     return 0;
 }
 }

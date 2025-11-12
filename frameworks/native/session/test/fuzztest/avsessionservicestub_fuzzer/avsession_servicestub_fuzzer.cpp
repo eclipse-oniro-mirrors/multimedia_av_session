@@ -137,11 +137,8 @@ void AvSessionServiceStubFuzzer::MarshallingAVQueueInfosFuzzTest()
     CHECK_AND_RETURN(avSessionService != nullptr);
     MessageParcel reply;
     std::vector<OHOS::AVSession::AVQueueInfo> avQueueInfos;
-    size_t elements = provider.ConsumeIntegralInRange<size_t>(0, ELEMENTS_MAX_LENGTH);
-    for (size_t i = 0; i < elements; ++i) {
-        OHOS::AVSession::AVQueueInfo info;
-        avQueueInfos.push_back(std::move(info));
-    }
+    AVQueueInfo avQueueInfo;
+    avQueueInfos.push_back(avQueueInfo);
     avSessionService->MarshallingAVQueueInfos(reply, avQueueInfos);
 }
 
@@ -151,9 +148,6 @@ void AvSessionServiceStubFuzzer::AVQueueInfoImgToBufferFuzzTest()
     CHECK_AND_RETURN(avSessionService != nullptr);
     std::vector<OHOS::AVSession::AVQueueInfo> avQueueInfos;
     size_t elements = provider.ConsumeIntegralInRange<size_t>(0, ELEMENTS_MAX_LENGTH);
-    if (elements > SIZE_MAX / MAX_AVQUEUEINFO_SIZE) {
-        return;
-    }
     for (size_t i = 0; i < elements; ++i) {
         OHOS::AVSession::AVQueueInfo info;
         avQueueInfos.push_back(std::move(info));
@@ -166,6 +160,15 @@ void AvSessionServiceStubFuzzer::AVQueueInfoImgToBufferFuzzTest()
     unsigned char* buffer = new unsigned char[bufferSize];
     avSessionService->AVQueueInfoImgToBuffer(avQueueInfos, buffer);
     delete[] buffer;
+}
+
+void AvSessionServiceStubFuzzer::HandleCastAudioForAllFuzzTest()
+{
+    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(avSessionService != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    avSessionService->HandleCastAudioForAll(data, reply);
 }
 
 void AvSessionServiceStubFuzzer::HandleGetHistoricalAVQueueInfosFuzzTest()
@@ -209,13 +212,14 @@ void OHOS::AVSession::AvSessionServiceTests()
     aVSessionService->FuzzTests();
 }
 
-typedef void (*TestFuncs[7])();
+typedef void (*TestFuncs[8])();
 
 TestFuncs g_testFuncs = {
     AvSessionServiceOnRemoteRequest,
     AvSessionServiceTests,
     AvSessionServiceStubFuzzer::MarshallingAVQueueInfosFuzzTest,
     AvSessionServiceStubFuzzer::AVQueueInfoImgToBufferFuzzTest,
+    AvSessionServiceStubFuzzer::HandleCastAudioForAllFuzzTest,
     AvSessionServiceStubFuzzer::HandleGetHistoricalAVQueueInfosFuzzTest,
     AvSessionServiceStubFuzzer::HandleSendSystemAVKeyEventFuzzTest,
     AvSessionServiceStubFuzzer::HandleGetDistributedSessionControllersInnerFuzzTest,
