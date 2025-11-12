@@ -51,6 +51,8 @@ sptr<AVSessionItem> avsessionHere_ = nullptr;
 std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
 static const int32_t MAX_CODE_LEN  = 20;
 static const int32_t MIN_SIZE_NUM = 10;
+static const int32_t COLLABORATION_SA_ID = 70633;
+static const int32_t ANCO_BROKER_SA_ID = 66849;
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_totalSize = 0;
 static size_t g_sizePos;
@@ -141,7 +143,7 @@ uint32_t GetArrLength(T& arr)
     return sizeof(arr) / sizeof(arr[0]);
 }
 
-typedef void (*TestFuncs[11])();
+typedef void (*TestFuncs[12])();
 
 TestFuncs g_allFuncs = {
     MockGetTrustedDeviceList,
@@ -155,6 +157,7 @@ TestFuncs g_allFuncs = {
     AVSessionServiceFuzzer::HandleOtherSessionPlayingTest,
     AVSessionServiceFuzzer::GetOtherPlayingSessionTest,
     AVSessionServiceFuzzer::ReportSessionControlTest,
+    AVSessionServiceFuzzer::UpdateFrontSessionTest,
 };
 
 bool FuzzTest(const uint8_t* rawData, size_t size)
@@ -307,7 +310,9 @@ void AvSessionServiceSystemAbilityTest(sptr<AVSessionService> service)
         CAST_ENGINE_SA_ID,
         MEMORY_MANAGER_SA_ID,
         SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN,
-        COMMON_EVENT_SERVICE_ID
+        COMMON_EVENT_SERVICE_ID,
+        COLLABORATION_SA_ID,
+        ANCO_BROKER_SA_ID,
     };
 
     auto randomNumber = GetData<uint32_t>();
@@ -1291,7 +1296,9 @@ void AVSessionServiceFuzzer::UpdateOrderTest()
 {
     sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
     CHECK_AND_RETURN(avsessionService != nullptr);
-    sptr<OHOS::AVSession::AVSessionItem> sessionItem{};
+    AVSessionDescriptor descriptor;
+    sptr<OHOS::AVSession::AVSessionItem> sessionItem = new OHOS::AVSession::AVSessionItem(descriptor);
+    CHECK_AND_RETURN(sessionItem != nullptr);
     avsessionService->UpdateOrder(sessionItem);
 }
 
@@ -1319,7 +1326,9 @@ void AVSessionServiceFuzzer::HandleOtherSessionPlayingTest()
 {
     sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
     CHECK_AND_RETURN(avsessionService != nullptr);
-    sptr<OHOS::AVSession::AVSessionItem> session{};
+    AVSessionDescriptor descriptor;
+    sptr<OHOS::AVSession::AVSessionItem> session = new OHOS::AVSession::AVSessionItem(descriptor);
+    CHECK_AND_RETURN(session != nullptr);
     avsessionService->HandleOtherSessionPlaying(session);
 }
 
@@ -1341,6 +1350,17 @@ void AVSessionServiceFuzzer::ReportSessionControlTest()
     int32_t cmd = provider.ConsumeIntegral<int32_t>();
     avsessionService->ReportSessionControl(bundleName, cmd);
 #endif
+}
+
+void AVSessionServiceFuzzer::UpdateFrontSessionTest()
+{
+    sptr<AVSessionService> avsessionService = new AVSessionService(provider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+    AVSessionDescriptor descriptor;
+    sptr<OHOS::AVSession::AVSessionItem> session = new OHOS::AVSession::AVSessionItem(descriptor);
+    CHECK_AND_RETURN(session != nullptr);
+    bool isAdd = provider.ConsumeBool();
+    avsessionService->UpdateFrontSession(session, isAdd);
 }
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv)

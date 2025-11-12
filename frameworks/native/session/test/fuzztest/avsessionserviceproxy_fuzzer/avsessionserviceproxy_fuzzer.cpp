@@ -24,6 +24,8 @@
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
 #include "securec.h"
+#include "session_listener_client.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 using namespace std;
 using namespace OHOS;
@@ -37,6 +39,7 @@ static const uint8_t* RAW_DATA = nullptr;
 const size_t THRESHOLD = 25;
 static size_t g_dataSize = 0;
 static size_t g_pos;
+using TestFunc = function<void(FuzzedDataProvider&)>;
 
 /*
 * describe: get data from outside untrusted data(g_data) which size is according to sizeof(T)
@@ -83,6 +86,15 @@ uint32_t GetArrLength(T& arr)
     }
     return sizeof(arr) / sizeof(arr[0]);
 }
+
+class AncoMediaSessionListenerFuzz : public AncoMediaSessionListener {
+public:
+    int32_t OnStartAVPlayback(const std::string &bundleName) override
+    {
+        return 0;
+    }
+    ~AncoMediaSessionListenerFuzz() override = default;
+};
 
 void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskOne(std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy,
     sptr<IRemoteObject> object)
@@ -136,10 +148,14 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionSe
     SessionToken sessionToken;
     sessionToken.sessionId = GetString();
     std::vector<AudioStandard::AudioDeviceDescriptor> deviceDescriptor;
+    AudioStandard::AudioDeviceDescriptor audioDeviceDescriptor;
+    deviceDescriptor.push_back(audioDeviceDescriptor);
 
     AVSessionServiceProxy::RemoteServiceCommand remoteCommand =
         static_cast<AVSessionServiceProxy::RemoteServiceCommand>(GetData<int32_t>());
     OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
 
     avServiceProxy->SendSystemAVKeyEvent(keyEvent);
     avServiceProxy->SendSystemControlCommand(command);
@@ -152,6 +168,7 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskTwo(std::shared_ptr<AVSessionSe
     bool enable = GetData<bool>();
     int32_t castDeviceCapability = GetData<int32_t>();
     std::vector<std::string> drmSchemes;
+    drmSchemes.push_back("test");
     avServiceProxy->StartCastDiscovery(castDeviceCapability, drmSchemes);
     avServiceProxy->StopCastDiscovery();
     avServiceProxy->SetDiscoverable(enable);
@@ -248,6 +265,66 @@ bool OHOS::AVSession::AVServiceProxySendRequestTest()
     return avServiceProxy->FuzzSendRequest();
 }
 
+void GetSessionFuzzTest(FuzzedDataProvider& provider)
+{
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_AND_RETURN(mgr != nullptr);
+    auto object = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(object != nullptr);
+    std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy =
+        std::make_shared<AVSessionServiceProxyFuzzerTest>(object);
+    CHECK_AND_RETURN(avServiceProxy != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(GetString());
+    elementName.SetAbilityName(GetString());
+    std::string tag = GetString();
+    int32_t type = GetData<int32_t>();
+    std::shared_ptr<OHOS::AVSession::AVSession> session = nullptr;
+    avServiceProxy->CreateSession(tag, type, elementName, session);
+    avServiceProxy->GetSession(elementName, tag, session);
+}
+
+void GetSessionInnerFuzzTest(FuzzedDataProvider& provider)
+{
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_AND_RETURN(mgr != nullptr);
+    auto object = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(object != nullptr);
+    std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy =
+        std::make_shared<AVSessionServiceProxyFuzzerTest>(object);
+    CHECK_AND_RETURN(avServiceProxy != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(GetString());
+    elementName.SetAbilityName(GetString());
+    std::string tag = GetString();
+    int32_t type = GetData<int32_t>();
+    avServiceProxy->CreateSession(tag, type, elementName);
+    sptr<IRemoteObject> session = nullptr;
+    avServiceProxy->GetSessionInner(elementName, tag, session);
+}
+
+void RegisterAncoMediaSessionListenerFuzzTest(FuzzedDataProvider& provider)
+{
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_AND_RETURN(mgr != nullptr);
+    auto object = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(object != nullptr);
+    std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy =
+        std::make_shared<AVSessionServiceProxyFuzzerTest>(object);
+    CHECK_AND_RETURN(avServiceProxy != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(GetString());
+    elementName.SetAbilityName(GetString());
+    std::string tag = GetString();
+    int32_t type = GetData<int32_t>();
+    avServiceProxy->CreateSession(tag, type, elementName);
+    std::shared_ptr<AncoMediaSessionListenerFuzz> listener = std::make_shared<AncoMediaSessionListenerFuzz>();
+    CHECK_AND_RETURN(listener != nullptr);
+    sptr<IAncoMediaSessionListener> listenerPtr = new(std::nothrow) AncoMediaSessionListenerImpl(listener);
+    CHECK_AND_RETURN(listenerPtr != nullptr);
+    avServiceProxy->RegisterAncoMediaSessionListener(listenerPtr);
+}
+
 static bool FuzzTest(const uint8_t* rawData, size_t size)
 {
     // initialize data
@@ -255,7 +332,20 @@ static bool FuzzTest(const uint8_t* rawData, size_t size)
     g_dataSize = size;
     g_pos = 0;
 
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+    std::vector<TestFunc> allFuncs = {
+        GetSessionFuzzTest,
+        GetSessionInnerFuzzTest,
+        RegisterAncoMediaSessionListenerFuzzTest,
+    };
     OHOS::AVSession::AVServiceProxySendRequestTest();
+    uint32_t code = provider.ConsumeIntegral<uint32_t>();
+    uint32_t len = allFuncs.size();
+    if (len > 0) {
+        allFuncs[code % len](provider);
+    } else {
+        SLOGE("%{public}s: The len length is equal to 0", __func__);
+    }
     return true;
 }
 
