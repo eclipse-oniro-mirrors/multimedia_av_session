@@ -16,6 +16,7 @@
 import { Component, UIExtensionComponent, UIExtensionProxy, Column, Position } from '@ohos.arkui.component';
 import { Watch, PropRef } from '@ohos.arkui.stateManagement'
 import Want from '@ohos.app.ability.Want'
+import { RecordData } from '@ohos.base';
 
 const TAG = 'AVVolumePanel';
 
@@ -64,7 +65,7 @@ export struct AVVolumePanel {
             'volumeParameter': this.volumeParameter,
             'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
             'currentPanelCount': this.panelCountOncreation,
-          } as Record<string, Object>
+          } as Record<string, RecordData>
         } as Want)
         .onReceive((data) => {
           console.info(TAG, `onReceive : ${JSON.stringify(data['state'])}`);
