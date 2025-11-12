@@ -2913,6 +2913,7 @@ static HWTEST_F(AVSessionServiceTest, SetPlayWithAssetId001, TestSize.Level0)
 {
     SLOGD("SetPlayWithAssetId001 begin!");
     std::string test = "";
+    auto avcommand_ = std::make_shared<AVControlCommand>();
     int32_t ret = avcommand_->SetPlayWithAssetId(test);
     EXPECT_EQ(ret, ERR_INVALID_PARAM);
     SLOGD("SetPlayWithAssetId001 end!");
