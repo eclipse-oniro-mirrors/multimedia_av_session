@@ -2465,6 +2465,7 @@ void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)
         callback_->OnPlay(cmd);
     }
 
+    AVSessionUtils::PublishCtrlCmdEvent("OnPlay", GetUid(), GetPid());
     std::string playParam = "";
     auto ret = cmd.GetPlayParam(playParam);
     SLOGI("handleOnplay with param %{public}s", playParam.c_str());
