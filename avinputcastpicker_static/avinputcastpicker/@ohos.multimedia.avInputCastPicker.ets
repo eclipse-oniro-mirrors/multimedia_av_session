@@ -122,7 +122,7 @@ export struct AVInputCastPicker {
   @Builder
   deviceMenu() {
     Column() {
-      ForEach(this.deviceInfoList.slice(), (item: AVInputCastPickerDeviceInfo, index: number) => {
+      ForEach(this.deviceInfoList.slice(), (item: AVInputCastPickerDeviceInfo, index: int) => {
         Flex({
           direction: FlexDirection.Column,
           justifyContent: FlexAlign.SpaceBetween,
