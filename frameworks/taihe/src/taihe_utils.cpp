@@ -832,7 +832,7 @@ static void GetKeyItem(keyEvent::Key const &in, OHOS::MMI::KeyEvent::KeyItem &ou
     out.SetKeyCode(code);
 
     int64_t pressedTime = in.pressedTime;
-    SLOGI("pressedTime=%{public}lld", pressedTime);
+    SLOGI("pressedTime=%{public}ld", pressedTime);
     out.SetDownTime(pressedTime);
 
     int32_t deviceId = in.deviceId;
