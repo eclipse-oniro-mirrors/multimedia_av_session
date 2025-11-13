@@ -52,6 +52,7 @@ ohos_shared_library("avsession_common") {
   deps = [ "../../utils:avsession_utils" ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",

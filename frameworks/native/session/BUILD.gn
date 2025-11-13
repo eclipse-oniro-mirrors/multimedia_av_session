@@ -85,6 +85,7 @@ ohos_shared_library("avsession_client") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_foundation",
@@ -160,6 +161,7 @@ ohos_static_library("avsession_client_static") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_foundation",
@@ -224,6 +226,7 @@ ohos_shared_library("avsession_cast_client") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_client",
