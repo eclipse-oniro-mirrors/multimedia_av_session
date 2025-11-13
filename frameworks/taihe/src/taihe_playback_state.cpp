@@ -210,14 +210,14 @@ int32_t TaihePlaybackState::SetPosition(const OHOS::AVSession::AVPlaybackState &
 int32_t TaihePlaybackState::GetBufferedTime(AVPlaybackState const &in, OHOS::AVSession::AVPlaybackState &out)
 {
     int64_t property = in.bufferedTime.has_value() ? in.bufferedTime.value() : 0;
-    SLOGD("GetBufferedTime %{public}ld", property);
+    SLOGD("GetBufferedTime %{public}" PRId64, property);
     out.SetBufferedTime(property);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
 int32_t TaihePlaybackState::SetBufferedTime(const OHOS::AVSession::AVPlaybackState &in, AVPlaybackState &out)
 {
-    SLOGD("SetSpeed %{public}ld", in.GetBufferedTime());
+    SLOGD("SetSpeed %{public}" PRId64, in.GetBufferedTime());
     out.bufferedTime = optional<int64_t>(std::in_place_t {}, in.GetBufferedTime());
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
