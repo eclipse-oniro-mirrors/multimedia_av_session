@@ -22,6 +22,7 @@ import {
 import { State } from '@ohos.arkui.stateManagement'
 import { AVCastPickerState } from '@ohos.multimedia.avCastPickerParam';
 import Want from '@ohos.app.ability.Want'
+import { RecordData } from '@ohos.base';
 
 const TAG = 'AVInputCastPicker_component';
 
@@ -188,7 +189,7 @@ export struct AVInputCastPicker {
         'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',
         'isCustomPicker': isCustomPicker,
         'currentPickerCount': this.pickerCountOnCreation,
-      } as Record<string, Object>
+      } as Record<string, RecordData>
     } as Want)
       .size({ width: '100%', height: '100%' })
       .bindMenu( (()=>this.deviceMenu()) as CustomBuilder, {
@@ -217,7 +218,7 @@ export struct AVInputCastPicker {
       })
       .onReceive((data) => {
         if (data['deviceInfoList'] !== undefined) {
-          let srcInfoList: Array<Record<string, Object>> = data['deviceInfolist'] as Array<Record<string, Object>>;
+          let srcInfoList: Array<Record<string, RecordData>> = data['deviceInfolist'] as Array<Record<string, RecordData>>;
           let desInfoList: Array<AVInputCastPickerDeviceInfo> = [] as Array<AVInputCastPickerDeviceInfo>;
           for (let info of srcInfoList) {
             desInfoList.push({
