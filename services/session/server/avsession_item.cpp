@@ -2151,12 +2151,16 @@ void AVSessionItem::HandleOnAVCallToggleCallMute(const AVControlCommand& cmd)
 void AVSessionItem::HandleOnPlay(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlay");
-    std::lock_guard callbackLockGuard(callbackLock_);
-    if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlay();
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callbackForMigrate_) {
+            callbackForMigrate_->OnPlay();
+        }
+        CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+        callback_->OnPlay();
     }
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlay();
+
+    AVSessionUtils::PublishCtrlCmdEvent("OnPlay", GetUid(), GetPid());
 }
 
 void AVSessionItem::HandleOnPause(const AVControlCommand& cmd)
