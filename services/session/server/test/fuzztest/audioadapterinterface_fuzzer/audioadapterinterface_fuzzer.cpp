@@ -240,7 +240,7 @@ void AudioAdapterTest009(FuzzedDataProvider& provider)
     rendererInfo.sceneType = provider.ConsumeRandomLengthString();
     rendererInfo.spatializationEnabled = provider.ConsumeBool();
     rendererInfo.pipeType = static_cast<AudioStandard::AudioPipeType>(
-        provider.ConsumeIntegralInRange<int>(0, AudioStandard::PIPE_TYPE_DIRECT_VOIP));
+        provider.ConsumeIntegralInRange<int>(0, AudioStandard::PIPE_TYPE_OUT_VOIP));
     rendererInfo.samplingRate = static_cast<AudioStandard::AudioSamplingRate>(
         provider.ConsumeIntegralInRange<int>(0, AudioStandard::SAMPLE_RATE_192000));
     rendererInfo.format = static_cast<AudioStandard::AudioSampleFormat>(
