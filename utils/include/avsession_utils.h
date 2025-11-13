@@ -188,6 +188,20 @@ public:
         return ret;
     }
 
+    static void PublishCtrlCmdEvent(const std::string& cmd, int32_t uid, int32_t pid)
+    {
+        OHOS::AAFwk::Want want;
+        want.SetAction("usual.event.MEDIA_CTRL_EVENT");
+        want.SetParam("cmd", cmd);
+        want.SetParam("uid", uid);
+        want.SetParam("pid", pid);
+        EventFwk::CommonEventData data { want };
+        EventFwk::CommonEventPublishInfo publishInfo;
+        publishInfo.SetSubscriberUid({RSS_UID});
+        int32_t ret = EventFwk::CommonEventManager::NewPublishCommonEvent(data, publishInfo);
+        SLOGD("publish ret:%{public}d cmd:%{public}s uid:%{public}d pid:%{public}d", ret, cmd.c_str(), uid, pid);
+    }
+
     static std::string GetAnonyTitle(const std::string& title, double ratio = 0.3)
     {
         if (title.empty()) return "";
@@ -254,6 +268,7 @@ public:
     }
 
 private:
+    static constexpr const int32_t RSS_UID = 1096;
     static constexpr const char* DATA_PATH_NAME = "/data/service/el2/";
     static constexpr const char* CACHE_PATH_NAME = "/av_session/cache/";
     static constexpr const char* FIXED_PATH_NAME = "/av_session/";
