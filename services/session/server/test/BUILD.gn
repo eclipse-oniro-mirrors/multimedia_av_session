@@ -84,6 +84,7 @@ common_deps_without_third_party = [
 
 common_external_deps = [
   "relational_store:native_rdb",
+  "ability_base:configuration",
   "ability_base:want",
   "ability_runtime:wantagent_innerkits",
   "access_token:libaccesstoken_sdk",
@@ -183,6 +184,7 @@ ohos_unittest("AVSessionUsersManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -250,6 +252,7 @@ ohos_unittest("AVSharedMemoryBaseTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -326,6 +329,7 @@ ohos_unittest("AVSessionServiceAddedTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -408,6 +412,7 @@ ohos_unittest("AudioDeviceManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -487,6 +492,7 @@ ohos_unittest("AVSessionItemTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -586,6 +592,7 @@ ohos_unittest("AVControllerItemTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -669,6 +676,7 @@ ohos_unittest("MigrateAVSessionProxyTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -751,6 +759,7 @@ ohos_unittest("MigrateAVSessionManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -833,6 +842,7 @@ ohos_unittest("SoftbusSessionManagerSupplementTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -915,6 +925,7 @@ ohos_unittest("MigrateAVSessionServerForNextTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -1821,6 +1832,7 @@ ohos_unittest("MigrateAVSessionTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -1897,6 +1909,7 @@ ohos_unittest("SoftbusSessionManagerTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -1957,6 +1970,7 @@ ohos_unittest("AVSessionServiceTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
@@ -2038,6 +2052,7 @@ ohos_unittest("AVSessionServiceExtTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",

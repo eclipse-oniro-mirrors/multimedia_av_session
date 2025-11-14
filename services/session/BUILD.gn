@@ -80,6 +80,7 @@ idl_gen_interface("idl_avsession_service_interface") {
   ]
 
   sequenceable_ext_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
     "input:libmmi-client",
