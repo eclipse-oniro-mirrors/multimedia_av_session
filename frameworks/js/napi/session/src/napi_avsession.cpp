@@ -1097,7 +1097,8 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
         SLOGI("do metadata set with repeat uriSize:%{public}d.", static_cast<int>(uri.size()));
     } else if (data.GetMediaImage() == nullptr) {
         ret = DoDownload(data, uri);
-        SLOGI("DoDownload uriSize:%{public}d complete with ret %{public}d", static_cast<int>(uri.size()), ret);
+        SLOGI("DoDownload uriSize:%{public}d complete with ret:%{public}d|%{public}d",
+            static_cast<int>(uri.size()), ret, data.GetMediaImageTopic());
         CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, false, "doMetaDataSet without session");
         if (ret != AVSESSION_SUCCESS) {
             SLOGE("DoDownload failed but not repeat setmetadata again");
@@ -1157,8 +1158,8 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
     DoLastMetaDataRefresh(napiAvSession);
 
-    std::thread([context]() {
-        AVQueueImgDownloadSyncExecutor(reinterpret_cast<NapiAVSession*>(context->native), context->metaData);
+    std::thread([napiAvSession, metaData = context->metaData]() {
+        AVQueueImgDownloadSyncExecutor(napiAvSession, metaData);
     }).detach();
 
     auto executor = [context]() {

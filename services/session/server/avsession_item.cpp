@@ -2311,8 +2311,8 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const Com
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
-    SLOGI("HandleMediaKeyEvent check isMediaKeySupport %{public}d for %{public}d",
-        static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()));
+    SLOGI("HandleMediaKeyEvent check isMediaKeySupport %{public}d for %{public}d to pid %{public}d",
+        static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()), static_cast<int>(GetPid()));
     if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
         AVControlCommand cmd;
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);

@@ -191,6 +191,8 @@ public:
 
     bool IsValid() const;
 
+    int GetMediaImageTopic() const;
+
     const static inline std::vector<int32_t> localCapability {
         META_KEY_ASSET_ID,
         META_KEY_TITLE,
@@ -364,6 +366,8 @@ private:
         &AVMetaData::CloneBundleIcon,
         &AVMetaData::CloneSingleLyricText
     };
+
+    int8_t minImgSize_ = 2;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVMETA_DATA_H

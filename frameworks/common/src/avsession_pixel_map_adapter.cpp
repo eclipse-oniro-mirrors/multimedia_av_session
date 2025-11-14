@@ -164,11 +164,14 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertAndSetInnerI
         imgBuffer.insert(imgBuffer.begin() + imgBuffer.size(), tmpValue);
         computedValue = computedValue >> OFFSET_BYTE;
     }
-    SLOGI("insert with size: %{public}hu, %{public}u, %{public}d",
-        imageInfoSize, pixelDataSize, static_cast<int>(imgBuffer.size()));
     imgBuffer.insert(imgBuffer.begin() + imgBuffer.size(), pixelMapTemp->GetPixels(),
         pixelMapTemp->GetPixels() + pixelDataSize);
     innerPixelMap->SetInnerImgBuffer(imgBuffer);
+    CHECK_AND_RETURN_RET_LOG(imgBuffer.size() > IMAGE_BYTE_SIZE, innerPixelMap, "imgBuffer size invalid");
+    uint8_t imgTopicNumber =
+        imgBuffer[imgBuffer.size() / IMAGE_BYTE_SIZE] + imgBuffer[imgBuffer.size() / IMAGE_BYTE_SIZE + 1];
+    SLOGI("insert with size:%{public}hu,%{public}u,%{public}d|%{public}d",
+        imageInfoSize, pixelDataSize, static_cast<int>(imgBuffer.size()), static_cast<int>(imgTopicNumber));
     imgBuffer.clear();
     return innerPixelMap;
 }

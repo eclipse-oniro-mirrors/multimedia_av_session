@@ -42,6 +42,7 @@ bool AVMetaData::WriteToParcel(MessageParcel& parcel) const
         SetAVQueueLength(avQueueImageLength);
     }
     int32_t twoImageLength = mediaImageLength + avQueueImageLength;
+    SLOGI("twoImageLength:%{public}d|%{public}d|%{public}d", twoImageLength, mediaImageLength, GetMediaImageTopic());
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(twoImageLength), false, "write twoImageLength failed");
     CHECK_AND_RETURN_RET_LOG(MarshallingExceptImg(parcel), false, "MarshallingExceptImg failed");
 
@@ -109,6 +110,7 @@ bool AVMetaData::ReadFromParcel(MessageParcel& in, int32_t twoImageLength)
     }
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
     (mediaImageLength > 0) ? SetMediaImage(mediaPixelMap) : (void)0;
+    SLOGI("twoImageLength:%{public}d|%{public}d|%{public}d", twoImageLength, mediaImageLength, GetMediaImageTopic());
 
     CHECK_AND_RETURN_RET_LOG(twoImageLength > mediaImageLength, true,
                              "twoImageLength <= mediaImageLength");
@@ -412,6 +414,16 @@ void AVMetaData::SetMediaImage(const std::shared_ptr<AVSessionPixelMap>& mediaIm
 std::shared_ptr<AVSessionPixelMap> AVMetaData::GetMediaImage() const
 {
     return mediaImage_;
+}
+
+int AVMetaData::GetMediaImageTopic() const
+{
+    CHECK_AND_RETURN_RET(mediaImage_ != nullptr, -1);
+    std::vector<uint8_t> imgBuffer = mediaImage_->GetInnerImgBuffer();
+    int imgSize = static_cast<int>(imgBuffer.size());
+    CHECK_AND_RETURN_RET(imgSize > minImgSize_, -1);
+    uint8_t imgTopicNumber = imgBuffer[imgSize / minImgSize_] + imgBuffer[imgSize / minImgSize_ + 1];
+    return static_cast<int>(imgTopicNumber);
 }
 
 void AVMetaData::SetMediaImageUri(const std::string& mediaImageUri)

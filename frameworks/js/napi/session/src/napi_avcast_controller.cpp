@@ -307,7 +307,7 @@ int32_t NapiAVCastController::DownloadCastImg(std::shared_ptr<AVMediaDescription
 }
 
 void NapiAVCastController::PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
-    AVQueueItem& data)
+    const AVQueueItem& data)
 {
     CHECK_AND_RETURN_LOG(castController_ != nullptr, "prepare download but no castcontroller");
     SLOGI("do prepare set download");
@@ -384,10 +384,10 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
 
     auto complete = [env, context](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
-        std::thread([context]() {
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        std::thread([castController = napiCastController->castController_, avQueueItem = context->avQueueItem_]() {
             std::lock_guard lockGuard(downloadPrepareMutex_);
-            auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-            PrepareAsyncExecutor(napiCastController->castController_, context->avQueueItem_);
+            PrepareAsyncExecutor(castController, avQueueItem);
         }).detach();
     };
     return NapiAsyncWork::Enqueue(env, context, "Prepare", executor, complete);
