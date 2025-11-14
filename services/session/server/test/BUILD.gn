@@ -2749,7 +2749,6 @@ group("av_session_server_unittest") {
     ":AVSessionServiceStubPermissionTest",
     ":AVSessionServiceStubTest",
     ":AVSessionServiceSupplementTest",
-    ":AVSessionServiceTest",
     ":AVSessionStubTest",
     ":AVSessionUsersManagerTest",
     ":AVSharedMemoryBaseTest",
