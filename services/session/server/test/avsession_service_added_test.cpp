@@ -249,6 +249,7 @@ static HWTEST_F(AVSessionServiceAddedTest, StopCast001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
+#ifdef DEVICE_MANAGER_ENABLE
 static HWTEST_F(AVSessionServiceAddedTest, ProcessTargetMigrateTest001, TestSize.Level0)
 {
     SLOGD("ProcessTargetMigrateTest001 begin!");
@@ -497,6 +498,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionDeviceStateCallbackTest_OnDe
     ASSERT_TRUE(callback.servicePtr_ != nullptr);
     SLOGD("AVSessionDeviceStateCallbackTest_OnDeviceOffline_002 end!");
 }
+#endif
 
 /**
  * @tc.name: DoRemoteAVSessionLoad_001
@@ -519,6 +521,7 @@ static HWTEST_F(AVSessionServiceAddedTest, DoRemoteAVSessionLoad_001, TestSize.L
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
+#ifdef DEVICE_MANAGER_ENABLE
 static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DoConnectProcessWithMigrate_001, TestSize.Level0)
 {
     SLOGD("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_001 begin!");
@@ -583,6 +586,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DoConnectPr
     g_AVSessionService->DoConnectProcessWithMigrate(deviceInfo);
     SLOGI("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003 end!");
 }
+#endif
 
 /**
  * @tc.name: AVSessionServiceAddedTest_HandleUserEvent_001

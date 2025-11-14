@@ -18,7 +18,9 @@
 #include <iomanip>
 #include <cstdlib>
 #include "avsession_radar.h"
+#ifdef DEVICE_MANAGER_ENABLE
 #include "device_manager.h"
+#endif
 #include "radar_constants.h"
 #include "avsession_log.h"
 #include "avsession_sysevent.h"
@@ -58,10 +60,12 @@ int32_t AVSessionRadar::GetRadarErrorCode(int32_t err)
 std::string AVSessionRadar::GetLocalDeviceNetworkId()
 {
     std::string networkId = "";
+#ifdef DEVICE_MANAGER_ENABLE
     if (OHOS::DistributedHardware::DeviceManager::GetInstance()
         .GetLocalDeviceNetWorkId(AVSESSION_PKG_NAME, networkId) != 0) {
         SLOGE("GetLocalDeviceNetWorkId failed");
     }
+#endif
 
     return networkId;
 }
@@ -69,10 +73,12 @@ std::string AVSessionRadar::GetLocalDeviceNetworkId()
 std::string AVSessionRadar::GetUdidByNetworkId(const std::string &networkId)
 {
     std::string localDevUdid = "";
+#ifdef DEVICE_MANAGER_ENABLE
     if (OHOS::DistributedHardware::DeviceManager::GetInstance()
         .GetUdidByNetworkId(AVSESSION_PKG_NAME, networkId, localDevUdid) != 0) {
         SLOGE("GetUdidByNetworkId failed");
     }
+#endif
     return localDevUdid;
 }
 
@@ -91,12 +97,14 @@ std::string AVSessionRadar::GetLocalDevType()
 {
     SLOGI("GetLocalDevType");
     int32_t localDevType = 0;
+#ifdef DEVICE_MANAGER_ENABLE
     if (OHOS::DistributedHardware::DeviceManager::GetInstance()
         .GetLocalDeviceType(AVSESSION_PKG_NAME, localDevType) != 0) {
         SLOGE("GetLocalDevType failed");
     } else {
         SLOGI("GetLocalDevType: %{public}d", localDevType);
     }
+#endif
     return ConvertHexToString(localDevType);
 }
 

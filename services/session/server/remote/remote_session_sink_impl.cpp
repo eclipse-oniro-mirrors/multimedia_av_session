@@ -44,7 +44,9 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
                                                      const std::string& sinkDevice,
                                                      const std::string& sourceCap)
 {
+#ifdef DATA_OBJECT_ENABLE
     syncer_ = std::make_shared<RemoteSessionSyncerImpl>(sourceSessionId, sourceDevice, sinkDevice);
+#endif
     CHECK_AND_RETURN_RET_LOG(syncer_ != nullptr, AVSESSION_ERROR, "syncer_ is nullptr");
     int32_t ret = syncer_->Init();
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "syncer init failed");
@@ -135,7 +137,9 @@ int32_t RemoteSessionSinkImpl::CancelCastSession()
 {
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session is nullptr");
     RemoteSessionCapabilitySet::GetInstance().RemoveRemoteCapability(session_->GetSessionId(), sourceDevice_);
-    syncer_->Destroy();
+    if (syncer_) {
+        syncer_->Destroy();
+    }
     syncer_ = nullptr;
     return AVSESSION_SUCCESS;
 }

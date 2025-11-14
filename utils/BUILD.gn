@@ -48,7 +48,6 @@ ohos_shared_library("avsession_utils") {
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_single",
@@ -73,5 +72,9 @@ ohos_shared_library("avsession_utils") {
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
   if (use_libfuzzer || use_clang_coverage) {
     defines += [ "TEST_COVERAGE" ]
+  }
+  if (multimedia_av_session_enable_device_manager) {
+    defines += ["DEVICE_MANAGER_ENABLE"]
+    external_deps += ["device_manager:devicemanagersdk"]
   }
 }

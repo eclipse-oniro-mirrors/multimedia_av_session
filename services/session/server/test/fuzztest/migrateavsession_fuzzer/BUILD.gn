@@ -15,6 +15,7 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("../../../../../../bluetooth_part.gni")
 import("../../../../../../castplus_cast_engine_part.gni")
+import("../../../../../../config.gni")
 module_output_path = "av_session/av_session"
 
 ##############################fuzztest##########################################
@@ -53,9 +54,6 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
     "background_task_mgr:bgtaskmgr_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
-    "data_object:distributeddataobject_impl",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-client",
@@ -65,6 +63,18 @@ ohos_fuzztest("MigrateAVSessionFuzzTest") {
     "window_manager:libdm_lite",
     "audio_framework:audio_foundation",
   ]
+
+  if (multimedia_av_session_enable_data_object) {
+    external_deps += [ "data_object:distributeddataobject_impl" ]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]

@@ -37,6 +37,7 @@ void SoftbusDistributedDataManager::Init()
     SoftbusSessionManager::GetInstance().AddSessionListener(ssListener_);
 }
 
+#ifdef DSOFTBUS_ENABLE
 void SoftbusDistributedDataManager::SessionOpened(int32_t socket, PeerSocketInfo info)
 {
     std::string sessionName = info.name;
@@ -68,6 +69,7 @@ void SoftbusDistributedDataManager::SessionClosed(int32_t socket)
         OnSessionProxyClosed(socket);
     }
 }
+#endif
 
 void SoftbusDistributedDataManager::MessageReceived(int32_t socket, const std::string &data)
 {
@@ -101,8 +103,10 @@ void SoftbusDistributedDataManager::InitSessionServer(const std::string &pkg)
     SLOGI("init session server...");
     isServer_ = true;
     std::lock_guard lockGuard(softbusDistributedDataLock_);
+#ifdef DSOFTBUS_ENABLE
     int32_t socket = SoftbusSessionManager::GetInstance().Socket(pkg);
     mServerSocketMap_.insert({pkg, socket});
+#endif
 }
 
 void SoftbusDistributedDataManager::CreateServer(const std::shared_ptr<SoftbusSessionServer> &server)
@@ -198,7 +202,9 @@ bool SoftbusDistributedDataManager::ReleaseProxy(const std::shared_ptr<SoftbusSe
         if (mProxySocketMap_.find(peerNetworkId) != mProxySocketMap_.end()) {
             int32_t socket = mProxySocketMap_[peerNetworkId];
             OnSessionProxyClosed(socket);
+#ifdef DSOFTBUS_ENABLE
             SoftbusSessionManager::GetInstance().Shutdown(socket);
+#endif
         }
         mDeviceToProxyMap_.erase(peerNetworkId);
         return true;
@@ -215,9 +221,11 @@ void SoftbusDistributedDataManager::DestroySessionServer(const std::string &pkg)
             it->second->DisconnectAllProxy();
             it = serverMap_.erase(it);
         }
+#ifdef DSOFTBUS_ENABLE
         int32_t mSocket = mServerSocketMap_[pkg];
         mServerSocketMap_.erase(pkg);
         SoftbusSessionManager::GetInstance().Shutdown(mSocket);
+#endif
     } else {
         for (auto proxyMap = mDeviceToProxyMap_.begin(); proxyMap != mDeviceToProxyMap_.end(); proxyMap++) {
             for (auto it = proxyMap->second.begin(); it != proxyMap->second.end(); it++) {
@@ -242,14 +250,18 @@ void SoftbusDistributedDataManager::ReleaseServer(const std::shared_ptr<SoftbusS
 // LCOV_EXCL_START
 void SoftbusDistributedDataManager::OnSessionServerOpened()
 {
+#ifdef DSOFTBUS_ENABLE
     SLOGI("OnSessionServerOpened: the peer device id is %{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(peerSocketInfo.networkId).c_str());
+#endif
 }
 
 void SoftbusDistributedDataManager::OnSessionServerClosed(int32_t socket)
 {
+#ifdef DSOFTBUS_ENABLE
     SLOGI("OnSessionServerClosed: the peer device id is %{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(peerSocketInfo.networkId).c_str());
+#endif
     std::lock_guard lockGuard(softbusDistributedDataLock_);
     for (auto it = serverMap_.begin(); it != serverMap_.end(); it++) {
         it->second->DisconnectProxy(socket);
@@ -258,14 +270,18 @@ void SoftbusDistributedDataManager::OnSessionServerClosed(int32_t socket)
 
 void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, const std::string &data)
 {
+#ifdef DSOFTBUS_ENABLE
     std::string deviceId = peerSocketInfo.networkId;
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onMessageHandleReceived: %{public}s", anonymizeDeviceId.c_str());
+#endif
     if (data.length() > 1 && data[0] == MESSAGE_CODE_CONNECT_SERVER) {
         std::lock_guard lockGuard(softbusDistributedDataLock_);
         auto iter = serverMap_.find(data[1]);
         if (iter == serverMap_.end()) {
+#ifdef DSOFTBUS_ENABLE
             SLOGE("onMessageHandleReceived: server is invalid deviceId %{public}s", anonymizeDeviceId.c_str());
+#endif
             return;
         }
         iter->second->ConnectProxy(socket);
@@ -274,21 +290,27 @@ void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, cons
 
 void SoftbusDistributedDataManager::OnBytesServerReceived(int32_t socket, const std::string &data)
 {
+#ifdef DSOFTBUS_ENABLE
     std::string deviceId = peerSocketInfo.networkId;
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onBytesServerReceived: %{public}s", anonymizeDeviceId.c_str());
+#endif
     if (data.length() > 0) {
         std::lock_guard lockGuard(softbusDistributedDataLock_);
         auto iter = serverMap_.find(data[0]);
         if (iter == serverMap_.end()) {
+#ifdef DSOFTBUS_ENABLE
             SLOGE("onBytesServerReceived: server is invalid deviceId %{public}s", anonymizeDeviceId.c_str());
+#endif
             return;
         }
         if (data.length() > 1 && data[1] == MESSAGE_CODE_CONNECT_SERVER) {
             iter->second->ConnectProxy(socket);
             return;
         }
+#ifdef DSOFTBUS_ENABLE
         iter->second->OnBytesReceived(deviceId, data);
+#endif
     }
 }
 
@@ -302,12 +324,16 @@ int32_t SoftbusDistributedDataManager::ConnectRemoteDevice(const std::string &pe
         SLOGI("%{public}s is connected, no need to connect.", anonymizeNetworkId.c_str());
         return mProxySocketMap_[peerNetworkId];
     }
+#ifdef DSOFTBUS_ENABLE
     int32_t socket = SoftbusSessionManager::GetInstance().Bind(peerNetworkId, packageName);
     if (socket <= 0 && retryCount > 0) {
         std::this_thread::sleep_for(std::chrono::milliseconds(retryIntervalTime));
         socket = ConnectRemoteDevice(peerNetworkId, packageName, retryCount - 1);
     }
     return socket;
+#else
+    return -1;
+#endif
 }
 
 void SoftbusDistributedDataManager::OnSessionProxyOpened(int32_t socket)

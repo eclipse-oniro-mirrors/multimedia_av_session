@@ -171,6 +171,7 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     migrateManager_->CreateLocalSessionStub("SuperLauncher-Dual", server_);
     EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher-Dual") != migrateManager_->serverMap_.end(), true);
 
+#ifdef DSOFTBUS_ENABLE
     char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
@@ -181,6 +182,7 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
         .dataType = DATA_TYPE_BYTES,
     };
     migrateManager_->softBusDistributedDataMgr_->SessionOpened(sessionId, info);
+#endif
     migrateManager_->softBusDistributedDataMgr_->OnSessionServerOpened();
     migrateManager_->softBusDistributedDataMgr_->MessageReceived(sessionId, "default");
     migrateManager_->softBusDistributedDataMgr_->OnMessageHandleReceived(sessionId, "default");

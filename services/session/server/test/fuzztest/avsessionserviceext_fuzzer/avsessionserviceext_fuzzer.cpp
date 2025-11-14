@@ -138,6 +138,7 @@ void AVSessionServiceExtFuzzTest001()
     service->NotifyMigrateStop(deviceId);
 }
 
+#ifdef DEVICE_MANAGER_ENABLE
 void AVSessionServiceExtFuzzTest002()
 {
     FuzzedDataProvider provider(RAW_DATA, g_dataSize);
@@ -182,6 +183,7 @@ void AVSessionServiceExtFuzzTest002()
     service->DoDisconnectProcessWithMigrateServer(deviceInfo);
     service->DoRemoteAVSessionLoad(deviceId);
 }
+#endif
 
 void AVSessionServiceExtFuzzTest003()
 {
@@ -216,12 +218,14 @@ void AVSessionDeviceStateCallbackTest()
     FuzzedDataProvider provider(RAW_DATA, g_dataSize);
 
     AVSessionDeviceStateCallback callback(service);
+#ifdef DEVICE_MANAGER_ENABLE
     OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
     deviceInfo.deviceTypeId = provider.ConsumeIntegral<int32_t>();
     callback.OnDeviceOnline(deviceInfo);
     callback.OnDeviceReady(deviceInfo);
     callback.OnDeviceOffline(deviceInfo);
     callback.OnDeviceChanged(deviceInfo);
+#endif
 }
 
 void AVSessionServiceExtFuzzer::AVSessionServiceExtFuzzTest(uint8_t* data, size_t size)
@@ -239,7 +243,9 @@ void AVSessionServiceExtFuzzer::AVSessionServiceExtFuzzTest(uint8_t* data, size_
     }
     SuperLauncherTest();
     AVSessionServiceExtFuzzTest001();
+#ifdef DEVICE_MANAGER_ENABLE
     AVSessionServiceExtFuzzTest002();
+#endif
     AVSessionServiceExtFuzzTest003();
     AVSessionSystemAbilityLoadCallbackTest();
     AVSessionDeviceStateCallbackTest();

@@ -20,10 +20,14 @@
 #include "avsession_errors.h"
 #include "avsession_callback_client.h"
 #include "system_ability_definition.h"
+#ifdef DSOFTBUS_ENABLE
 #include "softbus_bus_center.h"
+#endif
 #include "avsession_log.h"
+#ifdef DEVICE_MANAGER_ENABLE
 #include "device_manager.h"
 #include "dm_device_info.h"
+#endif
 #include "device_manager_callback.h"
 #include "audio_system_manager.h"
 #include "accesstoken_kit.h"
@@ -36,7 +40,9 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace AVSession {
+#ifdef DEVICE_MANAGER_ENABLE
 const int32_t DECICE_ID = 2;
+#endif
 
 static HapInfoParams g_info = {
     .userID = 100,
@@ -78,6 +84,7 @@ static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
 static std::vector<AudioDeviceDescriptor> g_descriptors;
 
+#ifdef DEVICE_MANAGER_ENABLE
 class InitCallback : public OHOS::DistributedHardware::DmInitCallback {
 public:
     ~InitCallback() override
@@ -87,6 +94,7 @@ public:
     {
     }
 };
+#endif
 
 class AVSessionRemoteTest : public testing::Test {
 public:
@@ -123,10 +131,12 @@ void AVSessionRemoteTest::SetUpTestCase()
     AccessTokenKit::AllocHapToken(g_info, g_policy);
     AccessTokenIDEx tokenID = AccessTokenKit::GetHapTokenIDEx(g_info.userID, g_info.bundleName, g_info.instIndex);
     SetSelfTokenID(tokenID.tokenIDEx);
-
+#ifdef DSOFTBUS_ENABLE
     NodeBasicInfo *nodeInfo[NODE_NUMBER];
     int32_t infoNum = NODE_NUMBER;
     GetAllNodeDeviceInfo(TEST_PACKAGE_NAME, nodeInfo, &infoNum);
+#endif
+#ifdef DEVICE_MANAGER_ENABLE
     std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
     auto callback = std::make_shared<InitCallback>();
     int ret = OHOS::DistributedHardware::DeviceManager::GetInstance().InitDeviceManager("av_session", callback);
@@ -145,6 +155,7 @@ void AVSessionRemoteTest::SetUpTestCase()
         g_descriptors.push_back(descriptor);
         SLOGI("g_sinkDevices is %{public}s", deviceList[i].networkId);
     }
+#endif
 }
 
 void AVSessionRemoteTest::TearDownTestCase()

@@ -1333,6 +1333,7 @@ static HWTEST_F(AVSessionServiceTestSecond, GetTrustedDeviceName001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
+#ifdef DEVICE_MANAGER_ENABLE
 static HWTEST_F(AVSessionServiceTestSecond, DoConnectProcessWithMigrateProxy001, TestSize.Level0)
 {
     SLOGD("DoConnectProcessWithMigrateProxy001 begin!");
@@ -1471,6 +1472,7 @@ static HWTEST_F(AVSessionServiceTestSecond, NotifyLocalFrontSessionChangeForMigr
     EXPECT_TRUE(g_AVSessionService != nullptr);
     SLOGD("NotifyLocalFrontSessionChangeForMigrate001 end!");
 }
+#endif
 
 /**
 * @tc.name: SuperLauncher002

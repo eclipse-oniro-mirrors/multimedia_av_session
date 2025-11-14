@@ -20,13 +20,17 @@
 #include <mutex>
 #include <map>
 
+#ifdef DSOFTBUS_ENABLE
 #include "socket.h"
+#endif
 
 namespace OHOS::AVSession {
 class SoftbusSessionListener {
 public:
+#ifdef DSOFTBUS_ENABLE
     virtual void OnBind(int32_t socket, PeerSocketInfo info) = 0;
     virtual void OnShutdown(int32_t socket, ShutdownReason reason) = 0;
+#endif
     virtual void OnBytes(int32_t socket, const void *data, int32_t dataLen) = 0;
     virtual void OnMessage(int32_t socket, const void *data, int32_t dataLen) = 0;
     virtual ~SoftbusSessionListener() = default;
@@ -38,9 +42,11 @@ public:
 
     int32_t Socket(const std::string &pkgName);
 
+#ifdef DSOFTBUS_ENABLE
     int32_t Bind(const std::string &peerNetworkId, const std::string &pkgName);
 
     void Shutdown(int32_t socket);
+#endif
 
     int32_t SendMessage(int32_t socket, const std::string &data);
 
@@ -52,6 +58,7 @@ public:
 
     void AddSessionListener(std::shared_ptr<SoftbusSessionListener> softbusSessionListener);
 
+#ifdef DSOFTBUS_ENABLE
     /* *
      * Callback adaptation for session channel opened.
      *
@@ -65,6 +72,7 @@ public:
      * @param socket socket
      */
     void OnShutdown(int32_t socket, ShutdownReason reason);
+#endif
 
     /* *
      * Callback adaptation for data received by the session channel.

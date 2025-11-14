@@ -49,8 +49,6 @@ common_external_deps = [
   "background_task_mgr:bgtaskmgr_innerkits",
   "cJSON:cjson",
   "c_utils:utils",
-  "device_manager:devicemanagersdk",
-  "dsoftbus:softbus_client",
   "hilog:libhilog",
   "image_framework:image_native",
   "input:libmmi-client",
@@ -59,6 +57,14 @@ common_external_deps = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
+
+if (multimedia_av_session_enable_device_manager) {
+  common_external_deps += [ "device_manager:devicemanagersdk" ]
+}
+
+if (multimedia_av_session_enable_dsoftbus) {
+  common_external_deps += [ "dsoftbus:softbus_client" ]
+}
 
 ohos_unittest("AVSessionManagerTest") {
   module_out_path = module_output_path
@@ -462,14 +468,21 @@ if (castplus_cast_engine_enable) {
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "cast_engine:cast_engine_client",
-      "data_object:distributeddataobject_impl",
-      "device_manager:devicemanagersdk",
       "hilog:libhilog",
       "input:libmmi-client",
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
+
+    if (multimedia_av_session_enable_data_object) {
+      external_deps += [ "data_object:distributeddataobject_impl" ]
+    }
+
+    if (multimedia_av_session_enable_device_manager) {
+      defines = ["DEVICE_MANAGER_ENABLE"]
+      external_deps += [ "device_manager:devicemanagersdk" ]
+    }
 
     public_configs = ["../../../../../services/session:avsession_ipc_config"]
   }

@@ -489,9 +489,11 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
         case APP_MGR_SERVICE_ID:
             InitAMS();
             break;
+#ifdef DEVICE_MANAGER_ENABLE
         case DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID:
             InitDM();
             break;
+#endif
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
             InitBMS();
             InitRadarBMS();
@@ -950,6 +952,7 @@ void AVSessionService::InitAMS()
     });
 }
 
+#ifdef DEVICE_MANAGER_ENABLE
 void AVSessionService::InitDM()
 {
     SLOGI("enter");
@@ -959,6 +962,7 @@ void AVSessionService::InitDM()
     CHECK_AND_RETURN_LOG(ret == 0, "InitDeviceManager error ret is %{public}d", ret);
     DoTargetDevListenWithDM();
 }
+#endif
 
 void AVSessionService::InitBMS()
 {
@@ -3424,20 +3428,28 @@ bool AVSessionService::IsLocalDevice(const std::string& networkId)
 
 int32_t AVSessionService::GetLocalNetworkId(std::string& networkId)
 {
+#ifdef DEVICE_MANAGER_ENABLE
     DistributedHardware::DmDeviceInfo deviceInfo;
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo("av_session", deviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == 0, ret, "get local deviceInfo failed");
     networkId = deviceInfo.networkId;
+#else
+    networkId = "";
+    return AVSESSION_ERROR;
+#endif
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionService::GetTrustedDeviceName(const std::string& networkId, std::string& deviceName)
 {
+#ifdef DEVICE_MANAGER_ENABLE
     std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList {};
+#endif
     if (IsLocalDevice(networkId)) {
         deviceName = "LocalDevice";
         return AVSESSION_SUCCESS;
     }
+#ifdef DEVICE_MANAGER_ENABLE
     int32_t ret = GetTrustedDevicesInfo(deviceList);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "get devicesInfo failed");
     for (const auto& device : deviceList) {
@@ -3447,16 +3459,19 @@ int32_t AVSessionService::GetTrustedDeviceName(const std::string& networkId, std
             return AVSESSION_SUCCESS;
         }
     }
+#endif
     SLOGI("GetTrustedDeviceName is not find this device %{public}.6s", networkId.c_str());
     return AVSESSION_ERROR;
 }
 
+#ifdef DEVICE_MANAGER_ENABLE
 int32_t AVSessionService::GetTrustedDevicesInfo(std::vector<OHOS::DistributedHardware::DmDeviceInfo>& deviceList)
 {
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList("av_session", "", deviceList);
     CHECK_AND_RETURN_RET_LOG(ret == 0, ret, "get trusted device list failed");
     return AVSESSION_SUCCESS;
 }
+#endif
 
 int32_t AVSessionService::SetBasicInfo(std::string& sessionInfo)
 {

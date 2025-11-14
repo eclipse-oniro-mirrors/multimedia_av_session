@@ -28,6 +28,7 @@ SoftbusSessionManager& SoftbusSessionManager::GetInstance()
     return softbusSessionListener;
 }
 
+#ifdef DSOFTBUS_ENABLE
 static void OnBind(int32_t socket, PeerSocketInfo info)
 {
     SLOGI("OnBind sessionId[%{public}d] result[%{public}s]", socket,
@@ -175,6 +176,7 @@ int32_t SoftbusSessionManager::SendBytesForNext(int32_t socket, const std::strin
     }
     return ret;
 }
+#endif
 
 int32_t SoftbusSessionManager::ObtainPeerDeviceId(int32_t socket, std::string &deviceId)
 {
@@ -200,6 +202,7 @@ void SoftbusSessionManager::AddSessionListener(std::shared_ptr<SoftbusSessionLis
     sessionListeners_.emplace_back(softbusSessionListener);
 }
 
+#ifdef DSOFTBUS_ENABLE
 void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
 {
     if (info.networkId == nullptr) {
@@ -222,6 +225,7 @@ void SoftbusSessionManager::OnShutdown(int32_t socket, ShutdownReason reason)
         mMap_.erase(socket);
     }
 }
+#endif
 
 void SoftbusSessionManager::OnMessage(int32_t socket, const void *data, int32_t dataLen)
 {

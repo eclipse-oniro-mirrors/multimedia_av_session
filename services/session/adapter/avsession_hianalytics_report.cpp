@@ -18,8 +18,10 @@
 #include "avsession_hianalytics_report.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#ifdef DEVICE_MANAGER_ENABLE
 #include "device_manager.h"
 #include "dm_device_info.h"
+#endif
 
 
 namespace OHOS::AVSession {
@@ -113,16 +115,20 @@ void AVSessionHiAnalyticsReport::PublishRecommendInfo(const std::string &bundleN
 void AVSessionHiAnalyticsReport::PublishCastEvent(const std::string &bundleName, const int32_t castState,
     const DeviceInfo deviceInfo)
 {
+#ifdef DEVICE_MANAGER_ENABLE
     DistributedHardware::DmDeviceInfo dmDeviceInfo;
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo("av_session", dmDeviceInfo);
     CHECK_AND_RETURN_LOG(ret == 0, "get local deviceInfo failed");
     std::string localNetworkId = dmDeviceInfo.networkId;
     std::string localDeviceId = dmDeviceInfo.deviceId;
+#endif
     std::unordered_map<std::string, std::string> properties;
     properties.emplace(HA_KEY_SRC_BUNDLE_NAME, bundleName);
     properties.emplace(HA_KEY_AVCAST_STATE, std::to_string(castState == CAST_CONNECT_STATE ? CONNECT : DISCONNECT));
+#ifdef DEVICE_MANAGER_ENABLE
     properties.emplace(HA_KEY_SRC_DEVICE_ID, localDeviceId);
     properties.emplace(HA_KEY_SRC_NETWORK_ID, localNetworkId);
+#endif
     properties.emplace(HA_KEY_PEER_DEVICE_ID, deviceInfo.deviceId_);
     properties.emplace(HA_KEY_PEER_NETWORK_ID, deviceInfo.networkId_);
     SLOGI("PublishCastEvent: bundleName:%{public}s castState:%{public}d", bundleName.c_str(), castState);
@@ -132,6 +138,7 @@ void AVSessionHiAnalyticsReport::PublishCastEvent(const std::string &bundleName,
 
 void AVSessionHiAnalyticsReport::PublishCastRecord(const std::string &bundleName, const DeviceInfo deviceInfo)
 {
+#ifdef DEVICE_MANAGER_ENABLE
     DistributedHardware::DmDeviceInfo dmDeviceInfo;
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo("av_session", dmDeviceInfo);
     CHECK_AND_RETURN_LOG(ret == 0, "get local deviceInfo failed");
@@ -139,13 +146,16 @@ void AVSessionHiAnalyticsReport::PublishCastRecord(const std::string &bundleName
     std::string localDeviceId = dmDeviceInfo.deviceId;
     uint16_t localDeviceType = dmDeviceInfo.deviceTypeId;
     std::string localDeviceName = dmDeviceInfo.deviceName;
+#endif
     std::unordered_map<std::string, std::string> properties;
     properties.emplace(HA_KEY_SRC_BUNDLE_NAME, bundleName);
     properties.emplace(HA_KEY_PROTOCOL_TYPE, GetProtocol(deviceInfo.supportedProtocols_));
+#ifdef DEVICE_MANAGER_ENABLE
     properties.emplace(HA_KEY_SRC_DEVICE_ID, localDeviceId);
     properties.emplace(HA_KEY_SRC_NETWORK_ID, localNetworkId);
     properties.emplace(HA_KEY_SRC_DEVICE_TYPE, std::to_string(localDeviceType));
     properties.emplace(HA_KEY_SRC_DEVICE_NAME, localDeviceName);
+#endif
     properties.emplace(HA_KEY_PEER_DEVICE_ID, deviceInfo.deviceId_);
     properties.emplace(HA_KEY_PEER_NETWORK_ID, deviceInfo.networkId_);
     properties.emplace(HA_KEY_PEER_DEVICE_TYPE, std::to_string(deviceInfo.deviceType_));

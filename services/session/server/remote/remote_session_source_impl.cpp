@@ -40,11 +40,13 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
                                                      const std::string& sinkCapability)
 {
     session_ = session;
+#ifdef DATA_OBJECT_ENABLE
     auto syncer = std::make_shared<RemoteSessionSyncerImpl>(session->GetSessionId(), sourceDevice, sinkDevice);
     CHECK_AND_RETURN_RET_LOG(syncer != nullptr, AVSESSION_ERROR, "syncer is nullptr");
     int32_t ret = syncer->Init();
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "syncer init failed");
     syncers_[sinkDevice] = syncer;
+#endif
     SLOGI("sinkDevice is %{public}s", sinkDevice.c_str());
 
     RemoteSessionCapabilitySet::GetInstance().AddRemoteCapability(session->GetSessionId(), sinkDevice, sinkCapability);
@@ -53,6 +55,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
 
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         auto sessionSyncer = iter->second;
+#ifdef DATA_OBJECT_ENABLE
         ret = sessionSyncer->RegisterDisconnectNotifier([this] (const std::string& deviceId) {
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
                                      "syncer is not exist");
@@ -79,6 +82,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
             return HandleSourceSessionDataCategory(category, deviceId);
         });
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDataNotifier failed");
+#endif
     }
     return AVSESSION_SUCCESS;
 }

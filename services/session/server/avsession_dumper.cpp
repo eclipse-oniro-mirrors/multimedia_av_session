@@ -53,6 +53,7 @@ std::map<int32_t, std::string> AVSessionDumper::playBackStates_ = {
 };
 
 std::map<int32_t, std::string> AVSessionDumper::deviceTypeId_ = {
+#ifdef DEVICE_MANAGER_ENABLE
     {DistributedHardware::DEVICE_TYPE_UNKNOWN, "unknown" },
     {DistributedHardware::DEVICE_TYPE_WIFI_CAMERA, "camera" },
     {DistributedHardware::DEVICE_TYPE_AUDIO, "audio" },
@@ -62,6 +63,7 @@ std::map<int32_t, std::string> AVSessionDumper::deviceTypeId_ = {
     {DistributedHardware::DEVICE_TYPE_WATCH, "watch" },
     {DistributedHardware::DEVICE_TYPE_CAR, "car" },
     {DistributedHardware::DEVICE_TYPE_TV, "tv" },
+#endif
 };
 
 std::map<int32_t, std::string> AVSessionDumper::loopMode_ = {
@@ -123,6 +125,7 @@ void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService& 
 
 void AVSessionDumper::ShowTrustedDevicesInfo(std::string& result, const AVSessionService& sessionService)
 {
+#ifdef DEVICE_MANAGER_ENABLE
     std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
     DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList("av_session", "", deviceList);
 
@@ -147,6 +150,7 @@ void AVSessionDumper::ShowTrustedDevicesInfo(std::string& result, const AVSessio
         result.append("\n        range                  : " + std::to_string(device.range));
         result.append("\n");
     }
+#endif
 }
 
 void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionService& sessionService)

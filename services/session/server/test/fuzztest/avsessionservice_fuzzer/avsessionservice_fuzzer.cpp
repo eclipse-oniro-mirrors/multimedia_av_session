@@ -48,7 +48,9 @@ static char g_testAnotherAbilityName[] = "testAnother.ability";
 static sptr<AVSessionService> avsessionService_;
 AppExecFwk::ElementName elementName;
 sptr<AVSessionItem> avsessionHere_ = nullptr;
+#ifdef DEVICE_MANAGER_ENABLE
 std::vector<OHOS::DistributedHardware::DmDeviceInfo> deviceList;
+#endif
 static const int32_t MAX_CODE_LEN  = 20;
 static const int32_t MIN_SIZE_NUM = 10;
 static const int32_t COLLABORATION_SA_ID = 70633;
@@ -146,7 +148,9 @@ uint32_t GetArrLength(T& arr)
 typedef void (*TestFuncs[12])();
 
 TestFuncs g_allFuncs = {
+#ifdef DEVICE_MANAGER_ENABLE
     MockGetTrustedDeviceList,
+#endif
     AvSessionServiceTest,
     AVSessionServiceStubRemoteRequestTest,
     AVSessionServiceFuzzer::HandleBundleRemoveEventTest,
@@ -255,6 +259,7 @@ private:
     T ptr_;
 };
 
+#ifdef DEVICE_MANAGER_ENABLE
 void MockGetTrustedDeviceList()
 {
     OHOS::DistributedHardware::DmDeviceInfo localeDevice;
@@ -271,6 +276,7 @@ void MockGetTrustedDeviceList()
     deviceList.push_back(localeDevice);
     deviceList.push_back(remoteDevice);
 }
+#endif
 
 void GetDeviceInfoTest()
 {
@@ -288,7 +294,9 @@ void GetDeviceInfoTest()
     auto uid = GetData<int32_t>();
     std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> descriptors;
     avsessionService_->GetDeviceInfo(avsessionHere_, descriptors, descriptors, descriptors);
+#ifdef DEVICE_MANAGER_ENABLE
     avsessionService_->GetTrustedDevicesInfo(deviceList);
+#endif
     AudioStandard::AudioDeviceDescriptor des;
     avsessionService_->SelectOutputDevice(uid, des);
     avsessionService_->HandleSessionRelease(avsessionHere_->GetSessionId());
@@ -976,6 +984,7 @@ void NotifyMigrateStopTest(sptr<AVSessionService> service)
     service->NotifyMigrateStop(deviceId);
 }
 
+#ifdef DEVICE_MANAGER_ENABLE
 void ProcessTargetMigrateTest(sptr<AVSessionService> service)
 {
     OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
@@ -1010,6 +1019,7 @@ void ProcessTargetMigrateTest(sptr<AVSessionService> service)
     bool isOnline = GetData<bool>();
     service->ProcessTargetMigrate(isOnline, deviceInfo);
 }
+#endif
 
 void NotifyRemoteBundleChangeTest(sptr<AVSessionService> service)
 {
@@ -1106,7 +1116,9 @@ void AvSessionServiceTest002(sptr<AVSessionService> service)
     GetAVQueueDirTest(service);
     GetAVSortDirTest(service);
     NotifyMigrateStopTest(service);
+#ifdef DEVICE_MANAGER_ENABLE
     ProcessTargetMigrateTest(service);
+#endif
     NotifyRemoteBundleChangeTest(service);
     AbilityHasSessionTest(service);
     GetPresentControllerTest(service);
