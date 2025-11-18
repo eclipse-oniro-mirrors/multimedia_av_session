@@ -131,7 +131,7 @@ private:
     static napi_status OffCustomData(napi_env env, NapiAVCastController* napiCastController, napi_value callback);
 
     static void PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
-        AVQueueItem& avQueueItem);
+        const AVQueueItem& avQueueItem);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
