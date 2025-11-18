@@ -425,13 +425,8 @@ bool AVSessionItem::CheckTitleChange(const AVMetaData& meta)
     bool isTitleChange = metaData_.GetTitle() != meta.GetTitle();
     bool isAncoTitleLyric = GetUid() == audioBrokerUid && meta.GetArtist().find("-") != std::string::npos;
     bool isTitleLyric = ((GetBundleName() == defaultBundleName) && !meta.GetDescription().empty()) || isAncoTitleLyric;
-    SLOGI("isTitleLyric:%{public}d isAncoTitleLyric:%{public}d isTitleChange:%{public}d isAssetChange:%{public}d",
-        isTitleLyric, isAncoTitleLyric, isTitleChange, isAssetChange_);
-    if (isAssetChange_ && isAncoTitleLyric) {
-        SetLyricTitle(metaData_.GetTitle());
-        isAssetChange_ = false;
-        SLOGI("CheckTitleChange SetLyricTitle %{public}s", GetLyricTitle().c_str());
-    }
+    SLOGI("isTitleLyric:%{public}d isAncoTitleLyric:%{public}d isTitleChange:%{public}d",
+        isTitleLyric, isAncoTitleLyric, isTitleChange);
     return isTitleChange && !isTitleLyric;
 }
 
@@ -481,12 +476,10 @@ void AVSessionItem::UpdateMetaData(const AVMetaData& meta)
     std::lock_guard lockGuard(avsessionItemLock_);
     SessionXCollie sessionXCollie("avsession::SetAVMetaData");
     ReportSetAVMetaDataInfo(meta);
-    if (metaData_.GetAssetId() != meta.GetAssetId()) {
-        isAssetChange_ = true;
-    }
     if ((metaData_.GetAssetId() != meta.GetAssetId()) || CheckTitleChange(meta)) {
         isMediaChange_ = true;
         isRecommendMediaChange_ = true;
+        SetLyricTitle(meta.GetTitle());
     }
     std::string oldImageUri = metaData_.GetMediaImageUri();
     CHECK_AND_RETURN_LOG(metaData_.CopyFrom(meta), "AVMetaData set error");

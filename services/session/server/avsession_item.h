@@ -495,7 +495,6 @@ private:
     bool isMediaKeySupport = false;
     bool isNotShowNotification_ = false;
     bool isMediaChange_ = true;
-    bool isAssetChange_ = false;
     bool isRecommendMediaChange_ = false;
     bool isRecommend_ = false;
     bool isPlayingState_ = false;
