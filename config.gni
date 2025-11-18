@@ -33,7 +33,7 @@ declare_args() {
     multimedia_av_session_enable_device_manager = true
   }
   if (defined(global_parts_info) &&
-      defined(global_parts_info.communication_dsfotbus)) {
+      defined(global_parts_info.communication_dsoftbus)) {
     multimedia_av_session_enable_dsoftbus = true
   }
 }
