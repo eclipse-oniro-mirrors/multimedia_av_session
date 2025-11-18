@@ -15,7 +15,6 @@
 
 #include "avsession_errors.h"
 #include "avsession_trace.h"
-#include "napi_async_work.h"
 #include "napi_avsession_manager.h"
 #include "napi_avcast_picker_helper.h"
 
@@ -204,16 +203,11 @@ napi_value NapiAVCastPickerHelper::OffEvent(napi_env env, napi_callback_info inf
 
 napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_info info)
 {
-    struct ConcreteContext : public ContextBase {
-        NapiAVCastPickerOptions napiAVCastPickerOptions;
-    };
     auto context = std::make_shared<ConcreteContext>();
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
                                "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        if (argc == ARGC_ZERO) {
-            SLOGI("NapiAVCastPickerOptions use default options");
-        } else {
+        if (argc == ARGC_ONE) {
             context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->napiAVCastPickerOptions);
         }
         CHECK_STATUS_RETURN_VOID(context, "get object failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -228,6 +222,11 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
         request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, targetType);
         request.SetParam("isAVCastPickerHelper", true);
         request.SetParam("AVCastPickerOptionsType", context->napiAVCastPickerOptions.sessionType);
+        request.SetParam("AVCastPickerOptionsStyle", context->napiAVCastPickerOptions.pickerStyle);
+        request.SetParam("AVCastPickerOptionsPositionX", context->napiAVCastPickerOptions.menuPosition.x);
+        request.SetParam("AVCastPickerOptionsPositionY", context->napiAVCastPickerOptions.menuPosition.y);
+        request.SetParam("AVCastPickerOptionsPositionW", context->napiAVCastPickerOptions.menuPosition.width);
+        request.SetParam("AVCastPickerOptionsPositionH", context->napiAVCastPickerOptions.menuPosition.height);
         request.SetElementName(ABILITY_WANT_ELEMENT_NAME, "UIExtAbility");
 
         PickerCallBack pickerCallBack;

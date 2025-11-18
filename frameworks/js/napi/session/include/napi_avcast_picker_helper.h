@@ -23,12 +23,20 @@
 #include "ui_content.h"
 #include "ui_extension_context.h"
 #include "audio_routing_manager.h"
+#include "napi_async_work.h"
 
 namespace OHOS::AVSession {
 
 struct PickerCallBack {
     bool ready = false;
     int32_t resultCode;
+};
+
+struct MenuPosition {
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t width = 0;
+    int32_t height = 0;
 };
 
 class ModalUICallback {
@@ -50,6 +58,12 @@ private:
 
 struct NapiAVCastPickerOptions {
     std::string sessionType = "audio";
+    int32_t pickerStyle = 0;
+    MenuPosition menuPosition;
+};
+
+struct ConcreteContext : public ContextBase {
+    NapiAVCastPickerOptions napiAVCastPickerOptions;
 };
 
 class NapiAVCastPickerHelper {
@@ -111,6 +125,9 @@ private:
 
     static constexpr uint32_t STATE_APPEARING = 0;
     static constexpr uint32_t STATE_DISAPPEARING = 1;
+
+    static constexpr int32_t STYLE_PANEL = 0;
+    static constexpr int32_t STYLE_MENU = 1;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVCAST_PICKER_HELPER_H

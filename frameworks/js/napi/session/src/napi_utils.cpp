@@ -874,11 +874,60 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<CastDisplayInfo>
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, NapiAVCastPickerOptions& out)
 {
     napi_value value {};
-    auto status = napi_get_named_property(env, in, "sessionType", &value);
-    CHECK_RETURN(status == napi_ok, "get sessionType failed", status);
-    status = GetValue(env, value, out.sessionType);
-    CHECK_RETURN(status == napi_ok, "get sessionType value failed", status);
+    napi_status status = napi_ok;
+    bool hasKey = false;
+    napi_has_named_property(env, in, "sessionType", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "sessionType", &value);
+        CHECK_RETURN(status == napi_ok, "get sessionType failed", status);
+        status = GetValue(env, value, out.sessionType);
+        CHECK_RETURN(status == napi_ok, "get sessionType value failed", status);
+    }
 
+    napi_has_named_property(env, in, "pickerStyle", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "pickerStyle", &value);
+        CHECK_RETURN(status == napi_ok, "get pickerStyle failed", status);
+        status = GetValue(env, value, out.pickerStyle);
+        CHECK_RETURN(status == napi_ok, "get pickerStyle value failed", status);
+    }
+
+    napi_has_named_property(env, in, "menuPosition", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "menuPosition", &value);
+        CHECK_RETURN(status == napi_ok, "get menuPosition failed", status);
+        status = GetValue(env, value, out.menuPosition);
+        CHECK_RETURN(status == napi_ok, "get menuPosition value failed", status);
+    }
+    return napi_ok;
+}
+
+/* napi_value <-> MenuPosition */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, MenuPosition& out)
+{
+    napi_value valueX {};
+    auto status = napi_get_named_property(env, in, "x", &valueX);
+    CHECK_RETURN(status == napi_ok, "get x failed", status);
+    status = GetValue(env, valueX, out.x);
+    CHECK_RETURN(status == napi_ok, "get x value failed", status);
+
+    napi_value valueY {};
+    status = napi_get_named_property(env, in, "y", &valueY);
+    CHECK_RETURN(status == napi_ok, "get y failed", status);
+    status = GetValue(env, valueY, out.y);
+    CHECK_RETURN(status == napi_ok, "get y value failed", status);
+
+    napi_value valueW {};
+    status = napi_get_named_property(env, in, "width", &valueW);
+    CHECK_RETURN(status == napi_ok, "get width failed", status);
+    status = GetValue(env, valueW, out.width);
+    CHECK_RETURN(status == napi_ok, "get width value failed", status);
+
+    napi_value valueH {};
+    status = napi_get_named_property(env, in, "height", &valueH);
+    CHECK_RETURN(status == napi_ok, "get height failed", status);
+    status = GetValue(env, valueH, out.height);
+    CHECK_RETURN(status == napi_ok, "get height value failed", status);
     return napi_ok;
 }
 
