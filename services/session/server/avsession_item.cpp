@@ -1636,7 +1636,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
 {
     SLOGI("enter DealCollaborationPublishState");
-    CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsInMirrorToStreamState(),
+    CHECK_AND_RETURN_LOG(castServiceNameStatePair_.second != deviceStateConnection,
         "cast not add to collaboration when mirror to stream cast");
 
     collaborationNeedDeviceId_ = deviceInfo.deviceId_;
