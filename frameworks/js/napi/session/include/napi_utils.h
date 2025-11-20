@@ -244,6 +244,9 @@ public:
     /* napi_value <-> NapiAVCastPickerOptions */
     static napi_status GetValue(napi_env env, napi_value in, NapiAVCastPickerOptions& out);
 
+    /* napi_value <-> MenuPosition */
+    static napi_status GetValue(napi_env env, napi_value in, MenuPosition& out);
+
     /* napi_value <-> AVDataSrcDescriptor */
     static napi_status GetValue(napi_env env, napi_value in, AVDataSrcDescriptor& out);
     static napi_status SetValue(napi_env env, const AVDataSrcDescriptor& in, napi_value& out);
