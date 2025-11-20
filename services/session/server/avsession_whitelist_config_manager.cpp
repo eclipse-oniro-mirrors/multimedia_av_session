@@ -32,7 +32,7 @@ constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdat
 constexpr const char *SETTINGS_DATA_KEY_URI = "&key=";
 constexpr const char *SETTINGS_DATA_COLUMN_VALUE = "VALUE";
 constexpr const char *SETTINGS_DATA_COLUMN_KEYWORD = "KEYWORD";
-constexpr const char *WHITELIST_AVSESSION_SIRATEGY = "WHITELIST_AVSESSION_SIRATEGY";
+constexpr const char *WHITELIST_AVSESSION_STRATEGY = "WHITELIST_AVSESSION_STRATEGY";
 
 bool AVSessionWhitelistConfigManager::IsKeyEventSupported(const std::string &bundleName)
 {
@@ -52,7 +52,7 @@ bool AVSessionWhitelistConfigManager::IsKeyEventSupported(const std::string &bun
 
 bool AVSessionWhitelistConfigManager::GetSupportKeyEventFromSettings(const std::string &bundleName)
 {
-    std::call_once(settingDataLoadFlag_, [this]() {
+    std::call_once(settingsDataLoadFlag_, [this]() {
         SLOGI("load settings data start");
         std::string jsonStr = GetSettingsDataStringValue();
         if (!ParseJsonToMap(jsonStr, compatibleInfoMap_)) {
@@ -81,9 +81,9 @@ std::string AVSessionWhitelistConfigManager::GetSettingsDataStringValue()
     }
     std::vector<std::string> columns = {SETTINGS_DATA_COLUMN_VALUE};
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(SETTINGS_DATA_COLUMN_KEYWORD, WHITELIST_AVSESSION_SIRATEGY);
+    predicates.EqualTo(SETTINGS_DATA_COLUMN_KEYWORD, WHITELIST_AVSESSION_STRATEGY);
     std::string uriString = SETTING_URI_PROXY;
-    Uri uri(uriString + SETTINGS_DATA_KEY_URI + WHITELIST_AVSESSION_SIRATEGY);
+    Uri uri(uriString + SETTINGS_DATA_KEY_URI + WHITELIST_AVSESSION_STRATEGY);
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
     if (resultSet == nullptr) {
@@ -94,7 +94,7 @@ std::string AVSessionWhitelistConfigManager::GetSettingsDataStringValue()
     resultSet->GetRowCount(count);
     if (count == 0) {
         SLOGW("not found value, count=%{public}d", count);
-        resultSet->close();
+        resultSet->Close();
         return "";
     }
     const int32_t index = 0;
@@ -114,7 +114,7 @@ bool AVSessionWhitelistConfigManager::ParseJsonToMap(
     const std::string &jsonStr, std::map<std::string, bool> &compatibleMap)
 {
     if (jsonStr.empty()) {
-        SLOGW("json str is empty");
+        SLOGW("json str is empty.");
         return false;
     }
     SLOGI("jsonStr : %{public}s", jsonStr.c_str());
@@ -135,7 +135,7 @@ bool AVSessionWhitelistConfigManager::ParseJsonToMap(
     return true;
 }
 
-static std::shared_ptr<DataShareHelper> AVSessionWhitelistConfigManager::CreateDataShareHelper()
+std::shared_ptr<DataShare::DataShareHelper> AVSessionWhitelistConfigManager::CreateDataShareHelper()
 {
     auto sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sam == nullptr) {
@@ -147,7 +147,7 @@ static std::shared_ptr<DataShareHelper> AVSessionWhitelistConfigManager::CreateD
         SLOGW("GetSystemAbility return nullptr");
         return nullptr;
     }
-    auto helper = DataShare::DataShareHelper::Creator(remoteObj, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI)；
+    auto helper = DataShare::DataShareHelper::Creator(remoteObj, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
         SLOGW("helper is nullptr");
         return nullptr;
@@ -172,6 +172,6 @@ bool AVSessionWhitelistConfigManager::ReleaseDataShareHelper(std::shared_ptr<Dat
 bool AVSessionWhitelistConfigManager::IsSystemApp()
 {
     uint64_t callingTokenId = IPCSkeleton::GetCallingFullTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenId(callingTokenId);
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
 }
 }// namespace OHOS::AVSession

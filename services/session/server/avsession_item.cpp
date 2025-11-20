@@ -1254,7 +1254,7 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 {
     if (event == "InputRedistributeEvent") {
         if (AAFwk::IInteger* codeValue = AAFwk::IInteger::Query(args.GetParam("keyCode"))) {
-            int32_t keyCode = AAFwk::IInteger::Unbox(codeValue);
+            int32_t keyCode = AAFwk::Integer::Unbox(codeValue);
             return ProcessInputRedistributeEvent(keyCode);
         }
         return AVSESSION_ERROR;

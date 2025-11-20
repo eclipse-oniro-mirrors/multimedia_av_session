@@ -283,7 +283,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionTag", property), napi_generic_failure);
 
     napiAVSession_->recipientInfo_.identity = Rosen::InputRedistributeIdentity::IDENTITY_MEDIA_CONTROLLER;
-    napiAVSession_->recipientInfo_.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_CPMPONENT;
+    napiAVSession_->recipientInfo_.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT;
     napiAVSession_->recipientInfo_.type = Rosen::InputEventType::KEY_EVENT;
     std::shared_ptr<NapiAVSessionInputRedistributeCallback> inputRedistributeCallback =
         std::make_shared<NapiAVSessionInputRedistributeCallback>();

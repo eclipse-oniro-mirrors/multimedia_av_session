@@ -22,14 +22,14 @@ using namespace OHOS::AVSession;
 
 namespace OHOS {
 namespace AVSession {
-class AVSessionWhitelistConfigManagerTest : public testing:Test {
+class AVSessionWhitelistConfigManagerTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<AVSessionWhitelistConfigManager> avsessionWhitelistConfigManager;
-}
+};
 
 void AVSessionWhitelistConfigManagerTest::SetUpTestCase(void)
 {}
@@ -50,7 +50,7 @@ void AVSessionWhitelistConfigManagerTest::TearDown(void)
  * @tc.desc: IsKeyEventSupported test with empty bundleName
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_IsKeyEventSupported_001, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_001, TestSize.Level1)
 {
     std::string bundleName = "";
     bool ret = avsessionWhitelistConfigManager->IsKeyEventSupported(bundleName);
@@ -62,9 +62,9 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_IsKeyEventSupported_
  * @tc.desc: IsKeyEventSupported test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_IsKeyEventSupported_002, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_002, TestSize.Level1)
 {
-    std::string bundleName = "testbundle";
+    std::string bundleName = "testBundle";
     bool ret = avsessionWhitelistConfigManager->IsKeyEventSupported(bundleName);
     EXPECT_EQ(ret, false);
 }
@@ -74,10 +74,10 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_IsKeyEventSupported_
  * @tc.desc: IsKeyEventSupported test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_IsKeyEventSupported_003, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_003, TestSize.Level1)
 {
-    std::string bundleName = "testbundle";
-    avsessionWhitelistConfigManager->isSettingDataLoaded_ = true;
+    std::string bundleName = "testBundle";
+    avsessionWhitelistConfigManager->isSettingsDataLoaded_ = true;
     bool ret = avsessionWhitelistConfigManager->IsKeyEventSupported(bundleName);
     EXPECT_EQ(ret, false);
 }
@@ -87,10 +87,10 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_IsKeyEventSupported_
  * @tc.desc: IsKeyEventSupported test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_IsKeyEventSupported_004, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_004, TestSize.Level1)
 {
-    std::string bundleName = "testbundle";
-    avsessionWhitelistConfigManager->isSettingDataLoaded_ = false;
+    std::string bundleName = "testBundle";
+    avsessionWhitelistConfigManager->isSettingsDataLoaded_ = false;
     bool ret = avsessionWhitelistConfigManager->IsKeyEventSupported(bundleName);
     EXPECT_EQ(ret, false);
 }
@@ -100,7 +100,7 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_IsKeyEventSupported_
  * @tc.desc: CreateDataShareHelper test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_CreateDataShareHelper_001, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, CreateDataShareHelper_001, TestSize.Level1)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper = avsessionWhitelistConfigManager->CreateDataShareHelper();
     EXPECT_NE(helper, nullptr);
@@ -111,7 +111,7 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_CreateDataShareHelpe
  * @tc.desc: ReleaseDataShareHelper test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ReleaseDataShareHelper_001, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, ReleaseDataShareHelper_001, TestSize.Level1)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper =  nullptr;
     bool ret = avsessionWhitelistConfigManager->ReleaseDataShareHelper(helper);
@@ -123,7 +123,7 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ReleaseDataShareHelp
  * @tc.desc: ReleaseDataShareHelper test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ReleaseDataShareHelper_002, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, ReleaseDataShareHelper_002, TestSize.Level1)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper =  avsessionWhitelistConfigManager->CreateDataShareHelper();
     bool ret = avsessionWhitelistConfigManager->ReleaseDataShareHelper(helper);
@@ -135,7 +135,7 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ReleaseDataShareHelp
  * @tc.desc: ParseJsonToMap test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ParseJsonToMap_001, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, ParseJsonToMap_001, TestSize.Level1)
 {
     std::string jsonStr = "";
     std::map<std::string, bool> compatibleInfoMap;
@@ -148,7 +148,7 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ParseJsonToMap_001, 
  * @tc.desc: ParseJsonToMap test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ParseJsonToMap_002, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, ParseJsonToMap_002, TestSize.Level1)
 {
     std::string jsonStr = "{\"testBundle1\":true,\"testBundle2\":true}";
     std::map<std::string, bool> compatibleInfoMap;
@@ -164,7 +164,7 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ParseJsonToMap_002, 
  * @tc.desc: ParseJsonToMap test
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, AVSessionItem_ParseJsonToMap_003, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, ParseJsonToMap_003, TestSize.Level1)
 {
     std::string jsonStr = "jsonstr";
     std::map<std::string, bool> compatibleInfoMap;

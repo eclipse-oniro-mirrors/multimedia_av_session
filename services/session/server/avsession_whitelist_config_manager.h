@@ -37,7 +37,7 @@ private:
     bool GetSupportKeyEventFromSettings(const std::string &bundleName);
     std::string GetSettingsDataStringValue();
     bool ParseJsonToMap(const std::string &jsonStr, std::map<std::string, bool> &compatibleMap);
-    static std::shared_ptr<DataShareHelper> CreateDataShareHelper();
+    static std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
     bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &helper);
     bool IsSystemApp();
 };

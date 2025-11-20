@@ -249,7 +249,7 @@ ohos_unittest("AVSessionWhitelistConfigManagerTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "access_token:libaccesstoken_sdk",
-    "data_share:datashare_consumer"
+    "data_share:datashare_consumer",
     "ipc:ipc_single",
     "cJSON:cjson",
   ]
@@ -3026,6 +3026,7 @@ group("av_session_server_unittest") {
     ":AVSessionServiceTest",
     ":AVSessionServiceExtTest",
     ":AVSessionStubTest",
+    ":AVSessionWhitelistConfigManagerTest",
     ":AVSessionUsersManagerTest",
     ":AVSharedMemoryBaseTest",
     ":AVsessionSyseventTest",
