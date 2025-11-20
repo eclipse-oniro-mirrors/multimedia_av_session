@@ -397,7 +397,7 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
         if (argc == ARGC_THREE && !NapiUtils::TypeCheck(env, argv[ARGV_THIRD], napi_undefined) &&
             !NapiUtils::TypeCheck(env, argv[ARGV_THIRD], napi_null)) {
             std::string moduleName {};
-            if (NapiUtils::GetNamedProperty(env, argv[ARGV_THIRD], "moduleName", moduleName) == napi_ok) {
+            if (NapiUtils::GetNamedProperty(env, argv[ARGV_THIRD], "callerModuleName", moduleName) == napi_ok) {
                 context->moduleName_ = moduleName;
             }
         }
