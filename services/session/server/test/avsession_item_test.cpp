@@ -622,6 +622,39 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_CheckIfSendCapsule_001, TestSize.Level
     SLOGD("AVSessionItem_CheckIfSendCapsule_001 end!");
 }
 
+/**
+ * @tc.name: AVSessionItem_ProcessInputRedistributeEvent_001
+ * @tc.desc: Test ProcessInputRedistributeEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_ProcessInputRedistributeEvent_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_ProcessInputRedistributeEvent_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_SPACE), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_DPAD_UP), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_DPAD_DOWN), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_DPAD_LEFT), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_DPAD_RIGHT), AVSESSION_ERROR);
+    SLOGD("AVSessionItem_ProcessInputRedistributeEvent_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_IsKeyEventSupported_001
+ * @tc.desc: Test IsKeyEventSupported.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_IsKeyEventSupported_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_IsKeyEventSupported_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    EXPECT_EQ(g_AVSessionItem->IsKeyEventSupported(""), false);
+    EXPECT_EQ(g_AVSessionItem->IsKeyEventSupported("com.test"), false);
+    SLOGD("AVSessionItem_IsKeyEventSupported_001 end!");
+}
+
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 /**
  * @tc.name: AVSessionItem_ReportPlaybackState_001

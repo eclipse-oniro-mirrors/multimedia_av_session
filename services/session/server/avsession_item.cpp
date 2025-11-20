@@ -38,6 +38,7 @@
 #include "int_wrapper.h"
 #include "avsession_hianalytics_report.h"
 #include "want_agent_helper.h"
+#include "avsession_whitelist_config_manager.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -73,6 +74,8 @@ const std::map<int32_t, int32_t> g_cmdToOffsetMap = {
     {AVControlCommand::SESSION_CMD_SET_LOOP_MODE, 1},
     {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE, 0}
 };
+
+constexpr int32_t PROGRESS_ADJUST_VALUE = 5;
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t CONTROL_COLD_START = 2;
@@ -1249,6 +1252,13 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
 
 int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
+    if (event == "InputRedistributeEvent") {
+        if (AAFwk::IInteger* codeValue = AAFwk::IInteger::Query(args.GetParam("keyCode"))) {
+            int32_t keyCode = AAFwk::IInteger::Unbox(codeValue);
+            return ProcessInputRedistributeEvent(keyCode);
+        }
+        return AVSESSION_ERROR;
+    }
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
@@ -1262,6 +1272,73 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
         auto ret = remoteSource_->SetSessionEventRemote(event, args);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetSessionEvent failed");
     }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::ProcessInputRedistributeEvent(const int32_t keyCode)
+{
+    SLOGI("ProcessInputRedistributeEvent keyCode %{public}d", keyCode);
+    if (!IsKeyEventSupported(GetBundleName())) {
+        return AVSESSION_ERROR;
+    }
+    if (keyCode == MMI::KeyEvent::KEYCODE_SPACE) {
+        SLOGI("ProcessInputRedistributeEvent playbackState %{public}d", playbackState_.GetState());
+        if (playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+            if (callbackForMigrate_) {
+                callbackForMigrate_->OnPause();
+            }
+            CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
+            callback_->OnPause();
+        } else {
+            if (callbackForMigrate_) {
+                callbackForMigrate_->OnPlay();
+            }
+            CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
+            callback_->OnPlay();
+        }
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_UP) {
+        return updateVolume(true);
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_DOWN) {
+        return updateVolume(false);
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_LEFT) {
+        CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
+        callback_->OnRewind(PROGRESS_ADJUST_VALUE);
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_RIGHT) {
+        CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
+        callback_->OnFastForward(PROGRESS_ADJUST_VALUE);
+    } else {
+        return AVSESSION_ERROR;
+    }
+    return AVSESSION_SUCCESS;
+}
+
+bool AVSessionItem::IsKeyEventSupported(const std::string &bundleName)
+{
+    if(bundleName.empty()) {
+        SLOGE("bundleName is empty");
+        return false;
+    }
+    auto manager = DelayedSingleton<AVSessionWhitelistConfigManager>::GetInstance();
+    if (manager == nullptr) {
+        SLOGE("failed, manager is nullptr");
+        return false;
+    }
+    bool supportKeyEvent = manager->IsKeyEventSupported(bundleName);
+    return supportKeyEvent;
+}
+
+int32_t AVSessionItem::updateVolume(bool up)
+{
+    AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
+    AudioSystemManager *audioManager = AudioSystemManager::GetInstance();
+    int32_t volumeMax_ = audioManager->GetMaxVolume(streamType);
+    int32_t volumeMin_ = audioManager->GetMinVolume(streamType);
+    int32_t volume = audioManager->GetVolume(streamType, GetCallingUid());
+    volume = up ? ++volume : --volume;
+    volume = std::min(volumeMax_, std::max(volume, volumeMin_));
+    SLOGI("updateVolume volume:%{public}d max:%{public}d min:%{public}d", volume, volumeMax_, volumeMin_);
+    auto ret = audioManager->SetVolume(streamType, volume, GetCallingUid());
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetVolume failed");
     return AVSESSION_SUCCESS;
 }
 

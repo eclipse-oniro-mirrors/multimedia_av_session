@@ -50,6 +50,7 @@ ohos_shared_library("avsession_napi") {
     "src/napi_queue_item.cpp",
     "src/napi_session_listener.cpp",
     "src/napi_utils.cpp",
+    "src/napi_avsession_input_redistribute_callback.cpp",
   ]
 
   deps = [
@@ -88,6 +89,7 @@ ohos_shared_library("avsession_napi") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libwm",
   ]
 
   cflags = []

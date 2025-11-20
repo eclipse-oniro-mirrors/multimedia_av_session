@@ -504,6 +504,7 @@ av_session_ohos_library("avsession_item") {
   service_sources = [
     "server/avcontroller_item.cpp",
     "server/avsession_item.cpp",
+    "server/avsession_whitelist_config_manager.cpp",
     "server/hw_cast_display_listener.cpp",
     "server/remote/json_utils.cpp",
     "server/remote/remote_session_command_process.cpp",
@@ -586,6 +587,7 @@ av_session_ohos_library("avsession_item") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
+    "data_share:datashare_consumer",
     "c_utils:utils",
     "graphic_surface:surface",
     "hilog:libhilog",

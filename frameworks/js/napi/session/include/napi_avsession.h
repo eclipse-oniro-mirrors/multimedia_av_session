@@ -32,6 +32,7 @@
 #include "napi_avsession_callback.h"
 #include "want_agent.h"
 #include "avsession_event_handler.h"
+#include "napi_avsession_input_redistribute_callback.h"
 
 namespace OHOS::AVSession {
 class NapiAVSession {
@@ -161,6 +162,7 @@ private:
     std::string latestDownloadedAssetId_;
     std::string latestDownloadedAVQueueId_;
     AVMetaData metaData_;
+    Rosen::IInputEventRecipientInfo recipientInfo_;
 
     static std::mutex lock_;
     static std::mutex syncMutex_;

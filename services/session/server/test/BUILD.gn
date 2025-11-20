@@ -229,6 +229,32 @@ ohos_unittest("AVSessionUsersManagerTest") {
   public_configs = ["../../../session:avsession_ipc_config"]
 }
 
+ohos_unittest("AVSessionWhitelistConfigManagerTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_whitelist_config_manager_test.cpp" ]
+
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "../../server/",
+  ]
+
+  deps = [
+    "../../../session:avsession_item_static",
+  ]
+
+  external_deps = [
+    "relational_store:native_rdb",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "access_token:libaccesstoken_sdk",
+    "data_share:datashare_consumer"
+    "ipc:ipc_single",
+    "cJSON:cjson",
+  ]
+}
+
 ohos_unittest("AVSharedMemoryBaseTest") {
   module_out_path = module_output_path
 
