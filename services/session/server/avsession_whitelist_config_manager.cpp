@@ -52,6 +52,10 @@ bool AVSessionWhitelistConfigManager::IsKeyEventSupported(const std::string &bun
 
 bool AVSessionWhitelistConfigManager::GetSupportKeyEventFromSettings(const std::string &bundleName)
 {
+    if (bundleName.empty()) {
+        SLOGI("bundleName empty");
+        return false;
+    }
     std::call_once(settingsDataLoadFlag_, [this]() {
         SLOGI("load settings data start");
         std::string jsonStr = GetSettingsDataStringValue();
@@ -90,7 +94,7 @@ std::string AVSessionWhitelistConfigManager::GetSettingsDataStringValue()
         SLOGW("helper->Query return nullptr");
         return "";
     }
-    int32_t count;
+    int32_t count = 0;
     resultSet->GetRowCount(count);
     if (count == 0) {
         SLOGW("not found value, count=%{public}d", count);
