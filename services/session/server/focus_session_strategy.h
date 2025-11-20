@@ -70,6 +70,7 @@ private:
         AudioStandard::STREAM_USAGE_VOICE_COMMUNICATION
     };
     const std::vector<AudioStandard::StreamUsage> ALLOWED_MEDIA_STREAM_USAGE {
+        AudioStandard::STREAM_USAGE_UNKNOWN,
         AudioStandard::STREAM_USAGE_MUSIC,
         AudioStandard::STREAM_USAGE_MOVIE,
         AudioStandard::STREAM_USAGE_AUDIOBOOK
