@@ -736,11 +736,11 @@ void AVSessionService::DoDisconnectProcessWithMigrateServer(const OHOS::Distribu
 void AVSessionService::DoDisconnectProcessWithMigrateProxy(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
 {
     std::string networkId = std::string(deviceInfo.networkId);
-    std::lock_guard lockGuard(migrateProxyMapLock_);
-    SLOGI("DoDisconnectProcessWithMigrateProxy networkId:%{public}s|%{public}d",
-        AVSessionUtils::GetAnonySessionId(networkId).c_str(), static_cast<int>(migrateAVSessionProxyMap_.size()));
     MigrateAVSessionManager::GetInstance().ReleaseRemoteSessionProxy(networkId,
         MigrateAVSessionManager::migrateSceneNext);
+    std::lock_guard lockGuard(migrateProxyMapLock_);
+    SLOGI("DoDisconnectProcessWithMigrateProxy networkId:%{public}s|%{public}d.",
+        AVSessionUtils::GetAnonySessionId(networkId).c_str(), static_cast<int>(migrateAVSessionProxyMap_.size()));
     if (migrateAVSessionProxyMap_.find(networkId) != migrateAVSessionProxyMap_.end()) {
         migrateAVSessionProxyMap_.erase(networkId);
         PublishEvent(remoteMediaNone);
