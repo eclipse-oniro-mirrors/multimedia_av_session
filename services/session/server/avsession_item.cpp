@@ -1507,7 +1507,8 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     CHECK_AND_RETURN_RET_LOG(deviceInfo.deviceId_ != "", AVSESSION_ERROR, "deviceid is empty");
     SLOGI("supportedProtocols is %{public}d", deviceInfo.supportedProtocols_);
     bool checkLinkConflict = deviceInfo.supportedProtocols_ != ProtocolType::TYPE_DLNA;
-    CollaborationManager::GetInstance().ApplyAdvancedResource(deviceInfo.deviceId_.c_str(), checkLinkConflict);
+    CollaborationManager::GetInstance().ApplyAdvancedResource(deviceInfo.deviceId_.c_str(), deviceInfo,
+        checkLinkConflict);
     //wait collaboration callback 10s
     std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
     bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),

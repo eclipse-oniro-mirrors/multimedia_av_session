@@ -51,6 +51,14 @@ typedef enum ServiceCollaborationManagerCheckConflictType {
     ONLY_LINK_CONFLICT = 2 // reservation param, not implementation
 } ServiceCollaborationManagerCheckConflictType;
 
+typedef enum ServiceCollaborationManagerLinkType {
+    UNKNOWN = 0,
+    SOFTBUS_HML_OR_P2P = 1, // create HML by softbus
+    SOFTBUS_P2P = 2, // create P2P by softbus
+    NATIVE_P2P = 3,
+    REUSING_AP = 4, // business reuse ap link
+} ServiceCollaborationManagerLinkType;
+
 typedef struct ServiceCollaborationManager_HardwareRequestInfo {
     ServiceCollaborationManagerHardwareType hardWareType;
     bool canShare;
@@ -71,6 +79,7 @@ typedef struct ServiceCollaborationManager_ResourceRequestInfoSets {
     ServiceCollaborationManager_HardwareRequestInfo *localHardwareList;
     ServiceCollaborationManager_CommunicationRequestInfo *communicationRequest;
     ServiceCollaborationManagerCheckConflictType checkConflictType;
+    ServiceCollaborationManagerLinkType linkType;
 } ServiceCollaborationManager_ResourceRequestInfoSets;
 
 typedef struct ServiceCollaborationManager_Callback {

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "avsession_info.h"
 #include "collaboration_manager_utils.h"
 #include "collaboration_manager.h"
 
@@ -226,7 +227,8 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource001, testing::ext
 {
     SLOGI("ApplyAdvancedResource001, start");
     const char* peerNetworkId = "";
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId);
+    DeviceInfo deviceInfo;
+    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("ApplyAdvancedResource001, end");
 }
@@ -240,6 +242,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource002, testing::ext
 {
     SLOGI("ApplyAdvancedResource002, start");
     const char* peerNetworkId = "";
+    DeviceInfo deviceInfo;
     auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
         ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
         ServiceCollaborationManager_Callback* callback) {
@@ -247,7 +250,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource002, testing::ext
     };
     CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
         = applyAdvancedResource;
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId);
+    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("ApplyAdvancedResource002, end");
 }
@@ -261,6 +264,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource003, testing::ext
 {
     SLOGI("ApplyAdvancedResource003, start");
     const char* peerNetworkId = "";
+    DeviceInfo deviceInfo;
     auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
         ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
         ServiceCollaborationManager_Callback* callback) {
@@ -268,7 +272,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource003, testing::ext
     };
     CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
         = applyAdvancedResource;
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId);
+    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("ApplyAdvancedResource003, end");
 }
@@ -284,6 +288,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource004, testing::ext
     auto& instance = CollaborationManager::GetInstance();
     auto originalResourceRequest = instance.resourceRequest_;
     const char* peerNetworkId = "";
+    DeviceInfo deviceInfo;
     auto applyAdvancedResource = [](const char* networkId, const char* serviceName,
         ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
         ServiceCollaborationManager_Callback* callback) {
@@ -291,10 +296,35 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource004, testing::ext
     };
     instance.exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = applyAdvancedResource;
     instance.resourceRequest_ = nullptr;
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId);
+    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     instance.resourceRequest_ = originalResourceRequest;
     SLOGI("ApplyAdvancedResource004, end");
+}
+
+/**
+ * @tc.name: ApplyAdvancedResource005
+ * @tc.desc: Test ApplyAdvancedResource with HiPlay P2P device.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource005, testing::ext::TestSize.Level1)
+{
+    SLOGI("ApplyAdvancedResource005, start");
+    const char* peerNetworkId = "";
+    DeviceInfo deviceInfo;
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    deviceInfo.ipAddress_ = "";
+    auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
+        ServiceCollaborationManager_Callback* callback) {
+            EXPECT_EQ(resourceRequest->linkType, ServiceCollaborationManagerLinkType::NATIVE_P2P);
+            return static_cast<int32_t>(0);
+    };
+    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
+        = applyAdvancedResource;
+    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("ApplyAdvancedResource005, end");
 }
 
 /**

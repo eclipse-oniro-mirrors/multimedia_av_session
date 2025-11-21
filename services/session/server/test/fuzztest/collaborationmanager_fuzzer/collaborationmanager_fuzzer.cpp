@@ -36,6 +36,7 @@ static const uint8_t *RAW_DATA = nullptr;
 static size_t g_dataSize = 0;
 static size_t g_totalSize = 0;
 static size_t g_pos;
+static size_t g_sizePos;
 using TestFunc = function<void(FuzzedDataProvider&)>;
 
 template<class T>
@@ -52,6 +53,22 @@ T GetData()
     }
     g_pos += objectSize;
     return object;
+}
+
+std::string GetString()
+{
+    size_t objectSize = (GetData<int8_t>() % MAX_CODE_LEN) + 1;
+    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+        return "OVER_SIZE";
+    }
+    char object[objectSize + 1];
+    errno_t ret = memcpy_s(object, sizeof(object), RAW_DATA + g_sizePos, objectSize);
+    if (ret != EOK) {
+        return "";
+    }
+    g_sizePos += objectSize;
+    std::string output(object);
+    return output;
 }
 
 void CollaborationManagerFuzzer::CollaborationManagerFuzzTest(uint8_t* data, size_t size)
@@ -77,13 +94,16 @@ void CollaborationManagerFuzzer::CollaborationManagerFuzzTest(uint8_t* data, siz
     CollaborationManager collaborationManager;
     collaborationManager.ReadCollaborationManagerSo();
     std::string peerNetworkId = std::to_string(GetData<uint8_t>());
+    DeviceInfo deviceInfo;
+    deviceInfo.supportedProtocols_ = GetData<int32_t>();
+    deviceInfo.ipAddress_ = GetString();
     vector<ServiceCollaborationManagerBussinessStatus> states;
     states.push_back(ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     states.push_back(ServiceCollaborationManagerBussinessStatus::SCM_PREPARE);
     states.push_back(ServiceCollaborationManagerBussinessStatus::SCM_CONNECTING);
     states.push_back(ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     collaborationManager.PublishServiceState(peerNetworkId.c_str(), states[GetData<uint8_t>() % states.size()]);
-    collaborationManager.ApplyAdvancedResource(peerNetworkId.c_str());
+    collaborationManager.ApplyAdvancedResource(peerNetworkId.c_str(), deviceInfo);
 }
 
 void CollaborationManagerRemoteRequest(uint8_t* data, size_t size)
