@@ -14,6 +14,10 @@
  */
 
 #include "collaboration_manager.h"
+#include "avsession_descriptor.h"
+#include "avsession_info.h"
+
+#include <string>
 
 namespace OHOS::AVSession {
 std::shared_ptr<CollaborationManager> CollaborationManager::instance_;
@@ -174,7 +178,18 @@ int32_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
     return AVSESSION_SUCCESS;
 }
 
-int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId, bool checkLinkConflict)
+bool CollaborationManager::IsHiPlayDevice(const DeviceInfo& deviceInfo)
+{
+    return deviceInfo.supportedProtocols_ == ProtocolType::TYPE_CAST_PLUS_AUDIO;
+}
+
+bool CollaborationManager::IsHiPlayP2PDevice(const DeviceInfo& deviceInfo)
+{
+    return IsHiPlayDevice(deviceInfo) && deviceInfo.ipAddress_.empty();
+}
+
+int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId, const DeviceInfo& deviceInfo,
+    bool checkLinkConflict)
 {
     SLOGI("enter ApplyAdvancedResource");
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource == nullptr) {
@@ -192,6 +207,9 @@ int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId, b
     resourceRequest_->communicationRequest = &communicationRequest_;
     resourceRequest_->checkConflictType = checkLinkConflict ? ServiceCollaborationManagerCheckConflictType::ALL :
         ServiceCollaborationManagerCheckConflictType::BUSINESS_AND_HARDWARE_CONFLICT;
+    if (IsHiPlayP2PDevice(deviceInfo)) {
+        resourceRequest_->linkType = ServiceCollaborationManagerLinkType::NATIVE_P2P;
+    }
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource(peerNetworkId,
         serviceName_.c_str(), resourceRequest_, &serviceCollaborationCallback)) {
         return AVSESSION_ERROR;

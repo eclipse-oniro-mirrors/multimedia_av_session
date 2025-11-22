@@ -20,6 +20,7 @@
 #include <string>
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "avsession_descriptor.h"
 #include "collaboration_manager_utils.h"
 #include "plugin_lib.h"
 
@@ -36,7 +37,10 @@ public:
     int32_t RegisterLifecycleCallback();
     int32_t UnRegisterLifecycleCallback();
     int32_t PublishServiceState(const char* peerNetworkId, ServiceCollaborationManagerBussinessStatus state);
-    int32_t ApplyAdvancedResource(const char* peerNetworkId, bool checkLinkConflict = true);
+    int32_t ApplyAdvancedResource(const char* peerNetworkId, const DeviceInfo& deviceInfo,
+        bool checkLinkConflict = true);
+    bool IsHiPlayDevice(const DeviceInfo& deviceInfo);
+    bool IsHiPlayP2PDevice(const DeviceInfo& deviceInfo);
 
     std::function<void(const int32_t code)> sendCollaborationApplyResult_;
     std::function<void(void)> sendCollaborationOnStop_;
