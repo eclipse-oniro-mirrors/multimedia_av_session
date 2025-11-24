@@ -96,12 +96,37 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_004, TestSize.
 }
 
 /**
+ * @tc.name: GetSupportKeyEventFromSettings_001
+ * @tc.desc: GetSupportKeyEventFromSettings test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionWhitelistConfigManagerTest, GetSupportKeyEventFromSettings_001, TestSize.Level1)
+{
+    std::string bundleName = "";
+    bool ret = avsessionWhitelistConfigManager->GetSupportKeyEventFromSettings(bundleName);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetSupportKeyEventFromSettings_002
+ * @tc.desc: GetSupportKeyEventFromSettings test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionWhitelistConfigManagerTest, GetSupportKeyEventFromSettings_002, TestSize.Level1)
+{
+    std::string bundleName = "testBundle";
+    bool ret = avsessionWhitelistConfigManager->GetSupportKeyEventFromSettings(bundleName);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: CreateDataShareHelper_001
  * @tc.desc: CreateDataShareHelper test
  * @tc.type: FUNC
  */
 HWTEST_F(AVSessionWhitelistConfigManagerTest, CreateDataShareHelper_001, TestSize.Level1)
 {
+    EXPECT_NE(avsessionWhitelistConfigManager, nullptr);
     std::shared_ptr<DataShare::DataShareHelper> helper = avsessionWhitelistConfigManager->CreateDataShareHelper();
     EXPECT_NE(helper, nullptr);
 }

@@ -40,7 +40,7 @@ Rosen::InputAfterRedistributeBehavior NapiAVSessionInputRedistributeCallback::On
 }
 
 Rosen::InputAfterRedistributeBehavior NapiAVSessionInputRedistributeCallback::OnInputEvent(
-    const std::shared_ptr<MMI::PointerEvent>& keyEvent)
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
 }

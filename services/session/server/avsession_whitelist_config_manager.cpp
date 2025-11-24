@@ -130,10 +130,12 @@ bool AVSessionWhitelistConfigManager::ParseJsonToMap(
     }
     cJSON* item = root->child;
     while (item != nullptr) {
-        const char* key = item->string;
-        bool value = cJSON_IsTrue(item) != 0;
-        compatibleMap[key] = value;
-        item = item->next;
+        if (!cJSON_IsInvalid(item) && cJSON_IsBool(item)) {
+            const char* key = item->string;
+            bool value = cJSON_IsTrue(item);
+            compatibleMap[key] = value;
+            item = item->next;
+        }
     }
     cJSON_Delete(root);
     return true;

@@ -1290,22 +1290,28 @@ int32_t AVSessionItem::ProcessInputRedistributeEvent(const int32_t keyCode)
             CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
             callback_->OnPause();
         } else {
+            AVControlCommand command;
+            command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
             if (callbackForMigrate_) {
-                callbackForMigrate_->OnPlay();
+                callbackForMigrate_->OnPlay(command);
             }
             CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
-            callback_->OnPlay();
+            callback_->OnPlay(command);
         }
     } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_UP) {
-        return updateVolume(true);
+        return UpdateVolume(true);
     } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_DOWN) {
-        return updateVolume(false);
+        return UpdateVolume(false);
     } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_LEFT) {
         CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
-        callback_->OnRewind(PROGRESS_ADJUST_VALUE);
+        AVControlCommand command;
+        command.SetCommand(AVControlCommand::SESSION_CMD_REWIND);
+        callback_->OnRewind(PROGRESS_ADJUST_VALUE, command);
     } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_RIGHT) {
         CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
-        callback_->OnFastForward(PROGRESS_ADJUST_VALUE);
+        AVControlCommand command;
+        command.SetCommand(AVControlCommand::SESSION_CMD_FAST_FORWARD);
+        callback_->OnFastForward(PROGRESS_ADJUST_VALUE, command);
     } else {
         return AVSESSION_ERROR;
     }
@@ -1327,7 +1333,7 @@ bool AVSessionItem::IsKeyEventSupported(const std::string &bundleName)
     return supportKeyEvent;
 }
 
-int32_t AVSessionItem::updateVolume(bool up)
+int32_t AVSessionItem::UpdateVolume(bool up)
 {
     AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
     AudioSystemManager *audioManager = AudioSystemManager::GetInstance();

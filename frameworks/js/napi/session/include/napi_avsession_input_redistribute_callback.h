@@ -23,7 +23,7 @@ namespace OHOS::AVSession {
 class NapiAVSessionInputRedistributeCallback : public Rosen::IInputEventRecipientCallback {
 public:
     Rosen::InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    Rosen::InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& keyEvent) override;
+    Rosen::InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     std::shared_ptr<AVSession> nativeSession;
 };
 } // namespace OHOS::AVSession
