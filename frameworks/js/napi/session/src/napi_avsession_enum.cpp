@@ -67,6 +67,19 @@ static napi_value ExportDecoderType(napi_env env)
     napi_object_freeze(env, result);
     return result;
 }
+    
+static napi_value ExportCallerType(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "TYPE_CAST", static_cast<std::string>(CallerType::TYPE_CAST));
+    (void)SetNamedProperty(env, result, "TYPE_BLUETOOTH", static_cast<std::string>(CallerType::TYPE_BLUETOOTH));
+    (void)SetNamedProperty(env, result, "TYPE_APP", static_cast<std::string>(CallerType::TYPE_APP));
+
+    napi_object_freeze(env, result);
+    return result;
+}
 
 static napi_value ExportResolutionLevel(napi_env env)
 {
@@ -438,6 +451,7 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DistributedSessionType", ExportDistributedSessionType(env)),
         DECLARE_NAPI_PROPERTY("DecoderType", ExportDecoderType(env)),
         DECLARE_NAPI_PROPERTY("ResolutionLevel", ExportResolutionLevel(env)),
+        DECLARE_NAPI_PROPERTY("CallerType", ExportCallerType(env))
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

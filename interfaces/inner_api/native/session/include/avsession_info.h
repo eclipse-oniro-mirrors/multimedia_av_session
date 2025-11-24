@@ -715,6 +715,35 @@ enum ConnectionState {
      */
     STATE_DISCONNECTED = 6,
 };
+    
+/**
+ * Enumerates CallerType indicating caller source type.
+ * @enum { string }
+ * @syscap SystemCapability.Multimedia.AVSession.Core
+ * @since 22 dynamic&static
+ */
+struct CallerType {
+    /**
+     * The control command comes from cast service.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 22 dynamic&static
+     */
+    static constexpr const char *TYPE_CAST = "cast";
+
+    /**
+     * The control command comes from bluetooth.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 22 dynamic&static
+     */
+    static constexpr const char *TYPE_BLUETOOTH = "bluetooth";
+
+    /**
+     * The control command comes from an application.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 22 dynamic&static
+     */
+    static constexpr const char *TYPE_APP = "app";
+};
 
 enum DeviceType {
     /**
