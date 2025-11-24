@@ -722,27 +722,27 @@ enum ConnectionState {
  * @syscap SystemCapability.Multimedia.AVSession.Core
  * @since 22 dynamic&static
  */
-enum CallerType {
+struct CallerType {
     /**
      * The control command comes from cast service.
      * @syscap SystemCapability.Multimedia.AVSession.Core
      * @since 22 dynamic&static
      */
-    TYPE_CAST = "cast",
+    static constexpr const char *TYPE_CAST = "cast",
 
     /**
      * The control command comes from bluetooth.
      * @syscap SystemCapability.Multimedia.AVSession.Core
      * @since 22 dynamic&static
      */
-    TYPE_BLUETOOTH = "bluetooth",
+    static constexpr const char *TYPE_BLUETOOTH = "bluetooth",
 
     /**
      * The control command comes from an application.
      * @syscap SystemCapability.Multimedia.AVSession.Core
      * @since 22 dynamic&static
      */
-    TYPE_APP = "app",
+    static constexpr const char *TYPE_APP = "app",
 };
 
 enum DeviceType {
