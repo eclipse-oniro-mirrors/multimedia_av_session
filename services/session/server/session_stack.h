@@ -24,7 +24,7 @@
 
 namespace OHOS::AVSession {
 constexpr const char* RECLAIM_MEMORY = "AVSessionReclaimMemory";
-constexpr uint32_t TIME_OF_RECLAIM_MEMORY = 240000;
+constexpr uint32_t TIME_OF_RECLAIM_MEMORY = 280000;
 constexpr const char* RECLAIM_FILE_STRING = "1";
 
 class SessionStack : public SessionContainer {
