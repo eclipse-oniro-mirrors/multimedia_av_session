@@ -129,6 +129,8 @@ int32_t NapiUtils::ConvertSessionType(const std::string& typeString)
         return AVSession::SESSION_TYPE_VOICE_CALL;
     } else if (typeString == "video_call") {
         return AVSession::SESSION_TYPE_VIDEO_CALL;
+    } else if (typeString == "photo") {
+        return AVSession::SESSION_TYPE_PHOTO;
     } else {
         return AVSession::SESSION_TYPE_INVALID;
     }
@@ -144,6 +146,8 @@ std::string NapiUtils::ConvertSessionType(int32_t type)
         return "voice_call";
     } else if (type == AVSession::SESSION_TYPE_VIDEO_CALL) {
         return "video_call";
+    } else if (type == AVSession::SESSION_TYPE_PHOTO) {
+        return "photo";
     } else {
         return "";
     }
@@ -2245,6 +2249,17 @@ napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t
     napi_create_int32(env, napiCode, &code);
     napi_set_named_property(env, result, "code", code);
     napi_throw(env, result);
+    return napi_ok;
+}
+
+/* napi_value <-> SessionCategory */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, SessionCategory& out)
+{
+    napi_value value {};
+    auto status = napi_get_named_property(env, in, "category", &value);
+    CHECK_RETURN(status == napi_ok, "get category failed", status);
+    status = GetValue(env, value, out);
+    CHECK_RETURN(status == napi_ok, "get category value failed", status);
     return napi_ok;
 }
 }

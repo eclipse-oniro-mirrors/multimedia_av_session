@@ -46,6 +46,8 @@ public:
 
     virtual int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) = 0;
 
+    virtual int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) = 0;
+
     virtual int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId,
         AVSessionDescriptor& descriptor) = 0;
 

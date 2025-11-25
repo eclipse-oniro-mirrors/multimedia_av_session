@@ -76,6 +76,16 @@ public:
     virtual int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) = 0;
 
     /**
+     * Send the key command to get the descriptor of sessions.
+     *
+     * @param category Session category for different scenes {@link SessionCategory}.
+     * @param descriptors Get relevant descriptions of sessions
+     * @return Whether the relevant descriptions of sessions are obtained successfully
+     * @since 23
+    */
+    virtual int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) = 0;
+
+    /**
      * Send the key command to get the descriptor of activated sessions.
      *
      * @param activatedSessions Get relevant descriptions of activated sessions

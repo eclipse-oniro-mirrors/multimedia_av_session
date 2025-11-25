@@ -42,7 +42,8 @@ public:
         SESSION_TYPE_AUDIO = 0,
         SESSION_TYPE_VIDEO = 1,
         SESSION_TYPE_VOICE_CALL = 2,
-        SESSION_TYPE_VIDEO_CALL = 3
+        SESSION_TYPE_VIDEO_CALL = 3,
+        SESSION_TYPE_PHOTO = 4
     };
 
     /**

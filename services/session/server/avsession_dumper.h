@@ -44,6 +44,7 @@ private:
     static std::map<int32_t, std::string> loopMode_;
     static std::vector<std::string> errMessage_;
     static std::map<int32_t, std::string> deviceTypeId_;
+    static std::map<int32_t, std::string> sessionTypeMap_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_DUMP_HELPER_H

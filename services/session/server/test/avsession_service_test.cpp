@@ -2256,6 +2256,65 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle002, TestSize.Level1)
     SLOGD("GetLocalTitle002 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors001, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptors001 begin!");
+    std::vector<AVSessionDescriptor> descriptors;
+    int ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_ACTIVE, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptors.size(), 0);
+
+    ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_NOT_ACTIVE, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptors.size(), 0);
+
+    ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_ALL, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptors.size(), 0);
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    avsessionHere_->Activate();
+
+    ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_ACTIVE, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_NOT_ACTIVE, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_ALL, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avsessionHere_->Destroy();
+    SLOGI("GetSessionDescriptors001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors002, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptors002 begin!");
+    std::vector<AVSessionDescriptor> descriptors;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+
+    int ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_ACTIVE, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_NOT_ACTIVE, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_ALL, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avsessionHere_->Destroy();
+    SLOGI("GetSessionDescriptors002 end!");
+}
+
 /**
  * @tc.name: HandleRemoveMediaCardEvent001
  * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a valid session.

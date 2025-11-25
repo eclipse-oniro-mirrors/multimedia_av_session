@@ -97,6 +97,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
     napi_property_descriptor descriptors[] = {
         DECLARE_NAPI_STATIC_FUNCTION("createAVSession", CreateAVSession),
         DECLARE_NAPI_STATIC_FUNCTION("getAllSessionDescriptors", GetAllSessionDescriptors),
+        DECLARE_NAPI_STATIC_FUNCTION("getSessionDescriptors", GetSessionDescriptors),
         DECLARE_NAPI_STATIC_FUNCTION("getHistoricalSessionDescriptors", GetHistoricalSessionDescriptors),
         DECLARE_NAPI_STATIC_FUNCTION("getHistoricalAVQueueInfos", GetHistoricalAVQueueInfos),
         DECLARE_NAPI_STATIC_FUNCTION("startAVPlayback", StartAVPlayback),
@@ -266,6 +267,53 @@ napi_value NapiAVSessionManager::GetAllSessionDescriptors(napi_env env, napi_cal
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetAllSessionDescriptors", executor, complete);
+}
+
+napi_value NapiAVSessionManager::GetSessionDescriptors(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        int32_t category_;
+        std::vector<AVSessionDescriptor> descriptors_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        context->category_ = SessionCategory::CATEGORY_ALL;
+        if (argc == ARGC_ONE && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_undefined)
+            && !NapiUtils::TypeCheck(env, argv[ARGV_FIRST], napi_null)) {
+            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->category_);
+            CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid arguments",
+                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            CHECK_ARGS_RETURN_VOID(context, (context->category_ >= SessionCategory::CATEGORY_ACTIVE
+                && context->category_ <= SessionCategory::CATEGORY_ALL),
+                "wrong session category", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        }
+    };
+
+    context->GetCbInfo(env, info, input);
+
+    auto executor = [context]() {
+        int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptors(context->category_, context->descriptors_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetSessionDescriptors failed : native no permission";
+            } else if (ret == ERR_PERMISSION_DENIED) {
+                context->errMessage = "GetSessionDescriptors failed : native permission denied";
+            } else {
+                context->errMessage = "GetSessionDescriptors failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->descriptors_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetSessionDescriptors", executor, complete);
 }
 
 napi_value NapiAVSessionManager::GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info)

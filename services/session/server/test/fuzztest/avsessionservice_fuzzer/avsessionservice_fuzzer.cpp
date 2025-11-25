@@ -346,6 +346,7 @@ void AvSessionServiceGetDescriptorsTest(sptr<AVSessionService> service)
     int32_t maxSize = GetData<int32_t>();
 
     service->GetAllSessionDescriptors(descriptors);
+    service->GetSessionDescriptors(SessionCategory::CATEGORY_ALL, descriptors);
     service->GetSessionDescriptorsBySessionId(systemAbilityId, descriptor);
     service->GetHistoricalSessionDescriptors(maxSize, descriptors);
     systemAbilityId = "sessionId";

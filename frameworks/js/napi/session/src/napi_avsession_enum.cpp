@@ -433,6 +433,23 @@ static napi_value ExportDistributedSessionType(napi_env env)
     return result;
 }
 
+static napi_value ExportSessionCategory(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_object(env, &result);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+
+    (void)SetNamedProperty(env, result, "CATEGORY_ACTIVE", static_cast<int32_t>(SessionCategory::CATEGORY_ACTIVE));
+    (void)SetNamedProperty(env, result, "CATEGORY_NOT_ACTIVE",
+        static_cast<int32_t>(SessionCategory::CATEGORY_NOT_ACTIVE));
+    (void)SetNamedProperty(env, result, "CATEGORY_ALL", static_cast<int32_t>(SessionCategory::CATEGORY_ALL));
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -451,7 +468,8 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DistributedSessionType", ExportDistributedSessionType(env)),
         DECLARE_NAPI_PROPERTY("DecoderType", ExportDecoderType(env)),
         DECLARE_NAPI_PROPERTY("ResolutionLevel", ExportResolutionLevel(env)),
-        DECLARE_NAPI_PROPERTY("CallerType", ExportCallerType(env))
+        DECLARE_NAPI_PROPERTY("CallerType", ExportCallerType(env)),
+        DECLARE_NAPI_PROPERTY("SessionCategory", ExportSessionCategory(env))
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

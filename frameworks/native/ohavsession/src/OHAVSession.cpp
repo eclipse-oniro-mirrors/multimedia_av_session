@@ -347,6 +347,7 @@ AVSession_ErrCode OH_AVSession_Create(AVSession_Type sessionType, const char* se
         case SESSION_TYPE_VIDEO:
         case SESSION_TYPE_VOICE_CALL:
         case SESSION_TYPE_VIDEO_CALL:
+        case SESSION_TYPE_PHOTO:
             break;
         default:
             SLOGE("Invalid session type: %{public}d", sessionType);

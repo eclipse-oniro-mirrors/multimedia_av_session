@@ -143,6 +143,40 @@ BENCHMARK_F(AVSessionManagerTest, GetAllSessionDescriptors)(benchmark::State& st
 }
 
 /**
+ * @tc.name: GetSessionDescriptors
+ * @tc.desc: Get session descriptors
+ * @tc.type: FUNC
+ * @tc.require: AR20251017593891
+ */
+BENCHMARK_F(AVSessionManagerTest, GetSessionDescriptors)(benchmark::State& state)
+{
+    SLOGI("BenchMark GetSessionDescriptors test begin");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
+    if (session == nullptr) {
+        SLOGE("%{public}s error, failed to CreateSession, session is nullptr.", __func__);
+        state.SkipWithError("CreateSession failed, return error.");
+    }
+
+    while (state.KeepRunning()) {
+        std::vector<AVSessionDescriptor> descriptors;
+        auto errCode = AVSessionManager::GetInstance().GetSessionDescriptors(
+            SessionCategory::CATEGORY_ALL, descriptors);
+        if (errCode != AVSESSION_SUCCESS) {
+            SLOGE("%{public}s error, failed to GetSessionDescriptors, error code is %{public}d.", __func__, errCode);
+            state.SkipWithError("GetSessionDescriptors failed, return error.");
+        }
+    }
+
+    session->Destroy();
+
+    SLOGI("BenchMark GetSessionDescriptors test end");
+}
+
+/**
  * @tc.name: GetActivatedSessionDescriptors
  * @tc.desc: Get all activated session descriptors
  * @tc.type: FUNC

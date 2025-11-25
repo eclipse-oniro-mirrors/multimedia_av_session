@@ -45,6 +45,8 @@ public:
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
+    int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) override;
+
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;

@@ -59,6 +59,7 @@ const std::map<int32_t, std::string> sessionTypeMap_ = {
     {AVSession::SESSION_TYPE_VIDEO, "video"},
     {AVSession::SESSION_TYPE_VOICE_CALL, "voice_call"},
     {AVSession::SESSION_TYPE_VIDEO_CALL, "video_call"},
+    {AVSession::SESSION_TYPE_PHOTO, "photo"},
 };
 
 const std::map<int32_t, int32_t> g_cmdToOffsetMap = {

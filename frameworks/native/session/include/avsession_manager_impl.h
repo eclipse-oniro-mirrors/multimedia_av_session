@@ -49,6 +49,8 @@ public:
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
+    int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) override;
+
     int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller) override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE

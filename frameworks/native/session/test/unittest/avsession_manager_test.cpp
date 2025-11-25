@@ -301,6 +301,44 @@ HWTEST_F(AVSessionManagerTest, GetAllSessionDescriptors001, TestSize.Level1)
 }
 
 /**
+* @tc.name: GetSessionDescriptors001
+* @tc.desc: Get session descriptors
+* @tc.type: FUNC
+* @tc.require: AR20251017593891
+*/
+HWTEST_F(AVSessionManagerTest, GetSessionDescriptors001, TestSize.Level1)
+{
+    SLOGI("GetSessionDescriptors001 begin");
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetSessionDescriptors(SessionCategory::CATEGORY_ALL, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetSessionDescriptors001 check descriptors num %{public}d", static_cast<int>(descriptors.size()));
+    EXPECT_EQ(descriptors.size() <= 10, true);
+
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testBundleName);
+    elementName.SetAbilityName(g_testAbilityName);
+    auto session = AVSessionManager::GetInstance().CreateSession(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                                                                 elementName);
+    EXPECT_NE(session, nullptr);
+    descriptors.clear();
+    ret = AVSessionManager::GetInstance().GetSessionDescriptors(SessionCategory::CATEGORY_ALL, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetSessionDescriptors001 recheck descriptors num %{public}d", static_cast<int>(descriptors.size()));
+    if (descriptors.size() >= 1) {
+        EXPECT_EQ(descriptors[0].sessionTag_, g_testSessionTag);
+        EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
+        EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), g_testBundleName);
+        EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), g_testAbilityName);
+        EXPECT_EQ(descriptors[0].isActive_, false);
+    }
+
+    session->Destroy();
+
+    SLOGI("GetSessionDescriptors001 end");
+}
+
+/**
 * @tc.name: GetActivatedSessionDescriptors001
 * @tc.desc: Get all activated session descriptors
 * @tc.type: FUNC

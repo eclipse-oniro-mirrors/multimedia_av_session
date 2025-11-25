@@ -179,6 +179,8 @@ public:
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
+    int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) override;
+
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
     int32_t GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors);
@@ -446,6 +448,8 @@ private:
     int32_t GetLocalNetworkId(std::string& networkId);
 
     int32_t GetTrustedDeviceName(const std::string& networkId, std::string& deviceName);
+
+    int32_t GetNotActiveSession(std::vector<AVSessionDescriptor>& descriptors);
 
 #ifdef DEVICE_MANAGER_ENABLE
     int32_t GetTrustedDevicesInfo(std::vector<OHOS::DistributedHardware::DmDeviceInfo>& deviceList);
@@ -795,6 +799,8 @@ private:
     const uint8_t doRemoteLoadRetryTime = 5;
     const int32_t defaultUserId = 100;
     const int32_t mediaControlAncoParam = 52225;
+
+    const std::string sessionTypePhoto = "photo";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

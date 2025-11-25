@@ -37,6 +37,7 @@ private:
     static napi_value GetAVSession(napi_env env, napi_callback_info info);
     static napi_value CreateAVSession(napi_env env, napi_callback_info info);
     static napi_value GetAllSessionDescriptors(napi_env env, napi_callback_info info);
+    static napi_value GetSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info);
     static napi_value GetHistoricalAVQueueInfos(napi_env env, napi_callback_info info);
     static napi_value StartAVPlayback(napi_env env, napi_callback_info info);

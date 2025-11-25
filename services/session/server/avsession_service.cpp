@@ -854,6 +854,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+    CHECK_AND_RETURN_LOG(sessionItem->GetSessionType() != sessionTypePhoto, "session type is photo");
     auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
         sessionItem->GetUid(), sessionItem->GetPid(), isAdd);
     if (ret != AVSESSION_SUCCESS) {
@@ -890,6 +891,8 @@ bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr!");
+    CHECK_AND_RETURN_RET_LOG(sessionItem->GetSessionType() != sessionTypePhoto,
+        false, "session type is photo");
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
     if (it != sessionListForFront->end()) {
         SLOGI("session is in sessionListForFront_, need to change order of it.");
@@ -1602,7 +1605,8 @@ bool AVSessionService::IsParamInvalid(const std::string& tag, int32_t type, cons
         return false;
     }
     if (type != AVSession::SESSION_TYPE_AUDIO && type != AVSession::SESSION_TYPE_VIDEO
-        && type != AVSession::SESSION_TYPE_VOICE_CALL && type != AVSession::SESSION_TYPE_VIDEO_CALL) {
+        && type != AVSession::SESSION_TYPE_VOICE_CALL && type != AVSession::SESSION_TYPE_VIDEO_CALL
+        && type != AVSession::SESSION_TYPE_PHOTO) {
         SLOGE("type is invalid when create session");
         return false;
     }
@@ -1935,6 +1939,48 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
     SLOGI("GetAllSessionDescriptors with size=%{public}d, topSession:%{public}s",
         static_cast<int32_t>(descriptors.size()),
         (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::GetNotActiveSession(std::vector<AVSessionDescriptor>& descriptors)
+{
+    std::lock_guard frontLockGuard(sessionFrontLock_);
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session != nullptr) {
+            auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), session);
+            if (it == sessionListForFront->end()) {
+                AVSessionDescriptor descriptor = session->GetDescriptor();
+                descriptors.push_back(descriptor);
+            }
+        }
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors)
+{
+    switch (category) {
+        case SessionCategory::CATEGORY_ACTIVE:
+            GetAllSessionDescriptors(descriptors);
+            break;
+        case SessionCategory::CATEGORY_NOT_ACTIVE:
+            GetNotActiveSession(descriptors);
+            break;
+        case SessionCategory::CATEGORY_ALL:
+            for (const auto& session : GetContainer().GetAllSessions()) {
+                if (session != nullptr) {
+                    AVSessionDescriptor descriptor = session->GetDescriptor();
+                    descriptors.push_back(descriptor);
+                }
+            }
+            break;
+        default:
+            SLOGE("undefined category %{public}d", category);
+    }
+    SLOGI("GetSessionDescriptors with size=%{public}d, category:%{public}d",
+        static_cast<int32_t>(descriptors.size()), category);
     return AVSESSION_SUCCESS;
 }
 
