@@ -76,6 +76,7 @@ static napi_value ExportCallerType(napi_env env)
     (void)SetNamedProperty(env, result, "TYPE_CAST", static_cast<std::string>(CallerType::TYPE_CAST));
     (void)SetNamedProperty(env, result, "TYPE_BLUETOOTH", static_cast<std::string>(CallerType::TYPE_BLUETOOTH));
     (void)SetNamedProperty(env, result, "TYPE_APP", static_cast<std::string>(CallerType::TYPE_APP));
+    (void)SetNamedProperty(env, result, "TYPE_NEARLINK", static_cast<std::string>(CallerType::TYPE_NEARLINK));
 
     napi_object_freeze(env, result);
     return result;

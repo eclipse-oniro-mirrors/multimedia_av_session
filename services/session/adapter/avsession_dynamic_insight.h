@@ -25,15 +25,18 @@
 
 namespace OHOS::AVSession {
 #define BLUETOOTH_UID 1002
+#define NEARLINK_UID 7030
 
 enum class StartPlayType {
     APP = 0,
     BLUETOOTH = 1,
+    NEARLINK = 2
 };
 
 const std::map<StartPlayType, std::string> StartPlayTypeToString = {
     {StartPlayType::APP, "app"},
     {StartPlayType::BLUETOOTH, "bluetooth"},
+    {StartPlayType::NEARLINK, "nearlink"}
 };
 
 class StartPlayInfo {

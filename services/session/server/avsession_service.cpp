@@ -2812,12 +2812,21 @@ bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand
     }
     CHECK_AND_RETURN_RET_LOG(procSession != nullptr, false, "handlevent session is null");
     SLOGI("CheckSessionHandleKeyEvent procSession:%{public}s", procSession->GetBundleName().c_str());
+
+    auto uid = GetCallingUid();
     CommandInfo cmdInfo;
-    if (deviceId != "") {
-        // The current scenario treats all device IDs as Bluetooth type by default
-        cmdInfo.SetCallerType(PlayTypeToString.at(PlayType::BLUETOOTH));
-        cmdInfo.SetCallerDeviceId(deviceId);
-    }
+    switch (uid) {
+        case BLUETOOTH_UID:
+            cmdInfo.SetCallerType(PlayTypeToString.at(PlayType::BLUETOOTH));
+            break;
+        case NEARLINK_UID:
+            cmdInfo.SetCallerType(PlayTypeToString.at(PlayType::NEARLINK));
+            break;
+        default:
+            break;
+    };
+    cmdInfo.SetCallerDeviceId(deviceId);
+
     if (procCmd) {
         cmd.SetCommandInfo(cmdInfo);
         procSession->ExecuteControllerCommand(cmd);
