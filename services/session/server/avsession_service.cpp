@@ -2360,6 +2360,9 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     if (uid == BLUETOOTH_UID) {
         startPlayType = StartPlayType::BLUETOOTH;
     }
+    if (uid == NEARLINK_UID) {
+        startPlayType = StartPlayType::NEARLINK;
+    }
     StartPlayInfo startPlayInfo;
     startPlayInfo.setBundleName(CallerBundleName);
     startPlayInfo.setDeviceId(deviceId);
@@ -2394,6 +2397,9 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     StartPlayType startPlayType = StartPlayType::APP;
     if (uid == BLUETOOTH_UID) {
         startPlayType = StartPlayType::BLUETOOTH;
+    }
+    if (uid == NEARLINK_UID) {
+        startPlayType = StartPlayType::NEARLINK;
     }
     StartPlayInfo startPlayInfo;
     startPlayInfo.setBundleName(CallerBundleName);
