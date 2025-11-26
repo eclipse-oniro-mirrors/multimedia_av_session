@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#define private public
 #include <gtest/gtest.h>
+
+#define private public
 #include "avsession_whitelist_config_manager.h"
+#undef private
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;

@@ -1320,7 +1320,7 @@ int32_t AVSessionItem::ProcessInputRedistributeEvent(const int32_t keyCode)
 
 bool AVSessionItem::IsKeyEventSupported(const std::string &bundleName)
 {
-    if(bundleName.empty()) {
+    if (bundleName.empty()) {
         SLOGE("bundleName is empty");
         return false;
     }
@@ -1337,12 +1337,12 @@ int32_t AVSessionItem::UpdateVolume(bool up)
 {
     AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
     AudioSystemManager *audioManager = AudioSystemManager::GetInstance();
-    int32_t volumeMax_ = audioManager->GetMaxVolume(streamType);
-    int32_t volumeMin_ = audioManager->GetMinVolume(streamType);
+    int32_t volumeMax = audioManager->GetMaxVolume(streamType);
+    int32_t volumeMin = audioManager->GetMinVolume(streamType);
     int32_t volume = audioManager->GetVolume(streamType, GetCallingUid());
     volume = up ? ++volume : --volume;
-    volume = std::min(volumeMax_, std::max(volume, volumeMin_));
-    SLOGI("updateVolume volume:%{public}d max:%{public}d min:%{public}d", volume, volumeMax_, volumeMin_);
+    volume = std::min(volumeMax, std::max(volume, volumeMin));
+    SLOGI("updateVolume volume:%{public}d max:%{public}d min:%{public}d", volume, volumeMax, volumeMin);
     auto ret = audioManager->SetVolume(streamType, volume, GetCallingUid());
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetVolume failed");
     return AVSESSION_SUCCESS;

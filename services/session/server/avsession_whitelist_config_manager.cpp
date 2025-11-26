@@ -180,4 +180,4 @@ bool AVSessionWhitelistConfigManager::IsSystemApp()
     uint64_t callingTokenId = IPCSkeleton::GetCallingFullTokenID();
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
 }
-}// namespace OHOS::AVSession
+} // namespace OHOS::AVSession
