@@ -2980,10 +2980,10 @@ bool AVSessionService::CheckIfOtherAudioPlaying()
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr quit");
-    CHECK_AND_RETURN_RET_LOG(!sessionListForFront->empty() || topSession_ != nullptr || IsAncoValid(), true,
-        "sessionListForFront and top empty but audio playing, control block");
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront->empty() && topSession_ == nullptr && !IsAncoValid(), false,
+        "has sessions:%{public}d for audioUid:%{public}d",
+        static_cast<int>(sessionListForFront->size()), audioPlayingUids[0]);
     bool isAncoPlaying = false;
-    bool hasAncoMediaSession = false;
     for (int uid : audioPlayingUids) {
         if (uid == ancoUid) {
             isAncoPlaying = true;
@@ -2992,22 +2992,9 @@ bool AVSessionService::CheckIfOtherAudioPlaying()
             SLOGI("audioplaying but session alive:%{public}d", uid);
             return false;
         }
-        std::string bundleNamePlaying = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
-        CHECK_AND_RETURN_RET_LOG(topSession_ == nullptr || bundleNamePlaying != topSession_->GetBundleName(),
-            false, "audioplaying but topBundle alive:%{public}s", bundleNamePlaying.c_str());
-        for (const auto& session : *sessionListForFront) {
-            CHECK_AND_CONTINUE(session != nullptr);
-            if (bundleNamePlaying == session->GetBundleName()) {
-                SLOGE("audioplaying but bundle alive:%{public}s", bundleNamePlaying.c_str());
-                return false;
-            }
-            if (session->GetSessionTag() == "ancoMediaSession") {
-                hasAncoMediaSession = true;
-            }
-        }
         SLOGI("audioPlaying and no session:%{public}d", uid);
     }
-    CHECK_AND_RETURN_RET_LOG(!isAncoPlaying || !hasAncoMediaSession, false, "ancoMediaSession Playing");
+    CHECK_AND_RETURN_RET_LOG(!isAncoPlaying, false, "ancoMediaSession Playing.");
     return true;
 }
 
