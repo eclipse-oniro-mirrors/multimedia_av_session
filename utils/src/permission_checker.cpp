@@ -62,6 +62,22 @@ int32_t PermissionChecker::CheckPermission(int32_t checkPermissionType)
             }
             return CheckMediaResourcePermission(callerToken, std::string(MANAGE_MEDIA_RESOURCES));
         }
+        case CHECK_MEDIA_RESOURCES_PUBLIC_PERMISSION: {
+            if (CheckSystemPermission(callerToken) == ERR_NO_PERMISSION) {
+                return CheckMediaResourcePermission(callerToken, MANAGE_MEDIA_RESOURCES_FOR_PUBLIC);
+            }
+            auto checkMediaResource = CheckMediaResourcePermission(callerToken, MANAGE_MEDIA_RESOURCES);
+            if (checkMediaResource == ERR_PERMISSION_DENIED) {
+                return CheckMediaResourcePermission(callerToken, MANAGE_MEDIA_RESOURCES_FOR_PUBLIC);
+            }
+            return checkMediaResource;
+        }
+        case CHECK_SYSTEM_AND_MEDIA_RESOURCES_PUBLIC_PERMISSION: {
+            if (CheckSystemPermission(callerToken) == ERR_NONE) {
+                return ERR_NONE;
+            }
+            return CheckMediaResourcePermission(callerToken, MANAGE_MEDIA_RESOURCES_FOR_PUBLIC);
+        }
         default:
             return ERR_NO_PERMISSION;
     }
@@ -73,7 +89,7 @@ int32_t PermissionChecker::CheckMediaResourcePermission(
     const std::string &permission = permissionName;
     int32_t ret = AccessTokenKit::VerifyAccessToken(callerToken, permission);
     if (ret == PermissionState::PERMISSION_DENIED) {
-        SLOGE("Check media resources permission failed.");
+        SLOGE("Check %{public}s permission failed.", permission.c_str());
         return ERR_PERMISSION_DENIED;
     }
     return ERR_NONE;
