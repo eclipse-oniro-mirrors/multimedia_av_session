@@ -16,8 +16,6 @@
 #include "session_stack.h"
 #include "avsession_errors.h"
 #include "avsession_sysevent.h"
-#include "parameter.h"
-#include "parameters.h"
 
 namespace OHOS::AVSession {
 int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr<AVSessionItem>& item)
@@ -197,9 +195,8 @@ void SessionStack::PostReclaimMemoryTask()
         isActivatedMemReclaimTask_.store(false);
         return;
     }
-    if (!isActivatedMemReclaimTask_.load() && CheckSessionStateIdle() &&
-        system::GetParameter("persist.ace.testmode.enabled", "0") == "1") {
-        SLOGI("start reclaim memory task.");
+    if (!isActivatedMemReclaimTask_.load() && CheckSessionStateIdle()) {
+        SLOGI("start reclaim memory tasks");
         AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
             ReclaimMem();
             isActivatedMemReclaimTask_.store(false);
@@ -229,15 +226,6 @@ bool SessionStack::CheckSessionStateIdle()
     if (sessions_.empty()) {
         SLOGI("there are no sessions");
         return true;
-    }
-    if (sessions_.size() == 1) {
-        auto it = sessions_.begin();
-        sptr<AVSessionItem> sessionItemPtr = it->second;
-        CHECK_AND_RETURN_RET_LOG(sessionItemPtr != nullptr, false, "only session null");
-        if (sessionItemPtr->GetBundleName() == "anco_audio") {
-            SLOGI("only has anco audio session");
-            return true;
-        }
     }
     return false;
 }
