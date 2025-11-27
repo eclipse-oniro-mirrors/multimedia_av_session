@@ -32,13 +32,15 @@ constexpr int32_t CAST_STATIC_UID = 5226;
 enum class PlayType {
     APP = 0,
     BLUETOOTH = 1,
-    CAST = 2
+    CAST = 2,
+    NEARLINK = 3
 };
 
 const std::unordered_map<PlayType, std::string> PlayTypeToString = {
     {PlayType::APP, "app"},
     {PlayType::BLUETOOTH, "bluetooth"},
-    {PlayType::CAST, "cast"}
+    {PlayType::CAST, "cast"},
+    {PlayType::NEARLINK, "nearlink"}
 };
 
 class AVControlCommand : public Parcelable {

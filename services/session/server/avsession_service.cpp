@@ -2360,6 +2360,9 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     if (uid == BLUETOOTH_UID) {
         startPlayType = StartPlayType::BLUETOOTH;
     }
+    if (uid == NEARLINK_UID) {
+        startPlayType = StartPlayType::NEARLINK;
+    }
     StartPlayInfo startPlayInfo;
     startPlayInfo.setBundleName(CallerBundleName);
     startPlayInfo.setDeviceId(deviceId);
@@ -2394,6 +2397,9 @@ int32_t AVSessionService::StartAVPlayback(const std::string& bundleName, const s
     StartPlayType startPlayType = StartPlayType::APP;
     if (uid == BLUETOOTH_UID) {
         startPlayType = StartPlayType::BLUETOOTH;
+    }
+    if (uid == NEARLINK_UID) {
+        startPlayType = StartPlayType::NEARLINK;
     }
     StartPlayInfo startPlayInfo;
     startPlayInfo.setBundleName(CallerBundleName);
@@ -2812,12 +2818,21 @@ bool AVSessionService::CheckSessionHandleKeyEvent(bool procCmd, AVControlCommand
     }
     CHECK_AND_RETURN_RET_LOG(procSession != nullptr, false, "handlevent session is null");
     SLOGI("CheckSessionHandleKeyEvent procSession:%{public}s", procSession->GetBundleName().c_str());
+
+    auto uid = GetCallingUid();
     CommandInfo cmdInfo;
-    if (deviceId != "") {
-        // The current scenario treats all device IDs as Bluetooth type by default
-        cmdInfo.SetCallerType(PlayTypeToString.at(PlayType::BLUETOOTH));
-        cmdInfo.SetCallerDeviceId(deviceId);
-    }
+    switch (uid) {
+        case BLUETOOTH_UID:
+            cmdInfo.SetCallerType(PlayTypeToString.at(PlayType::BLUETOOTH));
+            break;
+        case NEARLINK_UID:
+            cmdInfo.SetCallerType(PlayTypeToString.at(PlayType::NEARLINK));
+            break;
+        default:
+            break;
+    };
+    cmdInfo.SetCallerDeviceId(deviceId);
+
     if (procCmd) {
         cmd.SetCommandInfo(cmdInfo);
         procSession->ExecuteControllerCommand(cmd);

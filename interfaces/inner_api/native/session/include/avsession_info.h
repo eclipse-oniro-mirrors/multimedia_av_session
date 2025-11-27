@@ -743,6 +743,13 @@ struct CallerType {
      * @since 22 dynamic&static
      */
     static constexpr const char *TYPE_APP = "app";
+
+    /**
+     * The control command comes from nearlink.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 22 dynamic&static
+     */
+    static constexpr const char *TYPE_NEARLINK = "nearlink";
 };
 
 enum DeviceType {
