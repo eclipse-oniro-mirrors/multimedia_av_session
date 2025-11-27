@@ -27,7 +27,7 @@
 
 namespace OHOS::AVSession {
 
-constexpr int32_t CAST_STATIC_UID = 5226;
+constexpr int32_t CAST_STATIC_UID = 5526;
 
 enum class PlayType {
     APP = 0,

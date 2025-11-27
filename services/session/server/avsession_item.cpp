@@ -2352,7 +2352,7 @@ void AVSessionItem::ExecuteControllerCommand(const AVControlCommand& cmd)
     // Existing commandInfo data cannot be overwritten
     std::string callerModuleName {};
     cmdInfo.GetCallerModuleName(callerModuleName);
-    if (!callerModuleName.empty()) {
+    if (!callerModuleName.empty() || callingUid == CAST_STATIC_UID) {
         cmdBack.SetCommandInfo(cmdInfo);
         SLOGI("ExecuteControllerCommand has moduleName do set CommandInfo");
     }
