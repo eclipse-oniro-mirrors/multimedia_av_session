@@ -16,7 +16,9 @@
 #ifndef OHOS_AVSESSION_WHITELIST_CONFIG_MANAGER_H
 #define OHOS_AVSESSION_WHITELIST_CONFIG_MANAGER_H
 
+#ifdef INPUT_REDISTRIBUTE_ENABLE
 #include "datashare_helper.h"
+#endif
 #include <map>
 #include <mutex>
 #include "singleton.h"
@@ -30,6 +32,7 @@ public:
     bool IsKeyEventSupported(const std::string &bundleName);
 
 private:
+#ifdef INPUT_REDISTRIBUTE_ENABLE
     std::once_flag settingsDataLoadFlag_;
     std::atomic_bool isSettingsDataLoaded_{ false };
     std::map<std::string, bool> compatibleInfoMap_;
@@ -39,6 +42,7 @@ private:
     bool ParseJsonToMap(const std::string &jsonStr, std::map<std::string, bool> &compatibleMap);
     static std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
     bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper> &helper);
+#endif
     bool IsSystemApp();
 };
 } // namespace OHOS::AVSession

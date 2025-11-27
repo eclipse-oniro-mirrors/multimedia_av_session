@@ -587,7 +587,6 @@ av_session_ohos_library("avsession_item") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
-    "data_share:datashare_consumer",
     "c_utils:utils",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -597,6 +596,11 @@ av_session_ohos_library("avsession_item") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (av_session_enable_input_redistribute) {
+    defines += [ "INPUT_REDISTRIBUTE_ENABLE" ]
+    external_deps += [ "data_share:datashare_consumer" ]
+  }
 
   if (multimedia_av_session_enable_device_manager) {
     defines += [ "DEVICE_MANAGER_ENABLE" ]

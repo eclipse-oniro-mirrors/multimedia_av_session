@@ -234,6 +234,10 @@ ohos_unittest("AVSessionWhitelistConfigManagerTest") {
 
   sources = [ "avsession_whitelist_config_manager_test.cpp" ]
 
+  if (av_session_enable_input_redistribute) {
+    defines = [ "INPUT_REDISTRIBUTE_ENABLE" ]
+  }
+
   visibility = [ ":*" ]
 
   include_dirs = [
@@ -510,6 +514,10 @@ ohos_unittest("AVSessionItemTest") {
   visibility = [ ":*" ]
 
   defines = [ "CASTPLUS_CAST_ENGINE_ENABLE" ]
+
+  if (av_session_enable_input_redistribute) {
+    defines += [ "INPUT_REDISTRIBUTE_ENABLE" ]
+  }
 
   include_dirs = [
     "../../ipc/base/",

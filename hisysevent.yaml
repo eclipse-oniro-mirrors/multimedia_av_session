@@ -129,6 +129,16 @@ REMOTE_CONTROL_FAILED:
   ERROR_TYPE: {type: STRING, desc: error type}
   ERROR_INFO: {type: STRING, desc: error info}
 
+SESSION_INPUT_REDISTRIBUTE:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: session input redistribute}
+  KEY_CODE: {type: INT32, desc: key code}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+
+SESSION_INPUT_REDISTRIBUTE_SUCC:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: session input redistribute success}
+  KEY_CODE: {type: INT32, desc: key code}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+
 SESSION_API_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: session API behavior}
   API_NAME: {type: STRING, desc: api name}

@@ -1252,6 +1252,7 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
 
 int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
 {
+#ifdef INPUT_REDISTRIBUTE_ENABLE
     if (event == "InputRedistributeEvent") {
         if (AAFwk::IInteger* codeValue = AAFwk::IInteger::Query(args.GetParam("keyCode"))) {
             int32_t keyCode = AAFwk::Integer::Unbox(codeValue);
@@ -1259,6 +1260,7 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
         }
         return AVSESSION_ERROR;
     }
+#endif
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
@@ -1277,6 +1279,9 @@ int32_t AVSessionItem::SetSessionEvent(const std::string& event, const AAFwk::Wa
 
 int32_t AVSessionItem::ProcessInputRedistributeEvent(const int32_t keyCode)
 {
+    HISYSEVENT_BEHAVIOR("SESSION_INPUT_REDISTRIBUTE",
+        "KEY_CODE", keyCode,
+        "BUNDLE_NAME", GetBundleName());
     SLOGI("ProcessInputRedistributeEvent keyCode %{public}d", keyCode);
     if (!IsKeyEventSupported(GetBundleName())) {
         return AVSESSION_ERROR;
@@ -1315,6 +1320,9 @@ int32_t AVSessionItem::ProcessInputRedistributeEvent(const int32_t keyCode)
     } else {
         return AVSESSION_ERROR;
     }
+    HISYSEVENT_BEHAVIOR("SESSION_INPUT_REDISTRIBUTE_SUCC",
+        "KEY_CODE", keyCode,
+        "BUNDLE_NAME", GetBundleName());
     return AVSESSION_SUCCESS;
 }
 
@@ -1345,6 +1353,10 @@ int32_t AVSessionItem::UpdateVolume(bool up)
     SLOGI("updateVolume volume:%{public}d max:%{public}d min:%{public}d", volume, volumeMax, volumeMin);
     auto ret = audioManager->SetVolume(streamType, volume, GetCallingUid());
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetVolume failed");
+    int32_t keyCode = up ? MMI::KeyEvent::KEYCODE_DPAD_UP : MMI::KeyEvent::KEYCODE_DPAD_DOWN;
+    HISYSEVENT_BEHAVIOR("SESSION_INPUT_REDISTRIBUTE_SUCC",
+        "KEY_CODE", keyCode,
+        "BUNDLE_NAME", GetBundleName());
     return AVSESSION_SUCCESS;
 }
 

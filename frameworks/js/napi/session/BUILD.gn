@@ -53,6 +53,10 @@ ohos_shared_library("avsession_napi") {
     "src/napi_avsession_input_redistribute_callback.cpp",
   ]
 
+  if (av_session_enable_input_redistribute) {
+    defines = [ "INPUT_REDISTRIBUTE_ENABLE" ]
+  }
+
   deps = [
     "../../../../utils:avsession_utils",
     "../../../common:avsession_common",

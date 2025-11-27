@@ -133,8 +133,10 @@ NapiAVSession::~NapiAVSession()
 {
     SLOGI("destroy");
     AVSessionManager::GetInstance().UnregisterServiceStartCallback();
+#ifdef INPUT_REDISTRIBUTE_ENABLE
     Rosen::WindowInputRedistributeClient clientInstance;
     clientInstance.UnRegisterInputEventRedistribute(recipientInfo_);
+#endif
     std::lock_guard lockGuard(registerEventLock_);
     registerEventList_.clear();
 }
@@ -282,6 +284,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionTag", property), napi_generic_failure);
 
+#ifdef INPUT_REDISTRIBUTE_ENABLE
     napiAVSession_->recipientInfo_.identity = Rosen::InputRedistributeIdentity::IDENTITY_MEDIA_CONTROLLER;
     napiAVSession_->recipientInfo_.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT;
     napiAVSession_->recipientInfo_.type = Rosen::InputEventType::KEY_EVENT;
@@ -291,6 +294,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     napiAVSession_->recipientInfo_.recipient = inputRedistributeCallback;
     Rosen::WindowInputRedistributeClient clientInstance;
     clientInstance.RegisterInputEventRedistribute(napiAVSession_->recipientInfo_);
+#endif
     out = instance;
     return napi_ok;
 }

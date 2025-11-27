@@ -623,6 +623,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_CheckIfSendCapsule_001, TestSize.Level
     SLOGD("AVSessionItem_CheckIfSendCapsule_001 end!");
 }
 
+#ifdef INPUT_REDISTRIBUTE_ENABLE
 /**
  * @tc.name: AVSessionItem_SetSessionEvent_001
  * @tc.desc: Test SetSessionEvent.
@@ -801,6 +802,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_UpdateVolume_001, TestSize.Level1)
     EXPECT_EQ(g_AVSessionItem->UpdateVolume(false), AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_UpdateVolume_001 end!");
 }
+#endif
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 /**

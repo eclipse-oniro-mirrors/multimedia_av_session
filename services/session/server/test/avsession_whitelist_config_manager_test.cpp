@@ -14,7 +14,6 @@
  */
 
 #include <gtest/gtest.h>
-
 #define private public
 #include "avsession_whitelist_config_manager.h"
 #undef private
@@ -47,6 +46,7 @@ void AVSessionWhitelistConfigManagerTest::SetUp(void)
 void AVSessionWhitelistConfigManagerTest::TearDown(void)
 {}
 
+#ifdef INPUT_REDISTRIBUTE_ENABLE
 /**
  * @tc.name: IsKeyEventSupported_001
  * @tc.desc: IsKeyEventSupported test with empty bundleName
@@ -198,6 +198,7 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, ParseJsonToMap_003, TestSize.Level
     bool ret = avsessionWhitelistConfigManager->ParseJsonToMap(jsonStr, compatibleInfoMap);
     EXPECT_EQ(ret, false);
 }
+#endif
 
 } // namespace AVSession
 } // namespace OHOS

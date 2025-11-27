@@ -26,6 +26,7 @@
 
 namespace OHOS::AVSession {
 
+#ifdef INPUT_REDISTRIBUTE_ENABLE
 constexpr const char *SETTING_URI_PROXY =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
@@ -33,6 +34,7 @@ constexpr const char *SETTINGS_DATA_KEY_URI = "&key=";
 constexpr const char *SETTINGS_DATA_COLUMN_VALUE = "VALUE";
 constexpr const char *SETTINGS_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *WHITELIST_AVSESSION_STRATEGY = "WHITELIST_AVSESSION_STRATEGY";
+#endif
 
 bool AVSessionWhitelistConfigManager::IsKeyEventSupported(const std::string &bundleName)
 {
@@ -45,11 +47,14 @@ bool AVSessionWhitelistConfigManager::IsKeyEventSupported(const std::string &bun
         return false;
     }
     bool supportKeyEvent = false;
+#ifdef INPUT_REDISTRIBUTE_ENABLE
     supportKeyEvent = GetSupportKeyEventFromSettings(bundleName);
+#endif
     SLOGI("supportKeyEvent:%{public}d, bundleName: %{public}s", supportKeyEvent, bundleName.c_str());
     return supportKeyEvent;
 }
 
+#ifdef INPUT_REDISTRIBUTE_ENABLE
 bool AVSessionWhitelistConfigManager::GetSupportKeyEventFromSettings(const std::string &bundleName)
 {
     if (bundleName.empty()) {
@@ -174,7 +179,7 @@ bool AVSessionWhitelistConfigManager::ReleaseDataShareHelper(std::shared_ptr<Dat
     helper = nullptr;
     return true;
 }
-
+#endif
 bool AVSessionWhitelistConfigManager::IsSystemApp()
 {
     uint64_t callingTokenId = IPCSkeleton::GetCallingFullTokenID();
