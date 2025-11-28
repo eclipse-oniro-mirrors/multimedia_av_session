@@ -924,11 +924,14 @@ ohos_unittest("SoftbusSessionManagerSupplementTest") {
     "window_manager:libdm_lite",
   ]
 
+  defines = []
   if (multimedia_av_session_enable_dsoftbus) {
+    defines += ["DSOFTBUS_ENABLE"]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
   if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -1924,11 +1927,14 @@ ohos_unittest("MigrateAVSessionTest") {
     "window_manager:libdm_lite",
   ]
 
+  defines = []
   if (multimedia_av_session_enable_dsoftbus) {
+    defines += ["DSOFTBUS_ENABLE"]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
   if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -2006,11 +2012,14 @@ ohos_unittest("SoftbusSessionManagerTest") {
     "window_manager:libdm_lite",
   ]
 
+  defines = []
   if (multimedia_av_session_enable_dsoftbus) {
+    defines += ["DSOFTBUS_ENABLE"]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
   if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
