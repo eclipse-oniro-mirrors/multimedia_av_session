@@ -79,6 +79,7 @@
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
 #include "collaboration_manager.h"
+#include "pcm_cast_session.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -732,6 +733,7 @@ private:
     bool cancelCastRelease_ = false;
     std::condition_variable enableCastCond_;
     const int32_t castReleaseTimeOut_ = 120;
+    std::shared_ptr<PcmCastSession> pcmCastSession_ = nullptr;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
