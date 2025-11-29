@@ -157,7 +157,8 @@ std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string
         return nullptr;
     }
     if (type != AVSession::SESSION_TYPE_AUDIO && type != AVSession::SESSION_TYPE_VIDEO
-        && type != AVSession::SESSION_TYPE_VOICE_CALL && type != AVSession::SESSION_TYPE_VIDEO_CALL) {
+        && type != AVSession::SESSION_TYPE_VOICE_CALL && type != AVSession::SESSION_TYPE_VIDEO_CALL
+        && type != AVSession::SESSION_TYPE_PHOTO) {
         SLOGE("type is invalid");
         return nullptr;
     }
@@ -176,7 +177,8 @@ int32_t AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type
         return ERR_INVALID_PARAM;
     }
     if (type != AVSession::SESSION_TYPE_AUDIO && type != AVSession::SESSION_TYPE_VIDEO
-        && type != AVSession::SESSION_TYPE_VOICE_CALL && type != AVSession::SESSION_TYPE_VIDEO_CALL) {
+        && type != AVSession::SESSION_TYPE_VOICE_CALL && type != AVSession::SESSION_TYPE_VIDEO_CALL
+        && type != AVSession::SESSION_TYPE_PHOTO) {
         SLOGE("type is invalid");
         return ERR_INVALID_PARAM;
     }
@@ -189,6 +191,12 @@ int32_t AVSessionManagerImpl::GetAllSessionDescriptors(std::vector<AVSessionDesc
 {
     auto service = GetService();
     return service ? service->GetAllSessionDescriptors(descriptors) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors)
+{
+    auto service = GetService();
+    return service ? service->GetSessionDescriptors(category, descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::GetActivatedSessionDescriptors(std::vector<AVSessionDescriptor>& activatedSessions)

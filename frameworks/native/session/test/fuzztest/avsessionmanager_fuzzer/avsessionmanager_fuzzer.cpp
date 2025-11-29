@@ -172,9 +172,11 @@ void AVSessionManagerTestClient()
     SessionToken sessionToken;
     sessionToken.sessionId = sessionId;
     std::vector<AudioStandard::AudioDeviceDescriptor> deviceDescriptor;
+    int32_t category = GetData<int32_t>() % 4; // valid size 1~3
 
     AVSessionManagerImpl avSessionManagerImpl;
     avSessionManagerImpl.GetAllSessionDescriptors(descriptors);
+    avSessionManagerImpl.GetSessionDescriptors(category, descriptors);
     avSessionManagerImpl.GetHistoricalSessionDescriptors(maxSize, descriptors);
     avSessionManagerImpl.CreateController(sessionId, controller);
     avSessionManagerImpl.GetActivatedSessionDescriptors(descriptors);

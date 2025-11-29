@@ -76,6 +76,14 @@ std::map<int32_t, std::string> AVSessionDumper::loopMode_ = {
 
 std::vector<std::string> AVSessionDumper::errMessage_ = {};
 
+std::map<int32_t, std::string> AVSessionDumper::sessionTypeMap_ = {
+    {AVSession::SESSION_TYPE_AUDIO, "audio"},
+    {AVSession::SESSION_TYPE_VIDEO, "video"},
+    {AVSession::SESSION_TYPE_VOICE_CALL, "voice_call"},
+    {AVSession::SESSION_TYPE_VIDEO_CALL, "video_call"},
+    {AVSession::SESSION_TYPE_PHOTO, "photo"},
+};
+
 void AVSessionDumper::ShowHelp(std::string& result) const
 {
     result.append("Usage:dump <command> [options]\n")
@@ -171,14 +179,9 @@ void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionServic
             .append("\n\nConfiguration:\n")
             .append("pid                          : " + std::to_string(session->GetPid()) + "\n")
             .append("uid                          : " + std::to_string(session->GetUid()) + "\n");
-        if (descriptor.sessionType_ == AVSession::SESSION_TYPE_AUDIO) {
-            result.append("session type                 : audio\n");
-        } else if (descriptor.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
-            result.append("session type                 : video\n");
-        } else if (descriptor.sessionType_ == AVSession::SESSION_TYPE_VOICE_CALL) {
-            result.append("session type                 : voice_call\n");
-        } else if (descriptor.sessionType_ == AVSession::SESSION_TYPE_VIDEO_CALL) {
-            result.append("session type                 : video_call\n");
+        auto iter = sessionTypeMap_.find(descriptor.sessionType_);
+        if (iter != sessionTypeMap_.end()) {
+            result.append("session type                 : " + iter->second + "\n");
         } else {
             result.append("session type is invalid.\n");
         }

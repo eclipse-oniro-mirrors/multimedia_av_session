@@ -124,6 +124,29 @@ int32_t AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel& data
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleGetSessionDescriptors(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(
+        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("GetSessionDescriptors: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice getsessiondescriptors checkpermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t category = 0;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(category), ERR_NONE, "Read category failed");
+    int32_t ret = GetSessionDescriptors(category, descriptors);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
+    for (const auto& descriptor : descriptors) {
+        CHECK_AND_BREAK_LOG(descriptor.Marshalling(reply), "write descriptor failed");
+    }
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply)
 {
     AVSessionDescriptor descriptor;

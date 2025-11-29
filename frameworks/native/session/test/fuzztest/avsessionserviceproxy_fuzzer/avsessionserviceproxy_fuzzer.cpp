@@ -112,6 +112,7 @@ void AVSessionServiceProxyFuzzer::FuzzDoProxyTaskOne(std::shared_ptr<AVSessionSe
     avServiceProxy->CreateSessionInner(GetString(), GetData<int32_t>(), elementName);
     avServiceProxy->CreateSessionInner(GetString(), GetData<int32_t>(), elementName, object);
     avServiceProxy->GetAllSessionDescriptors(descriptors);
+    avServiceProxy->GetSessionDescriptors(GetData<int32_t>(), descriptors);
     avServiceProxy->GetSessionDescriptorsBySessionId(GetString(), descriptor);
     avServiceProxy->GetHistoricalSessionDescriptors(GetData<int32_t>(), descriptors);
 

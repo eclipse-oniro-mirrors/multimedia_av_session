@@ -44,6 +44,11 @@ public:
         return AVSESSION_SUCCESS;
     }
 
+    int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override
     {
         return AVSESSION_SUCCESS;

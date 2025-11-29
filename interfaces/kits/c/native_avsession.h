@@ -73,7 +73,12 @@ typedef enum {
     /**
      * @brief video call session type.
      */
-    SESSION_TYPE_VIDEO_CALL = 3
+    SESSION_TYPE_VIDEO_CALL = 3,
+
+    /**
+     * @brief photo session type.
+     */
+    SESSION_TYPE_PHOTO = 4
 } AVSession_Type;
 
 /**

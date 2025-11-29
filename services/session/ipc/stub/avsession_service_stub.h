@@ -31,6 +31,7 @@ private:
     int32_t HandleGetSessionInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateSessionInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleGetSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetSessionDescriptorsById(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalAVQueueInfos(MessageParcel& data, MessageParcel& reply);
@@ -69,6 +70,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleCreateSessionInner(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAllSessionDescriptors(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSessionDescriptors(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID),
             [this](MessageParcel& data, MessageParcel& reply)
             { return HandleGetSessionDescriptorsById(data, reply); }},
@@ -132,6 +135,8 @@ private:
             "HandleCreateSessionInner"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_ALL_SESSION_DESCRIPTORS),
             "HandleGetAllSessionDescriptors"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS),
+            "HandleGetSessionDescriptors"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_BY_ID),
             "HandleGetSessionDescriptorsById"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_HISTORY_SESSION_DESCRIPTORS),

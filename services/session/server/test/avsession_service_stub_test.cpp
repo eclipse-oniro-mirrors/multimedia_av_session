@@ -104,6 +104,8 @@ public:
     int32_t CreateSessionInner(const std::string &tag, int32_t type, const OHOS::AppExecFwk::ElementName &elementName,
         OHOS::sptr<IRemoteObject> &session) override { return 0; };
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor> &descriptors) override { return 0; };
+    int32_t GetSessionDescriptors(int32_t category,
+        std::vector<AVSessionDescriptor> &descriptors) override { return 0; };
     int32_t GetSessionDescriptorsBySessionId(const std::string &sessionId,
         AVSessionDescriptor &descriptor) override { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; };
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor> &descriptors) override
@@ -884,6 +886,23 @@ static HWTEST_F(AVSessionServiceStubTest, HandleGetHistoricalAVQueueInfos001, Te
     int ret = avsessionservicestub.HandleGetHistoricalAVQueueInfos(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleGetHistoricalAVQueueInfos001 end!");
+}
+
+/**
+ * @tc.name: HandleGetSessionDescriptors001
+ * @tc.desc: Test HandleGetSessionDescriptors
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleGetSessionDescriptors001, TestSize.Level0)
+{
+    SLOGI("HandleGetSessionDescriptors001, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteInt32(0);
+    AVSessionServiceStubPerDemo stub;
+    int32_t result = stub.HandleGetSessionDescriptors(data, reply);
+    EXPECT_EQ(reply.ReadInt32(), ERR_PERMISSION_DENIED);
+    SLOGI("HandleGetSessionDescriptors001 end!");
 }
 } // AVSession
 } // OHOS

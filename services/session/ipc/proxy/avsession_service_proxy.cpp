@@ -164,6 +164,38 @@ int32_t AVSessionServiceProxy::GetAllSessionDescriptors(std::vector<AVSessionDes
     return ret;
 }
 
+int32_t AVSessionServiceProxy::GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(category), ERR_MARSHALLING,
+                             "write category failed");
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
+    if (ret == AVSESSION_SUCCESS) {
+        uint32_t size {};
+        CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
+        CHECK_AND_RETURN_RET_LOG(size, ret, "get all session with true empty");
+        descriptors.resize(size);
+        for (auto& descriptor : descriptors) {
+            CHECK_AND_RETURN_RET_LOG(descriptor.ReadFromParcel(reply), ERR_UNMARSHALLING, "read descriptor failed");
+        }
+    }
+    return ret;
+}
+
 int32_t AVSessionServiceProxy::GetSessionDescriptorsBySessionId(const std::string& sessionId,
     AVSessionDescriptor& descriptor)
 {

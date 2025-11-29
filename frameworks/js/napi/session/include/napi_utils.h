@@ -320,6 +320,8 @@ public:
 
     static napi_status ThrowError(napi_env env, const char* napiMessage, int32_t napiCode);
 
+    static napi_status GetValue(napi_env env, napi_value in, SessionCategory& out);
+
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
     static constexpr size_t ARGC_THREE = 3;

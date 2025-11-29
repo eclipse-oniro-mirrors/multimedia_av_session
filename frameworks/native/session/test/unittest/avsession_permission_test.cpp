@@ -302,6 +302,31 @@ HWTEST_F(AVSessionPermissionTest, GetAllSessionDescriptorsWithPerm001, TestSize.
 }
 
 /**
+* @tc.name: GetSessionDescriptorsWithPerm001
+* @tc.desc: Get session descriptors with permission
+* @tc.type: FUNC
+* @tc.require: AR20251017593891
+*/
+HWTEST_F(AVSessionPermissionTest, GetSessionDescriptorsWithPerm001, TestSize.Level1)
+{
+    AddPermission(g_infoB, g_policyB);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession");
+    elementName.SetAbilityName("test.ability");
+    auto session = AVSessionManager::GetInstance().CreateSession("test", AVSession::SESSION_TYPE_AUDIO, elementName);
+    ASSERT_NE(session, nullptr);
+
+    std::vector<AVSessionDescriptor> descriptors;
+    auto ret = AVSessionManager::GetInstance().GetSessionDescriptors(SessionCategory::CATEGORY_ALL, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("check descriptors count for stricter check size %{public}d", static_cast<int>(descriptors.size()));
+    if (session != nullptr) {
+        session->Destroy();
+    }
+    DeletePermission(g_infoB);
+}
+
+/**
 * @tc.name: GetActivatedSessionDescriptorsWithPerm001
 * @tc.desc: Get all activated session descriptors with permission
 * @tc.type: FUNC

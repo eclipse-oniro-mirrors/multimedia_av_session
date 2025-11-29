@@ -1594,5 +1594,38 @@ enum AVSessionErrorCode {
      */
     ERR_CODE_CAST_CONTROL_DRM_PROVIDE_KEY_RESPONSE_ERROR = 6616100,
 };
+
+/**
+ * Session category for different scenes.
+ * @enum { int }
+ * @syscap SystemCapability.Multimedia.AVSession.Manager
+ * @systemapi
+ * @since 22 dynamic&static
+*/
+enum SessionCategory {
+    /**
+     * The active session category which can be shown on system control entrance.
+     * @syscap SystemCapability.Multimedia.AVSession.Manager
+     * @systemapi
+     * @since 22 dynamic&static
+    */
+    CATEGORY_ACTIVE = 1,
+
+    /**
+     * The session category which is partially integrated with AVSession function.
+     * @syscap SystemCapability.Multimedia.AVSession.Manager
+     * @systemapi
+     * @since 22 dynamic&static
+    */
+    CATEGORY_NOT_ACTIVE = 2,
+
+    /**
+     * The all session category including all the applications using AVSession.
+     * @syscap SystemCapability.Multimedia.AVSession.Manager
+     * @systemapi
+     * @since 22 dynamic&static
+    */
+    CATEGORY_ALL = 3,
+};
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

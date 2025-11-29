@@ -75,6 +75,7 @@ public:
         {"video", SESSION_TYPE_VIDEO},
         {"voice_call", SESSION_TYPE_VOICE_CALL},
         {"video_call", SESSION_TYPE_VIDEO_CALL},
+        {"photo", SESSION_TYPE_PHOTO},
     };
 
 private:
