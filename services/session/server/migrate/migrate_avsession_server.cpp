@@ -197,6 +197,8 @@ void MigrateAVSessionServer::CreateController(const std::string &sessionId)
     }
     AVMetaData::MetaMaskType metaDataFilter(METADATA_MASK_ALL);
     AVPlaybackState::PlaybackStateMaskType playFilter(PLAYBACK_MASK_ALL);
+    metaDataFilter.set();
+    playFilter.set();
     controller->SetMetaFilter(metaDataFilter);
     controller->SetPlaybackFilter(playFilter);
     UpdateCache(sessionId, controller, callback, true);

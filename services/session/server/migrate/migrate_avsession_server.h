@@ -187,6 +187,26 @@ private:
 
     std::string GenerateClearAVSessionMsg();
     std::atomic<bool> isNeedByRemote = false;
+
+    std::atomic<bool> hasSession_ = false;
+    std::string mediaImgTopicStr_ = "";
+    std::vector<int32_t> validCommands_;
+    std::string curBundleName_ = "";
+    std::string curAbilityName_ = "";
+    std::atomic<int32_t> volumeCache_ = -1;
+    std::string devicesListStr_ = "";
+    std::string devicePreferStr_ = "";
+
+    void CheckPostClean();
+    bool CheckPostSessionInfo(bool sessionState);
+    bool CheckPostMetaData(const AVMetaData& data);
+    bool CheckPostMediaImage(std::vector<uint8_t>& imgBuffer);
+    bool CheckPostPlaybackState(const AVPlaybackState& state);
+    bool CheckPostValidCommands(const std::vector<int32_t>& commands);
+    bool CheckPostBundleInfo(std::string bundleName, std::string abilityName);
+    bool CheckPostVolume(int32_t volumeNum);
+    bool CheckPostAvailableDevice(std::string& msg);
+    bool CheckPostPreferredDevice(std::string& msg);
 };
 
 class AVControllerObserver : public AVControllerCallback {

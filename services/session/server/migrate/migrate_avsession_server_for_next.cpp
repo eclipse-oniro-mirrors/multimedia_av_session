@@ -124,6 +124,22 @@ void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
         "LocalFrontSessionChange");
 }
 
+void MigrateAVSessionServer::CheckPostClean()
+{
+    std::lock_guard lockGuard(cacheJsonLock_);
+
+    mediaImgTopicStr_ = "";
+    validCommands_.clear();
+    curBundleName_ = "";
+    curAbilityName_ = "";
+    volumeCache_.store(-1);
+    devicesListStr_ = "";
+    devicePreferStr_ = "";
+    metaDataCache_.Reset();
+    playbackStateCache_.SetState(-1);
+    playbackStateCache_.SetFavorite(0);
+}
+
 void MigrateAVSessionServer::HandleFocusPlaybackStateChange(const std::string &sessionId, const AVPlaybackState &state)
 {
     DoPlaybackStateSyncToRemote(state);
@@ -144,8 +160,9 @@ void MigrateAVSessionServer::HandleFocusValidCommandChange(const std::string &se
     DoValidCommandsSyncToRemote(cmds);
 }
 
-void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
+bool MigrateAVSessionServer::CheckPostMetaData(const AVMetaData& data)
 {
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load(), false, "migrate no need");
     std::lock_guard lockGuard(cacheJsonLock_);
     bool needRefresh = false;
     if (data.GetAssetId() != metaDataCache_.GetAssetId()) {
@@ -166,7 +183,12 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
         metaDataCache_.SetArtist(data.GetSubTitle());
         needRefresh = true;
     }
-    CHECK_AND_RETURN_LOG(needRefresh, "metadata no change");
+    return needRefresh;
+}
+
+void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
+{
+    CHECK_AND_RETURN_LOG(CheckPostMetaData(data), "metadata no change");
 
     cJSON* metaDataItem = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(metaDataItem != nullptr, "get metadata json with nullptr");
@@ -197,10 +219,24 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
     cJSON_Delete(metaDataItem);
 }
 
+bool MigrateAVSessionServer::CheckPostMediaImage(std::vector<uint8_t>& imgBuffer)
+{
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load(), false, "migrate no need");
+    std::lock_guard lockGuard(cacheJsonLock_);
+    int32_t imgSize = static_cast<int>(imgBuffer.size());
+    CHECK_AND_RETURN_RET_LOG(imgSize > static_cast<int>(DEFAULT_QUALITY), false, "imgSize:%{public}d invalid", imgSize);
+    int mediaImgTopicNum = imgBuffer[imgSize / MSG_HEAD_LENGTH] + imgBuffer[imgSize / MSG_HEAD_LENGTH + 1];
+    CHECK_AND_RETURN_RET_LOG(mediaImgTopicStr_ != curAssetId_ + std::to_string(mediaImgTopicNum), false,
+        "mediaImg topic same:%{public}s", AVSessionUtils::GetAnonySessionId(mediaImgTopicStr_).c_str());
+    mediaImgTopicStr_ = curAssetId_ + std::to_string(mediaImgTopicNum);
+    return true;
+}
+
 void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionPixelMap> innerPixelMap)
 {
     CHECK_AND_RETURN_LOG(innerPixelMap != nullptr, "DoMediaImageSyncToRemote with innerPixelMap null");
     std::vector<uint8_t> imgBuffer = innerPixelMap->GetInnerImgBuffer();
+    CHECK_AND_RETURN_LOG(CheckPostMediaImage(imgBuffer), "mediaImg no change");
     SLOGI("DoMediaImageSyncToRemote with img size:%{public}d", static_cast<int>(imgBuffer.size()));
 
     if (imgBuffer.size() <= 0) {
@@ -227,8 +263,9 @@ void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionP
     SLOGI("DoMediaImageSyncToRemote async size:%{public}d", static_cast<int>(msg.size()));
 }
 
-void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& state)
+bool MigrateAVSessionServer::CheckPostPlaybackState(const AVPlaybackState& state)
 {
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load(), false, "migrate no need");
     std::lock_guard lockGuard(cacheJsonLock_);
     bool needRefresh = false;
     if (state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_STATE) &&
@@ -241,7 +278,12 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
         playbackStateCache_.SetFavorite(state.GetFavorite());
         needRefresh = true;
     }
-    CHECK_AND_RETURN_LOG(needRefresh, "playbackstate no change");
+    return needRefresh;
+}
+
+void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& state)
+{
+    CHECK_AND_RETURN_LOG(CheckPostPlaybackState(state), "playbackstate no change");
 
     cJSON* playbackStateItem = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(playbackStateItem != nullptr, "get playbackState json with nullptr");
@@ -267,8 +309,19 @@ void MigrateAVSessionServer::DoPlaybackStateSyncToRemote(const AVPlaybackState& 
     cJSON_Delete(playbackStateItem);
 }
 
+bool MigrateAVSessionServer::CheckPostValidCommands(const std::vector<int32_t>& commands)
+{
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load(), false, "migrate no need");
+    std::lock_guard lockGuard(cacheJsonLock_);
+    CHECK_AND_RETURN_RET_LOG(commands != validCommands_, false,
+        "no change:%{public}d", static_cast<int>(commands.size()));
+    validCommands_ = commands;
+    return true;
+}
+
 void MigrateAVSessionServer::DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands)
 {
+    CHECK_AND_RETURN_LOG(CheckPostValidCommands(commands), "validCommands no change");
     cJSON* validCommands = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(validCommands != nullptr, "get validCommands json with nullptr");
     std::string commandsStr;
@@ -293,12 +346,24 @@ void MigrateAVSessionServer::DoValidCommandsSyncToRemote(const std::vector<int32
     cJSON_Delete(validCommands);
 }
 
+bool MigrateAVSessionServer::CheckPostBundleInfo(std::string bundleName, std::string abilityName)
+{
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load(), false, "migrate no need");
+    std::lock_guard lockGuard(cacheJsonLock_);
+    CHECK_AND_RETURN_RET_LOG(curBundleName_ != bundleName || curAbilityName_ != abilityName, false,
+        "no change:%{public}s", bundleName.c_str());
+    curBundleName_ = bundleName;
+    curAbilityName_ = abilityName;
+    return true;
+}
+
 void MigrateAVSessionServer::DoBundleInfoSyncToRemote(sptr<AVControllerItem> controller)
 {
     CHECK_AND_RETURN_LOG(controller != nullptr, "DoBundleInfoSyncToRemote with controller null");
     AppExecFwk::ElementName elementName = controller->GetElementOfSession();
     std::string bundleName = elementName.GetBundleName();
     std::string abilityName = elementName.GetAbilityName();
+    CHECK_AND_RETURN_LOG(CheckPostBundleInfo(bundleName, abilityName), "bundleInfo no change");
     std::string iconStr;
     if (!BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, abilityName, iconStr)) {
         SLOGE("DoBundleInfoSyncToRemote get bundle icon fail for bundleName:%{public}s", bundleName.c_str());
@@ -338,12 +403,6 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
         AVSessionUtils::GetAnonySessionId(controller->GetSessionId()).c_str());
 
     UpdateSessionInfoToRemote(controller);
-    {
-        std::lock_guard lockGuard(cacheJsonLock_);
-        metaDataCache_.Reset();
-        playbackStateCache_.SetState(0);
-        playbackStateCache_.SetFavorite(0);
-    }
     AVMetaData metaData;
     int32_t ret = controller->GetAVMetaData(metaData);
     if (AVSESSION_SUCCESS == ret || ERR_INVALID_PARAM == ret) {
@@ -371,9 +430,19 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
     SLOGI("UpdateFrontSessionInfoToRemote done");
 }
 
+bool MigrateAVSessionServer::CheckPostSessionInfo(bool sessionState)
+{
+    std::lock_guard lockGuard(cacheJsonLock_);
+    CHECK_AND_RETURN_RET_LOG(hasSession_.load() != sessionState, false,
+        "sessionState:%{public}d no change", sessionState);
+    hasSession_.store(sessionState);
+    return true;
+}
+
 void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> controller)
 {
     CHECK_AND_RETURN_LOG(controller != nullptr, "controller get nullptr");
+    CHECK_AND_RETURN_LOG(CheckPostSessionInfo(true), "sessionState no change");
     cJSON* sessionInfo = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(sessionInfo != nullptr, "get sessionInfo json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_SESSION_ID, controller->GetSessionId().c_str())) {
@@ -411,6 +480,7 @@ void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> co
 void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
 {
     SLOGI("UpdateEmptyInfoToRemote in async");
+    CHECK_AND_RETURN_LOG(CheckPostSessionInfo(false), "sessionState no change");
     cJSON* sessionInfo = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(sessionInfo != nullptr, "get sessionInfo json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_SESSION_ID, EMPTY_SESSION)) {
@@ -542,9 +612,20 @@ void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* command
     SLOGI("isNeedSet:%{public}d", isNeedByRemote.load());
 }
 
+bool MigrateAVSessionServer::CheckPostVolume(int32_t volumeNum)
+{
+    std::lock_guard lockGuard(cacheJsonLock_);
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load(), false, "migrate no need");
+    CHECK_AND_RETURN_RET_LOG(volumeCache_.load() != volumeNum, false,
+        "volumeNum:%{public}d no change", volumeNum);
+    volumeCache_.store(volumeNum);
+    return true;
+}
+
 std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFunc()
 {
     return [this](int32_t volumeNum) {
+        CHECK_AND_RETURN_LOG(CheckPostVolume(volumeNum), "volumeNum no change");
         std::lock_guard lockGuard(migrateDeviceChangeLock_);
         cJSON* value = SoftbusSessionUtils::GetNewCJSONObject();
         CHECK_AND_RETURN_LOG(value != nullptr, "get value json with nullptr");
@@ -566,6 +647,15 @@ std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFu
     };
 }
 
+bool MigrateAVSessionServer::CheckPostAvailableDevice(std::string& msg)
+{
+    std::lock_guard lockGuard(cacheJsonLock_);
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load(), false, "migrate no need");
+    CHECK_AND_RETURN_RET_LOG(devicesListStr_ != msg, false, "devicesList no change");
+    devicesListStr_ = msg;
+    return true;
+}
+
 AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceChangeCallbackFunc()
 {
     return [this](const AudioDeviceDescriptors& devices) {
@@ -579,14 +669,24 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceCha
         }
         std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_AVAIL_DEVICES_LIST});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
-        SLOGI("server send get available device change callback async");
+        cJSON_Delete(value);
+        CHECK_AND_RETURN_LOG(CheckPostAvailableDevice(msg), "AvailableDevice no change");
+        SLOGI("server send get available device change callback async:%{public}d", static_cast<int>(devices.size()));
         MigratePostTask(
             [this, msg]() {
                 SendJsonStringByte(deviceId_, msg);
             },
             "SYNC_AVAIL_DEVICES_LIST");
-        cJSON_Delete(value);
     };
+}
+
+bool MigrateAVSessionServer::CheckPostPreferredDevice(std::string& msg)
+{
+    std::lock_guard lockGuard(cacheJsonLock_);
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load(), false, "migrate no need");
+    CHECK_AND_RETURN_RET_LOG(devicePreferStr_ != msg, false, "devicePrefer no change");
+    devicePreferStr_ = msg;
+    return true;
 }
 
 AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceChangeCallbackFunc()
@@ -602,14 +702,15 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
         }
         std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_CURRENT_DEVICE});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
-        SLOGI("server send get preferred device change callback async");
+        cJSON_Delete(value);
+        CHECK_AND_RETURN_LOG(CheckPostPreferredDevice(msg), "PreferredDevice no change");
+        SLOGI("server send get preferred device change callback async:%{public}d", static_cast<int>(msg.size()));
         MigratePostTask(
             [this, msg]() {
                 SendJsonStringByte(deviceId_, msg);
             },
             "SYNC_CURRENT_DEVICE");
         volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
-        cJSON_Delete(value);
     };
 }
 
@@ -757,10 +858,6 @@ bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Cal
         return false;
     }
     SLOGD("MigratePostTask with name:%{public}s.", name.c_str());
-    if (!isNeedByRemote.load() && name != "LocalFrontSessionChange" && name != "SYNC_FOCUS_SESSION_INFO") {
-        SLOGI("no send task:%{public}s for no listen", name.c_str());
-        return false;
-    }
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(name);
     return AVSessionEventHandler::GetInstance().AVSessionPostTask(callback, name);
 }
