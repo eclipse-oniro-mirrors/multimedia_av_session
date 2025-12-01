@@ -900,7 +900,7 @@ static HWTEST_F(AVSessionServiceStubTest, HandleGetSessionDescriptors001, TestSi
     OHOS::MessageParcel reply;
     data.WriteInt32(0);
     AVSessionServiceStubPerDemo stub;
-    int32_t result = stub.HandleGetSessionDescriptors(data, reply);
+    stub.HandleGetSessionDescriptors(data, reply);
     EXPECT_EQ(reply.ReadInt32(), ERR_PERMISSION_DENIED);
     SLOGI("HandleGetSessionDescriptors001 end!");
 }
