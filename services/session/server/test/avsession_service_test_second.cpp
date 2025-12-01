@@ -1790,7 +1790,7 @@ static HWTEST_F(AVSessionServiceTestSecond, HandleRemoveMediaCardEvent003, TestS
     ASSERT_TRUE(g_AVSessionService->topSession_ != nullptr);
     bool ret = g_AVSessionService->topSession_->IsCasting();
     g_AVSessionService->topSession_->SetUid(AVSESSION_ERROR);
-    g_AVSessionService->HandleRemoveMediaCardEvent();
+    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
     EXPECT_EQ(ret, false);
 }
 

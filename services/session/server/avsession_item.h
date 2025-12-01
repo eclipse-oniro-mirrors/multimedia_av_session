@@ -97,6 +97,8 @@ public:
     void ListenCollaborationApplyResult();
 
     void ListenCollaborationOnStop();
+
+    void DestroyCast(bool continuePlay);
 #endif
 
     void InitListener();
@@ -345,6 +347,8 @@ public:
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
     
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
+
+    void SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback);
 #endif
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
@@ -582,6 +586,7 @@ private:
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
+    std::function<void(std::string, bool)> serviceCallbackForPhotoCast_;
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";
