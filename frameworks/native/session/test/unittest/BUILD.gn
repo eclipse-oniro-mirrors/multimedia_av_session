@@ -337,6 +337,15 @@ ohos_unittest("AVSessionRemoteTest") {
     ubsan = true
   }
 
+  defines = []
+  if (multimedia_av_session_enable_dsoftbus) {
+    defines += ["DSOFTBUS_ENABLE"]
+  }
+
+  if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
+  }
+
   deps = common_deps
 
   external_deps = common_external_deps
