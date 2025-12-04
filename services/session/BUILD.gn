@@ -137,6 +137,12 @@ av_session_ohos_library("avsession_service") {
     "server/softbus/softbus_session_server.cpp",
   ]
 
+  if (castplus_cast_engine_enable) {
+    service_sources += [
+      "server/pcm_cast_session.cpp",
+    ]
+  }
+
   adapter_sources = [
     "adapter/ability_connect_helper.cpp",
     "adapter/ability_manager_adapter.cpp",

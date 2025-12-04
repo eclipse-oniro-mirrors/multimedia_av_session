@@ -176,6 +176,15 @@ public:
         return res;
     }
 
+    static std::string GetAnonymousDeviceId(std::string deviceId)
+    {
+        if (deviceId.empty() || deviceId.length() < DEVICE_ID_MIN_LEN) {
+            return "unknown";
+        }
+        const uint32_t half = DEVICE_ID_MIN_LEN / 2;
+        return deviceId.substr(0, half) + "**" + deviceId.substr(deviceId.length() - half);
+    }
+
     static int32_t PublishCommonEvent(const std::string& action)
     {
         OHOS::AAFwk::Want want;
@@ -275,6 +284,7 @@ private:
     static constexpr const char* PUBLIC_PATH_NAME = "public";
     static constexpr const char* FILE_SUFFIX = ".image.dat";
     static constexpr const char* CAST_PREFIX = "cast_";
+    static constexpr const int32_t DEVICE_ID_MIN_LEN = 10;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_UTILS_H

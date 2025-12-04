@@ -942,5 +942,26 @@ static HWTEST_F(AVSessionServiceTestExt, NotifyLocalFrontSessionChangeForMigrate
     g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate("");
     EXPECT_EQ(g_AVSessionService->localFrontSessionId_, "");
 }
+
+/**
+ * @tc.name: ServiceStartStopCast001
+ * @tc.desc: Cover if StartCast for pcm device
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    pcmCastSession->OnCastStateChange(5, deviceInfo, false);
+    pcmCastSession->OnCastStateChange(0, deviceInfo, false);
+#endif
+    EXPECT_EQ(g_AVSessionService, nullptr);
+}
 } // AVSession
 } // OHOS
