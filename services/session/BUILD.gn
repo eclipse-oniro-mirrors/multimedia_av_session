@@ -510,6 +510,7 @@ av_session_ohos_library("avsession_item") {
   service_sources = [
     "server/avcontroller_item.cpp",
     "server/avsession_item.cpp",
+    "server/avsession_whitelist_config_manager.cpp",
     "server/hw_cast_display_listener.cpp",
     "server/remote/json_utils.cpp",
     "server/remote/remote_session_command_process.cpp",
@@ -601,6 +602,11 @@ av_session_ohos_library("avsession_item") {
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
   ]
+
+  if (av_session_enable_input_redistribute) {
+    defines += [ "INPUT_REDISTRIBUTE_ENABLE" ]
+    external_deps += [ "data_share:datashare_consumer" ]
+  }
 
   if (multimedia_av_session_enable_device_manager) {
     defines += [ "DEVICE_MANAGER_ENABLE" ]

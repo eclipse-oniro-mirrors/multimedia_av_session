@@ -403,6 +403,9 @@ private:
     bool SearchSpidInCapability(const std::string& deviceId);
     void CheckIfSendCapsule(const AVPlaybackState& state);
     void CheckSupportColdStartExtra(const AAFwk::WantParams& extras);
+    int32_t ProcessInputRedistributeEvent(const int32_t keyCode);
+    bool IsKeyEventSupported(const std::string &bundleName);
+    int32_t UpdateVolume(bool up);
     void GetCurrentAppIndexForSession();
     AbilityRuntime::WantAgent::WantAgent CreateWantAgentWithIndex(const AbilityRuntime::WantAgent::WantAgent& ability,
         int32_t index);

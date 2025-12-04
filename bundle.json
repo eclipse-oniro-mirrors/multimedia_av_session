@@ -19,7 +19,10 @@
           "SystemCapability.Multimedia.AVSession.Manager",
           "SystemCapability.Multimedia.AVSession.AVInputCast = false"
       ],
-      "features": [ "av_session_enable_start_stop_on_demand" ],
+      "features": [
+        "av_session_enable_start_stop_on_demand",
+        "av_session_enable_input_redistribute"
+      ],
       "adapted_system_type": [ "standard" ],
       "rom": "3000KB",
       "ram": "5120KB",
@@ -31,6 +34,7 @@
           "ability_base",
           "ability_runtime",
           "cJSON",
+          "data_share",
           "json",
           "init",
           "access_token",

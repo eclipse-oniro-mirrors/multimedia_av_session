@@ -29,6 +29,7 @@
 #include "migrate_avsession_constant.h"
 #include "system_ability_definition.h"
 #include "avsession_service.h"
+#include "int_wrapper.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -621,6 +622,187 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_CheckIfSendCapsule_001, TestSize.Level
     g_AVSessionItem->SetUid(oriUid);
     SLOGD("AVSessionItem_CheckIfSendCapsule_001 end!");
 }
+
+#ifdef INPUT_REDISTRIBUTE_ENABLE
+/**
+ * @tc.name: AVSessionItem_SetSessionEvent_001
+ * @tc.desc: Test SetSessionEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSessionEvent_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetSessionEvent_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    std::string event = "InputRedistributeEvent";
+    int32_t keyCode = 123456789;
+    AAFwk::WantParams args;
+    args.SetParam("keyCode", AAFwk::Integer::Box(static_cast<int32_t>(keyCode)));
+    int32_t result = g_AVSessionItem->SetSessionEvent(event, args);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGD("AVSessionItem_SetSessionEvent_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetSessionEvent_002
+ * @tc.desc: Test SetSessionEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSessionEvent_002, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetSessionEvent_002 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    std::string event = "InputRedistributeEvent";
+    int32_t keyCode = MMI::KeyEvent::KEYCODE_SPACE;
+    AAFwk::WantParams args;
+    args.SetParam("keyCode", AAFwk::Integer::Box(static_cast<int32_t>(keyCode)));
+    int32_t result = g_AVSessionItem->SetSessionEvent(event, args);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGD("AVSessionItem_SetSessionEvent_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetSessionEvent_003
+ * @tc.desc: Test SetSessionEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSessionEvent_003, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetSessionEvent_003 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    std::string event = "InputRedistributeEvent";
+    int32_t keyCode = MMI::KeyEvent::KEYCODE_DPAD_UP;
+    AAFwk::WantParams args;
+    args.SetParam("keyCode", AAFwk::Integer::Box(static_cast<int32_t>(keyCode)));
+    int32_t result = g_AVSessionItem->SetSessionEvent(event, args);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGD("AVSessionItem_SetSessionEvent_003 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetSessionEvent_004
+ * @tc.desc: Test SetSessionEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSessionEvent_004, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetSessionEvent_004 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    std::string event = "InputRedistributeEvent";
+    int32_t keyCode = MMI::KeyEvent::KEYCODE_DPAD_DOWN;
+    AAFwk::WantParams args;
+    args.SetParam("keyCode", AAFwk::Integer::Box(static_cast<int32_t>(keyCode)));
+    int32_t result = g_AVSessionItem->SetSessionEvent(event, args);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGD("AVSessionItem_SetSessionEvent_004 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetSessionEvent_005
+ * @tc.desc: Test SetSessionEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSessionEvent_005, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetSessionEvent_005 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    std::string event = "InputRedistributeEvent";
+    int32_t keyCode = MMI::KeyEvent::KEYCODE_DPAD_LEFT;
+    AAFwk::WantParams args;
+    args.SetParam("keyCode", AAFwk::Integer::Box(static_cast<int32_t>(keyCode)));
+    int32_t result = g_AVSessionItem->SetSessionEvent(event, args);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGD("AVSessionItem_SetSessionEvent_005 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetSessionEvent_006
+ * @tc.desc: Test SetSessionEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSessionEvent_006, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetSessionEvent_006 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    std::string event = "InputRedistributeEvent";
+    int32_t keyCode = MMI::KeyEvent::KEYCODE_DPAD_RIGHT;
+    AAFwk::WantParams args;
+    args.SetParam("keyCode", AAFwk::Integer::Box(static_cast<int32_t>(keyCode)));
+    int32_t result = g_AVSessionItem->SetSessionEvent(event, args);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGD("AVSessionItem_SetSessionEvent_006 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetSessionEvent_007
+ * @tc.desc: Test SetSessionEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSessionEvent_007, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_SetSessionEvent_007 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    std::string event = "OtherEvent";
+    AAFwk::WantParams args;
+    int32_t result = g_AVSessionItem->SetSessionEvent(event, args);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGD("AVSessionItem_SetSessionEvent_007 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_ProcessInputRedistributeEvent_001
+ * @tc.desc: Test ProcessInputRedistributeEvent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_ProcessInputRedistributeEvent_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_ProcessInputRedistributeEvent_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_SPACE), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_DPAD_UP), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_DPAD_DOWN), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_DPAD_LEFT), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->ProcessInputRedistributeEvent(MMI::KeyEvent::KEYCODE_DPAD_RIGHT), AVSESSION_ERROR);
+    SLOGD("AVSessionItem_ProcessInputRedistributeEvent_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_IsKeyEventSupported_001
+ * @tc.desc: Test IsKeyEventSupported.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_IsKeyEventSupported_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_IsKeyEventSupported_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    EXPECT_EQ(g_AVSessionItem->IsKeyEventSupported(""), false);
+    EXPECT_EQ(g_AVSessionItem->IsKeyEventSupported("com.test"), false);
+    SLOGD("AVSessionItem_IsKeyEventSupported_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_UpdateVolume_001
+ * @tc.desc: Test UpdateVolume.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_UpdateVolume_001, TestSize.Level1)
+{
+    SLOGD("AVSessionItem_UpdateVolume_001 begin!");
+    EXPECT_NE(g_AVSessionItem, nullptr);
+    EXPECT_EQ(g_AVSessionItem->UpdateVolume(true), AVSESSION_SUCCESS);
+    EXPECT_EQ(g_AVSessionItem->UpdateVolume(false), AVSESSION_SUCCESS);
+    SLOGD("AVSessionItem_UpdateVolume_001 end!");
+}
+#endif
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 /**

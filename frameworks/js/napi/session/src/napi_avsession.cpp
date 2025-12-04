@@ -35,6 +35,7 @@
 #include "image_source.h"
 #include "pixel_map.h"
 #include "avsession_pixel_map_adapter.h"
+#include "int_wrapper.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller.h"
@@ -132,6 +133,10 @@ NapiAVSession::~NapiAVSession()
 {
     SLOGI("destroy");
     AVSessionManager::GetInstance().UnregisterServiceStartCallback();
+#ifdef INPUT_REDISTRIBUTE_ENABLE
+    Rosen::WindowInputRedistributeClient clientInstance;
+    clientInstance.UnRegisterInputEventRedistribute(recipientInfo_);
+#endif
     std::lock_guard lockGuard(registerEventLock_);
     registerEventList_.clear();
 }
@@ -278,6 +283,18 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     status = NapiUtils::SetValue(env, napiAVSession_->sessionTag_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionTag", property), napi_generic_failure);
+
+#ifdef INPUT_REDISTRIBUTE_ENABLE
+    napiAVSession_->recipientInfo_.identity = Rosen::InputRedistributeIdentity::IDENTITY_MEDIA_CONTROLLER;
+    napiAVSession_->recipientInfo_.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT;
+    napiAVSession_->recipientInfo_.type = Rosen::InputEventType::KEY_EVENT;
+    std::shared_ptr<NapiAVSessionInputRedistributeCallback> inputRedistributeCallback =
+        std::make_shared<NapiAVSessionInputRedistributeCallback>();
+    inputRedistributeCallback->nativeSession = napiAVSession_->session_;
+    napiAVSession_->recipientInfo_.recipient = inputRedistributeCallback;
+    Rosen::WindowInputRedistributeClient clientInstance;
+    clientInstance.RegisterInputEventRedistribute(napiAVSession_->recipientInfo_);
+#endif
     out = instance;
     return napi_ok;
 }

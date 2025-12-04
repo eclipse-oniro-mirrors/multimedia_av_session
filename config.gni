@@ -13,6 +13,7 @@
 
 declare_args() {
   av_session_enable_start_stop_on_demand = false
+  av_session_enable_input_redistribute = false
   multimedia_av_session_enable_background_audio_control = false
   multimedia_av_session_enable_trace_control = true
   multimedia_av_session_enable_sysevent_control = true
