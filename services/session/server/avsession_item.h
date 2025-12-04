@@ -543,6 +543,8 @@ private:
 
     std::shared_mutex coldStartCallbackLock_;
 
+    std::recursive_mutex launchAbilityLock_;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;
     int64_t castHandle_ = 0;
