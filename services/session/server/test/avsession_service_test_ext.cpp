@@ -961,7 +961,7 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     pcmCastSession->OnCastStateChange(5, deviceInfo, false);
     pcmCastSession->OnCastStateChange(0, deviceInfo, false);
 #endif
-    EXPECT_EQ(g_AVSessionService, nullptr);
+    EXPECT_NE(g_AVSessionService, nullptr);
 }
 } // AVSession
 } // OHOS
