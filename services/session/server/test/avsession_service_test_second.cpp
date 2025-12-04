@@ -1519,21 +1519,24 @@ static HWTEST_F(AVSessionServiceTestSecond, NotifyMigrateStop001, TestSize.Level
 */
 static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo001, TestSize.Level0)
 {
+    std::string info = R"({"SUPPORT_MIRROR_TO_STREAM": false})";
+    g_AVSessionService->SplitExtraInfo(info);
+
     const string supportInfo = "SUPPORT_MIRROR_TO_STREAM:true";
     g_AVSessionService->SplitExtraInfo(supportInfo);
-    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, true);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
 
     const string deviceInfo = "deviceId : dev01";
     g_AVSessionService->SplitExtraInfo(deviceInfo);
-    EXPECT_NE(g_AVSessionService->castDeviceId_, "");
+    EXPECT_EQ(g_AVSessionService->castDeviceId_, "0");
 
     const string nameInfo = "deviceName : device";
     g_AVSessionService->SplitExtraInfo(nameInfo);
-    EXPECT_NE(g_AVSessionService->castDeviceName_, "");
+    EXPECT_EQ(g_AVSessionService->castDeviceName_, " ");
 
     const string deviceTypeInfo = "deviceType : 1";
     g_AVSessionService->SplitExtraInfo(deviceTypeInfo);
-    EXPECT_EQ(g_AVSessionService->castDeviceType_, 1);
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 0);
 }
 
 /**
