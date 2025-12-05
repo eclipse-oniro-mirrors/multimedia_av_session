@@ -830,7 +830,10 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
         isSetLaunchAbility_ = true;
     }
     GetCurrentAppIndexForSession();
-    launchAbility_ = ability;
+    {
+        std::lock_guard lockGuard(launchAbilityLock_);
+        launchAbility_ = ability;
+    }
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> launchWantAgent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>(ability);
@@ -839,10 +842,12 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
         res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launchWantAgent, want);
         AAFwk::WantParams params = want->GetParams();
         if (!params.HasParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
+            std::lock_guard lockGuard(launchAbilityLock_);
             launchAbility_ = CreateWantAgentWithIndex(ability, appIndex_);
         } else {
             auto appIndex = params.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, -1);
             if (appIndex != appIndex_) {
+                std::lock_guard lockGuard(launchAbilityLock_);
                 launchAbility_ = CreateWantAgentWithIndex(ability, appIndex_);
             }
         }
@@ -2348,6 +2353,7 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
             0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITIES, flags, wants, nullptr);
         auto launchAbility = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, getuid());
         CHECK_AND_RETURN_RET_LOG(launchAbility != nullptr, launchAbility_, "GetWantAgent failed");
+        std::lock_guard lockGuard(launchAbilityLock_);
         launchAbility_ = *launchAbility;
     }
     return launchAbility_;
