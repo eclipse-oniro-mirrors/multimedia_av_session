@@ -38,6 +38,7 @@ public:
         EVENT_DEVICE_OFFLINE,
         EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED,
         EVENT_DEVICE_STATE_CHANGED,
+        EVENT_ACTIVE_SESSION_CHANGED,
         EVENT_TYPE_MAX
     };
 
@@ -54,6 +55,7 @@ public:
     void OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override;
     void OnDeviceStateChange(const DeviceState& deviceState) override;
+    void OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

@@ -101,6 +101,8 @@ public:
     ErrCode OnDeviceStateChange(const DeviceState& deviceState) override { return AVSESSION_SUCCESS; };
     ErrCode OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; };
+    ErrCode OnActiveSessionChanged(
+        const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; };
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 

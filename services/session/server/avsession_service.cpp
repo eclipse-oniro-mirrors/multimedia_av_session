@@ -899,6 +899,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
     }
     UpdateLocalFrontSession(sessionListForFront);
+    NotifySessionChange(sessionListForFront, userId);
 }
 
 bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
@@ -917,6 +918,7 @@ bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
         sessionListForFront->remove(sessionItem);
         sessionListForFront->push_front(sessionItem);
         UpdateSessionTimestamp(sessionItem);
+        NotifySessionChange(sessionListForFront);
     }
     return true;
 }
@@ -1669,6 +1671,7 @@ void AVSessionService::AddExtraFrontSession(int32_t type, sptr<AVSessionItem>& s
         it == sessionListForFront->end()) {
         SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
         sessionListForFront->push_front(sessionItem);
+        NotifySessionChange(sessionListForFront);
     }
 }
 

@@ -102,6 +102,10 @@ class TestISessionListener : public ISessionListener {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override
+    {
+        return AVSESSION_SUCCESS;
+    };
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 

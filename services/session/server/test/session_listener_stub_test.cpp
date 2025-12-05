@@ -131,6 +131,10 @@ class SessionListenerStubDemo : public SessionListenerStub {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override
+    {
+        return AVSESSION_SUCCESS;
+    }
 };
 
 /**

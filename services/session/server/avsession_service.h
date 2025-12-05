@@ -616,6 +616,11 @@ private:
 
     void AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionItem);
 
+    void NotifySessionChange(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront,
+        int32_t userId = 0);
+
+    void NotifyActiveSessionChange(const std::vector<AVSessionDescriptor> &descriptors);
+
     std::string GetLocalTitle();
 
     bool InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray);
