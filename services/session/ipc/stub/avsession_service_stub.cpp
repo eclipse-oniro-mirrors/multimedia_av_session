@@ -106,7 +106,7 @@ int32_t AVSessionServiceStub::HandleCreateSessionInner(MessageParcel& data, Mess
 int32_t AVSessionServiceStub::HandleGetAllSessionDescriptors(MessageParcel& data, MessageParcel& reply)
 {
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
-        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+        PermissionChecker::CHECK_MEDIA_RESOURCES_PUBLIC_PERMISSION);
     if (err != ERR_NONE) {
         SLOGE("GetAllSessionDescriptors: CheckPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
@@ -305,7 +305,7 @@ int32_t AVSessionServiceStub::HandleCreateControllerInner(MessageParcel& data, M
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::CreateControllerInner");
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
-        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+        PermissionChecker::CHECK_MEDIA_RESOURCES_PUBLIC_PERMISSION);
     if (err != ERR_NONE) {
         SLOGE("CreateControllerInner: CheckPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
@@ -349,7 +349,7 @@ int32_t AVSessionServiceStub::HandleGetAVCastControllerInner(MessageParcel& data
 int32_t AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply)
 {
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
-        PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        PermissionChecker::CHECK_SYSTEM_AND_MEDIA_RESOURCES_PUBLIC_PERMISSION);
     if (err != ERR_NONE) {
         SLOGE("RegisterSessionListener: CheckPermission failed");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
