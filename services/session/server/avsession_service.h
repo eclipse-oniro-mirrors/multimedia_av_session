@@ -299,7 +299,7 @@ public:
 
     void HandleUserEvent(const std::string &type, const int &userId);
 
-    void HandleRemoveMediaCardEvent();
+    void HandleRemoveMediaCardEvent(int32_t uid, bool isPhoto);
 
     void HandleBundleRemoveEvent(const std::string bundleName);
 
@@ -350,7 +350,7 @@ private:
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession, bool addCapsule,
-                        bool isCapsuleUpdate);
+                        bool isCapsuleUpdate, bool isPhoto);
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
@@ -531,9 +531,9 @@ private:
     void UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd);
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
-        const AVSessionDescriptor* histroyDescriptor);
+        const AVSessionDescriptor* histroyDescriptor, bool isPhoto);
     
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateNftRemoveWant(int32_t uid);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateNftRemoveWant(int32_t uid, bool isPhoto);
 
     void DoMetadataImgClean(AVMetaData& data);
 
@@ -567,6 +567,8 @@ private:
     void AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     void AddAncoColdStartServiceCallback(sptr<AVSessionItem>& session);
+
+    void AddCastServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     bool VerifyNotification();
 
@@ -617,6 +619,10 @@ private:
     void AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     std::string GetLocalTitle();
+
+    std::string GetDescriptorTitle(const AVSessionDescriptor* historyDescriptor);
+
+    void DealFlowControl(int32_t uid, bool isBroker);
 
     bool InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray);
 
@@ -752,7 +758,6 @@ private:
     static constexpr const char *DEFAULT_SESSION_ID = "default";
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
-    static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
 
@@ -812,6 +817,10 @@ private:
     const uint8_t doRemoteLoadRetryTime = 5;
     const int32_t defaultUserId = 100;
     const int32_t mediaControlAncoParam = 52225;
+    const int32_t systemuiLiveviewTypeCodeMediacontroller = 2;
+    const int32_t systemuiLiveviewTypeCodePhoto = 27;
+    const int32_t mediacontrollerNotifyId = 0;
+    const int32_t photoNotifyId = 1;
 
     const std::string sessionTypePhoto = "photo";
 };

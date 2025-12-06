@@ -185,6 +185,26 @@ void AVSessionItem::DelRecommend()
 #endif
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionItem::DestroyCast(bool continuePlay)
+{
+    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+        if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
+            serviceCallbackForPhotoCast_(descriptor_.sessionId_, false);
+        }
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+        if (!collaborationNeedNetworkId_.empty()) {
+            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+        }
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
+        ReleaseCast(continuePlay);
+        StopCastSession();
+    }
+}
+#endif
+
 int32_t AVSessionItem::DestroyTask(bool continuePlay)
 {
     {
@@ -222,17 +242,7 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}lld", (long long)castHandle_);
-    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
-            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-        if (!collaborationNeedNetworkId_.empty()) {
-            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
-                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-        }
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
-        ReleaseCast(continuePlay);
-        StopCastSession();
-    }
+    DestroyCast(continuePlay);
     ReleaseAVCastControllerInner();
     StopCastDisplayListener();
 #endif
@@ -438,9 +448,19 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
 {
     bool hasPixelMap = (meta.GetMediaImage() != nullptr);
     SLOGI("MediaCapsule addLocalCapsule hasImage_:%{public}d isMediaChange_:%{public}d", hasPixelMap, isMediaChange_);
-    if (serviceCallbackForNtf_ && hasPixelMap && isMediaChange_) {
-        serviceCallbackForNtf_(GetSessionId(), isMediaChange_);
-        isMediaChange_ = false;
+    if (isMediaChange_) {
+        if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
+            SLOGI("photo MediaChange");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+            if (serviceCallbackForPhotoCast_ && IsCasting()) {
+                serviceCallbackForPhotoCast_(GetSessionId(), true);
+                isMediaChange_ = false;
+            }
+#endif
+        } else if (serviceCallbackForNtf_ && hasPixelMap) {
+            serviceCallbackForNtf_(GetSessionId(), isMediaChange_);
+            isMediaChange_ = false;
+        }
     }
     ProcessFrontSession("SetAVMetaData");
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
@@ -1983,9 +2003,16 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             SLOGI("AVSessionItem send callStart event to service for connected");
             callStartCallback_(*this);
         }
+        if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
+            serviceCallbackForPhotoCast_(GetSessionId(), true);
+        }
     }
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
+        if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO &&
+            !isSwitchNewDevice_) {
+            serviceCallbackForPhotoCast_(GetSessionId(), false);
+        }
         DealDisconnect(deviceInfo, isNeedRemove);
     }
     DealOutputDeviceChange(castState, outputDeviceInfo);
@@ -2316,6 +2343,12 @@ void AVSessionItem::SetServiceCallbackForCastNtfCapsule(const std::function<void
 {
     SLOGI("SetServiceCallbackForCastNtfCapsule in");
     serviceCallbackForCastNtf_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback)
+{
+    SLOGI("SetServiceCallbackForPhotoCast in");
+    serviceCallbackForPhotoCast_ = callback;
 }
 #endif
 

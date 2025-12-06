@@ -715,10 +715,56 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     g_AVSessionService->UpdateTopSession(avsessionItem);
     bool ret = g_AVSessionService->topSession_->IsCasting();
     EXPECT_EQ(ret, false);
-    g_AVSessionService->HandleRemoveMediaCardEvent();
+    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_002
+ * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a valid session.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_002, TestSize.Level0)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+         g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_PHOTO, false, elementName);
+    avsessionItem->castHandle_ = 1;
+    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
+    bool ret = avsessionItem->IsCasting();
+    EXPECT_EQ(ret, false);
+    EXPECT_NE(avsessionItem, nullptr);
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_003
+ * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a valid session.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_003, TestSize.Level0)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+         g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_PHOTO, false, elementName);
+    avsessionItem->castHandle_ = 1;
+    g_AVSessionService->HandleRemoveMediaCardEvent(avsessionItem->GetUid(), true);
+    bool ret = avsessionItem->IsCasting();
+    EXPECT_EQ(ret, false);
+    EXPECT_NE(avsessionItem, nullptr);
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_003 end!");
 }
 
 /**
@@ -1028,6 +1074,75 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_AddCapsuleS
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_AddCapsuleServiceCallback_001 end!");
 }
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_AddCastServiceCallback_001
+ * @tc.desc: video stream
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_AddCastServiceCallback_001, TestSize.Level0)
+{
+    SLOGD("AVSessionServiceAddedTest_AddCastServiceCallback_001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+    std::string sessionId = "test";
+    g_AVSessionService->AddCastServiceCallback(avsessionItem);
+    auto callback = avsessionItem->serviceCallbackForStream_;
+    callback(sessionId);
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_AddCastServiceCallback_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_AddCastServiceCallback_002
+ * @tc.desc: not photo session
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_AddCastServiceCallback_002, TestSize.Level0)
+{
+    SLOGD("AVSessionServiceAddedTest_AddCastServiceCallback_002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+    std::string sessionId = "test";
+    g_AVSessionService->AddCastServiceCallback(avsessionItem);
+    auto callback = avsessionItem->serviceCallbackForPhotoCast_;
+    callback(sessionId, false);
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_AddCastServiceCallback_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_AddCastServiceCallback_003
+ * @tc.desc: photo session
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_AddCastServiceCallback_003, TestSize.Level0)
+{
+    SLOGD("AVSessionServiceAddedTest_AddCastServiceCallback_003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_PHOTO, false, elementName);
+    EXPECT_EQ(avsessionItem != nullptr, true);
+    std::string sessionId = "test";
+    g_AVSessionService->AddCastServiceCallback(avsessionItem);
+    auto callback = avsessionItem->serviceCallbackForPhotoCast_;
+    callback(sessionId, true);
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_AddCastServiceCallback_003 end!");
+}
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 
 /**
@@ -1196,11 +1311,34 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_NotifySyste
     bool addCapsule = true;
     bool isCapsuleUpdate = true;
     g_AVSessionService->NotifySystemUI(historyDescriptor.get(),
-        isActiveSession, addCapsule, isCapsuleUpdate);
+        isActiveSession, addCapsule, isCapsuleUpdate, false);
     bool ret = addCapsule && g_AVSessionService->topSession_;
     EXPECT_EQ(ret, true);
 
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGI("AVSessionServiceAddedTest_NotifySystemUI_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_DealFlowControl001
+ * @tc.desc: not photo session
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DealFlowControl001, TestSize.Level1)
+{
+    SLOGD("AVSessionServiceAddedTest_DealFlowControl001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_PHOTO, false, elementName);
+    EXPECT_TRUE(avsessionItem != nullptr);
+    avsessionItem->Activate();
+    int32_t uid = avsessionItem->GetUid();
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    g_AVSessionService->DealFlowControl(uid, false);
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_DealFlowControl001 end!");
 }
