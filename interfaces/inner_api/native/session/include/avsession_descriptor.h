@@ -55,6 +55,7 @@ public:
     AudioCapabilities audioCapabilities_;
     std::string bleMac_;
     int32_t triggerType_ {};
+    std::string uuid_;
 };
 
 class OutputDeviceInfo : public Parcelable {
