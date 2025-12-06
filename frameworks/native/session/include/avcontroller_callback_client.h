@@ -55,6 +55,9 @@ public:
 
     ErrCode OnCustomData(const AAFwk::WantParams& extras) override;
 
+    ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override;
+
+    ErrCode OnDesktopLyricStateChanged(const DesktopLyricState& state) override;
 private:
     std::shared_ptr<AVControllerCallback> callback_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;

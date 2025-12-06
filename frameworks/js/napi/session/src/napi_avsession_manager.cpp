@@ -91,6 +91,8 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_REPEAT_CAST, 6600101},
     {ERR_WAIT_ALLCONNECT_TIMEOUT, 6600101},
     {ERR_ALLCONNECT_CAST_REJECT, 6600101},
+    {ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600110},
+    {ERR_DESKTOPLYRIC_NOT_ENABLE, 6600111},
 };
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 {
@@ -117,6 +119,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("stopCasting", StopCast),
         DECLARE_NAPI_STATIC_FUNCTION("getDistributedSessionController", GetDistributedSessionControllers),
         DECLARE_NAPI_STATIC_FUNCTION("getAVSession", GetAVSession),
+        DECLARE_NAPI_STATIC_FUNCTION("isDesktopLyricFeatureSupported", IsDesktopLyricFeatureSupported),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
@@ -1474,6 +1477,37 @@ napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
 #else
     return nullptr;
 #endif
+}
+
+napi_value NapiAVSessionManager::IsDesktopLyricFeatureSupported(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        bool isSupported_ = false;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("Activate failed : no memory");
+        NapiUtils::ThrowError(env, "Activate failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        int32_t ret = AVSessionManager::GetInstance().IsDesktopLyricFeatureSupported(context->isSupported_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->errMessage = "IsDesktopLyricFeatureSupported failed : native server exception";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value &output) {
+        context->status = NapiUtils::SetValue(env, context->isSupported_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "IsDesktopLyricFeatureSupported", executor, complete);
 }
 
 napi_status NapiAVSessionManager::OnSessionCreate(napi_env env, napi_value callback)

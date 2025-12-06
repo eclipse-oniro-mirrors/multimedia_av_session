@@ -314,6 +314,18 @@ void NapiAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDispl
     HandleEvent(EVENT_DISPLAY_CHANGE, castDisplayInfo);
 }
 
+void NapiAVSessionCallback::OnDesktopLyricVisibilityChanged(bool isVisible)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnDesktopLyricVisibilityChanged");
+    HandleEvent(EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED, isVisible);
+}
+
+void NapiAVSessionCallback::OnDesktopLyricStateChanged(const DesktopLyricState &state)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnDesktopLyricStateChanged");
+    HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, state);
+}
+
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     SLOGI("Add callback %{public}d", event);

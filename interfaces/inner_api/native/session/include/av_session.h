@@ -268,6 +268,51 @@ public:
     */
     virtual int32_t UpdateAVQueueInfo(const AVQueueInfo& info) {return 0;};
 
+    /**
+     * @brief Enable desktop lyric.
+     *
+     * @param isEnabled Whether desktop lyric is enabled
+     * @return Return whether the enable is successful
+     * @since 23
+     */
+    virtual int32_t EnableDesktopLyric(bool isEnabled) {return 0;};
+
+    /**
+     * @brief Set desktop lyric visible.
+     *
+     * @param isVisible Whether desktop lyric is visible
+     * @return Return whether the set is successful
+     * @since 23
+     */
+    virtual int32_t SetDesktopLyricVisible(bool isVisible) {return 0;};
+
+    /**
+     * @brief Get desktop lyric visible.
+     *
+     * @param isVisible Whether desktop lyric is visible
+     * @return Return whether the get is successful
+     * @since 23
+     */
+    virtual int32_t IsDesktopLyricVisible(bool &isVisible) {return 0;};
+
+    /**
+     * @brief Set desktop lyric state.
+     *
+     * @param state State of desktop lyric
+     * @return Return whether the set is successful
+     * @since 23
+     */
+    virtual int32_t SetDesktopLyricState(DesktopLyricState state) {return 0;};
+
+    /**
+     * @brief Get desktop lyric state.
+     *
+     * @param state State of desktop lyric
+     * @return Return whether the get is successful
+     * @since 23
+     */
+    virtual int32_t GetDesktopLyricState(DesktopLyricState &state) {return 0;};
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
      * @brief Get the controller corresponding to this session.

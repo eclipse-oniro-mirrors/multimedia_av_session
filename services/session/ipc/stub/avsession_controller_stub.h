@@ -87,6 +87,16 @@ private:
 
     int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleIsDesktopLyricEnabled(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleSetDesktopLyricVisible(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleIsDesktopLyricVisible(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleSetDesktopLyricState(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleGetDesktopLyricState(MessageParcel &data, MessageParcel &reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     virtual void DoMetadataImgClean(AVMetaData& data) = 0;
@@ -138,7 +148,17 @@ private:
         {CONTROLLER_CMD_GET_AVCALL_STATE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCallState(data, reply); }},
         {CONTROLLER_CMD_SET_AVCALL_STATE_FILTER,
-            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVCallStateFilter(data, reply); }}
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetAVCallStateFilter(data, reply); }},
+        {CONTROLLER_CMD_IS_DESKTOP_LYRIC_ENABLED,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleIsDesktopLyricEnabled(data, reply); }},
+        {CONTROLLER_CMD_SET_DESKTOP_LYRIC_VISIBLE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetDesktopLyricVisible(data, reply); }},
+        {CONTROLLER_CMD_IS_DESKTOP_LYRIC_VISIBLE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleIsDesktopLyricVisible(data, reply); }},
+        {CONTROLLER_CMD_SET_DESKTOP_LYRIC_STATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetDesktopLyricState(data, reply); }},
+        {CONTROLLER_CMD_GET_DESKTOP_LYRIC_STATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetDesktopLyricState(data, reply); }}
     };
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
         {CONTROLLER_CMD_REGISTER_CALLBACK, "HandleRegisterCallbackInner"},
@@ -163,7 +183,12 @@ private:
         {CONTROLLER_CMD_GET_AVCALL_META_DATA, "HandleGetAVCallMetaData"},
         {CONTROLLER_CMD_SET_AVCALL_META_FILTER, "HandleSetAVCallMetaFilter"},
         {CONTROLLER_CMD_GET_AVCALL_STATE, "HandleGetAVCallState"},
-        {CONTROLLER_CMD_SET_AVCALL_STATE_FILTER, "HandleSetAVCallStateFilter"}
+        {CONTROLLER_CMD_SET_AVCALL_STATE_FILTER, "HandleSetAVCallStateFilter"},
+        {CONTROLLER_CMD_IS_DESKTOP_LYRIC_ENABLED, "HandleCheckDesktopLyricSupported"},
+        {CONTROLLER_CMD_SET_DESKTOP_LYRIC_VISIBLE, "HandleSetDesktopLyricVisible"},
+        {CONTROLLER_CMD_IS_DESKTOP_LYRIC_VISIBLE, "HandleIsDesktopLyricVisible"},
+        {CONTROLLER_CMD_SET_DESKTOP_LYRIC_STATE, "HandleSetDesktopLyricState"},
+        {CONTROLLER_CMD_GET_DESKTOP_LYRIC_STATE, "HandleGetDesktopLyricState"},
     };
     const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
     static std::recursive_mutex getMetadataLock_;

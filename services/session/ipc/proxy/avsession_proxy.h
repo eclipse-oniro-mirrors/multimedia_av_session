@@ -100,6 +100,16 @@ public:
 
     int32_t UpdateAVQueueInfo(const AVQueueInfo& info) override;
 
+    int32_t EnableDesktopLyric(bool isEnabled) override;
+
+    int32_t SetDesktopLyricVisible(bool isVisible) override;
+
+    int32_t IsDesktopLyricVisible(bool &isVisible) override;
+
+    int32_t SetDesktopLyricState(DesktopLyricState state) override;
+
+    int32_t GetDesktopLyricState(DesktopLyricState &state) override;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t ReleaseCast(bool continuePlay = false) override;
 #endif

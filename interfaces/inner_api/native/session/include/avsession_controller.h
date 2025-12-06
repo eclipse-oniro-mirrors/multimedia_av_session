@@ -225,6 +225,51 @@ public:
     virtual int32_t GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras) = 0;
 
     /**
+     * @brief Get desktop lyric enable.
+     *
+     * @param isEnabled Whether desktop lyric is enabled
+     * @return Return whether the get is successful
+     * @since 23
+     */
+    virtual int32_t IsDesktopLyricEnabled(bool &isEnabled) { return AVSESSION_SUCCESS; };
+
+    /**
+     * @brief Set desktop lyric visible.
+     *
+     * @param isVisible Whether desktop lyric is visible
+     * @return Return whether the set is successful
+     * @since 23
+     */
+    virtual int32_t SetDesktopLyricVisible(bool isVisible) { return AVSESSION_SUCCESS; };
+
+    /**
+     * @brief Get desktop lyric visible.
+     *
+     * @param isVisible Whether desktop lyric is visible
+     * @return Return whether the get is successful
+     * @since 23
+     */
+    virtual int32_t IsDesktopLyricVisible(bool &isVisible) { return AVSESSION_SUCCESS; };
+
+    /**
+     * @brief Set desktop lyric state.
+     *
+     * @param state State of desktop lyric
+     * @return Return whether the set is successful
+     * @since 23
+     */
+    virtual int32_t SetDesktopLyricState(DesktopLyricState state) { return AVSESSION_SUCCESS; };
+
+    /**
+     * @brief Get desktop lyric state.
+     *
+     * @param state State of desktop lyric
+     * @return Return whether the get is successful
+     * @since 23
+     */
+    virtual int32_t GetDesktopLyricState(DesktopLyricState &state) { return AVSESSION_SUCCESS; };
+
+    /**
      * @brief Destroy session.
      *
      * @return Returns whether destroy successful.

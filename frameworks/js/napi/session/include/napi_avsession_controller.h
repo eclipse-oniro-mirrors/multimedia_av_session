@@ -70,6 +70,11 @@ private:
     static napi_value GetExtras(napi_env env, napi_callback_info info);
     static napi_value GetExtrasWithEvent(napi_env env, napi_callback_info info);
     static napi_value SendCustomData(napi_env env, napi_callback_info info);
+    static napi_value IsDesktopLyricEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetDesktopLyricVisible(napi_env env, napi_callback_info info);
+    static napi_value IsDesktopLyricVisible(napi_env env, napi_callback_info info);
+    static napi_value SetDesktopLyricState(napi_env env, napi_callback_info info);
+    static napi_value GetDesktopLyricState(napi_env env, napi_callback_info info);
 
     static napi_status OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
         napi_value param, napi_value callback);
@@ -97,6 +102,8 @@ private:
         napi_value param, napi_value callback);
     static napi_status OnCustomData(napi_env env, NapiAVSessionController* napiController,
         napi_value param, napi_value callback);
+    static napi_value OnDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
+    static napi_value OnDesktopLyricStateChanged(napi_env env, napi_callback_info info);
 
     static napi_status OffAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
@@ -121,6 +128,8 @@ private:
         napi_value callback);
     static napi_status OffCustomData(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
+    static napi_value OffDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
+    static napi_value OffDesktopLyricStateChanged(napi_env env, napi_callback_info info);
 
     static napi_status SetAVCallMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status SetAVCallStateFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
@@ -131,6 +140,7 @@ private:
                                         const std::string& eventName, napi_value filter, napi_value callback);
     static napi_status DoRegisterCallback(napi_env env, NapiAVSessionController* napiController);
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
+    static void ErrCodeToMessage(int32_t errCode, const std::string &funcName, std::string &message);
 
     napi_ref wrapperRef_ {};
     std::string sessionId_;

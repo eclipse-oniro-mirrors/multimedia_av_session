@@ -161,6 +161,11 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getAVCastController", GetAVCastController),
         DECLARE_NAPI_FUNCTION("stopCasting", ReleaseCast),
         DECLARE_NAPI_FUNCTION("getAllCastDisplays", GetAllCastDisplays),
+        DECLARE_NAPI_FUNCTION("enableDesktopLyric", EnableDesktopLyric),
+        DECLARE_NAPI_FUNCTION("setDesktopLyricVisible", SetDesktopLyricVisible),
+        DECLARE_NAPI_FUNCTION("isDesktopLyricVisible", IsDesktopLyricVisible),
+        DECLARE_NAPI_FUNCTION("setDesktopLyricState", SetDesktopLyricState),
+        DECLARE_NAPI_FUNCTION("getDesktopLyricState", GetDesktopLyricState),
         DECLARE_NAPI_FUNCTION("onPlay", OnEventPlay),
         DECLARE_NAPI_FUNCTION("offPlay", OffEventPlay),
         DECLARE_NAPI_FUNCTION("onPlayNext", OnEventPlayNext),
@@ -171,6 +176,10 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("offFastForward", OffEventFastForward),
         DECLARE_NAPI_FUNCTION("onRewind", OnEventRewind),
         DECLARE_NAPI_FUNCTION("offRewind", OffEventRewind),
+        DECLARE_NAPI_FUNCTION("onDesktopLyricVisibilityChanged", OnDesktopLyricVisibilityChanged),
+        DECLARE_NAPI_FUNCTION("offDesktopLyricVisibilityChanged", OffDesktopLyricVisibilityChanged),
+        DECLARE_NAPI_FUNCTION("onDesktopLyricStateChanged", OnDesktopLyricStateChanged),
+        DECLARE_NAPI_FUNCTION("offDesktopLyricStateChanged", OffDesktopLyricStateChanged),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor {};
@@ -614,6 +623,107 @@ napi_value NapiAVSession::OnEventRewind(napi_env env, napi_callback_info info)
     return NapiUtils::GetUndefinedValue(env);
 }
 
+napi_value NapiAVSession::OnDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnDesktopLyricVisibilityChanged failed : no memory");
+        return ThrowErrorAndReturn(env, "OnDesktopLyricVisibilityChanged failed : no memory", ERR_NO_MEMORY);
+    }
+
+    napi_value callback {};
+    auto input = [&callback, env, &context](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        SLOGE("OnDesktopLyricVisibilityChanged failed : session is nullptr");
+        return ThrowErrorAndReturn(env, "OnDesktopLyricVisibilityChanged failed : session is nullptr",
+            ERR_SESSION_NOT_EXIST);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+        if (napiSession->callback_ == nullptr) {
+            return ThrowErrorAndReturn(env, "OnDesktopLyricVisibilityChanged failed : no memory", ERR_NO_MEMORY);
+        }
+        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            return ThrowErrorAndReturnByErrCode(env, "OnDesktopLyricVisibilityChanged", ret);
+        }
+    }
+
+    if (napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
+        callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+
+napi_value NapiAVSession::OnDesktopLyricStateChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnDesktopLyricStateChanged failed : no memory");
+        return ThrowErrorAndReturn(env, "OnDesktopLyricStateChanged failed : no memory", ERR_NO_MEMORY);
+    }
+
+    napi_value callback {};
+    auto input = [&callback, env, &context](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        SLOGE("OnDesktopLyricStateChanged failed : session is nullptr");
+        return ThrowErrorAndReturn(env, "OnDesktopLyricStateChanged failed : session is nullptr",
+            ERR_SESSION_NOT_EXIST);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+        if (napiSession->callback_ == nullptr) {
+            return ThrowErrorAndReturn(env, "OnDesktopLyricStateChanged failed : no memory", ERR_NO_MEMORY);
+        }
+        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+        if (ret != AVSESSION_SUCCESS) {
+            return ThrowErrorAndReturnByErrCode(env, "OnDesktopLyricStateChanged", ret);
+        }
+    }
+
+    if (napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_DESKTOP_LYRIC_STATE_CHANGED,
+        callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
 napi_value NapiAVSession::ThrowErrorAndReturn(napi_env env, const std::string& message, int32_t errCode)
 {
     std::string tempMessage = message;
@@ -932,6 +1042,100 @@ napi_value NapiAVSession::OffEventRewind(napi_env env, napi_callback_info info)
         std::lock_guard lockGuard(registerEventLock_);
         registerEventList_.remove(AVControlCommand::SESSION_CMD_REWIND);
     }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OffDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffDesktopLyricVisibilityChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OffDesktopLyricVisibilityChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, &callback](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffDesktopLyricVisibilityChanged failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffDesktopLyricVisibilityChanged failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        SLOGE("OffDesktopLyricVisibilityChanged failed : callback is nullptr");
+        NapiUtils::ThrowError(env, "OffDesktopLyricVisibilityChanged failed : callback is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
+        callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OffDesktopLyricStateChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffDesktopLyricStateChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OffDesktopLyricStateChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, &callback](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffDesktopLyricStateChanged failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffDesktopLyricStateChanged failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        SLOGE("OffDesktopLyricStateChanged failed : callback is nullptr");
+        NapiUtils::ThrowError(env, "OffDesktopLyricStateChanged failed : callback is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_DESKTOP_LYRIC_STATE_CHANGED,
+        callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
     return NapiUtils::GetUndefinedValue(env);
 }
 
@@ -2009,6 +2213,213 @@ napi_value NapiAVSession::GetAllCastDisplays(napi_env env, napi_callback_info in
 #endif
 }
 
+napi_value NapiAVSession::EnableDesktopLyric(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        bool isEnabled_ = false;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("EnableDesktopLyric failed : no memory");
+        NapiUtils::ThrowError(env, "EnableDesktopLyric failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->isEnabled_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get isEnabled_ failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "EnableDesktopLyric", context->errMessage);
+            return;
+        }
+        int32_t ret = napiSession->session_->EnableDesktopLyric(context->isEnabled_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+            ErrCodeToMessage(ret, "EnableDesktopLyric", context->errMessage);
+        }
+    };
+    auto complete = [env](napi_value &output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "EnableDesktopLyric", executor, complete);
+}
+
+napi_value NapiAVSession::SetDesktopLyricVisible(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        bool isVisible_ = false;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetDesktopLyricVisible failed : no memory");
+        NapiUtils::ThrowError(env, "SetDesktopLyricVisible failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->isVisible_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get isVisible_ failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "SetDesktopLyricVisible", context->errMessage);
+            return;
+        }
+        int32_t ret = napiSession->session_->SetDesktopLyricVisible(context->isVisible_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+            ErrCodeToMessage(ret, "SetDesktopLyricVisible", context->errMessage);
+        }
+    };
+    auto complete = [env](napi_value &output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetDesktopLyricVisible", executor, complete);
+}
+
+napi_value NapiAVSession::IsDesktopLyricVisible(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        bool isEnable_ = false;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("IsDesktopLyricVisible failed : no memory");
+        NapiUtils::ThrowError(env, "IsDesktopLyricVisible failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "IsDesktopLyricVisible", context->errMessage);
+            return;
+        }
+        int32_t ret = napiSession->session_->IsDesktopLyricVisible(context->isEnable_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+            ErrCodeToMessage(ret, "IsDesktopLyricVisible", context->errMessage);
+        }
+    };
+
+    auto complete = [env, context](napi_value &output) {
+        context->status = NapiUtils::SetValue(env, context->isEnable_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "IsDesktopLyricVisible", executor, complete);
+}
+
+napi_value NapiAVSession::SetDesktopLyricState(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        DesktopLyricState state_ = {};
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetDesktopLyricState failed : no memory");
+        NapiUtils::ThrowError(env, "SetDesktopLyricState failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->state_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get state_ failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "SetDesktopLyricState", context->errMessage);
+            return;
+        }
+        int32_t ret = napiSession->session_->SetDesktopLyricState(context->state_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+            ErrCodeToMessage(ret, "SetDesktopLyricState", context->errMessage);
+        }
+    };
+    auto complete = [env](napi_value &output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetDesktopLyricState", executor, complete);
+}
+
+napi_value NapiAVSession::GetDesktopLyricState(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        DesktopLyricState state_ = {};
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("GetDesktopLyricState failed : no memory");
+        NapiUtils::ThrowError(env, "GetDesktopLyricState failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info);
+
+    auto executor = [context]() {
+        auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "GetDesktopLyricState", context->errMessage);
+            return;
+        }
+        int32_t ret = napiSession->session_->GetDesktopLyricState(context->state_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+            ErrCodeToMessage(ret, "GetDesktopLyricState", context->errMessage);
+        }
+    };
+
+    auto complete = [env, context](napi_value &output) {
+        context->status = NapiUtils::SetValue(env, context->state_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetDesktopLyricState", executor, complete);
+}
+
 void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
 {
     switch (errCode) {
@@ -2023,6 +2434,24 @@ void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
             break;
         default:
             message = "SetSessionEvent failed : native server exception";
+            break;
+    }
+}
+
+void NapiAVSession::ErrCodeToMessage(int32_t errCode, const std::string &funcName, std::string &message)
+{
+    switch (errCode) {
+        case ERR_SESSION_NOT_EXIST:
+            message = funcName + " failed : native session not exist";
+            break;
+        case ERR_DESKTOPLYRIC_NOT_SUPPORT:
+            message = funcName + " failed : native desktop lyrics feature is not supported";
+            break;
+        case ERR_DESKTOPLYRIC_NOT_ENABLE:
+            message = funcName + " failed : native desktop lyrics feature of this application is not enabled";
+            break;
+        default:
+            message = funcName + " failed : native server exception";
             break;
     }
 }

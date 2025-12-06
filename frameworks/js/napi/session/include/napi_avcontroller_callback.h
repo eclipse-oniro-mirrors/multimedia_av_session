@@ -40,6 +40,8 @@ public:
         EVENT_AVCALL_META_DATA_CHANGE,
         EVENT_AVCALL_STATE_CHANGE,
         EVENT_CUSTOM_DATA,
+        EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
+        EVENT_DESKTOP_LYRIC_STATE_CHANGED,
         EVENT_TYPE_MAX,
     };
 
@@ -59,6 +61,8 @@ public:
     void OnQueueTitleChange(const std::string& title) override;
     void OnExtrasChange(const AAFwk::WantParams& extras) override;
     void OnCustomData(const AAFwk::WantParams& data) override;
+    void OnDesktopLyricVisibilityChanged(bool isVisible) override;
+    void OnDesktopLyricStateChanged(const DesktopLyricState &state) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

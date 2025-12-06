@@ -349,6 +349,15 @@ public:
     */
     virtual int32_t GetSession(const AppExecFwk::ElementName& elementName,
         std::string& tag, std::shared_ptr<AVSession>& session) = 0;
+
+    /**
+     * Check whether the desktop lyric feature is supported.
+     *
+     * @param isSupported Whether the desktop lyric feature is supported
+     * @return Return whether the request for enabling the desktop lyrics feature was successful.
+     * @since 23
+    */
+    virtual int32_t IsDesktopLyricFeatureSupported(bool &isSupported) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

@@ -344,6 +344,18 @@ void NapiAVControllerCallback::OnExtrasChange(const AAFwk::WantParams& extras)
     HandleEvent(EVENT_EXTRAS_CHANGE, extras);
 }
 
+void NapiAVControllerCallback::OnDesktopLyricVisibilityChanged(bool isVisible)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnDesktopLyricVisibilityChanged");
+    HandleEvent(EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED, isVisible);
+}
+
+void NapiAVControllerCallback::OnDesktopLyricStateChanged(const DesktopLyricState& state)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnDesktopLyricStateChanged");
+    HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, state);
+}
+
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

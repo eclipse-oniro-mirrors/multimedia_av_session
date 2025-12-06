@@ -102,6 +102,8 @@ public:
 
     virtual int32_t GetSessionInner(const AppExecFwk::ElementName& elementName,
         std::string& tag, sptr<IRemoteObject>& session) = 0;
+
+    virtual int32_t IsDesktopLyricFeatureSupported(bool &isSupported) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_IAVSESSION_SERVICE_H

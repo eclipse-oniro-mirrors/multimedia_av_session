@@ -89,6 +89,16 @@ public:
 
     AppExecFwk::ElementName GetElementOfSession();
 
+    int32_t IsDesktopLyricEnabled(bool &isEnabled) override;
+
+    int32_t SetDesktopLyricVisible(bool isVisible) override;
+
+    int32_t IsDesktopLyricVisible(bool &isVisible) override;
+
+    int32_t SetDesktopLyricState(DesktopLyricState state) override;
+
+    int32_t GetDesktopLyricState(DesktopLyricState &state) override;
+
     void HandleSessionDestroy();
 
     void HandleAVCallStateChange(const AVCallState& avCallState);
@@ -115,6 +125,10 @@ public:
     void HandleExtrasChange(const AAFwk::WantParams& extras);
 
     void HandleCustomData(const AAFwk::WantParams& data);
+
+    void HandleDesktopLyricVisibilityChanged(bool isVisible);
+
+    void HandleDesktopLyricStateChanged(const DesktopLyricState &state);
 
     pid_t GetPid() const;
 

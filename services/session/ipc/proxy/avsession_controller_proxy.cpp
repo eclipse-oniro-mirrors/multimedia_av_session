@@ -680,4 +680,115 @@ bool AVSessionControllerProxy::IsDestroy()
     std::lock_guard lockGuard(controllerProxyLock_);
     return isDestroy_;
 }
+
+int32_t AVSessionControllerProxy::IsDesktopLyricEnabled(bool &isEnabled)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_IS_DESKTOP_LYRIC_ENABLED,
+        parcel, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(reply.ReadBool(isEnabled), ERR_UNMARSHALLING, "read isEnabled bool failed");
+    }
+    return ret;
+}
+
+int32_t AVSessionControllerProxy::SetDesktopLyricVisible(bool isVisible)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteBool(isVisible), ERR_MARSHALLING, "write isVisible failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_DESKTOP_LYRIC_VISIBLE,
+        parcel, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
+}
+
+int32_t AVSessionControllerProxy::IsDesktopLyricVisible(bool &isVisible)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_IS_DESKTOP_LYRIC_VISIBLE,
+        parcel, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(reply.ReadBool(isVisible), ERR_UNMARSHALLING, "read isVisible bool failed");
+    }
+    return ret;
+}
+
+int32_t AVSessionControllerProxy::SetDesktopLyricState(DesktopLyricState state)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(state.Marshalling(parcel), ERR_MARSHALLING, "write state failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_DESKTOP_LYRIC_STATE, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
+}
+
+int32_t AVSessionControllerProxy::GetDesktopLyricState(DesktopLyricState &state)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_DESKTOP_LYRIC_STATE,
+        parcel, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        std::shared_ptr<DesktopLyricState> desktopLyricState(DesktopLyricState::Unmarshalling(reply));
+        CHECK_AND_RETURN_RET_LOG(desktopLyricState != nullptr, ERR_UNMARSHALLING, "read desktopLyricState failed");
+        state = *desktopLyricState;
+    }
+    return ret;
+}
 }

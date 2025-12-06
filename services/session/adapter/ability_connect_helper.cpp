@@ -21,8 +21,16 @@
 #include "ipc_skeleton.h"
 #include "message_parcel.h"
 #include "system_ability_definition.h"
+#include "extension_manager_client.h"
 
 namespace OHOS::AVSession {
+const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
+const std::string DESKTOP_LYRIC_ABILITYNAME = "DesktopLyricAbility";
+sptr<DesktopLyricCallConnection> g_desktopLyricConnection = nullptr;
+std::mutex g_mutex;
+constexpr int32_t DESKTOP_LYRICS_ABILITY_CONNECTED = 2;
+constexpr int32_t DESKTOP_LYRICS_ABILITY_DISCONNECTED = 4;
+
 AbilityConnectHelper& AbilityConnectHelper::GetInstance()
 {
     static AbilityConnectHelper abilityConnectHelper;
@@ -129,6 +137,33 @@ int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, 
     return reply.ReadInt32() == ERR_OK ? AVSESSION_SUCCESS : ERR_ABILITY_NOT_AVAILABLE;
 }
 
+int32_t AbilityConnectHelper::StartDesktopLyricAbility(const std::string &sessionId, int32_t userId,
+    std::function<void(int32_t)> cb)
+{
+    SLOGI("sessionId=%{public}s userId=%{public}d", sessionId.c_str(), userId);
+    std::lock_guard<std::mutex> lock(g_mutex);
+    g_desktopLyricConnection = new(std::nothrow) DesktopLyricCallConnection(cb);
+    if (g_desktopLyricConnection == nullptr) {
+        SLOGE("create g_desktopLyricConnection fail");
+        return ERR_NO_MEMORY;
+    }
+
+    AAFwk::Want want;
+    want.SetElementName(MEDIA_CONTROL_BUNDLENAME, DESKTOP_LYRIC_ABILITYNAME);
+    want.SetParam("sessionId", sessionId);
+    int32_t result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want,
+        g_desktopLyricConnection, nullptr, userId);
+    return result;
+}
+
+int32_t AbilityConnectHelper::StopDesktopLyricAbility()
+{
+    SLOGI("entry");
+    std::lock_guard<std::mutex> lock(g_mutex);
+    int32_t result = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(g_desktopLyricConnection);
+    return result;
+}
+
 sptr<IRemoteObject> AbilityConnectHelper::GetSystemAbility()
 {
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -207,5 +242,31 @@ void AbilityConnectCallback::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
 {
     SLOGI("OnAbilityDisConnectDone callback, retcode:%{public}d, bundlename:%{public}s, abilityname:%{public}s",
         resultCode, element.GetBundleName().c_str(), element.GetAbilityName().c_str());
+}
+
+DesktopLyricCallConnection::~DesktopLyricCallConnection()
+{}
+
+void DesktopLyricCallConnection::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
+    const sptr<IRemoteObject>& __attribute__((unused)) remoteObject, int resultCode)
+{
+    SLOGI("OnAbilityConnectDone callback, retcode:%{public}d, bundlename:%{public}s, abilityname:%{public}s",
+        resultCode, element.GetBundleName().c_str(), element.GetAbilityName().c_str());
+    if (callback_) {
+        callback_(DESKTOP_LYRICS_ABILITY_CONNECTED);
+    } else {
+        SLOGE("callback no register");
+    }
+}
+
+void DesktopLyricCallConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode)
+{
+    SLOGI("OnAbilityDisConnectDone callback, retcode:%{public}d, bundlename:%{public}s, abilityname:%{public}s",
+        resultCode, element.GetBundleName().c_str(), element.GetAbilityName().c_str());
+    if (callback_) {
+        callback_(DESKTOP_LYRICS_ABILITY_DISCONNECTED);
+    } else {
+        SLOGE("callback no register");
+    }
 }
 } // namespace OHOS::AVSession
