@@ -29,6 +29,12 @@
  * @since 10
  */
 namespace OHOS::AVSession {
+enum class CAST_SIDE {
+    DEFAULT,
+    CAST_SINK,
+    CAST_SOURCE,
+};
+
 class AVRouter {
 public:
     /**
@@ -226,6 +232,18 @@ public:
      * @param { int64_t } castHandleconst - The ID corresponding to the provider.
      * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
      * @param { std::string } sessionId - avsession id.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 22
+    */
+    virtual void RegisterStashCallback(int64_t castHandleconst,
+        std::shared_ptr<IAVRouterListener> callback, std::string sessionId) = 0;
+
+    /**
+     * @brief Listen for AVRouter Callback event.
+     *
+     * @param { int64_t } castHandleconst - The ID corresponding to the provider.
+     * @param { std::shared_ptr<IAVRouterListener> } callback - Callback function.
+     * @param { std::string } sessionId - avsession id.
      * @param { DeviceInfo } deviceInfo The device info.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
@@ -331,6 +349,14 @@ public:
     virtual bool IsRemoteCasting() = 0;
 
     /**
+     * @brief set cast session create session info.
+     *
+     * @param { AAFwk::Want } cast session info want parameters.
+     * @since 22
+    */
+    virtual void SetSinkCastSessionInfo(const AAFwk::Want &want) = 0;
+
+    /**
      * @brief set mirror castHandle.
      *
      * @param castHandle The mirror cast handle.
@@ -341,10 +367,48 @@ public:
     /**
      * @brief notify cast session created.
      *
-     * @param castSessionId The cast session id.
      * @since 20
     */
-    virtual void NotifyCastSessionCreated(const std::string castSessionId) = 0;
+    virtual void NotifyCastSessionCreated() = 0;
+
+    /**
+     * @brief destroy cast session created.
+     *
+     * @since 22
+    */
+    virtual void DestroyCastSessionCreated() = 0;
+
+    /**
+     * @brief set the device to cast source or sink.
+     *
+     * @param castSide The device is cast source or sink.
+     * @since 22
+    */
+    virtual void SetCastSide(CAST_SIDE castSide) = 0;
+
+    /**
+     * @brief get the device cast side, which is cast source or sink.
+     *
+     * @return { CAST_SIDE } cast side.
+     * @since 22
+    */
+    virtual CAST_SIDE GetCastSide() = 0;
+
+    /**
+     * @brief set casting to device name.
+     *
+     * @param deviceName The casting to device name.
+     * @since 22
+    */
+    virtual void SetCastingDeviceName(std::string deviceName) = 0;
+
+    /**
+     * @brief get casting to device name.
+     *
+     * @return { string } Casting device name.
+     * @since 22
+    */
+    virtual std::string GetCastingDeviceName() = 0;
 
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;

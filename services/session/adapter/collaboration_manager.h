@@ -21,6 +21,8 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_descriptor.h"
+#include "avsession_info.h"
+#include "avsession_log.h"
 #include "collaboration_manager_utils.h"
 #include "plugin_lib.h"
 
@@ -41,6 +43,8 @@ public:
         bool checkLinkConflict = true);
     bool IsHiPlayDevice(const DeviceInfo& deviceInfo);
     bool IsHiPlayP2PDevice(const DeviceInfo& deviceInfo);
+    int32_t CastAddToCollaboration(const DeviceInfo& deviceInfo);
+    void ListenCollaborationApplyResult();
 
     std::function<void(const int32_t code)> sendCollaborationApplyResult_;
     std::function<void(void)> sendCollaborationOnStop_;
@@ -62,6 +66,15 @@ private:
     ServiceCollaborationManager_HardwareRequestInfo localHardwareList_;
     ServiceCollaborationManager_HardwareRequestInfo remoteHardwareList_[2];
     ServiceCollaborationManager_CommunicationRequestInfo communicationRequest_;
+
+    bool collaborationRejectFlag_ = false;
+    bool applyUserResultFlag_ = false;
+    bool applyResultFlag_ = false;
+    bool waitUserDecisionFlag_ = false;
+    std::mutex collaborationApplyResultMutex_;
+    std::condition_variable connectWaitCallbackCond_;
+    const int32_t collaborationCallbackTimeOut_ = 10;
+    const int32_t collaborationUserCallbackTimeOut_ = 60;
 };
 }   // namespace OHOS::AVSession
 #endif //COLLABORATION_MANAGER_H

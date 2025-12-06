@@ -94,9 +94,14 @@ public:
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
-    void ListenCollaborationApplyResult();
-
     void ListenCollaborationOnStop();
+
+    enum class MultiDeviceState {
+        DEFAULT,
+        CASTING_SWITCH_DEVICE,
+        CASTED_AND_CASTING,
+        CASTING_AND_CASTED,
+    }
 #endif
 
     void InitListener();
@@ -345,6 +350,12 @@ public:
     void SetServiceCallbackForStream(const std::function<void(std::string)>& callback);
     
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
+
+    void SetServiceCallbackForStopSinkCast(const std::function<void()>& callback);
+
+    void SetMultiDeviceState(MultiDeviceState multiDeviceState);
+
+    MultiDeviceState GetMultiDeviceState();
 #endif
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
@@ -557,17 +568,9 @@ private:
     int32_t newCastState = -1;
     std::pair<std::string, std::string> castServiceNameStatePair_;
 
-    bool collaborationRejectFlag_ = false;
-    bool applyUserResultFlag_ = false;
-    bool applyResultFlag_ = false;
-    bool waitUserDecisionFlag_ = false;
     std::atomic<bool> mirrorToStreamOnceFlag_ = false;
     std::string collaborationNeedDeviceId_;
     std::string collaborationNeedNetworkId_;
-    std::mutex collaborationApplyResultMutex_;
-    std::condition_variable connectWaitCallbackCond_;
-    const int32_t collaborationCallbackTimeOut_ = 10;
-    const int32_t collaborationUserCallbackTimeOut_ = 60;
 
     std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
@@ -582,11 +585,12 @@ private:
     uint32_t spid_ = 0;
     std::mutex spidMutex_;
     std::function<void(std::string)> serviceCallbackForStream_;
-    bool isSwitchNewDevice_ = false;
+    std::atomic<MultiDeviceState> multiDeviceState_ = MultiDeviceState::DEFAULT;
     OutputDeviceInfo newOutputDeviceInfo_;
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
+    std::function<void()> serviceCallbackStopSinkCast_;
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";

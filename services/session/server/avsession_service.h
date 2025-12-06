@@ -282,6 +282,10 @@ public:
 
     int32_t StopCast(const SessionToken& sessionToken) override;
 
+    int32_t StopSourceCast();
+
+    void AddStopSinkCastCallback(sptr<AVSessionItem>& session);
+
     int32_t checkEnableCast(bool enable) override;
 
     void setInCast(bool isInCast) override;

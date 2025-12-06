@@ -306,10 +306,15 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         servicePtr_->HandleBundleRemoveEvent(bundleName);
     } else if (action.compare("usual.event.CAST_SESSION_CREATE") == 0) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        std::string sessionId = want.GetStringParam("sessionId");
-        SLOGI("Cast Session Create success with sessionId length %{public}d", static_cast<int32_t>(sessionId.size()));
-        servicePtr_->checkEnableCast(true);
-        AVRouter::GetInstance().NotifyCastSessionCreated(sessionId);
+        AVRouter::GetInstance().SetSinkCastSessionInfo(want);
+
+        if (AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SOURCE &&
+            AVRouter::GetInstance().GetMirrorCastHandle() == -1) {
+            servicePtr_->StopSourceCast();
+        } else {
+            servicePtr_->checkEnableCast(true);
+            AVRouter::GetInstance().NotifyCastSessionCreated();
+        }
 #endif
     }
 }
@@ -1540,6 +1545,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     AddUpdateTopServiceCallback(sessionItem);
     AddAncoColdStartServiceCallback(sessionItem);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AddStopSinkCastCallback(sessionItem);
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "Session not exist");
@@ -1547,6 +1553,23 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     });
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionService::AddStopSinkCastCallback(sptr<AVSessionItem>& session)
+{
+    sessionItem->SetServiceCallbackForStopSinkCast([this]() {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        SLOGI("Start release cast session");
+        for (const auto& session : GetContainer().GetAllSessions()) {
+            if (session != nullptr && session->GetDescriptor().sessionTag_ == "RemoteCast") {
+                std::string sessionId = session->GetDescriptor().sessionId_;
+                SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+                session->StopCastSession();
+            }
+        }
+    });
+}
+#endif // CASTPLUS_CAST_ENGINE_ENABLE
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)

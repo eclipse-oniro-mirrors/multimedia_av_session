@@ -45,10 +45,10 @@ public:
     bool GetRemoteDrmCapabilities(std::string deviceId, std::vector<std::string> &drmCapabilities);
     void SetProtocolType(CastEngine::ProtocolType);
     void OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo);
-    void SetCastSource(bool isCastSource);
 
 private:
-    void computeToastOnDeviceState(CastEngine::DeviceState state);
+    void ComputeToastOnDeviceState(CastEngine::DeviceState state,
+        const CastEngine::CastRemoteDevice &castRemoteDevice);
 
     std::shared_ptr<CastEngine::ICastSession> castSession_;
     std::vector<std::shared_ptr<IAVCastSessionStateListener>> castSessionStateListenerList_;
@@ -57,13 +57,13 @@ private:
     std::string stashDeviceId_;
     CastEngine::ProtocolType protocolType_ = CastEngine::ProtocolType::CAST_PLUS_STREAM;
     int32_t avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
-    std::atomic<bool> isCastSource_ = false;
 
     const int32_t deviceStateConnection = 6;
     const int32_t eventIdStart = 2000;
     const int32_t eventIdEnd = 2999;
     const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
+    const std::string MEDIA_CAST_CONFLICT = "usual.event.MEDIA_CAST_CONFLICT";
 };
 } // namespace OHOS::AVSession
 
