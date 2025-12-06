@@ -84,6 +84,7 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
         }
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.bleMac_), false, "write bleMac failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.triggerType_), false, "write triggerType failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.uuid_), false, "write uuid failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -157,6 +158,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     deviceInfo.supportedPullClients_ = supportedPullClients;
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.bleMac_), false, "Read bleMac failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.triggerType_), false, "Read triggerType failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.uuid_), false, "Read uuid failed");
     outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
@@ -220,6 +222,7 @@ bool DeviceInfo::Marshalling(Parcel& out) const
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteString(bleMac_), false, "write bleMac failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(triggerType_), false, "write triggerType failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(uuid_), false, "write uuid failed");
     return true;
 }
 
@@ -279,6 +282,7 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     supportedPullClients_ = supportedPullClients;
     CHECK_AND_RETURN_RET_LOG(in.ReadString(bleMac_), false, "Read bleMac failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(triggerType_), false, "Read triggerType failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(uuid_), false, "Read uuid failed");
     return true;
 }
 

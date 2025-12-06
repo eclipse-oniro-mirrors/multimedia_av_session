@@ -403,6 +403,9 @@ private:
     bool SearchSpidInCapability(const std::string& deviceId);
     void CheckIfSendCapsule(const AVPlaybackState& state);
     void CheckSupportColdStartExtra(const AAFwk::WantParams& extras);
+    int32_t ProcessInputRedistributeEvent(const int32_t keyCode);
+    bool IsKeyEventSupported(const std::string &bundleName);
+    int32_t UpdateVolume(bool up);
     void GetCurrentAppIndexForSession();
     AbilityRuntime::WantAgent::WantAgent CreateWantAgentWithIndex(const AbilityRuntime::WantAgent::WantAgent& ability,
         int32_t index);
@@ -542,6 +545,8 @@ private:
     std::recursive_mutex updateTopLock_;
 
     std::shared_mutex coldStartCallbackLock_;
+
+    std::recursive_mutex launchAbilityLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::recursive_mutex castLock_;

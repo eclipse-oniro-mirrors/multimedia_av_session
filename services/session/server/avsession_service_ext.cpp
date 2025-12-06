@@ -42,19 +42,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         castDeviceId_ = "0";
         castDeviceName_ = " ";
         castDeviceType_ = 0;
-        std::string info;
-        std::string::size_type beginPos = 0;
-        std::string::size_type endPos = extraInfo.find(seperator);
-        while (endPos != std::string::npos) {
-            info = extraInfo.substr(beginPos, endPos - beginPos);
-            beginPos = endPos + seperator.size();
-            endPos = extraInfo.find(seperator, beginPos);
-            SplitExtraInfo(info);
-        }
-        if (beginPos != extraInfo.length()) {
-            info = extraInfo.substr(beginPos);
-            SplitExtraInfo(info);
-        }
+        SplitExtraInfo(extraInfo);
         NotifyMirrorToStreamCast();
         if (state == "IDLE") {
             SLOGI("call disable cast for cast idle");
@@ -108,27 +96,45 @@ void AVSessionService::NotifyMigrateStop(const std::string &deviceId)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionService::SplitExtraInfo(std::string info)
 {
-    if (info.find("SUPPORT_MIRROR_TO_STREAM") != std::string::npos && info.find("true") != std::string::npos) {
-        isSupportMirrorToStream_ = true;
+    cJSON* extraInfo = cJSON_Parse(info.c_str());
+    bool extraInfoFlag = (extraInfo == nullptr) || cJSON_IsInvalid(extraInfo) || cJSON_IsNull(extraInfo);
+    if (extraInfoFlag) {
+        SLOGE("extraInfo parse is not valid json");
+        cJSON_Delete(extraInfo);
+        return;
     }
-    if (info.find("appCastExit") != std::string::npos && info.find("true") != std::string::npos) {
-        appCastExit_ = true;
-    }
-    if (info.find("deviceId") != std::string::npos && info.find(":") != std::string::npos) {
-        std::string::size_type idBeginPos = info.find(":");
-        castDeviceId_ = info.substr(idBeginPos + beginAddPos,
-            info.length() -idBeginPos - endDecPos); // "deviceId" : "xxxx"
-    }
-    if (info.find("deviceName") != std::string::npos && info.find(":") != std::string::npos) {
-        std::string::size_type nameBeginPos = info.find(":");
-        castDeviceName_ = info.substr(nameBeginPos + beginAddPos,
-            info.length() - nameBeginPos - endDecPos); // "deviceName" : "xxxx"
-    }
-    if (info.find("deviceType") != std::string::npos && info.find(":") != std::string::npos) {
-        std::string::size_type typeBeginPos = info.find(":");
-        std::string tmpType = info.substr(typeBeginPos + typeAddPos, info.length()); // "deviceType" : xxx
-        castDeviceType_ = atoi(tmpType.c_str());
-    }
+
+    cJSON* supportMirrorToStreamItem = cJSON_GetObjectItem(extraInfo, "SUPPORT_MIRROR_TO_STREAM");
+    CHECK_AND_PRINT_LOG(supportMirrorToStreamItem != nullptr, "supportMirrorToStreamItem is nullptr");
+    bool supportMirrorToStreamItemFlag = (supportMirrorToStreamItem != nullptr) &&
+        !cJSON_IsInvalid(supportMirrorToStreamItem) && !cJSON_IsNull(supportMirrorToStreamItem) &&
+        cJSON_IsBool(supportMirrorToStreamItem) && cJSON_IsTrue(supportMirrorToStreamItem);
+    isSupportMirrorToStream_ = supportMirrorToStreamItemFlag ? cJSON_IsTrue(supportMirrorToStreamItem) : false;
+
+    cJSON* appCastExitItem = cJSON_GetObjectItem(extraInfo, "appCastExit");
+    CHECK_AND_PRINT_LOG(appCastExitItem != nullptr, "appCastExitItem is nullptr");
+    bool appCastExitItemFlag = (appCastExitItem != nullptr) && !cJSON_IsInvalid(appCastExitItem) &&
+        !cJSON_IsNull(appCastExitItem) && cJSON_IsBool(appCastExitItem) && cJSON_IsTrue(appCastExitItem);
+    appCastExit_ = appCastExitItemFlag ? cJSON_IsTrue(appCastExitItem) : false;
+
+    cJSON* deviceIdItem = cJSON_GetObjectItem(extraInfo, "deviceId");
+    CHECK_AND_PRINT_LOG(deviceIdItem != nullptr, "deviceIdItem is nullptr");
+    bool deviceIdItemFlag = (deviceIdItem != nullptr) && !cJSON_IsInvalid(deviceIdItem) &&
+        !cJSON_IsNull(deviceIdItem) && cJSON_IsString(deviceIdItem) && deviceIdItem->valuestring != nullptr;
+    castDeviceId_ = deviceIdItemFlag ? std::string(deviceIdItem->valuestring) : "0";
+
+    cJSON* deviceNameItem = cJSON_GetObjectItem(extraInfo, "deviceName");
+    CHECK_AND_PRINT_LOG(deviceNameItem != nullptr, "deviceNameItem is nullptr");
+    bool deviceNameItemFlag = (deviceNameItem != nullptr) && !cJSON_IsInvalid(deviceNameItem) &&
+        !cJSON_IsNull(deviceNameItem) && cJSON_IsString(deviceNameItem) && deviceNameItem->valuestring != nullptr;
+    castDeviceName_ = deviceNameItemFlag ? std::string(deviceNameItem->valuestring) : " ";
+
+    cJSON* deviceTypeItem = cJSON_GetObjectItem(extraInfo, "deviceType");
+    CHECK_AND_PRINT_LOG(deviceTypeItem != nullptr, "deviceTypeItem is nullptr");
+    bool deviceTypeItemFlag = (deviceTypeItem != nullptr) && !cJSON_IsInvalid(deviceTypeItem) &&
+        !cJSON_IsNull(deviceTypeItem) && cJSON_IsNumber(deviceTypeItem);
+    castDeviceType_ = deviceTypeItemFlag ? deviceTypeItem->valueint : 0;
+    cJSON_Delete(extraInfo);
 }
 #endif
 
@@ -392,6 +398,16 @@ void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
 int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    bool isPcm = (outputDeviceInfo.deviceInfos_[0].supportedProtocols_ & ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0;
+    if (isPcm) {
+        pcmCastSession_ = std::make_shared<PcmCastSession>();
+        return pcmCastSession_->StartCast(outputDeviceInfo, castServiceNameStatePair_);
+    }
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
+
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
         AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
@@ -414,6 +430,13 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
 
 int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    if (pcmCastSession_ != nullptr) {
+        pcmCastSession_->StopCast();
+        pcmCastSession_ = nullptr;
+    }
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
+
     sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "StopCast: session is not exist");
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
