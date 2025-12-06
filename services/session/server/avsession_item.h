@@ -157,6 +157,22 @@ public:
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
 
+    void SetDesktopLyricFeatureSupported(bool isSupported);
+
+    int32_t EnableDesktopLyric(bool isEnabled) override;
+
+    int32_t IsDesktopLyricEnabled(bool &isEnabled);
+
+    int32_t SetDesktopLyricVisible(bool isVisible) override;
+
+    int32_t IsDesktopLyricVisible(bool &isVisible) override;
+
+    int32_t SetDesktopLyricState(DesktopLyricState state) override;
+
+    int32_t GetDesktopLyricState(DesktopLyricState &state) override;
+
+    void SetLaunchDesktopLyricCb(std::function<int32_t(std::string)> cb);
+
     AVCallState GetAVCallState();
 
     AVCallMetaData GetAVCallMetaData();
@@ -409,6 +425,8 @@ private:
     void GetCurrentAppIndexForSession();
     AbilityRuntime::WantAgent::WantAgent CreateWantAgentWithIndex(const AbilityRuntime::WantAgent::WantAgent& ability,
         int32_t index);
+    void HandleDesktopLyricVisibilityChanged(bool isVisible);
+    void HandleDesktopLyricStateChanged(const DesktopLyricState &state);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -516,6 +534,14 @@ private:
     static constexpr const char *defaultBundleName = "com.example.himusicdemo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
     static constexpr const int32_t cancelTimeout = 5000;
+
+    std::atomic_bool isSupportedDesktopLyric_ = false;
+    std::atomic_bool isEnabledDesktopLyric_ = false;
+    std::mutex desktopLyricVisibleMutex_;
+    bool isDesktopLyricVisible_ = false;
+    std::mutex desktopLyricStateMutex_;
+    DesktopLyricState desktopLyricState_ = {};
+    std::function<int32_t(std::string)> launchDesktopLyricCb_;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;

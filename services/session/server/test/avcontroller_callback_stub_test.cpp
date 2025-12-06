@@ -148,6 +148,14 @@ class AVControllerCallbackStubDemo : public AVControllerCallbackStub {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override
+    {
+        return AVSESSION_SUCCESS;
+    };
 };
 
 /**

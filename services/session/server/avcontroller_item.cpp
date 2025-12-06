@@ -611,6 +611,24 @@ void AVControllerItem::HandleCustomData(const AAFwk::WantParams& data)
     }
 }
 
+void AVControllerItem::HandleDesktopLyricVisibilityChanged(bool isVisible)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnDesktopLyricVisibilityChanged");
+    if (callback_ != nullptr) {
+        callback_->OnDesktopLyricVisibilityChanged(isVisible);
+    }
+}
+
+void AVControllerItem::HandleDesktopLyricStateChanged(const DesktopLyricState &state)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::OnDesktopLyricStateChanged");
+    if (callback_ != nullptr) {
+        callback_->OnDesktopLyricStateChanged(state);
+    }
+}
+
 pid_t AVControllerItem::GetPid() const
 {
     return pid_;
@@ -634,5 +652,40 @@ std::string AVControllerItem::GetSessionType()
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, "SESSION_NULL", "session not exist");
     std::string sessionTypeStr = session_->GetSessionType();
     return sessionTypeStr;
+}
+
+int32_t AVControllerItem::IsDesktopLyricEnabled(bool &isEnabled)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    return session_->IsDesktopLyricEnabled(isEnabled);
+}
+
+int32_t AVControllerItem::SetDesktopLyricVisible(bool isVisible)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    return session_->SetDesktopLyricVisible(isVisible);
+}
+
+int32_t AVControllerItem::IsDesktopLyricVisible(bool &isVisible)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    return session_->IsDesktopLyricVisible(isVisible);
+}
+
+int32_t AVControllerItem::SetDesktopLyricState(DesktopLyricState state)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    return session_->SetDesktopLyricState(state);
+}
+
+int32_t AVControllerItem::GetDesktopLyricState(DesktopLyricState &state)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    return session_->GetDesktopLyricState(state);
 }
 } // namespace OHOS::AVSession

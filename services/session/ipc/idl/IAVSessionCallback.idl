@@ -19,6 +19,7 @@ sequenceable KeyEvent..OHOS.MMI.KeyEvent;
 sequenceable WantParams..OHOS.AAFwk.WantParams;
 sequenceable OHOS.IRemoteObject;
 sequenceable AvcontrolCommand..OHOS.AVSession.AVControlCommand;
+sequenceable AvsessionInfo..OHOS.AVSession.DesktopLyricState;
 
 interface OHOS.AVSession.IAVSessionCallback {
     [oneway] void OnAVCallAnswer();
@@ -66,4 +67,8 @@ interface OHOS.AVSession.IAVSessionCallback {
     [oneway] void OnCastDisplayChange([in] CastDisplayInfo castDisplayInfo);
 
     [oneway] void OnCustomData([in] WantParams customData);
+
+    [oneway] void OnDesktopLyricVisibilityChanged([in] boolean isVisible);
+
+    [oneway] void OnDesktopLyricStateChanged([in] DesktopLyricState state);
 }

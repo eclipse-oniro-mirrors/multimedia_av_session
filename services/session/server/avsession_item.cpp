@@ -823,6 +823,129 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 }
 // LCOV_EXCL_STOP
 
+void AVSessionItem::SetDesktopLyricFeatureSupported(bool isSupported)
+{
+    SLOGI("Set up support for desktop lyrics: isSupported=%{public}d", isSupported);
+    isSupportedDesktopLyric_ = isSupported;
+}
+
+int32_t AVSessionItem::EnableDesktopLyric(bool isEnabled)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    SLOGI("enable desktop lyrics: isEnable=%{public}d", isEnabled);
+    isEnabledDesktopLyric_ = isEnabled;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::IsDesktopLyricEnabled(bool &isEnabled)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    SLOGI("Entry");
+    isEnabled = isEnabledDesktopLyric_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetDesktopLyricVisible(bool isVisible)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+    SLOGI("set desktop lyrics visible: isVisible=%{public}d", isVisible);
+    std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
+    if (isVisible) {
+        if (!(launchDesktopLyricCb_ && launchDesktopLyricCb_(GetSessionId()) == AVSESSION_SUCCESS)) {
+            SLOGE("callback is null or launch media control failed");
+            return AVSESSION_ERROR;
+        }
+    }
+
+    isDesktopLyricVisible_ = isVisible;
+    HandleDesktopLyricVisibilityChanged(isVisible);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::IsDesktopLyricVisible(bool &isVisible)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+    SLOGI("Entry");
+    std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
+    isVisible = isDesktopLyricVisible_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetDesktopLyricState(DesktopLyricState state)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+        SLOGI("set desktop lyrics state: isLocked=%{public}d", state.isLocked_);
+    std::lock_guard<std::mutex> lock(desktopLyricStateMutex_);
+    desktopLyricState_ = state;
+    HandleDesktopLyricStateChanged(state);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::GetDesktopLyricState(DesktopLyricState &state)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+    SLOGI("entry");
+    std::lock_guard<std::mutex> lock(desktopLyricStateMutex_);
+    state = desktopLyricState_;
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::SetLaunchDesktopLyricCb(std::function<int32_t(std::string)> cb)
+{
+    std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
+    launchDesktopLyricCb_ = std::move(cb);
+}
+
+void AVSessionItem::HandleDesktopLyricVisibilityChanged(bool isVisible)
+{
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callback_ != nullptr) {
+            callback_->OnDesktopLyricVisibilityChanged(isVisible);
+        }
+    }
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandleDesktopLyricVisibilityChanged(isVisible);
+            }
+        }
+    }
+}
+
+void AVSessionItem::HandleDesktopLyricStateChanged(const DesktopLyricState &state)
+{
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callback_ != nullptr) {
+            callback_->OnDesktopLyricStateChanged(state);
+        }
+    }
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto &[pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandleDesktopLyricStateChanged(state);
+            }
+        }
+    }
+}
+
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
     {

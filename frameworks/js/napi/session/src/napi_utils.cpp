@@ -2251,6 +2251,30 @@ napi_status NapiUtils::SetValue(napi_env env, const AudioStreamInfo& in, napi_va
     return napi_ok;
 }
 
+/* napi_value -> AudioStreamInfo */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, DesktopLyricState &out)
+{
+    napi_value value {};
+    napi_status status = napi_get_named_property(env, in, "isLocked", &value);
+    CHECK_RETURN(status == napi_ok, "get isLocked failed", status);
+    status = GetValue(env, value, out.isLocked_);
+    CHECK_RETURN(status == napi_ok, "get isLocked value failed", status);
+    return napi_ok;
+}
+
+/* napi_value <- AudioStreamInfo */
+napi_status NapiUtils::SetValue(napi_env env, const DesktopLyricState &in, napi_value &out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN(status == napi_ok, "create object failed", status);
+    napi_value property = nullptr;
+    status = SetValue(env, in.isLocked_, property);
+    CHECK_RETURN(status == napi_ok, "create object failed", status);
+    status = napi_set_named_property(env, out, "isLocked", property);
+    CHECK_RETURN(status == napi_ok, "set property isLocked failed", status);
+    return status;
+}
+
 napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)
 {
     napi_value message = nullptr;

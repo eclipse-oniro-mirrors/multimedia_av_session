@@ -81,6 +81,16 @@ public:
 
     bool IsDestroy() override;
 
+    int32_t IsDesktopLyricEnabled(bool &isEnabled) override;
+
+    int32_t SetDesktopLyricVisible(bool isVisible) override;
+
+    int32_t IsDesktopLyricVisible(bool &isVisible) override;
+
+    int32_t SetDesktopLyricState(DesktopLyricState state) override;
+
+    int32_t GetDesktopLyricState(DesktopLyricState &state) override;
+
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 

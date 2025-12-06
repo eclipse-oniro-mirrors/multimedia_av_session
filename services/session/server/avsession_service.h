@@ -221,6 +221,8 @@ public:
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
+    int32_t IsDesktopLyricFeatureSupported(bool &isSupported) override;
+
     void OnClientDied(pid_t pid, pid_t uid);
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
@@ -322,6 +324,12 @@ public:
     void NotifyRemoteBundleChange(const std::string bundleName);
 
     bool CheckIfOtherAudioPlaying();
+
+    int32_t StartDesktopLyricAbility(const std::string &sessionId);
+
+    int32_t StopDesktopLyricAbility();
+
+    void SetDesktopLyricAbilityState(int32_t state);
 
 private:
     void NotifyProcessStatus(bool isStart);
@@ -775,6 +783,9 @@ private:
     std::map<std::string, std::shared_ptr<MigrateAVSessionServer>> migrateAVSessionServerMap_;
     std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
     std::recursive_mutex migrateProxyMapLock_;
+
+    int32_t desktopLyricAbilityState_ = 0;
+    std::mutex desktopLyricAbilityStateMutex_;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;

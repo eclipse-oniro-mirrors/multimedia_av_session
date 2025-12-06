@@ -21,6 +21,7 @@
  sequenceable WantParams..OHOS.AAFwk.WantParams;
  sequenceable AvqueueItem..OHOS.AVSession.AVQueueItem;
  sequenceable OHOS.IRemoteObject;
+ sequenceable AvsessionInfo..OHOS.AVSession.DesktopLyricState;
 
  interface OHOS.AVSession.IAVControllerCallback {
    [oneway] void OnSessionDestroy();
@@ -48,4 +49,8 @@
    [oneway] void OnExtrasChange([in] WantParams extras);
 
    [oneway] void OnCustomData([in] WantParams customData);
+
+   [oneway] void OnDesktopLyricVisibilityChanged([in] boolean isVisible);
+
+   [oneway] void OnDesktopLyricStateChanged([in] DesktopLyricState state);
  }

@@ -279,6 +279,28 @@ ErrCode AVSessionCallbackClient::OnCustomData(const AAFwk::WantParams& data)
     return AVSESSION_SUCCESS;
 }
 
+ErrCode AVSessionCallbackClient::OnDesktopLyricVisibilityChanged(bool isVisible)
+{
+    CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, isVisible]() { callback->OnDesktopLyricVisibilityChanged(isVisible); },
+        EVENT_NAME), "AVSessionCallbackClient handler postTask failed");
+    return AVSESSION_SUCCESS;
+}
+
+ErrCode AVSessionCallbackClient::OnDesktopLyricStateChanged(const DesktopLyricState &state)
+{
+    CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, state]() { callback->OnDesktopLyricStateChanged(state); }, EVENT_NAME),
+        "AVSessionCallbackClient handler postTask failed");
+    return AVSESSION_SUCCESS;
+}
+
 AVSessionCallbackClient::~AVSessionCallbackClient()
 {
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(std::string(__FUNCTION__));

@@ -40,6 +40,7 @@
 namespace OHOS::AVSession {
 using DeathCallback = std::function<void()>;
 struct DeviceState;
+struct DesktopLyricState;
 class SessionListener {
 public:
     /**
@@ -339,6 +340,10 @@ public:
      * @since 20
     */
     virtual void OnPlayWithAssetId(const std::string& assetId) {};
+
+    virtual void OnDesktopLyricVisibilityChanged(bool isVisible) {};
+
+    virtual void OnDesktopLyricStateChanged(const DesktopLyricState &state) {};
 };
 
 class AVControllerCallback {
@@ -446,6 +451,9 @@ public:
      * @since 10
      */
     virtual void OnCustomData(const AAFwk::WantParams& data) {};
+
+    virtual void OnDesktopLyricVisibilityChanged(bool isVisible) {};
+    virtual void OnDesktopLyricStateChanged(const DesktopLyricState &state) {};
 
     /**
      * @brief Deconstruct AVControllerCallback.
@@ -1626,6 +1634,24 @@ enum SessionCategory {
      * @since 22 dynamic&static
     */
     CATEGORY_ALL = 3,
+};
+
+struct DesktopLyricState : public Parcelable {
+    bool isLocked_ = false;
+
+    bool Marshalling(Parcel& out) const override
+    {
+        return out.WriteBool(isLocked_);
+    }
+
+    static DesktopLyricState *Unmarshalling(Parcel &in)
+    {
+        auto state = std::make_unique<DesktopLyricState>();
+        if (state != nullptr && in.ReadBool(state->isLocked_)) {
+            return state.release();
+        }
+        return nullptr;
+    }
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H
