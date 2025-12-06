@@ -186,6 +186,35 @@ void AVSessionService::NotifyHistoricalRecordChange(const std::string& bundleNam
     }
 }
 
+void AVSessionService::NotifySessionChange(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront,
+    int32_t userId)
+{
+    CHECK_AND_RETURN_LOG(userId == 0 || userId == GetUsersManager().GetCurrentUserId(), "Notify current user only");
+    CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
+    std::vector<AVSessionDescriptor> descriptors;
+    for (const auto &session : *sessionListForFront) {
+        CHECK_AND_CONTINUE(session != nullptr);
+        descriptors.push_back(session->GetDescriptor());
+    }
+    NotifyActiveSessionChange(descriptors);
+}
+
+void AVSessionService::NotifyActiveSessionChange(const std::vector<AVSessionDescriptor> &descriptors)
+{
+    SLOGI("NotifyActiveSessionChange with size=%{public}d, topSession:%{public}s",
+        static_cast<int32_t>(descriptors.size()),
+        (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
+    std::lock_guard lockGuard(sessionListenersLock_);
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        SLOGI("notify active session change with pid %{public}d", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::NotifyActiveSessionChange");
+        if (listener != nullptr) {
+            listener->OnActiveSessionChanged(descriptors);
+        }
+    }
+}
+
 // LCOV_EXCL_START
 void AVSessionService::HandleAppStateChange(int uid, int state)
 {
@@ -302,6 +331,7 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
         if (it == sessionListForFront->end()) {
             SLOGI(" front session add cast session");
             sessionListForFront->push_front(sinkSession);
+            NotifySessionChange(sessionListForFront, 0);
         }
     }
 

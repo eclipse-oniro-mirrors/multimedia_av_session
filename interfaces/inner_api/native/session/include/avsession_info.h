@@ -118,6 +118,14 @@ public:
     virtual void OnDeviceStateChange(const DeviceState& deviceState) {};
 
     /**
+     * @brief Listen for the event of activeSession changed.
+     *
+     * @param { AVSessionDescriptor } activeSession info.
+     * @since 23
+    */
+    virtual void OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) {};
+
+    /**
      * @brief Deconstruct SessionListener.
      * @since 9
     */

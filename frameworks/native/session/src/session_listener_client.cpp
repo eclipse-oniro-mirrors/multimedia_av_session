@@ -106,6 +106,14 @@ ErrCode SessionListenerClient::OnDeviceStateChange(const DeviceState& deviceStat
     return AVSESSION_SUCCESS;
 }
 
+ErrCode SessionListenerClient::OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors)
+{
+    auto copiedListener = listener_;
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnActiveSessionChanged(descriptors);
+    return AVSESSION_SUCCESS;
+}
+
 AncoMediaSessionListenerImpl::AncoMediaSessionListenerImpl(const std::shared_ptr<AncoMediaSessionListener>& listener)
     : listener_(listener)
 {

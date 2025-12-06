@@ -206,6 +206,13 @@ void NapiSessionListener::OnDeviceStateChange(const DeviceState& deviceState)
     HandleEvent(EVENT_DEVICE_STATE_CHANGED, deviceState);
 }
 
+void NapiSessionListener::OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors)
+{
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnActiveSessionChanged");
+    SLOGI("Start handle activeSession changed event");
+    HandleEvent(EVENT_ACTIVE_SESSION_CHANGED, descriptors);
+}
+
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
