@@ -47,6 +47,8 @@ public:
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override;
 
     ErrCode OnDeviceStateChange(const DeviceState& deviceState) override;
+
+    ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override;
 private:
     std::shared_ptr<SessionListener> listener_;
 };

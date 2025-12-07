@@ -120,6 +120,8 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("getDistributedSessionController", GetDistributedSessionControllers),
         DECLARE_NAPI_STATIC_FUNCTION("getAVSession", GetAVSession),
         DECLARE_NAPI_STATIC_FUNCTION("isDesktopLyricFeatureSupported", IsDesktopLyricFeatureSupported),
+        DECLARE_NAPI_STATIC_FUNCTION("onActiveSessionChanged", OnActiveSessionChanged),
+        DECLARE_NAPI_STATIC_FUNCTION("offActiveSessionChanged", OffActiveSessionChanged),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
@@ -960,6 +962,109 @@ napi_value NapiAVSessionManager::OffDistributedSessionChangeEvent(napi_env env, 
     }
 
     if (it->second.second(env, context->callback_) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionManager::OnActiveSessionChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnActiveSessionChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OnActiveSessionChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&callback, env, &context](size_t argc, napi_value *argv) {
+        int32_t err = ERR_NONE;
+        err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+        err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check media resources permission error",
+            NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
+        /* require 1 arguments <callback> */
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (RegisterNativeSessionListener(env) == napi_generic_failure) {
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    bool isAddSuccess = false;
+    {
+        std::lock_guard lockGuard(listenersMutex_);
+        isAddSuccess = listener_ != nullptr &&
+            listener_->AddCallback(env, NapiSessionListener::EVENT_ACTIVE_SESSION_CHANGED, callback) == napi_ok;
+    }
+
+    if (!isAddSuccess) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionManager::OffActiveSessionChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffActiveSessionChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OffActiveSessionChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [env, &context, &callback](size_t argc, napi_value *argv) {
+        int32_t err = ERR_NONE;
+        err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+        err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check media resources permission error",
+            NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
+        CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            napi_valuetype type = napi_undefined;
+            context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                                   "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            callback = argv[ARGV_FIRST];
+        }
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    bool isDelSuccess = false;
+    {
+        std::lock_guard lockGuard(listenersMutex_);
+        isDelSuccess = listener_ != nullptr &&
+            listener_->RemoveCallback(env, NapiSessionListener::EVENT_ACTIVE_SESSION_CHANGED, callback) == napi_ok;
+    }
+
+    if (!isDelSuccess) {
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
 

@@ -42,6 +42,7 @@ static char g_testAnotherAbilityName[] = "testAnother.ability";
 static OHOS::sptr<AVSessionService> g_AVSessionService {nullptr};
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
+static bool g_isCallOnActiveSessionChanged = false;
 static bool g_isCallOnTopSessionChange = false;
 static const int32_t ANCO_BROKER_SA_ID = 66849;
 
@@ -87,6 +88,11 @@ class TestISessionListener : public ISessionListener {
     ErrCode OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override
     {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override
+    {
+        g_isCallOnActiveSessionChanged = false;
         return AVSESSION_SUCCESS;
     };
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
@@ -962,6 +968,35 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     pcmCastSession->OnCastStateChange(0, deviceInfo, false);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: NotifyActiveSessionChange001
+ * @tc.desc: Test NotifyActiveSessionChange with normal branch
+ * @tc.type: FUNC
+ * @tc.require: #1984
+ */
+static HWTEST_F(AVSessionServiceTestExt, NotifyActiveSessionChange001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
+    CHECK_AND_RETURN(avsessionHere != nullptr);
+    int32_t infoUid = 123;
+    int32_t infoPid = 123;
+    avsessionHere->SetUid(infoUid);
+    avsessionHere->SetPid(infoPid);
+    auto sessionListForFront = std::make_shared<std::list<sptr<AVSessionItem>>>();
+    CHECK_AND_RETURN(sessionListForFront != nullptr);
+    sessionListForFront->push_front(avsessionHere);
+
+    int32_t curUserId = 100;
+    g_AVSessionService->NotifySessionChange(sessionListForFront, curUserId);
+    EXPECT_EQ(g_isCallOnActiveSessionChanged, true);
+    avsessionHere->Destroy();
 }
 } // AVSession
 } // OHOS

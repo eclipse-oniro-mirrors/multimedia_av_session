@@ -69,6 +69,11 @@ public:
         return AVSESSION_SUCCESS;
     };
 
+    ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;

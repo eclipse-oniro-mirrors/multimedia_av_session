@@ -60,6 +60,8 @@ private:
     static napi_value OffEvent(napi_env env, napi_callback_info info);
     static napi_value OnDistributedSessionChangeEvent(napi_env env, napi_callback_info info);
     static napi_value OffDistributedSessionChangeEvent(napi_env env, napi_callback_info info);
+    static napi_value OnActiveSessionChanged(napi_env env, napi_callback_info info);
+    static napi_value OffActiveSessionChanged(napi_env env, napi_callback_info info);
 
     static napi_status OnSessionCreate(napi_env env, napi_value callback);
     static napi_status OnSessionDestroy(napi_env env, napi_value callback);

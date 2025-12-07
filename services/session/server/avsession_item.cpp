@@ -1863,7 +1863,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     CHECK_AND_RETURN_LOG(castServiceNameStatePair_.second != deviceStateConnection,
         "cast not add to collaboration when mirror to stream cast");
 
-    CHECK_AND_RETURN_LOG(multiDeviceState != MultiDeviceState::CASTED_AND_CASTING,
+    CHECK_AND_RETURN_LOG(multiDeviceState_ != MultiDeviceState::CASTED_AND_CASTING,
         "session casted already publish service state");
 
     collaborationNeedDeviceId_ = deviceInfo.deviceId_;
@@ -2001,7 +2001,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
         if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO &&
-            !isSwitchNewDevice_) {
+            multiDeviceState_ != MultiDeviceState::CASTING_SWITCH_DEVICE) {
             serviceCallbackForPhotoCast_(GetSessionId(), false);
         }
         DealDisconnect(deviceInfo, isNeedRemove);
@@ -2018,7 +2018,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
 
 void AVSessionItem::DealOutputDeviceChange(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo)
 {
-    CHECK_AND_RETURN_LOG(multiDeviceState != MultiDeviceState::CASTED_AND_CASTING,
+    CHECK_AND_RETURN_LOG(multiDeviceState_ != MultiDeviceState::CASTED_AND_CASTING,
         "current session no need deal output device change");
     if (castState == ConnectionState::STATE_CONNECTED && mirrorToStreamOnceFlag_ &&
         AVRouter::GetInstance().IsInMirrorToStreamState()) {

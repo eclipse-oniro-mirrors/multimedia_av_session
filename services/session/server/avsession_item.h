@@ -103,7 +103,7 @@ public:
         CASTING_SWITCH_DEVICE,
         CASTED_AND_CASTING,
         CASTING_AND_CASTED,
-    }
+    };
 #endif
 
     void InitListener();

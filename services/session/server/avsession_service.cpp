@@ -916,6 +916,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
     }
     UpdateLocalFrontSession(sessionListForFront);
+    NotifySessionChange(sessionListForFront, userId);
 }
 
 bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
@@ -934,6 +935,7 @@ bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
         sessionListForFront->remove(sessionItem);
         sessionListForFront->push_front(sessionItem);
         UpdateSessionTimestamp(sessionItem);
+        NotifySessionChange(sessionListForFront);
     }
     return true;
 }
@@ -1616,23 +1618,6 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     AddCastServiceCallback(sessionItem);
 }
 
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-void AVSessionService::AddStopSinkCastCallback(sptr<AVSessionItem>& session)
-{
-    sessionItem->SetServiceCallbackForStopSinkCast([this]() {
-        std::lock_guard lockGuard(sessionServiceLock_);
-        SLOGI("Start release cast session");
-        for (const auto& session : GetContainer().GetAllSessions()) {
-            if (session != nullptr && session->GetDescriptor().sessionTag_ == "RemoteCast") {
-                std::string sessionId = session->GetDescriptor().sessionId_;
-                SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-                session->StopCastSession();
-            }
-        }
-    });
-}
-#endif // CASTPLUS_CAST_ENGINE_ENABLE
-
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {
@@ -1736,6 +1721,7 @@ void AVSessionService::AddExtraFrontSession(int32_t type, sptr<AVSessionItem>& s
         it == sessionListForFront->end()) {
         SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
         sessionListForFront->push_front(sessionItem);
+        NotifySessionChange(sessionListForFront);
     }
 }
 
