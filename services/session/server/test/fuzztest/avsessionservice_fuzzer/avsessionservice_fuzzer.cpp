@@ -483,7 +483,7 @@ void AvSessionServiceClientTest(sptr<AVSessionService> service)
     service->RegisterClientDeathObserver(clientDeath);
 
     service->NotifyTopSessionChanged(descriptor);
-    service->CreateWantAgent(&descriptor);
+    service->CreateWantAgent(&descriptor, false);
 }
 
 void AvSessionServiceHandleEventTest(sptr<AVSessionService> service)
@@ -788,7 +788,7 @@ void OnActiveTest()
 void HandleRemoveMediaCardEventTest()
 {
     SystemAbilityOnDemandReason reason;
-    avsessionService_->HandleRemoveMediaCardEvent();
+    avsessionService_->HandleRemoveMediaCardEvent(0, false);
 }
 
 void IsTopSessionPlayingTest()
@@ -1055,7 +1055,7 @@ void StartAbilityByCallTest()
     avsessionService_->IsCapsuleNeeded();
     avsessionService_->NotifyFlowControl();
     int32_t uid = provider.ConsumeIntegral<int32_t>();
-    avsessionService_->CreateNftRemoveWant(uid);
+    avsessionService_->CreateNftRemoveWant(uid, false);
 }
 
 void CallbackTest()

@@ -350,4 +350,55 @@ int32_t AVSessionControllerStub::HandleGetSessionId(MessageParcel& data, Message
     CHECK_AND_PRINT_LOG(reply.WriteString(GetSessionId()), "write int32_t failed");
     return ERR_NONE;
 }
+
+int32_t AVSessionControllerStub::HandleIsDesktopLyricEnabled(MessageParcel &data, MessageParcel &reply)
+{
+    bool isEnabled = false;
+    int32_t ret = IsDesktopLyricEnabled(isEnabled);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteBool(isEnabled), ERR_MARSHALLING, "write bool failed");
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleSetDesktopLyricVisible(MessageParcel &data, MessageParcel &reply)
+{
+    bool isVisible = false;
+    CHECK_AND_RETURN_RET_LOG(data.ReadBool(isVisible), ERR_UNMARSHALLING, "read bool failed");
+    int32_t ret = SetDesktopLyricVisible(isVisible);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "write int32 failed");
+    return ret;
+}
+
+int32_t AVSessionControllerStub::HandleIsDesktopLyricVisible(MessageParcel &data, MessageParcel &reply)
+{
+    bool isVisible = false;
+    int32_t ret = IsDesktopLyricVisible(isVisible);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteBool(isVisible), ERR_MARSHALLING, "write bool failed");
+    }
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleSetDesktopLyricState(MessageParcel &data, MessageParcel &reply)
+{
+    std::shared_ptr<DesktopLyricState> state(DesktopLyricState::Unmarshalling(data));
+    CHECK_AND_RETURN_RET_LOG(state != nullptr, ERR_UNMARSHALLING, "read DesktopLyricState failed");
+    int32_t ret = SetDesktopLyricState(*state);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "write int32 failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleGetDesktopLyricState(MessageParcel &data, MessageParcel &reply)
+{
+    DesktopLyricState state = {};
+    int32_t ret = GetDesktopLyricState(state);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "write int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(state.Marshalling(reply), ERR_MARSHALLING, "write DesktopLyricState failed");
+    }
+    return ERR_NONE;
+}
 } // namespace OHOS::AVSession

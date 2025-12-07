@@ -96,6 +96,8 @@ public:
 
     void ListenCollaborationOnStop();
 
+    void DestroyCast(bool continuePlay);
+
     enum class MultiDeviceState {
         DEFAULT,
         CASTING_SWITCH_DEVICE,
@@ -161,6 +163,22 @@ public:
     AVPlaybackState::PlaybackStateMaskType GetControlItemsPlaybackFilter();
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
+
+    void SetDesktopLyricFeatureSupported(bool isSupported);
+
+    int32_t EnableDesktopLyric(bool isEnabled) override;
+
+    int32_t IsDesktopLyricEnabled(bool &isEnabled);
+
+    int32_t SetDesktopLyricVisible(bool isVisible) override;
+
+    int32_t IsDesktopLyricVisible(bool &isVisible) override;
+
+    int32_t SetDesktopLyricState(DesktopLyricState state) override;
+
+    int32_t GetDesktopLyricState(DesktopLyricState &state) override;
+
+    void SetLaunchDesktopLyricCb(std::function<int32_t(std::string)> cb);
 
     AVCallState GetAVCallState();
 
@@ -351,6 +369,8 @@ public:
     
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
 
+    void SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback);
+
     void SetServiceCallbackForStopSinkCast(const std::function<void()>& callback);
 
     void SetMultiDeviceState(MultiDeviceState multiDeviceState);
@@ -420,6 +440,8 @@ private:
     void GetCurrentAppIndexForSession();
     AbilityRuntime::WantAgent::WantAgent CreateWantAgentWithIndex(const AbilityRuntime::WantAgent::WantAgent& ability,
         int32_t index);
+    void HandleDesktopLyricVisibilityChanged(bool isVisible);
+    void HandleDesktopLyricStateChanged(const DesktopLyricState &state);
 
     using HandlerFuncType = std::function<void(const AVControlCommand&)>;
     std::map<uint32_t, HandlerFuncType> cmdHandlers = {
@@ -528,6 +550,14 @@ private:
     static constexpr const char *sessionCastState_ = "CAST_STATE";
     static constexpr const int32_t cancelTimeout = 5000;
 
+    std::atomic_bool isSupportedDesktopLyric_ = false;
+    std::atomic_bool isEnabledDesktopLyric_ = false;
+    std::mutex desktopLyricVisibleMutex_;
+    bool isDesktopLyricVisible_ = false;
+    std::mutex desktopLyricStateMutex_;
+    DesktopLyricState desktopLyricState_ = {};
+    std::function<int32_t(std::string)> launchDesktopLyricCb_;
+
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;
 
@@ -590,6 +620,7 @@ private:
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
+    std::function<void(std::string, bool)> serviceCallbackForPhotoCast_;
     std::function<void()> serviceCallbackStopSinkCast_;
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";

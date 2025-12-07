@@ -76,6 +76,11 @@ private:
     static napi_value ReleaseCast(napi_env env, napi_callback_info info);
     static napi_value GetAllCastDisplays(napi_env env, napi_callback_info info);
     static napi_value SendCustomData(napi_env env, napi_callback_info info);
+    static napi_value EnableDesktopLyric(napi_env env, napi_callback_info info);
+    static napi_value SetDesktopLyricVisible(napi_env env, napi_callback_info info);
+    static napi_value IsDesktopLyricVisible(napi_env env, napi_callback_info info);
+    static napi_value SetDesktopLyricState(napi_env env, napi_callback_info info);
+    static napi_value GetDesktopLyricState(napi_env env, napi_callback_info info);
     static napi_value OnEventPlay(napi_env env, napi_callback_info info);
     static napi_value OffEventPlay(napi_env env, napi_callback_info info);
     static napi_value OnEventPlayNext(napi_env env, napi_callback_info info);
@@ -86,6 +91,10 @@ private:
     static napi_value OffEventFastForward(napi_env env, napi_callback_info info);
     static napi_value OnEventRewind(napi_env env, napi_callback_info info);
     static napi_value OffEventRewind(napi_env env, napi_callback_info info);
+    static napi_value OnDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
+    static napi_value OffDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
+    static napi_value OnDesktopLyricStateChanged(napi_env env, napi_callback_info info);
+    static napi_value OffDesktopLyricStateChanged(napi_env env, napi_callback_info info);
 
     static std::function<void()> PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
         AVPlaybackState playBackState);
@@ -142,6 +151,7 @@ private:
     static napi_status OffCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
+    static void ErrCodeToMessage(int32_t errCode, const std::string &funcName, std::string &message);
 
     static napi_value ThrowErrorAndReturn(napi_env env, const std::string& message, int32_t errCode);
     static napi_value ThrowErrorAndReturnByErrCode(napi_env env, const std::string& message, int32_t errCode);

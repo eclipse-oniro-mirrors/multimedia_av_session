@@ -1817,7 +1817,7 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent001, TestSize.Level0)
 {
     SLOGD("CreateWantAgent001 begin!");
     std::shared_ptr<AVSessionDescriptor> histroyDescriptor(nullptr);
-    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get());
+    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get(), false);
     EXPECT_EQ(ret, nullptr);
     SLOGD("CreateWantAgent001 end!");
 }
@@ -1826,7 +1826,7 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent002, TestSize.Level0)
 {
     SLOGD("CreateWantAgent001 begin!");
     std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get());
+    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get(), false);
     EXPECT_EQ(ret, nullptr);
     SLOGD("CreateWantAgent001 end!");
 }
@@ -1841,9 +1841,11 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent003, TestSize.Level0)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avservice_->UpdateTopSession(avsessionHere);
     std::shared_ptr<AVSessionDescriptor> histroyDescriptor(nullptr);
-    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get());
-    avsessionHere->Destroy();
+    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get(), false);
     EXPECT_EQ(ret, nullptr);
+    ret = avservice_->CreateWantAgent(histroyDescriptor.get(), true);
+    EXPECT_EQ(ret, nullptr);
+    avsessionHere->Destroy();
     SLOGD("CreateWantAgent003 end!");
 }
 
@@ -1857,9 +1859,11 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent004, TestSize.Level0)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avservice_->UpdateTopSession(avsessionHere);
     std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get());
-    avsessionHere->Destroy();
+    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get(), false);
     EXPECT_EQ(ret, nullptr);
+    ret = avservice_->CreateWantAgent(histroyDescriptor.get(), true);
+    EXPECT_EQ(ret, nullptr);
+    avsessionHere->Destroy();
     SLOGD("CreateWantAgent004 end!");
 }
 #endif
@@ -1877,7 +1881,7 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent005, TestSize.Level1)
     avsessionHere->SetUid(5557);
     avservice_->UpdateTopSession(avsessionHere);
     EXPECT_NE(avservice_->topSession_, nullptr);
-    auto wantAgent = avservice_->CreateWantAgent(nullptr);
+    auto wantAgent = avservice_->CreateWantAgent(nullptr, false);
     EXPECT_EQ(wantAgent, nullptr);
     avsessionHere->Destroy();
     SLOGD("CreateWantAgent005 end!");
@@ -2256,6 +2260,22 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle002, TestSize.Level1)
     SLOGD("GetLocalTitle002 end!");
 }
 
+/**
+ * @tc.name: GetDescriptorTitle001
+ * @tc.desc: get local title.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetDescriptorTitle001, TestSize.Level1)
+{
+    SLOGD("GetDescriptorTitle001 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    auto historyDescriptor = std::make_shared<AVSessionDescriptor>();
+    std::string descriptorTitle  = avservice_->GetDescriptorTitle(historyDescriptor.get());
+    EXPECT_EQ(descriptorTitle, " ");
+    SLOGD("GetDescriptorTitle001 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors001, TestSize.Level0)
 {
     SLOGI("GetSessionDescriptors001 begin!");
@@ -2285,9 +2305,11 @@ static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors001, TestSize.Level0)
 
     ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_NOT_ACTIVE, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptors.size() >= 1, true);
 
     ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_ALL, descriptors);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(descriptors.size() >= 1, true);
     avsessionHere_->Destroy();
     SLOGI("GetSessionDescriptors001 end!");
 }
@@ -2336,9 +2358,9 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent001, TestSize.Le
     avsessionHere_->SetUid(uid);
     AVPlaybackState playbackState;
     playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
-    avservice_->HandleRemoveMediaCardEvent();
+    avservice_->HandleRemoveMediaCardEvent(0, false);
     playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
-    avservice_->HandleRemoveMediaCardEvent();
+    avservice_->HandleRemoveMediaCardEvent(0, false);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     EXPECT_EQ(avservice_->topSession_, nullptr);
@@ -2360,7 +2382,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent002, TestSize.Le
     avservice_->topSession_ =
          avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     bool ret = avservice_->topSession_->IsCasting();
-    avservice_->HandleRemoveMediaCardEvent();
+    avservice_->HandleRemoveMediaCardEvent(0, false);
     EXPECT_EQ(ret, false);
     SLOGD("HandleRemoveMediaCardEvent002 end!");
 }
@@ -2375,7 +2397,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent003, TestSize.Le
 {
     SLOGD("HandleRemoveMediaCardEvent003 begin!");
     avservice_->topSession_ = nullptr;
-    avservice_->HandleRemoveMediaCardEvent();
+    avservice_->HandleRemoveMediaCardEvent(0, false);
     EXPECT_EQ(avservice_->topSession_, nullptr);
     SLOGD("HandleRemoveMediaCardEvent003 end!");
 }

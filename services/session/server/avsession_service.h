@@ -221,6 +221,8 @@ public:
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
+    int32_t IsDesktopLyricFeatureSupported(bool &isSupported) override;
+
     void OnClientDied(pid_t pid, pid_t uid);
 
     void HandleSessionRelease(std::string sessionId, bool continuePlay = false);
@@ -284,8 +286,6 @@ public:
 
     int32_t StopSourceCast();
 
-    void AddStopSinkCastCallback(sptr<AVSessionItem>& session);
-
     int32_t checkEnableCast(bool enable) override;
 
     void setInCast(bool isInCast) override;
@@ -301,7 +301,7 @@ public:
 
     void HandleUserEvent(const std::string &type, const int &userId);
 
-    void HandleRemoveMediaCardEvent();
+    void HandleRemoveMediaCardEvent(int32_t uid, bool isPhoto);
 
     void HandleBundleRemoveEvent(const std::string bundleName);
 
@@ -327,6 +327,12 @@ public:
 
     bool CheckIfOtherAudioPlaying();
 
+    int32_t StartDesktopLyricAbility(const std::string &sessionId);
+
+    int32_t StopDesktopLyricAbility();
+
+    void SetDesktopLyricAbilityState(int32_t state);
+
 private:
     void NotifyProcessStatus(bool isStart);
 
@@ -346,7 +352,7 @@ private:
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
     void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession, bool addCapsule,
-                        bool isCapsuleUpdate);
+                        bool isCapsuleUpdate, bool isPhoto);
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
@@ -527,9 +533,9 @@ private:
     void UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd);
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
-        const AVSessionDescriptor* histroyDescriptor);
+        const AVSessionDescriptor* histroyDescriptor, bool isPhoto);
     
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateNftRemoveWant(int32_t uid);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateNftRemoveWant(int32_t uid, bool isPhoto);
 
     void DoMetadataImgClean(AVMetaData& data);
 
@@ -563,6 +569,8 @@ private:
     void AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     void AddAncoColdStartServiceCallback(sptr<AVSessionItem>& session);
+
+    void AddCastServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     bool VerifyNotification();
 
@@ -613,6 +621,10 @@ private:
     void AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     std::string GetLocalTitle();
+
+    std::string GetDescriptorTitle(const AVSessionDescriptor* historyDescriptor);
+
+    void DealFlowControl(int32_t uid, bool isBroker);
 
     bool InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray);
 
@@ -748,7 +760,6 @@ private:
     static constexpr const char *DEFAULT_SESSION_ID = "default";
     static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
-    static constexpr const int32_t SYSTEMUI_LIVEVIEW_TYPECODE_MDEDIACONTROLLER = 2;
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
 
@@ -780,6 +791,9 @@ private:
     std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
     std::recursive_mutex migrateProxyMapLock_;
 
+    int32_t desktopLyricAbilityState_ = 0;
+    std::mutex desktopLyricAbilityStateMutex_;
+
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;
     const int32_t THREE_CLICK = 3;
@@ -805,6 +819,10 @@ private:
     const uint8_t doRemoteLoadRetryTime = 5;
     const int32_t defaultUserId = 100;
     const int32_t mediaControlAncoParam = 52225;
+    const int32_t systemuiLiveviewTypeCodeMediacontroller = 2;
+    const int32_t systemuiLiveviewTypeCodePhoto = 27;
+    const int32_t mediacontrollerNotifyId = 0;
+    const int32_t photoNotifyId = 1;
 
     const std::string sessionTypePhoto = "photo";
 };

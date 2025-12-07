@@ -50,6 +50,8 @@ public:
     ErrCode OnPlayWithAssetId(const std::string& assetId) override;
     ErrCode OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
     ErrCode OnCustomData(const AAFwk::WantParams& extras) override;
+    ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override;
+    ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override;
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;

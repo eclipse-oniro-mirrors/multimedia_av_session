@@ -185,6 +185,26 @@ void AVSessionItem::DelRecommend()
 #endif
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionItem::DestroyCast(bool continuePlay)
+{
+    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+        if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
+            serviceCallbackForPhotoCast_(descriptor_.sessionId_, false);
+        }
+        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+        if (!collaborationNeedNetworkId_.empty()) {
+            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+        }
+        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
+        ReleaseCast(continuePlay);
+        StopCastSession();
+    }
+}
+#endif
+
 int32_t AVSessionItem::DestroyTask(bool continuePlay)
 {
     {
@@ -222,17 +242,7 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("Session destroy with castHandle: %{public}lld", (long long)castHandle_);
-    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
-            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-        if (!collaborationNeedNetworkId_.empty()) {
-            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
-                ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-        }
-        AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
-        ReleaseCast(continuePlay);
-        StopCastSession();
-    }
+    DestroyCast(continuePlay);
     ReleaseAVCastControllerInner();
     StopCastDisplayListener();
 #endif
@@ -438,9 +448,19 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
 {
     bool hasPixelMap = (meta.GetMediaImage() != nullptr);
     SLOGI("MediaCapsule addLocalCapsule hasImage_:%{public}d isMediaChange_:%{public}d", hasPixelMap, isMediaChange_);
-    if (serviceCallbackForNtf_ && hasPixelMap && isMediaChange_) {
-        serviceCallbackForNtf_(GetSessionId(), isMediaChange_);
-        isMediaChange_ = false;
+    if (isMediaChange_) {
+        if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
+            SLOGI("photo MediaChange");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+            if (serviceCallbackForPhotoCast_ && IsCasting()) {
+                serviceCallbackForPhotoCast_(GetSessionId(), true);
+                isMediaChange_ = false;
+            }
+#endif
+        } else if (serviceCallbackForNtf_ && hasPixelMap) {
+            serviceCallbackForNtf_(GetSessionId(), isMediaChange_);
+            isMediaChange_ = false;
+        }
     }
     ProcessFrontSession("SetAVMetaData");
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
@@ -822,6 +842,129 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
+
+void AVSessionItem::SetDesktopLyricFeatureSupported(bool isSupported)
+{
+    SLOGI("Set up support for desktop lyrics: isSupported=%{public}d", isSupported);
+    isSupportedDesktopLyric_ = isSupported;
+}
+
+int32_t AVSessionItem::EnableDesktopLyric(bool isEnabled)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    SLOGI("enable desktop lyrics: isEnable=%{public}d", isEnabled);
+    isEnabledDesktopLyric_ = isEnabled;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::IsDesktopLyricEnabled(bool &isEnabled)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    SLOGI("Entry");
+    isEnabled = isEnabledDesktopLyric_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetDesktopLyricVisible(bool isVisible)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+    SLOGI("set desktop lyrics visible: isVisible=%{public}d", isVisible);
+    std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
+    if (isVisible) {
+        if (!(launchDesktopLyricCb_ && launchDesktopLyricCb_(GetSessionId()) == AVSESSION_SUCCESS)) {
+            SLOGE("callback is null or launch media control failed");
+            return AVSESSION_ERROR;
+        }
+    }
+
+    isDesktopLyricVisible_ = isVisible;
+    HandleDesktopLyricVisibilityChanged(isVisible);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::IsDesktopLyricVisible(bool &isVisible)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+    SLOGI("Entry");
+    std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
+    isVisible = isDesktopLyricVisible_;
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetDesktopLyricState(DesktopLyricState state)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+        SLOGI("set desktop lyrics state: isLocked=%{public}d", state.isLocked_);
+    std::lock_guard<std::mutex> lock(desktopLyricStateMutex_);
+    desktopLyricState_ = state;
+    HandleDesktopLyricStateChanged(state);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::GetDesktopLyricState(DesktopLyricState &state)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+    SLOGI("entry");
+    std::lock_guard<std::mutex> lock(desktopLyricStateMutex_);
+    state = desktopLyricState_;
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionItem::SetLaunchDesktopLyricCb(std::function<int32_t(std::string)> cb)
+{
+    std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
+    launchDesktopLyricCb_ = std::move(cb);
+}
+
+void AVSessionItem::HandleDesktopLyricVisibilityChanged(bool isVisible)
+{
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callback_ != nullptr) {
+            callback_->OnDesktopLyricVisibilityChanged(isVisible);
+        }
+    }
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandleDesktopLyricVisibilityChanged(isVisible);
+            }
+        }
+    }
+}
+
+void AVSessionItem::HandleDesktopLyricStateChanged(const DesktopLyricState &state)
+{
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callback_ != nullptr) {
+            callback_->OnDesktopLyricStateChanged(state);
+        }
+    }
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto &[pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandleDesktopLyricStateChanged(state);
+            }
+        }
+    }
+}
 
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
@@ -1851,9 +1994,16 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             SLOGI("AVSessionItem send callStart event to service for connected");
             callStartCallback_(*this);
         }
+        if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
+            serviceCallbackForPhotoCast_(GetSessionId(), true);
+        }
     }
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
+        if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO &&
+            !isSwitchNewDevice_) {
+            serviceCallbackForPhotoCast_(GetSessionId(), false);
+        }
         DealDisconnect(deviceInfo, isNeedRemove);
     }
     DealOutputDeviceChange(castState, outputDeviceInfo);
@@ -2159,6 +2309,12 @@ void AVSessionItem::SetServiceCallbackForCastNtfCapsule(const std::function<void
 {
     SLOGI("SetServiceCallbackForCastNtfCapsule in");
     serviceCallbackForCastNtf_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback)
+{
+    SLOGI("SetServiceCallbackForPhotoCast in");
+    serviceCallbackForPhotoCast_ = callback;
 }
 
 void AVSessionItem::SetServiceCallbackForStopSinkCast(const std::function<void()>& callback)

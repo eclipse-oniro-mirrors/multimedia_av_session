@@ -23,6 +23,8 @@ class PermissionChecker {
 public:
     static const int32_t CHECK_SYSTEM_PERMISSION = 0;
     static const int32_t CHECK_MEDIA_RESOURCES_PERMISSION = 1;
+    static const int32_t CHECK_MEDIA_RESOURCES_PUBLIC_PERMISSION = 2;
+    static const int32_t CHECK_SYSTEM_AND_MEDIA_RESOURCES_PUBLIC_PERMISSION = 3;
 
     static PermissionChecker& GetInstance();
 
@@ -34,6 +36,8 @@ public:
 
 private:
     static constexpr const char* MANAGE_MEDIA_RESOURCES = "ohos.permission.MANAGE_MEDIA_RESOURCES";
+    static constexpr const char* MANAGE_MEDIA_RESOURCES_FOR_PUBLIC =
+        "ohos.permission.MANAGE_MEDIA_RESOURCES_FOR_PUBLIC";
     static constexpr int UID_TRANSFORM_DIVISOR = 200000;
 
     bool IsSystemApp();

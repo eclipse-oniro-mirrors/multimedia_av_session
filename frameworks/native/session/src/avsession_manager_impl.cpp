@@ -274,6 +274,12 @@ int32_t AVSessionManagerImpl::GetDistributedSessionControllers(const Distributed
     return service ? service->GetDistributedSessionControllers(sessionType, sessionControllers) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::IsDesktopLyricFeatureSupported(bool &isSupported)
+{
+    auto service = GetService();
+    return service ? service->IsDesktopLyricFeatureSupported(isSupported) : ERR_SERVICE_NOT_EXIST;
+}
+
 int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     std::shared_ptr<AVSessionController>& controller)
 {

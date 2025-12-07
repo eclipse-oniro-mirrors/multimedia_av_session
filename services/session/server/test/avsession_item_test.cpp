@@ -88,6 +88,8 @@ public:
     sptr<IRemoteObject> AsObject() override { return nullptr; }
     ErrCode OnPlayWithAssetId(const std::string& assetId) override { return AVSESSION_SUCCESS; };
     ErrCode OnCustomData(const OHOS::AAFwk::WantParams& data) override { return AVSESSION_SUCCESS; };
+    ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override { return AVSESSION_SUCCESS; };
+    ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override { return AVSESSION_SUCCESS; };
 
     AVSessionCallbackImpl() = default;
     ~AVSessionCallbackImpl() = default;
@@ -1043,6 +1045,138 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DealLocalState_001, TestSize.Level1)
     auto deviceName = g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_;
     EXPECT_EQ(deviceName, "LocalDevice");
     SLOGI("AVSessionItem_DealLocalState_001 end!");
+}
+
+/**
+* @tc.name: AVSessionItem_EnableDesktopLyric_001
+* @tc.desc: enable desktop lyric
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_EnableDesktopLyric_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_EnableDesktopLyric_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = true;
+    int32_t res = g_AVSessionItem->EnableDesktopLyric(true);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_EnableDesktopLyric_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_IsDesktopLyricEnabled_001
+* @tc.desc: get desktop lyric enabled state
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_IsDesktopLyricEnabled_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_IsDesktopLyricEnabled_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = true;
+    bool isEnable = false;
+    int32_t res = g_AVSessionItem->IsDesktopLyricEnabled(isEnable);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_IsDesktopLyricEnabled_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_SetDesktopLyricVisible_001
+* @tc.desc: set desktop lyric visible
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricVisible_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetDesktopLyricVisible_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = true;
+    g_AVSessionItem->isEnabledDesktopLyric_ = true;
+
+    g_AVSessionItem->launchDesktopLyricCb_ = nullptr;
+    int32_t res = AVSESSION_SUCCESS;
+    res = g_AVSessionItem->SetDesktopLyricVisible(true);
+    EXPECT_EQ(res, AVSESSION_ERROR);
+
+    g_AVSessionItem->launchDesktopLyricCb_ = [] (std::string sessionId) { return AVSESSION_ERROR; };
+    res = g_AVSessionItem->SetDesktopLyricVisible(true);
+    EXPECT_EQ(res, AVSESSION_ERROR);
+
+    g_AVSessionItem->launchDesktopLyricCb_ = [] (std::string sessionId) { return AVSESSION_SUCCESS; };
+    res = g_AVSessionItem->SetDesktopLyricVisible(true);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_SetDesktopLyricVisible_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_SetDesktopLyricVisible_002
+* @tc.desc: set desktop lyric visible
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricVisible_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetDesktopLyricVisible_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = true;
+    g_AVSessionItem->isEnabledDesktopLyric_ = true;
+    int32_t res = g_AVSessionItem->SetDesktopLyricVisible(false);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_SetDesktopLyricVisible_002 End");
+}
+
+/**
+* @tc.name: AVSessionItem_IsDesktopLyricVisible_001
+* @tc.desc: get desktop lyric visible
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_IsDesktopLyricVisible_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_IsDesktopLyricVisible_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = true;
+    g_AVSessionItem->isEnabledDesktopLyric_ = true;
+    bool isVisible = false;
+    int32_t res = g_AVSessionItem->IsDesktopLyricVisible(isVisible);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_IsDesktopLyricVisible_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_SetDesktopLyricState_001
+* @tc.desc: set desktop lyric state
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricState_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetDesktopLyricState_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = true;
+    g_AVSessionItem->isEnabledDesktopLyric_ = true;
+    DesktopLyricState state = {};
+    int32_t res = g_AVSessionItem->SetDesktopLyricState(state);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_SetDesktopLyricState_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_GetDesktopLyricState_001
+* @tc.desc: get desktop lyric state
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetDesktopLyricState_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_GetDesktopLyricState_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = true;
+    g_AVSessionItem->isEnabledDesktopLyric_ = true;
+    DesktopLyricState state = {};
+    int32_t res = g_AVSessionItem->GetDesktopLyricState(state);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_GetDesktopLyricState_001 End");
 }
 } //AVSession
 } //OHOS

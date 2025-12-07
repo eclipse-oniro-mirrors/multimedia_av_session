@@ -35,6 +35,10 @@ public:
 
     int32_t StartAbilityByCall(const std::string &bundleName, const std::string &abilityName);
 
+    int32_t StartDesktopLyricAbility(const std::string &sessionId, int32_t userId, std::function<void(int32_t)> cb);
+
+    int32_t StopDesktopLyricAbility();
+
 private:
    sptr<IRemoteObject> GetSystemAbility();
 
@@ -61,6 +65,20 @@ public:
     void OnAbilityConnectDone(
         const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
+};
+
+class DesktopLyricCallConnection : public AbilityConnectionStub {
+public:
+    explicit DesktopLyricCallConnection(std::function<void(int32_t)> cb)
+        : callback_(std::move(cb)) {};
+    ~DesktopLyricCallConnection() override;
+
+    void OnAbilityConnectDone(
+        const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int resultCode) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override;
+
+private:
+    std::function<void(int32_t)> callback_;
 };
 } // namespace OHOS::AVSession
 #endif /* ABILITY_CONNECT_HELPER_H */

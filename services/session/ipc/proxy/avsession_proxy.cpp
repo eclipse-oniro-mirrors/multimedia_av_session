@@ -764,4 +764,108 @@ int32_t AVSessionProxy::ReleaseCast(bool continuePlay)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 #endif
+
+int32_t AVSessionProxy::EnableDesktopLyric(bool isEnabled)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::EnableDesktopLyric");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteBool(isEnabled),
+        ERR_MARSHALLING, "Write isEnabled failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_ENABLE_DESKTOP_LYRIC,
+        data, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
+}
+
+int32_t AVSessionProxy::SetDesktopLyricVisible(bool isVisible)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetDesktopLyricVisible");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteBool(isVisible),
+        ERR_MARSHALLING, "Write isVisible failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_DESKTOP_LYRIC_VISIBLE,
+        data, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
+}
+
+int32_t AVSessionProxy::IsDesktopLyricVisible(bool &isVisible)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_IS_DESKTOP_LYRIC_VISIBLE, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        CHECK_AND_RETURN_RET_LOG(reply.ReadBool(isVisible), ERR_UNMARSHALLING, "read isVisible bool failed");
+    }
+    return ret;
+}
+
+int32_t AVSessionProxy::SetDesktopLyricState(DesktopLyricState state)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetDesktopLyricState");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(state.Marshalling(data),
+        ERR_MARSHALLING, "Write state failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_DESKTOP_LYRIC_STATE,
+        data, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
+}
+
+int32_t AVSessionProxy::GetDesktopLyricState(DesktopLyricState &state)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_GET_DESKTOP_LYRIC_STATE, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        std::shared_ptr<DesktopLyricState> desktopLyricState(DesktopLyricState::Unmarshalling(reply));
+        CHECK_AND_RETURN_RET_LOG(desktopLyricState != nullptr, ERR_UNMARSHALLING, "read desktopLyricState failed");
+        state = *desktopLyricState;
+    }
+    return ret;
+}
 } // namespace OHOS::AVSession

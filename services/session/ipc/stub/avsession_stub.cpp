@@ -360,6 +360,56 @@ int32_t AVSessionStub::HandleUpdateAVQueueInfoEvent(MessageParcel& data, Message
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleEnableDesktopLyric(MessageParcel &data, MessageParcel &reply)
+{
+    bool isEnable = false;
+    CHECK_AND_RETURN_RET_LOG(data.ReadBool(isEnable), ERR_UNMARSHALLING, "ReadBool isEnable failed");
+    int32_t ret = EnableDesktopLyric(isEnable);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetDesktopLyricSupported failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetDesktopLyricVisible(MessageParcel &data, MessageParcel &reply)
+{
+    bool isVisible = false;
+    CHECK_AND_RETURN_RET_LOG(data.ReadBool(isVisible), ERR_UNMARSHALLING, "ReadBool isVisible failed");
+    int32_t ret = SetDesktopLyricVisible(isVisible);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetDesktopLyricVisible failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleIsDesktopLyricVisible(MessageParcel &data, MessageParcel &reply)
+{
+    bool isVisible = false;
+    int32_t ret = IsDesktopLyricVisible(isVisible);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "IsDesktopLyricVisible failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteBool(isVisible), ERR_MARSHALLING, "write isVisible bool failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetDesktopLyricState(MessageParcel &data, MessageParcel &reply)
+{
+    std::shared_ptr<DesktopLyricState> desktopLyricState(DesktopLyricState::Unmarshalling(data));
+    CHECK_AND_RETURN_RET_LOG(desktopLyricState != nullptr, ERR_UNMARSHALLING, "read DesktopLyricState failed");
+    int32_t ret = SetDesktopLyricState(*desktopLyricState);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "WriteInt32 result failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetDesktopLyricState failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleGetDesktopLyricState(MessageParcel &data, MessageParcel &reply)
+{
+    DesktopLyricState desktopLyricState = {};
+    int32_t ret = GetDesktopLyricState(desktopLyricState);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "GetDesktopLyricState failed");
+    CHECK_AND_RETURN_RET_LOG(desktopLyricState.Marshalling(reply), ERR_MARSHALLING, "write state bool failed");
+    return ERR_NONE;
+}
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
 {

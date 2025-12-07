@@ -849,4 +849,27 @@ int32_t AVSessionServiceProxy::GetDistributedSessionControllersInner(const Distr
     }
     return ret;
 }
+
+int32_t AVSessionServiceProxy::IsDesktopLyricFeatureSupported(bool &isSupported)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(static_cast<uint32_t>(
+        AvsessionSeviceInterfaceCode::SERVICE_CMD_IS_DESKTOP_LYRIC_FEATURE_SUPPORTED), data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    if (ret == AVSESSION_SUCCESS) {
+        bool isSupportedOut = false;
+        CHECK_AND_RETURN_RET_LOG(reply.ReadBool(isSupportedOut), ERR_UNMARSHALLING, "read bool failed");
+        isSupported = isSupportedOut;
+    }
+    return ret;
+}
 } // namespace OHOS::AVSession

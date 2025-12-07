@@ -123,6 +123,14 @@ class IAVControllerCallbackTest : public IAVControllerCallback {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override
+    {
+        return AVSESSION_SUCCESS;
+    };
     OHOS::sptr<IRemoteObject> AsObject() override
     {
         OHOS::AppExecFwk::ElementName elementName;
@@ -351,6 +359,86 @@ HWTEST_F(AVControllerItemTest, HandleCustomData002, TestSize.Level0)
     data.SetParam("customData", AAFwk::String::Box(test));
     controller->HandleCustomData(data);
     EXPECT_NE(controller->session_, nullptr);
+}
+
+/**
+* @tc.name: IsDesktopLyricEnabled_001
+* @tc.desc: get desktop lyric enabled state
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVControllerItemTest, IsDesktopLyricEnabled_001, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = false;
+    bool isEnable = false;
+    int32_t res = controller->IsDesktopLyricEnabled(isEnable);
+    EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
+}
+
+/**
+* @tc.name: SetDesktopLyricVisible_001
+* @tc.desc: set desktop lyric visible
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVControllerItemTest, SetDesktopLyricVisible_001, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = false;
+    bool isVisible = false;
+    int32_t res = controller->SetDesktopLyricVisible(isVisible);
+    EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
+}
+
+/**
+* @tc.name: IsDesktopLyricVisible_001
+* @tc.desc: get desktop lyric visible
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVControllerItemTest, IsDesktopLyricVisible_001, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = false;
+    bool isVisible = false;
+    int32_t res = controller->IsDesktopLyricVisible(isVisible);
+    EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
+}
+
+/**
+* @tc.name: SetDesktopLyricState_001
+* @tc.desc: set desktop lyric state
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVControllerItemTest, SetDesktopLyricState_001, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = false;
+    DesktopLyricState state = {};
+    int32_t res = g_AVSessionItem->SetDesktopLyricState(state);
+    EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
+}
+
+/**
+* @tc.name: GetDesktopLyricState_001
+* @tc.desc: get desktop lyric state
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVControllerItemTest, GetDesktopLyricState_001, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    g_AVSessionItem->isSupportedDesktopLyric_ = false;
+    DesktopLyricState state = {};
+    int32_t res = g_AVSessionItem->GetDesktopLyricState(state);
+    EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
 }
 } //AVSession
 } //OHOS
