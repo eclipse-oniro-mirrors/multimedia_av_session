@@ -1551,6 +1551,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
         mirrorToStreamOnceFlag_ = true;
     }
     castHandleDeviceId_ = deviceInfo.deviceId_;
+    AVRouter::GetInstance().SetCastingDeviceName(deviceInfo.deviceName_);
     SLOGI("RegisterListenerStreamToCast check handle set to %{public}lld", (long long)castHandle_);
     UpdateCastDeviceMap(deviceInfo);
     DoContinuousTaskRegister();
@@ -1741,42 +1742,10 @@ int32_t AVSessionItem::ReleaseCast(bool continuePlay)
 
 int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo)
 {
-    SLOGI("enter CastAddToCollaboration");
-    if (castDeviceInfoMap_.count(outputDeviceInfo.deviceInfos_[0].deviceId_) != 1) {
-        SLOGE("deviceId map deviceinfo is not exit");
-        return AVSESSION_ERROR;
-    }
-    ListenCollaborationApplyResult();
+    CHECK_AND_RETURN_RET_LOG(castDeviceInfoMap_.count(outputDeviceInfo.deviceInfos_[0].deviceId_),
+        AVSESSION_ERROR, "deviceId map deviceinfo is not exit");
     DeviceInfo deviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
-    CHECK_AND_RETURN_RET_LOG(deviceInfo.deviceId_ != "", AVSESSION_ERROR, "deviceid is empty");
-    SLOGI("supportedProtocols is %{public}d", deviceInfo.supportedProtocols_);
-    bool checkLinkConflict = deviceInfo.supportedProtocols_ != ProtocolType::TYPE_DLNA;
-    CollaborationManager::GetInstance().ApplyAdvancedResource(deviceInfo.deviceId_.c_str(), deviceInfo,
-        checkLinkConflict);
-    //wait collaboration callback 10s
-    std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
-    bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
-        [this]() {
-            return applyResultFlag_;
-    });
-    //wait user decision collaboration callback 60s
-    if (waitUserDecisionFlag_) {
-        flag = connectWaitCallbackCond_.wait_for(applyResultLock,
-            std::chrono::seconds(collaborationUserCallbackTimeOut_),
-        [this]() {
-            return applyUserResultFlag_;
-        });
-    }
-    applyResultFlag_ = false;
-    applyUserResultFlag_ = false;
-    waitUserDecisionFlag_ = false;
-    CHECK_AND_RETURN_RET_LOG(flag, ERR_WAIT_ALLCONNECT_TIMEOUT, "collaboration callback timeout");
-    if (collaborationRejectFlag_) {
-        collaborationRejectFlag_ = false;
-        SLOGE("collaboration callback reject");
-        return ERR_ALLCONNECT_CAST_REJECT;
-    }
-    return AVSESSION_SUCCESS;
+    return CollaborationManager::GetInstance().CastAddToCollaboration(deviceInfo);
 }
 
 int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
@@ -1803,18 +1772,29 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             return ERR_REPEAT_CAST;
         } else {
             SLOGI("cast check with pre cast alive %{public}lld, unregister callback", (long long)castHandle_);
-            isSwitchNewDevice_ = true;
+            multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
             newOutputDeviceInfo_ = outputDeviceInfo;
             StopCast();
             return AVSESSION_SUCCESS;
         }
     } else {
-        if (AVRouter::GetInstance().IsRemoteCasting()) {
+        if (AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SINK) {
+            multiDeviceState_ = MultiDeviceState::CASTED_AND_CASTING;
+            newOutputDeviceInfo_ = outputDeviceInfo;
+            StopCast();
+            return AVSESSION_SUCCESS;
+        }
+        if (AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SOURCE &&
+            AVRouter::GetInstance().IsRemoteCasting() &&
+            AVRouter::GetInstance().GetMirrorCastHandle() == -1) {
             return SubStartCast(outputDeviceInfo);
         }
-        int32_t flag = CastAddToCollaboration(outputDeviceInfo);
-        flag != AVSESSION_SUCCESS ? AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR) : static_cast<int32_t>(0);
-        CHECK_AND_RETURN_RET_LOG(flag == AVSESSION_SUCCESS, flag, "collaboration to start cast fail");
+        int32_t sourceAllConnectResult = CastAddToCollaboration(outputDeviceInfo);
+        if (sourceAllConnectResult != AVSESSION_SUCCESS) {
+            AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
+            SLOGE("collaboration to start cast fail");
+            return sourceAllConnectResult;
+        }
     }
     return SubStartCast(outputDeviceInfo);
 }
@@ -1864,14 +1844,13 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
     castHandleDeviceId_ = "-100";
     castControllerProxy_ = nullptr;
     isFirstCallback_ = true;
-    if (!isSwitchNewDevice_) {
+    if (multiDeviceState_ != MultiDeviceState::CASTING_SWITCH_DEVICE) {
         {
             std::lock_guard lockGuard(avsessionItemLock_);
             supportedCastCmds_.clear();
         }
         ProcessFrontSession("Disconnect");
     }
-    SaveLocalDeviceInfo();
     if (serviceCallbackForCastNtf_) {
         serviceCallbackForCastNtf_(GetSessionId(), false, false);
     }
@@ -1883,6 +1862,9 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     SLOGI("enter DealCollaborationPublishState");
     CHECK_AND_RETURN_LOG(castServiceNameStatePair_.second != deviceStateConnection,
         "cast not add to collaboration when mirror to stream cast");
+
+    CHECK_AND_RETURN_LOG(multiDeviceState_ != MultiDeviceState::CASTED_AND_CASTING,
+        "session casted already publish service state");
 
     collaborationNeedDeviceId_ = deviceInfo.deviceId_;
     if (castState == authingStateFromCast_) {
@@ -1913,27 +1895,36 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
 
 void AVSessionItem::DealLocalState(int32_t castState)
 {
-    if (castState == static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED)) {
-        OutputDeviceInfo localDeviceInfo;
-        DeviceInfo deviceInfo;
-        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
-        deviceInfo.deviceId_ = "0";
-        deviceInfo.deviceName_ = "LocalDevice";
-        localDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-        if (!isSwitchNewDevice_) {
+    CHECK_AND_RETURN(castState == static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED));
+    OutputDeviceInfo localDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "LocalDevice";
+    localDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+
+    switch (multiDeviceState_) {
+        case MultiDeviceState::DEFAULT:
             SetOutputDevice(localDeviceInfo);
-        } else {
-            isSwitchNewDevice_ = false;
+            break;
+        case MultiDeviceState::CASTING_SWITCH_DEVICE:
+        case MultiDeviceState::CASTED_AND_CASTING:
+            multiDeviceState_ = MultiDeviceState::DEFAULT;
             CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
             std::this_thread::sleep_for(std::chrono::milliseconds(SWITCH_WAIT_TIME));
-            int32_t flag = CastAddToCollaboration(newOutputDeviceInfo_);
-            if (flag == AVSESSION_SUCCESS) {
+            if (CastAddToCollaboration(newOutputDeviceInfo_) == AVSESSION_SUCCESS) {
                 SubStartCast(newOutputDeviceInfo_);
             } else {
                 OnCastStateChange(disconnectStateFromCast_, newOutputDeviceInfo_.deviceInfos_[0], false);
                 AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
             }
-        }
+            break;
+        case MultiDeviceState::CASTING_AND_CASTED:
+            multiDeviceState_ = MultiDeviceState::DEFAULT;
+            AVRouter::GetInstance().SetCastingDeviceName(descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_);
+            SetOutputDevice(localDeviceInfo);
+            AVRouter::GetInstance().NotifyCastSessionCreated();
+            break;
     }
 }
 
@@ -1971,7 +1962,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
         deviceInfo.deviceId_.c_str());
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
-        deviceInfo = GetDescriptor().outputDeviceInfo_.deviceInfos_[0];
+        deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
@@ -2010,7 +2001,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
         if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO &&
-            !isSwitchNewDevice_) {
+            multiDeviceState_ != MultiDeviceState::CASTING_SWITCH_DEVICE) {
             serviceCallbackForPhotoCast_(GetSessionId(), false);
         }
         DealDisconnect(deviceInfo, isNeedRemove);
@@ -2027,6 +2018,8 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
 
 void AVSessionItem::DealOutputDeviceChange(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo)
 {
+    CHECK_AND_RETURN_LOG(multiDeviceState_ != MultiDeviceState::CASTED_AND_CASTING,
+        "current session no need deal output device change");
     if (castState == ConnectionState::STATE_CONNECTED && mirrorToStreamOnceFlag_ &&
         AVRouter::GetInstance().IsInMirrorToStreamState()) {
         mirrorToStreamOnceFlag_ = false;
@@ -2035,12 +2028,10 @@ void AVSessionItem::DealOutputDeviceChange(const int32_t castState, const Output
     }
     
     HandleOutputDeviceChange(castState, outputDeviceInfo);
-    {
-        std::lock_guard controllersLockGuard(controllersLock_);
-        for (const auto& controller : controllers_) {
-            if (controller.second != nullptr) {
-                controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
-            }
+    std::lock_guard controllersLockGuard(controllersLock_);
+    for (const auto& controller : controllers_) {
+        if (controller.second != nullptr) {
+            controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
         }
     }
 }
@@ -2052,36 +2043,6 @@ void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     for (auto controller : castControllers_) {
         controller->OnPlayerError(errorCode, errorMsg);
     }
-}
-
-void AVSessionItem::ListenCollaborationApplyResult()
-{
-    SLOGI("enter ListenCollaborationApplyResult");
-    CollaborationManager::GetInstance().SendCollaborationApplyResult([this](const int32_t code) {
-        std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
-        if (code == ServiceCollaborationManagerResultCode::PASS) {
-            SLOGI("ApplyResult can cast");
-            applyResultFlag_ = true;
-            applyUserResultFlag_ = true;
-            connectWaitCallbackCond_.notify_one();
-        }
-        if (code == ServiceCollaborationManagerResultCode::REJECT) {
-            SLOGI("ApplyResult can not cast");
-            collaborationRejectFlag_ = true;
-            applyResultFlag_ = true;
-            applyUserResultFlag_ = true;
-            connectWaitCallbackCond_.notify_one();
-        }
-        if (code == ServiceCollaborationManagerResultCode::USERTIP) {
-            SLOGI("ApplyResult user tip");
-            applyResultFlag_ = true;
-            waitUserDecisionFlag_ = true;
-            connectWaitCallbackCond_.notify_one();
-        }
-        if (code == ServiceCollaborationManagerResultCode::USERAGREE) {
-            SLOGI("ApplyResult user agree cast");
-        }
-    });
 }
 
 int32_t AVSessionItem::StopCast(bool continuePlay)
@@ -2099,27 +2060,32 @@ int32_t AVSessionItem::StopCast(bool continuePlay)
         SLOGI("Unregister and Stop cast process for sink with ret %{public}d", ret);
         return ret;
     }
-    {
-        CHECK_AND_RETURN_RET_LOG(castHandle_ != 0 && castHandle_ != -1, AVSESSION_SUCCESS, "Not cast session, return");
-        std::string callingBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
-        bool isMediaOrSceneBoard = (callingBundleName == MEDIA_CONTROL_BUNDLENAME) ||
-                                   (callingBundleName == SCENE_BOARD_BUNDLENAME);
-        SLOGI("Stop cast process %{public}lld with rm device %{public}d", (long long)castHandle_, isMediaOrSceneBoard);
-        if ((castHandle_ == AVRouter::GetInstance().GetMirrorCastHandle()) && !isMediaOrSceneBoard) {
-            if (castControllerProxy_ != nullptr) {
-                AVCastControlCommand cmd;
-                cmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
-                castControllerProxy_->SendControlCommand(cmd);
-            }
-        } else {
-            AVSessionRadarInfo info("AVSessionItem::StopCast");
-            AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
-            int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, continuePlay);
-            AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
-            SLOGI("StopCast with unchange castHandle is %{public}lld", (long long)castHandle_);
-            CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
-        }
+    if (AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SINK) {
+        CHECK_AND_RETURN_RET_LOG(serviceCallbackStopSinkCast_ != nullptr, AVSESSION_ERROR, "callback nullptr");
+        AVRouter::GetInstance().RegisterStashCallback(INT64_MAX, cssListener_, GetSessionId());
+        serviceCallbackStopSinkCast_();
+        return AVSESSION_SUCCESS;
     }
+
+    CHECK_AND_RETURN_RET_LOG(castHandle_ != 0 && castHandle_ != -1, AVSESSION_SUCCESS, "Not cast session, return");
+    std::string callingBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
+    bool isMediaOrSceneBoard = (callingBundleName == MEDIA_CONTROL_BUNDLENAME) ||
+                                (callingBundleName == SCENE_BOARD_BUNDLENAME);
+    SLOGI("Stop cast process %{public}lld with rm device %{public}d", (long long)castHandle_, isMediaOrSceneBoard);
+    if ((castHandle_ == AVRouter::GetInstance().GetMirrorCastHandle()) && !isMediaOrSceneBoard) {
+        CHECK_AND_RETURN_RET(castControllerProxy_ != nullptr, AVSESSION_SUCCESS);
+        AVCastControlCommand cmd;
+        cmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_STOP);
+        castControllerProxy_->SendControlCommand(cmd);
+    } else {
+        AVSessionRadarInfo info("AVSessionItem::StopCast");
+        AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
+        int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, continuePlay);
+        AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
+        SLOGI("StopCast with unchange castHandle is %{public}lld", (long long)castHandle_);
+        CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
+    }
+    
     return AVSESSION_SUCCESS;
 }
 
@@ -2349,6 +2315,22 @@ void AVSessionItem::SetServiceCallbackForPhotoCast(const std::function<void(std:
 {
     SLOGI("SetServiceCallbackForPhotoCast in");
     serviceCallbackForPhotoCast_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForStopSinkCast(const std::function<void()>& callback)
+{
+    SLOGI("SetServiceCallbackForStopSinkCast in");
+    serviceCallbackStopSinkCast_ = callback;
+}
+
+void AVSessionItem::SetMultiDeviceState(MultiDeviceState multiDeviceState)
+{
+    multiDeviceState_.store(multiDeviceState);
+}
+
+AVSessionItem::MultiDeviceState AVSessionItem::GetMultiDeviceState()
+{
+    return multiDeviceState_.load();
 }
 #endif
 

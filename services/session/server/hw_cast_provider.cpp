@@ -151,7 +151,6 @@ int HwCastProvider::StartCastSession(bool isHiStream)
         auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
         if (hwCastProviderSession) {
             if (hwCastProviderSession->Init() != AVSESSION_ERROR) {
-                hwCastProviderSession->SetCastSource(true);
                 SLOGI("CastSession init successed");
             } else {
                 hwCastProviderSession->Release();
@@ -167,6 +166,7 @@ int HwCastProvider::StartCastSession(bool isHiStream)
 
     return castId;
 }
+
 void HwCastProvider::StopCastSession(int castId)
 {
     SLOGI("StopCastSession begin");
@@ -473,7 +473,6 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
 void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
 {
     SLOGI("eventId is %{public}d, param is %{public}" PRId64, eventId, param);
-    std::lock_guard lockGuard(mutexLock_);
     for (auto listener : castStateListenerList_) {
         if (listener != nullptr) {
             SLOGI("trigger the OnDeviceLogEvent for registered listeners");
@@ -523,7 +522,6 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
         }
         auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
         hwCastProviderSession->Init();
-        hwCastProviderSession->SetCastSource(false);
         {
             std::lock_guard lockGuard(mutexLock_);
             hwCastProviderSessionMap_[castId] = hwCastProviderSession;
@@ -535,6 +533,14 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
         }
         SLOGI("do session create notify finished %{public}d", castId);
         }, "OnSessionCreated", 0);
+}
+
+void HwCastProvider::DestroyCastSessionCreated(const std::string castSessionId)
+{
+    std::shared_ptr<ICastSession> castSession = nullptr;
+    CastSessionManager::GetInstance().GetCastSession(castSessionId, castSession);
+    auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
+    hwCastProviderSession->Release();
 }
 
 void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)

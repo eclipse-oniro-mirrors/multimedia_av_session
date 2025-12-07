@@ -323,10 +323,15 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         servicePtr_->HandleBundleRemoveEvent(bundleName);
     } else if (action.compare("usual.event.CAST_SESSION_CREATE") == 0) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        std::string sessionId = want.GetStringParam("sessionId");
-        SLOGI("Cast Session Create success with sessionId length %{public}d", static_cast<int32_t>(sessionId.size()));
-        servicePtr_->checkEnableCast(true);
-        AVRouter::GetInstance().NotifyCastSessionCreated(sessionId);
+        AVRouter::GetInstance().SetSinkCastSessionInfo(want);
+
+        if (AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SOURCE &&
+            AVRouter::GetInstance().GetMirrorCastHandle() == -1) {
+            servicePtr_->StopSourceCast();
+        } else {
+            servicePtr_->checkEnableCast(true);
+            AVRouter::GetInstance().NotifyCastSessionCreated();
+        }
 #endif
     } else if (action.compare("usual.event.DESKTOP_LYRIC_DESTROY") == 0) {
         servicePtr_->StopDesktopLyricAbility();
@@ -1553,6 +1558,18 @@ void AVSessionService::AddCastServiceCallback(sptr<AVSessionItem>& sessionItem)
                 std::to_string(session->GetDescriptor().userId_), photoNotifyId);
             SLOGI("CancelNotification PHOTO with userId:%{public}d, ret=%{public}d",
                 session->GetDescriptor().userId_, ret);
+        }
+    });
+
+    sessionItem->SetServiceCallbackForStopSinkCast([this]() {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        SLOGI("Start release cast session");
+        for (const auto& session : GetContainer().GetAllSessions()) {
+            if (session != nullptr && session->GetDescriptor().sessionTag_ == "RemoteCast") {
+                std::string sessionId = session->GetDescriptor().sessionId_;
+                SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+                session->StopCastSession();
+            }
         }
     });
 #endif // CASTPLUS_CAST_ENGINE_ENABLE

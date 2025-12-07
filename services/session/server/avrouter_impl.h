@@ -19,6 +19,7 @@
 #include "av_router.h"
 #include "avcast_provider_manager.h"
 #include "hw_cast_provider.h"
+#include "avsession_errors.h"
 #include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
@@ -75,7 +76,9 @@ public:
 
     int32_t OnCastSessionCreated(const int32_t castId) override;
 
-    void NotifyCastSessionCreated(const std::string castSessionId) override;
+    void NotifyCastSessionCreated() override;
+
+    void DestroyCastSessionCreated() override;
 
     int32_t OnCastServerDied(int32_t providerNumber) override;
 
@@ -90,6 +93,9 @@ public:
     int32_t StopCast(const int64_t castHandle, bool continuePlay = false) override;
 
     int32_t StopCastSession(const int64_t castHandle) override;
+
+    void RegisterStashCallback(int64_t castHandleconst,
+        std::shared_ptr<IAVRouterListener> callback, std::string sessionId) override;
 
     int32_t RegisterCallback(int64_t castHandleconst,
         std::shared_ptr<IAVRouterListener> callback, std::string sessionId, DeviceInfo deviceInfo) override;
@@ -108,6 +114,8 @@ public:
 
     void SetMirrorCastHandle(int64_t castHandle) override;
 
+    void SetSinkCastSessionInfo(const AAFwk::Want &want) override;
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
@@ -119,6 +127,14 @@ public:
     bool IsRemoteCasting() override;
 
     void UpdateConnectState(int32_t castState);
+
+    void SetCastSide(CAST_SIDE castSide) override;
+
+    CAST_SIDE GetCastSide() override;
+
+    void SetCastingDeviceName(std::string deviceName) override;
+
+    std::string GetCastingDeviceName() override;
 
 protected:
 
@@ -152,6 +168,12 @@ private:
     std::atomic<bool> isInMirrorToStream_ = false;
     std::atomic<bool> isRemoteCasting_ = false;
     std::map<std::string, DeviceInfo> validDeviceInfoMap_;
+    std::atomic<CAST_SIDE> castSide_ = CAST_SIDE::DEFAULT;
+    std::string sinkCastSessionId_;
+    std::string sourceDeviceId_;
+    ProtocolType sourceProtocols_ = ProtocolType::TYPE_LOCAL;
+    std::atomic<int32_t> sinkAllConnectResult_ = AVSESSION_SUCCESS;
+    std::string sinkDeviceName_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

@@ -197,6 +197,21 @@ public:
         return ret;
     }
 
+    static int32_t PublishCommonEventWithDeviceName(const std::string& action, const std::string& sinkDeviceName,
+        const std::string& sourceDeviceName)
+    {
+        OHOS::AAFwk::Want want;
+        want.SetAction(action);
+        want.SetParam("sinkDeviceName", sinkDeviceName);
+        want.SetParam("sourceDeviceName", sourceDeviceName);
+        EventFwk::CommonEventData data;
+        data.SetWant(want);
+        EventFwk::CommonEventPublishInfo publishInfo;
+        int32_t ret = EventFwk::CommonEventManager::NewPublishCommonEvent(data, publishInfo);
+        SLOGI("PublishCommonEventWithDeviceName: %{public}s return %{public}d", action.c_str(), ret);
+        return ret;
+    }
+
     static void PublishCtrlCmdEvent(const std::string& cmd, int32_t uid, int32_t pid)
     {
         OHOS::AAFwk::Want want;

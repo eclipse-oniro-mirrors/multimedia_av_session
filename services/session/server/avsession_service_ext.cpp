@@ -480,6 +480,18 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionService::StopSourceCast()
+{
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        CHECK_AND_RETURN_RET(session != nullptr, AVSESSION_SUCCESS);
+        CHECK_AND_RETURN_RET(session->IsCasting(), AVSESSION_SUCCESS);
+        session->SetMultiDeviceState(AVSessionItem::MultiDeviceState::CASTING_AND_CASTED);
+        CHECK_AND_RETURN_RET(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR);
+    }
+
+    return AVSESSION_SUCCESS;
+}
+
 void AVSessionService::NotifyMirrorToStreamCast()
 {
     for (auto& session : GetContainer().GetAllSessions()) {

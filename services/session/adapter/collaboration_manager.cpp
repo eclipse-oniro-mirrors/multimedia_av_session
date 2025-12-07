@@ -216,4 +216,68 @@ int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId, c
     }
     return AVSESSION_SUCCESS;
 }
+
+int32_t CollaborationManager::CastAddToCollaboration(const DeviceInfo& deviceInfo)
+{
+    SLOGI("enter CastAddToCollaboration");
+    ListenCollaborationApplyResult();
+    CHECK_AND_RETURN_RET_LOG(deviceInfo.deviceId_ != "", AVSESSION_ERROR, "deviceid is empty");
+    SLOGI("supportedProtocols is %{public}d", deviceInfo.supportedProtocols_);
+    bool checkLinkConflict = deviceInfo.supportedProtocols_ != ProtocolType::TYPE_DLNA;
+    ApplyAdvancedResource(deviceInfo.deviceId_.c_str(), deviceInfo, checkLinkConflict);
+    //wait collaboration callback 10s
+    std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
+    bool flag = connectWaitCallbackCond_.wait_for(applyResultLock, std::chrono::seconds(collaborationCallbackTimeOut_),
+        [this]() {
+            return applyResultFlag_;
+    });
+    //wait user decision collaboration callback 60s
+    if (waitUserDecisionFlag_) {
+        flag = connectWaitCallbackCond_.wait_for(applyResultLock,
+            std::chrono::seconds(collaborationUserCallbackTimeOut_),
+        [this]() {
+            return applyUserResultFlag_;
+        });
+    }
+    applyResultFlag_ = false;
+    applyUserResultFlag_ = false;
+    waitUserDecisionFlag_ = false;
+    CHECK_AND_RETURN_RET_LOG(flag, ERR_WAIT_ALLCONNECT_TIMEOUT, "collaboration callback timeout");
+    if (collaborationRejectFlag_) {
+        collaborationRejectFlag_ = false;
+        SLOGE("collaboration callback reject");
+        return ERR_ALLCONNECT_CAST_REJECT;
+    }
+    return AVSESSION_SUCCESS;
+}
+
+void CollaborationManager::ListenCollaborationApplyResult()
+{
+    SLOGI("enter ListenCollaborationApplyResult");
+    SendCollaborationApplyResult([this](const int32_t code) {
+        std::unique_lock <std::mutex> applyResultLock(collaborationApplyResultMutex_);
+        if (code == ServiceCollaborationManagerResultCode::PASS) {
+            SLOGI("ApplyResult can cast");
+            applyResultFlag_ = true;
+            applyUserResultFlag_ = true;
+            connectWaitCallbackCond_.notify_one();
+        }
+        if (code == ServiceCollaborationManagerResultCode::REJECT) {
+            SLOGI("ApplyResult can not cast");
+            collaborationRejectFlag_ = true;
+            applyResultFlag_ = true;
+            applyUserResultFlag_ = true;
+            connectWaitCallbackCond_.notify_one();
+        }
+        if (code == ServiceCollaborationManagerResultCode::USERTIP) {
+            SLOGI("ApplyResult user tip");
+            applyResultFlag_ = true;
+            waitUserDecisionFlag_ = true;
+            connectWaitCallbackCond_.notify_one();
+        }
+        if (code == ServiceCollaborationManagerResultCode::USERAGREE) {
+            SLOGI("ApplyResult user agree cast");
+        }
+    });
+}
 }   // namespace OHOS::AVSession

@@ -55,6 +55,7 @@ public:
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
     void NotifyCastSessionCreated(const std::string castSessionId);
+    void DestroyCastSessionCreated(const std::string castSessionId);
     void OnServiceDied() override;
     bool SetStreamState(int64_t castHandle, DeviceInfo deviceInfo) override;
     int64_t GetMirrorCastHandle() override;

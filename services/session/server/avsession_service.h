@@ -284,6 +284,8 @@ public:
 
     int32_t StopCast(const SessionToken& sessionToken) override;
 
+    int32_t StopSourceCast();
+
     int32_t checkEnableCast(bool enable) override;
 
     void setInCast(bool isInCast) override;

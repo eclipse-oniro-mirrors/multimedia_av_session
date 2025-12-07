@@ -43,12 +43,6 @@ void HwCastProviderSession::SetProtocolType(CastEngine::ProtocolType protocolTyp
     protocolType_ = protocolType;
 }
 
-void HwCastProviderSession::SetCastSource(bool isCastSource)
-{
-    SLOGI("SetCastSource %{public}d", isCastSource);
-    isCastSource_ = isCastSource;
-}
-
 void HwCastProviderSession::Release()
 {
     SLOGI("release the HwCastProviderSession");
@@ -208,8 +202,11 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         SLOGI("duplicate devicestate");
         return;
     }
+    
+    CastRemoteDevice castRemoteDevice;
+    castSession_ ? castSession_->GetRemoteDeviceInfo(stateInfo.deviceId, castRemoteDevice) : static_cast<int32_t>(0);
 
-    isCastSource_ ? computeToastOnDeviceState(stateInfo.deviceState) : (void)0;
+    ComputeToastOnDeviceState(stateInfo.deviceState, castRemoteDevice);
     {
         std::lock_guard lockGuard(mutex_);
         if (castSessionStateListenerList_.size() == 0) {
@@ -225,8 +222,6 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     std::vector<AudioStreamInfo> streamInfos;
     if (protocolType_ == CastEngine::ProtocolType::CAST_PLUS_AUDIO) {
         SLOGI("OnDeviceState CAST_PLUS_AUDIO GetRemoteDeviceInfo");
-        CastRemoteDevice castRemoteDevice = {};
-        castSession_->GetRemoteDeviceInfo(stateInfo.deviceId, castRemoteDevice);
         AudioStreamInfo audioStreamInfo;
         audioStreamInfo.samplingRate = static_cast<AudioSamplingRate>(castRemoteDevice.audioCapability.samplingRate);
         audioStreamInfo.encoding = static_cast<AudioEncodingType>(castRemoteDevice.audioCapability.encoding);
@@ -250,16 +245,25 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     }
 }
 
-void HwCastProviderSession::computeToastOnDeviceState(CastEngine::DeviceState state)
+void HwCastProviderSession::ComputeToastOnDeviceState(CastEngine::DeviceState state,
+    const CastEngine::CastRemoteDevice &castRemoteDevice)
 {
     // device connected
     if (state == CastEngine::DeviceState::STREAM) {
         avToastDeviceState_ = ConnectionState::STATE_CONNECTED;
+
+        CHECK_AND_RETURN(AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SINK);
+        std::string preSinkDeviceName = AVRouter::GetInstance().GetCastingDeviceName();
+        CHECK_AND_RETURN_LOG(!preSinkDeviceName.empty(), "preSinkDeviceName empty");
+        std::string curSourceDeviceName = castRemoteDevice.deviceName;
+        AVSessionUtils::PublishCommonEventWithDeviceName(MEDIA_CAST_CONFLICT, preSinkDeviceName, curSourceDeviceName);
+        AVRouter::GetInstance().SetCastingDeviceName("");
         return;
     }
     // stream to mirror scene, session is not hold by avsession
     if (state == CastEngine::DeviceState::STREAM_TO_MIRROR) {
         avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
+        AVRouter::GetInstance().SetCastingDeviceName("");
         return;
     }
     if (state != CastEngine::DeviceState::DISCONNECTED) {
@@ -267,11 +271,13 @@ void HwCastProviderSession::computeToastOnDeviceState(CastEngine::DeviceState st
     }
     // device disconnected after successful connection
     if (avToastDeviceState_ == ConnectionState::STATE_CONNECTED) {
+        CHECK_AND_RETURN(AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SOURCE);
         AVSessionUtils::PublishCommonEvent(MEDIA_CAST_DISCONNECT);
         return;
     }
     // device disconnected during connecting
     if (avToastDeviceState_ == ConnectionState::STATE_CONNECTING) {
+        CHECK_AND_RETURN(AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SOURCE);
         AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
         return;
     }

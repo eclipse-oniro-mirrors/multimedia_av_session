@@ -329,7 +329,10 @@ if (castplus_cast_engine_enable) {
       "server/hw_cast_stream_player.cpp",
     ]
 
-    adapter_sources = []
+    adapter_sources = [
+      "adapter/collaboration_manager.cpp",
+      "adapter/plugin_lib.cpp",
+    ]
 
     sources = ipc_sources + adapter_sources + service_sources
 
@@ -395,6 +398,7 @@ if (castplus_cast_engine_enable) {
       "image_framework:image_native",
       "input:libmmi-client",
       "ipc:ipc_single",
+      "openssl:libcrypto_shared",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]

@@ -21,6 +21,8 @@
 #include "permission_checker.h"
 #include "avcast_provider_manager.h"
 #include "avsession_sysevent.h"
+#include "collaboration_manager.h"
+#include "cJSON.h"
 #ifdef DEVICE_MANAGER_ENABLE
 #include "device_manager.h"
 #endif
@@ -366,6 +368,7 @@ std::shared_ptr<IAVCastControllerProxy> AVRouterImpl::GetRemoteController(const 
 int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     std::pair<std::string, std::string>& serviceNameStatePair, std::string sessionId)
 {
+    castSide_ = CAST_SIDE::CAST_SOURCE;
     SLOGI("AVRouterImpl start cast process");
     castServiceNameStatePair_ = serviceNameStatePair;
     int64_t castHandle = -1;
@@ -464,6 +467,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
 
     isInMirrorToStream_ = false;
     isRemoteCasting_ = false;
+    castSide_ = CAST_SIDE::DEFAULT;
     int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
 
     CHECK_AND_RETURN_RET_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
@@ -526,6 +530,14 @@ int32_t AVRouterImpl::GetRemoteDrmCapabilities(int64_t castHandle, std::string d
     return AVSESSION_SUCCESS;
 }
 
+void AVRouterImpl::RegisterStashCallback(int64_t castHandle, const std::shared_ptr<IAVRouterListener> callback,
+    std::string sessionId)
+{
+    SLOGI("AVRouterImpl register stash callback to provider");
+    castHandleToInfoMap_[castHandle].avRouterListener_ = callback;
+    castHandleToInfoMap_[castHandle].sessionId_ = sessionId;
+}
+
 int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr<IAVRouterListener> callback,
     std::string sessionId, DeviceInfo deviceInfo)
 {
@@ -551,11 +563,11 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
                 return AVSESSION_SUCCESS;
             }
         }
-        providerManagerMap_[providerNumber]->provider_->RegisterCastSessionStateListener(castId, castSessionListener_);
         if (castHandleToInfoMap_.find(castHandle) != castHandleToInfoMap_.end()) {
             castHandleToInfoMap_[castHandle].avRouterListener_ = callback;
             castHandleToInfoMap_[castHandle].sessionId_ = sessionId;
         }
+        providerManagerMap_[providerNumber]->provider_->RegisterCastSessionStateListener(castId, castSessionListener_);
     } else {
         if (castHandleToInfoMap_.find(castHandle) != castHandleToInfoMap_.end() &&
             castHandleToInfoMap_[castHandle].avRouterListener_ == nullptr) {
@@ -616,10 +628,81 @@ void AVRouterImpl::SetMirrorCastHandle(int64_t castHandle)
     hwProvider_->SetMirrorCastHandle(castHandle);
 }
 
-void AVRouterImpl::NotifyCastSessionCreated(const std::string castSessionId)
+void AVRouterImpl::SetSinkCastSessionInfo(const AAFwk::Want &want)
 {
+    std::string deviceInfoStr = want.GetStringParam("deviceInfo");
+    cJSON* deviceInfo = cJSON_Parse(deviceInfoStr.c_str());
+    bool deviceInfoFlag = (deviceInfo == nullptr) || cJSON_IsInvalid(deviceInfo) || cJSON_IsNull(deviceInfo);
+    if (deviceInfoFlag) {
+        SLOGE("deviceInfo parse is not valid json");
+        cJSON_Delete(deviceInfo);
+        return;
+    }
+    
+    cJSON* deviceIdItem = cJSON_GetObjectItem(deviceInfo, "deviceId");
+    CHECK_AND_PRINT_LOG(deviceIdItem != nullptr, "deviceIdItem is nullptr");
+    bool deviceIdItemFlag = (deviceIdItem != nullptr) && !cJSON_IsInvalid(deviceIdItem) &&
+        !cJSON_IsNull(deviceIdItem) && cJSON_IsString(deviceIdItem) && deviceIdItem->valuestring != nullptr;
+    sourceDeviceId_ = deviceIdItemFlag ? std::string(deviceIdItem->valuestring) : "";
+
+    cJSON* protocolTypeItem = cJSON_GetObjectItem(deviceInfo, "protocolType");
+    CHECK_AND_PRINT_LOG(protocolTypeItem != nullptr, "protocolTypeItem is nullptr");
+    bool protocolTypeItemFlag = (protocolTypeItem != nullptr) && !cJSON_IsInvalid(protocolTypeItem) &&
+        !cJSON_IsNull(protocolTypeItem) && cJSON_IsNumber(protocolTypeItem);
+    sourceProtocols_ = protocolTypeItemFlag ?
+        static_cast<ProtocolType>(protocolTypeItem->valueint) : ProtocolType::TYPE_LOCAL;
+
+    sinkCastSessionId_ = want.GetStringParam("sessionId");
+    SLOGI("Cast Session Create success with sessionId length %{public}d and deviceId length %{public}d",
+        static_cast<int32_t>(sinkCastSessionId_.size()), static_cast<int32_t>(sourceDeviceId_.size()));
+    cJSON_Delete(deviceInfo);
+}
+
+void AVRouterImpl::NotifyCastSessionCreated()
+{
+    CHECK_AND_RETURN_LOG(!sinkCastSessionId_.empty(), "sinkCastSessionId_ is empty");
+    CHECK_AND_RETURN_LOG(!sourceDeviceId_.empty(), "sourceDeviceId_ is empty");
     CHECK_AND_RETURN_LOG(hwProvider_ != nullptr, "hwProvider_ is nullptr");
-    hwProvider_->NotifyCastSessionCreated(castSessionId);
+
+    if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1) {
+        DeviceInfo deviceInfo;
+        deviceInfo.deviceId_ = sourceDeviceId_;
+        deviceInfo.supportedProtocols_ = sourceProtocols_;
+        SLOGI("sourceProtocols_ is %{public}d", sourceProtocols_);
+        castSide_ = CAST_SIDE::CAST_SINK;  // prohibit cast preempt mirror toast disconnect
+        sinkAllConnectResult_ = CollaborationManager::GetInstance().CastAddToCollaboration(deviceInfo);
+        sourceDeviceId_.clear();
+    }
+    
+    castSide_ = CAST_SIDE::CAST_SINK;
+    hwProvider_->NotifyCastSessionCreated(sinkCastSessionId_);
+}
+
+void AVRouterImpl::DestroyCastSessionCreated()
+{
+    CHECK_AND_RETURN_LOG(!sinkCastSessionId_.empty(), "sinkCastSessionId_ is empty");
+    CHECK_AND_RETURN_LOG(hwProvider_ != nullptr, "hwProvider_ is nullptr");
+    hwProvider_->DestroyCastSessionCreated(sinkCastSessionId_);
+}
+
+void AVRouterImpl::SetCastSide(CAST_SIDE castSide)
+{
+    castSide_.store(castSide);
+}
+
+CAST_SIDE AVRouterImpl::GetCastSide()
+{
+    return castSide_.load();
+}
+
+void AVRouterImpl::SetCastingDeviceName(std::string deviceName)
+{
+    sinkDeviceName_ = deviceName;
+}
+
+std::string AVRouterImpl::GetCastingDeviceName()
+{
+    return sinkDeviceName_;
 }
 
 bool AVRouterImpl::IsInMirrorToStreamState()
@@ -647,6 +730,23 @@ void AVRouterImpl::UpdateConnectState(int32_t castState)
 void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 {
     UpdateConnectState(castState);
+    switch (castState) {
+        case static_cast<int32_t>(CastEngine::DeviceState::STREAM):
+            if (sinkAllConnectResult_ != AVSESSION_SUCCESS) {
+                sinkAllConnectResult_ = AVSESSION_SUCCESS;
+                DestroyCastSessionCreated();
+                return;
+            }
+            break;
+        case static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED):
+            sinkAllConnectResult_ = AVSESSION_SUCCESS;
+            castSide_ = CAST_SIDE::DEFAULT;
+            std::lock_guard lockGuard(servicePtrLock_);
+            servicePtr_->SetIsSupportMirrorToStream(false);
+            servicePtr_->checkEnableCast(false);
+            break;
+    }
+
     for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
         if (castHandleInfo.avRouterListener_ != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered avRouterListener");
@@ -664,12 +764,10 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
                 localDevice.deviceInfos_.emplace_back(localInfo);
                 castHandleToInfoMap_[number].outputDeviceInfo_ = localDevice;
             }
+            if (number == INT64_MAX) {
+                castHandleToInfoMap_[number].avRouterListener_ = nullptr;
+            }
         }
-    }
-    if (castState == disconnectStateFromCast_) {
-        std::lock_guard lockGuard(servicePtrLock_);
-        servicePtr_->SetIsSupportMirrorToStream(false);
-        servicePtr_->checkEnableCast(false);
     }
 }
 
