@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Huawei Device Co., Ltd.
+ * Copyright (C) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,7 +80,98 @@ typedef enum {
      * @error Too many commands or events.
      */
     AV_SESSION_ERR_CODE_MESSAGE_OVERLOAD = 6600107,
+
+    /**
+     * @error The remote connection is not established.
+     */
+    AV_SESSION_ERR_CODE_REMOTE_CONNECTION_NOT_EXIST = 6600109,
 } AVSession_ErrCode;
+
+/**
+ * @brief Defines enumeration of avsession callback result.
+ *
+ * @since 13
+ */
+typedef enum {
+    /**
+     * @brief Result of avsession callabck is success.
+     */
+    AVSESSION_CALLBACK_RESULT_SUCCESS = 0,
+
+    /**
+     * @brief Result of avsession callabck failed.
+     */
+    AVSESSION_CALLBACK_RESULT_FAILURE = -1,
+} AVSessionCallback_Result;
+
+/**
+ * @brief AVMetadata error code
+ *
+ * @since 13
+ * @version 1.0
+ */
+typedef enum {
+    /**
+     * @error The call was successful.
+     */
+    AVMETADATA_SUCCESS = 0,
+
+    /**
+     * @error This means that the function was executed with an invalid input parameter.
+     */
+    AVMETADATA_ERROR_INVALID_PARAM = 1,
+
+    /**
+     * @error This means there is no memory left.
+     */
+    AVMETADATA_ERROR_NO_MEMORY = 2,
+} AVMetadata_Result;
+
+/**
+ * @brief AVQUEUEITEM error code
+ *
+ * @since 23
+ * @version 1.0
+ */
+typedef enum {
+    /**
+     * @error The call was successful.
+     */
+    AVQUEUEITEM_SUCCESS = 0,
+
+    /**
+     * @error This means that the function was executed with an invalid input parameter.
+     */
+    AVQUEUEITEM_ERROR_INVALID_PARAM = 1,
+
+    /**
+     * @error This means there is no memory left.
+     */
+    AVQUEUEITEM_ERROR_NO_MEMORY = 2,
+} AVQueueItem_Result;
+
+/**
+ * @brief AVQUEUEITEM error code
+ *
+ * @since 23
+ * @version 1.0
+ */
+typedef enum {
+    /**
+     * @error The call was successful.
+     */
+    AVCASTPICKEROPTION_SUCCESS = 0,
+
+    /**
+     * @error This means that the function was executed with an invalid input parameter.
+     */
+    AVCASTPICKEROPTION_ERROR_INVALID_PARAM = 1,
+
+    /**
+     * @error This means there is no memory left.
+     */
+    AVCASTPICKEROPTION_ERROR_NO_MEMORY = 2,
+} AVCastPickerOptions_Result;
 
 #ifdef __cplusplus
 }

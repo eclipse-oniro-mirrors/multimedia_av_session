@@ -607,4 +607,26 @@ HWTEST_F(OHAVSessionCallbackImplTest, OnPlayWithAssetId001, TestSize.Level0)
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     SLOGI("OnPlayWithAssetId001 End");
 }
+
+/**
+ * @tc.name: RegisterOutputDeviceChangeCallback001
+ * @tc.desc: test RegisterOutputDeviceChangeCallback
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterOutputDeviceChangeCallback001, TestSize.Level0)
+{
+    SLOGI("RegisterOutputDeviceChangeCallback001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterOutputDeviceChangeCallback001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OutputDeviceChange callback = [](OH_AVSession* session,
+        AVSession_ConnectionState state, AVSession_OutputDeviceInfo* outputDeviceInfo)-> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterOutputDeviceChangeCallback(avsession, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    SLOGI("RegisterOutputDeviceChangeCallback001 End");
+}
 } //OHOS::AVSession

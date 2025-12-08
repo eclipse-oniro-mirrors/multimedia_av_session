@@ -92,9 +92,9 @@ AVMetadata_Result OHAVMetadataBuilder::SetAssetId(const std::string &assetId)
 AVMetadata_Result OHAVMetadataBuilder::SetSkipIntervals(AVMetadata_SkipIntervals intervals)
 {
     switch (intervals) {
-        case SECONDS_10:
-        case SECONDS_15:
-        case SECONDS_30:
+        case AVMetadata_SkipIntervals::SECONDS_10:
+        case AVMetadata_SkipIntervals::SECONDS_15:
+        case AVMetadata_SkipIntervals::SECONDS_30:
             intervals_ = intervals;
             return AVMETADATA_SUCCESS;
         default:
@@ -106,6 +106,12 @@ AVMetadata_Result OHAVMetadataBuilder::SetSkipIntervals(AVMetadata_SkipIntervals
 AVMetadata_Result OHAVMetadataBuilder::SetDisplayTags(int32_t tags)
 {
     tags_ = tags;
+    return AVMETADATA_SUCCESS;
+}
+
+AVMetadata_Result OHAVMetadataBuilder::SetFilter(uint32_t filter)
+{
+    filter_ = filter;
     return AVMETADATA_SUCCESS;
 }
 
@@ -210,13 +216,13 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
     }
 
     switch (intervals_) {
-        case SECONDS_10:
+        case AVMetadata_SkipIntervals::SECONDS_10:
             metadata->SetSkipIntervals(AVMetaData::SECONDS_10);
             break;
-        case SECONDS_15:
+        case AVMetadata_SkipIntervals::SECONDS_15:
             metadata->SetSkipIntervals(AVMetaData::SECONDS_15);
             break;
-        case SECONDS_30:
+        case AVMetadata_SkipIntervals::SECONDS_30:
             metadata->SetSkipIntervals(AVMetaData::SECONDS_30);
             break;
         default:
@@ -382,6 +388,13 @@ AVMetadata_Result OH_AVMetadataBuilder_SetDisplayTags(OH_AVMetadataBuilder* buil
     }
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
     return metadata->SetDisplayTags(tags);
+}
+
+AVMetadata_Result OH_AVMetadataBuilder_SetFilter(OH_AVMetadataBuilder* builder, uint32_t filter)
+{
+    CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
+    OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);
+    return metadata->SetFilter(filter);
 }
 
 AVMetadata_Result OH_AVMetadataBuilder_GenerateAVMetadata(OH_AVMetadataBuilder* builder,

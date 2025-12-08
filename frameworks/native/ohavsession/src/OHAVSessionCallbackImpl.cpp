@@ -15,10 +15,22 @@
 
 #include "OHAVSessionCallbackImpl.h"
 #include "avcast_control_command.h"
+#include "OHDeviceInfo.h"
 
 namespace OHOS::AVSession {
+OHAVSessionCallbackImpl::OHAVSessionCallbackImpl()
+{
+    InitSharedPtrMember();
+}
+
 OHAVSessionCallbackImpl::~OHAVSessionCallbackImpl()
 {
+}
+
+void OHAVSessionCallbackImpl::InitSharedPtrMember()
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    avSessionOutputDeviceInfo_ = std::make_shared<AVSession_OutputDeviceInfo>();
 }
 
 void OHAVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
@@ -88,6 +100,17 @@ void OHAVSessionCallbackImpl::OnToggleFavorite(const std::string& mediaId)
 {
     for (auto it = toggleFavoriteCallbacks_.begin(); it != toggleFavoriteCallbacks_.end(); ++it) {
         it->first(avsession_, mediaId.c_str(), it->second);
+    }
+}
+
+void OHAVSessionCallbackImpl::OnOutputDeviceChange(const int32_t connectionState,
+    const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo)
+{
+    for (auto it = outputDeviceChangeCallbacks_.begin(); it != outputDeviceChangeCallbacks_.end(); ++it) {
+        AVSession_OutputDeviceInfo *deviceInfo = OHDeviceInfo::ConvertDesc(outputDeviceInfo);
+        avSessionOutputDeviceInfo_->size = deviceInfo->size;
+        avSessionOutputDeviceInfo_->deviceInfos = deviceInfo->deviceInfos;
+        (*it)(avsession_, (AVSession_ConnectionState)connectionState, avSessionOutputDeviceInfo_.get());
     }
 }
 
@@ -348,6 +371,39 @@ AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterToggleFavoriteCallback(OH_A
         [callback](const std::pair<OH_AVSessionCallback_OnToggleFavorite, void*> &element) {
             return element.first == callback;
         });
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSessionCallbackImpl::RegisterOutputDeviceChangeCallback(OH_AVSession* session,
+    OH_AVSessionCallback_OutputDeviceChange callback)
+{
+    if (avsession_ == nullptr) {
+        avsession_ = session;
+    }
+    auto it = outputDeviceChangeCallbacks_.begin();
+    for (; it != outputDeviceChangeCallbacks_.end(); ++it) {
+        if (*it == callback) {
+            break;
+        }
+    }
+    if (it == outputDeviceChangeCallbacks_.end()) {
+        outputDeviceChangeCallbacks_.emplace_back(callback);
+    }
+
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterOutputDeviceChangeCallback(OH_AVSession* session,
+    OH_AVSessionCallback_OutputDeviceChange callback)
+{
+    auto it = outputDeviceChangeCallbacks_.begin();
+    for (; it != outputDeviceChangeCallbacks_.end(); ++it) {
+        if (*it == callback) {
+            outputDeviceChangeCallbacks_.erase(it);
+            break;
+        }
+    }
+
     return AV_SESSION_ERR_SUCCESS;
 }
 }

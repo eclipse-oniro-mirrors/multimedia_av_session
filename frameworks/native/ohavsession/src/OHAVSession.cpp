@@ -14,8 +14,14 @@
  */
 
 #include "OHAVSession.h"
+#include "OHAVCastController.h"
+#include "OHAVSession.h"
+#include "OHDeviceInfo.h"
 #include "avmeta_data.h"
 #include "avsession_manager.h"
+
+#include "string_wrapper.h"
+#include "want_params_wrapper.h"
 
 namespace OHOS::AVSession {
 OHAVSession::~OHAVSession()
@@ -113,6 +119,18 @@ AVSession_ErrCode OHAVSession::SetLoopMode(AVSession_LoopMode loopMode)
     AVPlaybackState avPlaybackState;
     avPlaybackState.SetLoopMode(loopMode);
     int32_t ret = avSession_->SetAVPlaybackState(avPlaybackState);
+    return GetEncodeErrcode(ret);
+}
+
+AVSession_ErrCode OHAVSession::SetRemoteCastEnabled(bool enabled)
+{
+    AAFwk::WantParams extra;
+
+    if (enabled) {
+        extra.SetParam("requireAbilityList", OHOS::AAFwk::String::Box("url-cast"));
+    }
+
+    int32_t ret = avSession_->SetExtras(extra);
     return GetEncodeErrcode(ret);
 }
 
@@ -327,6 +345,119 @@ AVSession_ErrCode OHAVSession::UnregisterToggleFavoriteCallback(OH_AVSessionCall
     return AV_SESSION_ERR_SUCCESS;
 }
 
+AVSession_ErrCode OHAVSession::RegisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    CheckAndRegister();
+    ohAVSessionCallbackImpl_->RegisterOutputDeviceChangeCallback((OH_AVSession*)this, callback);
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSession::UnregisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback)
+{
+    if (ohAVSessionCallbackImpl_ == nullptr) {
+        return AV_SESSION_ERR_SUCCESS;
+    }
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    ohAVSessionCallbackImpl_->UnregisterOutputDeviceChangeCallback((OH_AVSession*)this, callback);
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSession::GetAVCastController(OHAVCastController **avcastController)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (IsAVSessionNull()) {
+        SLOGE("avsession is not exist");
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
+
+    std::shared_ptr<AVCastController> controller = avSession_->GetAVCastController();
+    if (controller == nullptr) {
+        SLOGE("get controller fail");
+        return AV_SESSION_ERR_SERVICE_EXCEPTION;
+    }
+
+    OHAVCastController *avCastControllerObj = new OHAVCastController();
+    if (avCastControllerObj == nullptr) {
+        SLOGE("create avCastControllerObj fail");
+        return AV_SESSION_ERR_SERVICE_EXCEPTION;
+    }
+    avCastControllerObj->SetAVCastController(controller);
+
+    *avcastController = avCastControllerObj;
+    return AV_SESSION_ERR_SUCCESS;
+#else
+    return AV_SESSION_ERR_SERVICE_EXCEPTION;
+#endif
+}
+
+AVSession_ErrCode OHAVSession::StopCasting()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (IsAVSessionNull()) {
+        SLOGE("avsession is not exist");
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
+
+    int32_t ret = avSession_->ReleaseCast();
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("release cast fail");
+        return AV_SESSION_ERR_SERVICE_EXCEPTION;
+    }
+    return AV_SESSION_ERR_SUCCESS;
+#else
+    return AV_SESSION_ERR_SERVICE_EXCEPTION;
+#endif
+}
+
+void OHAVSession::DestroyAVSessionOutputDevice(AVSession_OutputDeviceInfo *array)
+{
+    if (array) {
+        for (uint32_t index = 0; index < array->size; index++) {
+            AVSession_OutputDeviceInfo* outputDeviceInfo =
+                (AVSession_OutputDeviceInfo*)array->deviceInfos[index];
+            delete outputDeviceInfo;
+            array->deviceInfos[index] = nullptr;
+        }
+        free(array->deviceInfos);
+        free(array);
+    }
+}
+
+AVSession_ErrCode OHAVSession::GetOutputDevice(AVSession_OutputDeviceInfo **outputDeviceInfo)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (IsAVSessionNull()) {
+        SLOGE("avsession is not exist");
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
+    OutputDeviceInfo outputDeviceInfoVec;
+    AVSessionDescriptor descriptor;
+    AVSessionManager::GetInstance().GetSessionDescriptorsBySessionId(avSession_->GetSessionId(), descriptor);
+
+    outputDeviceInfoVec = descriptor.outputDeviceInfo_;
+    size_t size = outputDeviceInfoVec.deviceInfos_.size();
+    if (size == 0) {
+        SLOGE("outputDeviceInfoVec is empty");
+        return AV_SESSION_ERR_SERVICE_EXCEPTION;
+    }
+    *outputDeviceInfo = OHDeviceInfo::ConvertDesc(outputDeviceInfoVec);
+    if ((*outputDeviceInfo) == nullptr) {
+        SLOGE("convert output device info fail");
+        return AV_SESSION_ERR_SERVICE_EXCEPTION;
+    }
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSession::ReleaseOutputDevice(AVSession_OutputDeviceInfo *outputDeviceInfo)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    DestroyAVSessionOutputDevice(outputDeviceInfo);
+    return AV_SESSION_ERR_SUCCESS;
+}
+
 AVSession_ErrCode OHAVSession::Destroy()
 {
     avSession_->Destroy();
@@ -494,6 +625,14 @@ AVSession_ErrCode OH_AVSession_SetLoopMode(OH_AVSession* avsession, AVSession_Lo
     return oh_avsession->SetLoopMode(loopMode);
 }
 
+AVSession_ErrCode OH_AVSession_SetRemoteCastEnabled(OH_AVSession* avsession, bool enabled)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->SetRemoteCastEnabled(enabled);
+}
+
 AVSession_ErrCode OH_AVSession_RegisterCommandCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void* userData)
 {
@@ -636,4 +775,62 @@ AVSession_ErrCode OH_AVSession_UnregisterToggleFavoriteCallback(OH_AVSession* av
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterToggleFavoriteCallback(callback);
+}
+
+AVSession_ErrCode OH_AVSession_RegisterOutputDeviceChangeCallback(OH_AVSession* avsession,
+    OH_AVSessionCallback_OutputDeviceChange callback)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->RegisterOutputDeviceChangeCallback(callback);
+}
+
+AVSession_ErrCode OH_AVSession_UnregisterOutputDeviceChangeCallback(OH_AVSession* avsession,
+    OH_AVSessionCallback_OutputDeviceChange callback)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->UnregisterOutputDeviceChangeCallback(callback);
+}
+
+AVSession_ErrCode OH_AVSession_GetAVCastController(OH_AVSession* avsession, OH_AVCastController** avcastcontroller)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "avcastcontroller is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    OHOS::AVSession::OHAVCastController **oh_avcastcontroller =
+        (OHOS::AVSession::OHAVCastController **)(avcastcontroller);
+    return oh_avsession->GetAVCastController(oh_avcastcontroller);
+}
+
+AVSession_ErrCode OH_AVSession_StopCasting(OH_AVSession* avsession)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->StopCasting();
+}
+
+AVSession_ErrCode OH_AVSession_GetOutputDevice(OH_AVSession* avsession, AVSession_OutputDeviceInfo **outputDeviceInfo)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "outputDeviceInfo is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->GetOutputDevice(outputDeviceInfo);
+}
+
+AVSession_ErrCode OH_AVSession_ReleaseOutputDevice(OH_AVSession* avsession,
+    AVSession_OutputDeviceInfo *outputDeviceInfo)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "outputDeviceInfo is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->ReleaseOutputDevice(outputDeviceInfo);
 }

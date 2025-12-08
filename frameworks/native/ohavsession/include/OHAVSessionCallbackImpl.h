@@ -24,7 +24,10 @@ namespace OHOS::AVSession {
 
 class OHAVSessionCallbackImpl : public AVSessionCallback {
 public:
+    OHAVSessionCallbackImpl();
     ~OHAVSessionCallbackImpl() override;
+    void InitSharedPtrMember();
+
     void OnPlay(const AVControlCommand& cmd) override;
     void OnPause() override;
     void OnStop() override;
@@ -38,7 +41,7 @@ public:
     void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override {};
     void OnOutputDeviceChange(const int32_t connectionState,
-    const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override {};
+        const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override;
     void OnCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override {};
     void OnSkipToQueueItem(int32_t itemId) override {};
     void OnAVCallAnswer() override {};
@@ -88,6 +91,10 @@ public:
         OH_AVSessionCallback_OnToggleFavorite callback, void* userData);
     AVSession_ErrCode UnregisterToggleFavoriteCallback(OH_AVSession* session,
         OH_AVSessionCallback_OnToggleFavorite callback);
+    AVSession_ErrCode RegisterOutputDeviceChangeCallback(OH_AVSession* session,
+        OH_AVSessionCallback_OutputDeviceChange callback);
+    AVSession_ErrCode UnregisterOutputDeviceChangeCallback(OH_AVSession* session,
+        OH_AVSessionCallback_OutputDeviceChange callback);
 
 private:
     OH_AVSession* avsession_ = {nullptr};
@@ -101,6 +108,10 @@ private:
     std::vector<std::pair<OH_AVSessionCallback_OnSeek, void*>> seekCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnSetLoopMode, void*>> setLoopModeCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnToggleFavorite, void*>> toggleFavoriteCallbacks_;
+    std::vector<OH_AVSessionCallback_OutputDeviceChange> outputDeviceChangeCallbacks_;
+
+    std::shared_ptr<AVSession_OutputDeviceInfo> avSessionOutputDeviceInfo_;
+    std::mutex lock_;
 };
 }
 #endif // OHOS_OHAVSESSION_CALLBACKIMPL_H

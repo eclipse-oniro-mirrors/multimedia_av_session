@@ -18,6 +18,7 @@
 #include <string>
 #include "native_avmetadata.h"
 #include "native_avsession_errors.h"
+#include "native_avsession_base.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avmeta_data.h"
 #include "curl/curl.h"
@@ -42,6 +43,7 @@ public:
     AVMetadata_Result SetSkipIntervals(AVMetadata_SkipIntervals intervals);
     AVMetadata_Result SetDisplayTags(int32_t tags);
     AVMetadata_Result GenerateAVMetadata(OH_AVMetadata** avMetadata);
+    AVMetadata_Result SetFilter(uint32_t filter);
 
 private:
     static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);
@@ -62,6 +64,7 @@ private:
     std::string assetId_ = "";
     AVMetadata_SkipIntervals intervals_ = SECONDS_15;
     int32_t tags_ = 0;
+    uint32_t filter_ = 2;
     static constexpr size_t TIME_OUT_SECOND = 5;
     static constexpr int HTTP_ERROR_CODE = 400;
 };

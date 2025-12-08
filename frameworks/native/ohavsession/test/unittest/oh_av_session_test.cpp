@@ -1290,4 +1290,196 @@ HWTEST(OHAVSessionTest, CheckAndRegister_002, TestSize.Level0)
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
 
+/**
+ * @tc.name: OHAVSession_StopCasting_001
+ * @tc.desc: Test stopping casting when avcastController is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_StopCasting_001, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_StopCasting(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+#else
+    GTEST_SKIP() << "CASTPLUS_CAST_ENGINE_ENABLE is not defined.";
+#endif
+}
+
+/**
+ * @tc.name: OHAVSession_StopCasting_002
+ * @tc.desc: Test stopping casting when avsession is nullptr
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_StopCasting_002, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_StopCasting(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
+#else
+    GTEST_SKIP() << "CASTPLUS_CAST_ENGINE_ENABLE is not defined.";
+#endif
+}
+
+/**
+ * @tc.name: OHAVSession_SetRemoteCastEnabled_001
+ * @tc.desc: Test setting remote cast enabled
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_SetRemoteCastEnabled_001, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    bool enabled = true;
+    ret = OH_AVSession_SetRemoteCastEnabled(avsession, enabled);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: OHAVSession_SetRemoteCastEnabled_002
+ * @tc.desc: Test setting remote cast disabled
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_SetRemoteCastEnabled_002, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    bool enabled = false;
+    ret = OH_AVSession_SetRemoteCastEnabled(avsession, enabled);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: OHAVSession_GetOutputDevice_001
+ * @tc.desc: Test getting output device
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_GetOutputDevice_001, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    AVSession_OutputDeviceInfo* outputDevice = nullptr;
+    ret = OH_AVSession_GetOutputDevice(avsession, &outputDevice);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: OHAVSession_GetOutputDevice_002
+ * @tc.desc: Test getting output device when avsession is nullptr
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_GetOutputDevice_002, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_OutputDeviceInfo* outputDevice = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_GetOutputDevice(avsession, &outputDevice);
+    EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: OHAVSession_ReleaseOutputDevice_001
+ * @tc.desc: Test releasing output device
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_ReleaseOutputDevice_001, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    AVSession_OutputDeviceInfo* outputDevice = nullptr;
+    ret = OH_AVSession_GetOutputDevice(avsession, &outputDevice);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_ReleaseOutputDevice(avsession, outputDevice);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: OHAVSession_ReleaseOutputDevice_002
+ * @tc.desc: Test releasing output device when avsession is nullptr
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OHAVSession_ReleaseOutputDevice_002, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_OutputDeviceInfo* outputDevice = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_ReleaseOutputDevice(avsession, outputDevice);
+    EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: OH_AVSession_RegisterOutputDeviceChangeCallback_001
+ * @tc.desc: RegisterOutputDeviceChangeCallback from the class of ohavsession
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterOutputDeviceChangeCallback_001, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    OH_AVSessionCallback_OutputDeviceChange callback = [](OH_AVSession* session,
+        AVSession_ConnectionState state, AVSession_OutputDeviceInfo* outputDeviceInfo) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    ret = OH_AVSession_RegisterOutputDeviceChangeCallback(avsession, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: OH_AVSession_UnregisterOutputDeviceChangeCallback_001
+ * @tc.desc: UnregisterOutputDeviceChangeCallback from the class of ohavsession
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OH_AVSession_UnregisterOutputDeviceChangeCallback_001, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_test_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    OH_AVSessionCallback_OutputDeviceChange callback = [](OH_AVSession* session,
+        AVSession_ConnectionState state, AVSession_OutputDeviceInfo* outputDeviceInfo) -> AVSessionCallback_Result
+    {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    ret = OH_AVSession_RegisterOutputDeviceChangeCallback(avsession, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_UnregisterOutputDeviceChangeCallback(avsession, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
 }

@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("../../../config.gni")
+import("../../../castplus_cast_engine_part.gni")
 
 ohos_shared_library("ohavsession") {
   install_enable = true
@@ -36,9 +37,15 @@ ohos_shared_library("ohavsession") {
   ]
 
   sources = [
+    "src/OHAVCastController.cpp",
+    "src/OHAVCastControllerCallbackImpl.cpp",
+    "src/OHAVSessionPlaybackState.cpp",
     "src/OHAVMetadataBuilder.cpp",
     "src/OHAVSession.cpp",
     "src/OHAVSessionCallbackImpl.cpp",
+    "src/OHAVMediaDescriptionBuilder.cpp",
+    "src/OHAVMediaDescription.cpp",
+    "src/OHDeviceInfo.cpp",
   ]
 
   deps = [
@@ -58,10 +65,16 @@ ohos_shared_library("ohavsession") {
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
+    "image_framework:pixelmap",
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [ "./../session:avsession_cast_client" ]
+  }
 
   innerapi_tags = [ "ndk" ]
 
