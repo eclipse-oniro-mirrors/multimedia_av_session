@@ -130,6 +130,8 @@ public:
 
     void HandleDesktopLyricStateChanged(const DesktopLyricState &state);
 
+    void HandleDesktopLyricEnabled(bool isEnabled);
+
     pid_t GetPid() const;
 
     bool HasSession(const std::string& sessionId);

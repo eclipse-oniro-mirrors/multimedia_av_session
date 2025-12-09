@@ -21,7 +21,6 @@
 #include "ipc_skeleton.h"
 #include "message_parcel.h"
 #include "system_ability_definition.h"
-#include "extension_manager_client.h"
 
 namespace OHOS::AVSession {
 const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
@@ -137,34 +136,153 @@ int32_t AbilityConnectHelper::StartAbilityByCall(const std::string& bundleName, 
     return reply.ReadInt32() == ERR_OK ? AVSESSION_SUCCESS : ERR_ABILITY_NOT_AVAILABLE;
 }
 
-int32_t AbilityConnectHelper::StartDesktopLyricAbility(const std::string &sessionId, int32_t userId,
+sptr<IRemoteObject> AbilityConnectHelper::GetSystemAbility()
+{
+    sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemManager == nullptr) {
+        SLOGE("Fail to get registry");
+        return nullptr;
+    }
+    sptr<IRemoteObject> remote = systemManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
+    if (remote == nullptr) {
+        SLOGE("Fail to connect ability manager service");
+        return nullptr;
+    }
+    SLOGI("Connect ability manager service success");
+    return remote;
+}
+
+ExtensionConnectHelper &ExtensionConnectHelper::GetInstance()
+{
+    static ExtensionConnectHelper instance;
+    return instance;
+}
+
+int32_t ExtensionConnectHelper::StartDesktopLyricAbility(const std::string &sessionId, int32_t userId,
     std::function<void(int32_t)> cb)
 {
-    SLOGI("sessionId=%{public}s userId=%{public}d", sessionId.c_str(), userId);
+    SLOGI("sessionId=%{private}s userId=%{public}d", sessionId.c_str(), userId);
     std::lock_guard<std::mutex> lock(g_mutex);
-    g_desktopLyricConnection = new(std::nothrow) DesktopLyricCallConnection(cb);
     if (g_desktopLyricConnection == nullptr) {
-        SLOGE("create g_desktopLyricConnection fail");
-        return ERR_NO_MEMORY;
+        g_desktopLyricConnection = new(std::nothrow) DesktopLyricCallConnection(cb);
+        CHECK_AND_RETURN_RET_LOG(g_desktopLyricConnection != nullptr, ERR_NO_MEMORY,
+            "create desktop lyric connection fail");
     }
 
     AAFwk::Want want;
     want.SetElementName(MEDIA_CONTROL_BUNDLENAME, DESKTOP_LYRIC_ABILITYNAME);
     want.SetParam("sessionId", sessionId);
-    int32_t result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want,
-        g_desktopLyricConnection, nullptr, userId);
-    return result;
+    int32_t result = ConnectAbilityCommon(want, g_desktopLyricConnection, userId);
+    CHECK_AND_RETURN_RET_LOG(result == ERR_NONE, AVSESSION_ERROR,
+        "connect desktop lyric ability fail: %{public}d", result);
+    return AVSESSION_SUCCESS;
 }
 
-int32_t AbilityConnectHelper::StopDesktopLyricAbility()
+int32_t ExtensionConnectHelper::StopDesktopLyricAbility()
 {
     SLOGI("entry");
     std::lock_guard<std::mutex> lock(g_mutex);
-    int32_t result = AAFwk::ExtensionManagerClient::GetInstance().DisconnectAbility(g_desktopLyricConnection);
-    return result;
+    CHECK_AND_RETURN_RET_LOG(g_desktopLyricConnection != nullptr, AVSESSION_ERROR,
+        "g_desktopLyricConnection is nullptr");
+    int32_t result = DisconnectAbility(g_desktopLyricConnection);
+    CHECK_AND_RETURN_RET_LOG(result == ERR_NONE, AVSESSION_ERROR,
+        "disconnect desktop lyric ability fail: %{public}d", result);
+    return AVSESSION_SUCCESS;
 }
 
-sptr<IRemoteObject> AbilityConnectHelper::GetSystemAbility()
+int32_t ExtensionConnectHelper::ConnectAbilityCommon(const AAFwk::Want &want, sptr<IRemoteObject> connect,
+    int32_t userId)
+{
+    SLOGI("ConnectAbilityCommon name:%{public}s %{public}s, userId:%{public}d.",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    if (connect == nullptr) {
+        SLOGE("null connect");
+        return ERR_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(EXTENSION_MANAGER_INTERFACE_TOKEN)) {
+        SLOGE("write interface token failed");
+        return ERR_MARSHALLING;
+    }
+
+    if (!data.WriteParcelable(&want)) {
+        SLOGE("want write failed");
+        return ERR_MARSHALLING;
+    }
+
+    if (!data.WriteBool(true) || !data.WriteRemoteObject(connect)) {
+        SLOGE("flag or connect write failed");
+        return ERR_MARSHALLING;
+    }
+
+    if (!data.WriteBool(false)) {
+        SLOGE("flag write failed");
+        return ERR_MARSHALLING;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        SLOGE("userId write failed.");
+        return ERR_MARSHALLING;
+    }
+
+    if (!data.WriteInt32(AVSESSION_EXTENSION_ABILITY_TYPE_SERVICE)) {
+        SLOGE("extensionType write failed.");
+        return ERR_MARSHALLING;
+    }
+
+    if (!data.WriteBool(false)) {
+        SLOGE("isQueryExtensionOnly write failed");
+        return ERR_MARSHALLING;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    int error = remote->SendRequest(AVSESSION_CONNECT_ABILITY_WITH_TYPE, data, reply, option);
+    if (error != NO_ERROR) {
+        SLOGE("Send request error: %{public}d", error);
+        return ERR_IPC_SEND_REQUEST;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t ExtensionConnectHelper::DisconnectAbility(const sptr<IRemoteObject> &connect)
+{
+    SLOGI("Entry");
+    if (connect == nullptr) {
+        SLOGE("null connect");
+        return ERR_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(EXTENSION_MANAGER_INTERFACE_TOKEN)) {
+        SLOGE("write interface token failed");
+        return ERR_MARSHALLING;
+    }
+    if (!data.WriteRemoteObject(connect)) {
+        SLOGE("connect write failed");
+        return ERR_MARSHALLING;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    auto error = remote->SendRequest(AVSESSION_DISCONNECT_ABILITY, data, reply, option);
+    if (error != NO_ERROR) {
+        SLOGE("Send request error: %{public}d", error);
+        return ERR_IPC_SEND_REQUEST;
+    }
+    return reply.ReadInt32();
+}
+
+sptr<IRemoteObject> ExtensionConnectHelper::GetSystemAbility()
 {
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
@@ -268,5 +386,7 @@ void DesktopLyricCallConnection::OnAbilityDisconnectDone(const AppExecFwk::Eleme
     } else {
         SLOGE("callback no register");
     }
+    std::lock_guard<std::mutex> lock(g_mutex);
+    g_desktopLyricConnection = nullptr;
 }
 } // namespace OHOS::AVSession

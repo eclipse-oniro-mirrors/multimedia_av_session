@@ -356,6 +356,12 @@ void NapiAVControllerCallback::OnDesktopLyricStateChanged(const DesktopLyricStat
     HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, state);
 }
 
+void NapiAVControllerCallback::OnDesktopLyricEnabled(bool isEnabled)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnDesktopLyricEnabled");
+    HandleEvent(EVENT_DESKTOP_LYRIC_ENABLED, isEnabled);
+}
+
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

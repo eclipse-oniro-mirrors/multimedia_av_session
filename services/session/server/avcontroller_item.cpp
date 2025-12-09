@@ -629,6 +629,15 @@ void AVControllerItem::HandleDesktopLyricStateChanged(const DesktopLyricState &s
     }
 }
 
+void AVControllerItem::HandleDesktopLyricEnabled(bool isEnabled)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    AVSESSION_TRACE_SYNC_START("AVControllerItem::HandleDesktopLyricEnabled");
+    if (callback_ != nullptr) {
+        callback_->OnDesktopLyricEnabled(isEnabled);
+    }
+}
+
 pid_t AVControllerItem::GetPid() const
 {
     return pid_;

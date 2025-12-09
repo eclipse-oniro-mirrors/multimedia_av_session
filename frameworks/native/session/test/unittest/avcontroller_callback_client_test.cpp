@@ -299,5 +299,54 @@ HWTEST_F(AVControllerCallbackClientTest, OnCustomData001, TestSize.Level0)
     aVControllerCallbackClient->OnCustomData(data);
 }
 
+/**
+* @tc.name: OnDesktopLyricVisibilityChanged001
+* @tc.desc: test OnDesktopLyricVisibilityChanged
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricVisibilityChanged001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    ASSERT_NE(aVControllerCallbackClient, nullptr);
+    ErrCode ret = aVControllerCallbackClient->OnDesktopLyricVisibilityChanged(true);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: OnDesktopLyricStateChanged001
+ * @tc.desc: test OnDesktopLyricStateChanged
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricStateChanged001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    ASSERT_NE(aVControllerCallbackClient, nullptr);
+    DesktopLyricState state = {};
+    ErrCode ret = aVControllerCallbackClient->OnDesktopLyricStateChanged(state);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: OnDesktopLyricEnabled001
+ * @tc.desc: test OnDesktopLyricEnabled
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricEnabled001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    ASSERT_NE(aVControllerCallbackClient, nullptr);
+    ErrCode ret = aVControllerCallbackClient->OnDesktopLyricEnabled(false);
+    EXPECT_EQ(ret, 0);
+}
+
 } // namespace AVSession
 } // namespace OHOS

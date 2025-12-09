@@ -103,7 +103,6 @@ static const int32_t CONTROL_COLD_START = 2;
 const std::string PAD_DEVICE_TYPE = "tablet";
 const std::string PC_DEVICE_TYPE = "2in1";
 const std::string PHONE_DEVICE_TYPE = "phone";
-constexpr int32_t MIN_API_VERSION_DESKTOP_LYRICS = 23;
 static const std::set<std::string> DESKTOP_LYRICS_SUPPORTED_DEVICES = {
     PHONE_DEVICE_TYPE,
     PC_DEVICE_TYPE,
@@ -3191,13 +3190,11 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
 int32_t AVSessionService::IsDesktopLyricFeatureSupported(bool &isSupported)
 {
     isSupported = false;
-    std::string deviceTypeStr = "";
     const char *deviceType = GetDeviceType();
     CHECK_AND_RETURN_RET_LOG(deviceType != nullptr, AVSESSION_ERROR, "get device type failed");
-    deviceTypeStr = std::string(deviceType);
-    uint32_t apiVersion = BundleStatusAdapter::GetInstance().GetApiVersionFromUid(IPCSkeleton::GetCallingUid());
-    SLOGI("deviceType:%{public}s, apiVersion:%{public}u", deviceTypeStr.c_str(), apiVersion);
-    if (apiVersion >= MIN_API_VERSION_DESKTOP_LYRICS && DESKTOP_LYRICS_SUPPORTED_DEVICES.count(deviceTypeStr) != 0) {
+    std::string deviceTypeStr = std::string(deviceType);
+    SLOGI("deviceType:%{public}s", deviceTypeStr.c_str());
+    if (DESKTOP_LYRICS_SUPPORTED_DEVICES.count(deviceTypeStr) != 0) {
         isSupported = true;
     }
     return AVSESSION_SUCCESS;
@@ -3232,7 +3229,6 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
     }
     if (BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == MEDIA_CONTROL_BUNDLENAME) {
         SLOGI("mediacontroller on client die");
-        StopDesktopLyricAbility();
     }
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
@@ -4646,10 +4642,10 @@ int32_t AVSessionService::StartDesktopLyricAbility(const std::string &sessionId)
         desktopLyricAbilityState_ != DESKTOP_LYRICS_ABILITY_CONNECTED, AVSESSION_SUCCESS,
         "desktop lyric ability is already started");
     int32_t userId = GetUsersManager().GetCurrentUserId();
-    int32_t result = AbilityConnectHelper::GetInstance().StartDesktopLyricAbility(sessionId, userId,
+    int32_t result = ExtensionConnectHelper::GetInstance().StartDesktopLyricAbility(sessionId, userId,
         [this](int32_t state) { SetDesktopLyricAbilityState(state); });
     CHECK_AND_RETURN_RET_LOG(result == AVSESSION_SUCCESS, result, "StartDesktopLyricAbility failed");
-    SLOGI("Start enabling  the desktop lyrics feature.");
+    SLOGI("Start enabling the desktop lyrics feature.");
     desktopLyricAbilityState_ = DESKTOP_LYRICS_ABILITY_CONNECTING;
     return result;
 }
@@ -4660,7 +4656,7 @@ int32_t AVSessionService::StopDesktopLyricAbility()
     CHECK_AND_RETURN_RET_LOG(desktopLyricAbilityState_ != DESKTOP_LYRICS_ABILITY_DISCONNECTING &&
         desktopLyricAbilityState_ != DESKTOP_LYRICS_ABILITY_DISCONNECTED, AVSESSION_SUCCESS,
         "desktop lyric ability is already stopped");
-    AbilityConnectHelper::GetInstance().StopDesktopLyricAbility();
+    ExtensionConnectHelper::GetInstance().StopDesktopLyricAbility();
     SLOGI("Disable the desktop lyrics feature.");
     desktopLyricAbilityState_ = DESKTOP_LYRICS_ABILITY_DISCONNECTING;
     return AVSESSION_SUCCESS;

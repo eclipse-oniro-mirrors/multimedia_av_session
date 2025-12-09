@@ -1483,5 +1483,22 @@ HWTEST_F(AVSessionControllerTest, GetLaunchAbilityInner001, TestSize.Level1)
     OHOS::AbilityRuntime::WantAgent::WantAgent* ability;
     EXPECT_EQ(controller_->GetLaunchAbilityInner(ability), AVSESSION_SUCCESS);
 }
+
+/**
+* @tc.name: DesktopLyricState
+* @tc.desc: Test DesktopLyricState Unmarshalling
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, DesktopLyricState001, TestSize.Level1)
+{
+    DesktopLyricState state = {};
+    state.isLocked_ = true;
+    Parcel parcel;
+    EXPECT_EQ(state.Marshalling(parcel), true);
+    auto ptr = std::shared_ptr<DesktopLyricState>(DesktopLyricState::Unmarshalling(parcel));
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(ptr->isLocked_, state.isLocked_);
+}
 } // namespace AVSession
 } // namespace OHOS

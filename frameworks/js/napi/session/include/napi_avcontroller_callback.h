@@ -42,6 +42,7 @@ public:
         EVENT_CUSTOM_DATA,
         EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
         EVENT_DESKTOP_LYRIC_STATE_CHANGED,
+        EVENT_DESKTOP_LYRIC_ENABLED,
         EVENT_TYPE_MAX,
     };
 
@@ -63,6 +64,7 @@ public:
     void OnCustomData(const AAFwk::WantParams& data) override;
     void OnDesktopLyricVisibilityChanged(bool isVisible) override;
     void OnDesktopLyricStateChanged(const DesktopLyricState &state) override;
+    void OnDesktopLyricEnabled(bool isEnabled) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

@@ -156,6 +156,10 @@ class AVControllerCallbackStubDemo : public AVControllerCallbackStub {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnDesktopLyricEnabled(bool isEnabled) override
+    {
+        return AVSESSION_SUCCESS;
+    };
 };
 
 /**

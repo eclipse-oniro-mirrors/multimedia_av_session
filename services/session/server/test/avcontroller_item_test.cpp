@@ -131,6 +131,10 @@ class IAVControllerCallbackTest : public IAVControllerCallback {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnDesktopLyricEnabled(bool isEnabled) override
+    {
+        return AVSESSION_SUCCESS;
+    };
     OHOS::sptr<IRemoteObject> AsObject() override
     {
         OHOS::AppExecFwk::ElementName elementName;
@@ -369,6 +373,7 @@ HWTEST_F(AVControllerItemTest, HandleCustomData002, TestSize.Level0)
 */
 HWTEST_F(AVControllerItemTest, IsDesktopLyricEnabled_001, TestSize.Level1)
 {
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
     g_AVSessionItem->isSupportedDesktopLyric_ = false;
@@ -385,6 +390,7 @@ HWTEST_F(AVControllerItemTest, IsDesktopLyricEnabled_001, TestSize.Level1)
 */
 HWTEST_F(AVControllerItemTest, SetDesktopLyricVisible_001, TestSize.Level1)
 {
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
     g_AVSessionItem->isSupportedDesktopLyric_ = false;
@@ -401,6 +407,7 @@ HWTEST_F(AVControllerItemTest, SetDesktopLyricVisible_001, TestSize.Level1)
 */
 HWTEST_F(AVControllerItemTest, IsDesktopLyricVisible_001, TestSize.Level1)
 {
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
     g_AVSessionItem->isSupportedDesktopLyric_ = false;
@@ -417,11 +424,12 @@ HWTEST_F(AVControllerItemTest, IsDesktopLyricVisible_001, TestSize.Level1)
 */
 HWTEST_F(AVControllerItemTest, SetDesktopLyricState_001, TestSize.Level1)
 {
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
     g_AVSessionItem->isSupportedDesktopLyric_ = false;
     DesktopLyricState state = {};
-    int32_t res = g_AVSessionItem->SetDesktopLyricState(state);
+    int32_t res = controller->SetDesktopLyricState(state);
     EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
 }
 
@@ -433,12 +441,71 @@ HWTEST_F(AVControllerItemTest, SetDesktopLyricState_001, TestSize.Level1)
 */
 HWTEST_F(AVControllerItemTest, GetDesktopLyricState_001, TestSize.Level1)
 {
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
     OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
     ASSERT_TRUE(controller != nullptr);
     g_AVSessionItem->isSupportedDesktopLyric_ = false;
     DesktopLyricState state = {};
-    int32_t res = g_AVSessionItem->GetDesktopLyricState(state);
+    int32_t res = controller->GetDesktopLyricState(state);
     EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
+}
+
+/**
+* @tc.name: HandleDesktopLyricVisibilityChanged001
+* @tc.desc: handle desktop lyric visibility changed
+* @tc.type: FUNC
+* @tc.require: #1998
+*/
+HWTEST_F(AVControllerItemTest, HandleDesktopLyricVisibilityChanged001, TestSize.Level0)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    controller->HandleDesktopLyricVisibilityChanged(true);
+    EXPECT_NE(controller->session_, nullptr);
+    OHOS::sptr<IAVControllerCallback> callback = new IAVControllerCallbackTest();
+    ASSERT_TRUE(callback != nullptr);
+    controller->callback_ = callback;
+    controller->HandleDesktopLyricVisibilityChanged(true);
+    EXPECT_NE(controller->session_, nullptr);
+}
+
+/**
+* @tc.name: HandleDesktopLyricStateChanged001
+* @tc.desc: handle desktop lyric state changed
+* @tc.type: FUNC
+* @tc.require: #1998
+*/
+HWTEST_F(AVControllerItemTest, HandleDesktopLyricStateChanged001, TestSize.Level0)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    DesktopLyricState state = {};
+    controller->HandleDesktopLyricStateChanged(state);
+    EXPECT_NE(controller->session_, nullptr);
+    OHOS::sptr<IAVControllerCallback> callback = new IAVControllerCallbackTest();
+    ASSERT_TRUE(callback != nullptr);
+    controller->callback_ = callback;
+    controller->HandleDesktopLyricStateChanged(state);
+    EXPECT_NE(controller->session_, nullptr);
+}
+
+/**
+* @tc.name: HandleDesktopLyricEnabled001
+* @tc.desc: handle desktop lyric enabled
+* @tc.type: FUNC
+* @tc.require: #1998
+*/
+HWTEST_F(AVControllerItemTest, HandleDesktopLyricEnabled001, TestSize.Level0)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    controller->HandleDesktopLyricEnabled(false);
+    EXPECT_NE(controller->session_, nullptr);
+    OHOS::sptr<IAVControllerCallback> callback = new IAVControllerCallbackTest();
+    ASSERT_TRUE(callback != nullptr);
+    controller->callback_ = callback;
+    controller->HandleDesktopLyricEnabled(false);
+    EXPECT_NE(controller->session_, nullptr);
 }
 } //AVSession
 } //OHOS

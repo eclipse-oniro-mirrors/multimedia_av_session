@@ -494,5 +494,40 @@ HWTEST_F(AVSessionCallbackClientTest, OnCustomData001, TestSize.Level0)
     ErrCode ret = sessionCallbackClient->OnCustomData(extras);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
+
+/**
+ * @tc.name: OnDesktopLyricVisibilityChanged001
+ * @tc.desc: test OnDesktopLyricVisibilityChanged
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+HWTEST_F(AVSessionCallbackClientTest, OnDesktopLyricVisibilityChanged001, TestSize.Level0)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::shared_ptr<AVSessionCallback> sessionCallback = std::make_shared<AVSessionCallbackImpl>();
+    std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
+        std::make_shared<AVSessionCallbackClient>(sessionCallback);
+    ASSERT_NE(sessionCallbackClient, nullptr);
+    ErrCode ret = sessionCallbackClient->OnDesktopLyricVisibilityChanged(true);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: OnDesktopLyricStateChanged001
+ * @tc.desc: test OnDesktopLyricStateChanged
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+HWTEST_F(AVSessionCallbackClientTest, OnDesktopLyricStateChanged001, TestSize.Level0)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::shared_ptr<AVSessionCallback> sessionCallback = std::make_shared<AVSessionCallbackImpl>();
+    std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
+        std::make_shared<AVSessionCallbackClient>(sessionCallback);
+    ASSERT_NE(sessionCallbackClient, nullptr);
+    DesktopLyricState state = {};
+    ErrCode ret = sessionCallbackClient->OnDesktopLyricStateChanged(state);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
 } // namespace AVSession
 } // namespace OHOS

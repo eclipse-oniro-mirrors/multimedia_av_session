@@ -53,4 +53,6 @@
    [oneway] void OnDesktopLyricVisibilityChanged([in] boolean isVisible);
 
    [oneway] void OnDesktopLyricStateChanged([in] DesktopLyricState state);
+
+   [oneway] void OnDesktopLyricEnabled([in] boolean isEnabled);
  }
