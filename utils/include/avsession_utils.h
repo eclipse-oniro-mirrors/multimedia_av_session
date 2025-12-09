@@ -229,12 +229,10 @@ public:
     static std::string GetAnonyTitle(const std::string& title, double ratio = 0.3)
     {
         if (title.empty()) return "";
-        // UTF-8字符边界常量
-        const unsigned char UTF8_CONTINUATION_BYTE_MASK = 0xC0;    // 11000000
-        const unsigned char UTF8_CONTINUATION_BYTE_VALUE = 0x80;   // 10000000
-        const unsigned char UTF8_3BYTE_START_MIN = 0xE0;           // 11100000
-        const unsigned char UTF8_3BYTE_START_MAX = 0xEF;           // 11101111
-        // 统计字符位置（处理UTF-8多字节字符）
+        const unsigned char UTF8_CONTINUATION_BYTE_MASK = 0xC0;
+        const unsigned char UTF8_CONTINUATION_BYTE_VALUE = 0x80;
+        const unsigned char UTF8_3BYTE_START_MIN = 0xE0;
+        const unsigned char UTF8_3BYTE_START_MAX = 0xEF;
         std::vector<int> char_positions;
         for (size_t i = 0; i < title.size(); ++i) {
             if ((static_cast<unsigned char>(title[i]) & UTF8_CONTINUATION_BYTE_MASK) != UTF8_CONTINUATION_BYTE_VALUE) {
@@ -244,27 +242,25 @@ public:
         const int char_count = char_positions.size();
         // 特殊处理短字符串
         const int VERY_SHORT_TEXT_LENGTH = 3;
+        const int SHORT_TEXT_LENGTH = 2;
         if (char_count <= VERY_SHORT_TEXT_LENGTH) {
-            // 3字节UTF-8字符的特殊处理
-            if (char_count == 3) {
+            std::string first_char = title.substr(char_positions[0], 3);
+            if (char_count == VERY_SHORT_TEXT_LENGTH) {
                 const unsigned char first_byte = static_cast<unsigned char>(title[0]);
                 if (first_byte >= UTF8_3BYTE_START_MIN && first_byte <= UTF8_3BYTE_START_MAX) {
-                    return "*" + title + "*";
+                    return first_char + "***";
                 }
             }
-            // 2字符文本的处理
-            if (char_count == 2) {
-                std::string first_char = title.substr(char_positions[0], 3);
+            if (char_count == SHORT_TEXT_LENGTH) {
                 return first_char + "***";
             }
-            // 单字符直接返回
             return "*" + title + "*";
         }
-        // 掩码参数配置
-        const int SHORT_TEXT_THRESHOLD = 7;                              // 短文本阈值
-        const int LONG_TEXT_FRONT_KEEP = 2;                              // 长文本前保留字符数
-        const int LONG_TEXT_BACK_KEEP = 2;                               // 长文本后保留字符数
-        const int MIN_KEEP_COUNT = 1;                                    // 最少保留字符数
+
+        const int SHORT_TEXT_THRESHOLD = 7;
+        const int LONG_TEXT_FRONT_KEEP = 2;
+        const int LONG_TEXT_BACK_KEEP = 2;
+        const int MIN_KEEP_COUNT = 1;
         int keep_front = 0;
         int keep_back = 0;
 
@@ -282,7 +278,6 @@ public:
             keep_front = LONG_TEXT_FRONT_KEEP;
             keep_back = LONG_TEXT_BACK_KEEP;
         }
-        // 边界安全检查：如果保留字符数超过总字符数
         if (keep_front + keep_back >= char_count) return std::string(1, title[0]) + "***";
         // 构建匿名化字符串
         const int start_idx = char_positions[keep_front];                    // 掩码开始位置
@@ -290,7 +285,25 @@ public:
 
         return title.substr(0, start_idx) + "***" + title.substr(end_idx);
     }
+    
+static std::string GetAnonyNetworkid(const std::string& networkkid)
+{
+    if (networkkid.empty()) {
+        return "";
+    }
 
+    const size_t total_length = networkkid.length();
+    int PREFIX_LENGTH = 4;
+    int SUFFIX_LENGTH = 4;
+    std::string result;
+    result.reserve(total_length);
+
+    result += networkkid.substr(0, PREFIX_LENGTH);
+    result.append(total_length - PREFIX_LENGTH - SUFFIX_LENGTH, '*');
+    result += networkkid.substr(total_length - SUFFIX_LENGTH);
+
+    return result;
+}
 private:
     static constexpr const int32_t RSS_UID = 1096;
     static constexpr const char* DATA_PATH_NAME = "/data/service/el2/";
