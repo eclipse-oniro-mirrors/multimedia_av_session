@@ -767,6 +767,7 @@ export class AVCastPicker extends ViewPU {
                     'isCustomPicker': c8,
                     'message': this.restartUECMessage,
                     'currentPickerCount': this.pickerCountOnCreation,
+                    'sessionType': this.sessionType,
                 }
             });
             UIExtensionComponent.onRemoteReady((n8) => {
