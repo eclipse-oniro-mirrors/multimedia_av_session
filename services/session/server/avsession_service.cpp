@@ -3408,7 +3408,8 @@ sptr <AVSessionItem> AVSessionService::GetOtherPlayingSession(int32_t userId, st
         }
     }
     CHECK_AND_RETURN_RET_LOG(!bundleName.empty(), nullptr, "bundleName is empty");
-    CHECK_AND_RETURN_RET_LOG(sessionListForFront->size() >= 2, nullptr, "sessionListForFront size less than 2");
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront->size() >= otherPlayingSessionMinLen,
+        nullptr, "sessionListForFront size less than otherPlayingSessionMinLen");
     sptr<AVSessionItem> secondSession = *(++sessionListForFront->begin());
     CHECK_AND_RETURN_RET_LOG(secondSession != nullptr, nullptr, "secondSession is nullptr!");
     if (secondSession->IsCasting() &&

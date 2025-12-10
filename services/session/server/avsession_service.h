@@ -828,6 +828,7 @@ private:
     const int32_t systemuiLiveviewTypeCodePhoto = 27;
     const int32_t mediacontrollerNotifyId = 0;
     const int32_t photoNotifyId = 1;
+    const int32_t otherPlayingSessionMinLen = 2;
 
     const std::string sessionTypePhoto = "photo";
 };
