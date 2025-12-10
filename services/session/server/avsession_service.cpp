@@ -3407,14 +3407,14 @@ sptr <AVSessionItem> AVSessionService::GetOtherPlayingSession(int32_t userId, st
             return session;
         }
     }
-    if (!bundleName.empty()) {
-        sptr<AVSessionItem> firstSession = sessionListForFront->front();
-        CHECK_AND_RETURN_RET_LOG(firstSession != nullptr, nullptr, "firstSession is nullptr!");
-        if (firstSession->IsCasting() &&
-            firstSession->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
-            SLOGI("find casting session, uid:%{public}d", firstSession->GetUid());
-            return firstSession;
-        }
+    CHECK_AND_RETURN_RET_LOG(!bundleName.empty(), nullptr, "bundleName is empty");
+    CHECK_AND_RETURN_RET_LOG(sessionListForFront->size() >= 2, nullptr, "sessionListForFront size less than 2");
+    sptr<AVSessionItem> secondSession = *(++sessionListForFront->begin());
+    CHECK_AND_RETURN_RET_LOG(secondSession != nullptr, nullptr, "secondSession is nullptr!");
+    if (secondSession->IsCasting() &&
+        secondSession->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+        SLOGI("find casting session, uid:%{public}d", secondSession->GetUid());
+        return secondSession;
     }
     return nullptr;
 }
