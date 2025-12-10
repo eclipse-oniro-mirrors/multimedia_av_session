@@ -15,6 +15,7 @@
 
 #include "hw_cast_provider_session.h"
 #include <thread>
+#include "avsession_utils.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "av_router.h"
@@ -286,7 +287,8 @@ void HwCastProviderSession::ComputeToastOnDeviceState(CastEngine::DeviceState st
 void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo)
 {
     SLOGI("OnDeviceStateChange from cast with deviceId %{public}s, state %{public}d, reasonCode %{public}d",
-        stateInfo.deviceId.c_str(), static_cast<int32_t>(stateInfo.deviceState),
+        AVSessionUtils::GetAnonyNetworkid(stateInfo.deviceId.c_str()).c_str(),
+            static_cast<int32_t>(stateInfo.deviceState),
         static_cast<int32_t>(stateInfo.reasonCode));
 
     DeviceState deviceState;
