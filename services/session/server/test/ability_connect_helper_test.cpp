@@ -27,6 +27,8 @@
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
+constexpr int32_t DESKTOP_LYRICS_ABILITY_CONNECTED = 2;
+constexpr int32_t DESKTOP_LYRICS_ABILITY_DISCONNECTED = 4;
 
 class AbilityConnectHelperTest : public testing::Test {
 public:
@@ -169,6 +171,48 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest005, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnAbilityConnectDone001
+ * @tc.desc: Test OnAbilityConnect with normal branch
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+static HWTEST(AbilityConnectHelperTest, OnAbilityConnectDone001, TestSize.Level0)
+{
+    SLOGI("OnAbilityConnectDone001 begin!");
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr);
+    ASSERT_NE(connect, nullptr);
+
+    OHOS::AppExecFwk::ElementName element;
+    connect->OnAbilityConnectDone(element, nullptr, 0);
+
+    int32_t ret = 0;
+    connect->callback_ = [&ret](int32_t in){ ret = in; };
+    connect->OnAbilityConnectDone(element, nullptr, 0);
+    EXPECT_EQ(ret, DESKTOP_LYRICS_ABILITY_CONNECTED);
+}
+
+/**
+ * @tc.name: OnAbilityDisconnectDone001
+ * @tc.desc: Test OnAbilityDisconnectDone
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+static HWTEST(AbilityConnectHelperTest, OnAbilityDisconnectDone001, TestSize.Level0)
+{
+    SLOGI("OnAbilityDisconnectDone001 begin!");
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr);
+    ASSERT_NE(connect, nullptr);
+
+    OHOS::AppExecFwk::ElementName element;
+    connect->OnAbilityDisconnectDone(element, 0);
+
+    int32_t ret = 0;
+    connect->callback_ = [&ret](int32_t in){ ret = in; };
+    connect->OnAbilityDisconnectDone(element, 0);
+    EXPECT_EQ(ret, DESKTOP_LYRICS_ABILITY_DISCONNECTED);
+}
+
+/**
  * @tc.name: StartAbilityForegroundByCall001
  * @tc.desc: Test StartAbilityForegroundByCall
  * @tc.type: FUNC
@@ -223,4 +267,63 @@ static HWTEST(AbilityConnectHelperTest, StartAbilityByCall002, TestSize.Level0)
     std::string abilityName = "test.ability";
     int32_t ret = AbilityConnectHelper::GetInstance().StartAbilityByCall(bundleName, abilityName);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: ConnectAbilityCommon001
+ * @tc.desc: Test ConnectAbilityCommon
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+static HWTEST(AbilityConnectHelperTest, ConnectAbilityCommon001, TestSize.Level0)
+{
+    SLOGI("ConnectAbilityCommon001 begin!");
+    OHOS::AAFwk::Want want;
+    int32_t ret = ExtensionConnectHelper::GetInstance().ConnectAbilityCommon(want, nullptr, 0);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ConnectAbilityCommon002
+ * @tc.desc: Test ConnectAbilityCommon
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+static HWTEST(AbilityConnectHelperTest, ConnectAbilityCommon002, TestSize.Level0)
+{
+    SLOGI("ConnectAbilityCommon002 begin!");
+    OHOS::AAFwk::Want want;
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr);
+    ASSERT_NE(connect, nullptr);
+    int32_t ret = ExtensionConnectHelper::GetInstance().ConnectAbilityCommon(want, connect, 0);
+    EXPECT_NE(ret, ERR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: DisconnectAbility001
+ * @tc.desc: Test DisconnectAbility001
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+static HWTEST(AbilityConnectHelperTest, DisconnectAbility001, TestSize.Level0)
+{
+    SLOGI("DisconnectAbility001 begin!");
+    int32_t ret = ExtensionConnectHelper::GetInstance().DisconnectAbility(nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: DisconnectAbility002
+ * @tc.desc: Test DisconnectAbility
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+static HWTEST(AbilityConnectHelperTest, DisconnectAbility002, TestSize.Level0)
+{
+    SLOGI("DisconnectAbility002 begin!");
+    OHOS::AAFwk::Want want;
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr);
+    ASSERT_NE(connect, nullptr);
+    int32_t ret = ExtensionConnectHelper::GetInstance().DisconnectAbility(connect);
+    EXPECT_NE(ret, ERR_INVALID_PARAM);
 }

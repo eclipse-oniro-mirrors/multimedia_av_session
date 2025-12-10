@@ -855,6 +855,13 @@ int32_t AVSessionItem::EnableDesktopLyric(bool isEnabled)
         "The desktop lyrics feature is not supported.");
     SLOGI("enable desktop lyrics: isEnable=%{public}d", isEnabled);
     isEnabledDesktopLyric_ = isEnabled;
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        for (const auto& [pid, controller] : controllers_) {
+            CHECK_AND_CONTINUE(controller != nullptr);
+            controller->HandleDesktopLyricEnabled(isEnabled);
+        }
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -941,9 +948,8 @@ void AVSessionItem::HandleDesktopLyricVisibilityChanged(bool isVisible)
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
-            if (controller != nullptr) {
-                controller->HandleDesktopLyricVisibilityChanged(isVisible);
-            }
+            CHECK_AND_CONTINUE(controller != nullptr);
+            controller->HandleDesktopLyricVisibilityChanged(isVisible);
         }
     }
 }
@@ -959,9 +965,8 @@ void AVSessionItem::HandleDesktopLyricStateChanged(const DesktopLyricState &stat
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto &[pid, controller] : controllers_) {
-            if (controller != nullptr) {
-                controller->HandleDesktopLyricStateChanged(state);
-            }
+            CHECK_AND_CONTINUE(controller != nullptr);
+            controller->HandleDesktopLyricStateChanged(state);
         }
     }
 }

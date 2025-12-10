@@ -27,7 +27,6 @@
 namespace OHOS::AVSession {
 std::shared_ptr<BundleStatusAdapter> BundleStatusAdapter::instance_;
 std::recursive_mutex BundleStatusAdapter::instanceLock_;
-constexpr int32_t API_VERSION_REMAINDER = 1000;
 
 BundleStatusAdapter::BundleStatusAdapter()
 {
@@ -200,27 +199,6 @@ int32_t BundleStatusAdapter::GetUidFromBundleName(const std::string bundleName, 
         CHECK_AND_RETURN_RET_LOG(ret, -1, "getbundleinfo fail");
     }
     return bundleInfo.uid;
-}
-
-uint32_t BundleStatusAdapter::GetApiVersionFromUid(int32_t uid)
-{
-    std::string bundleName = GetBundleNameFromUid(uid);
-    SLOGI("get api version from uid, bundleName=%{public}s", bundleName.c_str());
-    if (bundleName.empty()) {
-        return 0;
-    }
-
-    AppExecFwk::BundleInfo bundleInfo;
-    {
-        std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
-        CHECK_AND_RETURN_RET_LOG(bundleMgrProxy != nullptr, 0, "bundleMgrProxy is null");
-        auto ret = bundleMgrProxy->GetBundleInfo(bundleName,
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT),
-            bundleInfo, AppExecFwk::Constants::ALL_USERID);
-        CHECK_AND_RETURN_RET_LOG(ret, 0, "getbundleinfo fail");
-    }
-    SLOGI("get api version from uid, apiTargetVersion=%{public}u", bundleInfo.applicationInfo.apiTargetVersion);
-    return bundleInfo.applicationInfo.apiTargetVersion % API_VERSION_REMAINDER;
 }
 
 bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)

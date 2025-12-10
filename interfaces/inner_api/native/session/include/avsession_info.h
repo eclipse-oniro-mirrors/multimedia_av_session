@@ -461,7 +461,10 @@ public:
     virtual void OnCustomData(const AAFwk::WantParams& data) {};
 
     virtual void OnDesktopLyricVisibilityChanged(bool isVisible) {};
+
     virtual void OnDesktopLyricStateChanged(const DesktopLyricState &state) {};
+
+    virtual void OnDesktopLyricEnabled(bool isEnabled) {};
 
     /**
      * @brief Deconstruct AVControllerCallback.

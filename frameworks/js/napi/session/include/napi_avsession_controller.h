@@ -104,6 +104,7 @@ private:
         napi_value param, napi_value callback);
     static napi_value OnDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
     static napi_value OnDesktopLyricStateChanged(napi_env env, napi_callback_info info);
+    static napi_value OnDesktopLyricEnabled(napi_env env, napi_callback_info info);
 
     static napi_status OffAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
@@ -130,6 +131,7 @@ private:
         napi_value callback);
     static napi_value OffDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
     static napi_value OffDesktopLyricStateChanged(napi_env env, napi_callback_info info);
+    static napi_value OffDesktopLyricEnabled(napi_env env, napi_callback_info info);
 
     static napi_status SetAVCallMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status SetAVCallStateFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);

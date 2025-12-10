@@ -25,6 +25,9 @@
 #include "want.h"
 
 #define AVSESSION_START_CALL_ABILITY_CODE 1032
+#define AVSESSION_CONNECT_ABILITY_WITH_TYPE 1034
+#define AVSESSION_DISCONNECT_ABILITY 1003
+#define AVSESSION_EXTENSION_ABILITY_TYPE_SERVICE 3
 
 namespace OHOS::AVSession {
 class AbilityConnectHelper {
@@ -35,14 +38,28 @@ public:
 
     int32_t StartAbilityByCall(const std::string &bundleName, const std::string &abilityName);
 
+private:
+   sptr<IRemoteObject> GetSystemAbility();
+
+   const std::u16string ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.aafwk.AbilityManager";
+};
+
+class ExtensionConnectHelper {
+public:
+    static ExtensionConnectHelper& GetInstance();
+
     int32_t StartDesktopLyricAbility(const std::string &sessionId, int32_t userId, std::function<void(int32_t)> cb);
 
     int32_t StopDesktopLyricAbility();
 
 private:
-   sptr<IRemoteObject> GetSystemAbility();
+    int32_t ConnectAbilityCommon(const AAFwk::Want &want, sptr<IRemoteObject> connect, int32_t userId);
 
-   const std::u16string ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.aafwk.AbilityManager";
+    int32_t DisconnectAbility(const sptr<IRemoteObject> &connect);
+
+    sptr<IRemoteObject> GetSystemAbility();
+
+    const std::u16string EXTENSION_MANAGER_INTERFACE_TOKEN = u"ohos.aafwk.ExtensionManager";
 };
 
 class AbilityConnectionStub : public IRemoteStub<AAFwk::IAbilityConnection> {

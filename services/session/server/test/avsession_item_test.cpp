@@ -1122,6 +1122,12 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricVisible_002, TestSize.L
     g_AVSessionItem->isEnabledDesktopLyric_ = true;
     int32_t res = g_AVSessionItem->SetDesktopLyricVisible(false);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
+
+    auto cb = g_AVSessionItem->callback_;
+    g_AVSessionItem->callback_ = nullptr;
+    res = g_AVSessionItem->SetDesktopLyricVisible(false);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    g_AVSessionItem->callback_ = cb;
     SLOGI("AVSessionItem_SetDesktopLyricVisible_002 End");
 }
 
@@ -1158,6 +1164,12 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricState_001, TestSize.Lev
     DesktopLyricState state = {};
     int32_t res = g_AVSessionItem->SetDesktopLyricState(state);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
+
+    auto cb = g_AVSessionItem->callback_;
+    g_AVSessionItem->callback_ = nullptr;
+    res = g_AVSessionItem->SetDesktopLyricState(state);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    g_AVSessionItem->callback_ = cb;
     SLOGI("AVSessionItem_SetDesktopLyricState_001 End");
 }
 

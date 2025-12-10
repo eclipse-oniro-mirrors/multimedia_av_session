@@ -58,6 +58,8 @@ public:
     ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override;
 
     ErrCode OnDesktopLyricStateChanged(const DesktopLyricState& state) override;
+
+    ErrCode OnDesktopLyricEnabled(bool isEnabled) override;
 private:
     std::shared_ptr<AVControllerCallback> callback_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;

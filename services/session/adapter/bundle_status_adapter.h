@@ -46,8 +46,6 @@ public:
 
     int32_t GetUidFromBundleName(const std::string bundleName, const int32_t userId);
 
-    uint32_t GetApiVersionFromUid(int32_t uid);
-
     __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntent(const std::string& bundleName,
         std::string& supportModule, std::string& profile);
 

@@ -2298,6 +2298,8 @@ ohos_unittest("AbilityConnectHelperTest") {
     "./../../../session:libidl_avsession_service_interface_stub",
   ]
 
+  cflags_cc = [ "-fno-access-control" ]
+
   external_deps = [
     "ability_base:want",
     "ability_runtime:app_manager",
