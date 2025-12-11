@@ -1849,6 +1849,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
     castHandleDeviceId_ = "-100";
     castControllerProxy_ = nullptr;
     isFirstCallback_ = true;
+    castServiceNameStatePair_ = {};
     if (multiDeviceState_ != MultiDeviceState::CASTING_SWITCH_DEVICE) {
         {
             std::lock_guard lockGuard(avsessionItemLock_);
