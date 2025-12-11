@@ -289,7 +289,7 @@ int32_t AVSessionServiceStub::HandleRegisterAncoMediaSessionListener(MessageParc
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-    auto listener = iface_cast<AncoMediaSessionListenerProxy>(remoteObject);
+    auto listener = iface_cast<IAncoMediaSessionListener>(remoteObject);
     if (listener == nullptr) {
         SLOGI("RegisterAncoMediaSessionListener but iface_cast remote object failed");
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
@@ -363,7 +363,7 @@ int32_t AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel& data,
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-    auto listener = iface_cast<SessionListenerProxy>(remoteObject);
+    auto listener = iface_cast<ISessionListener>(remoteObject);
     if (listener == nullptr) {
         SLOGI("RegisterSessionListener but iface_cast remote object failed");
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
@@ -392,7 +392,7 @@ int32_t AVSessionServiceStub::HandleRegisterSessionListenerForAllUsers(MessagePa
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-    auto listener = iface_cast<SessionListenerProxy>(remoteObject);
+    auto listener = iface_cast<ISessionListener>(remoteObject);
     if (listener == nullptr) {
         SLOGI("RegisterSessionListenerForAllUsers but iface_cast remote object failed");
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
@@ -481,7 +481,7 @@ int32_t AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel& d
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-    auto clientDeathObserver = iface_cast<ClientDeathProxy>(remoteObject);
+    auto clientDeathObserver = iface_cast<IClientDeath>(remoteObject);
     if (clientDeathObserver == nullptr) {
         SLOGI("iface_cast remote object failed");
         reply.WriteInt32(ERR_INVALID_PARAM);

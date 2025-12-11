@@ -196,7 +196,7 @@ void TaiheSessionListener::OnRemoteDistributedSessionChange(
     SLOGI("Start handle remote distributed session changed event");
     std::vector<std::shared_ptr<OHOS::AVSession::AVSessionController>> sessionControllersRef;
     for (auto& object: sessionControllers) {
-        auto controllerObject = OHOS::iface_cast<OHOS::AVSession::AVSessionControllerProxy>(object);
+        auto controllerObject = OHOS::iface_cast<OHOS::AVSession::IAVSessionController>(object);
         sessionControllersRef.push_back(std::shared_ptr<OHOS::AVSession::AVSessionController>(
             controllerObject.GetRefPtr(), [holder = controllerObject](const auto*) {}));
     }

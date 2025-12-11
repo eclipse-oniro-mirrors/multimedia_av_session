@@ -53,7 +53,7 @@ static char g_testBundleName[] = "test.ohos.avsession";
 static char g_testAbilityName[] = "test.ability";
 static uint64_t g_selfTokenId = 0;
 static std::string g_errLog;
-sptr<AVCastControllerCallbackProxy> g_AVCastControllerCallbackProxy {nullptr};
+sptr<IAVCastControllerCallback> g_AVCastControllerCallbackProxy {nullptr};
 
 void MyLogCallback(const LogType type, const LogLevel level,
     const unsigned int domain, const char *tag, const char *msg)
@@ -127,7 +127,7 @@ void AVCastControllerTest::SetUpTestCase()
         SLOGI("failed to get service");
         return;
     }
-    g_AVCastControllerCallbackProxy = iface_cast<AVCastControllerCallbackProxy>(object);
+    g_AVCastControllerCallbackProxy = iface_cast<IAVCastControllerCallback>(object);
     ASSERT_TRUE(g_AVCastControllerCallbackProxy != nullptr);
 }
 

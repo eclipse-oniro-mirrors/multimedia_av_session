@@ -54,7 +54,7 @@ int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callb
 {
     std::lock_guard lockGuard(callbackMutex_);
     SLOGD("do register callback for controller %{public}d", static_cast<int>(pid_));
-    callback_ = iface_cast<AVControllerCallbackProxy>(callback);
+    callback_ = iface_cast<IAVControllerCallback>(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "RegisterCallbackInner callback_ is nullptr");
     return AVSESSION_SUCCESS;
 }

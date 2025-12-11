@@ -61,7 +61,8 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
             return nullptr;
         }
     }
-    service_ = iface_cast<AVSessionServiceProxy>(object);
+    auto serviceObj = iface_cast<IAVSessionService>(object);
+    service_ = static_cast<AVSessionServiceProxy*>(serviceObj.GetRefPtr());
     if (service_ != nullptr) {
         serviceDeathRecipient_ = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDie(); });
         if (serviceDeathRecipient_ == nullptr) {

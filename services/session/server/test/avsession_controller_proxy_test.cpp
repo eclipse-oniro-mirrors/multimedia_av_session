@@ -71,7 +71,7 @@ public:
     void TearDown();
 
     std::shared_ptr<AVSessionControllerProxy> aVSessionControllerProxyEmpty;
-    OHOS::sptr<AVSessionControllerProxy> aVSessionControllerProxy;
+    OHOS::sptr<IAVSessionController> aVSessionControllerProxy;
 };
 
 void AVSessionControllerProxyTest::SetUpTestCase()
@@ -104,7 +104,7 @@ void AVSessionControllerProxyTest::SetUp()
         SLOGI("failed to get service");
         return;
     }
-    aVSessionControllerProxy = OHOS::iface_cast<AVSessionControllerProxy>(object);
+    aVSessionControllerProxy = OHOS::iface_cast<IAVSessionController>(object);
 }
 
 void AVSessionControllerProxyTest::TearDown()
