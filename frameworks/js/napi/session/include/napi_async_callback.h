@@ -35,12 +35,13 @@ public:
 
     napi_env GetEnv() const;
 
-    void Call(napi_ref& method, NapiArgsGetter getter = NapiArgsGetter());
+    void Call(napi_ref& method, std::string callbackName, NapiArgsGetter getter = NapiArgsGetter());
 
     void CallWithFlag(napi_ref& method, std::shared_ptr<bool> isValid, NapiArgsGetter getter = NapiArgsGetter());
 
     void CallWithFunc(napi_ref& method, std::shared_ptr<bool> isValid,
         const std::function<bool()>& checkCallbackValid,
+        std::string callbackName,
         NapiArgsGetter getter = NapiArgsGetter());
 
 private:

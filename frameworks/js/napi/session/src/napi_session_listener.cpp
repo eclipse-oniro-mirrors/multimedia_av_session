@@ -37,7 +37,7 @@ NapiSessionListener::~NapiSessionListener()
 }
 
 template<typename T>
-void NapiSessionListener::HandleEvent(int32_t event, const T& param)
+void NapiSessionListener::HandleEvent(int32_t event, std::string callBackName, const T& param)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -61,6 +61,7 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param)
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
+            callBackName,
             [param](napi_env env, int& argc, napi_value* argv) {
                 argc = 1;
                 NapiUtils::SetValue(env, param, *argv);
@@ -69,7 +70,7 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param)
 }
 
 template<typename T>
-void NapiSessionListener::HandleEvent(int32_t event, const T& param, bool checkValid)
+void NapiSessionListener::HandleEvent(int32_t event, std::string callBackName, const T& param, bool checkValid)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -92,6 +93,7 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param, bool checkV
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
+            callBackName,
             [param](napi_env env, int& argc, napi_value* argv) {
                 argc = 1;
                 NapiUtils::SetValue(env, param, *argv);
@@ -101,7 +103,8 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& param, bool checkV
 }
 
 template<typename T, typename N>
-void NapiSessionListener::HandleEvent(int32_t event, const T& firstParam, const N& secondParam)
+void NapiSessionListener::HandleEvent(int32_t event,
+    std::string callBackName, const T& firstParam, const N& secondParam)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -125,6 +128,7 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& firstParam, const 
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
             },
+            callBackName,
             [firstParam, secondParam](napi_env env, int& argc, napi_value* argv) {
                 argc = NapiUtils::ARGC_TWO;
                 auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
@@ -138,55 +142,63 @@ void NapiSessionListener::HandleEvent(int32_t event, const T& firstParam, const 
 
 void NapiSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
 {
+    std::string callBackName = "NapiSessionListener::OnSessionCreate";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnSessionCreate");
     SLOGI("sessionId=%{public}s***", descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
-    HandleEvent(EVENT_SESSION_CREATED, descriptor);
+    HandleEvent(EVENT_SESSION_CREATED, callBackName, descriptor);
 }
 
 void NapiSessionListener::OnSessionRelease(const AVSessionDescriptor& descriptor)
 {
+    std::string callBackName = "NapiSessionListener::OnSessionRelease";
     SLOGI("sessionId=%{public}s***", descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
-    HandleEvent(EVENT_SESSION_DESTROYED, descriptor);
+    HandleEvent(EVENT_SESSION_DESTROYED, callBackName, descriptor);
 }
 
 void NapiSessionListener::OnTopSessionChange(const AVSessionDescriptor& descriptor)
 {
+    std::string callBackName = "NapiSessionListener::OnTopSessionChange";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnTopSessionChange");
     SLOGI("sessionId=%{public}s***", descriptor.sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
-    HandleEvent(EVENT_TOP_SESSION_CHANGED, descriptor);
+    HandleEvent(EVENT_TOP_SESSION_CHANGED, callBackName, descriptor);
 }
 
 void NapiSessionListener::OnAudioSessionChecked(const int32_t uid)
 {
+    std::string callBackName = "NapiSessionListener::OnAudioSessionChecked";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnAudioSessionCheck");
     SLOGI("uid=%{public}d checked", uid);
-    HandleEvent(EVENT_AUDIO_SESSION_CHECKED, uid);
+    HandleEvent(EVENT_AUDIO_SESSION_CHECKED, callBackName, uid);
 }
 
 void NapiSessionListener::OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
+    std::string callBackName = "NapiSessionListener::OnDeviceAvailable";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceAvailable");
     SLOGI("Start handle device found event");
-    HandleEvent(EVENT_DEVICE_AVAILABLE, castOutputDeviceInfo, true);
+    HandleEvent(EVENT_DEVICE_AVAILABLE, callBackName, castOutputDeviceInfo, true);
 }
 
 void NapiSessionListener::OnDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
 {
+    std::string callBackName = "NapiSessionListener::OnDeviceLogEvent";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceLogEvent");
     SLOGI("Start device log event");
-    HandleEvent(EVENT_DEVICE_LOG_EVENT, eventId, param);
+    HandleEvent(EVENT_DEVICE_LOG_EVENT, callBackName, eventId, param);
 }
 
 void NapiSessionListener::OnDeviceOffline(const std::string& deviceId)
 {
+    std::string callBackName = "NapiSessionListener::OnDeviceOffline";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceOffline");
     SLOGI("Start handle device offline event");
-    HandleEvent(EVENT_DEVICE_OFFLINE, deviceId);
+    HandleEvent(EVENT_DEVICE_OFFLINE, callBackName, deviceId);
 }
 
 void NapiSessionListener::OnRemoteDistributedSessionChange(
     const std::vector<sptr<IRemoteObject>>& sessionControllers)
 {
+    std::string callBackName = "NapiSessionListener::OnRemoteDistributedSessionChange";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnRemoteDistributedSessionChange");
     SLOGI("Start handle remote distributed session changed event");
     std::vector<std::shared_ptr<AVSessionController>> sessionControllersRef;
@@ -196,21 +208,23 @@ void NapiSessionListener::OnRemoteDistributedSessionChange(
                                                               [holder = controllerObject](const auto*) {}));
     }
     SLOGI("handle remote distributed session changed end size=%{public}d", (int) sessionControllersRef.size());
-    HandleEvent(EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, sessionControllersRef);
+    HandleEvent(EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callBackName, sessionControllersRef);
 }
 
 void NapiSessionListener::OnDeviceStateChange(const DeviceState& deviceState)
 {
+    std::string callBackName = "NapiSessionListener::OnDeviceStateChange";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnDeviceStateChange");
     SLOGI("Start handle device state changed event");
-    HandleEvent(EVENT_DEVICE_STATE_CHANGED, deviceState);
+    HandleEvent(EVENT_DEVICE_STATE_CHANGED, callBackName, deviceState);
 }
 
 void NapiSessionListener::OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors)
 {
+    std::string callBackName = "NapiSessionListener::OnActiveSessionChanged";
     AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnActiveSessionChanged");
     SLOGI("Start handle activeSession changed event");
-    HandleEvent(EVENT_ACTIVE_SESSION_CHANGED, descriptors);
+    HandleEvent(EVENT_ACTIVE_SESSION_CHANGED, callBackName, descriptors);
 }
 
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)

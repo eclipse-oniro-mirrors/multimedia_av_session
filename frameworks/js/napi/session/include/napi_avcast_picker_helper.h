@@ -101,7 +101,7 @@ private:
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
 
     template<typename T>
-    void HandleEvent(int32_t event, const T& param);
+    void HandleEvent(int32_t event, std::string callBackName, const T& param);
     
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;

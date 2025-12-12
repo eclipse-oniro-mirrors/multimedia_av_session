@@ -40,7 +40,7 @@ NapiAVCastControllerCallback::~NapiAVCastControllerCallback()
     SLOGI("destroy");
 }
 
-void NapiAVCastControllerCallback::HandleEvent(int32_t event)
+void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBackName)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -48,7 +48,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event)
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref);
+        asyncCallback_->Call(*ref, callBackName);
     }
 }
 
@@ -71,7 +71,7 @@ std::function<bool()> NapiAVCastControllerCallback::CheckCallbackValid(int32_t e
 }
 
 template<typename T>
-void NapiAVCastControllerCallback::HandleEvent(int32_t event, const T& param)
+void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBackName, const T& param)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -80,7 +80,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const T& param)
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         SLOGI("call with flag for event %{public}d", event);
-        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref), callBackName,
             [param](napi_env env, int& argc, napi_value *argv) {
                 argc = NapiUtils::ARGC_ONE;
                 auto status = NapiUtils::SetValue(env, param, *argv);
@@ -90,7 +90,8 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const T& param)
 }
 
 template<typename T>
-void NapiAVCastControllerCallback::HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam)
+void NapiAVCastControllerCallback::HandleEvent(int32_t event,
+    std::string callBackName, const std::string& firstParam, const T& secondParam)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -98,7 +99,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const std::string&
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref), callBackName,
             [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
                 argc = NapiUtils::ARGC_TWO;
                 auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
@@ -110,7 +111,8 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const std::string&
 }
 
 template<typename T>
-void NapiAVCastControllerCallback::HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam)
+void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBackName,
+    const int32_t firstParam, const T& secondParam)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -118,7 +120,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const int32_t firs
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref), callBackName,
             [firstParam, secondParam](napi_env env, int& argc, napi_value *argv) {
                 argc = NapiUtils::ARGC_TWO;
                 auto status = NapiUtils::SetValue(env, firstParam, argv[0]);
@@ -129,7 +131,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, const int32_t firs
     }
 }
 
-void NapiAVCastControllerCallback::HandleEvent(int32_t event,
+void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBackName,
     const int32_t firstParam, const int32_t secondParam, const int32_t thirdParam)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
@@ -138,7 +140,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event,
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref), callBackName,
             [firstParam, secondParam, thirdParam](napi_env env, int& argc, napi_value *argv) {
                 argc = NapiUtils::ARGC_THREE;
                 auto status = NapiUtils::SetValue(env, firstParam, argv[NapiUtils::ARGV_FIRST]);
@@ -152,7 +154,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event,
 }
 
 void NapiAVCastControllerCallback::HandleErrorEvent(int32_t event, const int32_t errorCode,
-    const std::string& errorMsg)
+    const std::string& errorMsg, std::string callBackName)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -160,7 +162,7 @@ void NapiAVCastControllerCallback::HandleErrorEvent(int32_t event, const int32_t
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
+        asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref), callBackName,
             [errorCode, errorMsg](napi_env env, int& argc, napi_value *argv) {
                 napi_status status = napi_create_object(env, argv);
                 CHECK_RETURN_VOID((status == napi_ok) && (argv != nullptr), "create object failed");
@@ -181,98 +183,106 @@ void NapiAVCastControllerCallback::HandleErrorEvent(int32_t event, const int32_t
 
 void NapiAVCastControllerCallback::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnCastPlaybackStateChange";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnCastPlaybackStateChange");
     SLOGI("Start handle OnCastPlaybackStateChange event with state: %{public}d", state.GetState());
-    HandleEvent(EVENT_CAST_PLAYBACK_STATE_CHANGE, state);
+    HandleEvent(EVENT_CAST_PLAYBACK_STATE_CHANGE, callBackName, state);
 }
 
 void NapiAVCastControllerCallback::OnMediaItemChange(const AVQueueItem& avQueueItem)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnMediaItemChange";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnMediaItemChange");
     SLOGI("Start handle OnMediaItemChange event");
-    HandleEvent(EVENT_CAST_MEDIA_ITEM_CHANGE, avQueueItem);
+    HandleEvent(EVENT_CAST_MEDIA_ITEM_CHANGE, callBackName, avQueueItem);
 }
 
 void NapiAVCastControllerCallback::OnCustomData(const AAFwk::WantParams& data)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnCustomData";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnCustomData");
     SLOGI("Start handle OnCustomData event");
-    HandleEvent(EVENT_CAST_CUSTOM_DATA, data);
+    HandleEvent(EVENT_CAST_CUSTOM_DATA, callBackName, data);
 }
 
 void NapiAVCastControllerCallback::OnPlayNext()
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnPlayNext";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayNext");
     SLOGI("Start handle OnPlayNext event");
-    HandleEvent(EVENT_CAST_PLAY_NEXT);
+    HandleEvent(EVENT_CAST_PLAY_NEXT, callBackName);
 }
 
 void NapiAVCastControllerCallback::OnPlayPrevious()
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnPlayPrevious";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayPrevious");
     SLOGI("Start handle OnPlayPrevious event");
-    HandleEvent(EVENT_CAST_PLAY_PREVIOUS);
+    HandleEvent(EVENT_CAST_PLAY_PREVIOUS, callBackName);
 }
 
 void NapiAVCastControllerCallback::OnSeekDone(const int32_t seekNumber)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnSeekDone";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnSeekDone");
     SLOGI("Start handle OnSeekDone event");
-    HandleEvent(EVENT_CAST_SEEK_DONE, seekNumber);
+    HandleEvent(EVENT_CAST_SEEK_DONE, callBackName, seekNumber);
 }
 
 void NapiAVCastControllerCallback::OnVideoSizeChange(const int32_t width, const int32_t height)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnVideoSizeChange";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnVideoSizeChange");
     SLOGI("Start handle OnVideoSizeChange event");
-    HandleEvent(EVENT_CAST_VIDEO_SIZE_CHANGE, width, height);
+    HandleEvent(EVENT_CAST_VIDEO_SIZE_CHANGE, callBackName, width, height);
 }
 
 void NapiAVCastControllerCallback::HandlePlayerErrorAPI13(const int32_t errorCode, const std::string& errorMsg)
 {
     CastExtErrCodeAPI13 jsErr;
+    std::string callBackName = "NapiAVCastControllerCallback::HandlePlayerErrorAPI13";
     if (CAST_GENERIC_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI13.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // Generic error
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI13.at(static_cast<CastErrCode>(errorCode));
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-        HandleErrorEvent(EVENT_CAST_GENERIC_ERR, static_cast<int32_t>(jsErr), errorMsg);
+        HandleErrorEvent(EVENT_CAST_GENERIC_ERR, static_cast<int32_t>(jsErr), errorMsg, callBackName);
     } else if (CAST_IO_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI13.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // Input/Output errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI13.at(static_cast<CastErrCode>(errorCode));
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-        HandleErrorEvent(EVENT_CAST_IO_ERR, static_cast<int32_t>(jsErr), errorMsg);
+        HandleErrorEvent(EVENT_CAST_IO_ERR, static_cast<int32_t>(jsErr), errorMsg, callBackName);
     } else if (CAST_PARSING_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI13.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // Content parsing errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI13.at(static_cast<CastErrCode>(errorCode));
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-        HandleErrorEvent(EVENT_CAST_PARSING_ERR, static_cast<int32_t>(jsErr), errorMsg);
+        HandleErrorEvent(EVENT_CAST_PARSING_ERR, static_cast<int32_t>(jsErr), errorMsg, callBackName);
     } else if (CAST_DECODE_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI13.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // Decoding errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI13.at(static_cast<CastErrCode>(errorCode));
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-        HandleErrorEvent(EVENT_CAST_DECOD_EERR, static_cast<int32_t>(jsErr), errorMsg);
+        HandleErrorEvent(EVENT_CAST_DECOD_EERR, static_cast<int32_t>(jsErr), errorMsg, callBackName);
     } else if (CAST_RENDER_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI13.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // AudioRender errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI13.at(static_cast<CastErrCode>(errorCode));
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-        HandleErrorEvent(EVENT_CAST_RENDER_ERR, static_cast<int32_t>(jsErr), errorMsg);
+        HandleErrorEvent(EVENT_CAST_RENDER_ERR, static_cast<int32_t>(jsErr), errorMsg, callBackName);
     } else if (CAST_DRM_ERRCODE_INFOS.count(static_cast<CastErrCode>(errorCode)) != 0 &&
         CASTERRCODE_TO_EXTERRORCODEAPI13.count(static_cast<CastErrCode>(errorCode)) != 0) {
         // DRM errors
         jsErr = CASTERRCODE_TO_EXTERRORCODEAPI13.at(static_cast<CastErrCode>(errorCode));
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-        HandleErrorEvent(EVENT_CAST_DRM_ERR, static_cast<int32_t>(jsErr), errorMsg);
+        HandleErrorEvent(EVENT_CAST_DRM_ERR, static_cast<int32_t>(jsErr), errorMsg, callBackName);
     } else {
         SLOGW("Can not match error code, use default");
         // If error not in map, need add error and should not return default ERROR_CODE_UNSPECIFIED.
         jsErr = CAST_GENERICERR_EXT_API13_UNSPECIFIED;
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-        HandleErrorEvent(EVENT_CAST_GENERIC_ERR, static_cast<int32_t>(jsErr), errorMsg);
+        HandleErrorEvent(EVENT_CAST_GENERIC_ERR, static_cast<int32_t>(jsErr), errorMsg, callBackName);
     }
 }
 
@@ -280,6 +290,7 @@ void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const 
 {
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayerError");
     SLOGI("Start handle OnPlayerError event");
+    std::string callBackName = "NapiAVCastControllerCallback::OnPlayerError";
     if (static_cast<MediaServiceErrCode>(errorCode) >= MSERR_NO_MEMORY &&
         static_cast<MediaServiceErrCode>(errorCode) <= MSERR_EXTEND_START) {
         MediaServiceExtErrCodeAPI9 jsErr;
@@ -292,7 +303,7 @@ void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const 
             jsErr = MSERR_EXT_API9_IO;
         }
         SLOGI("Native errCode: %{public}d, JS errCode: %{public}d", errorCode, static_cast<int32_t>(jsErr));
-        HandleErrorEvent(EVENT_CAST_ERROR, static_cast<int32_t>(jsErr), errorMsg);
+        HandleErrorEvent(EVENT_CAST_ERROR, static_cast<int32_t>(jsErr), errorMsg, callBackName);
     } else {
         HandlePlayerErrorAPI13(errorCode, errorMsg);
     }
@@ -300,30 +311,34 @@ void NapiAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const 
 
 void NapiAVCastControllerCallback::OnEndOfStream(const int32_t isLooping)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnEndOfStream";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnEndOfStream");
     SLOGI("Start handle OnEndOfStream event");
-    HandleEvent(EVENT_CAST_END_OF_STREAM, isLooping);
+    HandleEvent(EVENT_CAST_END_OF_STREAM, callBackName, isLooping);
 }
 
 void NapiAVCastControllerCallback::OnPlayRequest(const AVQueueItem& avQueueItem)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnPlayRequest";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnPlayRequest");
     SLOGI("Start handle OnPlayRequest event");
-    HandleEvent(EVENT_CAST_PLAY_REQUEST, avQueueItem);
+    HandleEvent(EVENT_CAST_PLAY_REQUEST, callBackName, avQueueItem);
 }
 
 void NapiAVCastControllerCallback::OnKeyRequest(const std::string &assetId, const std::vector<uint8_t> &keyRequestData)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnKeyRequest";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnKeyRequest");
     SLOGI("Start handle OnKeyRequest event");
-    HandleEvent(EVENT_CAST_KEY_REQUEST, assetId, keyRequestData);
+    HandleEvent(EVENT_CAST_KEY_REQUEST, callBackName, assetId, keyRequestData);
 }
 
 void NapiAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<int32_t>& cmds)
 {
+    std::string callBackName = "NapiAVCastControllerCallback::OnCastValidCommandChanged";
     SLOGI("Start handle OnValidCommandChanged event. cmd size:%{public}zd", cmds.size());
     std::vector<std::string> stringCmds = NapiCastControlCommand::ConvertCommands(cmds);
-    HandleEvent(EVENT_CAST_VALID_COMMAND_CHANGED, stringCmds);
+    HandleEvent(EVENT_CAST_VALID_COMMAND_CHANGED, callBackName, stringCmds);
 }
 
 int32_t NapiAVCastControllerCallback::onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
