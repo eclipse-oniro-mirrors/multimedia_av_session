@@ -345,8 +345,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
         std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
         avQueueItem.GetDescription()->SetAppName(bundleName);
     }
-    if (avQueueItem.GetDescription() != nullptr && (avQueueItem.GetDescription()->GetIcon() != nullptr &&
-        avQueueItem.GetDescription()->GetIconUri() == "URI_CACHE")) {
+    if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetIcon() != nullptr) {
         std::string fileDir = AVSessionUtils::GetCachePathNameForCast(userId_);
         AVSessionUtils::WriteImageToFile(avQueueItem.GetDescription()->GetIcon(),
             fileDir, sessionId_ + AVSessionUtils::GetFileSuffix());
