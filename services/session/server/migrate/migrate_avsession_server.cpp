@@ -71,7 +71,8 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
     isSoftbusConnecting_ = true;
     deviceId_ = deviceId;
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
-        SLOGI("connect process as next behavior");
+        SLOGI("connect process as next behavior.");
+        CheckPostClean();
         LocalFrontSessionArrive(lastSessionId_);
         RegisterAudioCallbackAndTrigger();
         return;
