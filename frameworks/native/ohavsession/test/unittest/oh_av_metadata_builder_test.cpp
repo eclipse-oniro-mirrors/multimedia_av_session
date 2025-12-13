@@ -74,6 +74,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData001, TestSize.Level0)
     g_ohAVMetaDataBuilder.SetAssetId("000");
     g_ohAVMetaDataBuilder.SetSkipIntervals(SECONDS_30);
     g_ohAVMetaDataBuilder.SetDisplayTags(TAGS);
+    g_ohAVMetaDataBuilder.SetFilter(2);
 
     g_ohAVMetaDataBuilder.GenerateAVMetadata(&ohMetadata);
 
@@ -92,6 +93,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData001, TestSize.Level0)
     EXPECT_EQ(metadata->GetAssetId(), "000");
     EXPECT_EQ(metadata->GetSkipIntervals(), SECONDS_30);
     EXPECT_EQ(metadata->GetDisplayTags(), TAGS);
+    EXPECT_EQ(metadata->GetFilter(), 2);
 
     delete metadata;
     metadata = nullptr;
@@ -141,6 +143,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level0)
     OH_AVMetadataBuilder_SetAssetId(builder, "000");
     OH_AVMetadataBuilder_SetSkipIntervals(builder, SECONDS_30);
     OH_AVMetadataBuilder_SetDisplayTags(builder, TAGS);
+    OH_AVMetadataBuilder_SetFilter(builder, 2);
     OH_AVMetadataBuilder_GenerateAVMetadata(builder, &ohMetadata);
 
     metadata = reinterpret_cast<AVMetaData*>(ohMetadata);
@@ -159,6 +162,7 @@ HWTEST_F(OHAVMetadataBuilderTest, SetAVMetaData003, TestSize.Level0)
     EXPECT_EQ(metadata->GetAssetId(), "000");
     EXPECT_EQ(metadata->GetSkipIntervals(), SECONDS_30);
     EXPECT_EQ(metadata->GetDisplayTags(), TAGS);
+    EXPECT_EQ(metadata->GetFilter(), 2);
 
     OH_AVMetadataBuilder_Destroy(builder);
     OH_AVMetadata_Destroy(ohMetadata);

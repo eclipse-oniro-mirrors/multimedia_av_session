@@ -42,221 +42,14 @@
 
 #include <stdint.h>
 #include "native_avsession_errors.h"
+#include "native_avsession_base.h"
 #include "native_avmetadata.h"
+#include "native_avplaybackstate.h"
+#include "native_deviceinfo.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @brief Enum for avsession type.
- *
- * @since 13
- * @version 1.0
- */
-typedef enum {
-    /**
-     * @brief audio session type.
-     */
-    SESSION_TYPE_AUDIO = 0,
-
-    /**
-     * @brief video session type.
-     */
-    SESSION_TYPE_VIDEO = 1,
-
-    /**
-     * @brief voice call session type.
-     */
-    SESSION_TYPE_VOICE_CALL = 2,
-
-    /**
-     * @brief video call session type.
-     */
-    SESSION_TYPE_VIDEO_CALL = 3,
-
-    /**
-     * @brief photo session type.
-     */
-    SESSION_TYPE_PHOTO = 4
-} AVSession_Type;
-
-/**
- * @brief Enum for playback state.
- *
- * @since 13
- * @version 1.0
- */
-typedef enum {
-    /**
-     * @brief Initial state.
-     */
-    PLAYBACK_STATE_INITIAL = 0,
-
-    /**
-     * @brief Preparing state. Indicates that the media file is not ready to play.
-     */
-    PLAYBACK_STATE_PREPARING = 1,
-
-    /**
-     * @brief Playing state.
-     */
-    PLAYBACK_STATE_PLAYING = 2,
-
-    /**
-     * @brief Pause state.
-     */
-    PLAYBACK_STATE_PAUSED = 3,
-
-    /**
-     * @brief Fast forward state.
-     */
-    PLAYBACK_STATE_FAST_FORWARDING = 4,
-
-    /**
-     * @brief Rewind state.
-     */
-    PLAYBACK_STATE_REWINDED = 5,
-
-    /**
-     * @brief Stopped state.
-     */
-    PLAYBACK_STATE_STOPPED = 6,
-
-    /**
-     * @brief Complete state.
-     */
-    PLAYBACK_STATE_COMPLETED = 7,
-
-    /**
-     * @brief Release state.
-     */
-    PLAYBACK_STATE_RELEASED = 8,
-
-    /**
-     * @brief Error state.
-     */
-    PLAYBACK_STATE_ERROR = 9,
-
-    /**
-     * @brief Idle state.
-     */
-    PLAYBACK_STATE_IDLE = 10,
-
-    /**
-     * @brief Buffering state.
-     */
-    PLAYBACK_STATE_BUFFERING = 11,
-
-    /**
-     * @brief Max state.
-     */
-    PLAYBACK_STATE_MAX = 12,
-} AVSession_PlaybackState;
-
-/**
- * @brief Defines the playback position.
- *
- * @since 13
- */
-typedef struct AVSession_PlaybackPosition {
-    /**
-     * @brief Elapsed time(position) of this media set by the app.
-     */
-    int64_t elapsedTime;
-
-    /**
-     * @brief Record the system time when elapsedTime is set.
-     */
-    int64_t updateTime;
-} AVSession_PlaybackPosition;
-
-/**
- * @brief Defines the playback mode.
- *
- * @since 13
- */
-typedef enum {
-    /**
-     * @brief sequential playback mode
-     */
-    LOOP_MODE_SEQUENCE = 0,
-
-    /**
-     * @brief single playback mode
-     */
-    LOOP_MODE_SINGLE = 1,
-
-    /**
-     * @brief list playback mode
-     */
-    LOOP_MODE_LIST = 2,
-
-    /**
-     * @brief shuffle playback mode
-     */
-    LOOP_MODE_SHUFFLE = 3,
-
-    /**
-     * @brief custom playback mode
-     */
-    LOOP_MODE_CUSTOM = 4,
-} AVSession_LoopMode;
-
-/**
- * @brief Enum for different control command.
- *
- * @since 13
- * @version 1.0
- */
-typedef enum AVSession_ControlCommand {
-    /**
-     * @brief invalid control command
-     */
-    CONTROL_CMD_INVALID = -1,
-
-    /**
-     * @brief play command
-     */
-    CONTROL_CMD_PLAY = 0,
-
-    /**
-     * @brief pause command
-     */
-    CONTROL_CMD_PAUSE = 1,
-
-    /**
-     * @brief stop command
-     */
-    CONTROL_CMD_STOP = 2,
-
-    /**
-     * @brief playnext command
-     */
-    CONTROL_CMD_PLAY_NEXT = 3,
-
-    /**
-     * @brief playprevious command
-     */
-    CONTROL_CMD_PLAY_PREVIOUS = 4,
-} AVSession_ControlCommand;
-
-/**
- * @brief Defines enumeration of avsession callback result.
- *
- * @since 13
- */
-typedef enum {
-    /**
-     * @brief Result of avsession callabck is success.
-     */
-    AVSESSION_CALLBACK_RESULT_SUCCESS = 0,
-
-    /**
-     * @brief Result of avsession callabck failed.
-     */
-    AVSESSION_CALLBACK_RESULT_FAILURE = -1,
-} AVSessionCallback_Result;
 
 /**
  * @brief AVSession object
@@ -267,6 +60,16 @@ typedef enum {
  * @version 1.0
  */
 typedef struct OH_AVSession OH_AVSession;
+
+/**
+ * @brief AVSession object
+ *
+ * A pointer can be created using {@link OH_AVSession_GetAVCastController} method.
+ *
+ * @since 23
+ * @version 1.0
+ */
+typedef struct OH_AVCastController OH_AVCastController;
 
 /**
  * @brief Declaring the callback struct for playback command
@@ -321,6 +124,15 @@ typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnSetLoopMode)(OH_AVSess
  */
 typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnToggleFavorite)(OH_AVSession* session,
     const char* assetId, void* userData);
+
+/**
+ * @brief Declaring the callback struct for output device change
+ *
+ * @since 23
+ * @version 1.0
+ */
+typedef AVSessionCallback_Result (*OH_AVSessionCallback_OutputDeviceChange)(OH_AVSession* session,
+    AVSession_ConnectionState state, AVSession_OutputDeviceInfo *outputDeviceInfo);
 
 /**
  * @brief Request to create the avsession.
@@ -482,6 +294,20 @@ AVSession_ErrCode OH_AVSession_SetFavorite(OH_AVSession* avsession, bool favorit
  * @since 13
  */
 AVSession_ErrCode OH_AVSession_SetLoopMode(OH_AVSession* avsession, AVSession_LoopMode loopMode);
+
+/**
+ * @brief Request to set extra info.
+ *
+ * @param avsession The avsession instance pointer
+ * @param enabled true: Enable Cast Stream
+ * @return Function result code：
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Internal server error.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1. The param of avsession is nullptr.
+ * @since 23
+ */
+AVSession_ErrCode OH_AVSession_SetRemoteCastEnabled(OH_AVSession* avsession, bool enabled);
 
 /**
  * @brief Request to register command callback.
@@ -684,6 +510,101 @@ AVSession_ErrCode OH_AVSession_RegisterToggleFavoriteCallback(OH_AVSession* avse
  */
 AVSession_ErrCode OH_AVSession_UnregisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback);
+
+/**
+ * @brief Request to register output device change callback.
+ *
+ * @param avsession The avsession instance pointer
+ * @param callback the {@link OH_AVSessionCallback_OutputDeviceChange} to be registered.
+ * @return Function result code：
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Internal server error.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1. The param of avsession is nullptr.
+ *                                                 2. The param of callback is nullptr.
+ * @since 23
+ */
+AVSession_ErrCode OH_AVSession_RegisterOutputDeviceChangeCallback(OH_AVSession* avsession,
+    OH_AVSessionCallback_OutputDeviceChange callback);
+
+/**
+ * @brief Request to unregister output device change callback.
+ *
+ * @param avsession The avsession instance pointer
+ * @param callback the {@link OH_AVSessionCallback_OutputDeviceChange} to be unregistered.
+ * @return Function result code：
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Internal server error.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1. The param of avsession is nullptr.
+ *                                                 2. The param of callback is nullptr.
+ * @since 23
+ */
+AVSession_ErrCode OH_AVSession_UnregisterOutputDeviceChangeCallback(OH_AVSession* avsession,
+    OH_AVSessionCallback_OutputDeviceChange callback);
+
+/**
+ * @brief Get AVCastController object.
+ *
+ * @param avsession The avsession instance pointer
+ * @param avcastcontroller {@link OH_AVCastController} Pointer to a variable to receive the avcastcontroller
+ * @return Function result code:
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Internal server error.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1. The param of avsession is nullptr.
+ *                                                 2. The param of avcastcontroller is nullptr.
+ * @since 23
+ */
+AVSession_ErrCode OH_AVSession_GetAVCastController(OH_AVSession* avsession, OH_AVCastController** avcastcontroller);
+
+/**
+ * @brief Request to stop current cast and disconnect device connection.
+ *
+ * @param avsession The avsession instance pointer
+ * @return Function result code：
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Internal server error.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1. The param of avsession is nullptr.
+ *         {@link AV_SESSION_ERR_CODE_SESSION_NOT_EXIST} The remote connection is not established.
+ * @since 23
+ */
+AVSession_ErrCode OH_AVSession_StopCasting(OH_AVSession* avsession);
+
+/**
+ * @brief Get Output device.
+ *
+ * @param avsession The avsession instance pointer
+ * @param outputDeviceInfo Pointer {@link AVSession_OutputDeviceInfo} to a variable to receive the OutputDeviceInfo
+ *     Do not release the outputDeviceInfo pointer separately, instead call {@link OH_AVSession_ReleaseOutputDevice}
+ *     to release the outputDeviceInfo when it is no use anymore.
+ * @return Function result code:
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Internal server error.
+ *         {@link AV_SESSION_ERR_CODE_SESSION_NOT_EXIST} The remote connection is not established.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1. The param of avsession is nullptr.
+ *                                                 2. The param of outputDeviceInfo is nullptr.
+ * @since 23
+ */
+AVSession_ErrCode OH_AVSession_GetOutputDevice(OH_AVSession* avsession,
+    AVSession_OutputDeviceInfo** outputDeviceInfo);
+
+/**
+ * @brief Release outputDeviceInfo object.
+ *
+ * @param avsession The avsession instance pointer
+ * @param outputDeviceInfo outputdeivce should be released.
+ * @return Function result code:
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1.The param of avsession is nullptr;
+ *                                                 2.The param of outputDeviceInfo is nullptr.
+ * @since 23
+ */
+AVSession_ErrCode OH_AVSession_ReleaseOutputDevice(OH_AVSession* avsession,
+    AVSession_OutputDeviceInfo *outputDeviceInfo);
 
 #ifdef __cplusplus
 }

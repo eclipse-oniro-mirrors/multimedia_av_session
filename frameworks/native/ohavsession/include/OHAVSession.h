@@ -19,9 +19,12 @@
 #include <unordered_map>
 #include "native_avsession.h"
 #include "native_avsession_errors.h"
+#include "native_avcastcontroller.h"
+#include "native_deviceinfo.h"
 #include "avsession_info.h"
 #include "av_session.h"
 #include "OHAVSessionCallbackImpl.h"
+#include "OHAVCastController.h"
 #include "avsession_log.h"
 #include "avcast_control_command.h"
 
@@ -43,6 +46,7 @@ public:
     AVSession_ErrCode SetPlaybackPosition(AVSession_PlaybackPosition* playbackPosition);
     AVSession_ErrCode SetFavorite(bool favorite);
     AVSession_ErrCode SetLoopMode(AVSession_LoopMode loopMode);
+    AVSession_ErrCode SetRemoteCastEnabled(bool enabled);
 
     AVSession_ErrCode RegisterCommandCallback(AVSession_ControlCommand command,
                                               OH_AVSessionCallback_OnCommand callback, void* userData);
@@ -58,6 +62,16 @@ public:
     AVSession_ErrCode UnregisterSetLoopModeCallback(OH_AVSessionCallback_OnSetLoopMode callback);
     AVSession_ErrCode RegisterToggleFavoriteCallback(OH_AVSessionCallback_OnToggleFavorite callback, void* userData);
     AVSession_ErrCode UnregisterToggleFavoriteCallback(OH_AVSessionCallback_OnToggleFavorite callback);
+    AVSession_ErrCode RegisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback);
+    AVSession_ErrCode UnregisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback);
+
+    AVSession_ErrCode GetAVCastController(OHAVCastController **avcastController);
+    AVSession_ErrCode StopCasting();
+    AVSession_ErrCode GetOutputDevice(AVSession_OutputDeviceInfo **outputDeviceInfo);
+    AVSession_ErrCode ReleaseOutputDevice(AVSession_OutputDeviceInfo *outputDeviceInfo);
+
+    void DestroyAVSessionOutputDevice(AVSession_OutputDeviceInfo *array);
+
     AVSession_ErrCode Destroy();
     AVSession_ErrCode CheckAndRegister();
 

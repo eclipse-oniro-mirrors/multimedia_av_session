@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("../../../../../config.gni")
+import("../../../../../castplus_cast_engine_part.gni")
 
 module_output_path = "av_session/av_session/ndk"
 
@@ -34,10 +35,42 @@ common_external_deps = [
   "hilog:libhilog",
   "image_framework:image",
   "image_framework:image_native",
+  "image_framework:pixelmap",
   "input:libmmi-client",
   "ipc:ipc_single",
   "samgr:samgr_proxy",
 ]
+
+ohos_unittest("OHAVMediaDescriptionBuilderTest") {
+  install_enable = true
+  visibility = [ ":*" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "../../../../../interfaces/inner_api/native/session/include",
+    "../../../../../interfaces/kits/c",
+    "../../include",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
+
+  sources = [ "./oh_av_media_description_builder_test.cpp" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  module_out_path = module_output_path
+}
 
 ohos_unittest("OHAVMetadataBuilderTest") {
   install_enable = true
@@ -134,11 +167,44 @@ ohos_unittest("OHAVSessionTest") {
   module_out_path = module_output_path
 }
 
+ohos_unittest("OHDeviceInfoTest") {
+  install_enable = true
+  visibility = [ ":*" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "../../../../../interfaces/inner_api/native/session/include",
+    "../../../../../interfaces/kits/c",
+    "../../include",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
+
+  sources = [ "./oh_deviceinfo_test.cpp" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  module_out_path = module_output_path
+}
+
 group("oh_av_session_unittest") {
   testonly = true
   deps = [
     ":OHAVMetadataBuilderTest",
     ":OHAVSessionCallbackImplTest",
     ":OHAVSessionTest",
+    ":OHAVMediaDescriptionBuilderTest",
+    ":OHDeviceInfoTest"
   ]
 }
