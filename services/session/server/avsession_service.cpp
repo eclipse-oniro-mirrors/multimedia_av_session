@@ -174,6 +174,7 @@ void AVSessionService::OnStart()
     GetUsersManager().ClearCache();
     CHECK_AND_RETURN_LOG(Publish(this), "publish avsession service failed");
     OnStartProcess();
+    UpdateControlListFromFile();
 }
 
 void AVSessionService::OnStartProcess()
@@ -885,6 +886,11 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     int32_t userId = sessionItem->GetUserId();
     SLOGI("UpdateFrontSession with bundle=%{public}s,userId=%{public}d,isAdd=%{public}d",
         sessionItem->GetBundleName().c_str(), userId, isAdd);
+    {
+        std::lock_guard lockGuard(controlListLock_);
+        CHECK_AND_RETURN_LOG(controlBundleNameSet_.find(sessionItem->GetBundleName()) == controlBundleNameSet_.end(),
+            "session is in controlList, dont add to front");
+    }
     std::lock_guard frontLockGuard(sessionFrontLock_);
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
@@ -1862,6 +1868,12 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     std::string supportModule;
     std::string profile;
     if (BundleStatusAdapter::GetInstance().IsSupportPlayIntent(elementName.GetBundleName(), supportModule, profile)) {
+        {
+            std::lock_guard lockGuard(controlListLock_);
+            CHECK_AND_RETURN_RET_LOG(
+                controlBundleNameSet_.find(elementName.GetBundleName()) == controlBundleNameSet_.end(),
+                    AVSESSION_SUCCESS, "session is in controlList, dont add to history");
+        }
         SLOGI("bundleName=%{public}s support play intent, refreshSortFile", elementName.GetBundleName().c_str());
         SaveSessionInfoInFile(tag, session->GetSessionId(), session->GetSessionType(), elementName);
     }
@@ -2000,6 +2012,29 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& tag, const std::
         SLOGE("LoadStringToFile failed, filename=%{public}s", SORT_FILE_NAME);
     }
 }
+
+int32_t AVSessionService::UpdateControlListFromFile()
+{
+    std::lock_guard lockGuard(controlListLock_);
+    std::string controlListContent;
+    bool isFileLoad = LoadStringFromFileEx(controlListFile, controlListContent);
+    CHECK_AND_RETURN_RET_LOG(isFileLoad, AVSESSION_ERROR, "UpdateControlListFromFile read file fail, Return!");
+
+    cJSON* appValuesArray = cJSON_Parse(controlListContent.c_str());
+    CHECK_AND_RETURN_RET_LOG(appValuesArray != nullptr && !cJSON_IsInvalid(appValuesArray) &&
+        cJSON_IsArray(appValuesArray), AVSESSION_ERROR, "controlList parse json not valid");
+
+    cJSON* valueItem = nullptr;
+    cJSON_ArrayForEach(valueItem, appValuesArray) {
+        cJSON* bundleNameItem = cJSON_GetObjectItem(valueItem, "bundleName");
+        CHECK_AND_CONTINUE_LOG(bundleNameItem != nullptr &&
+            !cJSON_IsInvalid(bundleNameItem) && cJSON_IsString(bundleNameItem), "controlList get bundleName fail");
+        controlBundleNameSet_.insert(bundleNameItem->valuestring);
+    }
+
+    cJSON_Delete(appValuesArray);
+    return AVSESSION_SUCCESS;
+}
 // LCOV_EXCL_STOP
 
 int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
@@ -2100,6 +2135,11 @@ void AVSessionService::ProcessDescriptorsFromCJSON(std::vector<AVSessionDescript
         return;
     }
     std::string bundleName(bundleNameItem->valuestring);
+    {
+        std::lock_guard lockGuard(controlListLock_);
+        CHECK_AND_RETURN_LOG(controlBundleNameSet_.find(bundleName) == controlBundleNameSet_.end(),
+            "session is in controlList, dont add to history");
+    }
     cJSON* abilityNameItem = cJSON_GetObjectItem(valueItem, "abilityName");
     if (abilityNameItem == nullptr || cJSON_IsInvalid(abilityNameItem) || !cJSON_IsString(abilityNameItem)) {
         SLOGE("valueItem get abilityName fail");

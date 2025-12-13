@@ -524,6 +524,8 @@ private:
 
     int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
 
+    int32_t UpdateControlListFromFile();
+
     void ReportStartCastBegin(std::string func, const OutputDeviceInfo& outputDeviceInfo, int32_t uid);
 
     void ReportStartCastEnd(std::string func, const OutputDeviceInfo &outputDeviceInfo, int32_t uid, int ret);
@@ -703,6 +705,7 @@ private:
     std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
     std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
     sptr<IAncoMediaSessionListener> ancoMediaSessionListener_;
+    std::set<std::string> controlBundleNameSet_;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex sessionServiceLock_;
@@ -738,6 +741,8 @@ private:
 
     std::recursive_mutex keyEventListLock_;
 
+    std::recursive_mutex controlListLock_;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::pair<std::string, std::string> castServiceNameStatePair_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
@@ -767,6 +772,7 @@ private:
     static constexpr const char *DEFAULT_ABILITY_NAME = "MainAbility";
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
+    static constexpr const char *controlListFile = "/data/service/el2/public/av_session/controlList";
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";
