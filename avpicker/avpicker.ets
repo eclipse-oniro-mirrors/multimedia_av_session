@@ -427,6 +427,7 @@ export struct AVCastPicker {
             'isCustomPicker': isCustomPicker,
             'message': this.restartUECMessage,
             'currentPickerCount': this.pickerCountOnCreation,
+            'sessionType': this.sessionType,
           }
         })
         .onRemoteReady((proxy: UIExtensionProxy) => {
