@@ -191,7 +191,7 @@ void NapiSessionListener::OnRemoteDistributedSessionChange(
     SLOGI("Start handle remote distributed session changed event");
     std::vector<std::shared_ptr<AVSessionController>> sessionControllersRef;
     for (auto& object: sessionControllers) {
-        auto controllerObject = iface_cast<AVSessionControllerProxy>(object);
+        auto controllerObject = iface_cast<IAVSessionController>(object);
         sessionControllersRef.push_back(std::shared_ptr<AVSessionController>(controllerObject.GetRefPtr(),
                                                               [holder = controllerObject](const auto*) {}));
     }

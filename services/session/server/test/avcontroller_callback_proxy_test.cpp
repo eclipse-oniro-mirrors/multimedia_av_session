@@ -86,7 +86,7 @@ public:
     void SetUp();
     void TearDown();
 
-    OHOS::sptr<AVControllerCallbackProxy> aVControllerCallbackProxy;
+    OHOS::sptr<IAVControllerCallback> aVControllerCallbackProxy;
 };
 
 void AVControllerCallbackProxyTest::SetUpTestCase()
@@ -116,7 +116,7 @@ void AVControllerCallbackProxyTest::SetUp()
         SLOGI("failed to get service");
         return;
     }
-    aVControllerCallbackProxy = OHOS::iface_cast<AVControllerCallbackProxy>(object);
+    aVControllerCallbackProxy = OHOS::iface_cast<IAVControllerCallback>(object);
 }
 
 void AVControllerCallbackProxyTest::TearDown()

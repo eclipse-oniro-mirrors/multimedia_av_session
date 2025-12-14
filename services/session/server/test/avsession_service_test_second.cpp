@@ -1245,7 +1245,7 @@ static HWTEST_F(AVSessionServiceTestSecond, RemoveClientDeathObserver001, TestSi
     ASSERT_TRUE(mgr != nullptr);
     auto object = mgr->GetSystemAbility(OHOS::AVSESSION_SERVICE_ID);
     ASSERT_TRUE(object != nullptr);
-    OHOS::sptr<ClientDeathProxy> observer = OHOS::iface_cast<ClientDeathProxy>(object);
+    OHOS::sptr<IClientDeath> observer = OHOS::iface_cast<IClientDeath>(object);
     ASSERT_TRUE(observer != nullptr);
     auto func = []() -> void {};
     OHOS::sptr<ClientDeathRecipient> recipient = new ClientDeathRecipient(func);
@@ -1308,7 +1308,7 @@ static HWTEST_F(AVSessionServiceTestSecond, RegisterClientDeathObserver001, Test
     ASSERT_TRUE(mgr != nullptr);
     auto object = mgr->GetSystemAbility(OHOS::AVSESSION_SERVICE_ID);
     ASSERT_TRUE(object != nullptr);
-    OHOS::sptr<ClientDeathProxy> observer = OHOS::iface_cast<ClientDeathProxy>(object);
+    OHOS::sptr<IClientDeath> observer = OHOS::iface_cast<IClientDeath>(object);
     ASSERT_TRUE(observer != nullptr);
     int32_t ret = g_AVSessionService->RegisterClientDeathObserver(observer);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);

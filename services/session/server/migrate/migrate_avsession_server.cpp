@@ -183,7 +183,8 @@ void MigrateAVSessionServer::CreateController(const std::string &sessionId)
         SLOGW("CreateControllerInner fail");
         return;
     }
-    sptr<AVControllerItem> controller = iface_cast<AVControllerItem>(proxyObject);
+    auto controllerObj = iface_cast<IAVSessionController>(proxyObject);
+    sptr<AVControllerItem> controller = static_cast<AVControllerItem*>(controllerObj.GetRefPtr());
     if (controller == nullptr) {
         SLOGW("controller is null");
         return;

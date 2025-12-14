@@ -68,7 +68,7 @@ int32_t AVSessionStub::HandleRegisterCallbackInner(MessageParcel& data, MessageP
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32_t failed");
         return ERR_NONE;
     }
-    auto callback = iface_cast<AVSessionCallbackProxy>(remoteObject);
+    auto callback = iface_cast<IAVSessionCallback>(remoteObject);
     CHECK_AND_RETURN_RET_LOG(callback != nullptr, ERR_NONE, "callback is nullptr");
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(RegisterCallbackInner(callback)),
                              ERR_NONE, "write int32_t failed");

@@ -30,7 +30,7 @@
 namespace OHOS::AVSession {
 
 static std::shared_ptr<AVSessionService> g_AVSessionService;
-static sptr<AVSessionProxy> g_AVSessionProxy;
+static sptr<IAVSession> g_AVSessionProxy;
 
 class AVSessionProxyTest : public testing::Test {
 public:
@@ -50,7 +50,7 @@ void AVSessionProxyTest::SetUpTestCase()
     AppExecFwk::ElementName elementName(deviceId, bundleName, abilityName, moduleName);
     sptr<IRemoteObject> obj = g_AVSessionService->CreateSessionInner("test",
         AVSession::SESSION_TYPE_AUDIO, elementName);
-    g_AVSessionProxy = iface_cast<AVSessionProxy>(obj);
+    g_AVSessionProxy = iface_cast<IAVSession>(obj);
     g_AVSessionProxy->Activate();
 }
 

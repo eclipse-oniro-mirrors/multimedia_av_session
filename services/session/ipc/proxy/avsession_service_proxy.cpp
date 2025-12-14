@@ -35,7 +35,7 @@ int32_t AVSessionServiceProxy::GetSession(const AppExecFwk::ElementName& element
     sptr<IRemoteObject> object = nullptr;
     int ret = GetSessionInner(elementName, tag, object);
     CHECK_AND_RETURN_RET_LOG(object != nullptr, ret, "get remoteObjectSession fail");
-    auto sessionObj = iface_cast<AVSessionProxy>(object);
+    auto sessionObj = iface_cast<IAVSession>(object);
     CHECK_AND_RETURN_RET_LOG(sessionObj != nullptr, AVSESSION_ERROR, "sessionObj get nullptr");
     session = std::shared_ptr<AVSession>(sessionObj.GetRefPtr(), [holder = sessionObj](const auto*) {});
     return ret;
@@ -73,7 +73,7 @@ std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::strin
         SLOGE("object is nullptr");
         return nullptr;
     }
-    auto session = iface_cast<AVSessionProxy>(object);
+    auto session = iface_cast<IAVSession>(object);
     if (session == nullptr) {
         SLOGE("session is nullptr");
         return nullptr;
@@ -89,7 +89,7 @@ int32_t AVSessionServiceProxy::CreateSession(const std::string& tag, int32_t typ
     auto ret = AVSessionServiceProxy::CreateSessionInner(tag, type, elementName, object);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateSession failed");
 
-    auto sessionObj = iface_cast<AVSessionProxy>(object);
+    auto sessionObj = iface_cast<IAVSession>(object);
     CHECK_AND_RETURN_RET_LOG(sessionObj, AVSESSION_ERROR, "sessionObj is nullptr");
 
     session = std::shared_ptr<AVSession>(sessionObj.GetRefPtr(), [holder = sessionObj](const auto*) {});
@@ -394,7 +394,7 @@ int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
         ret, "CreateControllerInner failed");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
-    auto controllerObject = iface_cast<AVSessionControllerProxy>(object);
+    auto controllerObject = iface_cast<IAVSessionController>(object);
     CHECK_AND_RETURN_RET_LOG(controllerObject, AVSESSION_ERROR, "controllerObject is nullptr");
 
     controller = std::shared_ptr<AVSessionController>(controllerObject.GetRefPtr(),
@@ -434,7 +434,7 @@ int32_t AVSessionServiceProxy::GetAVCastController(const std::string& sessionId,
     CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "CreateControllerInner failed");
 
-    auto castControllerObject = iface_cast<AVCastControllerProxy>(object);
+    auto castControllerObject = iface_cast<IAVCastController>(object);
     CHECK_AND_RETURN_RET_LOG(castControllerObject, AVSESSION_ERROR, "castControllerObject is nullptr");
 
     castController = std::shared_ptr<AVCastController>(castControllerObject.GetRefPtr(),
@@ -806,7 +806,7 @@ int32_t AVSessionServiceProxy::GetDistributedSessionControllers(const Distribute
     CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
     CHECK_AND_RETURN_RET_LOG(ret != ERR_REMOTE_CONNECTION_NOT_EXIST, ret, "connect not exist");
     for (auto& object: objects) {
-        auto controllerObject = iface_cast<AVSessionControllerProxy>(object);
+        auto controllerObject = iface_cast<IAVSessionController>(object);
         CHECK_AND_RETURN_RET_LOG(controllerObject, AVSESSION_ERROR, "controllerObject is nullptr");
         sessionControllers.push_back(std::shared_ptr<AVSessionController>(controllerObject.GetRefPtr(),
             [holder = controllerObject](const auto*) {}));

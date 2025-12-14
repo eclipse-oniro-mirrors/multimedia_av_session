@@ -613,7 +613,7 @@ int32_t AVCastControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& c
 {
     SLOGI("call RegisterCallbackInner of cast controller proxy");
     std::lock_guard lockGuard(castControllerCallbackLock_);
-    callback_ = iface_cast<AVCastControllerCallbackProxy>(callback);
+    callback_ = iface_cast<IAVCastControllerCallback>(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
     return AVSESSION_SUCCESS;
 }

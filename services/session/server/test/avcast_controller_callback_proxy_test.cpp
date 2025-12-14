@@ -30,7 +30,7 @@ public:
     void SetUp();
     void TearDown();
     
-    sptr<AVCastControllerCallbackProxy> avCastControllerCallbackProxy_;
+    sptr<IAVCastControllerCallback> avCastControllerCallbackProxy_;
 };
 
 void AVCastControllerCallbackProxyTest::SetUpTestCase()
@@ -53,7 +53,7 @@ void AVCastControllerCallbackProxyTest::SetUp()
         SLOGI("failed to get service");
         return;
     }
-    avCastControllerCallbackProxy_ = iface_cast<AVCastControllerCallbackProxy>(object);
+    avCastControllerCallbackProxy_ = iface_cast<IAVCastControllerCallback>(object);
 }
 
 void AVCastControllerCallbackProxyTest::TearDown()

@@ -38,7 +38,7 @@ public:
     void SetUp();
     void TearDown();
 
-    OHOS::sptr<AVSessionCallbackProxy> aVSessionCallbackProxy;
+    OHOS::sptr<IAVSessionCallback> aVSessionCallbackProxy;
 };
 
 void AVSessionCallbackProxyTest::SetUpTestCase()
@@ -61,7 +61,7 @@ void AVSessionCallbackProxyTest::SetUp()
         SLOGI("failed to get service");
         return;
     }
-    aVSessionCallbackProxy = OHOS::iface_cast<AVSessionCallbackProxy>(object);
+    aVSessionCallbackProxy = OHOS::iface_cast<IAVSessionCallback>(object);
 }
 
 void AVSessionCallbackProxyTest::TearDown()
