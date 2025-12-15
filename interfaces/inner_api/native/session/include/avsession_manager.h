@@ -357,7 +357,7 @@ public:
      * @return Return whether the request for enabling the desktop lyrics feature was successful.
      * @since 23
     */
-    virtual int32_t IsDesktopLyricFeatureSupported(bool &isSupported) = 0;
+    virtual int32_t IsDesktopLyricSupported(bool &isSupported) = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_MANAGER_H

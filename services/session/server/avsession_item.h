@@ -30,6 +30,7 @@
 #include "avcast_control_command.h"
 #include "system_ability_definition.h"
 #include "collaboration_manager_utils.h"
+#include "avsession_item_extension.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include <condition_variable>
@@ -77,7 +78,8 @@ public:
 };
 #endif
 public:
-    explicit AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId = DEFAULT_USER_ID);
+    explicit AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId = DEFAULT_USER_ID,
+        AVSessionItemExtension *extension = nullptr);
 
     ~AVSessionItem() override;
 
@@ -178,7 +180,9 @@ public:
 
     int32_t GetDesktopLyricState(DesktopLyricState &state) override;
 
-    void SetLaunchDesktopLyricCb(std::function<int32_t(std::string)> cb);
+    int32_t SetDesktopLyricVisibleInner(bool isVisible, const std::string &handler);
+
+    int32_t SetDesktopLyricStateInner(const DesktopLyricState &state, const std::string &handler);
 
     AVCallState GetAVCallState();
 
@@ -556,7 +560,7 @@ private:
     bool isDesktopLyricVisible_ = false;
     std::mutex desktopLyricStateMutex_;
     DesktopLyricState desktopLyricState_ = {};
-    std::function<int32_t(std::string)> launchDesktopLyricCb_;
+    AVSessionItemExtension *extension_ = nullptr;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;

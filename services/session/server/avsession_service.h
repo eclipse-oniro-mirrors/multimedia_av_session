@@ -141,7 +141,8 @@ private:
     AVSessionService *servicePtr_ = nullptr;
 };
 
-class AVSessionService : public SystemAbility, public AVSessionServiceStub, public IAVSessionServiceListener {
+class AVSessionService : public SystemAbility, public AVSessionServiceStub, public IAVSessionServiceListener,
+    public AVSessionItemExtension {
     DECLARE_SYSTEM_ABILITY(AVSessionService);
 
 public:
@@ -221,7 +222,7 @@ public:
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
-    int32_t IsDesktopLyricFeatureSupported(bool &isSupported) override;
+    int32_t IsDesktopLyricSupported(bool &isSupported) override;
 
     void OnClientDied(pid_t pid, pid_t uid);
 
@@ -327,11 +328,14 @@ public:
 
     bool CheckIfOtherAudioPlaying();
 
-    int32_t StartDesktopLyricAbility(const std::string &sessionId);
+    int32_t StartDesktopLyricAbility(const std::string &sessionId, const std::string &handler) override;
 
     int32_t StopDesktopLyricAbility();
 
     void SetDesktopLyricAbilityState(int32_t state);
+
+    int32_t UploadDesktopLyricOperationInfo(const std::string &sessionId,
+        const std::string &handler, uint32_t sceneCode) override;
 
 private:
     void NotifyProcessStatus(bool isStart);

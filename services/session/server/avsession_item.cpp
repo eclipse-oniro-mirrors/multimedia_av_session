@@ -76,14 +76,21 @@ const std::map<int32_t, int32_t> g_cmdToOffsetMap = {
     {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE, 0}
 };
 
+enum SendCodeEnum : uint32_t {
+    OPEN = 1,
+    CLOSE = 2,
+    LOCK = 3,
+    UNLOCK = 4,
+};
+
 constexpr int32_t PROGRESS_ADJUST_VALUE = 5;
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t CONTROL_COLD_START = 2;
 #endif
 
-AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId)
-    : descriptor_(descriptor), userId_(userId)
+AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId, AVSessionItemExtension *extension)
+    : descriptor_(descriptor), userId_(userId), extension_(extension)
 {
     SLOGI("constructor session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
@@ -876,22 +883,7 @@ int32_t AVSessionItem::IsDesktopLyricEnabled(bool &isEnabled)
 
 int32_t AVSessionItem::SetDesktopLyricVisible(bool isVisible)
 {
-    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
-        "The desktop lyrics feature is not supported.");
-    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
-        "The desktop lyrics feature of this application is not enabled.");
-    SLOGI("set desktop lyrics visible: isVisible=%{public}d", isVisible);
-    std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
-    if (isVisible) {
-        if (!(launchDesktopLyricCb_ && launchDesktopLyricCb_(GetSessionId()) == AVSESSION_SUCCESS)) {
-            SLOGE("callback is null or launch media control failed");
-            return AVSESSION_ERROR;
-        }
-    }
-
-    isDesktopLyricVisible_ = isVisible;
-    HandleDesktopLyricVisibilityChanged(isVisible);
-    return AVSESSION_SUCCESS;
+    return SetDesktopLyricVisibleInner(isVisible, GetBundleName());
 }
 
 int32_t AVSessionItem::IsDesktopLyricVisible(bool &isVisible)
@@ -908,15 +900,7 @@ int32_t AVSessionItem::IsDesktopLyricVisible(bool &isVisible)
 
 int32_t AVSessionItem::SetDesktopLyricState(DesktopLyricState state)
 {
-    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
-        "The desktop lyrics feature is not supported.");
-    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
-        "The desktop lyrics feature of this application is not enabled.");
-        SLOGI("set desktop lyrics state: isLocked=%{public}d", state.isLocked_);
-    std::lock_guard<std::mutex> lock(desktopLyricStateMutex_);
-    desktopLyricState_ = state;
-    HandleDesktopLyricStateChanged(state);
-    return AVSESSION_SUCCESS;
+    return SetDesktopLyricStateInner(state, GetBundleName());
 }
 
 int32_t AVSessionItem::GetDesktopLyricState(DesktopLyricState &state)
@@ -931,10 +915,45 @@ int32_t AVSessionItem::GetDesktopLyricState(DesktopLyricState &state)
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionItem::SetLaunchDesktopLyricCb(std::function<int32_t(std::string)> cb)
+int32_t AVSessionItem::SetDesktopLyricVisibleInner(bool isVisible, const std::string &handler)
 {
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+    CHECK_AND_RETURN_RET_LOG(extension_ != nullptr, AVSESSION_ERROR, "not support extension ability.");
+
+    SLOGI("set desktop lyrics visible: isVisible=%{public}d", isVisible);
     std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
-    launchDesktopLyricCb_ = std::move(cb);
+    if (isVisible) {
+        if (extension_->StartDesktopLyricAbility(GetSessionId(), handler) != AVSESSION_SUCCESS) {
+            SLOGE("launch media control failed");
+            return AVSESSION_ERROR;
+        }
+    }
+
+    isDesktopLyricVisible_ = isVisible;
+    HandleDesktopLyricVisibilityChanged(isVisible);
+    extension_->UploadDesktopLyricOperationInfo(GetSessionId(), handler,
+        isVisible ? SendCodeEnum::OPEN : SendCodeEnum::CLOSE);
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::SetDesktopLyricStateInner(const DesktopLyricState &state, const std::string &handler)
+{
+    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        "The desktop lyrics feature is not supported.");
+    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        "The desktop lyrics feature of this application is not enabled.");
+    CHECK_AND_RETURN_RET_LOG(extension_ != nullptr, AVSESSION_ERROR, "not support extension ability.");
+
+    SLOGI("set desktop lyrics state: isLocked=%{public}d", state.isLocked_);
+    std::lock_guard<std::mutex> lock(desktopLyricStateMutex_);
+    desktopLyricState_ = state;
+    HandleDesktopLyricStateChanged(state);
+    extension_->UploadDesktopLyricOperationInfo(GetSessionId(), handler,
+        state.isLocked_ ? SendCodeEnum::LOCK : SendCodeEnum::UNLOCK);
+    return AVSESSION_SUCCESS;
 }
 
 void AVSessionItem::HandleDesktopLyricVisibilityChanged(bool isVisible)

@@ -56,7 +56,7 @@ private:
     int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStopCast(MessageParcel& data, MessageParcel& reply);
     int32_t HandleClose(MessageParcel& data, MessageParcel& reply);
-    int32_t HandleIsDesktopLyricFeatureSupported(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsDesktopLyricSupported(MessageParcel &data, MessageParcel &reply);
     static bool CheckInterfaceToken(MessageParcel& data);
     int32_t GetAVQueueInfosImgLength(std::vector<AVQueueInfo>& avQueueInfos);
     void MarshallingAVQueueInfos(MessageParcel &reply, const std::vector<AVQueueInfo>& avQueueInfos);
@@ -130,7 +130,7 @@ private:
             return HandleRegisterAncoMediaSessionListener(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_IS_DESKTOP_LYRIC_FEATURE_SUPPORTED),
             [this](MessageParcel &data, MessageParcel &reply) {
-            return HandleIsDesktopLyricFeatureSupported(data, reply); }},
+            return HandleIsDesktopLyricSupported(data, reply); }},
     };
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION),
@@ -190,7 +190,7 @@ private:
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_ANCO_MEDIA_SESSION_LISTENER),
             "HandleRegisterAncoMediaSessionListener"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_IS_DESKTOP_LYRIC_FEATURE_SUPPORTED),
-            "HandleIsDesktopLyricFeatureSupported"},
+            "HandleIsDesktopLyricSupported"},
     };
 
     static constexpr int32_t RECEIVE_DEVICE_NUM_MAX = 10;

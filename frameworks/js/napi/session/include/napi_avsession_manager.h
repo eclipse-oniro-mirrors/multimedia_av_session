@@ -54,7 +54,7 @@ private:
     static napi_value StopDeviceLogging(napi_env env, napi_callback_info info);
     static napi_value StartCast(napi_env env, napi_callback_info info);
     static napi_value StopCast(napi_env env, napi_callback_info info);
-    static napi_value IsDesktopLyricFeatureSupported(napi_env env, napi_callback_info info);
+    static napi_value IsDesktopLyricSupported(napi_env env, napi_callback_info info);
 
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);

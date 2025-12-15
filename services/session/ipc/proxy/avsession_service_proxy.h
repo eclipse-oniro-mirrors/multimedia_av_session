@@ -127,7 +127,7 @@ public:
     int32_t GetSessionInner(const AppExecFwk::ElementName& elementName,
         std::string& tag, sptr<IRemoteObject>& session) override;
 
-    int32_t IsDesktopLyricFeatureSupported(bool &isSupported) override;
+    int32_t IsDesktopLyricSupported(bool &isSupported) override;
 
 private:
     void UnMarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos);

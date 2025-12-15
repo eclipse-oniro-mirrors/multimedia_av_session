@@ -26,6 +26,7 @@
 #include "avsession_sysevent.h"
 #include "want_params.h"
 #include "string_wrapper.h"
+#include "bundle_status_adapter.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -674,7 +675,9 @@ int32_t AVControllerItem::SetDesktopLyricVisible(bool isVisible)
 {
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
-    return session_->SetDesktopLyricVisible(isVisible);
+    std::string callingBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
+    SLOGI("controller call");
+    return session_->SetDesktopLyricVisibleInner(isVisible, callingBundleName);
 }
 
 int32_t AVControllerItem::IsDesktopLyricVisible(bool &isVisible)
@@ -688,7 +691,9 @@ int32_t AVControllerItem::SetDesktopLyricState(DesktopLyricState state)
 {
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
-    return session_->SetDesktopLyricState(state);
+    std::string callingBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
+    SLOGI("controller call");
+    return session_->SetDesktopLyricStateInner(state, callingBundleName);
 }
 
 int32_t AVControllerItem::GetDesktopLyricState(DesktopLyricState &state)

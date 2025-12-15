@@ -59,6 +59,7 @@
 #include "notification_request.h"
 #include "notification_constant.h"
 #include "ability_connect_helper.h"
+#include "extension_connect_helper.h"
 #include "if_system_ability_manager.h"
 #include "parameter.h"
 #include "parameters.h"
@@ -109,6 +110,7 @@ static const std::set<std::string> DESKTOP_LYRICS_SUPPORTED_DEVICES = {
     PAD_DEVICE_TYPE,
 };
 enum DESKTOP_LYRICS_ABILITY_STATE {
+    DESKTOP_LYRICS_ABILITY_DEFAULT = 0,
     DESKTOP_LYRICS_ABILITY_CONNECTING = 1,
     DESKTOP_LYRICS_ABILITY_CONNECTED = 2,
     DESKTOP_LYRICS_ABILITY_DISCONNECTING = 3,
@@ -1640,7 +1642,7 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     descriptor.elementName_ = elementName;
     descriptor.isThirdPartyApp_ = thirdPartyApp;
 
-    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor, descriptor.userId_);
+    sptr<AVSessionItem> result = new(std::nothrow) AVSessionItem(descriptor, descriptor.userId_, this);
     if (result == nullptr) {
         return nullptr;
     }
@@ -1648,11 +1650,8 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     result->SetPid(GetCallingPid());
     result->SetUid(GetCallingUid());
     bool isSupported = false;
-    IsDesktopLyricFeatureSupported(isSupported);
+    IsDesktopLyricSupported(isSupported);
     result->SetDesktopLyricFeatureSupported(isSupported);
-    result->SetLaunchDesktopLyricCb([this](std::string sessionId) -> int32_t {
-        return StartDesktopLyricAbility(sessionId);
-    });
     ServiceCallback(result);
 
     OutputDeviceInfo outputDeviceInfo;
@@ -3244,7 +3243,7 @@ int32_t AVSessionService::RegisterClientDeathObserver(const sptr<IClientDeath>& 
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::IsDesktopLyricFeatureSupported(bool &isSupported)
+int32_t AVSessionService::IsDesktopLyricSupported(bool &isSupported)
 {
     isSupported = false;
     const char *deviceType = GetDeviceType();
@@ -4693,30 +4692,38 @@ std::function<bool(int32_t, int32_t)> AVSessionService::GetAllowedPlaybackCallba
     };
 }
 
-int32_t AVSessionService::StartDesktopLyricAbility(const std::string &sessionId)
+int32_t AVSessionService::StartDesktopLyricAbility(const std::string &sessionId, const std::string &handler)
 {
-    std::lock_guard<std::mutex> lock(desktopLyricAbilityStateMutex_);
+    std::unique_lock<std::mutex> lock(desktopLyricAbilityStateMutex_);
     CHECK_AND_RETURN_RET_LOG(desktopLyricAbilityState_ != DESKTOP_LYRICS_ABILITY_CONNECTING &&
         desktopLyricAbilityState_ != DESKTOP_LYRICS_ABILITY_CONNECTED, AVSESSION_SUCCESS,
         "desktop lyric ability is already started");
-    int32_t userId = GetUsersManager().GetCurrentUserId();
-    int32_t result = ExtensionConnectHelper::GetInstance().StartDesktopLyricAbility(sessionId, userId,
-        [this](int32_t state) { SetDesktopLyricAbilityState(state); });
-    CHECK_AND_RETURN_RET_LOG(result == AVSESSION_SUCCESS, result, "StartDesktopLyricAbility failed");
-    SLOGI("Start enabling the desktop lyrics feature.");
+    bool shouldBeRecreated = desktopLyricAbilityState_ == DESKTOP_LYRICS_ABILITY_DISCONNECTED;
     desktopLyricAbilityState_ = DESKTOP_LYRICS_ABILITY_CONNECTING;
+    lock.unlock();
+
+    SLOGI("Start enabling the desktop lyrics feature.");
+    int32_t userId = GetUsersManager().GetCurrentUserId();
+    int32_t result = ExtensionConnectHelper::GetInstance().StartDesktopLyricAbility(sessionId, handler, userId,
+        [this](int32_t state) { SetDesktopLyricAbilityState(state); }, shouldBeRecreated);
+    if (result != AVSESSION_SUCCESS) {
+        SetDesktopLyricAbilityState(DESKTOP_LYRICS_ABILITY_DEFAULT);
+        SLOGE("StartDesktopLyricAbility failed.");
+    }
     return result;
 }
 
 int32_t AVSessionService::StopDesktopLyricAbility()
 {
-    std::lock_guard<std::mutex> lock(desktopLyricAbilityStateMutex_);
+    std::unique_lock<std::mutex> lock(desktopLyricAbilityStateMutex_);
     CHECK_AND_RETURN_RET_LOG(desktopLyricAbilityState_ != DESKTOP_LYRICS_ABILITY_DISCONNECTING &&
         desktopLyricAbilityState_ != DESKTOP_LYRICS_ABILITY_DISCONNECTED, AVSESSION_SUCCESS,
         "desktop lyric ability is already stopped");
-    ExtensionConnectHelper::GetInstance().StopDesktopLyricAbility();
-    SLOGI("Disable the desktop lyrics feature.");
     desktopLyricAbilityState_ = DESKTOP_LYRICS_ABILITY_DISCONNECTING;
+    lock.unlock();
+
+    SLOGI("Disable the desktop lyrics feature.");
+    ExtensionConnectHelper::GetInstance().StopDesktopLyricAbility();
     return AVSESSION_SUCCESS;
 }
 
@@ -4727,6 +4734,17 @@ void AVSessionService::SetDesktopLyricAbilityState(int32_t state)
         "state value invalid");
     SLOGI("set desktop lyric ability state:%{public}d", state);
     desktopLyricAbilityState_ = state;
+}
+
+int32_t AVSessionService::UploadDesktopLyricOperationInfo(const std::string &sessionId,
+    const std::string &handler, uint32_t sceneCode)
+{
+    std::unique_lock<std::mutex> lock(desktopLyricAbilityStateMutex_);
+    CHECK_AND_RETURN_RET_LOG(desktopLyricAbilityState_ == DESKTOP_LYRICS_ABILITY_CONNECTED, AVSESSION_ERROR,
+        "desktop lyric ability is not connected");
+    lock.unlock();
+
+    return ExtensionConnectHelper::GetInstance().UploadDesktopLyricOperationInfo(sessionId, handler, sceneCode);
 }
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL

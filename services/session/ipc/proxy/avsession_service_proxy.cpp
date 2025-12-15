@@ -850,7 +850,7 @@ int32_t AVSessionServiceProxy::GetDistributedSessionControllersInner(const Distr
     return ret;
 }
 
-int32_t AVSessionServiceProxy::IsDesktopLyricFeatureSupported(bool &isSupported)
+int32_t AVSessionServiceProxy::IsDesktopLyricSupported(bool &isSupported)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
