@@ -99,6 +99,8 @@ private:
     void GetMediaCapabilitiesOfAudio(cJSON* audioValue);
     AVQueueItem RefreshCurrentItemDuration();
     void buildCastInfo(std::shared_ptr<AVMediaDescription>& mediaDescription, CastEngine::MediaInfo& mediaInfo);
+    void buildCastExtraInfo(std::shared_ptr<AVMediaDescription>& mediaDescription,
+        CastEngine::MediaInfo& mediaInfo);
     void CheckIfCancelCastCapsule();
 
     std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();

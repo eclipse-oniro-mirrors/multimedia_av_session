@@ -314,11 +314,21 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
         mediaInfo.mediaUrl = "/file";
         mediaInfo.dataSrc = castDataSrc_;
     }
+    buildCastExtraInfo(mediaDescription, mediaInfo);
+}
+
+void HwCastStreamPlayer::buildCastExtraInfo(std::shared_ptr<AVMediaDescription>& mediaDescription,
+    CastEngine::MediaInfo& mediaInfo)
+{
     if (mediaDescription->GetPcmSrc() && mediaDescription->GetCastInfo() != nullptr) {
         uid_t appUid = mediaDescription->GetCastInfo()->GetAppUid();
         SLOGI("buildCastInfo AUDIO_PCM uid %{public}d", appUid);
         mediaInfo.appUid = appUid;
         mediaInfo.mediaType = "AUDIO_PCM";
+    }
+    if (mediaDescription->GetIcon() != nullptr) {
+        SLOGI("buildCastExtraInfo has albumPixelMap");
+        mediaInfo.albumPixelMap = AVSessionPixelMapAdapter::ConvertFromInner(mediaDescription->GetIcon(), false);
     }
 }
 
@@ -791,6 +801,10 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
         && mediaInfo.mediaId == originMediaDescription->GetMediaId()) {
         SLOGI("cacheMedia:%{public}s", originMediaDescription->GetMediaId().c_str());
         mediaDescription->SetIcon(originMediaDescription->GetIcon());
+    }
+    if (mediaInfo.albumPixelMap != nullptr) {
+        SLOGI("OnMediaItemChanged has albumPixelMap");
+        mediaDescription->SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(mediaInfo.albumPixelMap));
     }
     AVQueueItem queueItem;
     queueItem.SetDescription(mediaDescription);
