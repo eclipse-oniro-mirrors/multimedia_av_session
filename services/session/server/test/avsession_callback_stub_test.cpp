@@ -206,6 +206,9 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest003, TestSize.Level0)
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    data.WriteParcelable(&cmd);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
@@ -263,6 +266,9 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest006, TestSize.Level0)
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+    data.WriteParcelable(&cmd);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
@@ -285,6 +291,9 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest007, TestSize.Level0)
     OHOS::MessageOption option;
 
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+    data.WriteParcelable(&cmd);
     int ret = avSessionCallbackStub.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("OnRemoteRequest007 end!");
