@@ -1064,6 +1064,21 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_EnableDesktopLyric_001, TestSize.Level
 }
 
 /**
+* @tc.name: AVSessionItem_EnableDesktopLyric_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_EnableDesktopLyric_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_EnableDesktopLyric_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    int32_t res = g_AVSessionItem->AVSession::EnableDesktopLyric(true);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_EnableDesktopLyric_002 End");
+}
+
+/**
 * @tc.name: AVSessionItem_IsDesktopLyricEnabled_001
 * @tc.desc: get desktop lyric enabled state
 * @tc.type: FUNC
@@ -1132,6 +1147,21 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricVisible_002, TestSize.L
 }
 
 /**
+* @tc.name: AVSessionItem_SetDesktopLyricVisible_003
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricVisible_003, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetDesktopLyricVisible_003 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    int32_t res = g_AVSessionItem->AVSession::SetDesktopLyricVisible(false);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_SetDesktopLyricVisible_003 End");
+}
+
+/**
 * @tc.name: AVSessionItem_IsDesktopLyricVisible_001
 * @tc.desc: get desktop lyric visible
 * @tc.type: FUNC
@@ -1147,6 +1177,22 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_IsDesktopLyricVisible_001, TestSize.Le
     int32_t res = g_AVSessionItem->IsDesktopLyricVisible(isVisible);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
     SLOGI("AVSessionItem_IsDesktopLyricVisible_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_IsDesktopLyricVisible_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_IsDesktopLyricVisible_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_IsDesktopLyricVisible_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    bool isVisible = false;
+    int32_t res = g_AVSessionItem->AVSession::IsDesktopLyricVisible(isVisible);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_IsDesktopLyricVisible_002 End");
 }
 
 /**
@@ -1174,6 +1220,22 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricState_001, TestSize.Lev
 }
 
 /**
+* @tc.name: AVSessionItem_SetDesktopLyricState_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricState_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetDesktopLyricState_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    DesktopLyricState state = {};
+    int32_t res = g_AVSessionItem->AVSession::SetDesktopLyricState(state);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_SetDesktopLyricState_002 End");
+}
+
+/**
 * @tc.name: AVSessionItem_GetDesktopLyricState_001
 * @tc.desc: get desktop lyric state
 * @tc.type: FUNC
@@ -1189,6 +1251,22 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetDesktopLyricState_001, TestSize.Lev
     int32_t res = g_AVSessionItem->GetDesktopLyricState(state);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
     SLOGI("AVSessionItem_GetDesktopLyricState_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_GetDesktopLyricState_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetDesktopLyricState_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_GetDesktopLyricState_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    DesktopLyricState state = {};
+    int32_t res = g_AVSessionItem->AVSession::GetDesktopLyricState(state);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_GetDesktopLyricState_002 End");
 }
 } //AVSession
 } //OHOS
