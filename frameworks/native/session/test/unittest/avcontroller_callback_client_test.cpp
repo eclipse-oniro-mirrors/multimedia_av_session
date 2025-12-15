@@ -308,6 +308,8 @@ HWTEST_F(AVControllerCallbackClientTest, OnCustomData001, TestSize.Level0)
 HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricVisibilityChanged001, TestSize.Level0)
 {
     std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    ASSERT_NE(ptr, nullptr);
+    ptr->OnDesktopLyricVisibilityChanged(true);
     std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
         std::make_shared<AVControllerCallbackClient>(ptr);
     ASSERT_NE(aVControllerCallbackClient, nullptr);
@@ -324,10 +326,12 @@ HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricVisibilityChanged001, Tes
 HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricStateChanged001, TestSize.Level0)
 {
     std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    ASSERT_NE(ptr, nullptr);
+    DesktopLyricState state = {};
+    ptr->OnDesktopLyricStateChanged(state);
     std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
         std::make_shared<AVControllerCallbackClient>(ptr);
     ASSERT_NE(aVControllerCallbackClient, nullptr);
-    DesktopLyricState state = {};
     ErrCode ret = aVControllerCallbackClient->OnDesktopLyricStateChanged(state);
     EXPECT_EQ(ret, 0);
 }
@@ -341,6 +345,8 @@ HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricStateChanged001, TestSize
 HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricEnabled001, TestSize.Level0)
 {
     std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    ASSERT_NE(ptr, nullptr);
+    ptr->OnDesktopLyricEnabled(false);
     std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
         std::make_shared<AVControllerCallbackClient>(ptr);
     ASSERT_NE(aVControllerCallbackClient, nullptr);

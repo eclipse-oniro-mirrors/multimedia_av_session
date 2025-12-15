@@ -505,6 +505,8 @@ HWTEST_F(AVSessionCallbackClientTest, OnDesktopLyricVisibilityChanged001, TestSi
 {
     LOG_SetCallback(MyLogCallback);
     std::shared_ptr<AVSessionCallback> sessionCallback = std::make_shared<AVSessionCallbackImpl>();
+    ASSERT_NE(sessionCallback, nullptr);
+    sessionCallback->OnDesktopLyricVisibilityChanged(true);
     std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
         std::make_shared<AVSessionCallbackClient>(sessionCallback);
     ASSERT_NE(sessionCallbackClient, nullptr);
@@ -522,10 +524,12 @@ HWTEST_F(AVSessionCallbackClientTest, OnDesktopLyricStateChanged001, TestSize.Le
 {
     LOG_SetCallback(MyLogCallback);
     std::shared_ptr<AVSessionCallback> sessionCallback = std::make_shared<AVSessionCallbackImpl>();
+    ASSERT_NE(sessionCallback, nullptr);
+    DesktopLyricState state = {};
+    sessionCallback->OnDesktopLyricStateChanged(state);
     std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
         std::make_shared<AVSessionCallbackClient>(sessionCallback);
     ASSERT_NE(sessionCallbackClient, nullptr);
-    DesktopLyricState state = {};
     ErrCode ret = sessionCallbackClient->OnDesktopLyricStateChanged(state);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }

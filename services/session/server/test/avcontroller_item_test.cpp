@@ -383,6 +383,21 @@ HWTEST_F(AVControllerItemTest, IsDesktopLyricEnabled_001, TestSize.Level1)
 }
 
 /**
+* @tc.name: IsDesktopLyricEnabled_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVControllerItemTest, IsDesktopLyricEnabled_002, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    bool isEnable = false;
+    int32_t res = controller->AVSessionController::IsDesktopLyricEnabled(isEnable);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: SetDesktopLyricVisible_001
 * @tc.desc: set desktop lyric visible
 * @tc.type: FUNC
@@ -397,6 +412,21 @@ HWTEST_F(AVControllerItemTest, SetDesktopLyricVisible_001, TestSize.Level1)
     bool isVisible = false;
     int32_t res = controller->SetDesktopLyricVisible(isVisible);
     EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
+}
+
+/**
+* @tc.name: SetDesktopLyricVisible_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVControllerItemTest, SetDesktopLyricVisible_002, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    bool isVisible = false;
+    int32_t res = controller->AVSessionController::SetDesktopLyricVisible(isVisible);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
 }
 
 /**
@@ -417,6 +447,21 @@ HWTEST_F(AVControllerItemTest, IsDesktopLyricVisible_001, TestSize.Level1)
 }
 
 /**
+* @tc.name: IsDesktopLyricVisible_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVControllerItemTest, IsDesktopLyricVisible_002, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    bool isVisible = false;
+    int32_t res = controller->AVSessionController::IsDesktopLyricVisible(isVisible);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: SetDesktopLyricState_001
 * @tc.desc: set desktop lyric state
 * @tc.type: FUNC
@@ -434,6 +479,21 @@ HWTEST_F(AVControllerItemTest, SetDesktopLyricState_001, TestSize.Level1)
 }
 
 /**
+* @tc.name: SetDesktopLyricState_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVControllerItemTest, SetDesktopLyricState_002, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    DesktopLyricState state = {};
+    int32_t res = controller->AVSessionController::SetDesktopLyricState(state);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+}
+
+/**
 * @tc.name: GetDesktopLyricState_001
 * @tc.desc: get desktop lyric state
 * @tc.type: FUNC
@@ -448,6 +508,21 @@ HWTEST_F(AVControllerItemTest, GetDesktopLyricState_001, TestSize.Level1)
     DesktopLyricState state = {};
     int32_t res = controller->GetDesktopLyricState(state);
     EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
+}
+
+/**
+* @tc.name: GetDesktopLyricState_002
+* @tc.desc: covering the base class branch
+* @tc.type: FUNC
+* @tc.require: #2011
+*/
+HWTEST_F(AVControllerItemTest, GetDesktopLyricState_002, TestSize.Level1)
+{
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    DesktopLyricState state = {};
+    int32_t res = controller->AVSessionController::GetDesktopLyricState(state);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
 }
 
 /**
