@@ -19,7 +19,9 @@
 #include <regex>
 #include <dlfcn.h>
 #include <thread>
+#include <cerrno>
 #include <chrono>
+#include <climits>
 #include <filesystem>
 #include <openssl/crypto.h>
 
@@ -1677,7 +1679,19 @@ void AVSessionService::RefreshUserFromAnco(const std::string& tag, const AppExec
     bool isBroker = (tag == "ancoMediaSession") && (GetCallingUid() == audioBrokerUid);
     bool isAnco = (tag == "anco_audio") && (GetCallingUid() == ancoUid);
     CHECK_AND_RETURN_LOG((isBroker || isAnco) && !elementName.GetDeviceID().empty(), "RefreshUserFromAnco return");
-    int32_t ancoUserId = std::stoi(elementName.GetDeviceID());
+    std::string deviceIdStr = elementName.GetDeviceID();
+    char* endptr{};
+    errno = 0;
+    long deviceIdLong = std::strtol(deviceIdStr.c_str(), &endptr, 10);
+    CHECK_AND_RETURN_LOG(endptr != deviceIdStr.c_str(),
+        "RefreshUserFromAnco returns, DeviceID is not valid char number.");
+    CHECK_AND_RETURN_LOG(*endptr == '\0',
+        "RefreshUserFromAnco returns, DeviceID contains non-number char.");
+    CHECK_AND_RETURN_LOG(!(errno == ERANGE && (deviceIdLong == LONG_MIN || deviceIdLong == LONG_MAX)),
+        "RefreshUserFromAnco returns, DeviceID is not in valid long type number range.");
+    CHECK_AND_RETURN_LOG(deviceIdLong >= INT32_MIN && deviceIdLong <= INT32_MAX,
+        "RefreshUserFromAnco returns, DeviceID is not in valid int32 type number range.");
+    int32_t ancoUserId = static_cast<int32_t>(deviceIdLong);
     CHECK_AND_RETURN_LOG(GetUsersManager().GetCurrentUserId() != ancoUserId, "RefreshUserFromAnco same user, return");
     SLOGI("RefreshUserFromAnco to: %{public}d", ancoUserId);
     HandleUserEvent(AVSessionUsersManager::accountEventSwitched, ancoUserId);
