@@ -430,14 +430,6 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
 
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    bool isPcm = (outputDeviceInfo.deviceInfos_[0].supportedProtocols_ & ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0;
-    if (isPcm) {
-        pcmCastSession_ = std::make_shared<PcmCastSession>();
-        return pcmCastSession_->StartCast(outputDeviceInfo, castServiceNameStatePair_);
-    }
-#endif //CASTPLUS_CAST_ENGINE_ENABLE
-
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
         AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
@@ -460,13 +452,6 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
 
 int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 {
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (pcmCastSession_ != nullptr) {
-        pcmCastSession_->StopCast();
-        pcmCastSession_ = nullptr;
-    }
-#endif //CASTPLUS_CAST_ENGINE_ENABLE
-
     sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionToken.sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "StopCast: session is not exist");
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
