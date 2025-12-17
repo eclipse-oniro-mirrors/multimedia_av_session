@@ -1465,11 +1465,13 @@ int32_t AVSessionItem::ProcessInputRedistributeEvent(const int32_t keyCode)
         CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
         AVControlCommand command;
         command.SetCommand(AVControlCommand::SESSION_CMD_REWIND);
+        command.SetRewindTime(PROGRESS_ADJUST_VALUE);
         callback_->OnRewind(PROGRESS_ADJUST_VALUE, command);
     } else if (keyCode == MMI::KeyEvent::KEYCODE_DPAD_RIGHT) {
         CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback_ is nullptr");
         AVControlCommand command;
         command.SetCommand(AVControlCommand::SESSION_CMD_FAST_FORWARD);
+        command.SetForwardTime(PROGRESS_ADJUST_VALUE);
         callback_->OnFastForward(PROGRESS_ADJUST_VALUE, command);
     } else {
         return AVSESSION_ERROR;
