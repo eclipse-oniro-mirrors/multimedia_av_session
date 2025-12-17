@@ -1110,6 +1110,8 @@ napi_status NapiAVCastController::OnPlaybackStateChange(napi_env env, NapiAVCast
 napi_status NapiAVCastController::OnMediaItemChange(napi_env env, NapiAVCastController* napiCastController,
     napi_value param, napi_value callback)
 {
+    CHECK_AND_RETURN_RET_LOG(napiCastController->callback_ != nullptr, napi_generic_failure,
+        "NapiAVCastControllerCallback object is nullptr");
     return napiCastController->callback_->AddCallback(env,
         NapiAVCastControllerCallback::EVENT_CAST_MEDIA_ITEM_CHANGE, callback);
 }
