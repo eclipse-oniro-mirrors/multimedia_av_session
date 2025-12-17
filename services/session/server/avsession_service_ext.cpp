@@ -923,7 +923,6 @@ int32_t AVSessionService::GetDistributedSessionControllersInner(const Distribute
 
 void AVSessionService::NotifyRemoteBundleChange(const std::string bundleName)
 {
-    std::lock_guard lockGuard(migrateProxyMapLock_);
     if (migrateAVSessionProxyMap_.empty()) {
         SLOGE("not in migrate proxy scene, return");
         return;

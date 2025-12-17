@@ -229,14 +229,13 @@ void AVSessionService::OnDump()
 
 int32_t AVSessionService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
 {
-    SLOGI("OnIdle SA, idle reason %{public}d, %{public}s, %{public}s",
+    SLOGI("OnIdle SA, idle reason %{public}d, %{public}s, %{public}s.",
         idleReason.GetId(), idleReason.GetName().c_str(), idleReason.GetValue().c_str());
     uint32_t ret = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
     if (ret != 0) {
         SLOGI("IPC is not used for a long time, there are %{public}d sessions.", ret);
         return -1;
     }
-    std::lock_guard lockGuard(migrateProxyMapLock_);
     for (const auto& pair : migrateAVSessionProxyMap_) {
         std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
             std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
