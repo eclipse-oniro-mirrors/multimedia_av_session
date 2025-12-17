@@ -1186,7 +1186,7 @@ static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest039_2, TestSize.Leve
 static HWTEST_F(AVSessionControllerStubTest, OnRemoteRequest040, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest040 begin!");
-    uint32_t code = 25;
+    uint32_t code = 100;
     AVSessionControllerStubDemo avSessionControllerStub;
     avSessionControllerStub.isSuccess = false;
     OHOS::MessageParcel data;
