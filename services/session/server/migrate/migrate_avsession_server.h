@@ -197,7 +197,7 @@ private:
     std::string devicesListStr_ = "";
     std::string devicePreferStr_ = "";
 
-    void CheckPostClean();
+    void CheckPostClean(bool resetOnlySessionInfo = false);
     bool CheckPostSessionInfo(bool sessionState);
     bool CheckPostMetaData(const AVMetaData& data);
     bool CheckPostMediaImage(std::vector<uint8_t>& imgBuffer);

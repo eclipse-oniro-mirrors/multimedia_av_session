@@ -46,6 +46,7 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
         SLOGE("LocalFrontSessionArrive with sessionId EMPTY");
         return;
     }
+    lastSessionId_ != sessionId ? CheckPostClean(true) : (void)0;
     lastSessionId_ = sessionId;
     SLOGI("LocalFrontSessionArrive in:%{public}s.", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     MigratePostTask(
@@ -124,7 +125,7 @@ void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
         "LocalFrontSessionChange");
 }
 
-void MigrateAVSessionServer::CheckPostClean()
+void MigrateAVSessionServer::CheckPostClean(bool resetOnlySessionInfo)
 {
     std::lock_guard lockGuard(cacheJsonLock_);
 
@@ -132,12 +133,13 @@ void MigrateAVSessionServer::CheckPostClean()
     validCommands_.clear();
     curBundleName_ = "";
     curAbilityName_ = "";
-    volumeCache_.store(-1);
-    devicesListStr_ = "";
-    devicePreferStr_ = "";
     metaDataCache_.Reset();
     playbackStateCache_.SetState(-1);
     playbackStateCache_.SetFavorite(0);
+    CHECK_AND_RETURN_LOG(!resetOnlySessionInfo, "only SessionInfo reset");
+    volumeCache_.store(-1);
+    devicesListStr_ = "";
+    devicePreferStr_ = "";
 }
 
 void MigrateAVSessionServer::HandleFocusPlaybackStateChange(const std::string &sessionId, const AVPlaybackState &state)
@@ -433,7 +435,7 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
 bool MigrateAVSessionServer::CheckPostSessionInfo(bool sessionState)
 {
     std::lock_guard lockGuard(cacheJsonLock_);
-    CHECK_AND_RETURN_RET_LOG(hasSession_.load() != sessionState, false,
+    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load() || hasSession_.load() != sessionState, false,
         "sessionState:%{public}d no change", sessionState);
     hasSession_.store(sessionState);
     return true;
@@ -475,6 +477,8 @@ void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> co
         },
         "SYNC_FOCUS_SESSION_INFO");
     cJSON_Delete(sessionInfo);
+    SLOGI("UpdateSessionInfoToRemote with sessionId:%{public}s|bundleName:%{public}s",
+        SoftbusSessionUtils::AnonymizeDeviceId(controller->GetSessionId()).c_str(), bundleNameForMigrate.c_str());
 }
 
 void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
