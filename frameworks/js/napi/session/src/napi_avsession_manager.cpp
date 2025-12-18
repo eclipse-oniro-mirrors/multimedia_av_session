@@ -119,7 +119,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("stopCasting", StopCast),
         DECLARE_NAPI_STATIC_FUNCTION("getDistributedSessionController", GetDistributedSessionControllers),
         DECLARE_NAPI_STATIC_FUNCTION("getAVSession", GetAVSession),
-        DECLARE_NAPI_STATIC_FUNCTION("isDesktopLyricFeatureSupported", IsDesktopLyricFeatureSupported),
+        DECLARE_NAPI_STATIC_FUNCTION("isDesktopLyricSupported", IsDesktopLyricSupported),
         DECLARE_NAPI_STATIC_FUNCTION("onActiveSessionChanged", OnActiveSessionChanged),
         DECLARE_NAPI_STATIC_FUNCTION("offActiveSessionChanged", OffActiveSessionChanged),
     };
@@ -1584,7 +1584,7 @@ napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
 #endif
 }
 
-napi_value NapiAVSessionManager::IsDesktopLyricFeatureSupported(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionManager::IsDesktopLyricSupported(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
         bool isSupported_ = false;
@@ -1598,9 +1598,9 @@ napi_value NapiAVSessionManager::IsDesktopLyricFeatureSupported(napi_env env, na
     context->GetCbInfo(env, info);
 
     auto executor = [context]() {
-        int32_t ret = AVSessionManager::GetInstance().IsDesktopLyricFeatureSupported(context->isSupported_);
+        int32_t ret = AVSessionManager::GetInstance().IsDesktopLyricSupported(context->isSupported_);
         if (ret != AVSESSION_SUCCESS) {
-            context->errMessage = "IsDesktopLyricFeatureSupported failed : native server exception";
+            context->errMessage = "IsDesktopLyricSupported failed : native server exception";
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
@@ -1612,7 +1612,7 @@ napi_value NapiAVSessionManager::IsDesktopLyricFeatureSupported(napi_env env, na
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
 
-    return NapiAsyncWork::Enqueue(env, context, "IsDesktopLyricFeatureSupported", executor, complete);
+    return NapiAsyncWork::Enqueue(env, context, "IsDesktopLyricSupported", executor, complete);
 }
 
 napi_status NapiAVSessionManager::OnSessionCreate(napi_env env, napi_value callback)

@@ -23,7 +23,9 @@
 #include "ipc_types.h"
 #include "iremote_object.h"
 #include "ability_connect_helper.h"
+#include "extension_connect_helper.h"
 #include "insight_intent_execute_param.h"
+#include <thread>
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -179,7 +181,7 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest005, TestSize.Level0)
 static HWTEST(AbilityConnectHelperTest, OnAbilityConnectDone001, TestSize.Level0)
 {
     SLOGI("OnAbilityConnectDone001 begin!");
-    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr);
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "");
     ASSERT_NE(connect, nullptr);
 
     OHOS::AppExecFwk::ElementName element;
@@ -200,7 +202,7 @@ static HWTEST(AbilityConnectHelperTest, OnAbilityConnectDone001, TestSize.Level0
 static HWTEST(AbilityConnectHelperTest, OnAbilityDisconnectDone001, TestSize.Level0)
 {
     SLOGI("OnAbilityDisconnectDone001 begin!");
-    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr);
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "");
     ASSERT_NE(connect, nullptr);
 
     OHOS::AppExecFwk::ElementName element;
@@ -293,7 +295,7 @@ static HWTEST(AbilityConnectHelperTest, ConnectAbilityCommon002, TestSize.Level0
 {
     SLOGI("ConnectAbilityCommon002 begin!");
     OHOS::AAFwk::Want want;
-    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr);
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "");
     ASSERT_NE(connect, nullptr);
     int32_t ret = ExtensionConnectHelper::GetInstance().ConnectAbilityCommon(want, connect, 0);
     EXPECT_NE(ret, ERR_INVALID_PARAM);
@@ -322,7 +324,7 @@ static HWTEST(AbilityConnectHelperTest, DisconnectAbility002, TestSize.Level0)
 {
     SLOGI("DisconnectAbility002 begin!");
     OHOS::AAFwk::Want want;
-    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr);
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "");
     ASSERT_NE(connect, nullptr);
     int32_t ret = ExtensionConnectHelper::GetInstance().DisconnectAbility(connect);
     EXPECT_NE(ret, ERR_INVALID_PARAM);

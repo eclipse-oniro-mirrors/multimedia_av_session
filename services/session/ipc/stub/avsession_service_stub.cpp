@@ -872,12 +872,12 @@ int32_t AVSessionServiceStub::HandleGetDistributedSessionControllersInner(Messag
     return ERR_NONE;
 }
 
-int32_t AVSessionServiceStub::HandleIsDesktopLyricFeatureSupported(MessageParcel &data, MessageParcel &reply)
+int32_t AVSessionServiceStub::HandleIsDesktopLyricSupported(MessageParcel &data, MessageParcel &reply)
 {
-    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleIsDesktopLyricFeatureSupported");
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleIsDesktopLyricSupported");
     bool isSupported = false;
-    int32_t ret = IsDesktopLyricFeatureSupported(isSupported);
-    SLOGI("HandleIsDesktopLyricFeatureSupported ret: %{public}d, isSupported:%{public}d", ret, isSupported);
+    int32_t ret = IsDesktopLyricSupported(isSupported);
+    SLOGI("HandleIsDesktopLyricSupported ret: %{public}d, isSupported:%{public}d", ret, isSupported);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteBool(isSupported), ERR_MARSHALLING, "write bool failed");

@@ -1173,6 +1173,24 @@ enum AVSessionErrorCode {
     ERR_CODE_REMOTE_CONNECTION_NOT_EXIST = 6600109,
 
     /**
+     * The desktop lyrics feature of this application is not enabled.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @stagemodelonly
+     * @atomicservice
+     * @since 23
+     */
+    ERR_CODE_DESKTOP_LYRIC_NOT_ENABLED = 6600110,
+
+    /**
+     * The desktop lyrics feature is not supported.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @stagemodelonly
+     * @atomicservice
+     * @since 23
+     */
+    ERR_CODE_DESKTOP_LYRIC_NOT_SUPPORTED = 6600111,
+
+    /**
      * The error code for cast control is unspecified.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice

@@ -52,6 +52,8 @@ const int32_t KEYCODE_MEDIA_PLAY_PAUSE = 10;
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnTopSessionChange = false;
+const int32_t DESKTOP_LYRICS_ABILITY_CONNECTED = 2;
+const int32_t DESKTOP_LYRICS_ABILITY_DISCONNECTED = 4;
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t REPORT_SIZE = 100;
@@ -1826,6 +1828,50 @@ static HWTEST_F(AVSessionServiceTestSecond, UpdateFrontSession005, TestSize.Leve
     g_AVSessionService->UpdateFrontSession(avsessionHere, false);
     g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
+}
+
+/**
+ * @tc.name: StartDesktopLyricAbility001
+ * @tc.desc: Test desktopLyricAbilityState is DESKTOP_LYRICS_ABILITY_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #2014
+ */
+static HWTEST_F(AVSessionServiceTestSecond, StartDesktopLyricAbility001, TestSize.Level0)
+{
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    g_AVSessionService->SetDesktopLyricAbilityState(DESKTOP_LYRICS_ABILITY_CONNECTED);
+    std::string sessionId = "123456";
+    int32_t ret = g_AVSessionService->StartDesktopLyricAbility(sessionId, g_testAnotherBundleName);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: StopDesktopLyricAbility001
+ * @tc.desc: Test desktopLyricAbilityState is DESKTOP_LYRICS_ABILITY_DISCONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #2014
+ */
+static HWTEST_F(AVSessionServiceTestSecond, StopDesktopLyricAbility001, TestSize.Level0)
+{
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    g_AVSessionService->SetDesktopLyricAbilityState(DESKTOP_LYRICS_ABILITY_DISCONNECTED);
+    int32_t ret = g_AVSessionService->StopDesktopLyricAbility();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+ * @tc.name: UploadDesktopLyricOperationInfo001
+ * @tc.desc: Test UploadDesktopLyricOperationInfo.
+ * @tc.type: FUNC
+ * @tc.require: #2014
+ */
+static HWTEST_F(AVSessionServiceTestSecond, UploadDesktopLyricOperationInfo001, TestSize.Level0)
+{
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    g_AVSessionService->SetDesktopLyricAbilityState(DESKTOP_LYRICS_ABILITY_DISCONNECTED);
+    std::string sessionId = "123456";
+    int32_t ret = g_AVSessionService->UploadDesktopLyricOperationInfo(sessionId, g_testAnotherBundleName, 0);
+    EXPECT_NE(ret, AVSESSION_SUCCESS);
 }
 } //AVSession
 } //OHOS

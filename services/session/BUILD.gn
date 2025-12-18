@@ -151,6 +151,7 @@ av_session_ohos_library("avsession_service") {
     "adapter/audio_adapter.cpp",
     "adapter/bundle_status_adapter.cpp",
     "adapter/collaboration_manager.cpp",
+    "adapter/extension_connect_helper.cpp",
     "adapter/key_event_adapter.cpp",
     "adapter/params_config_operator.cpp",
     "adapter/session_xcollie.cpp",

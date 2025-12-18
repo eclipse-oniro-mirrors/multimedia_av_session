@@ -166,7 +166,7 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t IsDesktopLyricFeatureSupported(bool &isSupported) override
+    int32_t IsDesktopLyricSupported(bool &isSupported) override
     {
         return AVSESSION_SUCCESS;
     }

@@ -103,7 +103,7 @@ public:
     int32_t GetSession(const AppExecFwk::ElementName& elementName,
         std::string& tag, std::shared_ptr<AVSession>& session) override;
 
-    int32_t IsDesktopLyricFeatureSupported(bool &isSupported) override;
+    int32_t IsDesktopLyricSupported(bool &isSupported) override;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t StartCastDiscovery(int32_t castDeviceCapability, std::vector<std::string> drmSchemes) override;

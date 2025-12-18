@@ -371,6 +371,10 @@ static napi_value ExportAVSessionErrorCode(napi_env env)
         AVSessionErrorCode::ERR_CODE_DEVICE_CONNECTION_FAILED);
     (void)SetNamedProperty(env, result, "ERR_CODE_REMOTE_CONNECTION_NOT_EXIST",
         AVSessionErrorCode::ERR_CODE_REMOTE_CONNECTION_NOT_EXIST);
+    (void)SetNamedProperty(env, result, "ERR_CODE_DESKTOP_LYRIC_NOT_ENABLED",
+        AVSessionErrorCode::ERR_CODE_DESKTOP_LYRIC_NOT_ENABLED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_DESKTOP_LYRIC_NOT_SUPPORTED",
+        AVSessionErrorCode::ERR_CODE_DESKTOP_LYRIC_NOT_SUPPORTED);
     AVSessionControlErrorCode(env, result);
     AVSessionIOErrorCode(env, result);
     AVSessionParsingErrorCode(env, result);

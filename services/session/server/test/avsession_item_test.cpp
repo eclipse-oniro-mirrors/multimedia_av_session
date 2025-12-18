@@ -122,6 +122,15 @@ class MockIAVCastControllerProxy : public OHOS::AVSession::IAVCastControllerProx
     void SetSpid(uint32_t spid) override {}
 };
 
+class MockAVSessionItemExtension : public AVSessionItemExtension {
+public:
+    int32_t StartDesktopLyricAbility(const std::string &sessionId, const std::string &handler)
+        override { return isStartSuccend; }
+    int32_t UploadDesktopLyricOperationInfo(const std::string &sessionId,
+        const std::string &handler, uint32_t sceneCode) override { return 0; }
+    int32_t isStartSuccend = 0; // is start success
+};
+
 void AVsessionItemTest::SetUpTestCase()
 {
     SLOGI("AVsessionItemTest SetUpTestCase");
@@ -1107,19 +1116,18 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricVisible_001, TestSize.L
     ASSERT_NE(g_AVSessionItem, nullptr);
     g_AVSessionItem->isSupportedDesktopLyric_ = true;
     g_AVSessionItem->isEnabledDesktopLyric_ = true;
-
-    g_AVSessionItem->launchDesktopLyricCb_ = nullptr;
+    MockAVSessionItemExtension extension;
+    g_AVSessionItem->extension_ = &extension;
     int32_t res = AVSESSION_SUCCESS;
+
+    extension.isStartSuccend = AVSESSION_ERROR;
     res = g_AVSessionItem->SetDesktopLyricVisible(true);
     EXPECT_EQ(res, AVSESSION_ERROR);
 
-    g_AVSessionItem->launchDesktopLyricCb_ = [] (std::string sessionId) { return AVSESSION_ERROR; };
-    res = g_AVSessionItem->SetDesktopLyricVisible(true);
-    EXPECT_EQ(res, AVSESSION_ERROR);
-
-    g_AVSessionItem->launchDesktopLyricCb_ = [] (std::string sessionId) { return AVSESSION_SUCCESS; };
+    extension.isStartSuccend = AVSESSION_SUCCESS;
     res = g_AVSessionItem->SetDesktopLyricVisible(true);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
+    g_AVSessionItem->extension_ = nullptr;
     SLOGI("AVSessionItem_SetDesktopLyricVisible_001 End");
 }
 
@@ -1135,6 +1143,9 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricVisible_002, TestSize.L
     ASSERT_NE(g_AVSessionItem, nullptr);
     g_AVSessionItem->isSupportedDesktopLyric_ = true;
     g_AVSessionItem->isEnabledDesktopLyric_ = true;
+    MockAVSessionItemExtension extension;
+    g_AVSessionItem->extension_ = &extension;
+
     int32_t res = g_AVSessionItem->SetDesktopLyricVisible(false);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
 
@@ -1143,6 +1154,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricVisible_002, TestSize.L
     res = g_AVSessionItem->SetDesktopLyricVisible(false);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
     g_AVSessionItem->callback_ = cb;
+    g_AVSessionItem->extension_ = nullptr;
     SLOGI("AVSessionItem_SetDesktopLyricVisible_002 End");
 }
 
@@ -1207,6 +1219,8 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricState_001, TestSize.Lev
     ASSERT_NE(g_AVSessionItem, nullptr);
     g_AVSessionItem->isSupportedDesktopLyric_ = true;
     g_AVSessionItem->isEnabledDesktopLyric_ = true;
+    MockAVSessionItemExtension extension;
+    g_AVSessionItem->extension_ = &extension;
     DesktopLyricState state = {};
     int32_t res = g_AVSessionItem->SetDesktopLyricState(state);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
@@ -1216,6 +1230,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetDesktopLyricState_001, TestSize.Lev
     res = g_AVSessionItem->SetDesktopLyricState(state);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
     g_AVSessionItem->callback_ = cb;
+    g_AVSessionItem->extension_ = nullptr;
     SLOGI("AVSessionItem_SetDesktopLyricState_001 End");
 }
 
