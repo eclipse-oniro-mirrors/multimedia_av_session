@@ -239,7 +239,7 @@ public:
                 char_positions.push_back(i);
             }
         }
-        const int char_count = char_positions.size();
+        const int char_count = static_cast<int>(char_positions.size());
         // 特殊处理短字符串
         const int VERY_SHORT_TEXT_LENGTH = 3;
         const int SHORT_TEXT_LENGTH = 2;
