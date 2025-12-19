@@ -90,16 +90,16 @@ public:
     bool IsCallbacksEmpty(int32_t event);
 
 private:
-    void HandleEvent(int32_t event);
+    void HandleEvent(int32_t event, std::string callBackName);
 
     template<typename T>
-    void HandleEvent(int32_t event, const T& param);
+    void HandleEvent(int32_t event, std::string callBackName, const T& param);
 
     template<typename T>
-    void HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam);
+    void HandleEvent(int32_t event, std::string callBackName, const std::string& firstParam, const T& secondParam);
 
     template<typename T>
-    void HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam);
+    void HandleEvent(int32_t event, std::string callBackName, const int32_t firstParam, const T& secondParam);
 
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;

@@ -1701,10 +1701,11 @@ napi_status NapiAVSessionManager::OnDeviceStateChanged(napi_env env, napi_value 
 
 void NapiAVSessionManager::HandleServiceDied()
 {
+    std::string callBackName = "NapiAVSessionManager::HandleServiceDied";
     if (!serviceDiedCallbacks_.empty() && asyncCallback_ != nullptr) {
         for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
              ++callbackRef) {
-            asyncCallback_->Call(*callbackRef);
+            asyncCallback_->Call(*callbackRef, callBackName);
         }
     }
     std::lock_guard lockGuard(listenersMutex_);

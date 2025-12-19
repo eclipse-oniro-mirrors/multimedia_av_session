@@ -37,7 +37,7 @@ NapiAVControllerCallback::~NapiAVControllerCallback()
     *isValid_ = false;
 }
 
-void NapiAVControllerCallback::HandleEvent(int32_t event)
+void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackName)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -59,12 +59,12 @@ void NapiAVControllerCallback::HandleEvent(int32_t event)
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
-            });
+            }, callBackName);
     }
 }
 
 template<typename T>
-void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
+void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackName, const T& param)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -86,7 +86,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
-            },
+            }, callBackName,
             [param](napi_env env, int& argc, napi_value *argv) {
                 argc = NapiUtils::ARGC_ONE;
                 auto status = NapiUtils::SetValue(env, param, *argv);
@@ -96,7 +96,8 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const T& param)
 }
 
 template<typename T>
-void NapiAVControllerCallback::HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam)
+void NapiAVControllerCallback::HandleEvent(int32_t event,
+    std::string callBackName, const std::string& firstParam, const T& secondParam)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -118,7 +119,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const std::string& fir
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
-            },
+            }, callBackName,
             [firstParam, secondParam](napi_env env, int& argc,
                 napi_value *argv) {
                 argc = NapiUtils::ARGC_TWO;
@@ -131,7 +132,8 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const std::string& fir
 }
 
 template<typename T>
-void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam)
+void NapiAVControllerCallback::HandleEvent(int32_t event,
+    std::string callBackName, const int32_t firstParam, const T& secondParam)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -153,7 +155,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, const int32_t firstPar
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
-            },
+            }, callBackName,
             [firstParam, secondParam](napi_env env, int& argc,
                 napi_value *argv) {
                 argc = NapiUtils::ARGC_TWO;
@@ -259,19 +261,22 @@ void NapiAVControllerCallback::ThreadSafeCallback(napi_env env, napi_value js_cb
 
 void NapiAVControllerCallback::OnAVCallStateChange(const AVCallState& avCallState)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnAVCallStateChange";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnAVCallStateChange");
-    HandleEvent(EVENT_AVCALL_STATE_CHANGE, avCallState);
+    HandleEvent(EVENT_AVCALL_STATE_CHANGE, callBackName, avCallState);
 }
 
 void NapiAVControllerCallback::OnAVCallMetaDataChange(const AVCallMetaData& avCallMetaData)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnAVCallMetaDataChange";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnAVCallMetaDataChange");
-    HandleEvent(EVENT_AVCALL_META_DATA_CHANGE, avCallMetaData);
+    HandleEvent(EVENT_AVCALL_META_DATA_CHANGE, callBackName, avCallMetaData);
 }
 
 void NapiAVControllerCallback::OnSessionDestroy()
 {
-    HandleEvent(EVENT_SESSION_DESTROY);
+    std::string callBackName = "NapiAVControllerCallback::OnSessionDestroy";
+    HandleEvent(EVENT_SESSION_DESTROY, callBackName);
     SLOGD("callback for sessionDestroy, check callback");
     if (sessionDestroyCallback_ != nullptr) {
         SLOGI("notify session Destroy for repeat");
@@ -283,8 +288,9 @@ void NapiAVControllerCallback::OnSessionDestroy()
 
 void NapiAVControllerCallback::OnCustomData(const AAFwk::WantParams& data)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnCustomData";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnCustomData");
-    HandleEvent(EVENT_CUSTOM_DATA, data);
+    HandleEvent(EVENT_CUSTOM_DATA, callBackName, data);
 }
 
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
@@ -305,7 +311,8 @@ void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 
 void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 {
-    HandleEvent(EVENT_ACTIVE_STATE_CHANGE, isActive);
+    std::string callBackName = "NapiAVControllerCallback::OnActiveStateChange";
+    HandleEvent(EVENT_ACTIVE_STATE_CHANGE, callBackName, isActive);
 }
 
 void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
@@ -317,49 +324,57 @@ void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& 
 
 void NapiAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& info)
 {
-    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, connectionState, info);
+    std::string callBackName = "NapiAVControllerCallback::OnOutputDeviceChange";
+    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, callBackName, connectionState, info);
 }
 
 void NapiAVControllerCallback::OnSessionEventChange(const std::string& event, const AAFwk::WantParams& args)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnSessionEventChange";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnSessionEventChange");
-    HandleEvent(EVENT_SESSION_EVENT_CHANGE, event, args);
+    HandleEvent(EVENT_SESSION_EVENT_CHANGE, callBackName, event, args);
 }
 
 void NapiAVControllerCallback::OnQueueItemsChange(const std::vector<AVQueueItem>& items)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnQueueItemsChange";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnQueueItemsChange");
-    HandleEvent(EVENT_QUEUE_ITEMS_CHANGE, items);
+    HandleEvent(EVENT_QUEUE_ITEMS_CHANGE, callBackName, items);
 }
 
 void NapiAVControllerCallback::OnQueueTitleChange(const std::string& title)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnQueueTitleChange";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnQueueTitleChange");
-    HandleEvent(EVENT_QUEUE_TITLE_CHANGE, title);
+    HandleEvent(EVENT_QUEUE_TITLE_CHANGE, callBackName, title);
 }
 
 void NapiAVControllerCallback::OnExtrasChange(const AAFwk::WantParams& extras)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnExtrasChange";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnExtrasChange");
-    HandleEvent(EVENT_EXTRAS_CHANGE, extras);
+    HandleEvent(EVENT_EXTRAS_CHANGE, callBackName, extras);
 }
 
 void NapiAVControllerCallback::OnDesktopLyricVisibilityChanged(bool isVisible)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnDesktopLyricVisibilityChanged";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnDesktopLyricVisibilityChanged");
-    HandleEvent(EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED, isVisible);
+    HandleEvent(EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED, callBackName, isVisible);
 }
 
 void NapiAVControllerCallback::OnDesktopLyricStateChanged(const DesktopLyricState& state)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnDesktopLyricStateChanged";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnDesktopLyricStateChanged");
-    HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, state);
+    HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, callBackName, state);
 }
 
 void NapiAVControllerCallback::OnDesktopLyricEnabled(bool isEnabled)
 {
+    std::string callBackName = "NapiAVControllerCallback::OnDesktopLyricEnabled";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnDesktopLyricEnabled");
-    HandleEvent(EVENT_DESKTOP_LYRIC_ENABLED, isEnabled);
+    HandleEvent(EVENT_DESKTOP_LYRIC_ENABLED, callBackName, isEnabled);
 }
 
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)

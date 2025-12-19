@@ -42,7 +42,7 @@ napi_env NapiAsyncCallback::GetEnv() const
     return env_;
 }
 
-void NapiAsyncCallback::Call(napi_ref& method, NapiArgsGetter getter)
+void NapiAsyncCallback::Call(napi_ref& method, std::string callbackName, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
@@ -83,7 +83,7 @@ void NapiAsyncCallback::Call(napi_ref& method, NapiArgsGetter getter)
         }
         napi_close_handle_scope(context->env, scope);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, callbackName.c_str())) {
         SLOGE("Call: napi_send_event fail");
     }
 }
@@ -136,13 +136,13 @@ void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<bool> isV
         }
         napi_close_handle_scope(context->env, scope);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, "NapiAsyncCallback::CallWithFlag")) {
         SLOGE("CallWithFlag: napi_send_event fail");
     }
 }
 
 void NapiAsyncCallback::CallWithFunc(napi_ref& method, std::shared_ptr<bool> isValid,
-    const std::function<bool()>& checkCallbackValid, NapiArgsGetter getter)
+    const std::function<bool()>& checkCallbackValid, std::string callbackName, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(loop_ != nullptr && method != nullptr, "loop_ or method is nullptr");
 
@@ -194,7 +194,7 @@ void NapiAsyncCallback::CallWithFunc(napi_ref& method, std::shared_ptr<bool> isV
         }
         napi_close_handle_scope(context->env, scope);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, callbackName.c_str())) {
         SLOGE("CallWithFlag: napi_send_event fail");
     }
 }

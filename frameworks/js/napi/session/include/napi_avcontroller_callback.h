@@ -71,16 +71,16 @@ public:
     void AddCallbackForSessionDestroy(const std::function<void(void)>& sessionDestroyCallback);
 
 private:
-    void HandleEvent(int32_t event);
+    void HandleEvent(int32_t event, std::string callBackName);
 
     template<typename T>
-    void HandleEvent(int32_t event, const T& param);
+    void HandleEvent(int32_t event, std::string callBackName, const T& param);
 
     template<typename T>
-    void HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam);
+    void HandleEvent(int32_t event, std::string callBackName, const std::string& firstParam, const T& secondParam);
 
     template<typename T>
-    void HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam);
+    void HandleEvent(int32_t event, std::string callBackName, const int32_t firstParam, const T& secondParam);
 
     template<typename T>
     void HandleEventWithThreadSafe(int32_t event, int state, const T& param);
