@@ -60,6 +60,21 @@ std::vector<int> FocusSessionStrategy::GetAudioPlayingUids()
     return audioPlayingUids_;
 }
 
+void FocusSessionStrategy::AddControlBundle(int32_t uid, int32_t pid)
+{
+    std::lock_guard lockGuard(controlLock_);
+    controlBundleList_.insert(std::make_pair(uid, pid));
+}
+
+void FocusSessionStrategy::RemoveControlBundle(int32_t uid, int32_t pid)
+{
+    std::lock_guard lockGuard(controlLock_);
+    std::pair<int32_t, int32_t> controlKey = std::make_pair(uid, pid);
+    if (controlBundleList_.find(controlKey) != controlBundleList_.end()) {
+        controlBundleList_.erase(controlKey);
+    }
+}
+
 void FocusSessionStrategy::ProcAudioRenderChange(const AudioRendererChangeInfos& infos)
 {
     SLOGD("AudioRenderStateChange start");
@@ -81,7 +96,8 @@ void FocusSessionStrategy::ProcAudioRenderChange(const AudioRendererChangeInfos&
             continue;
         }
         if ((std::count(ALLOWED_MEDIA_STREAM_USAGE.begin(),
-            ALLOWED_MEDIA_STREAM_USAGE.end(), info->rendererInfo.streamUsage) == 0)) {
+            ALLOWED_MEDIA_STREAM_USAGE.end(), info->rendererInfo.streamUsage) == 0) &&
+            (controlBundleList_.find(std::make_pair(info->clientUID, info->clientPid)) != controlBundleList_.end())) {
             SLOGI("Media invalid uid=%{public}d usage=%{public}d", info->clientUID, info->rendererInfo.streamUsage);
             continue;
         }
