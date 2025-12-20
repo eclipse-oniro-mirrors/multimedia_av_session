@@ -1654,6 +1654,11 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
     IsDesktopLyricSupported(isSupported);
     result->SetDesktopLyricFeatureSupported(isSupported);
     ServiceCallback(result);
+    auto it = std::find(controlListForNtf_.begin(), controlListForNtf_.end(), elementName.GetBundleName());
+    if (it != controlListForNtf_.end()) {
+        SLOGI("AddControlBundle for :%{public}s ", elementName.GetBundleName().c_str());
+        focusSessionStrategy_.AddControlBundle(result->GetUid(), result->GetPid());
+    }
 
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
@@ -3503,6 +3508,11 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
             ancoSession_ = nullptr;
             SLOGI("ancoSession release in user:%{public}d", userId);
         }
+        auto it = std::find(controlListForNtf_.begin(), controlListForNtf_.end(), sessionItem->GetBundleName());
+        if (it != controlListForNtf_.end()) {
+            SLOGI("RemoveControlBundle for :%{public}s ", sessionItem->GetBundleName().c_str());
+            focusSessionStrategy_.RemoveControlBundle(sessionItem->GetUid(), sessionItem->GetPid());
+        }
         sessionItem->DestroyTask(continuePlay);
         HandleTopSessionRelease(userId, sessionItem);
         if (sessionItem->GetRemoteSource() != nullptr) {
@@ -3529,10 +3539,6 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         }
     }
     HandleSessionReleaseInner();
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    SLOGI("call disable cast after session release task");
-    checkEnableCast(false);
-#endif
 }
 
 void AVSessionService::HandleSessionReleaseInner()
@@ -3541,6 +3547,10 @@ void AVSessionService::HandleSessionReleaseInner()
     if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0) {
         PublishEvent(mediaPlayStateFalse);
     }
+#endif
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("call disable cast after session release task");
+    checkEnableCast(false);
 #endif
 }
 

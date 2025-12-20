@@ -805,6 +805,7 @@ private:
     std::map<std::string, std::shared_ptr<MigrateAVSessionServer>> migrateAVSessionServerMap_;
     std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
     std::recursive_mutex migrateProxyMapLock_;
+    std::list<std::string> controlListForNtf_ = {"com.ohos.mediacontroller"};
 
     int32_t desktopLyricAbilityState_ = 0;
     std::mutex desktopLyricAbilityStateMutex_;
