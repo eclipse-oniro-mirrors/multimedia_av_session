@@ -53,12 +53,12 @@ ani_object TaiheUtils::CreateAniEmptyRecord()
     CHECK_RETURN(env != nullptr, "env is nullptr", aniRecord);
 
     ani_class cls {};
-    static const std::string className = "escompat.Record";
-    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find escompat.Record", aniRecord);
+    static const std::string className = "std.core.Record";
+    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find std.core.Record", aniRecord);
 
     ani_method constructor {};
     CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "C{std.core.Object}:", &constructor) == ANI_OK,
-        "Can't find method <ctor> in escompat.Record", aniRecord);
+        "Can't find method <ctor> in std.core.Record", aniRecord);
 
     CHECK_RETURN(env->Object_New(cls, constructor, &aniRecord, nullptr) == ANI_OK,
         "Call method <ctor> fail", aniRecord);
@@ -233,12 +233,12 @@ bool TaiheUtils::IsAniArray(ani_env *env, ani_object obj)
 {
     CHECK_RETURN(env != nullptr && obj != nullptr, "env or obj is nullptr", false);
     ani_class cls {};
-    static const std::string className = "escompat.Array";
-    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find escompat.Array.", false);
+    static const std::string className = "std.core.Array";
+    CHECK_RETURN(env->FindClass(className.c_str(), &cls) == ANI_OK, "Can't find std.core.Array.", false);
 
     ani_static_method isArrayMethod {};
     CHECK_RETURN(env->Class_FindStaticMethod(cls, "isArray", nullptr, &isArrayMethod) == ANI_OK,
-        "Can't find method isArray in Lescompat/Array.", false);
+        "Can't find method isArray in Lstd/core/Array.", false);
 
     ani_boolean isArray = ANI_FALSE;
     CHECK_RETURN(env->Class_CallStaticMethod_Boolean(cls, isArrayMethod, &isArray, obj) == ANI_OK,
@@ -313,12 +313,12 @@ static int32_t GetAniInt32(ani_env *env, ani_object obj, int32_t &value)
         "Can't find std.core.Int", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_method method {};
-    CHECK_RETURN(env->Class_FindMethod(cls, "unboxed", nullptr, &method) == ANI_OK,
-        "Can't find method unboxed in std.core.Int", OHOS::AVSession::AVSESSION_ERROR);
+    CHECK_RETURN(env->Class_FindMethod(cls, "toInt", nullptr, &method) == ANI_OK,
+        "Can't find method toInt in std.core.Int", OHOS::AVSession::AVSESSION_ERROR);
 
     ani_int aniInt = 0;
     CHECK_RETURN(env->Object_CallMethod_Int(obj, method, &aniInt) == ANI_OK,
-        "Call method unboxed failed.", OHOS::AVSession::AVSESSION_ERROR);
+        "Call method toInt failed.", OHOS::AVSession::AVSESSION_ERROR);
     value = static_cast<int32_t>(aniInt);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
