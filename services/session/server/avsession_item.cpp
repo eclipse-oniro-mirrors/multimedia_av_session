@@ -473,6 +473,7 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
+    bool isSupportCast;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
         std::shared_ptr<AVSessionPixelMap> avQueueImg = meta.GetAVQueueImage();
@@ -484,9 +485,11 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
             AVSessionUtils::WriteImageToFile(avQueueImg, fileDir, fileName);
             avQueueImg->Clear();
         }
+        isSupportCast = extras_.HasParam("requireAbilityList") && metaData_.GetFilter() != 0 &&
+            metaData_.GetDuration() != 0;
     }
-
-    UpdateRecommendInfo(true);
+    SLOGI("UpdateRecommendInfo isSupportCast %{public}d", isSupportCast);
+    UpdateRecommendInfo(isSupportCast);
 }
 
 int32_t AVSessionItem::UpdateAVQueueInfo(const AVQueueInfo& info)
