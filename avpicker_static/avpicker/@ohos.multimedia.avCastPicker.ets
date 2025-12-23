@@ -578,7 +578,7 @@ export struct AVCastPicker {
   }
 }
 
-function highQualityStyles(this: TextAttribute, maxScale: number): this {
+function highQualityStyles(this: TextAttribute, maxScale: number) {
   this.fontSize(7);
   this.fontWeight(FontWeight.Medium);
   this.fontColor($r('sys.color.font_secondary'));
