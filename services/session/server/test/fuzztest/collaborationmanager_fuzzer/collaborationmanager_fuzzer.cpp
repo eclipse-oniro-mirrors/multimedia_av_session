@@ -29,10 +29,11 @@
 
 using namespace std;
 namespace OHOS::AVSession {
-static const int32_t MAX_CODE_LEN  = 20;
-static const int32_t MIN_SIZE_NUM = 10;
+static const int32_t MAX_CODE_LEN  = 512;
+static const int32_t MIN_SIZE_NUM = 4;
 
 static const uint8_t *RAW_DATA = nullptr;
+static size_t g_dataSize = 0;
 static size_t g_totalSize = 0;
 static size_t g_sizePos;
 using TestFunc = function<void(FuzzedDataProvider&)>;
@@ -42,7 +43,7 @@ T GetData()
 {
     T object {};
     size_t objectSize = sizeof(object);
-    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_sizePos) {
         return object;
     }
     errno_t ret = memcpy_s(&object, objectSize, RAW_DATA + g_sizePos, objectSize);
@@ -56,7 +57,7 @@ T GetData()
 std::string GetString()
 {
     size_t objectSize = (GetData<int8_t>() % MAX_CODE_LEN) + 1;
-    if (RAW_DATA == nullptr || objectSize > g_totalSize - g_sizePos) {
+    if (RAW_DATA == nullptr || objectSize > g_dataSize - g_sizePos) {
         return "OVER_SIZE";
     }
     char object[objectSize + 1];
