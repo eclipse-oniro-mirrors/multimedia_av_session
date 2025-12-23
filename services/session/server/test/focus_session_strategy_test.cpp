@@ -490,6 +490,7 @@ static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange004, testing::ext
     info->rendererState = RendererState::RENDERER_RUNNING;
     info->rendererInfo.streamUsage = USAGE_INVALID;
 
+    focusSessionStrategy.controlBundleList_.insert(std::make_pair(info->clientUID, info->clientPid));
     AudioRendererChangeInfos infos;
     infos.push_back(info);
     focusSessionStrategy.ProcAudioRenderChange(infos);
@@ -608,6 +609,7 @@ static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange008, testing::ext
     info->rendererState = RendererState::RENDERER_RELEASED;
     info->rendererInfo.streamUsage = USAGE_INVALID;
 
+    focusSessionStrategy.controlBundleList_.insert(std::make_pair(info->clientUID, info->clientPid));
     AudioRendererChangeInfos infos;
     infos.push_back(info);
     focusSessionStrategy.ProcAudioRenderChange(infos);
