@@ -1074,7 +1074,7 @@ static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level0)
 static HWTEST_F(AVRouterImplTest, StopCast001, TestSize.Level0)
 {
     SLOGI("StopCast001 begin");
-    bool continuePlay = true;
+    DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_CONTINUE_PLAY;
     g_AVRouterImpl->providerNumber_ = 1;
     int32_t providerNumber = g_AVRouterImpl->providerNumber_;
     int32_t castId = 1;
@@ -1097,7 +1097,7 @@ static HWTEST_F(AVRouterImplTest, StopCast001, TestSize.Level0)
     castHandleInfo.sessionId_ = sessionId;
     g_AVRouterImpl->castHandleToInfoMap_[providerNumber] = castHandleInfo;
 
-    auto ret = g_AVRouterImpl->StopCast(castHandle, continuePlay);
+    auto ret = g_AVRouterImpl->StopCast(castHandle, deviceRemoveAction);
     EXPECT_TRUE(ret == AVSESSION_SUCCESS);
     SLOGI("StopCast001 end");
 }

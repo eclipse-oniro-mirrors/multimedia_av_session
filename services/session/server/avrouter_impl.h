@@ -90,7 +90,8 @@ public:
     int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
         uint32_t spid) override;
 
-    int32_t StopCast(const int64_t castHandle, bool continuePlay = false) override;
+    int32_t StopCast(const int64_t castHandle,
+        const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT) override;
 
     int32_t StopCastSession(const int64_t castHandle) override;
 
