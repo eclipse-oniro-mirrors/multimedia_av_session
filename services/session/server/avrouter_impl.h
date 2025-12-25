@@ -137,6 +137,8 @@ public:
 
     std::string GetCastingDeviceName() override;
 
+    bool IsDisconnectingOtherSession() override;
+
 protected:
 
 private:
@@ -175,6 +177,7 @@ private:
     ProtocolType sourceProtocols_ = ProtocolType::TYPE_LOCAL;
     std::atomic<int32_t> sinkAllConnectResult_ = AVSESSION_SUCCESS;
     std::string sinkDeviceName_;
+    std::atomic<bool> disconnectOtherSession_ = false;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H
