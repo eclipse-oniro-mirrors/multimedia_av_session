@@ -127,6 +127,19 @@ enum DeviceLogEventCode {
     DEVICE_LOG_MAX = 3,
 };
 
+enum DeviceRemoveAction {
+    // device remove and stop playing.
+    ACTION_DISCONNECT = 0,
+    // device remove and keep playing.
+    ACTION_CONTINUE_PLAY = 1,
+    // toSwitch DLNA
+    ACTION_TO_SWITCH_DLNA = 2,
+    // toSwitch hiplay
+    ACTION_TO_SWITCH_HIPLAY = 3,
+    // toSwitch stream
+    ACTION_TO_SWITCH_STREAM = 4,
+};
+
 struct CastDisplayInfo: public Parcelable {
     bool Marshalling(Parcel& out) const override;
     bool ReadFromParcel(Parcel& in);

@@ -211,11 +211,12 @@ public:
      * @brief Stop cast process.
      *
      * @param { const int64_t } castHandle - The ID corresponding to the provider that needs to be stopped.
-     * @param { bool } continuePlay - whether continue play when stop cast.
+     * @param { DeviceRemoveAction } deviceRemoveAction - whether continue play or switch device when stop cast.
      * @return { int32_t } Whether the operation was successful.
      * @since 10
     */
-    virtual int32_t StopCast(const int64_t castHandle, bool continuePlay = false) = 0;
+    virtual int32_t StopCast(const int64_t castHandle,
+        const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT) = 0;
 
     /**
      * @brief Stop cast session process.

@@ -104,8 +104,8 @@ public:
     virtual int32_t RegisterListener(std::shared_ptr<ICastSessionListener> listener) { return 0; }
     virtual int32_t UnregisterListener() { return 0; }
     virtual int32_t AddDevice(const CastRemoteDevice &remoteDevice) { return 0; }
-    virtual int32_t RemoveDevice(const std::string &deviceId,
-        const DeviceRemoveAction &actionType = DeviceRemoveAction::ACTION_DISCONNECT) { return 0; }
+    virtual int32_t RemoveDevice(const std::string &deviceId, const CastEngine::DeviceRemoveAction &actionType =
+        CastEngine::DeviceRemoveAction::ACTION_DISCONNECT) { return 0; }
     virtual int32_t StartAuth(const AuthInfo &authInfo) { return 0; }
     virtual int32_t GetSessionId(std::string &sessionId) { return 0; }
     virtual int32_t SetSessionProperty(const CastSessionProperty &property) { return 0; }
