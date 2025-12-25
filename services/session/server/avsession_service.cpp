@@ -1556,7 +1556,7 @@ void AVSessionService::AddCastServiceCallback(sptr<AVSessionItem>& sessionItem)
     });
 
     sessionItem->SetServiceCallbackForPhotoCast([this](std::string sessionId, bool isConnect) {
-        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist");
         if (isConnect) {
             AVSessionDescriptor selectSession = session->GetDescriptor();
