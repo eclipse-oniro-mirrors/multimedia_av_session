@@ -758,9 +758,6 @@ private:
     std::string castDeviceId_ = "0";
     std::string castDeviceName_ = " ";
     int32_t castDeviceType_ = 0;
-    const int32_t beginAddPos = 3;
-    const int32_t endDecPos = 4;
-    const int32_t typeAddPos = 2;
     std::mutex checkEnableCastMutex_;
     std::recursive_mutex checkEnableCastLock_;
     std::unordered_set<pid_t> cacheEnableCastPids_;

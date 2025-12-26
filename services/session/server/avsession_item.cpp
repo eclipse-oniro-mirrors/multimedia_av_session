@@ -1909,7 +1909,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_.c_str()).c_str());
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
@@ -1918,7 +1918,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_.c_str()).c_str());
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
@@ -1995,7 +1995,7 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
 {
     SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
-        AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_.c_str()).c_str());
+        AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
@@ -3137,7 +3137,7 @@ int32_t AVSessionItem::SinkCancelCastAudio()
 void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 {
     SLOGI("UpdateCastDeviceMap with id: %{public}s",
-        AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_.c_str()).c_str());
+        AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
     castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
 
     if (descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0 &&

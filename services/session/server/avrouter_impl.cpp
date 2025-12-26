@@ -781,8 +781,14 @@ void AVRouterImpl::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     }
 }
 
+bool AVRouterImpl::IsDisconnectingOtherSession()
+{
+    return disconnectOtherSession_.load();
+}
+
 void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo)
 {
+    disconnectOtherSession_.store(true);
     for (const auto& [string, avRouterListener] : mirrorSessionMap_) {
         if (string != sessionId && avRouterListener != nullptr) {
             avRouterListener->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false);
@@ -798,5 +804,6 @@ void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo devi
         }
     }
     mirrorSessionMap_.clear();
+    disconnectOtherSession_.store(false);
 }
 } // namespace OHOS::AVSession

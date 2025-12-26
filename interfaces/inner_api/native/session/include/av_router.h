@@ -411,6 +411,14 @@ public:
     */
     virtual std::string GetCastingDeviceName() = 0;
 
+    /**
+     * @brief check is disconnecting other session.
+     *
+     * @return { bool } is in disconnecting process.
+     * @since 22
+    */
+    virtual bool IsDisconnectingOtherSession() = 0;
+
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
     std::string sessionId_ = "-1";

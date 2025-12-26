@@ -515,7 +515,8 @@ bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
     bool deviceCond = isSupportMirrorToStream_ && !appCastExit_;
     
     CHECK_AND_RETURN_RET_LOG(deviceCond, false, "deviceCond is false");
-    bool connectCond = castServiceNameStatePair_.second == deviceStateConnection;
+    bool connectCond = castServiceNameStatePair_.second == deviceStateConnection &&
+        !AVRouter::GetInstance().IsDisconnectingOtherSession();
 
     CHECK_AND_RETURN_RET_LOG(deviceCond && connectCond, false, "connectCond is false");
     std::string bundleName = session->GetBundleName();
