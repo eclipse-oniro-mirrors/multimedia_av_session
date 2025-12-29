@@ -1812,10 +1812,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         SLOGE("session num exceed max");
         return ERR_SESSION_EXCEED_MAX;
     }
-    if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 1) {
-        SetCritical(true);
-    }
-
+    SetCriticalWhenCreate(result);
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
 
@@ -1833,6 +1830,21 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         ReportSessionState(sessionItem, SessionState::STATE_CREATE);
 #endif
     return AVSESSION_SUCCESS;
+}
+
+void AVSessionService::SetCriticalWhenCreate(sptr<AVSessionItem> sessionItem)
+{
+    int32_t currentAllSessionSize = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
+    SLOGI("size: %{public}d, Uid: %{public}d", currentAllSessionSize, sessionItem->GetUid());
+    if (currentAllSessionSize == 1) {
+        if (sessionItem->GetUid() == ancoUid) {
+            SetCritical(false);
+        } else {
+            SetCritical(true);
+        }
+    } else if (currentAllSessionSize > 1) {
+        SetCritical(true);
+    }
 }
 
 sptr<AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
@@ -3534,11 +3546,24 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
                 keyEventList->erase(it);
             }
         }
-        if (GetUsersManager().GetContainerFromAll().GetAllSessions().size() == 0) {
-            SetCritical(false);
-        }
+        SetCriticalWhenRelease(sessionItem);
     }
     HandleSessionReleaseInner();
+}
+
+void AVSessionService::SetCriticalWhenRelease(sptr<AVSessionItem> sessionItem)
+{
+    int32_t currentAllSessionSize = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
+    SLOGI("size: %{public}d, Uid: %{public}d", currentAllSessionSize, sessionItem->GetUid());
+    if (currentAllSessionSize == 0) {
+        SetCritical(false);
+    } else if (currentAllSessionSize == 1) {
+        if (GetUsersManager().GetContainerFromAll().GetSessionByUid(ancoUid) != nullptr) {
+            SetCritical(false);
+        } else {
+            SLOGI("no anco session");
+        }
+    }
 }
 
 void AVSessionService::HandleSessionReleaseInner()
