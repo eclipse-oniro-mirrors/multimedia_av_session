@@ -355,8 +355,7 @@ private:
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
-    void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession, bool addCapsule,
-                        bool isCapsuleUpdate, bool isPhoto);
+    void NotifySystemUI(sptr<AVSessionItem> photoSession, bool addCapsule, bool isCapsuleUpdate);
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
@@ -538,8 +537,7 @@ private:
 
     void UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd);
 
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
-        const AVSessionDescriptor* histroyDescriptor, bool isPhoto);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(sptr<AVSessionItem> photoSession);
     
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateNftRemoveWant(int32_t uid, bool isPhoto);
 
@@ -632,8 +630,6 @@ private:
     void NotifyActiveSessionChange(const std::vector<AVSessionDescriptor> &descriptors);
 
     std::string GetLocalTitle();
-
-    std::string GetDescriptorTitle(const AVSessionDescriptor* historyDescriptor);
 
     void DealFlowControl(int32_t uid, bool isBroker);
 

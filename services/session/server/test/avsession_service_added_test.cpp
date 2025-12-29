@@ -1306,12 +1306,9 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_NotifySyste
     EXPECT_TRUE(avsessionItem != nullptr);
     g_AVSessionService->UpdateTopSession(avsessionItem);
 
-    auto historyDescriptor = std::make_shared<AVSessionDescriptor>();
-    bool isActiveSession = true;
     bool addCapsule = true;
     bool isCapsuleUpdate = true;
-    g_AVSessionService->NotifySystemUI(historyDescriptor.get(),
-        isActiveSession, addCapsule, isCapsuleUpdate, false);
+    g_AVSessionService->NotifySystemUI(avsessionItem, addCapsule, isCapsuleUpdate);
     bool ret = addCapsule && g_AVSessionService->topSession_;
     EXPECT_EQ(ret, true);
 
