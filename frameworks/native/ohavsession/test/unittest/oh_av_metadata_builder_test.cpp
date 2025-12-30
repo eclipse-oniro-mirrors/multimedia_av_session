@@ -254,4 +254,27 @@ HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata004, TestSize.Level0)
     SLOGI("GenerateAVMetadata004 End");
 }
 
+/**
+ * @tc.name: GenerateAVMetadata005
+ * @tc.desc: test GenerateAVMetadata
+ * @tc.type: FUNC
+ * @tc.require: #2042
+ */
+HWTEST_F(OHAVMetadataBuilderTest, GenerateAVMetadata005, TestSize.Level0)
+{
+    SLOGI("GenerateAVMetadata005 Begin");
+    g_ohAVMetaDataBuilder.SetFilter(1);
+
+    OH_AVMetadata *ptr = nullptr;
+    AVMetadata_Result ret = g_ohAVMetaDataBuilder.GenerateAVMetadata(&ptr);
+    ASSERT_NE(ptr, nullptr);
+    ASSERT_EQ(ret, AVMETADATA_SUCCESS);
+    AVMetaData *metadata = reinterpret_cast<AVMetaData *>(ptr);
+    ASSERT_NE(metadata, nullptr);
+    std::shared_ptr<AVMetaData> sharedPtr(metadata);
+
+    EXPECT_EQ(metadata->GetFilter(), 1);
+    SLOGI("GenerateAVMetadata005 End");
+}
+
 }  // namespace OHOS::AVSession
