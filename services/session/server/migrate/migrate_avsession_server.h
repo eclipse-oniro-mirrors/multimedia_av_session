@@ -188,7 +188,7 @@ private:
     std::string GenerateClearAVSessionMsg();
     std::atomic<bool> isNeedByRemote = false;
 
-    std::atomic<bool> hasSession_ = false;
+    std::string sessionIdCache_ = "";
     std::string mediaImgTopicStr_ = "";
     std::vector<int32_t> validCommands_;
     std::string curBundleName_ = "";
@@ -198,7 +198,7 @@ private:
     std::string devicePreferStr_ = "";
 
     void CheckPostClean(bool resetOnlySessionInfo = false);
-    bool CheckPostSessionInfo(bool sessionState);
+    bool CheckPostSessionInfo(std::string sessionId);
     bool CheckPostMetaData(const AVMetaData& data);
     bool CheckPostMediaImage(std::vector<uint8_t>& imgBuffer);
     bool CheckPostPlaybackState(const AVPlaybackState& state);

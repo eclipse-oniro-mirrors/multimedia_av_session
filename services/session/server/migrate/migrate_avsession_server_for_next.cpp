@@ -140,6 +140,7 @@ void MigrateAVSessionServer::CheckPostClean(bool resetOnlySessionInfo)
     volumeCache_.store(-1);
     devicesListStr_ = "";
     devicePreferStr_ = "";
+    SLOGI("CheckPostClean done");
 }
 
 void MigrateAVSessionServer::HandleFocusPlaybackStateChange(const std::string &sessionId, const AVPlaybackState &state)
@@ -182,6 +183,8 @@ bool MigrateAVSessionServer::CheckPostMetaData(const AVMetaData& data)
         needRefresh = true;
     } else if (data.GetMetaMask().test(AVMetaData::META_KEY_SUBTITLE) &&
         data.GetSubTitle() != metaDataCache_.GetArtist()) {
+        CHECK_AND_RETURN_RET_LOG(!data.GetMetaMask().test(AVMetaData::META_KEY_ARTIST),
+            needRefresh, "refresh done with:%{public}d", needRefresh);
         metaDataCache_.SetArtist(data.GetSubTitle());
         needRefresh = true;
     }
@@ -432,19 +435,21 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
     SLOGI("UpdateFrontSessionInfoToRemote done");
 }
 
-bool MigrateAVSessionServer::CheckPostSessionInfo(bool sessionState)
+bool MigrateAVSessionServer::CheckPostSessionInfo(std::string sessionId)
 {
     std::lock_guard lockGuard(cacheJsonLock_);
-    CHECK_AND_RETURN_RET_LOG(isNeedByRemote.load() || hasSession_.load() != sessionState, false,
-        "sessionState:%{public}d no change", sessionState);
-    hasSession_.store(sessionState);
+    CHECK_AND_RETURN_RET_LOG(!(isNeedByRemote.load() && sessionIdCache_ == sessionId), false,
+        "need but session:%{public}s no change", SoftbusSessionUtils::AnonymizeDeviceId(sessionIdCache_).c_str());
+    CHECK_AND_RETURN_RET_LOG(!(!isNeedByRemote.load() && sessionIdCache_.empty() == sessionId.empty()), false,
+        "no need but sessionState:%{public}d no change", !sessionId.empty());
+    sessionIdCache_ = sessionId;
     return true;
 }
 
 void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> controller)
 {
     CHECK_AND_RETURN_LOG(controller != nullptr, "controller get nullptr");
-    CHECK_AND_RETURN_LOG(CheckPostSessionInfo(true), "sessionState no change");
+    CHECK_AND_RETURN_LOG(CheckPostSessionInfo(controller->GetSessionId()), "sessionState no change");
     cJSON* sessionInfo = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(sessionInfo != nullptr, "get sessionInfo json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_SESSION_ID, controller->GetSessionId().c_str())) {
@@ -484,7 +489,7 @@ void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> co
 void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
 {
     SLOGI("UpdateEmptyInfoToRemote in async");
-    CHECK_AND_RETURN_LOG(CheckPostSessionInfo(false), "sessionState no change");
+    CHECK_AND_RETURN_LOG(CheckPostSessionInfo(""), "sessionState no change");
     cJSON* sessionInfo = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(sessionInfo != nullptr, "get sessionInfo json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_SESSION_ID, EMPTY_SESSION)) {
