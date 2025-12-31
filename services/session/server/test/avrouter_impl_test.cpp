@@ -1495,5 +1495,84 @@ static HWTEST_F(AVRouterImplTest, OnDeviceStateChange001, TestSize.Level0)
     EXPECT_TRUE(g_AVRouterImpl->servicePtr_ != nullptr);
     SLOGI("OnDeviceStateChange001 end");
 }
+
+/**
+ * @tc.name: NotifyCastSessionCreated001
+ * @tc.desc: router notify cast session created
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVRouterImplTest, NotifyCastSessionCreated001, TestSize.Level0)
+{
+    SLOGI("NotifyCastSessionCreated001 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    auto listener = std::make_shared<AVSessionServiceListenerMock>();
+    ASSERT_TRUE(listener != nullptr);
+    g_AVRouterImpl->NotifyCastSessionCreated();
+    ASSERT_TRUE(listener != nullptr);
+    SLOGI("NotifyCastSessionCreated001 end");
+}
+
+/**
+ * @tc.name: NotifyCastSessionCreated002
+ * @tc.desc: router notify cast session created
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVRouterImplTest, NotifyCastSessionCreated002, TestSize.Level0)
+{
+    SLOGI("NotifyCastSessionCreated002 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    auto listener = std::make_shared<AVSessionServiceListenerMock>();
+    ASSERT_TRUE(listener != nullptr);
+    g_AVRouterImpl->sinkCastSessionId_ = "123456";
+    g_AVRouterImpl->sourceDeviceId_ = "a123456";
+    g_AVRouterImpl->hwProvider_ = std::make_shared<HwCastProvider>();
+#ifdef DEVICE_MANAGER_ENABLE
+    g_AVRouterImpl->deviceType_ = DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1;
+#endif
+    g_AVRouterImpl->NotifyCastSessionCreated();
+    ASSERT_TRUE(listener != nullptr);
+    SLOGI("NotifyCastSessionCreated002 end");
+}
+
+/**
+ * @tc.name: SetSinkCastSessionInfo001
+ * @tc.desc: router set cast session info
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVRouterImplTest, SetSinkCastSessionInfo001, TestSize.Level0)
+{
+    SLOGI("SetSinkCastSessionInfo001 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    auto listener = std::make_shared<AVSessionServiceListenerMock>();
+    ASSERT_TRUE(listener != nullptr);
+    OHOS::AAFwk::Want want;
+
+    std::string sessionId = "123456";
+    std::string deviceId = "a123456";
+    ProtocolType sourceProtocols = ProtocolType::TYPE_CAST_PLUS_STREAM;
+
+    want.SetParam("sessionId", sessionId);
+    
+    cJSON *deviceInfo = cJSON_CreateObject();
+    cJSON_AddStringToObject(deviceInfo, "deviceId", deviceId.c_str());
+    cJSON_AddNumberToObject(deviceInfo, "protocolType", static_cast<int>(sourceProtocols));
+    std::string deviceInfoStr = cJSON_PrintUnformatted(deviceInfo);
+    want.SetParam("deviceInfo", deviceInfoStr);
+
+    g_AVRouterImpl->SetSinkCastSessionInfo(want);
+    cJSON* deviceIdItem = cJSON_GetObjectItem(deviceInfo, "deviceId");
+    g_AVRouterImpl->sourceDeviceId_ = std::string(deviceIdItem->valuestring);
+    cJSON* protocolTypeItem = cJSON_GetObjectItem(deviceInfo, "protocolType");
+    g_AVRouterImpl->sourceProtocols_ = static_cast<ProtocolType>(protocolTypeItem->valueint);
+    ASSERT_TRUE(listener != nullptr);
+    ASSERT_TRUE(g_AVRouterImpl->sinkCastSessionId_ == sessionId);
+    ASSERT_TRUE(g_AVRouterImpl->sourceDeviceId_ == deviceId);
+    ASSERT_TRUE(g_AVRouterImpl->sourceProtocols_ == sourceProtocols);
+    cJSON_Delete(deviceInfo);
+    SLOGI("SetSinkCastSessionInfo001 end");
+}
 } //AVSession
 } //OHOS
