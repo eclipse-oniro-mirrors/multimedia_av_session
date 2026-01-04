@@ -332,7 +332,9 @@ public:
 
     int32_t StopDesktopLyricAbility();
 
-    void SetDesktopLyricAbilityState(int32_t state);
+    void SetDesktopLyricAbilityState(int32_t userId, int32_t state);
+
+    int32_t GetDesktopLyricAbilityState(int32_t userId);
 
     int32_t UploadDesktopLyricOperationInfo(const std::string &sessionId,
         const std::string &handler, uint32_t sceneCode) override;
@@ -804,7 +806,7 @@ private:
     std::recursive_mutex migrateProxyMapLock_;
     std::list<std::string> controlListForNtf_ = {"com.ohos.mediacontroller"};
 
-    int32_t desktopLyricAbilityState_ = 0;
+    std::map<int32_t, int32_t> desktopLyricAbilityStateMap_;
     std::mutex desktopLyricAbilityStateMutex_;
 
     const int32_t ONE_CLICK = 1;

@@ -24,18 +24,19 @@
 #define AVSESSION_EXTENSION_ABILITY_TYPE_SERVICE 3
 
 namespace OHOS::AVSession {
+using ConnectionStateChangedCallback = std::function<void(int32_t userId, int32_t state)>;
 class DesktopLyricCallConnection;
 class ExtensionConnectHelper {
 public:
     static ExtensionConnectHelper& GetInstance();
 
     int32_t StartDesktopLyricAbility(const std::string &sessionId, const std::string &handler,
-        int32_t userId, std::function<void(int32_t)> cb, bool shouldBeRecreated = false);
+        int32_t userId, ConnectionStateChangedCallback cb, bool shouldBeRecreated = false);
 
-    int32_t StopDesktopLyricAbility();
+    int32_t StopDesktopLyricAbility(int32_t userId);
 
     int32_t UploadDesktopLyricOperationInfo(const std::string &sessionId,
-        const std::string &handler, uint32_t sceneCode);
+        const std::string &handler, uint32_t sceneCode, int32_t userId);
 
 private:
     int32_t ConnectAbilityCommon(const AAFwk::Want &want, sptr<IRemoteObject> connect, int32_t userId);
@@ -46,15 +47,16 @@ private:
 
 private:
     std::mutex desktopLyricConnMutex;
-    sptr<DesktopLyricCallConnection> desktopLyricConnection_ = nullptr;
+    std::map<int32_t, sptr<DesktopLyricCallConnection>> desktopLyricConnectionMap_;
 
     const std::u16string EXTENSION_MANAGER_INTERFACE_TOKEN = u"ohos.aafwk.ExtensionManager";
 };
 
 class DesktopLyricCallConnection : public AbilityConnectionStub {
 public:
-    explicit DesktopLyricCallConnection(std::function<void(int32_t)> cb, std::string sessionId, std::string handler)
-        : callback_(std::move(cb)), sessionId_(std::move(sessionId)), handler_(std::move(handler)) {};
+    explicit DesktopLyricCallConnection(ConnectionStateChangedCallback cb, std::string sessionId,
+        std::string handler, int32_t userId)
+        : callback_(std::move(cb)), sessionId_(std::move(sessionId)), handler_(std::move(handler)), userId_(userId) {};
     ~DesktopLyricCallConnection() override;
 
     void OnAbilityConnectDone(const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject,
@@ -65,9 +67,10 @@ public:
         const std::string &handler, uint32_t sceneCode);
 
 private:
-    std::function<void(int32_t)> callback_;
+    ConnectionStateChangedCallback callback_;
     std::string sessionId_;
     std::string handler_;
+    int32_t userId_;
     std::mutex desktopLyricProxyMutex_;
     sptr<IRemoteObject> desktopLyricProxy_ = nullptr;
 };

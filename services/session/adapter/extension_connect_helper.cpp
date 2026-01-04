@@ -38,46 +38,60 @@ ExtensionConnectHelper &ExtensionConnectHelper::GetInstance()
 }
 
 int32_t ExtensionConnectHelper::StartDesktopLyricAbility(const std::string &sessionId, const std::string &handler,
-    int32_t userId, std::function<void(int32_t)> cb, bool shouldBeRecreated)
+    int32_t userId, ConnectionStateChangedCallback cb, bool shouldBeRecreated)
 {
     SLOGI("sessionId=%{public}s,handler=%{public}s,userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(sessionId).c_str(), handler.c_str(), userId);
     std::lock_guard<std::mutex> lock(desktopLyricConnMutex);
-    if (desktopLyricConnection_ == nullptr || shouldBeRecreated) {
-        desktopLyricConnection_ = new(std::nothrow) DesktopLyricCallConnection(cb, sessionId, handler);
-        CHECK_AND_RETURN_RET_LOG(desktopLyricConnection_ != nullptr, ERR_NO_MEMORY,
+    auto item = desktopLyricConnectionMap_.find(userId);
+    if (shouldBeRecreated || item == desktopLyricConnectionMap_.end() || item->second == nullptr) {
+        desktopLyricConnectionMap_[userId] = new(std::nothrow) DesktopLyricCallConnection(cb, sessionId,
+            handler, userId);
+        CHECK_AND_RETURN_RET_LOG(desktopLyricConnectionMap_[userId] != nullptr, ERR_NO_MEMORY,
             "create desktop lyric connection fail");
     }
 
     AAFwk::Want want;
     want.SetElementName(MEDIA_CONTROL_BUNDLENAME, DESKTOP_LYRIC_ABILITYNAME);
     want.SetParam("sessionId", sessionId);
-    int32_t result = ConnectAbilityCommon(want, desktopLyricConnection_, userId);
+    int32_t result = ConnectAbilityCommon(want, desktopLyricConnectionMap_[userId], userId);
     CHECK_AND_RETURN_RET_LOG(result == ERR_NONE, AVSESSION_ERROR,
         "connect desktop lyric ability fail: %{public}d", result);
     return AVSESSION_SUCCESS;
 }
 
-int32_t ExtensionConnectHelper::StopDesktopLyricAbility()
+int32_t ExtensionConnectHelper::StopDesktopLyricAbility(int32_t userId)
 {
     std::lock_guard<std::mutex> lock(desktopLyricConnMutex);
-    CHECK_AND_RETURN_RET_LOG(desktopLyricConnection_ != nullptr, AVSESSION_ERROR,
-        "desktopLyricConnection_ is nullptr");
-    int32_t result = DisconnectAbility(desktopLyricConnection_);
+    if (desktopLyricConnectionMap_.find(userId) == desktopLyricConnectionMap_.end()) {
+        SLOGE("userId=%{public}d not found", userId);
+        return AVSESSION_ERROR;
+    }
+    if (desktopLyricConnectionMap_[userId] == nullptr) {
+        SLOGE("userId=%{public}d desktopLyricConnection is nullptr", userId);
+        return AVSESSION_ERROR;
+    }
+    int32_t result = DisconnectAbility(desktopLyricConnectionMap_[userId]);
     CHECK_AND_RETURN_RET_LOG(result == ERR_NONE, AVSESSION_ERROR,
-        "disconnect desktop lyric ability fail: %{public}d", result);
+        "disconnect userId=%{public}d desktop lyric ability fail: %{public}d", userId, result);
     return AVSESSION_SUCCESS;
 }
 
 int32_t ExtensionConnectHelper::UploadDesktopLyricOperationInfo(const std::string &sessionId,
-    const std::string &handler, uint32_t sceneCode)
+    const std::string &handler, uint32_t sceneCode, int32_t userId)
 {
     std::lock_guard<std::mutex> lock(desktopLyricConnMutex);
-    CHECK_AND_RETURN_RET_LOG(desktopLyricConnection_ != nullptr, AVSESSION_ERROR,
-        "desktopLyricConnection_ is nullptr");
-    int32_t result = desktopLyricConnection_->SendDesktopLyricOperationInfo(sessionId, handler, sceneCode);
+    if (desktopLyricConnectionMap_.find(userId) == desktopLyricConnectionMap_.end()) {
+        SLOGE("userId=%{public}d not found", userId);
+        return AVSESSION_ERROR;
+    }
+    if (desktopLyricConnectionMap_[userId] == nullptr) {
+        SLOGE("userId=%{public}d desktopLyricConnection is nullptr", userId);
+        return AVSESSION_ERROR;
+    }
+    int32_t result = desktopLyricConnectionMap_[userId]->SendDesktopLyricOperationInfo(sessionId, handler, sceneCode);
     CHECK_AND_RETURN_RET_LOG(result == ERR_NONE, AVSESSION_ERROR,
-        "upload desktop lyric operation info fail: %{public}d", result);
+        "upload userId=%{public}d desktop lyric operation info fail: %{public}d", userId, result);
     return AVSESSION_SUCCESS;
 }
 
@@ -198,7 +212,7 @@ void DesktopLyricCallConnection::OnAbilityConnectDone(const AppExecFwk::ElementN
         desktopLyricProxy_ = remoteObject;
     }
     if (callback_) {
-        callback_(DESKTOP_LYRICS_ABILITY_CONNECTED);
+        callback_(userId_, DESKTOP_LYRICS_ABILITY_CONNECTED);
     } else {
         SLOGE("callback no register");
     }
@@ -213,7 +227,7 @@ void DesktopLyricCallConnection::OnAbilityDisconnectDone(const AppExecFwk::Eleme
         desktopLyricProxy_ = nullptr;
     }
     if (callback_) {
-        callback_(DESKTOP_LYRICS_ABILITY_DISCONNECTED);
+        callback_(userId_, DESKTOP_LYRICS_ABILITY_DISCONNECTED);
     } else {
         SLOGE("callback no register");
     }
