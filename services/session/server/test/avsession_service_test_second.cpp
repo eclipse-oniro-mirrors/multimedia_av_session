@@ -1839,7 +1839,8 @@ static HWTEST_F(AVSessionServiceTestSecond, UpdateFrontSession005, TestSize.Leve
 static HWTEST_F(AVSessionServiceTestSecond, StartDesktopLyricAbility001, TestSize.Level0)
 {
     ASSERT_TRUE(g_AVSessionService != nullptr);
-    g_AVSessionService->SetDesktopLyricAbilityState(DESKTOP_LYRICS_ABILITY_CONNECTED);
+    int32_t userId = g_AVSessionService->GetUsersManager().GetCurrentUserId();
+    g_AVSessionService->SetDesktopLyricAbilityState(userId, DESKTOP_LYRICS_ABILITY_CONNECTED);
     std::string sessionId = "123456";
     int32_t ret = g_AVSessionService->StartDesktopLyricAbility(sessionId, g_testAnotherBundleName);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
@@ -1854,7 +1855,8 @@ static HWTEST_F(AVSessionServiceTestSecond, StartDesktopLyricAbility001, TestSiz
 static HWTEST_F(AVSessionServiceTestSecond, StopDesktopLyricAbility001, TestSize.Level0)
 {
     ASSERT_TRUE(g_AVSessionService != nullptr);
-    g_AVSessionService->SetDesktopLyricAbilityState(DESKTOP_LYRICS_ABILITY_DISCONNECTED);
+    int32_t userId = g_AVSessionService->GetUsersManager().GetCurrentUserId();
+    g_AVSessionService->SetDesktopLyricAbilityState(userId, DESKTOP_LYRICS_ABILITY_DISCONNECTED);
     int32_t ret = g_AVSessionService->StopDesktopLyricAbility();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
@@ -1868,7 +1870,8 @@ static HWTEST_F(AVSessionServiceTestSecond, StopDesktopLyricAbility001, TestSize
 static HWTEST_F(AVSessionServiceTestSecond, UploadDesktopLyricOperationInfo001, TestSize.Level0)
 {
     ASSERT_TRUE(g_AVSessionService != nullptr);
-    g_AVSessionService->SetDesktopLyricAbilityState(DESKTOP_LYRICS_ABILITY_DISCONNECTED);
+    int32_t userId = g_AVSessionService->GetUsersManager().GetCurrentUserId();
+    g_AVSessionService->SetDesktopLyricAbilityState(userId, DESKTOP_LYRICS_ABILITY_DISCONNECTED);
     std::string sessionId = "123456";
     int32_t ret = g_AVSessionService->UploadDesktopLyricOperationInfo(sessionId, g_testAnotherBundleName, 0);
     EXPECT_NE(ret, AVSESSION_SUCCESS);
