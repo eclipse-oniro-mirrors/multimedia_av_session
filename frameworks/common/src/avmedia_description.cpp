@@ -19,7 +19,7 @@
 namespace OHOS::AVSession {
 bool AVMediaDescription::Marshalling(Parcel& parcel) const
 {
-    return parcel.WriteString(mediaId_) &&
+    bool res = parcel.WriteString(mediaId_) &&
         parcel.WriteString(title_) &&
         parcel.WriteString(subtitle_) &&
         parcel.WriteString(description_) &&
@@ -38,11 +38,25 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(creditsPosition_) &&
         parcel.WriteString(appName_) &&
         parcel.WriteString(launchClientData_) &&
-        parcel.WriteParcelable(icon_.get()) &&
         parcel.WriteParcelable(extras_.get()) &&
         parcel.WriteString(drmScheme_) &&
         dataSrc_.WriteToParcel(parcel) &&
         parcel.WriteBool(pcmSrc_);
+
+    std::vector<uint8_t> iconBuffer = (icon_ == nullptr) ? std::vector<uint8_t>() : icon_->GetInnerImgBuffer();
+    int32_t iconSize = static_cast<int32_t>(iconBuffer.size());
+    res &= parcel.WriteInt32(iconSize);
+    CHECK_AND_RETURN_RET_LOG(iconSize > 0, res,
+        "noIcon Marshalling:%{public}d", parcel.WriteParcelable(nullptr));
+    unsigned char *buffer = new (std::nothrow) unsigned char[iconSize];
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, res, "icon new buffer failed");
+    for (int32_t i = 0; i < iconSize; i++) {
+        buffer[i] = iconBuffer[i];
+    }
+    res &= static_cast<MessageParcel&>(parcel).WriteRawData(buffer, iconSize);
+    SLOGI("write Icon rawdata:%{public}d ret:%{public}d", iconSize, res);
+    delete[] buffer;
+    return res;
 }
 
 AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
@@ -68,10 +82,6 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     data.ReadInt32(result->creditsPosition_);
     data.ReadString(result->appName_);
     data.ReadString(result->launchClientData_);
-    result->icon_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
-    if (result->icon_ == nullptr) {
-        SLOGD("read AVMediaDescription - icon null");
-    }
     result->extras_ = std::shared_ptr<AAFwk::WantParams>(data.ReadParcelable<AAFwk::WantParams>());
     if (result->extras_ == nullptr) {
         SLOGD("read AVMediaDescription - extras null");
@@ -79,6 +89,24 @@ AVMediaDescription *AVMediaDescription::Unmarshalling(Parcel& data)
     data.ReadString(result->drmScheme_);
     result->dataSrc_.ReadFromParcel(data);
     data.ReadBool(result->pcmSrc_);
+
+    int32_t iconSize = 0;
+    data.ReadInt32(iconSize);
+    result->icon_ = (iconSize <= 0) ?
+        std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>()) : nullptr;
+    CHECK_AND_RETURN_RET_LOG(iconSize > 0, result, "noIcon Unmarshalling");
+
+    const char *buffer = nullptr;
+    buffer = reinterpret_cast<const char *>(static_cast<MessageParcel&>(data).ReadRawData(iconSize));
+    CHECK_AND_RETURN_RET_LOG(buffer != nullptr, result, "icon readRawData without buffer:%{public}d", iconSize);
+    result->icon_ = std::make_shared<AVSessionPixelMap>();
+    CHECK_AND_RETURN_RET_LOG(result->icon_ != nullptr, result, "icon get nullptr:%{public}d", iconSize);
+    std::vector<uint8_t> iconImageBuffer;
+    for (int32_t i = 0; i < iconSize; i++) {
+        iconImageBuffer.push_back((uint8_t)buffer[i]);
+    }
+    result->icon_->SetInnerImgBuffer(iconImageBuffer);
+    SLOGI("read Icon rawdata:%{public}d", iconSize);
     return result;
 }
 
