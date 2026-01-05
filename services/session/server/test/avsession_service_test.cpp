@@ -1434,6 +1434,27 @@ static HWTEST_F(AVSessionServiceTest, CreateSessionInner002, TestSize.Level0)
     SLOGI("CreateSessionInner001 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, CreateAndReleaseSessionSetCritical001, TestSize.Level0)
+{
+    SLOGI("CreateAndReleaseSessionSetCritical001 begin!");
+    OHOS::sptr<AVSessionItem> sessionItem = nullptr;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName("Test_1.abc");
+    int32_t ret = avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                    false, elementName, sessionItem);
+    avservice_->SetCriticalWhenCreate(sessionItem);
+    avservice_->SetCriticalWhenRelease(sessionItem);
+    int32_t ancoUid = 1041;
+    sessionItem->SetUid(ancoUid);
+    avservice_->SetCriticalWhenCreate(sessionItem);
+    avservice_->SetCriticalWhenRelease(sessionItem);
+    avservice_->HandleSessionRelease(sessionItem->GetSessionId());
+    avservice_->SetCriticalWhenRelease(sessionItem);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("CreateAndReleaseSessionSetCritical001 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, ReportSessionInfo001, TestSize.Level0)
 {
     SLOGI("ReportSessionInfo001 begin!");

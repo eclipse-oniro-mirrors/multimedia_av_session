@@ -712,6 +712,8 @@ private:
     std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
     sptr<IAncoMediaSessionListener> ancoMediaSessionListener_;
     std::set<std::string> controlBundleNameSet_;
+    void SetCriticalWhenCreate(sptr<AVSessionItem> sessionItem);
+    void SetCriticalWhenRelease(sptr<AVSessionItem> sessionItem);
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex sessionServiceLock_;
