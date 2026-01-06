@@ -184,6 +184,7 @@ void AVSessionServiceExtFuzzTest002()
     service->DoDisconnectProcessWithMigrate(deviceInfo);
     service->DoDisconnectProcessWithMigrateServer(deviceInfo);
     service->DoRemoteAVSessionLoad(deviceId);
+    sleep(service->doRemoteLoadRetryTime);
 }
 #endif
 

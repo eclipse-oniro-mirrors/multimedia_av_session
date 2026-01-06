@@ -69,7 +69,13 @@ ohos_fuzztest("AVSessionServiceExtFuzzTest") {
   }
 
   if (multimedia_av_session_enable_data_object) {
+    defines += [ "DATA_OBJECT_ENABLE" ]
     external_deps += [ "data_object:distributeddataobject_impl" ]
+  }
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    defines += [ "DSOFTBUS_ENABLE" ]
+    external_deps += [ "dsoftbus:softbus_client" ]
   }
 
   if (castplus_cast_engine_enable) {
