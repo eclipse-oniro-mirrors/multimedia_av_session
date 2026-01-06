@@ -359,7 +359,7 @@ void AVSessionService::HandleUserEvent(const std::string &type, const int &userI
         SLOGI("userSwitch userId:%{public}d curUserId:%{public}d hasCapsule:%{public}d",
             userId, curUserId, hasMediaCapsule_.load());
         std::lock_guard lockGuard(sessionServiceLock_);
-        NotifySystemUI(nullptr, true, false, false, false);
+        NotifySystemUI(nullptr, false, false);
     }
     GetUsersManager().NotifyAccountsEvent(type, userId);
     if (type == AVSessionUsersManager::accountEventSwitched) {
@@ -438,7 +438,7 @@ void AVSessionService::HandleMediaCardStateChangeEvent(std::string isAppear)
                 }
                 {
                     std::lock_guard lockGuard(sessionServiceLock_);
-                    NotifySystemUI(nullptr, true, false, false, false);
+                    NotifySystemUI(nullptr, false, false);
                     hasCardStateChangeStopTask_ = false;
                 }
             }, "CheckCardStateChangeStop", cancelTimeout);
@@ -736,7 +736,7 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
             UpdateTopSession(session);
             if (topSession_ != nullptr &&
                 (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video")) {
-                AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false, false);
+                AVSessionService::NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
                 PublishEvent(mediaPlayStateTrue);
                 auto ret = BackgroundTaskMgr::BackgroundTaskMgrHelper::AVSessionNotifyUpdateNotification(
                     topSession_->GetUid(), topSession_->GetPid(), true);
@@ -788,7 +788,7 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
                 HandleOtherSessionPlaying(result);
             }
             if (!hasOtherPlayingSession) {
-                AVSessionService::NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), false, false);
+                AVSessionService::NotifySystemUI(nullptr, isPlaying && IsCapsuleNeeded(), false);
             }
 #ifdef START_STOP_ON_DEMAND_ENABLE
             PublishEvent(mediaPlayStateTrue);
@@ -914,8 +914,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         if (AudioAdapter::GetInstance().GetRendererRunning(sessionItem->GetUid(), sessionItem->GetPid())) {
             SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
             UpdateTopSession(sessionItem);
-            AVSessionDescriptor selectSession = sessionItem->GetDescriptor();
-            NotifySystemUI(&selectSession, true, IsCapsuleNeeded(), false, false);
+            NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
             PublishEvent(mediaPlayStateTrue);
         }
     } else {
@@ -1397,7 +1396,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         CHECK_AND_RETURN_LOG(hasMediaCapsule_.load(), "notifysystemui but no capsule here");
         if (session && topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
             SLOGI("MediaCapsule topsession %{public}s updateImage", topSession_->GetBundleName().c_str());
-            NotifySystemUI(nullptr, true, IsCapsuleNeeded() && hasMediaCapsule_.load(), isMediaChange, false);
+            NotifySystemUI(nullptr, IsCapsuleNeeded() && hasMediaCapsule_.load(), isMediaChange);
         }
     });
 
@@ -1424,7 +1423,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
                 HandleOtherSessionPlaying(result);
             }
             if (!hasOtherSessionPlaying) {
-                NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isMediaChange, false);
+                NotifySystemUI(nullptr, isPlaying && IsCapsuleNeeded(), isMediaChange);
             }
             return;
         }
@@ -1439,7 +1438,7 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), session);
         CHECK_AND_RETURN_LOG(it != sessionListForFront->end(), "mediasession not in frontlist");
         UpdateTopSession(session);
-        NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isMediaChange, false);
+        NotifySystemUI(nullptr, isPlaying && IsCapsuleNeeded(), isMediaChange);
     });
 }
 
@@ -1481,7 +1480,7 @@ void AVSessionService::AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessio
                 HandleOtherSessionPlaying(result);
             }
             if (!hasOtherSessionPlaying) {
-                NotifySystemUI(nullptr, true, isPlaying && IsCapsuleNeeded(), isChange, false);
+                NotifySystemUI(nullptr, isPlaying && IsCapsuleNeeded(), isChange);
             }
             return;
         }
@@ -1490,7 +1489,7 @@ void AVSessionService::AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessio
             SLOGI("MediaCapsule fresh castSession %{public}s to top, isMediaChange %{public}d",
                 session->GetBundleName().c_str(), isChange);
             UpdateTopSession(session);
-            NotifySystemUI(nullptr, true, isPlaying, isChange, false);
+            NotifySystemUI(nullptr, isPlaying, isChange);
             bool updateOrderResult = UpdateOrder(session);
             CHECK_AND_RETURN_LOG(updateOrderResult, "UpdateOrder fail");
         }
@@ -1541,7 +1540,7 @@ void AVSessionService::AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionI
         sessionInfo.uid = session->GetUid();
         sessionInfo.pid = session->GetPid();
         SelectFocusSession(sessionInfo);
-        NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false, false);
+        NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
     });
 }
 
@@ -1559,8 +1558,7 @@ void AVSessionService::AddCastServiceCallback(sptr<AVSessionItem>& sessionItem)
         sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist");
         if (isConnect) {
-            AVSessionDescriptor selectSession = session->GetDescriptor();
-            NotifySystemUI(&selectSession, true, true, false, true);
+            NotifySystemUI(session, true, false);
         } else {
             int32_t ret = Notification::NotificationHelper::CancelNotification(
                 std::to_string(session->GetDescriptor().userId_), photoNotifyId);
@@ -1614,8 +1612,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
         if (topSession_ && topSession_.GetRefPtr() == session.GetRefPtr()) {
-            AVSessionDescriptor selectSession = session->GetDescriptor();
-            NotifySystemUI(&selectSession, true, IsCapsuleNeeded() && hasMediaCapsule_.load(), false, false);
+            NotifySystemUI(nullptr, IsCapsuleNeeded() && hasMediaCapsule_.load(), false);
         }
     });
     AddCapsuleServiceCallback(sessionItem);
@@ -3453,7 +3450,7 @@ void AVSessionService::HandleOtherSessionPlaying(sptr<AVSessionItem>& session)
     bool updateOrderResult = UpdateOrder(session);
     CHECK_AND_RETURN_LOG(updateOrderResult, "UpdateOrder fail");
     if (session->GetSessionType() == "audio" || session->GetSessionType() == "video") {
-        AVSessionService::NotifySystemUI(nullptr, true, IsCapsuleNeeded(), false, false);
+        AVSessionService::NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
     }
 }
 
@@ -4298,10 +4295,10 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 }
 
 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWantAgent(
-    const AVSessionDescriptor* histroyDescriptor, bool isPhoto)
+    sptr<AVSessionItem> photoSession)
 {
-    if (histroyDescriptor == nullptr && topSession_ == nullptr) {
-        SLOGE("CreateWantAgent error, histroyDescriptor and topSession_ null");
+    if (photoSession == nullptr && topSession_ == nullptr) {
+        SLOGE("CreateWantAgent error, photoSession and topSession_ null");
         return nullptr;
     }
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
@@ -4314,22 +4311,21 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     auto uid = -1;
     auto isCustomer = false;
     bool isAnco = false;
-    if (topSession_ != nullptr && !isPhoto) {
+    if (photoSession != nullptr) {
+        bundleName = photoSession->GetBundleName();
+        uid = photoSession->GetUid();
+        launWantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(photoSession->GetLaunchAbility());
+        auto res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launWantAgent, want);
+        isCustomer = (res == AVSESSION_SUCCESS) && (bundleName == want->GetElement().GetBundleName());
+        abilityName = isCustomer ? want->GetElement().GetAbilityName() : photoSession->GetAbilityName();
+    } else if (topSession_ != nullptr) {
         bundleName = topSession_->GetBundleName();
         uid = topSession_->GetUid();
         launWantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(topSession_->GetLaunchAbility());
         auto res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launWantAgent, want);
         isCustomer = (res == AVSESSION_SUCCESS) && (bundleName == want->GetElement().GetBundleName());
         abilityName = isCustomer ? want->GetElement().GetAbilityName() : topSession_->GetAbilityName();
-        SLOGI("CreateWantAgent GetWant res=%{public}d", res);
         isAnco = topSession_->GetUid() == audioBrokerUid;
-    }
-    if (histroyDescriptor != nullptr) {
-        SLOGI("CreateWantAgent with historyDescriptor");
-        bundleName = histroyDescriptor->elementName_.GetBundleName();
-        abilityName = histroyDescriptor->elementName_.GetAbilityName();
-        uid = histroyDescriptor->uid_;
-        isCustomer = false;
     }
     SLOGI("CreateWantAgent bundleName:%{public}s,abilityName:%{public}s,isCustomer:%{public}d",
         bundleName.c_str(), abilityName.c_str(), isCustomer);
@@ -4476,12 +4472,12 @@ void AddCapsule(std::string title, bool isCapsuleUpdate, std::shared_ptr<Media::
     SLOGI("PublishNotification with MediaCapsule");
 }
 
-void GetBundlePixelMap(const AVSessionDescriptor* historyDescriptor, std::shared_ptr<Media::PixelMap>& pixelMap)
+void GetBundlePixelMap(sptr<AVSessionItem> photoSession, std::shared_ptr<Media::PixelMap>& pixelMap)
 {
-    CHECK_AND_RETURN_LOG(historyDescriptor != nullptr, "GetBundlePixelMap historyDescriptor nullptr error");
+    CHECK_AND_RETURN_LOG(photoSession != nullptr, "GetBundlePixelMap photoSession nullptr error");
     std::string icon;
-    BundleStatusAdapter::GetInstance().GetBundleIcon(historyDescriptor->elementName_.GetBundleName(),
-        historyDescriptor->elementName_.GetAbilityName(), icon);
+    BundleStatusAdapter::GetInstance().GetBundleIcon(photoSession->GetBundleName(),
+        photoSession->GetAbilityName(), icon);
     CHECK_AND_RETURN_LOG(!icon.empty(), "icon is empty");
     Media::SourceOptions opts;
     uint32_t errorCode = 0;
@@ -4552,19 +4548,6 @@ std::string AVSessionService::GetLocalTitle()
     return localTitle;
 }
 
-std::string AVSessionService::GetDescriptorTitle(const AVSessionDescriptor* historyDescriptor)
-{
-    CHECK_AND_RETURN_RET_LOG(historyDescriptor != nullptr, " ", "GetDescriptorTitle historyDescriptor nullptr error");
-    std::string descriptorTitle = " ";
-    for (auto& session : GetContainer().GetAllSessions()) {
-        if (session != nullptr && session->GetSessionId() == historyDescriptor->sessionId_) {
-            descriptorTitle = session->GetMetaData().GetTitle();
-        }
-    }
-    SLOGI("GetDescriptorTitle localTitle:%{public}s", AVSessionUtils::GetAnonyTitle(descriptorTitle.c_str()).c_str());
-    return descriptorTitle;
-}
-
 void AVSessionService::DealFlowControl(int32_t uid, bool isBroker)
 {
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
@@ -4584,8 +4567,7 @@ void AVSessionService::DealFlowControl(int32_t uid, bool isBroker)
 }
 
 // LCOV_EXCL_START
-void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession,
-    bool addCapsule, bool isCapsuleUpdate, bool isPhoto)
+void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool addCapsule, bool isCapsuleUpdate)
 {
 #ifdef DEVICE_MANAGER_ENABLE
     bool is2in1 = (GetLocalDeviceType() == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
@@ -4599,31 +4581,32 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
 #endif
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
-    SLOGI("NotifySystemUI isActiveNtf %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d, isPhoto %{public}d",
-        isActiveSession, addCapsule, isCapsuleUpdate, isPhoto);
+    SLOGI("NotifySystemUI photoSession %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d",
+        static_cast<int>(photoSession != nullptr), addCapsule, isCapsuleUpdate);
     Notification::NotificationRequest request;
     std::shared_ptr<Notification::NotificationLocalLiveViewContent> localLiveViewContent =
         std::make_shared<Notification::NotificationLocalLiveViewContent>();
     CHECK_AND_RETURN_LOG(localLiveViewContent != nullptr, "avsession item local live view content nullptr error");
-    localLiveViewContent->SetType(isPhoto ? systemuiLiveviewTypeCodePhoto : systemuiLiveviewTypeCodeMediacontroller);
-    localLiveViewContent->SetTitle(historyDescriptor && !isActiveSession ? "" : "AVSession NotifySystemUI");
-    localLiveViewContent->SetText(historyDescriptor && !isActiveSession ? "" : "AVSession NotifySystemUI");
+    localLiveViewContent->SetType(photoSession ?
+        systemuiLiveviewTypeCodePhoto : systemuiLiveviewTypeCodeMediacontroller);
+    localLiveViewContent->SetTitle("AVSession NotifySystemUI");
+    localLiveViewContent->SetText("AVSession NotifySystemUI");
 
     std::shared_ptr<Notification::NotificationContent> content =
         std::make_shared<Notification::NotificationContent>(localLiveViewContent);
     CHECK_AND_RETURN_LOG(content != nullptr, "avsession item notification content nullptr error");
-    int32_t userId = historyDescriptor ? historyDescriptor->userId_ : GetUsersManager().GetCurrentUserId();
-    SLOGD("get historyDescriptor %{public}d with userId:%{public}d",
-        static_cast<int>(historyDescriptor != nullptr), userId);
+    int32_t userId = photoSession ? photoSession->GetUserId() : GetUsersManager().GetCurrentUserId();
     auto uid = topSession_ ? (topSession_->GetUid() == audioBrokerUid ?
         BundleStatusAdapter::GetInstance().GetUidFromBundleName(topSession_->GetBundleName(), userId) :
-        topSession_->GetUid()) : (historyDescriptor ? historyDescriptor->uid_ : -1);
+        topSession_->GetUid()) : -1;
 
     std::shared_ptr<Media::PixelMap> pixelMap;
-    if (isPhoto) {
-        GetBundlePixelMap(historyDescriptor, pixelMap);
-        AddCapsule(GetDescriptorTitle(historyDescriptor), isCapsuleUpdate, pixelMap, localLiveViewContent, &(request));
-        request.SetOwnerUid(historyDescriptor->uid_);
+    bool isBroker = false;
+    if (photoSession) {
+        GetBundlePixelMap(photoSession, pixelMap);
+        AddCapsule(photoSession->GetMetaData().GetTitle(), isCapsuleUpdate, pixelMap,
+            localLiveViewContent, &(request));
+        request.SetOwnerUid(photoSession->GetUid());
         request.SetNotificationId(photoNotifyId);
     } else {
         if (topSession_) {
@@ -4649,9 +4632,8 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
         hasMediaCapsule_ = addCapsule;
         request.SetOwnerUid(uid);
         request.SetNotificationId(mediacontrollerNotifyId);
+        isBroker = topSession_ != nullptr && topSession_->GetUid() == audioBrokerUid;
     }
-  
-    bool isBroker = topSession_ != nullptr && topSession_->GetUid() == audioBrokerUid;
     request.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
     request.SetContent(content);
     request.SetCreatorUid(avSessionUid);
@@ -4661,11 +4643,12 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     if (isBroker) {
         request.SetOwnerUserId(userId);
     }
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(historyDescriptor, isPhoto);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(photoSession);
     CHECK_AND_RETURN_LOG(wantAgent != nullptr, "wantAgent nullptr error");
     request.SetWantAgent(wantAgent);
     request.SetLabel(std::to_string(userId));
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removeWantAgent = CreateNftRemoveWant(uid, isPhoto);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removeWantAgent = CreateNftRemoveWant(
+        photoSession ? photoSession->GetUid() : uid,  photoSession ? true : false);
     request.SetRemovalWantAgent(removeWantAgent);
     {
         std::lock_guard lockGuard(notifyLock_);
@@ -4673,7 +4656,7 @@ void AVSessionService::NotifySystemUI(const AVSessionDescriptor* historyDescript
     }
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("NotifyFlowControl");
     Notification::NotificationHelper::SetHashCodeRule(1);
-    if (isPhoto) {
+    if (photoSession) {
         result = Notification::NotificationHelper::PublishNotification(request);
         SLOGI("PublishNotification uid %{public}d, user id %{public}d, result %{public}d", uid, userId, result);
     } else {

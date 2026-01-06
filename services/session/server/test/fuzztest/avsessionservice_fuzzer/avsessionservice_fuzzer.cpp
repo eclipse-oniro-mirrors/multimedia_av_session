@@ -488,7 +488,6 @@ void AvSessionServiceClientTest(sptr<AVSessionService> service)
     service->RegisterClientDeathObserver(clientDeath);
 
     service->NotifyTopSessionChanged(descriptor);
-    service->CreateWantAgent(&descriptor, false);
 }
 
 void AvSessionServiceHandleEventTest(sptr<AVSessionService> service)
