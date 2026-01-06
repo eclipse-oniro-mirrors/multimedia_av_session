@@ -108,6 +108,7 @@ void OHAVSessionCallbackImpl::OnOutputDeviceChange(const int32_t connectionState
 {
     for (auto it = outputDeviceChangeCallbacks_.begin(); it != outputDeviceChangeCallbacks_.end(); ++it) {
         AVSession_OutputDeviceInfo *deviceInfo = OHDeviceInfo::ConvertDesc(outputDeviceInfo);
+        CHECK_AND_CONTINUE_LOG(deviceInfo != nullptr, "OnOutputDeviceChange local variable deviceInfo is nullptr.");
         avSessionOutputDeviceInfo_->size = deviceInfo->size;
         avSessionOutputDeviceInfo_->deviceInfos = deviceInfo->deviceInfos;
         (*it)(avsession_, (AVSession_ConnectionState)connectionState, avSessionOutputDeviceInfo_.get());
