@@ -190,8 +190,9 @@ void AVSessionAudioAdapterTest()
 
 void CollaborationManagerTest()
 {
-    CollaborationManager::GetInstance().SendCollaborationOnStop([]()->void {});
-    CollaborationManager::GetInstance().SendCollaborationApplyResult([](int32_t)->void {});
+    CollaborationManager collaborationManager;
+    collaborationManager.SendCollaborationOnStop([]()->void {});
+    collaborationManager.SendCollaborationApplyResult([](int32_t)->void {});
 }
 
 void PluginLibTest()
