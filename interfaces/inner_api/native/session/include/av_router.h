@@ -303,6 +303,14 @@ public:
      * @since 13
     */
     virtual int64_t GetMirrorCastHandle() = 0;
+    
+    /**
+     * @brief get mirror deviceid.
+     *
+     * @return { int64_t } mirror deviceid.
+     * @since 22
+    */
+    virtual std::string GetMirrorDeviceId() = 0;
 
     /**
      * @brief Listen to the change of cast state change.

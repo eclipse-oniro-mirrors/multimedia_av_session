@@ -1782,7 +1782,8 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
     std::lock_guard lockGuard(castLock_);
 
     if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && castHandle_ <= 0 &&
-        descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO) {
+        descriptor_.sessionType_ == AVSession::SESSION_TYPE_VIDEO &&
+        AVRouter::GetInstance().GetMirrorDeviceId() == outputDeviceInfo.deviceInfos_[0].deviceId_) {
         SetCastHandle(AVRouter::GetInstance().GetMirrorCastHandle());
         InitAVCastControllerProxy();
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_,
@@ -1991,8 +1992,9 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
 {
-    SLOGI("OnCastStateChange in with state: %{public}d | id: %{public}s", static_cast<int32_t>(castState),
-        AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_.c_str()).c_str());
+    SLOGI("OnCastStateChange in with BundleName: %{public}s | state: %{public}d | id: %{public}s",
+        GetBundleName().c_str(), static_cast<int32_t>(castState),
+        AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_).c_str());
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
