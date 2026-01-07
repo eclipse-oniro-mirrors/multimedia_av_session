@@ -445,6 +445,23 @@ int32_t TaiheUtils::ToAniDoubleObject(ani_env *env, double in, ani_object &out)
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
+int32_t TaiheUtils::ToAniLongObject(ani_env *env, int64_t in, ani_object &out)
+{
+    CHECK_RETURN(env != nullptr, "env is nullptr", OHOS::AVSession::AVSESSION_ERROR);
+
+    ani_class cls {};
+    CHECK_RETURN(env->FindClass("std.core.Long", &cls) == ANI_OK,
+        "FindClass std.core.Long failed", OHOS::AVSession::AVSESSION_ERROR);
+
+    ani_method ctorMethod {};
+    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "l:", &ctorMethod) == ANI_OK,
+        "Class_FindMethod std.core.Long <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
+
+    CHECK_RETURN(env->Object_New(cls, ctorMethod, &out, static_cast<ani_long>(in)) == ANI_OK,
+        "Object_New std.core.Long failed", OHOS::AVSession::AVSESSION_ERROR);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
 static int32_t ToAniString(ani_env *env, const std::string &str, ani_string &aniString)
 {
     CHECK_RETURN(env != nullptr, "env is nullptr", OHOS::AVSession::AVSESSION_ERROR);
@@ -1353,6 +1370,29 @@ AudioCapabilities TaiheUtils::ToTaiheAudioCapabilities(const OHOS::AVSession::Au
         streamInfos.emplace_back(reinterpret_cast<uintptr_t>(aniObj));
     }
     out.streamInfos = taihe::array<uintptr_t>(streamInfos);
+    return out;
+}
+
+CommandInfo TaiheUtils::ToTaiheCommandInfo(const OHOS::AVSession::AVControlCommand& in)
+{
+    OHOS::AVSession::CommandInfo cmdInfo;
+    in.GetCommandInfo(cmdInfo);
+
+    std::string callerBundleName;
+    std::string callerModuleName;
+    std::string callerDeviceId;
+    std::string callerType;
+    cmdInfo.GetCallerBundleName(callerBundleName);
+    cmdInfo.GetCallerModuleName(callerModuleName);
+    cmdInfo.GetCallerDeviceId(callerDeviceId);
+    cmdInfo.GetCallerType(callerType);
+
+    CommandInfo out = {
+        .callerBundleName = optional<taihe::string>(std::in_place_t {}, taihe::string(callerBundleName)),
+        .callerModuleName = optional<taihe::string>(std::in_place_t {}, taihe::string(callerModuleName)),
+        .callerDeviceId = optional<taihe::string>(std::in_place_t {}, taihe::string(callerDeviceId)),
+        .callerType = optional<CallerType>(std::in_place_t {}, CallerType::from_value(callerType)),
+    };
     return out;
 }
 } // namespace ANI::AVSession

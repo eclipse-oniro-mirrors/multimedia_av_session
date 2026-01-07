@@ -73,13 +73,13 @@ public:
     void DestroySync();
     void SendCustomDataSync(uintptr_t data);
 
-    void OnPlay(callback_view<void()> callback);
+    void OnPlay(callback_view<void(CommandInfo const& commandInfo)> callback);
     void OnPause(callback_view<void()> callback);
     void OnStop(callback_view<void()> callback);
-    void OnPlayNext(callback_view<void()> callback);
-    void OnPlayPrevious(callback_view<void()> callback);
-    void OnFastForward(callback_view<void(int64_t)> callback);
-    void OnRewind(callback_view<void(int64_t)> callback);
+    void OnPlayNext(callback_view<void(CommandInfo const& commandInfo)> callback);
+    void OnPlayPrevious(callback_view<void(CommandInfo const& commandInfo)> callback);
+    void OnFastForward(callback_view<void(int64_t time, CommandInfo const& commandInfo)> callback);
+    void OnRewind(callback_view<void(int64_t time, CommandInfo const& commandInfo)> callback);
     void OnPlayFromAssetId(callback_view<void(int64_t)> callback);
     void OnPlayWithAssetId(callback_view<void(string_view)> callback);
     void OnSeek(callback_view<void(int64_t)> callback);
@@ -97,13 +97,13 @@ public:
     void OnCastDisplayChange(callback_view<void(CastDisplayInfo const&)> callback);
     void OnCustomDataChange(callback_view<void(uintptr_t)> callback);
 
-    void OffPlay(optional_view<callback<void()>> callback);
+    void OffPlay(optional_view<callback<void(CommandInfo const& commandInfo)>> callback);
     void OffPause(optional_view<callback<void()>> callback);
     void OffStop(optional_view<callback<void()>> callback);
-    void OffPlayNext(optional_view<callback<void()>> callback);
-    void OffPlayPrevious(optional_view<callback<void()>> callback);
-    void OffFastForward(optional_view<callback<void()>> callback);
-    void OffRewind(optional_view<callback<void()>> callback);
+    void OffPlayNext(optional_view<callback<void(CommandInfo const& commandInfo)>> callback);
+    void OffPlayPrevious(optional_view<callback<void(CommandInfo const& commandInfo)>> callback);
+    void OffFastForward(optional_view<callback<void(int64_t time, CommandInfo const& commandInfo)>> callback);
+    void OffRewind(optional_view<callback<void(int64_t time, CommandInfo const& commandInfo)>> callback);
     void OffPlayFromAssetId(optional_view<callback<void(int64_t)>> callback);
     void OffPlayWithAssetId(optional_view<callback<void(string_view)>> callback);
     void OffSeek(optional_view<callback<void(int64_t)>> callback);

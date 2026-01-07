@@ -17,6 +17,7 @@
 
 from ohos.multimodalInput.keyEvent use KeyEvent;
 from ohos.multimedia.avCastPickerParam use AVCastPickerState;
+from ohos.multimedia.avCastPickerParam use AVCastPickerStyle;
 
 @!sts_inject("""
 static { loadLibrary("avsession_taihe.z"); }
@@ -347,6 +348,7 @@ union AVControlParameterType {
 struct AVControlCommand {
   command: String;
   parameter: Optional<AVControlParameterType>;
+  commandInfo: Optional<CommandInfo>;
 }
 
 interface AVSession {
@@ -423,13 +425,13 @@ interface AVSession {
   @gen_promise("sendCustomData")
   SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
 
-  OnPlay(callback: () => void): void;
+  OnPlay(callback: (commandInfo: CommandInfo) => void): void;
   OnPause(callback: () => void): void;
   OnStop(callback: () => void): void;
-  OnPlayNext(callback: () => void): void;
-  OnPlayPrevious(callback: () => void): void;
-  OnFastForward(callback: (time: i64) => void): void;
-  OnRewind(callback: (time: i64) => void): void;
+  OnPlayNext(callback: (commandInfo: CommandInfo) => void): void;
+  OnPlayPrevious(callback: (commandInfo: CommandInfo) => void): void;
+  OnFastForward(callback: (time: i64, commandInfo: CommandInfo) => void): void;
+  OnRewind(callback: (time: i64, commandInfo: CommandInfo) => void): void;
   OnPlayWithAssetId(callback: (assetId: String) => void): void;
   OnSeek(callback: (time: i64) => void): void;
   OnSetSpeed(callback: (speed: f64) => void): void;
@@ -446,13 +448,13 @@ interface AVSession {
   OnCastDisplayChange(callback: (data: CastDisplayInfo) => void): void;
   OnCustomDataChange(callback: (data: @sts_type("Record<String, Object>") Opaque) =>void): void;
 
-  OffPlay(callback: Optional<() => void>): void;
+  OffPlay(callback: Optional<(commandInfo: CommandInfo) => void>): void;
   OffPause(callback: Optional<() => void>): void;
   OffStop(callback: Optional<() => void>): void;
-  OffPlayNext(callback: Optional<() => void>): void;
-  OffPlayPrevious(callback: Optional<() => void>): void;
-  OffFastForward(callback: Optional<() => void>): void;
-  OffRewind(callback: Optional<() => void>): void;
+  OffPlayNext(callback: Optional<(commandInfo: CommandInfo) => void>): void;
+  OffPlayPrevious(callback: Optional<(commandInfo: CommandInfo) => void>): void;
+  OffFastForward(callback: Optional<(time: i64, commandInfo: CommandInfo) => void>): void;
+  OffRewind(callback: Optional<(time: i64, commandInfo: CommandInfo) => void>): void;
   OffPlayWithAssetId(callback: Optional<(assetId: String) => void>): void;
   OffSeek(callback: Optional<(time: i64) => void>): void;
   OffSetSpeed(callback: Optional<(speed: f64) => void>): void;
@@ -666,6 +668,9 @@ class AVCastPickerHelper {
 @gen_promise("createAVSession")
 function CreateAVSessionSync(context: @sts_type("Context") Opaque, tag: String, type: String): AVSession;
 
+@gen_promise("getAVSession")
+function GetAVSessionSync(context: @sts_type("Context") Opaque): AVSession;
+
 @gen_async("getAllSessionDescriptors")
 @gen_promise("getAllSessionDescriptors")
 function GetAllSessionDescriptorsSync(): Array<AVSessionDescriptor>;
@@ -686,6 +691,9 @@ function CreateControllerSync(sessionId: String): AVSessionController;
 
 @gen_promise("startAVPlayback")
 function StartAVPlaybackSync(bundleName: String, assetId: String): void;
+
+@gen_promise("startAVPlayback")
+function StartAVPlaybackInfoSync(bundleName: String, assetId: String, info: CommandInfo): void;
 
 @gen_async("getAVCastController")
 @gen_promise("getAVCastController")
@@ -741,6 +749,9 @@ function StartDeviceLoggingSync(url: String, maxSize: Optional<i32>): void;
 function StopDeviceLoggingSync(): void;
 
 function CreateAVKeyEventSync(nativePtr: i64): KeyEvent;
+
+@gen_promise("getSessionDescriptors")
+function GetSessionDescriptorsSync(category: SessionCategory): Array<AVSessionDescriptor>;
 
 enum DistributedSessionType :i32 {
   TYPE_SESSION_REMOTE = 0,
@@ -846,4 +857,31 @@ enum AVSessionErrorCode : i32 {
   ERR_CODE_CAST_CONTROL_DRM_DEVICE_REVOKED = 6616007,
   ERR_CODE_CAST_CONTROL_DRM_LICENSE_EXPIRED = 6616008,
   ERR_CODE_CAST_CONTROL_DRM_PROVIDE_KEY_RESPONSE_ERROR = 6616100,
+}
+
+enum CallerType : String {
+  TYPE_CAST = "cast",
+  TYPE_BLUETOOTH = "bluetooth",
+  TYPE_NEARLINK = "nearlink",
+  TYPE_APP = "app",
+}
+
+enum SessionCategory : i32 {
+  CATEGORY_ACTIVE = 1,
+  CATEGORY_NOT_ACTIVE = 2,
+  CATEGORY_ALL = 3,
+}
+
+struct MenuPosition {
+  x: i32;
+  y: i32;
+  width: i32;
+  height: i32;
+}
+
+struct CommandInfo {
+  callerBundleName: Optional<String>;
+  callerModuleName: Optional<String>;
+  callerDeviceId: Optional<String>;
+  callerType: Optional<CallerType>;
 }

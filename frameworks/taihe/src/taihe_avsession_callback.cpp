@@ -73,11 +73,12 @@ void TaiheAVSessionCallback::HandleEvent(int32_t event, TaiheFuncExecute execute
 void TaiheAVSessionCallback::OnPlay(const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnPlay");
-    auto execute = [](std::shared_ptr<uintptr_t> method) {
-        std::shared_ptr<taihe::callback<void()>> cacheCallback =
-            std::reinterpret_pointer_cast<taihe::callback<void()>>(method);
+    CommandInfo infoTaihe = TaiheUtils::ToTaiheCommandInfo(cmd);
+    auto execute = [infoTaihe](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(CommandInfo const& commandInfo)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(CommandInfo const& commandInfo)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
-        (*cacheCallback)();
+        (*cacheCallback)(infoTaihe);
     };
     HandleEvent(EVENT_PLAY, execute);
 }
@@ -109,11 +110,12 @@ void TaiheAVSessionCallback::OnStop()
 void TaiheAVSessionCallback::OnPlayNext(const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnPlayNext");
-    auto execute = [](std::shared_ptr<uintptr_t> method) {
-        std::shared_ptr<taihe::callback<void()>> cacheCallback =
-            std::reinterpret_pointer_cast<taihe::callback<void()>>(method);
+    CommandInfo infoTaihe = TaiheUtils::ToTaiheCommandInfo(cmd);
+    auto execute = [infoTaihe](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(CommandInfo const& commandInfo)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(CommandInfo const& commandInfo)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
-        (*cacheCallback)();
+        (*cacheCallback)(infoTaihe);
     };
     HandleEvent(EVENT_PLAY_NEXT, execute);
 }
@@ -121,11 +123,12 @@ void TaiheAVSessionCallback::OnPlayNext(const OHOS::AVSession::AVControlCommand&
 void TaiheAVSessionCallback::OnPlayPrevious(const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnPlayPrevious");
-    auto execute = [](std::shared_ptr<uintptr_t> method) {
-        std::shared_ptr<taihe::callback<void()>> cacheCallback =
-            std::reinterpret_pointer_cast<taihe::callback<void()>>(method);
+    CommandInfo infoTaihe = TaiheUtils::ToTaiheCommandInfo(cmd);
+    auto execute = [infoTaihe](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(CommandInfo const& commandInfo)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(CommandInfo const& commandInfo)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
-        (*cacheCallback)();
+        (*cacheCallback)(infoTaihe);
     };
     HandleEvent(EVENT_PLAY_PREVIOUS, execute);
 }
@@ -133,11 +136,12 @@ void TaiheAVSessionCallback::OnPlayPrevious(const OHOS::AVSession::AVControlComm
 void TaiheAVSessionCallback::OnFastForward(int64_t time, const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnFastForward");
-    auto execute = [time](std::shared_ptr<uintptr_t> method) {
-        std::shared_ptr<taihe::callback<void(int64_t)>> cacheCallback =
-            std::reinterpret_pointer_cast<taihe::callback<void(int64_t)>>(method);
+    CommandInfo infoTaihe = TaiheUtils::ToTaiheCommandInfo(cmd);
+    auto execute = [time, infoTaihe](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(int64_t time, CommandInfo const& commandInfo)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(int64_t time, CommandInfo const& commandInfo)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
-        (*cacheCallback)(time);
+        (*cacheCallback)(time, infoTaihe);
     };
     HandleEvent(EVENT_FAST_FORWARD, execute);
 }
@@ -145,11 +149,12 @@ void TaiheAVSessionCallback::OnFastForward(int64_t time, const OHOS::AVSession::
 void TaiheAVSessionCallback::OnRewind(int64_t time, const OHOS::AVSession::AVControlCommand& cmd)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnRewind");
-    auto execute = [time](std::shared_ptr<uintptr_t> method) {
-        std::shared_ptr<taihe::callback<void(int64_t)>> cacheCallback =
-            std::reinterpret_pointer_cast<taihe::callback<void(int64_t)>>(method);
+    CommandInfo infoTaihe = TaiheUtils::ToTaiheCommandInfo(cmd);
+    auto execute = [time, infoTaihe](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(int64_t time, CommandInfo const& commandInfo)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(int64_t time, CommandInfo const& commandInfo)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
-        (*cacheCallback)(time);
+        (*cacheCallback)(time, infoTaihe);
     };
     HandleEvent(EVENT_REWIND, execute);
 }
@@ -194,11 +199,12 @@ void TaiheAVSessionCallback::OnSetLoopMode(int32_t loopMode)
 void TaiheAVSessionCallback::OnSetTargetLoopMode(int32_t targetLoopMode)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnSetTargetLoopMode");
-    auto execute = [targetLoopMode](std::shared_ptr<uintptr_t> method) {
-        std::shared_ptr<taihe::callback<void(int32_t)>> cacheCallback =
-            std::reinterpret_pointer_cast<taihe::callback<void(int32_t)>>(method);
+    LoopMode targetLoopModeTaihe = LoopMode::from_value(targetLoopMode);
+    auto execute = [targetLoopModeTaihe](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(LoopMode)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(LoopMode)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
-        (*cacheCallback)(targetLoopMode);
+        (*cacheCallback)(targetLoopModeTaihe);
     };
     HandleEvent(EVENT_SET_TARGET_LOOP_MODE, execute);
 }

@@ -553,6 +553,43 @@ struct AVSession CreateAVSessionSync(uintptr_t context, string_view tag, string_
     return output;
 }
 
+struct AVSession GetAVSessionSync(uintptr_t context)
+{
+    OHOS::AVSession::AVSessionTrace trace("GetAVSessionSync");
+    struct AVSession undefinedAVSession = make_holder<AVSessionImpl, struct AVSession>();
+    OHOS::AppExecFwk::ElementName elementName;
+    if (TaiheUtils::GetStageElementName(context, elementName) != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM], "invalid context");
+        return undefinedAVSession;
+    }
+    std::string tagString;
+    std::shared_ptr<OHOS::AVSession::AVSession> session;
+    int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().GetSession(elementName, tagString, session);
+    if (ret == OHOS::AVSession::AVSESSION_SUCCESS) {
+        SLOGE("getAVSession success");
+    }
+    std::string errMessage;
+    if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
+        errMessage = "getAVSession failed:session not exist";
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return undefinedAVSession;
+    } else {
+        errMessage = "getAVSession failed:native get session err:" + std::to_string(ret);
+        ret = OHOS::AVSession::AVSESSION_ERROR;
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return undefinedAVSession;
+    }
+
+    struct AVSession output = make_holder<AVSessionImpl, struct AVSession>();
+    ret = AVSessionImpl::NewInstance(session, output, taiheSession, tagString, elementName);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
+            "convert native object to ets object failed");
+        return undefinedAVSession;
+    }
+    return output;
+}
+
 array<AVSessionDescriptor> GetAllSessionDescriptorsSync()
 {
     std::vector<AVSessionDescriptor> emptyResult;
@@ -686,6 +723,38 @@ void StartAVPlaybackSync(string_view bundleName, string_view assetId)
     }
 
     int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().StartAVPlayback(bundleNameInner, assetIdInner);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "StartAVPlayback failed : native server exception";
+        if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "StartAVPlayback failed : native no permission";
+        } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
+            errMessage = "StartAVPlayback failed : native permission denied";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+}
+
+void StartAVPlaybackInfoSync(string_view bundleName, string_view assetId, CommandInfo info)
+{
+    std::string bundleNameInner;
+    if (TaiheUtils::GetString(bundleName, bundleNameInner) != OHOS::AVSession::AVSESSION_SUCCESS ||
+        bundleNameInner.empty()) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "StartAVPlayback invalid bundlename");
+        return;
+    }
+    std::string assetIdInner;
+    if (TaiheUtils::GetString(assetId, assetIdInner) != OHOS::AVSession::AVSESSION_SUCCESS || assetIdInner.empty()) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "StartAVPlayback invalid assetId");
+        return;
+    }
+    std::string moduleNameInner;
+    TaiheUtils::GetOptionalString(info.callerModuleName, moduleNameInner);
+
+    int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().StartAVPlayback(bundleNameInner, assetIdInner,
+        moduleNameInner);
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
         std::string errMessage = "StartAVPlayback failed : native server exception";
         if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
@@ -1164,6 +1233,33 @@ void StopDeviceLoggingSync()
 #endif
 }
 
+array<AVSessionDescriptor> GetSessionDescriptorsSync(SessionCategory category)
+{
+    int32_t sessionCategory = static_cast<OHOS::AVSession::SessionCategory>(category.get_value());
+    std::vector<AVSessionDescriptor> emptyResult;
+    std::vector<OHOS::AVSession::AVSessionDescriptor> descriptors;
+    if (!(sessionCategory >= OHOS::AVSession::SessionCategory::CATEGORY_ACTIVE && sessionCategory <=
+        OHOS::AVSession::SessionCategory::CATEGORY_ALL)) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "wrong session category");
+        return array<AVSessionDescriptor>(emptyResult);
+    }
+    int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().GetSessionDescriptors(sessionCategory, descriptors);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "GetSessionDescriptors failed : native no permission";
+        } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
+            errMessage = "GetSessionDescriptors failed : native permission denied";
+        } else {
+            errMessage = "GetSessionDescriptors failed : native server exception";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return array<AVSessionDescriptor>(emptyResult);
+    }
+    return TaiheUtils::ToTaiheAVSessionDescriptorArray(descriptors);
+}
+
 keyEvent::KeyEvent CreateAVKeyEventSync(int64_t nativePtr)
 {
     inputEvent::InputEvent undefinedInputEvent = {
@@ -1356,6 +1452,7 @@ AVCastPickerHelperInner CreateAVCastPickerHelperInnerSync(uintptr_t context)
 
 TH_EXPORT_CPP_API_CreateAVCastPickerHelperInnerSync(ANI::AVSession::CreateAVCastPickerHelperInnerSync);
 TH_EXPORT_CPP_API_CreateAVSessionSync(ANI::AVSession::CreateAVSessionSync);
+TH_EXPORT_CPP_API_GetAVSessionSync(ANI::AVSession::GetAVSessionSync);
 TH_EXPORT_CPP_API_GetAllSessionDescriptorsSync(ANI::AVSession::GetAllSessionDescriptorsSync);
 TH_EXPORT_CPP_API_GetHistoricalSessionDescriptorsSync(ANI::AVSession::GetHistoricalSessionDescriptorsSync);
 TH_EXPORT_CPP_API_GetHistoricalSessionDescriptorsOptionalSync(
@@ -1363,6 +1460,7 @@ TH_EXPORT_CPP_API_GetHistoricalSessionDescriptorsOptionalSync(
 TH_EXPORT_CPP_API_GetHistoricalAVQueueInfosSync(ANI::AVSession::GetHistoricalAVQueueInfosSync);
 TH_EXPORT_CPP_API_CreateControllerSync(ANI::AVSession::CreateControllerSync);
 TH_EXPORT_CPP_API_StartAVPlaybackSync(ANI::AVSession::StartAVPlaybackSync);
+TH_EXPORT_CPP_API_StartAVPlaybackInfoSync(ANI::AVSession::StartAVPlaybackInfoSync);
 TH_EXPORT_CPP_API_GetAVCastControllerSync(ANI::AVSession::GetAVCastControllerSync);
 TH_EXPORT_CPP_API_StartCastingSync(ANI::AVSession::StartCastingSync);
 TH_EXPORT_CPP_API_StopCastingSync(ANI::AVSession::StopCastingSync);
@@ -1378,6 +1476,7 @@ TH_EXPORT_CPP_API_SendSystemAVKeyEventSync(ANI::AVSession::SendSystemAVKeyEventS
 TH_EXPORT_CPP_API_SendSystemControlCommandSync(ANI::AVSession::SendSystemControlCommandSync);
 TH_EXPORT_CPP_API_StartDeviceLoggingSync(ANI::AVSession::StartDeviceLoggingSync);
 TH_EXPORT_CPP_API_StopDeviceLoggingSync(ANI::AVSession::StopDeviceLoggingSync);
+TH_EXPORT_CPP_API_GetSessionDescriptorsSync(ANI::AVSession::GetSessionDescriptorsSync);
 TH_EXPORT_CPP_API_CreateAVKeyEventSync(ANI::AVSession::CreateAVKeyEventSync);
 TH_EXPORT_CPP_API_OnDistributedSessionChange(ANI::AVSession::OnDistributedSessionChange);
 TH_EXPORT_CPP_API_OnSessionCreate(ANI::AVSession::OnSessionCreate);
