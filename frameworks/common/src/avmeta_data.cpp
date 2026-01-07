@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <climits>
 
 #include "avmeta_data.h"
 #include "avsession_log.h"
@@ -420,6 +421,7 @@ int AVMetaData::GetMediaImageTopic() const
 {
     CHECK_AND_RETURN_RET(mediaImage_ != nullptr, -1);
     std::vector<uint8_t> imgBuffer = mediaImage_->GetInnerImgBuffer();
+    CHECK_AND_RETURN_RET(imgBuffer.size() <= INT_MAX, -1);
     int imgSize = static_cast<int>(imgBuffer.size());
     CHECK_AND_RETURN_RET(imgSize > minImgSize_, -1);
     uint8_t imgTopicNumber = imgBuffer[imgSize / minImgSize_] + imgBuffer[imgSize / minImgSize_ + 1];
