@@ -865,7 +865,7 @@ void RemoveRegisterEvent(std::string eventName)
     registerEventList_.remove(convertEventType_[eventName]);
 }
 
-void AVSessionImpl::OnPlay(callback_view<void()> callback)
+void AVSessionImpl::OnPlay(callback_view<void(CommandInfo const& commandInfo)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "play";
@@ -910,7 +910,7 @@ void AVSessionImpl::OnStop(callback_view<void()> callback)
     }
 }
 
-void AVSessionImpl::OnPlayNext(callback_view<void()> callback)
+void AVSessionImpl::OnPlayNext(callback_view<void(CommandInfo const& commandInfo)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "playNext";
@@ -925,7 +925,7 @@ void AVSessionImpl::OnPlayNext(callback_view<void()> callback)
     }
 }
 
-void AVSessionImpl::OnPlayPrevious(callback_view<void()> callback)
+void AVSessionImpl::OnPlayPrevious(callback_view<void(CommandInfo const& commandInfo)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "playPrevious";
@@ -940,7 +940,7 @@ void AVSessionImpl::OnPlayPrevious(callback_view<void()> callback)
     }
 }
 
-void AVSessionImpl::OnFastForward(callback_view<void(int64_t)> callback)
+void AVSessionImpl::OnFastForward(callback_view<void(int64_t time, CommandInfo const& commandInfo)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "fastForward";
@@ -955,7 +955,7 @@ void AVSessionImpl::OnFastForward(callback_view<void(int64_t)> callback)
     }
 }
 
-void AVSessionImpl::OnRewind(callback_view<void(int64_t)> callback)
+void AVSessionImpl::OnRewind(callback_view<void(int64_t time, CommandInfo const& commandInfo)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     const std::string eventName = "rewind";
@@ -1199,7 +1199,7 @@ void AVSessionImpl::OnCustomDataChange(callback_view<void(uintptr_t)> callback)
     }
 }
 
-void AVSessionImpl::OffPlay(optional_view<callback<void()>> callback)
+void AVSessionImpl::OffPlay(optional_view<callback<void(CommandInfo const& commandInfo)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1259,7 +1259,7 @@ void AVSessionImpl::OffStop(optional_view<callback<void()>> callback)
     }
 }
 
-void AVSessionImpl::OffPlayNext(optional_view<callback<void()>> callback)
+void AVSessionImpl::OffPlayNext(optional_view<callback<void(CommandInfo const& commandInfo)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1279,7 +1279,7 @@ void AVSessionImpl::OffPlayNext(optional_view<callback<void()>> callback)
     }
 }
 
-void AVSessionImpl::OffPlayPrevious(optional_view<callback<void()>> callback)
+void AVSessionImpl::OffPlayPrevious(optional_view<callback<void(CommandInfo const& commandInfo)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1299,7 +1299,7 @@ void AVSessionImpl::OffPlayPrevious(optional_view<callback<void()>> callback)
     }
 }
 
-void AVSessionImpl::OffFastForward(optional_view<callback<void()>> callback)
+void AVSessionImpl::OffFastForward(optional_view<callback<void(int64_t time, CommandInfo const& commandInfo)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
@@ -1319,7 +1319,7 @@ void AVSessionImpl::OffFastForward(optional_view<callback<void()>> callback)
     }
 }
 
-void AVSessionImpl::OffRewind(optional_view<callback<void()>> callback)
+void AVSessionImpl::OffRewind(optional_view<callback<void(int64_t time, CommandInfo const& commandInfo)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {
