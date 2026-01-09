@@ -91,8 +91,8 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_REPEAT_CAST, 6600101},
     {ERR_WAIT_ALLCONNECT_TIMEOUT, 6600101},
     {ERR_ALLCONNECT_CAST_REJECT, 6600101},
-    {ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600110},
-    {ERR_DESKTOPLYRIC_NOT_ENABLE, 6600111},
+    {ERR_DESKTOPLYRIC_NOT_ENABLE, 6600110},
+    {ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600111},
 };
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 {
