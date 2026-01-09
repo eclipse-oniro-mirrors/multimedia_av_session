@@ -4270,11 +4270,12 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
     } else {
         if (cJSON_IsInvalid(checkValuesItem)) {
             isJsonDiscarded = true;
-            cJSON_Delete(checkValuesItem);
         }
+        isJsonDiscarded = cJSON_IsArray(checkValuesItem) ? isJsonDiscarded : true;
+        cJSON_Delete(checkValuesItem);
     }
     if (isJsonDiscarded) {
-        SLOGE("check content discarded! content %{public}s", content.c_str());
+        SLOGE("check content discarded or not array! content %{public}s", content.c_str());
         ofstream fileWrite;
         fileWrite.open(filePath.c_str(), ios::out | ios::trunc);
         if (!fileWrite.is_open()) {
