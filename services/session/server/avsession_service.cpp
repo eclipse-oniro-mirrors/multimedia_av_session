@@ -1831,8 +1831,8 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
 
 void AVSessionService::SetCriticalWhenCreate(sptr<AVSessionItem> sessionItem)
 {
-    int32_t currentAllSessionSize = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
-    SLOGI("size: %{public}d, Uid: %{public}d", currentAllSessionSize, sessionItem->GetUid());
+    uint32_t currentAllSessionSize = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
+    SLOGI("size: %{public}u, Uid: %{public}d", currentAllSessionSize, sessionItem->GetUid());
     if (currentAllSessionSize == 1) {
         if (sessionItem->GetUid() == ancoUid) {
             SetCritical(false);
@@ -3550,8 +3550,8 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
 
 void AVSessionService::SetCriticalWhenRelease(sptr<AVSessionItem> sessionItem)
 {
-    int32_t currentAllSessionSize = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
-    SLOGI("size: %{public}d, Uid: %{public}d", currentAllSessionSize, sessionItem->GetUid());
+    uint32_t currentAllSessionSize = GetUsersManager().GetContainerFromAll().GetAllSessions().size();
+    SLOGI("size: %{public}u, Uid: %{public}d", currentAllSessionSize, sessionItem->GetUid());
     if (currentAllSessionSize == 0) {
         SetCritical(false);
     } else if (currentAllSessionSize == 1) {
