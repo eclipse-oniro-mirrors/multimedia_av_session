@@ -18,7 +18,6 @@
 #include <dlfcn.h>
 #include <filesystem>
 #include <string>
-#include <openssl/crypto.h>
 
 #include "avsession_log.h"
 
@@ -39,9 +38,6 @@ PluginLib::PluginLib(const std::string &libName)
 PluginLib::~PluginLib()
 {
 #ifndef TEST_COVERAGE
-    if (handle_ != nullptr) {
-        OPENSSL_thread_stop();
-    }
     if (handle_ == nullptr || dlclose(handle_) != 0) {
         LogDlfcnErr("close lib failed");
     }

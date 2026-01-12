@@ -29,6 +29,9 @@ group("avsession_server") {
     "../etc:avsession_service.rc",
     "../etc:ohos.para.dac",
   ]
+  if (multimedia_av_session_enable_dsoftbus) {
+    deps += [ ":softbus_manager_dynamic" ]
+  }
 }
 
 group("avsession_server_static") {
@@ -244,7 +247,6 @@ av_session_ohos_library("avsession_service") {
 
   if (multimedia_av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
-    external_deps += [ "dsoftbus:softbus_client" ]
   }
 
   if (castplus_cast_engine_enable) {
@@ -291,7 +293,6 @@ av_session_ohos_library("avsession_service") {
 
   public_external_deps = [
     "cJSON:cjson",
-    "openssl:libcrypto_shared",
     "relational_store:native_rdb",
   ]
 
@@ -397,7 +398,6 @@ if (castplus_cast_engine_enable) {
       "image_framework:image_native",
       "input:libmmi-client",
       "ipc:ipc_single",
-      "openssl:libcrypto_shared",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
     ]
@@ -489,6 +489,64 @@ ohos_shared_library("avsession_dynamic_insight") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
+
+  subsystem_name = "multimedia"
+  part_name = "av_session"
+}
+
+
+ohos_shared_library("softbus_manager_dynamic") {
+  install_enable = true
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [ "server/softbus/softbus_session_manager_dynamic.cpp" ]
+
+  include_dirs = [
+    "./server",
+    "./server/migrate",
+    "./server/softbus",
+    "./../../interfaces/inner_api/native/session/include",
+  ]
+
+  cflags = [
+    "-fPIC",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
+  ]
+
+  if (!use_libfuzzer) {
+    cflags += [ "-flto" ]
+    ldflags = [
+      "-flto",
+      "-Wl,--gc-sections",
+    ]
+  }
+  cflags_cc = cflags
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
+
+  defines = []
+
+  deps = [
+    "../../frameworks/common:avsession_common",
+    "../../utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+
+  if (multimedia_av_session_enable_dsoftbus) {
+    defines += [ "DSOFTBUS_ENABLE" ]
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   subsystem_name = "multimedia"
   part_name = "av_session"
@@ -657,7 +715,6 @@ av_session_ohos_library("avsession_item") {
 
   public_external_deps = [
     "cJSON:cjson",
-    "openssl:libcrypto_shared",
     "relational_store:native_rdb",
   ]
 
@@ -798,7 +855,6 @@ av_session_ohos_library("avsession_cast_item") {
 
   public_external_deps = [
     "cJSON:cjson",
-    "openssl:libcrypto_shared",
   ]
 
   subsystem_name = "multimedia"

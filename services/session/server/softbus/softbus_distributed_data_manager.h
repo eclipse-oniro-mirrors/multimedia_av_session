@@ -32,7 +32,7 @@ class SoftbusDistributedDataManager : public std::enable_shared_from_this<Softbu
         }
 
 #ifdef DSOFTBUS_ENABLE
-        void OnBind(int32_t socket, PeerSocketInfo info) override
+        void OnBind(int32_t socket, SoftbusPeerSocketInfo info) override
         {
             std::shared_ptr<SoftbusDistributedDataManager> manager = ptr_.lock();
             if (manager != nullptr) {
@@ -40,7 +40,7 @@ class SoftbusDistributedDataManager : public std::enable_shared_from_this<Softbu
             }
         }
 
-        void OnShutdown(int32_t socket, ShutdownReason reason) override
+        void OnShutdown(int32_t socket, SoftbusShutdownReason reason) override
         {
             std::shared_ptr<SoftbusDistributedDataManager> manager = ptr_.lock();
             if (manager != nullptr) {
@@ -92,7 +92,7 @@ public:
 
 private:
 #ifdef DSOFTBUS_ENABLE
-    void SessionOpened(int32_t socket, PeerSocketInfo info);
+    void SessionOpened(int32_t socket, SoftbusPeerSocketInfo info);
     void SessionClosed(int32_t socket);
 #endif
     void MessageReceived(int32_t socket, const std::string &data);
@@ -115,7 +115,7 @@ private:
     static constexpr const int MESSAGE_CODE_CONNECT_SERVER = 1;
 
 #ifdef DSOFTBUS_ENABLE
-    PeerSocketInfo peerSocketInfo = {
+    SoftbusPeerSocketInfo peerSocketInfo = {
         .name = nullptr,
         .networkId = nullptr,
         .pkgName = nullptr,

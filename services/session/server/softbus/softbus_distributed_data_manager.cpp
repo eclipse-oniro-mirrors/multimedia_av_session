@@ -38,7 +38,7 @@ void SoftbusDistributedDataManager::Init()
 }
 
 #ifdef DSOFTBUS_ENABLE
-void SoftbusDistributedDataManager::SessionOpened(int32_t socket, PeerSocketInfo info)
+void SoftbusDistributedDataManager::SessionOpened(int32_t socket, SoftbusPeerSocketInfo info)
 {
     std::string sessionName = info.name;
     if (sessionName != CONFIG_SOFTBUS_SESSION_TAG) {

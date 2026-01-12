@@ -49,8 +49,8 @@ T GetData()
 class SoftbusSessionListenerDemo : public SoftbusSessionListener {
 public:
 #ifdef DSOFTBUS_ENABLE
-    void OnBind(int32_t socket, PeerSocketInfo info) override {};
-    void OnShutdown(int32_t socket, ShutdownReason reason) override {};
+    void OnBind(int32_t socket, SoftbusPeerSocketInfo info) override {};
+    void OnShutdown(int32_t socket, SoftbusShutdownReason reason) override {};
 #endif
     void OnBytes(int32_t socket, const void *data, int32_t dataLen) override {};
     void OnMessage(int32_t socket, const void *data, int32_t dataLen) override {};
@@ -67,14 +67,14 @@ void SoftbusSessionManagerFuzzer::SoftbusSessionManagerFuzzTest(uint8_t* data, s
     std::string infoNetworkId = std::to_string(GetData<uint8_t>());
     std::string infoPkgName = std::to_string(GetData<uint8_t>());
 #ifdef DSOFTBUS_ENABLE
-    PeerSocketInfo info = {
+    SoftbusPeerSocketInfo info = {
         .name = const_cast<char *>(infoName.c_str()),
         .networkId = const_cast<char *>(infoNetworkId.c_str()),
         .pkgName = const_cast<char *>(infoPkgName.c_str()),
         .dataType = DATA_TYPE_BYTES,
     };
     manager_->OnBind(socket, info);
-    manager_->OnShutdown(socket, ShutdownReason::SHUTDOWN_REASON_LOCAL);
+    manager_->OnShutdown(socket, SoftbusShutdownReason::SHUTDOWN_REASON_LOCAL);
 #endif
 
     MessageParcel data_;
@@ -189,7 +189,7 @@ void SoftbusSessionManagerFuzzer::OnBindFuzzTest()
     std::string infoPkgName = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     std::string infoDataType = provider.ConsumeRandomLengthString(STRING_MAX_LENGTH);
 #ifdef DSOFTBUS_ENABLE
-    PeerSocketInfo info = {
+    SoftbusPeerSocketInfo info = {
         .name = const_cast<char *>(infoName.c_str()),
         .networkId = const_cast<char *>(infoNetworkId.c_str()),
         .pkgName = const_cast<char *>(infoPkgName.c_str()),
@@ -211,7 +211,7 @@ void SoftbusSessionManagerFuzzer::OnShutdownFuzzTest()
 #ifdef DSOFTBUS_ENABLE
     int32_t socket = provider.ConsumeIntegral<int32_t>();
     int32_t reason = provider.ConsumeIntegralInRange<int32_t>(0, STRING_MAX_LENGTH);
-    ShutdownReason Reason = static_cast<ShutdownReason>(reason);
+    SoftbusShutdownReason Reason = static_cast<SoftbusShutdownReason>(reason);
 #endif
     auto softbusSessionListener = std::make_shared<SoftbusSessionListenerDemo>();
     CHECK_AND_RETURN(softbusSessionListener != nullptr);

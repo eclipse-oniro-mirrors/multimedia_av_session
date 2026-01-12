@@ -175,7 +175,7 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
-    PeerSocketInfo info = {
+    SoftbusPeerSocketInfo info = {
         .name = infoName,
         .networkId = infoNetworkId,
         .pkgName = infoPkgName,

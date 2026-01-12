@@ -23,7 +23,6 @@
 #include <chrono>
 #include <climits>
 #include <filesystem>
-#include <openssl/crypto.h>
 
 #include "accesstoken_kit.h"
 #include "account_manager_adapter.h"
@@ -267,9 +266,6 @@ void AVSessionService::OnStop()
         stopMigrateStub();
     }
 #ifndef TEST_COVERAGE
-    if (migrateStubFuncHandle_ != nullptr) {
-        OPENSSL_thread_stop();
-    }
     dlclose(migrateStubFuncHandle_);
 #endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -581,9 +577,6 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
     if (!notifyProcessStatusFunc) {
         SLOGE("dlsm notify_process_status failed");
 #ifndef TEST_COVERAGE
-        if (libMemMgrClientHandle != nullptr) {
-            OPENSSL_thread_stop();
-        }
         dlclose(libMemMgrClientHandle);
 #endif
         return;
@@ -597,9 +590,6 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
         notifyProcessStatus(pid, saType, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
     }
 #ifndef TEST_COVERAGE
-    if (libMemMgrClientHandle != nullptr) {
-        OPENSSL_thread_stop();
-    }
     dlclose(libMemMgrClientHandle);
 #endif
 }
@@ -616,9 +606,6 @@ void AVSessionService::SetCritical(bool isCritical)
     if (!setCriticalFunc) {
         SLOGE("dlsm set_critical failed");
 #ifndef TEST_COVERAGE
-        if (libMemMgrClientHandle != nullptr) {
-            OPENSSL_thread_stop();
-        }
         dlclose(libMemMgrClientHandle);
 #endif
         return;
@@ -627,9 +614,6 @@ void AVSessionService::SetCritical(bool isCritical)
     SLOGI("notify to memmgr as av_session isCritical:%{public}d", isCritical);
     setCritical(pid, isCritical, AVSESSION_SERVICE_ID); // 1 indicates the service is started
 #ifndef TEST_COVERAGE
-    if (libMemMgrClientHandle != nullptr) {
-        OPENSSL_thread_stop();
-    }
     dlclose(libMemMgrClientHandle);
 #endif
 }

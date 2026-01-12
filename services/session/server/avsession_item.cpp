@@ -49,7 +49,6 @@
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
 #include <string>
-#include <openssl/crypto.h>
 #endif
 
 using namespace OHOS::AudioStandard;
@@ -3211,9 +3210,6 @@ int32_t AVSessionItem::DoContinuousTaskRegister()
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
 #ifndef TEST_COVERAGE
-    if (handle_ != nullptr) {
-        OPENSSL_thread_stop();
-    }
     dlclose(handle_);
 #endif
 #endif
@@ -3243,9 +3239,6 @@ int32_t AVSessionItem::DoContinuousTaskUnregister()
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 2, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done when stop cast, result: %{public}d", errCode);
 #ifndef TEST_COVERAGE
-    if (handle_ != nullptr) {
-        OPENSSL_thread_stop();
-    }
     dlclose(handle_);
 #endif
 #endif

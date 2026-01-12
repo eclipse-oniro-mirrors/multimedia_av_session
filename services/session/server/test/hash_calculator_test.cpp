@@ -52,7 +52,7 @@ static HWTEST_F(HashCalculatorTest, Update001, testing::ext::TestSize.Level0)
     HashCalculator hashCalculator;
     std::vector<uint8_t> vec;
     int32_t result = hashCalculator.Update(vec);
-    EXPECT_EQ(result, AVSESSION_ERROR);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
     result = hashCalculator.GetResult(vec);
-    EXPECT_EQ(result, AVSESSION_ERROR);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
 }
