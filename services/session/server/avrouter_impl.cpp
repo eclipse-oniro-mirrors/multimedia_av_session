@@ -428,7 +428,7 @@ int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& ou
     return ret ? AVSESSION_SUCCESS : ERR_DEVICE_CONNECTION_FAILED;
 }
 
-int32_t AVRouterImpl::StopCast(const int64_t castHandle, bool continuePlay)
+int32_t AVRouterImpl::StopCast(const int64_t castHandle, const DeviceRemoveAction deviceRemoveAction)
 {
     SLOGI("AVRouterImpl stop cast process");
 
@@ -446,7 +446,7 @@ int32_t AVRouterImpl::StopCast(const int64_t castHandle, bool continuePlay)
     CHECK_AND_RETURN_RET_LOG(castHandleToInfoMap_[castHandle].outputDeviceInfo_.deviceInfos_.size() > 0,
         AVSESSION_ERROR, "deviceInfos is empty");
     providerManagerMap_[providerNumber]->provider_->RemoveCastDevice(castId,
-        castHandleToInfoMap_[castHandle].outputDeviceInfo_.deviceInfos_[0], continuePlay);
+        castHandleToInfoMap_[castHandle].outputDeviceInfo_.deviceInfos_[0], deviceRemoveAction);
     SLOGI("AVRouterImpl stop cast process remove device done");
 
     if (castHandleToInfoMap_.find(castHandle) != castHandleToInfoMap_.end()) {
@@ -790,8 +790,14 @@ void AVRouterImpl::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     }
 }
 
+bool AVRouterImpl::IsDisconnectingOtherSession()
+{
+    return disconnectOtherSession_.load();
+}
+
 void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo)
 {
+    disconnectOtherSession_.store(true);
     for (const auto& [string, avRouterListener] : mirrorSessionMap_) {
         if (string != sessionId && avRouterListener != nullptr) {
             avRouterListener->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false);
@@ -806,5 +812,6 @@ void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo devi
         castHandleInfo.avRouterListener_ = mirrorSessionMap_[sessionId];
     }
     mirrorSessionMap_.clear();
+    disconnectOtherSession_.store(false);
 }
 } // namespace OHOS::AVSession

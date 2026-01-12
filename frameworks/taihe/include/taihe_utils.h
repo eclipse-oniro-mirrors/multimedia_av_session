@@ -141,6 +141,7 @@ public:
     static int32_t GetAVCallMetaData(const CallMetadata &in, OHOS::AVSession::AVCallMetaData &out);
 
     static int32_t ToAniDoubleObject(ani_env *env, double in, ani_object &out);
+    static int32_t ToAniLongObject(ani_env *env, int64_t in, ani_object &out);
     static ani_object ToAniElementName(const OHOS::AppExecFwk::ElementName &in);
     static ani_object ToAniWantParams(const OHOS::AAFwk::WantParams &in);
     static ani_object ToAniWantAgent(OHOS::AbilityRuntime::WantAgent::WantAgent* &in);
@@ -184,6 +185,7 @@ public:
     static taihe::array<DecoderType> ToTaiheDecoderTypeArray(const std::vector<std::string> &in);
     static keyEvent::KeyEvent ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in);
     static AudioCapabilities ToTaiheAudioCapabilities(const OHOS::AVSession::AudioCapabilities &in);
+    static CommandInfo ToTaiheCommandInfo(const OHOS::AVSession::AVControlCommand& in);
 
     static ohos::multimedia::avsession::avSession::OutputDeviceInfo CreateUndefinedOutputDeviceInfo();
 

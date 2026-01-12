@@ -523,23 +523,25 @@ public:
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
 
 private:
-    void HandleEvent(int32_t event);
+    void HandleEvent(int32_t event, std::string callBackName);
     void HandlePlayerErrorAPI13(const int32_t errorCode, const std::string& errorMsg);
 
     std::function<bool()> CheckCallbackValid(int32_t event, const std::list<napi_ref>::iterator& ref);
 
     template<typename T>
-    void HandleEvent(int32_t event, const T& param);
+    void HandleEvent(int32_t event, std::string callBackName, const T& param);
 
     template<typename T>
-    void HandleEvent(int32_t event, const std::string& firstParam, const T& secondParam);
+    void HandleEvent(int32_t event, std::string callBackName, const std::string& firstParam, const T& secondParam);
 
     template<typename T>
-    void HandleEvent(int32_t event, const int32_t firstParam, const T& secondParam);
+    void HandleEvent(int32_t event, std::string callBackName, const int32_t firstParam, const T& secondParam);
 
-    void HandleEvent(int32_t event, const int32_t firstParam, const int32_t secondParam, const int32_t thirdParam);
+    void HandleEvent(int32_t event, std::string callBackName,
+                     const int32_t firstParam, const int32_t secondParam, const int32_t thirdParam);
 
-    void HandleErrorEvent(int32_t event, const int32_t errorCode, const std::string& errorMsg);
+    void HandleErrorEvent(int32_t event, const int32_t errorCode,
+                          const std::string& errorMsg, std::string callBackName);
 
     static void threadSafeReadDataSrcCb(napi_env env, napi_value js_cb, void* context, void* data);
 

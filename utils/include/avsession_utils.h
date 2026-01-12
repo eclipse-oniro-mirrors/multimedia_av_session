@@ -239,7 +239,7 @@ public:
                 char_positions.push_back(i);
             }
         }
-        const int char_count = char_positions.size();
+        const int char_count = static_cast<int>(char_positions.size());
         // 特殊处理短字符串
         const int VERY_SHORT_TEXT_LENGTH = 3;
         const int SHORT_TEXT_LENGTH = 2;
@@ -286,21 +286,23 @@ public:
         return title.substr(0, start_idx) + "***" + title.substr(end_idx);
     }
     
-static std::string GetAnonyNetworkid(const std::string& networkkid)
+static std::string GetAnonyNetworkId(const std::string& networkId)
 {
-    if (networkkid.empty()) {
+    if (networkId.empty()) {
         return "";
     }
 
-    const size_t total_length = networkkid.length();
+    const size_t total_length = networkId.length();
     int PREFIX_LENGTH = 4;
     int SUFFIX_LENGTH = 4;
+    CHECK_AND_RETURN_RET(total_length >= static_cast<size_t>(PREFIX_LENGTH + SUFFIX_LENGTH), networkId);
+
     std::string result;
     result.reserve(total_length);
 
-    result += networkkid.substr(0, PREFIX_LENGTH);
+    result += networkId.substr(0, PREFIX_LENGTH);
     result.append(total_length - PREFIX_LENGTH - SUFFIX_LENGTH, '*');
-    result += networkkid.substr(total_length - SUFFIX_LENGTH);
+    result += networkId.substr(total_length - SUFFIX_LENGTH);
 
     return result;
 }

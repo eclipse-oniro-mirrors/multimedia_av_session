@@ -63,13 +63,13 @@ public:
 
 private:
     template<typename T>
-    void HandleEvent(int32_t event, const T& param);
+    void HandleEvent(int32_t event, std::string callBackName, const T& param);
 
     template<typename T>
-    void HandleEvent(int32_t event, const T& param, bool checkValid);
+    void HandleEvent(int32_t event, std::string callBackName, const T& param, bool checkValid);
 
     template<typename T, typename N>
-    void HandleEvent(int32_t event, const T& firstParam, const N& secondParam);
+    void HandleEvent(int32_t event, std::string callBackName, const T& firstParam, const N& secondParam);
 
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::mutex lock_;

@@ -91,8 +91,8 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_REPEAT_CAST, 6600101},
     {ERR_WAIT_ALLCONNECT_TIMEOUT, 6600101},
     {ERR_ALLCONNECT_CAST_REJECT, 6600101},
-    {ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600110},
-    {ERR_DESKTOPLYRIC_NOT_ENABLE, 6600111},
+    {ERR_DESKTOPLYRIC_NOT_ENABLE, 6600110},
+    {ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600111},
 };
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 {
@@ -760,7 +760,7 @@ napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
         int32_t err = PermissionChecker::GetInstance().CheckPermission(
             PermissionChecker::CHECK_SYSTEM_PERMISSION);
         CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
-            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+            NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
         /* require 2 arguments <event, callback> */
         CHECK_ARGS_RETURN_VOID(context, argc >= ARGC_TWO, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -818,7 +818,7 @@ napi_value NapiAVSessionManager::OffEvent(napi_env env, napi_callback_info info)
         int32_t err = PermissionChecker::GetInstance().CheckPermission(
             PermissionChecker::CHECK_SYSTEM_PERMISSION);
         CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
-            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
+            NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
         CHECK_ARGS_RETURN_VOID(context, argc >= ARGC_ONE || argc <= ARGC_THREE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], eventName);
@@ -1701,10 +1701,11 @@ napi_status NapiAVSessionManager::OnDeviceStateChanged(napi_env env, napi_value 
 
 void NapiAVSessionManager::HandleServiceDied()
 {
+    std::string callBackName = "NapiAVSessionManager::HandleServiceDied";
     if (!serviceDiedCallbacks_.empty() && asyncCallback_ != nullptr) {
         for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
              ++callbackRef) {
-            asyncCallback_->Call(*callbackRef);
+            asyncCallback_->Call(*callbackRef, callBackName);
         }
     }
     std::lock_guard lockGuard(listenersMutex_);

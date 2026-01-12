@@ -1766,7 +1766,9 @@ int32_t AVSessionItem::ReleaseCast(bool continuePlay)
         "SESSION_TYPE", GetSessionType(),
         "ERROR_CODE", AVSESSION_SUCCESS,
         "ERROR_MSG", "SUCCESS");
-    return StopCast(continuePlay);
+    DeviceRemoveAction deviceRemoveAction = continuePlay ?
+        DeviceRemoveAction::ACTION_CONTINUE_PLAY : DeviceRemoveAction::ACTION_DISCONNECT;
+    return StopCast(deviceRemoveAction);
 }
 
 int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDeviceInfo)
@@ -1804,7 +1806,8 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             SLOGI("cast check with pre cast alive %{public}lld, unregister callback", (long long)castHandle_);
             multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
             newOutputDeviceInfo_ = outputDeviceInfo;
-            StopCast();
+            ProtocolType protocol = static_cast<ProtocolType>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_);
+            StopCast(deviceRemoveActionMap_[protocol]);
             return AVSESSION_SUCCESS;
         }
     } else {
@@ -1882,6 +1885,7 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
         }
         ProcessFrontSession("Disconnect");
     }
+    SaveLocalDeviceInfo();
     if (serviceCallbackForCastNtf_) {
         serviceCallbackForCastNtf_(GetSessionId(), false, false);
     }
@@ -1907,7 +1911,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_.c_str()).c_str());
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
@@ -1916,7 +1920,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_.c_str()).c_str());
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
@@ -2079,7 +2083,7 @@ void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     }
 }
 
-int32_t AVSessionItem::StopCast(bool continuePlay)
+int32_t AVSessionItem::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
     std::lock_guard lockGuard(castLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
@@ -2114,7 +2118,7 @@ int32_t AVSessionItem::StopCast(bool continuePlay)
     } else {
         AVSessionRadarInfo info("AVSessionItem::StopCast");
         AVSessionRadar::GetInstance().StopCastBegin(descriptor_.outputDeviceInfo_, info);
-        int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, continuePlay);
+        int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);
         AVSessionRadar::GetInstance().StopCastEnd(descriptor_.outputDeviceInfo_, info);
         SLOGI("StopCast with unchange castHandle is %{public}lld", (long long)castHandle_);
         CHECK_AND_RETURN_RET_LOG(ret != AVSESSION_ERROR, AVSESSION_ERROR, "StopCast failed");
@@ -3136,7 +3140,7 @@ int32_t AVSessionItem::SinkCancelCastAudio()
 void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 {
     SLOGI("UpdateCastDeviceMap with id: %{public}s",
-        AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_.c_str()).c_str());
+        AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
     castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
 
     if (descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0 &&

@@ -246,6 +246,7 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
     metadata->SetLyric(lyric_);
     metadata->SetAssetId(assetId_);
     metadata->SetDisplayTags(tags_);
+    metadata->SetFilter(static_cast<int32_t>(filter_));
 
     DoDownload(*metadata, mediaImageUri_);
 

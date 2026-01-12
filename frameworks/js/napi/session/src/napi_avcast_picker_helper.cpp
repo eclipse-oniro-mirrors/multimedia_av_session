@@ -214,11 +214,12 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_CAST_PICKER_HELPER_TASK_ID;
-
+   
     auto executor = [context]() {
         auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
         AAFwk::Want request;
         std::string targetType = "sysPicker/mediaControl";
+        
         request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, targetType);
         request.SetParam("isAVCastPickerHelper", true);
         request.SetParam("AVCastPickerOptionsType", context->napiAVCastPickerOptions.sessionType);
@@ -231,17 +232,18 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
 
         PickerCallBack pickerCallBack;
         auto callback = std::make_shared<ModalUICallback>(napiAVCastPickerHelper->uiContent_, pickerCallBack);
+        std::string callBackName = "NapiAVCastPickerHelper::SelectAVPicker";
         Ace::ModalUIExtensionCallbacks extensionCallback = {
             .onRelease = ([callback](auto arg) { callback->OnRelease(arg); }),
             .onResult = ([callback](auto arg1, auto arg2) { callback->OnResult(arg1, arg2); }),
-            .onReceive = ([callback, napiAVCastPickerHelper](auto arg) {
+            .onReceive = ([callback, napiAVCastPickerHelper, callBackName](auto arg) {
                 callback->OnReceive(arg);
-                napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_DISAPPEARING);
+                napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, callBackName, STATE_DISAPPEARING);
             }),
             .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
-            .onRemoteReady = ([callback, napiAVCastPickerHelper](auto arg) {
+            .onRemoteReady = ([callback, napiAVCastPickerHelper, callBackName](auto arg) {
                 callback->OnRemoteReady(arg);
-                napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_APPEARING);
+                napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, callBackName, STATE_APPEARING);
             }),
             .onDestroy = ([callback]() { callback->OnDestroy(); }),
         };
@@ -300,7 +302,7 @@ napi_status NapiAVCastPickerHelper::OffPickerStateChange(napi_env env, NapiAVCas
 }
 
 template<typename T>
-void NapiAVCastPickerHelper::HandleEvent(int32_t event, const T& param)
+void NapiAVCastPickerHelper::HandleEvent(int32_t event, std::string callBackName, const T& param)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
@@ -323,7 +325,7 @@ void NapiAVCastPickerHelper::HandleEvent(int32_t event, const T& param)
                     SLOGE("checkCallbackValid res false for event=%{public}d", event);
                 }
                 return hasFunc;
-            },
+            }, callBackName,
             [param](napi_env env, int& argc, napi_value* argv) {
                 argc = NapiUtils::ARGC_ONE;
                 NapiUtils::SetValue(env, param, *argv);

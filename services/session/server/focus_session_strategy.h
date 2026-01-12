@@ -43,6 +43,8 @@ public:
     void RegisterFocusSessionSelector(const FocusSessionSelector& selector);
     std::vector<int> GetAudioPlayingUids();
     void SetAudioPlayingUids(std::vector<int> audioPlayingUids);
+    void AddControlBundle(int32_t uid, int32_t pid);
+    void RemoveControlBundle(int32_t uid, int32_t pid);
 
 private:
     void HandleAudioRenderStateChangeEvent(const AudioRendererChangeInfos& infos);
@@ -59,6 +61,8 @@ private:
     std::recursive_mutex stateLock_;
     std::map<std::pair<int32_t, int32_t>, int32_t> lastStates_;   //<<uid,pid>, state>
     std::map<std::pair<int32_t, int32_t>, int32_t> currentStates_;
+    std::recursive_mutex controlLock_;
+    std::set<std::pair<int32_t, int32_t>> controlBundleList_;
     const int32_t cancelTimeout = 5000;
     const int32_t runningState = 2;
     const int32_t stopState = 0;

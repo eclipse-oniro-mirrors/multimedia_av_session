@@ -58,6 +58,7 @@ void BundleStatusAdapter::ReleaseInstance()
 
 void BundleStatusAdapter::Init()
 {
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
     auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
         SLOGI("fail to get system ability mgr");
@@ -70,8 +71,7 @@ void BundleStatusAdapter::Init()
         return;
     }
 
-    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
-    SLOGI("get bundle manager proxy success");
+    SLOGI("get bundle manager proxy success.");
     bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     bundleResourceProxy = bundleMgrProxy->GetBundleResourceProxy();
 }
@@ -113,7 +113,7 @@ bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, const std:
 bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleName,
     const std::function<void(const std::string, const int32_t userId)>& callback, int32_t userId)
 {
-    SLOGI("Bundle status adapter subscribe bundle status event, bundleName=%{public}s, userId=%{public}d",
+    SLOGI("Bundle status adapter subscribe bundle status event, bundleName=%{public}s, userId=%{public}d.",
         bundleName.c_str(), userId);
     auto bundleStatusListener = bundleStatusListeners_.find(std::make_pair(bundleName, userId));
     if (bundleStatusListener != bundleStatusListeners_.end()) {
@@ -129,15 +129,12 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
         SLOGE("no memory");
         return false;
     }
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
     bool isProxyNull = false;
-    {
-        std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
-        isProxyNull = (bundleMgrProxy == nullptr);
-    }
+    isProxyNull = (bundleMgrProxy == nullptr);
     if (isProxyNull) {
         SLOGE("SubscribeBundleStatusEvent with proxy null!");
         Init();
-        std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
         if (bundleMgrProxy == nullptr) {
             SLOGE("SubscribeBundleStatusEvent with proxy null after init!");
             return false;

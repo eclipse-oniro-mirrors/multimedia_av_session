@@ -470,19 +470,19 @@ int32_t TaiheMetaData::GetPublishDate(AVMetadata const &in, OHOS::AVSession::AVM
         CHECK_RETURN(env != nullptr, "env is nullptr", OHOS::AVSession::AVSESSION_ERROR);
 
         ani_class cls {};
-        CHECK_RETURN(env->FindClass("escompat.Date", &cls) == ANI_OK,
-            "FindClass escompat.Date failed", OHOS::AVSession::AVSESSION_ERROR);
+        CHECK_RETURN(env->FindClass("std.core.Date", &cls) == ANI_OK,
+            "FindClass std.core.Date failed", OHOS::AVSession::AVSESSION_ERROR);
         ani_method method {};
         CHECK_RETURN(env->Class_FindMethod(cls, "valueOf", nullptr, &method) == ANI_OK,
             "Class_FindMethod Date valueOf failed", OHOS::AVSession::AVSESSION_ERROR);
 
         ani_object aniDate = reinterpret_cast<ani_object>(in.publishDate.value());
         CHECK_RETURN(aniDate != nullptr, "aniDate is nullptr", OHOS::AVSession::AVSESSION_ERROR);
-        ani_double aniDouble = 0;
-        CHECK_RETURN(env->Object_CallMethod_Double(aniDate, method, &aniDouble) == ANI_OK,
-            "Object_CallMethod_Double Date valueOf failed", OHOS::AVSession::AVSESSION_ERROR);
+        ani_long aniLong = 0;
+        CHECK_RETURN(env->Object_CallMethod_Long(aniDate, method, &aniLong) == ANI_OK,
+            "Object_CallMethod_Long Date valueOf failed", OHOS::AVSession::AVSESSION_ERROR);
 
-        out.SetPublishDate(static_cast<double>(aniDouble));
+        out.SetPublishDate(static_cast<double>(aniLong));
     }
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
@@ -497,18 +497,18 @@ int32_t TaiheMetaData::SetPublishDate(const OHOS::AVSession::AVMetaData &in, AVM
     }
 
     ani_class cls {};
-    CHECK_RETURN(env->FindClass("escompat.Date", &cls) == ANI_OK,
-        "FindClass escompat.Date failed", OHOS::AVSession::AVSESSION_ERROR);
+    CHECK_RETURN(env->FindClass("std.core.Date", &cls) == ANI_OK,
+        "FindClass std.core.Date failed", OHOS::AVSession::AVSESSION_ERROR);
     ani_method ctorMethod {};
-    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "X{C{std.core.Double}C{std.core.String}C{escompat.Date}}:",
-        &ctorMethod) == ANI_OK, "Class_FindMethod escompat.Date <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
-    ani_object aniDoubleObject {};
-    int32_t ret = TaiheUtils::ToAniDoubleObject(env, in.GetPublishDate(), aniDoubleObject);
+    CHECK_RETURN(env->Class_FindMethod(cls, "<ctor>", "X{C{std.core.Long}C{std.core.String}C{std.core.Date}}:",
+        &ctorMethod) == ANI_OK, "Class_FindMethod std.core.Date <ctor> failed", OHOS::AVSession::AVSESSION_ERROR);
+    ani_object aniLong {};
+    int32_t ret = TaiheUtils::ToAniLongObject(env, in.GetPublishDate(), aniLong);
     CHECK_RETURN(ret == OHOS::AVSession::AVSESSION_SUCCESS, "ToAniDoubleObject failed", ret);
 
     ani_object aniDate {};
-    CHECK_RETURN(env->Object_New(cls, ctorMethod, &aniDate, aniDoubleObject) == ANI_OK,
-        "Object_New escompat.Date failed", OHOS::AVSession::AVSESSION_ERROR);
+    CHECK_RETURN(env->Object_New(cls, ctorMethod, &aniDate, aniLong) == ANI_OK,
+        "Object_New std.core.Date failed", OHOS::AVSession::AVSESSION_ERROR);
 
     out.publishDate = optional<uintptr_t>(std::in_place_t {}, reinterpret_cast<uintptr_t>(aniDate));
     return OHOS::AVSession::AVSESSION_SUCCESS;

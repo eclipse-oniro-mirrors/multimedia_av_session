@@ -378,7 +378,7 @@ export struct AVCastPicker {
             if (JSON.stringify(data['deviceList']) !== undefined) {
               console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
               this.deviceList =
-                JSON.parse(JSON.stringify(data!['deviceList'] as string), Type.from<string>())! as Array<AVCastPickerDeviceInfo>;
+                JSON.parse(JSON.stringify(data!['deviceList'] as string), Class.from<string>())! as Array<AVCastPickerDeviceInfo>;
               let hasOnlySpeakerAndEarpiece: boolean = this.deviceList!.length === 2 &&
                 !this.hasExtDevice(this.deviceList!);
               let hasNoDevices: boolean = this.deviceList === null || this.deviceList!.length === 0;
@@ -578,7 +578,7 @@ export struct AVCastPicker {
   }
 }
 
-function highQualityStyles(this: TextAttribute, maxScale: number): this {
+function highQualityStyles(this: TextAttribute, maxScale: number) {
   this.fontSize(7);
   this.fontWeight(FontWeight.Medium);
   this.fontColor($r('sys.color.font_secondary'));

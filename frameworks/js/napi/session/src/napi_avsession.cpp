@@ -1676,7 +1676,7 @@ napi_value NapiAVSession::SetAVQueueTitle(napi_env env, napi_callback_info info)
 napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
-        AbilityRuntime::WantAgent::WantAgent* wantAgent_;
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
@@ -1689,9 +1689,11 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->wantAgent_);
+        AbilityRuntime::WantAgent::WantAgent* wantAgentPtr_;
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], wantAgentPtr_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get  wantAgent failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->wantAgent_ = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgentPtr_);
     };
     context->GetCbInfo(env, info, inputParser);
 
@@ -1703,6 +1705,7 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
+        SLOGI("SetLaunchAbility in");
         int32_t ret = napiSession->session_->SetLaunchAbility(*context->wantAgent_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {

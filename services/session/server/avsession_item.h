@@ -335,7 +335,7 @@ public:
     int32_t AddDevice(const int64_t castHandle, const OutputDeviceInfo& outputDeviceInfo,
         uint32_t spid);
 
-    int32_t StopCast(bool continuePlay = false);
+    int32_t StopCast(const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
 
     void dealValidCallback(int32_t cmd, std::vector<int32_t>& supportedCastCmds);
 
@@ -631,6 +631,12 @@ private:
     const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";
     const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
+
+    std::map<ProtocolType, DeviceRemoveAction> deviceRemoveActionMap_ = {
+        {ProtocolType::TYPE_CAST_PLUS_STREAM, DeviceRemoveAction::ACTION_TO_SWITCH_STREAM},
+        {ProtocolType::TYPE_DLNA, DeviceRemoveAction::ACTION_TO_SWITCH_DLNA},
+        {ProtocolType::TYPE_CAST_PLUS_AUDIO, DeviceRemoveAction::ACTION_TO_SWITCH_HIPLAY}
+    };
 #endif
 };
 } // namespace OHOS::AVSession

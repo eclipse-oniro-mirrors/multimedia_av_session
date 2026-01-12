@@ -181,14 +181,14 @@ static HWTEST(AbilityConnectHelperTest, OnRemoteRequest005, TestSize.Level0)
 static HWTEST(AbilityConnectHelperTest, OnAbilityConnectDone001, TestSize.Level0)
 {
     SLOGI("OnAbilityConnectDone001 begin!");
-    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "");
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "", 0);
     ASSERT_NE(connect, nullptr);
 
     OHOS::AppExecFwk::ElementName element;
     connect->OnAbilityConnectDone(element, nullptr, 0);
 
     int32_t ret = 0;
-    connect->callback_ = [&ret](int32_t in){ ret = in; };
+    connect->callback_ = [&ret](int32_t userId, int32_t state){ ret = state; };
     connect->OnAbilityConnectDone(element, nullptr, 0);
     EXPECT_EQ(ret, DESKTOP_LYRICS_ABILITY_CONNECTED);
 }
@@ -202,16 +202,93 @@ static HWTEST(AbilityConnectHelperTest, OnAbilityConnectDone001, TestSize.Level0
 static HWTEST(AbilityConnectHelperTest, OnAbilityDisconnectDone001, TestSize.Level0)
 {
     SLOGI("OnAbilityDisconnectDone001 begin!");
-    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "");
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "", 0);
     ASSERT_NE(connect, nullptr);
 
     OHOS::AppExecFwk::ElementName element;
     connect->OnAbilityDisconnectDone(element, 0);
 
     int32_t ret = 0;
-    connect->callback_ = [&ret](int32_t in){ ret = in; };
+    connect->callback_ = [&ret](int32_t userId, int32_t state){ ret = state; };
     connect->OnAbilityDisconnectDone(element, 0);
     EXPECT_EQ(ret, DESKTOP_LYRICS_ABILITY_DISCONNECTED);
+}
+
+/**
+ * @tc.name: StartDesktopLyricAbility001
+ * @tc.desc: Test StartDesktopLyricAbility
+ * @tc.type: FUNC
+ * @tc.require: #2047
+ */
+static HWTEST(AbilityConnectHelperTest, StartDesktopLyricAbility001, TestSize.Level0)
+{
+    SLOGI("StartDesktopLyricAbility001 begin!");
+    std::string sessionId = "";
+    std::string handler = "";
+    int32_t userId = 0;
+    int32_t ret = ExtensionConnectHelper::GetInstance().StartDesktopLyricAbility(sessionId, handler, userId,
+        nullptr, true);
+    EXPECT_NE(ret, ERR_NO_MEMORY);
+
+    ExtensionConnectHelper::GetInstance().desktopLyricConnectionMap_.clear();
+    ret = ExtensionConnectHelper::GetInstance().StartDesktopLyricAbility(sessionId, handler, userId,
+        nullptr, false);
+    EXPECT_NE(ret, ERR_NO_MEMORY);
+
+    ExtensionConnectHelper::GetInstance().desktopLyricConnectionMap_[userId] = nullptr;
+    ret = ExtensionConnectHelper::GetInstance().StartDesktopLyricAbility(sessionId, handler, userId,
+        nullptr, false);
+    EXPECT_NE(ret, ERR_NO_MEMORY);
+
+    ret = ExtensionConnectHelper::GetInstance().StartDesktopLyricAbility(sessionId, handler, userId,
+        nullptr, false);
+    EXPECT_NE(ret, ERR_NO_MEMORY);
+}
+
+/**
+ * @tc.name: StopDesktopLyricAbility001
+ * @tc.desc: Test StopDesktopLyricAbility
+ * @tc.type: FUNC
+ * @tc.require: #2047
+ */
+static HWTEST(AbilityConnectHelperTest, StopDesktopLyricAbility001, TestSize.Level0)
+{
+    SLOGI("StopDesktopLyricAbility001 begin!");
+    ExtensionConnectHelper::GetInstance().desktopLyricConnectionMap_.clear();
+    int32_t ret = ExtensionConnectHelper::GetInstance().StopDesktopLyricAbility(0);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+
+    ExtensionConnectHelper::GetInstance().desktopLyricConnectionMap_[0] = nullptr;
+    ret = ExtensionConnectHelper::GetInstance().StopDesktopLyricAbility(0);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+
+    ExtensionConnectHelper::GetInstance().desktopLyricConnectionMap_[0] =
+        new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "", 0);
+    ret = ExtensionConnectHelper::GetInstance().StopDesktopLyricAbility(0);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: UploadDesktopLyricOperationInfo001
+ * @tc.desc: Test UploadDesktopLyricOperationInfo
+ * @tc.type: FUNC
+ * @tc.require: #2047
+ */
+static HWTEST(AbilityConnectHelperTest, UploadDesktopLyricOperationInfo001, TestSize.Level0)
+{
+    SLOGI("UploadDesktopLyricOperationInfo001 begin!");
+    ExtensionConnectHelper::GetInstance().desktopLyricConnectionMap_.clear();
+    int32_t ret = ExtensionConnectHelper::GetInstance().UploadDesktopLyricOperationInfo("", "", 0, 0);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+
+    ExtensionConnectHelper::GetInstance().desktopLyricConnectionMap_[0] = nullptr;
+    ret = ExtensionConnectHelper::GetInstance().UploadDesktopLyricOperationInfo("", "", 0, 0);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+
+    ExtensionConnectHelper::GetInstance().desktopLyricConnectionMap_[0] =
+        new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "", 0);
+    ret = ExtensionConnectHelper::GetInstance().UploadDesktopLyricOperationInfo("", "", 0, 0);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
 }
 
 /**
@@ -295,7 +372,7 @@ static HWTEST(AbilityConnectHelperTest, ConnectAbilityCommon002, TestSize.Level0
 {
     SLOGI("ConnectAbilityCommon002 begin!");
     OHOS::AAFwk::Want want;
-    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "");
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "", 0);
     ASSERT_NE(connect, nullptr);
     int32_t ret = ExtensionConnectHelper::GetInstance().ConnectAbilityCommon(want, connect, 0);
     EXPECT_NE(ret, ERR_INVALID_PARAM);
@@ -324,7 +401,7 @@ static HWTEST(AbilityConnectHelperTest, DisconnectAbility002, TestSize.Level0)
 {
     SLOGI("DisconnectAbility002 begin!");
     OHOS::AAFwk::Want want;
-    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "");
+    OHOS::sptr<DesktopLyricCallConnection> connect = new (std::nothrow) DesktopLyricCallConnection(nullptr, "", "", 0);
     ASSERT_NE(connect, nullptr);
     int32_t ret = ExtensionConnectHelper::GetInstance().DisconnectAbility(connect);
     EXPECT_NE(ret, ERR_INVALID_PARAM);

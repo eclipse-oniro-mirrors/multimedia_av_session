@@ -332,7 +332,9 @@ public:
 
     int32_t StopDesktopLyricAbility();
 
-    void SetDesktopLyricAbilityState(int32_t state);
+    void SetDesktopLyricAbilityState(int32_t userId, int32_t state);
+
+    int32_t GetDesktopLyricAbilityState(int32_t userId);
 
     int32_t UploadDesktopLyricOperationInfo(const std::string &sessionId,
         const std::string &handler, uint32_t sceneCode) override;
@@ -355,8 +357,7 @@ private:
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
     void NotifyAudioSessionCheck(const int32_t uid);
-    void NotifySystemUI(const AVSessionDescriptor* historyDescriptor, bool isActiveSession, bool addCapsule,
-                        bool isCapsuleUpdate, bool isPhoto);
+    void NotifySystemUI(sptr<AVSessionItem> photoSession, bool addCapsule, bool isCapsuleUpdate);
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
@@ -538,8 +539,7 @@ private:
 
     void UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd);
 
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
-        const AVSessionDescriptor* histroyDescriptor, bool isPhoto);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(sptr<AVSessionItem> photoSession);
     
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateNftRemoveWant(int32_t uid, bool isPhoto);
 
@@ -633,8 +633,6 @@ private:
 
     std::string GetLocalTitle();
 
-    std::string GetDescriptorTitle(const AVSessionDescriptor* historyDescriptor);
-
     void DealFlowControl(int32_t uid, bool isBroker);
 
     bool InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray);
@@ -710,6 +708,8 @@ private:
     std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
     sptr<IAncoMediaSessionListener> ancoMediaSessionListener_;
     std::set<std::string> controlBundleNameSet_;
+    void SetCriticalWhenCreate(sptr<AVSessionItem> sessionItem);
+    void SetCriticalWhenRelease(sptr<AVSessionItem> sessionItem);
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex sessionServiceLock_;
@@ -758,9 +758,6 @@ private:
     std::string castDeviceId_ = "0";
     std::string castDeviceName_ = " ";
     int32_t castDeviceType_ = 0;
-    const int32_t beginAddPos = 3;
-    const int32_t endDecPos = 4;
-    const int32_t typeAddPos = 2;
     std::mutex checkEnableCastMutex_;
     std::recursive_mutex checkEnableCastLock_;
     std::unordered_set<pid_t> cacheEnableCastPids_;
@@ -805,8 +802,9 @@ private:
     std::map<std::string, std::shared_ptr<MigrateAVSessionServer>> migrateAVSessionServerMap_;
     std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
     std::recursive_mutex migrateProxyMapLock_;
+    std::list<std::string> controlListForNtf_ = {"com.ohos.mediacontroller"};
 
-    int32_t desktopLyricAbilityState_ = 0;
+    std::map<int32_t, int32_t> desktopLyricAbilityStateMap_;
     std::mutex desktopLyricAbilityStateMutex_;
 
     const int32_t ONE_CLICK = 1;

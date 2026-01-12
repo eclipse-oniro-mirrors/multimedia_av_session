@@ -1434,6 +1434,27 @@ static HWTEST_F(AVSessionServiceTest, CreateSessionInner002, TestSize.Level0)
     SLOGI("CreateSessionInner001 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, CreateAndReleaseSessionSetCritical001, TestSize.Level0)
+{
+    SLOGI("CreateAndReleaseSessionSetCritical001 begin!");
+    OHOS::sptr<AVSessionItem> sessionItem = nullptr;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName("Test_1.abc");
+    int32_t ret = avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO,
+                    false, elementName, sessionItem);
+    avservice_->SetCriticalWhenCreate(sessionItem);
+    avservice_->SetCriticalWhenRelease(sessionItem);
+    int32_t ancoUid = 1041;
+    sessionItem->SetUid(ancoUid);
+    avservice_->SetCriticalWhenCreate(sessionItem);
+    avservice_->SetCriticalWhenRelease(sessionItem);
+    avservice_->HandleSessionRelease(sessionItem->GetSessionId());
+    avservice_->SetCriticalWhenRelease(sessionItem);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("CreateAndReleaseSessionSetCritical001 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, ReportSessionInfo001, TestSize.Level0)
 {
     SLOGI("ReportSessionInfo001 begin!");
@@ -1816,19 +1837,23 @@ static HWTEST_F(AVSessionServiceTest, SendSystemControlCommand003, TestSize.Leve
 static HWTEST_F(AVSessionServiceTest, CreateWantAgent001, TestSize.Level0)
 {
     SLOGD("CreateWantAgent001 begin!");
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor(nullptr);
-    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get(), false);
+    auto ret = avservice_->CreateWantAgent(nullptr);
     EXPECT_EQ(ret, nullptr);
     SLOGD("CreateWantAgent001 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, CreateWantAgent002, TestSize.Level0)
 {
-    SLOGD("CreateWantAgent001 begin!");
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get(), false);
+    SLOGD("CreateWantAgent002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_PHOTO, false, elementName);
+    auto ret = avservice_->CreateWantAgent(avsessionHere);
     EXPECT_EQ(ret, nullptr);
-    SLOGD("CreateWantAgent001 end!");
+    avsessionHere->Destroy();
+    SLOGD("CreateWantAgent002 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, CreateWantAgent003, TestSize.Level0)
@@ -1840,10 +1865,7 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent003, TestSize.Level0)
     OHOS::sptr<AVSessionItem> avsessionHere =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avservice_->UpdateTopSession(avsessionHere);
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor(nullptr);
-    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get(), false);
-    EXPECT_EQ(ret, nullptr);
-    ret = avservice_->CreateWantAgent(histroyDescriptor.get(), true);
+    auto ret = avservice_->CreateWantAgent(nullptr);
     EXPECT_EQ(ret, nullptr);
     avsessionHere->Destroy();
     SLOGD("CreateWantAgent003 end!");
@@ -1852,25 +1874,6 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent003, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTest, CreateWantAgent004, TestSize.Level0)
 {
     SLOGD("CreateWantAgent004 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere =
-        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    avservice_->UpdateTopSession(avsessionHere);
-    std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    auto ret = avservice_->CreateWantAgent(histroyDescriptor.get(), false);
-    EXPECT_EQ(ret, nullptr);
-    ret = avservice_->CreateWantAgent(histroyDescriptor.get(), true);
-    EXPECT_EQ(ret, nullptr);
-    avsessionHere->Destroy();
-    SLOGD("CreateWantAgent004 end!");
-}
-#endif
-
-static HWTEST_F(AVSessionServiceTest, CreateWantAgent005, TestSize.Level1)
-{
-    SLOGD("CreateWantAgent005 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
@@ -1881,11 +1884,12 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent005, TestSize.Level1)
     avsessionHere->SetUid(5557);
     avservice_->UpdateTopSession(avsessionHere);
     EXPECT_NE(avservice_->topSession_, nullptr);
-    auto wantAgent = avservice_->CreateWantAgent(nullptr, false);
+    auto wantAgent = avservice_->CreateWantAgent(nullptr);
     EXPECT_EQ(wantAgent, nullptr);
     avsessionHere->Destroy();
-    SLOGD("CreateWantAgent005 end!");
+    SLOGD("CreateWantAgent004 end!");
 }
+#endif
 
 /**
  * @tc.name: UpdateOrder001
@@ -2258,22 +2262,6 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle002, TestSize.Level1)
     EXPECT_EQ(songName, "title");
     avsessionHere_->Destroy();
     SLOGD("GetLocalTitle002 end!");
-}
-
-/**
- * @tc.name: GetDescriptorTitle001
- * @tc.desc: get local title.
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceTest, GetDescriptorTitle001, TestSize.Level1)
-{
-    SLOGD("GetDescriptorTitle001 begin!");
-    ASSERT_TRUE(avservice_ != nullptr);
-    auto historyDescriptor = std::make_shared<AVSessionDescriptor>();
-    std::string descriptorTitle  = avservice_->GetDescriptorTitle(historyDescriptor.get());
-    EXPECT_EQ(descriptorTitle, " ");
-    SLOGD("GetDescriptorTitle001 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors001, TestSize.Level0)

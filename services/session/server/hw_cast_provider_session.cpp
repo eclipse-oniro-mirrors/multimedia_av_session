@@ -75,19 +75,17 @@ bool HwCastProviderSession::AddDevice(const DeviceInfo deviceInfo, uint32_t spid
     return (ret == 0) ? true : false;
 }
 
-bool HwCastProviderSession::RemoveDevice(std::string deviceId, bool continuePlay)
+bool HwCastProviderSession::RemoveDevice(std::string deviceId, const DeviceRemoveAction deviceRemoveAction)
 {
-    SLOGI("RemoveDevice in HwCastProviderSession, continuePlay=%{public}d", static_cast<int32_t>(continuePlay));
+    SLOGI("RemoveDevice in HwCastProviderSession, device remove action %{public}d",
+        static_cast<int32_t>(deviceRemoveAction));
     if (!castSession_) {
         SLOGE("castSession_ is not exist");
         return false;
     }
 
     avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
-    if (continuePlay) {
-        return castSession_->RemoveDevice(deviceId, CastEngine::DeviceRemoveAction::ACTION_CONTINUE_PLAY);
-    }
-    return castSession_->RemoveDevice(deviceId);
+    return castSession_->RemoveDevice(deviceId, static_cast<CastEngine::DeviceRemoveAction>(deviceRemoveAction));
 }
 
 std::shared_ptr<CastEngine::IStreamPlayer> HwCastProviderSession::CreateStreamPlayer()
@@ -287,7 +285,7 @@ void HwCastProviderSession::ComputeToastOnDeviceState(CastEngine::DeviceState st
 void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo)
 {
     SLOGI("OnDeviceStateChange from cast with deviceId %{public}s, state %{public}d, reasonCode %{public}d",
-        AVSessionUtils::GetAnonyNetworkid(stateInfo.deviceId.c_str()).c_str(),
+        AVSessionUtils::GetAnonyNetworkId(stateInfo.deviceId).c_str(),
             static_cast<int32_t>(stateInfo.deviceState),
         static_cast<int32_t>(stateInfo.reasonCode));
 
