@@ -1998,7 +1998,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
 {
     SLOGI("OnCastStateChange in with BundleName: %{public}s | state: %{public}d | id: %{public}s",
         GetBundleName().c_str(), static_cast<int32_t>(castState),
-        AVSessionUtils::GetAnonyNetworkid(deviceInfo.deviceId_).c_str());
+        AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
