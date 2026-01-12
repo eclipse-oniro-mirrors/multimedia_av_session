@@ -661,7 +661,6 @@ void AVRouterImpl::SetSinkCastSessionInfo(const AAFwk::Want &want)
 void AVRouterImpl::NotifyCastSessionCreated()
 {
     CHECK_AND_RETURN_LOG(!sinkCastSessionId_.empty(), "sinkCastSessionId_ is empty");
-    CHECK_AND_RETURN_LOG(!sourceDeviceId_.empty(), "sourceDeviceId_ is empty");
     CHECK_AND_RETURN_LOG(hwProvider_ != nullptr, "hwProvider_ is nullptr");
 
     if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1) {
@@ -671,7 +670,6 @@ void AVRouterImpl::NotifyCastSessionCreated()
         SLOGI("sourceProtocols_ is %{public}d", sourceProtocols_);
         castSide_ = CAST_SIDE::CAST_SINK;  // prohibit cast preempt mirror toast disconnect
         sinkAllConnectResult_ = CollaborationManager::GetInstance().CastAddToCollaboration(deviceInfo);
-        sourceDeviceId_.clear();
     }
     
     castSide_ = CAST_SIDE::CAST_SINK;
