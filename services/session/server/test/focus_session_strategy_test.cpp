@@ -729,13 +729,11 @@ static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange012, testing::ext
     info->rendererState = RendererState::RENDERER_RUNNING;
     info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
 
-    size_t before = focusSessionStrategy.currentStates_.size();
     AudioRendererChangeInfos infos;
     infos.push_back(info);
     focusSessionStrategy.ProcAudioRenderChange(infos);
-    size_t after = focusSessionStrategy.currentStates_.size();
 
-    EXPECT_EQ(before, after);
+    EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key)->second == focusSessionStrategy.runningState);
     EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
     SLOGI("ProcAudioRenderChange012 end!");
 }
