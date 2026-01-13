@@ -114,6 +114,8 @@ public:
     int64_t GetMirrorCastHandle() override;
 
     void SetMirrorCastHandle(int64_t castHandle) override;
+    
+    std::string GetMirrorDeviceId() override;
 
     void SetSinkCastSessionInfo(const AAFwk::Want &want) override;
 

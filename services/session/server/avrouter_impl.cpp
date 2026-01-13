@@ -628,6 +628,15 @@ void AVRouterImpl::SetMirrorCastHandle(int64_t castHandle)
     hwProvider_->SetMirrorCastHandle(castHandle);
 }
 
+std::string AVRouterImpl::GetMirrorDeviceId()
+{
+    std::string castHandleDeviceId = "-100";
+    if (castHandleToInfoMap_.find(GetMirrorCastHandle()) != castHandleToInfoMap_.end()) {
+        castHandleDeviceId = castHandleToInfoMap_[GetMirrorCastHandle()].outputDeviceInfo_.deviceInfos_[0].deviceId_;
+    }
+    return castHandleDeviceId;
+}
+
 void AVRouterImpl::SetSinkCastSessionInfo(const AAFwk::Want &want)
 {
     std::string deviceInfoStr = want.GetStringParam("deviceInfo");
@@ -792,14 +801,13 @@ void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo devi
             avRouterListener->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false);
         }
     }
-    for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
-        if (castHandleInfo.sessionId_ != sessionId) {
-            if (castHandleInfo.avRouterListener_ != nullptr) {
-                castHandleInfo.avRouterListener_->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false);
-            }
-            castHandleToInfoMap_[number].sessionId_ = sessionId;
-            castHandleToInfoMap_[number].avRouterListener_ = mirrorSessionMap_[sessionId];
-        }
+    for (auto& [number, castHandleInfo] : castHandleToInfoMap_) {
+        CHECK_AND_CONTINUE(castHandleInfo.sessionId_ != sessionId);
+        CHECK_AND_CONTINUE(castHandleInfo.avRouterListener_ != nullptr);
+        CHECK_AND_CONTINUE(mirrorSessionMap_[sessionId] != nullptr);
+        castHandleInfo.avRouterListener_->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false);
+        castHandleInfo.sessionId_ = sessionId;
+        castHandleInfo.avRouterListener_ = mirrorSessionMap_[sessionId];
     }
     mirrorSessionMap_.clear();
     disconnectOtherSession_.store(false);
