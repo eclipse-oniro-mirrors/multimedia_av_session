@@ -214,6 +214,7 @@ av_session_ohos_library("avsession_service") {
 
   external_deps = [
     "ability_base:base",
+    "ability_base:configuration",
     "ability_base:zuri",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -382,6 +383,7 @@ if (castplus_cast_engine_enable) {
 
     external_deps = [
       "ability_base:base",
+      "ability_base:configuration",
       "ability_base:want",
       "ability_runtime:app_manager",
       "ability_runtime:wantagent_innerkits",
@@ -749,6 +751,7 @@ av_session_ohos_library("avsession_cast_item") {
 
   external_deps = [
     "ability_base:base",
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
