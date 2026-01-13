@@ -1689,9 +1689,11 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        AbilityRuntime::WantAgent::WantAgent* wantAgentPtr_;
+        AbilityRuntime::WantAgent::WantAgent* wantAgentPtr_ = nullptr;
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], wantAgentPtr_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get  wantAgent failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        CHECK_ARGS_RETURN_VOID(context, wantAgentPtr_ != nullptr, "get wantAgent nullptr",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->wantAgent_ = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgentPtr_);
     };
