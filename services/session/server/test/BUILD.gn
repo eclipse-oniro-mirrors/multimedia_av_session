@@ -2258,6 +2258,7 @@ ohos_unittest("AppManagerAdapterTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -2301,6 +2302,7 @@ ohos_unittest("AbilityConnectHelperTest") {
   cflags_cc = [ "-fno-access-control" ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -2347,6 +2349,7 @@ ohos_unittest("BkGrAudioControllerTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -2449,6 +2452,7 @@ ohos_unittest("SessionStackTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -2526,6 +2530,7 @@ ohos_unittest("AVRouterTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -2615,6 +2620,7 @@ ohos_unittest("AVRouterImplTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
@@ -2691,6 +2697,7 @@ if (castplus_cast_engine_enable) {
     ]
 
     external_deps = [
+      "ability_base:configuration",
       "ability_base:want",
       "ability_runtime:app_manager",
       "ability_runtime:wantagent_innerkits",
@@ -2756,6 +2763,7 @@ if (castplus_cast_engine_enable) {
     ]
 
     external_deps = [
+      "ability_base:configuration",
       "ability_base:want",
       "ability_runtime:app_manager",
       "ability_runtime:wantagent_innerkits",
@@ -2822,6 +2830,7 @@ if (castplus_cast_engine_enable) {
     ]
 
     external_deps = [
+      "ability_base:configuration",
       "ability_base:want",
       "ability_runtime:app_manager",
       "ability_runtime:wantagent_innerkits",
