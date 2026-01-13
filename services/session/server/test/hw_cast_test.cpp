@@ -1289,6 +1289,21 @@ static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level0)
     hwCastProvider->OnSessionCreated(nullptr);
     SLOGI("HwCastProviderOnSessionCreated001 end!");
 }
+/**
+ * @tc.name: HwCastProviderOnSessionCreated001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastProviderNotifyCastSessionCreated001, TestSize.Level0)
+{
+    SLOGI("HwCastProviderNotifyCastSessionCreated001 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+    hwCastProvider->NotifyCastSessionCreated("123456");
+    SLOGI("HwCastProviderOnSessionCreated001 end!");
+}
 
 /**
  * @tc.name: HwCastProviderOnServiceDied001

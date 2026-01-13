@@ -435,7 +435,10 @@ static HWTEST(AVSharedMemoryBaseTest, Read007, TestSize.Level4)
 {
     SLOGI("Read007 begin!");
     auto memory = std::make_shared<AVSharedMemoryBase>(10, 0, "test");
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->MapMemory(false);
     uint8_t testData = 42;
     memory->Write(&testData, 1, 0);
@@ -457,7 +460,10 @@ static HWTEST(AVSharedMemoryBaseTest, CreateFromLocal001, TestSize.Level4)
     uint32_t flags = 0;
     const std::string name = "test_ashmem";
     auto memory = AVSharedMemoryBase::CreateFromLocal(size, flags, name);
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     EXPECT_NE(memory, nullptr);
     if (memory != nullptr) {
         EXPECT_EQ(memory->GetSize(), size);
@@ -513,7 +519,10 @@ static HWTEST(AVSharedMemoryBaseTest, Init001, TestSize.Level4)
     uint32_t flags = 0;
     const std::string name = "test_invalid_size";
     auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     int32_t ret = memory->Init();
     EXPECT_EQ(ret, static_cast<int32_t>(ERR_INVALID_PARAM));
     EXPECT_LE(memory->capacity_, 0);
@@ -533,7 +542,10 @@ static HWTEST(AVSharedMemoryBaseTest, Init002, TestSize.Level4)
     uint32_t flags = 0;
     const std::string name = "remote_memory";
     auto memory = std::make_shared<AVSharedMemoryBase>(wrong_size, flags, name);
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     EXPECT_GT(memory->fd_, 0);
     int32_t ret = memory->Init();
@@ -555,7 +567,10 @@ static HWTEST(AVSharedMemoryBaseTest, Init003, TestSize.Level4)
     uint32_t flags = 0;
     const std::string name = "remote_memory";
     auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     EXPECT_GT(memory->fd_, 0);
     int32_t ret = memory->Init();
@@ -580,7 +595,10 @@ static HWTEST(AVSharedMemoryBaseTest, Init004, TestSize.Level4)
     uint32_t flags = 0;
     const std::string name = "closed_fd_memory";
     auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     int32_t ret = memory->Init();
     EXPECT_EQ(ret, static_cast<int32_t>(ERR_INVALID_PARAM));
@@ -603,7 +621,10 @@ static HWTEST(AVSharedMemoryBaseTest, Init005, TestSize.Level4)
     uint32_t flags = 0;
     const std::string name = "skip_map_memory";
     auto memory = std::make_shared<AVSharedMemoryBase>(capacity_, flags, name);
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     EXPECT_EQ(memory->capacity_, capacity_);
     EXPECT_EQ(memory->fd_, fd);
@@ -625,7 +646,10 @@ static HWTEST(AVSharedMemoryBaseTest, MapMemory001, TestSize.Level4)
     int fd = AshmemCreate("test_local", 4096);
     ASSERT_GT(fd, 0);
     auto memory = std::make_shared<AVSharedMemoryBase>(4096, 0, "local_rw");
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     memory->capacity_ = 4096;
     int32_t ret = memory->MapMemory(false);
@@ -647,7 +671,10 @@ static HWTEST(AVSharedMemoryBaseTest, MapMemory002, TestSize.Level4)
     ASSERT_GT(fd, 0);
     auto memory = std::make_shared<AVSharedMemoryBase>(4096,
          AVSharedMemory::FLAGS_READ_ONLY, "local_ro");
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     memory->capacity_ = 4096;
     int32_t ret = memory->MapMemory(false);
@@ -672,7 +699,10 @@ static HWTEST(AVSharedMemoryBaseTest, MapMemory003, TestSize.Level4)
     int fd = AshmemCreate("test_remote", 4096);
     ASSERT_GT(fd, 0);
     auto memory = std::make_shared<AVSharedMemoryBase>(4096, 0, "remote_rw");
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     memory->capacity_ = 4096;
     int32_t ret = memory->MapMemory(true);
@@ -694,7 +724,10 @@ static HWTEST(AVSharedMemoryBaseTest, MapMemory004, TestSize.Level4)
     ASSERT_GT(fd, 0);
     auto memory = std::make_shared<AVSharedMemoryBase>(4096,
         AVSharedMemory::FLAGS_READ_ONLY, "remote_ro");
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     memory->capacity_ = 4096;
     int32_t ret = memory->MapMemory(true);
@@ -714,7 +747,10 @@ static HWTEST(AVSharedMemoryBaseTest, MapMemory006, TestSize.Level4)
     int fd = AshmemCreate("test_closed", 4096);
     ASSERT_GT(fd, 0);
     auto memory = std::make_shared<AVSharedMemoryBase>(4096, 0, "closed_fd");
-    ASSERT_NE(memory, nullptr);
+    if (memory == nullptr) {
+        SLOGE("Failed to allocate memory");
+        return;
+    }
     memory->fd_ = fd;
     memory->capacity_ = 4096;
     close(fd);

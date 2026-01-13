@@ -874,7 +874,8 @@ static HWTEST_F(MigrateAVSessionTest, GetAllControllers001, TestSize.Level1)
 static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState001, TestSize.Level0)
 {
     SLOGI("DelaySendPlaybackState001 begin");
-    std::shared_ptr<MigrateAVSessionServer> tempServer;
+    std::shared_ptr<MigrateAVSessionServer> tempServer =
+        std::make_shared<MigrateAVSessionServer>();
     tempServer->topSessionId_ = "1111";
     int32_t ret = tempServer->DelaySendPlaybackState();
     EXPECT_EQ(ret, AVSESSION_ERROR);
@@ -890,10 +891,16 @@ static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState001, TestSize.Level0
 static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState002, TestSize.Level0)
 {
     SLOGI("DelaySendPlaybackState002 begin");
-    std::shared_ptr<MigrateAVSessionServer> tempServer;
-    const std::string sessionId = "1111";
-    tempServer->CreateController(sessionId);
-    int32_t ret = tempServer->DelaySendPlaybackState();
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession");
+    elementName.SetAbilityName("test.ability");
+    OHOS::sptr<AVSessionItem> avsession_ =
+    avservice_ ->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    SetMetaDataAndPlaybackState(avsession_);
+    AVSessionDescriptor descriptor = avsession_->GetDescriptor();
+    server_->OnSessionCreate(descriptor);
+    server_->OnTopSessionChange(descriptor);
+    int32_t ret = server_->DelaySendPlaybackState();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("DelaySendPlaybackState002 end");
 }

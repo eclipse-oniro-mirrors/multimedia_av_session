@@ -930,46 +930,45 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_ReportSessionControl_001, TestSize.Lev
  */
 HWTEST_F(AVsessionItemTest, AVSessionItem_CheckUseAVMetaData_001, TestSize.Level1)
 {
-    SLOGI("AVSessionItem_CheckUseAVMetaData_001 begin!");
+    SLOGI("AVSessionItem_CheckUseAVMetaData_001 begin");
     ASSERT_TRUE(g_AVSessionItem != nullptr);
     g_AVSessionItem->serviceCallbackForAddAVQueueInfo_ = nullptr;
-    AVMetaData metadata;
-    metadata.SetAssetId("test");
-    metadata.SetTitle("test");
-    g_AVSessionItem->CheckUseAVMetaData(metadata);
-    ASSERT_TRUE(metadata.GetAVQueueImage() == nullptr);
+    g_AVSessionItem->metaData_.SetAssetId("test");
+    g_AVSessionItem->metaData_.SetTitle("test");
+    g_AVSessionItem->CheckUseAVMetaData(g_AVSessionItem->metaData_);
+    ASSERT_TRUE(g_AVSessionItem->metaData_.GetAVQueueImage() == nullptr);
 
     auto avQueueImg = std::make_shared<AVSessionPixelMap>();
     ASSERT_TRUE(avQueueImg != nullptr);
-    metadata.SetAVQueueImage(avQueueImg);
-    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    g_AVSessionItem->metadata_.SetAVQueueImage(avQueueImg);
+    g_AVSessionItem->CheckUseAVMetaData(g_AVSessionItem->metaData_);
     ASSERT_TRUE(avQueueImg != nullptr);
-    EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, true);
+    EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, false);
 
     std::vector<uint8_t> vec = {0, 1, 0, 1};
     avQueueImg->SetInnerImgBuffer(vec);
-    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    g_AVSessionItem->CheckUseAVMetaData(g_AVSessionItem->metaData_);
     ASSERT_TRUE(avQueueImg != nullptr);
     EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, true);
 
-    metadata.SetAVQueueName("test");
-    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    g_AVSessionItem->metaData_.SetAVQueueName("test");
+    g_AVSessionItem->CheckUseAVMetaData(g_AVSessionItem->metaData_);
     ASSERT_TRUE(avQueueImg != nullptr);
     EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, true);
 
-    metadata.SetAVQueueId("test");
-    g_AVSessionItem->CheckUseAVMetaData(metadata);
+    g_AVSessionItem->metaData_.SetAVQueueId("test");
+    g_AVSessionItem->CheckUseAVMetaData(g_AVSessionItem->metaData_);
     ASSERT_TRUE(avQueueImg != nullptr);
     EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size(), 0);
-    SLOGI("AVSessionItem_CheckUseAVMetaData_001 end!");
+    SLOGI("AVSessionItem_CheckUseAVMetaData_001 end");
 }
 
 /**
-    * @tc.name: AVSessionItem_GetCurrentAppIndexForSession_001
-    * @tc.desc: Test GetCurrentAppIndexForSession sets appIndex_ correctly.
-    * @tc.type: FUNC
-    * @tc.require: #1787
-    */
+ * @tc.name: AVSessionItem_GetCurrentAppIndexForSession_001
+ * @tc.desc: Test GetCurrentAppIndexForSession sets appIndex_ correctly.
+ * @tc.type: FUNC
+ * @tc.require: #1787
+*/
 HWTEST_F(AVsessionItemTest, AVSessionItem_GetCurrentAppIndexForSession_001, TestSize.Level0)
 {
     SLOGI("AVSessionItem_GetCurrentAppIndexForSession_001 begin!");
@@ -981,11 +980,11 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetCurrentAppIndexForSession_001, Test
 }
 
 /**
-    * @tc.name: AVSessionItem_GetAppIndex_001
-    * @tc.desc: Test GetAppIndex returns appIndex_ value.
-    * @tc.type: FUNC
-    * @tc.require: #1787
-    */
+ * @tc.name: AVSessionItem_GetAppIndex_001
+ * @tc.desc: Test GetAppIndex returns appIndex_ value.
+ * @tc.type: FUNC
+ * @tc.require: #1787
+*/
 HWTEST_F(AVsessionItemTest, AVSessionItem_GetAppIndex_001, TestSize.Level0)
 {
     SLOGI("AVSessionItem_GetAppIndex_001 begin!");

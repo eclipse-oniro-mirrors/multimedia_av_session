@@ -1573,8 +1573,7 @@ static HWTEST_F(AVSessionServiceTestSecond, StopCast001, TestSize.Level0)
     }
     auto avsessionHere = CreateSession();
     ASSERT_TRUE(avsessionHere != nullptr);
-    g_AVSessionService->migrateAVSessionServerMap_.clear();
-
+    
     avsessionHere->descriptor_.sessionTag_ = "RemoteCast";
     SessionToken sessionToken;
     sessionToken.sessionId = avsessionHere->GetSessionId();

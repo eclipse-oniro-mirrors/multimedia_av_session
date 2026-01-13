@@ -92,7 +92,7 @@ class TestISessionListener : public ISessionListener {
     };
     ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override
     {
-        g_isCallOnActiveSessionChanged = false;
+        g_isCallOnActiveSessionChanged = true;
         return AVSESSION_SUCCESS;
     };
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
@@ -970,7 +970,7 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     EXPECT_NE(g_AVSessionService, nullptr);
 }
 
-/**
+/*
  * @tc.name: NotifyActiveSessionChange001
  * @tc.desc: Test NotifyActiveSessionChange with normal branch
  * @tc.type: FUNC
