@@ -338,7 +338,7 @@ int32_t TaiheUtils::GetAniPropertyInt32Array(ani_env *env, ani_object obj, const
         "Call method <get>length failed", OHOS::AVSession::AVSESSION_ERROR);
     for (ani_int i = 0; i < static_cast<ani_int>(length); i++) {
         ani_ref ref;
-        CHECK_RETURN(env->Object_CallMethodByName_Ref(valueObj, "$_get", "i:C{std.core.Object}", &ref, i) == ANI_OK,
+        CHECK_RETURN(env->Object_CallMethodByName_Ref(valueObj, "$_get", "i:Y", &ref, i) == ANI_OK,
             "Call method $_get failed.", OHOS::AVSession::AVSESSION_ERROR);
 
         int32_t value = 0;
