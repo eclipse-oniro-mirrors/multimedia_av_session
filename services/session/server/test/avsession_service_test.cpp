@@ -62,7 +62,6 @@ static int32_t g_pauseOnCall = AVSESSION_ERROR;
 static int32_t g_nextOnCall = AVSESSION_ERROR;
 static int32_t g_previousOnCall = AVSESSION_ERROR;
 static AVSessionService *avservice_;
-static AVControlCommand *avcommand_;
 
 class AVSessionServiceTest : public testing::Test {
 public:
@@ -3068,6 +3067,7 @@ static HWTEST_F(AVSessionServiceTest, SetForwardTime001, TestSize.Level0)
 {
     SLOGD("SetForwardTime001 begin!");
     int64_t test = -1;
+    auto avcommand_ = std::make_shared<AVControlCommand>();
     int32_t ret = avcommand_->SetForwardTime(test);
     EXPECT_EQ(ret, ERR_INVALID_PARAM);
     SLOGD("SetForwardTime001 end!");
@@ -3076,6 +3076,7 @@ static HWTEST_F(AVSessionServiceTest, SetForwardTime001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTest, SetRewindTime001, TestSize.Level0)
 {
     SLOGD("SetRewindTime001 begin!");
+    auto avcommand_ = std::make_shared<AVControlCommand>();
     int64_t test = -1;
     int32_t ret = avcommand_->SetRewindTime(test);
     EXPECT_EQ(ret, ERR_INVALID_PARAM);
@@ -3085,6 +3086,7 @@ static HWTEST_F(AVSessionServiceTest, SetRewindTime001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTest, SetSeekTime001, TestSize.Level0)
 {
     SLOGD("SetSeekTime001 begin!");
+    auto avcommand_ = std::make_shared<AVControlCommand>();
     int64_t test = -1;
     int32_t ret = avcommand_->SetSeekTime(test);
     EXPECT_EQ(ret, ERR_INVALID_PARAM);

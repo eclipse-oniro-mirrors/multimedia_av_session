@@ -58,9 +58,9 @@ void MigrateAVSessionProxyTest::SetUpTestCase()
 void MigrateAVSessionProxyTest::TearDownTestCase()
 {
     SLOGI("MigrateAVSessionProxyTest TearDownTestCase");
-    g_MigrateAVSessionProxy = nullptr;
-    g_AVSessionService = nullptr;
-    g_AVSessionObserver = nullptr;
+    g_MigrateAVSessionProxy.reset();
+    g_AVSessionService.reset();
+    g_AVSessionObserver.reset();
 }
 
 void MigrateAVSessionProxyTest::SetUp()

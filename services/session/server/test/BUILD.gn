@@ -405,12 +405,20 @@ ohos_unittest("AVSessionServiceAddedTest") {
     "window_manager:libdm_lite",
   ]
 
+  defines = []
   if (multimedia_av_session_enable_dsoftbus) {
+    defines += [ "DSOFTBUS_ENABLE" ]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
   if (multimedia_av_session_enable_device_manager) {
+    defines += [ "DEVICE_MANAGER_ENABLE" ]
     external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (multimedia_av_session_enable_data_object) {
+    defines += [ "DATA_OBJECT_ENABLE" ]
+    external_deps += [ "data_object:distributeddataobject_impl" ]
   }
 
   if (castplus_cast_engine_enable) {

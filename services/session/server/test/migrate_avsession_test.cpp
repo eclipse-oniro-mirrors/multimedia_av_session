@@ -874,7 +874,8 @@ static HWTEST_F(MigrateAVSessionTest, GetAllControllers001, TestSize.Level1)
 static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState001, TestSize.Level0)
 {
     SLOGI("DelaySendPlaybackState001 begin");
-    std::shared_ptr<MigrateAVSessionServer> tempServer;
+    std::shared_ptr<MigrateAVSessionServer> tempServer =
+        std::make_shared<MigrateAVSessionServer>();
     tempServer->topSessionId_ = "1111";
     int32_t ret = tempServer->DelaySendPlaybackState();
     EXPECT_EQ(ret, AVSESSION_ERROR);
