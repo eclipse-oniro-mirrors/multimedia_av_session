@@ -1202,7 +1202,6 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
         [holder = castController](const auto*) {});
     CHECK_AND_RETURN_RET_LOG(sharedPtr != nullptr, nullptr, "malloc AVCastControllerItem failed");
     ReportAVCastControllerInfo();
-
     auto validCallback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         dealValidCallback(cmd, supportedCastCmds);
     };
@@ -1222,7 +1221,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     sharedPtr->SetSessionTag(descriptor_.sessionTag_);
     sharedPtr->SetSessionId(descriptor_.sessionId_);
     sharedPtr->SetUserId(userId_);
-    if (descriptor_.sessionTag_ != "RemoteCast") {
+    if (descriptor_.sessionTag_ != "RemoteCast" && castControllerProxy_ != nullptr) {
         std::lock_guard callbackForCastCapLockGuard(callbackForCastCapLock_);
         castControllerProxy_->SetSessionCallbackForCastCap([this](bool isPlaying, bool isMediaChange) {
             std::thread([this, isPlaying, isMediaChange]() {
@@ -1233,7 +1232,6 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
             }).detach();
         });
     }
-
     InitializeCastCommands();
     if (SearchSpidInCapability(castHandleDeviceId_)) {
         if (castControllerProxy_ != nullptr) {
