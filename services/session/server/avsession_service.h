@@ -505,6 +505,8 @@ private:
     
     void DeleteAVQueueInfoRecord(const std::string& bundleName, int32_t userId = 0);
 
+    bool SaveAvQueueInfo(std::string& oldContent, const std::string &bundleName, AVSessionItem& session);
+
     const cJSON* GetSubNode(const cJSON* nodeItem, const std::string& name);
 
     void SaveSessionInfoInFile(const std::string& tag, const std::string& sessionId,
@@ -572,6 +574,10 @@ private:
 
     void AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
 
+    void AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionItem);
+
+    void AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionItem);
+
     void AddCastCapsuleServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     void AddAncoColdStartServiceCallback(sptr<AVSessionItem>& session);
@@ -586,7 +592,11 @@ private:
 
     bool IsTopSessionPlaying();
 
+    bool IsLocalSessionPlaying(const sptr<AVSessionItem>& session);
+
     bool NotifyFlowControl();
+
+    bool IsCapsuleNeeded();
 
     int32_t GetLocalDeviceType();
 
@@ -619,12 +629,6 @@ private:
 #endif
 
     void NotifyHistoricalRecordChange(const std::string& bundleName, int32_t userId);
-
-    bool IsCapsuleNeeded();
-
-    void AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionItem);
-
-    void AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     void NotifySessionChange(std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront,
         int32_t userId = 0);
@@ -669,6 +673,8 @@ private:
     std::string DoCJSONArrayTransformToString(cJSON* valueItem);
 
     void HandleTopSessionRelease(int32_t userId, sptr<AVSessionItem>& sessionItem);
+
+    bool ProcTopSessionPlaying(sptr<AVSessionItem> session, bool isPlaying, bool isMediaChange);
 
     bool CheckStartAncoMediaPlay(const std::string& bundleName, int32_t *result);
 
@@ -741,9 +747,9 @@ private:
 
     std::recursive_mutex castAudioSessionMapLock_;
 
-    std::recursive_mutex historicalRecordListenersLock_;
-
     std::recursive_mutex keyEventListLock_;
+
+    std::recursive_mutex historicalRecordListenersLock_;
 
     std::recursive_mutex controlListLock_;
 
@@ -764,7 +770,7 @@ private:
     bool cancelCastRelease_ = false;
     std::condition_variable enableCastCond_;
     const int32_t castReleaseTimeOut_ = 120;
-    std::shared_ptr<PcmCastSession> pcmCastSession_ = nullptr;
+    shared_ptr<PcmCastSession> pcmCastSession_ = nullptr;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
@@ -802,7 +808,7 @@ private:
     std::map<std::string, std::shared_ptr<MigrateAVSessionServer>> migrateAVSessionServerMap_;
     std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
     std::recursive_mutex migrateProxyMapLock_;
-    std::list<std::string> controlListForNtf_ = {"com.ohos.mediacontroller"};
+    std::set<std::string> controlListForNtf_ = {"com.ohos.mediacontroller"};
 
     std::map<int32_t, int32_t> desktopLyricAbilityStateMap_;
     std::mutex desktopLyricAbilityStateMutex_;
@@ -832,11 +838,11 @@ private:
     const uint8_t doRemoteLoadRetryTime = 5;
     const int32_t defaultUserId = 100;
     const int32_t mediaControlAncoParam = 52225;
+    const int32_t otherPlayingSessionMinLen = 2;
     const int32_t systemuiLiveviewTypeCodeMediacontroller = 2;
     const int32_t systemuiLiveviewTypeCodePhoto = 27;
     const int32_t mediacontrollerNotifyId = 0;
     const int32_t photoNotifyId = 1;
-    const int32_t otherPlayingSessionMinLen = 2;
 
     const std::string sessionTypePhoto = "photo";
 };
