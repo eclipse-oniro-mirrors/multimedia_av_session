@@ -373,13 +373,13 @@ public:
     
     void SetServiceCallbackForCastNtfCapsule(const std::function<void(std::string, bool, bool)>& callback);
 
-    void SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback);
-
     void SetServiceCallbackForStopSinkCast(const std::function<void()>& callback);
 
     void SetMultiDeviceState(MultiDeviceState multiDeviceState);
 
     MultiDeviceState GetMultiDeviceState();
+
+    void SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback);
 #endif
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
@@ -552,7 +552,7 @@ private:
     static constexpr const int32_t audioBrokerUid = 5557;
     static constexpr const char *defaultBundleName = "com.example.himusicdemo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
-    static constexpr const int32_t cancelTimeout = 5000;
+    static constexpr const int32_t cancelTimeoutMs = 5000;
 
     std::atomic_bool isSupportedDesktopLyric_ = false;
     std::atomic_bool isEnabledDesktopLyric_ = false;
@@ -606,7 +606,6 @@ private:
     std::string collaborationNeedDeviceId_;
     std::string collaborationNeedNetworkId_;
 
-    std::recursive_mutex castControllerProxyLock_;
     std::shared_ptr<IAVCastControllerProxy> castControllerProxy_;
     std::recursive_mutex castControllersLock_;
     std::vector<std::shared_ptr<AVCastControllerItem>> castControllers_;
@@ -624,8 +623,8 @@ private:
     bool isFirstCallback_ = true;
     const int32_t SWITCH_WAIT_TIME = 300;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
-    std::function<void(std::string, bool)> serviceCallbackForPhotoCast_;
     std::function<void()> serviceCallbackStopSinkCast_;
+    std::function<void(std::string, bool)> serviceCallbackForPhotoCast_;
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";

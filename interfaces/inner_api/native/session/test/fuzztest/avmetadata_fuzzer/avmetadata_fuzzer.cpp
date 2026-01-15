@@ -28,7 +28,7 @@ void OHOS::AVSession::AVMetaDataTest(const uint8_t* data, size_t size)
         return;
     }
 
-    Parcel dataParcel;
+    MessageParcel dataParcel;
     dataParcel.WriteBuffer(data, size);
     dataParcel.RewindRead(0);
 
