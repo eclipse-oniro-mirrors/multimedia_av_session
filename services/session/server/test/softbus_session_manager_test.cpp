@@ -108,7 +108,7 @@ static HWTEST_F(SoftbusSessionManagerTest, SoftbusDistributedTest001, TestSize.L
     char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
-    PeerSocketInfo info = {
+    SoftbusPeerSocketInfo info = {
         .name = infoName,
         .networkId = infoNetworkId,
         .pkgName = infoPkgName,
@@ -229,7 +229,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnSessionOpened001, TestSize.Level0)
     char infoName[] = "Media_Session_RemoteCtrl";
     char infoNetworkId[] = "testInfoNetworkId";
     char infoPkgName[] = "testInfoPkgName";
-    PeerSocketInfo info = {
+    SoftbusPeerSocketInfo info = {
         .name = infoName,
         .networkId = infoNetworkId,
         .pkgName = infoPkgName,
@@ -381,7 +381,7 @@ static HWTEST_F(SoftbusSessionManagerTest, OnBind001, TestSize.Level0)
 {
     SLOGI("OnBind001 begin");
     int32_t socket = 1231;
-    PeerSocketInfo info;
+    SoftbusPeerSocketInfo info;
     EXPECT_TRUE(manager_ != nullptr);
     manager_->OnBind(socket, info);
     SLOGI("OnBind001 end");

@@ -17,8 +17,6 @@
 #define AV_SESSION_HASH_CALCULATOR_H
 
 #include <vector>
-#include <openssl/sha.h>
-
 #include "avsession_errors.h"
 #include "avsession_log.h"
 
@@ -27,16 +25,13 @@ class HashCalculator {
 public:
     HashCalculator() = default;
 
-    ~HashCalculator();
+    ~HashCalculator() = default;
 
     int32_t Init();
 
     int32_t Update(const std::vector<uint8_t> &value);
 
     int32_t GetResult(std::vector<uint8_t> &value);
-
-private:
-    SHA256_CTX *context_ = nullptr;
 };
 }
 #endif // AV_SESSION_HASH_CALCULATOR_H

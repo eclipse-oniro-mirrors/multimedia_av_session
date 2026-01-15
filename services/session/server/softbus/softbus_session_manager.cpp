@@ -22,6 +22,9 @@
 #include "softbus_session_utils.h"
 
 namespace OHOS::AVSession {
+
+static const std::string SOFTBUS_DYNAMIC_LIBRARY_PATH = std::string("libsoftbus_manager_dynamic.z.so");
+
 SoftbusSessionManager& SoftbusSessionManager::GetInstance()
 {
     static SoftbusSessionManager softbusSessionListener;
@@ -29,14 +32,14 @@ SoftbusSessionManager& SoftbusSessionManager::GetInstance()
 }
 
 #ifdef DSOFTBUS_ENABLE
-static void OnBind(int32_t socket, PeerSocketInfo info)
+static void OnBind(int32_t socket, SoftbusPeerSocketInfo info)
 {
     SLOGI("OnBind sessionId[%{public}d] result[%{public}s]", socket,
         SoftbusSessionUtils::AnonymizeDeviceId(std::string(info.networkId ? info.networkId : "")).c_str());
     SoftbusSessionManager::GetInstance().OnBind(socket, info);
 }
 
-static void OnShutdown(int32_t socket, ShutdownReason reason)
+static void OnShutdown(int32_t socket, SoftbusShutdownReason reason)
 {
     SLOGI("OnSessionClosed sessionId[%{public}d], reason[%{public}d]", socket, reason);
     SoftbusSessionManager::GetInstance().OnShutdown(socket, reason);
@@ -56,7 +59,7 @@ static void OnMessage(int socket, const void *data, unsigned int dataLen)
     SoftbusSessionManager::GetInstance().OnMessage(socket, msg.c_str(), dataLen);
 }
 
-static ISocketListener iSessionListener = {
+static DynamicSocketCallbackFunc callbackFunc = {
     .OnBind = OnBind,
     .OnShutdown = OnShutdown,
     .OnBytes = OnBytes,
@@ -65,30 +68,23 @@ static ISocketListener iSessionListener = {
 
 int32_t SoftbusSessionManager::Socket(const std::string &pkgName)
 {
-    if (pkgName.c_str() == nullptr) {
-        SLOGE("pkg name is null");
-        return AVSESSION_ERROR;
+    using SocketCallbackFunc = void(*)(DynamicSocketCallbackFunc*);
+    SocketCallbackFunc registerCallback = reinterpret_cast<SocketCallbackFunc>(dynamicLoader->GetFuntion(
+        SOFTBUS_DYNAMIC_LIBRARY_PATH, "DRegisterSocketCallback"));
+    if (registerCallback) {
+        SLOGI("DRegisterSocketCallback");
+        registerCallback(&callbackFunc);
     }
-    SocketInfo info = {
-        .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG),
-        .pkgName = const_cast<char *>(pkgName.c_str()),
-        .dataType = DATA_TYPE_BYTES
-    };
-    int32_t socket = ::Socket(info);
-    QosTV serverQos[] = {
-        {.qos = QOS_TYPE_MIN_BW,        .value = 64 * 1024 }, //最小带宽64k
-        {.qos = QOS_TYPE_MAX_LATENCY,   .value = 19000 }, //最大建链时延19s
-        {.qos = QOS_TYPE_MIN_LATENCY,   .value = 500 }, //最小建链时延0.5s
-    };
-    int32_t ret = ::Listen(socket, serverQos, QOS_COUNT, &iSessionListener);
-    if (ret == 0) {
-        SLOGI("service success ,socket[%{public}d]", socket);
-        //建立服务成功
-    } else {
-        SLOGI("service failed ,ret[%{public}d]", ret);
-        //建立服务失败，错误码
+
+    using SocketFunc = int32_t(*)(const std::string&);
+    SocketFunc socket = reinterpret_cast<SocketFunc>(dynamicLoader->GetFuntion(
+        SOFTBUS_DYNAMIC_LIBRARY_PATH, "DSocket"));
+    if (socket) {
+        SLOGI("DSocket");
+        return socket(pkgName);
     }
-    return socket;
+    SLOGE("dlopen DSocket fail");
+    return AVSESSION_ERROR;
 }
 
 int32_t SoftbusSessionManager::Bind(const std::string &peerNetworkId, const std::string &pkgName)
@@ -97,38 +93,38 @@ int32_t SoftbusSessionManager::Bind(const std::string &peerNetworkId, const std:
         SLOGE("pkg or networkId name is empty");
         return AVSESSION_ERROR;
     }
-    SocketInfo info = {
-        .name = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG),
-        .peerName = const_cast<char *>(CONFIG_SOFTBUS_SESSION_TAG),
-        .peerNetworkId = const_cast<char *>(peerNetworkId.c_str()),
-        .pkgName = const_cast<char *>(pkgName.c_str()),
-        .dataType = DATA_TYPE_BYTES
-    };
-    int32_t socket = ::Socket(info);
-    QosTV serverQos[] = {
-        {.qos = QOS_TYPE_MIN_BW,        .value = 64 * 1024 }, //最小带宽64k
-        {.qos = QOS_TYPE_MAX_LATENCY,   .value = 19000 }, //最大建链时延19s
-        {.qos = QOS_TYPE_MIN_LATENCY,   .value = 500 }, //最小建链时延0.5s
-    };
-    int32_t ret = ::Bind(socket, serverQos, QOS_COUNT, &iSessionListener);
-    if (ret == 0) {
-        SLOGI("service success ,socket[%{public}d]", socket);
-        std::lock_guard lockGuard(socketLock_);
-        mMap_.insert({socket, peerNetworkId});
-        //建立服务成功
-        return socket;
-    } else {
-        SLOGI("service failed ,ret[%{public}d]", ret);
-        //建立服务失败，错误码
-        return AVSESSION_ERROR;
+
+    using BindFunc = int32_t(*)(const std::string&, const std::string&);
+    BindFunc bind = reinterpret_cast<BindFunc>(dynamicLoader->GetFuntion(SOFTBUS_DYNAMIC_LIBRARY_PATH, "DBind"));
+    if (bind) {
+        SLOGI("DBind");
+        int32_t socket = bind(peerNetworkId, pkgName);
+        if (socket != -1) {
+            SLOGI("DBind success ,socket[%{public}d]", socket);
+            std::lock_guard lockGuard(socketLock_);
+            mMap_.insert({socket, peerNetworkId});
+            return socket;
+        } else {
+            SLOGE("DBind failed");
+            return AVSESSION_ERROR;
+        }
     }
+    SLOGE("dlopen DBind fail");
+    return AVSESSION_ERROR;
 }
 
 void SoftbusSessionManager::Shutdown(int32_t socket)
 {
     SLOGI("socket Shutdown with mallopt");
-    ::Shutdown(socket);
-    mallopt(M_DELAYED_FREE, M_DELAYED_FREE_DISABLE);
+    using ShutdownFunc = void(*)(int32_t);
+    ShutdownFunc shutdown = reinterpret_cast<ShutdownFunc>(dynamicLoader->GetFuntion(
+        SOFTBUS_DYNAMIC_LIBRARY_PATH, "DShutdown"));
+    if (shutdown) {
+        SLOGI("DShutdown");
+        shutdown(socket);
+    } else {
+        SLOGE("dlopen DShutdown fail");
+    }
 }
 
 int32_t SoftbusSessionManager::SendMessage(int32_t socket, const std::string &data)
@@ -137,12 +133,14 @@ int32_t SoftbusSessionManager::SendMessage(int32_t socket, const std::string &da
         SLOGE("the params invalid, unable to send message by session.");
         return AVSESSION_ERROR;
     }
-    int ret = ::SendMessage(socket, data.c_str(), data.length());
-    if (ret != 0) {
-        SLOGE("SendMessage error, ret = %{public}d", ret);
-        return AVSESSION_ERROR;
+    using SendMessageFunc = int32_t(*)(int32_t, const std::string&);
+    SendMessageFunc sendMsg = reinterpret_cast<SendMessageFunc>(dynamicLoader->GetFuntion(
+        SOFTBUS_DYNAMIC_LIBRARY_PATH, "DSendMessage"));
+    if (sendMsg) {
+        return sendMsg(socket, data);
     }
-    return ret;
+    SLOGE("dlopen DSendMessage fali");
+    return AVSESSION_ERROR;
 }
 
 int32_t SoftbusSessionManager::SendBytes(int32_t socket, const std::string &data)
@@ -155,12 +153,14 @@ int32_t SoftbusSessionManager::SendBytes(int32_t socket, const std::string &data
         SLOGE("the params invalid, unable to send sendBytes by session.");
         return AVSESSION_ERROR;
     }
-    int ret = ::SendBytes(socket, data.c_str(), data.length());
-    if (ret != 0) {
-        SLOGE("SendBytes error, ret = %{public}d", ret);
-        return AVSESSION_ERROR;
+    using SendBytesFunc = int32_t(*)(int32_t, const std::string&);
+    SendBytesFunc sendBytes = reinterpret_cast<SendBytesFunc>(dynamicLoader->GetFuntion(
+        SOFTBUS_DYNAMIC_LIBRARY_PATH, "DSendBytes"));
+    if (sendBytes) {
+        return sendBytes(socket, data);
     }
-    return ret;
+    SLOGE("SendBytes dlopen DSendBytes fali");
+    return AVSESSION_ERROR;
 }
 
 int32_t SoftbusSessionManager::SendBytesForNext(int32_t socket, const std::string &data)
@@ -169,12 +169,14 @@ int32_t SoftbusSessionManager::SendBytesForNext(int32_t socket, const std::strin
         SLOGE("the params invalid, unable to send sendBytes by session.");
         return AVSESSION_ERROR;
     }
-    int ret = ::SendBytes(socket, data.c_str(), data.length());
-    if (ret != 0) {
-        SLOGE("SendBytes error, ret = %{public}d", ret);
-        return AVSESSION_ERROR;
+    using SendBytesFunc = int32_t(*)(int32_t, const std::string&);
+    SendBytesFunc sendBytes = reinterpret_cast<SendBytesFunc>(dynamicLoader->GetFuntion(
+        SOFTBUS_DYNAMIC_LIBRARY_PATH, "DSendBytes"));
+    if (sendBytes) {
+        return sendBytes(socket, data);
     }
-    return ret;
+    SLOGE("SendBytesForNext dlopen DSendBytes fali");
+    return AVSESSION_ERROR;
 }
 #endif
 
@@ -203,7 +205,7 @@ void SoftbusSessionManager::AddSessionListener(std::shared_ptr<SoftbusSessionLis
 }
 
 #ifdef DSOFTBUS_ENABLE
-void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
+void SoftbusSessionManager::OnBind(int32_t socket, SoftbusPeerSocketInfo info)
 {
     if (info.networkId == nullptr) {
         SLOGE("PeerSocketInfo is nullptr");
@@ -216,7 +218,7 @@ void SoftbusSessionManager::OnBind(int32_t socket, PeerSocketInfo info)
     }
 }
 
-void SoftbusSessionManager::OnShutdown(int32_t socket, ShutdownReason reason)
+void SoftbusSessionManager::OnShutdown(int32_t socket, SoftbusShutdownReason reason)
 {
     SLOGI("ShutdownReason = %{public}d", reason);
     std::lock_guard lockGuard(socketLock_);
