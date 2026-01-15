@@ -295,9 +295,7 @@ HWTEST_F(AVSessionPermissionTest, GetAllSessionDescriptorsWithPerm001, TestSize.
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("check descriptors count for stricter check size %{public}d", static_cast<int>(descriptors.size()));
     EXPECT_EQ(descriptors.size() >= 0, true);
-    if (session != nullptr) {
-        session->Destroy();
-    }
+    session->Destroy();
     DeletePermission(g_infoB);
 }
 
