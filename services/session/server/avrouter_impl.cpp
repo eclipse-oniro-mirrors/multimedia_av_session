@@ -33,6 +33,11 @@ AVRouterImpl::AVRouterImpl()
     SLOGD("AVRouter construct");
 }
 
+AVRouterImpl::~AVRouterImpl()
+{
+    SLOGD("AVRouter destruct");
+}
+
 int32_t AVRouterImpl::GetLocalDeviceType()
 {
     int32_t deviceType = -1;
@@ -172,7 +177,7 @@ int32_t AVRouterImpl::StopCastDiscovery()
 
     auto pid = IPCSkeleton::GetCallingPid();
     CHECK_AND_RETURN_RET_LOG(IsStopCastDiscovery(pid), AVSESSION_SUCCESS,
-        "StopCastDiscovery is invalid");
+        "StartCastDiscovery is still in use, no need to stop");
     if (cacheStartDiscovery_) {
         SLOGI("clear cacheStartDiscovery when stop discovery");
         cacheStartDiscovery_ = false;
@@ -622,6 +627,11 @@ int64_t AVRouterImpl::GetMirrorCastHandle()
     return providerManagerMap_[providerNumberEnableDefault_]->provider_->GetMirrorCastHandle();
 }
 
+bool AVRouterImpl::IsInMirrorToStreamState()
+{
+    return isInMirrorToStream_;
+}
+
 void AVRouterImpl::SetMirrorCastHandle(int64_t castHandle)
 {
     CHECK_AND_RETURN_LOG(hwProvider_ != nullptr, "hwProvider_ is nullptr");
@@ -712,11 +722,6 @@ std::string AVRouterImpl::GetCastingDeviceName()
     return sinkDeviceName_;
 }
 
-bool AVRouterImpl::IsInMirrorToStreamState()
-{
-    return isInMirrorToStream_;
-}
-
 bool AVRouterImpl::IsRemoteCasting()
 {
     return isRemoteCasting_;
@@ -729,8 +734,10 @@ void AVRouterImpl::UpdateConnectState(int32_t castState)
         isInMirrorToStream_ = (castState == static_cast<int32_t>(CastEngine::DeviceState::MIRROR_TO_STREAM));
     }
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM) ||
-        castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
+        castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED) ||
+        castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM_TO_MIRROR)) {
         isRemoteCasting_ = (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM));
+        SLOGI("isRemoteCasting_ is %{public}d", isRemoteCasting_.load());
     }
 }
 

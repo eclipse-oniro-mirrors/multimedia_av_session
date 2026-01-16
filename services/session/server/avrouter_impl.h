@@ -45,6 +45,7 @@ public:
 };
 public:
     AVRouterImpl();
+    virtual ~AVRouterImpl();
 
     int32_t Init(IAVSessionServiceListener *servicePtr) override;
 

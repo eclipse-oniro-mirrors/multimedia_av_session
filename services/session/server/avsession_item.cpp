@@ -36,8 +36,8 @@
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
-#include "avsession_hianalytics_report.h"
 #include "want_agent_helper.h"
+#include "avsession_hianalytics_report.h"
 #include "avsession_whitelist_config_manager.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -115,10 +115,12 @@ AVSessionItem::~AVSessionItem()
         Deactivate();
     }
     {
-        std::lock_guard callbackForCastCapLockGuard(callbackForCastCapLock_);
-        if (castControllerProxy_ != nullptr) {
-            castControllerProxy_->SetSessionCallbackForCastCap(nullptr);
-        }
+        #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+            std::lock_guard callbackForCastCapLockGuard(callbackForCastCapLock_);
+            if (castControllerProxy_ != nullptr) {
+                castControllerProxy_->SetSessionCallbackForCastCap(nullptr);
+            }
+        #endif
     }
     {
         std::lock_guard aliveLockGuard(isAliveLock_);
@@ -157,8 +159,7 @@ void AVSessionItem::UpdateSessionElement(const AppExecFwk::ElementName& elementN
 
 int32_t AVSessionItem::Destroy()
 {
-    SLOGI("AVSessionItem %{public}d check service destroy event with service, check serviceCallback exist",
-        static_cast<int>(GetPid()));
+    SLOGI("AVSessionItem check service destroy event with service, check serviceCallback exist");
     {
         std::lock_guard lockGuard(destroyLock_);
         if (isDestroyed_) {
@@ -444,7 +445,7 @@ bool AVSessionItem::CheckTitleChange(const AVMetaData& meta)
 {
     bool isTitleChange = metaData_.GetTitle() != meta.GetTitle();
     bool isAncoTitleLyric = GetUid() == audioBrokerUid && meta.GetArtist().find("-") != std::string::npos;
-    bool isTitleLyric = ((GetBundleName() == defaultBundleName) && !meta.GetDescription().empty()) || isAncoTitleLyric;
+    bool isTitleLyric = (GetBundleName() == defaultBundleName && !meta.GetDescription().empty()) || isAncoTitleLyric;
     SLOGI("isTitleLyric:%{public}d isAncoTitleLyric:%{public}d isTitleChange:%{public}d",
         isTitleLyric, isAncoTitleLyric, isTitleChange);
     return isTitleChange && !isTitleLyric;
@@ -723,7 +724,9 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
                     SLOGI("anco capsule del for %{public}s", shardPtr->GetBundleName().c_str());
                     shardPtr->serviceCallbackForMediaSession_(shardPtr->GetSessionId(), false, false);
                 }
-            }, "CancelAncoMediaCapsule", cancelTimeout);
+            }, "CancelAncoMediaCapsule", cancelTimeoutMs);
+    } else {
+        SLOGD("CheckIfSendCapsule not valid state, dont porc capsule");
     }
 }
 
@@ -1744,8 +1747,8 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
 void AVSessionItem::HandleCastValidCommandChange(const std::vector<int32_t> &cmds)
 {
     std::lock_guard lockGuard(castControllersLock_);
-    SLOGI("send command change event to controller, controller size: %{public}d, cmds size is: %{public}d,",
-        static_cast<int>(castControllers_.size()), static_cast<int>(cmds.size()));
+    SLOGI("send command change event to controller, controller size: %{public}d",
+        static_cast<int>(castControllers_.size()));
     for (auto controller : castControllers_) {
         if (controller != nullptr) {
             controller->HandleCastValidCommandChange(cmds);
@@ -1858,7 +1861,7 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
 
 void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 {
-    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}lld", (long long)castHandle_);
+    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}lld", castHandle_);
     if (isNeedRemove) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -2152,7 +2155,7 @@ void AVSessionItem::UnRegisterDeviceStateCallback()
 
 void AVSessionItem::StopCastSession()
 {
-    SLOGI("Stop cast session process with castHandle: %{public}lld", (long long)castHandle_);
+    SLOGI("Stop cast session process with castHandle: %{public}lld", castHandle_);
     int64_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
     DoContinuousTaskUnregister();
     if (ret != AVSESSION_ERROR) {
@@ -2231,9 +2234,8 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
         sptr<Rosen::DisplayLite> display = Rosen::DisplayManagerLite::GetInstance().GetDisplayById(displayId);
         CHECK_AND_RETURN_RET_LOG(display != nullptr, AVSESSION_ERROR, "display is nullptr");
         auto displayInfo = display->GetDisplayInfo();
-        SLOGI("GetAllCastDisplays name: %{public}s, id: %{public}llu",
-            displayInfo->GetName().c_str(), (unsigned long long)displayInfo->GetDisplayId());
         if (displayInfo->GetName() == "HwCast_AppModeDisplay") {
+            std::lock_guard displayListenerLockGuard(displayListenerLock_);
             displays.clear();
             SLOGI("GetAllCastDisplays AppCast");
             if (displayListener_ != nullptr) {
@@ -2346,12 +2348,6 @@ void AVSessionItem::SetServiceCallbackForCastNtfCapsule(const std::function<void
     serviceCallbackForCastNtf_ = callback;
 }
 
-void AVSessionItem::SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback)
-{
-    SLOGI("SetServiceCallbackForPhotoCast in");
-    serviceCallbackForPhotoCast_ = callback;
-}
-
 void AVSessionItem::SetServiceCallbackForStopSinkCast(const std::function<void()>& callback)
 {
     SLOGI("SetServiceCallbackForStopSinkCast in");
@@ -2366,6 +2362,12 @@ void AVSessionItem::SetMultiDeviceState(MultiDeviceState multiDeviceState)
 AVSessionItem::MultiDeviceState AVSessionItem::GetMultiDeviceState()
 {
     return multiDeviceState_.load();
+}
+
+void AVSessionItem::SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback)
+{
+    SLOGI("SetServiceCallbackForPhotoCast in");
+    serviceCallbackForPhotoCast_ = callback;
 }
 #endif
 
@@ -2548,6 +2550,7 @@ void AVSessionItem::NotificationExtras(AAFwk::IArray* list)
             } else {
                 isNotShowNotification_ = false;
             }
+            SLOGI("NotificationExtras=%{public}d", isNotShowNotification_);
         }
     };
     AAFwk::Array::ForEach(list, func);
