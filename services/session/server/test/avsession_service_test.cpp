@@ -2325,31 +2325,6 @@ static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors002, TestSize.Level0)
     SLOGI("GetSessionDescriptors002 end!");
 }
 
-/**
- * @tc.name: ProcTopSessionPlaying001
- * @tc.desc: Process top session playing.
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
-*/
-static HWTEST_F(AVSessionServiceTest, ProcTopSessionPlaying001, TestSize.Level1)
-{
-    SLOGI("ProcTopSessionPlaying001 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionHere_ = 
-        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    EXPECT_NE(avsessionHere_, nullptr);
-    avservice_->UpdateTopSession(avsessionHere_);
-    EXPECT_NE(avservice_->topSession_, nullptr);
-    avservice_->ProcTopSessionPlaying(avsessionHere_, false, false);
-    EXPECT_EQ(avservice_->hasMediaCapsule_, false);
-    avservice_->ProcTopSessionPlaying(avsessionHere_, true, false);
-    EXPECT_EQ(avservice_->hasMediaCapsule_, true);
-    avsessionHere_->Destroy();
-    SLOGI("ProcTopSessionPlay001 end!");
-}
-
 /** 
  * @tc.name: ProcTopSessionPlaying001
  * @tc.desc: Process top session playing.
