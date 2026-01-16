@@ -289,7 +289,7 @@ int32_t TaiheUtils::GetAniOptionalPropertyInt32(ani_env *env, ani_object obj, co
         return OHOS::AVSession::AVSESSION_ERROR;
     }
     ani_method method {};
-    if (env->Class_FindMethod(cls, "intValue", nullptr, &method) != ANI_OK) {
+    if (env->Class_FindMethod(cls, "toInt", nullptr, &method) != ANI_OK) {
         SLOGE("GetAniOptionalPropertyInt32 [%{public}s] find method intValue failed", name.c_str());
         return OHOS::AVSession::AVSESSION_ERROR;
     }
@@ -395,7 +395,7 @@ int32_t TaiheUtils::GetAniOptionalPropertyInt64(ani_env *env, ani_object obj, co
         return OHOS::AVSession::AVSESSION_ERROR;
     }
     ani_method method {};
-    if (env->Class_FindMethod(cls, "longValue", nullptr, &method) != ANI_OK) {
+    if (env->Class_FindMethod(cls, "toLong", nullptr, &method) != ANI_OK) {
         SLOGE("GetAniOptionalPropertyInt64 [%{public}s] find method longValue failed", name.c_str());
         return OHOS::AVSession::AVSESSION_ERROR;
     }
