@@ -17,7 +17,8 @@
           "SystemCapability.Multimedia.AVSession.Core",
           "SystemCapability.Multimedia.AVSession.ExtendedDisplayCast",
           "SystemCapability.Multimedia.AVSession.Manager",
-          "SystemCapability.Multimedia.AVSession.AVInputCast = false"
+          "SystemCapability.Multimedia.AVSession.AVInputCast = false",
+          "SystemCapability.Multimedia.AVSession.AVMusicTemplate = false"
       ],
       "features": [
         "av_session_enable_start_stop_on_demand",
