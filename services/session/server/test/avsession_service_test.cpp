@@ -2341,7 +2341,7 @@ static HWTEST_F(AVSessionServiceTest, ProcTopSessionPlaying001, TestSize.Level1)
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     int oriUid = avsessionHere_->GetUid();
-    int oriPid = avsessionHere_->getpid();
+    int oriPid = avsessionHere_->Getpid();
     avsessionHere_->SetUid(1041);
     avsessionHere_->SetPid(1041);
     avservice_->UpdateFrontSession(avsessionHere_, true);
