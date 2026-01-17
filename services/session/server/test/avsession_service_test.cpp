@@ -77,7 +77,7 @@ public:
 void AVSessionServiceTest::SetUpTestCase()
 {
     SLOGI("set up AVSessionServiceTest");
-    system("killall -9 com.example.himusicdemo");
+    system("killall -9 com.example.hiMusicDemo");
     sleep(1);
     avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     avservice_->InitKeyEvent();
