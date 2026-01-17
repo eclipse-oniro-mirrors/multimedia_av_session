@@ -895,7 +895,7 @@ static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState002, TestSize.Level0
     elementName.SetBundleName("test.ohos.avsession");
     elementName.SetAbilityName("test.ability");
     OHOS::sptr<AVSessionItem> avsession_ =
-    avservice_ ->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avservice_->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     SetMetaDataAndPlaybackState(avsession_);
     AVSessionDescriptor descriptor = avsession_->GetDescriptor();
     server_->OnSessionCreate(descriptor);
