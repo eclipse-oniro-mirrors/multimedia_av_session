@@ -767,7 +767,7 @@ private:
     std::mutex checkEnableCastMutex_;
     std::recursive_mutex checkEnableCastLock_;
     std::unordered_set<pid_t> cacheEnableCastPids_;
-    bool cancelCastRelease_ = false;
+    std::atomic<bool> cancelCastRelease_ = false;
     std::condition_variable enableCastCond_;
     const int32_t castReleaseTimeOut_ = 120;
     shared_ptr<PcmCastSession> pcmCastSession_ = nullptr;
