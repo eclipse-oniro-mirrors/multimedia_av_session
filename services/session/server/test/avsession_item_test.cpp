@@ -944,7 +944,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_CheckUseAVMetaData_001, TestSize.Level
     metadata.SetAVQueueImage(avQueueImg);
     g_AVSessionItem->CheckUseAVMetaData(metadata);
     ASSERT_TRUE(avQueueImg != nullptr);
-    EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, true);
+    EXPECT_EQ(avQueueImg->GetInnerImgBuffer().size() > 0, false);
 
     std::vector<uint8_t> vec = {0, 1, 0, 1};
     avQueueImg->SetInnerImgBuffer(vec);

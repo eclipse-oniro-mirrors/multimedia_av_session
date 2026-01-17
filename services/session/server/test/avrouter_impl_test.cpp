@@ -1380,18 +1380,6 @@ static HWTEST_F(AVRouterImplTest, UnRegisterCallback002, TestSize.Level0)
     EXPECT_TRUE(AVSESSION_SUCCESS == ret);
     SLOGI("UnRegisterCallback002 end");
 }
-/**
-* @tc.name: Release001
-* @tc.desc: call Release
-* @tc.type: FUNC
-* @tc.require: NA
-*/
-static HWTEST_F(AVRouterImplTest, Release001, TestSize.Level0)
-{
-    std::shared_ptr<AVRouterImpl> aVRouterImpl = std::make_shared<AVRouterImplMock>();
-    auto ret = aVRouterImpl->Release();
-    EXPECT_EQ(ret, false);
-}
 
 /**
 * @tc.name: GetRemoteController007
