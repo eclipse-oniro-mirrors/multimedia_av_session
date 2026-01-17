@@ -637,8 +637,6 @@ HWTEST_F(AVSessionManagerTest, RegisterSessionListener002, TestSize.Level1)
     OutputDeviceInfo outputDeviceInfo;
     listener->OnDeviceAvailable(outputDeviceInfo);
     sleep(1);
-    listener->OnDeviceOffline("deviceId");
-    sleep(1);
     session->Destroy();
 
     SLOGI("RegisterSessionListener002 end");

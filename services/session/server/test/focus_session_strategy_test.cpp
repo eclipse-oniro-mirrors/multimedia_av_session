@@ -729,10 +729,10 @@ static HWTEST_F(FocusSessionStrategyTest, ProcAudioRenderChange012, testing::ext
     info->rendererState = RendererState::RENDERER_RUNNING;
     info->rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
 
+ 
     AudioRendererChangeInfos infos;
     infos.push_back(info);
     focusSessionStrategy.ProcAudioRenderChange(infos);
-
     EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key)->second == focusSessionStrategy.runningState);
     EXPECT_TRUE(focusSessionStrategy.currentStates_.find(key) != focusSessionStrategy.currentStates_.end());
     SLOGI("ProcAudioRenderChange012 end!");

@@ -2216,7 +2216,7 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
     SLOGD("GetLocalTitle001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetBundleName("com.example.hiMusicDemo");
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
@@ -2226,7 +2226,7 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
     AVMetaData metadata;
     metadata.SetAssetId("mediaId");
     metadata.SetDescription("title;artist");
-    avsessionHere_->SetAVMetaData(g_metaData);
+    avsessionHere_->SetAVMetaData(metadata);
     std::string songName = avservice_->GetLocalTitle();
     EXPECT_EQ(songName, "title");
     avsessionHere_->Destroy();
@@ -2255,8 +2255,8 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle002, TestSize.Level1)
     AVMetaData metadata;
     metadata.SetAssetId("mediaId");
     metadata.SetTitle("title");
-    metadata.SetDescription("title-artist");
-    avsessionHere_->SetAVMetaData(g_metaData);
+    metadata.SetArtist("title-artist");
+    avsessionHere_->SetAVMetaData(metadata);
     std::string songName = avservice_->GetLocalTitle();
     EXPECT_EQ(songName, "title");
     avsessionHere_->Destroy();
@@ -2325,6 +2325,40 @@ static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ProcTopSessionPlaying001
+ * @tc.desc: Process top session playing.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTest, ProcTopSessionPlaying001, TestSize.Level1)
+{
+    SLOGI("ProcTopSessionPlaying001 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    int oriUid = avsessionHere_->GetUid();
+    int oriPid = avsessionHere_->GetPid();
+    avsessionHere_->SetUid(1041);
+    avsessionHere_->SetPid(1041);
+    avservice_->UpdateFrontSession(avsessionHere_, true);
+    FocusSessionStrategy::FocusSessionChangeInfo info;
+    info.uid = 1041;
+    info.pid = 1041;
+    avservice_->HandleFocusSession(info, true);
+    std::vector<int> audioPlayingUids;
+    audioPlayingUids.push_back(1041);
+    avservice_->focusSessionStrategy_.SetAudioPlayingUids(audioPlayingUids);
+    EXPECT_EQ(avservice_->CheckIfOtherAudioPlaying(), false);
+    avsessionHere_->SetUid(oriUid);
+    avsessionHere_->SetPid(oriPid);
+    avsessionHere_->Destroy();
+    SLOGI("ProcTopSessionPlay001 end!");
+}
+
+/**
  * @tc.name: HandleRemoveMediaCardEvent001
  * @tc.desc: Verifying the HandleRemoveMediaCardEvent method with a valid session.
  * @tc.type: FUNC
@@ -2338,7 +2372,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent001, TestSize.Le
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
-         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
     avservice_->UpdateTopSession(avsessionHere_);
     EXPECT_NE(avservice_->topSession_, nullptr);
@@ -2367,7 +2401,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent002, TestSize.Le
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     avservice_->topSession_ =
-         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     bool ret = avservice_->topSession_->IsCasting();
     avservice_->HandleRemoveMediaCardEvent(0, false);
     EXPECT_EQ(ret, false);
