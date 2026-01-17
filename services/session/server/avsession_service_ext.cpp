@@ -268,7 +268,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         std::thread([this]() {
             std::unique_lock<std::mutex> lock(checkEnableCastMutex_);
             CHECK_AND_RETURN_LOG(!enableCastCond_.wait_for(lock, std::chrono::seconds(castReleaseTimeOut_),
-                [this]() { return cancelCastRelease_; }), "cancel cast release");
+                [this]() { return cancelCastRelease_.load(); }), "cancel cast release");
             std::lock_guard threadLockGuard(checkEnableCastLock_);
             CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsRemoteCasting(),
                 "can not release cast with session casting");
@@ -440,6 +440,10 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     if (isPcm) {
         pcmCastSession_ = std::make_shared<PcmCastSession>();
         return pcmCastSession_->StartCast(outputDeviceInfo, castServiceNameStatePair_);
+    }
+    if (!cancelCastRelease_) {
+        cancelCastRelease_ = true;
+        enableCastCond_.notify_all();
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 
