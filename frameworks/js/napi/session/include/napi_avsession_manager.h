@@ -62,6 +62,14 @@ private:
     static napi_value OffDistributedSessionChangeEvent(napi_env env, napi_callback_info info);
     static napi_value OnActiveSessionChanged(napi_env env, napi_callback_info info);
     static napi_value OffActiveSessionChanged(napi_env env, napi_callback_info info);
+    static napi_value OnSessionEvent(napi_env env, napi_callback_info info, std::string eventName);
+    static napi_value OffSessionEvent(napi_env env, napi_callback_info info, std::string eventName);
+    static napi_value OnSessionCreateEvent(napi_env env, napi_callback_info info);
+    static napi_value OffSessionCreateEvent(napi_env env, napi_callback_info info);
+    static napi_value OnSessionDestroyEvent(napi_env env, napi_callback_info info);
+    static napi_value OffSessionDestroyEvent(napi_env env, napi_callback_info info);
+    static napi_value OnTopSessionChangeEvent(napi_env env, napi_callback_info info);
+    static napi_value OffTopSessionChangeEvent(napi_env env, napi_callback_info info);
 
     static napi_status OnSessionCreate(napi_env env, napi_value callback);
     static napi_status OnSessionDestroy(napi_env env, napi_value callback);
