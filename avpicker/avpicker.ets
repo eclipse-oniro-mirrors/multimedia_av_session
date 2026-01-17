@@ -563,6 +563,9 @@ export struct AVCastPicker {
     .accessibilityLevel('yes')
     .accessibilityText(this.accessibilityAudioControlStr)
     .onClick(() => {
+        if (this.extensionProxy == null) {
+          return; 
+        }
         if (this.needToRestart) {
           this.needToRestart = false;
           this.restartUECMessage += 1;
@@ -578,9 +581,7 @@ export struct AVCastPicker {
         if (isExtMenuScene || isPanelForMedia) {
           this.isMenuShow = false;
           this.touchMenuItemIndex = -1;
-          if (this.extensionProxy != null) {
-            this.extensionProxy.send({'clickEvent': true});
-          }
+          this.extensionProxy.send({'clickEvent': true});
         } else {
           this.isMenuShow = !this.isMenuShow;
           if (this.isMenuShow) {

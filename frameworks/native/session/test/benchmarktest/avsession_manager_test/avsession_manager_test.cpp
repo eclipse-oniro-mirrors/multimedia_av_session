@@ -158,7 +158,7 @@ BENCHMARK_F(AVSessionManagerTest, GetSessionDescriptors)(benchmark::State& state
                                                                  elementName);
     if (session == nullptr) {
         SLOGE("%{public}s error, failed to CreateSession, session is nullptr.", __func__);
-        state.SkipWithError("CreateSession failed, return error.");
+        return;
     }
 
     while (state.KeepRunning()) {

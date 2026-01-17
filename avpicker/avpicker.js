@@ -721,6 +721,9 @@ export class AVCastPicker extends ViewPU {
             Button.accessibilityLevel('yes');
             Button.accessibilityText(this.accessibilityAudioControlStr);
             Button.onClick(() => {
+                if (this.extensionProxy == null) {
+                    return;
+                }
                 if (this.needToRestart) {
                     this.needToRestart = false;
                     this.restartUECMessage += 1;
@@ -736,9 +739,7 @@ export class AVCastPicker extends ViewPU {
                 if (x || y) {
                     this.isMenuShow = false;
                     this.touchMenuItemIndex = -1;
-                    if (this.extensionProxy != null) {
-                        this.extensionProxy.send({'clickEvent': true});
-                    }
+                    this.extensionProxy.send({'clickEvent': true});
                 } else {
                     this.isMenuShow = !this.isMenuShow;
                     if (this.isMenuShow) {
