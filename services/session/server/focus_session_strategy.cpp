@@ -220,7 +220,8 @@ void FocusSessionStrategy::DelayStopFocusSession(const std::pair<int32_t, int32_
                 CHECK_AND_RETURN_LOG(!(it != lastStates_.end() &&
                     it->second == AudioStandard::RendererState::RENDERER_RUNNING),
                     "DelayStopFocus uid=%{public}d pid=%{public}d not found or not running", key.first, key.second);
-                SLOGE("DelayStopFocus uid=%{public}d lastState=%{public}d", it->first.first, it->second);
+                CHECK_AND_PRINT_LOG(it == lastStates_.end(),
+                    "DelayStopFocus uid=%{public}d lastState=%{public}d", it->first.first, it->second);
             }
             FocusSessionChangeInfo changeInfo;
             changeInfo.uid = key.first;
