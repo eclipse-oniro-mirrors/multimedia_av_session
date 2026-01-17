@@ -2217,7 +2217,7 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
     SLOGD("GetLocalTitle001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("com.example.himusicdemo");
+    elementName.SetBundleName("com.example.hiMusicDemo");
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
