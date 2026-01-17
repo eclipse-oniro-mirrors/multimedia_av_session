@@ -2325,7 +2325,7 @@ static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors002, TestSize.Level0)
     SLOGI("GetSessionDescriptors002 end!");
 }
 
-/** 
+/**
  * @tc.name: ProcTopSessionPlaying001
  * @tc.desc: Process top session playing.
  * @tc.type: FUNC
