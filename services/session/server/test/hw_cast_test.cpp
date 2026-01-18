@@ -1289,6 +1289,7 @@ static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level0)
     hwCastProvider->OnSessionCreated(nullptr);
     SLOGI("HwCastProviderOnSessionCreated001 end!");
 }
+
 /**
  * @tc.name: HwCastProviderOnSessionCreated001
  * @tc.desc:

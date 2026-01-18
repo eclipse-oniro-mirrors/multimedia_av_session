@@ -937,7 +937,6 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_CheckUseAVMetaData_001, TestSize.Level
     g_AVSessionItem->metaData_.SetTitle("test");
     g_AVSessionItem->CheckUseAVMetaData(g_AVSessionItem->metaData_);
     ASSERT_TRUE(g_AVSessionItem->metaData_.GetAVQueueImage() == nullptr);
-
     auto avQueueImg = std::make_shared<AVSessionPixelMap>();
     ASSERT_TRUE(avQueueImg != nullptr);
     g_AVSessionItem->metaData_.SetAVQueueImage(avQueueImg);

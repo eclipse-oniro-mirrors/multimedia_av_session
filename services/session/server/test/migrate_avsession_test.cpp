@@ -904,3 +904,4 @@ static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState002, TestSize.Level0
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("DelaySendPlaybackState002 end");
 }
+
