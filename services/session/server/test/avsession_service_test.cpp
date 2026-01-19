@@ -2357,7 +2357,7 @@ static HWTEST_F(AVSessionServiceTest, ProcTopSessionPlaying001, TestSize.Level1)
 */
 static HWTEST_F(AVSessionServiceTest, CheckIfOtherAudioPlaying001, TestSize.Level1)
 {
-    SLOGI("ProcTopSessionPlay001 begin!");
+    SLOGI("CheckIfOtherAudioPlaying001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
