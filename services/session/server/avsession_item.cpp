@@ -1930,7 +1930,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     }
 }
 
-void AVSessionItem::DealLocalState(int32_t castState)
+void AVSessionItem::DealLocalState(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo)
 {
     CHECK_AND_RETURN(castState == static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED));
     OutputDeviceInfo localDeviceInfo;
@@ -1958,7 +1958,7 @@ void AVSessionItem::DealLocalState(int32_t castState)
             break;
         case MultiDeviceState::CASTING_AND_CASTED:
             multiDeviceState_ = MultiDeviceState::DEFAULT;
-            AVRouter::GetInstance().SetCastingDeviceName(descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_);
+            AVRouter::GetInstance().SetCastingDeviceName(outputDeviceInfo.deviceInfos_[0].deviceName_);
             SetOutputDevice(localDeviceInfo);
             AVRouter::GetInstance().NotifyCastSessionCreated();
             break;
@@ -2050,7 +2050,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
         Destroy();
     } else {
-        DealLocalState(castState);
+        DealLocalState(castState, outputDeviceInfo);
     }
 }
 

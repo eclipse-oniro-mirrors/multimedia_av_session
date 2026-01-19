@@ -90,7 +90,7 @@ public:
 
     void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
-    void DealLocalState(int32_t castState);
+    void DealLocalState(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove);
 
