@@ -1049,7 +1049,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DealLocalState_001, TestSize.Level1)
     info.deviceInfos_.push_back(deviceInfo);
     g_AVSessionItem->newOutputDeviceInfo_ = info;
     int32_t castState = static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED);
-    g_AVSessionItem->DealLocalState(castState);
+    g_AVSessionItem->DealLocalState(castState, info);
     auto deviceName = g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_;
     EXPECT_EQ(deviceName, "LocalDevice");
     SLOGI("AVSessionItem_DealLocalState_001 end!");
