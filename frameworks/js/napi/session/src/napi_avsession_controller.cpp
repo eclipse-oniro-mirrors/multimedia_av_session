@@ -159,7 +159,7 @@ napi_status NapiAVSessionController::NewInstance(
     napiController->controller_ = std::move(nativeController);
     napiController->sessionId_ = napiController->controller_->GetSessionId();
 
-    CHECK_RETURN(DoRegisterCallback(env, napiController) == napi_ok, "add callback failed", napi_generic_failure);
+    CHECK_RETURN(DoRegisterCallback(env, napiController, true) == napi_ok, "add callback failed", napi_generic_failure);
     SLOGD("add napiController instance prelock for sessionId: %{public}s***",
         napiController->sessionId_.substr(0, ARGC_THREE).c_str());
     std::lock_guard<std::mutex> lock(controllerListMutex_);
@@ -2002,7 +2002,8 @@ napi_status NapiAVSessionController::SetMetaFilter(napi_env env, NapiAVSessionCo
     return status;
 }
 
-napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSessionController* napiController)
+napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSessionController* napiController,
+    bool isFromNewInstance)
 {
     CHECK_AND_RETURN_RET_LOG(napiController != nullptr, napi_generic_failure, "napiController null");
     std::string controllerId = napiController->sessionId_;
@@ -2010,6 +2011,8 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
     if (napiController->callback_ == nullptr) {
         napiController->callback_ = std::make_shared<NapiAVControllerCallback>();
         if (napiController->callback_ == nullptr) {
+            CHECK_AND_RETURN_RET_LOG(!isFromNewInstance, napi_generic_failure,
+                "DoRegisterCallback but no memory in controller construct");
             SLOGE("OnEvent failed : no memory");
             NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
             return napi_generic_failure;
@@ -2021,7 +2024,10 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
         });
         auto ret = napiController->controller_->RegisterCallback(napiController->callback_);
         if (ret != AVSESSION_SUCCESS) {
-            SLOGE("controller RegisterCallback failed:%{public}d", ret);
+            napiController->callback_ = nullptr;
+            CHECK_AND_RETURN_RET_LOG(!isFromNewInstance, napi_generic_failure,
+                "DoRegisterCallback fail:%{public}d in controller construct", ret);
+            SLOGE("controller RegisterCallback failed:%{public}d.", ret);
             if (ret == ERR_CONTROLLER_NOT_EXIST) {
                 NapiUtils::ThrowError(env, "OnEvent failed : native controller not exist",
                     NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -2035,7 +2041,6 @@ napi_status NapiAVSessionController::DoRegisterCallback(napi_env env, NapiAVSess
                 NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
                     NapiAVSessionManager::errcode_[ret]);
             }
-            napiController->callback_ = nullptr;
             return napi_generic_failure;
         }
     }
