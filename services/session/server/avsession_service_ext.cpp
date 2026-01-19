@@ -264,6 +264,8 @@ int32_t AVSessionService::checkEnableCast(bool enable)
     if (enable == true && isInCast_ == false) {
         isInCast_ = AVRouter::GetInstance().Init(this) == AVSESSION_SUCCESS ? true : false;
     } else if (enable == false && isInCast_ == true) {
+        CHECK_AND_RETURN_RET_LOG(cacheEnableCastPids_.empty(), AVSESSION_ERROR,
+            "can not create task release cast with pid still calling");
         cancelCastRelease_ = false;
         std::thread([this]() {
             std::unique_lock<std::mutex> lock(checkEnableCastMutex_);
@@ -440,10 +442,6 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     if (isPcm) {
         pcmCastSession_ = std::make_shared<PcmCastSession>();
         return pcmCastSession_->StartCast(outputDeviceInfo, castServiceNameStatePair_);
-    }
-    if (!cancelCastRelease_) {
-        cancelCastRelease_ = true;
-        enableCastCond_.notify_all();
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 
