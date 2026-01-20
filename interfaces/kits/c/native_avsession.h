@@ -579,6 +579,23 @@ AVSession_ErrCode OH_AVSession_AcquireSession(const char* sessionTag, const char
  *                                                 2. The param of avcastcontroller is nullptr.
  * @since 23
  */
+AVSession_ErrCode OH_AVSession_GetAVCastController(OH_AVSession* avsession, OH_AVCastController** avcastcontroller);
+
+/**
+ * @brief Create an AVCastController object.
+ * Call {@link OH_AVCastController_Destroy} to release the OH_AVCastController when it is not used anymore.
+ *
+ * @param avsession The avsession instance pointer
+ * @param avcastcontroller {@link OH_AVCastController} Pointer to a variable to receive the avcastcontroller
+ * @return Function result code:
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Internal server error.
+ *         {@link AV_SESSION_ERR_CODE_SESSION_NOT_EXIST} The session does not exist.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1. The param of avsession is nullptr.
+ *                                                 2. The param of avcastcontroller is nullptr.
+ * @since 23
+ */
 AVSession_ErrCode OH_AVSession_CreateAVCastController(OH_AVSession* avsession, OH_AVCastController** avcastcontroller);
 
 /**
@@ -594,6 +611,25 @@ AVSession_ErrCode OH_AVSession_CreateAVCastController(OH_AVSession* avsession, O
  * @since 23
  */
 AVSession_ErrCode OH_AVSession_StopCasting(OH_AVSession* avsession);
+
+/**
+ * @brief Acquire current output device.
+ *
+ * @param avsession The avsession instance pointer
+ * @param outputDeviceInfo Pointer {@link AVSession_OutputDeviceInfo} to a variable to receive the OutputDeviceInfo
+ *     Do not release the outputDeviceInfo pointer separately, instead call {@link OH_AVSession_ReleaseOutputDevice}
+ *     to release the outputDeviceInfo when it is not used anymore.
+ * @return Function result code:
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Internal server error.
+ *         {@link AV_SESSION_ERR_CODE_SESSION_NOT_EXIST} The session does not exist.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
+ *                                                 1. The param of avsession is nullptr.
+ *                                                 2. The param of outputDeviceInfo is nullptr.
+ * @since 23
+ */
+AVSession_ErrCode OH_AVSession_GetOutputDevice(OH_AVSession* avsession,
+    AVSession_OutputDeviceInfo** outputDeviceInfo);
 
 /**
  * @brief Acquire current output device.

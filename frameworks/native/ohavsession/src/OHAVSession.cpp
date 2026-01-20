@@ -887,6 +887,17 @@ AVSession_ErrCode OH_AVSession_AcquireSession(const char* sessionTag, const char
     return AV_SESSION_ERR_SUCCESS;
 }
 
+AVSession_ErrCode OH_AVSession_GetAVCastController(OH_AVSession* avsession, OH_AVCastController** avcastcontroller)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "avcastcontroller is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    OHOS::AVSession::OHAVCastController **oh_avcastcontroller =
+        (OHOS::AVSession::OHAVCastController **)(avcastcontroller);
+    return oh_avsession->GetAVCastController(oh_avcastcontroller);
+}
+
 AVSession_ErrCode OH_AVSession_CreateAVCastController(OH_AVSession* avsession, OH_AVCastController** avcastcontroller)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
@@ -904,6 +915,16 @@ AVSession_ErrCode OH_AVSession_StopCasting(OH_AVSession* avsession)
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->StopCasting();
+}
+
+AVSession_ErrCode OH_AVSession_GetOutputDevice(OH_AVSession* avsession,
+    AVSession_OutputDeviceInfo** outputDeviceInfo)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "outputDeviceInfo is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->GetOutputDevice(outputDeviceInfo);
 }
 
 AVSession_ErrCode OH_AVSession_AcquireOutputDevice(OH_AVSession* avsession,
