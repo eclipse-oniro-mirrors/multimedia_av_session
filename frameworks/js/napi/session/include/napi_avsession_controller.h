@@ -140,7 +140,8 @@ private:
     static napi_status SetMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
                                         const std::string& eventName, napi_value filter, napi_value callback);
-    static napi_status DoRegisterCallback(napi_env env, NapiAVSessionController* napiController);
+    static napi_status DoRegisterCallback(napi_env env, NapiAVSessionController* napiController,
+        bool isFromNewInstance = false);
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static void ErrCodeToMessage(int32_t errCode, const std::string &funcName, std::string &message);
 
