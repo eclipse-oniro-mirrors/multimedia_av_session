@@ -599,7 +599,6 @@ private:
     std::string castHandleDeviceId_ = "-100";
     const int32_t streamStateConnection = 6;
     const std::string deviceStateConnection = "CONNECT_SUCC";
-    int32_t newCastState = -1;
     std::pair<std::string, std::string> castServiceNameStatePair_;
 
     std::atomic<bool> mirrorToStreamOnceFlag_ = false;

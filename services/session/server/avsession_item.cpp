@@ -1970,13 +1970,11 @@ void AVSessionItem::ListenCollaborationOnStop()
 {
     SLOGI("enter ListenCollaborationOnStop");
     CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
-        if (newCastState == connectStateFromCast_) {
-            if (descriptor_.sessionTag_ == "RemoteCast") {
-                SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
-                AVRouter::GetInstance().StopCastSession(castHandle_);
-            } else {
-                StopCast();
-            }
+        if (descriptor_.sessionTag_ == "RemoteCast") {
+            SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
+            AVRouter::GetInstance().StopCastSession(castHandle_);
+        } else {
+            StopCast();
         }
     });
 }
@@ -2011,7 +2009,6 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         deviceInfo.supportedPullClients_.push_back(GetSpid());
         SLOGI("OnCastStateChange add pull client: %{public}u", GetSpid());
     }
-    newCastState = castState;
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
