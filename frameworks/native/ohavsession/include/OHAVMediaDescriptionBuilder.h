@@ -31,7 +31,7 @@ public:
 
     AVQueueItem_Result SetArtist(const std::string& artist);
 
-    AVQueueItem_Result SetMediaImage(OH_PixelmapNative *mediaImage);
+    AVQueueItem_Result SetAlbumCoverUri(const std::string& albumCoverUri);
 
     AVQueueItem_Result SetMediaType(const std::string& mediaType);
 
@@ -57,7 +57,7 @@ private:
     std::string title_ = "";
     std::string subtitle_ = "";
     std::string artist_ = "";
-    OH_PixelmapNative *mediaImage_ = nullptr;
+    std::string albumCoverUri_ = "";
     std::string mediaType_ = "";
     std::string lyricContent_ = "";
     int32_t duration_ = 0;

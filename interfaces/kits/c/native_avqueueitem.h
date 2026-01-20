@@ -41,7 +41,6 @@
 #define NATIVE_AVQUEUEITEM_H
 
 #include <stdint.h>
-#include "pixelmap_native.h"
 #include "native_avsession_errors.h"
 
 #ifdef __cplusplus
@@ -172,16 +171,16 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetArtist(OH_AVSession
  * @brief Set the image of the resource
  *
  * @param builder The AVMediaDescription builder instance pointer
- * @param mediaImage The image of resource use to display in media center.
+ * @param albumCoverUri The media image url of the resource.
  * @return Function result code:
  *         {@link AVQUEUEITEM_SUCCESS} If the execution is successful.
  *         {@link AVQUEUEITEM_ERROR_INVALID_PARAM}:
  *                                                 1.The param of builder is nullptr;
- *                                                 2.The param of mediaImage is nullptr.
+ *                                                 2.The param of albumCoverUri nullptr.
  * @since 23
  */
-AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetMediaImage(OH_AVSession_AVMediaDescriptionBuilder* builder,
-    OH_PixelmapNative *mediaImage);
+AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetAlbumCoverUri(
+    OH_AVSession_AVMediaDescriptionBuilder* builder, const char* albumCoverUri);
 
 /**
  * @brief Set the mediaType of the resource
@@ -362,19 +361,20 @@ AVQueueItem_Result OH_AVSession_AVMediaDescription_GetArtist(OH_AVSession_AVMedi
     char** artist);
 
 /**
- * @brief Get the media image of the resource
+ * @brief Get the media image url of the resource
  *
  * @param description The AVMediaDescription instance pointer
- * @param mediaImage The pixelmap of resource.
+ * @param albumCoverUri The media image url of resource.
  * @return Function result code:
  *         {@link AVQUEUEITEM_SUCCESS} If the execution is successful.
  *         {@link AVQUEUEITEM_ERROR_INVALID_PARAM}:
  *                                                1.The param of description is nullptr.
- *                                                2.The param of mediaImage is nullptr.
+ *                                                2.The param of albumCoverUri is nullptr.
  * @since 23
  */
-AVQueueItem_Result OH_AVSession_AVMediaDescription_GetMediaImage(OH_AVSession_AVMediaDescription* description,
-    OH_PixelmapNative** mediaImage);
+AVQueueItem_Result OH_AVSession_AVMediaDescription_GetAlbumCoverUri(OH_AVSession_AVMediaDescription* description,
+    char** albumCoverUri);
+
 /**
  * @brief Get the media type information
  *

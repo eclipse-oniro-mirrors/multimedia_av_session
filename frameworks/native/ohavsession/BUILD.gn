@@ -45,6 +45,7 @@ ohos_shared_library("ohavsession") {
     "src/OHAVSessionCallbackImpl.cpp",
     "src/OHAVMediaDescriptionBuilder.cpp",
     "src/OHAVMediaDescription.cpp",
+    "src/OHAVUtils.cpp",
     "src/OHDeviceInfo.cpp",
   ]
 

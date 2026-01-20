@@ -59,11 +59,19 @@ public:
 
     void SetVolume(int32_t volume);
     int32_t GetVolume() const;
+
+    static void ConvertFilter(int32_t filter, AVPlaybackState::PlaybackStateMaskType &maskType);
 private:
     int32_t state_ = PLAYBACK_STATE_INITIAL;
     OHAVSessionPlaybackState::Position position_;
     double speed_ = 1.0;
     int32_t volume_ = 0;
+    inline static const std::map<int32_t, int32_t> filterMap_ = {
+        { FILTER_STATE, AVPlaybackState::PLAYBACK_KEY_STATE},
+        { FILTER_POSITION, AVPlaybackState::PLAYBACK_KEY_POSITION},
+        { FILTER_SPEED, AVPlaybackState::PLAYBACK_KEY_SPEED},
+        { FILTER_VOLUME, AVPlaybackState::PLAYBACK_KEY_VOLUME},
+    };
 };
 }
 

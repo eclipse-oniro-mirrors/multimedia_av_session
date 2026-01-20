@@ -53,7 +53,7 @@ extern "C" {
 /**
  * @brief AVSession object
  *
- * A pointer can be created using {@link OH_AVSession_GetAVCastController} method.
+ * A pointer can be created using {@link OH_AVSession_CreateAVCastController} method.
  *
  * @since 23
  * @version 1.0
@@ -153,6 +153,8 @@ AVSession_ErrCode OH_AVCastController_GetPlaybackState(OH_AVCastController* avca
  * @brief Request to register playback state changed callback.
  *
  * @param avcastcontroller The avcastcontroller instance pointer
+ * @param filter The filter {@link AVSession_PlaybackFilter} of PlaybackState determines which parameters are included
+ *               in callback.
  * @param callback the {@link OH_AVCastControllerCallback_PlaybackStateChanged} to be registered.
  * @param userData User data which is passed by user.
  * @return Function result code：
@@ -164,7 +166,7 @@ AVSession_ErrCode OH_AVCastController_GetPlaybackState(OH_AVCastController* avca
  * @since 23
  */
 AVSession_ErrCode OH_AVCastController_RegisterPlaybackStateChangedCallback(OH_AVCastController* avcastcontroller,
-    OH_AVCastControllerCallback_PlaybackStateChanged callback, void* userData);
+    int32_t filter, OH_AVCastControllerCallback_PlaybackStateChanged callback, void* userData);
 
 /**
  * @brief Request to unregister playback state changed callback.

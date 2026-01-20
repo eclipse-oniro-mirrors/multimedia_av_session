@@ -17,6 +17,7 @@
 #include "OHAVCastController.h"
 #include "OHAVSession.h"
 #include "OHDeviceInfo.h"
+#include "OHAVUtils.h"
 #include "avmeta_data.h"
 #include "avsession_manager.h"
 
@@ -24,6 +25,7 @@
 #include "want_params_wrapper.h"
 
 namespace OHOS::AVSession {
+std::mutex g_setAVMetaDataMutex;
 OHAVSession::~OHAVSession()
 {
 }
@@ -39,6 +41,14 @@ OHAVSession::OHAVSession(AVSession_Type sessionType, const char* sessionTag,
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
     avSession_ = AVSessionManager::GetInstance().CreateSession(sessionTag, sessionType, elementName);
+    dataTracker_ = std::make_shared<AVSessionDataTracker>();
+}
+
+void OHAVSession::SetAVSession(const std::shared_ptr<AVSession> &avsession)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    avSession_ = avsession;
+    dataTracker_ = std::make_shared<AVSessionDataTracker>();
 }
 
 bool OHAVSession::IsAVSessionNull()
@@ -82,11 +92,60 @@ const std::string& OHAVSession::GetSessionId()
     return sessionId_;
 }
 
+void OHAVSession::DownloadAndSetAVMetaData(std::shared_ptr<AVSession> avSession, AVMetaData data,
+    std::shared_ptr<AVSessionDataTracker> dataTracker)
+{
+    if (avSession == nullptr || dataTracker == nullptr) {
+        SLOGE("DownloadAndSetAVMetaData failed because session or tracker is nullptr");
+        return;
+    }
+
+    int32_t ret = AVSessionNdkUtils::DownloadAndSetCoverImage(data.GetMediaImageUri(), data);
+    SLOGI("DownloadAndSetAVMetaData uriSize:%{public}d complete with ret:%{public}d|%{public}d",
+        static_cast<int>(data.GetMediaImageUri().size()), ret, data.GetMediaImageTopic());
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("DownloadAndSetAVMetaData failed but not repeat setmetadata again");
+        return;
+    }
+
+    std::lock_guard<std::mutex> lockGuard(g_setAVMetaDataMutex);
+    bool isOutOfDate = dataTracker->IsOutOfDate(data.GetAssetId(), data.GetMediaImageUri());
+    SLOGI("DownloadAndSetAVMetaData ret:%{public}d|%{public}d", static_cast<int>(ret), isOutOfDate);
+    if (!isOutOfDate) {
+        dataTracker->OnDownloadCompleted(data.GetAssetId(), data.GetMediaImageUri());
+        avSession->SetAVMetaData(data);
+    }
+}
+
 AVSession_ErrCode OHAVSession::SetAVMetaData(OH_AVMetadata* metadata)
 {
-    AVMetaData* avMetaData = reinterpret_cast<AVMetaData*>(metadata);
-    int32_t ret = avSession_->SetAVMetaData(*avMetaData);
-    return GetEncodeErrcode(ret);
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(metadata != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "metadata is nullptr");
+    CHECK_AND_RETURN_RET_LOG(avSession_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(dataTracker_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION, "dataTracker_ is nullptr");
+
+    AVMetaData *avMetaData = (AVMetaData*)metadata;
+    if (metaData_.EqualWithUri(*avMetaData)) {
+        SLOGI("metadata all same");
+        return AV_SESSION_ERR_SUCCESS;
+    }
+
+    metaData_ = *avMetaData;
+    dataTracker_->OnDataUpdated(metaData_.GetAssetId(), metaData_.GetMediaImageUri(),
+        metaData_.GetMediaImage() != nullptr);
+    bool isDownloadNeeded = dataTracker_->IsDownloadNeeded();
+    int32_t ret = avSession_->SetAVMetaData(metaData_);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, GetEncodeErrcode(ret), "SetAVMetaData fail:%{public}d", ret);
+
+    if (!avMetaData->GetMediaImageUri().empty() && isDownloadNeeded && avMetaData->GetMediaImage() == nullptr) {
+        AVSessionDownloadHandler::GetInstance().AVSessionDownloadRemoveTask("OHAVSession::SetAVMetaData");
+        CHECK_AND_PRINT_LOG(AVSessionDownloadHandler::GetInstance().AVSessionDownloadPostTask(
+            [avSession = avSession_, data = (*avMetaData), dataTracker = dataTracker_] {
+                DownloadAndSetAVMetaData(avSession, data, dataTracker);
+            }, "OHAVSession::SetAVMetaData"), "OHAVSession SetAVMetaData handler postTask failed");
+    }
+
+    return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSession::SetPlaybackState(AVSession_PlaybackState playbackState)
@@ -797,7 +856,49 @@ AVSession_ErrCode OH_AVSession_UnregisterOutputDeviceChangeCallback(OH_AVSession
     return oh_avsession->UnregisterOutputDeviceChangeCallback(callback);
 }
 
+AVSession_ErrCode OH_AVSession_AcquireSession(const char* sessionTag, const char* bundleName, const char* abilityName,
+    OH_AVSession** avsession)
+{
+    CHECK_AND_RETURN_RET_LOG(sessionTag != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "sessionTag is null");
+    CHECK_AND_RETURN_RET_LOG(bundleName != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "bundleName is null");
+    CHECK_AND_RETURN_RET_LOG(abilityName != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "abilityName is null");
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+
+    std::shared_ptr<OHOS::AVSession::AVSession> session = nullptr;
+    std::string tag = sessionTag;
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(bundleName);
+    elementName.SetAbilityName(abilityName);
+    OHOS::AVSession::AVSessionManager::GetInstance().GetSession(elementName, tag, session);
+    if (session == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
+    OHOS::AVSession::OHAVSession *oh_avsession = new OHOS::AVSession::OHAVSession();
+    if (oh_avsession == nullptr) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
+    oh_avsession->SetAVSession(session);
+    if (oh_avsession->IsAVSessionNull()) {
+        delete oh_avsession;
+        oh_avsession = nullptr;
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
+    *avsession = (OH_AVSession *)oh_avsession;
+    return AV_SESSION_ERR_SUCCESS;
+}
+
 AVSession_ErrCode OH_AVSession_GetAVCastController(OH_AVSession* avsession, OH_AVCastController** avcastcontroller)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "avcastcontroller is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    OHOS::AVSession::OHAVCastController **oh_avcastcontroller =
+        (OHOS::AVSession::OHAVCastController **)(avcastcontroller);
+    return oh_avsession->GetAVCastController(oh_avcastcontroller);
+}
+
+AVSession_ErrCode OH_AVSession_CreateAVCastController(OH_AVSession* avsession, OH_AVCastController** avcastcontroller)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
     CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "avcastcontroller is null");
@@ -816,7 +917,18 @@ AVSession_ErrCode OH_AVSession_StopCasting(OH_AVSession* avsession)
     return oh_avsession->StopCasting();
 }
 
-AVSession_ErrCode OH_AVSession_GetOutputDevice(OH_AVSession* avsession, AVSession_OutputDeviceInfo **outputDeviceInfo)
+AVSession_ErrCode OH_AVSession_GetOutputDevice(OH_AVSession* avsession,
+    AVSession_OutputDeviceInfo** outputDeviceInfo)
+{
+    CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "outputDeviceInfo is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->GetOutputDevice(outputDeviceInfo);
+}
+
+AVSession_ErrCode OH_AVSession_AcquireOutputDevice(OH_AVSession* avsession,
+    AVSession_OutputDeviceInfo** outputDeviceInfo)
 {
     CHECK_AND_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVSession is null");
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "outputDeviceInfo is null");

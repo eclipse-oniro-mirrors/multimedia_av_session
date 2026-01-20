@@ -84,16 +84,7 @@ void OHAVCastControllerCallbackImpl::OnMediaItemChange(const AVQueueItem& avQueu
     ohAVMediaDescription_->SetTitle(avMediaDescription_->GetTitle());
     ohAVMediaDescription_->SetSubtitle(avMediaDescription_->GetSubtitle());
     ohAVMediaDescription_->SetArtist(avMediaDescription_->GetArtist());
-    if (avMediaDescription_->GetIcon() != nullptr) {
-        std::shared_ptr<OHOS::Media::PixelMap> PixelMap =
-            AVSessionPixelMapAdapter::ConvertFromInner(avMediaDescription_->GetIcon());
-        ohPixelmapNative_ = std::make_shared<OH_PixelmapNative>(std::move(PixelMap));
-        if (ohPixelmapNative_ == nullptr) {
-            SLOGE("ohPixelmapNative is null");
-            return;
-        }
-        ohAVMediaDescription_->SetMediaImage(ohPixelmapNative_.get());
-    }
+    ohAVMediaDescription_->SetAlbumCoverUri(avMediaDescription_->GetAlbumCoverUri());
     ohAVMediaDescription_->SetMediaType(avMediaDescription_->GetMediaType());
     ohAVMediaDescription_->SetLyricContent(avMediaDescription_->GetLyricContent());
     ohAVMediaDescription_->SetDuration(avMediaDescription_->GetDuration());
@@ -190,10 +181,11 @@ void OHAVCastControllerCallbackImpl::OnEndOfStream(const int32_t isLooping)
 AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterPlaybackStateChangedCallback(
     OH_AVCastController* avcastcontroller, OH_AVCastControllerCallback_PlaybackStateChanged callback, void* userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         avCastController_ = avcastcontroller;
     }
-    auto it = std::find_if (playbackStateCallbacks_.begin(), playbackStateCallbacks_.end(),
+    auto it = std::find_if(playbackStateCallbacks_.begin(), playbackStateCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_PlaybackStateChanged, void*> &element) {
             return element.first == callback;
         });
@@ -206,20 +198,23 @@ AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterPlaybackStateChangedCa
 AVSession_ErrCode OHAVCastControllerCallbackImpl::UnregisterPlaybackStateChangedCallback(
     OH_AVCastController* avcastcontroller, OH_AVCastControllerCallback_PlaybackStateChanged callback)
 {
-    std::remove_if (playbackStateCallbacks_.begin(), playbackStateCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto newEnd = std::remove_if(playbackStateCallbacks_.begin(), playbackStateCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_PlaybackStateChanged, void*> &element) {
             return element.first == callback;
         });
+    playbackStateCallbacks_.erase(newEnd, playbackStateCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterMediaItemChangedCallback(
     OH_AVCastController* avcastcontroller, OH_AVCastControllerCallback_MediaItemChange callback, void* userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         avCastController_ = avcastcontroller;
     }
-    auto it = std::find_if (mediaItemChangedCallbacks_.begin(), mediaItemChangedCallbacks_.end(),
+    auto it = std::find_if(mediaItemChangedCallbacks_.begin(), mediaItemChangedCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_MediaItemChange, void*> &element) {
             return element.first == callback;
         });
@@ -232,20 +227,23 @@ AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterMediaItemChangedCallba
 AVSession_ErrCode OHAVCastControllerCallbackImpl::UnregisterMediaItemChangedCallback(
     OH_AVCastController* avcastcontroller, OH_AVCastControllerCallback_MediaItemChange callback)
 {
-    std::remove_if (mediaItemChangedCallbacks_.begin(), mediaItemChangedCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto newEnd = std::remove_if(mediaItemChangedCallbacks_.begin(), mediaItemChangedCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_MediaItemChange, void*> &element) {
             return element.first == callback;
         });
+    mediaItemChangedCallbacks_.erase(newEnd, mediaItemChangedCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterPlayNextCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlayNext callback, void* userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         avCastController_ = avcastcontroller;
     }
-    auto it = std::find_if (playNextCallbacks_.begin(), playNextCallbacks_.end(),
+    auto it = std::find_if(playNextCallbacks_.begin(), playNextCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_PlayNext, void*> &element) {
             return element.first == callback;
         });
@@ -258,20 +256,23 @@ AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterPlayNextCallback(OH_AV
 AVSession_ErrCode OHAVCastControllerCallbackImpl::UnregisterPlayNextCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlayNext callback)
 {
-    std::remove_if (playNextCallbacks_.begin(), playNextCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto newEnd = std::remove_if(playNextCallbacks_.begin(), playNextCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_PlayNext, void*> &element) {
             return element.first == callback;
         });
+    playNextCallbacks_.erase(newEnd, playNextCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterPlayPreviousCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlayPrevious callback, void* userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         avCastController_ = avcastcontroller;
     }
-    auto it = std::find_if (playPreviousCallbacks_.begin(), playPreviousCallbacks_.end(),
+    auto it = std::find_if(playPreviousCallbacks_.begin(), playPreviousCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_PlayPrevious, void*> &element) {
             return element.first == callback;
         });
@@ -284,20 +285,23 @@ AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterPlayPreviousCallback(O
 AVSession_ErrCode OHAVCastControllerCallbackImpl::UnregisterPlayPreviousCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlayPrevious callback)
 {
-    std::remove_if (playPreviousCallbacks_.begin(), playPreviousCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto newEnd = std::remove_if(playPreviousCallbacks_.begin(), playPreviousCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_PlayPrevious, void*> &element) {
             return element.first == callback;
         });
+    playPreviousCallbacks_.erase(newEnd, playPreviousCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterSeekDoneCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_SeekDone callback, void* userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         avCastController_ = avcastcontroller;
     }
-    auto it = std::find_if (seekDoneCallbacks_.begin(), seekDoneCallbacks_.end(),
+    auto it = std::find_if(seekDoneCallbacks_.begin(), seekDoneCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_SeekDone, void*> &element) {
             return element.first == callback;
         });
@@ -310,20 +314,23 @@ AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterSeekDoneCallback(OH_AV
 AVSession_ErrCode OHAVCastControllerCallbackImpl::UnregisterSeekDoneCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_SeekDone callback)
 {
-    std::remove_if (seekDoneCallbacks_.begin(), seekDoneCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto newEnd = std::remove_if(seekDoneCallbacks_.begin(), seekDoneCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_SeekDone, void*> &element) {
             return element.first == callback;
         });
+    seekDoneCallbacks_.erase(newEnd, seekDoneCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterEndOfStreamCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_EndOfStream callback, void* userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         avCastController_ = avcastcontroller;
     }
-    auto it = std::find_if (endOfStreamCallbacks_.begin(), endOfStreamCallbacks_.end(),
+    auto it = std::find_if(endOfStreamCallbacks_.begin(), endOfStreamCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_EndOfStream, void*> &element) {
             return element.first == callback;
         });
@@ -336,20 +343,23 @@ AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterEndOfStreamCallback(OH
 AVSession_ErrCode OHAVCastControllerCallbackImpl::UnregisterEndOfStreamCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_EndOfStream callback)
 {
-    std::remove_if (endOfStreamCallbacks_.begin(), endOfStreamCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto newEnd = std::remove_if(endOfStreamCallbacks_.begin(), endOfStreamCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_EndOfStream, void*> &element) {
             return element.first == callback;
         });
+    endOfStreamCallbacks_.erase(newEnd, endOfStreamCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterErrorCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_Error callback, void* userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         avCastController_ = avcastcontroller;
     }
-    auto it = std::find_if (errorCallbacks_.begin(), errorCallbacks_.end(),
+    auto it = std::find_if(errorCallbacks_.begin(), errorCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_Error, void*> &element) {
             return element.first == callback;
         });
@@ -362,10 +372,12 @@ AVSession_ErrCode OHAVCastControllerCallbackImpl::RegisterErrorCallback(OH_AVCas
 AVSession_ErrCode OHAVCastControllerCallbackImpl::UnregisterErrorCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_Error callback)
 {
-    std::remove_if (errorCallbacks_.begin(), errorCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto newEnd = std::remove_if(errorCallbacks_.begin(), errorCallbacks_.end(),
         [callback](const std::pair<OH_AVCastControllerCallback_Error, void*> &element) {
             return element.first == callback;
         });
+    errorCallbacks_.erase(newEnd, errorCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 }

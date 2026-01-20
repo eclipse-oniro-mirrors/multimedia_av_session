@@ -16,6 +16,7 @@
 #include <thread>
 #include "OHAVCastController.h"
 #include "OHAVMetadataBuilder.h"
+#include "OHAVUtils.h"
 #include "avcast_control_command.h"
 #include "avqueue_item.h"
 #include "avmedia_description.h"
@@ -40,8 +41,8 @@ void OHAVCastController::InitSharedPtrMember()
     std::lock_guard<std::mutex> lockGuard(lock_);
     ohAVSessionPlaybackState_ = std::make_shared<OHAVSessionPlaybackState>();
     ohAVMediaDescription_ = std::make_shared<OHAVMediaDescription>();
-    avQueueItem_ = std::make_shared<AVQueueItem>();
-    avMediaDescription_ = std::make_shared<AVMediaDescription>();
+    dataTracker_ = std::make_shared<AVSessionDataTracker>();
+    avQueueItem_.SetDescription(std::make_shared<AVMediaDescription>());
 }
 
 bool OHAVCastController::SetAVCastController(std::shared_ptr<AVCastController> &castController)
@@ -95,9 +96,10 @@ AVSession_ErrCode OHAVCastController::GetPlaybackState(OH_AVSession_AVPlaybackSt
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVCastController::RegisterPlaybackStateChangedCallback(
+AVSession_ErrCode OHAVCastController::RegisterPlaybackStateChangedCallback(int32_t filter,
     OH_AVCastControllerCallback_PlaybackStateChanged callback, void* userData)
 {
+    SLOGI("RegisterPlaybackStateChangedCallback filter:%{public}d", filter);
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         SLOGE("RegisterPlaybackStateChangedCallback avCastController_ is nullptr");
@@ -109,7 +111,7 @@ AVSession_ErrCode OHAVCastController::RegisterPlaybackStateChangedCallback(
     }
 
     AVPlaybackState::PlaybackStateMaskType playbackMask;
-    playbackMask.set();
+    OHAVSessionPlaybackState::ConvertFilter(filter, playbackMask);
     avCastController_->SetCastPlaybackFilter(playbackMask);
     ret = avCastController_->AddAvailableCommand(
         static_cast<int32_t>(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_STATE_CHANGE));
@@ -444,80 +446,77 @@ AVSession_ErrCode OHAVCastController::SendVolumeCommand(int32_t volume)
     return GetEncodeErrcode(ret);
 }
 
+void OHAVCastController::UpdateAVQueueItem(const AVQueueItem &avQueueItem)
+{
+    if (avQueueItem_.GetDescription() == nullptr || avQueueItem.GetDescription() == nullptr) {
+        return;
+    }
+
+    avQueueItem_.GetDescription()->SetMediaId(avQueueItem.GetDescription()->GetMediaId());
+    avQueueItem_.GetDescription()->SetAlbumCoverUri(avQueueItem.GetDescription()->GetAlbumCoverUri());
+    avQueueItem_.GetDescription()->SetMediaUri(avQueueItem.GetDescription()->GetMediaUri());
+}
+
+bool OHAVCastController::IsSameAVQueueItem(const AVQueueItem &avQueueItem)
+{
+    if (avQueueItem_.GetDescription() == nullptr || avQueueItem.GetDescription() == nullptr) {
+        return false;
+    }
+
+    return avQueueItem_.GetDescription()->GetMediaId() == avQueueItem.GetDescription()->GetMediaId() &&
+        avQueueItem_.GetDescription()->GetAlbumCoverUri() == avQueueItem.GetDescription()->GetAlbumCoverUri() &&
+        avQueueItem_.GetDescription()->GetMediaUri() == avQueueItem.GetDescription()->GetMediaUri();
+}
+
 AVSession_ErrCode OHAVCastController::Prepare(OH_AVSession_AVQueueItem* avqueueItem)
 {
+    AVQueueItem avQueueItem;
+    AVSession_ErrCode errCode = AVSessionNdkUtils::ConvertOHQueueItemToInner(avqueueItem, avQueueItem);
+    CHECK_AND_RETURN_RET_LOG(errCode == AV_SESSION_ERR_SUCCESS && avQueueItem.GetDescription() != nullptr,
+        errCode, "ConvertOHQueueItemToInner fail");
+
     std::lock_guard<std::mutex> lockGuard(lock_);
-    if (avCastController_ == nullptr) {
-        SLOGE("Prepare avCastController_ is nullptr");
-        return AV_SESSION_ERR_INVALID_PARAMETER;
+    CHECK_AND_RETURN_RET_LOG(avCastController_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION,
+        "Prepare avCastController_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(dataTracker_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION, "dataTracker_ is nullptr");
+
+    if (IsSameAVQueueItem(avQueueItem)) {
+        SLOGI("avqueueItem all same");
+        return AV_SESSION_ERR_SUCCESS;
     }
-    avQueueItem_->SetItemId(static_cast<int32_t>(avqueueItem->itemId));
-    if (avqueueItem->description == nullptr) {
-        SLOGE("Description is nullptr");
-        return AV_SESSION_ERR_INVALID_PARAMETER;
+
+    UpdateAVQueueItem(avQueueItem);
+    auto description = avQueueItem.GetDescription();
+
+    dataTracker_->OnDataUpdated(description->GetMediaId(), description->GetAlbumCoverUri(),
+        description->GetIcon() != nullptr);
+    bool isDownloadNeeded = dataTracker_->IsDownloadNeeded();
+
+    int32_t ret = avCastController_->Prepare(avQueueItem_);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, GetEncodeErrcode(ret), "Prepare fail:%{public}d", ret);
+
+    if (!description->GetAlbumCoverUri().empty() && isDownloadNeeded && description->GetIcon() == nullptr) {
+        CHECK_AND_PRINT_LOG(AVSessionDownloadHandler::GetInstance().AVSessionDownloadPostTask(
+            [castController = avCastController_, avQueueItem, dataTracker = dataTracker_]() {
+                std::lock_guard lockGuard(downloadPrepareMutex_);
+                PrepareAsyncExecutor(castController, avQueueItem, dataTracker);
+            }, "OHAVCastController::Prepare"), "OHAVCastController Prepare handler postTask failed");
     }
-    OHOS::AVSession::OHAVMediaDescription *oh_description =
-        (OHOS::AVSession::OHAVMediaDescription *)(avqueueItem->description);
-    avMediaDescription_->SetMediaId(oh_description->GetAssetId());
-    avMediaDescription_->SetTitle(oh_description->GetTitle());
-    avMediaDescription_->SetSubtitle(oh_description->GetSubtitle());
-    avMediaDescription_->SetArtist(oh_description->GetArtist());
-    avMediaDescription_->SetMediaType(oh_description->GetMediaType());
-    if (oh_description->GetMediaImage() != nullptr) {
-        avMediaDescription_->SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(
-            oh_description->GetMediaImage()->GetInnerPixelmap()));
-    }
-    avMediaDescription_->SetLyricContent(oh_description->GetLyricContent());
-    avMediaDescription_->SetDuration(oh_description->GetDuration());
-    avMediaDescription_->SetMediaUri(oh_description->GetMediaUri());
-    avMediaDescription_->SetStartPosition(oh_description->GetStartPosition());
-    avMediaDescription_->SetMediaSize(oh_description->GetMediaSize());
-    avMediaDescription_->SetAlbumTitle(oh_description->GetAlbumTitle());
-    avMediaDescription_->SetAppName(oh_description->GetAppName());
-    avQueueItem_->SetDescription(avMediaDescription_);
-    int32_t ret = avCastController_->Prepare(*(avQueueItem_.get()));
-    if (ret != AVSESSION_SUCCESS) {
-        return GetEncodeErrcode(ret);
-    }
-    std::thread([castController = avCastController_, queueItem = *(avQueueItem_.get())]() {
-        std::lock_guard lockGuard(downloadPrepareMutex_);
-        PrepareAsyncExecutor(castController, queueItem);
-    }).detach();
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVCastController::Start(OH_AVSession_AVQueueItem* avqueueItem)
 {
+    AVQueueItem avQueueItem;
+    CHECK_AND_RETURN_RET_LOG(AVSessionNdkUtils::ConvertOHQueueItemToInner(avqueueItem, avQueueItem) ==
+        AV_SESSION_ERR_SUCCESS, AV_SESSION_ERR_SERVICE_EXCEPTION, "ConvertOHQueueItemToInner fail");
+
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         SLOGE("Start avCastController_ is nullptr");
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
-    avQueueItem_->SetItemId(static_cast<int32_t>(avqueueItem->itemId));
-    if (avqueueItem->description == nullptr) {
-        SLOGE("Description is nullptr");
-        return AV_SESSION_ERR_INVALID_PARAMETER;
-    }
-    OHOS::AVSession::OHAVMediaDescription *oh_description =
-        (OHOS::AVSession::OHAVMediaDescription *)(avqueueItem->description);
-    avMediaDescription_->SetMediaId(oh_description->GetAssetId());
-    avMediaDescription_->SetTitle(oh_description->GetTitle());
-    avMediaDescription_->SetSubtitle(oh_description->GetSubtitle());
-    avMediaDescription_->SetArtist(oh_description->GetArtist());
-    avMediaDescription_->SetMediaType(oh_description->GetMediaType());
-    if (oh_description->GetMediaImage() != nullptr) {
-        avMediaDescription_->SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(
-            oh_description->GetMediaImage()->GetInnerPixelmap()));
-    }
-    avMediaDescription_->SetLyricContent(oh_description->GetLyricContent());
-    avMediaDescription_->SetDuration(oh_description->GetDuration());
-    avMediaDescription_->SetMediaUri(oh_description->GetMediaUri());
-    avMediaDescription_->SetStartPosition(oh_description->GetStartPosition());
-    avMediaDescription_->SetMediaSize(oh_description->GetMediaSize());
-    avMediaDescription_->SetAlbumTitle(oh_description->GetAlbumTitle());
-    avMediaDescription_->SetAppName(oh_description->GetAppName());
-    avQueueItem_->SetDescription(avMediaDescription_);
-    int32_t ret = avCastController_->Start(*(avQueueItem_.get()));
+    int32_t ret = avCastController_->Start(avQueueItem);
     return GetEncodeErrcode(ret);
 }
 
@@ -546,131 +545,33 @@ AVSession_ErrCode OHAVCastController::GetEncodeErrcode(int32_t ret)
     return AV_SESSION_ERR_SERVICE_EXCEPTION;
 }
 
-size_t OHAVCastController::WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb,
-    std::vector<std::uint8_t> *imgBuffer)
-{
-    size_t realsize = 0;
-    if (ptr == nullptr || size == realsize || nmemb == realsize || imgBuffer == nullptr) {
-        SLOGE("WriteCallback parameter is invaild");
-        return realsize;
-    }
-    realsize = size * nmemb;
-    imgBuffer->reserve(realsize + imgBuffer->capacity());
-    for (size_t i = 0; i < realsize; i++) {
-        imgBuffer->push_back(ptr[i]);
-    }
-    return realsize;
-}
-
-int32_t OHAVCastController::DownloadCastImg(std::shared_ptr<AVMediaDescription> description, const std::string& uri)
-{
-    SLOGI("DownloadCastImg with title %{public}s", description->GetTitle().c_str());
-
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    bool ret = OHAVCastController::DoDownloadInCommon(pixelMap, uri);
-    SLOGI("DownloadCastImg with ret %{public}d, %{public}d",
-        static_cast<int>(ret), static_cast<int>(pixelMap == nullptr));
-    if (ret && pixelMap != nullptr) {
-        SLOGI("DownloadCastImg success");
-        description->SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap));
-        return AVSESSION_SUCCESS;
-    }
-    return AVSESSION_ERROR;
-}
-
 void OHAVCastController::PrepareAsyncExecutor(std::shared_ptr<AVCastController> avCastController,
-    const AVQueueItem& data)
+    const AVQueueItem& data, std::shared_ptr<AVSessionDataTracker> dataTracker)
 {
-    CHECK_AND_RETURN_LOG(avCastController != nullptr, "prepare download but no castcontroller");
-    SLOGI("do prepare set download");
     std::shared_ptr<AVMediaDescription> description = data.GetDescription();
-    if (description == nullptr) {
-        SLOGE("do prepare download image description is null");
+    CHECK_AND_RETURN_LOG(avCastController != nullptr, "prepare download but no castcontroller");
+    CHECK_AND_RETURN_LOG(dataTracker != nullptr, "prepare download but dataTracker is null");
+    CHECK_AND_RETURN_LOG(description != nullptr, "prepare download but image description is null");
+
+    SLOGI("do prepare set download");
+    std::string uri = description->GetAlbumCoverUri();
+    if (description->GetIcon() != nullptr || uri.empty()) {
+        SLOGI("prepare download but icon exist or uri empty");
         return;
     }
-    auto uri = description->GetIconUri() == "" ?
-        description->GetAlbumCoverUri() : description->GetIconUri();
-    AVQueueItem item;
-    if (description->GetIcon() == nullptr && !uri.empty()) {
-        auto ret = DownloadCastImg(description, uri);
-        SLOGI("DownloadCastImg complete with ret %{public}d", ret);
-        if (ret != AVSESSION_SUCCESS) {
-            SLOGE("DownloadCastImg failed but not repeat setmetadata again");
-        } else {
-            description->SetIconUri("URI_CACHE");
-            item.SetDescription(description);
-            if (avCastController == nullptr) {
-                return;
-            }
-            auto prepareRet = avCastController->Prepare(item);
-            SLOGI("do prepare set second with prepareret %{public}d", prepareRet);
-        }
-    }
-}
 
-bool OHAVCastController::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri)
-{
-    CURL *easyHandle_ = curl_easy_init();
-    if (easyHandle_) {
-        // set request options
-        curl_easy_setopt(easyHandle_, CURLOPT_URL, uri.c_str());
-        curl_easy_setopt(easyHandle_, CURLOPT_CONNECTTIMEOUT, OHAVCastController::TIME_OUT_SECOND);
-        curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
-        curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, "/etc/ssl/certs/" "cacert.pem");
-        curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
-        curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, OHAVCastController::WriteCallback);
-        curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, &imgBuffer);
-
-        // perform request
-        CURLcode res = curl_easy_perform(easyHandle_);
-        if (res != CURLE_OK) {
-            SLOGI("DoDownload curl easy_perform failure: %{public}s\n", curl_easy_strerror(res));
-            curl_easy_cleanup(easyHandle_);
-            easyHandle_ = nullptr;
-            return false;
-        } else {
-            int64_t httpCode = 0;
-            curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
-            SLOGI("DoDownload Http result " "%{public}" PRId64, httpCode);
-            CHECK_AND_RETURN_RET_LOG(httpCode < OHAVCastController::HTTP_ERROR_CODE, false, "recv Http ERROR");
-            curl_easy_cleanup(easyHandle_);
-            easyHandle_ = nullptr;
-            return true;
-        }
+    int32_t ret = AVSessionNdkUtils::DownloadAndSetCastIcon(uri, description);
+    CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "DownloadCastImg failed but not repeat setmetadata again");
+    bool isOutOfDate = dataTracker->IsOutOfDate(description->GetMediaId(), uri);
+    SLOGI("DownloadAndSetCastIcon ret:%{public}d|%{public}d", static_cast<int>(ret), isOutOfDate);
+    if (!isOutOfDate) {
+        description->SetIconUri("URI_CACHE");
+        AVQueueItem item;
+        item.SetDescription(description);
+        dataTracker->OnDownloadCompleted(description->GetMediaId(), uri);
+        int32_t prepareRet = avCastController->Prepare(item);
+        SLOGI("do prepare set second with prepareret %{public}d", prepareRet);
     }
-    return false;
-}
-
-bool OHAVCastController::DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri)
-{
-    std::vector<std::uint8_t> imgBuffer(0);
-    if (CurlSetRequestOptions(imgBuffer, uri) == true) {
-        std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
-        if (buffer == nullptr) {
-            SLOGE("buffer malloc fail");
-            free(buffer);
-            return false;
-        }
-        std::copy(imgBuffer.begin(), imgBuffer.end(), buffer);
-        uint32_t errorCode = 0;
-        Media::SourceOptions opts;
-        SLOGD("DoDownload get size %{public}d", static_cast<int>(imgBuffer.size()));
-        auto imageSource = Media::ImageSource::CreateImageSource(buffer, imgBuffer.size(), opts, errorCode);
-        free(buffer);
-        if (errorCode || !imageSource) {
-            SLOGE("DoDownload create imageSource fail: %{public}u", errorCode);
-            return false;
-        }
-        Media::DecodeOptions decodeOpts;
-        pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
-        if (errorCode || pixelMap == nullptr) {
-            SLOGE("DoDownload creatPix fail: %{public}u, %{public}d", errorCode, static_cast<int>(pixelMap != nullptr));
-            return false;
-        }
-        return true;
-    }
-    return false;
 }
 } // OHOS::AVSession
 
@@ -699,13 +600,13 @@ AVSession_ErrCode OH_AVCastController_GetPlaybackState(OH_AVCastController* avca
 }
 
 AVSession_ErrCode OH_AVCastController_RegisterPlaybackStateChangedCallback(OH_AVCastController* avcastcontroller,
-    OH_AVCastControllerCallback_PlaybackStateChanged callback, void* userData)
+    int32_t filter, OH_AVCastControllerCallback_PlaybackStateChanged callback, void* userData)
 {
     CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
         "AVCastController is null");
     CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
-    return oh_avcastcontroller->RegisterPlaybackStateChangedCallback(callback, userData);
+    return oh_avcastcontroller->RegisterPlaybackStateChangedCallback(filter, callback, userData);
 }
 
 AVSession_ErrCode OH_AVCastController_UnregisterPlaybackStateChangedCallback(OH_AVCastController* avcastcontroller,
