@@ -248,8 +248,6 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
     metadata->SetDisplayTags(tags_);
     metadata->SetFilter(static_cast<int32_t>(filter_));
 
-    DoDownload(*metadata, mediaImageUri_);
-
     *avMetadata = reinterpret_cast<OH_AVMetadata*>(metadata);
 
     return AVMETADATA_SUCCESS;

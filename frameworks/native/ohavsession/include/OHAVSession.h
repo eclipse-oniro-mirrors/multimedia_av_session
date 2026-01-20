@@ -25,6 +25,7 @@
 #include "av_session.h"
 #include "OHAVSessionCallbackImpl.h"
 #include "OHAVCastController.h"
+#include "OHAVUtils.h"
 #include "avsession_log.h"
 #include "avcast_control_command.h"
 
@@ -35,6 +36,7 @@ public:
     OHAVSession();
     OHAVSession(AVSession_Type sessionType, const char* sessionTag,
         const char* bundleName, const char* abilityName);
+    void SetAVSession(const std::shared_ptr<AVSession> &avsession);
     bool IsAVSessionNull();
     AVSession_ErrCode Activate();
     AVSession_ErrCode Deactivate();
@@ -93,10 +95,17 @@ public:
     };
 
 private:
+    static void DownloadAndSetAVMetaData(std::shared_ptr<AVSession> avSession, AVMetaData data,
+        std::shared_ptr<AVSessionDataTracker> dataTracker);
+
+private:
     std::mutex lock_;
     std::shared_ptr<AVSession> avSession_;
     std::shared_ptr<OHAVSessionCallbackImpl> ohAVSessionCallbackImpl_;
     std::string sessionId_;
+
+    std::shared_ptr<AVSessionDataTracker> dataTracker_;
+    AVMetaData metaData_;
 };
 }
 #endif // OHOS_OHAVSESSION_H

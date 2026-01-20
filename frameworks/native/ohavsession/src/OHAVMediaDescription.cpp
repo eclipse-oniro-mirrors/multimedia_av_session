@@ -25,10 +25,6 @@ OHAVMediaDescription::OHAVMediaDescription()
 
 OHAVMediaDescription::~OHAVMediaDescription()
 {
-    if (mediaImage_ != nullptr) {
-        delete mediaImage_;
-        mediaImage_ = nullptr;
-    }
 }
 
 AVQueueItem_Result OHAVMediaDescription::SetAssetId(const std::string &assetId)
@@ -75,15 +71,15 @@ const std::string& OHAVMediaDescription::GetArtist() const
     return artist_;
 }
 
-AVQueueItem_Result OHAVMediaDescription::SetMediaImage(OH_PixelmapNative *mediaImage)
+AVQueueItem_Result OHAVMediaDescription::SetAlbumCoverUri(const std::string& albumCoverUri)
 {
-    mediaImage_ = mediaImage;
+    albumCoverUri_ = albumCoverUri;
     return AVQUEUEITEM_SUCCESS;
 }
 
-OH_PixelmapNative* OHAVMediaDescription::GetMediaImage() const
+const std::string& OHAVMediaDescription::GetAlbumCoverUri() const
 {
-    return mediaImage_;
+    return albumCoverUri_;
 }
 
 AVQueueItem_Result OHAVMediaDescription::SetMediaType(const std::string &mediaType)
@@ -210,12 +206,12 @@ AVQueueItem_Result OH_AVSession_AVMediaDescription_GetArtist(OH_AVSession_AVMedi
     return AVQUEUEITEM_SUCCESS;
 }
 
-AVQueueItem_Result OH_AVSession_AVMediaDescription_GetMediaImage(OH_AVSession_AVMediaDescription* description,
-    OH_PixelmapNative** pixelmap)
+AVQueueItem_Result OH_AVSession_AVMediaDescription_GetAlbumCoverUri(OH_AVSession_AVMediaDescription* description,
+    char** albumCoverUri)
 {
     CHECK_AND_RETURN_RET_LOG(description != nullptr, AVQUEUEITEM_ERROR_INVALID_PARAM, "description is null");
-    CHECK_AND_RETURN_RET_LOG(pixelmap != nullptr, AVQUEUEITEM_ERROR_INVALID_PARAM, "pixelmap is null");
-    *pixelmap = ((OHAVMediaDescription *)description)->GetMediaImage();
+    CHECK_AND_RETURN_RET_LOG(albumCoverUri != nullptr, AVQUEUEITEM_ERROR_INVALID_PARAM, "albumCoverUri is null");
+    *albumCoverUri = const_cast<char*>(((OHAVMediaDescription *)description)->GetAlbumCoverUri().c_str());
     return AVQUEUEITEM_SUCCESS;
 }
 

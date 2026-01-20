@@ -64,6 +64,15 @@ int32_t OHAVSessionPlaybackState::GetVolume() const
 {
     return volume_;
 }
+
+void OHAVSessionPlaybackState::ConvertFilter(int32_t filter, AVPlaybackState::PlaybackStateMaskType &maskType)
+{
+    for (const auto &[filterFlag, playbackKey] : filterMap_) {
+        if (filter & filterFlag) {
+            maskType.set(playbackKey);
+        }
+    }
+}
 }
 
 AVSession_ErrCode OH_AVSession_GetPlaybackState(OH_AVSession_AVPlaybackState* playbState,

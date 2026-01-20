@@ -454,6 +454,34 @@ typedef enum AVSession_PlaybackSpeed {
     SPEED_FORWARD_1_50_X = 6,
 } AVSession_PlaybackSpeed;
 
+/**
+ * @brief Enum for playbackstate filter.
+ *
+ * @since 23
+ * @version 1.0
+ */
+typedef enum AVSession_PlaybackFilter {
+    /**
+     * @brief filter state
+     */
+    FILTER_STATE = 1 << 0,
+
+    /**
+     * @brief filter position
+     */
+    FILTER_POSITION = 1 << 1,
+
+    /**
+     * @brief filter speed
+     */
+    FILTER_SPEED = 1 << 2,
+
+    /**
+     * @brief filter volume
+     */
+    FILTER_VOLUME = 1 << 3,
+} AVSession_PlaybackFilter;
+
 #ifdef __cplusplus
 }
 #endif

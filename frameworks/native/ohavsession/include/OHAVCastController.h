@@ -26,6 +26,7 @@
 #include "OHAVCastControllerCallbackImpl.h"
 #include "OHAVSessionPlaybackState.h"
 #include "OHAVMediaDescription.h"
+#include "OHAVUtils.h"
 #include "pixel_map.h"
 
 namespace OHOS::AVSession {
@@ -37,8 +38,8 @@ public:
 
     AVSession_ErrCode Destroy();
     AVSession_ErrCode GetPlaybackState(OH_AVSession_AVPlaybackState** playbackState);
-    AVSession_ErrCode RegisterPlaybackStateChangedCallback(OH_AVCastControllerCallback_PlaybackStateChanged callback,
-        void* userData);
+    AVSession_ErrCode RegisterPlaybackStateChangedCallback(int32_t filter,
+        OH_AVCastControllerCallback_PlaybackStateChanged callback, void* userData);
     AVSession_ErrCode UnregisterPlaybackStateChangedCallback(OH_AVCastControllerCallback_PlaybackStateChanged callback);
     AVSession_ErrCode RegisterMediaItemChangedCallback(OH_AVCastControllerCallback_MediaItemChange callback,
         void* userData);
@@ -78,18 +79,16 @@ public:
     bool SetAVCastController(std::shared_ptr<AVCastController> &castController);
 
 private:
-    static int32_t DownloadCastImg(std::shared_ptr<AVMediaDescription> description, const std::string& uri);
-    static void PrepareAsyncExecutor(std::shared_ptr<AVCastController> avCastController, const AVQueueItem& data);
-    static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);
-    static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri);
-    static size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer);
-    static constexpr size_t TIME_OUT_SECOND = 5;
-    static constexpr int HTTP_ERROR_CODE = 400;
+    bool IsSameAVQueueItem(const AVQueueItem &avQueueItem);
+    void UpdateAVQueueItem(const AVQueueItem &avQueueItem);
+    static void PrepareAsyncExecutor(std::shared_ptr<AVCastController> avCastController, const AVQueueItem& data,
+        std::shared_ptr<AVSessionDataTracker> dataTracker);
+
     std::shared_ptr<AVCastController> avCastController_;
     std::shared_ptr<OHAVSessionPlaybackState> ohAVSessionPlaybackState_;
-    std::shared_ptr<AVQueueItem> avQueueItem_;
     std::shared_ptr<OHAVMediaDescription> ohAVMediaDescription_;
-    std::shared_ptr<AVMediaDescription> avMediaDescription_;
+    AVQueueItem avQueueItem_;
+    std::shared_ptr<AVSessionDataTracker> dataTracker_;
     std::shared_ptr<OHAVCastControllerCallbackImpl> ohAVCastControllerCallbackImpl_;
     static std::mutex downloadPrepareMutex_;
     std::mutex lock_;

@@ -29,7 +29,7 @@ static char* g_assetId = nullptr;
 static char* g_title = nullptr;
 static char* g_subtitle = nullptr;
 static char* g_artist = nullptr;
-static OH_PixelmapNative *g_mediaImage = nullptr;
+static char* g_albumCoverUri = nullptr;
 static char* g_mediaType = nullptr;
 static char* g_lyricContent = nullptr;
 static int32_t g_duration = 0;
@@ -64,7 +64,7 @@ void OHAVMediaDescriptionBuilderTest::SetUp()
     g_title = nullptr;
     g_subtitle = nullptr;
     g_artist = nullptr;
-    g_mediaImage = nullptr;
+    g_albumCoverUri = nullptr;
     g_mediaType = nullptr;
     g_lyricContent = nullptr;
     g_duration = 0;
@@ -115,8 +115,7 @@ HWTEST_F(OHAVMediaDescriptionBuilderTest, SetAVMediaDescription001, TestSize.Lev
     g_ohAVMediaDescriptionBuilder.SetTitle("title");
     g_ohAVMediaDescriptionBuilder.SetSubtitle("subtitle");
     g_ohAVMediaDescriptionBuilder.SetArtist("artist");
-    OH_PixelmapNative* pixelmap = new (std::nothrow) OH_PixelmapNative(pixelMap);
-    g_ohAVMediaDescriptionBuilder.SetMediaImage(pixelmap);
+    g_ohAVMediaDescriptionBuilder.SetAlbumCoverUri("albumcoverUri");
     g_ohAVMediaDescriptionBuilder.SetMediaType("mediaType");
     g_ohAVMediaDescriptionBuilder.SetLyricContent("lyricContent");
     g_ohAVMediaDescriptionBuilder.SetDuration(DURATION);
@@ -133,7 +132,7 @@ HWTEST_F(OHAVMediaDescriptionBuilderTest, SetAVMediaDescription001, TestSize.Lev
     EXPECT_EQ(ohMediaDescription->GetTitle(), "title");
     EXPECT_EQ(ohMediaDescription->GetSubtitle(), "subtitle");
     EXPECT_EQ(ohMediaDescription->GetArtist(), "artist");
-    EXPECT_EQ(ohMediaDescription->GetMediaImage()->GetInnerPixelmap(), pixelmap->GetInnerPixelmap());
+    EXPECT_EQ(ohMediaDescription->GetAlbumCoverUri(), "albumcoverUri");
     EXPECT_EQ(ohMediaDescription->GetMediaType(), "mediaType");
     EXPECT_EQ(ohMediaDescription->GetLyricContent(), "lyricContent");
     EXPECT_EQ(ohMediaDescription->GetDuration(), DURATION);
@@ -165,8 +164,7 @@ HWTEST_F(OHAVMediaDescriptionBuilderTest, SetAVMediaDescription002, TestSize.Lev
     OH_AVSession_AVMediaDescriptionBuilder_SetTitle(builder, "title");
     OH_AVSession_AVMediaDescriptionBuilder_SetSubTitle(builder, "subtitle");
     OH_AVSession_AVMediaDescriptionBuilder_SetArtist(builder, "artist");
-    OH_PixelmapNative* pixelmap = new (std::nothrow) OH_PixelmapNative(pixelMap);
-    OH_AVSession_AVMediaDescriptionBuilder_SetMediaImage(builder, pixelmap);
+    OH_AVSession_AVMediaDescriptionBuilder_SetAlbumCoverUri(builder, "albumCoverUri");
     OH_AVSession_AVMediaDescriptionBuilder_SetMediaType(builder, "mediaType");
     OH_AVSession_AVMediaDescriptionBuilder_SetLyricContent(builder, "lyricContent");
     OH_AVSession_AVMediaDescriptionBuilder_SetDuration(builder, DURATION);
@@ -183,7 +181,7 @@ HWTEST_F(OHAVMediaDescriptionBuilderTest, SetAVMediaDescription002, TestSize.Lev
     EXPECT_EQ(OhAvMediaDescription->GetTitle(), "title");
     EXPECT_EQ(OhAvMediaDescription->GetSubtitle(), "subtitle");
     EXPECT_EQ(OhAvMediaDescription->GetArtist(), "artist");
-    EXPECT_EQ(OhAvMediaDescription->GetMediaImage()->GetInnerPixelmap(), pixelmap->GetInnerPixelmap());
+    EXPECT_EQ(OhAvMediaDescription->GetAlbumCoverUri(), "albumCoverUri");
     EXPECT_EQ(OhAvMediaDescription->GetMediaType(), "mediaType");
     EXPECT_EQ(OhAvMediaDescription->GetLyricContent(), "lyricContent");
     EXPECT_EQ(OhAvMediaDescription->GetDuration(), DURATION);
@@ -213,8 +211,7 @@ HWTEST_F(OHAVMediaDescriptionBuilderTest, SetAVMediaDescription003, TestSize.Lev
     OH_AVSession_AVMediaDescriptionBuilder_SetTitle(builder, "title");
     OH_AVSession_AVMediaDescriptionBuilder_SetSubTitle(builder, "subtitle");
     OH_AVSession_AVMediaDescriptionBuilder_SetArtist(builder, "artist");
-    OH_PixelmapNative* pixelmap = new (std::nothrow) OH_PixelmapNative(pixelMap);
-    OH_AVSession_AVMediaDescriptionBuilder_SetMediaImage(builder, pixelmap);
+    OH_AVSession_AVMediaDescriptionBuilder_SetAlbumCoverUri(builder, "albumCoverUri");
     OH_AVSession_AVMediaDescriptionBuilder_SetMediaType(builder, "mediaType");
     OH_AVSession_AVMediaDescriptionBuilder_SetLyricContent(builder, "lyricContent");
     OH_AVSession_AVMediaDescriptionBuilder_SetDuration(builder, DURATION);
@@ -228,7 +225,7 @@ HWTEST_F(OHAVMediaDescriptionBuilderTest, SetAVMediaDescription003, TestSize.Lev
     OH_AVSession_AVMediaDescription_GetTitle(ohMediaDescription, &g_title);
     OH_AVSession_AVMediaDescription_GetSubtitle(ohMediaDescription, &g_subtitle);
     OH_AVSession_AVMediaDescription_GetArtist(ohMediaDescription, &g_artist);
-    OH_AVSession_AVMediaDescription_GetMediaImage(ohMediaDescription, &g_mediaImage);
+    OH_AVSession_AVMediaDescription_GetAlbumCoverUri(ohMediaDescription, &g_albumCoverUri);
     OH_AVSession_AVMediaDescription_GetMediaType(ohMediaDescription, &g_mediaType);
     OH_AVSession_AVMediaDescription_GetLyricContent(ohMediaDescription, &g_lyricContent);
     OH_AVSession_AVMediaDescription_GetDuration(ohMediaDescription, &g_duration);
@@ -241,7 +238,7 @@ HWTEST_F(OHAVMediaDescriptionBuilderTest, SetAVMediaDescription003, TestSize.Lev
     EXPECT_STREQ(g_title, "title");
     EXPECT_STREQ(g_subtitle, "subtitle");
     EXPECT_STREQ(g_artist, "artist");
-    EXPECT_EQ(g_mediaImage->GetInnerPixelmap(), pixelmap->GetInnerPixelmap());
+    EXPECT_STREQ(g_albumCoverUri, "albumCoverUri");
     EXPECT_STREQ(g_mediaType, "mediaType");
     EXPECT_STREQ(g_lyricContent, "lyricContent");
     EXPECT_EQ(g_duration, DURATION);

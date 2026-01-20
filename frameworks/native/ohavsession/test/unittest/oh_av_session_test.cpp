@@ -1380,7 +1380,7 @@ HWTEST(OHAVSessionTest, OHAVSession_GetOutputDevice_001, TestSize.Level0)
         "com.xxx.hmxx", "ndkxx", &avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     AVSession_OutputDeviceInfo* outputDevice = nullptr;
-    ret = OH_AVSession_GetOutputDevice(avsession, &outputDevice);
+    ret = OH_AVSession_AcquireOutputDevice(avsession, &outputDevice);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_Destroy(avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
@@ -1396,7 +1396,7 @@ HWTEST(OHAVSessionTest, OHAVSession_GetOutputDevice_002, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_OutputDeviceInfo* outputDevice = nullptr;
-    AVSession_ErrCode ret = OH_AVSession_GetOutputDevice(avsession, &outputDevice);
+    AVSession_ErrCode ret = OH_AVSession_AcquireOutputDevice(avsession, &outputDevice);
     EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
 }
 
@@ -1413,7 +1413,7 @@ HWTEST(OHAVSessionTest, OHAVSession_ReleaseOutputDevice_001, TestSize.Level0)
         "com.xxx.hmxx", "ndkxx", &avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     AVSession_OutputDeviceInfo* outputDevice = nullptr;
-    ret = OH_AVSession_GetOutputDevice(avsession, &outputDevice);
+    ret = OH_AVSession_AcquireOutputDevice(avsession, &outputDevice);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_ReleaseOutputDevice(avsession, outputDevice);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
@@ -1478,6 +1478,34 @@ HWTEST(OHAVSessionTest, OH_AVSession_UnregisterOutputDeviceChangeCallback_001, T
     ret = OH_AVSession_RegisterOutputDeviceChangeCallback(avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_UnregisterOutputDeviceChangeCallback(avsession, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Destroy(avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: OH_AVSession_AcquireSession_001
+ * @tc.desc: Get AVSession from the class of ohavsession
+ * @tc.type: FUNC
+ * @tc.require: none
+*/
+HWTEST(OHAVSessionTest, OH_AVSession_AcquireSession_001, TestSize.Level0)
+{
+    const char *sessionTag = "OH_AVSession_AcquireSession_001";
+    const char *bundleName = "com.xxx.hmxx";
+    const char *abilityName = "ndkxx";
+    OH_AVSession* avsession = nullptr;
+
+    AVSession_ErrCode ret = OH_AVSession_AcquireSession(sessionTag, bundleName, nullptr, &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
+    ret = OH_AVSession_AcquireSession(sessionTag, bundleName, abilityName, &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_CODE_SESSION_NOT_EXIST);
+
+    ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, sessionTag,
+        bundleName, abilityName, &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+
+    ret = OH_AVSession_AcquireSession(sessionTag, bundleName, abilityName, &avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_Destroy(avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);

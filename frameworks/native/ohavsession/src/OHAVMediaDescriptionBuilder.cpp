@@ -42,9 +42,9 @@ AVQueueItem_Result OHAVMediaDescriptionBuilder::SetArtist(const std::string &art
     return AVQUEUEITEM_SUCCESS;
 }
 
-AVQueueItem_Result OHAVMediaDescriptionBuilder::SetMediaImage(OH_PixelmapNative *mediaImage)
+AVQueueItem_Result OHAVMediaDescriptionBuilder::SetAlbumCoverUri(const std::string& albumCoverUri)
 {
-    mediaImage_ = mediaImage;
+    albumCoverUri_ = albumCoverUri;
     return AVQUEUEITEM_SUCCESS;
 }
 
@@ -109,7 +109,7 @@ AVQueueItem_Result OHAVMediaDescriptionBuilder::GenerateAVMediaDescription(OHAVM
     (*avMediaDescription)->SetTitle(title_);
     (*avMediaDescription)->SetSubtitle(subtitle_);
     (*avMediaDescription)->SetArtist(artist_);
-    (*avMediaDescription)->SetMediaImage(mediaImage_);
+    (*avMediaDescription)->SetAlbumCoverUri(albumCoverUri_);
     (*avMediaDescription)->SetMediaType(mediaType_);
     (*avMediaDescription)->SetLyricContent(lyricContent_);
     (*avMediaDescription)->SetDuration(duration_);
@@ -196,17 +196,17 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetArtist(OH_AVSession
     return mediaDescriptionBuilder->SetArtist(artist);
 }
 
-AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetMediaImage(OH_AVSession_AVMediaDescriptionBuilder* builder,
-    OH_PixelmapNative *mediaImage)
+AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetAlbumCoverUri(
+    OH_AVSession_AVMediaDescriptionBuilder* builder, const char* albumCoverUri)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVQUEUEITEM_ERROR_INVALID_PARAM, "builder is null");
-    CHECK_AND_RETURN_RET_LOG(mediaImage != nullptr, AVQUEUEITEM_ERROR_INVALID_PARAM, "mediaImage is null");
+    CHECK_AND_RETURN_RET_LOG(albumCoverUri != nullptr, AVQUEUEITEM_ERROR_INVALID_PARAM, "mediaImage is null");
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set mediaImage: mediaDescriptionBuilder is null");
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
-    return mediaDescriptionBuilder->SetMediaImage(mediaImage);
+    return mediaDescriptionBuilder->SetAlbumCoverUri(albumCoverUri);
 }
 
 AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetMediaType(OH_AVSession_AVMediaDescriptionBuilder* builder,
