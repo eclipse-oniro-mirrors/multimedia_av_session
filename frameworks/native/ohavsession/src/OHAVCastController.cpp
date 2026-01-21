@@ -492,7 +492,7 @@ AVSession_ErrCode OHAVCastController::Prepare(OH_AVSession_AVQueueItem* avqueueI
         description->GetIcon() != nullptr);
     bool isDownloadNeeded = dataTracker_->IsDownloadNeeded();
 
-    int32_t ret = avCastController_->Prepare(avQueueItem_);
+    int32_t ret = avCastController_->Prepare(avQueueItem);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, GetEncodeErrcode(ret), "Prepare fail:%{public}d", ret);
 
     if (!description->GetAlbumCoverUri().empty() && isDownloadNeeded && description->GetIcon() == nullptr) {
