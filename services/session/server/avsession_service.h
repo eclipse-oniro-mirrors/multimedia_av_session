@@ -349,7 +349,7 @@ private:
 
     std::string AllocSessionId();
 
-    bool AbilityHasSession(pid_t pid);
+    bool AbilityHasSession(pid_t pid, int32_t userId = 0);
 
     sptr<AVControllerItem> GetPresentController(pid_t pid, const std::string& sessionId);
 
@@ -843,6 +843,7 @@ private:
     const int32_t systemuiLiveviewTypeCodePhoto = 27;
     const int32_t mediacontrollerNotifyId = 0;
     const int32_t photoNotifyId = 1;
+    const int32_t uidToUserId = 200000;
 
     const std::string sessionTypePhoto = "photo";
 };

@@ -1106,10 +1106,11 @@ std::string AVSessionService::AllocSessionId()
     return stream.str();
 }
 
-bool AVSessionService::AbilityHasSession(pid_t pid)
+bool AVSessionService::AbilityHasSession(pid_t pid, int32_t userId)
 {
     std::lock_guard lockGuard(sessionServiceLock_);
-    return GetContainer().PidHasSession(pid);
+    return (userId <= 0) ?
+        GetContainer().PidHasSession(pid) : GetUsersManager().GetContainerFromUser(userId).PidHasSession(pid);
 }
 
 sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const std::string& sessionId)
@@ -1748,9 +1749,10 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     }
     RefreshUserFromAnco(tag, elementName);
     auto pid = GetCallingPid();
+    int32_t userId = static_cast<int32_t>(GetCallingUid()) / uidToUserId;
     std::lock_guard lockGuard(sessionServiceLock_);
-    if (AbilityHasSession(pid)) {
-        SLOGE("process %{public}d %{public}s already has one session", pid, elementName.GetAbilityName().c_str());
+    if (AbilityHasSession(pid, userId)) {
+        SLOGE("process %{public}d %{public}s already has one session.", pid, elementName.GetAbilityName().c_str());
         CheckAndUpdateAncoMediaSession(elementName);
         return ERR_SESSION_IS_EXIST;
     }
@@ -1765,10 +1767,9 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
             elementName.GetBundleName(), "ERROR_MSG", "avsessionservice createsessioninner create new session failed");
         return ERR_NO_MEMORY;
     }
-    if (GetUsersManager().AddSessionForCurrentUser(pid, elementName.GetAbilityName(), result) != AVSESSION_SUCCESS) {
-        SLOGE("session num exceed max");
-        return ERR_SESSION_EXCEED_MAX;
-    }
+    CHECK_AND_RETURN_RET_LOG(
+        GetUsersManager().AddSessionForCurrentUser(pid, elementName.GetAbilityName(), result, userId)
+        == AVSESSION_SUCCESS, ERR_SESSION_EXCEED_MAX, "session num exceed max");
     SetCriticalWhenCreate(result);
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
