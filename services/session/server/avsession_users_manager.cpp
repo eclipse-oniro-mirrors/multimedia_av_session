@@ -169,14 +169,15 @@ std::string AVSessionUsersManager::GetDirForCurrentUser(int32_t userId)
 }
 
 int32_t AVSessionUsersManager::AddSessionForCurrentUser(pid_t pid,
-    const std::string& abilityName, sptr<AVSessionItem>& item)
+    const std::string& abilityName, sptr<AVSessionItem>& item, int32_t userId)
 {
     std::lock_guard lockGuard(userLock_);
-    SLOGI("add session for user %{public}d", curUserId_);
+    userId = (userId <= 0) ? curUserId_ : userId;
+    SLOGI("add session for user %{public}d", userId);
     int32_t ret = AVSESSION_ERROR;
     ret = GetContainerFromAll().AddSession(pid, abilityName, item);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "error when add session for all");
-    ret = GetContainerFromUser(curUserId_).AddSession(pid, abilityName, item);
+    ret = GetContainerFromUser(userId).AddSession(pid, abilityName, item);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "error when add session for user");
     return ret;
 }
