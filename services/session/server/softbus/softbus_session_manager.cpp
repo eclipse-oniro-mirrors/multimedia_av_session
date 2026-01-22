@@ -94,6 +94,14 @@ int32_t SoftbusSessionManager::Bind(const std::string &peerNetworkId, const std:
         return AVSESSION_ERROR;
     }
 
+    using SocketCallbackFunc = void(*)(DynamicSocketCallbackFunc*);
+    SocketCallbackFunc registerCallback = reinterpret_cast<SocketCallbackFunc>(dynamicLoader->GetFuntion(
+        SOFTBUS_DYNAMIC_LIBRARY_PATH, "DRegisterSocketCallback"));
+    if (registerCallback) {
+        SLOGI("DRegisterSocketCallback");
+        registerCallback(&callbackFunc);
+    }
+
     using BindFunc = int32_t(*)(const std::string&, const std::string&);
     BindFunc bind = reinterpret_cast<BindFunc>(dynamicLoader->GetFuntion(SOFTBUS_DYNAMIC_LIBRARY_PATH, "DBind"));
     if (bind) {
