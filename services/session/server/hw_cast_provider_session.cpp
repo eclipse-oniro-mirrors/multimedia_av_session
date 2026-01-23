@@ -15,6 +15,7 @@
 
 #include "hw_cast_provider_session.h"
 #include <thread>
+#include "avsession_radar.h"
 #include "avsession_utils.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
@@ -23,6 +24,18 @@
 using namespace OHOS::CastEngine;
 
 namespace OHOS::AVSession {
+static const std::set<SoftBusErrNo> SOFTBUS_CONN_PASSIVE_CONFLICT_CODE = {
+    SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_HML_NUM_LIMITED_CONFLICT,
+    SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_P2P_GO_GC_CONFLICT,
+    SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_555_CONFLICT,
+    SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_525_CONFLICT,
+    SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_255_CONFLICT,
+    SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_225_CONFLICT,
+    SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_55_CONFLICT,
+    SoftBusErrNo::SOFTBUS_CONN_PV2_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE,
+    SoftBusErrNo::SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE,
+};
+
 HwCastProviderSession::~HwCastProviderSession()
 {
     SLOGI("destruct the HwCastProviderSession");
@@ -205,7 +218,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     CastRemoteDevice castRemoteDevice;
     castSession_ ? castSession_->GetRemoteDeviceInfo(stateInfo.deviceId, castRemoteDevice) : static_cast<int32_t>(0);
 
-    ComputeToastOnDeviceState(stateInfo.deviceState, castRemoteDevice);
+    ComputeToastOnDeviceState(stateInfo, castRemoteDevice);
     {
         std::lock_guard lockGuard(mutex_);
         if (castSessionStateListenerList_.size() == 0) {
@@ -244,9 +257,10 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     }
 }
 
-void HwCastProviderSession::ComputeToastOnDeviceState(CastEngine::DeviceState state,
+void HwCastProviderSession::ComputeToastOnDeviceState(const CastEngine::DeviceStateInfo &stateInfo,
     const CastEngine::CastRemoteDevice &castRemoteDevice)
 {
+    CastEngine::DeviceState state = stateInfo.deviceState;
     // device connected
     if (state == CastEngine::DeviceState::STREAM) {
         avToastDeviceState_ = ConnectionState::STATE_CONNECTED;
@@ -255,7 +269,8 @@ void HwCastProviderSession::ComputeToastOnDeviceState(CastEngine::DeviceState st
         std::string preSinkDeviceName = AVRouter::GetInstance().GetCastingDeviceName();
         CHECK_AND_RETURN_LOG(!preSinkDeviceName.empty(), "preSinkDeviceName empty");
         std::string curSourceDeviceName = castRemoteDevice.deviceName;
-        AVSessionUtils::PublishCommonEventWithDeviceName(MEDIA_CAST_CONFLICT, preSinkDeviceName, curSourceDeviceName);
+        AVSessionUtils::PublishCommonEventWithDeviceName(MEDIA_SERIES_CAST_CONFLICT,
+            preSinkDeviceName, curSourceDeviceName);
         AVRouter::GetInstance().SetCastingDeviceName("");
         return;
     }
@@ -277,7 +292,9 @@ void HwCastProviderSession::ComputeToastOnDeviceState(CastEngine::DeviceState st
     // device disconnected during connecting
     if (avToastDeviceState_ == ConnectionState::STATE_CONNECTING) {
         CHECK_AND_RETURN(AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SOURCE);
-        AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
+        SOFTBUS_CONN_PASSIVE_CONFLICT_CODE.count(static_cast<SoftBusErrNo>(stateInfo.radarErrCode)) ?
+            AVSessionUtils::PublishCommonEvent(MEDIA_SERIES_CAST_3VAP) :
+            AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
         return;
     }
 }
@@ -286,13 +303,13 @@ void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInf
 {
     SLOGI("OnDeviceStateChange from cast with deviceId %{public}s, state %{public}d, reasonCode %{public}d",
         AVSessionUtils::GetAnonyNetworkId(stateInfo.deviceId).c_str(),
-            static_cast<int32_t>(stateInfo.deviceState),
-        static_cast<int32_t>(stateInfo.reasonCode));
+            static_cast<int32_t>(stateInfo.deviceState), static_cast<int32_t>(stateInfo.reasonCode));
 
     DeviceState deviceState;
     deviceState.deviceId = stateInfo.deviceId;
     deviceState.deviceState = static_cast<int32_t>(stateInfo.deviceState);
     deviceState.reasonCode = static_cast<int32_t>(stateInfo.reasonCode);
+    deviceState.radarErrorCode = stateInfo.radarErrCode;
 
     AVRouter::GetInstance().OnDeviceStateChange(deviceState);
 }
