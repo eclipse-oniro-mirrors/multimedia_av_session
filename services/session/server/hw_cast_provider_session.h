@@ -48,7 +48,7 @@ public:
     void OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo);
 
 private:
-    void ComputeToastOnDeviceState(CastEngine::DeviceState state,
+    void ComputeToastOnDeviceState(const CastEngine::DeviceStateInfo &stateInfo,
         const CastEngine::CastRemoteDevice &castRemoteDevice);
 
     std::shared_ptr<CastEngine::ICastSession> castSession_;
@@ -64,7 +64,8 @@ private:
     const int32_t eventIdEnd = 2999;
     const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
-    const std::string MEDIA_CAST_CONFLICT = "usual.event.MEDIA_CAST_CONFLICT";
+    const std::string MEDIA_SERIES_CAST_CONFLICT = "usual.event.MEDIA_SERIES_CAST_CONFLICT";
+    const std::string MEDIA_SERIES_CAST_3VAP = "usual.event.MEDIA_SERIES_CAST_3VAP";
 };
 } // namespace OHOS::AVSession
 
