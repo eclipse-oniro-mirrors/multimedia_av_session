@@ -125,10 +125,11 @@ AVSession_ErrCode OHAVSession::SetAVMetaData(OH_AVMetadata* metadata)
     CHECK_AND_RETURN_RET_LOG(dataTracker_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION, "dataTracker_ is nullptr");
 
     AVMetaData *avMetaData = (AVMetaData*)metadata;
-    if (metaData_.EqualWithUri(*avMetaData)) {
+    if (!isFirstMetaDataSet_ && metaData_.EqualWithUri(*avMetaData)) {
         SLOGI("metadata all same");
         return AV_SESSION_ERR_SUCCESS;
     }
+    isFirstMetaDataSet_ = false;
 
     metaData_ = *avMetaData;
     dataTracker_->OnDataUpdated(metaData_.GetAssetId(), metaData_.GetMediaImageUri(),
