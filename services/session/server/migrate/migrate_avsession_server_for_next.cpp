@@ -21,6 +21,7 @@
 #include "audio_device_manager.h"
 #include "avsession_errors.h"
 #include "avsession_item.h"
+#include "avsession_utils.h"
 #include "avsession_log.h"
 #include "avsession_service.h"
 #include "softbus/softbus_session_utils.h"
@@ -198,7 +199,8 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
     cJSON* metaDataItem = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(metaDataItem != nullptr, "get metadata json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(metaDataItem, METADATA_TITLE, metaDataCache_.GetTitle().c_str())) {
-        SLOGE("AddStringToJson with title value:%{public}s fail", metaDataCache_.GetTitle().c_str());
+        SLOGE("AddStringToJson with title value:%{public}s fail",
+            AVSessionUtils::GetAnonyTitle(metaDataCache_.GetTitle()).c_str());
         cJSON_Delete(metaDataItem);
         return;
     }
@@ -220,7 +222,7 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
             SendByteForNext(deviceId_, msg);
         }, "SYNC_FOCUS_META_INFO");
     SLOGI("DoMetaDataSyncToRemote async Title:%{public}s|len:%{public}d done",
-        metaDataCache_.GetTitle().c_str(), static_cast<int>(msg.size()));
+        AVSessionUtils::GetAnonyTitle(metaDataCache_.GetTitle()).c_str(), static_cast<int>(msg.size()));
     cJSON_Delete(metaDataItem);
 }
 

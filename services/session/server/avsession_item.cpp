@@ -581,13 +581,13 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     UpdateMetaData(meta);
     CheckUseAVMetaData(meta);
     SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d, isAlive:%{public}d",
-        AVSessionUtils::GetAnonyTitle(meta.GetTitle().c_str()).c_str(),
+        AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str(),
         static_cast<int>(GetPid()), (isAlivePtr_ == nullptr) ? -1 : *isAlivePtr_);
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_, changedDataMask]() {
         std::lock_guard aliveLockGuard(isAliveLock_);
         CHECK_AND_RETURN_LOG(isAlivePtr != nullptr && *isAlivePtr, "handle metadatachange with session gone, return");
         SLOGI("HandleMetaDataChange in postTask with title %{public}s and size %{public}d",
-            AVSessionUtils::GetAnonyTitle(meta.GetTitle().c_str()).c_str(),
+            AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str(),
             static_cast<int>(controllers_.size()));
         std::lock_guard controllerLockGuard(controllersLock_);
         CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");

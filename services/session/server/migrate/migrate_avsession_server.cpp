@@ -22,6 +22,7 @@
 #include "avsession_errors.h"
 #include "avsession_item.h"
 #include "avsession_log.h"
+#include "avsession_utils.h"
 #include "avsession_service.h"
 #include "softbus/softbus_session_utils.h"
 #include "migrate_avsession_constant.h"
@@ -1007,7 +1008,7 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
         SLOGI("ConvertMetadataToJson without img");
         if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, metadata.GetTitle())) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-                METADATA_TITLE, metadata.GetTitle().c_str());
+                METADATA_TITLE, AVSessionUtils::GetAnonyTitle(metadata.GetTitle()).c_str());
             cJSON_Delete(result);
             return nullptr;
         }

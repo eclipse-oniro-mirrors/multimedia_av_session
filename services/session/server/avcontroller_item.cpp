@@ -114,7 +114,7 @@ int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 int32_t AVControllerItem::ReadImgForMetaData(AVMetaData& data)
 {
     if (!data.GetMetaMask().test(AVMetaData::META_KEY_MEDIA_IMAGE)) {
-        SLOGI("curNoImgFor:%{public}s", data.GetTitle().c_str());
+        SLOGI("curNoImgFor:%{public}s", AVSessionUtils::GetAnonyTitle(data.GetTitle()).c_str());
         return AVSESSION_SUCCESS;
     }
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "SetImgForMetaData session not exist");
@@ -507,7 +507,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMeta
         }
         metaOut.SetAssetId(data.GetAssetId());
         SLOGI("update metaData pid %{public}d, title %{public}s", static_cast<int>(pid_),
-            AVSessionUtils::GetAnonyTitle(metaOut.GetTitle().c_str()).c_str());
+            AVSessionUtils::GetAnonyTitle(metaOut.GetTitle()).c_str());
         AVSESSION_TRACE_SYNC_START("AVControllerItem::OnMetaDataChange");
         if (metaOut.GetMediaImage() != nullptr && !metaOut.GetMediaImageUri().empty()) {
             SLOGI("isFromSession %{public}d in metaChange", isFromSession_);

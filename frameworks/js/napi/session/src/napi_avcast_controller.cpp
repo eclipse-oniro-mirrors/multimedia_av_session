@@ -37,6 +37,7 @@
 #include "pixel_map.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_event_handler.h"
+#include "avsession_utils.h"
 
 namespace OHOS::AVSession {
 
@@ -292,7 +293,7 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
 
 int32_t NapiAVCastController::DownloadCastImg(std::shared_ptr<AVMediaDescription> description, const std::string& uri)
 {
-    SLOGI("DownloadCastImg with title %{public}s", description->GetTitle().c_str());
+    SLOGI("DownloadCastImg with title %{public}s", AVSessionUtils::GetAnonyTitle(description->GetTitle()).c_str());
 
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);

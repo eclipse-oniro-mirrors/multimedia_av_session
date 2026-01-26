@@ -19,6 +19,7 @@
 #include "migrate_avsession_proxy.h"
 
 #include "avsession_log.h"
+#include "avsession_utils.h"
 #include "avsession_service.h"
 #include "softbus/softbus_session_utils.h"
 #include "int_wrapper.h"
@@ -506,7 +507,7 @@ void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
     }
 
     remoteSession_->SetAVMetaData(metaData);
-    SLOGI("ProcessMetaData set title:%{public}s", metaData.GetTitle().c_str());
+    SLOGI("ProcessMetaData set title:%{public}s", AVSessionUtils::GetAnonyTitle(metaData.GetTitle()).c_str());
 }
 
 void MigrateAVSessionProxy::ProcessPlaybackState(cJSON* jsonValue)

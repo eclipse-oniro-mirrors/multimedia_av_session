@@ -25,6 +25,7 @@
 #include "avsession_event_handler.h"
 #include "avsession_trace.h"
 #include "avsession_radar.h"
+#include "avsession_utils.h"
 
 using namespace OHOS::CastEngine;
 
@@ -252,7 +253,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
         return AVSESSION_SUCCESS;
     }
     SLOGI("do Prepare with mediaId %{public}s | title %{public}s",
-        mediaDescription->GetMediaId().c_str(), mediaDescription->GetTitle().c_str());
+        mediaDescription->GetMediaId().c_str(), AVSessionUtils::GetAnonyTitle(mediaDescription->GetTitle()).c_str());
 
     CastEngine::MediaInfo mediaInfo;
     buildCastInfo(mediaDescription, mediaInfo);

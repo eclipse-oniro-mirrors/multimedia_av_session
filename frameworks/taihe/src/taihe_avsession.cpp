@@ -28,6 +28,7 @@
 #include "want_agent.h"
 #include "want_params.h"
 #include "taihe_avsession_controller.h"
+#include "avsession_utils.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "taihe_avcast_controller.h"
@@ -255,7 +256,8 @@ void ProcessErrMsg(int32_t ret)
 
 int32_t DoDownload(OHOS::AVSession::AVMetaData &meta, const std::string &uri)
 {
-    SLOGI("DoDownload with title %{public}s", meta.GetTitle().c_str());
+    SLOGI("DoDownload with title %{public}s",
+        OHOS::AVSession::AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str());
 
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
     bool ret = TaiheUtils::DoDownloadInCommon(pixelMap, uri);
