@@ -59,7 +59,7 @@ int32_t AVSessionNdkUtils::DownloadAndSetCoverImage(const std::string &uri, AVMe
 {
     CHECK_AND_RETURN_RET_LOG(!uri.empty(), AVSESSION_ERROR, "uri is empty");
     SLOGI("DownloadAndSetCoverImage with title %{public}s",
-        AVSessionUtils::GetAnonyTitle(meta.GetTitle().c_str()).c_str());
+        AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str());
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     bool ret = DownloadImage(uri, pixelMap);
     SLOGI("DownloadAndSetCoverImage with ret %{public}d, %{public}d", static_cast<int>(ret),
@@ -78,7 +78,8 @@ int32_t AVSessionNdkUtils::DownloadAndSetCastIcon(const std::string &uri,
 {
     CHECK_AND_RETURN_RET_LOG(!uri.empty() && description != nullptr, AVSESSION_ERROR,
         "uri is empty or description is nullptr");
-    SLOGI("DownloadAndSetCastIcon with title %{public}s", description->GetTitle().c_str());
+    SLOGI("DownloadAndSetCastIcon with title %{public}s",
+        AVSessionUtils::GetAnonyTitle(description->GetTitle()).c_str());
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     bool ret = DownloadImage(uri, pixelMap);
     SLOGI("DownloadAndSetCastIcon with ret %{public}d, %{public}d",

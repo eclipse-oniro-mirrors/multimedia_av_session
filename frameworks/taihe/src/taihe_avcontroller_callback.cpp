@@ -23,6 +23,7 @@
 #include "avsession_trace.h"
 #include "taihe_control_command.h"
 #include "taihe_utils.h"
+#include "avsession_utils.h"
 
 namespace ANI::AVSession {
 std::mutex TaiheAVControllerCallback::sWorkerMutex_;
@@ -212,7 +213,8 @@ void TaiheAVControllerCallback::OnPlaybackStateChange(const OHOS::AVSession::AVP
 void TaiheAVControllerCallback::OnMetaDataChange(const OHOS::AVSession::AVMetaData &data)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnMetaDataChange");
-    SLOGI("do metadata change notify with title %{public}s", data.GetTitle().c_str());
+    SLOGI("do metadata change notify with title %{public}s",
+        OHOS::AVSession::AVSessionUtils::GetAnonyTitle(data.GetTitle()).c_str());
     auto execute = [this, data](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");

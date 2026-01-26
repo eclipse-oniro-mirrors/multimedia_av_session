@@ -30,6 +30,7 @@
 #include "taihe_queue_item.h"
 #include "taihe_utils.h"
 #include "taihe_playback_state.h"
+#include "avsession_utils.h"
 
 namespace ANI::AVSession {
 std::set<std::string> AVCastControllerImpl::eventHandlers_ = {
@@ -373,8 +374,8 @@ static int32_t DownloadCastImg(std::shared_ptr<OHOS::AVSession::AVMediaDescripti
 {
     CHECK_AND_RETURN_RET_LOG(description != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "DownloadCastImg description is null");
-    SLOGI("DownloadCastImg with title %{public}s", description->GetTitle().c_str());
-
+    SLOGI("DownloadCastImg with title %{public}s",
+        OHOS::AVSession::AVSessionUtils::GetAnonyTitle(description->GetTitle()).c_str());
     std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
     bool ret = TaiheUtils::DoDownloadInCommon(pixelMap, uri);
     SLOGI("DownloadCastImg with ret %{public}d, %{public}d",
