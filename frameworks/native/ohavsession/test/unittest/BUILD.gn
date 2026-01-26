@@ -198,6 +198,38 @@ ohos_unittest("OHDeviceInfoTest") {
   module_out_path = module_output_path
 }
 
+ohos_unittest("OHAVUtilsTest") {
+  install_enable = true
+  visibility = [ ":*" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "../../../../../interfaces/inner_api/native/session/include",
+    "../../../../../interfaces/kits/c",
+    "../../include",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-fno-access-control",
+  ]
+
+  sources = [ "./oh_av_util_test.cpp" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  module_out_path = module_output_path
+}
+
 group("oh_av_session_unittest") {
   testonly = true
   deps = [
@@ -205,6 +237,7 @@ group("oh_av_session_unittest") {
     ":OHAVSessionCallbackImplTest",
     ":OHAVSessionTest",
     ":OHAVMediaDescriptionBuilderTest",
-    ":OHDeviceInfoTest"
+    ":OHDeviceInfoTest",
+    ":OHAVUtilsTest",
   ]
 }
