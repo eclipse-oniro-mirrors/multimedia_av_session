@@ -33,6 +33,13 @@ struct PickerCallBack {
     int32_t resultCode = OHOS::AVSession::AVSESSION_ERROR;
 };
 
+struct TaiheMenuPosition {
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+};
+
 class ModalUICallback {
 public:
     explicit ModalUICallback(OHOS::Ace::UIContent* uiContent, PickerCallBack& pickerCallBack);
@@ -52,6 +59,8 @@ private:
 
 struct TaiheAVCastPickerOptions {
     std::string sessionType = "audio";
+    int32_t pickerStyle = 0;
+    TaiheMenuPosition menuPosition;
 };
 
 class AVCastPickerHelperInnerImpl {
@@ -75,6 +84,7 @@ public:
     ~AVCastPickerHelperInnerImpl();
 
     void SelectSync(optional_view<AVCastPickerOptions> options);
+    void ResetCommunicationDeviceSync();
     void OnPickerStateChange(callback_view<void(AVCastPickerState)> callback);
     void OffPickerStateChange(optional_view<callback<void(AVCastPickerState)>> callback);
 
@@ -104,6 +114,8 @@ private:
 
     OHOS::Ace::UIContent *uiContent_;
     std::shared_ptr<uintptr_t> wrapperRef_{};
+
+    OHOS::AudioStandard::AudioRoutingManager *audioRoutingMngr_;
 
     static constexpr uint32_t STATE_APPEARING = 0;
     static constexpr uint32_t STATE_DISAPPEARING = 1;

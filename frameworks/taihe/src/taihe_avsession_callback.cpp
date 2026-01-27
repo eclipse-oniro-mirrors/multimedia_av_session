@@ -366,7 +366,7 @@ void TaiheAVSessionCallback::OnCastDisplayChange(const OHOS::AVSession::CastDisp
 void TaiheAVSessionCallback::OnCustomData(const OHOS::AAFwk::WantParams &customData)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnCustomData");
-    auto execute = [this, customData](std::shared_ptr<uintptr_t> method) {
+    auto execute = [customData](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         auto customDataAni = TaiheUtils::ToAniWantParams(customData);
@@ -378,6 +378,31 @@ void TaiheAVSessionCallback::OnCustomData(const OHOS::AAFwk::WantParams &customD
         (*cacheCallback)(customDataTaihe);
     };
     HandleEvent(EVENT_CUSTOM_DATA_CHANGE, execute);
+}
+
+void TaiheAVSessionCallback::OnDesktopLyricVisibilityChanged(bool isVisible)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnDesktopLyricVisibilityChanged");
+    auto execute = [isVisible](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(bool)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(bool)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(isVisible);
+    };
+    HandleEvent(EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED, execute);
+}
+
+void TaiheAVSessionCallback::OnDesktopLyricStateChanged(const OHOS::AVSession::DesktopLyricState &state)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnDesktopLyricStateChanged");
+    DesktopLyricState desktopLyricState = TaiheUtils::ToTaiheDesktopLyricState(state);
+    auto execute = [desktopLyricState](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(DesktopLyricState const&)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(DesktopLyricState const&)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(desktopLyricState);
+    };
+    HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, execute);
 }
 
 int32_t TaiheAVSessionCallback::AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback)

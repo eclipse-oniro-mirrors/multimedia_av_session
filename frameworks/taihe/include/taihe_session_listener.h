@@ -40,6 +40,7 @@ public:
         EVENT_DEVICE_OFFLINE,
         EVENT_DEVICE_STATE_CHANGED,
         EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED,
+        EVENT_ACTIVE_SESSION_CHANGED,
         EVENT_TYPE_MAX
     };
 
@@ -56,6 +57,7 @@ public:
     void OnDeviceStateChange(const OHOS::AVSession::DeviceState& deviceState) override;
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override;
+    void OnActiveSessionChanged(const std::vector<OHOS::AVSession::AVSessionDescriptor> &descriptors) override;
 
     int32_t AddCallback(int32_t event, std::shared_ptr<uintptr_t> ref);
     int32_t RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> ref);

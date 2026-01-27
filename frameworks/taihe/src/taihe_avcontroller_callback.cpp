@@ -152,7 +152,7 @@ void TaiheAVControllerCallback::OnAVCallStateChange(const OHOS::AVSession::AVCal
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnAVCallStateChange");
     AVCallState stateTaihe = TaiheUtils::ToTaiheAVCallState(avCallState);
-    auto execute = [this, stateTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [stateTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(AVCallState const&)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(AVCallState const&)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -164,7 +164,7 @@ void TaiheAVControllerCallback::OnAVCallStateChange(const OHOS::AVSession::AVCal
 void TaiheAVControllerCallback::OnAVCallMetaDataChange(const OHOS::AVSession::AVCallMetaData &avCallMetaData)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnAVCallMetaDataChange");
-    auto execute = [this, avCallMetaData](std::shared_ptr<uintptr_t> method) {
+    auto execute = [avCallMetaData](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         CallMetadata dataTaihe = TaiheUtils::ToTaiheAVCallMetaData(avCallMetaData);
@@ -178,7 +178,7 @@ void TaiheAVControllerCallback::OnAVCallMetaDataChange(const OHOS::AVSession::AV
 
 void TaiheAVControllerCallback::OnSessionDestroy()
 {
-    auto execute = [this](std::shared_ptr<uintptr_t> method) {
+    auto execute = [](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void()>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void()>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -198,7 +198,7 @@ void TaiheAVControllerCallback::OnPlaybackStateChange(const OHOS::AVSession::AVP
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnPlaybackStateChange");
     SLOGD("OnPlaybackStateChange %{public}d", state.GetState());
-    auto execute = [this, state](std::shared_ptr<uintptr_t> method) {
+    auto execute = [state](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         AVPlaybackState stateTaihe = TaiheUtils::ToTaiheAVPlaybackState(state);
@@ -215,7 +215,7 @@ void TaiheAVControllerCallback::OnMetaDataChange(const OHOS::AVSession::AVMetaDa
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnMetaDataChange");
     SLOGI("do metadata change notify with title %{public}s",
         OHOS::AVSession::AVSessionUtils::GetAnonyTitle(data.GetTitle()).c_str());
-    auto execute = [this, data](std::shared_ptr<uintptr_t> method) {
+    auto execute = [data](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         AVMetadata dataTaihe = TaiheUtils::ToTaiheAVMetaData(data);
@@ -229,7 +229,7 @@ void TaiheAVControllerCallback::OnMetaDataChange(const OHOS::AVSession::AVMetaDa
 
 void TaiheAVControllerCallback::OnActiveStateChange(bool isActive)
 {
-    auto execute = [this, isActive](std::shared_ptr<uintptr_t> method) {
+    auto execute = [isActive](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(bool)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(bool)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -244,7 +244,7 @@ void TaiheAVControllerCallback::OnValidCommandChange(const std::vector<int32_t> 
     std::vector<std::string> stringCmds = TaiheControlCommand::ConvertCommands(cmds);
     dataContext_.cmds = TaiheUtils::ToTaiheStringArray(stringCmds);
     array_view<string> cmdsTaihe = dataContext_.cmds;
-    auto execute = [this, cmdsTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [cmdsTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(array_view<string>)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(array_view<string>)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -258,7 +258,7 @@ void TaiheAVControllerCallback::OnOutputDeviceChange(const int32_t connectionSta
 {
     ConnectionState stateTaihe = ConnectionState::from_value(connectionState);
     OutputDeviceInfo infoTaihe = TaiheUtils::ToTaiheOutputDeviceInfo(info);
-    auto execute = [this, stateTaihe, infoTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [stateTaihe, infoTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(ConnectionState, OutputDeviceInfo const&)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(ConnectionState, OutputDeviceInfo const&)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -272,7 +272,7 @@ void TaiheAVControllerCallback::OnSessionEventChange(const std::string &event, c
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnSessionEventChange");
     dataContext_.sessionEvent = string(event);
     string_view eventTaihe = dataContext_.sessionEvent;
-    auto execute = [this, eventTaihe, args](std::shared_ptr<uintptr_t> method) {
+    auto execute = [eventTaihe, args](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         auto argsAni = TaiheUtils::ToAniWantParams(args);
@@ -289,7 +289,7 @@ void TaiheAVControllerCallback::OnSessionEventChange(const std::string &event, c
 void TaiheAVControllerCallback::OnQueueItemsChange(const std::vector<OHOS::AVSession::AVQueueItem> &items)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnQueueItemsChange");
-    auto execute = [this, items](std::shared_ptr<uintptr_t> method) {
+    auto execute = [items](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         array<AVQueueItem> queueItems = TaiheUtils::ToTaiheAVQueueItemArray(items);
@@ -307,7 +307,7 @@ void TaiheAVControllerCallback::OnQueueTitleChange(const std::string &title)
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnQueueTitleChange");
     dataContext_.queueTitle = string(title);
     string_view titleTaihe = dataContext_.queueTitle;
-    auto execute = [this, titleTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [titleTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -319,7 +319,7 @@ void TaiheAVControllerCallback::OnQueueTitleChange(const std::string &title)
 void TaiheAVControllerCallback::OnExtrasChange(const OHOS::AAFwk::WantParams &extras)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnExtrasChange");
-    auto execute = [this, extras](std::shared_ptr<uintptr_t> method) {
+    auto execute = [extras](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         auto extrasAni = TaiheUtils::ToAniWantParams(extras);
@@ -336,7 +336,7 @@ void TaiheAVControllerCallback::OnExtrasChange(const OHOS::AAFwk::WantParams &ex
 void TaiheAVControllerCallback::OnCustomData(const OHOS::AAFwk::WantParams &customData)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnCustomData");
-    auto execute = [this, customData](std::shared_ptr<uintptr_t> method) {
+    auto execute = [customData](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         auto customDataAni = TaiheUtils::ToAniWantParams(customData);
@@ -348,6 +348,43 @@ void TaiheAVControllerCallback::OnCustomData(const OHOS::AAFwk::WantParams &cust
         (*cacheCallback)(customDataTaihe);
     };
     HandleEvent(EVENT_CUSTOM_DATA_CHANGE, execute);
+}
+
+void TaiheAVControllerCallback::OnDesktopLyricVisibilityChanged(bool isVisible)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnDesktopLyricVisibilityChanged");
+    auto execute = [isVisible](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(bool)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(bool)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(isVisible);
+    };
+    HandleEvent(EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED, execute);
+}
+
+void TaiheAVControllerCallback::OnDesktopLyricStateChanged(const OHOS::AVSession::DesktopLyricState &state)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnDesktopLyricStateChanged");
+    DesktopLyricState desktopLyricState = TaiheUtils::ToTaiheDesktopLyricState(state);
+    auto execute = [desktopLyricState](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(DesktopLyricState const&)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(DesktopLyricState const&)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(desktopLyricState);
+    };
+    HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, execute);
+}
+
+void TaiheAVControllerCallback::OnDesktopLyricEnabled(bool isEnabled)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnDesktopLyricEnabled");
+    auto execute = [isEnabled](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(bool)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(bool)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(isEnabled);
+    };
+    HandleEvent(EVENT_DESKTOP_LYRIC_ENABLED, execute);
 }
 
 int32_t TaiheAVControllerCallback::AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback)

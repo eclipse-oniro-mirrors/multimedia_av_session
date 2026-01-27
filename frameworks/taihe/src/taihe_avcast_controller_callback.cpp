@@ -113,7 +113,7 @@ void TaiheAVCastControllerCallback::OnCastPlaybackStateChange(const OHOS::AVSess
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnCastPlaybackStateChange");
     SLOGI("Start handle OnCastPlaybackStateChange event with state: %{public}d", state.GetState());
-    auto execute = [this, state](std::shared_ptr<uintptr_t> method) {
+    auto execute = [state](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         AVPlaybackState stateTaihe = TaiheUtils::ToTaiheAVPlaybackState(state);
@@ -129,7 +129,7 @@ void TaiheAVCastControllerCallback::OnMediaItemChange(const OHOS::AVSession::AVQ
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnMediaItemChange");
     SLOGI("Start handle OnMediaItemChange event");
-    auto execute = [this, avQueueItem](std::shared_ptr<uintptr_t> method) {
+    auto execute = [avQueueItem](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         AVQueueItem queueItemTaihe = TaiheUtils::ToTaiheAVQueueItem(avQueueItem);
@@ -280,7 +280,7 @@ void TaiheAVCastControllerCallback::OnPlayRequest(const OHOS::AVSession::AVQueue
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnPlayRequest");
     SLOGI("Start handle OnPlayRequest event");
-    auto execute = [this, avQueueItem](std::shared_ptr<uintptr_t> method) {
+    auto execute = [avQueueItem](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         AVQueueItem queueItemTaihe = TaiheUtils::ToTaiheAVQueueItem(avQueueItem);
@@ -301,7 +301,7 @@ void TaiheAVCastControllerCallback::OnKeyRequest(const std::string &assetId,
     dataContext_.assetId = string(assetId);
     array_view<uint8_t> dataTaihe = dataContext_.keyRequestData;
     string_view assetIdTaihe = dataContext_.assetId;
-    auto execute = [this, assetIdTaihe, dataTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [assetIdTaihe, dataTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(string_view, array_view<uint8_t>)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view, array_view<uint8_t>)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -316,7 +316,7 @@ void TaiheAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<
     std::vector<std::string> stringCmds = TaiheCastControlCommand::ConvertCommands(cmds);
     dataContext_.cmds = TaiheUtils::ToTaiheStringArray(stringCmds);
     array_view<string> cmdsTaihe = dataContext_.cmds;
-    auto execute = [this, cmdsTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [cmdsTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(array_view<string>)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(array_view<string>)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -328,7 +328,7 @@ void TaiheAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<
 void TaiheAVCastControllerCallback::OnCustomData(const OHOS::AAFwk::WantParams &customData)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnCustomData");
-    auto execute = [this, customData](std::shared_ptr<uintptr_t> method) {
+    auto execute = [customData](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         auto customDataAni = TaiheUtils::ToAniWantParams(customData);

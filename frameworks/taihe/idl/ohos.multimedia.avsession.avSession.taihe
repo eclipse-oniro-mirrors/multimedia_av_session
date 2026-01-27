@@ -351,9 +351,14 @@ struct AVControlCommand {
   commandInfo: Optional<CommandInfo>;
 }
 
+struct DesktopLyricState {
+  isLocked: bool;
+}
+
 interface AVSession {
   @get GetSessionId(): String;
   @get GetSessionType(): String;
+  @get GetSessionTag(): String;
 
   @gen_async("setAVMetadata")
   @gen_promise("setAVMetadata")
@@ -425,6 +430,21 @@ interface AVSession {
   @gen_promise("sendCustomData")
   SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
 
+  @gen_promise("enableDesktopLyric")
+  EnableDesktopLyricSync(enable: bool): void;
+
+  @gen_promise("setDesktopLyricVisible")
+  SetDesktopLyricVisibleSync(visible: bool): void;
+
+  @gen_promise("isDesktopLyricVisible")
+  IsDesktopLyricVisibleSync(): bool;
+
+  @gen_promise("setDesktopLyricState")
+  SetDesktopLyricStateSync(state: DesktopLyricState): void;
+
+  @gen_promise("getDesktopLyricState")
+  GetDesktopLyricStateSync(): DesktopLyricState;
+
   OnPlay(callback: (commandInfo: CommandInfo) => void): void;
   OnPause(callback: () => void): void;
   OnStop(callback: () => void): void;
@@ -447,6 +467,8 @@ interface AVSession {
   OnToggleCallMute(callback: () => void): void;
   OnCastDisplayChange(callback: (data: CastDisplayInfo) => void): void;
   OnCustomDataChange(callback: (data: @sts_type("Record<String, Object>") Opaque) =>void): void;
+  OnDesktopLyricVisibilityChanged(callback: (visible: bool) => void): void;
+  OnDesktopLyricStateChanged(callback: (state: DesktopLyricState) => void): void;
 
   OffPlay(callback: Optional<(commandInfo: CommandInfo) => void>): void;
   OffPause(callback: Optional<() => void>): void;
@@ -470,6 +492,8 @@ interface AVSession {
   OffToggleCallMute(callback: Optional<() => void>): void;
   OffCastDisplayChange(callback: Optional<(data: CastDisplayInfo) => void>): void;
   OffCustomDataChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
+  OffDesktopLyricVisibilityChanged(callback: Optional<(visible: bool) => void>): void;
+  OffDesktopLyricStateChanged(callback: Optional<(state: DesktopLyricState) => void>): void;
 }
 
 interface AVSessionController {
@@ -547,6 +571,21 @@ interface AVSessionController {
   @gen_promise("sendCustomData")
   SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
 
+  @gen_promise("isDesktopLyricEnabled")
+  IsDesktopLyricEnabledSync(): bool;
+
+  @gen_promise("setDesktopLyricVisible")
+  SetDesktopLyricVisibleSync(visible: bool): void;
+
+  @gen_promise("isDesktopLyricVisible")
+  IsDesktopLyricVisibleSync(): bool;
+
+  @gen_promise("setDesktopLyricState")
+  SetDesktopLyricStateSync(state: DesktopLyricState): void;
+
+  @gen_promise("getDesktopLyricState")
+  GetDesktopLyricStateSync(): DesktopLyricState;
+
   OnMetadataChange(filter: Array<String>, callback: (data: AVMetadata) => void): void;
   OnMetadataChangeAll(callback: (data: AVMetadata) => void): void;
   OnPlaybackStateChange(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
@@ -564,6 +603,9 @@ interface AVSessionController {
   OnQueueTitleChange(callback: (data: String) => void): void;
   OnExtrasChange(callback: (data: @sts_type("Record<String, Object>") Opaque) => void): void;
   OnCustomDataChange(callback: (data: @sts_type("Record<String, Object>") Opaque) => void): void;
+  OnDesktopLyricVisibilityChanged(callback: (data: bool) => void): void;
+  OnDesktopLyricStateChanged(callback: (data: DesktopLyricState) => void): void;
+  OnDesktopLyricEnabled(callback: (data: bool) => void): void;
 
   OffMetadataChange(callback: Optional<(data: AVMetadata) => void>): void;
   OffPlaybackStateChange(callback: Optional<(data: AVPlaybackState) => void>): void;
@@ -578,6 +620,9 @@ interface AVSessionController {
   OffQueueTitleChange(callback: Optional<(data: String) => void>): void;
   OffExtrasChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
   OffCustomDataChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
+  OffDesktopLyricVisibilityChanged(callback: Optional<(data: bool) => void>): void;
+  OffDesktopLyricStateChanged(callback: Optional<(data: DesktopLyricState) => void>): void;
+  OffDesktopLyricEnabled(callback: Optional<(data: bool) => void>): void;
 }
 
 struct AVSessionDescriptor {
@@ -617,6 +662,8 @@ struct SessionToken {
 
 struct AVCastPickerOptions {
   sessionType: Optional<String>;
+  pickerStyle: Optional<AVCastPickerStyle>;
+  menuPosition: Optional<MenuPosition>;
 }
 
 interface AVCastPickerHelperInner {
@@ -626,6 +673,9 @@ interface AVCastPickerHelperInner {
   OnPickerStateChange(callback: (data: AVCastPickerState) => void): void;
 
   OffPickerStateChange(callback: Optional<(data: AVCastPickerState) => void>): void;
+
+  @gen_promise("resetCommunicationDevice")
+  ResetCommunicationDeviceSync(): void;
 }
 
 function CreateAVCastPickerHelperInnerSync(context: @sts_type("Context") Opaque): AVCastPickerHelperInner;
@@ -660,6 +710,13 @@ class AVCastPickerHelper {
 
   offPickerStateChange(callback?: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
       this.objectInner?.offPickerStateChange(callback as ((data: ohos_multimedia_avCastPickerParam.AVCastPickerState) => void) | undefined);
+  }
+
+  resetCommunicationDevice(): Promise<void> | undefined {
+    if (this.objectInner === undefined) {
+      return undefined;
+    }
+    return this.objectInner?.resetCommunicationDevice();
   }
 }
 """)
@@ -734,6 +791,9 @@ function CastAudioAllSync(audioDevices: Array<@sts_type("audio.AudioDeviceDescri
 @gen_promise("getDistributedSessionController")
 function GetDistributedSessionControllerSync(distributedSessionType: DistributedSessionType): Array<AVSessionController>;
 
+@gen_promise("isDesktopLyricSupported")
+function IsDesktopLyricSupportedSync(): bool;
+
 @gen_async("sendSystemAVKeyEvent")
 @gen_promise("sendSystemAVKeyEvent")
 function SendSystemAVKeyEventSync(event: KeyEvent): void;
@@ -775,6 +835,8 @@ function OnDistributedSessionChange(param: DistributedSessionType, callback: (da
 function OffDistributedSessionChange(param: DistributedSessionType, callback: Optional<(data: Array<AVSessionController>) => void>): void;
 function OnSessionServiceDie(callback: () => void): void;
 function OffSessionServiceDie(callback: Optional<() => void>): void;
+function OnActiveSessionChanged(callback: (data: Array<AVSessionDescriptor>) => void): void;
+function OffActiveSessionChanged(callback: Optional<(data: Array<AVSessionDescriptor>) => void>): void;
 
 function OnSessionCreate(callback: (session: AVSessionDescriptor) => void): void;
 function OnSessionDestroy(callback: (session: AVSessionDescriptor) => void): void;
@@ -802,6 +864,8 @@ enum AVSessionErrorCode : i32 {
   ERR_CODE_MESSAGE_OVERLOAD = 6600107,
   ERR_CODE_DEVICE_CONNECTION_FAILED = 6600108,
   ERR_CODE_REMOTE_CONNECTION_NOT_EXIST = 6600109,
+  ERR_CODE_DESKTOP_LYRIC_NOT_ENABLED = 6600110,
+  ERR_CODE_DESKTOP_LYRIC_NOT_SUPPORTED = 6600111,
   ERR_CODE_CAST_CONTROL_UNSPECIFIED = 6611000,
   ERR_CODE_CAST_CONTROL_REMOTE_ERROR = 6611001,
   ERR_CODE_CAST_CONTROL_BEHIND_LIVE_WINDOW = 6611002,

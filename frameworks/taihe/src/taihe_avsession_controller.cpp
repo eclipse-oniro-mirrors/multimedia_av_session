@@ -44,6 +44,9 @@ std::set<std::string> AVSessionControllerImpl::eventHandlers_ = {
     "queueTitleChange",
     "extrasChange",
     "customDataChange",
+    "desktopLyricVisibilityChanged",
+    "desktopLyricStateChanged",
+    "desktopLyricEnabled",
 };
 std::map<std::string, std::shared_ptr<AVSessionControllerImpl>> AVSessionControllerImpl::controllerList_ = {};
 std::mutex AVSessionControllerImpl::uvMutex_;
@@ -739,6 +742,103 @@ uintptr_t AVSessionControllerImpl::GetExtrasWithEventSync(string_view extraEvent
     return reinterpret_cast<uintptr_t>(result);
 }
 
+bool AVSessionControllerImpl::IsDesktopLyricEnabledSync()
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::IsDesktopLyricEnabled");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "IsDesktopLyricEnabled failed : controller is nullptr");
+        return false;
+    }
+
+    bool isEnabled = false;
+    int32_t ret = controller_->IsDesktopLyricEnabled(isEnabled);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "IsDesktopLyricEnabled", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return false;
+    }
+    return isEnabled;
+}
+
+void AVSessionControllerImpl::SetDesktopLyricVisibleSync(bool visible)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::SetDesktopLyricVisible");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "SetDesktopLyricVisible failed : controller is nullptr");
+        return;
+    }
+
+    int32_t ret = controller_->SetDesktopLyricVisible(visible);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "SetDesktopLyricVisible", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+    }
+}
+
+bool AVSessionControllerImpl::IsDesktopLyricVisibleSync()
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::IsDesktopLyricVisible");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "IsDesktopLyricVisible failed : controller is nullptr");
+        return false;
+    }
+
+    bool isVisible = false;
+    int32_t ret = controller_->IsDesktopLyricVisible(isVisible);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "IsDesktopLyricVisible", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return false;
+    }
+    return isVisible;
+}
+
+void AVSessionControllerImpl::SetDesktopLyricStateSync(DesktopLyricState const& state)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::SetDesktopLyricState");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "SetDesktopLyricState failed : controller is nullptr");
+        return;
+    }
+
+    OHOS::AVSession::DesktopLyricState desktopLyricState = {};
+    TaiheUtils::GetAVSessionDesktopLyricState(state, desktopLyricState);
+    int32_t ret = controller_->SetDesktopLyricState(desktopLyricState);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "SetDesktopLyricState", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+    }
+}
+
+DesktopLyricState AVSessionControllerImpl::GetDesktopLyricStateSync()
+{
+    DesktopLyricState undefinedOutput = {};
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::GetDesktopLyricState");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "GetDesktopLyricState failed : controller is nullptr");
+        return undefinedOutput;
+    }
+
+    OHOS::AVSession::DesktopLyricState state = {};
+    int32_t ret = controller_->GetDesktopLyricState(state);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "GetDesktopLyricState", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return undefinedOutput;
+    }
+    return TaiheUtils::ToTaiheDesktopLyricState(state);
+}
+
 void AVSessionControllerImpl::OnMetadataChange(array_view<string> filter,
     callback_view<void(AVMetadata const&)> callback)
 {
@@ -938,6 +1038,39 @@ void AVSessionControllerImpl::OnCustomDataChange(callback_view<void(uintptr_t)> 
     }
 }
 
+void AVSessionControllerImpl::OnDesktopLyricVisibilityChanged(callback_view<void(bool)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("desktopLyricVisibilityChanged", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+    }
+}
+
+void AVSessionControllerImpl::OnDesktopLyricStateChanged(callback_view<void(DesktopLyricState const&)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("desktopLyricStateChanged", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_DESKTOP_LYRIC_STATE_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+    }
+}
+
+void AVSessionControllerImpl::OnDesktopLyricEnabled(callback_view<void(bool)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("desktopLyricEnabled", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_DESKTOP_LYRIC_ENABLED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+    }
+}
+
 void AVSessionControllerImpl::OffMetadataChange(optional_view<callback<void(AVMetadata const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
@@ -1113,6 +1246,49 @@ void AVSessionControllerImpl::OffCustomDataChange(optional_view<callback<void(ui
     }
 }
 
+void AVSessionControllerImpl::OffDesktopLyricVisibilityChanged(optional_view<callback<void(bool)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("desktopLyricVisibilityChanged", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    }
+}
+
+void AVSessionControllerImpl::OffDesktopLyricStateChanged(
+    optional_view<callback<void(DesktopLyricState const&)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("desktopLyricStateChanged", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_DESKTOP_LYRIC_STATE_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    }
+}
+
+void AVSessionControllerImpl::OffDesktopLyricEnabled(optional_view<callback<void(bool)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("desktopLyricEnabled", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_DESKTOP_LYRIC_ENABLED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    }
+}
+
 int32_t AVSessionControllerImpl::OnEvent(const std::string& event, AVSessionControllerImpl *taiheController)
 {
     std::string eventName = event;
@@ -1241,5 +1417,26 @@ int32_t AVSessionControllerImpl::SetMetaFilter(AVSessionControllerImpl *taiheCon
         return ret;
     }
     return ret;
+}
+
+void AVSessionControllerImpl::ErrCodeToMessage(int32_t errCode, const std::string &funcName, std::string &message)
+{
+    switch (errCode) {
+        case OHOS::AVSession::ERR_SESSION_NOT_EXIST:
+            message = funcName + " failed : native session not exist";
+            break;
+        case OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST:
+            message = funcName + " failed : native session controller does not exist";
+            break;
+        case OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_SUPPORT:
+            message = funcName + " failed : desktop lyrics feature is not supported";
+            break;
+        case OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_ENABLE:
+            message = funcName + " failed : desktop lyrics feature of this application is not enabled";
+            break;
+        default:
+            message = funcName + " failed : native server exception";
+            break;
+    }
 }
 } // namespace ANI::AVSession

@@ -82,6 +82,7 @@ AVCastPickerHelperInnerImpl::AVCastPickerHelperInnerImpl(OHOS::Ace::UIContent* u
     SLOGI("construct");
     uiContent_ = uiContent;
     isValid_ = std::make_shared<bool>(true);
+    audioRoutingMngr_ = OHOS::AudioStandard::AudioRoutingManager::GetInstance();
 }
 
 AVCastPickerHelperInnerImpl::~AVCastPickerHelperInnerImpl()
@@ -97,6 +98,13 @@ static int32_t GetTaiheAVCastPickerOptions(const AVCastPickerOptions &in, TaiheA
     if (in.sessionType.has_value()) {
         int32_t ret = TaiheUtils::GetString(in.sessionType.value(), out.sessionType);
         CHECK_RETURN(ret == OHOS::AVSession::AVSESSION_SUCCESS, "get sessionType failed", ret);
+    }
+    if (in.pickerStyle.has_value()) {
+        out.pickerStyle = in.pickerStyle.value().get_value();
+    }
+    if (in.menuPosition.has_value()) {
+        int32_t ret = TaiheUtils::GetMenuPosition(in.menuPosition.value(), out.menuPosition);
+        CHECK_RETURN(ret == OHOS::AVSession::AVSESSION_SUCCESS, "get menuPosition failed", ret);
     }
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
@@ -120,6 +128,11 @@ void AVCastPickerHelperInnerImpl::SelectSync(optional_view<AVCastPickerOptions> 
     request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, targetType);
     request.SetParam("isAVCastPickerHelper", true);
     request.SetParam("AVCastPickerOptionsType", taiheAVCastPickerOptions.sessionType);
+    request.SetParam("AVCastPickerOptionsStyle", taiheAVCastPickerOptions.pickerStyle);
+    request.SetParam("AVCastPickerOptionsPositionX", taiheAVCastPickerOptions.menuPosition.x);
+    request.SetParam("AVCastPickerOptionsPositionY", taiheAVCastPickerOptions.menuPosition.y);
+    request.SetParam("AVCastPickerOptionsPositionW", taiheAVCastPickerOptions.menuPosition.width);
+    request.SetParam("AVCastPickerOptionsPositionH", taiheAVCastPickerOptions.menuPosition.height);
     request.SetElementName(ABILITY_WANT_ELEMENT_NAME, "UIExtAbility");
 
     PickerCallBack pickerCallBack;
@@ -148,6 +161,21 @@ void AVCastPickerHelperInnerImpl::SelectSync(optional_view<AVCastPickerOptions> 
     config.isProhibitBack = true;
     int32_t sessionId = uiContent_->CreateModalUIExtension(request, extensionCallback, config);
     callback->SetSessionId(sessionId);
+}
+
+void AVCastPickerHelperInnerImpl::ResetCommunicationDeviceSync()
+{
+    OHOS::sptr<OHOS::AudioStandard::AudioRendererFilter> audioRendererFilter;
+    AVCastPickerHelperInnerImpl *taiheAVCastPickerHelper = this;
+    audioRendererFilter = new (std::nothrow) OHOS::AudioStandard::AudioRendererFilter();
+    if (audioRendererFilter == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_NO_MEMORY],
+            "init AudioRendererFilter failed");
+        return;
+    }
+    audioRendererFilter->rendererInfo.streamUsage = OHOS::AudioStandard::StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION;
+    taiheAVCastPickerHelper->audioRoutingMngr_->RestoreOutputDevice(audioRendererFilter);
+    return;
 }
 
 void AVCastPickerHelperInnerImpl::OnPickerStateChange(callback_view<void(AVCastPickerState)> callback)
@@ -244,7 +272,7 @@ void AVCastPickerHelperInnerImpl::HandleEvent(int32_t event, uint32_t state)
         SLOGE("Invalid state: %{public}u", state);
         return;
     }
-    auto execute = [this, stateTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [stateTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(AVCastPickerState)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(AVCastPickerState)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");

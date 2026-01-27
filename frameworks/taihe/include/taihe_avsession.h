@@ -53,6 +53,7 @@ public:
     // Taihe read only attributes
     string GetSessionId();
     string GetSessionType();
+    string GetSessionTag();
 
     void SetAVMetadataSync(AVMetadata const &data);
     void SetCallMetadataSync(CallMetadata const& data);
@@ -72,6 +73,11 @@ public:
     void DeactivateSync();
     void DestroySync();
     void SendCustomDataSync(uintptr_t data);
+    void EnableDesktopLyricSync(bool enable);
+    void SetDesktopLyricVisibleSync(bool visible);
+    bool IsDesktopLyricVisibleSync();
+    void SetDesktopLyricStateSync(DesktopLyricState const& state);
+    DesktopLyricState GetDesktopLyricStateSync();
 
     void OnPlay(callback_view<void(CommandInfo const& commandInfo)> callback);
     void OnPause(callback_view<void()> callback);
@@ -96,6 +102,8 @@ public:
     void OnToggleCallMute(callback_view<void()> callback);
     void OnCastDisplayChange(callback_view<void(CastDisplayInfo const&)> callback);
     void OnCustomDataChange(callback_view<void(uintptr_t)> callback);
+    void OnDesktopLyricVisibilityChanged(callback_view<void(bool)> callback);
+    void OnDesktopLyricStateChanged(callback_view<void(DesktopLyricState const&)> callback);
 
     void OffPlay(optional_view<callback<void(CommandInfo const& commandInfo)>> callback);
     void OffPause(optional_view<callback<void()>> callback);
@@ -120,6 +128,8 @@ public:
     void OffToggleCallMute(optional_view<callback<void()>> callback);
     void OffCastDisplayChange(optional_view<callback<void(CastDisplayInfo const&)>> callback);
     void OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback);
+    void OffDesktopLyricVisibilityChanged(optional_view<callback<void(bool)>> callback);
+    void OffDesktopLyricStateChanged(optional_view<callback<void(DesktopLyricState const&)>> callback);
 
     std::string GetSessionIdInner();
     void SetSessionIdInner(std::string sessionId);
@@ -127,8 +137,8 @@ public:
     std::string GetSessionTypeInner();
     void SetSessionTypeInner(std::string sessionType);
 
-    std::string GetSessionTag();
-    void SetSessionTag(std::string sessionTag);
+    std::string GetSessionTagInner();
+    void SetSessionTagInner(std::string sessionTag);
 
     OHOS::AppExecFwk::ElementName GetSessionElement();
     void SetSessionElement(OHOS::AppExecFwk::ElementName elementName);
@@ -141,6 +151,7 @@ private:
     static std::function<void()> PlaybackStateComplete();
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
+    static void ErrCodeToMessage(int32_t errCode, const std::string &funcName, std::string &message);
 
     static int32_t ThrowErrorAndReturn(const std::string& message, int32_t errCode);
     static int32_t ThrowErrorAndReturnByErrCode(const std::string& message, int32_t errCode);
