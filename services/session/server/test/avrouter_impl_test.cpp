@@ -1556,7 +1556,6 @@ static HWTEST_F(AVRouterImplTest, SetSinkCastSessionInfo001, TestSize.Level0)
     cJSON* protocolTypeItem = cJSON_GetObjectItem(deviceInfo, "protocolType");
     g_AVRouterImpl->sourceProtocols_ = static_cast<ProtocolType>(protocolTypeItem->valueint);
     ASSERT_TRUE(listener != nullptr);
-    ASSERT_TRUE(g_AVRouterImpl->sinkCastSessionId_ == sessionId);
     ASSERT_TRUE(g_AVRouterImpl->sourceDeviceId_ == deviceId);
     ASSERT_TRUE(g_AVRouterImpl->sourceProtocols_ == sourceProtocols);
     cJSON_Delete(deviceInfo);

@@ -35,7 +35,7 @@
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 
-static std::shared_ptr<AVSessionService> g_AVSessionService {nullptr};
+static AVSessionService* g_AVSessionService {nullptr};
 static std::shared_ptr<MigrateAVSessionProxy> g_MigrateAVSessionProxy {nullptr};
 static std::shared_ptr<AVSessionObserver> g_AVSessionObserver {nullptr};
 
@@ -50,17 +50,17 @@ public:
 void MigrateAVSessionProxyTest::SetUpTestCase()
 {
     SLOGI("MigrateAVSessionProxyTest SetUpTestCase");
-    g_AVSessionService =  std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID);
-    g_MigrateAVSessionProxy = std::make_shared<MigrateAVSessionProxy>(g_AVSessionService.get());
+    g_AVSessionService =  new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    g_MigrateAVSessionProxy = std::make_shared<MigrateAVSessionProxy>(g_AVSessionService);
     g_AVSessionObserver = std::make_shared<AVSessionObserver>();
 }
 
 void MigrateAVSessionProxyTest::TearDownTestCase()
 {
     SLOGI("MigrateAVSessionProxyTest TearDownTestCase");
-    g_MigrateAVSessionProxy.reset();
-    g_AVSessionService.reset();
-    g_AVSessionObserver.reset();
+    g_MigrateAVSessionProxy = nullptr;
+    g_AVSessionService = nullptr;
+    g_AVSessionObserver = nullptr;
 }
 
 void MigrateAVSessionProxyTest::SetUp()

@@ -1666,7 +1666,7 @@ static HWTEST_F(AVSessionServiceTest, LoadStringFromFileEx003, TestSize.Level0)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 
-    std::string filePath = "/test3.txt";
+    std::string filePath = avservice_->GetUsersManager().GetDirForCurrentUser() + "abcdeXYZ123/test3.txt";
     std::string content;
     std::ifstream file(filePath, std::ios_base::in);
     bool ret = avservice_->LoadStringFromFileEx(filePath, content);
@@ -2216,7 +2216,7 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
     SLOGD("GetLocalTitle001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("com.example.hiMusicDemo");
+    elementName.SetBundleName("com.example.himusicdemo");
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);

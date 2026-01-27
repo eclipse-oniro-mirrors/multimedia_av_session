@@ -181,7 +181,7 @@ void AVSessionServiceTestSecond::TearDownTestCase()
 
 void AVSessionServiceTestSecond::SetUp()
 {
-    SLOGI("set up test function in AVSessionServiceTestSecond");\
+    SLOGI("set up test function in AVSessionServiceTestSecond");
     g_AVSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     g_AVSessionService->InitKeyEvent();
 }
@@ -1551,12 +1551,15 @@ static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 static HWTEST_F(AVSessionServiceTestSecond, checkEnableCast001, TestSize.Level0)
 {
-    g_AVSessionService->isInCast_ = false;
+    g_AVSessionService->isInCast_ = true;
     auto ret = g_AVSessionService->checkEnableCast(true);
+    g_AVSessionService->isInCast_ = false;
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
+#endif
 
 /**
 * @tc.name: StopCast001
