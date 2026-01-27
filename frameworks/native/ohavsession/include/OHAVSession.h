@@ -106,6 +106,7 @@ private:
 
     std::shared_ptr<AVSessionDataTracker> dataTracker_;
     AVMetaData metaData_;
+    bool isFirstMetaDataSet_ = true;
 };
 }
 #endif // OHOS_OHAVSESSION_H
