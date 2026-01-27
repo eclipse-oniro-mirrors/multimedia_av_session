@@ -22,9 +22,7 @@ part_name = "av_session"
 taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
 
 copy_taihe_idl("copy_taihe_deps") {
-  sources = [
-    "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avCastPickerParam.taihe",
-  ]
+  sources = [ "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avCastPickerParam.taihe" ]
 }
 
 copy_taihe_idl("copy_taihe") {
@@ -38,7 +36,7 @@ copy_taihe_idl("copy_taihe") {
     "input:key_code_taihe",
     "input:key_event_taihe",
   ]
-  deps = [":copy_taihe_deps"]
+  deps = [ ":copy_taihe_deps" ]
 }
 
 ohos_taihe("run_taihe") {
@@ -113,6 +111,7 @@ taihe_shared_library("avsession_taihe") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",
     "ace_engine:ace_uicontent",
+    "audio_framework:audio_client",
     "audio_framework:audio_foundation",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -121,8 +120,8 @@ taihe_shared_library("avsession_taihe") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image",
-    "image_framework:image_taihe",
     "image_framework:image_native",
+    "image_framework:image_taihe",
     "input:libmmi-client",
     "ipc:ipc_single",
     "runtime_core:ani",
@@ -156,7 +155,7 @@ generate_static_abc("avsession_taihe_abc") {
   base_url = "$taihe_generated_file_path"
   files = [
     "$taihe_generated_file_path/@ohos.multimedia.avsession.ets",
-    "$taihe_generated_file_path/@ohos.multimedia.avCastPickerParam.ets"
+    "$taihe_generated_file_path/@ohos.multimedia.avCastPickerParam.ets",
   ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/avsession_taihe_abc.abc"

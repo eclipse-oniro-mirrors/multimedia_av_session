@@ -54,6 +54,8 @@ public:
         std::shared_ptr<uintptr_t> &callback);
     static int32_t OffDistributedSessionChangeEvent(OHOS::AVSession::DistributedSessionType sessionType,
         std::shared_ptr<uintptr_t> &callback);
+    static int32_t OnActiveSessionChangedEvent(std::shared_ptr<uintptr_t> &callback);
+    static int32_t OffActiveSessionChangedEvent(std::shared_ptr<uintptr_t> &callback);
 
     static int32_t OnSessionCreate(std::shared_ptr<uintptr_t> &callback);
     static int32_t OnSessionDestroy(std::shared_ptr<uintptr_t> &callback);

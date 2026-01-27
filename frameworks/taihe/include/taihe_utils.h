@@ -33,6 +33,7 @@
 #include "avqueue_info.h"
 #include "avsession_controller.h"
 #include "av_data_src_descriptor.h"
+#include "taihe_avcast_picker_helper.h"
 #include "taihe_avsession_enum.h"
 #include "taihe_headers.h"
 
@@ -139,6 +140,9 @@ public:
     static int32_t GetAVQueueItemArray(const array<ohos::multimedia::avsession::avSession::AVQueueItem> &in,
         std::vector<OHOS::AVSession::AVQueueItem> &out);
     static int32_t GetAVCallMetaData(const CallMetadata &in, OHOS::AVSession::AVCallMetaData &out);
+    static int32_t GetMenuPosition(const MenuPosition &in, TaiheMenuPosition &out);
+    static int32_t GetAVSessionDesktopLyricState(const ohos::multimedia::avsession::avSession::DesktopLyricState &in,
+        OHOS::AVSession::DesktopLyricState &out);
 
     static int32_t ToAniDoubleObject(ani_env *env, double in, ani_object &out);
     static int32_t ToAniLongObject(ani_env *env, int64_t in, ani_object &out);
@@ -186,6 +190,8 @@ public:
     static keyEvent::KeyEvent ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in);
     static AudioCapabilities ToTaiheAudioCapabilities(const OHOS::AVSession::AudioCapabilities &in);
     static CommandInfo ToTaiheCommandInfo(const OHOS::AVSession::AVControlCommand& in);
+    static ohos::multimedia::avsession::avSession::DesktopLyricState ToTaiheDesktopLyricState(
+        const OHOS::AVSession::DesktopLyricState &in);
 
     static ohos::multimedia::avsession::avSession::OutputDeviceInfo CreateUndefinedOutputDeviceInfo();
 

@@ -61,6 +61,11 @@ public:
     void SendCustomDataSync(uintptr_t data);
     uintptr_t GetExtrasSync();
     uintptr_t GetExtrasWithEventSync(string_view extraEvent);
+    bool IsDesktopLyricEnabledSync();
+    void SetDesktopLyricVisibleSync(bool visible);
+    bool IsDesktopLyricVisibleSync();
+    void SetDesktopLyricStateSync(DesktopLyricState const& state);
+    DesktopLyricState GetDesktopLyricStateSync();
 
     void OnMetadataChange(array_view<string> filter, callback_view<void(AVMetadata const&)> callback);
     void OnMetadataChangeAll(callback_view<void(AVMetadata const&)> callback);
@@ -79,6 +84,9 @@ public:
     void OnQueueTitleChange(callback_view<void(string_view)> callback);
     void OnExtrasChange(callback_view<void(uintptr_t)> callback);
     void OnCustomDataChange(callback_view<void(uintptr_t)> callback);
+    void OnDesktopLyricVisibilityChanged(callback_view<void(bool)> callback);
+    void OnDesktopLyricStateChanged(callback_view<void(DesktopLyricState const&)> callback);
+    void OnDesktopLyricEnabled(callback_view<void(bool)> callback);
 
     void OffMetadataChange(optional_view<callback<void(AVMetadata const&)>> callback);
     void OffPlaybackStateChange(optional_view<callback<void(AVPlaybackState const&)>> callback);
@@ -93,6 +101,9 @@ public:
     void OffQueueTitleChange(optional_view<callback<void(string_view)>> callback);
     void OffExtrasChange(optional_view<callback<void(uintptr_t)>> callback);
     void OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback);
+    void OffDesktopLyricVisibilityChanged(optional_view<callback<void(bool)>> callback);
+    void OffDesktopLyricStateChanged(optional_view<callback<void(DesktopLyricState const&)>> callback);
+    void OffDesktopLyricEnabled(optional_view<callback<void(bool)>> callback);
 
 private:
     static int32_t DoRegisterCallback(std::shared_ptr<AVSessionControllerImpl> &taiheController);
@@ -100,6 +111,7 @@ private:
     static int32_t OnEvent(const std::string &event, AVSessionControllerImpl *taiheController);
     static int32_t OffEvent(const std::string& event, AVSessionControllerImpl *taiheController);
     static int32_t RegisterCallback(const std::string &event, AVSessionControllerImpl *taiheController);
+    static void ErrCodeToMessage(int32_t errCode, const std::string &funcName, std::string &message);
 
     template<typename T>
     static int32_t SetAVCallMetaFilter(AVSessionControllerImpl *taiheController, T filter);

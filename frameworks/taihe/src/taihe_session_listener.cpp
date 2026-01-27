@@ -75,7 +75,7 @@ void TaiheSessionListener::OnSessionCreate(const OHOS::AVSession::AVSessionDescr
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnSessionCreate");
     SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
-    auto execute = [this, descriptor](std::shared_ptr<uintptr_t> method) {
+    auto execute = [descriptor](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         AVSessionDescriptor descriptorTaihe = TaiheUtils::ToTaiheAVSessionDescriptor(descriptor);
@@ -90,7 +90,7 @@ void TaiheSessionListener::OnSessionCreate(const OHOS::AVSession::AVSessionDescr
 void TaiheSessionListener::OnSessionRelease(const OHOS::AVSession::AVSessionDescriptor& descriptor)
 {
     SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
-    auto execute = [this, descriptor](std::shared_ptr<uintptr_t> method) {
+    auto execute = [descriptor](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         AVSessionDescriptor descriptorTaihe = TaiheUtils::ToTaiheAVSessionDescriptor(descriptor);
@@ -106,7 +106,7 @@ void TaiheSessionListener::OnTopSessionChange(const OHOS::AVSession::AVSessionDe
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnSessionCreate");
     SLOGI("sessionId=%{public}s", descriptor.sessionId_.c_str());
-    auto execute = [this, descriptor](std::shared_ptr<uintptr_t> method) {
+    auto execute = [descriptor](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         AVSessionDescriptor descriptorTaihe = TaiheUtils::ToTaiheAVSessionDescriptor(descriptor);
@@ -129,7 +129,7 @@ void TaiheSessionListener::OnDeviceAvailable(const OHOS::AVSession::OutputDevice
     SLOGI("Start handle device found event");
     ohos::multimedia::avsession::avSession::OutputDeviceInfo deviceInfoTaihe =
         TaiheUtils::ToTaiheOutputDeviceInfo(castOutputDeviceInfo);
-    auto execute = [this, deviceInfoTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [deviceInfoTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(
             ohos::multimedia::avsession::avSession::OutputDeviceInfo const&)>> cacheCallback =
                 std::reinterpret_pointer_cast<taihe::callback<void(
@@ -145,7 +145,7 @@ void TaiheSessionListener::OnDeviceLogEvent(const OHOS::AVSession::DeviceLogEven
     OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnDeviceLogEvent");
     SLOGI("Start device log event");
     DeviceLogEventCode eventCodeTaihe = DeviceLogEventCode::from_value(static_cast<int32_t>(eventId));
-    auto execute = [this, eventCodeTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [eventCodeTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(DeviceLogEventCode)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(DeviceLogEventCode)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -160,7 +160,7 @@ void TaiheSessionListener::OnDeviceOffline(const std::string& deviceId)
     SLOGI("Start handle device offline event");
     dataContext_.deviceId = string(deviceId);
     string_view deviceIdTaihe = dataContext_.deviceId;
-    auto execute = [this, deviceIdTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [deviceIdTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -204,13 +204,28 @@ void TaiheSessionListener::OnRemoteDistributedSessionChange(
     dataContext_.sessionControllers =
         TaiheUtils::ToTaiheAVSessionControllerArray(sessionControllersRef);
     array_view<AVSessionController> sessionControllersRefTaihe = dataContext_.sessionControllers;
-    auto execute = [this, sessionControllersRefTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [sessionControllersRefTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(array_view<AVSessionController>)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(array_view<AVSessionController>)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
         (*cacheCallback)(sessionControllersRefTaihe);
     };
     HandleEvent(EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, execute);
+}
+
+void TaiheSessionListener::OnActiveSessionChanged(
+    const std::vector<OHOS::AVSession::AVSessionDescriptor> &descriptors)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnActiveSessionChanged");
+    SLOGI("Start handle active session changed event");
+    array_view<AVSessionDescriptor> descriptorsTaihe = TaiheUtils::ToTaiheAVSessionDescriptorArray(descriptors);
+    auto execute = [descriptorsTaihe](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(array_view<AVSessionDescriptor>)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(array_view<AVSessionDescriptor>)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(descriptorsTaihe);
+    };
+    HandleEvent(EVENT_ACTIVE_SESSION_CHANGED, execute);
 }
 
 int32_t TaiheSessionListener::AddCallback(int32_t event, std::shared_ptr<uintptr_t> ref)

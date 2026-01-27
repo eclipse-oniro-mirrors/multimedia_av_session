@@ -55,6 +55,8 @@ public:
         EVENT_DISPLAY_CHANGE,
         EVENT_CUSTOM_DATA_CHANGE,
         EVENT_SET_TARGET_LOOP_MODE,
+        EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
+        EVENT_DESKTOP_LYRIC_STATE_CHANGED,
         EVENT_TYPE_MAX
     };
 
@@ -85,6 +87,8 @@ public:
     void OnPlayWithAssetId(const std::string &assetId) override;
     void OnCastDisplayChange(const OHOS::AVSession::CastDisplayInfo &castDisplayInfo) override;
     void OnCustomData(const OHOS::AAFwk::WantParams &customData) override;
+    void OnDesktopLyricVisibilityChanged(bool isVisible) override;
+    void OnDesktopLyricStateChanged(const OHOS::AVSession::DesktopLyricState &state) override;
 
     int32_t AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback);
     int32_t RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> callback);

@@ -92,6 +92,8 @@ std::map<int32_t, int32_t> TaiheAVSessionManager::errcode_ = {
     {OHOS::AVSession::ERR_PERMISSION_DENIED, 201},
     {OHOS::AVSession::ERR_NO_PERMISSION, 202},
     {OHOS::AVSession::ERR_INVALID_PARAM, 401},
+    {OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_ENABLE, 6600110},
+    {OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600111},
 };
 
 void TaiheAVSessionManager::ExecuteCallback(std::shared_ptr<uintptr_t> method)
@@ -124,7 +126,7 @@ void TaiheAVSessionManager::HandleServiceStart()
     SLOGI("HandleServiceStart enter");
     if (taiheSession != nullptr) {
         std::shared_ptr<OHOS::AVSession::AVSession> session;
-        int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().CreateSession(taiheSession->GetSessionTag(),
+        int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().CreateSession(taiheSession->GetSessionTagInner(),
             TaiheUtils::ConvertSessionType(taiheSession->GetSessionTypeInner()),
             taiheSession->GetSessionElement(), session);
         SLOGI("HandleServiceStart CreateSession ret=%{public}d", ret);
@@ -316,6 +318,72 @@ int32_t TaiheAVSessionManager::OffDistributedSessionChangeEvent(OHOS::AVSession:
     }
 
     if (it->second.second(callback) != napi_ok) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
+            "remove event callback failed");
+    }
+
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheAVSessionManager::OnActiveSessionChangedEvent(std::shared_ptr<uintptr_t> &callback)
+{
+    SLOGI("Entry");
+    int32_t err = OHOS::ERR_NONE;
+
+    err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
+        OHOS::AVSession::PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    CHECK_AND_RETURN_RET_LOG(err == OHOS::ERR_NONE, TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_NO_PERMISSION],
+        "Check system permission error");
+    err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
+        OHOS::AVSession::PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    CHECK_AND_RETURN_RET_LOG(err == OHOS::ERR_NONE,
+        TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_PERMISSION_DENIED],
+        "Check media resources permission error");
+
+    if (RegisterNativeSessionListener() != OHOS::AVSession::AVSESSION_SUCCESS) {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    bool isAddSuccess = false;
+    {
+        std::lock_guard lockGuard(listenerMutex_);
+        isAddSuccess = listener_ != nullptr &&
+            listener_->AddCallback(TaiheSessionListener::EVENT_ACTIVE_SESSION_CHANGED, callback) ==
+                OHOS::AVSession::AVSESSION_SUCCESS;
+    }
+
+    if (!isAddSuccess) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
+            "add event callback failed");
+    }
+
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheAVSessionManager::OffActiveSessionChangedEvent(std::shared_ptr<uintptr_t> &callback)
+{
+    SLOGI("Entry");
+    int32_t err = OHOS::ERR_NONE;
+
+    err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
+        OHOS::AVSession::PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    CHECK_AND_RETURN_RET_LOG(err == OHOS::ERR_NONE, TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_NO_PERMISSION],
+        "Check system permission error");
+    err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
+        OHOS::AVSession::PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    CHECK_AND_RETURN_RET_LOG(err == OHOS::ERR_NONE,
+        TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_PERMISSION_DENIED],
+        "Check media resources permission error");
+
+    bool isDelSuccess = false;
+    {
+        std::lock_guard lockGuard(listenerMutex_);
+        isDelSuccess = listener_ != nullptr &&
+            listener_->RemoveCallback(TaiheSessionListener::EVENT_ACTIVE_SESSION_CHANGED, callback) ==
+                OHOS::AVSession::AVSESSION_SUCCESS;
+    }
+
+    if (!isDelSuccess) {
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
             "remove event callback failed");
     }
@@ -1101,6 +1169,19 @@ array<AVSessionController> GetDistributedSessionControllerSync(DistributedSessio
     return TaiheUtils::ToTaiheAVSessionControllerArray(controllers);
 }
 
+bool IsDesktopLyricSupportedSync()
+{
+    SLOGI("IsDesktopLyricSupportedSync");
+    bool isSupported = false;
+    int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().IsDesktopLyricSupported(isSupported);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "IsDesktopLyricSupportedSync failed : native server exception";
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return false;
+    }
+    return isSupported;
+}
+
 void SendSystemAVKeyEventSync(keyEvent::KeyEvent const &event)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionManager::SendSystemAVKeyEventSync");
@@ -1352,6 +1433,12 @@ void OnDeviceStateChanged(callback_view<void(DeviceState const&)> callback)
     TaiheAVSessionManager::OnEvent("deviceStateChange", cacheCallback);
 }
 
+void OnActiveSessionChanged(callback_view<void(array_view<AVSessionDescriptor>)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    TaiheAVSessionManager::OnActiveSessionChangedEvent(cacheCallback);
+}
+
 void OffDistributedSessionChange(DistributedSessionType param,
     optional_view<callback<void(array_view<AVSessionController>)>> callback)
 {
@@ -1435,6 +1522,15 @@ void OffDeviceStateChanged(optional_view<callback<void(DeviceState const&)>> cal
     TaiheAVSessionManager::OffEvent("deviceStateChange", cacheCallback);
 }
 
+void OffActiveSessionChanged(optional_view<callback<void(array_view<AVSessionDescriptor>)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    TaiheAVSessionManager::OffActiveSessionChangedEvent(cacheCallback);
+}
+
 AVCastPickerHelperInner CreateAVCastPickerHelperInnerSync(uintptr_t context)
 {
     AVCastPickerHelperInner output = make_holder<AVCastPickerHelperInnerImpl, AVCastPickerHelperInner>();
@@ -1472,6 +1568,7 @@ TH_EXPORT_CPP_API_SetDiscoverableSync(ANI::AVSession::SetDiscoverableSync);
 TH_EXPORT_CPP_API_CastAudioSync(ANI::AVSession::CastAudioSync);
 TH_EXPORT_CPP_API_CastAudioAllSync(ANI::AVSession::CastAudioAllSync);
 TH_EXPORT_CPP_API_GetDistributedSessionControllerSync(ANI::AVSession::GetDistributedSessionControllerSync);
+TH_EXPORT_CPP_API_IsDesktopLyricSupportedSync(ANI::AVSession::IsDesktopLyricSupportedSync);
 TH_EXPORT_CPP_API_SendSystemAVKeyEventSync(ANI::AVSession::SendSystemAVKeyEventSync);
 TH_EXPORT_CPP_API_SendSystemControlCommandSync(ANI::AVSession::SendSystemControlCommandSync);
 TH_EXPORT_CPP_API_StartDeviceLoggingSync(ANI::AVSession::StartDeviceLoggingSync);
@@ -1487,6 +1584,7 @@ TH_EXPORT_CPP_API_OnDeviceAvailable(ANI::AVSession::OnDeviceAvailable);
 TH_EXPORT_CPP_API_OnDeviceLogEvent(ANI::AVSession::OnDeviceLogEvent);
 TH_EXPORT_CPP_API_OnDeviceOffline(ANI::AVSession::OnDeviceOffline);
 TH_EXPORT_CPP_API_OnDeviceStateChanged(ANI::AVSession::OnDeviceStateChanged);
+TH_EXPORT_CPP_API_OnActiveSessionChanged(ANI::AVSession::OnActiveSessionChanged);
 TH_EXPORT_CPP_API_OffDistributedSessionChange(ANI::AVSession::OffDistributedSessionChange);
 TH_EXPORT_CPP_API_OffSessionCreate(ANI::AVSession::OffSessionCreate);
 TH_EXPORT_CPP_API_OffSessionDestroy(ANI::AVSession::OffSessionDestroy);
@@ -1496,3 +1594,4 @@ TH_EXPORT_CPP_API_OffDeviceAvailable(ANI::AVSession::OffDeviceAvailable);
 TH_EXPORT_CPP_API_OffDeviceLogEvent(ANI::AVSession::OffDeviceLogEvent);
 TH_EXPORT_CPP_API_OffDeviceOffline(ANI::AVSession::OffDeviceOffline);
 TH_EXPORT_CPP_API_OffDeviceStateChanged(ANI::AVSession::OffDeviceStateChanged);
+TH_EXPORT_CPP_API_OffActiveSessionChanged(ANI::AVSession::OffActiveSessionChanged);

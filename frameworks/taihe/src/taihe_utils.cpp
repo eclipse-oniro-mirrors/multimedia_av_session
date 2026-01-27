@@ -198,6 +198,8 @@ int32_t TaiheUtils::ConvertSessionType(const std::string& typeString)
         return OHOS::AVSession::AVSession::SESSION_TYPE_VOICE_CALL;
     } else if (typeString == "video_call") {
         return OHOS::AVSession::AVSession::SESSION_TYPE_VIDEO_CALL;
+    } else if (typeString == "photo") {
+        return OHOS::AVSession::AVSession::SESSION_TYPE_PHOTO;
     } else {
         return OHOS::AVSession::AVSession::SESSION_TYPE_INVALID;
     }
@@ -213,6 +215,8 @@ std::string TaiheUtils::ConvertSessionType(int32_t type)
         return "voice_call";
     } else if (type == OHOS::AVSession::AVSession::SESSION_TYPE_VIDEO_CALL) {
         return "video_call";
+    } else if (type == OHOS::AVSession::AVSession::SESSION_TYPE_PHOTO) {
+        return "photo";
     } else {
         return "";
     }
@@ -906,6 +910,22 @@ int32_t TaiheUtils::GetAVCallMetaData(const CallMetadata &in, OHOS::AVSession::A
     return TaiheAVCallMetaData::GetCallMetadata(in, out);
 }
 
+int32_t TaiheUtils::GetAVSessionDesktopLyricState(const ohos::multimedia::avsession::avSession::DesktopLyricState &in,
+    OHOS::AVSession::DesktopLyricState &out)
+{
+    out.isLocked_ = in.isLocked;
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheUtils::GetMenuPosition(const MenuPosition &in, TaiheMenuPosition &out)
+{
+    out.x = in.x;
+    out.y = in.y;
+    out.width = in.width;
+    out.height = in.height;
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
 ani_object TaiheUtils::ToAniElementName(const OHOS::AppExecFwk::ElementName &in)
 {
     ani_env *env = taihe::get_env();
@@ -1370,6 +1390,14 @@ AudioCapabilities TaiheUtils::ToTaiheAudioCapabilities(const OHOS::AVSession::Au
         streamInfos.emplace_back(reinterpret_cast<uintptr_t>(aniObj));
     }
     out.streamInfos = taihe::array<uintptr_t>(streamInfos);
+    return out;
+}
+
+ohos::multimedia::avsession::avSession::DesktopLyricState TaiheUtils::ToTaiheDesktopLyricState(
+    const OHOS::AVSession::DesktopLyricState &in)
+{
+    ohos::multimedia::avsession::avSession::DesktopLyricState out {};
+    out.isLocked = in.isLocked_;
     return out;
 }
 
