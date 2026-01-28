@@ -258,7 +258,8 @@ export struct AVCastPicker {
         .fontSize('24vp')
         .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
           [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
-        .renderingStrategy(2)
+        .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
+          SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
     } else {
       Image(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
         .width(24)
@@ -279,7 +280,7 @@ export struct AVCastPicker {
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
         $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
       .textOverflow({ overflow: TextOverflow.Ellipsis })
-      .maxLines(item.fromCall ? 1 : 2)
+      .maxLines(2)
       .wordBreak(WordBreak.BREAK_WORD)
       .maxFontScale(this.maxFontSizeScale)
       .direction(this.isRTL ? Direction.Rtl : Direction.Ltr)

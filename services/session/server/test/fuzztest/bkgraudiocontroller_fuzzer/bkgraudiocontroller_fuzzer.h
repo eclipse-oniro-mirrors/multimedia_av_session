@@ -26,8 +26,8 @@
 #include "avsession_manager.h"
 
 namespace OHOS::AVSession {
-    void BackGroundAudioControllerTest01(uint8_t* data, size_t size);
-    void BackGroundAudioControllerTest02(uint8_t* data, size_t size);
+    void BackgroundAudioControllerTest01(uint8_t* data, size_t size);
+    void BackgroundAudioControllerTest02(uint8_t* data, size_t size);
 }
 #endif
 

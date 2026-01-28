@@ -16,8 +16,11 @@
 #include "audio_device_manager.h"
 #include "avsession_service.h"
 #include "migrate_avsession_manager.h"
-#include "cast_engine_common.h"
 #include "parameters.h"
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "cast_engine_common.h"
+#endif
 
 namespace OHOS::AVSession {
 bool g_isDevicePcmCastEnable = system::GetBoolParameter("const.pcmCastDevice.enable", false);

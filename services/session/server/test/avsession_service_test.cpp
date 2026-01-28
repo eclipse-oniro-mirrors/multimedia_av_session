@@ -2329,7 +2329,7 @@ static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors002, TestSize.Level0)
  * @tc.desc: Process top session playing.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
-*/
+ */
 static HWTEST_F(AVSessionServiceTest, ProcTopSessionPlaying001, TestSize.Level1)
 {
     SLOGI("ProcTopSessionPlaying001 begin!");
@@ -2354,7 +2354,7 @@ static HWTEST_F(AVSessionServiceTest, ProcTopSessionPlaying001, TestSize.Level1)
  * @tc.desc: check if other audio playing.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
-*/
+ */
 static HWTEST_F(AVSessionServiceTest, CheckIfOtherAudioPlaying001, TestSize.Level1)
 {
     SLOGI("CheckIfOtherAudioPlaying001 begin!");
@@ -2380,7 +2380,7 @@ static HWTEST_F(AVSessionServiceTest, CheckIfOtherAudioPlaying001, TestSize.Leve
     avsessionHere_->SetUid(oriUid);
     avsessionHere_->SetPid(oriPid);
     avsessionHere_->Destroy();
-    SLOGI("ProcTopSessionPlay001 end!");
+    SLOGI("CheckIfOtherAudioPlaying001 end!");
 }
 
 /**

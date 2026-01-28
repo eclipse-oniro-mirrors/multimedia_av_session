@@ -196,7 +196,7 @@ void SessionStack::PostReclaimMemoryTask()
         return;
     }
     if (!isActivatedMemReclaimTask_.load() && CheckSessionStateIdle()) {
-        SLOGI("start reclaim memory tasks");
+        SLOGI("start reclaim memory task");
         AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
             ReclaimMem();
             isActivatedMemReclaimTask_.store(false);

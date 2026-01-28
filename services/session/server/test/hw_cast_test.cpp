@@ -1291,7 +1291,7 @@ static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HwCastProviderOnSessionCreated001
+ * @tc.name: HwCastProviderNotifyCastSessionCreated001
  * @tc.desc:
  * @tc.type: FUNC
  * @tc.require:
@@ -1303,7 +1303,7 @@ static HWTEST(HwCastTest, HwCastProviderNotifyCastSessionCreated001, TestSize.Le
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
     hwCastProvider->NotifyCastSessionCreated("123456");
-    SLOGI("HwCastProviderOnSessionCreated001 end!");
+    SLOGI("HwCastProviderNotifyCastSessionCreated001 end!");
 }
 
 /**

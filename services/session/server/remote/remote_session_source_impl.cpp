@@ -59,7 +59,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
         ret = sessionSyncer->RegisterDisconnectNotifier([this] (const std::string& deviceId) {
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
                                      "syncer is not exist");
-            SLOGE("device %{public}s is disconnected", deviceId.c_str());
+            SLOGE("device is disconnected");
             if (session_ != nullptr) {
                 HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
                     "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
@@ -75,7 +75,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
         ret = sessionSyncer->RegisterDataNotifier([this] (const SessionDataCategory category,
                                                           const std::string& deviceId) {
             AVSESSION_TRACE_SYNC_START("RemoteSessionSourceImpl::DataNotifier");
-            SLOGI("device %{public}s category %{public}d changed", deviceId.c_str(), category);
+            SLOGI("device category %{public}d changed", category);
             CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
                 "syncer is not exist");

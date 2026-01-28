@@ -522,7 +522,7 @@ int32_t HwCastStreamPlayer::GetMediaCapabilities()
             SLOGE("speed get null or invalid");
             cJSON_Delete(valueItem);
             return AVSESSION_ERROR;
-    }
+        }
         cJSON* speedItem = nullptr;
         cJSON_ArrayForEach(speedItem, speedArray) {
             CHECK_AND_CONTINUE(speedItem != nullptr && !cJSON_IsInvalid(speedItem) &&
@@ -702,10 +702,10 @@ void HwCastStreamPlayer::CheckIfCancelCastCapsule()
         [weakSelf]() {
             auto shardPtr = weakSelf.lock();
             CHECK_AND_RETURN_LOG(shardPtr != nullptr, "CheckIfCancelCastCapsule player is null");
-            if (shardPtr->sessionCallbackForCastNtf_ && !shardPtr->isPlayingState_) {
-                SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", shardPtr->isPlayingState_);
-                shardPtr->sessionCallbackForCastNtf_(false, false);
-            }
+            CHECK_AND_RETURN_LOG(shardPtr->sessionCallbackForCastNtf_ && !shardPtr->isPlayingState_,
+                "CheckIfCancelCastCapsule return");
+            SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", shardPtr->isPlayingState_);
+            shardPtr->sessionCallbackForCastNtf_(false, false);
         }, "CancelCastCapsule", cancelTimeout);
 }
 

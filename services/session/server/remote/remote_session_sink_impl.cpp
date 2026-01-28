@@ -55,7 +55,7 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
     RemoteSessionCapabilitySet::GetInstance().AddRemoteCapability(session->GetSessionId(), sourceDevice, sourceCap);
 
     ret = syncer_->RegisterDisconnectNotifier([this](const std::string& deviceId) {
-        SLOGE("device %{public}s disconnected, sessionId is %{public}s", deviceId.c_str(),
+        SLOGE("device disconnected, sessionId is %{public}s",
               session_->GetSessionId().c_str());
         HISYSEVENT_FAULT("REMOTE_CONTROL_FAILED",
             "BUNDLE_NAME", session_->GetDescriptor().elementName_.GetBundleName(),
@@ -69,7 +69,7 @@ int32_t RemoteSessionSinkImpl::CastSessionFromRemote(const sptr <AVSessionItem>&
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "AddDisconnectNotifier failed");
 
     ret = syncer_->RegisterDataNotifier([this](const SessionDataCategory category, const std::string& deviceId) {
-        SLOGI("device %{public}s category %{public}d changed", deviceId.c_str(), category);
+        SLOGI("device category %{public}d changed", category);
         CHECK_AND_RETURN_RET_LOG(session_ != nullptr && syncer_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
 
         return HandleSessionDataCategory(category);
