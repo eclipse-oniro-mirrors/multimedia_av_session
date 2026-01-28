@@ -421,13 +421,7 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     std::string bundleNameBef = elementName_.GetBundleName();
     std::string bundleName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_BUNDLE_NAME);
     bundleName = bundleName.empty() ? DEFAULT_STRING : bundleName;
-    size_t insertPos = bundleName.find('|');
-    if (insertPos != std::string::npos && insertPos > 0 && insertPos < bundleName.size()) {
-        elementName_.SetBundleName(bundleName.substr(0, insertPos));
-    } else {
-        SLOGE("get bundleName invalid:%{public}s|%{public}s.", bundleName.c_str(),
-            elementName_.GetBundleName().c_str());
-    }
+    elementName_.SetBundleName(bundleName);
     std::string abilityName = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_ABILITY_NAME);
     abilityName = abilityName.empty() ? DEFAULT_STRING : abilityName;
     elementName_.SetAbilityName(abilityName);
@@ -442,7 +436,6 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     }
     SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s done.",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
-    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "ProcessSessionInfo find service ptr null!");
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
     if (bundleNameBef != elementName_.GetBundleName()) {
         AVPlaybackState playbackState;
@@ -528,7 +521,7 @@ void MigrateAVSessionProxy::ProcessPlaybackState(cJSON* jsonValue)
         playbackState.SetState(state);
     }
     if (cJSON_HasObjectItem(jsonValue, FAVOR_STATE)) {
-        bool isFavor = SoftbusSessionUtils::GetBoolFromJson(jsonValue, FAVOR_STATE);
+        int isFavor = SoftbusSessionUtils::GetBoolFromJson(jsonValue, FAVOR_STATE);
         playbackState.SetFavorite(isFavor);
     }
 

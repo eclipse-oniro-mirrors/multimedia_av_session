@@ -799,7 +799,7 @@ enum DeviceType {
 };
 
 /**
- * The defination of suggested resolution.
+ * The Definition of suggested resolution.
  * @enum { number }
  * @syscap SystemCapability.Multimedia.AVSession.AVCast
  * @atomicservice
@@ -815,7 +815,7 @@ enum ResolutionLevel {
     RESOLUTION_480P = 0,
 
     /**
-     * Defination of 720P which typically resolution is 1280*720.
+     * Definition of 720P which typically resolution is 1280*720.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice
      * @since 18

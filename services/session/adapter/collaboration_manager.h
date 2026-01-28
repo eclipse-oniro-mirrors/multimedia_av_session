@@ -22,7 +22,6 @@
 #include "avsession_errors.h"
 #include "avsession_descriptor.h"
 #include "avsession_info.h"
-#include "avsession_log.h"
 #include "collaboration_manager_utils.h"
 #include "plugin_lib.h"
 

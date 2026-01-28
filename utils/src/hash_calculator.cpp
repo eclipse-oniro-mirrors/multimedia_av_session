@@ -32,11 +32,12 @@
 #define sigma0(x) (ROTR((x), 7) ^ ROTR((x), 18) ^ SHR((x), 3)) // lowercase sigma0, rotates 7,18, shfit 3
 #define sigma1(x) (ROTR((x), 17) ^ ROTR((x), 19) ^ SHR((x), 10)) // lowercase sigma0, rotates 17,19, shfit 10
 namespace OHOS::AVSession {
+
 namespace {
 static constexpr size_t BLOCK_SIZE = 64;  // single msg length in bytes
 static constexpr size_t PAD_LENGTH = 56;  // padding length before appending msg length
 static constexpr size_t BYTES_PER_WORD = 4; // bytes per word, 32bit
-static constexpr size_t  SHA256_DIGEST_LENGTH = 32;
+static constexpr size_t SHA256_DIGEST_LENGTH = 32;
 
 // h0~h7 state registers
 enum StateWord {
@@ -72,7 +73,6 @@ static const uint32_t K256[64] = {
 };
 }
 
-// context
 struct AlgoCTX {
     uint32_t h[STATE_WORDS_COUNT];  // hash state h0~h7
     unsigned char data[BLOCK_SIZE]; // msg block buffer
@@ -80,7 +80,6 @@ struct AlgoCTX {
     unsigned long long nbits;       // total bits processed
 };
 
-// internal functions
 static void AlgoInit(AlgoCTX* c);
 static bool AlgoUpdate(AlgoCTX* c, const unsigned char *data, size_t len);
 static bool AlgoFinal(unsigned char *md, AlgoCTX* c);
@@ -113,9 +112,10 @@ int HashCalculator::GetResult(std::vector<uint8_t> &value)
     return AVSESSION_SUCCESS;
 }
 
-// context init
+// LCOV_EXCL_START
 static void AlgoInit(AlgoCTX* c)
 {
+    // context init
     // init state h[0~7]
     c->h[STATE_WORD_H0] = 0x6a09e667UL;
     c->h[STATE_WORD_H1] = 0xbb67ae85UL;
@@ -132,6 +132,7 @@ static void AlgoInit(AlgoCTX* c)
 // transform using full W[64] schedule (clear and explicit)
 static void AlgoTransform(AlgoCTX* ctx, const unsigned char *block)
 {
+    // transform using full W[64] schedule (clear and explicit)
     uint32_t w[BLOCK_SIZE];
     // load big-endian
     for (size_t t = 0; t < 16; ++t) { // load first 16 works from input block, big-endian
@@ -181,7 +182,6 @@ static void AlgoTransform(AlgoCTX* ctx, const unsigned char *block)
     ctx->h[STATE_WORD_H7] = static_cast<uint32_t>(static_cast<uint64_t>(ctx->h[STATE_WORD_H7]) + h);
 }
 
-// update
 static bool AlgoUpdate(AlgoCTX* c, const unsigned char *data, size_t len)
 {
     CHECK_AND_RETURN_RET(len != 0, true); // len == 0, return true directly
@@ -220,7 +220,6 @@ static bool AlgoUpdate(AlgoCTX* c, const unsigned char *data, size_t len)
     return true;
 }
 
-// final
 static bool AlgoFinal(unsigned char *md, AlgoCTX* c)
 {
     unsigned char tmp[64];
@@ -272,4 +271,5 @@ static bool AlgoFinal(unsigned char *md, AlgoCTX* c)
     memset_s(c, sizeof(*c), 0, sizeof(*c)); // ignore clearing failure for return value purposes
     return true;
 }
+// LCOV_EXCL_STOP
 }

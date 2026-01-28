@@ -1694,7 +1694,7 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get  wantAgent failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         CHECK_ARGS_RETURN_VOID(context, wantAgentPtr_ != nullptr, "get wantAgent nullptr",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
         context->wantAgent_ = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgentPtr_);
     };
     context->GetCbInfo(env, info, inputParser);

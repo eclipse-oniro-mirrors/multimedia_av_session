@@ -308,8 +308,8 @@ public:
     /**
      * @brief get mirror deviceid.
      *
-     * @return { int64_t } mirror deviceid.
-     * @since 22
+     * @return { std::string } mirror deviceid.
+     * @since 23
     */
     virtual std::string GetMirrorDeviceId() = 0;
 

@@ -355,7 +355,6 @@ void AVSessionItem::UpdateRecommendInfo(bool needRecommend)
                 metaData_.GetAssetId(), -1);
         }
     }
-
 }
 
 void AVSessionItem::HandleFrontSession()
@@ -412,7 +411,6 @@ bool AVSessionItem::HasAvQueueInfo()
         SLOGD("current avqueueinfo is not playing");
         return false;
     }
-
     return true;
 }
 
@@ -726,7 +724,7 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
                 }
             }, "CancelAncoMediaCapsule", cancelTimeoutMs);
     } else {
-        SLOGD("CheckIfSendCapsule not valid state, dont porc capsule");
+        SLOGD("CheckIfSendCapsule not valid state, dont proc capsule");
     }
 }
 
@@ -1744,7 +1742,7 @@ int32_t AVSessionItem::DeleteSupportCastCommand(int32_t cmd)
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionItem::HandleCastValidCommandChange(const std::vector<int32_t> &cmds)
+void AVSessionItem::HandleCastValidCommandChange(const std::vector<int32_t>& cmds)
 {
     std::lock_guard lockGuard(castControllersLock_);
     SLOGI("send command change event to controller, controller size: %{public}d",
@@ -2232,9 +2230,9 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
         CHECK_AND_RETURN_RET_LOG(display != nullptr, AVSESSION_ERROR, "display is nullptr");
         auto displayInfo = display->GetDisplayInfo();
         if (displayInfo->GetName() == "HwCast_AppModeDisplay") {
-            std::lock_guard displayListenerLockGuard(displayListenerLock_);
             displays.clear();
             SLOGI("GetAllCastDisplays AppCast");
+            std::lock_guard displayListenerLockGuard(displayListenerLock_);
             if (displayListener_ != nullptr) {
                 displayListener_->SetAppCastDisplayId(displayInfo->GetDisplayId());
             }
@@ -3290,8 +3288,8 @@ void AVSessionItem::ReportPlaybackState(const AVPlaybackState& state)
 {
     if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY ||
         state.GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
-            AVSessionSysEvent::GetInstance().UpdatePlaybackState(GetBundleName(),
-                static_cast<uint8_t>(state.GetState()));
+        AVSessionSysEvent::GetInstance().UpdatePlaybackState(GetBundleName(),
+            static_cast<uint8_t>(state.GetState()));
     }
 }
 
