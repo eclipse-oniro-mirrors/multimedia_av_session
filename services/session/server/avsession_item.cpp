@@ -1836,12 +1836,14 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     SetCastHandle(castHandle);
-    SLOGI("start cast check handle set to %{public}lld", (long long)castHandle_);
-    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo, GetSpid());
+    int32_t ret = AddDevice(castHandle, outputDeviceInfo, GetSpid());
     if (ret == AVSESSION_SUCCESS) {
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+        DoContinuousTaskRegister();
+        SLOGI("start cast check handle set to %{public}lld", (long long)castHandle_);
+    } else {
+        DestroyCast(false);
     }
-    DoContinuousTaskRegister();
     return ret;
 }
 
@@ -1849,9 +1851,9 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
 {
     SLOGI("Add device process");
     std::lock_guard lockGuard(castLock_);
-    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_,
+    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_,
         GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
-    int32_t castId = static_cast<int32_t>(castHandle_);
+    int32_t castId = static_cast<int32_t>(castHandle);
     int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo, spid);
     SLOGI("Add device process with ret %{public}d", ret);
     return ret;
@@ -1947,9 +1949,8 @@ void AVSessionItem::DealLocalState(const int32_t castState, const OutputDeviceIn
             multiDeviceState_ = MultiDeviceState::DEFAULT;
             CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
             std::this_thread::sleep_for(std::chrono::milliseconds(SWITCH_WAIT_TIME));
-            if (CastAddToCollaboration(newOutputDeviceInfo_) == AVSESSION_SUCCESS) {
-                SubStartCast(newOutputDeviceInfo_);
-            } else {
+            if (CastAddToCollaboration(newOutputDeviceInfo_) != AVSESSION_SUCCESS ||
+                SubStartCast(newOutputDeviceInfo_) != AVSESSION_SUCCESS) {
                 OnCastStateChange(disconnectStateFromCast_, newOutputDeviceInfo_.deviceInfos_[0], false);
                 AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
             }
