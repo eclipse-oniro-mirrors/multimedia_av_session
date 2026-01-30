@@ -44,7 +44,9 @@ std::map<std::string, NapiMetaData::GetterType> NapiMetaData::getterMap_ = {
     { "filter", GetFilter },
     { "displayTags", GetDisplayTags },
     { "drmSchemes", GetDrmSchemes },
-    { "singleLyricText", GetSingleLyricText }
+    { "singleLyricText", GetSingleLyricText },
+    { "fastForwardSkipIntervals", GetFastForwardSkipIntervals },
+    { "rewindSkipIntervals", GetRewindSkipIntervals }
 };
 
 std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
@@ -73,7 +75,9 @@ std::map<int32_t, NapiMetaData::SetterType> NapiMetaData::setterMap_ = {
     { AVMetaData::META_KEY_DISPLAY_TAGS, SetDisplayTags },
     { AVMetaData::META_KEY_DRM_SCHEMES, SetDrmSchemes },
     { AVMetaData::META_KEY_BUNDLE_ICON, SetBundleIcon },
-    { AVMetaData::META_KEY_SINGLE_LYRIC_TEXT, SetSingleLyricText }
+    { AVMetaData::META_KEY_SINGLE_LYRIC_TEXT, SetSingleLyricText },
+    { AVMetaData::META_KEY_FAST_FORWARD_SKIP_INTERVALS, SetFastForwardSkipIntervals },
+    { AVMetaData::META_KEY_REWIND_SKIP_INTERVALS, SetRewindSkipIntervals }
 };
 
 std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
@@ -102,7 +106,9 @@ std::pair<std::string, int32_t> NapiMetaData::filterMap_[] = {
     { "displayTags", AVMetaData::META_KEY_DISPLAY_TAGS },
     { "drmSchemes", AVMetaData::META_KEY_DRM_SCHEMES },
     { "bundleIcon", AVMetaData::META_KEY_BUNDLE_ICON },
-    { "singleLyricText", AVMetaData::META_KEY_SINGLE_LYRIC_TEXT }
+    { "singleLyricText", AVMetaData::META_KEY_SINGLE_LYRIC_TEXT },
+    { "fastForwardSkipIntervals", AVMetaData::META_KEY_FAST_FORWARD_SKIP_INTERVALS },
+    { "rewindSkipIntervals", AVMetaData::META_KEY_REWIND_SKIP_INTERVALS },
 };
 
 napi_status NapiMetaData::ConvertFilter(napi_env env, napi_value filter, AVMetaData::MetaMaskType& mask)
@@ -688,6 +694,48 @@ napi_status NapiMetaData::SetSkipIntervals(napi_env env, const AVMetaData& in, n
     auto status = NapiUtils::SetValue(env, in.GetSkipIntervals(), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "skipIntervals", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetFastForwardSkipIntervals(napi_env env, napi_value in, AVMetaData& out)
+{
+    int32_t property {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "fastForwardSkipIntervals", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    SLOGD("GetFastForwardSkipIntervals %{public}d", static_cast<int32_t>(property));
+    out.SetFastForwardSkipIntervals(property);
+    return status;
+}
+
+napi_status NapiMetaData::SetFastForwardSkipIntervals(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    napi_value property {};
+    SLOGD("SetFastForwardSkipIntervals %{public}d", static_cast<int32_t>(in.GetFastForwardSkipIntervals()));
+    auto status = NapiUtils::SetValue(env, in.GetFastForwardSkipIntervals(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "fastForwardSkipIntervals", property);
+    CHECK_RETURN(status == napi_ok, "set property failed", status);
+    return status;
+}
+
+napi_status NapiMetaData::GetRewindSkipIntervals(napi_env env, napi_value in, AVMetaData& out)
+{
+    int32_t property {};
+    auto status = NapiUtils::GetNamedProperty(env, in, "rewindSkipIntervals", property);
+    CHECK_RETURN(status == napi_ok, "get property failed", status);
+    SLOGD("GetRewindSkipIntervals %{public}d", static_cast<int32_t>(property));
+    out.SetRewindSkipIntervals(property);
+    return status;
+}
+
+napi_status NapiMetaData::SetRewindSkipIntervals(napi_env env, const AVMetaData& in, napi_value& out)
+{
+    napi_value property {};
+    SLOGD("SetRewindSkipIntervals %{public}d", static_cast<int32_t>(in.GetRewindSkipIntervals()));
+    auto status = NapiUtils::SetValue(env, in.GetRewindSkipIntervals(), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
+    status = napi_set_named_property(env, out, "rewindSkipIntervals", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;
 }
