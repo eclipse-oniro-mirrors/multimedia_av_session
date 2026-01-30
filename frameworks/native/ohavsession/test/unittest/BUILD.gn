@@ -31,6 +31,7 @@ common_external_deps = [
   "audio_framework:audio_client",
   "c_utils:utils",
   "curl:curl_shared",
+  "googletest:gmock",
   "googletest:gtest",
   "hilog:libhilog",
   "image_framework:image",
@@ -167,6 +168,70 @@ ohos_unittest("OHAVSessionTest") {
   module_out_path = module_output_path
 }
 
+ohos_unittest("OHAVCastControllerTest") {
+  install_enable = true
+  visibility = [ ":*" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "../../../../../interfaces/inner_api/native/session/include",
+    "../../../../../interfaces/kits/c",
+    "../../include",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-fno-access-control",
+  ]
+
+  sources = [ "./oh_av_castcontroller_test.cpp" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  module_out_path = module_output_path
+}
+
+ohos_unittest("OHAVCastControllerCallbackImplTest") {
+  install_enable = true
+  visibility = [ ":*" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "../../../../../interfaces/inner_api/native/session/include",
+    "../../../../../interfaces/kits/c",
+    "../../include",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-fno-access-control",
+  ]
+
+  sources = [ "./oh_av_castcontroller_callback_impl_test.cpp" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  module_out_path = module_output_path
+}
+
 ohos_unittest("OHDeviceInfoTest") {
   install_enable = true
   visibility = [ ":*" ]
@@ -239,5 +304,7 @@ group("oh_av_session_unittest") {
     ":OHAVMediaDescriptionBuilderTest",
     ":OHDeviceInfoTest",
     ":OHAVUtilsTest",
+    ":OHAVCastControllerTest",
+    ":OHAVCastControllerCallbackImplTest"
   ]
 }

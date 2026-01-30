@@ -186,7 +186,7 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetAlbumCoverUri(
  * @brief Set the mediaType of the resource
  *
  * @param builder The AVMediaDescription builder instance pointer
- * @param mediaType The type of this resource, such as VEDIO or AUDIO, which is capital.
+ * @param mediaType The type of this resource, such as VIDEO or AUDIO, which is capital.
  * @return Return code:
  *         {@link AVQUEUEITEM_SUCCESS} If the execution is successful.
  *         {@link AVQUEUEITEM_ERROR_INVALID_PARAM}:

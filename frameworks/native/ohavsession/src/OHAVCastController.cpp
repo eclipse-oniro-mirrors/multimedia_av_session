@@ -340,7 +340,7 @@ AVSession_ErrCode OHAVCastController::SendCommonCommand(AVSession_AVCastControlC
     AVCastControlCommand controlCommand;
     int32_t ret = controlCommand.SetCommand(*avCastControlCommand);
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
-        return GetEncodeErrcode(ret);
+        return AV_SESSION_ERR_CODE_COMMAND_INVALID;
     }
     ret = avCastController_->SendControlCommand(controlCommand);
     return GetEncodeErrcode(ret);
