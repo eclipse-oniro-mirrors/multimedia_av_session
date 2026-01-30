@@ -46,10 +46,6 @@ public:
     AVMetadata_Result SetFilter(uint32_t filter);
 
 private:
-    static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);
-    static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri);
-    static int32_t DoDownload(AVMetaData& meta, const std::string uri);
-    static size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer);
     std::string title_ = "";
     std::string artist_ = "";
     std::string author_ = "";
@@ -65,8 +61,6 @@ private:
     AVMetadata_SkipIntervals intervals_ = SECONDS_15;
     int32_t tags_ = 0;
     uint32_t filter_ = 2;
-    static constexpr size_t TIME_OUT_SECOND = 5;
-    static constexpr int HTTP_ERROR_CODE = 400;
 };
 }
 
