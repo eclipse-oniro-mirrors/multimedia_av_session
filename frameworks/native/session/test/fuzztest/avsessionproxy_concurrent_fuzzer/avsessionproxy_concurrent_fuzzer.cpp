@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "avsessionproxyconcurrent_fuzzer.h"
+#include "avsessionproxy_concurrent_fuzzer.h"
 
 #include <cstdint>
 #include <iostream>
