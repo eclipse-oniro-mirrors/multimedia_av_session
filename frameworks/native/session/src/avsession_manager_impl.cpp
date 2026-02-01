@@ -137,6 +137,7 @@ void AVSessionManagerImpl::OnServiceDie()
     AVSessionUtils::DeleteCacheFiles(cachePath);
 }
 
+#ifndef CLIENT_LITE
 int32_t AVSessionManagerImpl::GetSession(const AppExecFwk::ElementName& elementName,
     std::string& tag, std::shared_ptr<AVSession>& session)
 {
@@ -187,6 +188,7 @@ int32_t AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type
     auto service = GetService();
     return service ? service->CreateSession(tag, type, elementName, session) : ERR_SERVICE_NOT_EXIST;
 }
+#endif
 
 int32_t AVSessionManagerImpl::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {

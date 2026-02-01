@@ -18,7 +18,12 @@
 
 #include "audio_system_manager.h"
 #include "iremote_broker.h"
+
+#ifndef CLIENT_LITE
 #include "iav_session.h"
+#endif
+
+#include "want.h"
 #include "iavsession_service_ipc_interface_code.h"
 #include "iclient_death.h"
 #include "isession_listener.h"
@@ -38,11 +43,13 @@ public:
         COMMAND_MAX = 2
     };
 
+#ifndef CLIENT_LITE
     virtual sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
                                                    const AppExecFwk::ElementName& elementName) = 0;
     
     virtual int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                        sptr<IRemoteObject>& session) = 0;
+#endif
 
     virtual int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) = 0;
 
@@ -100,8 +107,10 @@ public:
     virtual int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
         std::vector<sptr<IRemoteObject>>& sessionControllers) = 0;
 
+#ifndef CLIENT_LITE
     virtual int32_t GetSessionInner(const AppExecFwk::ElementName& elementName,
         std::string& tag, sptr<IRemoteObject>& session) = 0;
+#endif
 
     virtual int32_t IsDesktopLyricSupported(bool &isSupported) = 0;
 };

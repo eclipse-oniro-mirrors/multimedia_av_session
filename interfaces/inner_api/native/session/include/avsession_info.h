@@ -28,7 +28,9 @@
 #include "avsession_descriptor.h"
 #include "av_shared_memory_base.h"
 #include "key_event.h"
+
 #include "want_params.h"
+
 #include "av_shared_memory.h"
 #include "avcontrol_command.h"
 
@@ -132,6 +134,7 @@ public:
     virtual ~SessionListener() = default;
 };
 
+#ifndef CLIENT_LITE
 class IAVCastControllerProxyListener {
 public:
     virtual void OnCastPlaybackStateChange(const AVPlaybackState& state) = 0;
@@ -353,6 +356,7 @@ public:
 
     virtual void OnDesktopLyricStateChanged(const DesktopLyricState &state) {};
 };
+#endif
 
 class AVControllerCallback {
 public:
@@ -473,6 +477,7 @@ public:
     virtual ~AVControllerCallback() = default;
 };
 
+#ifndef CLIENT_LITE
 class AVCastControllerCallback {
 public:
     virtual void OnCastPlaybackStateChange(const AVPlaybackState& state) = 0;
@@ -535,6 +540,7 @@ public:
     */
     virtual ~IAVCastSessionStateListener() = default;
 };
+#endif
 
 class IAVRouterListener {
 public:

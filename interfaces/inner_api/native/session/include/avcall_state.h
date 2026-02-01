@@ -18,7 +18,10 @@
 
 #include <bitset>
 #include <parcel.h>
+
+#ifndef CLIENT_LITE
 #include "want_agent.h"
+#endif
 
 namespace OHOS::AVSession {
 class AVCallState : public Parcelable {

@@ -21,7 +21,12 @@
 #include <memory>
 
 #include "audio_system_manager.h"
+
+#ifndef CLIENT_LITE
 #include "av_session.h"
+#endif
+
+#include "want.h"
 #include "avsession_controller.h"
 #include "avsession_info.h"
 #include "key_event.h"
@@ -42,6 +47,7 @@ public:
     */
     static AVSessionManager& GetInstance();
 
+#ifndef CLIENT_LITE
     /**
      * Create Session Object.
      *
@@ -66,6 +72,8 @@ public:
     */
     virtual int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                   std::shared_ptr<AVSession>& session) = 0;
+#endif
+
     /**
      * Send the key command to get the descriptor of all sessions.
      *
@@ -338,6 +346,7 @@ public:
     virtual int32_t GetDistributedSessionControllers(const DistributedSessionType& sessionType,
         std::vector<std::shared_ptr<AVSessionController>>& sessionControllers) = 0;
 
+#ifndef CLIENT_LITE
     /**
      * Get session already alive.
      *
@@ -349,6 +358,7 @@ public:
     */
     virtual int32_t GetSession(const AppExecFwk::ElementName& elementName,
         std::string& tag, std::shared_ptr<AVSession>& session) = 0;
+#endif
 
     /**
      * Check whether the desktop lyric feature is supported.
