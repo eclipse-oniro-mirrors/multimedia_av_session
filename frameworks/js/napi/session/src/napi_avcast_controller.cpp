@@ -132,6 +132,8 @@ napi_value NapiAVCastController::ConstructorCallback(napi_env env, napi_callback
     if (napi_wrap(env, self, static_cast<void*>(napiCastController), finalize,
         &(napiCastController->wrapperRef_),  nullptr) != napi_ok) {
         SLOGE("wrap failed");
+        delete napiCastController;
+        napiCastController = nullptr;
         return nullptr;
     }
     return self;

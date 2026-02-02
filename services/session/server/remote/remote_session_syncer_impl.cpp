@@ -396,6 +396,7 @@ int32_t RemoteSessionSyncerImpl::GetAVQueueTitle(std::string& title)
 
     std::string titleDate = parcelData.ReadString();
     title = std::string(titleDate);
+    allocator.Dealloc(allocateData);
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
