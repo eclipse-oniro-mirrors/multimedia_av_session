@@ -22,7 +22,9 @@
 #include <vector>
 #include <regex>
 
+#ifndef CLIENT_LITE
 #include "common_event_manager.h"
+#endif
 
 #include "avsession_log.h"
 #include "directory_ex.h"
@@ -185,6 +187,7 @@ public:
         return deviceId.substr(0, half) + "**" + deviceId.substr(deviceId.length() - half);
     }
 
+#ifndef CLIENT_LITE
     static int32_t PublishCommonEvent(const std::string& action)
     {
         OHOS::AAFwk::Want want;
@@ -225,6 +228,7 @@ public:
         int32_t ret = EventFwk::CommonEventManager::NewPublishCommonEvent(data, publishInfo);
         SLOGD("publish ret:%{public}d cmd:%{public}s uid:%{public}d pid:%{public}d", ret, cmd.c_str(), uid, pid);
     }
+#endif
 
     static std::string GetAnonyTitle(const std::string& title, double ratio = 0.3)
     {

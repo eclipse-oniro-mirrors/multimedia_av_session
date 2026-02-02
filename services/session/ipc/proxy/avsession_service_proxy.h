@@ -18,7 +18,11 @@
 
 #include "iavsession_service.h"
 #include "iremote_proxy.h"
+
+#ifndef CLIENT_LITE
 #include "av_session.h"
+#endif
+
 #include "avsession_controller.h"
 #include "avsession_errors.h"
 
@@ -31,6 +35,7 @@ class AVSessionServiceProxy : public IRemoteProxy<IAVSessionService> {
 public:
     explicit AVSessionServiceProxy(const sptr<IRemoteObject>& impl);
 
+#ifndef CLIENT_LITE
     std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                              const AppExecFwk::ElementName& elementName);
 
@@ -42,6 +47,7 @@ public:
     
     int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                sptr<IRemoteObject>& session) override;
+#endif
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
@@ -121,11 +127,13 @@ public:
     int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
         std::vector<sptr<IRemoteObject>>& sessionControllers) override;
 
+#ifndef CLIENT_LITE
     int32_t GetSession(const AppExecFwk::ElementName& elementName,
         std::string& tag, std::shared_ptr<AVSession>& session);
 
     int32_t GetSessionInner(const AppExecFwk::ElementName& elementName,
         std::string& tag, sptr<IRemoteObject>& session) override;
+#endif
 
     int32_t IsDesktopLyricSupported(bool &isSupported) override;
 

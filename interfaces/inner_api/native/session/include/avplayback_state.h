@@ -18,7 +18,11 @@
 
 #include <bitset>
 #include <parcel.h>
+
+#include "want.h"
+#ifndef CLIENT_LITE
 #include "want_agent.h"
+#endif
 
 namespace OHOS::AVSession {
 class AVPlaybackState : public Parcelable {
@@ -163,6 +167,7 @@ private:
     int32_t videoWidth_ = 0;
     int32_t videoHeight_ = 0;
     std::shared_ptr<AAFwk::WantParams> extras_ = nullptr;
+
     static bool CheckStateChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
     static bool CheckSpeedChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);
     static bool CheckPositionChange(const AVPlaybackState& newState, const AVPlaybackState& oldState);

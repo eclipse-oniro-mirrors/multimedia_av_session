@@ -15,7 +15,11 @@
 
 #include "avsession_service_proxy.h"
 #include "avsession_log.h"
+
+#ifndef CLIENT_LITE
 #include "avsession_proxy.h"
+#endif
+
 #include "avsession_controller_proxy.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -29,6 +33,7 @@ AVSessionServiceProxy::AVSessionServiceProxy(const sptr<IRemoteObject>& impl)
     SLOGI("constructor");
 }
 
+#ifndef CLIENT_LITE
 int32_t AVSessionServiceProxy::GetSession(const AppExecFwk::ElementName& elementName,
     std::string& tag, std::shared_ptr<AVSession>& session)
 {
@@ -131,6 +136,7 @@ int32_t AVSessionServiceProxy::CreateSessionInner(const std::string& tag, int32_
     }
     return res;
 }
+#endif
 
 int32_t AVSessionServiceProxy::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {

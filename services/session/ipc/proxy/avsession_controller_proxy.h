@@ -39,9 +39,11 @@ public:
 
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
+#ifndef CLIENT_LITE
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability) override;
 
     int32_t GetLaunchAbilityInner(AbilityRuntime::WantAgent::WantAgent*& ability) override;
+#endif
 
     int32_t GetValidCommands(std::vector<int32_t>& cmds) override;
 
