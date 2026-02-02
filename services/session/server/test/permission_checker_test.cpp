@@ -91,6 +91,6 @@ static HWTEST_F(PermissionCheckerTest, CheckSystemPermissionByUid001, testing::e
     SLOGI("CheckSystemPermissionByUid001 begin!");
     auto permissionChecker = PermissionChecker::GetInstance();
     bool ret = permissionChecker.CheckSystemPermissionByUid(-1);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     SLOGI("CheckSystemPermissionByUid001 end!");
 }
