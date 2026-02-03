@@ -471,20 +471,6 @@ AVSession_ErrCode OHAVSession::StopCasting()
 #endif
 }
 
-void OHAVSession::DestroyAVSessionOutputDevice(AVSession_OutputDeviceInfo *array)
-{
-    if (array) {
-        for (uint32_t index = 0; index < array->size; index++) {
-            AVSession_OutputDeviceInfo* outputDeviceInfo =
-                (AVSession_OutputDeviceInfo*)array->deviceInfos[index];
-            delete outputDeviceInfo;
-            array->deviceInfos[index] = nullptr;
-        }
-        free(array->deviceInfos);
-        free(array);
-    }
-}
-
 AVSession_ErrCode OHAVSession::GetOutputDevice(AVSession_OutputDeviceInfo **outputDeviceInfo)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
@@ -513,7 +499,7 @@ AVSession_ErrCode OHAVSession::GetOutputDevice(AVSession_OutputDeviceInfo **outp
 AVSession_ErrCode OHAVSession::ReleaseOutputDevice(AVSession_OutputDeviceInfo *outputDeviceInfo)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
-    DestroyAVSessionOutputDevice(outputDeviceInfo);
+    OHDeviceInfo::DestroyAVSessionOutputDevice(outputDeviceInfo);
     return AV_SESSION_ERR_SUCCESS;
 }
 

@@ -37,7 +37,8 @@ public:
     int32_t GetDeviceType();
     int32_t GetSupportedProtocols();
 
-    static AVSession_OutputDeviceInfo *ConvertDesc(OHOS::AVSession::OutputDeviceInfo outputDeviceInfoVec);
+    static AVSession_OutputDeviceInfo *ConvertDesc(const OHOS::AVSession::OutputDeviceInfo &outputDeviceInfoVec);
+    static void DestroyAVSessionOutputDevice(AVSession_OutputDeviceInfo *array);
 
 private:
     int32_t castCategory_ {};

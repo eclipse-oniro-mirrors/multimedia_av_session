@@ -124,4 +124,32 @@ HWTEST_F(OHDeviceInfoTest, OH_DeviceInfo_GetSupportedProtocols_001, TestSize.Lev
     EXPECT_EQ(supportedProtocols, TYPE_CAST_PLUS_STREAM);
     SLOGI("OH_DeviceInfo_GetSupportedProtocols_001 End");
 }
+
+/**
+ * @tc.name: OH_DeviceInfo_ConvertDesc_001
+ * @tc.desc: ConvertDesc OHDeviceInfo to AVSession_OutputDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST_F(OHDeviceInfoTest, OH_DeviceInfo_ConvertDesc_001, TestSize.Level0)
+{
+    OHOS::AVSession::OutputDeviceInfo outputDeviceInfoVec;
+    DeviceInfo devInfo;
+
+    devInfo.castCategory_ = 1;
+    devInfo.deviceId_ = "deviceId";
+    devInfo.deviceName_ = "deviceName";
+    devInfo.deviceType_ = 1;
+    devInfo.supportedProtocols_ = 1;
+
+    outputDeviceInfoVec.deviceInfos_.push_back(devInfo);
+    outputDeviceInfoVec.deviceInfos_.push_back(devInfo);
+    outputDeviceInfoVec.deviceInfos_.push_back(devInfo);
+
+    AVSession_OutputDeviceInfo *outputDeviceInfo = OHDeviceInfo::ConvertDesc(outputDeviceInfoVec);
+    EXPECT_NE(outputDeviceInfo, nullptr);
+
+    OHDeviceInfo::DestroyAVSessionOutputDevice(outputDeviceInfo);
+    EXPECT_NE(outputDeviceInfo, nullptr);
+}
 }   // namespace OHOS::AVSession
