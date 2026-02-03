@@ -417,6 +417,7 @@ private:
     void HandleOnPlayFromAssetId(const AVControlCommand& cmd);
     void HandleOnPlayWithAssetId(const AVControlCommand& cmd);
 
+    void PublishMediaKeyEvent(int32_t keyCode);
     void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
     void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
     void SaveLocalDeviceInfo();
