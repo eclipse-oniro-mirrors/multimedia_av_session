@@ -72,8 +72,6 @@ public:
     AVSession_ErrCode GetOutputDevice(AVSession_OutputDeviceInfo **outputDeviceInfo);
     AVSession_ErrCode ReleaseOutputDevice(AVSession_OutputDeviceInfo *outputDeviceInfo);
 
-    void DestroyAVSessionOutputDevice(AVSession_OutputDeviceInfo *array);
-
     AVSession_ErrCode Destroy();
     AVSession_ErrCode CheckAndRegister();
 

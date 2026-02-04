@@ -109,9 +109,6 @@ private:
     std::vector<std::pair<OH_AVSessionCallback_OnSetLoopMode, void*>> setLoopModeCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnToggleFavorite, void*>> toggleFavoriteCallbacks_;
     std::vector<OH_AVSessionCallback_OutputDeviceChange> outputDeviceChangeCallbacks_;
-
-    std::shared_ptr<AVSession_OutputDeviceInfo> avSessionOutputDeviceInfo_;
-    std::mutex lock_;
 };
 }
 #endif // OHOS_OHAVSESSION_CALLBACKIMPL_H
