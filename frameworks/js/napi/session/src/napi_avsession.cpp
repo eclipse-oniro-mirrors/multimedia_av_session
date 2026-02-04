@@ -1469,6 +1469,7 @@ void NapiAVSession::AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
     info.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap, true));
     info.SetAVQueueId(metaData.GetAVQueueId());
     info.SetAVQueueName(metaData.GetAVQueueName());
+    CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "aft avq convert NoSession");
     napiSession->session_->UpdateAVQueueInfo(info);
 }
 
