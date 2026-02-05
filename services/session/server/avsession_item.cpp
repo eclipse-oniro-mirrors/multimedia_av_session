@@ -2575,6 +2575,17 @@ bool AVSessionItem::IsNotShowNotification()
     return isNotShowNotification_;
 }
 
+void AVSessionItem::PublishMediaKeyEvent(int32_t keyCode)
+{
+    if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PLAY) {
+        AVSessionUtils::PublishCtrlCmdEvent("OnPlay", GetUid(), GetPid());
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_NEXT) {
+        AVSessionUtils::PublishCtrlCmdEvent("OnPlayNext", GetUid(), GetPid());
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PREVIOUS) {
+        AVSessionUtils::PublishCtrlCmdEvent("OnPlayPrevious", GetUid(), GetPid());
+    }
+}
+
 void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const CommandInfo& cmdInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
@@ -2589,10 +2600,13 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const Com
         cmd.SetCommandInfo(cmdInfo);
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
     } else {
-        std::lock_guard callbackLockGuard(callbackLock_);
-        if (callback_ != nullptr) {
-            callback_->OnMediaKeyEvent(keyEvent);
+        {
+            std::lock_guard callbackLockGuard(callbackLock_);
+            if (callback_ != nullptr) {
+                callback_->OnMediaKeyEvent(keyEvent);
+            }
         }
+        PublishMediaKeyEvent(keyEvent.GetKeyCode());
     }
 }
 
@@ -2776,23 +2790,29 @@ void AVSessionItem::HandleOnStop(const AVControlCommand& cmd)
 void AVSessionItem::HandleOnPlayNext(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayNext");
-    std::lock_guard callbackLockGuard(callbackLock_);
-    if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlayNext(cmd);
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callbackForMigrate_) {
+            callbackForMigrate_->OnPlayNext(cmd);
+        }
+        CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+        callback_->OnPlayNext(cmd);
     }
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlayNext(cmd);
+    AVSessionUtils::PublishCtrlCmdEvent("OnPlayNext", GetUid(), GetPid());
 }
 
 void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayPrevious");
-    std::lock_guard callbackLockGuard(callbackLock_);
-    if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlayPrevious((cmd));
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callbackForMigrate_) {
+            callbackForMigrate_->OnPlayPrevious((cmd));
+        }
+        CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+        callback_->OnPlayPrevious((cmd));
     }
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlayPrevious((cmd));
+    AVSessionUtils::PublishCtrlCmdEvent("OnPlayPrevious", GetUid(), GetPid());
 }
 
 void AVSessionItem::HandleOnFastForward(const AVControlCommand& cmd)
