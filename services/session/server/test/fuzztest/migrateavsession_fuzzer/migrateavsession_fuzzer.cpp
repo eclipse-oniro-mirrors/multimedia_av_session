@@ -93,7 +93,6 @@ void ConnectProxyTest()
     migrateServer_->ConnectProxy(sessionId);
     migrateServer_->OnConnectProxy(deviceId);
     migrateServer_->OnConnectSession(sessionId);
-    sleep(3);
     migrateServer_->OnDisconnectProxy(deviceId);
 
     AVSessionDescriptor descriptor;
