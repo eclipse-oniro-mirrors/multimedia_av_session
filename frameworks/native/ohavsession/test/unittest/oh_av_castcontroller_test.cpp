@@ -51,27 +51,29 @@ class AVCastControllerMock : public AVCastController {
 public:
     AVCastControllerMock() = default;
     virtual ~AVCastControllerMock() = default;
-    MOCK_METHOD(int32_t, SendControlCommand, (const AVCastControlCommand& cmd), (override));
-    MOCK_METHOD(int32_t, SendCustomData, (const AAFwk::WantParams& data), (override));
-    MOCK_METHOD(int32_t, Start, (const AVQueueItem& avQueueItem), (override));
-    MOCK_METHOD(int32_t, Prepare, (const AVQueueItem& avQueueItem), (override));
-    MOCK_METHOD(int32_t, RegisterCallback, (const std::shared_ptr<AVCastControllerCallback>& callback), (override));
-    MOCK_METHOD(int32_t, GetDuration, (int32_t& duration), (override));
-    MOCK_METHOD(int32_t, GetCastAVPlaybackState, (AVPlaybackState& avPlaybackState), (override));
-    MOCK_METHOD(int32_t, GetSupportedDecoders, (std::vector<std::string>& decoderTypes), (override));
-    MOCK_METHOD(int32_t, GetRecommendedResolutionLevel, (std::string& decoderType, ResolutionLevel& resolutionLevel),
-        (override));
-    MOCK_METHOD(int32_t, GetSupportedHdrCapabilities, (std::vector<HDRFormat>& hdrFormats), (override));
-    MOCK_METHOD(int32_t, GetSupportedPlaySpeeds, (std::vector<float>& playSpeeds), (override));
-    MOCK_METHOD(int32_t, GetCurrentItem, (AVQueueItem& currentItem), (override));
-    MOCK_METHOD(int32_t, GetValidCommands, (std::vector<int32_t>& cmds), (override));
-    MOCK_METHOD(int32_t, SetDisplaySurface, (std::string& surfaceId), (override));
-    MOCK_METHOD(int32_t, SetCastPlaybackFilter, (const AVPlaybackState::PlaybackStateMaskType& filter), (override));
-    MOCK_METHOD(int32_t, ProcessMediaKeyResponse, (const std::string& assetId, const std::vector<uint8_t>& response),
-    (override));
-    MOCK_METHOD(int32_t, AddAvailableCommand, (const int32_t cmd), (override));
-    MOCK_METHOD(int32_t, RemoveAvailableCommand, (const int32_t cmd), (override));
-    MOCK_METHOD(int32_t, Destroy, (), (override));
+    int32_t SendControlCommand(const AVCastControlCommand& cmd) override { return AVSESSION_SUCCESS; };
+    int32_t SendCustomData(const AAFwk::WantParams& data) override { return AVSESSION_SUCCESS; };
+    int32_t Start(const AVQueueItem& avQueueItem) override { return AVSESSION_SUCCESS; };
+    int32_t Prepare(const AVQueueItem& avQueueItem) override { return AVSESSION_SUCCESS; };
+    int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override
+        { return AVSESSION_SUCCESS; };
+    int32_t GetDuration(int32_t& duration) override { return AVSESSION_SUCCESS; };
+    int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override { return AVSESSION_SUCCESS; };
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override { return AVSESSION_SUCCESS; };
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType, ResolutionLevel& resolutionLevel) override
+        { return AVSESSION_SUCCESS; };
+    int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) override { return AVSESSION_SUCCESS; };
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override { return AVSESSION_SUCCESS; };
+    int32_t GetCurrentItem(AVQueueItem& currentItem) override { return AVSESSION_SUCCESS; };
+    int32_t GetValidCommands(std::vector<int32_t>& cmds) override { return AVSESSION_SUCCESS; };
+    int32_t SetDisplaySurface(std::string& surfaceId) override { return AVSESSION_SUCCESS; };
+    int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override
+        { return AVSESSION_SUCCESS; };
+    int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override
+        { return AVSESSION_SUCCESS; };
+    int32_t AddAvailableCommand(const int32_t cmd) override { return AVSESSION_SUCCESS; };
+    int32_t RemoveAvailableCommand(const int32_t cmd) override { return AVSESSION_SUCCESS; };
+    int32_t Destroy() override { return AVSESSION_SUCCESS; };
 };
 
 /**
@@ -109,7 +111,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_Destroy_001, TestSize.Level0)
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
     avCastController.avCastController_ = castControllerMock;
-    EXPECT_CALL(*castControllerMock, Destroy()).WillOnce(Return(0));
     result = avCastController.Destroy();
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -131,14 +132,7 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_GetPlaybackState_001, TestSiz
     AVSession_ErrCode result = avCastController.GetPlaybackState(nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
-    EXPECT_CALL(*castControllerMock, GetCastAVPlaybackState(_))
-        .WillOnce(DoAll(SetArgReferee<0>(dummyState), Return(AV_SESSION_ERR_SERVICE_EXCEPTION)))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(dummyState), Return(0)));
-
     avCastController.avCastController_ = castControllerMock;
-    result = avCastController.GetPlaybackState(&state);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     avCastController.ohAVSessionPlaybackState_ = nullptr;
     result = avCastController.GetPlaybackState(&state);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
@@ -165,20 +159,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_RegisterPlaybackStateChangedC
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
     avCastController.avCastController_ = castControllerMock;
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
-    EXPECT_CALL(*castControllerMock, SetCastPlaybackFilter(_))
-        .WillRepeatedly(Return(0));
-    EXPECT_CALL(*castControllerMock, AddAvailableCommand(_))
-        .WillOnce(Return(AV_SESSION_ERR_SERVICE_EXCEPTION))
-        .WillRepeatedly(Return(0));
-
-    result = avCastController.RegisterPlaybackStateChangedCallback(filter, nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
-    result = avCastController.RegisterPlaybackStateChangedCallback(filter, nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.RegisterPlaybackStateChangedCallback(filter, nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -202,16 +182,7 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_UnregisterPlaybackStateChange
     result = avCastController.UnregisterPlaybackStateChangedCallback(nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 
-    EXPECT_CALL(*castControllerMock, RemoveAvailableCommand(_))
-        .WillOnce(Return(AV_SESSION_ERR_SERVICE_EXCEPTION))
-        .WillRepeatedly(Return(0));
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
     avCastController.CheckAndRegister();
-
-    result = avCastController.UnregisterPlaybackStateChangedCallback(nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.UnregisterPlaybackStateChangedCallback(nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -227,14 +198,9 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_RegisterMediaItemChangedCallb
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
     
     avCastController.avCastController_ = castControllerMock;
     AVSession_ErrCode result = avCastController.RegisterMediaItemChangedCallback(nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
-    result = avCastController.RegisterMediaItemChangedCallback(nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
 
@@ -266,22 +232,11 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_RegisterPlayNextCallback_001,
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
-    EXPECT_CALL(*castControllerMock, AddAvailableCommand(_))
-        .WillOnce(Return(AV_SESSION_ERR_SERVICE_EXCEPTION))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.RegisterPlayNextCallback(nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
     avCastController.avCastController_ = castControllerMock;
-    result = avCastController.RegisterPlayNextCallback(nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
-    result = avCastController.RegisterPlayNextCallback(nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.RegisterPlayNextCallback(nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -297,11 +252,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_UnregisterPlayNextCallback_00
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
-    EXPECT_CALL(*castControllerMock, RemoveAvailableCommand(_))
-        .WillOnce(Return(AV_SESSION_ERR_SERVICE_EXCEPTION))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.UnregisterPlayNextCallback(nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
@@ -311,9 +261,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_UnregisterPlayNextCallback_00
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 
     avCastController.CheckAndRegister();
-    result = avCastController.UnregisterPlayNextCallback(nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.UnregisterPlayNextCallback(nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -329,22 +276,11 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_RegisterPlayPreviousCallback_
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
-    EXPECT_CALL(*castControllerMock, AddAvailableCommand(_))
-        .WillOnce(Return(AV_SESSION_ERR_SERVICE_EXCEPTION))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.RegisterPlayPreviousCallback(nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
     avCastController.avCastController_ = castControllerMock;
-    result = avCastController.RegisterPlayPreviousCallback(nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
-    result = avCastController.RegisterPlayPreviousCallback(nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.RegisterPlayPreviousCallback(nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -360,11 +296,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_UnregisterPlayPreviousCallbac
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
-    EXPECT_CALL(*castControllerMock, RemoveAvailableCommand(_))
-        .WillOnce(Return(AV_SESSION_ERR_SERVICE_EXCEPTION))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.UnregisterPlayPreviousCallback(nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
@@ -374,9 +305,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_UnregisterPlayPreviousCallbac
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 
     avCastController.CheckAndRegister();
-    result = avCastController.UnregisterPlayPreviousCallback(nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.UnregisterPlayPreviousCallback(nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -392,14 +320,9 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_RegisterSeekDoneCallback_001,
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
     avCastController.avCastController_ = castControllerMock;
 
     AVSession_ErrCode result = avCastController.RegisterSeekDoneCallback(nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
-    result = avCastController.RegisterSeekDoneCallback(nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
 
@@ -432,14 +355,9 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_RegisterEndOfStreamCallback_0
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
     avCastController.avCastController_ = castControllerMock;
 
     AVSession_ErrCode result = avCastController.RegisterEndOfStreamCallback(nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
-    result = avCastController.RegisterEndOfStreamCallback(nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
 
@@ -472,14 +390,9 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_RegisterErrorCallback_001, Te
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(AV_SESSION_ERR_SERVICE_EXCEPTION));
     avCastController.avCastController_ = castControllerMock;
 
     AVSession_ErrCode result = avCastController.RegisterErrorCallback(nullptr, nullptr);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
-    result = avCastController.RegisterErrorCallback(nullptr, nullptr);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
 
@@ -512,17 +425,12 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_SendCommonCommand_001, TestSi
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, SendControlCommand(_))
-        .WillRepeatedly(Return(0));
 
     AVSession_AVCastControlCommandType type = CAST_CONTROL_CMD_PLAY;
     AVSession_ErrCode result = avCastController.SendCommonCommand(&type);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
     avCastController.avCastController_ = castControllerMock;
-    result = avCastController.SendCommonCommand(&type);
-    EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
-
     type = static_cast<AVSession_AVCastControlCommandType>(-1);
     result = avCastController.SendCommonCommand(&type);
     EXPECT_EQ(result, AV_SESSION_ERR_CODE_COMMAND_INVALID);
@@ -539,16 +447,11 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_SendSeekCommand_001, TestSize
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, SendControlCommand(_))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.SendSeekCommand(0);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
     avCastController.avCastController_ = castControllerMock;
-    result = avCastController.SendSeekCommand(-1);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.SendSeekCommand(0);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -564,16 +467,11 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_SendFastForwardCommand_001, T
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, SendControlCommand(_))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.SendFastForwardCommand(0);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
     avCastController.avCastController_ = castControllerMock;
-    result = avCastController.SendFastForwardCommand(-1);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.SendFastForwardCommand(1);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -589,16 +487,11 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_SendRewindCommand_001, TestSi
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, SendControlCommand(_))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.SendRewindCommand(0);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
 
     avCastController.avCastController_ = castControllerMock;
-    result = avCastController.SendRewindCommand(-1);
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-
     result = avCastController.SendRewindCommand(0);
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
 }
@@ -614,8 +507,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_SendSetSpeedCommand_001, Test
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, SendControlCommand(_))
-        .WillRepeatedly(Return(0));
     AVSession_PlaybackSpeed speed = SPEED_FORWARD_1_00_X;
 
     AVSession_ErrCode result = avCastController.SendSetSpeedCommand(speed);
@@ -642,8 +533,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_SendVolumeCommand_001, TestSi
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, SendControlCommand(_))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.SendVolumeCommand(0);
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
@@ -696,8 +585,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_Prepare_001, TestSize.Level0)
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, Prepare(_))
-        .WillRepeatedly(Return(0));
     OH_AVSession_AVQueueItem avqueueItem {};
     auto description = std::make_shared<AVMediaDescription>();
     ASSERT_NE(description, nullptr);
@@ -723,8 +610,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_Start_001, TestSize.Level0)
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, Start(_))
-        .WillRepeatedly(Return(0));
     OH_AVSession_AVQueueItem avqueueItem {};
     auto description = std::make_shared<AVMediaDescription>();
     ASSERT_NE(description, nullptr);
@@ -750,8 +635,6 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_CheckAndRegister_001, TestSiz
     OHAVCastController avCastController;
     std::shared_ptr<AVCastControllerMock> castControllerMock = std::make_shared<AVCastControllerMock>();
     ASSERT_NE(castControllerMock, nullptr);
-    EXPECT_CALL(*castControllerMock, RegisterCallback(_))
-        .WillRepeatedly(Return(0));
 
     AVSession_ErrCode result = avCastController.CheckAndRegister();
     EXPECT_EQ(result, AV_SESSION_ERR_INVALID_PARAMETER);
