@@ -36,7 +36,7 @@ enum class PlayType {
     NEARLINK = 3
 };
 
-const std::unordered_map<PlayType, std::string> PlayTypeToString = {
+inline const std::unordered_map<PlayType, std::string> PlayTypeToString = {
     {PlayType::APP, "app"},
     {PlayType::BLUETOOTH, "bluetooth"},
     {PlayType::CAST, "cast"},

@@ -41,7 +41,7 @@ constexpr int64_t DELAY_METADATA_TIME = 100;
 constexpr int64_t DELAY_PLAY_COM_TIME = 500;
 constexpr int32_t MAX_SESSION_NUMS = 2;
 constexpr int32_t MAX_HISTORY_SESSION_NUMS = 6;
-const std::string ANCO_AUDIO_BUNDLE_NAME = "anco_audio";
+inline const std::string ANCO_AUDIO_BUNDLE_NAME = "anco_audio";
 
 class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServer,
     public HistoricalRecordListener,

@@ -74,7 +74,7 @@ public:
 private:
     static const std::string kBase64Chars;
 };
-const std::string Base64Utils::kBase64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+inline const std::string Base64Utils::kBase64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                               "abcdefghijklmnopqrstuvwxyz"
                                               "0123456789+/";
 } // namespace OHOS::AVSession
