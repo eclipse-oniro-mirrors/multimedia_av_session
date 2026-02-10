@@ -758,7 +758,6 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::CreateWantAgentWithIndex(
         res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launchWantAgent, want);
     }
     if (res == AVSESSION_SUCCESS && want != nullptr) {
-        want->SetElementName(GetBundleName(), GetAbilityName());
         AAFwk::WantParams params = want->GetParams();
         params.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, AAFwk::Integer::Box(index));
         want->SetParams(params);
