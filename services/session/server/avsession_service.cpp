@@ -2082,7 +2082,8 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "session to be got is not existed");
 
     auto pid = GetCallingPid();
-    if (pid == session->GetPid()) {
+    auto uid = GetCallingUid();
+    if (pid == session->GetPid() && uid == session->GetUid()) {
         descriptor = session->GetDescriptor();
         return AVSESSION_SUCCESS;
     }
