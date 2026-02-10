@@ -59,7 +59,6 @@ static const uint8_t *RAW_DATA = nullptr;
 static size_t g_totalSize = 0;
 static size_t g_sizePos;
 static size_t g_dataSize = 0;
-static size_t g_pos;
 constexpr size_t STRING_MAX_LENGTH = 128;
 constexpr uint32_t AVQ_ITEM_COUNT = 2;
 constexpr uint32_t LEN_ITEM0 = 3;
@@ -73,6 +72,8 @@ constexpr int FD_INVALID = -1;
 constexpr int PIPE_SUCCESS = 0;
 constexpr size_t PIPE_READ_END = 0;
 constexpr size_t PIPE_WRITE_END = 1;
+constexpr int32_t ABILITY_CONNECTED = 2;
+constexpr int32_t ABILITY_DISCONNECTED = 4;
 FuzzedDataProvider provider(RAW_DATA, g_dataSize);
 
 /*
@@ -145,9 +146,9 @@ uint32_t GetArrLength(T& arr)
     return sizeof(arr) / sizeof(arr[0]);
 }
 
-typedef void (*TestFuncs[12])();
+typedef void (*TestFuncs)();
 
-TestFuncs g_allFuncs = {
+TestFuncs g_allFuncs[] = {
 #ifdef DEVICE_MANAGER_ENABLE
     MockGetTrustedDeviceList,
 #endif
@@ -162,6 +163,7 @@ TestFuncs g_allFuncs = {
     AVSessionServiceFuzzer::GetOtherPlayingSessionTest,
     AVSessionServiceFuzzer::ReportSessionControlTest,
     AVSessionServiceFuzzer::UpdateFrontSessionTest,
+    AVSessionServiceFuzzer::DesktopLyriclTest,
 };
 
 bool FuzzTest(const uint8_t* rawData, size_t size)
@@ -177,7 +179,7 @@ bool FuzzTest(const uint8_t* rawData, size_t size)
 
     uint32_t code = GetData<uint32_t>();
     uint32_t len = GetArrLength(g_allFuncs);
-    if (len > 0) {
+    if (len > 0 && g_allFuncs[code % len] != nullptr) {
         g_allFuncs[code % len]();
     } else {
         SLOGE("%{public}s: The len length is equal to 0", __func__);
@@ -793,6 +795,7 @@ void HandleRemoveMediaCardEventTest()
 {
     SystemAbilityOnDemandReason reason;
     avsessionService_->HandleRemoveMediaCardEvent(0, false);
+    avsessionService_->HandleRemoveMediaCardEvent(0, true);
 }
 
 void IsTopSessionPlayingTest()
@@ -849,8 +852,10 @@ void StartAVPlaybackTest()
 {
     string bundleName = GetString();
     string assetId = GetString();
+    string moduleName = GetString();
     string deviceId = GetString();
-    avsessionService_->StartAVPlayback(bundleName, assetId, deviceId);
+    avsessionService_->StartAVPlayback(bundleName, assetId, moduleName);
+    avsessionService_->StartAVPlayback(bundleName, assetId, moduleName, deviceId);
 }
 
 void IsHistoricalSessionTest()
@@ -917,20 +922,25 @@ void handleusereventTest(sptr<AVSessionService> service)
 
 void OnReceiveEventTest(sptr<AVSessionService> service)
 {
-    const string actions[] = {
+    const std::vector<std::string> actions = {
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
         EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED,
         EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
+        "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW",
+        "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE",
+        "usual.event.PACKAGE_REMOVED",
+        "usual.event.CAST_SESSION_CREATE",
+        "usual.event.DESKTOP_LYRIC_DESTROY",
         GetString()
     };
     FuzzSessionListener listener;
     avsessionService_->AddInnerSessionListener(&listener);
     avsessionService_->RemoveInnerSessionListener(&listener);
     OHOS::EventFwk::CommonEventData eventData;
-    string action = actions[GetData<uint32_t>() % 7];
+    string action = actions[GetData<uint32_t>() % actions.size()];
     OHOS::AAFwk::Want want = eventData.GetWant();
     want.SetAction(action);
     eventData.SetWant(want);
@@ -1380,6 +1390,27 @@ void AVSessionServiceFuzzer::UpdateFrontSessionTest()
     avsessionService->UpdateFrontSession(session, isAdd);
 }
 
+void AVSessionServiceFuzzer::DesktopLyriclTest()
+{
+    FuzzedDataProvider dataProvider(RAW_DATA, g_dataSize);
+    sptr<AVSessionService> avsessionService = new AVSessionService(dataProvider.ConsumeIntegral<int32_t>());
+    CHECK_AND_RETURN(avsessionService != nullptr);
+
+    std::string sessionId = dataProvider.ConsumeRandomLengthString(MAX_CODE_LEN);
+    std::string handler = dataProvider.ConsumeRandomLengthString(MAX_CODE_LEN);
+    uint32_t sceneCode = dataProvider.ConsumeIntegral<uint32_t>();
+    int32_t userId = dataProvider.ConsumeIntegral<int32_t>();
+    int32_t curUserId = avsessionService->GetUsersManager().GetCurrentUserId();
+
+    avsessionService->GetDesktopLyricAbilityState(userId);
+    avsessionService->SetDesktopLyricAbilityState(curUserId, ABILITY_DISCONNECTED);
+    avsessionService->StartDesktopLyricAbility(sessionId, handler);
+    avsessionService->SetDesktopLyricAbilityState(curUserId, ABILITY_CONNECTED);
+    avsessionService->StopDesktopLyricAbility();
+    avsessionService->SetDesktopLyricAbilityState(curUserId, ABILITY_CONNECTED);
+    avsessionService->UploadDesktopLyricOperationInfo(sessionId, handler, sceneCode);
+}
+
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv)
 {
     int32_t systemAbilityId = provider.ConsumeIntegral<int32_t>();
@@ -1400,7 +1431,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
     RAW_DATA = data;
     g_dataSize = size;
-    g_pos = 0;
     /* Run your code on data */
     FuzzTest(data, size);
     return 0;

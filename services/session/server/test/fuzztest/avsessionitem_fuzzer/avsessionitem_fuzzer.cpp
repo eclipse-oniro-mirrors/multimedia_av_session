@@ -29,6 +29,7 @@
 #include "avcontrol_command.h"
 #include "avcall_meta_data.h"
 #include "avcall_state.h"
+#include "avsession_callback_client.h"
 #include "avsessionitem_fuzzer.h"
 
 using namespace std;
@@ -177,6 +178,7 @@ void AvSessionItemTest()
     AvSessionCallItemTest(avSessionItem);
     AvSessionItemTestImplExtension(avSessionItem);
     AvSessionCallItemTestExtension(avSessionItem);
+    AvSessionCallItemTestDesktopLyric(avSessionItem);
     BundleStatusAdapter::ReleaseInstance();
 }
 
@@ -365,6 +367,46 @@ void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem)
     avSessionItem->SetSessionEvent(event, wantParams);
     avSessionItem->SetServiceCallbackForAVQueueInfo(releaseAndStartCallback);
     avSessionItem->SetServiceCallbackForUpdateSession(updateSessionCallback);
+}
+
+void AvSessionCallItemTestDesktopLyric(sptr<AVSessionItem> avSessionItem)
+{
+    std::string bundleName = GetString();
+    int32_t pid = GetData<int32_t>();
+    int32_t keyCode = GetData<int32_t>();
+    DesktopLyricState state {};
+    state.isLocked_ = GetData<bool>();
+    bool isEnable = GetData<bool>();
+    bool isSupported = GetData<bool>();
+    bool isVisible = GetData<bool>();
+    bool up = GetData<bool>();
+
+    avSessionItem->isSupportedDesktopLyric_ = true;
+    avSessionItem->isEnabledDesktopLyric_ = true;
+    sptr<AVControllerItem> avControllerItem = new(std::nothrow) AVControllerItem(pid, avSessionItem);
+    if (avControllerItem == nullptr) {
+        return;
+    }
+    avSessionItem->AddController(pid, avControllerItem);
+    sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackClient(nullptr);
+    if (callback == nullptr) {
+        return;
+    }
+    avSessionItem->RegisterCallbackInner(callback);
+    avSessionItem->IsKeyEventSupported("");
+
+    avSessionItem->IsDesktopLyricEnabled(isEnable);
+    avSessionItem->SetDesktopLyricVisible(isVisible);
+    avSessionItem->IsDesktopLyricVisible(isVisible);
+    avSessionItem->SetDesktopLyricState(state);
+    avSessionItem->GetDesktopLyricState(state);
+    avSessionItem->HandleDesktopLyricVisibilityChanged(isVisible);
+    avSessionItem->HandleDesktopLyricStateChanged(state);
+    avSessionItem->EnableDesktopLyric(isEnable);
+    avSessionItem->SetDesktopLyricFeatureSupported(isSupported);
+    avSessionItem->ProcessInputRedistributeEvent(keyCode);
+    avSessionItem->IsKeyEventSupported(bundleName);
+    avSessionItem->UpdateVolume(up);
 }
 
 void AvSessionItemOnRemoteRequest()

@@ -106,6 +106,29 @@ public:
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 
+std::string GenerateExtraDataJson(FuzzedDataProvider &provider)
+{
+    static const std::vector<std::string> testJsons = {
+        R"({"OS_TYPE": 0})",
+        R"({"OS_TYPE": 1})",
+        R"({"OS_TYPE": "1"})",
+        R"({"other_key": 1})",
+        R"({})",
+    };
+    return testJsons[provider.ConsumeIntegralInRange<uint32_t>(0, testJsons.size() - 1)];
+}
+
+std::string GenerateElementNameJson(FuzzedDataProvider &provider)
+{
+    static const std::vector<std::string> testJsons = {
+        R"({"key": "value"})",
+        R"([{"sessionId": "other_id", "bundleName": "other_bundle", "abilityName": "other_ability"},
+                {"sessionId": "target_id", "bundleName": "com.example.app", "abilityName": "MainAbility"}])",
+        R"({})",
+    };
+    return testJsons[provider.ConsumeIntegralInRange<uint32_t>(0, testJsons.size() - 1)];
+}
+
 void SuperLauncherTest()
 {
     FuzzedDataProvider provider(RAW_DATA, g_dataSize);
@@ -282,6 +305,24 @@ void AVSessionServiceExtFuzzer::NotifyDeviceStateChangeFuzzTest()
 #endif
 }
 
+void AVSessionServiceExtFuzzer::CheckWhetherTargetDevIsNextTest()
+{
+#ifdef DEVICE_MANAGER_ENABLE
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+    CHECK_AND_RETURN(service != nullptr);
+    std::string sessionIdNeeded = "target_id";
+    std::string bundleName;
+    std::string abilityName;
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    deviceInfo.extraData = GenerateExtraDataJson(provider);
+    std::string sortContent = GenerateElementNameJson(provider);
+
+    service->StopSourceCast();
+    service->CheckWhetherTargetDevIsNext(deviceInfo);
+    service->GetElementNameBySessionIdFromCJSON(sortContent, sessionIdNeeded, bundleName, abilityName);
+#endif
+}
+
 template<class T>
 uint32_t GetArrLength(T& arr)
 {
@@ -292,11 +333,12 @@ uint32_t GetArrLength(T& arr)
     return sizeof(arr) / sizeof(arr[0]);
 }
 
-typedef void (*TestFuncs[2])();
+typedef void (*TestFuncs)();
 
-TestFuncs g_allFuncs = {
+TestFuncs g_allFuncs[] = {
     AVSessionServiceExtFuzzer::SucceedSuperLauncherFuzzTest,
     AVSessionServiceExtFuzzer::NotifyDeviceStateChangeFuzzTest,
+    AVSessionServiceExtFuzzer::CheckWhetherTargetDevIsNextTest,
 };
 
 bool FuzzTest(const uint8_t* rawData, size_t size)
@@ -312,7 +354,7 @@ bool FuzzTest(const uint8_t* rawData, size_t size)
 
     uint32_t code = GetData<uint32_t>();
     uint32_t len = GetArrLength(g_allFuncs);
-    if (len > 0) {
+    if (len > 0 && g_allFuncs[code % len] != nullptr) {
         g_allFuncs[code % len]();
     } else {
         SLOGE("%{public}s: The len length is equal to 0", __func__);

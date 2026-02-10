@@ -23,6 +23,7 @@
 #include "avsession_errors.h"
 #include "system_ability_definition.h"
 #include "avsession_service.h"
+#include "avcontroller_callback_client.h"
 #include "avcontrolleritem_fuzzer.h"
 
 using namespace std;
@@ -233,7 +234,8 @@ void AvControllerItemDataTest()
 
     AvControllerItemDataTestSecond(avControllerItem);
     AvControllerItemDataTestThird(avControllerItem);
-    avControllerItem->RegisterCallbackInner(avControllerItemObj);
+    AvControllerItemTestImplDesktopLyric(avControllerItem);
+
     service->OnStop();
     SLOGI("AvControllerItemDataTest done");
 }
@@ -528,6 +530,37 @@ void AvControllerItemTestImplThird(sptr<AVControllerItem> avControllerItem)
     AVMetaData newAVMetaData;
     CreateAVMetaData(newAVMetaData);
     avControllerItem->HandleMetaDataChange(newAVMetaData, filter);
+}
+
+void AvControllerItemTestImplDesktopLyric(sptr<AVControllerItem> avControllerItem)
+{
+    std::string bundleName = GetString();
+    DesktopLyricState state {};
+    state.isLocked_ = GetData<bool>();
+    bool isEnable = GetData<bool>();
+    bool isVisible = GetData<bool>();
+    bool isActive = GetData<bool>();
+    std::string event = GetString();
+    WantParams wantParams;
+    sptr<IAVControllerCallback> callback = new(std::nothrow) AVControllerCallbackClient(nullptr);
+    if (callback == nullptr) {
+        return;
+    }
+    avControllerItem->RegisterCallbackInner(callback->AsObject());
+    avControllerItem->GetSessionType();
+    avControllerItem->GetElementOfSession();
+
+    avControllerItem->IsDesktopLyricEnabled(isEnable);
+    avControllerItem->SetDesktopLyricVisible(isVisible);
+    avControllerItem->IsDesktopLyricVisible(isVisible);
+    avControllerItem->SetDesktopLyricState(state);
+    avControllerItem->GetDesktopLyricState(state);
+    avControllerItem->HandleDesktopLyricStateChanged(state);
+    avControllerItem->HandleDesktopLyricVisibilityChanged(isVisible);
+    avControllerItem->HandleDesktopLyricEnabled(isEnable);
+    avControllerItem->HandleActiveStateChange(isActive);
+    avControllerItem->HandleCustomData(wantParams);
+    avControllerItem->HandleSetSessionEvent(event, wantParams);
 }
 
 /* Fuzzer entry point */
