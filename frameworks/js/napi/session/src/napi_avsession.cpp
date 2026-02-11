@@ -767,7 +767,8 @@ napi_value NapiAVSession::ThrowErrorAndReturnByErrCode(napi_env env, const std::
 
 napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_shared<ContextBase>();
+    struct ConcreteContext : public ContextBase { std::shared_ptr<AVSession> sessionHolder_; };
+    auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("OffEvent failed : no memory");
         NapiUtils::ThrowError(env, "OffEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
@@ -796,18 +797,11 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr) {
-        SLOGE("OffEvent failed : napiSession is nullptr");
-        NapiUtils::ThrowError(env, "OffEvent failed : napiSession is nullptr",
-            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
-        return NapiUtils::GetUndefinedValue(env);
-    }
-    if (napiSession->session_ == nullptr) {
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
         SLOGE("OffEvent failed : session is nullptr");
-        NapiUtils::ThrowError(env, "OffEvent failed : session is nullptr",
-            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
-        return NapiUtils::GetUndefinedValue(env);
+        return ThrowErrorAndReturn(env, "OffEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
+    context->sessionHolder_ = napiSession->session_;
     if (napiSession != nullptr && it->second(env, napiSession, callback) != napi_ok) {
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
@@ -1529,6 +1523,7 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVPlaybackState");
     struct ConcreteContext : public ContextBase {
         AVPlaybackState playBackState_;
+        std::shared_ptr<AVSession> sessionHolder_;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
@@ -1547,9 +1542,10 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_AV_PLAYBACK_STATE_TASK_ID;
-
-    auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession->session_ == nullptr) {
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        context->sessionHolder_ = napiSession->session_;
+    }
+    if (context->sessionHolder_ == nullptr) {
         SLOGE("SetAVPlaybackState failed : session is nullptr");
         context->status = napi_generic_failure;
         context->errMessage = "SetAVPlaybackState failed : session is nullptr";
@@ -1559,7 +1555,7 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
         return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", executor, complete);
     }
 
-    auto syncExecutor = PlaybackStateSyncExecutor(napiSession->session_, context->playBackState_);
+    auto syncExecutor = PlaybackStateSyncExecutor(context->sessionHolder_, context->playBackState_);
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask(syncExecutor, "SetAVPlaybackState"),
         "NapiAVSession SetAVPlaybackState handler postTask failed");
@@ -1733,6 +1729,7 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetExtras");
     struct ConcreteContext : public ContextBase {
         AAFwk::WantParams extras_;
+        std::shared_ptr<AVSession> sessionHolder_;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
@@ -1750,16 +1747,17 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_EXTRAS_TASK_ID;
-
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        context->sessionHolder_ = napiSession->session_;
+    }
     auto executor = [context]() {
-        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (context->sessionHolder_  == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetExtras failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        int32_t ret = napiSession->session_->SetExtras(context->extras_);
+        int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "SetExtras failed : native session not exist";
@@ -1974,7 +1972,10 @@ napi_value NapiAVSession::GetOutputDeviceSync(napi_env env, napi_callback_info i
 
 napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_shared<ContextBase>();
+    struct ConcreteContext : public ContextBase {
+        std::shared_ptr<AVSession> sessionHolder_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("Activate failed : no memory");
         NapiUtils::ThrowError(env, "Activate failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
@@ -1982,16 +1983,17 @@ napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
     }
 
     context->GetCbInfo(env, info);
-
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        context->sessionHolder_ = napiSession->session_;
+    }
     auto executor = [context]() {
-        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (context->sessionHolder_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "Activate session failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        int32_t ret = napiSession->session_->Activate();
+        int32_t ret = context->sessionHolder_->Activate();
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "Activate session failed : native session not exist";
@@ -2012,24 +2014,27 @@ napi_value NapiAVSession::Activate(napi_env env, napi_callback_info info)
 
 napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_shared<ContextBase>();
+    struct ConcreteContext : public ContextBase {
+        std::shared_ptr<AVSession> sessionHolder_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("Deactivate failed : no memory");
         NapiUtils::ThrowError(env, "Deactivate failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
-
     context->GetCbInfo(env, info);
-
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        context->sessionHolder_ = napiSession->session_;
+    }
     auto executor = [context]() {
-        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (context->sessionHolder_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "Deactivate session failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        int32_t ret = napiSession->session_->Deactivate();
+        int32_t ret = context->sessionHolder_->Deactivate();
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "Deactivate session failed : native session not exist";
@@ -2050,30 +2055,34 @@ napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
 
 napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_shared<ContextBase>();
+    struct ConcreteContext : public ContextBase {
+        std::shared_ptr<AVSession> sessionHolder_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("Destroy failed : no memory");
         NapiUtils::ThrowError(env, "Destroy failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
-
     context->GetCbInfo(env, info);
-    
     SLOGI("Destroy session begin");
     {
         std::lock_guard lockGuard(destroyLock_);
         isNapiSessionDestroy_ = true;
     }
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        context->sessionHolder_ = napiSession->session_;
+    }
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (context->sessionHolder_  == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "Destroy session failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        int32_t ret = napiSession->session_->Destroy();
-        if (ret == AVSESSION_SUCCESS) {
+        int32_t ret = context->sessionHolder_->Destroy();
+        if (napiSession != nullptr && ret == AVSESSION_SUCCESS) {
             napiSession->session_ = nullptr;
             napiSession->callback_ = nullptr;
         } else if (ret == ERR_SESSION_NOT_EXIST) {
@@ -2147,24 +2156,27 @@ napi_value NapiAVSession::SetSessionEvent(napi_env env, napi_callback_info info)
 napi_value NapiAVSession::ReleaseCast(napi_env env, napi_callback_info info)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    auto context = std::make_shared<ContextBase>();
+    struct ConcreteContext : public ContextBase {
+        std::shared_ptr<AVSession> sessionHolder_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("ReleaseCast failed : no memory");
         NapiUtils::ThrowError(env, "ReleaseCast failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
-
     context->GetCbInfo(env, info);
-
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        context->sessionHolder_ = napiSession->session_;
+    }
     auto executor = [context]() {
-        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (context->sessionHolder_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "ReleaseCast failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        int32_t ret = napiSession->session_->ReleaseCast();
+        int32_t ret = context->sessionHolder_->ReleaseCast();
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "ReleaseCast failed : native session not exist";
