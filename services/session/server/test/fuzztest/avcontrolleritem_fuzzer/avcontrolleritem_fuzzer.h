@@ -22,6 +22,7 @@ void AvControllerItemRemoteRequestTest();
 void AvControllerItemDataTest();
 void AvControllerItemDataTestSecond(sptr<AVControllerItem> avControllerItem);
 void AvControllerItemDataTestThird(sptr<AVControllerItem> avControllerItem);
+void AvControllerItemTestImplDesktopLyric(sptr<AVControllerItem> avControllerItem);
 
 void AvControllerItemTest();
 void SendCommonCommandTest();

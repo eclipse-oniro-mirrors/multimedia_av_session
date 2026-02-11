@@ -102,6 +102,11 @@ ohos_fuzztest("AVSessionServiceFuzzTest") {
     defines += [ "START_STOP_ON_DEMAND_ENABLE" ]
   }
 
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
   public_configs = ["./../../../../../session:avsession_ipc_config"]
 }
 ###############################################################################

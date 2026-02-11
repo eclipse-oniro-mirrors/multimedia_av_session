@@ -53,6 +53,7 @@ public:
     static void GetOtherPlayingSessionTest();
     static void ReportSessionControlTest();
     static void UpdateFrontSessionTest();
+    static void DesktopLyriclTest();
 };
 
 }

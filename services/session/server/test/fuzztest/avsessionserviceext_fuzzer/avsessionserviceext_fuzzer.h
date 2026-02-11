@@ -26,6 +26,7 @@ namespace OHOS::AVSession {
         void AVSessionServiceExtFuzzTest(uint8_t* data, size_t size);
         static void SucceedSuperLauncherFuzzTest();
         static void NotifyDeviceStateChangeFuzzTest();
+        static void CheckWhetherTargetDevIsNextTest();
     };
 }
 
