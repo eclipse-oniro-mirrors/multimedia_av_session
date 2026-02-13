@@ -42,6 +42,7 @@ public:
     static int32_t SetSessionDescriptor(std::string& sessionInfo, const AVSessionDescriptor& descriptor);
     static int32_t GetSessionDescriptor(const std::string& sessionInfo, AVSessionDescriptor& descriptor);
 
+    static std::string GetStringParamFromJsonString(const std::string& jsonStr, const std::string& key);
 private:
     static int32_t JsonToVector(cJSON* object, std::vector<int32_t>& out);
     static int32_t ConvertSessionType(const std::string& typeString);

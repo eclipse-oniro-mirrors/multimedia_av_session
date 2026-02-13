@@ -64,6 +64,8 @@ void SoftbusSession::SendByte(const std::string &deviceId, const std::string &da
     auto iter = deviceToSessionMap_.find(deviceId);
     if (iter != deviceToSessionMap_.end()) {
         SoftbusSessionManager::GetInstance().SendBytes(iter->second, data);
+    } else {
+        SLOGE("SendByte findNoDevice:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
     }
 #endif
 }

@@ -162,6 +162,8 @@ private:
         std::vector<AVSessionDescriptor> hisSessionDescriptors);
     void StartConfigHistorySession(const std::string &data);
     std::string GenerateClearHistorySessionMsg();
+    bool AddBundleImgForSuper(cJSON* jsonObj,
+        const std::string& bundleName, const std::string& abilityName);
 
     AVSessionService *servicePtr_ = nullptr;
     bool isSoftbusConnecting_ = false;
@@ -170,6 +172,7 @@ private:
     std::string lastSessionId_;
     std::string releaseSessionId_;
     std::string releaseSessionBundleName_;
+    std::string releaseSessionAbilityName_;
     bool supportCrossMediaPlay_ = false;
     std::recursive_mutex migrateControllerLock_;
     std::recursive_mutex topSessionLock_;

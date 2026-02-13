@@ -49,8 +49,14 @@ public:
     void HandlePlayNext();
     void HandlePlayPrevious();
     void HandleToggleFavorite(const std::string& mediaId);
+    int32_t HandlePlayForSuper(const std::string& playerId);
+    int32_t HandlePauseForSuper(const std::string& playerId);
+    int32_t HandlePlayNextForSuper(const std::string& playerId);
+    int32_t HandlePlayPreviousForSuper(const std::string& playerId);
+    int32_t HandleToggleFavoriteForSuper(const std::string& mediaId, const std::string& playerId);
     void HandleCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
     void GetDistributedSessionControllerList(std::vector<sptr<IRemoteObject>>& controllerList);
+    int32_t GetControllerListForSuper(std::vector<sptr<IRemoteObject>>& controllerList);
     bool CheckMediaAlive();
 
     enum {
@@ -102,12 +108,27 @@ private:
     void GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras);
     void ColdStartFromProxy();
     void NotifyMediaControlNeedStateChange(AAFwk::WantParams& extras);
+    int32_t OnConnectForSuper();
+    int32_t OnDisconnectForSuper();
+    int32_t OnBytesRecvForSuper(const std::string &deviceId, const std::string &data);
+    int32_t ProcessControllerListForSuper(cJSON* jsonValue);
+    int32_t ProcessControllerForSuper(cJSON* jsonValue);
+    int32_t ProcessSessionInfoForSuper(cJSON* jsonValue);
+    int32_t ProcessControllerInfoForSuper(cJSON* jsonValue);
+    int32_t ProcessMetaDataForSuper(cJSON* jsonValue);
+    int32_t ProcessPlaybackStateForSuper(cJSON* jsonValue);
+    int32_t SendControlCommandMsgForSuper(int32_t commandCode, const std::string& commandArgsStr);
+    int32_t ColdStartForSuper(AAFwk::WantParams& extras);
+    int32_t CompressFromJPEG(AVMetaData &metadata, const std::vector<uint8_t> &inputData);
+    int32_t ConvertStateFromDoubleToSingle(int32_t state);
 
     int32_t mMode_ = 0;
     std::string deviceId_;
     std::string localDeviceId_;
     sptr<AVSessionItem> remoteSession_ = nullptr;
     sptr<AVControllerItem> preSetController_ = nullptr;
+    std::map<std::string, sptr<AVSessionItem>> sessionStackForMigrateIn_;
+    std::map<std::string, sptr<AVControllerItem>> controllerStackForMigrateIn_;
     AVSessionService *servicePtr_ = nullptr;
     AppExecFwk::ElementName elementName_;
 
@@ -120,6 +141,7 @@ private:
     std::thread keepAliveWorker_;
     std::thread checkConnectWorker_;
     std::recursive_mutex migrateProxyDeviceIdLock_;
+    std::recursive_mutex migrateProxySessionIdLock_;
     std::mutex keepAliveMtx_;
     std::condition_variable keepAliveCv_;
 };

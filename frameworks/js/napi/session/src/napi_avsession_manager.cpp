@@ -54,6 +54,8 @@ std::map<DistributedSessionType, std::pair<NapiAVSessionManager::OnEventHandlerT
     NapiAVSessionManager::OffEventHandlerType>> NapiAVSessionManager::distributedControllerEventHandlers_ = {
     { DistributedSessionType::TYPE_SESSION_REMOTE, {
         OnRemoteDistributedSessionChange, OffRemoteDistributedSessionChange } },
+    { DistributedSessionType::TYPE_SESSION_MIGRATE_IN, {
+        OnRemoteDistributedSessionChange, OffRemoteDistributedSessionChange } },
 };
 
 const std::string NapiAVSessionManager::DISTRIBUTED_SESSION_CHANGE_EVENT = "distributedSessionChange";

@@ -140,6 +140,7 @@ bool SoftbusDistributedDataManager::CreateProxy(const std::shared_ptr<SoftbusSes
                 proxy->ConnectServer(socketId);
                 return true;
             }
+            SLOGI("remove proxy socket for:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(peerNetworkId).c_str());
             mProxySocketMap_.erase(peerNetworkId);
         }
     }
@@ -207,6 +208,8 @@ bool SoftbusDistributedDataManager::ReleaseProxy(const std::shared_ptr<SoftbusSe
 #endif
         }
         mDeviceToProxyMap_.erase(peerNetworkId);
+        SLOGI("remove proxy socket:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(peerNetworkId).c_str());
+        mProxySocketMap_.erase(peerNetworkId);
         return true;
     }
     return false;
