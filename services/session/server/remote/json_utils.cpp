@@ -762,4 +762,32 @@ int32_t JsonUtils::GetSessionDescriptor(const std::string& sessionInfo, AVSessio
     cJSON_Delete(sessionInfoItem);
     return AVSESSION_SUCCESS;
 }
+
+std::string JsonUtils::GetStringParamFromJsonString(const std::string& jsonStr, const std::string& key)
+{
+    if (jsonStr.empty() || key.empty()) {
+        SLOGE("get jsonStr empty:%{public}d or key empty:%{public}d", jsonStr.empty(), key.empty());
+        return "";
+    }
+    cJSON* strJson = cJSON_Parse(jsonStr.c_str());
+    if (strJson == nullptr || cJSON_IsInvalid(strJson) || cJSON_IsNull(strJson)) {
+        SLOGE("get strJson fail");
+        cJSON_Delete(strJson);
+        return "";
+    }
+    cJSON* ItemObj = cJSON_GetObjectItem(strJson, key.c_str());
+    if (ItemObj == nullptr || cJSON_IsInvalid(ItemObj) || !cJSON_IsString(ItemObj)) {
+        SLOGE("get itemObj fail for key:%{public}s", key.c_str());
+        cJSON_Delete(strJson);
+        return "";
+    }
+    if (ItemObj->valuestring == nullptr) {
+        SLOGE("get valuestring but nullptr for key:%{public}s", key.c_str());
+        cJSON_Delete(strJson);
+        return "";
+    }
+    std::string valueStr = std::string(ItemObj->valuestring);
+    cJSON_Delete(strJson);
+    return valueStr;
+}
 } // namespace OHOS::AVSession

@@ -165,6 +165,18 @@ public:
         return cJSON_IsTrue(value);
     }
 
+    static inline bool GetArrayFromJson(cJSON* item, cJSON*& arrayObj, const char* key)
+    {
+        if (item == nullptr || cJSON_IsInvalid(item) || cJSON_IsNull(item)) {
+            return false;
+        }
+        arrayObj = cJSON_GetObjectItem(item, key);
+        if (arrayObj == nullptr || cJSON_IsInvalid(arrayObj) || !cJSON_IsArray(arrayObj)) {
+            return false;
+        }
+        return true;
+    }
+
     static inline cJSON* GetNewCJSONObject()
     {
         cJSON* value = cJSON_CreateObject();

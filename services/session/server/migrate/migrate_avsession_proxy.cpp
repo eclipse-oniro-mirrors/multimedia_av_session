@@ -55,6 +55,7 @@ void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
         std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
         deviceId_ = deviceId;
     }
+    CHECK_AND_RETURN_LOG(mMode_ != MSG_HEAD_MODE, "superMode:%{public}d", OnConnectForSuper());
     SendSpecialKeepAliveData();
     PrepareSessionFromRemote();
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnConnectServer find service ptr null!");
@@ -74,6 +75,7 @@ void MigrateAVSessionProxy::OnDisconnectServer(const std::string &deviceId)
             SLOGE("proxy onDisconnect but not:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
             return;
         }
+        CHECK_AND_RETURN_LOG(mMode_ != MSG_HEAD_MODE, "superMode:%{public}d", OnDisconnectForSuper());
         deviceId_ = "";
     }
     {
@@ -101,6 +103,7 @@ int32_t MigrateAVSessionProxy::GetCharacteristic()
 //LCOV_EXCL_START
 void MigrateAVSessionProxy::OnBytesReceived(const std::string &deviceId, const std::string &data)
 {
+    CHECK_AND_RETURN_LOG(mMode_ != MSG_HEAD_MODE, "superMode:%{public}d", OnBytesRecvForSuper(deviceId, data));
     if (data.length() <= MSG_HEAD_LENGTH) {
         SLOGE("OnBytesReceived too short to process");
         return;
@@ -117,10 +120,7 @@ void MigrateAVSessionProxy::OnBytesReceived(const std::string &deviceId, const s
     }
 
     cJSON* jsonValue = nullptr;
-    if (!SoftbusSessionUtils::TransferStrToJson(jsonStr, jsonValue)) {
-        SLOGE("OnBytesReceived parse json fail");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(SoftbusSessionUtils::TransferStrToJson(jsonStr, jsonValue), "OnBytes err parse json");
 
     switch (infoType) {
         case SYNC_FOCUS_SESSION_INFO:
@@ -186,6 +186,7 @@ void MigrateAVSessionProxy::HandleCommonCommand(const std::string& commonCommand
 
 void MigrateAVSessionProxy::GetDistributedSessionControllerList(std::vector<sptr<IRemoteObject>>& controllerList)
 {
+    CHECK_AND_RETURN_LOG(mMode_ != MSG_HEAD_MODE, "superMode:%{public}d", GetControllerListForSuper(controllerList));
     CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "GetDistributedSessionControllerList with controller null");
     controllerList.insert(controllerList.begin(), preSetController_);
 }
@@ -277,6 +278,8 @@ const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::Migrate
                 GetPreferredOutputDeviceForRendererInfo(extras);
                 break;
             case SESSION_NUM_COLD_START_FROM_PROXY:
+                CHECK_AND_RETURN_RET_LOG(mMode_ != MSG_HEAD_MODE, AVSESSION_SUCCESS,
+                    "superMode:%{public}d", ColdStartForSuper(extras));
                 ColdStartFromProxy();
                 break;
             case SESSION_NUM_SET_MEDIACONTROL_NEED_STATE:
@@ -308,7 +311,7 @@ void MigrateAVSessionProxy::SetVolume(const AAFwk::WantParams& extras)
         cJSON_Delete(value);
         return;
     }
-    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_SET_VOLUME_COMMAND});
+    std::string msg = std::string({mMode_, SYNC_SET_VOLUME_COMMAND});
     SoftbusSessionUtils::TransferJsonToStr(value, msg);
     cJSON_Delete(value);
     SendByteForNext(deviceId_, msg);
@@ -323,7 +326,7 @@ void MigrateAVSessionProxy::SelectOutputDevice(const AAFwk::WantParams& extras)
     CHECK_AND_RETURN_LOG(stringValue != nullptr, "extras have no value");
 
     std::string deviceValue = AAFwk::String::Unbox(stringValue);
-    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_SWITCH_AUDIO_DEVICE_COMMAND});
+    std::string msg = std::string({mMode_, SYNC_SWITCH_AUDIO_DEVICE_COMMAND});
     SendJsonStringByte(deviceId_, msg + deviceValue);
 }
 
@@ -392,7 +395,7 @@ void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantP
 void MigrateAVSessionProxy::ColdStartFromProxy()
 {
     SLOGI("proxy send in ColdStartFromProxy case with bundleName:%{public}s", elementName_.GetAbilityName().c_str());
-    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, COLD_START});
+    std::string msg = std::string({mMode_, COLD_START});
 
     cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
     if (controlMsg == nullptr) {
@@ -707,7 +710,7 @@ void MigrateAVSessionProxy::ProcessMediaImage(std::string mediaImageStr)
 void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr)
 {
     SLOGI("SendControlCommandMsg with code:%{public}d", commandCode);
-    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_COMMAND});
+    std::string msg = std::string({mMode_, SYNC_COMMAND});
 
     cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
     if (controlMsg == nullptr) {
@@ -733,7 +736,7 @@ void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::stri
 void MigrateAVSessionProxy::SendMediaControlNeedStateMsg(bool isMock)
 {
     SLOGI("SendMediaControlNeedStateMsg with state:%{public}d|mock:%{public}d", isNeedByMediaControl.load(), isMock);
-    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_MEDIA_CONTROL_NEED_STATE});
+    std::string msg = std::string({mMode_, SYNC_MEDIA_CONTROL_NEED_STATE});
 
     cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
     if (controlMsg == nullptr) {
@@ -773,7 +776,7 @@ void MigrateAVSessionProxy::SendSpecialKeepAliveData()
         while (!isDeviceIdEmpty) {
             SLOGI("SendSpecialKeepAliveData for deviceId:%{public}s.",
                 SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
-            std::string data = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_HEARTBEAT});
+            std::string data = std::string({mMode_, SYNC_HEARTBEAT});
             SendByteForNext(deviceId_, data);
 
             std::unique_lock<std::mutex> lock(keepAliveMtx_);
@@ -819,6 +822,8 @@ void AVSessionObserver::OnPlay(const AVControlCommand& cmd)
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
     CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");
+    CHECK_AND_RETURN_LOG(proxy->GetCharacteristic() != MSG_HEAD_MODE,
+        "superMode:%{public}d", proxy->HandlePlayForSuper(playerId_));
     proxy->HandlePlay();
 }
 
@@ -826,6 +831,8 @@ void AVSessionObserver::OnPause()
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
     CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");
+    CHECK_AND_RETURN_LOG(proxy->GetCharacteristic() != MSG_HEAD_MODE,
+        "superMode:%{public}d", proxy->HandlePauseForSuper(playerId_));
     proxy->HandlePause();
 }
 
@@ -833,6 +840,8 @@ void AVSessionObserver::OnPlayNext(const AVControlCommand& cmd)
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
     CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");
+    CHECK_AND_RETURN_LOG(proxy->GetCharacteristic() != MSG_HEAD_MODE,
+        "superMode:%{public}d", proxy->HandlePlayNextForSuper(playerId_));
     proxy->HandlePlayNext();
 }
 
@@ -840,6 +849,8 @@ void AVSessionObserver::OnPlayPrevious(const AVControlCommand& cmd)
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
     CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");
+    CHECK_AND_RETURN_LOG(proxy->GetCharacteristic() != MSG_HEAD_MODE,
+        "superMode:%{public}d", proxy->HandlePlayPreviousForSuper(playerId_));
     proxy->HandlePlayPrevious();
 }
 
@@ -847,6 +858,8 @@ void AVSessionObserver::OnToggleFavorite(const std::string& mediaId)
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
     CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");
+    CHECK_AND_RETURN_LOG(proxy->GetCharacteristic() != MSG_HEAD_MODE,
+        "superMode:%{public}d", proxy->HandleToggleFavoriteForSuper(playerId_, mediaId));
     proxy->HandleToggleFavorite(mediaId);
 }
 

@@ -258,6 +258,10 @@ public:
 
     void SucceedSuperLauncher(std::string deviceId, std::string extraInfo);
 
+    int32_t ProcessSuperLauncherConnect(std::string deviceId, std::string extraInfo);
+
+    int32_t ProcessSuperLauncherDisconnect(std::string deviceId, std::string extraInfo);
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void ReleaseCastSession() override;
 

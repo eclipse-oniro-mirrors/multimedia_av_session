@@ -38,6 +38,12 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         } else if (state == "CONNECT_SUCC") {
             SucceedSuperLauncher(deviceId, extraInfo);
         }
+    } else if (serviceName == "SuperLauncher") {
+        if (state == "IDLE") {
+            ProcessSuperLauncherDisconnect(deviceId, extraInfo);
+        } else if (state == "CONNECT_SUCC") {
+            ProcessSuperLauncherConnect(deviceId, extraInfo);
+        }
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if ((serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") &&
@@ -932,7 +938,7 @@ int32_t AVSessionService::GetDistributedSessionControllersInner(const Distribute
     std::vector<sptr<IRemoteObject>>& sessionControllers)
 {
     std::lock_guard lockGuard(migrateProxyMapLock_);
-    if (sessionType != DistributedSessionType::TYPE_SESSION_REMOTE || migrateAVSessionProxyMap_.empty()) {
+    if (migrateAVSessionProxyMap_.empty()) {
         SLOGE("GetDistributedSessionControllersInner with err type:%{public}d|proxyEmpty:%{public}d",
             static_cast<int>(sessionType), static_cast<int>(migrateAVSessionProxyMap_.empty()));
         return ERR_REMOTE_CONNECTION_NOT_EXIST;
@@ -941,6 +947,10 @@ int32_t AVSessionService::GetDistributedSessionControllersInner(const Distribute
         std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
             std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
         CHECK_AND_CONTINUE(migrateAVSessionProxy != nullptr);
+        CHECK_AND_CONTINUE(((sessionType == DistributedSessionType::TYPE_SESSION_REMOTE) &&
+            (migrateAVSessionProxy->GetCharacteristic() == MigrateAVSessionManager::MSG_HEAD_MODE_FOR_NEXT)) ||
+            ((sessionType == DistributedSessionType::TYPE_SESSION_MIGRATE_IN) &&
+            (migrateAVSessionProxy->GetCharacteristic() == MigrateAVSessionManager::MSG_HEAD_MODE)));
         migrateAVSessionProxy->GetDistributedSessionControllerList(sessionControllers);
     }
     SLOGI("GetDistributedController size:%{public}d", static_cast<int>(sessionControllers.size()));
@@ -954,5 +964,45 @@ void AVSessionService::NotifyRemoteBundleChange(const std::string bundleName)
         return;
     }
     PublishEvent(bundleName.empty() ? remoteMediaNone : remoteMediaAlive);
+}
+
+int32_t AVSessionService::ProcessSuperLauncherConnect(std::string deviceId, std::string extraInfo)
+{
+    SLOGI("ProcessSuperLauncherConnect with:%{public}s|%{public}s",
+        AVSessionUtils::GetAnonySessionId(deviceId).c_str(), AVSessionUtils::GetAnonySessionId(extraInfo).c_str());
+    std::string networkId = JsonUtils::GetStringParamFromJsonString(extraInfo, "mDeviceId");
+    std::lock_guard lockGuard(migrateProxyMapLock_);
+    if (migrateAVSessionProxyMap_.find(networkId) == migrateAVSessionProxyMap_.end()) {
+        std::string localDevId;
+        GetLocalNetworkId(localDevId);
+        std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
+            std::make_shared<MigrateAVSessionProxy>(this, MigrateAVSessionManager::MSG_HEAD_MODE, localDevId);
+        MigrateAVSessionManager::GetInstance().CreateRemoteSessionProxy(networkId,
+            MigrateAVSessionManager::migrateSceneNext, migrateAVSessionProxy);
+        migrateAVSessionProxyMap_.insert({networkId, std::static_pointer_cast<SoftbusSession>(migrateAVSessionProxy)});
+        SLOGI("new proxy success:%{public}d", static_cast<int>(migrateAVSessionProxyMap_.size()));
+    } else {
+        SLOGE("proxy already alive:%{public}d", static_cast<int>(migrateAVSessionProxyMap_.size()));
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::ProcessSuperLauncherDisconnect(std::string deviceId, std::string extraInfo)
+{
+    SLOGI("ProcessSuperLauncherDisconnect with:%{public}s|%{public}s",
+        AVSessionUtils::GetAnonySessionId(deviceId).c_str(), AVSessionUtils::GetAnonySessionId(extraInfo).c_str());
+    std::string networkId = JsonUtils::GetStringParamFromJsonString(extraInfo, "mDeviceId");
+    MigrateAVSessionManager::GetInstance().ReleaseRemoteSessionProxy(networkId,
+        MigrateAVSessionManager::migrateSceneNext);
+    std::lock_guard lockGuard(migrateProxyMapLock_);
+    SLOGI("ProcessSuperLauncherDisconnect networkId:%{public}s|%{public}d.",
+        AVSessionUtils::GetAnonySessionId(networkId).c_str(), static_cast<int>(migrateAVSessionProxyMap_.size()));
+    if (migrateAVSessionProxyMap_.find(networkId) != migrateAVSessionProxyMap_.end()) {
+        migrateAVSessionProxyMap_.erase(networkId);
+        PublishEvent(remoteMediaNone);
+    } else {
+        SLOGE("ProcessSuperLauncherDisconnect find networkId not exist");
+    }
+    return AVSESSION_SUCCESS;
 }
 }

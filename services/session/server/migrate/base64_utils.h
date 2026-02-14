@@ -71,6 +71,51 @@ public:
         return encoded;
     }
 
+    static std::vector<uint8_t> Base64Decode(const std::string& encoded)
+    {
+        std::vector<uint8_t> decoded;
+        int i = 0;
+        uint8_t byte4[NUMBER_FOUR] = {0};
+        uint8_t byte3[NUMBER_THREE] = {0};
+        for (char c : encoded) {
+            if (c == '=') {
+                break;
+            }
+            size_t pos = kBase64Chars.find(c);
+            if (pos == std::string::npos) {
+                continue;
+            }
+            byte4[i++] = static_cast<uint8_t>(pos);
+            if (i == NUMBER_FOUR) {
+                byte3[NUMBER_ZERO] = (byte4[NUMBER_ZERO] << NUMBER_TWO) |
+                                    ((byte4[NUMBER_ONE] & 0x30) >> NUMBER_FOUR);
+                byte3[NUMBER_ONE] = ((byte4[NUMBER_ONE] & 0x0f) << NUMBER_FOUR) |
+                                    ((byte4[NUMBER_TWO] & 0x3c) >> NUMBER_TWO);
+                byte3[NUMBER_TWO] = ((byte4[NUMBER_TWO] & 0x03) << NUMBER_SIX) |
+                                    byte4[NUMBER_THREE];
+                for (i = 0; i < NUMBER_THREE; i++) {
+                    decoded.push_back(byte3[i]);
+                }
+                i = NUMBER_ZERO;
+            }
+        }
+        if (i != NUMBER_ZERO) {
+            for (int k = i; k < NUMBER_FOUR; k++) {
+                byte4[k] = NUMBER_ZERO;
+            }
+            byte3[NUMBER_ZERO] = (byte4[NUMBER_ZERO] << NUMBER_TWO) |
+                                ((byte4[NUMBER_ONE] & 0x30) >> NUMBER_FOUR);
+            byte3[NUMBER_ONE] = ((byte4[NUMBER_ONE] & 0x0f) << NUMBER_FOUR) |
+                                ((byte4[NUMBER_TWO] & 0x3c) >> NUMBER_TWO);
+            byte3[NUMBER_TWO] = ((byte4[NUMBER_TWO] & 0x03) << NUMBER_SIX) |
+                                byte4[NUMBER_THREE];
+            for (int k = 0; k < i - NUMBER_ONE; k++) {
+                decoded.push_back(byte3[k]);
+            }
+        }
+        return decoded;
+    }
+
 private:
     static const std::string kBase64Chars;
 };

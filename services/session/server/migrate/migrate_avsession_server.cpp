@@ -457,6 +457,7 @@ void MigrateAVSessionServer::OnSessionRelease(const AVSessionDescriptor &descrip
     ClearCacheBySessionId(sessionId);
     releaseSessionId_ = sessionId;
     releaseSessionBundleName_ = descriptor.elementName_.GetBundleName();
+    releaseSessionAbilityName_ = descriptor.elementName_.GetAbilityName();
     SendRemoteHistorySessionList(deviceId_);
     SendRemoteControllerList(deviceId_);
     releaseSessionId_ = "";
@@ -587,9 +588,16 @@ bool MigrateAVSessionServer::ConvertSessionDescriptorsToCJSON(cJSON* jsonArray, 
             cJSON_Delete(releaseData);
             return false;
         }
+        SLOGI("checkBundle:%{public}s", releaseSessionBundleName_.c_str());
         if (!SoftbusSessionUtils::AddStringToJson(releaseData, PACKAGE_NAME, releaseSessionBundleName_)) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
                 PACKAGE_NAME, releaseSessionBundleName_.c_str());
+            cJSON_Delete(releaseData);
+            return false;
+        }
+        if (!AddBundleImgForSuper(releaseData, releaseSessionBundleName_, releaseSessionAbilityName_)) {
+            SLOGE("AddBundleImgForSuper with bundleName:%{public}s|abilityName:%{public}s fail",
+                releaseSessionBundleName_.c_str(), releaseSessionAbilityName_.c_str());
             cJSON_Delete(releaseData);
             return false;
         }
@@ -624,9 +632,16 @@ bool MigrateAVSessionServer::ConvertReleaseSessionToCJSON(cJSON* jsonArray,
             cJSON_Delete(jsonData);
             return false;
         }
+        SLOGI("checkBundle:%{public}s", iter->elementName_.GetBundleName().c_str());
         if (!SoftbusSessionUtils::AddStringToJson(jsonData, PACKAGE_NAME, iter->elementName_.GetBundleName())) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
                 PACKAGE_NAME, iter->elementName_.GetBundleName().c_str());
+            cJSON_Delete(jsonData);
+            return false;
+        }
+        if (!AddBundleImgForSuper(jsonData, iter->elementName_.GetBundleName(), iter->elementName_.GetAbilityName())) {
+            SLOGE("AddBundleImgForSuper with bundleName:%{public}s|abilityName:%{public}s fail",
+                iter->elementName_.GetBundleName().c_str(), iter->elementName_.GetAbilityName().c_str());
             cJSON_Delete(jsonData);
             return false;
         }
@@ -661,9 +676,16 @@ bool MigrateAVSessionServer::ConvertHisSessionDescriptorsToCJSON(cJSON* jsonArra
             cJSON_Delete(jsonData);
             return false;
         }
+        SLOGI("checkBundle:%{public}s", iter->elementName_.GetBundleName().c_str());
         if (!SoftbusSessionUtils::AddStringToJson(jsonData, PACKAGE_NAME, iter->elementName_.GetBundleName())) {
             SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
                 PACKAGE_NAME, iter->elementName_.GetBundleName().c_str());
+            cJSON_Delete(jsonData);
+            return false;
+        }
+        if (!AddBundleImgForSuper(jsonData, iter->elementName_.GetBundleName(), iter->elementName_.GetAbilityName())) {
+            SLOGE("AddBundleImgForSuper with bundleName:%{public}s|abilityName:%{public}s fail",
+                iter->elementName_.GetBundleName().c_str(), iter->elementName_.GetAbilityName().c_str());
             cJSON_Delete(jsonData);
             return false;
         }
@@ -1006,15 +1028,16 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
 
     if (metadata.IsValid()) {
         SLOGI("ConvertMetadataToJson without img");
-        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, metadata.GetTitle())) {
-            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-                METADATA_TITLE, AVSessionUtils::GetAnonyTitle(metadata.GetTitle()).c_str());
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, metadata.GetTitle()) ||
+            !SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, metadata.GetArtist())) {
+            SLOGE("AddStringToJson with title:%{public}s or artist:%{public}s fail",
+                AVSessionUtils::GetAnonyTitle(metadata.GetTitle()).c_str(), metadata.GetArtist().c_str());
             cJSON_Delete(result);
             return nullptr;
         }
-        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, metadata.GetArtist())) {
-            SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-                METADATA_ARTIST, metadata.GetArtist().c_str());
+        if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_LYRIC, metadata.GetLyric())) {
+            SLOGE("AddStringToJson with key:%{public}s|size:%{public}d fail",
+                METADATA_LYRIC, static_cast<int>(metadata.GetLyric().size()));
             cJSON_Delete(result);
             return nullptr;
         }
@@ -1033,6 +1056,7 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
     } else {
         if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, "") ||
             !SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, "") ||
+            !SoftbusSessionUtils::AddStringToJson(result, METADATA_LYRIC, "") ||
             !SoftbusSessionUtils::AddStringToJson(result, METADATA_IMAGE, "")) {
             cJSON_Delete(result);
             return nullptr;
@@ -1254,6 +1278,41 @@ void MigrateAVSessionServer::OnPlaybackStateChanged(const std::string &playerId,
     cJSON_Delete(value);
     std::string result = std::string(header) + msg;
     SendByte(deviceId_, result);
+}
+
+bool MigrateAVSessionServer::AddBundleImgForSuper(cJSON* jsonObj,
+    const std::string& bundleName, const std::string& abilityName)
+{
+    std::string iconStr;
+    if (!BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, abilityName, iconStr)) {
+        SLOGE("DoBundleInfoSyncToRemote get bundle icon fail for bundleName:%{public}s", bundleName.c_str());
+        return false;
+    }
+
+    uint32_t errorCode = 0;
+    Media::SourceOptions opts;
+    auto imageSource = Media::ImageSource::CreateImageSource(reinterpret_cast<const uint8_t*>(iconStr.c_str()),
+        iconStr.length(), opts, errorCode);
+    CHECK_AND_RETURN_RET_LOG(imageSource != nullptr, false,
+        "DoBundleInfoSyncToRemote CreateImageSource fail for bundleName:%{public}s|errorCode:%{public}u",
+        bundleName.c_str(), errorCode);
+    Media::DecodeOptions decodeOpts;
+    decodeOpts.allocatorType = Media::AllocatorType::HEAP_ALLOC;
+    std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
+    CHECK_AND_RETURN_RET_LOG(pixelMap != nullptr, false,
+        "DoBundleInfoSyncToRemote CreatePixelMap fail for bundleName:%{public}s", bundleName.c_str());
+
+    std::shared_ptr<AVSessionPixelMap> innerPixelMapForBundleIcon =
+        AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
+    CHECK_AND_RETURN_RET_LOG(innerPixelMapForBundleIcon != nullptr, false, "innerPixelMapForBundleIcon null");
+    std::vector<uint8_t> imgBufferMin = innerPixelMapForBundleIcon->GetInnerImgBuffer();
+    std::string imgStrMin(imgBufferMin.begin(), imgBufferMin.end());
+    if (!SoftbusSessionUtils::AddStringToJson(jsonObj, BUNDLE_ICON, imgStrMin)) {
+        SLOGE("AddStringToJson with bundleIcon:%{public}d fail", static_cast<int>(imgStrMin.size()));
+        return false;
+    }
+    SLOGI("addBundleForSuper:%{public}d success", static_cast<int>(imgStrMin.size()));
+    return true;
 }
 
 // LCOV_EXCL_START

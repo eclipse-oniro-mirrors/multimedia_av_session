@@ -119,6 +119,8 @@ const char* METADATA_TITLE = "MetadataTitle";
 
 const char* METADATA_ARTIST = "MetadataArtist";
 
+const char* METADATA_LYRIC = "MetadataLyric";
+
 const char* METADATA_IMAGE = "MetadataArt";
 
 const char* PLAYBACK_STATE = "PlaybackState";
