@@ -39,6 +39,7 @@
 #include "want_agent_helper.h"
 #include "avsession_hianalytics_report.h"
 #include "avsession_whitelist_config_manager.h"
+#include <filesystem>
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -501,6 +502,10 @@ int32_t AVSessionItem::UpdateAVQueueInfo(const AVQueueInfo& info)
     if (innerPixelMap != nullptr) {
         std::string fileDir = AVSessionUtils::GetFixedPathName(userId_);
         std::string fileName = GetBundleName() + "_" + info.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+        std::string filePath = fileDir + fileName;
+        std::filesystem::path resolvedPath = std::filesystem::absolute(filePath);
+        CHECK_AND_RETURN_RET_LOG(resolvedPath.string().find(fileDir) != std::string::npos, AVSESSION_ERROR,
+            "check fileName not valid");
         SLOGI("write image to file for %{public}s", info.GetAVQueueId().c_str());
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
         innerPixelMap->Clear();
