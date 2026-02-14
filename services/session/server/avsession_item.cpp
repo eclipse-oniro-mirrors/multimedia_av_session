@@ -325,6 +325,7 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
     return AVSESSION_SUCCESS;
 }
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionItem::UpdateRecommendInfo(bool needRecommend)
 {
     if (descriptor_.sessionTag_ == "RemoteCast") {
@@ -338,11 +339,10 @@ void AVSessionItem::UpdateRecommendInfo(bool needRecommend)
         extra = extras_;
     }
     SLOGI("assetChange:%{public}d AddFront:%{public}d supportCast:%{public}d filter:%{public}d duration:%{public}d",
-        isRecommendMediaChange_, isFirstAddToFront_, extra.HasParam("requireAbilityList"), meta.GetFilter(),
+        isRecommendMediaChange_, isFirstAddToFront_, IsAppSupportCast(), meta.GetFilter(),
         static_cast<int>(meta.GetDuration()));
     if (needRecommend) {
-        if (isRecommendMediaChange_ && !isFirstAddToFront_ && extra.HasParam("requireAbilityList") &&
-            meta.GetFilter() !=0 && meta.GetDuration() != 0) {
+        if (isRecommendMediaChange_ && !isFirstAddToFront_ && IsAppSupportCast() && meta.GetDuration() != 0) {
             isRecommendMediaChange_ = false;
             isRecommend_ = true;
             AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(),
@@ -356,6 +356,7 @@ void AVSessionItem::UpdateRecommendInfo(bool needRecommend)
         }
     }
 }
+#endif
 
 void AVSessionItem::HandleFrontSession()
 {
@@ -385,13 +386,17 @@ void AVSessionItem::HandleFrontSession()
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
             UpdateRecommendInfo(false);
+#endif
         }
     } else {
         if (isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), true);
             isFirstAddToFront_ = false;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
             UpdateRecommendInfo(true);
+#endif
         }
     }
 }
@@ -471,7 +476,6 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
     }
-    bool isSupportCast;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
         std::shared_ptr<AVSessionPixelMap> avQueueImg = meta.GetAVQueueImage();
@@ -483,11 +487,12 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
             AVSessionUtils::WriteImageToFile(avQueueImg, fileDir, fileName);
             avQueueImg->Clear();
         }
-        isSupportCast = extras_.HasParam("requireAbilityList") && metaData_.GetFilter() != 0 &&
-            metaData_.GetDuration() != 0;
     }
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    bool isSupportCast = IsAppSupportCast() && GetMetaDataWithoutImg().GetDuration() != 0;
     SLOGI("UpdateRecommendInfo isSupportCast %{public}d", isSupportCast);
     UpdateRecommendInfo(isSupportCast);
+#endif
 }
 
 int32_t AVSessionItem::UpdateAVQueueInfo(const AVQueueInfo& info)
@@ -1059,24 +1064,28 @@ int32_t AVSessionItem::SetExtras(const AAFwk::WantParams& extras)
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     if (extras.HasParam("requireAbilityList")) {
-        auto value = extras.GetParam("requireAbilityList");
-        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        AAFwk::IArray* list = AAFwk::IArray::Query(extras.GetParam("requireAbilityList"));
         if (list != nullptr && AAFwk::Array::IsStringArray(list)) {
             SetExtrasInner(list);
         }
     }
+    if (isRecommendMediaChange_ && !isFirstAddToFront_ && IsAppSupportCast() &&
+        GetMetaDataWithoutImg().GetDuration() != 0) {
+        isRecommendMediaChange_ = false;
+        isRecommend_ = true;
+        AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), GetSessionId(),
+            GetSessionType(), GetMetaDataWithoutImg().GetAssetId(), GetMetaDataWithoutImg().GetDuration());
+    }
     SetSpid(extras);
 #endif
     if (extras.HasParam("hw_live_view_hidden_when_keyguard")) {
-        auto value = extras.GetParam("hw_live_view_hidden_when_keyguard");
-        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        AAFwk::IArray* list = AAFwk::IArray::Query(extras.GetParam("hw_live_view_hidden_when_keyguard"));
         if (list != nullptr && AAFwk::Array::IsBooleanArray(list)) {
             NotificationExtras(list);
         }
     }
     if (extras.HasParam("support-keyevent")) {
-        auto value = extras.GetParam("support-keyevent");
-        AAFwk::IArray* list = AAFwk::IArray::Query(value);
+        AAFwk::IArray* list = AAFwk::IArray::Query(extras.GetParam("support-keyevent"));
         if (list != nullptr && AAFwk::Array::IsBooleanArray(list)) {
             KeyEventExtras(list);
         }
