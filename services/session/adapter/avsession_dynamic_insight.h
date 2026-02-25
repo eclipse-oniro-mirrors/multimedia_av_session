@@ -33,7 +33,7 @@ enum class StartPlayType {
     NEARLINK = 2
 };
 
-const std::map<StartPlayType, std::string> StartPlayTypeToString = {
+inline const std::map<StartPlayType, std::string> StartPlayTypeToString = {
     {StartPlayType::APP, "app"},
     {StartPlayType::BLUETOOTH, "bluetooth"},
     {StartPlayType::NEARLINK, "nearlink"}

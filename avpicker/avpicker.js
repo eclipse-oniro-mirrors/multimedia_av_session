@@ -439,7 +439,8 @@ export class AVCastPicker extends ViewPU {
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
                             [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-                        SymbolGlyph.renderingStrategy(2);
+                        SymbolGlyph.renderingStrategy(b3.fromCall && b3.deviceType === 2 ? 
+                            SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY);
                     }, SymbolGlyph);
                 });
             } else {

@@ -104,11 +104,11 @@ public:
     static inline bool AddJsonArrayToJson(cJSON*& item, const char* key, cJSON*& jsonArray)
     {
         if (item == nullptr || cJSON_IsInvalid(item) || cJSON_IsNull(item) ||
-            jsonArray == nullptr || cJSON_IsInvalid(jsonArray) || !cJSON_IsArray(jsonArray)) {
+            jsonArray == nullptr || cJSON_IsInvalid(jsonArray) || !cJSON_IsArray(jsonArray) ||
+            !cJSON_AddItemToObject(item, key, jsonArray)) {
             cJSON_Delete(jsonArray);
             return false;
         }
-        cJSON_AddItemToObject(item, key, jsonArray);
         if (cJSON_IsInvalid(item) || cJSON_IsNull(item)) {
             return false;
         }
@@ -118,11 +118,11 @@ public:
     static inline bool AddJsonToJsonArray(cJSON*& jsonArray, int32_t index, cJSON*& item)
     {
         if (jsonArray == nullptr || cJSON_IsInvalid(jsonArray) || !cJSON_IsArray(jsonArray) ||
-            item == nullptr || cJSON_IsInvalid(item) || cJSON_IsNull(item)) {
+            item == nullptr || cJSON_IsInvalid(item) || cJSON_IsNull(item) ||
+            !cJSON_InsertItemInArray(jsonArray, index, item)) {
             cJSON_Delete(item);
             return false;
         }
-        cJSON_InsertItemInArray(jsonArray, index, item);
         if (cJSON_IsInvalid(jsonArray) || cJSON_IsNull(jsonArray)) {
             return false;
         }

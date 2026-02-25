@@ -44,7 +44,7 @@ private:
 
 private:
     static constexpr int32_t ABILITY_START_TIMEOUT_MS = 5000;
-    static constexpr const char *defaultBundleName = "com.example.himusicdemo";
+    static constexpr const char *DEFAULT_BUNDLE_NAME = "com.example.himusicdemo";
     std::condition_variable syncCon_;
     std::mutex syncMutex_;
     std::atomic<Status> status_ = Status::ABILITY_STATUS_INIT;

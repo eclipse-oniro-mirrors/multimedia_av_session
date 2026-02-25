@@ -141,7 +141,7 @@ void AVSessionDumper::ShowTrustedDevicesInfo(std::string& result, const AVSessio
     result.append("Trusted Devices Info:\n\n")
         .append("Count                          : " + std::to_string(deviceList.size()) + "\n");
     for (const auto& device : deviceList) {
-        buff=device.deviceId;
+        buff = AVSessionUtils::GetAnonymousDeviceId(device.deviceId);
         result.append("         device id             : ");
         result.append(buff + "  ");
 
@@ -151,7 +151,7 @@ void AVSessionDumper::ShowTrustedDevicesInfo(std::string& result, const AVSessio
 
         result.append("\n        device type id         : " + deviceTypeId_.find(device.deviceTypeId)->second);
 
-        buff=device.networkId;
+        buff = AVSessionUtils::GetAnonyNetworkId(device.networkId);
         result.append("\n        network  id            : ");
         result.append(buff + "  ");
 
@@ -172,7 +172,7 @@ void AVSessionDumper::ShowSessionInfo(std::string& result, const AVSessionServic
         descriptor = session->GetDescriptor();
         std::string isActive = descriptor.isActive_ ? "true" : "false";
         std::string isTopSession = descriptor.isTopSession_ ? "true" : "false";
-        result.append("\n\ncurrent session id           : " + descriptor.sessionId_ + "\n")
+        result.append("\n\ncurrent session id: " + AVSessionUtils::GetAnonySessionId(descriptor.sessionId_) + "\n")
             .append("State:\n")
             .append("is active                    : " + isActive + "\n")
             .append("is the topsession            : " + isTopSession)

@@ -23,7 +23,11 @@
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "system_ability_status_change_stub.h"
+
+#ifndef CLIENT_LITE
 #include "av_session.h"
+#endif
+
 #include "avsession_service_proxy.h"
 #include "avsession_info.h"
 #include "client_death_stub.h"
@@ -41,11 +45,13 @@ public:
 
     static void DetachCallback();
 
+#ifndef CLIENT_LITE
     std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                              const AppExecFwk::ElementName& elementName) override;
 
     int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                           std::shared_ptr<AVSession>& session) override;
+#endif
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
@@ -100,8 +106,10 @@ public:
     int32_t GetDistributedSessionControllers(const DistributedSessionType& sessionType,
         std::vector<std::shared_ptr<AVSessionController>>& sessionControllers) override;
 
+#ifndef CLIENT_LITE
     int32_t GetSession(const AppExecFwk::ElementName& elementName,
         std::string& tag, std::shared_ptr<AVSession>& session) override;
+#endif
 
     int32_t IsDesktopLyricSupported(bool &isSupported) override;
 
