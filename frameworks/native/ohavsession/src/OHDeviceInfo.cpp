@@ -40,7 +40,7 @@ int32_t OHDeviceInfo::GetSupportedProtocols()
     return supportedProtocols_;
 }
 
-AVSession_OutputDeviceInfo* OHDeviceInfo::ConvertDesc(OHOS::AVSession::OutputDeviceInfo outputDeviceInfoVec)
+AVSession_OutputDeviceInfo* OHDeviceInfo::ConvertDesc(const OHOS::AVSession::OutputDeviceInfo &outputDeviceInfoVec)
 {
     size_t size = outputDeviceInfoVec.deviceInfos_.size();
     if (size == 0) {
@@ -90,6 +90,21 @@ AVSession_OutputDeviceInfo* OHDeviceInfo::ConvertDesc(OHOS::AVSession::OutputDev
 
     outputDeviceInfoArray->deviceInfos = (AVSession_DeviceInfo **)deviceInfoPtr;
     return outputDeviceInfoArray;
+}
+
+void OHDeviceInfo::DestroyAVSessionOutputDevice(AVSession_OutputDeviceInfo *array)
+{
+    if (array) {
+        for (uint32_t index = 0; index < array->size; index++) {
+            OHDeviceInfo *outputDeviceInfo = (OHDeviceInfo *)array->deviceInfos[index];
+            delete outputDeviceInfo;
+            array->deviceInfos[index] = nullptr;
+        }
+        free(array->deviceInfos);
+        array->deviceInfos = nullptr;
+        free(array);
+        array = nullptr;
+    }
 }
 
 AVSession_ErrCode OH_DeviceInfo_GetAVCastCategory(AVSession_DeviceInfo *deviceInfo,

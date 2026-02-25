@@ -16,7 +16,9 @@
 #ifndef OHOS_IAVSESSION_SERVICE_INTERFACE_H
 #define OHOS_IAVSESSION_SERVICE_INTERFACE_H
 
+#ifndef CLIENT_LITE
 #include "iav_session.h"
+#endif
 
 /* SAID: 3010 */
 namespace OHOS::AVSession {

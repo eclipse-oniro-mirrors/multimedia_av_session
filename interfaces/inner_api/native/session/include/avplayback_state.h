@@ -18,7 +18,11 @@
 
 #include <bitset>
 #include <parcel.h>
+
+#include "want.h"
+#ifndef CLIENT_LITE
 #include "want_agent.h"
+#endif
 
 namespace OHOS::AVSession {
 class AVPlaybackState : public Parcelable {

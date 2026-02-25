@@ -129,7 +129,6 @@ static void AlgoInit(AlgoCTX* c)
     c->nbits = 0;
 }
 
-// transform using full W[64] schedule (clear and explicit)
 static void AlgoTransform(AlgoCTX* ctx, const unsigned char *block)
 {
     // transform using full W[64] schedule (clear and explicit)

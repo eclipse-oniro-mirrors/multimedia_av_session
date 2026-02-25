@@ -609,7 +609,12 @@ napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAge
 {
     auto status = napi_create_object(env, &out);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
-    auto finalizecb = [](napi_env env, void* data, void* hint) {};
+    auto finalizecb = [](napi_env env, void* data, void* hint) {
+        auto *ability = reinterpret_cast<AbilityRuntime::WantAgent::WantAgent* >(data);
+        CHECK_RETURN_VOID(ability != nullptr, "finalize ability is null");
+        delete ability;
+        ability = nullptr;
+    };
     status = napi_wrap(env, out, static_cast<void*>(in), finalizecb, nullptr, nullptr);
     CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
     return status;

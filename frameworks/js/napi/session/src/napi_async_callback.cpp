@@ -57,16 +57,16 @@ void NapiAsyncCallback::Call(napi_ref& method, std::string callbackName, NapiArg
             delete ptr;
             ptr = nullptr;
         });
+        if (context == nullptr) {
+            SLOGE("context is nullptr");
+            return;
+        }
 
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(context->env, &scope);
 
         int argc = 0;
         napi_value argv[ARGC_MAX] = { nullptr };
-        if (context == nullptr) {
-            SLOGE("context is nullptr");
-            return;
-        }
         if (context->getter) {
             argc = ARGC_MAX;
             context->getter(context->env, argc, argv);
@@ -104,16 +104,16 @@ void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<bool> isV
             delete ptr;
             ptr = nullptr;
         });
+        if (context == nullptr) {
+            SLOGE("context is nullptr");
+            return;
+        }
 
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(context->env, &scope);
 
         int argc = 0;
         napi_value argv[ARGC_MAX] = { nullptr };
-        if (context == nullptr) {
-            SLOGE("context is nullptr");
-            return;
-        }
         if (context->getter) {
             argc = ARGC_MAX;
             context->getter(context->env, argc, argv);

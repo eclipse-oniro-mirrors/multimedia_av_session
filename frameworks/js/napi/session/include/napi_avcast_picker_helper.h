@@ -109,7 +109,7 @@ private:
     std::shared_ptr<bool> isValid_;
 
     Ace::UIContent *uiContent_;
-    napi_ref wrapperRef_{};
+    napi_ref wrapperRef_{ nullptr };
     int sessionId_ = 0;
 
     AudioStandard::AudioRoutingManager *audioRoutingMngr_;

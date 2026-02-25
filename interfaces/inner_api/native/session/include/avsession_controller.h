@@ -25,7 +25,10 @@
 #include "avsession_info.h"
 #include "avsession_errors.h"
 #include "key_event.h"
+
+#ifndef CLIENT_LITE
 #include "want_agent.h"
+#endif
 
 /**
  * @brief Session controller instance.
@@ -78,6 +81,7 @@ public:
     */
     virtual int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) = 0;
 
+#ifndef CLIENT_LITE
     /**
      * Get the WantAgent object saved by the application in the session.
      *
@@ -95,7 +99,8 @@ public:
      * @since 9
     */
     virtual int32_t GetLaunchAbilityInner(AbilityRuntime::WantAgent::WantAgent*& ability) = 0;
-    
+#endif
+
     /**
      * Get valid commands supported by the session.
      *

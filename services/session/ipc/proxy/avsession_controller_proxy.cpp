@@ -312,6 +312,7 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
+#ifndef CLIENT_LITE
 int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
@@ -363,6 +364,7 @@ int32_t AVSessionControllerProxy::GetLaunchAbilityInner(AbilityRuntime::WantAgen
     }
     return ret;
 }
+#endif
 
 int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
 {
