@@ -758,7 +758,6 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::CreateWantAgentWithIndex(
         res = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(launchWantAgent, want);
     }
     if (res == AVSESSION_SUCCESS && want != nullptr) {
-        want->SetElementName(GetBundleName(), GetAbilityName());
         AAFwk::WantParams params = want->GetParams();
         params.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, AAFwk::Integer::Box(index));
         want->SetParams(params);
@@ -1836,12 +1835,14 @@ int32_t AVSessionItem::SubStartCast(const OutputDeviceInfo& outputDeviceInfo)
     CHECK_AND_RETURN_RET_LOG(castHandle != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
 
     SetCastHandle(castHandle);
-    SLOGI("start cast check handle set to %{public}lld", (long long)castHandle_);
-    int32_t ret = AddDevice(static_cast<int32_t>(castHandle), outputDeviceInfo, GetSpid());
+    int32_t ret = AddDevice(castHandle, outputDeviceInfo, GetSpid());
     if (ret == AVSESSION_SUCCESS) {
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+        DoContinuousTaskRegister();
+        SLOGI("start cast check hanle set to %{public}lld", (long long)castHandle_);
+    } else {
+        DestroyCast(false);
     }
-    DoContinuousTaskRegister();
     return ret;
 }
 
@@ -1849,9 +1850,9 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
 {
     SLOGI("Add device process");
     std::lock_guard lockGuard(castLock_);
-    AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_,
+    AVRouter::GetInstance().RegisterCallback(castHandle, cssListener_,
         GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
-    int32_t castId = static_cast<int32_t>(castHandle_);
+    int32_t castId = static_cast<int32_t>(castHandle);
     int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo, spid);
     SLOGI("Add device process with ret %{public}d", ret);
     return ret;
@@ -1859,7 +1860,7 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
 
 void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 {
-    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}lld", castHandle_);
+    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}lld", (long long)castHandle_);
     if (isNeedRemove) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -1947,9 +1948,8 @@ void AVSessionItem::DealLocalState(const int32_t castState, const OutputDeviceIn
             multiDeviceState_ = MultiDeviceState::DEFAULT;
             CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
             std::this_thread::sleep_for(std::chrono::milliseconds(SWITCH_WAIT_TIME));
-            if (CastAddToCollaboration(newOutputDeviceInfo_) == AVSESSION_SUCCESS) {
-                SubStartCast(newOutputDeviceInfo_);
-            } else {
+            if (CastAddToCollaboration(newOutputDeviceInfo_) != AVSESSION_SUCCESS||
+                SubStartCast(newOutputDeviceInfo_) != AVSESSION_SUCCESS) {
                 OnCastStateChange(disconnectStateFromCast_, newOutputDeviceInfo_.deviceInfos_[0], false);
                 AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
             }
@@ -2574,6 +2574,17 @@ bool AVSessionItem::IsNotShowNotification()
     return isNotShowNotification_;
 }
 
+void AVSessionItem::PublishMediaKeyEvent(int32_t keyCode)
+{
+    if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PLAY) {
+        AVSessionUtils::PublishCtrlCmdEvent("OnPlay", GetUid(), GetPid());
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_NEXT) {
+        AVSessionUtils::PublishCtrlCmdEvent("OnPlayNext", GetUid(), GetPid());
+    } else if (keyCode == MMI::KeyEvent::KEYCODE_MEDIA_PREVIOUS) {
+        AVSessionUtils::PublishCtrlCmdEvent("OnPlayPrevious", GetUid(), GetPid());
+    }
+}
+
 void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const CommandInfo& cmdInfo)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
@@ -2588,10 +2599,13 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const Com
         cmd.SetCommandInfo(cmdInfo);
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
     } else {
-        std::lock_guard callbackLockGuard(callbackLock_);
-        if (callback_ != nullptr) {
-            callback_->OnMediaKeyEvent(keyEvent);
+        {
+            std::lock_guard callbackLockGuard(callbackLock_);
+            if (callback_ != nullptr) {
+                callback_->OnMediaKeyEvent(keyEvent);
+            }
         }
+        PublishMediaKeyEvent(keyEvent.GetKeyCode());
     }
 }
 
@@ -2775,23 +2789,29 @@ void AVSessionItem::HandleOnStop(const AVControlCommand& cmd)
 void AVSessionItem::HandleOnPlayNext(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayNext");
-    std::lock_guard callbackLockGuard(callbackLock_);
-    if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlayNext(cmd);
-    }
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
-    callback_->OnPlayNext(cmd);
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callbackForMigrate_) {
+            callbackForMigrate_->OnPlayNext(cmd);
+        }
+        CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
+        callback_->OnPlayNext(cmd);
+        }
+    AVSessionUtils::PublishCtrlCmdEvent("OnPlayNext", GetUid(), GetPid());
 }
 
 void AVSessionItem::HandleOnPlayPrevious(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnPlayPrevious");
-    std::lock_guard callbackLockGuard(callbackLock_);
-    if (callbackForMigrate_) {
-        callbackForMigrate_->OnPlayPrevious((cmd));
-    }
+    {
+        std::lock_guard callbackLockGuard(callbackLock_);
+        if (callbackForMigrate_) {
+            callbackForMigrate_->OnPlayPrevious(cmd);
+        }
     CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnPlayPrevious((cmd));
+    }
+    AVSessionUtils::PublishCtrlCmdEvent("OnPlayPervious", GetUid(), GetPid());
 }
 
 void AVSessionItem::HandleOnFastForward(const AVControlCommand& cmd)
