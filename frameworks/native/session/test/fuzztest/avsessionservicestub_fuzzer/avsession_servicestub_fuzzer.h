@@ -39,6 +39,8 @@ public:
     static void HandleGetHistoricalAVQueueInfosFuzzTest();
     static void HandleSendSystemAVKeyEventFuzzTest();
     static void HandleGetDistributedSessionControllersInnerFuzzTest();
+    static void HandleIsDesktopLyricSupportedFuzzTest();
+    static void HandleGetSessionInnerFuzzTest();
 };
 }
 #endif

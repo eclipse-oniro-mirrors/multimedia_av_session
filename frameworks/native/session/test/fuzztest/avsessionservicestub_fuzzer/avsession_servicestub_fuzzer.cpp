@@ -44,7 +44,6 @@ static size_t g_pos;
 constexpr size_t ELEMENTS_MAX_LENGTH = 128;
 const size_t MAX_BUFFER_SIZE = 64 * 1024;
 const size_t MAX_AVQUEUEINFO_SIZE = 512;
-FuzzedDataProvider provider(RAW_DATA, g_dataSize);
 
 /*
 * describe: get data from outside untrusted data(g_data) which size is according to sizeof(T)
@@ -146,10 +145,17 @@ void AvSessionServiceStubFuzzer::AVQueueInfoImgToBufferFuzzTest()
 {
     sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
     CHECK_AND_RETURN(avSessionService != nullptr);
+    std::shared_ptr<AVSessionPixelMap> avQueueImage = std::make_shared<AVSessionPixelMap>();
+    CHECK_AND_RETURN(avQueueImage != nullptr);
+    std::vector<uint8_t> imgBuffer = {0, 1, 2};
+    avQueueImage->SetInnerImgBuffer(imgBuffer);
     std::vector<OHOS::AVSession::AVQueueInfo> avQueueInfos;
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
     size_t elements = provider.ConsumeIntegralInRange<size_t>(0, ELEMENTS_MAX_LENGTH);
     for (size_t i = 0; i < elements; ++i) {
         OHOS::AVSession::AVQueueInfo info;
+        info.SetAVQueueImage(avQueueImage);
+        info.SetAVQueueLength(static_cast<int32_t>(imgBuffer.size()));
         avQueueInfos.push_back(std::move(info));
     }
     size_t requiredBufferSize = elements * MAX_AVQUEUEINFO_SIZE;
@@ -198,6 +204,31 @@ void AvSessionServiceStubFuzzer::HandleGetDistributedSessionControllersInnerFuzz
     avSessionService->HandleGetDistributedSessionControllersInner(data, reply);
 }
 
+void AvSessionServiceStubFuzzer::HandleIsDesktopLyricSupportedFuzzTest()
+{
+    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(avSessionService != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    avSessionService->HandleIsDesktopLyricSupported(data, reply);
+}
+
+void AvSessionServiceStubFuzzer::HandleGetSessionInnerFuzzTest()
+{
+    sptr<AVSessionService> avSessionService = new AVSessionService(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(avSessionService != nullptr);
+    const std::u16string interfaceToken = u"AVSessionService";
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    OHOS::AppExecFwk::ElementName elementName;
+    FuzzedDataProvider provider(RAW_DATA, g_dataSize);
+    std::string bundleName = provider.ConsumeRandomLengthString();
+    elementName.SetBundleName(bundleName);
+    data.WriteInterfaceToken(interfaceToken);
+    data.WriteParcelable(&elementName);
+    avSessionService->HandleGetSessionInner(data, reply);
+}
+
 void OHOS::AVSession::AvSessionServiceOnRemoteRequest()
 {
     auto aVSessionService = std::make_unique<AvSessionServiceFuzzer>();
@@ -212,9 +243,9 @@ void OHOS::AVSession::AvSessionServiceTests()
     aVSessionService->FuzzTests();
 }
 
-typedef void (*TestFuncs[8])();
+typedef void (*TestFuncs)();
 
-TestFuncs g_testFuncs = {
+TestFuncs g_testFuncs[] = {
     AvSessionServiceOnRemoteRequest,
     AvSessionServiceTests,
     AvSessionServiceStubFuzzer::MarshallingAVQueueInfosFuzzTest,
@@ -223,6 +254,8 @@ TestFuncs g_testFuncs = {
     AvSessionServiceStubFuzzer::HandleGetHistoricalAVQueueInfosFuzzTest,
     AvSessionServiceStubFuzzer::HandleSendSystemAVKeyEventFuzzTest,
     AvSessionServiceStubFuzzer::HandleGetDistributedSessionControllersInnerFuzzTest,
+    AvSessionServiceStubFuzzer::HandleIsDesktopLyricSupportedFuzzTest,
+    AvSessionServiceStubFuzzer::HandleGetSessionInnerFuzzTest,
 };
 
 static bool FuzzTest(const uint8_t* rawData, size_t size)
@@ -238,7 +271,7 @@ static bool FuzzTest(const uint8_t* rawData, size_t size)
 
     uint32_t code = GetData<uint32_t>();
     uint32_t len = GetArrLength(g_testFuncs);
-    if (len > 0) {
+    if (len > 0 && g_testFuncs[code % len] != nullptr) {
         g_testFuncs[code % len]();
     } else {
         SLOGI("%{public}s: The len length is equal to 0", __func__);

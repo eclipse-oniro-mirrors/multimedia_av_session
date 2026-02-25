@@ -39,6 +39,7 @@ static const uint8_t *RAW_DATA = nullptr;
 const size_t THRESHOLD = 10;
 static size_t g_dataSize = 0;
 static size_t g_pos;
+constexpr int32_t MAX_IPC_CODE = 25;
 
 /*
 * describe: get data from outside untrusted data(RAW_DATA) which size is according to sizeof(T)
@@ -233,7 +234,7 @@ void AvSessionCallbackClientFuzzer::FuzzOnRemoteRequest(int32_t code)
     if ((RAW_DATA == nullptr) || (g_dataSize > MAX_CODE_LEN) || (g_dataSize < MIN_SIZE_NUM)) {
         return;
     }
-    if (code >= MAX_CODE_TEST) {
+    if (code >= MAX_IPC_CODE) {
         return;
     }
     std::shared_ptr<TestAVSessionCallback> testAVSessionCallback = std::make_shared<TestAVSessionCallback>();
@@ -355,7 +356,7 @@ void AvSessionCallbackClientFuzzer::FuzzTestInner2()
 
 void OHOS::AVSession::AvSessionCallbackOnRemoteRequest()
 {
-    for (uint32_t i = 0; i <= MAX_CODE_TEST; i++) {
+    for (uint32_t i = 0; i <= MAX_IPC_CODE; i++) {
         auto avSessionCallbackClient = std::make_unique<AvSessionCallbackClientFuzzer>();
         if (avSessionCallbackClient == nullptr) {
             SLOGI("avSessionCallbackClient is null");
