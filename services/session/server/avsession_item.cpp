@@ -1914,7 +1914,6 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     CHECK_AND_RETURN_LOG(multiDeviceState_ != MultiDeviceState::CASTED_AND_CASTING,
         "session casted already publish service state");
 
-    collaborationNeedDeviceId_ = deviceInfo.deviceId_;
     if (castState == authingStateFromCast_) {
         CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTING);
@@ -2012,6 +2011,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
+    collaborationNeedDeviceId_ = deviceInfo.deviceId_;
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
@@ -2044,8 +2044,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
             serviceCallbackForPhotoCast_(GetSessionId(), true);
         }
-    }
-    if (castState == disconnectStateFromCast_) { // 5 is disconnected status
+    } else if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         castState = 6; // 6 is disconnected status of AVSession
         if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO &&
             multiDeviceState_ != MultiDeviceState::CASTING_SWITCH_DEVICE) {
