@@ -21,6 +21,7 @@ group("fuzztest") {
     "abilitymanageradapter_fuzzer:AbilityManagerAdapterFuzzTest",
     "audioadapterinterface_fuzzer:AudioAdapterInterfaceFuzzTest",
     "audiodevicemanager_fuzzer:AudioDeviceManagerFuzzTest",
+    "avcontrollercallbackclient_fuzzer:AVControllerCallbackClientFuzzTest",
     "avcontrollercallbackproxy_fuzzer:AVControllerCallbackProxyFuzzTest",
     "avcontrolleritem_fuzzer:AVControllerItemFuzzTest",
     "avsessionadapter_fuzzer:AVSessionAdapterFuzzTest",
