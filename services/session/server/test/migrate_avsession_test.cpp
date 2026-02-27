@@ -478,6 +478,11 @@ static HWTEST_F(MigrateAVSessionTest, ConvertMetadataInfoToStr001, TestSize.Leve
         cJSON_Delete(result);
         result = nullptr;
     }
+    if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_LYRIC, "")) {
+        SLOGE("AddStringToJson with key:%{public}s fail", METADATA_LYRIC);
+        cJSON_Delete(result);
+        result = nullptr;
+    }
     if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_IMAGE, "")) {
         SLOGE("AddStringToJson with key:%{public}s fail", METADATA_IMAGE);
         cJSON_Delete(result);
