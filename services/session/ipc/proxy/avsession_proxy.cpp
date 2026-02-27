@@ -105,7 +105,6 @@ int32_t AVSessionProxy::RegisterCallbackInner(const sptr<IAVSessionCallback>& ca
 
 int32_t AVSessionProxy::Destroy()
 {
-    std::lock_guard isDestroyedLockGuard(isDestroyedLock_);
     SLOGI("enter");
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
@@ -123,7 +122,7 @@ int32_t AVSessionProxy::Destroy()
         return AVSESSION_ERROR;
     }
     if (ret == AVSESSION_SUCCESS) {
-        isDestroyed_ = true;
+        isDestroyed_.store(true);
         controller_ = nullptr;
     }
     return ret;
@@ -395,7 +394,6 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
     SLOGI("SetAVPlaybackState:%{public}d.",
         state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_STATE) ? state.GetState() : -1);
 
-    std::lock_guard isDestroyedLockGuard(isDestroyedLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
@@ -645,7 +643,6 @@ int32_t AVSessionProxy::Activate()
 
 int32_t AVSessionProxy::Deactivate()
 {
-    std::lock_guard isDestroyedLockGuard(isDestroyedLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
