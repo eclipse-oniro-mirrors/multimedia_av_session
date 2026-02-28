@@ -19,6 +19,8 @@
 #include "avsession_trace.h"
 
 namespace OHOS::AVSession {
+
+OutputDeviceInfo outputDeviceInfo_ = OutputDeviceInfo();
 NapiAVSessionCallback::NapiAVSessionCallback()
 {
     SLOGI("construct NapiAVSessionCallback");
@@ -278,9 +280,33 @@ void NapiAVSessionCallback::OnOutputDeviceChange(const int32_t connectionState,
     const OutputDeviceInfo& outputDeviceInfo)
 {
     std::string callBackName = "NapiAVSessionCallback::OnOutputDeviceChange";
+    outputDeviceInfo_ = (connectionState == ConnectionState::STATE_CONNECTED &&
+        !outputDeviceInfo.deviceInfos_.empty() &&
+        outputDeviceInfo.deviceInfos_[0].castCategory_ == AVCastCategory::CATEGORY_REMOTE) ?
+        outputDeviceInfo : outputDeviceInfo_;
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
     SLOGI("OnOutputDeviceChange with connectionState %{public}d", connectionState);
     HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, callBackName, connectionState, outputDeviceInfo);
+}
+
+void NapiAVSessionCallback::RestartSessionDisconnect()
+{
+    if (outputDeviceInfo_.deviceInfos_.empty()) {
+        return;
+    }
+    SLOGI("RestartSessionDisconnect start");
+    outputDeviceInfo_.deviceInfos_[0].castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+    std::string callBackName = "NapiAVSessionCallback::OnOutputDeviceChange";
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
+    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, callBackName, ConnectionState::STATE_DISCONNECTED, outputDeviceInfo_);
+
+    OutputDeviceInfo localDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "LocalDevice";
+    localDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, callBackName, ConnectionState::STATE_CONNECTED, localDeviceInfo);
 }
 
 void NapiAVSessionCallback::OnCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
