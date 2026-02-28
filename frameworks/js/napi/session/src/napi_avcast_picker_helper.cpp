@@ -101,9 +101,6 @@ napi_value NapiAVCastPickerHelper::ConstructorCallback(napi_env env, napi_callba
     auto finalize = [](napi_env env, void* data, void* hint) {
         auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(data);
         CHECK_AND_RETURN_LOG(napiAVCastPickerHelper != nullptr, "napiAVCastPickerHelper is nullptr");
-        if (napiAVCastPickerHelper->uiContent_ != nullptr) {
-            napiAVCastPickerHelper->uiContent_->CloseModalUIExtension(napiAVCastPickerHelper->sessionId_);
-        }
         napi_delete_reference(env, napiAVCastPickerHelper->wrapperRef_);
         delete napiAVCastPickerHelper;
         napiAVCastPickerHelper = nullptr;
@@ -214,47 +211,62 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_CAST_PICKER_HELPER_TASK_ID;
-   
+    
     auto executor = [context]() {
         auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
         AAFwk::Want request;
-        std::string targetType = "sysPicker/mediaControl";
-        
-        request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, targetType);
-        request.SetParam("isAVCastPickerHelper", true);
-        request.SetParam("AVCastPickerOptionsType", context->napiAVCastPickerOptions.sessionType);
-        request.SetParam("AVCastPickerOptionsStyle", context->napiAVCastPickerOptions.pickerStyle);
-        request.SetParam("AVCastPickerOptionsPositionX", context->napiAVCastPickerOptions.menuPosition.x);
-        request.SetParam("AVCastPickerOptionsPositionY", context->napiAVCastPickerOptions.menuPosition.y);
-        request.SetParam("AVCastPickerOptionsPositionW", context->napiAVCastPickerOptions.menuPosition.width);
-        request.SetParam("AVCastPickerOptionsPositionH", context->napiAVCastPickerOptions.menuPosition.height);
-        request.SetElementName(ABILITY_WANT_ELEMENT_NAME, "UIExtAbility");
+        BuildPickerRequest(context->napiAVCastPickerOptions, request);
 
         PickerCallBack pickerCallBack;
         auto callback = std::make_shared<ModalUICallback>(napiAVCastPickerHelper->uiContent_, pickerCallBack);
-        std::string callBackName = "NapiAVCastPickerHelper::SelectAVPicker";
-        Ace::ModalUIExtensionCallbacks extensionCallback = {
-            .onRelease = ([callback](auto arg) { callback->OnRelease(arg); }),
-            .onResult = ([callback](auto arg1, auto arg2) { callback->OnResult(arg1, arg2); }),
-            .onReceive = ([callback, napiAVCastPickerHelper, callBackName](auto arg) {
-                callback->OnReceive(arg);
-                napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, callBackName, STATE_DISAPPEARING);
-            }),
-            .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
-            .onRemoteReady = ([callback, napiAVCastPickerHelper, callBackName](auto arg) {
-                callback->OnRemoteReady(arg);
-                napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, callBackName, STATE_APPEARING);
-            }),
-            .onDestroy = ([callback]() { callback->OnDestroy(); }),
-        };
+        auto extensionCallback = CreateExtensionCallback(callback, napiAVCastPickerHelper);
+
         Ace::ModalUIExtensionConfig config;
         config.isProhibitBack = true;
+        CHECK_AND_RETURN_LOG(napiAVCastPickerHelper->uiContent_ != nullptr, "uiContent_ is destroyed");
         napiAVCastPickerHelper->sessionId_ =
             napiAVCastPickerHelper->uiContent_->CreateModalUIExtension(request, extensionCallback, config);
         callback->SetSessionId(napiAVCastPickerHelper->sessionId_);
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SelectAVPicker", executor, complete);
+}
+
+void NapiAVCastPickerHelper::BuildPickerRequest(const NapiAVCastPickerOptions& options, AAFwk::Want& request)
+{
+    std::string targetType = "sysPicker/mediaControl";
+    request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, targetType);
+    request.SetParam("isAVCastPickerHelper", true);
+    request.SetParam("AVCastPickerOptionsType", options.sessionType);
+    request.SetParam("AVCastPickerOptionsStyle", options.pickerStyle);
+    request.SetParam("AVCastPickerOptionsPositionX", options.menuPosition.x);
+    request.SetParam("AVCastPickerOptionsPositionY", options.menuPosition.y);
+    request.SetParam("AVCastPickerOptionsPositionW", options.menuPosition.width);
+    request.SetParam("AVCastPickerOptionsPositionH", options.menuPosition.height);
+    request.SetElementName(ABILITY_WANT_ELEMENT_NAME, "UIExtAbility");
+}
+
+Ace::ModalUIExtensionCallbacks NapiAVCastPickerHelper::CreateExtensionCallback(
+    const std::shared_ptr<ModalUICallback>& callback, NapiAVCastPickerHelper* napiAVCastPickerHelper)
+{
+    static const std::string callBackName = "NapiAVCastPickerHelper::SelectAVPicker";
+    auto isValid = napiAVCastPickerHelper->isValid_;
+    return {
+        .onRelease = ([callback](auto arg) { callback->OnRelease(arg); }),
+        .onResult = ([callback](auto arg1, auto arg2) { callback->OnResult(arg1, arg2); }),
+        .onReceive = ([callback, napiAVCastPickerHelper, isValid](auto arg) {
+            callback->OnReceive(arg);
+            CHECK_AND_RETURN_LOG(isValid && *isValid, "NapiAVCastPickerHelper is destroyed");
+            napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, callBackName, STATE_DISAPPEARING);
+        }),
+        .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
+        .onRemoteReady = ([callback, napiAVCastPickerHelper, isValid](auto arg) {
+            callback->OnRemoteReady(arg);
+            CHECK_AND_RETURN_LOG(isValid && *isValid, "NapiAVCastPickerHelper is destroyed");
+            napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, callBackName, STATE_APPEARING);
+        }),
+        .onDestroy = ([callback]() { callback->OnDestroy(); }),
+    };
 }
 
 napi_value NapiAVCastPickerHelper::ResetCommunicationDevice(napi_env env, napi_callback_info info)

@@ -92,6 +92,10 @@ private:
     static napi_value OnEvent(napi_env env, napi_callback_info info);
     static napi_value OffEvent(napi_env env, napi_callback_info info);
 
+    static void BuildPickerRequest(const NapiAVCastPickerOptions& options, AAFwk::Want& request);
+    static Ace::ModalUIExtensionCallbacks CreateExtensionCallback(
+        const std::shared_ptr<ModalUICallback>& callback, NapiAVCastPickerHelper* napiAVCastPickerHelper);
+
     static napi_value SelectAVPicker(napi_env env, napi_callback_info info);
     static napi_value ResetCommunicationDevice(napi_env env, napi_callback_info info);
 
