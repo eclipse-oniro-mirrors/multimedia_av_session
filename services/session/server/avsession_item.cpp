@@ -40,6 +40,8 @@
 #include "avsession_hianalytics_report.h"
 #include "avsession_whitelist_config_manager.h"
 
+#include <cinttypes>
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
@@ -1860,7 +1862,7 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
 
 void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 {
-    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}lld", (long long)castHandle_);
+    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}" PRId64, castHandle_);
     if (isNeedRemove) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -2150,7 +2152,7 @@ void AVSessionItem::UnRegisterDeviceStateCallback()
 
 void AVSessionItem::StopCastSession()
 {
-    SLOGI("Stop cast session process with castHandle: %{public}lld", castHandle_);
+    SLOGI("Stop cast session process with castHandle: %{public}" PRId64, castHandle_);
     int64_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
     DoContinuousTaskUnregister();
     if (ret != AVSESSION_ERROR) {
