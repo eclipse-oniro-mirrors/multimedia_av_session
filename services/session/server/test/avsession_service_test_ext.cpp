@@ -85,6 +85,10 @@ class TestISessionListener : public ISessionListener {
         g_isCallOnTopSessionChange = true;
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override
+    {
+        return AVSESSION_SUCCESS;
+    };
     ErrCode OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override
     {
@@ -997,6 +1001,41 @@ static HWTEST_F(AVSessionServiceTestExt, NotifyActiveSessionChange001, TestSize.
     g_AVSessionService->NotifySessionChange(sessionListForFront, curUserId);
     EXPECT_EQ(g_isCallOnActiveSessionChanged, true);
     avsessionHere->Destroy();
+}
+
+/*
+ * @tc.name: UpdateDeviceCastMode001
+ * @tc.desc: Test UpdateDeviceCastMode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OutputDeviceInfo outputDeviceInfo;
+    g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+}
+
+/*
+ * @tc.name: NotifySystemCommonEvent001
+ * @tc.desc: Test NotifySystemCommonEvent
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, NotifySystemCommonEvent001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    pid_t pid = 1001;
+    sptr<ISessionListener> listener = new TestISessionListener();
+    CHECK_AND_RETURN(listener != nullptr);
+    g_AVSessionService->GetUsersManager().AddSessionListener(pid, listener);
+    std::string commonEvent = "";
+    std::string args = "";
+    g_AVSessionService->NotifySystemCommonEvent(commonEvent, args);
+    g_AVSessionService->GetUsersManager().AddSessionListener(pid, nullptr);
+    g_AVSessionService->NotifySystemCommonEvent(commonEvent, args);
+    EXPECT_TRUE(g_isCallOnTopSessionChange);
 }
 } // AVSession
 } // OHOS

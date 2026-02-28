@@ -25,6 +25,8 @@
 
 #include "avsession_controller.h"
 #include "avsession_errors.h"
+#include <cstdint>
+#include <string>
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller.h"
@@ -84,6 +86,8 @@ public:
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam) override;
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
+
+    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs) override;
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 

@@ -129,6 +129,8 @@ public:
     int32_t RegisterSessionListenerForAllUsers(const OHOS::sptr<ISessionListener> &listener) override { return 0; };
     int32_t SendSystemAVKeyEvent(const OHOS::MMI::KeyEvent &keyEvent) override { return 0; };
     int32_t SendSystemControlCommand(const AVControlCommand &command) override { return 0; };
+    int32_t SendSystemCommonCommand(const std::string& commonCommand,
+        const AAFwk::wantParams& commandArgs) override { return 0; };
     int32_t RegisterClientDeathObserver(const OHOS::sptr<IClientDeath> &observer) override { return 0; };
     int32_t CastAudio(const SessionToken &token,
         const std::vector<OHOS::AudioStandard::AudioDeviceDescriptor> &descriptors) override { return 0; };
@@ -904,6 +906,40 @@ static HWTEST_F(AVSessionServiceStubTest, HandleGetSessionDescriptors001, TestSi
     stub.HandleGetSessionDescriptors(data, reply);
     EXPECT_EQ(reply.ReadInt32(), ERR_PERMISSION_DENIED);
     SLOGI("HandleGetSessionDescriptors001 end!");
+}
+
+/**
+ * @tc.name: HandleSendSystemCommonCommand001
+ * @tc.desc: Test HandleSendSystemCommonCommand
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleSendSystemCommonCommand001, TestSize.Level0)
+{
+    SLOGI("HandleSendSystemCommonCommand001, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteInt32(0);
+    AVSessionServiceStubPerDemo stub;
+    stub.HandleGetSessionDescriptors(data, reply);
+    EXPECT_EQ(reply.ReadInt32(), AVSESSION_SUCCESS);
+    SLOGI("HandleSendSystemCommonCommand001 end!");
+}
+
+/**
+ * @tc.name: HandleSendSystemCommonCommand002
+ * @tc.desc: Test HandleSendSystemCommonCommand
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleSendSystemCommonCommand002, TestSize.Level0)
+{
+    SLOGI("HandleSendSystemCommonCommand002, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    data.WriteString("test");
+    AVSessionServiceStubPerDemo stub;
+    int32_t ret = stub.HandleSendSystemCommonCommand(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+    SLOGI("HandleSendSystemCommonCommand002 end!");
 }
 } // AVSession
 } // OHOS

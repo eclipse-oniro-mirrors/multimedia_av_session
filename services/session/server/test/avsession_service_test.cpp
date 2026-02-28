@@ -1957,6 +1957,22 @@ static HWTEST_F(AVSessionServiceTest, SendSystemControlCommand003, TestSize.Leve
     SLOGI("SendSystemControlCommand003 end!");
 }
 
+/**
+* @tc.name: SendSystemCommonCommand001
+* @tc.desc: valid command and args
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand001, TestSize.Level0)
+{
+    SLOGD("SendSystemCommonCommand001 begin!");
+    std::string commonCommand = "";
+    OHOS::AAFwk:WantParams commandArgs;
+    auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGD("SendSystemCommonCommand001 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, CreateWantAgent001, TestSize.Level0)
 {
     SLOGD("CreateWantAgent001 begin!");

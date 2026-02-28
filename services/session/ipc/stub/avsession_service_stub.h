@@ -43,6 +43,7 @@ private:
     int32_t HandleRegisterSessionListenerForAllUsers(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemAVKeyEvent(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemControlCommand(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleSendSystemCommonCommand(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterClientDeathObserver(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCastAudio(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCastAudioForAll(MessageParcel& data, MessageParcel& reply);
@@ -97,6 +98,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSendSystemAVKeyEvent(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSendSystemControlCommand(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_COMMON_COMMAND),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSendSystemCommonCommand(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_CLIENT_DEATH),
             [this](MessageParcel& data, MessageParcel& reply)
             { return HandleRegisterClientDeathObserver(data, reply); }},
@@ -161,6 +164,8 @@ private:
             "HandleSendSystemAVKeyEvent"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_CONTROL_COMMAND),
             "HandleSendSystemControlCommand"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_COMMON_COMMAND),
+            "HandleSendSystemCommonCommand"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_CLIENT_DEATH),
             "HandleRegisterClientDeathObserver"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CAST_AUDIO),

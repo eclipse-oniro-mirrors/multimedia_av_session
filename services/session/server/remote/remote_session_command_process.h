@@ -113,6 +113,11 @@ public:
         return AVSESSION_SUCCESS;
     }
 
+    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override
     {
         return AVSESSION_SUCCESS;

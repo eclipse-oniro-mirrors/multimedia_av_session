@@ -87,6 +87,7 @@ export class AVCastPicker extends ViewPU {
         this.__isShowLoadingProgress = new ObservedPropertySimplePU(false, this, 'isShowLoadingProgress');
         this.pickerCountOnCreation = 0;
         this.__isDisabledByPickerLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPickerLimit');
+        this.__isDeviceLevel = new ObservedPropertySimplePU(true, this, 'isDeviceLevel');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();

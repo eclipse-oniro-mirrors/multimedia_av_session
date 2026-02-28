@@ -20,10 +20,10 @@
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "cast_engine_common.h"
+#include <filesystem>
 #endif
 
 namespace OHOS::AVSession {
-bool g_isDevicePcmCastEnable = system::GetBoolParameter("const.pcmCastDevice.enable", false);
 
 void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceName,
     std::string extraInfo, const std::string& state)
@@ -365,29 +365,58 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
 void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo)
 {
     AVSessionRadarInfo info("AVSessionService::NotifyDeviceAvailable");
+    OutputDeviceInfo outputDeviceInfo = castOutputDeviceInfo;
+    UpdateDeviceCastMode(outputDeviceInfo);
     AVSessionRadar::GetInstance().CastDeviceAvailable(castOutputDeviceInfo, info);
 
-    for (DeviceInfo deviceInfo : castOutputDeviceInfo.deviceInfos_) {
+    for (const DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
         for (const auto& session : GetContainer().GetAllSessions()) {
             session->UpdateCastDeviceMap(deviceInfo);
         }
     }
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& listener : innerSessionListeners_) {
-        listener->OnDeviceAvailable(castOutputDeviceInfo);
+        listener->OnDeviceAvailable(outputDeviceInfo);
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
-        listener->OnDeviceAvailable(castOutputDeviceInfo);
+        listener->OnDeviceAvailable(outputDeviceInfo);
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
     for (const auto& [pid, listener] : listenerMapForAll) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
-        listener->OnDeviceAvailable(castOutputDeviceInfo);
+        listener->OnDeviceAvailable(outputDeviceInfo);
     }
 }
 // LCOV_EXCL_STOP
+
+void AVSessionService::UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo)
+{
+    SLOGI("UpdateDeviceCastMode in ");
+    for (auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
+        if (pcmCastSession_ != nullptr) {
+            int32_t castMode = pcmCastSession_->GetCastMode();
+            deviceInfo.hiPlayDeviceInfo_.lastCastUid_ = uid;
+        }
+        deviceInfo.hiPlayDeviceInfo_.targetCastMode_ = deviceInfo.hiPlayDeviceInfo_.supportCastMode_;
+
+        std::string fileDir = AVSessionUtils::GetCachePathName();
+        std::string fileName = deviceInfo.deviceId_ + "_cast_pair_" + AVSessionUtils::GetPairFileSuffix();
+        if (deviceInfo.hiPlayDeviceInfo_.supportCastMode_ == HiPlayCastMode::DEVICE_LEVEL
+            && std::filesystem::exists(fileDir + fileName)) {
+            std::pair<std::string, int32_t> castPair;
+            bool success = AVSessionUtils::ReadPairFromFile(castPair, fileDir, fileName);
+            if (success) {
+                deviceInfo.hiPlayDeviceInfo_.targetCastMode_ = castPair.second;
+                SLOGI("ReadPairFromFile success: deviceId=%{public}s, castMode=%{public}d",
+                    AVSessionUtils::GetAnonymousDeviceId(castPair.first).c_str(), castPair.second);
+            } else {
+                SLOGE("ReadPairFromFile failed.");
+            }
+        }
+    }
+}
 
 void AVSessionService::NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
 {
@@ -439,18 +468,51 @@ void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
     }
 }
 
+void AVSessionService::NotifySystemCommonEvent(const std::string& commmonEvent, const std::string& args)
+{
+    if (commonEvent == "HIPLAY_CONFIG_MODE_DATA" && pcmCastSession_ != nullptr) {
+        pcmCastSession_->OnSystemCommonEvent(args);
+    }
+    std::lock_guard lockGuard(sessionListenersLock_);
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    for (const auto& [pid, listener] : listenerMap) {
+        SLOGI("notify service event change with pid %{piblic}d", static_cast<int>(pid));
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnSystemCommonEvent");
+        if (listener != nullptr) {
+            listener->OnSystemCommonEvent(commonEvent, args);
+        }
+    }
+}
+
 int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    bool isPcm = g_isDevicePcmCastEnable &&
-        ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
-            ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0);
+    bool isPcm = (static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
+            ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0;
     if (isPcm) {
-        pcmCastSession_ = std::make_shared<PcmCastSession>();
-        return pcmCastSession_->StartCast(outputDeviceInfo, castServiceNameStatePair_);
+        if (pcmCastSession_ == nullptr) {
+            SLOGI("Create pcmCastSession");
+            pcmCastSession_ = std::make_shared<PcmCastSession>();
+        }
+        
+        SessionToken pcmSessionToken;
+        pcmSessionToken.sessionId = sessionToken.sessionId;
+
+        pid_t uid = 0;
+        if (pcmSessionToken.sessionId != "pcmCastSession") {
+            auto session = GetContainer().GetSessionById(pcmSessionToken.sessionId);
+            if (session != nullptr) {
+                uid = session->GetUid();
+                SLOGI("GetUid success");
+            } else {
+                SLOGE("GetSessionById failed, session is null");
+            }
+        }
+        pcmSessionToken.uid = uid;
+        return pcmCastSession_->StartCast(outputDeviceInfo, castServiceNameStatePair_, pcmSessionToken);
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 

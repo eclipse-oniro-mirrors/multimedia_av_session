@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <memory>
 #include "avsession_errors.h"
@@ -1489,4 +1490,43 @@ static HWTEST(HwCastTest, HwCastDisplayListenerOnDisconnect001, TestSize.Level1)
     listener->SetDisplayInfo(nullptr);
     listener->OnDisconnect(displayId);
     SLOGI("HwCastDisplayListenerOnDisconnect001 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSendCommandArgsToCast001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastProviderSendCommandArgsToCast001, TestSize.Level1)
+{
+    SLOGI("HwCastProviderSendCommandArgsToCast001 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+    int castId = 0;
+    int32_t commandType = 0;
+    std::string params = "";
+    hwCastProvider->SendCommandArgsToCast(castId, commandType, params);
+    EXPECT_TRUE(castId == 0);
+    SLOGI("HwCastProviderSendCommandArgsToCast001 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSessionOnHiPlayEventRecv001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastProviderSessionOnHiPlayEventRecv001, TestSize.Level1)
+{
+    SLOGI("HwCastProviderSessionOnHiPlayEventRecv001 begin!");
+    std::shared_ptr<HwCastProviderSession> provideSession = std::make_shared<HwCastProviderSession>(nullptr);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    int32_t eventId = 0;
+    std::string jsonParam = "";
+    provideSession->OnHiPlayEventRecv(eventId, jsonParam);
+    EXPECT_TRUE(eventId == 0);
+    SLOGI("HwCastProviderSessionOnHiPlayEventRecv001 end!");
 }

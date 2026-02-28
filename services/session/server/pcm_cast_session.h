@@ -17,21 +17,51 @@
 #define OHOS_PCM_CAST_SESSION_H
 
 #include "avsession_info.h"
+#include "cJSON.h"
 
 namespace OHOS::AVSession {
 class PcmCastSession : public IAVRouterListener, public std::enable_shared_from_this<PcmCastSession> {
 public:
+    enum {
+        CAST_MODE_CHANGE_COMMAND = 0,
+    };
+
+    enum CastState {
+        Disconnected = 0,
+        Connected = 1
+    };
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove) override;
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) override;
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
-        std::pair<std::string, std::string>& serviceNameStatePair);
+        std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
 
     void StopCast();
 
+    void ExecuteCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
+
+    void DestroyTask();
+
+    int32_t GetCastMode() const;
+    pid_t GetUid() const;
+    int32_t GetCastState() const;
+    AVSessionDescriptor GetDescriptor();
+
+    void OnSystemCommonEvent(const std::string& args);
+
 private:
     int64_t castHandle_ = 0;
+    int32_t castMode_ = HiPlayCastMode::DEVICE_LEVEL;
+    int32_t castState_ = CastState::Disconnected;
+    std::recursive_mutex castLock_;
+    AVSessionDescriptor descriptor_;
+    std::string castHandleDeviceId = "-100";
+
+    void WriteCastPairToFile(const std::string& deviceId, int32_t castMode);
+    int32_t SendStateChangeRequest(const SessionToken& sessionToken);
+    void CastStateCommandParams(const AAFwk::WantParams& commandArgs);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_PCM_CAST_SESSION_H

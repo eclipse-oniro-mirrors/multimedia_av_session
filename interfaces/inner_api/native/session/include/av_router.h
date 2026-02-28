@@ -150,6 +150,16 @@ public:
     virtual int32_t OnDeviceStateChange(const DeviceState& deviceState) = 0;
 
     /**
+     * @brief Listen for the event of system common event.
+     *
+     * @param { std::string& } commonEvent - The name of the system common event.
+     * @param { std::string& } args - Additional arguments for the event.
+     * @return { int32_t } Whether the notify operation was successful.
+     * @since 24
+    */
+    virtual int32_t OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) { return 0 };
+
+    /**
      * @brief Release current cast session.
      *
      * @since 10
@@ -426,6 +436,18 @@ public:
      * @since 22
     */
     virtual bool IsDisconnectingOtherSession() = 0;
+
+    /**
+     * @brief send command args to cast.
+     *
+     * @param {int64_t} castHandle - The ID of the castprovider.
+     * @param {int32_t} commandType - The type of command to be sent.
+     * @param {std::string} params - The command parameters in string format.
+     * @return void
+     * @since 24
+    */
+    virtual void SendCommandArgsToCast(const int64_t castHandle, const int32_t commandType,
+        const std::string& params) = 0;
 
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;

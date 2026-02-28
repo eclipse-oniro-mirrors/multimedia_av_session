@@ -450,6 +450,7 @@ static napi_value ExportSessionCategory(napi_env env)
     (void)SetNamedProperty(env, result, "CATEGORY_NOT_ACTIVE",
         static_cast<int32_t>(SessionCategory::CATEGORY_NOT_ACTIVE));
     (void)SetNamedProperty(env, result, "CATEGORY_ALL", static_cast<int32_t>(SessionCategory::CATEGORY_ALL));
+    (void)SetNamedProperty(env, result, "CATEGORY_HIPLAY", static_cast<int32_t>(SessionCategory::CATEGORY_HIPLAY));
 
     napi_object_freeze(env, result);
     return result;

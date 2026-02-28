@@ -1337,6 +1337,11 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "uuid", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+    
+    status = SetValue(env, in.hiPlayDeviceInfo, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "hiPlayDeviceInfo", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
     return napi_ok;
 }
@@ -1871,6 +1876,13 @@ napi_status NapiUtils::ProcessDeviceInfoParamsExtra(napi_env env, napi_value in,
         status = GetValue(env, value, out.uuid_);
         CHECK_RETURN(status == napi_ok, "get DeviceInfo uuid value failed", status);
     }
+    napi_has_named_property(env, in, "hiPlayDeviceInfo", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "hiPlayDeviceInfo", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo hiPlayDeviceInfo failed", status);
+        status = GetValue(env, value, out.hiPlayDeviceInfo_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo hiPlayDeviceInfo value failed", status);
+    }
     return napi_ok;
 }
 
@@ -2278,6 +2290,77 @@ napi_status NapiUtils::SetValue(napi_env env, const DesktopLyricState &in, napi_
     status = napi_set_named_property(env, out, "isLocked", property);
     CHECK_RETURN(status == napi_ok, "set property isLocked failed", status);
     return status;
+}
+
+/* napi_value -> HiPlayDeviceInfo */
+napi_status NapiUtils::GetValue(napi_env env, napi_value in, HiPlayDeviceInfo& out)
+{
+    napi_value value {};
+    auto status = napi_ok;
+    bool hasKey = false;
+
+    status = napi_has_named_property(env, in, "supportCastMode", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "supportCastMode", &value);
+        CHECK_RETURN(status == napi_ok, "get supportCastMode failed", status);
+        status = GetValue(env, value, out.supportCastMode_);
+        CHECK_RETURN(status == napi_ok, "get value supportCastMode failed", status);
+    }
+
+    status = napi_has_named_property(env, in, "curCastMode", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "curCastMode", &value);
+        CHECK_RETURN(status == napi_ok, "get curCastMode failed", status);
+        status = GetValue(env, value, out.curCastMode_);
+        CHECK_RETURN(status == napi_ok, "get value curCastMode failed", status);
+    }
+
+    status = napi_has_named_property(env, in, "targetCastMode", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "targetCastMode", &value);
+        CHECK_RETURN(status == napi_ok, "get targetCastMode failed", status);
+        status = GetValue(env, value, out.targetCastMode_);
+        CHECK_RETURN(status == napi_ok, "get value targetCastMode failed", status);
+    }
+
+    status = napi_has_named_property(env, in, "lastCastUid", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "lastCastUid", &value);
+        CHECK_RETURN(status == napi_ok, "get lastCastUid failed", status);
+        status = GetValue(env, value, out.lastCastUid_);
+        CHECK_RETURN(status == napi_ok, "get value lastCastUid failed", status);
+    }
+    return napi_ok;
+}
+
+/* napi_value <- HiPlayDeviceInfo */
+napi_status NapiUtils::SetValue(napi_env env, const HiPlayDeviceInfo& in, napi_value& out)
+{
+    napi_status status = napi_create_object(env, &out);
+    CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
+    napi_value property = nullptr;
+
+    status = SetValue(env, static_cast<int>(in.supportCastMode_), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set supportCastMode failed", status);
+    status = napi_set_named_property(env, out, "supportCastMode", property);
+    CHECK_RETURN(status == napi_ok, "set supportCastMode property failed", status);
+
+    status = SetValue(env, static_cast<int>(in.curCastMode_), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set curCastMode failed", status);
+    status = napi_set_named_property(env, out, "curCastMode", property);
+    CHECK_RETURN(status == napi_ok, "set curCastMode property failed", status);
+
+    status = SetValue(env, static_cast<int>(in.targetCastMode_), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set targetCastMode failed", status);
+    status = napi_set_named_property(env, out, "targetCastMode", property);
+    CHECK_RETURN(status == napi_ok, "set targetCastMode property failed", status);
+
+    status = SetValue(env, static_cast<int>(in.lastCastUid_), property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set lastCastUid failed", status);
+    status = napi_set_named_property(env, out, "lastCastUid", property);
+    CHECK_RETURN(status == napi_ok, "set lastCastUid property failed", status);
+
+    return napi_ok;
 }
 
 napi_status NapiUtils::ThrowError(napi_env env, const char* napiMessage, int32_t napiCode)

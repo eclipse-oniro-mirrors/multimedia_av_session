@@ -99,6 +99,11 @@ interface HighQualityParams {
   iconRight: string,
 }
 
+export interface ShowingBundleTS {
+  pixelData?: image.PixelMap | undefined;
+  appName?: string | undefined;
+}
+
 /**
  * menuItem device info
  */

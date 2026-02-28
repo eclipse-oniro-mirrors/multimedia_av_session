@@ -800,5 +800,38 @@ HWTEST_F(AVSessionManagerTest, SendSystemControlCommand003, TestSize.Level1)
 
     SLOGI("SendSystemControlCommand003 end");
 }
-} // namespace AVSession
-} // namespace OHOS
+
+/**
+* @tc.name: SendSystemCommonCommand001
+* @tc.desc: valid command and args
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand001, TestSize.Level1)
+{
+    SLOGI("SendSystemCommonCommand001 begin");
+    std::string commonCommand = "";
+    AAFwk::WantParams commandArgs;
+    auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
+    EXPECT_NE(result, AVSESSION_SUCCESS);
+    SLOGI("SendSystemCommonCommand001 end");
+}
+
+/**
+* @tc.name: SendSystemCommonCommand002
+* @tc.desc: valid command and args
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand002, TestSize.Level1)
+{
+    SLOGI("SendSystemCommonCommand002 begin");
+    std::string commonCommand = "";
+    AAFwk::WantParams commandArgs;
+    auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
+    EXPECT_NE(result, AVSESSION_SUCCESS);
+    sleep(1);
+    SLOGI("SendSystemCommonCommand002 end");
+}
+}
+}

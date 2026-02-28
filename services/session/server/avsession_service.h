@@ -220,6 +220,8 @@ public:
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
+    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs) override;
+
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
     int32_t IsDesktopLyricSupported(bool &isSupported) override;
@@ -276,6 +278,8 @@ public:
     void NotifyDeviceStateChange(const DeviceState& deviceState) override;
 
     void NotifyMirrorToStreamCast();
+
+    void NotifySystemCommonEvent(const std::string& commmonEvent, const std::string& args) override;
 
     bool IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session);
 
@@ -406,6 +410,8 @@ private:
     int32_t CancelCastAudioForClientExit(pid_t pid, const sptr<AVSessionItem>& session);
 
     void ClearSessionForClientDiedNoLock(pid_t pid, bool continuePlay);
+
+    void ClearPcmSessionForClientDiedNoLock();
 
     void ClearControllerForClientDiedNoLock(pid_t pid);
 
@@ -688,6 +694,8 @@ private:
 #endif
 
     void SubscribeBundleStatusIfNeeded(const std::string& oldSortContent, const std::string& bundleName);
+
+    void UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;

@@ -90,6 +90,8 @@ public:
     int32_t SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam) override;
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
+    
+    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs) override;
 
     int32_t CastAudio(const SessionToken& token,
                       const std::vector<AudioStandard::AudioDeviceDescriptor>& descriptors) override;

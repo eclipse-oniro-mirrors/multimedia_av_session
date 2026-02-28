@@ -104,6 +104,7 @@ public:
         void NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) {}
         void NotifyDeviceOffline(const std::string& deviceId) {}
         void NotifyDeviceStateChange(const DeviceState& deviceState) {}
+        void NotifySystemCommonEvent(const std::string& commmonEvent, const std::string& args) {}
         void setInCast(bool isInCast) {}
         void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) {}
         int32_t checkEnableCast(bool enable) { return 0; }
@@ -1560,6 +1561,44 @@ static HWTEST_F(AVRouterImplTest, SetSinkCastSessionInfo001, TestSize.Level0)
     ASSERT_TRUE(g_AVRouterImpl->sourceProtocols_ == sourceProtocols);
     cJSON_Delete(deviceInfo);
     SLOGI("SetSinkCastSessionInfo001 end");
+}
+
+/**
+ * @tc.name: OnSystemCommonEvent001
+ * @tc.desc: set servicePtr_ to not nullptr
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVRouterImplTest, OnSystemCommonEvent001, TestSize.Level0)
+{
+    SLOGI("OnSystemCommonEvent001 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    std::string commonEvent = "";
+    std::string args = "";
+    auto listener = std::make_shared<AVSessionServiceListenerMock>();
+    ASSERT_TRUE(listener != nullptr);
+    g_AVRouterImpl->servicePtr_ = listener.get();
+    g_AVRouterImpl->OnSystemCommonEvent(commonEvent, args);
+    EXPECT_TRUE(g_AVRouterImpl->servicePtr_ != nullptr);
+    SLOGI("OnSystemCommonEvent001 end");
+}
+
+/**
+ * @tc.name: SendCommandArgsToCast001
+ * @tc.desc: send commandType not changed
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVRouterImplTest, SendCommandArgsToCast001, TestSize.Level0)
+{
+    SLOGI("SendCommandArgsToCast001 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    int64_t castHandle = 0;
+    int32_t commandType = 0;
+    std::string params = "";
+    g_AVRouterImpl->SendCommandArgsToCast(castHandle, commandType, params);
+    EXPECT_TRUE(castHandle == 0);
+    SLOGI("SendCommandArgsToCast001 end");
 }
 } //AVSession
 } //OHOS
