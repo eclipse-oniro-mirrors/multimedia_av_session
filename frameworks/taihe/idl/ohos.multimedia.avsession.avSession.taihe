@@ -254,6 +254,8 @@ struct AVMetadata {
   filter: Optional<i32>;
   drmSchemes: Optional<Array<String>>;
   skipIntervals: Optional<SkipIntervals>;
+  fastForwardSkipIntervals: Optional<SkipIntervals>;
+  rewindSkipIntervals: Optional<SkipIntervals>;
   displayTags: Optional<i32>;
 }
 

@@ -73,6 +73,10 @@ void AVMetaDataTest::SetUp()
     g_metaData.SetSubTitle("fac");
     g_metaData.SetDescription("for friends");
     g_metaData.SetLyric("xxxxx");
+
+    const int32_t intervals = 15;
+    g_metaData.SetFastForwardSkipIntervals(intervals);
+    g_metaData.SetRewindSkipIntervals(intervals);
 }
 
 void AVMetaDataTest::TearDown()
@@ -2161,6 +2165,25 @@ HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test038, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetAVMetaData_sequence_test
+ * @tc.desc: set av meta data
+ * @tc.type: FUNC
+ * @tc.require: #2063
+ */
+HWTEST_F(AVMetaDataTest, SetAVMetaData_sequence_test039, TestSize.Level0)
+{
+    const int32_t fastForwardIntervals = 10;
+    g_metaData.SetFastForwardSkipIntervals(fastForwardIntervals);
+    EXPECT_EQ(fastForwardIntervals, g_metaData.GetFastForwardSkipIntervals());
+
+    const int32_t rewindIntervals = 10;
+    g_metaData.SetRewindSkipIntervals(rewindIntervals);
+    EXPECT_EQ(rewindIntervals, g_metaData.GetRewindSkipIntervals());
+
+    SLOGI("SetAVMetaData_sequence_test039 End");
+}
+
+/**
 * @tc.name: GetAVMetaData001
 * @tc.desc: get av meta data result
 * @tc.type: FUNC
@@ -2191,6 +2214,8 @@ HWTEST_F(AVMetaDataTest, GetAVMetaData001, TestSize.Level0)
     EXPECT_EQ(metaData.GetSubTitle(), g_metaData.GetSubTitle());
     EXPECT_EQ(metaData.GetDescription(), g_metaData.GetDescription());
     EXPECT_EQ(metaData.GetLyric(), g_metaData.GetLyric());
+    EXPECT_EQ(metaData.GetFastForwardSkipIntervals(), g_metaData.GetFastForwardSkipIntervals());
+    EXPECT_EQ(metaData.GetRewindSkipIntervals(), g_metaData.GetRewindSkipIntervals());
     SLOGI("GetAVMetaData001 End");
 }
 
@@ -2579,8 +2604,8 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg004, TestSize.Level0)
     MessageParcel data;
     data.WriteString(test);
     AVMetaData metaOut;
-    std::string bitStr = std::string(26, '1');
-    std::bitset<26> bits(bitStr);
+    std::string bitStr = std::string(28, '1');
+    std::bitset<28> bits(bitStr);
     metaOut.metaMask_ = bits;
     bool ret = metaOut.UnmarshallingExceptImg(data);
     EXPECT_EQ(ret, false);
@@ -2602,8 +2627,8 @@ static HWTEST_F(AVMetaDataTest, UnmarshallingExceptImg005, TestSize.Level0)
     pixelMap->SetInnerImgBuffer(vec);
     data.WriteParcelable(pixelMap);
     AVMetaData metaOut;
-    std::string bitStr = std::string(26, '1');
-    std::bitset<26> bits(bitStr);
+    std::string bitStr = std::string(28, '1');
+    std::bitset<28> bits(bitStr);
     metaOut.metaMask_ = bits;
     bool ret = metaOut.UnmarshallingExceptImg(data);
     EXPECT_TRUE(ret != false);

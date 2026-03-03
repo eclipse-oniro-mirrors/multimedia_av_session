@@ -101,6 +101,12 @@ private:
     static int32_t GetSkipIntervals(AVMetadata const &in, OHOS::AVSession::AVMetaData &out);
     static int32_t SetSkipIntervals(const OHOS::AVSession::AVMetaData &in, AVMetadata &out);
 
+    static int32_t GetFastForwardSkipIntervals(AVMetadata const &in, OHOS::AVSession::AVMetaData &out);
+    static int32_t SetFastForwardSkipIntervals(const OHOS::AVSession::AVMetaData &in, AVMetadata &out);
+
+    static int32_t GetRewindSkipIntervals(AVMetadata const &in, OHOS::AVSession::AVMetaData &out);
+    static int32_t SetRewindSkipIntervals(const OHOS::AVSession::AVMetaData &in, AVMetadata &out);
+
     static int32_t GetFilter(AVMetadata const &in, OHOS::AVSession::AVMetaData &out);
     static int32_t SetFilter(const OHOS::AVSession::AVMetaData &in, AVMetadata &out);
 
