@@ -186,8 +186,8 @@ static HWTEST_F(CollaborationManagerTest, PublishServiceState002, testing::ext::
     SLOGI("PublishServiceState002, start");
     const char* peerNetworkId = "";
     ServiceCollaborationManagerBussinessStatus state = ServiceCollaborationManagerBussinessStatus::SCM_IDLE;
-    auto publishServiceState = [](const char* peerNetworkId, const char* serviceName,
-        const char* extraInfo, ServiceCollaborationManagerBussinessStatus state) {
+    auto publishServiceState = [](ServiceCollaborationManager_ServiceStateInfo *serviceStateInfo,
+        ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId) {
             return static_cast<int32_t>(0);
     };
     CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
@@ -207,8 +207,8 @@ static HWTEST_F(CollaborationManagerTest, PublishServiceState003, testing::ext::
     SLOGI("PublishServiceState003, start");
     const char* peerNetworkId = "";
     ServiceCollaborationManagerBussinessStatus state = ServiceCollaborationManagerBussinessStatus::SCM_IDLE;
-    auto publishServiceState = [](const char* peerNetworkId, const char* serviceName,
-        const char* extraInfo, ServiceCollaborationManagerBussinessStatus state) {
+    auto publishServiceState = [](ServiceCollaborationManager_ServiceStateInfo *serviceStateInfo,
+        ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId) {
             return static_cast<int32_t>(1);
     };
     CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
@@ -216,6 +216,30 @@ static HWTEST_F(CollaborationManagerTest, PublishServiceState003, testing::ext::
     int32_t ret = CollaborationManager::GetInstance().PublishServiceState(peerNetworkId, state);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("PublishServiceState003, end");
+}
+
+/**
+ * @tc.name: PublishServiceState004
+ * @tc.desc: Test PublishServiceState
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, PublishServiceState004, testing::ext::TestSize.Level1)
+{
+    SLOGI("PublishServiceState004, start");
+    auto originalResourceRequest = CollaborationManager::GetInstance().resourceRequest_;
+    auto publishServiceState = [](ServiceCollaborationManager_ServiceStateInfo *serviceStateInfo,
+        ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId) {
+            return static_cast<int32_t>(0);
+    };
+    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
+        = publishServiceState;
+    CollaborationManager::GetInstance().resourceRequest_ = nullptr;
+    const char* peerNetworkId = "test_network_id";
+    ServiceCollaborationManagerBussinessStatus state = ServiceCollaborationManagerBussinessStatus::SCM_IDLE;
+    int32_t ret = CollaborationManager::GetInstance().PublishServiceState(peerNetworkId, state);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    CollaborationManager::GetInstance().resourceRequest_ = originalResourceRequest;
+    SLOGI("PublishServiceState004, end");
 }
 
 /**
@@ -244,7 +268,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource002, testing::ext
     const char* peerNetworkId = "";
     DeviceInfo deviceInfo;
     auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
-        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
         ServiceCollaborationManager_Callback* callback) {
             return static_cast<int32_t>(0);
     };
@@ -266,7 +290,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource003, testing::ext
     const char* peerNetworkId = "";
     DeviceInfo deviceInfo;
     auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
-        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
         ServiceCollaborationManager_Callback* callback) {
             return static_cast<int32_t>(1);
     };
@@ -290,7 +314,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource004, testing::ext
     const char* peerNetworkId = "";
     DeviceInfo deviceInfo;
     auto applyAdvancedResource = [](const char* networkId, const char* serviceName,
-        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
         ServiceCollaborationManager_Callback* callback) {
             return static_cast<int32_t>(1);
     };
@@ -315,7 +339,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource005, testing::ext
     deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
     deviceInfo.ipAddress_ = "";
     auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
-        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
         ServiceCollaborationManager_Callback* callback) {
             EXPECT_EQ(resourceRequest->linkType, ServiceCollaborationManagerLinkType::NATIVE_P2P);
             return static_cast<int32_t>(0);
@@ -401,4 +425,126 @@ static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult002, testi
     EXPECT_EQ(receivedCode, AVSESSION_SUCCESS);
     callbackRef = originalCallback;
     SLOGI("SendCollaborationApplyResult002, end");
+}
+
+/**
+ * @tc.name: ListenCollaborationApplyResult001
+ * @tc.desc: Test ListenCollaborationApplyResult with PASS result code.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult001, testing::ext::TestSize.Level1)
+{
+    SLOGI("ListenCollaborationApplyResult001, start");
+    auto& instance = CollaborationManager::GetInstance();
+    
+    // Reset flags before test
+    instance.applyResultFlag_ = false;
+    instance.applyUserResultFlag_ = false;
+    instance.collaborationRejectFlag_ = false;
+    instance.waitUserDecisionFlag_ = false;
+    
+    // Call ListenCollaborationApplyResult to set up the callback
+    instance.ListenCollaborationApplyResult();
+    
+    // Simulate callback with PASS result code
+    ASSERT_NE(instance.sendCollaborationApplyResult_, nullptr);
+    instance.sendCollaborationApplyResult_(ServiceCollaborationManagerResultCode::PASS);
+    
+    // Verify flags are set correctly for PASS
+    EXPECT_TRUE(instance.applyResultFlag_);
+    EXPECT_TRUE(instance.applyUserResultFlag_);
+    EXPECT_FALSE(instance.collaborationRejectFlag_);
+    SLOGI("ListenCollaborationApplyResult001, end");
+}
+
+/**
+ * @tc.name: ListenCollaborationApplyResult002
+ * @tc.desc: Test ListenCollaborationApplyResult with REJECT result code.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult002, testing::ext::TestSize.Level1)
+{
+    SLOGI("ListenCollaborationApplyResult002, start");
+    auto& instance = CollaborationManager::GetInstance();
+    
+    // Reset flags before test
+    instance.applyResultFlag_ = false;
+    instance.applyUserResultFlag_ = false;
+    instance.collaborationRejectFlag_ = false;
+    instance.waitUserDecisionFlag_ = false;
+    
+    // Call ListenCollaborationApplyResult to set up the callback
+    instance.ListenCollaborationApplyResult();
+    
+    // Simulate callback with REJECT result code
+    ASSERT_NE(instance.sendCollaborationApplyResult_, nullptr);
+    instance.sendCollaborationApplyResult_(ServiceCollaborationManagerResultCode::REJECT);
+    
+    // Verify flags are set correctly for REJECT
+    EXPECT_TRUE(instance.collaborationRejectFlag_);
+    EXPECT_TRUE(instance.applyResultFlag_);
+    EXPECT_TRUE(instance.applyUserResultFlag_);
+    SLOGI("ListenCollaborationApplyResult002, end");
+}
+
+/**
+ * @tc.name: ListenCollaborationApplyResult003
+ * @tc.desc: Test ListenCollaborationApplyResult with WAIT_SELECT result code.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult003, testing::ext::TestSize.Level1)
+{
+    SLOGI("ListenCollaborationApplyResult003, start");
+    auto& instance = CollaborationManager::GetInstance();
+    
+    // Reset flags before test
+    instance.applyResultFlag_ = false;
+    instance.applyUserResultFlag_ = false;
+    instance.collaborationRejectFlag_ = false;
+    instance.waitUserDecisionFlag_ = false;
+    
+    // Call ListenCollaborationApplyResult to set up the callback
+    instance.ListenCollaborationApplyResult();
+    
+    // Simulate callback with WAIT_SELECT result code
+    ASSERT_NE(instance.sendCollaborationApplyResult_, nullptr);
+    instance.sendCollaborationApplyResult_(ServiceCollaborationManagerResultCode::WAIT_SELECT);
+    
+    // Verify flags are set correctly for WAIT_SELECT
+    EXPECT_TRUE(instance.applyResultFlag_);
+    EXPECT_TRUE(instance.waitUserDecisionFlag_);
+    EXPECT_FALSE(instance.collaborationRejectFlag_);
+    SLOGI("ListenCollaborationApplyResult003, end");
+}
+
+/**
+ * @tc.name: ListenCollaborationApplyResult004
+ * @tc.desc: Test ListenCollaborationApplyResult with USER_AGREE result code.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult004, testing::ext::TestSize.Level1)
+{
+    SLOGI("ListenCollaborationApplyResult004, start");
+    auto& instance = CollaborationManager::GetInstance();
+    
+    // Reset flags before test
+    instance.applyResultFlag_ = false;
+    instance.applyUserResultFlag_ = false;
+    instance.collaborationRejectFlag_ = false;
+    instance.waitUserDecisionFlag_ = false;
+    
+    // Call ListenCollaborationApplyResult to set up the callback
+    instance.ListenCollaborationApplyResult();
+    
+    // Simulate callback with USER_AGREE result code
+    ASSERT_NE(instance.sendCollaborationApplyResult_, nullptr);
+    // USER_AGREE branch only logs, flags should remain unchanged
+    instance.sendCollaborationApplyResult_(ServiceCollaborationManagerResultCode::USER_AGREE);
+    
+    // Verify flags remain unchanged for USER_AGREE (only logs)
+    EXPECT_FALSE(instance.applyResultFlag_);
+    EXPECT_FALSE(instance.applyUserResultFlag_);
+    EXPECT_FALSE(instance.collaborationRejectFlag_);
+    EXPECT_FALSE(instance.waitUserDecisionFlag_);
+    SLOGI("ListenCollaborationApplyResult004, end");
 }
