@@ -27,7 +27,8 @@ constexpr const char* RECLAIM_MEMORY = "AVSessionReclaimMemory";
 constexpr uint32_t TIME_OF_RECLAIM_MEMORY = 240000;
 constexpr const char* RECLAIM_FILE_STRING = "1";
 
-class SessionStack : public SessionContainer {
+class SessionStack : public SessionContainer,
+    public std::enable_shared_from_this<SessionStack> {
 public:
     int32_t AddSession(pid_t pid, const std::string& abilityName, sptr<AVSessionItem>& item) override;
 
