@@ -53,7 +53,8 @@ public:
     int32_t HandlePauseForSuper(const std::string& playerId);
     int32_t HandlePlayNextForSuper(const std::string& playerId);
     int32_t HandlePlayPreviousForSuper(const std::string& playerId);
-    int32_t HandleToggleFavoriteForSuper(const std::string& mediaId, const std::string& playerId);
+    int32_t HandleToggleFavoriteForSuper(const std::string& playerId, const std::string& mediaId);
+    int32_t HandleSeekForSuper(const std::string& playerId, const int64_t time);
     void HandleCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
     void GetDistributedSessionControllerList(std::vector<sptr<IRemoteObject>>& controllerList);
     int32_t GetControllerListForSuper(std::vector<sptr<IRemoteObject>>& controllerList);
@@ -117,7 +118,8 @@ private:
     int32_t ProcessControllerInfoForSuper(cJSON* jsonValue);
     int32_t ProcessMetaDataForSuper(cJSON* jsonValue);
     int32_t ProcessPlaybackStateForSuper(cJSON* jsonValue);
-    int32_t SendControlCommandMsgForSuper(int32_t commandCode, const std::string& commandArgsStr);
+    int32_t SendControlCommandMsgForSuper(int32_t commandCode, const std::string& sessionId,
+        std::string commandArgsStr = "");
     int32_t ColdStartForSuper(AAFwk::WantParams& extras);
     int32_t CompressFromJPEG(AVMetaData &metadata, const std::vector<uint8_t> &inputData);
     int32_t ConvertStateFromDoubleToSingle(int32_t state);
@@ -144,6 +146,15 @@ private:
     std::recursive_mutex migrateProxySessionIdLock_;
     std::mutex keepAliveMtx_;
     std::condition_variable keepAliveCv_;
+    std::vector<int32_t> defaultValidCommands {
+        AVControlCommand::SESSION_CMD_PLAY,
+        AVControlCommand::SESSION_CMD_PAUSE,
+        AVControlCommand::SESSION_CMD_PLAY_NEXT,
+        AVControlCommand::SESSION_CMD_PLAY_PREVIOUS,
+        AVControlCommand::SESSION_CMD_SEEK,
+        AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE,
+        AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE
+    };
 };
 
 class AVSessionObserver : public AVSessionCallback {
@@ -159,7 +170,7 @@ public:
     void OnPlayPrevious(const AVControlCommand& cmd) override;
     void OnFastForward(int64_t time, const AVControlCommand& cmd) override {}
     void OnRewind(int64_t time, const AVControlCommand& cmd) override {}
-    void OnSeek(int64_t time) override {}
+    void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override {}
     void OnSetLoopMode(int32_t loopMode) override {}
     void OnSetTargetLoopMode(int32_t targetLoopMode) override {}
