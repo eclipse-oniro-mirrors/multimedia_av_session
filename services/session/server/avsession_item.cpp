@@ -3292,6 +3292,14 @@ bool AVSessionItem::IsCasting()
     return false;
 }
 
+bool AVSessionItem::IsCastConnected()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        return IsCasting() && AVRouter::GetInstance().IsRemoteCasting();
+#endif
+    return false;
+}
+
 void AVSessionItem::GetCurrentCastItem(AVQueueItem& currentItem)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE

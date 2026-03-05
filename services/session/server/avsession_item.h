@@ -292,6 +292,8 @@ public:
 
     bool IsCasting();
 
+    bool IsCastConnected();
+
     void GetCurrentCastItem(AVQueueItem& item);
 
     AVPlaybackState GetCastAVPlaybackState();
