@@ -17,6 +17,7 @@
 #include <memory>
 #include <fstream>
 #include <cstdio>
+#include <cstdlib>
 
 #include "avsession_log.h"
 #include "input_manager.h"
@@ -48,6 +49,125 @@
 #undef protected
 #undef private
 
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#include "i_avcast_controller_proxy.h"
+#include "avcast_control_command.h"
+#include "av_router.h"
+
+// Mock Cast Controller Proxy for testing
+class MockCastControllerProxy : public OHOS::AVSession::IAVCastControllerProxy {
+public:
+    MockCastControllerProxy()
+    {
+        castPlaybackState_.SetState(AVPlaybackState::PLAYBACK_STATE_INITIAL);
+    }
+    ~MockCastControllerProxy() override = default;
+
+    void SetCastPlaybackState(int32_t state)
+    {
+        castPlaybackState_.SetState(state);
+    }
+
+    int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override
+    {
+        avPlaybackState = castPlaybackState_;
+        return OHOS::AVSession::AVSESSION_SUCCESS;
+    }
+
+    // Implement all pure virtual methods from IAVCastControllerProxy
+    void Release() override {}
+
+    int32_t RegisterControllerListener(
+        const std::shared_ptr<OHOS::AVSession::IAVCastControllerProxyListener> listener) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t UnRegisterControllerListener(
+        const std::shared_ptr<OHOS::AVSession::IAVCastControllerProxyListener> listener) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    AVQueueItem GetCurrentItem() override
+    {
+        return AVQueueItem();
+    }
+
+    int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t Start(const AVQueueItem& avQueueItem) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t Prepare(const AVQueueItem& avQueueItem) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    void SendControlCommand(const OHOS::AVSession::AVCastControlCommand cmd) override {}
+
+    void SendCustomData(const std::string& customData) override {}
+
+    int32_t GetDuration(int32_t& duration) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t GetRecommendedResolutionLevel(std::string& decoderType,
+        OHOS::AVSession::ResolutionLevel& resolutionLevel) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t GetSupportedHdrCapabilities(std::vector<OHOS::AVSession::HDRFormat>& hdrFormats) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t SetValidAbility(const std::vector<int32_t>& validAbilityList) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t GetValidAbility(std::vector<int32_t>& validAbilityList) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t SetDisplaySurface(std::string& surfaceId) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    int32_t ProcessMediaKeyResponse(const std::string& assetId, const std::vector<uint8_t>& response) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) override {}
+
+    void SetSpid(uint32_t spid) override {}
+
+private:
+    AVPlaybackState castPlaybackState_;
+};
+#endif
+
 using namespace testing::ext;
 using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
@@ -76,7 +196,7 @@ public:
 void AVSessionServiceTest::SetUpTestCase()
 {
     SLOGI("set up AVSessionServiceTest");
-    system("killall -9 com.example.hiMusicDemo");
+    system("killall -9 com.example.himusicdemo");
     sleep(1);
     avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     avservice_->InitKeyEvent();
@@ -84,6 +204,10 @@ void AVSessionServiceTest::SetUpTestCase()
 
 void AVSessionServiceTest::TearDownTestCase()
 {
+    if (avservice_ != nullptr) {
+        delete avservice_;
+        avservice_ = nullptr;
+    }
 }
 
 void AVSessionServiceTest::SetUp()
@@ -2073,6 +2197,306 @@ static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession003, TestSize.Level1
     avservice_->HandleSessionRelease(avsessionFront_->GetSessionId());
     avsessionFront_->Destroy();
     SLOGI("GetOtherPlayingSession003 end!");
+}
+
+/**
+ * @tc.name: GetOtherPlayingSession004
+ * @tc.desc: Test GetOtherPlayingSession with 2 sessions,
+ *  second session casting with PLAYBACK_STATE_PLAY returns the session
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession004, TestSize.Level1)
+{
+    SLOGI("GetOtherPlayingSession004 begin!");
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
+    static char gTestFrontBundleName[] = "testFront.ohos.avsession";
+
+    // Get front list and create mock sessions directly
+    auto sessionListForFront = avservice_->GetUsersManager().GetCurSessionListForFront(userId);
+
+    // Save original size for cleanup
+    size_t originalSize = sessionListForFront->size();
+
+    // Create first mock session
+    AVSessionDescriptor descriptor1;
+    descriptor1.sessionTag_ = g_testSessionTag;
+    descriptor1.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptor1.elementName_.SetBundleName(gTestFrontBundleName);
+    descriptor1.elementName_.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionFront1_ = new AVSessionItem(descriptor1, userId);
+
+    // Create second mock session
+    AVSessionDescriptor descriptor2;
+    descriptor2.sessionTag_ = "tag2";
+    descriptor2.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptor2.elementName_.SetBundleName(g_testAnotherBundleName);
+    descriptor2.elementName_.SetAbilityName("testThird.ability");
+    OHOS::sptr<AVSessionItem> avsessionFront2_ = new AVSessionItem(descriptor2, userId);
+
+    // Add sessions to front list
+    sessionListForFront->push_back(avsessionFront1_);
+    sessionListForFront->push_back(avsessionFront2_);
+
+    // Set first session to STOP state to ensure it's not considered as playing
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_STOP);
+    avsessionFront1_->SetAVPlaybackState(g_playbackState);
+
+    // Set second session as casting with PLAYBACK_STATE_PLAY
+    avsessionFront2_->castHandle_ = 100;
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    avsessionFront2_->SetAVPlaybackState(g_playbackState);
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    // Create mock cast controller proxy and set it to return PLAYBACK_STATE_PLAY
+    auto mockProxy = std::make_shared<MockCastControllerProxy>();
+    mockProxy->SetCastPlaybackState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    avsessionFront2_->castControllerProxy_ = mockProxy;
+
+    // Call GetOtherPlayingSession - should return the second session
+    auto result = avservice_->GetOtherPlayingSession(userId, gTestFrontBundleName);
+    ASSERT_TRUE(result != nullptr) << "GetOtherPlayingSession should return casting session, not nullptr";
+    EXPECT_TRUE(result.GetRefPtr() == avsessionFront2_.GetRefPtr())
+        << "Should return the second casting session";
+#endif
+
+    // Clean up: remove sessions from front list
+    while (sessionListForFront->size() > originalSize) {
+        sessionListForFront->pop_back();
+    }
+
+    // Clear cast controller proxy before destroy to avoid memory leak
+    avsessionFront2_->castControllerProxy_ = nullptr;
+    avsessionFront1_->castControllerProxy_ = nullptr;
+
+    avsessionFront1_->Destroy();
+    avsessionFront2_->Destroy();
+
+    // Verify cleanup was successful
+    EXPECT_EQ(sessionListForFront->size(), originalSize);
+
+    SLOGI("GetOtherPlayingSession004 end!");
+}
+
+/**
+ * @tc.name: GetOtherPlayingSession005
+ * @tc.desc: Test GetOtherPlayingSession with 2 sessions,
+ *  second session casting with PLAYBACK_STATE_PAUSE returns nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession005, TestSize.Level1)
+{
+    SLOGI("GetOtherPlayingSession005 begin!");
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
+    static char gTestFrontBundleName[] = "testFront.ohos.avsession";
+
+    // Get front list and create mock sessions directly
+    auto sessionListForFront = avservice_->GetUsersManager().GetCurSessionListForFront(userId);
+
+    // Save original size for cleanup
+    size_t originalSize = sessionListForFront->size();
+
+    // Create first mock session
+    AVSessionDescriptor descriptor1;
+    descriptor1.sessionTag_ = g_testSessionTag;
+    descriptor1.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptor1.elementName_.SetBundleName(g_testAnotherBundleName);
+    descriptor1.elementName_.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionFront1_ = new AVSessionItem(descriptor1, userId);
+
+    // Create second mock session
+    AVSessionDescriptor descriptor2;
+    descriptor2.sessionTag_ = "tag2";
+    descriptor2.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptor2.elementName_.SetBundleName(g_testAnotherBundleName);
+    descriptor2.elementName_.SetAbilityName("testThird.ability");
+    OHOS::sptr<AVSessionItem> avsessionFront2_ = new AVSessionItem(descriptor2, userId);
+
+    // Add sessions to front list
+    sessionListForFront->push_back(avsessionFront1_);
+    sessionListForFront->push_back(avsessionFront2_);
+
+    // Set first session to STOP state to ensure it's not considered as playing
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_STOP);
+    avsessionFront1_->SetAVPlaybackState(g_playbackState);
+
+    // Set second session as casting with PLAYBACK_STATE_PAUSE
+    avsessionFront2_->castHandle_ = 100;
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    avsessionFront2_->SetAVPlaybackState(g_playbackState);
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    // Create mock cast controller proxy and set it to return PLAYBACK_STATE_PAUSE
+    auto mockProxy = std::make_shared<MockCastControllerProxy>();
+    mockProxy->SetCastPlaybackState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    avsessionFront2_->castControllerProxy_ = mockProxy;
+
+    // Call GetOtherPlayingSession - should return nullptr because cast state is PAUSE, not PLAY
+    auto result = avservice_->GetOtherPlayingSession(userId, gTestFrontBundleName);
+    EXPECT_TRUE(result == nullptr);
+#endif
+
+    // Clean up: remove sessions from front list
+    while (sessionListForFront->size() > originalSize) {
+        sessionListForFront->pop_back();
+    }
+
+    // Clear cast controller proxy before destroy to avoid memory leak
+    avsessionFront2_->castControllerProxy_ = nullptr;
+    avsessionFront1_->castControllerProxy_ = nullptr;
+
+    avsessionFront1_->Destroy();
+    avsessionFront2_->Destroy();
+
+    // Verify cleanup was successful
+    EXPECT_EQ(sessionListForFront->size(), originalSize);
+
+    SLOGI("GetOtherPlayingSession005 end!");
+}
+
+/**
+ * @tc.name: GetOtherPlayingSession006
+ * @tc.desc: Test GetOtherPlayingSession with 2 sessions,
+ *  second session casting with PLAYBACK_STATE_STOP returns nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession006, TestSize.Level1)
+{
+    SLOGI("GetOtherPlayingSession006 begin!");
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
+    static char gTestFrontBundleName[] = "testFront.ohos.avsession";
+
+    // Get front list and create mock sessions directly
+    auto sessionListForFront = avservice_->GetUsersManager().GetCurSessionListForFront(userId);
+
+    // Save original size for cleanup
+    size_t originalSize = sessionListForFront->size();
+
+    // Create first mock session
+    AVSessionDescriptor descriptor1;
+    descriptor1.sessionTag_ = g_testSessionTag;
+    descriptor1.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptor1.elementName_.SetBundleName(g_testAnotherBundleName);
+    descriptor1.elementName_.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionFront1_ = new AVSessionItem(descriptor1, userId);
+
+    // Create second mock session
+    AVSessionDescriptor descriptor2;
+    descriptor2.sessionTag_ = "tag2";
+    descriptor2.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptor2.elementName_.SetBundleName(g_testAnotherBundleName);
+    descriptor2.elementName_.SetAbilityName("testThird.ability");
+    OHOS::sptr<AVSessionItem> avsessionFront2_ = new AVSessionItem(descriptor2, userId);
+
+    // Add sessions to front list
+    sessionListForFront->push_back(avsessionFront1_);
+    sessionListForFront->push_back(avsessionFront2_);
+
+    // Set first session to STOP state to ensure it's not considered as playing
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_STOP);
+    avsessionFront1_->SetAVPlaybackState(g_playbackState);
+
+    // Set second session as casting with PLAYBACK_STATE_STOP
+    avsessionFront2_->castHandle_ = 100;
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_STOP);
+    avsessionFront2_->SetAVPlaybackState(g_playbackState);
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    // Create mock cast controller proxy and set it to return PLAYBACK_STATE_STOP
+    auto mockProxy = std::make_shared<MockCastControllerProxy>();
+    mockProxy->SetCastPlaybackState(AVPlaybackState::PLAYBACK_STATE_STOP);
+    avsessionFront2_->castControllerProxy_ = mockProxy;
+
+    // Call GetOtherPlayingSession - should return nullptr because cast state is STOP, not PLAY
+    auto result = avservice_->GetOtherPlayingSession(userId, gTestFrontBundleName);
+    EXPECT_TRUE(result == nullptr);
+#endif
+
+    // Clean up: remove sessions from front list
+    while (sessionListForFront->size() > originalSize) {
+        sessionListForFront->pop_back();
+    }
+
+    // Clear cast controller proxy before destroy to avoid memory leak
+    avsessionFront2_->castControllerProxy_ = nullptr;
+    avsessionFront1_->castControllerProxy_ = nullptr;
+
+    avsessionFront1_->Destroy();
+    avsessionFront2_->Destroy();
+
+    // Verify cleanup was successful
+    EXPECT_EQ(sessionListForFront->size(), originalSize);
+
+    SLOGI("GetOtherPlayingSession006 end!");
+}
+
+/**
+ * @tc.name: GetOtherPlayingSession007
+ * @tc.desc: Test GetOtherPlayingSession with 2 sessions, second session not casting returns nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, GetOtherPlayingSession007, TestSize.Level1)
+{
+    SLOGI("GetOtherPlayingSession007 begin!");
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
+    static char gTestFrontBundleName[] = "testFront.ohos.avsession";
+
+    // Get front list and create mock sessions directly
+    auto sessionListForFront = avservice_->GetUsersManager().GetCurSessionListForFront(userId);
+
+    // Save original size for cleanup
+    size_t originalSize = sessionListForFront->size();
+
+    // Create first mock session
+    AVSessionDescriptor descriptor1;
+    descriptor1.sessionTag_ = g_testSessionTag;
+    descriptor1.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptor1.elementName_.SetBundleName(g_testAnotherBundleName);
+    descriptor1.elementName_.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionFront1_ = new AVSessionItem(descriptor1, userId);
+
+    // Create second mock session
+    AVSessionDescriptor descriptor2;
+    descriptor2.sessionTag_ = "tag2";
+    descriptor2.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
+    descriptor2.elementName_.SetBundleName(g_testAnotherBundleName);
+    descriptor2.elementName_.SetAbilityName("testThird.ability");
+    OHOS::sptr<AVSessionItem> avsessionFront2_ = new AVSessionItem(descriptor2, userId);
+
+    // Add sessions to front list
+    sessionListForFront->push_back(avsessionFront1_);
+    sessionListForFront->push_back(avsessionFront2_);
+
+    // Set first session to STOP state to ensure it's not considered as playing
+    g_playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_STOP);
+    avsessionFront1_->SetAVPlaybackState(g_playbackState);
+
+    // Ensure second session is NOT casting (castHandle_ = 0 by default)
+    EXPECT_EQ(avsessionFront2_->castHandle_, 0);
+
+    // Call GetOtherPlayingSession - should return nullptr because second session is not casting
+    auto result = avservice_->GetOtherPlayingSession(userId, gTestFrontBundleName);
+    EXPECT_TRUE(result == nullptr);
+
+    // Clean up: remove sessions from front list
+    while (sessionListForFront->size() > originalSize) {
+        sessionListForFront->pop_back();
+    }
+
+    // Clear cast controller proxy before destroy to avoid memory leak
+    avsessionFront2_->castControllerProxy_ = nullptr;
+    avsessionFront1_->castControllerProxy_ = nullptr;
+
+    avsessionFront1_->Destroy();
+    avsessionFront2_->Destroy();
+
+    // Verify cleanup was successful
+    EXPECT_EQ(sessionListForFront->size(), originalSize);
+
+    SLOGI("GetOtherPlayingSession007 end!");
 }
 
 /**

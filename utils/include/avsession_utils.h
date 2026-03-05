@@ -27,6 +27,7 @@
 #endif
 
 #include "avsession_log.h"
+#include "avsession_pixel_map.h"
 #include "directory_ex.h"
 
 namespace OHOS::AVSession {
