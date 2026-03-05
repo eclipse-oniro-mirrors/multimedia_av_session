@@ -364,7 +364,11 @@ void AVSessionService::HandleRemoveMediaCardEvent(int32_t uid, bool isPhoto)
                 topSession_->GetUid(), topSession_->GetPid(), ret);
         }
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("NotifyFlowControl");
-        if (topSession_->IsCasting()) {
+        bool isCasting = topSession_->IsCasting();
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        isCasting = isCasting && AVRouter::GetInstance().IsRemoteCasting();
+#endif
+        if (isCasting) {
             AVCastControlCommand castCmd;
             castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
             topSession_->SendControlCommandToCast(castCmd);

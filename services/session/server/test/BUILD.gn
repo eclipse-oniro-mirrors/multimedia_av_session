@@ -1221,6 +1221,29 @@ ohos_unittest("JsonUtilsTest") {
   public_configs = ["../../../session:avsession_ipc_config"]
 }
 
+ohos_unittest("AVSessionUtilsTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_utils_test.cpp" ]
+
+  defines = [ "CLIENT_LITE" ]
+
+  include_dirs = [
+    "../../../../interfaces/inner_api/native/session/include/",
+    "../../../../utils/include/",
+  ]
+
+  deps = [
+    "../../../../utils:avsession_utils",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "googletest:gtest_main",
+  ]
+}
+
 ohos_unittest("FocusSessionStrategyTest") {
   module_out_path = module_output_path
 
@@ -3058,6 +3081,7 @@ group("av_session_server_unittest") {
     ":AVSessionWhitelistConfigManagerTest",
     ":AVSessionUsersManagerTest",
     ":AVSharedMemoryBaseTest",
+    ":AVSessionUtilsTest",
     ":AVsessionSyseventTest",
     ":AbilityConnectHelperTest",
     ":AbilityManagerAdapterDemoTest",

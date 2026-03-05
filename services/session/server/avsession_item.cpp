@@ -3266,8 +3266,8 @@ int32_t AVSessionItem::DoContinuousTaskUnregister()
 bool AVSessionItem::IsCasting()
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (descriptor_.sessionTag_ != "RemoteCast" &&
-        ((castHandle_ > 0 && castHandle_ != AVRouter::GetInstance().GetMirrorCastHandle()) ||
+    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0 &&
+        (castHandle_ != AVRouter::GetInstance().GetMirrorCastHandle() ||
         AVRouter::GetInstance().IsInMirrorToStreamState())) {
         return true;
     }

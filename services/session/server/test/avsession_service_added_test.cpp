@@ -40,6 +40,7 @@
 #include "avsession_info.h"
 #include "avsession_service.h"
 #include "avsession_service_proxy.h"
+#include "avrouter_impl.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -765,6 +766,78 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     EXPECT_NE(avsessionItem, nullptr);
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_003 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_004
+ * @tc.desc: Verify IsRemoteCasting()=true triggers Cast control command branch
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_004, TestSize.Level0)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_004 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionItem->descriptor_.sessionTag_ = "test";
+    avsessionItem->castHandle_ = 1;
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    
+    AVRouter& router = AVRouter::GetInstance();
+    AVRouterImpl* routerImpl = reinterpret_cast<AVRouterImpl*>(&router);
+    routerImpl->isInMirrorToStream_ = true;
+    routerImpl->isRemoteCasting_ = true;
+    
+    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
+    
+    EXPECT_TRUE(g_AVSessionService->topSession_->IsCasting());
+    EXPECT_TRUE(AVRouter::GetInstance().IsRemoteCasting());
+    
+    routerImpl->isInMirrorToStream_ = false;
+    routerImpl->isRemoteCasting_ = false;
+    
+    EXPECT_NE(avsessionItem, nullptr);
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_004 end!");
+}
+
+/**
+ * @tc.name: AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_005
+ * @tc.desc: Verify IsCasting()=true && IsRemoteCasting()=false triggers normal control command branch
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_005, TestSize.Level0)
+{
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_005 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    avsessionItem->descriptor_.sessionTag_ = "test";
+    avsessionItem->castHandle_ = 1;
+    g_AVSessionService->UpdateTopSession(avsessionItem);
+    
+    AVRouter& router = AVRouter::GetInstance();
+    AVRouterImpl* routerImpl = reinterpret_cast<AVRouterImpl*>(&router);
+    routerImpl->isInMirrorToStream_ = true;
+    routerImpl->isRemoteCasting_ = false;
+    
+    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
+    
+    EXPECT_TRUE(g_AVSessionService->topSession_->IsCasting());
+    EXPECT_FALSE(AVRouter::GetInstance().IsRemoteCasting());
+    
+    routerImpl->isInMirrorToStream_ = false;
+    routerImpl->isRemoteCasting_ = false;
+    
+    EXPECT_NE(avsessionItem, nullptr);
+    avsessionItem->Destroy();
+    SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_005 end!");
 }
 
 /**
