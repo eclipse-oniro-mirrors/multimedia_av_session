@@ -530,6 +530,7 @@ export struct AVCastPicker {
         .bindMenu(this.isMenuShow, this.deviceMenu(), {
           placement: Placement.BottomRight,
           showInSubWindow: false,
+          enableHoverMode: true,
           onDisappear: () => {
             this.isMenuShow = false;
             this.touchMenuItemIndex = -1;
