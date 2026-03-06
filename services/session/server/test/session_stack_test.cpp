@@ -58,16 +58,17 @@ HWTEST_F(SessionStackTest, RemoveSession001, TestSize.Level0)
     item->SetPid(getpid());
     item->SetUid(uid);
     std::string sessionId = item->GetDescriptor().sessionId_;
-    SessionStack sessionStack;
-    sessionStack.AddSession(getpid(), elementName.GetAbilityName(), item);
+    std::shared_ptr<SessionStack> sessionStack = std::make_shared<SessionStack>();
+    ASSERT_TRUE(sessionStack != nullptr);
+    sessionStack->AddSession(getpid(), elementName.GetAbilityName(), item);
 
-    auto actual = sessionStack.RemoveSession("test");
+    auto actual = sessionStack->RemoveSession("test");
     EXPECT_EQ(actual, nullptr);
 
-    actual = sessionStack.RemoveSession(getpid(), "test");
+    actual = sessionStack->RemoveSession(getpid(), "test");
     EXPECT_EQ(actual, nullptr);
 
-    actual = sessionStack.RemoveSession(sessionId);
+    actual = sessionStack->RemoveSession(sessionId);
     EXPECT_NE(actual, nullptr);
 
     avSessionService_->HandleSessionRelease(sessionId);
@@ -93,13 +94,14 @@ HWTEST_F(SessionStackTest, RemoveSession002, TestSize.Level0)
     item->SetPid(getpid());
     item->SetUid(uid);
     std::string sessionId = item->GetDescriptor().sessionId_;
-    SessionStack sessionStack;
-    sessionStack.AddSession(getpid(), elementName.GetAbilityName(), item);
+    std::shared_ptr<SessionStack> sessionStack = std::make_shared<SessionStack>();
+    ASSERT_TRUE(sessionStack != nullptr);
+    sessionStack->AddSession(getpid(), elementName.GetAbilityName(), item);
 
-    auto actual = sessionStack.RemoveSession(1);
+    auto actual = sessionStack->RemoveSession(1);
     EXPECT_EQ(actual.size(), 0);
 
-    actual = sessionStack.RemoveSession(getpid());
+    actual = sessionStack->RemoveSession(getpid());
     EXPECT_NE(actual.size(), 0);
 
     avSessionService_->HandleSessionRelease(sessionId);
@@ -124,15 +126,16 @@ HWTEST_F(SessionStackTest, AddSession001, TestSize.Level0)
     item->SetPid(getpid());
     item->SetUid(uid);
     std::string sessionId = item->GetDescriptor().sessionId_;
-    SessionStack sessionStack;
+    std::shared_ptr<SessionStack> sessionStack = std::make_shared<SessionStack>();
+    ASSERT_TRUE(sessionStack != nullptr);
     for (auto i = 0; i < SessionContainer::SESSION_NUM_MAX; i++) {
-        sessionStack.sessions_.insert(std::make_pair(std::make_pair(i, "test"), item));
+        sessionStack->sessions_.insert(std::make_pair(std::make_pair(i, "test"), item));
     }
-    auto ret = sessionStack.AddSession(getpid(), elementName.GetAbilityName(), item);
+    auto ret = sessionStack->AddSession(getpid(), elementName.GetAbilityName(), item);
     EXPECT_EQ(ret, ERR_SESSION_EXCEED_MAX);
 
     avSessionService_->HandleSessionRelease(sessionId);
-    sessionStack.sessions_.clear();
+    sessionStack->sessions_.clear();
 }
 
 /**
@@ -154,17 +157,18 @@ HWTEST_F(SessionStackTest, GetSession001, TestSize.Level0)
     item->SetPid(getpid());
     item->SetUid(uid);
     std::string sessionId = item->GetDescriptor().sessionId_;
-    SessionStack sessionStack;
-    auto ret = sessionStack.GetSession(getpid(), elementName.GetAbilityName());
+    std::shared_ptr<SessionStack> sessionStack = std::make_shared<SessionStack>();
+    ASSERT_TRUE(sessionStack != nullptr);
+    auto ret = sessionStack->GetSession(getpid(), elementName.GetAbilityName());
     EXPECT_EQ(ret, nullptr);
 
-    sessionStack.AddSession(getpid(), elementName.GetAbilityName(), item);
+    sessionStack->AddSession(getpid(), elementName.GetAbilityName(), item);
 
-    ret = sessionStack.GetSession(getpid(), elementName.GetAbilityName());
+    ret = sessionStack->GetSession(getpid(), elementName.GetAbilityName());
     EXPECT_NE(ret, nullptr);
 
     avSessionService_->HandleSessionRelease(sessionId);
-    sessionStack.sessions_.clear();
+    sessionStack->sessions_.clear();
 }
 
 /**
@@ -186,13 +190,14 @@ HWTEST_F(SessionStackTest, GetSessionById001, TestSize.Level0)
     item->SetPid(getpid());
     item->SetUid(uid);
     std::string sessionId = item->GetDescriptor().sessionId_;
-    SessionStack sessionStack;
-    sessionStack.AddSession(getpid(), elementName.GetAbilityName(), item);
-    auto ret = sessionStack.GetSessionById("test");
+    std::shared_ptr<SessionStack> sessionStack = std::make_shared<SessionStack>();
+    ASSERT_TRUE(sessionStack != nullptr);
+    sessionStack->AddSession(getpid(), elementName.GetAbilityName(), item);
+    auto ret = sessionStack->GetSessionById("test");
     EXPECT_EQ(ret, nullptr);
 
     avSessionService_->HandleSessionRelease(sessionId);
-    sessionStack.sessions_.clear();
+    sessionStack->sessions_.clear();
 }
 
 /**
@@ -214,15 +219,16 @@ HWTEST_F(SessionStackTest, UidHasSession001, TestSize.Level0)
     item->SetPid(getpid());
     item->SetUid(uid);
     std::string sessionId = item->GetDescriptor().sessionId_;
-    SessionStack sessionStack;
-    sessionStack.AddSession(getpid(), elementName.GetAbilityName(), item);
-    auto ret = sessionStack.UidHasSession(-1);
+    std::shared_ptr<SessionStack> sessionStack = std::make_shared<SessionStack>();
+    ASSERT_TRUE(sessionStack != nullptr);
+    sessionStack->AddSession(getpid(), elementName.GetAbilityName(), item);
+    auto ret = sessionStack->UidHasSession(-1);
     EXPECT_EQ(ret, false);
-    ret = sessionStack.UidHasSession(uid);
+    ret = sessionStack->UidHasSession(uid);
     EXPECT_EQ(ret, true);
 
     avSessionService_->HandleSessionRelease(sessionId);
-    sessionStack.sessions_.clear();
+    sessionStack->sessions_.clear();
 }
 
 /**
@@ -244,13 +250,14 @@ HWTEST_F(SessionStackTest, GetSessionByUid001, TestSize.Level0)
     item->SetPid(getpid());
     item->SetUid(uid);
     std::string sessionId = item->GetDescriptor().sessionId_;
-    SessionStack sessionStack;
-    sessionStack.AddSession(getpid(), elementName.GetAbilityName(), item);
-    auto ret = sessionStack.GetSessionByUid(-1);
+    std::shared_ptr<SessionStack> sessionStack = std::make_shared<SessionStack>();
+    ASSERT_TRUE(sessionStack != nullptr);
+    sessionStack->AddSession(getpid(), elementName.GetAbilityName(), item);
+    auto ret = sessionStack->GetSessionByUid(-1);
     EXPECT_EQ(ret, nullptr);
 
     avSessionService_->HandleSessionRelease(sessionId);
-    sessionStack.sessions_.clear();
+    sessionStack->sessions_.clear();
 }
 } //AVSession
 } //OHOS
