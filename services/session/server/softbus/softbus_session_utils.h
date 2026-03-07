@@ -17,8 +17,15 @@
 #define SOFTBUS_SESSION_UTILS_H
 
 #include <string>
+#include <iostream>
+#include <memory>
+#include <cstring>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
 #include "cJSON.h"
 #include "migrate_avsession_constant.h"
+#include "securec.h"
 
 namespace OHOS::AVSession {
 class SoftbusSessionUtils {
@@ -262,6 +269,26 @@ public:
             }
         }
         return output;
+    }
+
+    static std::string TransformInt64ToStr(const int64_t num)
+    {
+        std::string stringFromNum(sizeof(int64_t), '\0');
+        errno_t ret = memcpy_s(&stringFromNum[0], sizeof(int64_t), &num, sizeof(int64_t));
+        return ret == EOK ? stringFromNum : "";
+    }
+
+    static int64_t TransformStrToInt64(const std::string str)
+    {
+        int64_t intFromStr;
+        if (sizeof(int64_t) > str.size()) {
+            return -1;
+        }
+        errno_t ret = memcpy_s(&intFromStr, sizeof(int64_t), str.data(), sizeof(int64_t));
+        if (ret != EOK) {
+            return -1;
+        }
+        return intFromStr;
     }
 
 private:

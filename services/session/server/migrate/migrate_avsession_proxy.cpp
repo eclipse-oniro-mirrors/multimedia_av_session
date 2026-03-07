@@ -854,6 +854,14 @@ void AVSessionObserver::OnPlayPrevious(const AVControlCommand& cmd)
     proxy->HandlePlayPrevious();
 }
 
+void AVSessionObserver::OnSeek(int64_t time)
+{
+    std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
+    CHECK_AND_RETURN_LOG(proxy != nullptr, "check migrate proxy nullptr!");
+    CHECK_AND_RETURN_LOG(proxy->GetCharacteristic() != MSG_HEAD_MODE,
+        "superMode:%{public}d", proxy->HandleSeekForSuper(playerId_, time));
+}
+
 void AVSessionObserver::OnToggleFavorite(const std::string& mediaId)
 {
     std::shared_ptr<MigrateAVSessionProxy> proxy = migrateProxy_.lock();
