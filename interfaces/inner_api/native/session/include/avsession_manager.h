@@ -233,7 +233,8 @@ public:
      * @return Returns whether the common command was successfully send.
      * @since 24
     */
-    virtual int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs) { return 0; };
+    virtual int32_t SendSystemCommonCommand(const std::string& commonCommand,
+        const AAFwk::WantParams& commandArgs) { return 0; };
 
     /**
      * Cast the session to the specified device list.
