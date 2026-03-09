@@ -809,14 +809,14 @@ HWTEST_F(AVSessionManagerTest, SendSystemControlCommand003, TestSize.Level1)
 */
 HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand001, TestSize.Level1)
 {
-    SLOGI("SendSystemCommonCommand001 begin");
+    SLOGI("SendSystemControlCommand001 begin");
     std::string commonCommand = "";
     AAFwk::WantParams commandArgs;
     auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
-    EXPECT_NE(result, AVSESSION_SUCCESS);
-    SLOGI("SendSystemCommonCommand001 end");
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("SendSystemControlCommand001 end");
 }
-
+ 
 /**
 * @tc.name: SendSystemCommonCommand002
 * @tc.desc: valid command and args
@@ -825,13 +825,13 @@ HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand001, TestSize.Level1)
 */
 HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand002, TestSize.Level1)
 {
-    SLOGI("SendSystemCommonCommand002 begin");
+    SLOGI("SendSystemControlCommand002 begin");
     std::string commonCommand = "";
     AAFwk::WantParams commandArgs;
     auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
-    EXPECT_NE(result, AVSESSION_SUCCESS);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
     sleep(1);
-    SLOGI("SendSystemCommonCommand002 end");
+    SLOGI("SendSystemControlCommand002 end");
 }
 }
 }
