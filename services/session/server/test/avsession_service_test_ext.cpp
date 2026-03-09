@@ -26,6 +26,7 @@
 #include "client_death_proxy.h"
 #include "system_ability_definition.h"
 #include "system_ability_ondemand_reason.h"
+#include "migrate_avsession_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -997,6 +998,97 @@ static HWTEST_F(AVSessionServiceTestExt, NotifyActiveSessionChange001, TestSize.
     g_AVSessionService->NotifySessionChange(sessionListForFront, curUserId);
     EXPECT_EQ(g_isCallOnActiveSessionChanged, true);
     avsessionHere->Destroy();
+}
+
+/**
+ * @tc.name: ProcessSuperLauncherConnect001
+ * @tc.desc: Test ProcessSuperLauncherConnect with invalid JSON
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ProcessSuperLauncherConnect001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::string deviceId = "test_device_id";
+    std::string extraInfo = "invalid_json";
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+    
+    int32_t result = g_AVSessionService->ProcessSuperLauncherConnect(deviceId, extraInfo);
+    // Should still succeed but networkid will be empty
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+
+    // For invalid JSON case, networkId will be empty string
+    // Clean up safely
+    std::shared_ptr<SoftbusSession> proxyPtr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        auto it = g_AVSessionService->migrateAVSessionProxyMap_.find("");
+        if (it != g_AVSessionService->migrateAVSessionProxyMap_.end()) {
+            proxyPtr = it->second;
+            g_AVSessionService->migrateAVSessionProxyMap_.erase(it);
+        }
+    }
+    proxyPtr.reset();
+}
+
+/**
+ * @tc.name: ProcessSuperLauncherDisconnect001
+ * @tc.desc: Test ProcessSuperLauncherDisconnect with valid networkId
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ProcessSuperLauncherDisconnect001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::string deviceId = "test_device_id";
+    std::string networkId = "disconnect_network_id_001";
+    std::string extraInfo = R"({"mDeviceId": ")" + networkId + R"("})";
+    
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+    
+    int32_t result = g_AVSessionService->ProcessSuperLauncherDisconnect(deviceId, extraInfo);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    
+    // Cleanup
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+}
+
+/**
+ * @tc.name: ProcessSuperLauncherDisconnect002
+ * @tc.desc: Test ProcessSuperLauncherDisconnect with non-existent networkId
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ProcessSuperLauncherDisconnect002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::string deviceId = "test_device_id";
+    std::string networkId = "non_existent_network_id";
+    std::string extraInfo = R"({"mDeviceId": ")" + networkId + R"("})";
+    
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+    
+    int32_t result = g_AVSessionService->ProcessSuperLauncherDisconnect(deviceId, extraInfo);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    
+    // Cleanup
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
 }
 } // AVSession
 } // OHOS
