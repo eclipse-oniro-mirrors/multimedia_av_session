@@ -348,9 +348,9 @@ bool AudioCapabilities::ReadFromParcel(Parcel& in)
     return true;
 }
 
-bool HiPlayDeviceInfo::WriteParcelable(Parcel& out) const
+bool HiPlayDeviceInfo::WriteToParcel(Parcel& out) const
 {
-    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportCastMode_), flase, "write supportCastMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportCastMode_), false, "write supportCastMode_ failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(curCastMode_), false, "write curCastMode_ failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(targetCastMode_), false, "write targetCastMode_ failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(lastCastUid_), false, "write lastCastUid_ failed");
