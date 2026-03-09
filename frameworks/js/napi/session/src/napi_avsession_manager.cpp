@@ -1299,27 +1299,27 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
     return NapiAsyncWork::Enqueue(env, context, "SendSystemControlCommand", executor);
 }
 
-napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_callback_info info)
+napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_callback_info info) 
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::SendSystemCommonCommand");
-    struct ConcrentContext : public ContextBase {
-        AVCommonCommand commonCommand_;
+    struct ConcreteContext : public ContextBase {
+        std::string commonCommand_;
         AAFwk::WantParams commandArgs_;
     };
-    auto context = std::make_shared<ConcrentContext>();
+    auto context = std::make_shared<ConcreteContext>();
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "Invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->commonCommand_);
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "Get common command failed",
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get common command failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->commandArgs_);
-        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok), "Get command args failed",
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->commandArgs_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get command args failed",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SEND_SYSTEM_COMMON_COMMAND_TASK_ID;
-
+ 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().SendSystemCommonCommand(context->commonCommand_,
             context->commandArgs_);
@@ -1329,7 +1329,7 @@ napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_call
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
-
+ 
     return NapiAsyncWork::Enqueue(env, context, "SendSystemCommonCommand", executor);
 }
 
