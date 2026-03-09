@@ -1338,7 +1338,7 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     status = napi_set_named_property(env, out, "uuid", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
     
-    status = SetValue(env, in.hiPlayDeviceInfo, property);
+    status = SetValue(env, in.hiPlayDeviceInfo_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "hiPlayDeviceInfo", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
@@ -2340,22 +2340,22 @@ napi_status NapiUtils::SetValue(napi_env env, const HiPlayDeviceInfo& in, napi_v
     CHECK_RETURN((status == napi_ok) && (out != nullptr), "create object failed", status);
     napi_value property = nullptr;
 
-    status = SetValue(env, static_cast<int>(in.supportCastMode_), property);
+    status = SetValue(env, in.supportCastMode_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "set supportCastMode failed", status);
     status = napi_set_named_property(env, out, "supportCastMode", property);
     CHECK_RETURN(status == napi_ok, "set supportCastMode property failed", status);
-
-    status = SetValue(env, static_cast<int>(in.curCastMode_), property);
+ 
+    status = SetValue(env, in.curCastMode_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "set curCastMode failed", status);
     status = napi_set_named_property(env, out, "curCastMode", property);
     CHECK_RETURN(status == napi_ok, "set curCastMode property failed", status);
-
-    status = SetValue(env, static_cast<int>(in.targetCastMode_), property);
+ 
+    status = SetValue(env, in.targetCastMode_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "set targetCastMode failed", status);
     status = napi_set_named_property(env, out, "targetCastMode", property);
     CHECK_RETURN(status == napi_ok, "set targetCastMode property failed", status);
-
-    status = SetValue(env, static_cast<int>(in.lastCastUid_), property);
+ 
+    status = SetValue(env, in.lastCastUid_, property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "set lastCastUid failed", status);
     status = napi_set_named_property(env, out, "lastCastUid", property);
     CHECK_RETURN(status == napi_ok, "set lastCastUid property failed", status);
