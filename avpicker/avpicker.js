@@ -1096,6 +1096,7 @@ export class AVCastPicker extends ViewPU {
             } }, {
             placement: Placement.BottomRight,
             showInSubWindow: false,
+            enableHoverMode: true,
             onDisappear: () => {
                 if (this.isSubMenuExpanded) {
                     this.isSubMenuExpanded = false;

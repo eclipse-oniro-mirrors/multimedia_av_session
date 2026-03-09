@@ -125,6 +125,32 @@ static napi_value ExportSkipIntervals(napi_env env)
     return result;
 }
 
+static napi_value ExportFastForwardSkipIntervals(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "SECONDS_10", AVMetaData::SECONDS_10);
+    (void)SetNamedProperty(env, result, "SECONDS_15", AVMetaData::SECONDS_15);
+    (void)SetNamedProperty(env, result, "SECONDS_30", AVMetaData::SECONDS_30);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportRewindSkipIntervals(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "SECONDS_10", AVMetaData::SECONDS_10);
+    (void)SetNamedProperty(env, result, "SECONDS_15", AVMetaData::SECONDS_15);
+    (void)SetNamedProperty(env, result, "SECONDS_30", AVMetaData::SECONDS_30);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 static napi_value ExportAVCastCategory(napi_env env)
 {
     napi_value result = nullptr;
@@ -465,6 +491,8 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DeviceType", ExportDeviceType(env)),
         DECLARE_NAPI_PROPERTY("LoopMode", ExportLoopMode(env)),
         DECLARE_NAPI_PROPERTY("SkipIntervals", ExportSkipIntervals(env)),
+        DECLARE_NAPI_PROPERTY("FastForwardSkipIntervals", ExportFastForwardSkipIntervals(env)),
+        DECLARE_NAPI_PROPERTY("RewindSkipIntervals", ExportRewindSkipIntervals(env)),
         DECLARE_NAPI_PROPERTY("PlaybackState", ExportPlaybackState(env)),
         DECLARE_NAPI_PROPERTY("CallState", ExportAVCallState(env)),
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),

@@ -446,11 +446,6 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     SLOGI("GetHistoricalSessionDescriptors001 get historicalSession size %{public}d", static_cast<int>(size));
     SLOGI("GetHistoricalSessionDescriptors need session in sessionListForFront");
     EXPECT_EQ(size >= 0, true);
-    if (size >= 1) {
-        EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
-        EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), tempBundleNameForHis);
-        EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), tempAbilityNameForHis);
-    }
     session->Destroy();
     descriptors.clear();
     sleep(1);
@@ -460,6 +455,11 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     SLOGI("GetHistoricalSessionDescriptors001 get size after destroy %{public}d", static_cast<int>(reSize));
     // historical descriptors list may push default session when no session alive
     EXPECT_EQ(reSize >= size, true);
+    if (size >= 1) {
+        EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
+        EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), tempBundleNameForHis);
+        EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), tempAbilityNameForHis);
+    }
     SLOGI("GetHistoricalSessionDescriptors001 end");
 }
 

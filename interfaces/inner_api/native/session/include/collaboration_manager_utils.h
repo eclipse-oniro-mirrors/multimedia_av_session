@@ -41,8 +41,8 @@ typedef enum ServiceCollaborationManagerBussinessStatus {
 typedef enum ServiceCollaborationManagerResultCode {
     PASS = 1004720001,
     REJECT = 1004720002,
-    USERTIP = 1004720003,
-    USERAGREE = 1004720004
+    WAIT_SELECT = 1004720003,
+    USER_AGREE = 1004720004
 } ServiceCollaborationManagerResultCode;
 
 typedef enum ServiceCollaborationManagerCheckConflictType {
@@ -50,6 +50,36 @@ typedef enum ServiceCollaborationManagerCheckConflictType {
     BUSINESS_AND_HARDWARE_CONFLICT = 1,
     ONLY_LINK_CONFLICT = 2 // reservation param, not implementation
 } ServiceCollaborationManagerCheckConflictType;
+
+typedef enum ServiceCollaborationManagerRoleType {
+    ROLE_UNKNOWN,
+    ROLE_GO = 1,
+    ROLE_GC = 2,
+} ServiceCollaborationManagerRoleType;
+
+typedef enum ServiceCollaborationManagerBusinessType {
+    BUSINESS_UNKNOWN = 0,
+    BUSINESS_FOREGROUND = 1,
+    BUSINESS_BACKGROUND = 2,
+} ServiceCollaborationManagerBusinessType;
+
+typedef enum ServiceCollaborationManagerApplyResourceScenario {
+    SCENARIO_COMMON = 0,
+    SCENARIO_RESOLVE_AFTER_SOFTBUS_LINK_FAILED = 1,
+} ServiceCollaborationManagerApplyResourceScenario;
+
+typedef enum ServiceCollaborationManagerSoftbusTriggerType {
+    TRIGGER_UNKNOWN = 0,
+    TRIGGER_COAP = 1,
+    TRIGGER_BLE = 2,
+    TRIGGER_ACTION = 3
+} ServiceCollaborationManagerSoftbusTriggerType;
+
+typedef enum ServiceCollaborationManagerReuseValue {
+    REUSE_DEFAULT = 0,
+    REUSE_TRUE = 1,
+    REUSE_FALSE = 2,
+} ServiceCollaborationManagerReuseValue;
 
 typedef enum ServiceCollaborationManagerLinkType {
     UNKNOWN = 0,
@@ -78,27 +108,43 @@ typedef struct ServiceCollaborationManager_ResourceRequestInfoSets {
     uint32_t localHardwareListSize;
     ServiceCollaborationManager_HardwareRequestInfo *localHardwareList;
     ServiceCollaborationManager_CommunicationRequestInfo *communicationRequest;
-    ServiceCollaborationManagerCheckConflictType checkConflictType;
-    ServiceCollaborationManagerLinkType linkType;
+    ServiceCollaborationManagerCheckConflictType checkConflictType = ALL;
+    ServiceCollaborationManagerLinkType linkType = UNKNOWN;
+    ServiceCollaborationManagerRoleType roleTypeForP2P = ROLE_UNKNOWN;
+    ServiceCollaborationManagerSoftbusTriggerType softbusTriggerType = TRIGGER_UNKNOWN;
+    ServiceCollaborationManagerApplyResourceScenario applyResourceScenario = SCENARIO_COMMON;
+    int32_t softbusLinkFailedCode = 0;
+    ServiceCollaborationManagerReuseValue canReuseNativeP2pGo = REUSE_DEFAULT;
+    ServiceCollaborationManagerReuseValue canReuseSoftbusP2pGo = REUSE_DEFAULT;
+    ServiceCollaborationManagerBusinessType businessType = BUSINESS_UNKNOWN;
+    int32_t maxActiveTime = -1;
 } ServiceCollaborationManager_ResourceRequestInfoSets;
+
+typedef struct ServiceCollaborationManager_ServiceStateInfo {
+    const char *peerNetworkId = nullptr;
+    const char *serviceName = nullptr;
+    const char *extraInfo = nullptr;
+    ServiceCollaborationManagerBussinessStatus state = SCM_IDLE;
+} ServiceCollaborationManager_ServiceStateInfo;
 
 typedef struct ServiceCollaborationManager_Callback {
     int32_t (*OnStop)(const char* peerNetworkId);
     int32_t (*ApplyResult)(int32_t errorcode, int32_t result, const char* reason);
 } ServiceCollaborationManager_Callback;
 
-typedef struct ServiceCollaborationManager_API {
-    int32_t (*ServiceCollaborationManager_PublishServiceState)(const char* peerNetworkId, const char* serviceName,
-        const char* extraInfo, ServiceCollaborationManagerBussinessStatus state);
+typedef struct ServiceCollaborationManagerV2_API {
+    int32_t (*ServiceCollaborationManager_PublishServiceState)(
+        ServiceCollaborationManager_ServiceStateInfo *serviceStateInfo,
+        ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId);
     int32_t (*ServiceCollaborationManager_ApplyAdvancedResource)(const char* peerNetworkId, const char* serviceName,
-        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
         ServiceCollaborationManager_Callback* callback);
     int32_t (*ServiceCollaborationManager_RegisterLifecycleCallback)(const char* serviceName,
         ServiceCollaborationManager_Callback* callback);
     int32_t (*ServiceCollaborationManager_UnRegisterLifecycleCallback)(const char* serviceName);
-} ServiceCollaborationManager_API;
+} ServiceCollaborationManagerV2_API;
 
-int32_t ServiceCollaborationManager_Export(ServiceCollaborationManager_API *exportapi);
+int32_t ServiceCollaborationManagerV2_Export(ServiceCollaborationManagerV2_API *exportapi);
 
 #ifdef __cplusplus
 }

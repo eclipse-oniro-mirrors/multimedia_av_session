@@ -58,9 +58,9 @@ private:
     PluginLib pluginLib_ {"/system/lib64/libcfwk_allconnect_client.z.so"};
     ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest_ =
         new ServiceCollaborationManager_ResourceRequestInfoSets();
-    ServiceCollaborationManager_API exportapi_;
+    ServiceCollaborationManagerV2_API exportapi_;
 
-    using CollaborationManagerExportFunType = int32_t (*)(ServiceCollaborationManager_API *exportapi);
+    using CollaborationManagerExportFunType = int32_t (*)(ServiceCollaborationManagerV2_API *exportapi);
     CollaborationManagerExportFunType collaborationManagerExportFun_;
     ServiceCollaborationManager_HardwareRequestInfo localHardwareList_;
     ServiceCollaborationManager_HardwareRequestInfo remoteHardwareList_[2];

@@ -148,6 +148,8 @@ bool AVMetaData::MarshallingExceptImg(MessageParcel& data) const
         data.WriteString(previousAssetId_) &&
         data.WriteString(nextAssetId_) &&
         data.WriteInt32(skipIntervals_) &&
+        data.WriteInt32(fastForwardSkipIntervals_) &&
+        data.WriteInt32(rewindSkipIntervals_) &&
         data.WriteInt32(filter_) &&
         data.WriteInt32(mediaLength_) &&
         data.WriteInt32(avQueueLength_) &&
@@ -194,6 +196,8 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data)
         !data.ReadString(previousAssetId_) ||
         !data.ReadString(nextAssetId_) ||
         !data.ReadInt32(skipIntervals_) ||
+        !data.ReadInt32(fastForwardSkipIntervals_) ||
+        !data.ReadInt32(rewindSkipIntervals_) ||
         !data.ReadInt32(filter_) ||
         !data.ReadInt32(mediaLength_) ||
         !data.ReadInt32(avQueueLength_) ||
@@ -532,6 +536,32 @@ int32_t AVMetaData::GetSkipIntervals() const
     return skipIntervals_;
 }
 
+void AVMetaData::SetFastForwardSkipIntervals(int32_t fastForwardSkipIntervals)
+{
+    SLOGD("SetFastForwardSkipIntervals %{public}d", static_cast<int32_t>(fastForwardSkipIntervals));
+    fastForwardSkipIntervals_ = fastForwardSkipIntervals;
+    metaMask_.set(META_KEY_FAST_FORWARD_SKIP_INTERVALS);
+}
+
+int32_t AVMetaData::GetFastForwardSkipIntervals() const
+{
+    SLOGD("GetFastForwardSkipIntervals %{public}d", static_cast<int32_t>(fastForwardSkipIntervals_));
+    return fastForwardSkipIntervals_;
+}
+
+void AVMetaData::SetRewindSkipIntervals(int32_t rewindSkipIntervals)
+{
+    SLOGD("SetRewindSkipIntervals %{public}d", static_cast<int32_t>(rewindSkipIntervals));
+    rewindSkipIntervals_ = rewindSkipIntervals;
+    metaMask_.set(META_KEY_REWIND_SKIP_INTERVALS);
+}
+
+int32_t AVMetaData::GetRewindSkipIntervals() const
+{
+    SLOGD("GetRewindSkipIntervals %{public}d", static_cast<int32_t>(rewindSkipIntervals_));
+    return rewindSkipIntervals_;
+}
+
 void AVMetaData::SetFilter(int32_t filter)
 {
     SLOGD("SetFilter %{public}d", static_cast<int32_t>(filter));
@@ -620,6 +650,8 @@ void AVMetaData::Reset()
     previousAssetId_ = "";
     nextAssetId_ = "";
     skipIntervals_ = SECONDS_15;
+    fastForwardSkipIntervals_ = SECONDS_ZERO;
+    rewindSkipIntervals_ = SECONDS_ZERO;
     displayTags_ = 0;
     drmSchemes_.clear();
 }
@@ -650,6 +682,8 @@ void AVMetaData::ResetToBaseMeta()
     previousAssetId_ = "";
     nextAssetId_ = "";
     skipIntervals_ = SECONDS_15;
+    fastForwardSkipIntervals_ = SECONDS_ZERO;
+    rewindSkipIntervals_ = SECONDS_ZERO;
     displayTags_ = 0;
     drmSchemes_.clear();
 }
@@ -798,6 +832,16 @@ bool AVMetaData::CheckSkipIntervalsChange(const AVMetaData& from, const AVMetaDa
     return from.skipIntervals_ != to.skipIntervals_;
 }
 
+bool AVMetaData::CheckFastForwardSkipIntervalsChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.fastForwardSkipIntervals_ != to.fastForwardSkipIntervals_;
+}
+
+bool AVMetaData::CheckRewindSkipIntervalsChange(const AVMetaData& from, const AVMetaData& to)
+{
+    return from.rewindSkipIntervals_ != to.rewindSkipIntervals_;
+}
+
 bool AVMetaData::CheckFilterChange(const AVMetaData& from, const AVMetaData& to)
 {
     return from.filter_ != to.filter_;
@@ -882,6 +926,8 @@ bool AVMetaData::EqualWithUri(const AVMetaData& metaData)
         && (previousAssetId_ == metaData.previousAssetId_)
         && (nextAssetId_ == metaData.nextAssetId_)
         && (skipIntervals_ == metaData.skipIntervals_)
+        && (fastForwardSkipIntervals_ == metaData.fastForwardSkipIntervals_)
+        && (rewindSkipIntervals_ == metaData.rewindSkipIntervals_)
         && (filter_ == metaData.filter_)
         && (displayTags_ == metaData.displayTags_)
         && (drmSchemes_ == metaData.drmSchemes_);
@@ -1006,6 +1052,16 @@ void AVMetaData::CloneNextAssetId(const AVMetaData& from, AVMetaData& to)
 void AVMetaData::CloneSkipIntervals(const AVMetaData& from, AVMetaData& to)
 {
     to.skipIntervals_ = from.skipIntervals_;
+}
+
+void AVMetaData::CloneFastForwardSkipIntervals(const AVMetaData& from, AVMetaData& to)
+{
+    to.fastForwardSkipIntervals_ = from.fastForwardSkipIntervals_;
+}
+
+void AVMetaData::CloneRewindSkipIntervals(const AVMetaData& from, AVMetaData& to)
+{
+    to.rewindSkipIntervals_ = from.rewindSkipIntervals_;
 }
 
 void AVMetaData::CloneFilter(const AVMetaData& from, AVMetaData& to)

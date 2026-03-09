@@ -67,6 +67,11 @@ CollaborationManager::CollaborationManager()
         .maxWaitTime = 60000,
         .dataType = dataType_.c_str()
     };
+    resourceRequest_->localHardwareListSize = localHardwareListSize_;
+    resourceRequest_->localHardwareList = &localHardwareList_;
+    resourceRequest_->remoteHardwareListSize = remoteHardwareListSize_;
+    resourceRequest_->remoteHardwareList = remoteHardwareList_;
+    resourceRequest_->communicationRequest = &communicationRequest_;
 }
 
 CollaborationManager::~CollaborationManager()
@@ -125,7 +130,7 @@ static ServiceCollaborationManager_Callback serviceCollaborationCallback {
 __attribute__((no_sanitize("cfi"))) int32_t CollaborationManager::ReadCollaborationManagerSo()
 {
     SLOGI("enter ReadCollaborationManagerSo");
-    void *collaborationManagerExport = pluginLib_.LoadSymbol("ServiceCollaborationManager_Export");
+    void *collaborationManagerExport = pluginLib_.LoadSymbol("ServiceCollaborationManagerV2_Export");
     if (collaborationManagerExport == nullptr) {
         SLOGE("load libcfwk_allconnect_client.z.so failed");
         return AVSESSION_ERROR;
@@ -171,8 +176,16 @@ int32_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
         SLOGE("PublishServiceState function sptr nullptr");
         return AVSESSION_ERROR;
     }
-    if (exportapi_.ServiceCollaborationManager_PublishServiceState(peerNetworkId,
-        serviceName_.c_str(), "NULL", state)) {
+    if (resourceRequest_ == nullptr) {
+        SLOGE("resourceRequest_ is nullptr");
+        return AVSESSION_ERROR;
+    }
+    ServiceCollaborationManager_ServiceStateInfo serviceStateInfo;
+    serviceStateInfo.peerNetworkId = peerNetworkId;
+    serviceStateInfo.serviceName = serviceName_.c_str();
+    serviceStateInfo.extraInfo = "NULL";
+    serviceStateInfo.state = state;
+    if (exportapi_.ServiceCollaborationManager_PublishServiceState(&serviceStateInfo, resourceRequest_, -1)) {
         return AVSESSION_ERROR;
     }
     return AVSESSION_SUCCESS;
@@ -200,18 +213,13 @@ int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId, c
         SLOGE("resourceRequest_ is nullptr");
         return AVSESSION_ERROR;
     }
-    resourceRequest_->localHardwareListSize = localHardwareListSize_;
-    resourceRequest_->localHardwareList = &localHardwareList_;
-    resourceRequest_->remoteHardwareListSize = remoteHardwareListSize_;
-    resourceRequest_->remoteHardwareList = remoteHardwareList_;
-    resourceRequest_->communicationRequest = &communicationRequest_;
     resourceRequest_->checkConflictType = checkLinkConflict ? ServiceCollaborationManagerCheckConflictType::ALL :
         ServiceCollaborationManagerCheckConflictType::BUSINESS_AND_HARDWARE_CONFLICT;
     if (IsHiPlayP2PDevice(deviceInfo)) {
         resourceRequest_->linkType = ServiceCollaborationManagerLinkType::NATIVE_P2P;
     }
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource(peerNetworkId,
-        serviceName_.c_str(), resourceRequest_, &serviceCollaborationCallback)) {
+        serviceName_.c_str(), resourceRequest_, -1, &serviceCollaborationCallback)) {
         return AVSESSION_ERROR;
     }
     return AVSESSION_SUCCESS;
@@ -269,13 +277,13 @@ void CollaborationManager::ListenCollaborationApplyResult()
             applyUserResultFlag_ = true;
             connectWaitCallbackCond_.notify_one();
         }
-        if (code == ServiceCollaborationManagerResultCode::USERTIP) {
+        if (code == ServiceCollaborationManagerResultCode::WAIT_SELECT) {
             SLOGI("ApplyResult user tip");
             applyResultFlag_ = true;
             waitUserDecisionFlag_ = true;
             connectWaitCallbackCond_.notify_one();
         }
-        if (code == ServiceCollaborationManagerResultCode::USERAGREE) {
+        if (code == ServiceCollaborationManagerResultCode::USER_AGREE) {
             SLOGI("ApplyResult user agree cast");
         }
     });

@@ -365,11 +365,7 @@ void AVSessionService::HandleRemoveMediaCardEvent(int32_t uid, bool isPhoto)
                 topSession_->GetUid(), topSession_->GetPid(), ret);
         }
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("NotifyFlowControl");
-        bool isCasting = topSession_->IsCasting();
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        isCasting = isCasting && AVRouter::GetInstance().IsRemoteCasting();
-#endif
-        if (isCasting) {
+        if (topSession_->IsCastConnected()) {
             AVCastControlCommand castCmd;
             castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
             topSession_->SendControlCommandToCast(castCmd);
@@ -739,8 +735,8 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     }
     int32_t userId = GetUsersManager().GetCurrentUserId();
     if ((topSession_ && topSession_->GetUid() == info.uid && topSession_->GetPid() == info.pid) &&
-        topSession_->IsCasting()) {
-        SLOGI("cur topSession:%{public}s isCasting", topSession_->GetBundleName().c_str());
+        topSession_->IsCastConnected()) {
+        SLOGI("cur topSession:%{public}s isCastConnected", topSession_->GetBundleName().c_str());
         return;
     }
     if (topSession_ && topSession_->GetUid() == info.uid && topSession_->GetPid() == info.pid) {

@@ -45,6 +45,8 @@ std::map<std::string, TaiheMetaData::GetterType> TaiheMetaData::getterMap_ = {
     {"previousAssetId", GetPreviousAssetId},
     {"nextAssetId", GetNextAssetId},
     {"skipIntervals", GetSkipIntervals},
+    {"fastForwardSkipIntervals", GetFastForwardSkipIntervals},
+    {"rewindSkipIntervals", GetRewindSkipIntervals},
     {"filter", GetFilter},
     {"displayTags", GetDisplayTags},
     {"drmSchemes", GetDrmSchemes},
@@ -73,6 +75,8 @@ std::map<int32_t, TaiheMetaData::SetterType> TaiheMetaData::setterMap_ = {
     {OHOS::AVSession::AVMetaData::META_KEY_PREVIOUS_ASSET_ID, SetPreviousAssetId},
     {OHOS::AVSession::AVMetaData::META_KEY_NEXT_ASSET_ID, SetNextAssetId},
     {OHOS::AVSession::AVMetaData::META_KEY_SKIP_INTERVALS, SetSkipIntervals},
+    {OHOS::AVSession::AVMetaData::META_KEY_FAST_FORWARD_SKIP_INTERVALS, SetFastForwardSkipIntervals},
+    {OHOS::AVSession::AVMetaData::META_KEY_REWIND_SKIP_INTERVALS, SetRewindSkipIntervals},
     {OHOS::AVSession::AVMetaData::META_KEY_FILTER, SetFilter},
     {OHOS::AVSession::AVMetaData::META_KEY_DISPLAY_TAGS, SetDisplayTags},
     {OHOS::AVSession::AVMetaData::META_KEY_DRM_SCHEMES, SetDrmSchemes},
@@ -102,6 +106,8 @@ std::pair<std::string, int32_t> TaiheMetaData::filterMap_[] = {
     {"previousAssetId", OHOS::AVSession::AVMetaData::META_KEY_PREVIOUS_ASSET_ID},
     {"nextAssetId", OHOS::AVSession::AVMetaData::META_KEY_NEXT_ASSET_ID},
     {"skipIntervals", OHOS::AVSession::AVMetaData::META_KEY_SKIP_INTERVALS},
+    {"fastForwardSkipIntervals", OHOS::AVSession::AVMetaData::META_KEY_FAST_FORWARD_SKIP_INTERVALS},
+    {"rewindSkipIntervals", OHOS::AVSession::AVMetaData::META_KEY_REWIND_SKIP_INTERVALS},
     {"filter", OHOS::AVSession::AVMetaData::META_KEY_FILTER},
     {"displayTags", OHOS::AVSession::AVMetaData::META_KEY_DISPLAY_TAGS},
     {"drmSchemes", OHOS::AVSession::AVMetaData::META_KEY_DRM_SCHEMES},
@@ -617,6 +623,38 @@ int32_t TaiheMetaData::SetSkipIntervals(const OHOS::AVSession::AVMetaData &in, A
     SLOGD("SetSkipIntervals %{public}d", in.GetSkipIntervals());
     SkipIntervals intervals = SkipIntervals::from_value(in.GetSkipIntervals());
     out.skipIntervals = optional<SkipIntervals>(std::in_place_t {}, intervals);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheMetaData::GetFastForwardSkipIntervals(AVMetadata const &in, OHOS::AVSession::AVMetaData &out)
+{
+    int32_t property = in.fastForwardSkipIntervals.has_value() ? in.fastForwardSkipIntervals.value().get_value() : 0;
+    SLOGD("GetFastForwardSkipIntervals %{public}d", property);
+    out.SetFastForwardSkipIntervals(property);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheMetaData::SetFastForwardSkipIntervals(const OHOS::AVSession::AVMetaData &in, AVMetadata &out)
+{
+    SLOGD("SetFastForwardSkipIntervals %{public}d", in.GetFastForwardSkipIntervals());
+    SkipIntervals intervals = SkipIntervals::from_value(in.GetFastForwardSkipIntervals());
+    out.fastForwardSkipIntervals = optional<SkipIntervals>(std::in_place_t {}, intervals);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheMetaData::GetRewindSkipIntervals(AVMetadata const &in, OHOS::AVSession::AVMetaData &out)
+{
+    int32_t property = in.rewindSkipIntervals.has_value() ? in.rewindSkipIntervals.value().get_value() : 0;
+    SLOGD("GetRewindSkipIntervals %{public}d", property);
+    out.SetRewindSkipIntervals(property);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheMetaData::SetRewindSkipIntervals(const OHOS::AVSession::AVMetaData &in, AVMetadata &out)
+{
+    SLOGD("SetRewindSkipIntervals %{public}d", in.GetRewindSkipIntervals());
+    SkipIntervals intervals = SkipIntervals::from_value(in.GetRewindSkipIntervals());
+    out.rewindSkipIntervals = optional<SkipIntervals>(std::in_place_t {}, intervals);
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
