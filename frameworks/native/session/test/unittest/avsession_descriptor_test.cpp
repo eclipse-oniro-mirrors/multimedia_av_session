@@ -220,10 +220,10 @@ HWTEST_F(AVSessionDescriptorTest, ReadFromParcel005, TestSize.Level1)
     bool ret = hiPlayDeviceInfo.ReadFromParcel(in);
     EXPECT_EQ(ret, false);
 }
-
+ 
 /**
 * @tc.name: WriteToParcel001
-* @tc.desc: test ReadFromParcel
+* @tc.desc: test WriteToParcel
 * @tc.type: FUNC
 * @tc.require:
 */
