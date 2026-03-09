@@ -441,11 +441,11 @@ int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand& c
 }
 
 int32_t AVSessionManagerImpl::SendSystemCommonCommand(const std::string& commonCommand,
-    const AAFwk::wantParams& commandArgs)
+    const AAFwk::WantParams& commandArgs)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemCommonCommand");
     auto service = GetService();
-    return service ? service->sendSystemCommonCommand(commonCommand, commandArgs) : ERR_SERVICE_NOT_EXIST;
+    return service ? service->SendSystemCommonCommand(commonCommand, commandArgs) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::CastAudio(const SessionToken& token,
