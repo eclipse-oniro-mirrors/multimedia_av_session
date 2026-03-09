@@ -154,10 +154,10 @@ public:
      *
      * @param { std::string& } commonEvent - The name of the system common event.
      * @param { std::string& } args - Additional arguments for the event.
-     * @return { int32_t } Whether the notify operation was successful.
+     * @return {int32_t} Whether the notify operation was successful.
      * @since 24
     */
-    virtual int32_t OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) { return 0 };
+    virtual int32_t OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) { return 0; };
 
     /**
      * @brief Release current cast session.
@@ -447,7 +447,7 @@ public:
      * @since 24
     */
     virtual void SendCommandArgsToCast(const int64_t castHandle, const int32_t commandType,
-        const std::string& params) = 0;
+        const std::string& params) {};
 
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
