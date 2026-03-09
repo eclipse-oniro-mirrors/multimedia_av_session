@@ -267,9 +267,9 @@ public:
     static napi_status GetValue(napi_env env, napi_value in, DesktopLyricState &out);
     static napi_status SetValue(napi_env env, const DesktopLyricState &in, napi_value &out);
     
-    /* napi_value <-> HiPlayDeviceInfo */
-    static napi_status GetValue(napi_env env, napi_value in, HiPlayDeviceInfo& &out);
-    static napi_status SetValue(napi_env env, const HiPlayDeviceInfo &in, napi_value &out);
+    /* napi_value -> HiPlayDeviceInfo */
+    static napi_status GetValue(napi_env env, napi_value in, HiPlayDeviceInfo& out);
+    static napi_status SetValue(napi_env env, const HiPlayDeviceInfo& in, napi_value& out);
 
     /* napi_get_named_property wrapper */
     template <typename T>
