@@ -104,7 +104,7 @@ public:
         void NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) {}
         void NotifyDeviceOffline(const std::string& deviceId) {}
         void NotifyDeviceStateChange(const DeviceState& deviceState) {}
-        void NotifySystemCommonEvent(const std::string& commmonEvent, const std::string& args) {}
+        void NotifySystemCommonEvent(const std::string& commonEvent, const std::string& args) {}
         void setInCast(bool isInCast) {}
         void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) {}
         int32_t checkEnableCast(bool enable) { return 0; }
@@ -1562,13 +1562,13 @@ static HWTEST_F(AVRouterImplTest, SetSinkCastSessionInfo001, TestSize.Level0)
     cJSON_Delete(deviceInfo);
     SLOGI("SetSinkCastSessionInfo001 end");
 }
-
+ 
 /**
- * @tc.name: OnSystemCommonEvent001
- * @tc.desc: set servicePtr_ to not nullptr
- * @tc.type: FUNC
- * @tc.require: NA
- */
+* @tc.name: OnSystemCommonEvent001
+* @tc.desc: set servicePtr_ to not nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
 static HWTEST_F(AVRouterImplTest, OnSystemCommonEvent001, TestSize.Level0)
 {
     SLOGI("OnSystemCommonEvent001 begin");
@@ -1582,13 +1582,13 @@ static HWTEST_F(AVRouterImplTest, OnSystemCommonEvent001, TestSize.Level0)
     EXPECT_TRUE(g_AVRouterImpl->servicePtr_ != nullptr);
     SLOGI("OnSystemCommonEvent001 end");
 }
-
+ 
 /**
- * @tc.name: SendCommandArgsToCast001
- * @tc.desc: send commandType not changed
- * @tc.type: FUNC
- * @tc.require: NA
- */
+* @tc.name: SendCommandArgsToCast001
+* @tc.desc: set commandType not changed
+* @tc.type: FUNC
+* @tc.require: NA
+*/
 static HWTEST_F(AVRouterImplTest, SendCommandArgsToCast001, TestSize.Level0)
 {
     SLOGI("SendCommandArgsToCast001 begin");
