@@ -39,7 +39,7 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
         AVRouter::GetInstance().StopCastSession(castHandle_);
         castHandle_ = -1;
-        castState_ = CastState::Disconnected;
+        castState_ = CastState::DISCONNECTED;
         castHandleDeviceId_ = "-100";
     }
     
@@ -50,11 +50,12 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
-        castState_ = CastState::Connected;
+        castState_ = CastState::CONNECTED;
     }
 }
  
-void PcmCastSession::OnSystemCommonEvent(const std::string& args) {
+void PcmCastSession::OnSystemCommonEvent(const std::string& args)
+{
     int32_t code = JsonUtils::GetIntParamFromJsonString(args, "code");
     CHECK_AND_RETURN_RET_LOG(castState_ != 0, void(), "First connection, castState is 0.");
     CHECK_AND_RETURN_RET_LOG(code == 0, void(), "Castmode changes fail, code is %{public}d", code);
@@ -118,8 +119,7 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo, 0);
     if (ret == AVSESSION_SUCCESS) {
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
-        SLOGI("PcmCastSession StartCast castHandleDeviceId_: %{public}s",
-           castHandleDeviceId_.c_str());
+        SLOGI("PcmCastSession StartCast castHandleDeviceId_: %{public}s", castHandleDeviceId_.c_str());
     }
     SLOGI("PcmCastSession StartCast ret %{public}d", ret);
     return ret;
