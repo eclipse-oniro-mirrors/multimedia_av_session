@@ -57,7 +57,7 @@ private:
     int32_t castState_ = CastState::Disconnected;
     std::recursive_mutex castLock_;
     AVSessionDescriptor descriptor_;
-    std::string castHandleDeviceId = "-100";
+    std::string castHandleDeviceId_ = "-100";
 
     void WriteCastPairToFile(const std::string& deviceId, int32_t castMode);
     int32_t SendStateChangeRequest(const SessionToken& sessionToken);
