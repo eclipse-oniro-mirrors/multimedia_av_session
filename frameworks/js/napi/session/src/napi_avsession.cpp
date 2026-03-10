@@ -257,6 +257,7 @@ napi_status NapiAVSession::ReCreateInstance()
                 continue;
             }
         }
+        napiAVSession_->callback_->RestartSessionDisconnect();
     }
     napiAVSession_->session_->Activate();
     return napi_ok;
