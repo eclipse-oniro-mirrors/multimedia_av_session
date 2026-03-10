@@ -575,7 +575,8 @@ int32_t AVSessionServiceProxy::SendSystemControlCommand(const AVControlCommand& 
 }
 
 int32_t AVSessionServiceProxy::SendSystemCommonCommand(const std::string& commonCommand,
-    const AAFwk::WantParams& commandArgs) {
+    const AAFwk::WantParams& commandArgs)
+{
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "Write interface token failed");
