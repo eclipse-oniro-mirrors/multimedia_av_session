@@ -113,7 +113,7 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs) override
+    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override
     {
         return AVSESSION_SUCCESS;
     }
