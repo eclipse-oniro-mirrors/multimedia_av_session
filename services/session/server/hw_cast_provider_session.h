@@ -56,7 +56,7 @@ public:
     void SetProtocolType(CastEngine::ProtocolType);
     void OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo);
     void SendCommandArgsToCast(const int32_t commandType, const std::string& params);
-    void OnHiPlayEventRecv(const int32_t eventId, const std::string& jsonParam);
+    void OnHiplayEventRecv(const int32_t eventId, const std::string& jsonParam);
 
 private:
     void ComputeToastOnDeviceState(const CastEngine::DeviceStateInfo &stateInfo,
@@ -73,8 +73,8 @@ private:
     const int32_t deviceStateConnection = 6;
     const int32_t eventIdStart = 2000;
     const int32_t eventIdEnd = 2999;
-    const int32_t hiPlayEventIdStart = 4200;
-    const int32_t hiPlayEventIdEnd = 4250;
+    const int32_t hiplayEventIdStart = 4200;
+    const int32_t hiplayEventIdEnd = 4250;
     const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
     const std::string MEDIA_SERIES_CAST_CONFLICT = "usual.event.MEDIA_SERIES_CAST_CONFLICT";
