@@ -54,6 +54,12 @@ export let AVCastPickerColorMode;
     v11[v11.LIGHT = 2] = 'LIGHT';
 })(AVCastPickerColorMode || (AVCastPickerColorMode = {}));
 
+export let HiPlayCastMode;
+(function(w11) {
+    w11[w11.DEVICE_LEVEL = 1] = 'DEVICE_LEVEL';
+    w11[w11.APP_LEVEL = 2] = 'APP_LEVEL';
+})(HiPlayCastMode || (HiPlayCastMode = {}));
+
 export class AVCastPicker extends ViewPU {
     constructor(d11, e11, f11, g11 = -1, h11 = undefined, i11) {
         super(d11, f11, g11, i11);
@@ -669,12 +675,12 @@ export class AVCastPicker extends ViewPU {
                             Flex.pop();
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 If.create();
-                                if (x8.isConnected && x8.supportCastMode === 1) {
+                                if (x8.isConnected && x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                                     this.ifElseBranchUpdateFunction(0, () => {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Flex.create();
                                             Flex.onClick(() => {
-                                                this.isDeviceLevel = (x8.curCastMode === 1);
+                                                this.isDeviceLevel = (x8.castMode === HiPlayCastMode.DEVICE_LEVEL);
                                                 if (!this.isSubMenuExpanded) {
                                                     this.isSubMenuExpanded = true;
                                                 }
@@ -689,7 +695,7 @@ export class AVCastPicker extends ViewPU {
                                         }, Row);
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             If.create();
-                                            if (x8.curCastMode === 1) {
+                                            if (x8.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.speaker_wave_3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -711,7 +717,7 @@ export class AVCastPicker extends ViewPU {
                                         }, Row);
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             If.create();
-                                            if (x8.curCastMode === 1) {
+                                            if (x8.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Text.create('正在播放所有媒体');
@@ -830,7 +836,7 @@ export class AVCastPicker extends ViewPU {
             Flex.onClick(() => {
                 this.isDeviceLevel = true;
                 if (this.extensionProxy != null) {
-                    this.extensionProxy.send({ 'castMode': 1 });
+                    this.extensionProxy.send({ 'castMode': HiPlayCastMode.DEVICE_LEVEL });
                 }
             });
         }, Flex);
@@ -873,7 +879,7 @@ export class AVCastPicker extends ViewPU {
             Flex.onClick(() => {
                 this.isDeviceLevel = false;
                 if (this.extensionProxy != null) {
-                    this.extensionProxy.send({ 'castMode': 2 });
+                    this.extensionProxy.send({ 'castMode': HiPlayCastMode.APP_LEVEL });
                 }
             });
         }, Flex);

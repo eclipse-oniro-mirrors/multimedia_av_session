@@ -43,9 +43,9 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         castHandleDeviceId_ = "-100";
     }
     
-    deviceInfo.hiPlayDeviceInfo_.curCastMode_ = castMode_;
-    deviceInfo.hiPlayDeviceInfo_.lastCastUid_ = GetUid();
-    SLOGI("PcmCastSession OnCastStateChange lastCastUid %{public}d", deviceInfo.hiPlayDeviceInfo_.lastCastUid_);
+    deviceInfo.hiPlayDeviceInfo_.castMode_ = castMode_;
+    deviceInfo.hiPlayDeviceInfo_.castUid_ = GetUid();
+    SLOGI("PcmCastSession OnCastStateChange castUid %{public}d", deviceInfo.hiPlayDeviceInfo_.castUid_);
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
@@ -63,16 +63,16 @@ void PcmCastSession::OnSystemCommonEvent(const std::string& args)
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
     SLOGI("Received HIPLAY_CONFIG_MODE_DATA: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
-        castMode, uid, deviceId.c_str());
+        castMode, uid, AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str());
  
     if (castMode == HiPlayCastMode::DEVICE_LEVEL) {
         castMode_ = HiPlayCastMode::DEVICE_LEVEL;
         descriptor_.uid_ = 0;
-        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.lastCastUid_ = 0;
+        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = 0;
     } else if (castMode == HiPlayCastMode::APP_LEVEL) {
         castMode_ = HiPlayCastMode::APP_LEVEL;
         descriptor_.uid_ = uid;
-        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.lastCastUid_ = uid;
+        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = uid;
     }
  
     WriteCastPairToFile(deviceId, castMode_);
@@ -101,14 +101,14 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
             SendStateChangeRequest(sessionToken);
             
             descriptor_.uid_ = sessionToken.uid;
-            descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.lastCastUid_ = sessionToken.uid;
+            descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = sessionToken.uid;
  
             return ERR_REPEAT_CAST;
         }
     }
  
     castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, serviceNameStatePair, "pcmCastSession");
-    SLOGI("PcmCastSession StartCast-castHandle_ %{public}" PRIi64, castHandle_);
+    SLOGI("PcmCastSession StartCast-castHandle_ %{public}lld", (long long)castHandle_);
     AVRouter::GetInstance().RegisterCallback(castHandle_, shared_from_this(),
         "pcmCastSession", outputDeviceInfo.deviceInfos_[0]);
  
