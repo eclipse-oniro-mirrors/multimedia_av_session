@@ -27,8 +27,8 @@ public:
     };
 
     enum CastState {
-        Disconnected = 0,
-        Connected = 1
+        DISCONNECTED = 0,
+        CONNECTED = 1
     };
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove) override;
@@ -54,7 +54,7 @@ public:
 private:
     int64_t castHandle_ = 0;
     int32_t castMode_ = HiPlayCastMode::DEVICE_LEVEL;
-    int32_t castState_ = CastState::Disconnected;
+    int32_t castState_ = CastState::DISCONNECTED;
     std::recursive_mutex castLock_;
     AVSessionDescriptor descriptor_;
     std::string castHandleDeviceId_ = "-100";
