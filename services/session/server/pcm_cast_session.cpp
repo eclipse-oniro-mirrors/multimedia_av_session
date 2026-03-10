@@ -27,10 +27,6 @@
 
 namespace OHOS::AVSession {
 
-const std::map<const std::string, int32_t> COMMON_COMMAND_MAPS = {
-    {"CHANGE_CAST_MODE", PcmCastSession::CAST_MODE_CHANGE_COMMAND},
-};
-
 void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
 {
     SLOGI("PcmCastSession OnCastStateChange state %{public}d id %{public}s", castState,
@@ -184,6 +180,12 @@ void PcmCastSession::ExecuteCommonCommand(const std::string& commonCommand, cons
         case CAST_MODE_CHANGE_COMMAND:
             CastStateCommandParams(commandArgs);
             break;
+        case BYPASS_NUM_COMMAND:
+            BypassCommandParams(commandArgs);
+            break;
+        case QUERY_NUM_COMMAND:
+            QueryCommandParams(commandArgs);
+            break;
         default:
             break;
     }
@@ -221,6 +223,50 @@ int32_t PcmCastSession::GetCastState() const
 AVSessionDescriptor PcmCastSession::GetDescriptor()
 {
     return descriptor_;
+}
+
+void PcmCastSession::BypassCommandParams(const AAFwk::WantParams& commandArgs)
+{
+    auto commandType = AAFwk::IString::Query(commandArgs.GetParam(COMMAND_TYPE));
+    CHECK_AND_RETURN_LOG(commandType != nullptr, "commandType not have value");
+
+    std::string type = AAFwk::String::Unbox(commandType);
+
+    const auto& it = BYPASS_COMMAND_MAPS.find(type);
+    CHECK_AND_RETURN_LOG(it != BYPASS_COMMAND_MAPS.end(), "bypassCommand is not support");
+
+    AAFwk::WantParams commandBody = commandArgs.GetWantParams(COMMAND_BODY);
+    std::string params = commandBody.ToString();
+
+    switch (it->second) {
+        case BYPASS_NUM_TO_CAST:
+            AVRouter::GetInstance().SendCommandArgsToCast(castHandle_, BYPASS_NUM_COMMAND, params);
+            break;
+        default:
+            break;
+    }
+}
+
+void PcmCastSession::QueryCommandParams(const AAFwk::WantParams& commandArgs)
+{
+    auto commandType = AAFwk::IString::Query(commandArgs.GetParam(COMMAND_TYPE));
+    CHECK_AND_RETURN_LOG(commandType != nullptr, "commandType not have value");
+
+    std::string type = AAFwk::String::Unbox(commandType);
+
+    const auto& it = QUERY_COMMAND_MAPS.find(type);
+    CHECK_AND_RETURN_LOG(it != QUERY_COMMAND_MAPS.end(), "queryCommand is not support");
+
+    AAFwk::WantParams commandBody = commandArgs.GetWantParams(COMMAND_BODY);
+    std::string params = commandBody.ToString();
+
+    switch (it->second) {
+        case QUERY_NUM_TO_CAST:
+            AVRouter::GetInstance().SendCommandArgsToCast(castHandle_, QUERY_NUM_COMMAND, params);
+            break;
+        default:
+            break;
+    }
 }
  
 } // namespace OHOS::AVSession

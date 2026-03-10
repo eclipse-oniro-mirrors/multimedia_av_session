@@ -26,6 +26,8 @@
 #include "client_death_proxy.h"
 #include "system_ability_definition.h"
 #include "system_ability_ondemand_reason.h"
+#include "string_wrapper.h"
+#include "want_params_wrapper.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -1036,6 +1038,48 @@ static HWTEST_F(AVSessionServiceTestExt, NotifySystemCommonEvent001, TestSize.Le
     g_AVSessionService->GetUsersManager().AddSessionListener(pid, nullptr);
     g_AVSessionService->NotifySystemCommonEvent(commonEvent, args);
     EXPECT_TRUE(g_isCallOnTopSessionChange);
+}
+
+/*
+ * @tc.name: BypassCommandParams001
+ * @tc.desc: Test BypassCommandParams
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, BypassCommandParams001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OHOS::AAFwk::WantParams commandArgs;
+    commandArgs.SetParam("command_type", OHOS::AAFwk::String::Box("BYPASS_TO_CAST"));
+    OHOS::AAFwk::WantParams commandBody;
+    commandBody.SetParam("test", OHOS::AAFwk::String::Box("test001"));
+    commandArgs.SetParam("command_body", OHOS::AAFwk::WantParamWrapper::Box(commandBody));
+    pcmCastSession->BypassCommandParams(commandArgs);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/*
+ * @tc.name: QueryCommandParams001
+ * @tc.desc: Test QueryCommandParams
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, QueryCommandParams001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OHOS::AAFwk::WantParams commandArgs;
+    commandArgs.SetParam("command_type", OHOS::AAFwk::String::Box("QUERY_TO_CAST"));
+    OHOS::AAFwk::WantParams commandBody;
+    commandBody.SetParam("test", OHOS::AAFwk::String::Box("test001"));
+    commandArgs.SetParam("command_body", OHOS::AAFwk::WantParamWrapper::Box(commandBody));
+    pcmCastSession->QueryCommandParams(commandArgs);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
 }
 } // AVSession
 } // OHOS

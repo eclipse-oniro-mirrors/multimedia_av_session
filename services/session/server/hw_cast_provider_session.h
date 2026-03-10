@@ -30,9 +30,13 @@ class HwCastProviderSession : public CastEngine::ICastSessionListener,
 public:
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,
+        BYPASS_NUM_COMMAND = 1,
+        QUERY_NUM_COMMAND = 2,
     };
 
     enum {
+        HIPLAY_NUM_BYPASS_DATA = 4201,
+        HIPLAY_NUM_QUERY_RESPONSE = 4203,
         HIPLAY_CONFIG_MODE_RESULT = 4205,
     };
 
@@ -80,6 +84,8 @@ private:
     const std::string MEDIA_SERIES_CAST_CONFLICT = "usual.event.MEDIA_SERIES_CAST_CONFLICT";
     const std::string MEDIA_SERIES_CAST_3VAP = "usual.event.MEDIA_SERIES_CAST_3VAP";
     const std::string HIPLAY_CONFIG_MODE_DATA = "HIPLAY_CONFIG_MODE_DATA";
+    const std::string HIPLAY_BYPASS_DATA = "HIPLAY_BYPASS_DATA";
+    const std::string HIPLAY_QUERY_RESPONSE = "HIPLAY_QUERY_RESPONSE";
 };
 } // namespace OHOS::AVSession
 
