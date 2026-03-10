@@ -135,8 +135,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     std::vector<std::string> supportedDrmCapabilities;
     for (int i = 0; i < supportedDrmCapabilityLen; i++) {
         std::string supportedDrmCapability;
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
-            "read supportedDrmCapability failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false, "read supportedDrmCapability failed");
         supportedDrmCapabilities.emplace_back(supportedDrmCapability);
     }
     deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
@@ -153,8 +152,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     std::vector<std::uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient = 0;
-        CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false,
-            "read supportedPullClient failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false, "read supportedPullClient failed");
         supportedPullClients.emplace_back(supportedPullClient);
     }
     deviceInfo.supportedPullClients_ = supportedPullClients;
