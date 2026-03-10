@@ -220,7 +220,7 @@ public:
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
-    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs) override;
+    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
@@ -279,7 +279,7 @@ public:
 
     void NotifyMirrorToStreamCast();
 
-    void NotifySystemCommonEvent(const std::string& commmonEvent, const std::string& args) override;
+    void NotifySystemCommonEvent(const std::string& commonEvent, const std::string& args) override;
 
     bool IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session);
 
