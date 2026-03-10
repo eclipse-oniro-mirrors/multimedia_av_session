@@ -84,6 +84,8 @@ public:
 
     virtual int32_t SendSystemControlCommand(const AVControlCommand& command) = 0;
 
+    virtual int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) = 0;
+
     virtual int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) = 0;
 
     virtual int32_t CastAudio(const SessionToken& token,

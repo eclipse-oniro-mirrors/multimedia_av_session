@@ -227,6 +227,14 @@ void NapiSessionListener::OnActiveSessionChanged(const std::vector<AVSessionDesc
     HandleEvent(EVENT_ACTIVE_SESSION_CHANGED, callBackName, descriptors);
 }
 
+void NapiSessionListener::OnSystemCommonEvent(const std::string& commonEvent, const std::string& args)
+{
+    std::string callBackName = "NapiSessionListener::OnSystemCommonEvent";
+    AVSESSION_TRACE_SYNC_START("NapiSessionListener::OnSystemCommonEvent");
+    SLOGI("Start handle systemCommonEvent event");
+    HandleEvent(EVENT_SYSTEM_COMMON_EVENT, callBackName, commonEvent, args);
+}
+
 napi_status NapiSessionListener::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

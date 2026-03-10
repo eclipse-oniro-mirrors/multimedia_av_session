@@ -22,11 +22,20 @@
 #include "cast_engine_common.h"
 #include "avsession_info.h"
 #include "avsession_utils.h"
+#include "cJSON.h"
 
 namespace OHOS::AVSession {
 class HwCastProviderSession : public CastEngine::ICastSessionListener,
     public std::enable_shared_from_this<HwCastProviderSession> {
 public:
+    enum {
+        CAST_MODE_CHANGE_COMMAND = 0,
+    };
+
+    enum {
+        HIPLAY_CONFIG_MODE_RESULT = 4205,
+    };
+
     explicit HwCastProviderSession(std::shared_ptr<CastEngine::ICastSession> castSession) : castSession_(castSession) {}
     ~HwCastProviderSession() override;
 
@@ -46,6 +55,8 @@ public:
     bool GetRemoteDrmCapabilities(std::string deviceId, std::vector<std::string> &drmCapabilities);
     void SetProtocolType(CastEngine::ProtocolType);
     void OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo);
+    void SendCommandArgsToCast(const int32_t commandType, const std::string& params);
+    void OnHiplayEventRecv(const int32_t eventId, const std::string& jsonParam);
 
 private:
     void ComputeToastOnDeviceState(const CastEngine::DeviceStateInfo &stateInfo,
@@ -62,10 +73,13 @@ private:
     const int32_t deviceStateConnection = 6;
     const int32_t eventIdStart = 2000;
     const int32_t eventIdEnd = 2999;
+    const int32_t hiplayEventIdStart = 4200;
+    const int32_t hiplayEventIdEnd = 4250;
     const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
     const std::string MEDIA_SERIES_CAST_CONFLICT = "usual.event.MEDIA_SERIES_CAST_CONFLICT";
     const std::string MEDIA_SERIES_CAST_3VAP = "usual.event.MEDIA_SERIES_CAST_3VAP";
+    const std::string HIPLAY_CONFIG_MODE_DATA = "HIPLAY_CONFIG_MODE_DATA";
 };
 } // namespace OHOS::AVSession
 

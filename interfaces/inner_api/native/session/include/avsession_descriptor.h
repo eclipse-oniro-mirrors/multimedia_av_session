@@ -28,6 +28,21 @@ struct AudioCapabilities {
     std::vector<AudioStreamInfo> streamInfos_;
 };
 
+struct HiPlayDeviceInfo {
+    bool WriteToParcel(Parcel& out) const;
+    bool ReadFromParcel(Parcel& in);
+
+    int32_t supportCastMode_;
+    int32_t curCastMode_;
+    int32_t targetCastMode_;
+    int32_t lastCastUid_;
+};
+
+enum HiPlayCastMode {
+    DEVICE_LEVEL = 1,
+    APP_LEVEL = 2,
+};
+
 class DeviceInfo : public Parcelable {
 public:
     DeviceInfo() = default;
@@ -56,6 +71,7 @@ public:
     std::string bleMac_;
     int32_t triggerType_ {};
     std::string uuid_;
+    HiPlayDeviceInfo hiPlayDeviceInfo_ {};
 };
 
 class OutputDeviceInfo : public Parcelable {

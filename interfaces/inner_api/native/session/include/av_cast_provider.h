@@ -234,6 +234,18 @@ public:
      * @since 13
     */
     virtual int32_t GetProtocolType(uint32_t castProtocolType) = 0;
+
+    /**
+     * @brief send command args to cast.
+     *
+     * @param {int32_t} castId - The ID of the castprovider.
+     * @param {int32_t} commandType - The type of command to be sent.
+     * @param {std::string} params - The command parameters in string format.
+     * @return void
+     * @since 24
+    */
+    virtual void SendCommandArgsToCast(const int32_t castId, const int32_t commandType,
+        const std::string& params) {};
 };
 } // namespace OHOS::AVSession
 #endif

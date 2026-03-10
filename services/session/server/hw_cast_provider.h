@@ -65,6 +65,8 @@ public:
         std::vector<std::string> &drmCapabilities) override;
     int32_t GetProtocolType(uint32_t castProtocolType) override;
 
+    void SendCommandArgsToCast(int castId, const int32_t commandType, const std::string& params) override;
+
     int GetCastProtocolType(int castCapability);
 
     void SetMirrorCastHandle(int64_t castHandle);

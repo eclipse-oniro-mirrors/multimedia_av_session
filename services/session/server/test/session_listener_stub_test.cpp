@@ -126,6 +126,10 @@ class SessionListenerStubDemo : public SessionListenerStub {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override
+    {
+        return AVSESSION_SUCCESS;
+    };
     ErrCode OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>> &sessionControllers) override
     {

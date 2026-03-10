@@ -85,6 +85,8 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.bleMac_), false, "write bleMac failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.triggerType_), false, "write triggerType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.uuid_), false, "write uuid failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.WriteToParcel(out), false,
+            "write hiPlayDeviceInfo failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -133,8 +135,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     std::vector<std::string> supportedDrmCapabilities;
     for (int i = 0; i < supportedDrmCapabilityLen; i++) {
         std::string supportedDrmCapability;
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
-            "read supportedDrmCapability failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false, "read supportedDrmCapability failed");
         supportedDrmCapabilities.emplace_back(supportedDrmCapability);
     }
     deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
@@ -151,14 +152,14 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     std::vector<std::uint32_t> supportedPullClients;
     for (int j = 0; j < supportedPullClientsLen; j++) {
         uint32_t supportedPullClient = 0;
-        CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false,
-            "read supportedPullClient failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadUint32(supportedPullClient), false, "read supportedPullClient failed");
         supportedPullClients.emplace_back(supportedPullClient);
     }
     deviceInfo.supportedPullClients_ = supportedPullClients;
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.bleMac_), false, "Read bleMac failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.triggerType_), false, "Read triggerType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.uuid_), false, "Read uuid failed");
+    CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.ReadFromParcel(in), false, "Read hiPlayDeviceInfo failed");
     outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
@@ -223,6 +224,7 @@ bool DeviceInfo::Marshalling(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteString(bleMac_), false, "write bleMac failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(triggerType_), false, "write triggerType failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(uuid_), false, "write uuid failed");
+    CHECK_AND_RETURN_RET_LOG(hiPlayDeviceInfo_.WriteToParcel(out), false, "write hiPlayDeviceInfo failed");
     return true;
 }
 
@@ -283,6 +285,7 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadString(bleMac_), false, "Read bleMac failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(triggerType_), false, "Read triggerType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(uuid_), false, "Read uuid failed");
+    CHECK_AND_RETURN_RET_LOG(hiPlayDeviceInfo_.ReadFromParcel(in), false, "Read hiPlayDeviceInfo failed");
     return true;
 }
 
@@ -340,6 +343,26 @@ bool AudioCapabilities::ReadFromParcel(Parcel& in)
         CHECK_AND_RETURN_RET_LOG(streamInfo.ReadFromParcel(in), false, "read streamInfo failed");
         streamInfos_.emplace_back(streamInfo);
     }
+    return true;
+}
+
+bool HiPlayDeviceInfo::WriteToParcel(Parcel& out) const
+{
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportCastMode_), false, "write supportCastMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(curCastMode_), false, "write curCastMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(targetCastMode_), false, "write targetCastMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(lastCastUid_), false, "write lastCastUid_ failed");
+
+    return true;
+}
+
+bool HiPlayDeviceInfo::ReadFromParcel(Parcel& in)
+{
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportCastMode_), false, "read supportCastMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(curCastMode_), false, "read curCastMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(targetCastMode_), false, "read targetCastMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(lastCastUid_), false, "read lastCastUid_ failed");
+
     return true;
 }
 

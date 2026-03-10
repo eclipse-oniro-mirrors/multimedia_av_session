@@ -31,6 +31,7 @@
 #include "notification_constant.h"
 #include "parameter.h"
 #include "parameters.h"
+#include "pcm_cast_session.h"
 #include "remote_session_capability_set.h"
 #include "remote_session_source_proxy.h"
 #include "remote_session_sink_proxy.h"
@@ -2066,6 +2067,17 @@ int32_t AVSessionService::GetSessionDescriptors(int32_t category, std::vector<AV
                 }
             }
             break;
+# ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        case SessionCategory::CATEGORY_HIPLAY:
+            if (pcmCastSession_ != nullptr && pcmCastSession_->GetCastState()) {
+                AVSessionDescriptor descriptor = pcmCastSession_->GetDescriptor();
+                descriptors.push_back(descriptor);
+            } else {
+                AVSessionDescriptor descriptor;
+                descriptors.push_back(descriptor);
+            }
+            break;
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
         default:
             SLOGE("undefined category %{public}d", category);
     }
@@ -3176,6 +3188,18 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionService::SendSystemCommonCommand(const std::string& commonCommand,
+    const AAFwk::WantParams& commandArgs)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    CHECK_AND_RETURN_RET_LOG(pcmCastSession_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
+    pcmCastSession_->ExecuteCommonCommand(commonCommand, commandArgs);
+    return AVSESSION_SUCCESS;
+#else
+    return AVSESSION_SUCCESS;
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
+}
+
 void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
     const sptr<ClientDeathRecipient> recipient)
 {
@@ -3257,6 +3281,10 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
 {
     ClearClientResources(pid, true);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    if (pcmCastSession_ != nullptr && pcmCastSession_->GetCastMode() == HiPlayCastMode::APP_LEVEL
+        && pcmCastSession_->GetUid() == uid) {
+        ClearPcmSessionForClientDiedNoLock();
+        }
     AVRouter::GetInstance().IsStopCastDiscovery(pid);
     {
         std::lock_guard lockGuard(checkEnableCastLock_);
@@ -4035,6 +4063,16 @@ void AVSessionService::ClearSessionForClientDiedNoLock(pid_t pid, bool continueP
         HandleSessionRelease(session->GetSessionId(), continuePlay);
     }
 }
+
+void AVSessionService::ClearPcmSessionForClientDiedNoLock()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("clear PcmSession in ");
+    pcmCastSession_->DestroyTask();
+    pcmCastSession_ = nullptr;
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
+}
+
 
 void AVSessionService::ClearControllerForClientDiedNoLock(pid_t pid)
 {
