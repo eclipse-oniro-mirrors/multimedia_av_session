@@ -367,8 +367,9 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     AVSessionRadarInfo info("AVSessionService::NotifyDeviceAvailable");
     OutputDeviceInfo outputDeviceInfo = castOutputDeviceInfo;
     UpdateDeviceCastMode(outputDeviceInfo);
-    AVSessionRadar::GetInstance().CastDeviceAvailable(castOutputDeviceInfo, info);
-
+ 
+    AVSessionRadar::GetInstance().CastDeviceAvailable(outputDeviceInfo, info);
+ 
     for (const DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
         for (const auto& session : GetContainer().GetAllSessions()) {
             session->UpdateCastDeviceMap(deviceInfo);
@@ -390,19 +391,21 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     }
 }
 // LCOV_EXCL_STOP
-
+ 
 void AVSessionService::UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("UpdateDeviceCastMode in ");
     for (auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
         if (pcmCastSession_ != nullptr) {
             int32_t castMode = pcmCastSession_->GetCastMode();
+            deviceInfo.hiPlayDeviceInfo_.curCastMode_ = castMode;
+            int32_t uid = pcmCastSession_->GetUid();
             deviceInfo.hiPlayDeviceInfo_.lastCastUid_ = uid;
         }
         deviceInfo.hiPlayDeviceInfo_.targetCastMode_ = deviceInfo.hiPlayDeviceInfo_.supportCastMode_;
-
+ 
         std::string fileDir = AVSessionUtils::GetCachePathName();
-        std::string fileName = deviceInfo.deviceId_ + "_cast_pair_" + AVSessionUtils::GetPairFileSuffix();
+        std::string fileName = deviceInfo.deviceId_ + "_cast_pair" + AVSessionUtils::GetPairFileSuffix();
         if (deviceInfo.hiPlayDeviceInfo_.supportCastMode_ == HiPlayCastMode::DEVICE_LEVEL
             && std::filesystem::exists(fileDir + fileName)) {
             std::pair<std::string, int32_t> castPair;
@@ -468,7 +471,7 @@ void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
     }
 }
 
-void AVSessionService::NotifySystemCommonEvent(const std::string& commmonEvent, const std::string& args)
+void AVSessionService::NotifySystemCommonEvent(const std::string& commonEvent, const std::string& args)
 {
     if (commonEvent == "HIPLAY_CONFIG_MODE_DATA" && pcmCastSession_ != nullptr) {
         pcmCastSession_->OnSystemCommonEvent(args);
@@ -476,7 +479,7 @@ void AVSessionService::NotifySystemCommonEvent(const std::string& commmonEvent, 
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
-        SLOGI("notify service event change with pid %{piblic}d", static_cast<int>(pid));
+        SLOGI("notify service event change with pid %{public}d", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnSystemCommonEvent");
         if (listener != nullptr) {
             listener->OnSystemCommonEvent(commonEvent, args);
