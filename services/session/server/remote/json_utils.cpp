@@ -794,7 +794,7 @@ std::string JsonUtils::GetStringParamFromJsonString(const std::string& jsonStr, 
 int32_t JsonUtils::GetIntParamFromJsonString(const std::string& jsonStr, const std::string& key)
 {
     if (jsonStr.empty() || key.empty()) {
-        SLOGE("get jsonStr empty:%{public}d or key empty:%{public}d", jsonStr.empty(), key,empty());
+        SLOGE("get jsonStr empty:%{public}d or key empty:%{public}d", jsonStr.empty(), key.empty());
         return 0;
     }
 
