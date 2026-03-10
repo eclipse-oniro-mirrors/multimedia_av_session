@@ -367,7 +367,7 @@ export struct AVCastPicker {
                   if (item.isConnected && item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                     Flex() {
                       Row() {
-                        if (item.castMode === DEVICE_LEVEL) {
+                        if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                           SymbolGlyph($r('sys.symbol.speaker_wave_3'))
                             .fontSize(`16vp`)
                         } else {
