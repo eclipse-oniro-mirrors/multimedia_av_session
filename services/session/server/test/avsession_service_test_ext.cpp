@@ -642,6 +642,18 @@ static HWTEST_F(AVSessionServiceTestExt, ClearControllerForClientDiedNoLock001, 
 }
 
 /**
+ * @tc.name: ClearPcmSessionForClientDiedNoLock001
+ * @tc.desc: Verfying ClearPcmSessionForClientDiedNoLock
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ClearPcmSessionForClientDiedNoLock001, TestSize.Level0)
+{
+    g_AVSessionService->ClearPcmSessionForClientDiedNoLock();
+    EXPECT_TRUE(g_AVSessionService->pcmCastSession_ == nullptr);
+}
+
+/**
  * @tc.name: SuperLauncher001
  * @tc.desc: Verifying SuperLauncher with invalid state
  * @tc.type: FUNC
@@ -966,10 +978,18 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     DeviceInfo deviceInfo;
     deviceInfo.deviceId_ = "deviceId";
     deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    AAFwk::WantParams commandArgs;
 
     shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
     pcmCastSession->OnCastStateChange(5, deviceInfo, false);
     pcmCastSession->OnCastStateChange(0, deviceInfo, false);
+    pcmCastSession->OnCastStateChange(6, deviceInfo, false);
+
+    pcmCastSession->CastStateCommandParams(commandArgs);
+    pcmCastSession->DestroyTask();
+    pcmCastSession->GetCastMode();
+    pcmCastSession->GetCastState();
+    pcmCastSession->GetDescriptor();
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
 }
@@ -1003,7 +1023,7 @@ static HWTEST_F(AVSessionServiceTestExt, NotifyActiveSessionChange001, TestSize.
     avsessionHere->Destroy();
 }
 
-/*
+/**
  * @tc.name: UpdateDeviceCastMode001
  * @tc.desc: Test UpdateDeviceCastMode
  * @tc.type: FUNC
@@ -1013,11 +1033,16 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode001, TestSize.Level
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
     OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    deviceInfos_.push_back(deviceInfo);
+
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
     g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
     EXPECT_TRUE(g_AVSessionService != nullptr);
 }
 
-/*
+/**
  * @tc.name: NotifySystemCommonEvent001
  * @tc.desc: Test NotifySystemCommonEvent
  * @tc.type: FUNC
@@ -1030,8 +1055,9 @@ static HWTEST_F(AVSessionServiceTestExt, NotifySystemCommonEvent001, TestSize.Le
     sptr<ISessionListener> listener = new TestISessionListener();
     CHECK_AND_RETURN(listener != nullptr);
     g_AVSessionService->GetUsersManager().AddSessionListener(pid, listener);
-    std::string commonEvent = "";
+    std::string commonEvent = "HIPLAY_CONFIG_MODE_DATA";
     std::string args = "";
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
     g_AVSessionService->NotifySystemCommonEvent(commonEvent, args);
     g_AVSessionService->GetUsersManager().AddSessionListener(pid, nullptr);
     g_AVSessionService->NotifySystemCommonEvent(commonEvent, args);
