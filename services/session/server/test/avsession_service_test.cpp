@@ -1967,7 +1967,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand001, TestSize.Level
 {
     SLOGD("SendSystemCommonCommand001 begin!");
     std::string commonCommand = "";
-    OHOS::AAFwk:WantParams commandArgs;
+    OHOS::AAFwk::WantParams commandArgs;
     auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("SendSystemCommonCommand001 end!");
