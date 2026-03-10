@@ -87,7 +87,7 @@ public:
 
     int32_t SendSystemControlCommand(const AVControlCommand& command) override;
 
-    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs) override;
+    int32_t SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs) override;
 
     int32_t RegisterClientDeathObserver(const sptr<IClientDeath>& observer) override;
 
