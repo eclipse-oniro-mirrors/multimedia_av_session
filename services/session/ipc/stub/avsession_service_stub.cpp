@@ -473,7 +473,8 @@ int32_t AVSessionServiceStub::HandleSendSystemControlCommand(MessageParcel& data
     return ERR_NONE;
 }
 
-int32_t AVSessionServiceStub::HandleSendSystemCommonCommand(MessageParcel& data, MessageParcel& reply) {
+int32_t AVSessionServiceStub::HandleSendSystemCommonCommand(MessageParcel& data, MessageParcel& reply)
+{
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::SendSystemCommonCommand");
     auto commonCommand = data.ReadString();
     sptr commandArgs = data.ReadParcelable<AAFwk::WantParams>();
