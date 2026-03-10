@@ -367,10 +367,10 @@ void HwCastProvider::SetMirrorCastHandle(int64_t castHandle)
 void HwCastProvider::SendCommandArgsToCast(int castId, const int32_t commandType, const std::string& params)
 {
     SLOGI("SendCommandArgsToCast with config castSession and corresponding castId is %{public}d", castId);
-
-    CHECK_AND_CONTINUE_LOG(hwCastProviderSessionMap_.find(castId) != hwCastProviderSessionMap_.end(),
+ 
+    CHECK_AND_RETURN_LOG(hwCastProviderSessionMap_.find(castId) != hwCastProviderSessionMap_.end(),
         "Can not find corresponding castId");
-    CHECK_AND_CONTINUE_LOG(hwCastProviderSessionMap_[castId] != nullptr, "castSession is nullptr");
+    CHECK_AND_RETURN_LOG(hwCastProviderSessionMap_[castId] != nullptr, "castSession is nullptr");
     hwCastProviderSessionMap_[castId]->SendCommandArgsToCast(commandType, params);
 }
 
