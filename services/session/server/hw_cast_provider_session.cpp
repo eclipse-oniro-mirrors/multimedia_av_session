@@ -336,12 +336,12 @@ void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const st
     int32_t castEventId = static_cast<int>(eventId);
     if (castEventId >= eventIdStart && castEventId <= eventIdEnd) {
         SLOGI("trigger the OnCastEventRecv");
-    } else if (castEventId >= hiPlayEventIdStart && castEventId <= hiPlayEventIdEnd) {
-        OnHiPlayEventRecv(castEventId, jsonParam);
+    } else if (castEventId >= hiplayEventIdStart && castEventId <= hiplayEventIdEnd) {
+        OnHiplayEventRecv(castEventId, jsonParam);
     }
 }
-
-void HwCastProviderSession::OnHiPlayEventRecv(const int32_t eventId, const std::string& jsonParam)
+ 
+void HwCastProviderSession::OnHiplayEventRecv(const int32_t eventId, const std::string& jsonParam)
 {
     switch (eventId) {
         case HIPLAY_CONFIG_MODE_RESULT:
