@@ -1299,7 +1299,7 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
     return NapiAsyncWork::Enqueue(env, context, "SendSystemControlCommand", executor);
 }
 
-napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_callback_info info) 
+napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::SendSystemCommonCommand");
     struct ConcreteContext : public ContextBase {
