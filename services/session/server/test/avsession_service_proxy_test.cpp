@@ -138,16 +138,16 @@ static HWTEST_F(AVSessionServiceProxyTest, GetSessionDescriptors001, testing::ex
     avSessionServiceProxy = nullptr;
     SLOGI("GetSessionDescriptors001, end");
 }
-
+ 
 /**
  * @tc.name: SendSystemCommonCommand001
  * @tc.desc: Test SendSystemCommonCommand
  * @tc.type: FUNC
  */
-static HWTEST_F(AVSessionServiceProxyTest, SendSystemCommonCommand001, testing::ext::TextSize.Level0)
+static HWTEST_F(AVSessionServiceProxyTest, SendSystemCommonCommand001, testing::ext::TestSize.Level0)
 {
     SLOGI("SendSystemCommonCommand001, start");
-
+ 
     int32_t ret = AVSESSION_ERROR;
     sptr<ISystemAbilityManager> mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     ASSERT_NE(mgr, nullptr);
@@ -155,10 +155,10 @@ static HWTEST_F(AVSessionServiceProxyTest, SendSystemCommonCommand001, testing::
     ASSERT_NE(sessionService, nullptr);
     std::shared_ptr<AVSessionServiceProxy> avSessionServiceProxy =
         std::make_shared<AVSessionServiceProxy>(sessionService);
-
+ 
     std::string commonCommand = "commonCommand";
     AAFwk::WantParams commandArgs;
-    ret = avSessionServiceProxy->sendSystemCommonCommand(commonCommand, commandArgs);
+    ret = avSessionServiceProxy->SendSystemCommonCommand(commonCommand, commandArgs);
     EXPECT_EQ(ret, AVSESSION_ERROR);
-    SLOGI("SendSystemCommonCommand001, end")
+    SLOGI("SendSystemCommonCommand001, end");
 }
