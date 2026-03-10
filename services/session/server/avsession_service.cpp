@@ -3188,10 +3188,11 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::SendSystemCommonCommand(const std::string& commonCommand, const AAFwk::wantParams& commandArgs)
+int32_t AVSessionService::SendSystemCommonCommand(const std::string& commonCommand,
+    const AAFwk::WantParams& commandArgs)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CHECK_AND_RETURN_RET_LOG(pcmCastSession_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exit");
+    CHECK_AND_RETURN_RET_LOG(pcmCastSession_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
     pcmCastSession_->ExecuteCommonCommand(commonCommand, commandArgs);
     return AVSESSION_SUCCESS;
 #else
