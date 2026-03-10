@@ -575,13 +575,13 @@ int32_t AVSessionServiceProxy::SendSystemControlCommand(const AVControlCommand& 
 }
 
 int32_t AVSessionServiceProxy::SendSystemCommonCommand(const std::string& commonCommand,
-    const AAFwk::wantParams& commandArgs) {
+    const AAFwk::WantParams& commandArgs) {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
-                             "write interface token failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteString(&commonCommand), ERR_MARSHALLING, "write commonCommand string failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&commandArgs), ERR_MARSHALLING, "write args failed");
-
+        "Write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(commonCommand), ERR_MARSHALLING, "Write commonCommand string failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&commandArgs), ERR_MARSHALLING, "Write args failed");
+ 
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;
