@@ -205,5 +205,35 @@ HWTEST_F(AVSessionDescriptorTest, ReadFromParcel004, TestSize.Level1)
     bool ret = deviceState.ReadFromParcel(in);
     EXPECT_EQ(ret, false);
 }
+
+/**
+* @tc.name: ReadFromParcel005
+* @tc.desc: test ReadFromParcel
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionDescriptorTest, ReadFromParcel005, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    HiPlayDeviceInfo hiPlayDeviceInfo;
+    Parcel in;
+    bool ret = hiPlayDeviceInfo.ReadFromParcel(in);
+    EXPECT_EQ(ret, false);
+}
+ 
+/**
+* @tc.name: WriteToParcel001
+* @tc.desc: test WriteToParcel
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionDescriptorTest, WriteToParcel001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    HiPlayDeviceInfo hiPlayDeviceInfo;
+    Parcel out;
+    bool ret = hiPlayDeviceInfo.WriteToParcel(out);
+    EXPECT_EQ(ret, true);
+}
 } // namespace AVSESSION
 } // namespace OHOS

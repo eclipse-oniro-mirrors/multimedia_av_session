@@ -295,6 +295,18 @@ int32_t AVRouterImpl::OnDeviceOffline(const std::string& deviceId)
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVRouterImpl::OnSystemCommonEvent(const std::string& commonEvent, const std::string& args)
+{
+    SLOGI("AVRouterImpl received OnSystemCommonEvent event");
+
+    std::lock_guard lockGuard(servicePtrLock_);
+    if (servicePtr_ == nullptr) {
+        return ERR_SERVICE_NOT_EXIST;
+    }
+    servicePtr_->NotifySystemCommonEvent(commonEvent, args);
+    return AVSESSION_SUCCESS;
+}
+
 int32_t AVRouterImpl::OnDeviceStateChange(const DeviceState& deviceState)
 {
     SLOGI("AVRouterImpl received OnDeviceStateChange event");
@@ -799,6 +811,26 @@ bool AVRouterImpl::IsDisconnectingOtherSession()
 {
     return disconnectOtherSession_.load();
 }
+
+void AVRouterImpl::SendCommandArgsToCast(const int64_t castHandle, const int32_t commandType,
+    const std::string& params)
+{
+    SLOGI("AVRouterImpl start send commandArgs to cast");
+ 
+    // the first 32 bits are providerId, the last 32 bits are castId
+    int32_t providerNumber = static_cast<int32_t>(static_cast<const uint64_t>(castHandle) >> 32);
+    SLOGI("Get hwcastprovider of provider %{public}d", providerNumber);
+ 
+    int32_t castId = static_cast<int32_t>((static_cast<const uint64_t>(castHandle) << 32) >> 32);
+ 
+    CHECK_AND_RETURN_LOG(providerManagerMap_.find(providerNumber) != providerManagerMap_.end(),
+        "Can not find corresponding provider");
+    CHECK_AND_RETURN_LOG(providerManagerMap_[providerNumber] != nullptr && providerManagerMap_[providerNumber]->
+        provider_ != nullptr, "provider is nullptr");
+ 
+    providerManagerMap_[providerNumber]->provider_->SendCommandArgsToCast(castId, commandType, params);
+}
+
 
 void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo)
 {

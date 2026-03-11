@@ -35,6 +35,8 @@ interface OHOS.AVSession.ISessionListener {
 
     [oneway] void OnDeviceStateChange([in] DeviceState deviceState);
 
+    [oneway] void OnSystemCommonEvent([in] String commonEvent, [in] String args);
+
     [oneway] void OnRemoteDistributedSessionChange([in] IRemoteObject[] sessionControllers);
 
     [oneway] void OnActiveSessionChanged([in] List<AVSessionDescriptor> descriptors);

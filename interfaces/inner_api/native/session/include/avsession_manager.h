@@ -227,6 +227,16 @@ public:
     virtual int32_t SendSystemControlCommand(const AVControlCommand& command) = 0;
 
     /**
+     * Send system common command.
+     *
+     * @param commonCommand The command name to be sent.
+     * @return Returns whether the common command was successfully send.
+     * @since 24
+    */
+    virtual int32_t SendSystemCommonCommand(const std::string& commonCommand,
+        const AAFwk::WantParams& commandArgs) { return 0; };
+
+    /**
      * Cast the session to the specified device list.
      *
      * @param token Session token

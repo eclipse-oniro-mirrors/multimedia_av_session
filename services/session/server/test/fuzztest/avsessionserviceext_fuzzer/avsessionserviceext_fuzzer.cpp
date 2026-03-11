@@ -99,6 +99,8 @@ public:
     ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override { return AVSESSION_SUCCESS; };
     ErrCode OnDeviceOffline(const std::string& deviceId) override { return AVSESSION_SUCCESS; };
     ErrCode OnDeviceStateChange(const DeviceState& deviceState) override { return AVSESSION_SUCCESS; };
+    ErrCode OnSystemCommonEvent(
+        const std::string& commonEvent, const std::string& args) override { return AVSESSION_SUCCESS; };
     ErrCode OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; };
     ErrCode OnActiveSessionChanged(

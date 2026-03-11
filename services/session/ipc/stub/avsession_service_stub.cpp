@@ -473,6 +473,20 @@ int32_t AVSessionServiceStub::HandleSendSystemControlCommand(MessageParcel& data
     return ERR_NONE;
 }
 
+int32_t AVSessionServiceStub::HandleSendSystemCommonCommand(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::SendSystemCommonCommand");
+    auto commonCommand = data.ReadString();
+    sptr commandArgs = data.ReadParcelable<AAFwk::WantParams>();
+    if (commandArgs == nullptr) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SendSystemCommonCommand(commonCommand, *commandArgs)),
+        ERR_NONE, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionServiceStub::HandleRegisterClientDeathObserver(MessageParcel& data, MessageParcel& reply)
 {
     auto remoteObject = data.ReadRemoteObject();

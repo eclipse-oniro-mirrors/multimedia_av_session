@@ -77,6 +77,15 @@ public:
     virtual void NotifyDeviceStateChange(const DeviceState& deviceState) = 0;
 
     /**
+     * Notify the event of system common event.
+     *
+     * @param { std::string& } commonEvent - The name of the system common event.
+     * @param { std::string& } jsonParam - Additional arguments for the event.
+     * @since 24
+    */
+    virtual void NotifySystemCommonEvent(const std::string& commonEvent, const std::string& jsonParam) {};
+
+    /**
      * set cast state at castservice state changed.
      *
      * @param { bool } isInCast - cast state.

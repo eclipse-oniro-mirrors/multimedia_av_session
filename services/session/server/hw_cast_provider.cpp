@@ -364,6 +364,16 @@ void HwCastProvider::SetMirrorCastHandle(int64_t castHandle)
     mirrorCastHandle = castHandle;
 }
 
+void HwCastProvider::SendCommandArgsToCast(int castId, const int32_t commandType, const std::string& params)
+{
+    SLOGI("SendCommandArgsToCast with config castSession and corresponding castId is %{public}d", castId);
+ 
+    CHECK_AND_RETURN_LOG(hwCastProviderSessionMap_.find(castId) != hwCastProviderSessionMap_.end(),
+        "Can not find corresponding castId");
+    CHECK_AND_RETURN_LOG(hwCastProviderSessionMap_[castId] != nullptr, "castSession is nullptr");
+    hwCastProviderSessionMap_[castId]->SendCommandArgsToCast(commandType, params);
+}
+
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,
     std::shared_ptr<IAVCastSessionStateListener> listener)
 {
@@ -441,7 +451,6 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     }
     SLOGI("get deviceList size %{public}zu", deviceList.size());
     for (const CastRemoteDevice& castRemoteDevice : deviceList) {
-        SLOGI("get devices with deviceName %{public}s", castRemoteDevice.deviceName.c_str());
         DeviceInfo deviceInfo;
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         deviceInfo.deviceId_ = castRemoteDevice.deviceId;
@@ -460,6 +469,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
         deviceInfo.bleMac_ = castRemoteDevice.bleMac;
         deviceInfo.uuid_ = castRemoteDevice.uuid;
+        deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = castRemoteDevice.isSupportDeviceCast ?
+            HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
         deviceInfoList.emplace_back(deviceInfo);
     }
     for (auto listener : castStateListenerList_) {
