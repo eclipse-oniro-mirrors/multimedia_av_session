@@ -22,6 +22,7 @@
 
 #include "avcontroller_callback_client.h"
 #include "avsession_log.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace AVSession {
@@ -155,6 +156,11 @@ void AvControllerCallbackClientFuzzer::OnQueueItemsChangeFuzzTest(FuzzedDataProv
     CHECK_AND_RETURN(callbackClient != nullptr);
 
     std::vector<AVQueueItem> items;
+    int32_t itemsLen = provider.ConsumeIntegralInRange<int32_t>(MIN_SIZE_NUM, MAX_SIZE_NUM);
+    for (int32_t i = 0; i < itemsLen; i++) {
+        AVQueueItem item;
+        item.SetItemId(provider.ConsumeIntegral<int32_t>());
+    }
     callbackClient->OnQueueItemsChange(items);
 }
 
@@ -175,6 +181,7 @@ void AvControllerCallbackClientFuzzer::OnExtrasChangeFuzzTest(FuzzedDataProvider
     CHECK_AND_RETURN(callbackClient != nullptr);
 
     AAFwk::WantParams extras;
+    extras.SetParam("test", OHOS::AAFwk::String::Box(provider.ConsumeRandomLengthString()));
     callbackClient->OnExtrasChange(extras);
 }
 
@@ -185,6 +192,7 @@ void AvControllerCallbackClientFuzzer::OnCustomDataFuzzTest(FuzzedDataProvider &
     CHECK_AND_RETURN(callbackClient != nullptr);
 
     AAFwk::WantParams data;
+    data.SetParam("test", OHOS::AAFwk::String::Box(provider.ConsumeRandomLengthString()));
     callbackClient->OnCustomData(data);
 }
 
