@@ -1107,11 +1107,31 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode003, TestSize.Level
 
     outputDeviceInfo.deviceInfos_ = deviceInfos_;
     AVSessionDescriptor descriptor;
-    outputDeviceInfo.deviceInfos_[0].deviceId_ = "deviceId2";
     descriptor.outputDeviceInfo_ = outputDeviceInfo;
+    descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_ = "deviceId2";
     
     g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
     g_AVSessionService->pcmCastSession_->descriptor_ = descriptor;
+    g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+}
+
+
+/**
+ * @tc.name: UpdateDeviceCastMode004
+ * @tc.desc: Test UpdateDeviceCastMode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode004, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
     g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
     EXPECT_TRUE(g_AVSessionService != nullptr);
 }
