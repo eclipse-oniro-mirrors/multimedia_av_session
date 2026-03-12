@@ -54,6 +54,12 @@ export let AVCastPickerColorMode;
     v11[v11.LIGHT = 2] = 'LIGHT';
 })(AVCastPickerColorMode || (AVCastPickerColorMode = {}));
 
+export let HiPlayCastMode;
+(function(w11) {
+    w11[w11.DEVICE_LEVEL = 1] = 'DEVICE_LEVEL';
+    w11[w11.APP_LEVEL = 2] = 'APP_LEVEL';
+})(HiPlayCastMode || (HiPlayCastMode = {}));
+
 export class AVCastPicker extends ViewPU {
     constructor(d11, e11, f11, g11 = -1, h11 = undefined, i11) {
         super(d11, f11, g11, i11);
@@ -89,6 +95,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPickerLimit');
         this.__isDeviceLevel = new ObservedPropertySimplePU(true, this, 'isDeviceLevel');
         this.__isSubMenuExpanded = new ObservedPropertySimplePU(false, this, 'isSubMenuExpanded');
+        this.__isShowBadge = new ObservedPropertySimplePU(false, this, 'isShowBadge');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -176,6 +183,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.isSubMenuExpanded !== undefined) {
             this.isSubMenuExpanded = c11.isSubMenuExpanded;
         }
+        if (c11.isShowBadge !== undefined) {
+            this.isShowBadge = c11.isShowBadge;
+        }
     }
 
     updateStateVars(b11) {
@@ -203,6 +213,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit.purgeDependencyOnElmtId(a11);
         this.__isDeviceLevel.purgeDependencyOnElmtId(a11);
         this.__isSubMenuExpanded.purgeDependencyOnElmtId(a11);
+        this.__isShowBadge.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -227,6 +238,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit.aboutToBeDeleted();
         this.__isDeviceLevel.aboutToBeDeleted();
         this.__isSubMenuExpanded.aboutToBeDeleted();
+        this.__isShowBadge.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -395,6 +407,13 @@ export class AVCastPicker extends ViewPU {
     }
     set isSubMenuExpanded(i1) {
         this.__isSubMenuExpanded.set(i1);
+    }
+
+    get isShowBadge() {
+        return this.__isShowBadge.get();
+    }
+    set isShowBadge(i1) {
+        this.__isShowBadge.set(i1);
     }
 
     aboutToAppear() {
@@ -669,13 +688,17 @@ export class AVCastPicker extends ViewPU {
                             Flex.pop();
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 If.create();
-                                if (x8.isConnected && x8.supportCastMode === 1) {
+                                if (x8.isConnected && x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                                     this.ifElseBranchUpdateFunction(0, () => {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                            Flex.create();
+                                            Flex.create({
+                                                direction: FlexDirection.Row,
+                                                alignItems: ItemAlign.Center
+                                            });
                                             Flex.onClick(() => {
-                                                this.isDeviceLevel = (x8.curCastMode === 1);
+                                                this.isDeviceLevel = (x8.castMode === HiPlayCastMode.DEVICE_LEVEL);
                                                 if (!this.isSubMenuExpanded) {
+                                                    this.isShowBadge = false;
                                                     this.isSubMenuExpanded = true;
                                                 }
                                             });
@@ -689,11 +712,14 @@ export class AVCastPicker extends ViewPU {
                                         }, Row);
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             If.create();
-                                            if (x8.curCastMode === 1) {
+                                            if (x8.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.speaker_wave_3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.speaker_wave_3'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                         SymbolGlyph.fontSize(`16vp`);
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                     }, SymbolGlyph);
                                                 });
                                             }
@@ -711,13 +737,19 @@ export class AVCastPicker extends ViewPU {
                                         }, Row);
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             If.create();
-                                            if (x8.curCastMode === 1) {
+                                            if (x8.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Text.create('正在播放所有媒体');
+                                                        Text.create('所有媒体音频');
                                                         Text.fontWeight('sys.string.ohos_id_text_font_family_regular');
-                                                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                         Text.margin({ left: 2, right: 2 });
+                                                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                                                        Text.maxFontScale(this.maxFontSizeScale);
+                                                        Text.wordBreak(WordBreak.BREAK_ALL);
+                                                        Text.maxLines(1);
+
                                                     }, Text);
                                                     Text.pop();
                                                 });
@@ -725,10 +757,15 @@ export class AVCastPicker extends ViewPU {
                                             else {
                                                 this.ifElseBranchUpdateFunction(1, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Text.create(`正在播放“${x8.bundleInfo?.appName ?? ''}”`);
+                                                        Text.create(`正在播放`);
                                                         Text.fontWeight('sys.string.ohos_id_text_font_family_regular');
-                                                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                         Text.margin({ left: 2, right: 2 });
+                                                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                                                        Text.maxFontScale(this.maxFontSizeScale);
+                                                        Text.wordBreak(WordBreak.BREAK_ALL);
+                                                        Text.maxLines(1);
                                                     }, Text);
                                                     Text.pop();
                                                 });
@@ -737,14 +774,51 @@ export class AVCastPicker extends ViewPU {
                                         If.pop();
                                         Row.pop();
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                            Row.create();
-                                            Row.direction(Direction.Ltr);
-                                        }, Row);
-                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                            SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                            SymbolGlyph.fontSize('16vp');
-                                        }, SymbolGlyph);
-                                        Row.pop();
+                                            If.create();
+                                            if (this.isShowBadge) {
+                                                this.ifElseBranchUpdateFunction(0, () => {
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        Row.create();
+                                                        Row.direction(Direction.Ltr);
+                                                    }, Row);
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        Badge.create({
+                                                            value: '',
+                                                            style: { badgeSize: 6, BadgeColor:  {'id': -1, 'type': 10001, params: ['sys.color.warning'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'} }
+                                                        });
+                                                        Badge.width(18);
+                                                        Badge.height(16);
+                                                    }, Badge);
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        SymbolGlyph.fontSize('16vp');
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                    }, SymbolGlyph);
+                                                    Badge.pop();
+                                                    Row.pop();
+                                                });
+                                            }
+                                            else {
+                                                this.ifElseBranchUpdateFunction(1, () => {
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        Row.create();
+                                                        Row.direction(Direction.Ltr);
+                                                    }, Row);
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        SymbolGlyph.fontSize('16vp');
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                    }, SymbolGlyph);
+                                                    Row.pop();
+                                                });
+                                            }
+                                        }, If);
+                                        If.pop();
                                         Flex.pop();
                                     });
                                 }
@@ -825,32 +899,62 @@ export class AVCastPicker extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create();
-            Flex.width(224)
+            Flex.width(224);
             Flex.height(48);
             Flex.onClick(() => {
                 this.isDeviceLevel = true;
                 if (this.extensionProxy != null) {
-                    this.extensionProxy.send({ 'castMode': 1 });
+                    this.extensionProxy.send({ 'castMode': HiPlayCastMode.DEVICE_LEVEL });
                 }
             });
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('所有媒体');
+            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
+            Flex.margin({ left: 4, right: 4 });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ alignItems: ItemAlign.Center });
+            Flex.margin({ left: 12, right: 12 });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('所有媒体音频');
             Text.fontWeight('sys.string.ohos_id_text_font_family_medium');
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName':'__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'],
+                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.width('100%');
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxFontScale(this.maxFontSizeScale);
+            Text.wordBreak(WordBreak.BREAK_ALL);
+            Text.maxLines(1);
         }, Text);
         Text.pop();
+        Flex.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
+            Row.width(48);
+
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.isDeviceLevel) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.checkmark'], 'bundleName':'__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.checkmark'],
+                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         SymbolGlyph.fontSize('24vp');
+                        SymbolGlyph.fontColor((this.configurationColorMode !==
+                            ConfigurationColorMode.COLOR_MODE_DARK) ?
+                            [{
+                                'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
+                            }] :
+                            [{
+                                'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
+                            }]);
                     }, SymbolGlyph);
                 });
             }
@@ -861,6 +965,8 @@ export class AVCastPicker extends ViewPU {
         }, If);
         If.pop();
         Row.pop();
+        Flex.pop();
+        Flex.pop();
         Flex.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Divider.create();
@@ -873,27 +979,58 @@ export class AVCastPicker extends ViewPU {
             Flex.onClick(() => {
                 this.isDeviceLevel = false;
                 if (this.extensionProxy != null) {
-                    this.extensionProxy.send({ 'castMode': 2 });
+                    this.extensionProxy.send({ 'castMode': HiPlayCastMode.APP_LEVEL });
                 }
             });
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
+            Flex.margin({ left: 4, right: 4 });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ alignItems: ItemAlign.Center });
+            Flex.margin({ left: 12, right: 12 });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('当前应用媒体');
             Text.fontWeight('sys.string.ohos_id_text_font_family_medium');
-            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName':'__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'],
+                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.width('100%');
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxFontScale(this.maxFontSizeScale);
+            Text.wordBreak(WordBreak.BREAK_ALL);
+            Text.maxLines(1);
         }, Text);
         Text.pop();
+        Flex.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
+            Row.width(48);
+            Row.height(48);
+            Row.justifyContent(FlexAlign.End)
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (!this.isDeviceLevel) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.checkmark'], 'bundleName':'__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.checkmark'],
+                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         SymbolGlyph.fontSize('24vp');
+                        SymbolGlyph.fontColor((this.configurationColorMode !==
+                            ConfigurationColorMode.COLOR_MODE_DARK) ?
+                            [{
+                                'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
+                            }] :
+                            [{
+                                'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
+                            }]);
                     }, SymbolGlyph);
                 });
             }
@@ -905,8 +1042,11 @@ export class AVCastPicker extends ViewPU {
         If.pop();
         Row.pop();
         Flex.pop();
+        Flex.pop();
+        Flex.pop();
         Column.pop();
     }
+
     SmallPicIcon(q8, u8 = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();

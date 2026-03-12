@@ -805,6 +805,78 @@ ohos_unittest("MigrateAVSessionProxyTest") {
   public_configs = ["../../../../services/session:avsession_ipc_config"]
 }
 
+ohos_unittest("MigrateAVSessionProxyForSuperTest") {
+  module_out_path = module_output_path
+
+  sources = [ "migrate_avsession_proxy_for_super_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+  deps += [
+    "../../../session:libidl_avsession_service_interface_proxy",
+    "../../../session:libidl_avsession_service_interface_stub",
+  ]
+
+  external_deps = common_external_deps
+  external_deps += [
+    "relational_store:native_rdb",
+    "json:nlohmann_json_static",
+  ]
+
+  if (castplus_cast_engine_enable) {
+    cflags_cc += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../services/session:avsession_cast_item_static",
+      "../../../../services/session:avsession_router_static",
+    ]
+    external_deps += [ "cast_engine:cast_engine_client" ]
+  }
+
+  if (bluetooth_part_enable) {
+    cflags_cc += [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
+
+  public_configs = ["../../../session:avsession_ipc_config"]
+}
+
+ohos_unittest("Base64UtilsTest") {
+  module_out_path = module_output_path
+
+  sources = [ "base64_utils_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+  ]
+
+  public_configs = ["../../../session:avsession_ipc_config"]
+}
+
 ohos_unittest("MigrateAVSessionManagerTest") {
   module_out_path = module_output_path
 
@@ -3088,6 +3160,7 @@ group("av_session_server_unittest") {
     ":AppManagerAdapterTest",
     ":AudioAdapterTest",
     ":AudioDeviceManagerTest",
+    ":Base64UtilsTest",
     ":BkGrAudioControllerTest",
     ":BundleStatusAdapterTest",
     ":CollaborationManagerTest",
@@ -3096,6 +3169,7 @@ group("av_session_server_unittest") {
     ":HashCalculatorTest",
     ":JsonUtilsTest",
     ":MigrateAVSessionManagerTest",
+    ":MigrateAVSessionProxyForSuperTest",
     ":MigrateAVSessionProxyTest",
     ":MigrateAVSessionServerForNextTest",
     ":MigrateAVSessionTest",

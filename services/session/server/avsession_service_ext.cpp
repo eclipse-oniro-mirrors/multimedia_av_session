@@ -370,7 +370,7 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
  
     AVSessionRadar::GetInstance().CastDeviceAvailable(outputDeviceInfo, info);
  
-    for (const DeviceInfo deviceInfo : outputDeviceInfo.deviceInfos_) {
+    for (const DeviceInfo& deviceInfo : outputDeviceInfo.deviceInfos_) {
         for (const auto& session : GetContainer().GetAllSessions()) {
             session->UpdateCastDeviceMap(deviceInfo);
         }
@@ -397,21 +397,27 @@ void AVSessionService::UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo)
     SLOGI("UpdateDeviceCastMode in ");
     for (auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
         if (pcmCastSession_ != nullptr) {
-            int32_t castMode = pcmCastSession_->GetCastMode();
-            deviceInfo.hiPlayDeviceInfo_.curCastMode_ = castMode;
-            int32_t uid = pcmCastSession_->GetUid();
-            deviceInfo.hiPlayDeviceInfo_.lastCastUid_ = uid;
+            auto descriptor = pcmCastSession_->GetDescriptor();
+            std::string deviceId = deviceInfo.deviceId_;
+            if (descriptor.outputDeviceInfo_.deviceInfos_.size() > 0 &&
+                descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_ == deviceId) {
+                int32_t castMode = pcmCastSession_->GetCastMode();
+                deviceInfo.hiPlayDeviceInfo_.castMode_ = castMode;
+                int32_t uid = pcmCastSession_->GetUid();
+                deviceInfo.hiPlayDeviceInfo_.castUid_ = uid;
+                continue;
+            }
         }
-        deviceInfo.hiPlayDeviceInfo_.targetCastMode_ = deviceInfo.hiPlayDeviceInfo_.supportCastMode_;
+        deviceInfo.hiPlayDeviceInfo_.castMode_ = deviceInfo.hiPlayDeviceInfo_.supportCastMode_;
  
         std::string fileDir = AVSessionUtils::GetCachePathName();
         std::string fileName = deviceInfo.deviceId_ + "_cast_pair" + AVSessionUtils::GetPairFileSuffix();
-        if (deviceInfo.hiPlayDeviceInfo_.supportCastMode_ == HiPlayCastMode::DEVICE_LEVEL
-            && std::filesystem::exists(fileDir + fileName)) {
+        if (deviceInfo.hiPlayDeviceInfo_.supportCastMode_ == HiPlayCastMode::DEVICE_LEVEL &&
+            std::filesystem::exists(fileDir + fileName)) {
             std::pair<std::string, int32_t> castPair;
             bool success = AVSessionUtils::ReadPairFromFile(castPair, fileDir, fileName);
             if (success) {
-                deviceInfo.hiPlayDeviceInfo_.targetCastMode_ = castPair.second;
+                deviceInfo.hiPlayDeviceInfo_.castMode_ = castPair.second;
                 SLOGI("ReadPairFromFile success: deviceId=%{public}s, castMode=%{public}d",
                     AVSessionUtils::GetAnonymousDeviceId(castPair.first).c_str(), castPair.second);
             } else {

@@ -18,6 +18,7 @@
 #include <fstream>
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 
 #include "avsession_log.h"
 #include "input_manager.h"
@@ -196,7 +197,7 @@ public:
 void AVSessionServiceTest::SetUpTestCase()
 {
     SLOGI("set up AVSessionServiceTest");
-    system("killall -9 com.example.himusicdemo");
+    system("killall -9 com.huawei.hmsapp.music");
     sleep(1);
     avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     avservice_->InitKeyEvent();
@@ -1966,11 +1967,57 @@ static HWTEST_F(AVSessionServiceTest, SendSystemControlCommand003, TestSize.Leve
 static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand001, TestSize.Level0)
 {
     SLOGD("SendSystemCommonCommand001 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    avservice_->pcmCastSession_ = std::make_shared<PcmCastSession>();
     std::string commonCommand = "";
     OHOS::AAFwk::WantParams commandArgs;
-    auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    auto result = avservice_->SendSystemCommonCommand(commonCommand, commandArgs);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
+#endif
     SLOGD("SendSystemCommonCommand001 end!");
+}
+
+/**
+* @tc.name: SendSystemCommonCommand002
+* @tc.desc: valid cast enable
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand002, TestSize.Level0)
+{
+    SLOGD("SendSystemCommonCommand002 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    avservice_->pcmCastSession_ = nullptr;
+    std::string commonCommand = "";
+    OHOS::AAFwk::WantParams commandArgs;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    auto result = avservice_->SendSystemCommonCommand(commonCommand, commandArgs);
+    EXPECT_EQ(result, ERR_SESSION_NOT_EXIST);
+#endif
+
+    SLOGD("SendSystemCommonCommand002 end!");
+}
+
+/**
+* @tc.name: SendSystemCommonCommand003
+* @tc.desc: valid pcm cast session
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand003, TestSize.Level0)
+{
+    SLOGD("SendSystemCommonCommand003 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    std::string commonCommand = "";
+    OHOS::AAFwk::WantParams commandArgs;
+    #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        avservice_->pcmCastSession_ = std::make_shared<PcmCastSession>();
+        auto result = avservice_->SendSystemCommonCommand(commonCommand, commandArgs);
+        EXPECT_EQ(result, AVSESSION_SUCCESS);
+    #endif
+
+    SLOGD("SendSystemCommonCommand003 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, CreateWantAgent001, TestSize.Level0)
@@ -2656,7 +2703,7 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
     SLOGD("GetLocalTitle001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("com.example.himusicdemo");
+    elementName.SetBundleName("com.huawei.hmsapp.music");
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
@@ -2762,6 +2809,18 @@ static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors002, TestSize.Level0)
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     avsessionHere_->Destroy();
     SLOGI("GetSessionDescriptors002 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors003, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptors003 begin!");
+    std::vector<AVSessionDescriptor> descriptors;
+    #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        int32_t ret = avservice_->GetSessionDescriptors(SessionCategory::CATEGORY_HIPLAY, descriptors);
+        EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    #endif
+
+    SLOGI("GetSessionDescriptors003 end!");
 }
 
 /**
