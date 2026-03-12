@@ -995,6 +995,25 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     EXPECT_NE(g_AVSessionService, nullptr);
 }
 
+/**
+ * @tc.name: ServiceStartStopCast002
+ * @tc.desc: Cover if StartCast for pcm device
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    std::string args = R"({"code":0,"mode":1,"uid":1000,"deviceId":"1234567890"})";
+    pcmCastSession->OnSystemCommonEvent(args);
+    args = R"({"code":0,"mode":2,"uid":1000,"deviceId":"1234567890"})";
+    pcmCastSession->OnSystemCommonEvent(args);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
 /*
  * @tc.name: NotifyActiveSessionChange001
  * @tc.desc: Test NotifyActiveSessionChange with normal branch
@@ -1127,9 +1146,84 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode001, TestSize.Level
     OutputDeviceInfo outputDeviceInfo;
     std::vector<DeviceInfo> deviceInfos_;
     DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = 1;
+    deviceInfos_.push_back(deviceInfo);
+ 
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+}
+ 
+/**
+ * @tc.name: UpdateDeviceCastMode002
+ * @tc.desc: Test UpdateDeviceCastMode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode002, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = 1;
+    deviceInfos_.push_back(deviceInfo);
+ 
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    AVSessionDescriptor descriptor;
+    descriptor.outputDeviceInfo_ = outputDeviceInfo;
+    
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    g_AVSessionService->pcmCastSession_->descriptor_ = descriptor;
+    g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+}
+
+/**
+ * @tc.name: UpdateDeviceCastMode003
+ * @tc.desc: Test UpdateDeviceCastMode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode003, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = 1;
     deviceInfos_.push_back(deviceInfo);
 
     outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    AVSessionDescriptor descriptor;
+    descriptor.outputDeviceInfo_ = outputDeviceInfo;
+    descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_ = "deviceId2";
+    
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    g_AVSessionService->pcmCastSession_->descriptor_ = descriptor;
+    g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+}
+
+
+/**
+ * @tc.name: UpdateDeviceCastMode004
+ * @tc.desc: Test UpdateDeviceCastMode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode004, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
     g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
     EXPECT_TRUE(g_AVSessionService != nullptr);
 }

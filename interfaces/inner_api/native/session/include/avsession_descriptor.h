@@ -33,9 +33,8 @@ struct HiPlayDeviceInfo {
     bool ReadFromParcel(Parcel& in);
 
     int32_t supportCastMode_;
-    int32_t curCastMode_;
-    int32_t targetCastMode_;
-    int32_t lastCastUid_;
+    int32_t castMode_;
+    int32_t castUid_;
 };
 
 enum HiPlayCastMode {
