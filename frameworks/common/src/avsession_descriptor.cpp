@@ -349,9 +349,8 @@ bool AudioCapabilities::ReadFromParcel(Parcel& in)
 bool HiPlayDeviceInfo::WriteToParcel(Parcel& out) const
 {
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportCastMode_), false, "write supportCastMode_ failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(curCastMode_), false, "write curCastMode_ failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(targetCastMode_), false, "write targetCastMode_ failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(lastCastUid_), false, "write lastCastUid_ failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castMode_), false, "write castMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castUid_), false, "write castUid_ failed");
 
     return true;
 }
@@ -359,9 +358,8 @@ bool HiPlayDeviceInfo::WriteToParcel(Parcel& out) const
 bool HiPlayDeviceInfo::ReadFromParcel(Parcel& in)
 {
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportCastMode_), false, "read supportCastMode_ failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(curCastMode_), false, "read curCastMode_ failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(targetCastMode_), false, "read targetCastMode_ failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(lastCastUid_), false, "read lastCastUid_ failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castMode_), false, "read castMode_ failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castUid_), false, "read castUid_ failed");
 
     return true;
 }

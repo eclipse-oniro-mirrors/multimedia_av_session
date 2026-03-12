@@ -26,6 +26,7 @@
 #include "client_death_proxy.h"
 #include "system_ability_definition.h"
 #include "system_ability_ondemand_reason.h"
+#include "migrate_avsession_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -994,6 +995,25 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     EXPECT_NE(g_AVSessionService, nullptr);
 }
 
+/**
+ * @tc.name: ServiceStartStopCast002
+ * @tc.desc: Cover if StartCast for pcm device
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    std::string args = R"({"code":0,"mode":1,"uid":1000,"deviceId":"1234567890"})";
+    pcmCastSession->OnSystemCommonEvent(args);
+    args = R"({"code":0,"mode":2,"uid":1000,"deviceId":"1234567890"})";
+    pcmCastSession->OnSystemCommonEvent(args);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
 /*
  * @tc.name: NotifyActiveSessionChange001
  * @tc.desc: Test NotifyActiveSessionChange with normal branch
@@ -1024,6 +1044,97 @@ static HWTEST_F(AVSessionServiceTestExt, NotifyActiveSessionChange001, TestSize.
 }
 
 /**
+ * @tc.name: ProcessSuperLauncherConnect001
+ * @tc.desc: Test ProcessSuperLauncherConnect with invalid JSON
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ProcessSuperLauncherConnect001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::string deviceId = "test_device_id";
+    std::string extraInfo = "invalid_json";
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+    
+    int32_t result = g_AVSessionService->ProcessSuperLauncherConnect(deviceId, extraInfo);
+    // Should still succeed but networkid will be empty
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+
+    // For invalid JSON case, networkId will be empty string
+    // Clean up safely
+    std::shared_ptr<SoftbusSession> proxyPtr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        auto it = g_AVSessionService->migrateAVSessionProxyMap_.find("");
+        if (it != g_AVSessionService->migrateAVSessionProxyMap_.end()) {
+            proxyPtr = it->second;
+            g_AVSessionService->migrateAVSessionProxyMap_.erase(it);
+        }
+    }
+    proxyPtr.reset();
+}
+
+/**
+ * @tc.name: ProcessSuperLauncherDisconnect001
+ * @tc.desc: Test ProcessSuperLauncherDisconnect with valid networkId
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ProcessSuperLauncherDisconnect001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::string deviceId = "test_device_id";
+    std::string networkId = "disconnect_network_id_001";
+    std::string extraInfo = R"({"mDeviceId": ")" + networkId + R"("})";
+    
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+    
+    int32_t result = g_AVSessionService->ProcessSuperLauncherDisconnect(deviceId, extraInfo);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    
+    // Cleanup
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+}
+
+/**
+ * @tc.name: ProcessSuperLauncherDisconnect002
+ * @tc.desc: Test ProcessSuperLauncherDisconnect with non-existent networkId
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ProcessSuperLauncherDisconnect002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::string deviceId = "test_device_id";
+    std::string networkId = "non_existent_network_id";
+    std::string extraInfo = R"({"mDeviceId": ")" + networkId + R"("})";
+    
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+    
+    int32_t result = g_AVSessionService->ProcessSuperLauncherDisconnect(deviceId, extraInfo);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    
+    // Cleanup
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+}
+
+/**
  * @tc.name: UpdateDeviceCastMode001
  * @tc.desc: Test UpdateDeviceCastMode
  * @tc.type: FUNC
@@ -1035,9 +1146,84 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode001, TestSize.Level
     OutputDeviceInfo outputDeviceInfo;
     std::vector<DeviceInfo> deviceInfos_;
     DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = 1;
+    deviceInfos_.push_back(deviceInfo);
+ 
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+}
+ 
+/**
+ * @tc.name: UpdateDeviceCastMode002
+ * @tc.desc: Test UpdateDeviceCastMode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode002, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = 1;
+    deviceInfos_.push_back(deviceInfo);
+ 
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    AVSessionDescriptor descriptor;
+    descriptor.outputDeviceInfo_ = outputDeviceInfo;
+    
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    g_AVSessionService->pcmCastSession_->descriptor_ = descriptor;
+    g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+}
+
+/**
+ * @tc.name: UpdateDeviceCastMode003
+ * @tc.desc: Test UpdateDeviceCastMode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode003, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = 1;
     deviceInfos_.push_back(deviceInfo);
 
     outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    AVSessionDescriptor descriptor;
+    descriptor.outputDeviceInfo_ = outputDeviceInfo;
+    descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_ = "deviceId2";
+    
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    g_AVSessionService->pcmCastSession_->descriptor_ = descriptor;
+    g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+}
+
+
+/**
+ * @tc.name: UpdateDeviceCastMode004
+ * @tc.desc: Test UpdateDeviceCastMode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode004, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+    
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
     g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
     EXPECT_TRUE(g_AVSessionService != nullptr);
 }

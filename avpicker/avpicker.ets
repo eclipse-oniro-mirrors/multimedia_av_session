@@ -94,6 +94,11 @@ enum AVCastPickerColorMode {
   LIGHT = 2
 }
 
+enum HiPlayCastMode {
+  DEVICE_LEVEL = 1,
+  APP_LEVEL = 2
+}
+
 interface HighQualityParams {
   iconLeft: string,
   iconRight: string,
@@ -121,8 +126,7 @@ export interface AVCastPickerDeviceInfo {
   fromCall?: boolean,
   deviceSubName?: string,
   supportCastMode?: number,
-  curCastMode?: number,
-  targetCastMode?: number,
+  castMode?: number,
   bundleInfo?: ShowingBundleTS;
 }
 
@@ -361,7 +365,7 @@ export struct AVCastPicker {
                   .margin({top: 4})
                   .width('auto')
                    
-                  if (item.isConnected && item.supportCastMode == 1) {
+                  if (item.isConnected && item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                     Flex({direction.FlexDirection.Row, alignItems.ItemAlign.Center}) {
                       Row() {
                         if (item.curCastMode == 1) {
@@ -375,7 +379,7 @@ export struct AVCastPicker {
                       .direction(Direction.Ltr)
  
                       Row() {
-                        if (item.curCastMode == 1) {
+                        if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                           Text('所有媒体音频')
                           .fontWeight('sys.string.ohos_id_text_font_family_regular')
                           .fontSize($r('sys.float.ohos_id_text_size_body3'))
@@ -422,7 +426,7 @@ export struct AVCastPicker {
                     }
                   }
                   .onClick(() => {
-                    this.isDeviceLevel = (item.curCastMode === 1)
+                    this.isDeviceLevel = (item.castMode === HiPlayCastMode.DEVICE_LEVEL)
                     if (!this.isSubMenuExpanded) {
                       this.isShowBadge =  false;
                       this.isSubMenuExpanded = true;
@@ -529,7 +533,7 @@ export struct AVCastPicker {
       .onClick(() => {
         this.isDeviceLevel = true
         if (this.extensionProxy != null) {
-          this.extensionProxy.send({'castMode': 1});
+          this.extensionProxy.send({'castMode': HiPlayCastMode.DEVICE_LEVEL});
         }
       })
 
@@ -570,7 +574,7 @@ export struct AVCastPicker {
       .onClick(() => {
         this.isDeviceLevel = false
         if (this.extensionProxy != null) {
-           this.extensionProxy.send({'castMode': 2});
+           this.extensionProxy.send({'castMode': HiPlayCastMode.APP_LEVEL});
         }
       })
     }
