@@ -225,6 +225,7 @@ export struct AVCastPicker {
   @State isDisabledByPickerLimit: boolean = false;
   @State isDeviceLevel: boolean = true;
   @State isSubMenuExpanded: boolean = false;
+  @State isShowBadge: boolean = false;
 
   private static currentPickerCount: number = 0;
 
@@ -365,11 +366,12 @@ export struct AVCastPicker {
                   .width('auto')
                    
                   if (item.isConnected && item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
-                    Flex() {
+                    Flex({direction.FlexDirection.Row, alignItems.ItemAlign.Center}) {
                       Row() {
-                        if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
-                          SymbolGlyph($r('sys.symbol.speaker_wave_3'))
+                        if (item.curCastMode == 1) {
+                          SymbolGlyph($r('sys.symbol.speaker_wave_2'))
                             .fontSize(`16vp`)
+                            .fontColor($r('sys.color.font_primary'))
                         } else {
                           this.SmallPicIcon(item.bundleInfo?.pixelData)
                         }
@@ -378,30 +380,55 @@ export struct AVCastPicker {
  
                       Row() {
                         if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
-                          Text('正在播放所有媒体')
+                          Text('所有媒体音频')
                           .fontWeight('sys.string.ohos_id_text_font_family_regular')
                           .fontSize($r('sys.float.ohos_id_text_size_body3'))
                           .margin({left: 2, right: 2})
+                          .textOverflow({ overflow: TextOverflow.Ellipsis })
+                          .maxFontScale(this.maxFontSizeScale)
+                          .wordBreak(WordBreak.BREAK_ALL)
+                          .maxLines(1)
                       } else {
                         Text(`正在播放“${item.bundleInfo?.appName ?? ''}”`)
                           .fontWeight('sys.string.ohos_id_text_font_family_regular')
                           .fontSize($r('sys.float.ohos_id_text_size_body3'))
                           .margin({left: 2, right: 2})
+                          .textOverflow({ overflow: TextOverflow.Ellipsis })
+                          .maxFontScale(this.maxFontSizeScale)
+                          .wordBreak(WordBreak.BREAK_ALL)
+                          .maxLines(1)
                       }
 
                     }
                     .direction(Direction.Ltr)
 
-                    Row() {
-                      SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
-                        .fontSize('16vp')
+                    if (this.isShowBadge) {
+                      Row(){
+                        Badge({
+                          value: '',
+                          style: { badgeSize: 6, badgeColor: $r('sys.color.warning') }
+                        }) {
+                          SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
+                            .fontSize('16vp')
+                            .fontColor($r('sys.color.font_primary'))
+                        }
+                        .width(18)
+                        .height(16)
+                      }
+                      .direction(Direction.Ltr) 
+                    } else {
+                      Row() {
+                        SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
+                          .fontSize('16vp')
+                          .fontColor($r('sys.color.font_primary'))
+                      }
+                      .direction(Direction.Ltr)
                     }
-                    .direction(Direction.Ltr)
-
                   }
                   .onClick(() => {
                     this.isDeviceLevel = (item.castMode === HiPlayCastMode.DEVICE_LEVEL)
                     if (!this.isSubMenuExpanded) {
+                      this.isShowBadge =  false;
                       this.isSubMenuExpanded = true;
                     }
                   })
@@ -472,52 +499,87 @@ export struct AVCastPicker {
   castModeMenu() {
     Column() {
       Flex() {
-        Text('所有媒体')
-          .fontWeight('sys.string.ohos_id_text_font_family_medium')
-          .fontSize($r('sys.float.ohos_id_text_size_body1'))
-          .width('100%')
+        Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
+          Flex({ alignItems: ItemAlign.Center}){
+            Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center}) {
+              Text('所有媒体')
+                .fontWeight('sys.string.ohos_id_text_font_family_medium')
+                .fontSize($r('sys.float.ohos_id_text_size_body1'))
+                .width('100%')
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .maxFontScale(this.maxFontSizeScale)
+                .wordBreak(WordBreak.BREAK_ALL)
+                .maxLines(1)
+            }
  
-        Row() {
-          if (this.isDeviceLevel) {
-            SymbolGlyph($r('sys.symbol.checkmark'))
-            .fontSize('24vp')
+            Row() {
+              if (this.isDeviceLevel) {
+                SymbolGlyph($r('sys.symbol.checkmark'))
+                  .fontSize('24vp')
+                  .fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+                    [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+              }
+            }
+            .width(48)
+            .height(48)
+            .justifyContent(FlexAlign.End)
+          }
+          .margin({ left: 12, right: 12 })
         }
+        .margin({ left: 4, right: 4 })
       }
-    }
-    .width(224)
-    .height(48)
-    .onClick(() => {
-      this.isDeviceLevel = true
-      if (this.extensionProxy != null) {
-        this.extensionProxy.send({'castMode': HiPlayCastMode.DEVICE_LEVEL});
-      }
-    })
-
-    Divider().width(192)
-
-    Flex() {
-      Text('当前应用媒体')
-        .fontWeight('sys.string.ohos_id_text_font_family_medium')
-        .fontSize($r('sys.float.ohos_id_text_size_body1'))
-        .width('100%')
-      Row() {
-        if (!this.isDeviceLevel) {
-          SymbolGlyph($r('sys.symbol.checkmark'))
-            .fontSize('24vp')
+      .width(224)
+      .height(48)
+      .onClick(() => {
+        this.isDeviceLevel = true
+        if (this.extensionProxy != null) {
+          this.extensionProxy.send({'castMode': HiPlayCastMode.DEVICE_LEVEL});
         }
+      })
+
+      Divider().width(192)
+
+       Flex() {
+        Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems.Center }) {
+          Flex({ alignItems:ItemAlign.Center }) {
+            Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center}) {
+              Text('当前应用媒体')
+                .fontWeight('sys.string.ohos_id_text_font_family_medium')
+                .fontSize($r('sys.float.ohos_id_text_size_body1'))
+                .width('100%')
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .maxFontScale(this.maxFontSizeScale)
+                .wordBreak(WordBreak.BREAK_ALL)
+                .maxLines(1)
+            }
+
+            Row() {
+              if (!this.isDeviceLevel) {
+                SymbolGlyph($r('sys.symbol.checkmark'))
+                  .fontSize('24vp')
+                  .fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+                    [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+              }
+            }
+            .width(48)
+            .height(48)
+            .justifyContent(FlexAlign.End)
+          }
+          .margin({ left: 12, right: 12 })
+        }
+        .margin({ left: 4, right: 4 })
       }
+      .width(224)
+      .height(48)
+      .onClick(() => {
+        this.isDeviceLevel = false
+        if (this.extensionProxy != null) {
+           this.extensionProxy.send({'castMode': HiPlayCastMode.APP_LEVEL});
+        }
+      })
     }
-    .width(224)
-    .height(48)
-    .onClick(() => {
-      this.isDeviceLevel = false
-      if (this.extensionProxy != null) {
-        this.extensionProxy.send({'castMode': HiPlayCastMode.APP_LEVEL});
-      }
-    })
+    .padding({ top: 4, bottom: 4})
   }
-  .padding({ top: 4, bottom: 4})
-}
 
 @Builder SmallPicIcon(appIcon : image.PixelMap | undefined) {
   Column() {
