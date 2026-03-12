@@ -81,6 +81,7 @@ private:
     static napi_value IsDesktopLyricVisible(napi_env env, napi_callback_info info);
     static napi_value SetDesktopLyricState(napi_env env, napi_callback_info info);
     static napi_value GetDesktopLyricState(napi_env env, napi_callback_info info);
+    static napi_value SetBackgroundPlayMode(napi_env env, napi_callback_info info);
     static napi_value OnEventPlay(napi_env env, napi_callback_info info);
     static napi_value OffEventPlay(napi_env env, napi_callback_info info);
     static napi_value OnEventPlayNext(napi_env env, napi_callback_info info);

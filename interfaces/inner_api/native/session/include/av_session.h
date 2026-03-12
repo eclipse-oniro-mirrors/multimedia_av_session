@@ -313,6 +313,14 @@ public:
      */
     virtual int32_t GetDesktopLyricState(DesktopLyricState &state) {return 0;};
 
+    /**
+     * set background play mode for this session.
+     * @param mode Whether session supports background playback
+     * @returns Whether the set is successful
+     * @since 24
+     */
+    virtual int32_t SetBackgroundPlayMode(int32_t mode) {return 0;};
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
      * @brief Get the controller corresponding to this session.

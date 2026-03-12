@@ -865,4 +865,23 @@ int32_t AVSessionProxy::GetDesktopLyricState(DesktopLyricState &state)
     }
     return ret;
 }
+
+int32_t AVSessionProxy::SetBackgroundPlayMode(int32_t mode)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::SetBackgroundPlayMode");
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(mode), ERR_MARSHALLING, "write mode int32 failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_BACKGROUND_PLAY_MODE,
+        data, reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
+}
 } // namespace OHOS::AVSession

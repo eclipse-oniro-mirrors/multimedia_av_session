@@ -482,6 +482,23 @@ static napi_value ExportSessionCategory(napi_env env)
     return result;
 }
 
+static napi_value ExportPlayMode(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_object(env, &result);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+
+    (void)SetNamedProperty(env, result, "ENABLE_BACKGROUND_PLAY",
+        static_cast<int32_t>(PlayMode::ENABLE_BACKGROUND_PLAY));
+    (void)SetNamedProperty(env, result, "DISABLE_BACKGROUND_PLAY",
+        static_cast<int32_t>(PlayMode::DISABLE_BACKGROUND_PLAY));
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -503,7 +520,8 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DecoderType", ExportDecoderType(env)),
         DECLARE_NAPI_PROPERTY("ResolutionLevel", ExportResolutionLevel(env)),
         DECLARE_NAPI_PROPERTY("CallerType", ExportCallerType(env)),
-        DECLARE_NAPI_PROPERTY("SessionCategory", ExportSessionCategory(env))
+        DECLARE_NAPI_PROPERTY("SessionCategory", ExportSessionCategory(env)),
+        DECLARE_NAPI_PROPERTY("PlayMode", ExportPlayMode(env))
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

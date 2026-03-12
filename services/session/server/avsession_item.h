@@ -184,6 +184,10 @@ public:
 
     int32_t SetDesktopLyricStateInner(const DesktopLyricState &state, const std::string &handler);
 
+    int32_t SetBackgroundPlayMode(int32_t mode) override;
+
+    int32_t GetBackgroundPlayMode();
+
     AVCallState GetAVCallState();
 
     AVCallMetaData GetAVCallMetaData();
@@ -289,6 +293,8 @@ public:
     void SetServiceCallbackForUpdateTop(const std::function<void(std::string)>& callback);
 
     void SetServiceCallbackForAncoStart(const std::function<void(std::string, std::string, std::string)>& callback);
+
+    void SetServiceCallbackForBgPlayModeChange(const std::function<void(std::string, int32_t)>& callback);
 
     bool IsCasting();
 
@@ -534,6 +540,7 @@ private:
     std::function<void(std::string, bool)> serviceCallbackForNtf_;
     std::function<void(std::string)> serviceCallbackForUpdateTop_;
     std::function<void(std::string, std::string, std::string)> serviceCallbackForAncoStart_;
+    std::function<void(std::string, int32_t)> serviceCallbackForBgPlayModeChange_;
     volatile bool isFirstAddToFront_ = true;
     bool isMediaKeySupport = false;
     bool isNotShowNotification_ = false;
@@ -564,6 +571,7 @@ private:
     std::mutex desktopLyricStateMutex_;
     DesktopLyricState desktopLyricState_ = {};
     AVSessionItemExtension *extension_ = nullptr;
+    int32_t playMode_ = -1;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;
