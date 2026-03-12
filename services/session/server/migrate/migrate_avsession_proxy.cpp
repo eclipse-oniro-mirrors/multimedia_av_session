@@ -440,6 +440,8 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s done.",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
     servicePtr_->NotifyRemoteBundleChange(elementName_.GetBundleName());
+    bundleNameBef = ((bundleNameBef.empty() || bundleNameBef == DEFAULT_STRING) &&
+        !elementName_.GetBundleName().empty()) ? elementName_.GetBundleName() : bundleNameBef;
     if (bundleNameBef != elementName_.GetBundleName()) {
         AVPlaybackState playbackState;
         playbackState.SetState(0);
