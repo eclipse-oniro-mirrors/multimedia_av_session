@@ -97,6 +97,12 @@ void HwCastProviderSession::SendCommandArgsToCast(const int32_t commandType, con
             SLOGI("SendCommandArgsToCast: cast mode change");
             castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_CONFIG_MODE, parStr);
             break;
+        case BYPASS_NUM_COMMAND:
+            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_BYPASS_DATA, parStr);
+            break;
+        case QUERY_NUM_COMMAND:
+            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_QUERY_REQUEST, parStr);
+            break;
         default:
             break;
     }
@@ -346,6 +352,12 @@ void HwCastProviderSession::OnHiplayEventRecv(const int32_t eventId, const std::
     switch (eventId) {
         case HIPLAY_CONFIG_MODE_RESULT:
             AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_CONFIG_MODE_DATA, jsonParam);
+            break;
+        case HIPLAY_NUM_BYPASS_DATA:
+            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_BYPASS_DATA, jsonParam);
+            break;
+        case HIPLAY_NUM_QUERY_RESPONSE:
+            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_QUERY_RESPONSE, jsonParam);
             break;
         default:
             break;
