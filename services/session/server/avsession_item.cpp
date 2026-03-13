@@ -1005,7 +1005,7 @@ void AVSessionItem::HandleDesktopLyricStateChanged(const DesktopLyricState &stat
 int32_t AVSessionItem::SetBackgroundPlayMode(int32_t mode)
 {
     SLOGI("SetBackgroundPlayMode %{public}d", mode);
-    playMode_ = mode;
+    playMode_.store(mode);
     if (serviceCallbackForBgPlayModeChange_) {
         serviceCallbackForBgPlayModeChange_(GetSessionId(), mode);
     }
@@ -1014,7 +1014,7 @@ int32_t AVSessionItem::SetBackgroundPlayMode(int32_t mode)
 
 int32_t AVSessionItem::GetBackgroundPlayMode()
 {
-    return playMode_;
+    return playMode_.load();
 }
 
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)

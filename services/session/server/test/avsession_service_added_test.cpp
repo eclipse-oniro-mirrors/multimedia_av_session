@@ -1148,6 +1148,10 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_AddCapsuleS
     auto playModeCallback = avsessionItem->serviceCallbackForBgPlayModeChange_;
     avsessionItem->SetBackgroundPlayMode(1);
     playModeCallback(sessionId, 1);
+    playModeCallback("none", 1);
+
+    avsessionItem->serviceCallbackForBgPlayModeChange_ = nullptr;
+    avsessionItem->SetBackgroundPlayMode(1);
 
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();

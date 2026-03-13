@@ -571,7 +571,7 @@ private:
     std::mutex desktopLyricStateMutex_;
     DesktopLyricState desktopLyricState_ = {};
     AVSessionItemExtension *extension_ = nullptr;
-    int32_t playMode_ = -1;
+    std::atomic_int playMode_ = -1;
 
     // The following locks are used in the defined order of priority
     std::recursive_mutex avsessionItemLock_;

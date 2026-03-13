@@ -1428,7 +1428,9 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
     sessionItem->SetServiceCallbackForBgPlayModeChange([this](std::string sessionId, int32_t mode) {
         std::lock_guard lockGuard(sessionServiceLock_);
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
-        if (session && topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
+        bool isUpdateForTop = session != nullptr && topSession_ != nullptr &&
+            (topSession_.GetRefPtr() == session.GetRefPtr());
+        if (isUpdateForTop) {
             SLOGI("BgPlayModeChange topsession %{public}s", topSession_->GetBundleName().c_str());
             NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
         }
