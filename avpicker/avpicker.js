@@ -96,6 +96,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDeviceLevel = new ObservedPropertySimplePU(true, this, 'isDeviceLevel');
         this.__isSubMenuExpanded = new ObservedPropertySimplePU(false, this, 'isSubMenuExpanded');
         this.__isShowBadge = new ObservedPropertySimplePU(false, this, 'isShowBadge');
+        this.__isSwitch = new ObservedPropertySimplePU(false, this, 'isSwitch');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -186,6 +187,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.isShowBadge !== undefined) {
             this.isShowBadge = c11.isShowBadge;
         }
+        if (c11.isSwitch !== undefined) {
+            this.isSwitch = c11.isSwitch;
+        }
     }
 
     updateStateVars(b11) {
@@ -214,6 +218,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDeviceLevel.purgeDependencyOnElmtId(a11);
         this.__isSubMenuExpanded.purgeDependencyOnElmtId(a11);
         this.__isShowBadge.purgeDependencyOnElmtId(a11);
+        this.__isSwitch.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -239,6 +244,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDeviceLevel.aboutToBeDeleted();
         this.__isSubMenuExpanded.aboutToBeDeleted();
         this.__isShowBadge.aboutToBeDeleted();
+        this.__isSwitch.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -414,6 +420,13 @@ export class AVCastPicker extends ViewPU {
     }
     set isShowBadge(i1) {
         this.__isShowBadge.set(i1);
+    }
+
+    get isSwitch() {
+        return this.__isSwitch.get();
+    }
+    set isSwitch(i1) {
+        this.__isSwitch.set(i1);
     }
 
     aboutToAppear() {
@@ -699,7 +712,8 @@ export class AVCastPicker extends ViewPU {
                                                 this.isDeviceLevel = (x8.castMode === HiPlayCastMode.DEVICE_LEVEL);
                                                 if (!this.isSubMenuExpanded) {
                                                     this.isShowBadge = false;
-                                                    this.isSubMenuExpanded = true;
+                                                    this.isSwitch = true;
+                                                    this.isMenuShow = false;
                                                 }
                                             });
                                             Flex.padding({ top: 2.5, right: 4, bottom: 2.5, left: 4 });
@@ -715,7 +729,7 @@ export class AVCastPicker extends ViewPU {
                                             if (x8.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.speaker_wave_3'],
+                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.speaker_wave_2'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                         SymbolGlyph.fontSize(`16vp`);
                                                         SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
@@ -1247,6 +1261,10 @@ export class AVCastPicker extends ViewPU {
                     this.isMenuShow = false;
                     this.touchMenuItemIndex = -1;
                     this.menuShowStateCallback(this.isMenuShow);
+                }
+                if (this.isSwitch) {
+                    this.isSubMenuExpanded = true;
+                    this.isSwitch = false;
                 }
             },
             onAppear: () => {
