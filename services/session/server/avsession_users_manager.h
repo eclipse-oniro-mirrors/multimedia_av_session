@@ -59,7 +59,7 @@ public:
 
     std::vector<sptr<AVSessionItem>> RemoveSessionForAllUser(pid_t pid);
 
-    void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
+    void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener, int32_t userId = 0);
 
     void AddSessionListenerForAllUsers(pid_t pid, const sptr<ISessionListener>& listener);
 
