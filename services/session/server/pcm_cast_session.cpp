@@ -69,10 +69,12 @@ void PcmCastSession::OnSystemCommonEvent(const std::string& args)
         castMode_ = HiPlayCastMode::DEVICE_LEVEL;
         descriptor_.uid_ = 0;
         descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = 0;
+        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::DEVICE_LEVEL;
     } else if (castMode == HiPlayCastMode::APP_LEVEL) {
         castMode_ = HiPlayCastMode::APP_LEVEL;
         descriptor_.uid_ = uid;
         descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = uid;
+        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::APP_LEVEL;
     }
  
     WriteCastPairToFile(deviceId, castMode_);
