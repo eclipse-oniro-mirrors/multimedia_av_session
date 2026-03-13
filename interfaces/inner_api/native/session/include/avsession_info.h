@@ -1705,5 +1705,22 @@ struct DesktopLyricState : public Parcelable {
         return nullptr;
     }
 };
+
+/**
+ * Supported play mode definition
+ * @enum { int }
+ * @syscap SystemCapability.Multimedia.AVSession.Core
+ * @since 24 dynamic&static
+ */
+enum PlayMode {
+    /**
+     * @brief enable background play
+     */
+    ENABLE_BACKGROUND_PLAY = 0,
+    /**
+     * @brief disable background play
+     */
+    DISABLE_BACKGROUND_PLAY = 1,
+};
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

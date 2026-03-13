@@ -1136,12 +1136,18 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_AddCapsuleS
         g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
     EXPECT_EQ(avsessionItem != nullptr, true);
 
+    avsessionItem->SetBackgroundPlayMode(1);
+
     g_AVSessionService->AddCapsuleServiceCallback(avsessionItem);
     auto callback = avsessionItem->serviceCallbackForCastNtf_;
     std::string sessionId = "test";
     bool isPlaying = true;
     bool isChange = true;
     callback(sessionId, isPlaying, isChange);
+
+    auto playModeCallback = avsessionItem->serviceCallbackForBgPlayModeChange_;
+    avsessionItem->SetBackgroundPlayMode(1);
+    playModeCallback(sessionId, 1);
 
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();

@@ -1424,6 +1424,15 @@ void AVSessionService::AddCapsuleServiceCallback(sptr<AVSessionItem>& sessionIte
         }
         NotifySystemUI(nullptr, isPlaying && IsCapsuleNeeded(), isMediaChange);
     });
+
+    sessionItem->SetServiceCallbackForBgPlayModeChange([this](std::string sessionId, int32_t mode) {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+        if (session && topSession_ && (topSession_.GetRefPtr() == session.GetRefPtr())) {
+            SLOGI("BgPlayModeChange topsession %{public}s", topSession_->GetBundleName().c_str());
+            NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
+        }
+    });
 }
 
 void AVSessionService::AddAncoColdStartServiceCallback(sptr<AVSessionItem>& session)
@@ -4335,7 +4344,9 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
 bool AVSessionService::IsCapsuleNeeded()
 {
     CHECK_AND_RETURN_RET_LOG(topSession_ != nullptr, false, "audio broker capsule");
-    return topSession_->GetSessionType() == "audio" || topSession_->IsCasting();
+    int32_t playMode = topSession_->GetBackgroundPlayMode();
+    return playMode == PlayMode::ENABLE_BACKGROUND_PLAY || topSession_->IsCasting() ||
+        (topSession_->GetSessionType() == "audio" && playMode != PlayMode::DISABLE_BACKGROUND_PLAY);
 }
 
 void AVSessionService::RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,

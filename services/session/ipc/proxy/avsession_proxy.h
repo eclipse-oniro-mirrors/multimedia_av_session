@@ -110,6 +110,8 @@ public:
 
     int32_t GetDesktopLyricState(DesktopLyricState &state) override;
 
+    int32_t SetBackgroundPlayMode(int32_t mode) override;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t ReleaseCast(bool continuePlay = false) override;
 #endif

@@ -1002,6 +1002,21 @@ void AVSessionItem::HandleDesktopLyricStateChanged(const DesktopLyricState &stat
     }
 }
 
+int32_t AVSessionItem::SetBackgroundPlayMode(int32_t mode)
+{
+    SLOGI("SetBackgroundPlayMode %{public}d", mode);
+    playMode_ = mode;
+    if (serviceCallbackForBgPlayModeChange_) {
+        serviceCallbackForBgPlayModeChange_(GetSessionId(), mode);
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::GetBackgroundPlayMode()
+{
+    return playMode_;
+}
+
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
     {
@@ -3066,6 +3081,13 @@ void AVSessionItem::SetServiceCallbackForAncoStart(
     SLOGI("SetServiceCallbackForAncoStart in");
     std::lock_guard coldStartLockGuard(coldStartCallbackLock_);
     serviceCallbackForAncoStart_ = callback;
+}
+
+void AVSessionItem::SetServiceCallbackForBgPlayModeChange(
+    const std::function<void(std::string, int32_t)>& callback)
+{
+    SLOGI("SetServiceCallbackForBgPlayModeChange in");
+    serviceCallbackForBgPlayModeChange_ = callback;
 }
 
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)

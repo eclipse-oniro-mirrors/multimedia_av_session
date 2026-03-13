@@ -125,6 +125,8 @@ private:
 
     int32_t HandleGetDesktopLyricState(MessageParcel &data, MessageParcel &reply);
 
+    int32_t HandleSetBackgroundPlayMode(MessageParcel &data, MessageParcel &reply);
+
     static bool CheckInterfaceToken(MessageParcel& data);
 
     using HandlerFunc = std::function<int32_t(MessageParcel&, MessageParcel&)>;
@@ -205,6 +207,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSetDesktopLyricState(data, reply); }},
         {SESSION_CMD_GET_DESKTOP_LYRIC_STATE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetDesktopLyricState(data, reply); }},
+        {SESSION_CMD_SET_BACKGROUND_PLAY_MODE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetBackgroundPlayMode(data, reply); }},
     };
     std::map<uint32_t, std::string> mapCodeToFuncNameXCollie = {
         {SESSION_CMD_GET_SESSION_ID, "HandleGetSessionId"},
@@ -247,6 +251,7 @@ private:
         {SESSION_CMD_IS_DESKTOP_LYRIC_VISIBLE, "HandleIsDesktopLyricVisible"},
         {SESSION_CMD_SET_DESKTOP_LYRIC_STATE, "HandleSetDesktopLyricState"},
         {SESSION_CMD_GET_DESKTOP_LYRIC_STATE, "HandleGetDesktopLyricState"},
+        {SESSION_CMD_SET_BACKGROUND_PLAY_MODE, "HandleSetBackgroundPlayMode"},
     };
 
     const size_t defaultIpcCapacity = 1048576; // Increase the IPC default capacity(200K) to 1M
