@@ -417,7 +417,6 @@ int32_t AVSessionStub::HandleSetBackgroundPlayMode(MessageParcel &data, MessageP
         playMode <= PlayMode::DISABLE_BACKGROUND_PLAY, ERR_UNMARSHALLING, "read int32 playMode failed");
     int32_t ret = SetBackgroundPlayMode(playMode);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "WriteInt32 result failed");
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "SetBackgroundPlayMode failed");
     return ERR_NONE;
 }
 
