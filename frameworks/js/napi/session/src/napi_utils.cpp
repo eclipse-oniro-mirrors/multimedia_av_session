@@ -2081,7 +2081,8 @@ napi_status NapiUtils::SetValue(
     int index = 0;
     for (const auto& item : in) {
         napi_value entry = nullptr;
-        NapiAVSessionController::NewInstance(env, item, entry);
+        status = NapiAVSessionController::NewInstance(env, item, entry);
+        CHECK_RETURN((status == napi_ok), "controller newInstance failed!", status);
         napi_set_element(env, out, index++, entry);
     }
     return status;
