@@ -226,6 +226,7 @@ export struct AVCastPicker {
   @State isDeviceLevel: boolean = true;
   @State isSubMenuExpanded: boolean = false;
   @State isShowBadge: boolean = false;
+  @State isSwitch: boolean = false;
 
   private static currentPickerCount: number = 0;
 
@@ -429,7 +430,8 @@ export struct AVCastPicker {
                     this.isDeviceLevel = (item.castMode === HiPlayCastMode.DEVICE_LEVEL)
                     if (!this.isSubMenuExpanded) {
                       this.isShowBadge =  false;
-                      this.isSubMenuExpanded = true;
+                      this.isSwitch = true;
+                      this.isMenuShow = false;
                     }
                   })
                   .padding({top: 2.5, right: 4, bottom: 2.5, left: 4})
@@ -737,6 +739,10 @@ export struct AVCastPicker {
               this.touchMenuItemIndex = -1;
               this.menuShowStateCallback(this.isMenuShow);
             }
+            if (this.isSwitch) {
+              this.isSubMenuExpanded = true;
+              this.isSwitch = false;
+              }
           },
           onAppear: () => {
             if (this.isSubMenuExpanded) {
