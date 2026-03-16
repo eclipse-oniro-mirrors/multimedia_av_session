@@ -4347,8 +4347,8 @@ bool AVSessionService::IsCapsuleNeeded()
 {
     CHECK_AND_RETURN_RET_LOG(topSession_ != nullptr, false, "audio broker capsule");
     int32_t playMode = topSession_->GetBackgroundPlayMode();
-    return playMode == PlayMode::ENABLE_BACKGROUND_PLAY || topSession_->IsCasting() ||
-        (topSession_->GetSessionType() == "audio" && playMode != PlayMode::DISABLE_BACKGROUND_PLAY);
+    return playMode == BackgroundPlayMode::ENABLE_BACKGROUND_PLAY || topSession_->IsCasting() ||
+        (playMode != BackgroundPlayMode::DISABLE_BACKGROUND_PLAY && topSession_->GetSessionType() == "audio");
 }
 
 void AVSessionService::RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,

@@ -1712,7 +1712,7 @@ struct DesktopLyricState : public Parcelable {
  * @syscap SystemCapability.Multimedia.AVSession.Core
  * @since 24 dynamic&static
  */
-enum PlayMode {
+enum BackgroundPlayMode {
     /**
      * @brief enable background play
      */
