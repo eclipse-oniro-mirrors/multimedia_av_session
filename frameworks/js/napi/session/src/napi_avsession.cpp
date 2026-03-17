@@ -171,6 +171,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isDesktopLyricVisible", IsDesktopLyricVisible),
         DECLARE_NAPI_FUNCTION("setDesktopLyricState", SetDesktopLyricState),
         DECLARE_NAPI_FUNCTION("getDesktopLyricState", GetDesktopLyricState),
+        DECLARE_NAPI_FUNCTION("setBackgroundPlayMode", SetBackgroundPlayMode),
         DECLARE_NAPI_FUNCTION("onPlay", OnEventPlay),
         DECLARE_NAPI_FUNCTION("offPlay", OffEventPlay),
         DECLARE_NAPI_FUNCTION("onPlayNext", OnEventPlayNext),
@@ -257,6 +258,7 @@ napi_status NapiAVSession::ReCreateInstance()
                 continue;
             }
         }
+        napiAVSession_->callback_->RestartSessionDisconnect();
     }
     napiAVSession_->session_->Activate();
     return napi_ok;
@@ -2453,6 +2455,49 @@ napi_value NapiAVSession::GetDesktopLyricState(napi_env env, napi_callback_info 
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     };
     return NapiAsyncWork::Enqueue(env, context, "GetDesktopLyricState", executor, complete);
+}
+
+napi_value NapiAVSession::SetBackgroundPlayMode(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        int32_t playMode_ = 0;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("SetBackgroundPlayMode failed : no memory");
+        NapiUtils::ThrowError(env, "SetBackgroundPlayMode failed : no memory",
+                              NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->playMode_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get playMode_ failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+
+    auto executor = [context]() {
+        auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "SetBackgroundPlayMode", context->errMessage);
+            return;
+        }
+        int32_t ret = napiSession->session_->SetBackgroundPlayMode(context->playMode_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+            ErrCodeToMessage(ret, "SetBackgroundPlayMode", context->errMessage);
+        }
+    };
+    auto complete = [env](napi_value &output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SetBackgroundPlayMode", executor, complete);
 }
 
 void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)

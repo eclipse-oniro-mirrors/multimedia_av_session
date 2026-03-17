@@ -73,6 +73,8 @@ public:
 
     int32_t OnDeviceStateChange(const DeviceState& deviceState) override;
 
+    int32_t OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override;
+
     void ReleaseCurrentCastSession() override;
 
     int32_t OnCastSessionCreated(const int32_t castId) override;
@@ -141,6 +143,9 @@ public:
     std::string GetCastingDeviceName() override;
 
     bool IsDisconnectingOtherSession() override;
+
+    void SendCommandArgsToCast(const int64_t castHandle, const int32_t commandType,
+        const std::string& params) override;
 
 protected:
 

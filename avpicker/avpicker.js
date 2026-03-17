@@ -54,6 +54,12 @@ export let AVCastPickerColorMode;
     v11[v11.LIGHT = 2] = 'LIGHT';
 })(AVCastPickerColorMode || (AVCastPickerColorMode = {}));
 
+export let HiPlayCastMode;
+(function(w11) {
+    w11[w11.DEVICE_LEVEL = 1] = 'DEVICE_LEVEL';
+    w11[w11.APP_LEVEL = 2] = 'APP_LEVEL';
+})(HiPlayCastMode || (HiPlayCastMode = {}));
+
 export class AVCastPicker extends ViewPU {
     constructor(d11, e11, f11, g11 = -1, h11 = undefined, i11) {
         super(d11, f11, g11, i11);
@@ -87,6 +93,10 @@ export class AVCastPicker extends ViewPU {
         this.__isShowLoadingProgress = new ObservedPropertySimplePU(false, this, 'isShowLoadingProgress');
         this.pickerCountOnCreation = 0;
         this.__isDisabledByPickerLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPickerLimit');
+        this.__isDeviceLevel = new ObservedPropertySimplePU(true, this, 'isDeviceLevel');
+        this.__isSubMenuExpanded = new ObservedPropertySimplePU(false, this, 'isSubMenuExpanded');
+        this.__isShowBadge = new ObservedPropertySimplePU(false, this, 'isShowBadge');
+        this.__isSwitch = new ObservedPropertySimplePU(false, this, 'isSwitch');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.finalizeConstruction();
@@ -168,6 +178,18 @@ export class AVCastPicker extends ViewPU {
         if (c11.isDisabledByPickerLimit !== undefined) {
             this.isDisabledByPickerLimit = c11.isDisabledByPickerLimit;
         }
+        if (c11.isDeviceLevel !== undefined) {
+            this.isDeviceLevel = c11.isDeviceLevel;
+        }
+        if (c11.isSubMenuExpanded !== undefined) {
+            this.isSubMenuExpanded = c11.isSubMenuExpanded;
+        }
+        if (c11.isShowBadge !== undefined) {
+            this.isShowBadge = c11.isShowBadge;
+        }
+        if (c11.isSwitch !== undefined) {
+            this.isSwitch = c11.isSwitch;
+        }
     }
 
     updateStateVars(b11) {
@@ -193,6 +215,10 @@ export class AVCastPicker extends ViewPU {
         this.__restartUECMessage.purgeDependencyOnElmtId(a11);
         this.__isShowLoadingProgress.purgeDependencyOnElmtId(a11);
         this.__isDisabledByPickerLimit.purgeDependencyOnElmtId(a11);
+        this.__isDeviceLevel.purgeDependencyOnElmtId(a11);
+        this.__isSubMenuExpanded.purgeDependencyOnElmtId(a11);
+        this.__isShowBadge.purgeDependencyOnElmtId(a11);
+        this.__isSwitch.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -215,6 +241,10 @@ export class AVCastPicker extends ViewPU {
         this.__restartUECMessage.aboutToBeDeleted();
         this.__isShowLoadingProgress.aboutToBeDeleted();
         this.__isDisabledByPickerLimit.aboutToBeDeleted();
+        this.__isDeviceLevel.aboutToBeDeleted();
+        this.__isSubMenuExpanded.aboutToBeDeleted();
+        this.__isShowBadge.aboutToBeDeleted();
+        this.__isSwitch.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -369,6 +399,34 @@ export class AVCastPicker extends ViewPU {
 
     set isDisabledByPickerLimit(g1) {
         this.__isDisabledByPickerLimit.set(g1);
+    }
+
+    get isDeviceLevel() {
+        return this.__isDeviceLevel.get();
+    }
+    set isDeviceLevel(h1) {
+        this.__isDeviceLevel.set(h1);
+    }
+ 
+    get isSubMenuExpanded() {
+        return this.__isSubMenuExpanded.get();
+    }
+    set isSubMenuExpanded(i1) {
+        this.__isSubMenuExpanded.set(i1);
+    }
+
+    get isShowBadge() {
+        return this.__isShowBadge.get();
+    }
+    set isShowBadge(i1) {
+        this.__isShowBadge.set(i1);
+    }
+
+    get isSwitch() {
+        return this.__isSwitch.get();
+    }
+    set isSwitch(i1) {
+        this.__isSwitch.set(i1);
     }
 
     aboutToAppear() {
@@ -641,6 +699,149 @@ export class AVCastPicker extends ViewPU {
                             }, Flex);
                             this.highQualityIconBuilder.bind(this)(x8.highQualityParams);
                             Flex.pop();
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                If.create();
+                                if (x8.isConnected && x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
+                                    this.ifElseBranchUpdateFunction(0, () => {
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Flex.create({
+                                                direction: FlexDirection.Row,
+                                                alignItems: ItemAlign.Center
+                                            });
+                                            Flex.onClick(() => {
+                                                this.isDeviceLevel = (x8.castMode === HiPlayCastMode.DEVICE_LEVEL);
+                                                if (!this.isSubMenuExpanded) {
+                                                    this.isShowBadge = false;
+                                                    this.isSwitch = true;
+                                                    this.isMenuShow = false;
+                                                }
+                                            });
+                                            Flex.padding({ top: 2.5, right: 4, bottom: 2.5, left: 4 });
+                                            Flex.margin({ top: 4 });
+                                            Flex.width('auto');
+                                        }, Flex);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Row.create();
+                                            Row.direction(Direction.Ltr);
+                                        }, Row);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            If.create();
+                                            if (x8.castMode === HiPlayCastMode.DEVICE_LEVEL) {
+                                                this.ifElseBranchUpdateFunction(0, () => {
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.speaker_wave_2'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        SymbolGlyph.fontSize(`16vp`);
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                    }, SymbolGlyph);
+                                                });
+                                            }
+                                            else {
+                                                this.ifElseBranchUpdateFunction(1, () => {
+                                                    this.SmallPicIcon.bind(this)(x8.bundleInfo?.pixelData);
+                                                });
+                                            }
+                                        }, If);
+                                        If.pop();
+                                        Row.pop();
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            Row.create();
+                                            Row.direction(Direction.Ltr);
+                                        }, Row);
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            If.create();
+                                            if (x8.castMode === HiPlayCastMode.DEVICE_LEVEL) {
+                                                this.ifElseBranchUpdateFunction(0, () => {
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        Text.create('所有媒体音频');
+                                                        Text.fontWeight('sys.string.ohos_id_text_font_family_regular');
+                                                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        Text.margin({ left: 2, right: 2 });
+                                                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                                                        Text.maxFontScale(this.maxFontSizeScale);
+                                                        Text.wordBreak(WordBreak.BREAK_ALL);
+                                                        Text.maxLines(1);
+
+                                                    }, Text);
+                                                    Text.pop();
+                                                });
+                                            }
+                                            else {
+                                                this.ifElseBranchUpdateFunction(1, () => {
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        Text.create(`正在播放`);
+                                                        Text.fontWeight('sys.string.ohos_id_text_font_family_regular');
+                                                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        Text.margin({ left: 2, right: 2 });
+                                                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                                                        Text.maxFontScale(this.maxFontSizeScale);
+                                                        Text.wordBreak(WordBreak.BREAK_ALL);
+                                                        Text.maxLines(1);
+                                                    }, Text);
+                                                    Text.pop();
+                                                });
+                                            }
+                                        }, If);
+                                        If.pop();
+                                        Row.pop();
+                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            If.create();
+                                            if (this.isShowBadge) {
+                                                this.ifElseBranchUpdateFunction(0, () => {
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        Row.create();
+                                                        Row.direction(Direction.Ltr);
+                                                    }, Row);
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        Badge.create({
+                                                            value: '',
+                                                            style: { badgeSize: 6, BadgeColor:  {'id': -1, 'type': 10001, params: ['sys.color.warning'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'} }
+                                                        });
+                                                        Badge.width(18);
+                                                        Badge.height(16);
+                                                    }, Badge);
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        SymbolGlyph.fontSize('16vp');
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                    }, SymbolGlyph);
+                                                    Badge.pop();
+                                                    Row.pop();
+                                                });
+                                            }
+                                            else {
+                                                this.ifElseBranchUpdateFunction(1, () => {
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        Row.create();
+                                                        Row.direction(Direction.Ltr);
+                                                    }, Row);
+                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                        SymbolGlyph.fontSize('16vp');
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                    }, SymbolGlyph);
+                                                    Row.pop();
+                                                });
+                                            }
+                                        }, If);
+                                        If.pop();
+                                        Flex.pop();
+                                    });
+                                }
+                                else {
+                                    this.ifElseBranchUpdateFunction(1, () => {
+                                    });
+                                }
+                            }, If);
+                            If.pop();
                         });
                     }
                     else {
@@ -705,6 +906,182 @@ export class AVCastPicker extends ViewPU {
         Column.pop();
     }
 
+    castModeMenu(p8) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.padding({ top: 4, bottom: 4 });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create();
+            Flex.width(224);
+            Flex.height(48);
+            Flex.onClick(() => {
+                this.isDeviceLevel = true;
+                if (this.extensionProxy != null) {
+                    this.extensionProxy.send({ 'castMode': HiPlayCastMode.DEVICE_LEVEL });
+                }
+            });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
+            Flex.margin({ left: 4, right: 4 });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ alignItems: ItemAlign.Center });
+            Flex.margin({ left: 12, right: 12 });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('所有媒体音频');
+            Text.fontWeight('sys.string.ohos_id_text_font_family_medium');
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'],
+                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.width('100%');
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxFontScale(this.maxFontSizeScale);
+            Text.wordBreak(WordBreak.BREAK_ALL);
+            Text.maxLines(1);
+        }, Text);
+        Text.pop();
+        Flex.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Row.width(48);
+
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.isDeviceLevel) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.checkmark'],
+                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        SymbolGlyph.fontSize('24vp');
+                        SymbolGlyph.fontColor((this.configurationColorMode !==
+                            ConfigurationColorMode.COLOR_MODE_DARK) ?
+                            [{
+                                'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
+                            }] :
+                            [{
+                                'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
+                            }]);
+                    }, SymbolGlyph);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        Row.pop();
+        Flex.pop();
+        Flex.pop();
+        Flex.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Divider.create();
+            Divider.width(192);
+        }, Divider);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create();
+            Flex.width(224);
+            Flex.height(48);
+            Flex.onClick(() => {
+                this.isDeviceLevel = false;
+                if (this.extensionProxy != null) {
+                    this.extensionProxy.send({ 'castMode': HiPlayCastMode.APP_LEVEL });
+                }
+            });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
+            Flex.margin({ left: 4, right: 4 });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ alignItems: ItemAlign.Center });
+            Flex.margin({ left: 12, right: 12 });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center });
+        }, Flex);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('当前应用媒体');
+            Text.fontWeight('sys.string.ohos_id_text_font_family_medium');
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'],
+                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.width('100%');
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxFontScale(this.maxFontSizeScale);
+            Text.wordBreak(WordBreak.BREAK_ALL);
+            Text.maxLines(1);
+        }, Text);
+        Text.pop();
+        Flex.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Row.width(48);
+            Row.height(48);
+            Row.justifyContent(FlexAlign.End)
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (!this.isDeviceLevel) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.checkmark'],
+                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        SymbolGlyph.fontSize('24vp');
+                        SymbolGlyph.fontColor((this.configurationColorMode !==
+                            ConfigurationColorMode.COLOR_MODE_DARK) ?
+                            [{
+                                'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
+                            }] :
+                            [{
+                                'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
+                            }]);
+                    }, SymbolGlyph);
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        Row.pop();
+        Flex.pop();
+        Flex.pop();
+        Flex.pop();
+        Column.pop();
+    }
+
+    SmallPicIcon(q8, u8 = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.clip(true);
+            Column.size({
+                width: '16vp',
+                height: '16vp'
+            });
+            Column.backgroundColor('#00ffffff');
+            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(q8);
+            Image.size({ width: '100%', height: '100%' });
+            Image.backgroundColor('#00ffffff');
+            Image.draggable(false);
+            Image.interpolation(ImageInterpolation.Medium);
+            Image.autoResize(false);
+        }, Image);
+        Column.pop();
+    }
     buildDisabledPicker(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -866,22 +1243,45 @@ export class AVCastPicker extends ViewPU {
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
-            UIExtensionComponent.bindMenu(this.isMenuShow, { builder: () => { this.deviceMenu.call(this); }}, {
-                placement: Placement.BottomRight,
-                showInSubWindow: false,
-                onDisappear: () => {
-                  this.isMenuShow = false;
-                  this.touchMenuItemIndex = -1;
-                  this.menuShowStateCallback(this.isMenuShow);
-                },
-                onAppear: () => {
+            UIExtensionComponent.bindMenu(this.isSubMenuExpanded ? this.isSubMenuExpanded : this.isMenuShow, this.isSubMenuExpanded ? { builder: () => {
+                this.castModeMenu.call(this);
+            } } : { builder: () => {
+                this.deviceMenu.call(this);
+            } }, {
+            placement: Placement.BottomRight,
+            showInSubWindow: false,
+            enableHoverMode: true,
+            onDisappear: () => {
+                if (this.isSubMenuExpanded) {
+                    this.isSubMenuExpanded = false;
+                    this.isMenuShow = true;
+                    this.menuShowStateCallback(this.isMenuShow);
+                }
+                else {
+                    this.isMenuShow = false;
+                    this.touchMenuItemIndex = -1;
+                    this.menuShowStateCallback(this.isMenuShow);
+                }
+                if (this.isSwitch) {
+                    this.isSubMenuExpanded = true;
+                    this.isSwitch = false;
+                }
+            },
+            onAppear: () => {
+                if (this.isSubMenuExpanded) {
+                    this.isMenuShow = false;
+                    this.touchMenuItemIndex = -1;
+                    this.menuShowStateCallback(this.isMenuShow);
+                }
+                else {
                     if (this.extensionProxy != null && this.pickerClickTime !== -1) {
                         this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
                         this.pickerClickTime = -1;
                     }
                     this.menuShowStateCallback(this.isMenuShow);
                 }
-            });
+            }
+        });
             UIExtensionComponent.onRelease((releaseCode) => {
                 console.error(TAG, `onRelease code ${releaseCode}`);
                 if (releaseCode === 1) {

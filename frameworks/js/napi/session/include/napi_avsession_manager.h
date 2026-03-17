@@ -47,6 +47,7 @@ private:
     static napi_value CastAudio(napi_env env, napi_callback_info info);
     static napi_value SendSystemAVKeyEvent(napi_env env, napi_callback_info info);
     static napi_value SendSystemControlCommand(napi_env env, napi_callback_info info);
+    static napi_value SendSystemCommonCommand(napi_env env, napi_callback_info info);
     static napi_value StartCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value StopCastDiscovery(napi_env env, napi_callback_info info);
     static napi_value SetDiscoverable(napi_env env, napi_callback_info info);
@@ -81,6 +82,7 @@ private:
     static napi_status OnServiceDie(napi_env env, napi_value callback);
     static napi_status OnRemoteDistributedSessionChange(napi_env env, napi_value callback);
     static napi_status OnDeviceStateChanged(napi_env env, napi_value callback);
+    static napi_status OnSystemCommonEvent(napi_env env, napi_value callback);
 
     static napi_status OffSessionCreate(napi_env env, napi_value callback);
     static napi_status OffSessionDestroy(napi_env env, napi_value callback);
@@ -92,6 +94,7 @@ private:
     static napi_status OffServiceDie(napi_env env, napi_value callback);
     static napi_status OffRemoteDistributedSessionChange(napi_env env, napi_value callback);
     static napi_status OffDeviceStateChanged(napi_env env, napi_value callback);
+    static napi_status OffSystemCommonEvent(napi_env env, napi_value callback);
 
     static void HandleServiceDied();
 

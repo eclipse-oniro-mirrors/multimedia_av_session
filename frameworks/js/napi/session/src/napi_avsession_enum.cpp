@@ -125,6 +125,32 @@ static napi_value ExportSkipIntervals(napi_env env)
     return result;
 }
 
+static napi_value ExportFastForwardSkipIntervals(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "SECONDS_10", AVMetaData::SECONDS_10);
+    (void)SetNamedProperty(env, result, "SECONDS_15", AVMetaData::SECONDS_15);
+    (void)SetNamedProperty(env, result, "SECONDS_30", AVMetaData::SECONDS_30);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportRewindSkipIntervals(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+
+    (void)SetNamedProperty(env, result, "SECONDS_10", AVMetaData::SECONDS_10);
+    (void)SetNamedProperty(env, result, "SECONDS_15", AVMetaData::SECONDS_15);
+    (void)SetNamedProperty(env, result, "SECONDS_30", AVMetaData::SECONDS_30);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 static napi_value ExportAVCastCategory(napi_env env)
 {
     napi_value result = nullptr;
@@ -450,6 +476,24 @@ static napi_value ExportSessionCategory(napi_env env)
     (void)SetNamedProperty(env, result, "CATEGORY_NOT_ACTIVE",
         static_cast<int32_t>(SessionCategory::CATEGORY_NOT_ACTIVE));
     (void)SetNamedProperty(env, result, "CATEGORY_ALL", static_cast<int32_t>(SessionCategory::CATEGORY_ALL));
+    (void)SetNamedProperty(env, result, "CATEGORY_HIPLAY", static_cast<int32_t>(SessionCategory::CATEGORY_HIPLAY));
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
+static napi_value ExportBackgroundPlayMode(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_object(env, &result);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+
+    (void)SetNamedProperty(env, result, "ENABLE_BACKGROUND_PLAY",
+        static_cast<int32_t>(BackgroundPlayMode::ENABLE_BACKGROUND_PLAY));
+    (void)SetNamedProperty(env, result, "DISABLE_BACKGROUND_PLAY",
+        static_cast<int32_t>(BackgroundPlayMode::DISABLE_BACKGROUND_PLAY));
 
     napi_object_freeze(env, result);
     return result;
@@ -464,6 +508,8 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DeviceType", ExportDeviceType(env)),
         DECLARE_NAPI_PROPERTY("LoopMode", ExportLoopMode(env)),
         DECLARE_NAPI_PROPERTY("SkipIntervals", ExportSkipIntervals(env)),
+        DECLARE_NAPI_PROPERTY("FastForwardSkipIntervals", ExportFastForwardSkipIntervals(env)),
+        DECLARE_NAPI_PROPERTY("RewindSkipIntervals", ExportRewindSkipIntervals(env)),
         DECLARE_NAPI_PROPERTY("PlaybackState", ExportPlaybackState(env)),
         DECLARE_NAPI_PROPERTY("CallState", ExportAVCallState(env)),
         DECLARE_NAPI_PROPERTY("AVSessionErrorCode", ExportAVSessionErrorCode(env)),
@@ -474,7 +520,8 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DecoderType", ExportDecoderType(env)),
         DECLARE_NAPI_PROPERTY("ResolutionLevel", ExportResolutionLevel(env)),
         DECLARE_NAPI_PROPERTY("CallerType", ExportCallerType(env)),
-        DECLARE_NAPI_PROPERTY("SessionCategory", ExportSessionCategory(env))
+        DECLARE_NAPI_PROPERTY("SessionCategory", ExportSessionCategory(env)),
+        DECLARE_NAPI_PROPERTY("BackgroundPlayMode", ExportBackgroundPlayMode(env))
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

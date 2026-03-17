@@ -34,6 +34,75 @@ namespace OHOS::AVSession {
 class AVSessionUtils {
 public:
     static constexpr const int32_t MAX_FILE_SIZE = 4 * 1024 * 1024;
+ 
+    static void WritePairToFile(const std::pair<std::string, int32_t>& castPair,
+        const std::string& fileDir, const std::string& fileName)
+    {
+        char realPath[PATH_MAX] = { 0x00 };
+        if (realpath(fileDir.c_str(), realPath) == nullptr
+            && !OHOS::ForceCreateDirectory(fileDir)) {
+            SLOGE("WritePairToFile check and create path failed %{public}s", fileDir.c_str());
+            return;
+        }
+        std::string filePath = fileDir + fileName;
+ 
+        size_t strLen = castPair.first.size();
+        if (strLen > static_cast<size_t>(MAX_FILE_SIZE) || strLen == 0) {
+            SLOGE("error, dataSize larger than %{public}d or invalid", MAX_FILE_SIZE);
+            return;
+        }
+ 
+        std::ofstream ofile(filePath.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);
+        if (!ofile.is_open()) {
+            SLOGE("open file error");
+            return;
+        }
+ 
+        ofile.write(reinterpret_cast<char*>(&strLen), sizeof(size_t));
+ 
+        ofile.write(castPair.first.c_str(), strLen);
+ 
+        int32_t mode = castPair.second;
+        ofile.write(reinterpret_cast<char*>(&mode), sizeof(int32_t));
+ 
+        ofile.close();
+    }
+ 
+    static bool ReadPairFromFile(std::pair<std::string, int32_t>& castPair,
+        const std::string& fileDir, const std::string& fileName)
+    {
+        std::string filePath = fileDir + fileName;
+ 
+        char realPath[PATH_MAX] = { 0x00 };
+        if (realpath(fileDir.c_str(), realPath) == nullptr) {
+            SLOGE("check path fail:%{public}s", fileDir.c_str());
+            return false;
+        }
+ 
+        std::ifstream ifile(filePath.c_str(), std::ios::binary | std::ios::in);
+        if (!ifile.is_open()) {
+            SLOGE("open file error");
+            return false;
+        }
+ 
+        size_t strLen;
+        ifile.read(reinterpret_cast<char*>(&strLen), sizeof(size_t));
+        SLOGD("BufferSize=%{public}zu", strLen);
+        if (strLen > static_cast<size_t>(MAX_FILE_SIZE) || strLen == 0) {
+            SLOGE("error, dataSize larger than %{public}d or invalid", MAX_FILE_SIZE);
+            ifile.close();
+            return false;
+        }
+ 
+        std::vector<char> strBuffer(strLen);
+        ifile.read(strBuffer.data(), strLen);
+        castPair.first = std::string(strBuffer.data(), strLen);
+ 
+        ifile.read(reinterpret_cast<char*>(&castPair.second), sizeof(int32_t));
+ 
+        ifile.close();
+        return true;
+    }
 
     static void WriteImageToFile(const std::shared_ptr<AVSessionPixelMap>& innerPixelMap,
         const std::string& fileDir, const std::string& fileName)
@@ -158,6 +227,11 @@ public:
         return FILE_SUFFIX;
     }
     
+    static const char* GetPairFileSuffix()
+    {
+        return PAIR_FILE_SUFFIX;
+    }
+
     static std::string GetAnonySessionId(const std::string& sessionId)
     {
         constexpr size_t PRE_LEN = 3;
@@ -318,6 +392,7 @@ private:
     static constexpr const char* FIXED_PATH_NAME = "/av_session/";
     static constexpr const char* PUBLIC_PATH_NAME = "public";
     static constexpr const char* FILE_SUFFIX = ".image.dat";
+    static constexpr const char* PAIR_FILE_SUFFIX = ".dat";
     static constexpr const char* CAST_PREFIX = "cast_";
     static constexpr const int32_t DEVICE_ID_MIN_LEN = 10;
 };

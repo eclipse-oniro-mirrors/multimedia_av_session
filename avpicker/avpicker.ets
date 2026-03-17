@@ -94,6 +94,11 @@ enum AVCastPickerColorMode {
   LIGHT = 2
 }
 
+enum HiPlayCastMode {
+  DEVICE_LEVEL = 1,
+  APP_LEVEL = 2
+}
+
 interface HighQualityParams {
   iconLeft: string,
   iconRight: string,
@@ -103,6 +108,11 @@ interface TextParams {
   currentApp?: string,
   allMediaAudio?: string,
   playingNow?: string,
+}
+
+export interface ShowingBundleTS {
+  pixelData?: image.PixelMap | undefined;
+  appName?: string | undefined;
 }
 
 /**
@@ -121,6 +131,9 @@ export interface AVCastPickerDeviceInfo {
   highQualityParams?: HighQualityParams,
   fromCall?: boolean,
   deviceSubName?: string,
+  supportCastMode?: number,
+  castMode?: number,
+  bundleInfo?: ShowingBundleTS;
 }
 
 @Component
@@ -200,7 +213,7 @@ export struct AVCastPicker {
   @State deviceInfoType: string = '';
 
   /**
-   * Max Font and graphic magnification. 
+   * Max Font and graphic magnification.
    */
   @State maxFontSizeScale: number = 1;
 
@@ -216,6 +229,10 @@ export struct AVCastPicker {
   @State isShowLoadingProgress: boolean = false;
   private pickerCountOnCreation: number = 0;
   @State isDisabledByPickerLimit: boolean = false;
+  @State isDeviceLevel: boolean = true;
+  @State isSubMenuExpanded: boolean = false;
+  @State isShowBadge: boolean = false;
+  @State isSwitch: boolean = false;
 
   private static currentPickerCount: number = 0;
 
@@ -354,6 +371,80 @@ export struct AVCastPicker {
                   .padding({top: 2.5, right: 4, bottom: 2.5, left: 4})
                   .margin({top: 4})
                   .width('auto')
+                   
+                  if (item.isConnected && item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
+                    Flex({direction.FlexDirection.Row, alignItems.ItemAlign.Center}) {
+                      Row() {
+                        if (item.curCastMode == 1) {
+                          SymbolGlyph($r('sys.symbol.speaker_wave_2'))
+                            .fontSize(`16vp`)
+                            .fontColor($r('sys.color.font_primary'))
+                        } else {
+                          this.SmallPicIcon(item.bundleInfo?.pixelData)
+                        }
+                      }
+                      .direction(Direction.Ltr)
+ 
+                      Row() {
+                        if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
+                          Text('所有媒体音频')
+                          .fontWeight('sys.string.ohos_id_text_font_family_regular')
+                          .fontSize($r('sys.float.ohos_id_text_size_body3'))
+                          .margin({left: 2, right: 2})
+                          .textOverflow({ overflow: TextOverflow.Ellipsis })
+                          .maxFontScale(this.maxFontSizeScale)
+                          .wordBreak(WordBreak.BREAK_ALL)
+                          .maxLines(1)
+                      } else {
+                        Text(`正在播放“${item.bundleInfo?.appName ?? ''}”`)
+                          .fontWeight('sys.string.ohos_id_text_font_family_regular')
+                          .fontSize($r('sys.float.ohos_id_text_size_body3'))
+                          .margin({left: 2, right: 2})
+                          .textOverflow({ overflow: TextOverflow.Ellipsis })
+                          .maxFontScale(this.maxFontSizeScale)
+                          .wordBreak(WordBreak.BREAK_ALL)
+                          .maxLines(1)
+                      }
+
+                    }
+                    .direction(Direction.Ltr)
+
+                    if (this.isShowBadge) {
+                      Row(){
+                        Badge({
+                          value: '',
+                          style: { badgeSize: 6, badgeColor: $r('sys.color.warning') }
+                        }) {
+                          SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
+                            .fontSize('16vp')
+                            .fontColor($r('sys.color.font_primary'))
+                        }
+                        .width(18)
+                        .height(16)
+                      }
+                      .direction(Direction.Ltr) 
+                    } else {
+                      Row() {
+                        SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
+                          .fontSize('16vp')
+                          .fontColor($r('sys.color.font_primary'))
+                      }
+                      .direction(Direction.Ltr)
+                    }
+                  }
+                  .onClick(() => {
+                    this.isDeviceLevel = (item.castMode === HiPlayCastMode.DEVICE_LEVEL)
+                    if (!this.isSubMenuExpanded) {
+                      this.isShowBadge =  false;
+                      this.isSwitch = true;
+                      this.isMenuShow = false;
+                    }
+                  })
+                  .padding({top: 2.5, right: 4, bottom: 2.5, left: 4})
+                  .margin({top: 4})
+                  .width('auto')
+                }
+
                 }
               }
               .width(this.isPc ? 254 : 144)
@@ -412,6 +503,110 @@ export struct AVCastPicker {
     .borderRadius(this.isPc ? 8 : 20)
   }
 
+  @Builder
+  castModeMenu() {
+    Column() {
+      Flex() {
+        Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
+          Flex({ alignItems: ItemAlign.Center}){
+            Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center}) {
+              Text('所有媒体')
+                .fontWeight('sys.string.ohos_id_text_font_family_medium')
+                .fontSize($r('sys.float.ohos_id_text_size_body1'))
+                .width('100%')
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .maxFontScale(this.maxFontSizeScale)
+                .wordBreak(WordBreak.BREAK_ALL)
+                .maxLines(1)
+            }
+ 
+            Row() {
+              if (this.isDeviceLevel) {
+                SymbolGlyph($r('sys.symbol.checkmark'))
+                  .fontSize('24vp')
+                  .fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+                    [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+              }
+            }
+            .width(48)
+            .height(48)
+            .justifyContent(FlexAlign.End)
+          }
+          .margin({ left: 12, right: 12 })
+        }
+        .margin({ left: 4, right: 4 })
+      }
+      .width(224)
+      .height(48)
+      .onClick(() => {
+        this.isDeviceLevel = true
+        if (this.extensionProxy != null) {
+          this.extensionProxy.send({'castMode': HiPlayCastMode.DEVICE_LEVEL});
+        }
+      })
+
+      Divider().width(192)
+
+       Flex() {
+        Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems.Center }) {
+          Flex({ alignItems:ItemAlign.Center }) {
+            Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center}) {
+              Text('当前应用媒体')
+                .fontWeight('sys.string.ohos_id_text_font_family_medium')
+                .fontSize($r('sys.float.ohos_id_text_size_body1'))
+                .width('100%')
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .maxFontScale(this.maxFontSizeScale)
+                .wordBreak(WordBreak.BREAK_ALL)
+                .maxLines(1)
+            }
+
+            Row() {
+              if (!this.isDeviceLevel) {
+                SymbolGlyph($r('sys.symbol.checkmark'))
+                  .fontSize('24vp')
+                  .fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+                    [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+              }
+            }
+            .width(48)
+            .height(48)
+            .justifyContent(FlexAlign.End)
+          }
+          .margin({ left: 12, right: 12 })
+        }
+        .margin({ left: 4, right: 4 })
+      }
+      .width(224)
+      .height(48)
+      .onClick(() => {
+        this.isDeviceLevel = false
+        if (this.extensionProxy != null) {
+           this.extensionProxy.send({'castMode': HiPlayCastMode.APP_LEVEL});
+        }
+      })
+    }
+    .padding({ top: 4, bottom: 4})
+  }
+
+@Builder SmallPicIcon(appIcon : image.PixelMap | undefined) {
+  Column() {
+    Image(appIcon)
+      .size({ width: '100%', height: '100%' })
+      .backgroundColor('#00ffffff')
+      .draggable(false)
+      .interpolation(ImageInterpolation.Medium)
+      .autoResize(false);
+  }
+  .clip(true)
+  .size({
+    width: '16vp',
+    height: '16vp'
+  })
+  .backgroundColor('#00ffffff')
+  .borderRadius($r('sys.float.ohos_id_corner_radius_default_xs'))
+}
+      
   @Builder
   private buildDisabledPicker() {
     Column();
@@ -533,20 +728,40 @@ export struct AVCastPicker {
           }
         })
         .size({ width: '100%', height: '100%' })
-        .bindMenu(this.isMenuShow, this.deviceMenu(), {
+        .bindMenu(
+          this.isSubMenuExpanded? this.isSubMenuExpanded : this.isMenuShow,
+          this.isSubMenuExpanded? this.castModeMenu() : this.deviceMenu(),
+          {
           placement: Placement.BottomRight,
           showInSubWindow: false,
+          enableHoverMode: true,
           onDisappear: () => {
-            this.isMenuShow = false;
-            this.touchMenuItemIndex = -1;
-            this.menuShowStateCallback(this.isMenuShow);
+            if (this.isSubMenuExpanded) {
+              this.isSubMenuExpanded = false;
+              this.isMenuShow = true;
+              this.menuShowStateCallback(this.isMenuShow);
+            } else {
+              this.isMenuShow = false;
+              this.touchMenuItemIndex = -1;
+              this.menuShowStateCallback(this.isMenuShow);
+            }
+            if (this.isSwitch) {
+              this.isSubMenuExpanded = true;
+              this.isSwitch = false;
+              }
           },
           onAppear: () => {
-            if (this.extensionProxy != null && this.pickerClickTime !== -1) {
-                this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime});
+            if (this.isSubMenuExpanded) {
+              this.isMenuShow = false;
+              this.touchMenuItemIndex = -1;
+              this.menuShowStateCallback(this.isMenuShow);
+            } else {
+              if (this.extensionProxy != null && this.pickerClickTime !== -1) {
+                this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
                 this.pickerClickTime = -1;
+              }
+              this.menuShowStateCallback(this.isMenuShow);
             }
-            this.menuShowStateCallback(this.isMenuShow);
           }
         })
         .onRelease((releaseCode) => {
@@ -570,9 +785,6 @@ export struct AVCastPicker {
     .accessibilityLevel('yes')
     .accessibilityText(this.accessibilityAudioControlStr)
     .onClick(() => {
-        if (this.extensionProxy == null) {
-          return; 
-        }
         if (this.needToRestart) {
           this.needToRestart = false;
           this.restartUECMessage += 1;
@@ -584,11 +796,13 @@ export struct AVCastPicker {
         let isExtMenuScene: boolean = isCalling && (hasNoDevices || hasOnlySpeakerAndEarpiece);
         let isPanelForMedia: boolean = !isCalling &&
           (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
-          this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);        
+            this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
         if (isExtMenuScene || isPanelForMedia) {
           this.isMenuShow = false;
           this.touchMenuItemIndex = -1;
-          this.extensionProxy.send({'clickEvent': true});
+          if (this.extensionProxy != null) {
+            this.extensionProxy.send({'clickEvent': true});
+          }
         } else {
           this.isMenuShow = !this.isMenuShow;
           if (this.isMenuShow) {

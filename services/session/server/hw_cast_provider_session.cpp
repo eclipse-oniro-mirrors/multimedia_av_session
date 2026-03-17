@@ -89,6 +89,25 @@ bool HwCastProviderSession::AddDevice(const DeviceInfo deviceInfo, uint32_t spid
     return (ret == 0) ? true : false;
 }
 
+void HwCastProviderSession::SendCommandArgsToCast(const int32_t commandType, const std::string& params)
+{
+    std::string parStr = params;
+    switch (commandType) {
+        case CAST_MODE_CHANGE_COMMAND:
+            SLOGI("SendCommandArgsToCast: cast mode change");
+            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_CONFIG_MODE, parStr);
+            break;
+        case BYPASS_NUM_COMMAND:
+            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_BYPASS_DATA, parStr);
+            break;
+        case QUERY_NUM_COMMAND:
+            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_QUERY_REQUEST, parStr);
+            break;
+        default:
+            break;
+    }
+}
+
 bool HwCastProviderSession::RemoveDevice(std::string deviceId, const DeviceRemoveAction deviceRemoveAction)
 {
     SLOGI("RemoveDevice in HwCastProviderSession, device remove action %{public}d",
@@ -323,6 +342,25 @@ void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const st
     int32_t castEventId = static_cast<int>(eventId);
     if (castEventId >= eventIdStart && castEventId <= eventIdEnd) {
         SLOGI("trigger the OnCastEventRecv");
+    } else if (castEventId >= hiplayEventIdStart && castEventId <= hiplayEventIdEnd) {
+        OnHiplayEventRecv(castEventId, jsonParam);
+    }
+}
+ 
+void HwCastProviderSession::OnHiplayEventRecv(const int32_t eventId, const std::string& jsonParam)
+{
+    switch (eventId) {
+        case HIPLAY_CONFIG_MODE_RESULT:
+            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_CONFIG_MODE_DATA, jsonParam);
+            break;
+        case HIPLAY_NUM_BYPASS_DATA:
+            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_BYPASS_DATA, jsonParam);
+            break;
+        case HIPLAY_NUM_QUERY_RESPONSE:
+            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_QUERY_RESPONSE, jsonParam);
+            break;
+        default:
+            break;
     }
 }
 }

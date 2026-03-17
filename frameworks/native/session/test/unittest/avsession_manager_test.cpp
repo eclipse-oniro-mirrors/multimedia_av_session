@@ -446,11 +446,6 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     SLOGI("GetHistoricalSessionDescriptors001 get historicalSession size %{public}d", static_cast<int>(size));
     SLOGI("GetHistoricalSessionDescriptors need session in sessionListForFront");
     EXPECT_EQ(size >= 0, true);
-    if (size >= 1) {
-        EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
-        EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), tempBundleNameForHis);
-        EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), tempAbilityNameForHis);
-    }
     session->Destroy();
     descriptors.clear();
     sleep(1);
@@ -460,6 +455,11 @@ HWTEST_F(AVSessionManagerTest, GetHistoricalSessionDescriptors001, TestSize.Leve
     SLOGI("GetHistoricalSessionDescriptors001 get size after destroy %{public}d", static_cast<int>(reSize));
     // historical descriptors list may push default session when no session alive
     EXPECT_EQ(reSize >= size, true);
+    if (size >= 1) {
+        EXPECT_EQ(descriptors[0].sessionType_, AVSession::SESSION_TYPE_AUDIO);
+        EXPECT_EQ(descriptors[0].elementName_.GetBundleName(), tempBundleNameForHis);
+        EXPECT_EQ(descriptors[0].elementName_.GetAbilityName(), tempAbilityNameForHis);
+    }
     SLOGI("GetHistoricalSessionDescriptors001 end");
 }
 
@@ -800,5 +800,38 @@ HWTEST_F(AVSessionManagerTest, SendSystemControlCommand003, TestSize.Level1)
 
     SLOGI("SendSystemControlCommand003 end");
 }
-} // namespace AVSession
-} // namespace OHOS
+
+/**
+* @tc.name: SendSystemCommonCommand001
+* @tc.desc: valid command and args
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand001, TestSize.Level1)
+{
+    SLOGI("SendSystemControlCommand001 begin");
+    std::string commonCommand = "";
+    AAFwk::WantParams commandArgs;
+    auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("SendSystemControlCommand001 end");
+}
+ 
+/**
+* @tc.name: SendSystemCommonCommand002
+* @tc.desc: valid command and args
+* @tc.type: FUNC
+* @tc.require: AR000H31JB
+*/
+HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand002, TestSize.Level1)
+{
+    SLOGI("SendSystemControlCommand002 begin");
+    std::string commonCommand = "";
+    AAFwk::WantParams commandArgs;
+    auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    sleep(1);
+    SLOGI("SendSystemControlCommand002 end");
+}
+}
+}

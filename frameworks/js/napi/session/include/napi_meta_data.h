@@ -98,6 +98,12 @@ private:
     static napi_status GetSkipIntervals(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetSkipIntervals(napi_env env, const AVMetaData& in, napi_value& out);
 
+    static napi_status GetFastForwardSkipIntervals(napi_env env, napi_value in, AVMetaData& out);
+    static napi_status SetFastForwardSkipIntervals(napi_env env, const AVMetaData& in, napi_value& out);
+
+    static napi_status GetRewindSkipIntervals(napi_env env, napi_value in, AVMetaData& out);
+    static napi_status SetRewindSkipIntervals(napi_env env, const AVMetaData& in, napi_value& out);
+
     static napi_status GetFilter(napi_env env, napi_value in, AVMetaData& out);
     static napi_status SetFilter(napi_env env, const AVMetaData& in, napi_value& out);
 

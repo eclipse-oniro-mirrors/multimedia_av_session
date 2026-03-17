@@ -59,10 +59,13 @@ public:
         META_KEY_DRM_SCHEMES = 23,
         META_KEY_BUNDLE_ICON = 24,
         META_KEY_SINGLE_LYRIC_TEXT = 25,
-        META_KEY_MAX = 26
+        META_KEY_FAST_FORWARD_SKIP_INTERVALS = 26,
+        META_KEY_REWIND_SKIP_INTERVALS = 27,
+        META_KEY_MAX = 28
     };
 
     enum {
+        SECONDS_ZERO = 0,
         SECONDS_10 = 10,
         SECONDS_15 = 15,
         SECONDS_30 = 30
@@ -161,6 +164,12 @@ public:
     void SetSkipIntervals(int32_t assetId);
     int32_t GetSkipIntervals() const;
 
+    void SetFastForwardSkipIntervals(int32_t fastForwardSkipIntervals);
+    int32_t GetFastForwardSkipIntervals() const;
+
+    void SetRewindSkipIntervals(int32_t rewindSkipIntervals);
+    int32_t GetRewindSkipIntervals() const;
+
     void SetFilter(int32_t filter);
     int32_t GetFilter() const;
     
@@ -219,7 +228,9 @@ public:
         META_KEY_DISPLAY_TAGS,
         META_KEY_DRM_SCHEMES,
         META_KEY_BUNDLE_ICON,
-        META_KEY_SINGLE_LYRIC_TEXT
+        META_KEY_SINGLE_LYRIC_TEXT,
+        META_KEY_FAST_FORWARD_SKIP_INTERVALS,
+        META_KEY_REWIND_SKIP_INTERVALS
     };
 
 private:
@@ -246,6 +257,8 @@ private:
     std::string previousAssetId_ = "";
     std::string nextAssetId_ = "";
     int32_t skipIntervals_ = SECONDS_15;
+    int32_t fastForwardSkipIntervals_ = SECONDS_ZERO;
+    int32_t rewindSkipIntervals_ = SECONDS_ZERO;
     int32_t filter_ = 2;
     mutable int32_t mediaLength_ = 0;
     mutable int32_t avQueueLength_ = 0;
@@ -280,6 +293,8 @@ private:
     static bool CheckDrmSchemesChange(const AVMetaData& from, const AVMetaData& to);
     static bool CheckBundleIconChange(const AVMetaData& from, const AVMetaData& to);
     static bool CheckSingleLyricTextChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckFastForwardSkipIntervalsChange(const AVMetaData& from, const AVMetaData& to);
+    static bool CheckRewindSkipIntervalsChange(const AVMetaData& from, const AVMetaData& to);
     using CheckActionType = bool(*)(const AVMetaData& from, const AVMetaData& to);
     static inline CheckActionType checkActions[META_KEY_MAX] = {
         &AVMetaData::CheckAssetIdChange,
@@ -307,7 +322,9 @@ private:
         &AVMetaData::CheckDisplayTagsChange,
         &AVMetaData::CheckDrmSchemesChange,
         &AVMetaData::CheckBundleIconChange,
-        &AVMetaData::CheckSingleLyricTextChange
+        &AVMetaData::CheckSingleLyricTextChange,
+        &AVMetaData::CheckFastForwardSkipIntervalsChange,
+        &AVMetaData::CheckRewindSkipIntervalsChange
     };
 
     static void CloneAssetId(const AVMetaData& from, AVMetaData& to);
@@ -336,7 +353,8 @@ private:
     static void CloneDrmSchemes(const AVMetaData& from, AVMetaData& to);
     static void CloneBundleIcon(const AVMetaData& from, AVMetaData& to);
     static void CloneSingleLyricText(const AVMetaData& from, AVMetaData& to);
-
+    static void CloneFastForwardSkipIntervals(const AVMetaData& from, AVMetaData& to);
+    static void CloneRewindSkipIntervals(const AVMetaData& from, AVMetaData& to);
     using CloneActionType = void(*)(const AVMetaData& from, AVMetaData& to);
     static inline CloneActionType cloneActions[META_KEY_MAX] = {
         &AVMetaData::CloneAssetId,
@@ -364,7 +382,9 @@ private:
         &AVMetaData::CloneDisplayTags,
         &AVMetaData::CloneDrmSchemes,
         &AVMetaData::CloneBundleIcon,
-        &AVMetaData::CloneSingleLyricText
+        &AVMetaData::CloneSingleLyricText,
+        &AVMetaData::CloneFastForwardSkipIntervals,
+        &AVMetaData::CloneRewindSkipIntervals
     };
 
     int8_t minImgSize_ = 2;

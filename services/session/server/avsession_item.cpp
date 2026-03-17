@@ -41,6 +41,8 @@
 #include "avsession_whitelist_config_manager.h"
 #include <filesystem>
 
+#include <cinttypes>
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
@@ -1002,6 +1004,21 @@ void AVSessionItem::HandleDesktopLyricStateChanged(const DesktopLyricState &stat
     }
 }
 
+int32_t AVSessionItem::SetBackgroundPlayMode(int32_t mode)
+{
+    SLOGI("SetBackgroundPlayMode %{public}d", mode);
+    playMode_.store(mode);
+    if (serviceCallbackForBgPlayModeChange_) {
+        serviceCallbackForBgPlayModeChange_(GetSessionId(), mode);
+    }
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionItem::GetBackgroundPlayMode()
+{
+    return playMode_.load();
+}
+
 int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability)
 {
     {
@@ -1874,7 +1891,7 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
 
 void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 {
-    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}lld", castHandle_);
+    SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}" PRId64, castHandle_);
     if (isNeedRemove) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -2163,7 +2180,7 @@ void AVSessionItem::UnRegisterDeviceStateCallback()
 
 void AVSessionItem::StopCastSession()
 {
-    SLOGI("Stop cast session process with castHandle: %{public}lld", castHandle_);
+    SLOGI("Stop cast session process with castHandle: %{public}" PRId64, castHandle_);
     int64_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
     DoContinuousTaskUnregister();
     if (ret != AVSESSION_ERROR) {
@@ -2607,8 +2624,12 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const Com
     if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
         AVControlCommand cmd;
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-        cmd.SetRewindTime(metaData_.GetSkipIntervals());
-        cmd.SetForwardTime(metaData_.GetSkipIntervals());
+        cmd.SetRewindTime(metaData_.GetRewindSkipIntervals() != 0
+            ? metaData_.GetRewindSkipIntervals()
+            : metaData_.GetSkipIntervals());
+        cmd.SetForwardTime(metaData_.GetFastForwardSkipIntervals() != 0
+            ? metaData_.GetFastForwardSkipIntervals()
+            : metaData_.GetSkipIntervals());
         cmd.SetCommandInfo(cmdInfo);
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
     } else {
@@ -3064,6 +3085,13 @@ void AVSessionItem::SetServiceCallbackForAncoStart(
     serviceCallbackForAncoStart_ = callback;
 }
 
+void AVSessionItem::SetServiceCallbackForBgPlayModeChange(
+    const std::function<void(std::string, int32_t)>& callback)
+{
+    SLOGI("SetServiceCallbackForBgPlayModeChange in");
+    serviceCallbackForBgPlayModeChange_ = callback;
+}
+
 void AVSessionItem::HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("output device change, connection state is %{public}d", connectionState);
@@ -3284,6 +3312,14 @@ bool AVSessionItem::IsCasting()
         AVRouter::GetInstance().IsInMirrorToStreamState())) {
         return true;
     }
+#endif
+    return false;
+}
+
+bool AVSessionItem::IsCastConnected()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        return IsCasting() && AVRouter::GetInstance().IsRemoteCasting();
 #endif
     return false;
 }

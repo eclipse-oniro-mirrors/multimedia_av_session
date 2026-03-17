@@ -48,6 +48,7 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
     { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
     { "deviceStateChanged", { OnDeviceStateChanged, OffDeviceStateChanged } },
+    { "systemCommonEvent", { OnSystemCommonEvent, OffSystemCommonEvent } },
 };
 
 std::map<DistributedSessionType, std::pair<NapiAVSessionManager::OnEventHandlerType,
@@ -112,6 +113,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("off", OffEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemAVKeyEvent", SendSystemAVKeyEvent),
         DECLARE_NAPI_STATIC_FUNCTION("sendSystemControlCommand", SendSystemControlCommand),
+        DECLARE_NAPI_STATIC_FUNCTION("sendSystemCommonCommand", SendSystemCommonCommand),
         DECLARE_NAPI_STATIC_FUNCTION("startCastDeviceDiscovery", StartCastDiscovery),
         DECLARE_NAPI_STATIC_FUNCTION("stopCastDeviceDiscovery", StopCastDiscovery),
         DECLARE_NAPI_STATIC_FUNCTION("startDeviceLogging", StartDeviceLogging),
@@ -298,7 +300,7 @@ napi_value NapiAVSessionManager::GetSessionDescriptors(napi_env env, napi_callba
             CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid arguments",
                 NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
             CHECK_ARGS_RETURN_VOID(context, (context->category_ >= SessionCategory::CATEGORY_ACTIVE
-                && context->category_ <= SessionCategory::CATEGORY_ALL),
+                && context->category_ <= SessionCategory::CATEGORY_HIPLAY),
                 "wrong session category", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         }
     };
@@ -1297,6 +1299,40 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
     return NapiAsyncWork::Enqueue(env, context, "SendSystemControlCommand", executor);
 }
 
+napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::SendSystemCommonCommand");
+    struct ConcreteContext : public ContextBase {
+        std::string commonCommand_;
+        AAFwk::WantParams commandArgs_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "Invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->commonCommand_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get common command failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->commandArgs_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get command args failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_SEND_SYSTEM_COMMON_COMMAND_TASK_ID;
+ 
+    auto executor = [context]() {
+        int32_t ret = AVSessionManager::GetInstance().SendSystemCommonCommand(context->commonCommand_,
+            context->commandArgs_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->errMessage = "SendSystemCommonCommand failed : native server exception";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+ 
+    return NapiAsyncWork::Enqueue(env, context, "SendSystemCommonCommand", executor);
+}
+
 napi_value NapiAVSessionManager::StartCastDiscovery(napi_env env, napi_callback_info info)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -1821,6 +1857,14 @@ napi_status NapiAVSessionManager::OnDeviceStateChanged(napi_env env, napi_value 
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
 
+napi_status NapiAVSessionManager::OnSystemCommonEvent(napi_env env, napi_value callback)
+{
+    SLOGI("OnSystemCommonEvent AddCallback");
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
+    return listener_->AddCallback(env, NapiSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback);
+}
+
+
 void NapiAVSessionManager::HandleServiceDied()
 {
     std::string callBackName = "NapiAVSessionManager::HandleServiceDied";
@@ -1903,6 +1947,13 @@ napi_status NapiAVSessionManager::OffDeviceStateChanged(napi_env env, napi_value
     SLOGI("OffDeviceStateChanged RemoveCallback");
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
+}
+
+napi_status NapiAVSessionManager::OffSystemCommonEvent(napi_env env, napi_value callback)
+{
+    SLOGI("OffSystemCommonEvent RemoveCallback");
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
+    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback);
 }
 
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)

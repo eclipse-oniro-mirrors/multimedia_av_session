@@ -68,10 +68,28 @@ int32_t MigrateAVSessionProxy::HandlePlayPreviousForSuper(const std::string& pla
     return AVSESSION_SUCCESS;
 }
 
-int32_t MigrateAVSessionProxy::HandleToggleFavoriteForSuper(const std::string& mediaId, const std::string& playerId)
+int32_t MigrateAVSessionProxy::HandleToggleFavoriteForSuper(const std::string& playerId, const std::string& mediaId)
 {
     SLOGI("HandleToggleFavoriteForSuper:%{public}s|%{public}s pass",
         SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str(), mediaId.c_str());
+    CHECK_AND_RETURN_RET_LOG(
+        SendControlCommandMsgForSuper(SYNC_MEDIASESSION_CALLBACK_ON_TOGGLE_FAVORITE,
+        playerId, mediaId) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "HandleToggleFavoriteForSuper:%{public}s fail",
+        SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
+    return AVSESSION_SUCCESS;
+}
+
+int32_t MigrateAVSessionProxy::HandleSeekForSuper(const std::string& playerId, const int64_t time)
+{
+    SLOGI("HandleSeekForSuper:%{public}s|%{public}lld pass",
+        SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str(), (long long)time);
+
+    std::string timeStr = SoftbusSessionUtils::TransformInt64ToStr(time);
+    CHECK_AND_RETURN_RET_LOG(
+        SendControlCommandMsgForSuper(SYNC_MEDIASESSION_CALLBACK_ON_SEEK, playerId, timeStr) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "HandleSeekForSuper:%{public}s fail",
+        SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
     return AVSESSION_SUCCESS;
 }
 
@@ -202,27 +220,32 @@ int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue)
     CHECK_AND_RETURN_RET_LOG(sessionItem != nullptr, AVSESSION_ERROR, "get avsession nullptr");
     sessionItem->SetPid(DEFAULT_NUM);
     sessionItem->SetUid(DEFAULT_NUM);
+    sessionItem->Activate();
+    sessionItem->SetSupportCommand(defaultValidCommands);
+    std::weak_ptr<MigrateAVSessionProxy> migrateProxyWeak(shared_from_this());
+    std::shared_ptr<AVSessionObserver> callback = std::make_shared<AVSessionObserver>(sessionId, migrateProxyWeak);
+    sessionItem->RegisterAVSessionCallback(callback);
     sessionStackForMigrateIn_[sessionId] = sessionItem;
     SLOGI("ProcessSessionInfoForSuper:%{public}s done", SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str());
     CHECK_AND_RETURN_RET_LOG(ProcessControllerInfoForSuper(jsonValue) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "controller get fail");
     std::string bundleIconStr = SoftbusSessionUtils::GetStringFromJson(jsonValue, BUNDLE_ICON);
-    CHECK_AND_RETURN_RET_LOG(!bundleIconStr.empty(), AVSESSION_SUCCESS, "no bundleIcon");
+    CHECK_AND_PRINT_LOG(!bundleIconStr.empty(), "no bundleIcon");
     AVMetaData metaData;
     CHECK_AND_RETURN_RET_LOG(AVSESSION_SUCCESS == sessionItem->GetAVMetaData(metaData),
         AVSESSION_ERROR, "ProcessBundleIcon get metadata fail");
     metaData.SetAssetId(metaData.GetAssetId().empty() ? DEFAULT_STRING : metaData.GetAssetId());
 
     std::vector<uint8_t> imgVec(bundleIconStr.begin(), bundleIconStr.end());
-    CHECK_AND_RETURN_RET_LOG(imgVec.size() > 0, AVSESSION_ERROR, "ProcessBundleIcon but empty");
+    CHECK_AND_PRINT_LOG(imgVec.size() > 0, "ProcessBundleIcon but empty");
 
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
     CHECK_AND_RETURN_RET_LOG(innerPixelMap != nullptr, AVSESSION_ERROR, "ProcessBundleIcon but nullptr");
     innerPixelMap->SetInnerImgBuffer(imgVec);
     metaData.SetBundleIcon(innerPixelMap);
-
+    metaData.SetWriter(bundleName);
     sessionItem->SetAVMetaData(metaData);
-    SLOGI("ProcessBundleImg set img size:%{public}d for bundle:%{public}s",
+    SLOGI("ProcessBundleImg set img size:%{public}d for bundleName:%{public}s",
         static_cast<int>(imgVec.size()), bundleName.c_str());
     return AVSESSION_SUCCESS;
 }
@@ -329,10 +352,10 @@ int32_t MigrateAVSessionProxy::ProcessPlaybackStateForSuper(cJSON* jsonValue)
     return AVSESSION_SUCCESS;
 }
 
-int32_t MigrateAVSessionProxy::SendControlCommandMsgForSuper(int32_t commandCode, const std::string& commandArgsStr)
+int32_t MigrateAVSessionProxy::SendControlCommandMsgForSuper(int32_t commandCode, const std::string& sessionId,
+    std::string commandArgsStr)
 {
     std::lock_guard lockGuard(migrateProxySessionIdLock_);
-    std::string sessionId = commandArgsStr;
     CHECK_AND_RETURN_RET_LOG(
         !sessionId.empty() && sessionStackForMigrateIn_.find(sessionId) != sessionStackForMigrateIn_.end(),
         AVSESSION_ERROR, "session invalid:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str());
@@ -351,7 +374,7 @@ int32_t MigrateAVSessionProxy::SendControlCommandMsgForSuper(int32_t commandCode
         return AVSESSION_ERROR;
     }
     if (!SoftbusSessionUtils::AddStringToJson(controlMsg, COMMAND, commandArgsStr)) {
-        SLOGE("AddIntToJson with key:%{public}s|value:%{public}s fail", COMMAND, commandArgsStr.c_str());
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", COMMAND, commandArgsStr.c_str());
         cJSON_Delete(controlMsg);
         return AVSESSION_ERROR;
     }
@@ -404,9 +427,9 @@ int32_t MigrateAVSessionProxy::CompressFromJPEG(AVMetaData &metadata, const std:
         "CreatePixelMap with nullptr, errorCode:%{public}u", errorCode);
 
     std::shared_ptr<AVSessionPixelMap> avsessionPixelMap =
-        AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap);
+        AVSessionPixelMapAdapter::ConvertToInner(pixelMap);
     CHECK_AND_RETURN_RET_LOG(avsessionPixelMap != nullptr, AVSESSION_ERROR,
-        "ConvertToInnerWithLimitedSize with nullptr");
+        "ConvertToInner with nullptr");
     metadata.SetMediaImageUri("");
     metadata.SetMediaImage(avsessionPixelMap);
     SLOGI("ProcessMediaImage set img size:%{public}d", static_cast<int>(metadata.GetMediaImage() == nullptr ?

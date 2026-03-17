@@ -114,6 +114,14 @@ ErrCode SessionListenerClient::OnActiveSessionChanged(const std::vector<AVSessio
     return AVSESSION_SUCCESS;
 }
 
+ErrCode SessionListenerClient::OnSystemCommonEvent(const std::string& commonEvent, const std::string& args)
+{
+    auto copiedListener = listener_;
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnSystemCommonEvent(commonEvent, args);
+    return AVSESSION_SUCCESS;
+}
+
 AncoMediaSessionListenerImpl::AncoMediaSessionListenerImpl(const std::shared_ptr<AncoMediaSessionListener>& listener)
     : listener_(listener)
 {

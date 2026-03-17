@@ -410,6 +410,16 @@ int32_t AVSessionStub::HandleGetDesktopLyricState(MessageParcel &data, MessagePa
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleSetBackgroundPlayMode(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t playMode = data.ReadInt32();
+    CHECK_AND_RETURN_RET_LOG(playMode >= BackgroundPlayMode::ENABLE_BACKGROUND_PLAY &&
+        playMode <= BackgroundPlayMode::DISABLE_BACKGROUND_PLAY, ERR_UNMARSHALLING, "read int32 playMode failed");
+    int32_t ret = SetBackgroundPlayMode(playMode);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_MARSHALLING, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
 {

@@ -48,6 +48,8 @@ public:
 
     ErrCode OnDeviceStateChange(const DeviceState& deviceState) override;
 
+    ErrCode OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override;
+
     ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override;
 private:
     std::shared_ptr<SessionListener> listener_;

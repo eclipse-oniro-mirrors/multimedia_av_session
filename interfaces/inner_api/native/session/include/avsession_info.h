@@ -126,6 +126,15 @@ public:
      * @since 23
     */
     virtual void OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) {};
+    
+    /**
+     * @brief Listen for the event of system common event.
+     *
+     * @param { std::string& } commonEvent - The name of the system common event.
+     * @param { std::string& } args - Additional arguments for the event.
+     * @since 24
+    */
+    virtual void OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) {};
 
     /**
      * @brief Deconstruct SessionListener.
@@ -1669,6 +1678,14 @@ enum SessionCategory {
      * @since 22 dynamic&static
     */
     CATEGORY_ALL = 3,
+
+    /**
+     * The session category which is HiPlay AVSession.
+     * @syscap SystemCapability.Multimedia.AVSession.Manager
+     * @systemapi
+     * @since 24 dynamic&static
+    */
+    CATEGORY_HIPLAY = 4,
 };
 
 struct DesktopLyricState : public Parcelable {
@@ -1687,6 +1704,23 @@ struct DesktopLyricState : public Parcelable {
         }
         return nullptr;
     }
+};
+
+/**
+ * Supported play mode definition
+ * @enum { int }
+ * @syscap SystemCapability.Multimedia.AVSession.Core
+ * @since 24 dynamic&static
+ */
+enum BackgroundPlayMode {
+    /**
+     * @brief enable background play
+     */
+    ENABLE_BACKGROUND_PLAY = 0,
+    /**
+     * @brief disable background play
+     */
+    DISABLE_BACKGROUND_PLAY = 1,
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

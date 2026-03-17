@@ -1222,6 +1222,16 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
             break;
         case SYNC_CONTROLLER_CALLBACK_ON_AUDIOINFO_CHANGED:
             break;
+        case SYNC_MEDIASESSION_CALLBACK_ON_TOGGLE_FAVORITE:
+            cmd.SetCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
+            cmd.SetAssetId(command);
+            controller->SendControlCommand(cmd);
+            break;
+        case SYNC_MEDIASESSION_CALLBACK_ON_SEEK:
+            cmd.SetCommand(AVControlCommand::SESSION_CMD_SEEK);
+            cmd.SetSeekTime(SoftbusSessionUtils::TransformStrToInt64(command));
+            controller->SendControlCommand(cmd);
+            break;
         default:
             SLOGI("mediaCommand is not support: %{public}s", command.c_str());
             break;

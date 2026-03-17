@@ -74,6 +74,8 @@ void BundleStatusAdapter::Init()
     SLOGI("get bundle manager proxy success.");
     bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     bundleResourceProxy = bundleMgrProxy->GetBundleResourceProxy();
+    bundleStatusListeners_.clear();
+    SLOGI("clear bundleStatusListeners done");
 }
 
 bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, const std::string abilityName, std::string& icon)

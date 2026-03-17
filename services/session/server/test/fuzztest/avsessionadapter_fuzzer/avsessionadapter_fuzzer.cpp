@@ -203,7 +203,11 @@ void PluginLibTest()
 
 void SessionStackTest()
 {
-    SessionStack sessionStack;
+    std::shared_ptr<SessionStack> sessionStack = std::make_shared<SessionStack>();
+    if (sessionStack == nullptr) {
+        SLOGE("create sessionStack fail");
+        return;
+    }
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetAbilityName(ABILITY_NAME);
     AVSessionDescriptor descriptor;
@@ -222,26 +226,26 @@ void SessionStackTest()
         return;
     }
 
-    sessionStack.IsEmpty();
-    sessionStack.getAllSessionNum();
+    sessionStack->IsEmpty();
+    sessionStack->getAllSessionNum();
     for (int32_t i = 0; i <= SessionContainer::SESSION_NUM_MAX + 1; i++) {
-        sessionStack.AddSession(descriptor.pid_ + i, ABILITY_NAME, item1);
+        sessionStack->AddSession(descriptor.pid_ + i, ABILITY_NAME, item1);
     }
-    sessionStack.UpdateSessionSort(item1);
-    sessionStack.UpdateSessionSort(item2);
-    sessionStack.GetSession(descriptor.pid_, ABILITY_NAME);
-    sessionStack.GetSession(0, ABILITY_NAME);
-    sessionStack.GetSessionsByPid(descriptor.pid_);
-    sessionStack.GetSessionsByPid(0);
-    sessionStack.UidHasSession(descriptor.uid_);
-    sessionStack.UidHasSession(0);
-    sessionStack.RemoveSession(0, ABILITY_NAME);
-    sessionStack.RemoveSession(descriptor.pid_, ABILITY_NAME);
-    sessionStack.RemoveSession(0);
-    sessionStack.RemoveSession(descriptor.pid_ + 1);
-    sessionStack.RemoveSession("");
-    sessionStack.RemoveSession(descriptor.sessionId_);
-    sessionStack.ReclaimMem();
+    sessionStack->UpdateSessionSort(item1);
+    sessionStack->UpdateSessionSort(item2);
+    sessionStack->GetSession(descriptor.pid_, ABILITY_NAME);
+    sessionStack->GetSession(0, ABILITY_NAME);
+    sessionStack->GetSessionsByPid(descriptor.pid_);
+    sessionStack->GetSessionsByPid(0);
+    sessionStack->UidHasSession(descriptor.uid_);
+    sessionStack->UidHasSession(0);
+    sessionStack->RemoveSession(0, ABILITY_NAME);
+    sessionStack->RemoveSession(descriptor.pid_, ABILITY_NAME);
+    sessionStack->RemoveSession(0);
+    sessionStack->RemoveSession(descriptor.pid_ + 1);
+    sessionStack->RemoveSession("");
+    sessionStack->RemoveSession(descriptor.sessionId_);
+    sessionStack->ReclaimMem();
 }
 
 /* Fuzzer entry point */

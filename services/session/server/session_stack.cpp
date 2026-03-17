@@ -190,16 +190,19 @@ void SessionStack::PostReclaimMemoryTask()
 {
     std::lock_guard sessionStackLockGuard(sessionStackLock_);
     if (isActivatedMemReclaimTask_.load() && !CheckSessionStateIdle()) {
-        SLOGI("clear reclaim memory task");
+        SLOGI("clear reclaim memory task.");
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask(RECLAIM_MEMORY);
         isActivatedMemReclaimTask_.store(false);
         return;
     }
     if (!isActivatedMemReclaimTask_.load() && CheckSessionStateIdle()) {
-        SLOGI("start reclaim memory task");
-        AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
-            ReclaimMem();
-            isActivatedMemReclaimTask_.store(false);
+        SLOGI("start reclaim memory task.");
+        std::weak_ptr<SessionStack> weakSelf = shared_from_this();
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([weakSelf]() {
+            auto sharedPtr = weakSelf.lock();
+            CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "ReclaimMem but stackPtr is null");
+            sharedPtr->ReclaimMem();
+            sharedPtr->isActivatedMemReclaimTask_.store(false);
             }, RECLAIM_MEMORY, TIME_OF_RECLAIM_MEMORY);
         isActivatedMemReclaimTask_.store(true);
         return;
