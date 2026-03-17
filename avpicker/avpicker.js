@@ -77,6 +77,7 @@ export class AVCastPicker extends ViewPU {
             new ObservedPropertySimplePU(AVCastPickerStyle.STYLE_PANEL, this, 'pickerStyleFromMediaController');
         this.__isMenuShow = new ObservedPropertySimplePU(false, this, 'isMenuShow');
         this.__touchMenuItemIndex = new ObservedPropertySimplePU(-1, this, 'touchMenuItemIndex');
+        this.__textParams = new ObservedPropertyObjectPU({}, this, 'textParams');
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;
@@ -133,6 +134,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.touchMenuItemIndex !== undefined) {
             this.touchMenuItemIndex = c11.touchMenuItemIndex;
         }
+        if (c11.textParams !== undefined) {
+            this.textParams = c11.textParams;
+        }  
         if (c11.onStateChange !== undefined) {
             this.onStateChange = c11.onStateChange;
         }
@@ -206,6 +210,7 @@ export class AVCastPicker extends ViewPU {
         this.__pickerStyleFromMediaController.purgeDependencyOnElmtId(a11);
         this.__isMenuShow.purgeDependencyOnElmtId(a11);
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(a11);
+        this.__textParams.purgeDependencyOnElmtId(a11);
         this.__configurationColorMode.purgeDependencyOnElmtId(a11);
         this.__deviceInfoType.purgeDependencyOnElmtId(a11);
         this.__maxFontSizeScale.purgeDependencyOnElmtId(a11);
@@ -232,6 +237,7 @@ export class AVCastPicker extends ViewPU {
         this.__pickerStyleFromMediaController.aboutToBeDeleted();
         this.__isMenuShow.aboutToBeDeleted();
         this.__touchMenuItemIndex.aboutToBeDeleted();
+        this.__textParams.aboutToBeDeleted();
         this.__configurationColorMode.aboutToBeDeleted();
         this.__deviceInfoType.aboutToBeDeleted();
         this.__maxFontSizeScale.aboutToBeDeleted();
@@ -327,6 +333,14 @@ export class AVCastPicker extends ViewPU {
 
     set touchMenuItemIndex(t10) {
         this.__touchMenuItemIndex.set(t10);
+    }
+
+    get textParams() {
+        return this.__textParams.get();
+    }
+ 
+    set textParams(t10) {
+        this.__textParams.set(t10);
     }
 
     get configurationColorMode() {
@@ -754,7 +768,7 @@ export class AVCastPicker extends ViewPU {
                                             if (x8.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Text.create('所有媒体音频');
+                                                        Text.create(this.textParams?.allMediaAudio);
                                                         Text.fontWeight('sys.string.ohos_id_text_font_family_regular');
                                                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -771,7 +785,7 @@ export class AVCastPicker extends ViewPU {
                                             else {
                                                 this.ifElseBranchUpdateFunction(1, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Text.create(`正在播放`);
+                                                        Text.create(this.textParams?.playingNow);
                                                         Text.fontWeight('sys.string.ohos_id_text_font_family_regular');
                                                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -934,7 +948,7 @@ export class AVCastPicker extends ViewPU {
             Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center });
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('所有媒体音频');
+            Text.create(this.textParams?.allMediaAudio);
             Text.fontWeight('sys.string.ohos_id_text_font_family_medium');
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'],
                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -1009,7 +1023,7 @@ export class AVCastPicker extends ViewPU {
             Flex.create({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center });
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create('当前应用媒体');
+            Text.create(this.textParams?.currentApp);
             Text.fontWeight('sys.string.ohos_id_text_font_family_medium');
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'],
                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -1240,6 +1254,11 @@ export class AVCastPicker extends ViewPU {
                 if (l8.isShowLoadingProgress !== undefined) {
                     console.info(TAG, `isShowLoadingProgress : ${l8.isShowLoadingProgress}`);
                     this.isShowLoadingProgress = l8.isShowLoadingProgress;
+                }
+
+                if (l8.textParams !== undefined) {
+                    console.info(TAG, `textParams : ${l8.textParams}`);
+                    this.textParams = l8.textParams;
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
