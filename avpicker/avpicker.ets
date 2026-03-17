@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import image from '@ohos.multimedia.image';
 
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
@@ -104,15 +105,15 @@ interface HighQualityParams {
   iconRight: string,
 }
 
+export interface ShowingBundleTS {
+  pixelData?: image.PixelMap | undefined;
+  appName?: string | undefined;
+}
+
 interface TextParams {
   currentApp?: string,
   allMediaAudio?: string,
   playingNow?: string,
-}
-
-export interface ShowingBundleTS {
-  pixelData?: image.PixelMap | undefined;
-  appName?: string | undefined;
 }
 
 /**
@@ -133,7 +134,7 @@ export interface AVCastPickerDeviceInfo {
   deviceSubName?: string,
   supportCastMode?: number,
   castMode?: number,
-  bundleInfo?: ShowingBundleTS;
+  bundleInfo?: ShowingBundleTS,
 }
 
 @Component
@@ -187,6 +188,11 @@ export struct AVCastPicker {
    * Touch item index.
    */
   @State touchMenuItemIndex: number = -1;
+
+  /**
+   * Text params.
+   */
+  @State textParams: TextParams = {};
 
   /**
    * Picker state change callback.
@@ -373,12 +379,12 @@ export struct AVCastPicker {
                   .width('auto')
                    
                   if (item.isConnected && item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
-                    Flex({direction.FlexDirection.Row, alignItems.ItemAlign.Center}) {
+                    Flex({direction:FlexDirection.Row, alignItems:ItemAlign.Center}) {
                       Row() {
-                        if (item.curCastMode == 1) {
+                        if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                           SymbolGlyph($r('sys.symbol.speaker_wave_2'))
                             .fontSize(`16vp`)
-                            .fontColor($r('sys.color.font_primary'))
+                            .fontColor([$r('sys.color.icon_primary')])
                         } else {
                           this.SmallPicIcon(item.bundleInfo?.pixelData)
                         }
@@ -387,7 +393,7 @@ export struct AVCastPicker {
  
                       Row() {
                         if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
-                          Text('所有媒体音频')
+                          Text(this.textParams?.allMediaAudio)
                           .fontWeight('sys.string.ohos_id_text_font_family_regular')
                           .fontSize($r('sys.float.ohos_id_text_size_body3'))
                           .margin({left: 2, right: 2})
@@ -396,7 +402,7 @@ export struct AVCastPicker {
                           .wordBreak(WordBreak.BREAK_ALL)
                           .maxLines(1)
                       } else {
-                        Text(`正在播放“${item.bundleInfo?.appName ?? ''}”`)
+                        Text(this.textParams?.playingNow)
                           .fontWeight('sys.string.ohos_id_text_font_family_regular')
                           .fontSize($r('sys.float.ohos_id_text_size_body3'))
                           .margin({left: 2, right: 2})
@@ -417,7 +423,7 @@ export struct AVCastPicker {
                         }) {
                           SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
                             .fontSize('16vp')
-                            .fontColor($r('sys.color.font_primary'))
+                            .fontColor([$r('sys.color.icon_primary')])
                         }
                         .width(18)
                         .height(16)
@@ -427,7 +433,7 @@ export struct AVCastPicker {
                       Row() {
                         SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
                           .fontSize('16vp')
-                          .fontColor($r('sys.color.font_primary'))
+                          .fontColor([$r('sys.color.icon_primary')])
                       }
                       .direction(Direction.Ltr)
                     }
@@ -510,7 +516,7 @@ export struct AVCastPicker {
         Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
           Flex({ alignItems: ItemAlign.Center}){
             Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center}) {
-              Text('所有媒体')
+              Text(this.textParams?.allMediaAudio)
                 .fontWeight('sys.string.ohos_id_text_font_family_medium')
                 .fontSize($r('sys.float.ohos_id_text_size_body1'))
                 .width('100%')
@@ -548,10 +554,10 @@ export struct AVCastPicker {
       Divider().width(192)
 
        Flex() {
-        Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems.Center }) {
+        Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems:ItemAlign.Center }) {
           Flex({ alignItems:ItemAlign.Center }) {
             Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center}) {
-              Text('当前应用媒体')
+              Text(this.textParams?.currentApp)
                 .fontWeight('sys.string.ohos_id_text_font_family_medium')
                 .fontSize($r('sys.float.ohos_id_text_size_body1'))
                 .width('100%')
@@ -725,6 +731,11 @@ export struct AVCastPicker {
           if (data['isShowLoadingProgress'] !== undefined) {
             console.info(TAG, `isShowLoadingProgress : ${JSON.stringify(data['isShowLoadingProgress'])}`);
             this.isShowLoadingProgress = data['isShowLoadingProgress'] as boolean;
+          }
+
+          if (data['textParams'] !== undefined) {
+            console.info(TAG, `textParams : ${JSON.stringify(data['textParams'])}`);
+            this.textParams = data['textParams'] as TextParams;
           }
         })
         .size({ width: '100%', height: '100%' })
