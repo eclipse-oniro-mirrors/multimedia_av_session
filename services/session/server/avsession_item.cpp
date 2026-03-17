@@ -783,7 +783,7 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::CreateWantAgentWithIndex(
         wants,
         nullptr
     );
-    auto launchAbility = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, GetUid());
+    auto launchAbility = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, GetUserId(), GetUid());
     CHECK_AND_RETURN_RET_LOG(launchAbility != nullptr, ability, "CreateWantAgentWithIndex failed");
     return *launchAbility;
 }
