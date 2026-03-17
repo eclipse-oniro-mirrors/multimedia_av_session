@@ -372,7 +372,7 @@ private:
         const sptr<ClientDeathRecipient> recipient);
     void RemoveClientDeathObserver(pid_t pid);
 
-    void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener);
+    void AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener, int32_t userId = 0);
     void AddSessionListenerForAllUsers(pid_t pid, const sptr<ISessionListener>& listener);
     void RemoveSessionListener(pid_t pid);
 
@@ -696,6 +696,8 @@ private:
     void SubscribeBundleStatusIfNeeded(const std::string& oldSortContent, const std::string& bundleName);
 
     void UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo);
+
+    int32_t GetUserIdFromCallingUid(const int32_t uid);
 
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;

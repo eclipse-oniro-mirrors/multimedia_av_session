@@ -700,7 +700,7 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
 void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, int32_t userId)
 {
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
     for (const auto& session : *sessionListForFront) {
         if (session->GetUid() == infoUid && session->GetPid() == infoPid &&
@@ -725,22 +725,22 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
     SLOGI("uid=%{public}d, pid=%{public}d curTop:%{public}s",
         info.uid, info.pid, (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     std::lock_guard lockGuard(sessionServiceLock_);
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(info.uid));
     if (info.uid == ancoUid && isPlaying) {
-        sptr<AVSessionItem> sessionItem = GetContainer().GetSessionByUid(info.uid);
+        sptr<AVSessionItem> sessionItem = GetUsersManager().GetContainerFromUser(userId).GetSessionByUid(info.uid);
         CHECK_AND_RETURN_LOG(sessionItem != nullptr, "handle focusession no anco_audio");
         ancoSession_ = sessionItem;
         UpdateSessionTimestamp(ancoSession_);
         SLOGI("HandleFocusSession updateancoSession");
         return;
     }
-    int32_t userId = GetUsersManager().GetCurrentUserId();
     if ((topSession_ && topSession_->GetUid() == info.uid && topSession_->GetPid() == info.pid) &&
         topSession_->IsCastConnected()) {
         SLOGI("cur topSession:%{public}s isCastConnected", topSession_->GetBundleName().c_str());
         return;
     }
     if (topSession_ && topSession_->GetUid() == info.uid && topSession_->GetPid() == info.pid) {
-        SLOGI(" HandleFocusSession focusSession is current topSession.");
+        SLOGI(" HandleFocusSession focusSession is current topSession:%{public}d|%{public}d.", userId, isPlaying);
         if (topSession_->GetSessionType() == "audio" || topSession_->GetSessionType() == "video") {
             auto hasOtherPlayingSession = false;
             if (!isPlaying) {
@@ -900,10 +900,12 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
 bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
 {
     CHECK_AND_RETURN_RET_LOG(sessionItem != nullptr, false, "session is nullptr!");
-    GetContainer().UpdateSessionSort(sessionItem);
+    int32_t userId = sessionItem->GetUserId();
+    GetUsersManager().GetContainerFromUser(userId).UpdateSessionSort(sessionItem);
     RefreshFocusSessionSort(sessionItem);
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront =
+        GetCurSessionListForFront(sessionItem->GetUserId());
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr!");
     CHECK_AND_RETURN_RET_LOG(sessionItem->GetSessionType() != sessionTypePhoto,
         false, "session type is photo");
@@ -913,14 +915,15 @@ bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
         sessionListForFront->remove(sessionItem);
         sessionListForFront->push_front(sessionItem);
         UpdateSessionTimestamp(sessionItem);
-        NotifySessionChange(sessionListForFront);
+        NotifySessionChange(sessionListForFront, userId);
     }
     return true;
 }
 
 bool AVSessionService::SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info)
 {
-    for (auto& session : GetContainer().GetAllSessions()) {
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(info.uid));
+    for (auto& session : GetUsersManager().GetContainerFromUser(userId).GetAllSessions()) {
         if (session->GetDescriptor().sessionTag_ == "RemoteCast" || session->GetPid() != info.pid) {
             continue;
         }
@@ -1143,7 +1146,8 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
     } else {
         SLOGE("AudioSystemManager is nullptr");
     }
-    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(descriptor.userId_);
+    SLOGI("NotifySessionCreate for user:%{public}d", descriptor.userId_);
 #ifdef START_STOP_ON_DEMAND_ENABLE
     PublishEvent(mediaPlayStateTrue);
 #endif
@@ -1218,7 +1222,8 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
 void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
+    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(descriptor.userId_);
+    SLOGI("NotifyTopSession for user:%{public}d", descriptor.userId_);
     for (const auto& [pid, listener] : listenerMap) {
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnTopSessionChange");
         if (listener != nullptr) {
@@ -1246,7 +1251,8 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
 void AVSessionService::LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::StreamUsage streamUsage,
     AudioStandard::RendererState rendererState)
 {
-    sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
+    int32_t userId = GetUserIdFromCallingUid(uid);
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromUser(userId).GetSessionByUid(uid);
     CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for LowQualityCheck");
 
     AVMetaData meta = session->GetMetaDataWithoutImg();
@@ -1279,7 +1285,8 @@ void AVSessionService::LowQualityCheck(int32_t uid, int32_t pid, AudioStandard::
 void AVSessionService::PlayStateCheck(int32_t uid, AudioStandard::StreamUsage streamUsage,
     AudioStandard::RendererState rState)
 {
-    sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
+    int32_t userId = GetUserIdFromCallingUid(uid);
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromUser(userId).GetSessionByUid(uid);
     CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for LowQualityCheck");
 
     AVPlaybackState aState = session->GetPlaybackState();
@@ -1608,7 +1615,8 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         SLOGE("alloc session id failed");
         return nullptr;
     }
-    descriptor.userId_ = GetUsersManager().GetCurrentUserId();
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    descriptor.userId_ = userId;
     descriptor.sessionTag_ = tag;
     descriptor.sessionType_ = type;
     descriptor.elementName_ = elementName;
@@ -1694,14 +1702,15 @@ void AVSessionService::AddExtraFrontSession(int32_t type, sptr<AVSessionItem>& s
 {
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "AddExtraFrontSession sessionItem nullptr!");
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    int32_t userId = sessionItem->GetUserId();
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "AddExtraFrontSession sessionListForFront ptr nullptr!");
     auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sessionItem);
     if ((type == AVSession::SESSION_TYPE_VOICE_CALL || type == AVSession::SESSION_TYPE_VIDEO_CALL) &&
         it == sessionListForFront->end()) {
         SLOGI(" front session add voice_call session=%{public}s", sessionItem->GetBundleName().c_str());
         sessionListForFront->push_front(sessionItem);
-        NotifySessionChange(sessionListForFront);
+        NotifySessionChange(sessionListForFront, userId);
     }
 }
 
@@ -1713,7 +1722,8 @@ int32_t AVSessionService::GetSessionInner(const AppExecFwk::ElementName& element
     auto pid = GetCallingPid();
     auto uid = GetCallingUid();
     std::lock_guard lockGuard(sessionServiceLock_);
-    sptr<AVSessionItem> sessionWanted = GetContainer().GetSessionByUid(uid);
+    int32_t userId = GetUserIdFromCallingUid(uid);
+    sptr<AVSessionItem> sessionWanted = GetUsersManager().GetContainerFromUser(userId).GetSessionByUid(uid);
     CHECK_AND_RETURN_RET_LOG(sessionWanted != nullptr, ERR_SESSION_NOT_EXIST,
         "process %{public}d:%{public}d has no session", pid, uid);
     CHECK_AND_RETURN_RET_LOG(sessionWanted->GetPid() == pid, ERR_SESSION_NOT_EXIST,
@@ -1761,7 +1771,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     }
     RefreshUserFromAnco(tag, elementName);
     auto pid = GetCallingPid();
-    int32_t userId = static_cast<int32_t>(GetCallingUid()) / uidToUserId;
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     std::lock_guard lockGuard(sessionServiceLock_);
     if (AbilityHasSession(pid, userId)) {
         SLOGE("process %{public}d %{public}s already has one session.", pid, elementName.GetAbilityName().c_str());
@@ -2031,15 +2041,16 @@ int32_t AVSessionService::UpdateControlListFromFile()
 int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
 {
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
     for (const auto& session : *sessionListForFront) {
         if (session != nullptr) {
             descriptors.push_back(session->GetDescriptor());
         }
     }
-    SLOGI("GetAllSessionDescriptors with size=%{public}d, topSession:%{public}s",
-        static_cast<int32_t>(descriptors.size()),
+    SLOGI("GetAllSessionDescriptors for user:%{public}d with size=%{public}d, topSession:%{public}s",
+        userId, static_cast<int32_t>(descriptors.size()),
         (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     return AVSESSION_SUCCESS;
 }
@@ -2047,9 +2058,10 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
 int32_t AVSessionService::GetNotActiveSession(std::vector<AVSessionDescriptor>& descriptors)
 {
     std::lock_guard frontLockGuard(sessionFrontLock_);
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
-    for (const auto& session : GetContainer().GetAllSessions()) {
+    for (const auto& session : GetUsersManager().GetContainerFromUser(userId).GetAllSessions()) {
         if (session != nullptr) {
             auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), session);
             if (it == sessionListForFront->end()) {
@@ -2058,6 +2070,7 @@ int32_t AVSessionService::GetNotActiveSession(std::vector<AVSessionDescriptor>& 
             }
         }
     }
+    SLOGI("GetNotActiveSession for user:%{public}d", userId);
     return AVSESSION_SUCCESS;
 }
 
@@ -2071,7 +2084,8 @@ int32_t AVSessionService::GetSessionDescriptors(int32_t category, std::vector<AV
             GetNotActiveSession(descriptors);
             break;
         case SessionCategory::CATEGORY_ALL:
-            for (const auto& session : GetContainer().GetAllSessions()) {
+            for (const auto& session : GetUsersManager().GetContainerFromUser(
+                GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()))).GetAllSessions()) {
                 if (session != nullptr) {
                     AVSessionDescriptor descriptor = session->GetDescriptor();
                     descriptors.push_back(descriptor);
@@ -2101,7 +2115,8 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
                                                            AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionServiceLock_);
-    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromUser(userId).GetSessionById(sessionId);
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "session to be got is not existed");
 
     auto pid = GetCallingPid();
@@ -2176,7 +2191,9 @@ void AVSessionService::ProcessDescriptorsFromCJSON(std::vector<AVSessionDescript
 int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors)
 {
     std::string oldSortContent;
-    if (!LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    SLOGI("getHistoryFile for:%{public}d", userId);
+    if (!LoadStringFromFileEx(GetAVSortDir(userId), oldSortContent)) {
         SLOGE("GetHistoricalSessionDescriptorsFromFile read sort fail, Return!");
         return AVSESSION_ERROR;
     }
@@ -2193,7 +2210,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
     cJSON_ArrayForEach(valueItem, sortValuesArray) {
         ProcessDescriptorsFromCJSON(descriptors, valueItem);
     }
-    if (descriptors.size() == 0 && GetContainer().GetAllSessions().size() == 0) {
+    if (descriptors.size() == 0 && GetUsersManager().GetContainerFromUser(userId).GetAllSessions().size() == 0) {
         SLOGE("GetHistoricalSessionDescriptorsFromFile read empty, return!");
     }
     cJSON_Delete(sortValuesArray);
@@ -2217,6 +2234,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
 {
     std::lock_guard sortFileLockGuard(sessionFileLock_);
     std::vector<AVSessionDescriptor> tempDescriptors;
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     GetHistoricalSessionDescriptorsFromFile(tempDescriptors);
     bool isNeedAllAnco = maxSize == mediaControlAncoParam;
     if (maxSize < 0 || maxSize > maxHistoryNums_) {
@@ -2227,7 +2245,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
             break;
         }
         std::string sessionId(iterator->sessionId_);
-        auto session = GetContainer().GetSessionById(sessionId);
+        auto session = GetUsersManager().GetContainerFromUser(userId).GetSessionById(sessionId);
         bool checkIfContinue = session != nullptr &&
             (!isNeedAllAnco || (session->GetSessionTag() != "ancoMediaSession" ||
             session->GetBundleName() == iterator->elementName_.GetBundleName()));
@@ -2837,9 +2855,10 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
 
 int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object, pid_t pid)
 {
-    SLOGI("CreateControllerInner for sessionId:%{public}s|%{public}d|%{public}d",
-        AVSessionUtils::GetAnonySessionId(sessionId).c_str(), pid, GetCallingPid());
-    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    SLOGI("CreateControllerInner for sessionId:%{public}s|%{public}d|%{public}d|%{public}d",
+        AVSessionUtils::GetAnonySessionId(sessionId).c_str(), pid, GetCallingPid(), userId);
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromUser(userId).GetSessionById(sessionId);
     if (session == nullptr) {
         SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
         return ERR_SESSION_NOT_EXIST;
@@ -2866,10 +2885,10 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener)
+void AVSessionService::AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener, int32_t userId)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    GetUsersManager().AddSessionListener(pid, listener);
+    GetUsersManager().AddSessionListener(pid, listener, userId);
 }
 
 void AVSessionService::AddSessionListenerForAllUsers(pid_t pid, const sptr<ISessionListener>& listener)
@@ -2886,11 +2905,11 @@ void AVSessionService::RemoveSessionListener(pid_t pid)
 
 int32_t AVSessionService::RegisterSessionListener(const sptr<ISessionListener>& listener)
 {
-    int32_t userId = GetUsersManager().GetCurrentUserId();
+    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     pid_t pid = GetCallingPid();
-    SLOGI("Enter RegisterSessionListener process for pid:%{public}d and return current userId:%{public}d",
+    SLOGI("Enter RegisterSessionListener process for pid:%{public}d and return target userId:%{public}d",
         static_cast<int>(pid), userId);
-    AddSessionListener(pid, listener);
+    AddSessionListener(pid, listener, userId);
     return userId;
 }
 
@@ -4850,6 +4869,13 @@ void AVSessionService::ReportSessionControl(const std::string& bundleName, int32
         AVSessionSysEvent::GetInstance().UpdateControl(bundleName, cmd,
             BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()));
     }
+}
+
+int32_t AVSessionService::GetUserIdFromCallingUid(const int32_t uid)
+{
+    int32_t userId = uid / uidToUserId;
+    userId = (userId <= 0) ? GetUsersManager().GetCurrentUserId() : userId;
+    return userId;
 }
 
 #endif // ENABLE_AVSESSION_SYSEVENT_CONTROL
