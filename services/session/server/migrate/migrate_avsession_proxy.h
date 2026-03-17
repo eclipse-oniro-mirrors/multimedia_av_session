@@ -144,6 +144,7 @@ private:
     std::thread checkConnectWorker_;
     std::recursive_mutex migrateProxyDeviceIdLock_;
     std::recursive_mutex migrateProxySessionIdLock_;
+    std::recursive_mutex migrateProxyRemoteSessionLock_;
     std::mutex keepAliveMtx_;
     std::condition_variable keepAliveCv_;
     std::vector<int32_t> defaultValidCommands {

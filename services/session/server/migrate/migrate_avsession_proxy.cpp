@@ -202,10 +202,10 @@ void MigrateAVSessionProxy::PrepareSessionFromRemote()
     descriptor.elementName_.SetAbilityName(DEFAULT_STRING);
     descriptor.isThirdPartyApp_ = false;
 
-    remoteSession_ = new(std::nothrow) AVSessionItem(descriptor);
-    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "create avsession but get nullptr");
-    remoteSession_->SetPid(DEFAULT_NUM);
-    remoteSession_->SetUid(DEFAULT_NUM);
+    sptr<AVSessionItem> sessionItem = new(std::nothrow) AVSessionItem(descriptor);
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "create avsession but get nullptr");
+    sessionItem->SetPid(DEFAULT_NUM);
+    sessionItem->SetUid(DEFAULT_NUM);
 
     OutputDeviceInfo outputDeviceInfo;
     DeviceInfo deviceInfo;
@@ -213,13 +213,17 @@ void MigrateAVSessionProxy::PrepareSessionFromRemote()
     deviceInfo.deviceId_ = DEFAULT_STRING;
     deviceInfo.deviceName_ = DEFAULT_STRING;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    remoteSession_->SetOutputDevice(outputDeviceInfo);
+    sessionItem->SetOutputDevice(outputDeviceInfo);
 
     std::weak_ptr<MigrateAVSessionProxy> migrateProxyWeak(shared_from_this());
     std::shared_ptr<AVSessionObserver> callback =
-        std::make_shared<AVSessionObserver>(remoteSession_->GetSessionId(), migrateProxyWeak);
-    remoteSession_->RegisterAVSessionCallback(callback);
-    PrepareControllerOfRemoteSession(remoteSession_);
+        std::make_shared<AVSessionObserver>(sessionItem->GetSessionId(), migrateProxyWeak);
+    sessionItem->RegisterAVSessionCallback(callback);
+    PrepareControllerOfRemoteSession(sessionItem);
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        remoteSession_ = sessionItem;
+    }
     SLOGI("PrepareSessionFromRemote done");
 }
 
@@ -237,10 +241,15 @@ void MigrateAVSessionProxy::ReleaseSessionFromRemote()
 {
     SLOGI("ReleaseSessionFromRemote in");
     ReleaseControllerOfRemoteSession();
-    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ReleaseSessionFromRemote with remoteSession null");
-    remoteSession_->RegisterAVSessionCallback(nullptr);
-    remoteSession_->DestroyTask();
-    remoteSession_ = nullptr;
+    sptr<AVSessionItem> sessionItem = nullptr;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        sessionItem = remoteSession_;
+        remoteSession_ = nullptr;
+    }
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "ReleaseSessionFromRemote with remoteSession null");
+    sessionItem->RegisterAVSessionCallback(nullptr);
+    sessionItem->DestroyTask();
     SLOGI("ReleaseSessionFromRemote done.");
 }
 
@@ -416,7 +425,12 @@ void MigrateAVSessionProxy::ColdStartFromProxy()
 
 void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
 {
-    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessSessionInfo with remote session null");
+    sptr<AVSessionItem> sessionItem = nullptr;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        sessionItem = remoteSession_;
+    }
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "ProcessSessionInfo with remote session null");
     if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
         SLOGE("get jsonValue invalid");
         return;
@@ -431,11 +445,11 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
     std::string sessionId = SoftbusSessionUtils::GetStringFromJson(jsonValue, MIGRATE_SESSION_ID);
     sessionId = sessionId.empty() ? DEFAULT_STRING : sessionId;
     if (sessionId.empty() || sessionId == DEFAULT_STRING || sessionId == EMPTY_SESSION) {
-        remoteSession_->Deactivate();
+        sessionItem->Deactivate();
         elementName_.SetAbilityName(elementName_.GetBundleName());
         elementName_.SetBundleName("");
     } else {
-        remoteSession_->Activate();
+        sessionItem->Activate();
     }
     SLOGI("ProcessSessionInfo with sessionId:%{public}s|bundleName:%{public}s done.",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), bundleName.c_str());
@@ -444,16 +458,15 @@ void MigrateAVSessionProxy::ProcessSessionInfo(cJSON* jsonValue)
         AVPlaybackState playbackState;
         playbackState.SetState(0);
         playbackState.SetFavorite(false);
-        remoteSession_->SetAVPlaybackState(playbackState);
-    }
-    if (bundleNameBef != elementName_.GetBundleName()) {
+        sessionItem->SetAVPlaybackState(playbackState);
+
         AVMetaData metaData;
         metaData.SetAssetId(DEFAULT_STRING);
         metaData.SetWriter(bundleName);
         metaData.SetTitle("");
         metaData.SetArtist("");
         metaData.SetPreviousAssetId("");
-        remoteSession_->SetAVMetaData(metaData);
+        sessionItem->SetAVMetaData(metaData);
     }
     SendMediaControlNeedStateMsg();
 }
@@ -465,13 +478,18 @@ bool MigrateAVSessionProxy::CheckMediaAlive()
 
 void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
 {
-    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessMetaData with remote session null");
+    sptr<AVSessionItem> sessionItem = nullptr;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        sessionItem = remoteSession_;
+    }
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "ProcessMetaData with remote session null");
     if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
         SLOGE("get jsonValue invalid");
         return;
     }
     AVMetaData metaData;
-    if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
+    if (AVSESSION_SUCCESS != sessionItem->GetAVMetaData(metaData)) {
         SLOGE("ProcessMetaData GetAVMetaData fail");
     }
 
@@ -502,20 +520,25 @@ void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
         metaData.SetArtist(artist);
     }
 
-    remoteSession_->SetAVMetaData(metaData);
+    sessionItem->SetAVMetaData(metaData);
     SLOGI("ProcessMetaData set title:%{public}s", AVSessionUtils::GetAnonyTitle(metaData.GetTitle()).c_str());
 }
 
 void MigrateAVSessionProxy::ProcessPlaybackState(cJSON* jsonValue)
 {
-    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessPlaybackState with remote session null");
+    sptr<AVSessionItem> sessionItem = nullptr;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        sessionItem = remoteSession_;
+    }
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "ProcessPlaybackState with remote session null");
     if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
         SLOGE("get jsonValue invalid");
         return;
     }
 
     AVPlaybackState playbackState;
-    if (AVSESSION_SUCCESS != remoteSession_->GetAVPlaybackState(playbackState)) {
+    if (AVSESSION_SUCCESS != sessionItem->GetAVPlaybackState(playbackState)) {
         SLOGE("ProcessPlaybackState GetAVPlaybackState fail");
     }
 
@@ -528,14 +551,19 @@ void MigrateAVSessionProxy::ProcessPlaybackState(cJSON* jsonValue)
         playbackState.SetFavorite(isFavor);
     }
 
-    remoteSession_->SetAVPlaybackState(playbackState);
+    sessionItem->SetAVPlaybackState(playbackState);
     SLOGI("ProcessPlaybackState set state:%{public}d | isFavor:%{public}d",
         playbackState.GetState(), playbackState.GetFavorite());
 }
 
 void MigrateAVSessionProxy::ProcessValidCommands(cJSON* jsonValue)
 {
-    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessValidCommands with remote session null");
+    sptr<AVSessionItem> sessionItem = nullptr;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        sessionItem = remoteSession_;
+    }
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "ProcessValidCommands with remote session null");
     if (jsonValue == nullptr || cJSON_IsInvalid(jsonValue) || cJSON_IsNull(jsonValue)) {
         SLOGE("get jsonValue invalid");
         return;
@@ -550,7 +578,7 @@ void MigrateAVSessionProxy::ProcessValidCommands(cJSON* jsonValue)
         for (unsigned long i = 0; i < commandsStr.length(); i++) {
             commands.insert(commands.begin(), static_cast<int>(commandsStr[i] - '0'));
         }
-        remoteSession_->SetSupportCommand(commands);
+        sessionItem->SetSupportCommand(commands);
     }
 
     SLOGI("ProcessValidCommands set cmd size:%{public}d", static_cast<int>(commands.size()));
@@ -654,16 +682,21 @@ void MigrateAVSessionProxy::ProcessPreferredOutputDevice(cJSON* jsonValue)
 
 void MigrateAVSessionProxy::ProcessBundleImg(std::string bundleIconStr)
 {
-    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessBundleImg with remote session null");
+    sptr<AVSessionItem> sessionItem = nullptr;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        sessionItem = remoteSession_;
+    }
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "ProcessBundleImg with remote session null");
     AVMetaData metaData;
-    if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
+    if (AVSESSION_SUCCESS != sessionItem->GetAVMetaData(metaData)) {
         SLOGE("ProcessBundleImg GetAVMetaData fail");
     }
     if (metaData.GetAssetId().empty()) {
         metaData.SetAssetId(DEFAULT_STRING);
     }
     std::vector<uint8_t> imgVec(bundleIconStr.begin(), bundleIconStr.end());
-    if (imgVec.size() <= 0) {
+    if (imgVec.empty()) {
         SLOGE("ProcessBundleImg with empty img, return");
         return;
     }
@@ -671,21 +704,26 @@ void MigrateAVSessionProxy::ProcessBundleImg(std::string bundleIconStr)
     innerPixelMap->SetInnerImgBuffer(imgVec);
     metaData.SetBundleIcon(innerPixelMap);
 
-    remoteSession_->SetAVMetaData(metaData);
+    sessionItem->SetAVMetaData(metaData);
     SLOGI("ProcessBundleImg set img size:%{public}d", static_cast<int>(metaData.GetBundleIcon() == nullptr ?
         -1 : metaData.GetBundleIcon()->GetInnerImgBuffer().size()));
 }
 
 void MigrateAVSessionProxy::ProcessMediaImage(std::string mediaImageStr)
 {
-    CHECK_AND_RETURN_LOG(remoteSession_ != nullptr, "ProcessMediaImage with remote session null");
+    sptr<AVSessionItem> sessionItem = nullptr;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        sessionItem = remoteSession_;
+    }
+    CHECK_AND_RETURN_LOG(sessionItem != nullptr, "ProcessMediaImage with remote session null");
     size_t insertPos = mediaImageStr.find('|');
     CHECK_AND_RETURN_LOG(insertPos != std::string::npos && insertPos > 0 && insertPos < mediaImageStr.size(),
         "mediaImgStr do not contain assetId, return");
     std::string assetIdForMediaImg = mediaImageStr.substr(0, insertPos);
     mediaImageStr.erase(0, insertPos + 1);
     AVMetaData metaData;
-    if (AVSESSION_SUCCESS != remoteSession_->GetAVMetaData(metaData)) {
+    if (AVSESSION_SUCCESS != sessionItem->GetAVMetaData(metaData)) {
         SLOGE("ProcessMediaImage GetAVMetaData fail");
     }
     if (metaData.GetAssetId().empty()) {
@@ -693,7 +731,7 @@ void MigrateAVSessionProxy::ProcessMediaImage(std::string mediaImageStr)
     }
     metaData.SetPreviousAssetId(assetIdForMediaImg);
     std::vector<uint8_t> imgVec(mediaImageStr.begin(), mediaImageStr.end());
-    if (imgVec.size() <= 0) {
+    if (imgVec.empty()) {
         metaData.SetMediaImageUri(DEFAULT_STRING);
         metaData.SetMediaImage(nullptr);
     } else {
@@ -704,7 +742,7 @@ void MigrateAVSessionProxy::ProcessMediaImage(std::string mediaImageStr)
     }
     SLOGI("ProcessMediaImage set img size:%{public}d", static_cast<int>(metaData.GetMediaImage() == nullptr ?
         -1 : metaData.GetMediaImage()->GetInnerImgBuffer().size()));
-    remoteSession_->SetAVMetaData(metaData);
+    sessionItem->SetAVMetaData(metaData);
 }
 
 void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr)
