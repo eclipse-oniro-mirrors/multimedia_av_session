@@ -99,6 +99,12 @@ interface HighQualityParams {
   iconRight: string,
 }
 
+interface TextParams {
+  currentApp?: string,
+  allMediaAudio?: string,
+  playingNow?: string,
+}
+
 /**
  * menuItem device info
  */
