@@ -78,6 +78,7 @@ public:
     bool IsDesktopLyricVisibleSync();
     void SetDesktopLyricStateSync(DesktopLyricState const& state);
     DesktopLyricState GetDesktopLyricStateSync();
+    void SetBackgroundPlayModeSync(BackgroundPlayMode mode);
 
     void OnPlay(callback_view<void(CommandInfo const& commandInfo)> callback);
     void OnPause(callback_view<void()> callback);

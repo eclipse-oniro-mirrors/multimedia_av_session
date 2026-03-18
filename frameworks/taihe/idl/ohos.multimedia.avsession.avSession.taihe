@@ -447,6 +447,9 @@ interface AVSession {
   @gen_promise("getDesktopLyricState")
   GetDesktopLyricStateSync(): DesktopLyricState;
 
+  @gen_promise("setBackgroundPlayMode")
+  SetBackgroundPlayModeSync(mode: BackgroundPlayMode): void;
+
   OnPlay(callback: (commandInfo: CommandInfo) => void): void;
   OnPause(callback: () => void): void;
   OnStop(callback: () => void): void;
@@ -950,4 +953,9 @@ struct CommandInfo {
   callerModuleName: Optional<String>;
   callerDeviceId: Optional<String>;
   callerType: Optional<CallerType>;
+}
+
+enum BackgroundPlayMode : i32 {
+  ENABLE_BACKGROUND_PLAY = 0,
+  DISABLE_BACKGROUND_PLAY = 1,
 }
