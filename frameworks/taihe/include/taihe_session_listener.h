@@ -39,6 +39,7 @@ public:
         EVENT_DEVICE_LOG_EVENT,
         EVENT_DEVICE_OFFLINE,
         EVENT_DEVICE_STATE_CHANGED,
+        EVENT_SYSTEM_COMMON_EVENT,
         EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED,
         EVENT_ACTIVE_SESSION_CHANGED,
         EVENT_TYPE_MAX
@@ -55,6 +56,7 @@ public:
     void OnDeviceLogEvent(const OHOS::AVSession::DeviceLogEventCode eventId, const int64_t param) override;
     void OnDeviceOffline(const std::string& deviceId) override;
     void OnDeviceStateChange(const OHOS::AVSession::DeviceState& deviceState) override;
+    void OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override;
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override;
     void OnActiveSessionChanged(const std::vector<OHOS::AVSession::AVSessionDescriptor> &descriptors) override;
@@ -69,6 +71,7 @@ private:
     struct DataContext {
         string deviceId;
         array<AVSessionController> sessionControllers;
+        string commonEvent;
     };
 
     std::shared_ptr<TaiheAsyncCallback> asyncCallback_;
