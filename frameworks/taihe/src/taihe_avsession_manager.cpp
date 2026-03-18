@@ -50,6 +50,7 @@ std::map<std::string, std::pair<TaiheAVSessionManager::OnEventHandlerType, Taihe
     { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
     { "deviceStateChange", { OnDeviceStateChanged, OffDeviceStateChanged } },
+    { "systemCommonEvent", { OnSystemCommonEvent, OffSystemCommonEvent } },
 };
 
 std::map<OHOS::AVSession::DistributedSessionType, std::pair<TaiheAVSessionManager::OnEventHandlerType,
@@ -454,6 +455,14 @@ int32_t TaiheAVSessionManager::OnDeviceStateChanged(std::shared_ptr<uintptr_t> &
     return listener_->AddCallback(TaiheSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
 
+int32_t TaiheAVSessionManager::OnSystemCommonEvent(std::shared_ptr<uintptr_t> &callback)
+{
+    std::lock_guard lockGuard(listenerMutex_);
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
+        "callback has not been registered");
+    return listener_->AddCallback(TaiheSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback);
+}
+
 int32_t TaiheAVSessionManager::OnServiceDie(std::shared_ptr<uintptr_t> &callback)
 {
     std::shared_ptr<uintptr_t> targetCb;
@@ -543,6 +552,14 @@ int32_t TaiheAVSessionManager::OffDeviceStateChanged(std::shared_ptr<uintptr_t> 
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "callback has not been registered");
     return listener_->RemoveCallback(TaiheSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
+}
+
+int32_t TaiheAVSessionManager::OffSystemCommonEvent(std::shared_ptr<uintptr_t> &callback)
+{
+    std::lock_guard lockGuard(listenerMutex_);
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
+        "callback has not been registered");
+    return listener_->RemoveCallback(TaiheSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback);
 }
 
 int32_t TaiheAVSessionManager::OffRemoteDistributedSessionChange(std::shared_ptr<uintptr_t> &callback)
@@ -1255,6 +1272,32 @@ void SendSystemControlCommandSync(AVControlCommand command)
     }
 }
 
+void SendSystemCommonCommandSync(string_view commonCommand, uintptr_t data)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionManager::SendSystemCommonCommandSync");
+    std::string commonCommandString;
+    if (TaiheUtils::GetString(commonCommand, commonCommandString) != OHOS::AVSession::AVSESSION_SUCCESS ||
+        commonCommandString.empty()) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "SendSystemCommonCommandSync invalid commonCommand");
+        return;
+    }
+    OHOS::AAFwk::WantParams dataArgs;
+    if (TaiheUtils::GetWantParams(data, dataArgs) != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "SendSystemCommonCommandSync failed : invalid command args");
+        return;
+    }
+ 
+    int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().SendSystemCommonCommand(
+        commonCommandString, dataArgs);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "SendSystemCommonCommandSync failed : native server exception";
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+}
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 static bool JudgeNumString(std::string str)
 {
@@ -1320,7 +1363,7 @@ array<AVSessionDescriptor> GetSessionDescriptorsSync(SessionCategory category)
     std::vector<AVSessionDescriptor> emptyResult;
     std::vector<OHOS::AVSession::AVSessionDescriptor> descriptors;
     if (!(sessionCategory >= OHOS::AVSession::SessionCategory::CATEGORY_ACTIVE && sessionCategory <=
-        OHOS::AVSession::SessionCategory::CATEGORY_ALL)) {
+        OHOS::AVSession::SessionCategory::CATEGORY_HIPLAY)) {
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
             "wrong session category");
         return array<AVSessionDescriptor>(emptyResult);
@@ -1433,6 +1476,12 @@ void OnDeviceStateChanged(callback_view<void(DeviceState const&)> callback)
     TaiheAVSessionManager::OnEvent("deviceStateChange", cacheCallback);
 }
 
+void OnSystemCommonEvent(callback_view<void(string_view)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    TaiheAVSessionManager::OnEvent("systemCommonEvent", cacheCallback);
+}
+
 void OnActiveSessionChanged(callback_view<void(array_view<AVSessionDescriptor>)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
@@ -1522,6 +1571,15 @@ void OffDeviceStateChanged(optional_view<callback<void(DeviceState const&)>> cal
     TaiheAVSessionManager::OffEvent("deviceStateChange", cacheCallback);
 }
 
+void OffSystemCommonEvent(optional_view<callback<void(string_view)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    TaiheAVSessionManager::OffEvent("systemCommonEvent", cacheCallback);
+}
+
 void OffActiveSessionChanged(optional_view<callback<void(array_view<AVSessionDescriptor>)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
@@ -1571,6 +1629,7 @@ TH_EXPORT_CPP_API_GetDistributedSessionControllerSync(ANI::AVSession::GetDistrib
 TH_EXPORT_CPP_API_IsDesktopLyricSupportedSync(ANI::AVSession::IsDesktopLyricSupportedSync);
 TH_EXPORT_CPP_API_SendSystemAVKeyEventSync(ANI::AVSession::SendSystemAVKeyEventSync);
 TH_EXPORT_CPP_API_SendSystemControlCommandSync(ANI::AVSession::SendSystemControlCommandSync);
+TH_EXPORT_CPP_API_SendSystemCommonCommandSync(ANI::AVSession::SendSystemCommonCommandSync);
 TH_EXPORT_CPP_API_StartDeviceLoggingSync(ANI::AVSession::StartDeviceLoggingSync);
 TH_EXPORT_CPP_API_StopDeviceLoggingSync(ANI::AVSession::StopDeviceLoggingSync);
 TH_EXPORT_CPP_API_GetSessionDescriptorsSync(ANI::AVSession::GetSessionDescriptorsSync);
@@ -1584,6 +1643,7 @@ TH_EXPORT_CPP_API_OnDeviceAvailable(ANI::AVSession::OnDeviceAvailable);
 TH_EXPORT_CPP_API_OnDeviceLogEvent(ANI::AVSession::OnDeviceLogEvent);
 TH_EXPORT_CPP_API_OnDeviceOffline(ANI::AVSession::OnDeviceOffline);
 TH_EXPORT_CPP_API_OnDeviceStateChanged(ANI::AVSession::OnDeviceStateChanged);
+TH_EXPORT_CPP_API_OnSystemCommonEvent(ANI::AVSession::OnSystemCommonEvent);
 TH_EXPORT_CPP_API_OnActiveSessionChanged(ANI::AVSession::OnActiveSessionChanged);
 TH_EXPORT_CPP_API_OffDistributedSessionChange(ANI::AVSession::OffDistributedSessionChange);
 TH_EXPORT_CPP_API_OffSessionCreate(ANI::AVSession::OffSessionCreate);
@@ -1594,4 +1654,5 @@ TH_EXPORT_CPP_API_OffDeviceAvailable(ANI::AVSession::OffDeviceAvailable);
 TH_EXPORT_CPP_API_OffDeviceLogEvent(ANI::AVSession::OffDeviceLogEvent);
 TH_EXPORT_CPP_API_OffDeviceOffline(ANI::AVSession::OffDeviceOffline);
 TH_EXPORT_CPP_API_OffDeviceStateChanged(ANI::AVSession::OffDeviceStateChanged);
+TH_EXPORT_CPP_API_OffSystemCommonEvent(ANI::AVSession::OffSystemCommonEvent);
 TH_EXPORT_CPP_API_OffActiveSessionChanged(ANI::AVSession::OffActiveSessionChanged);
