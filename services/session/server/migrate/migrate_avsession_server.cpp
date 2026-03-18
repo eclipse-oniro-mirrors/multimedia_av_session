@@ -525,7 +525,6 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
     std::string msg = ConvertControllersToStr(avcontroller);
 
     if (!deviceId.empty()) {
-        SLOGI("SendRemoteControllerList sendByte : %{public}s", msg.c_str());
         SendByte(deviceId, msg);
     } else {
         SendByteToAll(msg);
@@ -563,7 +562,6 @@ void MigrateAVSessionServer::SendRemoteHistorySessionList(const std::string &dev
 
     std::string msg = ConvertHistorySessionListToStr(descriptors, hisDescriptors);
     if (!deviceId.empty()) {
-        SLOGI("SendRemoteHistoryControllerList sendByte : %{public}s", msg.c_str());
         SendByte(deviceId, msg);
     } else {
         SendByteToAll(msg);
@@ -597,6 +595,7 @@ bool MigrateAVSessionServer::ConvertSessionDescriptorsToCJSON(cJSON* jsonArray, 
             SLOGE("AddJsonToJsonArray with index:%{public}d fail", descriptorNums);
             return false;
         }
+        SLOGI("packageName : %{public}s", releaseSessionBundleName_.c_str());
         descriptorNums++;
     }
     return true;
@@ -726,7 +725,6 @@ void MigrateAVSessionServer::DelaySendMetaData()
         metaDataInfo.SetMediaImage(mediaImage_);
         std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
             SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, metaDataInfo);
-        SLOGI("DelaySendMetaData sendByte : %{public}s", metaDataStr.c_str());
         SendByte(deviceId_, metaDataStr);
     }
 }
