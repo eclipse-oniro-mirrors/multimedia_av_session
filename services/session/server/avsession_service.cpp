@@ -2097,9 +2097,6 @@ int32_t AVSessionService::GetSessionDescriptors(int32_t category, std::vector<AV
             if (pcmCastSession_ != nullptr && pcmCastSession_->GetCastState()) {
                 AVSessionDescriptor descriptor = pcmCastSession_->GetDescriptor();
                 descriptors.push_back(descriptor);
-            } else {
-                AVSessionDescriptor descriptor;
-                descriptors.push_back(descriptor);
             }
             break;
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
