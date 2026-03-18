@@ -911,7 +911,7 @@ cJSON* MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerItem> av
         cJSON_Delete(metadata);
         return nullptr;
     }
-    SLOGI("SendRemoteController packageName:%{public}s",GetBundleName(avcontroller->GetSessionId()).c_str());
+    SLOGI("SendRemoteController packageName:%{public}s", GetBundleName(avcontroller->GetSessionId()).c_str());
     return metadata;
 }
 
