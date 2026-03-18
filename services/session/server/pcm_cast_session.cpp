@@ -138,11 +138,19 @@ void PcmCastSession::WriteCastPairToFile(const std::string& deviceId, int32_t ca
     SLOGI("PcmCastSession castPair: deviceId=%{public}s, castMode=%{public}d",
         AVSessionUtils::GetAnonymousDeviceId(castPair.first).c_str(), castPair.second);
  
+    int32_t userId = GetUsersManager().GetCurrentUserId();
+    std::string fileDir = AVSessionUtils::GetFixedPathNameForDevice(userId);
     std::string fileDir = AVSessionUtils::GetCachePathName();
     std::string fileName = deviceId + "_cast_pair" + AVSessionUtils::GetPairFileSuffix();
  
     AVSessionUtils::WritePairToFile(castPair, fileDir, fileName);
     SLOGI("PcmCastSession ExecuteCommonCommand finished.");
+}
+
+AVSessionUsersManager& PcmCastSession::GetUsersManager()
+{
+    static AVSessionUsersManager usersManager;
+    return usersManager;
 }
  
 int32_t PcmCastSession::SendStateChangeRequest(const SessionToken& sessionToken)
