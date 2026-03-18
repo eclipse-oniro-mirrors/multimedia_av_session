@@ -244,17 +244,18 @@ std::vector<sptr<AVSessionItem>> AVSessionUsersManager::RemoveSessionForAllUser(
     return result;
 }
 
-void AVSessionUsersManager::AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener)
+void AVSessionUsersManager::AddSessionListener(pid_t pid, const sptr<ISessionListener>& listener, int32_t userId)
 {
     std::lock_guard lockGuard(userLock_);
-    SLOGI("add sessionListener for pid %{public}d, curUser %{public}d", static_cast<int>(pid), curUserId_);
-    auto iterForListenerMap = sessionListenersMapByUserId_.find(curUserId_);
+    userId = (userId <= 0) ? curUserId_ : userId;
+    SLOGI("add sessionListener for pid %{public}d, targetUser %{public}d", static_cast<int>(pid), userId);
+    auto iterForListenerMap = sessionListenersMapByUserId_.find(userId);
     if (iterForListenerMap != sessionListenersMapByUserId_.end()) {
         (iterForListenerMap->second)[pid] = listener;
     } else {
         std::map<pid_t, sptr<ISessionListener>> listenerMap;
         listenerMap[pid] = listener;
-        sessionListenersMapByUserId_[curUserId_] = listenerMap;
+        sessionListenersMapByUserId_[userId] = listenerMap;
     }
 }
 

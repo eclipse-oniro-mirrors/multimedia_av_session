@@ -226,8 +226,8 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, HandleToggleFavoriteForSuper0
 {
     std::string mediaId = "";
     std::string playerId = "";
-    int32_t ret = g_migrateAVSessionProxyForSuper->HandleToggleFavoriteForSuper(mediaId, playerId);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t ret = g_migrateAVSessionProxyForSuper->HandleToggleFavoriteForSuper(playerId, mediaId);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
 }
 
 /**
@@ -240,7 +240,19 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, HandleToggleFavoriteForSuper0
 {
     std::string mediaId = "test_media_id";
     std::string playerId = "test_player_id";
-    int32_t ret = g_migrateAVSessionProxyForSuper->HandleToggleFavoriteForSuper(mediaId, playerId);
+
+    // Create a session
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = "test_player_id";
+    descriptor.sessionTag_ = "test_tag";
+    descriptor.sessionType_ = OHOS::AVSession::AVSession::SESSION_TYPE_AUDIO;
+
+    OHOS::sptr<AVSessionItem> sessionItem = new(std::nothrow) AVSessionItem(descriptor);
+    ASSERT_NE(sessionItem, nullptr);
+
+    // Add to stacks
+    g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_["test_player_id"] = sessionItem;
+    int32_t ret = g_migrateAVSessionProxyForSuper->HandleToggleFavoriteForSuper(playerId, mediaId);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 

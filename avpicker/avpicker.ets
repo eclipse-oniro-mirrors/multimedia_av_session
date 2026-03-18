@@ -108,6 +108,7 @@ interface HighQualityParams {
 export interface ShowingBundleTS {
   pixelData?: image.PixelMap | undefined;
   appName?: string | undefined;
+  isShowBadge: boolean | undefined;
 }
 
 interface TextParams {
@@ -237,7 +238,6 @@ export struct AVCastPicker {
   @State isDisabledByPickerLimit: boolean = false;
   @State isDeviceLevel: boolean = true;
   @State isSubMenuExpanded: boolean = false;
-  @State isShowBadge: boolean = false;
   @State isSwitch: boolean = false;
 
   private static currentPickerCount: number = 0;
@@ -384,11 +384,15 @@ export struct AVCastPicker {
                         if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
                           SymbolGlyph($r('sys.symbol.speaker_wave_2'))
                             .fontSize(`16vp`)
-                            .fontColor([$r('sys.color.icon_primary')])
+                            .fontColor([$r('sys.color.font_secondary')])
                         } else {
                           this.SmallPicIcon(item.bundleInfo?.pixelData)
                         }
                       }
+                      .margin({
+                        right: this.isRTL ? 0 : 4,
+                        left: this.isRTL ? 4 : 0
+                      })
                       .direction(Direction.Ltr)
  
                       Row() {
@@ -396,7 +400,6 @@ export struct AVCastPicker {
                           Text(this.textParams?.allMediaAudio)
                           .fontWeight('sys.string.ohos_id_text_font_family_regular')
                           .fontSize($r('sys.float.ohos_id_text_size_body3'))
-                          .margin({left: 2, right: 2})
                           .textOverflow({ overflow: TextOverflow.Ellipsis })
                           .maxFontScale(this.maxFontSizeScale)
                           .wordBreak(WordBreak.BREAK_ALL)
@@ -405,7 +408,6 @@ export struct AVCastPicker {
                         Text(this.textParams?.playingNow)
                           .fontWeight('sys.string.ohos_id_text_font_family_regular')
                           .fontSize($r('sys.float.ohos_id_text_size_body3'))
-                          .margin({left: 2, right: 2})
                           .textOverflow({ overflow: TextOverflow.Ellipsis })
                           .maxFontScale(this.maxFontSizeScale)
                           .wordBreak(WordBreak.BREAK_ALL)
@@ -415,7 +417,7 @@ export struct AVCastPicker {
                     }
                     .direction(Direction.Ltr)
 
-                    if (this.isShowBadge) {
+                    if (item.bundleInfo?.isShowBadge) {
                       Row(){
                         Badge({
                           value: '',
@@ -423,25 +425,29 @@ export struct AVCastPicker {
                         }) {
                           SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
                             .fontSize('16vp')
-                            .fontColor([$r('sys.color.icon_primary')])
+                            .fontColor([$r('sys.color.font_secondary')])
                         }
                         .width(18)
                         .height(16)
                       }
+                      .margin({left :8, right: 8})
                       .direction(Direction.Ltr) 
                     } else {
                       Row() {
                         SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
                           .fontSize('16vp')
-                          .fontColor([$r('sys.color.icon_primary')])
+                          .fontColor([$r('sys.color.font_secondary')])
                       }
+                      .margin({left :8, right: 8})
                       .direction(Direction.Ltr)
                     }
                   }
                   .onClick(() => {
                     this.isDeviceLevel = (item.castMode === HiPlayCastMode.DEVICE_LEVEL)
+                    if (this.extensionProxy != null) {
+                      this.extensionProxy.send({'isShowBadge': false});
+                    }
                     if (!this.isSubMenuExpanded) {
-                      this.isShowBadge =  false;
                       this.isSwitch = true;
                       this.isMenuShow = false;
                     }

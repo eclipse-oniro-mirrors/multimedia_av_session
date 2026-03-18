@@ -96,7 +96,6 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPickerLimit');
         this.__isDeviceLevel = new ObservedPropertySimplePU(true, this, 'isDeviceLevel');
         this.__isSubMenuExpanded = new ObservedPropertySimplePU(false, this, 'isSubMenuExpanded');
-        this.__isShowBadge = new ObservedPropertySimplePU(false, this, 'isShowBadge');
         this.__isSwitch = new ObservedPropertySimplePU(false, this, 'isSwitch');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
@@ -188,9 +187,6 @@ export class AVCastPicker extends ViewPU {
         if (c11.isSubMenuExpanded !== undefined) {
             this.isSubMenuExpanded = c11.isSubMenuExpanded;
         }
-        if (c11.isShowBadge !== undefined) {
-            this.isShowBadge = c11.isShowBadge;
-        }
         if (c11.isSwitch !== undefined) {
             this.isSwitch = c11.isSwitch;
         }
@@ -222,7 +218,6 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit.purgeDependencyOnElmtId(a11);
         this.__isDeviceLevel.purgeDependencyOnElmtId(a11);
         this.__isSubMenuExpanded.purgeDependencyOnElmtId(a11);
-        this.__isShowBadge.purgeDependencyOnElmtId(a11);
         this.__isSwitch.purgeDependencyOnElmtId(a11);
     }
 
@@ -249,7 +244,6 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit.aboutToBeDeleted();
         this.__isDeviceLevel.aboutToBeDeleted();
         this.__isSubMenuExpanded.aboutToBeDeleted();
-        this.__isShowBadge.aboutToBeDeleted();
         this.__isSwitch.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -427,13 +421,6 @@ export class AVCastPicker extends ViewPU {
     }
     set isSubMenuExpanded(i1) {
         this.__isSubMenuExpanded.set(i1);
-    }
-
-    get isShowBadge() {
-        return this.__isShowBadge.get();
-    }
-    set isShowBadge(i1) {
-        this.__isShowBadge.set(i1);
     }
 
     get isSwitch() {
@@ -724,8 +711,10 @@ export class AVCastPicker extends ViewPU {
                                             });
                                             Flex.onClick(() => {
                                                 this.isDeviceLevel = (x8.castMode === HiPlayCastMode.DEVICE_LEVEL);
+                                                if (this.extensionProxy != null) {
+                                                    this.extensionProxy.send({ 'isShowBadge': false})
+                                                }
                                                 if (!this.isSubMenuExpanded) {
-                                                    this.isShowBadge = false;
                                                     this.isSwitch = true;
                                                     this.isMenuShow = false;
                                                 }
@@ -736,6 +725,10 @@ export class AVCastPicker extends ViewPU {
                                         }, Flex);
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Row.create();
+                                            Row.margin({
+                                                right: this.isRTL ? 0 : 4,
+                                                left: this.isRTL ? 4 : 0,
+                                            });
                                             Row.direction(Direction.Ltr);
                                         }, Row);
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -746,7 +739,7 @@ export class AVCastPicker extends ViewPU {
                                                         SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.speaker_wave_2'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                         SymbolGlyph.fontSize(`16vp`);
-                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                     }, SymbolGlyph);
                                                 });
@@ -772,7 +765,6 @@ export class AVCastPicker extends ViewPU {
                                                         Text.fontWeight('sys.string.ohos_id_text_font_family_regular');
                                                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                                        Text.margin({ left: 2, right: 2 });
                                                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                                         Text.maxFontScale(this.maxFontSizeScale);
                                                         Text.wordBreak(WordBreak.BREAK_ALL);
@@ -789,7 +781,6 @@ export class AVCastPicker extends ViewPU {
                                                         Text.fontWeight('sys.string.ohos_id_text_font_family_regular');
                                                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body3'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                                        Text.margin({ left: 2, right: 2 });
                                                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                                                         Text.maxFontScale(this.maxFontSizeScale);
                                                         Text.wordBreak(WordBreak.BREAK_ALL);
@@ -803,10 +794,11 @@ export class AVCastPicker extends ViewPU {
                                         Row.pop();
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             If.create();
-                                            if (this.isShowBadge) {
+                                            if (x8.bundleInfo?.isShowBadge) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Row.create();
+                                                        Row.margin({ left: 8, right: 8})
                                                         Row.direction(Direction.Ltr);
                                                     }, Row);
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -822,7 +814,7 @@ export class AVCastPicker extends ViewPU {
                                                         SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                         SymbolGlyph.fontSize('16vp');
-                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                     }, SymbolGlyph);
                                                     Badge.pop();
@@ -833,13 +825,14 @@ export class AVCastPicker extends ViewPU {
                                                 this.ifElseBranchUpdateFunction(1, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         Row.create();
+                                                        Row.margin({ left: 8, right: 8})
                                                         Row.direction(Direction.Ltr);
                                                     }, Row);
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                         SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                                         SymbolGlyph.fontSize('16vp');
-                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                                                              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                     }, SymbolGlyph);
                                                     Row.pop();
