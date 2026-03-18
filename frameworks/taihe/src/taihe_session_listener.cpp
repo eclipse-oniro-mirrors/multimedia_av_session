@@ -189,6 +189,21 @@ void TaiheSessionListener::OnDeviceStateChange(const OHOS::AVSession::DeviceStat
     HandleEvent(EVENT_DEVICE_STATE_CHANGED, execute);
 }
 
+void TaiheSessionListener::OnSystemCommonEvent(const std::string& commonEvent, const std::string& args)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnSystemCommonEvent");
+    SLOGI("Start handle system common event");
+    dataContext_.commonEvent = string(commonEvent);
+    string_view commonEventTaihe = dataContext_.commonEvent;
+    auto execute = [commonEventTaihe](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(commonEventTaihe);
+    };
+    HandleEvent(EVENT_SYSTEM_COMMON_EVENT, execute);
+}
+
 void TaiheSessionListener::OnRemoteDistributedSessionChange(
     const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers)
 {
