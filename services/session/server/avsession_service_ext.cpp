@@ -410,7 +410,8 @@ void AVSessionService::UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo)
         }
         deviceInfo.hiPlayDeviceInfo_.castMode_ = deviceInfo.hiPlayDeviceInfo_.supportCastMode_;
  
-        std::string fileDir = AVSessionUtils::GetCachePathName();
+        int32_t userId = GetUsersManager().GetCurrentUserId();
+        std::string fileDir = AVSessionUtils::GetFixedPathNameForDevice(userId);
         std::string fileName = deviceInfo.deviceId_ + "_cast_pair" + AVSessionUtils::GetPairFileSuffix();
         if (deviceInfo.hiPlayDeviceInfo_.supportCastMode_ == HiPlayCastMode::DEVICE_LEVEL &&
             std::filesystem::exists(fileDir + fileName)) {
