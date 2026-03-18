@@ -20,8 +20,7 @@
 #include <iostream>
 #include <memory>
 #include <cstring>
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
 #include <unistd.h>
 #include "cJSON.h"
 #include "migrate_avsession_constant.h"
@@ -281,7 +280,7 @@ public:
     static int64_t TransformStrToInt64(const std::string str)
     {
         int64_t intFromStr;
-        if (sizeof(int64_t) > str.size()) {
+        if (str.size() < sizeof(int64_t)) {
             return -1;
         }
         errno_t ret = memcpy_s(&intFromStr, sizeof(int64_t), str.data(), sizeof(int64_t));
