@@ -222,6 +222,11 @@ public:
         return std::string(DATA_PATH_NAME) + std::to_string(userId) + FIXED_PATH_NAME;
     }
 
+    static std::string GetFixedPathNameForDevice(int32_t userId)
+    {
+        return std::string(DATA_PATH_NAME) + std::to_string(userId) + DEVICE_PATH_NAME;
+    }
+
     static const char* GetFileSuffix()
     {
         return FILE_SUFFIX;
@@ -390,6 +395,7 @@ private:
     static constexpr const char* DATA_PATH_NAME = "/data/service/el2/";
     static constexpr const char* CACHE_PATH_NAME = "/av_session/cache/";
     static constexpr const char* FIXED_PATH_NAME = "/av_session/";
+    static constexpr const char* DEVICE_PATH_NAME = "/av_session/deviceInfo/";
     static constexpr const char* PUBLIC_PATH_NAME = "public";
     static constexpr const char* FILE_SUFFIX = ".image.dat";
     static constexpr const char* PAIR_FILE_SUFFIX = ".dat";
