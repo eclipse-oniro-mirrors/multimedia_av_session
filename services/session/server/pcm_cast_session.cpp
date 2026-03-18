@@ -95,7 +95,7 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     }
     if (castHandle_ > 0) {
         if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
-            SLOGI("repeat startcast %{public}ld", castHandle_);
+            SLOGI("repeat startcast %{public}lld", castHandle_);
             SendStateChangeRequest(sessionToken);
             
             descriptor_.uid_ = sessionToken.uid;
@@ -106,7 +106,7 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     }
  
     castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, serviceNameStatePair, "pcmCastSession");
-    SLOGI("PcmCastSession StartCast-castHandle_ %{public}ld", castHandle_);
+    SLOGI("PcmCastSession StartCast-castHandle_ %{public}lld", castHandle_);
     AVRouter::GetInstance().RegisterCallback(castHandle_, shared_from_this(),
         "pcmCastSession", outputDeviceInfo.deviceInfos_[0]);
  
