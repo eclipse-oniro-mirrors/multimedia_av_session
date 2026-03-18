@@ -804,6 +804,10 @@ function SendSystemAVKeyEventSync(event: KeyEvent): void;
 @gen_promise("sendSystemControlCommand")
 function SendSystemControlCommandSync(command: AVControlCommand): void;
 
+@gen_async("sendSystemCommonCommand")
+@gen_promise("sendSystemCommonCommand")
+function SendSystemCommonCommandSync(commonCommand: String, data: @sts_type("Record<String, Object>") Opaque): void;
+
 @gen_promise("startDeviceLogging")
 function StartDeviceLoggingSync(url: String, maxSize: Optional<i32>): void;
 
@@ -847,6 +851,7 @@ function OnDeviceAvailable(callback: (device: OutputDeviceInfo) => void): void;
 function OnDeviceLogEvent(callback: (eventCode: DeviceLogEventCode) => void): void;
 function OnDeviceOffline(callback: (deviceId: String) => void): void;
 function OnDeviceStateChanged(callback: (deviceState: DeviceState) => void): void;
+function OnSystemCommonEvent(callback: (commonEvent: String) => void): void;
 
 function OffSessionCreate(callback: Optional<(session: AVSessionDescriptor) => void>): void;
 function OffSessionDestroy(callback: Optional<(session: AVSessionDescriptor) => void>): void;
@@ -855,6 +860,7 @@ function OffDeviceAvailable(callback: Optional<(device: OutputDeviceInfo) => voi
 function OffDeviceLogEvent(callback: Optional<(eventCode: DeviceLogEventCode) => void>): void;
 function OffDeviceOffline(callback: Optional<(deviceId: String) => void>): void;
 function OffDeviceStateChanged(callback: Optional<(deviceState: DeviceState) => void>): void;
+function OffSystemCommonEvent(callback: Optional<(commonEvent: String) => void>): void;
 
 enum AVSessionErrorCode : i32 {
   ERR_CODE_SERVICE_EXCEPTION = 6600101,
@@ -936,6 +942,7 @@ enum SessionCategory : i32 {
   CATEGORY_ACTIVE = 1,
   CATEGORY_NOT_ACTIVE = 2,
   CATEGORY_ALL = 3,
+  CATEGORY_HIPLAY = 4,
 }
 
 struct MenuPosition {
