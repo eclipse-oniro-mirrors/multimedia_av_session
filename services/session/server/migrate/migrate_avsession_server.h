@@ -98,6 +98,7 @@ private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
     std::map<std::string, std::shared_ptr<AVControllerObserver>> playerIdToControllerCallbackMap_;
     std::list<sptr<AVControllerItem>> sortControllerList_;
+    std::shared_ptr<AVSessionPixelMap> mediaImage_ = std::make_shared<AVSessionPixelMap>();
 
     void ObserveControllerChanged(const std::string &deviceId);
     void CreateController(const std::string &sessionId);
