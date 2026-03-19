@@ -92,6 +92,9 @@ void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
         SLOGI("onDisconnect but already:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
         return;
     }
+    if (mediaImage_ != nullptr) {
+        mediaImage_->Clear();
+    }
     UnregisterAudioCallback();
     isSoftbusConnecting_ = false;
     if (servicePtr_ == nullptr) {
@@ -605,6 +608,7 @@ bool MigrateAVSessionServer::ConvertSessionDescriptorsToCJSON(cJSON* jsonArray, 
             SLOGE("AddJsonToJsonArray with index:%{public}d fail", descriptorNums);
             return false;
         }
+        SLOGI("packageName : %{public}s", releaseSessionBundleName_.c_str());
         descriptorNums++;
     }
     return true;
@@ -649,6 +653,7 @@ bool MigrateAVSessionServer::ConvertReleaseSessionToCJSON(cJSON* jsonArray,
             SLOGE("AddJsonToJsonArray with index:%{public}d fail", descriptorNums);
             return false;
         }
+        SLOGI("packageName : %{public}s", iter->elementName_.GetBundleName().c_str());
         descriptorNums++;
     }
     return true;
@@ -693,6 +698,7 @@ bool MigrateAVSessionServer::ConvertHisSessionDescriptorsToCJSON(cJSON* jsonArra
             SLOGE("AddJsonToJsonArray with index:%{public}d fail", descriptorNums);
             return false;
         }
+        SLOGI("packageName : %{public}s", iter->elementName_.GetBundleName().c_str());
         descriptorNums++;
     }
     return true;
@@ -743,19 +749,10 @@ void MigrateAVSessionServer::DelaySendMetaData()
         resultMetaData.Reset();
         avcontroller->GetAVMetaData(resultMetaData);
         AVMetaData metaDataInfo = resultMetaData;
-        std::shared_ptr<AVSessionPixelMap> pixelImage = resultMetaData.GetMediaImage();
-        std::shared_ptr<AVSessionPixelMap> mediaImage = std::make_shared<AVSessionPixelMap>();
-        if (pixelImage != nullptr) {
-            SLOGI("ready to copy image");
-            mediaImage->SetInnerImgBuffer(pixelImage->GetInnerImgBuffer());
-            metaDataInfo.SetMediaImage(mediaImage);
-        }
+        metaDataInfo.SetMediaImage(mediaImage_);
         std::string metaDataStr = ConvertMetadataInfoToStr(topSessionId_,
             SYNC_CONTROLLER_CALLBACK_ON_METADATA_CHANNGED, metaDataInfo);
         SendByte(deviceId_, metaDataStr);
-        if (mediaImage != nullptr) {
-            mediaImage->Clear();
-        }
     }
 }
 
@@ -941,7 +938,7 @@ cJSON* MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerItem> av
         cJSON_Delete(metadata);
         return nullptr;
     }
-
+    SLOGI("SendRemoteController packageName:%{public}s", GetBundleName(avcontroller->GetSessionId()).c_str());
     return metadata;
 }
 
@@ -1247,6 +1244,11 @@ void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, cons
 {
     SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s",
         SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
+    std::shared_ptr<AVSessionPixelMap> pixelImage = data.GetMediaImage();
+    if (pixelImage != nullptr && mediaImage_ != nullptr) {
+        SLOGI("ready to copy image");
+        mediaImage_->SetInnerImgBuffer(pixelImage->GetInnerImgBuffer());
+    }
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
         DelaySendMetaData();
         }, "DelaySendMetaData", DELAY_METADATA_TIME);
