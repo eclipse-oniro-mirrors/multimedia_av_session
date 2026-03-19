@@ -957,6 +957,29 @@ DesktopLyricState AVSessionImpl::GetDesktopLyricStateSync()
     return TaiheUtils::ToTaiheDesktopLyricState(state);
 }
 
+void AVSessionImpl::SetBackgroundPlayModeSync(BackgroundPlayMode mode)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::SetBackgroundPlayMode");
+    if (session_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_SESSION_NOT_EXIST],
+            "SetBackgroundPlayMode failed : session is nullptr");
+        return;
+    }
+
+    if (!mode.is_valid()) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "SetBackgroundPlayMode failed : session is nullptr");
+        return;
+    }
+
+    int32_t ret = session_->SetBackgroundPlayMode(mode);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "SetBackgroundPlayMode", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+    }
+}
+
 void AddRegisterEvent(std::string eventName)
 {
     std::lock_guard lockGuard(registerEventLock_);
