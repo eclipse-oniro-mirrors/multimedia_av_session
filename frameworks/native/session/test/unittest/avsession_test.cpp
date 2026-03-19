@@ -6505,5 +6505,19 @@ HWTEST_F(AvsessionTest, SetBackgroundPlayMode001, TestSize.Level1)
     EXPECT_EQ(avsession_->SetBackgroundPlayMode(0), AVSESSION_SUCCESS);
     SLOGD("SetBackgroundPlayMode001 End");
 }
+
+/**
+* @tc.name: AVSessionDemoSetBackgroundPlayMode001
+* @tc.desc: set background play mode
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, AVSessionDemoSetBackgroundPlayMode001, TestSize.Level1)
+{
+    SLOGD("AVSessionDemoSetBackgroundPlayMode001 Begin");
+    AVSessionDemo avsessionDemo = AVSessionDemo();
+    EXPECT_EQ(avsessionDemo.SetBackgroundPlayMode(0), AVSESSION_SUCCESS);
+    SLOGD("AVSessionDemoSetBackgroundPlayMode001 End");
+}
 } // namespace AVSession
 } // namespace OHOS
