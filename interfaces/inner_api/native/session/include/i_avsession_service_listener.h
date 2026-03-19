@@ -83,7 +83,7 @@ public:
      * @param { std::string& } jsonParam - Additional arguments for the event.
      * @since 24
     */
-    virtual void NotifySystemCommonEvent(const std::string& commonEvent, const std::string& jsonParam) {};
+    virtual void NotifySystemCommonEvent(const std::string& commonEvent, const std::string& jsonParam) = 0;
 
     /**
      * set cast state at castservice state changed.

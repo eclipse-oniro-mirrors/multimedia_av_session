@@ -245,7 +245,7 @@ public:
      * @since 24
     */
     virtual void SendCommandArgsToCast(const int32_t castId, const int32_t commandType,
-        const std::string& params) {};
+        const std::string& params) = 0;
 };
 } // namespace OHOS::AVSession
 #endif

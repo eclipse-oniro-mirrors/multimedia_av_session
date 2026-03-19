@@ -18,6 +18,7 @@
 
 #include "avsession_info.h"
 #include "cJSON.h"
+#include "avsession_users_manager.h"
 
 namespace OHOS::AVSession {
 class PcmCastSession : public IAVRouterListener, public std::enable_shared_from_this<PcmCastSession> {
@@ -101,6 +102,7 @@ private:
     void WriteCastPairToFile(const std::string& deviceId, int32_t castMode);
     int32_t SendStateChangeRequest(const SessionToken& sessionToken);
     void CastStateCommandParams(const AAFwk::WantParams& commandArgs);
+    static AVSessionUsersManager& GetUsersManager();
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_PCM_CAST_SESSION_H
