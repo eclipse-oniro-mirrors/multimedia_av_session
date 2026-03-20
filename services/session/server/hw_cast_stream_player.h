@@ -101,6 +101,8 @@ private:
     void buildCastInfo(std::shared_ptr<AVMediaDescription>& mediaDescription, CastEngine::MediaInfo& mediaInfo);
     void buildCastExtraInfo(std::shared_ptr<AVMediaDescription>& mediaDescription,
         CastEngine::MediaInfo& mediaInfo);
+    std::string GetDlnaExtrasFromWantParams(
+        const std::shared_ptr<AAFwk::WantParams>& extras);
     void CheckIfCancelCastCapsule();
 
     std::shared_ptr<JsonCapabilities> jsonCapabilitiesSptr_ = std::make_shared<JsonCapabilities>();

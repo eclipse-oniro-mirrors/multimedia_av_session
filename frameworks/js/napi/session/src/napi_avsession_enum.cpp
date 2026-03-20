@@ -499,6 +499,23 @@ static napi_value ExportBackgroundPlayMode(napi_env env)
     return result;
 }
 
+static napi_value ExportExtraKey(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_object(env, &result);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+
+    (void)SetNamedProperty(env, result, "DLNA_CURRENT_URI_METADATA",
+        std::string(DlnaExtrasKey::CURRENT_URI_METADATA));
+    (void)SetNamedProperty(env, result, "DLNA_DIDL_LITE",
+        std::string(DlnaExtrasKey::DIDL_LITE));
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 napi_status InitEnums(napi_env env, napi_value exports)
 {
     const napi_property_descriptor properties[] = {
@@ -521,7 +538,8 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("ResolutionLevel", ExportResolutionLevel(env)),
         DECLARE_NAPI_PROPERTY("CallerType", ExportCallerType(env)),
         DECLARE_NAPI_PROPERTY("SessionCategory", ExportSessionCategory(env)),
-        DECLARE_NAPI_PROPERTY("BackgroundPlayMode", ExportBackgroundPlayMode(env))
+        DECLARE_NAPI_PROPERTY("BackgroundPlayMode", ExportBackgroundPlayMode(env)),
+        DECLARE_NAPI_PROPERTY("ExtraKey", ExportExtraKey(env))
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

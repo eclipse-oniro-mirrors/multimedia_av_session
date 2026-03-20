@@ -332,6 +332,35 @@ void HwCastStreamPlayer::buildCastExtraInfo(std::shared_ptr<AVMediaDescription>&
         SLOGI("buildCastExtraInfo has albumPixelMap");
         mediaInfo.albumPixelMap = AVSessionPixelMapAdapter::ConvertFromInner(mediaDescription->GetIcon(), false);
     }
+    auto extras = mediaDescription->GetExtras();
+    CHECK_AND_RETURN_LOG(extras != nullptr, "extras is null");
+    mediaInfo.extrasData = GetDlnaExtrasFromWantParams(extras);
+}
+
+std::string HwCastStreamPlayer::GetDlnaExtrasFromWantParams(
+    const std::shared_ptr<AAFwk::WantParams>& extras)
+{
+    CHECK_AND_RETURN_RET_LOG(extras != nullptr, "", "extras is null");
+    cJSON* extrasObj = cJSON_CreateObject();
+    CHECK_AND_RETURN_RET_LOG(extrasObj != nullptr, "", "Failed to create cJSON object");
+
+    auto appendKey = [&extras, extrasObj](const std::string& key) {
+        auto value = extras->GetParam(key);
+        CHECK_AND_RETURN_LOG(value != nullptr, "%{public}s value is null", key.c_str());
+        auto* extraValue = AAFwk::IString::Query(value);
+        CHECK_AND_RETURN_LOG(extraValue != nullptr, "%{public}s is not string type", key.c_str());
+        auto extraStr = AAFwk::String::Unbox(extraValue);
+        SLOGI("GetDlnaExtrasFromWantParams: %{public}s length=%{public}zu", key.c_str(), extraStr.length());
+        cJSON_AddStringToObject(extrasObj, key.c_str(), extraStr.c_str());
+    };
+    appendKey(DlnaExtrasKey::DIDL_LITE);
+    appendKey(DlnaExtrasKey::CURRENT_URI_METADATA);
+
+    char* jsonStr = cJSON_PrintUnformatted(extrasObj);
+    std::string result = (jsonStr != nullptr) ? jsonStr : "";
+    cJSON_free(jsonStr);
+    cJSON_Delete(extrasObj);
+    return result;
 }
 
 int32_t HwCastStreamPlayer::GetDuration(int32_t& duration)
