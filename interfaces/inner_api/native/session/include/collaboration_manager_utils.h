@@ -87,6 +87,7 @@ typedef enum ServiceCollaborationManagerLinkType {
     SOFTBUS_P2P = 2, // create P2P by softbus
     NATIVE_P2P = 3,
     REUSING_AP = 4, // business reuse ap link
+    WLAN = 5,
 } ServiceCollaborationManagerLinkType;
 
 typedef struct ServiceCollaborationManager_HardwareRequestInfo {

@@ -24,6 +24,7 @@
 #include "audio_info.h"
 #include "collaborationmanager_fuzzer.h"
 #include "collaboration_manager.h"
+#include "collaboration_manager_urlcasting.h"
 #include "securec.h"
 #include <fuzzer/FuzzedDataProvider.h>
 
@@ -75,21 +76,21 @@ void CollaborationManagerFuzzer::CollaborationManagerFuzzTest(uint8_t* data, siz
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
 
     auto registerLifecycleCallback1 = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
         return static_cast<int32_t>(0);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
         = registerLifecycleCallback1;
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
 
     auto registerLifecycleCallback2 = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
         return static_cast<int32_t>(1);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
         = registerLifecycleCallback2;
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
     CollaborationManager collaborationManager;
     collaborationManager.ReadCollaborationManagerSo();
     std::string peerNetworkId = std::to_string(GetData<uint8_t>());

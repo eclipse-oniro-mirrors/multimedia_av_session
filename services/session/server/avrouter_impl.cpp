@@ -21,7 +21,8 @@
 #include "permission_checker.h"
 #include "avcast_provider_manager.h"
 #include "avsession_sysevent.h"
-#include "collaboration_manager.h"
+#include "collaboration_manager_urlcasting.h"
+#include "collaboration_manager_hiplay.h"
 #include "cJSON.h"
 #ifdef DEVICE_MANAGER_ENABLE
 #include "device_manager.h"
@@ -700,7 +701,7 @@ void AVRouterImpl::NotifyCastSessionCreated()
         deviceInfo.supportedProtocols_ = sourceProtocols_;
         SLOGI("sourceProtocols_ is %{public}d", sourceProtocols_);
         castSide_ = CAST_SIDE::CAST_SINK;  // prohibit cast preempt mirror toast disconnect
-        sinkAllConnectResult_ = CollaborationManager::GetInstance().CastAddToCollaboration(deviceInfo);
+        sinkAllConnectResult_ = CollaborationManagerURLCasting::GetInstance().CastAddToCollaboration(deviceInfo);
     }
     
     castSide_ = CAST_SIDE::CAST_SINK;

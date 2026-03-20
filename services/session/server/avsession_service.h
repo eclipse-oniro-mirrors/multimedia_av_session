@@ -78,7 +78,8 @@
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
-#include "collaboration_manager.h"
+#include "collaboration_manager_urlcasting.h"
+#include "collaboration_manager_hiplay.h"
 #include "pcm_cast_session.h"
 #endif
 

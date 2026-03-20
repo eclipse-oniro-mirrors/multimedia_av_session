@@ -986,7 +986,19 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
     pcmCastSession->OnCastStateChange(5, deviceInfo, false);
     pcmCastSession->OnCastStateChange(0, deviceInfo, false);
-    pcmCastSession->OnCastStateChange(6, deviceInfo, false);
+    pcmCastSession->OnCastStateChange(6, deviceInfo, true);
+    
+    pcmCastSession->collaborationNeedNetworkId_ = "deviceId";
+    pcmCastSession->DealCollaborationPublishState(5, deviceInfo);
+    pcmCastSession->DealCollaborationPublishState(0, deviceInfo);
+    pcmCastSession->DealCollaborationPublishState(6, deviceInfo);
+
+    pcmCastSession->collaborationNeedNetworkId_.clear();
+    pcmCastSession->DealCollaborationPublishState(5, deviceInfo);
+    pcmCastSession->collaborationNeedNetworkId_.clear();
+    pcmCastSession->DealCollaborationPublishState(0, deviceInfo);
+    pcmCastSession->collaborationNeedNetworkId_.clear();
+    pcmCastSession->DealCollaborationPublishState(6, deviceInfo);
 
     pcmCastSession->CastStateCommandParams(commandArgs);
     pcmCastSession->DestroyTask();
