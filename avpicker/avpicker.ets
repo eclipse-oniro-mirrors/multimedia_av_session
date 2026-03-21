@@ -197,6 +197,11 @@ export struct AVCastPicker {
   @State textParams: TextParams = {};
 
   /**
+   * whether it is an ANCO session
+   */
+  @State isAncoSession: boolean = false;
+
+  /**
    * Picker state change callback.
    */
   private onStateChange?: (state: AVCastPickerState) => void;
@@ -379,7 +384,8 @@ export struct AVCastPicker {
                   .margin({top: 4})
                   .width('auto')
                    
-                  if (item.isConnected && item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
+                  if ((item.isConnected || item.castUid !== 0) &&
+                    item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL && !this.isAncoSession) {
                     Flex({direction:FlexDirection.Row, alignItems:ItemAlign.Center}) {
                       Row() {
                         if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
@@ -444,13 +450,15 @@ export struct AVCastPicker {
                     }
                   }
                   .onClick(() => {
-                    this.isDeviceLevel = (item.castMode === HiPlayCastMode.DEVICE_LEVEL)
-                    if (this.extensionProxy != null) {
-                      this.extensionProxy.send({'isShowBadge': false});
-                    }
-                    if (!this.isSubMenuExpanded) {
-                      this.isSwitch = true;
-                      this.isMenuShow = false;
+                    if (item.isConnected) {
+                      this.isDeviceLevel = (item.castMode === HiPlayCastMode.DEVICE_LEVEL)
+                      if (this.extensionProxy != null) {
+                        this.extensionProxy.send({'isShowBadge': false});
+                      }
+                      if (!this.isSubMenuExpanded) {
+                        this.isSwitch = true;
+                        this.isMenuShow = false;
+                      }
                     }
                   })
                   .padding({top: 2.5, right: 4, bottom: 2.5, left: 4})
@@ -743,6 +751,11 @@ export struct AVCastPicker {
           if (data['textParams'] !== undefined) {
             console.info(TAG, `textParams : ${JSON.stringify(data['textParams'])}`);
             this.textParams = data['textParams'] as TextParams;
+          }
+
+          if (data['isAncoSession'] !== undefined) {
+            console.info(TAG, `isAncoSession : ${JSON.stringify(data['isAncoSession'])}`);
+            this.isAncoSession = data['isAncoSession'] as boolean;
           }
         })
         .size({ width: '100%', height: '100%' })
