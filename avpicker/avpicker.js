@@ -78,6 +78,7 @@ export class AVCastPicker extends ViewPU {
         this.__isMenuShow = new ObservedPropertySimplePU(false, this, 'isMenuShow');
         this.__touchMenuItemIndex = new ObservedPropertySimplePU(-1, this, 'touchMenuItemIndex');
         this.__textParams = new ObservedPropertyObjectPU({}, this, 'textParams');
+        this.__isAncoSession = new ObservedPropertyObjectPU(false, this, 'isAncoSession');
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;

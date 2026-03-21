@@ -135,6 +135,7 @@ export interface AVCastPickerDeviceInfo {
   deviceSubName?: string,
   supportCastMode?: number,
   castMode?: number,
+  castUid?: number,
   bundleInfo?: ShowingBundleTS,
 }
 
