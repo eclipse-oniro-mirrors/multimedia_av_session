@@ -48,7 +48,6 @@ std::map<std::string, std::pair<NapiAVSessionManager::OnEventHandlerType, NapiAV
     { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
     { "deviceStateChanged", { OnDeviceStateChanged, OffDeviceStateChanged } },
-    { "systemCommonEvent", { OnSystemCommonEvent, OffSystemCommonEvent } },
 };
 
 std::map<DistributedSessionType, std::pair<NapiAVSessionManager::OnEventHandlerType,
@@ -132,6 +131,8 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("offSessionDestroy", OffSessionDestroyEvent),
         DECLARE_NAPI_STATIC_FUNCTION("onTopSessionChange", OnTopSessionChangeEvent),
         DECLARE_NAPI_STATIC_FUNCTION("offTopSessionChange", OffTopSessionChangeEvent),
+        DECLARE_NAPI_STATIC_FUNCTION("onSystemCommonEvent", onSystemCommonEvent),
+ 	         DECLARE_NAPI_STATIC_FUNCTION("offSystemCommonEvent", OffSystemCommonEvent),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
@@ -1857,14 +1858,6 @@ napi_status NapiAVSessionManager::OnDeviceStateChanged(napi_env env, napi_value 
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
 
-napi_status NapiAVSessionManager::OnSystemCommonEvent(napi_env env, napi_value callback)
-{
-    SLOGI("OnSystemCommonEvent AddCallback");
-    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return listener_->AddCallback(env, NapiSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback);
-}
-
-
 void NapiAVSessionManager::HandleServiceDied()
 {
     std::string callBackName = "NapiAVSessionManager::HandleServiceDied";
@@ -1947,13 +1940,6 @@ napi_status NapiAVSessionManager::OffDeviceStateChanged(napi_env env, napi_value
     SLOGI("OffDeviceStateChanged RemoveCallback");
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
-}
-
-napi_status NapiAVSessionManager::OffSystemCommonEvent(napi_env env, napi_value callback)
-{
-    SLOGI("OffSystemCommonEvent RemoveCallback");
-    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
-    return listener_->RemoveCallback(env, NapiSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback);
 }
 
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)

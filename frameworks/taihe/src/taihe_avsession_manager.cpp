@@ -50,7 +50,6 @@ std::map<std::string, std::pair<TaiheAVSessionManager::OnEventHandlerType, Taihe
     { "deviceLogEvent", { OnDeviceLogEvent, OffDeviceLogEvent } },
     { "deviceOffline", { OnDeviceOffline, OffDeviceOffline } },
     { "deviceStateChange", { OnDeviceStateChanged, OffDeviceStateChanged } },
-    { "systemCommonEvent", { OnSystemCommonEvent, OffSystemCommonEvent } },
 };
 
 std::map<OHOS::AVSession::DistributedSessionType, std::pair<TaiheAVSessionManager::OnEventHandlerType,
