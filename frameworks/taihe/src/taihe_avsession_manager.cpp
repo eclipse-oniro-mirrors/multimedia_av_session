@@ -391,6 +391,50 @@ int32_t TaiheAVSessionManager::OffActiveSessionChangedEvent(std::shared_ptr<uint
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
+int32_t TaiheAVSessionManager::OnCommonEvent(std::shared_ptr<uintptr_t> &callback)
+{
+    SLOGI("OnCommonEvent");
+
+    if (RegisterNativeSessionListener() != OHOS::AVSession::AVSESSION_SUCCESS) {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
+    bool isAddSuccess = false;
+    {
+        std::lock_guard lockGuard(listenerMutex_);
+        isAddSuccess = listener_ != nullptr &&
+            listener_->AddCallback(TaiheSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback) ==
+                OHOS::AVSession::AVSESSION_SUCCESS;
+    }
+
+    if (!isAddSuccess) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
+            "add event callback failed");
+    }
+
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+int32_t TaiheAVSessionManager::OffCommonEvent(std::shared_ptr<uintptr_t> &callback)
+{
+    SLOGI("OffCommonEvent");
+
+    bool isDelSuccess = false;
+    {
+        std::lock_guard lockGuard(listenerMutex_);
+        isDelSuccess = listener_ != nullptr &&
+            listener_->RemoveCallback(TaiheSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback) ==
+                OHOS::AVSession::AVSESSION_SUCCESS;
+    }
+
+    if (!isDelSuccess) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::AVSESSION_ERROR],
+            "remove event callback failed");
+    }
+
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
 int32_t TaiheAVSessionManager::OnSessionCreate(std::shared_ptr<uintptr_t> &callback)
 {
     std::lock_guard lockGuard(listenerMutex_);
@@ -452,14 +496,6 @@ int32_t TaiheAVSessionManager::OnDeviceStateChanged(std::shared_ptr<uintptr_t> &
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "callback has not been registered");
     return listener_->AddCallback(TaiheSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
-}
-
-int32_t TaiheAVSessionManager::OnSystemCommonEvent(std::shared_ptr<uintptr_t> &callback)
-{
-    std::lock_guard lockGuard(listenerMutex_);
-    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
-        "callback has not been registered");
-    return listener_->AddCallback(TaiheSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback);
 }
 
 int32_t TaiheAVSessionManager::OnServiceDie(std::shared_ptr<uintptr_t> &callback)
@@ -551,14 +587,6 @@ int32_t TaiheAVSessionManager::OffDeviceStateChanged(std::shared_ptr<uintptr_t> 
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "callback has not been registered");
     return listener_->RemoveCallback(TaiheSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
-}
-
-int32_t TaiheAVSessionManager::OffSystemCommonEvent(std::shared_ptr<uintptr_t> &callback)
-{
-    std::lock_guard lockGuard(listenerMutex_);
-    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
-        "callback has not been registered");
-    return listener_->RemoveCallback(TaiheSessionListener::EVENT_SYSTEM_COMMON_EVENT, callback);
 }
 
 int32_t TaiheAVSessionManager::OffRemoteDistributedSessionChange(std::shared_ptr<uintptr_t> &callback)
@@ -1478,7 +1506,7 @@ void OnDeviceStateChanged(callback_view<void(DeviceState const&)> callback)
 void OnSystemCommonEvent(callback_view<void(string_view)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
-    TaiheAVSessionManager::OnEvent("systemCommonEvent", cacheCallback);
+    TaiheAVSessionManager::OnCommonEvent(cacheCallback);
 }
 
 void OnActiveSessionChanged(callback_view<void(array_view<AVSessionDescriptor>)> callback)
@@ -1576,7 +1604,7 @@ void OffSystemCommonEvent(optional_view<callback<void(string_view)>> callback)
     if (callback.has_value()) {
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
-    TaiheAVSessionManager::OffEvent("systemCommonEvent", cacheCallback);
+    TaiheAVSessionManager::OffCommonEvent(cacheCallback);
 }
 
 void OffActiveSessionChanged(optional_view<callback<void(array_view<AVSessionDescriptor>)>> callback)
