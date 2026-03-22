@@ -131,7 +131,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("offSessionDestroy", OffSessionDestroyEvent),
         DECLARE_NAPI_STATIC_FUNCTION("onTopSessionChange", OnTopSessionChangeEvent),
         DECLARE_NAPI_STATIC_FUNCTION("offTopSessionChange", OffTopSessionChangeEvent),
-        DECLARE_NAPI_STATIC_FUNCTION("onSystemCommonEvent", onSystemCommonEvent),
+        DECLARE_NAPI_STATIC_FUNCTION("onSystemCommonEvent", OnSystemCommonEvent),
         DECLARE_NAPI_STATIC_FUNCTION("offSystemCommonEvent", OffSystemCommonEvent),
     };
 
