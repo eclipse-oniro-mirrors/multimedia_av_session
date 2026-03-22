@@ -84,7 +84,7 @@ private:
     static napi_status OnServiceDie(napi_env env, napi_value callback);
     static napi_status OnRemoteDistributedSessionChange(napi_env env, napi_value callback);
     static napi_status OnDeviceStateChanged(napi_env env, napi_value callback);
-    
+
     static napi_status OffSessionCreate(napi_env env, napi_value callback);
     static napi_status OffSessionDestroy(napi_env env, napi_value callback);
     static napi_status OffTopSessionChange(napi_env env, napi_value callback);
@@ -95,7 +95,7 @@ private:
     static napi_status OffServiceDie(napi_env env, napi_value callback);
     static napi_status OffRemoteDistributedSessionChange(napi_env env, napi_value callback);
     static napi_status OffDeviceStateChanged(napi_env env, napi_value callback);
-    
+
     static void HandleServiceDied();
 
     static void HandleServiceStart();
