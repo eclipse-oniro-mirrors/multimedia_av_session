@@ -37,6 +37,7 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         castHandle_ = -1;
         castState_ = CastState::DISCONNECTED;
         castHandleDeviceId_ = "-100";
+        descriptor_.uid_ = 0;
     }
     
     deviceInfo.hiPlayDeviceInfo_.castMode_ = castMode_;
