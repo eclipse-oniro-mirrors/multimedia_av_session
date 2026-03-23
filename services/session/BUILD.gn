@@ -29,7 +29,7 @@ group("avsession_server") {
     "../etc:avsession_service.rc",
     "../etc:ohos.para.dac",
   ]
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     deps += [ ":softbus_manager_dynamic" ]
   }
 }
@@ -247,7 +247,7 @@ av_session_ohos_library("avsession_service") {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
   }
 
@@ -546,7 +546,7 @@ ohos_shared_library("softbus_manager_dynamic") {
     "hilog:libhilog",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
     external_deps += [ "dsoftbus:softbus_client" ]
   }

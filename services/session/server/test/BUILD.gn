@@ -107,7 +107,7 @@ common_external_deps = [
   "window_manager:libdm_lite",
 ]
 
-if (multimedia_av_session_enable_dsoftbus) {
+if (av_session_enable_dsoftbus) {
   common_external_deps += [ "dsoftbus:softbus_client" ]
 }
 
@@ -136,7 +136,7 @@ common_external_deps_with_third_party = [
   "window_manager:libdm_lite",
 ]
 
-if (multimedia_av_session_enable_dsoftbus) {
+if (av_session_enable_dsoftbus) {
   common_external_deps_with_third_party += [ "dsoftbus:softbus_client" ]
 }
 
@@ -215,7 +215,7 @@ ohos_unittest("AVSessionUsersManagerTest") {
     "window_manager:libdm_lite",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -318,7 +318,7 @@ ohos_unittest("AVSharedMemoryBaseTest") {
     "window_manager:libdm_lite",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -401,7 +401,7 @@ ohos_unittest("AVSessionServiceAddedTest") {
   ]
 
   defines = []
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
@@ -497,7 +497,7 @@ ohos_unittest("AudioDeviceManagerTest") {
     "window_manager:libdm_lite",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -586,7 +586,7 @@ ohos_unittest("AVSessionItemTest") {
     "window_manager:libdm_lite",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -691,7 +691,7 @@ ohos_unittest("AVControllerItemTest") {
     "window_manager:libdm_lite",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -779,7 +779,7 @@ ohos_unittest("MigrateAVSessionProxyTest") {
     "window_manager:libdm_lite",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -939,7 +939,7 @@ ohos_unittest("MigrateAVSessionManagerTest") {
     "window_manager:libdm_lite",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -1028,7 +1028,7 @@ ohos_unittest("SoftbusSessionManagerSupplementTest") {
   ]
 
   defines = []
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += ["DSOFTBUS_ENABLE"]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
@@ -1119,7 +1119,7 @@ ohos_unittest("MigrateAVSessionServerForNextTest") {
     "window_manager:libdm_lite",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -2053,7 +2053,7 @@ ohos_unittest("MigrateAVSessionTest") {
   ]
 
   defines = []
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += ["DSOFTBUS_ENABLE"]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
@@ -2138,7 +2138,7 @@ ohos_unittest("SoftbusSessionManagerTest") {
   ]
 
   defines = []
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += ["DSOFTBUS_ENABLE"]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
@@ -2211,7 +2211,7 @@ ohos_unittest("AVSessionServiceTest") {
   ]
 
   defines = []
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
@@ -2315,7 +2315,7 @@ ohos_unittest("AVSessionServiceExtTest") {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 

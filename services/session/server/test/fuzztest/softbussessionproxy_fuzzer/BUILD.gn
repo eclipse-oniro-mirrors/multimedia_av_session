@@ -74,7 +74,7 @@ ohos_fuzztest("SoftbusSessionProxyFuzzTest") {
     external_deps += ["device_manager:devicemanagersdk"]
   }
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     external_deps += ["dsoftbus:softbus_client"]
   }
 
