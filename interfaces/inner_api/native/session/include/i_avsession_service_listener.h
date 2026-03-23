@@ -108,6 +108,13 @@ public:
      * @since 18
     */
     virtual int32_t checkEnableCast(bool enable) = 0;
+
+    /**
+     * Is HiPlay Casting.
+     *
+     * @since 24
+    */
+    virtual bool IsHiPlayCasting() = 0;
 #endif
 };
 } // namespace OHOS::AVSession

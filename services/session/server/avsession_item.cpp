@@ -1847,6 +1847,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
         }
         if (AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SOURCE &&
             AVRouter::GetInstance().IsRemoteCasting() &&
+            (!AVRouter::GetInstance().IsHiPlayCasting()) &&
             AVRouter::GetInstance().GetMirrorCastHandle() == -1) {
             return SubStartCast(outputDeviceInfo);
         }

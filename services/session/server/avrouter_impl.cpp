@@ -734,6 +734,16 @@ std::string AVRouterImpl::GetCastingDeviceName()
     return sinkDeviceName_;
 }
 
+bool AVRouterImpl::IsHiPlayCasting()
+{
+    if (servicePtr_ == nullptr) {
+        SLOGE("servicePtr is NULL");
+        return false;
+    }
+
+    return servicePtr_->IsHiPlayCasting();
+}
+
 bool AVRouterImpl::IsRemoteCasting()
 {
     return isRemoteCasting_;

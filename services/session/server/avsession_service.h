@@ -295,6 +295,8 @@ public:
 
     int32_t StopSourceCast();
 
+    bool IsHiPlayCasting() override;
+
     int32_t checkEnableCast(bool enable) override;
 
     void setInCast(bool isInCast) override;

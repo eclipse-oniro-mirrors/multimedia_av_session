@@ -1566,6 +1566,27 @@ static HWTEST_F(AVSessionServiceTestSecond, checkEnableCast001, TestSize.Level0)
 #endif
 
 /**
+* @tc.name: isHiPlayCasting001
+* @tc.desc: Verifying isHiPlayCasting001 with init state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+static HWTEST_F(AVSessionServiceTestSecond, isHiPlayCasting001, TestSize.Level0)
+{
+    g_AVSessionService->pcmCastSession_ = nullptr;
+    EXPECT_FALSE(g_AVSessionService->IsHiPlayCasting());
+    std::shared_ptr<PcmCastSession> pcm_cast = std::make_shared<PcmCastSession>();
+    g_AVSessionService->pcmCastSession_ = pcm_cast;
+    EXPECT_FALSE(g_AVSessionService->IsHiPlayCasting());
+    pcm_cast->castHandle_ = 1;
+    EXPECT_EQ(g_AVSessionService->pcmCastSession_->GetCastHandle(), pcm_cast->castHandle_);
+    EXPECT_TRUE(g_AVSessionService->IsHiPlayCasting());
+    g_AVSessionService->pcmCastSession_ = nullptr;
+}
+#endif
+
+/**
 * @tc.name: StopCast001
 * @tc.desc: Verifying StopCast with init state
 * @tc.type: FUNC

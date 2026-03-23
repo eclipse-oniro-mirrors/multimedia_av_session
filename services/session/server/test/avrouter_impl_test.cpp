@@ -110,6 +110,7 @@ public:
         void setInCast(bool isInCast) {}
         void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) {}
         int32_t checkEnableCast(bool enable) { return 0; }
+        bool IsHiPlayCasting() { return false; }
 #endif
     virtual ~AVSessionServiceListenerMock() {}
 };
@@ -822,6 +823,7 @@ static HWTEST_F(AVRouterImplTest, OnDeviceAvailable001, TestSize.Level0)
     g_AVRouterImpl->servicePtr_ = listener.get();
     g_AVRouterImpl->OnDeviceAvailable(outputDeviceInfo);
     EXPECT_TRUE(g_AVRouterImpl->servicePtr_ != nullptr);
+    EXPECT_FALSE(g_AVRouterImpl->IsHiPlayCasting());
     SLOGI("OnDeviceAvailable001 end");
 }
 
