@@ -245,6 +245,34 @@ static HWTEST_F(AVSessionServiceAddedTest, StopCast001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: StartCast001
+ * @tc.desc: test StartCast
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, StartCast001, TestSize.Level0)
+{
+    SLOGD("StartCast001 begin!");
+    #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AVSession::SessionToken sessionToken;
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "-100";
+    deviceInfo.supportedProtocols_ = 8;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    sessionToken.sessionId = "pcmCastSession";
+    sessionToken.pid = 1234;
+    sessionToken.uid = 5678;
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo);
+    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
+    #endif
+    SLOGD("StartCast001 end!");
+}
+
+
+/**
  * @tc.name: ProcessTargetMigrateTest001
  * @tc.desc: Test for deviceTypeId mismatch.
  * @tc.type: FUNC
@@ -565,7 +593,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DoConnectPr
  */
 static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003, TestSize.Level0)
 {
-    SLOGI("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003 begin!");
+    SLOGD("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003 begin!");
     ASSERT_TRUE(g_AVSessionService != nullptr);
     OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
     deviceInfo.deviceTypeId = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
@@ -585,7 +613,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DoConnectPr
     ret = g_AVSessionService->DoHisMigrateServerTransform("DEFAULT_NETWORKID");
     EXPECT_EQ(ret, ERR_SESSION_NOT_EXIST);
     g_AVSessionService->DoConnectProcessWithMigrate(deviceInfo);
-    SLOGI("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003 end!");
+    SLOGD("AVSessionServiceAddedTest_DoConnectProcessWithMigrate_003 end!");
 }
 #endif
 
@@ -1286,7 +1314,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_IsCapsuleNe
 */
 static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_StartDefaultAbilityByCall_001, TestSize.Level0)
 {
-    SLOGI("StartDefaultAbilityByCall001 begin!");
+    SLOGD("StartDefaultAbilityByCall001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -1309,7 +1337,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_StartDefaul
     EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS || ret == AVSESSION_ERROR, true);
     g_AVSessionService->HandleSessionRelease(sessionId);
     avsessionItem->Destroy();
-    SLOGI("StartDefaultAbilityByCall001 end!");
+    SLOGD("StartDefaultAbilityByCall001 end!");
 }
 
 /**
@@ -1320,7 +1348,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_StartDefaul
 */
 static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_StartAbilityByCall_001, TestSize.Level0)
 {
-    SLOGI("StartAbilityByCall001 begin!");
+    SLOGD("StartAbilityByCall001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -1344,7 +1372,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_StartAbilit
     EXPECT_EQ(ret == ERR_ABILITY_NOT_AVAILABLE || ret == AVSESSION_SUCCESS || ret == AVSESSION_ERROR, true);
     g_AVSessionService->HandleSessionRelease(sessionId);
     avsessionItem->Destroy();
-    SLOGI("StartAbilityByCall001 end!");
+    SLOGD("StartAbilityByCall001 end!");
 }
 
 /**
@@ -1355,7 +1383,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_StartAbilit
 */
 static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_GetLocalTitle_001, TestSize.Level0)
 {
-    SLOGI("AVSessionServiceAddedTest_GetLocalTitle_001 begin!");
+    SLOGD("AVSessionServiceAddedTest_GetLocalTitle_001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -1369,7 +1397,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_GetLocalTit
 
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
-    SLOGI("AVSessionServiceAddedTest_GetLocalTitle_001 end!");
+    SLOGD("AVSessionServiceAddedTest_GetLocalTitle_001 end!");
 }
 
 /**
@@ -1380,7 +1408,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_GetLocalTit
 */
 static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_NotifySystemUI_001, TestSize.Level0)
 {
-    SLOGI("AVSessionServiceAddedTest_NotifySystemUI_001 begin!");
+    SLOGD("AVSessionServiceAddedTest_NotifySystemUI_001 begin!");
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -1397,7 +1425,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_NotifySyste
 
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
-    SLOGI("AVSessionServiceAddedTest_NotifySystemUI_001 end!");
+    SLOGD("AVSessionServiceAddedTest_NotifySystemUI_001 end!");
 }
 
 /**

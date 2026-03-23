@@ -29,6 +29,7 @@
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
 #include "migrate_avsession_manager.h"
+#include "avrouter_impl.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -48,6 +49,7 @@ static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnActiveSessionChanged = false;
 static bool g_isCallOnTopSessionChange = false;
 static const int32_t ANCO_BROKER_SA_ID = 66849;
+static std::shared_ptr<AVRouterImpl> g_AVRouterImpl {nullptr};
 
 class TestISessionListener : public ISessionListener {
     TestISessionListener() = default;
@@ -1014,6 +1016,18 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast002, TestSize.Level
     pcmCastSession->OnSystemCommonEvent(args);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+static HWTEST_F(AVSessionServiceTestExt, SendStateChangeRequest001, TestSize.Level0)
+{
+    SLOGD("SendStateChangeRequest001 begin!");
+    SessionToken sessionToken;
+    sessionToken.sessionId = "pcmCastSession";
+    sessionToken.uid = 12345;
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    int32_t ret = pcmCastSession->SendStateChangeRequest(sessionToken);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("SendStateChangeRequest001 end!");
 }
 
 /*

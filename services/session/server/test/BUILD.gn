@@ -2251,7 +2251,7 @@ ohos_unittest("AVSessionServiceTest") {
   public_configs = ["../../../../services/session:avsession_ipc_config"]
 }
 
-ohos_unittest("AVSessionServiceExtTest") {
+ohos_unittest("AVSessionServiceTestExt") {
   module_out_path = module_output_path
 
   sources = [ "avsession_service_test_ext.cpp" ]
@@ -3148,7 +3148,7 @@ group("av_session_server_unittest") {
     ":AVSessionServiceStubTest",
     ":AVSessionServiceSupplementTest",
     ":AVSessionServiceTest",
-    ":AVSessionServiceExtTest",
+    ":AVSessionServiceTestExt",
     ":AVSessionStubTest",
     ":AVSessionWhitelistConfigManagerTest",
     ":AVSessionUsersManagerTest",
