@@ -1586,6 +1586,26 @@ static HWTEST_F(AVRouterImplTest, OnSystemCommonEvent001, TestSize.Level0)
 }
 
 /**
+* @tc.name: OnSystemCommonEvent002
+* @tc.desc: set servicePtr_ to nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, OnSystemCommonEvent002, TestSize.Level0)
+{
+    SLOGI("OnSystemCommonEvent002 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    std::string commonEvent = "";
+    std::string args = "";
+    auto listener = std::make_shared<AVSessionServiceListenerMock>();
+    ASSERT_TRUE(listener != nullptr);
+    g_AVRouterImpl->servicePtr_ = nullptr;
+    int32_t ret = g_AVRouterImpl->OnSystemCommonEvent(commonEvent, args);
+    EXPECT_TRUE(ret == ERR_SERVICE_NOT_EXIST);
+    SLOGI("OnSystemCommonEvent002 end");
+}
+
+/**
 * @tc.name: SendCommandArgsToCast001
 * @tc.desc: set commandType not changed
 * @tc.type: FUNC

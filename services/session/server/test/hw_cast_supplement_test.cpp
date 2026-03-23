@@ -1201,6 +1201,24 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_003, TestSize.
 }
 
 /**
+ * @tc.name: HwCastProviderSession_OnEvent_004
+ * @tc.desc: eventId is valid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_004, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_OnEvent_004 begin!");
+    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    OHOS::CastEngine::EventId eventId = static_cast<OHOS::CastEngine::EventId>(4210);
+    std::string jsonParam = "test";
+    provideSession->OnEvent(eventId, jsonParam);
+    SLOGI("HwCastProviderSession_OnEvent_004 end!");
+}
+
+/**
  * @tc.name: HwCastSessonToast001
  * @tc.desc:
  * @tc.type: FUNC

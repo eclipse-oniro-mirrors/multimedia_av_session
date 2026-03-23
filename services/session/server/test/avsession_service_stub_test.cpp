@@ -941,5 +941,26 @@ static HWTEST_F(AVSessionServiceStubTest, HandleSendSystemCommonCommand002, Test
     EXPECT_EQ(ret, ERR_NONE);
     SLOGI("HandleSendSystemCommonCommand002 end!");
 }
+
+
+/**
+ * @tc.name: HandleSendSystemCommonCommand003
+ * @tc.desc: Test HandleSendSystemCommonCommand
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleSendSystemCommonCommand003, TestSize.Level0)
+{
+    SLOGI("HandleSendSystemCommonCommand003, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    OHOS::AAFwk::WantParams wantParams;
+    data.WriteString("test");
+    data.WriteParcelable(&wantParams);
+    AVSessionServiceStubPerDemo stub;
+    int32_t ret = stub.HandleSendSystemCommonCommand(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+    SLOGI("HandleSendSystemCommonCommand003 end!");
+}
+
 } // AVSession
 } // OHOS
