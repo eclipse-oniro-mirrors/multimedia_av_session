@@ -438,6 +438,22 @@ public:
     virtual bool IsDisconnectingOtherSession() = 0;
 
     /**
+     * @brief Set stream to mirror from sink state.
+     *
+     * @param { bool } fromSink - stream to mirror from sink state.
+     * @since 22
+     */
+    virtual void SetStreamToMirrorFromSink(bool fromSink) = 0;
+
+    /**
+     * @brief Check if stream to mirror from sink.
+     *
+     * @return { bool } stream to mirror from sink state.
+     * @since 22
+     */
+    virtual bool IsStreamToMirrorFromSink() = 0;
+
+    /**
      * @brief send command args to cast.
      *
      * @param {int64_t} castHandle - The ID of the castprovider.

@@ -1282,5 +1282,66 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetDesktopLyricState_002, TestSize.Lev
     EXPECT_EQ(res, AVSESSION_SUCCESS);
     SLOGI("AVSessionItem_GetDesktopLyricState_002 End");
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+/**
+* @tc.name: AVSessionItem_SetMediaChangeForMirrorToStream_001
+* @tc.desc: test SetMediaChangeForMirrorToStream and IsMediaChangeForMirrorToStream
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetMediaChangeForMirrorToStream_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetMediaChangeForMirrorToStream_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    g_AVSessionItem->SetMediaChangeForMirrorToStream(false);
+    EXPECT_FALSE(g_AVSessionItem->IsMediaChangeForMirrorToStream());
+    
+    g_AVSessionItem->SetMediaChangeForMirrorToStream(true);
+    EXPECT_TRUE(g_AVSessionItem->IsMediaChangeForMirrorToStream());
+    
+    g_AVSessionItem->SetMediaChangeForMirrorToStream(false);
+    EXPECT_FALSE(g_AVSessionItem->IsMediaChangeForMirrorToStream());
+    SLOGI("AVSessionItem_SetMediaChangeForMirrorToStream_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_OnCastEventRecv_001
+* @tc.desc: test OnCastEventRecv with unhandled event
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_OnCastEventRecv_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_OnCastEventRecv_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    int32_t errorCode = 9999;
+    std::string errorMsg = "UNHANDLED_EVENT";
+    g_AVSessionItem->OnCastEventRecv(errorCode, errorMsg);
+    EXPECT_TRUE(true);
+    SLOGI("AVSessionItem_OnCastEventRecv_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_OnCastEventRecv_002
+* @tc.desc: test OnCastEventRecv with STREAM_TO_MIRROR_FROM_SINK
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_OnCastEventRecv_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_OnCastEventRecv_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    constexpr int32_t STREAM_TO_MIRROR_FROM_SINK = 2005;
+    int32_t errorCode = STREAM_TO_MIRROR_FROM_SINK;
+    std::string errorMsg = "STREAM_TO_MIRROR_FROM_SINK";
+    g_AVSessionItem->OnCastEventRecv(errorCode, errorMsg);
+    EXPECT_TRUE(true);
+    SLOGI("AVSessionItem_OnCastEventRecv_002 End");
+}
+#endif
 } //AVSession
 } //OHOS

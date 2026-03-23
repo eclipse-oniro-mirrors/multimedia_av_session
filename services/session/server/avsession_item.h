@@ -20,6 +20,7 @@
 #include <dlfcn.h>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
 
@@ -373,6 +374,10 @@ public:
 
     bool IsAppSupportCast();
 
+    bool IsMediaChangeForMirrorToStream() const;
+
+    void SetMediaChangeForMirrorToStream(bool isMediaChange);
+
     void SetSpid(const AAFwk::WantParams& extras);
 
     uint32_t GetSpid();
@@ -646,6 +651,12 @@ private:
         {ProtocolType::TYPE_DLNA, DeviceRemoveAction::ACTION_TO_SWITCH_DLNA},
         {ProtocolType::TYPE_CAST_PLUS_AUDIO, DeviceRemoveAction::ACTION_TO_SWITCH_HIPLAY}
     };
+    
+    std::atomic<bool> isMediaChangeForMirrorToStream_ = false;
+    void InitCastEventHandlers();
+    std::unordered_map<int32_t, std::function<void()>> castEventHandlers_;
+    
+    static constexpr int32_t STREAM_TO_MIRROR_FROM_SINK = 2005;
 #endif
 };
 } // namespace OHOS::AVSession

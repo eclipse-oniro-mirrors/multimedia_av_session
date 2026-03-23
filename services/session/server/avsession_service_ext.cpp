@@ -590,6 +590,7 @@ void AVSessionService::NotifyMirrorToStreamCast()
     if (castServiceNameStatePair_.second == deviceStateDisconnection) {
         DeviceInfo localDeviceInfo;
         AVRouter::GetInstance().SetServiceAllConnectState(-1, localDeviceInfo);
+        AVRouter::GetInstance().SetStreamToMirrorFromSink(false);
     }
 }
 
@@ -597,7 +598,7 @@ bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
 {
     CHECK_AND_RETURN_RET_LOG(session != nullptr, false, "session is nullptr");
     bool deviceCond = isSupportMirrorToStream_ && !appCastExit_;
-    
+
     CHECK_AND_RETURN_RET_LOG(deviceCond, false, "deviceCond is false");
     bool connectCond = castServiceNameStatePair_.second == deviceStateConnection &&
         !AVRouter::GetInstance().IsDisconnectingOtherSession();
@@ -609,6 +610,11 @@ bool AVSessionService::IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session)
     bool appCond = session->IsAppSupportCast() && isWhiteApp &&
                    session->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_VIDEO &&
                    !AppManagerAdapter::GetInstance().IsAppBackground(session->GetUid(), session->GetPid());
+    
+    if (AVRouter::GetInstance().IsStreamToMirrorFromSink()) {
+        appCond = appCond && session->IsMediaChangeForMirrorToStream();
+        SLOGI("IsStreamToMirrorFromSink in IsMirrorToStreamCastAllowed appCond %{public}d", appCond);
+    }
 
     return deviceCond && connectCond && appCond;
 }
@@ -620,6 +626,8 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
         appCastExit_ = false;
         return AVSESSION_SUCCESS;
     }
+    AVRouter::GetInstance().SetStreamToMirrorFromSink(false);
+    session->SetMediaChangeForMirrorToStream(false);
     checkEnableCast(true);
     {
         std::lock_guard lockGuard(checkEnableCastLock_);

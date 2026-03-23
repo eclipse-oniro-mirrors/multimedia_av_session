@@ -595,6 +595,44 @@ static HWTEST_F(AVRouterImplTest, OnCastEventRecv002, TestSize.Level0)
 }
 
 /**
+* @tc.name: OnCastEventRecv003
+* @tc.desc: test OnCastEventRecv with STREAM_TO_MIRROR_FROM_SINK
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, OnCastEventRecv003, TestSize.Level0)
+{
+    SLOGI("OnCastEventRecv003 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    
+    auto serviceListener = std::make_shared<AVSessionServiceListenerMock>();
+    g_AVRouterImpl->servicePtr_ = serviceListener.get();
+    
+    g_AVRouterImpl->SetStreamToMirrorFromSink(false);
+    EXPECT_FALSE(g_AVRouterImpl->IsStreamToMirrorFromSink());
+    
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = 1;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    
+    int64_t castHandle = 2001;
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    castHandleInfo.avRouterListener_ = std::make_shared<AVRouterListenerMock>();
+    g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
+
+    int32_t errorCode = 2005;
+    std::string errorMsg = "STREAM_TO_MIRROR_FROM_SINK";
+    g_AVRouterImpl->OnCastEventRecv(errorCode, errorMsg);
+    
+    EXPECT_TRUE(g_AVRouterImpl->IsStreamToMirrorFromSink());
+    g_AVRouterImpl->SetStreamToMirrorFromSink(false);
+    g_AVRouterImpl->servicePtr_ = nullptr;
+    SLOGI("OnCastEventRecv003 end");
+}
+
+/**
 * @tc.name: DisconnectOtherSession001
 * @tc.desc: listener is nullptr
 * @tc.type: FUNC
@@ -1652,6 +1690,28 @@ static HWTEST_F(AVRouterImplTest, SendCommandArgsToCast003, TestSize.Level0)
     g_AVRouterImpl->SendCommandArgsToCast(castHandle, commandType, params);
     EXPECT_TRUE(providerNumber == 20);
     SLOGI("SendCommandArgsToCast003 end");
+}
+
+/**
+* @tc.name: SetStreamToMirrorFromSink001
+* @tc.desc: test SetStreamToMirrorFromSink and IsStreamToMirrorFromSink
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, SetStreamToMirrorFromSink001, TestSize.Level0)
+{
+    SLOGI("SetStreamToMirrorFromSink001 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    
+    g_AVRouterImpl->SetStreamToMirrorFromSink(false);
+    EXPECT_FALSE(g_AVRouterImpl->IsStreamToMirrorFromSink());
+    
+    g_AVRouterImpl->SetStreamToMirrorFromSink(true);
+    EXPECT_TRUE(g_AVRouterImpl->IsStreamToMirrorFromSink());
+    
+    g_AVRouterImpl->SetStreamToMirrorFromSink(false);
+    EXPECT_FALSE(g_AVRouterImpl->IsStreamToMirrorFromSink());
+    SLOGI("SetStreamToMirrorFromSink001 end");
 }
 } //AVSession
 } //OHOS

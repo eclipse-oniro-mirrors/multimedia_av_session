@@ -337,11 +337,16 @@ void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInf
 void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const std::string &jsonParam)
 {
     SLOGI("OnEvent from cast with eventId %{public}d, %{public}s", eventId, jsonParam.c_str());
-    std::string jsonStr = jsonParam;
-    std::lock_guard lockGuard(mutex_);
     int32_t castEventId = static_cast<int>(eventId);
     if (castEventId >= eventIdStart && castEventId <= eventIdEnd) {
-        SLOGI("trigger the OnCastEventRecv");
+        std::lock_guard lockGuard(mutex_);
+        SLOGI("trigger the OnCastEventRecv for ListSize %{public}d",
+            static_cast<int>(castSessionStateListenerList_.size()));
+        for (auto listener : castSessionStateListenerList_) {
+            CHECK_AND_CONTINUE(listener != nullptr);
+            std::string param = jsonParam;
+            listener->OnCastEventRecv(castEventId, param);
+        }
     } else if (castEventId >= hiplayEventIdStart && castEventId <= hiplayEventIdEnd) {
         OnHiplayEventRecv(castEventId, jsonParam);
     }

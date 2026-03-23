@@ -92,9 +92,18 @@ public:
 
 class AVCastSessionStateListenerDemo : public IAVCastSessionStateListener {
 public:
+    int32_t lastErrorCode_ = -1;
+    std::string lastErrorMsg_;
+    int callCount_ = 0;
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) {}
 
-    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) {}
+    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
+    {
+        callCount_++;
+        lastErrorCode_ = errorCode;
+        lastErrorMsg_ = errorMsg;
+    }
 };
 
 class ICastSessionMock : public CastEngine::ICastSession {
