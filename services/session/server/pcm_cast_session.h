@@ -30,6 +30,9 @@ public:
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
 
+    int32_t SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
+        std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
+
     void StopCast();
 
     void ExecuteCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
@@ -47,6 +50,11 @@ public:
 
     void QueryCommandParams(const AAFwk::WantParams& commandArgs);
 
+    enum class MultiDeviceState {
+        DEFAULT,
+        CASTING_SWITCH_DEVICE,
+    };
+
 private:
     int64_t castHandle_ = 0;
     int32_t castMode_ = HiPlayCastMode::DEVICE_LEVEL;
@@ -54,6 +62,11 @@ private:
     std::recursive_mutex castLock_;
     AVSessionDescriptor descriptor_;
     std::string castHandleDeviceId_ = "-100";
+
+    std::atomic<MultiDeviceState> multiDeviceState_ = MultiDeviceState::DEFAULT;
+    OutputDeviceInfo newOutputDeviceInfo_;
+    SessionToken newSessionToken_;
+    std::pair<std::string, std::string> newServiceNameStatePair_;
 
     const std::string COMMAND_TYPE = "command_type";
     const std::string COMMAND_BODY = "command_body";
