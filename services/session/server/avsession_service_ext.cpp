@@ -405,10 +405,13 @@ void AVSessionService::UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo)
                 deviceInfo.hiPlayDeviceInfo_.castMode_ = castMode;
                 int32_t uid = pcmCastSession_->GetUid();
                 deviceInfo.hiPlayDeviceInfo_.castUid_ = uid;
+                SLOGI("UpdateDeviceCastMode success, deviceId: %{public}s, castMode: %{public}d, castUid: %{public}d",
+                    AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str(), castMode, uid);
                 continue;
             }
         }
         deviceInfo.hiPlayDeviceInfo_.castMode_ = deviceInfo.hiPlayDeviceInfo_.supportCastMode_;
+        deviceInfo.hiPlayDeviceInfo_.castUid_ = 0;
  
         int32_t userId = GetUsersManager().GetCurrentUserId();
         std::string fileDir = AVSessionUtils::GetFixedPathNameForDevice(userId);
