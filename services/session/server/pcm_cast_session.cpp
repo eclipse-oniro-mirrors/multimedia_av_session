@@ -224,6 +224,11 @@ pid_t PcmCastSession::GetUid() const
 {
     return descriptor_.uid_;
 }
+
+int64_t PcmCastSession::GetCastHandle() const
+{
+    return castHandle_;
+}
  
 int32_t PcmCastSession::GetCastState() const
 {

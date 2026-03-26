@@ -494,6 +494,19 @@ void AVSessionService::NotifySystemCommonEvent(const std::string& commonEvent, c
     }
 }
 
+bool AVSessionService::IsHiPlayCasting()
+{
+    if (pcmCastSession_ == nullptr) {
+        SLOGE("pcmCastSession is NULL");
+        return false;
+    }
+
+    if (pcmCastSession_->GetCastHandle() > 0) {
+        return true;
+    }
+    return false;
+}
+
 int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());

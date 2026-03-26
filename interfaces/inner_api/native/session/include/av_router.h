@@ -363,6 +363,14 @@ public:
      * @brief check is in stream state.
      *
      * @return { bool } is in stream state.
+     * @since 24
+    */
+    virtual bool IsHiPlayCasting() = 0;
+
+    /**
+     * @brief check is in stream state.
+     *
+     * @return { bool } is in stream state.
      * @since 20
     */
     virtual bool IsRemoteCasting() = 0;

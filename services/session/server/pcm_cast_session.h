@@ -39,6 +39,7 @@ public:
     int32_t GetCastMode() const;
     pid_t GetUid() const;
     int32_t GetCastState() const;
+    int64_t GetCastHandle() const;
     AVSessionDescriptor GetDescriptor();
 
     void OnSystemCommonEvent(const std::string& args);
