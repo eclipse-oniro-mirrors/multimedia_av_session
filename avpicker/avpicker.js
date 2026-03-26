@@ -869,7 +869,7 @@ export class AVCastPicker extends ViewPU {
                                             }
                                         }, If);
                                         If.pop();
-                                    });  
+                                    });
                                 }
                                 else {
                                     this.ifElseBranchUpdateFunction(1, () => {
