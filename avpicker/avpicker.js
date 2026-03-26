@@ -716,8 +716,7 @@ export class AVCastPicker extends ViewPU {
                             Flex.pop();
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 If.create();
-                                if ((x8.isConnected || x8.castUid !== 0) && x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL &&
-                                    !this.isAncoSession) {
+                                if ((x8.isConnected || x8.castUid !== 0) && x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                                     this.ifElseBranchUpdateFunction(0, () => {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Flex.create({
@@ -725,7 +724,7 @@ export class AVCastPicker extends ViewPU {
                                                 alignItems: ItemAlign.Center
                                             });
                                             Flex.onClick(() => {
-                                                if (x8.isConnected) {
+                                                if (x8.isConnected && !this.isAncoSession) {
                                                     this.isDeviceLevel = (x8.castMode === HiPlayCastMode.DEVICE_LEVEL);
                                                     if (this.extensionProxy != null) {
                                                         this.extensionProxy.send({ 'isShowBadge': false})
@@ -811,54 +810,66 @@ export class AVCastPicker extends ViewPU {
                                         Row.pop();
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             If.create();
-                                            if (x8.bundleInfo?.isShowBadge) {
+                                            if (x8.isConnected && !this.isAncoSession) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Row.create();
-                                                        Row.margin({ left: 8, right: 8})
-                                                        Row.direction(Direction.Ltr);
-                                                    }, Row);
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Badge.create({
-                                                            value: '',
-                                                            style: { badgeSize: 6, BadgeColor:  {'id': -1, 'type': 10001, params: ['sys.color.warning'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'} }
-                                                        });
-                                                        Badge.width(18);
-                                                        Badge.height(16);
-                                                    }, Badge);
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                                        SymbolGlyph.fontSize('16vp');
-                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-                                                    }, SymbolGlyph);
-                                                    Badge.pop();
-                                                    Row.pop();
+                                                        If.create();
+                                                        if (x8.bundleInfo?.isShowBadge) {
+                                                            this.ifElseBranchUpdateFunction(0, () => {
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    Row.create();
+                                                                    Row.margin({ left: 8, right: 8})
+                                                                    Row.direction(Direction.Ltr);
+                                                                }, Row);
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    Badge.create({
+                                                                        value: '',
+                                                                        style: { badgeSize: 6, BadgeColor:  {'id': -1, 'type': 10001, params: ['sys.color.warning'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'} }
+                                                                    });
+                                                                    Badge.width(18);
+                                                                    Badge.height(16);
+                                                                }, Badge);
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                                    SymbolGlyph.fontSize('16vp');
+                                                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                                }, SymbolGlyph);
+                                                                Badge.pop();
+                                                                Row.pop();
+                                                            });
+                                                        }
+                                                        else {
+                                                            this.ifElseBranchUpdateFunction(1, () => {
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    Row.create();
+                                                                    Row.margin({ left: 8, right: 8})
+                                                                    Row.direction(Direction.Ltr);
+                                                                }, Row);
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                                    SymbolGlyph.fontSize('16vp');
+                                                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                                }, SymbolGlyph);
+                                                                Row.pop();
+                                                            });
+                                                        }
+                                                    }, If);
+                                                    If.pop();
+                                                    Flex.pop();
                                                 });
                                             }
                                             else {
                                                 this.ifElseBranchUpdateFunction(1, () => {
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Row.create();
-                                                        Row.margin({ left: 8, right: 8})
-                                                        Row.direction(Direction.Ltr);
-                                                    }, Row);
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                                        SymbolGlyph.fontSize('16vp');
-                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-                                                    }, SymbolGlyph);
-                                                    Row.pop();
                                                 });
                                             }
                                         }, If);
                                         If.pop();
-                                        Flex.pop();
-                                    });
+                                    });  
                                 }
                                 else {
                                     this.ifElseBranchUpdateFunction(1, () => {
