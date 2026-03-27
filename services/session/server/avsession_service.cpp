@@ -1584,8 +1584,8 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
             return;
         }
         std::lock_guard lockGuard(sessionServiceLock_);
-        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
-        CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession.");
         UpdateFrontSession(session, isAdd);
     });
     sessionItem->SetServiceCallbackForUpdateExtras([this](std::string sessionId) {
