@@ -385,7 +385,7 @@ export struct AVCastPicker {
                   .width('auto')
                    
                   if ((item.isConnected || item.castUid !== 0) &&
-                    item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL && !this.isAncoSession) {
+                    item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                     Flex({direction:FlexDirection.Row, alignItems:ItemAlign.Center}) {
                       Row() {
                         if (item.castMode === HiPlayCastMode.DEVICE_LEVEL) {
@@ -424,33 +424,35 @@ export struct AVCastPicker {
                     }
                     .direction(Direction.Ltr)
 
-                    if (item.bundleInfo?.isShowBadge) {
-                      Row(){
-                        Badge({
-                          value: '',
-                          style: { badgeSize: 6, badgeColor: $r('sys.color.warning') }
-                        }) {
+                    if (item.isConnected && !this.isAncoSession) {
+                      if (item.bundleInfo?.isShowBadge) {
+                        Row(){
+                          Badge({
+                            value: '',
+                            style: { badgeSize: 6, badgeColor: $r('sys.color.warning') }
+                          }) {
+                            SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
+                              .fontSize('16vp')
+                              .fontColor([$r('sys.color.font_secondary')])
+                          }
+                          .width(18)
+                          .height(16)
+                        }
+                        .margin({left :8, right: 8})
+                        .direction(Direction.Ltr) 
+                      } else {
+                        Row() {
                           SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
                             .fontSize('16vp')
                             .fontColor([$r('sys.color.font_secondary')])
                         }
-                        .width(18)
-                        .height(16)
+                        .margin({left :8, right: 8})
+                        .direction(Direction.Ltr)
                       }
-                      .margin({left :8, right: 8})
-                      .direction(Direction.Ltr) 
-                    } else {
-                      Row() {
-                        SymbolGlyph($r('sys.symbol.arrowtriangle_down_fill'))
-                          .fontSize('16vp')
-                          .fontColor([$r('sys.color.font_secondary')])
-                      }
-                      .margin({left :8, right: 8})
-                      .direction(Direction.Ltr)
                     }
                   }
                   .onClick(() => {
-                    if (item.isConnected) {
+                    if (item.isConnected && !this.isAncoSession) {
                       this.isDeviceLevel = (item.castMode === HiPlayCastMode.DEVICE_LEVEL)
                       if (this.extensionProxy != null) {
                         this.extensionProxy.send({'isShowBadge': false});
