@@ -62,7 +62,7 @@ if (multimedia_av_session_enable_device_manager) {
   common_external_deps += [ "device_manager:devicemanagersdk" ]
 }
 
-if (multimedia_av_session_enable_dsoftbus) {
+if (av_session_enable_dsoftbus) {
   common_external_deps += [ "dsoftbus:softbus_client" ]
 }
 
@@ -381,7 +381,7 @@ ohos_unittest("AVSessionRemoteTest") {
   }
 
   defines = []
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += ["DSOFTBUS_ENABLE"]
   }
 
