@@ -19,6 +19,7 @@
 #include "avsession_utils.h"
 #include "av_router.h"
 #include "cast_engine_common.h"
+#include "collaboration_manager_hiplay.h"
 #include "ipc_skeleton.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
@@ -31,6 +32,16 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
 {
     SLOGI("PcmCastSession OnCastStateChange state %{public}d id %{public}s", castState,
         AVSessionUtils::GetAnonymousDeviceId(deviceInfo.deviceId_).c_str());
+
+    collaborationNeedDeviceId_ = deviceInfo.deviceId_;
+    if (isNeedRemove) { // same device cast exchange no publish when hostpot scene
+        DealCollaborationPublishState(castState, deviceInfo);
+    }
+
+    CollaborationManagerHiPlay::GetInstance().SendCollaborationOnStop([this](void) {
+        StopCast();
+    });
+
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
         AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -48,6 +59,38 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         castState_ = CastState::CONNECTED;
+    }
+}
+
+void PcmCastSession::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
+{
+    SLOGI("enter DealCollaborationPublishState");
+
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::AUTHING)) {
+        CollaborationManagerHiPlay::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_CONNECTING);
+    }
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) { // 6 is connected status (stream)
+        AVRouter::GetInstance().GetRemoteNetWorkId(
+            castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
+        if (collaborationNeedNetworkId_.empty()) {
+            SLOGI("networkId is empty, try use deviceId:%{public}s",
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
+            collaborationNeedNetworkId_ = deviceInfo.deviceId_;
+        }
+        CollaborationManagerHiPlay::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
+    }
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) { // 5 is disconnected status
+        if (collaborationNeedNetworkId_.empty()) {
+            SLOGI("networkId is empty, try use deviceId:%{public}s",
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
+            collaborationNeedNetworkId_ = deviceInfo.deviceId_;
+        }
+        CollaborationManagerHiPlay::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+        CollaborationManagerHiPlay::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     }
 }
  
@@ -85,6 +128,7 @@ void PcmCastSession::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
 {
+    SLOGI("PcmCastSession StartCast");
     if (sessionToken.sessionId == "pcmCastSession") {
         castMode_ = HiPlayCastMode::DEVICE_LEVEL;
         SLOGI("PcmCastSession isDeviceLevel: true");
@@ -105,6 +149,14 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
             return ERR_REPEAT_CAST;
         }
     }
+
+    int sourceAllConnectResult = CollaborationManagerHiPlay::GetInstance().CastAddToCollaboration(
+        outputDeviceInfo.deviceInfos_[0]);
+    if (sourceAllConnectResult != AVSESSION_SUCCESS) {
+        AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
+        SLOGE("Collaboration to start cast failed");
+        return sourceAllConnectResult;
+    }
  
     castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, serviceNameStatePair, "pcmCastSession");
     SLOGI("PcmCastSession StartCast-castHandle_ %{public}lld", castHandle_);
@@ -124,11 +176,12 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     return ret;
 }
 
-void PcmCastSession::StopCast()
+void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
     SLOGI("PcmCastSession StopCast");
-    AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
-    AVRouter::GetInstance().StopCastSession(castHandle_);
+    int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);
+    SLOGI("StopCast with unchange castHandle is %{public}lld", static_cast<long long>(castHandle_));
+    CHECK_AND_RETURN_LOG(ret != AVSESSION_ERROR, "StopCast failed");
 }
  
 void PcmCastSession::WriteCastPairToFile(const std::string& deviceId, int32_t castMode)
@@ -211,6 +264,12 @@ void PcmCastSession::CastStateCommandParams(const AAFwk::WantParams& commandArgs
 void PcmCastSession::DestroyTask()
 {
     SLOGI("PcmCastSession DestroyTask process");
+    CollaborationManagerHiPlay::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+        ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+    if (!collaborationNeedNetworkId_.empty()) {
+        CollaborationManagerHiPlay::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
+    }
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
     AVRouter::GetInstance().StopCastSession(castHandle_);
 }

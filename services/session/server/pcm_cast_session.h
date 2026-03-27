@@ -30,7 +30,7 @@ public:
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
 
-    void StopCast();
+    void StopCast(const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
 
     void ExecuteCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
 
@@ -55,6 +55,9 @@ private:
     std::recursive_mutex castLock_;
     AVSessionDescriptor descriptor_;
     std::string castHandleDeviceId_ = "-100";
+    std::string collaborationNeedDeviceId_;
+    std::string collaborationNeedNetworkId_;
+    const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
 
     const std::string COMMAND_TYPE = "command_type";
     const std::string COMMAND_BODY = "command_body";
@@ -104,6 +107,7 @@ private:
     int32_t SendStateChangeRequest(const SessionToken& sessionToken);
     void CastStateCommandParams(const AAFwk::WantParams& commandArgs);
     static AVSessionUsersManager& GetUsersManager();
+    void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_PCM_CAST_SESSION_H

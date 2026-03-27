@@ -20,30 +20,7 @@
 #include <string>
 
 namespace OHOS::AVSession {
-std::shared_ptr<CollaborationManager> CollaborationManager::instance_;
-std::recursive_mutex CollaborationManager::instanceLock_;
-
-CollaborationManager& CollaborationManager::GetInstance()
-{
-    std::lock_guard lockGuard(instanceLock_);
-    if (instance_ != nullptr) {
-        return *instance_;
-    }
-    SLOGI("GetInstance in");
-    instance_ = std::make_shared<CollaborationManager>();
-    instance_->exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr;
-    instance_->exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback = nullptr;
-    instance_->exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = nullptr;
-    instance_->exportapi_.ServiceCollaborationManager_PublishServiceState = nullptr;
-    return *instance_;
-}
-
-void CollaborationManager::ReleaseInstance()
-{
-    std::lock_guard lockGuard(instanceLock_);
-    SLOGI("ReleaseInstance in");
-    instance_ = nullptr;
-}
+PluginLib CollaborationManager::pluginLib_ {"/system/lib64/libcfwk_allconnect_client.z.so"};
 
 CollaborationManager::CollaborationManager()
 {
@@ -72,6 +49,11 @@ CollaborationManager::CollaborationManager()
     resourceRequest_->remoteHardwareListSize = remoteHardwareListSize_;
     resourceRequest_->remoteHardwareList = remoteHardwareList_;
     resourceRequest_->communicationRequest = &communicationRequest_;
+
+    exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr;
+    exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback = nullptr;
+    exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = nullptr;
+    exportapi_.ServiceCollaborationManager_PublishServiceState = nullptr;
 }
 
 CollaborationManager::~CollaborationManager()
@@ -90,15 +72,6 @@ void CollaborationManager::SendCollaborationOnStop(const std::function<void(void
     sendCollaborationOnStop_ = callback;
 }
 
-__attribute__((no_sanitize("cfi")))static int32_t OnStop(const char* peerNetworkId)
-{
-    SLOGE("enter onstop");
-    CHECK_AND_RETURN_RET_LOG(CollaborationManager::GetInstance().sendCollaborationOnStop_ != nullptr,
-        AVSESSION_ERROR, "sendCollaborationOnStop_ function ptr is nullptr");
-    CollaborationManager::GetInstance().sendCollaborationOnStop_();
-    return AVSESSION_SUCCESS;
-}
-
 void CollaborationManager::SendCollaborationApplyResult(const std::function<
     void(const int32_t code)>& callback)
 {
@@ -108,24 +81,6 @@ void CollaborationManager::SendCollaborationApplyResult(const std::function<
     }
     sendCollaborationApplyResult_ = callback;
 }
-
-__attribute__((no_sanitize("cfi")))static int32_t ApplyResult(int32_t errorcode,
-    int32_t result, const char* reason)
-{
-    SLOGI("enter ApplyResult");
-    if (result == ServiceCollaborationManagerResultCode::REJECT) {
-        SLOGE("return connect reject and reson:%{public}s", reason);
-    }
-    CHECK_AND_RETURN_RET_LOG(CollaborationManager::GetInstance().sendCollaborationApplyResult_ != nullptr,
-        AVSESSION_ERROR, "sendCollaborationApplyResult_ function ptr is nullptr");
-    CollaborationManager::GetInstance().sendCollaborationApplyResult_(result);
-    return AVSESSION_SUCCESS;
-}
-
-static ServiceCollaborationManager_Callback serviceCollaborationCallback {
-    .OnStop = OnStop,
-    .ApplyResult = ApplyResult
-};
 
 __attribute__((no_sanitize("cfi"))) int32_t CollaborationManager::ReadCollaborationManagerSo()
 {
@@ -143,13 +98,13 @@ __attribute__((no_sanitize("cfi"))) int32_t CollaborationManager::ReadCollaborat
 
 int32_t CollaborationManager::RegisterLifecycleCallback()
 {
-    SLOGI("enter RegisterLifecycleCallback");
+    SLOGI("enter RegisterLifecycleCallback %{public}s", serviceName_.c_str());
     if (exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback == nullptr) {
         SLOGE("RegisterLifecycleCallback function sptr nullptr");
         return AVSESSION_ERROR;
     }
     if (exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback(serviceName_.c_str(),
-        &serviceCollaborationCallback)) {
+        &serviceCollaborationCallback_)) {
         return AVSESSION_ERROR;
     }
     return AVSESSION_SUCCESS;
@@ -157,7 +112,7 @@ int32_t CollaborationManager::RegisterLifecycleCallback()
 
 int32_t CollaborationManager::UnRegisterLifecycleCallback()
 {
-    SLOGI("enter UnRegisterLifecycleCallback");
+    SLOGI("enter UnRegisterLifecycleCallback %{public}s", serviceName_.c_str());
     if (exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback == nullptr) {
         SLOGE("UnRegisterLifecycleCallback function sptr nullptr");
         return AVSESSION_ERROR;
@@ -191,16 +146,6 @@ int32_t CollaborationManager::PublishServiceState(const char* peerNetworkId,
     return AVSESSION_SUCCESS;
 }
 
-bool CollaborationManager::IsHiPlayDevice(const DeviceInfo& deviceInfo)
-{
-    return deviceInfo.supportedProtocols_ == ProtocolType::TYPE_CAST_PLUS_AUDIO;
-}
-
-bool CollaborationManager::IsHiPlayP2PDevice(const DeviceInfo& deviceInfo)
-{
-    return IsHiPlayDevice(deviceInfo) && deviceInfo.ipAddress_.empty();
-}
-
 int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId, const DeviceInfo& deviceInfo,
     bool checkLinkConflict)
 {
@@ -215,11 +160,10 @@ int32_t CollaborationManager::ApplyAdvancedResource(const char* peerNetworkId, c
     }
     resourceRequest_->checkConflictType = checkLinkConflict ? ServiceCollaborationManagerCheckConflictType::ALL :
         ServiceCollaborationManagerCheckConflictType::BUSINESS_AND_HARDWARE_CONFLICT;
-    if (IsHiPlayP2PDevice(deviceInfo)) {
-        resourceRequest_->linkType = ServiceCollaborationManagerLinkType::NATIVE_P2P;
-    }
+
+    UpdataLinkType(deviceInfo);
     if (exportapi_.ServiceCollaborationManager_ApplyAdvancedResource(peerNetworkId,
-        serviceName_.c_str(), resourceRequest_, -1, &serviceCollaborationCallback)) {
+        serviceName_.c_str(), resourceRequest_, -1, &serviceCollaborationCallback_)) {
         return AVSESSION_ERROR;
     }
     return AVSESSION_SUCCESS;

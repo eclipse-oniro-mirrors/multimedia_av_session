@@ -246,8 +246,10 @@ void AVSessionService::OnStop()
     dlclose(migrateStubFuncHandle_);
 #endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
-    CollaborationManager::ReleaseInstance();
+    CollaborationManagerURLCasting::GetInstance().UnRegisterLifecycleCallback();
+    CollaborationManagerURLCasting::ReleaseInstance();
+    CollaborationManagerHiPlay::GetInstance().UnRegisterLifecycleCallback();
+    CollaborationManagerHiPlay::ReleaseInstance();
 #endif
     CommandSendLimit::GetInstance().StopTimer();
     NotifyProcessStatus(false);
@@ -1016,8 +1018,10 @@ void AVSessionService::InitCollaboration()
 {
     SLOGI("InitCollaboration in");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CollaborationManager::GetInstance().ReadCollaborationManagerSo();
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    CollaborationManagerURLCasting::GetInstance().ReadCollaborationManagerSo();
+    CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
+    CollaborationManagerHiPlay::GetInstance().ReadCollaborationManagerSo();
+    CollaborationManagerHiPlay::GetInstance().RegisterLifecycleCallback();
 #endif
 }
 
