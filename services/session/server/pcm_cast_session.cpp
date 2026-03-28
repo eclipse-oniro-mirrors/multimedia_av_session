@@ -140,6 +140,7 @@ void PcmCastSession::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
 {
+    SLOGI("PcmCastSession StartCast");
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
     if (castHandle_ > 0) {
         if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
@@ -162,6 +163,14 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
  
             return AVSESSION_SUCCESS;
         }
+    }
+ 
+    int sourceAllConnectResult = CollaborationManagerHiPlay::GetInstance().CastAddToCollaboration(
+        outputDeviceInfo.deviceInfos_[0]);
+    if (sourceAllConnectResult != AVSESSION_SUCCESS) {
+        AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
+        SLOGE("Collaboration to start cast failed");
+        return sourceAllConnectResult;
     }
     return SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
 }
@@ -196,15 +205,12 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
     return ret;
 }
 
-void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
-{
-    SLOGI("PcmCastSession StopCast");
-    AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
-    AVRouter::GetInstance().StopCastSession(castHandle_);
-    castHandle_ = -1;
-    castState_ = CastState::DISCONNECTED;
-    castHandleDeviceId_ = "-100";
-    descriptor_.uid_ = 0;
+void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)	 
+{	 
+    SLOGI("PcmCastSession StopCast");	 
+    int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);	 
+    SLOGI("StopCast with unchange castHandle is %{public}lld", static_cast<long long>(castHandle_));	 
+    CHECK_AND_RETURN_LOG(ret != AVSESSION_ERROR, "StopCast failed");
 }
  
 void PcmCastSession::WriteCastPairToFile(const std::string& deviceId, int32_t castMode)
@@ -295,6 +301,10 @@ void PcmCastSession::DestroyTask()
     }
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
     AVRouter::GetInstance().StopCastSession(castHandle_);
+    castHandle_ = -1;
+    castState_ = CastState::DISCONNECTED;
+    castHandleDeviceId_ = "-100";
+    descriptor_.uid_ = 0;
 }
  
 int32_t PcmCastSession::GetCastMode() const
