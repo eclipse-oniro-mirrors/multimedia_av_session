@@ -205,11 +205,11 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
     return ret;
 }
 
-void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)	 
-{	 
-    SLOGI("PcmCastSession StopCast");	 
-    int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);	 
-    SLOGI("StopCast with unchange castHandle is %{public}lld", static_cast<long long>(castHandle_));	 
+void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
+{
+    SLOGI("PcmCastSession StopCast");
+    int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);
+    SLOGI("StopCast with unchange castHandle is %{public}lld", static_cast<long long>(castHandle_));
     CHECK_AND_RETURN_LOG(ret != AVSESSION_ERROR, "StopCast failed");
 }
  
