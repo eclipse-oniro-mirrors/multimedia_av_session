@@ -1030,6 +1030,36 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast002, TestSize.Level
     EXPECT_NE(g_AVSessionService, nullptr);
 }
 
+/**
+ * @tc.name: ServiceStartStopCast003
+ * @tc.desc: Cover if StartCast for pcm device
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = 1;
+    deviceInfos_.push_back(deviceInfo);
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+ 
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    
+    pcmCastSession->multiDeviceState_ = MultiDeviceState::DEFAULT;
+    pcmCastSession->OnCastStateChange(5, deviceInfo, false);
+ 
+    pcmCastSession->multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
+    pcmCastSession->OnCastStateChange(5, deviceInfo, false);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
 static HWTEST_F(AVSessionServiceTestExt, SendStateChangeRequest001, TestSize.Level0)
 {
     SLOGD("SendStateChangeRequest001 begin!");
