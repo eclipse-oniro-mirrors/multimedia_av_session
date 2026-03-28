@@ -2385,7 +2385,7 @@ void AVSessionItem::SetMultiDeviceState(MultiDeviceState multiDeviceState)
     multiDeviceState_.store(multiDeviceState);
 }
 
-AVSessionItem::MultiDeviceState AVSessionItem::GetMultiDeviceState()
+MultiDeviceState AVSessionItem::GetMultiDeviceState()
 {
     return multiDeviceState_.load();
 }
