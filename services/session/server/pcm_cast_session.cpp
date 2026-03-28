@@ -154,7 +154,7 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
  
             return ERR_REPEAT_CAST;
         } else {
-            SLOGI("cast check with pre cast alive %{public}lld, unregister callback", (long long)castHandle_);
+            SLOGI("cast check with pre cast alive %{public}lld, unregister callback", castHandle_);
             multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
             newOutputDeviceInfo_ = outputDeviceInfo;
             newSessionToken_ = sessionToken;
@@ -164,7 +164,7 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
             return AVSESSION_SUCCESS;
         }
     }
- 
+
     int sourceAllConnectResult = CollaborationManagerHiPlay::GetInstance().CastAddToCollaboration(
         outputDeviceInfo.deviceInfos_[0]);
     if (sourceAllConnectResult != AVSESSION_SUCCESS) {
@@ -174,11 +174,10 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     }
     return SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
 }
- 
+
 int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
     std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
 {
- 
     castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, serviceNameStatePair, "pcmCastSession");
     CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
     SLOGI("PcmCastSession StartCast-castHandle_ %{public}lld", castHandle_);
