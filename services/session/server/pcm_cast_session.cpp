@@ -176,15 +176,10 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
     AVRouter::GetInstance().RegisterCallback(castHandle_, shared_from_this(),
         "pcmCastSession", outputDeviceInfo.deviceInfos_[0]);
 
-    if (sessionToken.sessionId == "pcmCastSession") {
-        castMode_ = HiPlayCastMode::DEVICE_LEVEL;
-        SLOGI("PcmCastSession isDeviceLevel: true");
-    } else {
-        castMode_ = HiPlayCastMode::APP_LEVEL;
-        descriptor_.uid_ = sessionToken.uid;
-        SLOGI("PcmCastSession isDeviceLevel: false, sessionId: %{public}s", AVSessionUtils::GetAnonySessionId(
-            sessionToken.sessionId).c_str());
-    }
+    bool isDeviceLevel = (sessionToken.sessionId == "pcmCastSession");
+    castMode_ = isDeviceLevel ? HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
+    descriptor_.uid_ = isDeviceLevel ? 0 : sessionToken.uid;
+    SLOGI("PcmCastSession StartCast castMode: %{public}d", castMode_);
  
     SendStateChangeRequest(sessionToken);
     WriteCastPairToFile(outputDeviceInfo.deviceInfos_[0].deviceId_, castMode_);
