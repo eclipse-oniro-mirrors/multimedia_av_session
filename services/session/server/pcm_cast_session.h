@@ -51,11 +51,6 @@ public:
 
     void QueryCommandParams(const AAFwk::WantParams& commandArgs);
 
-    enum class MultiDeviceState {
-        DEFAULT,
-        CASTING_SWITCH_DEVICE,
-    };
-
 private:
     int64_t castHandle_ = 0;
     int32_t castMode_ = HiPlayCastMode::DEVICE_LEVEL;
