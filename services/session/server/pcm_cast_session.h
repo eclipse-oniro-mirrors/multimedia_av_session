@@ -30,10 +30,10 @@ public:
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
 
+    void StopCast(const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
+
     int32_t SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
-
-    void StopCast();
 
     void ExecuteCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
 
