@@ -246,8 +246,10 @@ void AVSessionService::OnStop()
     dlclose(migrateStubFuncHandle_);
 #endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
-    CollaborationManager::ReleaseInstance();
+    CollaborationManagerURLCasting::GetInstance().UnRegisterLifecycleCallback();
+    CollaborationManagerURLCasting::ReleaseInstance();
+    CollaborationManagerHiPlay::GetInstance().UnRegisterLifecycleCallback();
+    CollaborationManagerHiPlay::ReleaseInstance();
 #endif
     CommandSendLimit::GetInstance().StopTimer();
     NotifyProcessStatus(false);
@@ -1016,8 +1018,10 @@ void AVSessionService::InitCollaboration()
 {
     SLOGI("InitCollaboration in");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CollaborationManager::GetInstance().ReadCollaborationManagerSo();
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    CollaborationManagerURLCasting::GetInstance().ReadCollaborationManagerSo();
+    CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
+    CollaborationManagerHiPlay::GetInstance().ReadCollaborationManagerSo();
+    CollaborationManagerHiPlay::GetInstance().RegisterLifecycleCallback();
 #endif
 }
 
@@ -1584,8 +1588,8 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
             return;
         }
         std::lock_guard lockGuard(sessionServiceLock_);
-        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
-        CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+        CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession.");
         UpdateFrontSession(session, isAdd);
     });
     sessionItem->SetServiceCallbackForUpdateExtras([this](std::string sessionId) {

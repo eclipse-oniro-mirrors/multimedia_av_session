@@ -1722,5 +1722,21 @@ enum BackgroundPlayMode {
      */
     DISABLE_BACKGROUND_PLAY = 1,
 };
+
+/**
+ * DLNA extras key constants
+ * @syscap SystemCapability.Multimedia.AVSession.AVCast
+ * @since 26 dynamic&static
+ */
+struct DlnaExtrasKey {
+    /**
+     * @brief Key for DLNA DIDL-Lite extra parameter
+     */
+    static constexpr const char* DIDL_LITE = "DIDL-Lite";
+    /**
+     * @brief Key for DLNA CurrentURIMetadata extra parameter
+     */
+    static constexpr const char* CURRENT_URI_METADATA = "CurrentURIMetadata";
+};
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_INFO_H

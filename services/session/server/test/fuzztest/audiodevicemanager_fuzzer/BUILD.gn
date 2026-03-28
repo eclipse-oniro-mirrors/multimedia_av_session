@@ -75,7 +75,7 @@ ohos_fuzztest("AudioDeviceManagerFuzzTest") {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
     external_deps += [ "dsoftbus:softbus_client" ]
   }

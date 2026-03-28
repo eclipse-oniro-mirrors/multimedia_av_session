@@ -78,7 +78,8 @@
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
-#include "collaboration_manager.h"
+#include "collaboration_manager_urlcasting.h"
+#include "collaboration_manager_hiplay.h"
 #include "pcm_cast_session.h"
 #endif
 
@@ -294,6 +295,8 @@ public:
     int32_t StopCast(const SessionToken& sessionToken) override;
 
     int32_t StopSourceCast();
+
+    bool IsHiPlayCasting() override;
 
     int32_t checkEnableCast(bool enable) override;
 

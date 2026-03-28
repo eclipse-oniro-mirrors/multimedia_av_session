@@ -966,3 +966,8 @@ enum BackgroundPlayMode : i32 {
   ENABLE_BACKGROUND_PLAY = 0,
   DISABLE_BACKGROUND_PLAY = 1,
 }
+
+enum ExtraKey : String {
+  DLNA_DIDL_LITE = "DIDL-Lite",
+  DLNA_CURRENT_URI_METADATA = "CurrentURIMetadata",
+}
