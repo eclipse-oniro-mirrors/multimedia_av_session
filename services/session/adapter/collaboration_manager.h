@@ -32,7 +32,7 @@ public:
     virtual ~CollaborationManager();
     void SendCollaborationApplyResult(const std::function<void(const int32_t code)>& callback);
     void SendCollaborationOnStop(const std::function<void(void)>& callback);
-    int32_t ReadCollaborationManagerSo();
+    int32_t ReadCollaborationManagerSo(const std::shared_ptr<PluginLib>& pluginLib);
     int32_t RegisterLifecycleCallback();
     int32_t UnRegisterLifecycleCallback();
     int32_t PublishServiceState(const char* peerNetworkId, ServiceCollaborationManagerBussinessStatus state);
@@ -55,7 +55,7 @@ private:
     const int32_t remoteHardwareListSize_ = 2;
     const int32_t localHardwareListSize_ = 0;
     const std::string dataType_ = "DATA_TYPE_BYTES";
-    static PluginLib pluginLib_;
+    std::shared_ptr<PluginLib> pluginLib_;
 
     using CollaborationManagerExportFunType = int32_t (*)(ServiceCollaborationManagerV2_API *exportapi);
     CollaborationManagerExportFunType collaborationManagerExportFun_;

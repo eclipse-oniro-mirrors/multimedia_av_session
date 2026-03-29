@@ -1018,9 +1018,11 @@ void AVSessionService::InitCollaboration()
 {
     SLOGI("InitCollaboration in");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CollaborationManagerURLCasting::GetInstance().ReadCollaborationManagerSo();
+    std::shared_ptr<PluginLib> pluginLib = std::make_shared<PluginLib>("/system/lib64/libcfwk_allconnect_client.z.so");
+    CHECK_AND_RETURN_LOG((pluginLib != nullptr), "dlopen lib err");
+    CollaborationManagerURLCasting::GetInstance().ReadCollaborationManagerSo(pluginLib);
     CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
-    CollaborationManagerHiPlay::GetInstance().ReadCollaborationManagerSo();
+    CollaborationManagerHiPlay::GetInstance().ReadCollaborationManagerSo(pluginLib);
     CollaborationManagerHiPlay::GetInstance().RegisterLifecycleCallback();
 #endif
 }
