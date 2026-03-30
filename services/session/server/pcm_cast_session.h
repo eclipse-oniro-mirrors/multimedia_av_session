@@ -32,6 +32,9 @@ public:
 
     void StopCast(const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
 
+    int32_t SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
+        std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
+
     void ExecuteCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
 
     void DestroyTask();
@@ -58,6 +61,11 @@ private:
     std::string collaborationNeedDeviceId_;
     std::string collaborationNeedNetworkId_;
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
+
+    std::atomic<MultiDeviceState> multiDeviceState_ = MultiDeviceState::DEFAULT;
+    OutputDeviceInfo newOutputDeviceInfo_;
+    SessionToken newSessionToken_;
+    std::pair<std::string, std::string> newServiceNameStatePair_;
 
     const std::string COMMAND_TYPE = "command_type";
     const std::string COMMAND_BODY = "command_body";

@@ -166,5 +166,12 @@ struct CastDisplayInfo: public Parcelable {
     int32_t width {};
     int32_t height {};
 };
+
+enum class MultiDeviceState {
+    DEFAULT,
+    CASTING_SWITCH_DEVICE,
+    CASTED_AND_CASTING,
+    CASTING_AND_CASTED
+};
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_DESCRIPTOR_H
