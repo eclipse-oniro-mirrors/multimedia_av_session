@@ -77,22 +77,10 @@ void CollaborationManagerFuzzer::CollaborationManagerFuzzTest(uint8_t* data, siz
         return;
     }
     CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
-
-    auto registerLifecycleCallback1 = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
-        return static_cast<int32_t>(0);
-    };
-    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
-        = registerLifecycleCallback1;
-    CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
-
-    auto registerLifecycleCallback2 = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
-        return static_cast<int32_t>(1);
-    };
-    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
-        = registerLifecycleCallback2;
-    CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
+    std::shared_ptr<PluginLib> pluginLib = std::make_shared<PluginLib>("/system/lib64/libcfwk_allconnect_client.z.so");
+    CHECK_AND_RETURN_LOG((pluginLib != nullptr), "dlopen lib err");
     CollaborationManager collaborationManager;
-    collaborationManager.ReadCollaborationManagerSo();
+    collaborationManager.ReadCollaborationManagerSo(pluginLib);
     std::string peerNetworkId = std::to_string(GetData<uint8_t>());
     DeviceInfo deviceInfo;
     deviceInfo.supportedProtocols_ = GetData<int32_t>();

@@ -20,7 +20,6 @@
 #include <string>
 
 namespace OHOS::AVSession {
-PluginLib CollaborationManager::pluginLib_ {"/system/lib64/libcfwk_allconnect_client.z.so"};
 
 CollaborationManager::CollaborationManager()
 {
@@ -82,10 +81,13 @@ void CollaborationManager::SendCollaborationApplyResult(const std::function<
     sendCollaborationApplyResult_ = callback;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t CollaborationManager::ReadCollaborationManagerSo()
+__attribute__((no_sanitize("cfi"))) int32_t CollaborationManager::ReadCollaborationManagerSo(
+    const std::shared_ptr<PluginLib>& pluginLib)
 {
     SLOGI("enter ReadCollaborationManagerSo");
-    void *collaborationManagerExport = pluginLib_.LoadSymbol("ServiceCollaborationManagerV2_Export");
+    CHECK_AND_RETURN_RET((pluginLib != nullptr), AVSESSION_ERROR);
+    pluginLib_ = pluginLib;
+    void *collaborationManagerExport = pluginLib_->LoadSymbol("ServiceCollaborationManagerV2_Export");
     if (collaborationManagerExport == nullptr) {
         SLOGE("load libcfwk_allconnect_client.z.so failed");
         return AVSESSION_ERROR;

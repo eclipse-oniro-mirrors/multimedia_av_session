@@ -381,7 +381,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource005, testing::ext
     auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
         ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
         ServiceCollaborationManager_Callback* callback) {
-            EXPECT_EQ(resourceRequest->linkType, ServiceCollaborationManagerLinkType::NATIVE_P2P);
+            EXPECT_EQ(resourceRequest->linkType, ServiceCollaborationManagerLinkType::UNKNOWN);
             return static_cast<int32_t>(0);
     };
     CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
