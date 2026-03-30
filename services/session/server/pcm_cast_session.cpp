@@ -33,15 +33,6 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
     SLOGI("PcmCastSession OnCastStateChange state %{public}d id %{public}s", castState,
         AVSessionUtils::GetAnonymousDeviceId(deviceInfo.deviceId_).c_str());
 
-    collaborationNeedDeviceId_ = deviceInfo.deviceId_;
-    if (isNeedRemove) { // same device cast exchange no publish when hostpot scene
-        DealCollaborationPublishState(castState, deviceInfo);
-    }
-
-    CollaborationManagerHiPlay::GetInstance().SendCollaborationOnStop([this](void) {
-        StopCast();
-    });
-
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
         AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -60,6 +51,15 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         castState_ = CastState::CONNECTED;
     }
+
+    collaborationNeedDeviceId_ = deviceInfo.deviceId_;
+    if (isNeedRemove) { // same device cast exchange no publish when hostpot scene
+        DealCollaborationPublishState(castState, deviceInfo);
+    }
+
+    CollaborationManagerHiPlay::GetInstance().SendCollaborationOnStop([this](void) {
+        StopCast();
+    });
 }
 
 void PcmCastSession::DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo)
