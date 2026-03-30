@@ -438,6 +438,13 @@ export struct AVCastPicker {
                           .width(18)
                           .height(16)
                         }
+                        .onDisAppear(() => {
+                          if (item.bundleInfo?.isShowBadge && item?.deviceState === 0){
+                            if (this.extensionProxy != null) {
+                              this.extensionProxy.send({'isShowBadge': false});
+                            }
+                          }
+                        })
                         .margin({left :8, right: 8})
                         .direction(Direction.Ltr) 
                       } else {
