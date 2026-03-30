@@ -854,12 +854,13 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     AVRouterImpl* routerImpl = reinterpret_cast<AVRouterImpl*>(&router);
     routerImpl->isInMirrorToStream_ = true;
     routerImpl->isRemoteCasting_ = false;
+    routerImpl->servicePtr_ = nullptr;
     
     g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
     
     EXPECT_TRUE(g_AVSessionService->topSession_->IsCasting());
     EXPECT_FALSE(AVRouter::GetInstance().IsRemoteCasting());
-    EXPECT_FALSE(AVRouter::GetInstance().IsHiPlayCasting());
+    EXPECT_FALSE(routerImpl->IsHiPlayCasting());
     
     routerImpl->isInMirrorToStream_ = false;
     routerImpl->isRemoteCasting_ = false;
