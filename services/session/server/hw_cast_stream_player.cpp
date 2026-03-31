@@ -30,6 +30,7 @@
 using namespace OHOS::CastEngine;
 
 namespace OHOS::AVSession {
+static constexpr size_t DLNA_EXTRAS_MAX_LENGTH = 40960;
 HwCastStreamPlayer::~HwCastStreamPlayer()
 {
     SLOGI("destruct the HwCastStreamPlayer without release");
@@ -341,20 +342,25 @@ std::string HwCastStreamPlayer::GetDlnaExtrasFromWantParams(
     const std::shared_ptr<AAFwk::WantParams>& extras)
 {
     CHECK_AND_RETURN_RET_LOG(extras != nullptr, "", "extras is null");
-    cJSON* extrasObj = cJSON_CreateObject();
-    CHECK_AND_RETURN_RET_LOG(extrasObj != nullptr, "", "Failed to create cJSON object");
 
-    auto appendKey = [&extras, extrasObj](const std::string& key) {
+    auto getExtraStr = [&extras](const std::string& key) -> std::string {
         auto value = extras->GetParam(key);
-        CHECK_AND_RETURN_LOG(value != nullptr, "%{public}s value is null", key.c_str());
+        CHECK_AND_RETURN_RET_LOG(value != nullptr, "", "%{public}s value is null", key.c_str());
         auto* extraValue = AAFwk::IString::Query(value);
-        CHECK_AND_RETURN_LOG(extraValue != nullptr, "%{public}s is not string type", key.c_str());
+        CHECK_AND_RETURN_RET_LOG(extraValue != nullptr, "", "%{public}s is not string type", key.c_str());
         auto extraStr = AAFwk::String::Unbox(extraValue);
         SLOGI("GetDlnaExtrasFromWantParams: %{public}s length=%{public}zu", key.c_str(), extraStr.length());
-        cJSON_AddStringToObject(extrasObj, key.c_str(), extraStr.c_str());
+        return extraStr;
     };
-    appendKey(DlnaExtrasKey::DIDL_LITE);
-    appendKey(DlnaExtrasKey::CURRENT_URI_METADATA);
+    auto didlStr = getExtraStr(DlnaExtrasKey::DIDL_LITE);
+    auto metadataStr = getExtraStr(DlnaExtrasKey::CURRENT_URI_METADATA);
+    CHECK_AND_RETURN_RET_LOG(didlStr.length() + metadataStr.length() > DLNA_EXTRAS_MAX_LENGTH, "",
+        "GetDlnaExtrasFromWantParams total length exceeded max");
+
+    cJSON* extrasObj = cJSON_CreateObject();
+    CHECK_AND_RETURN_RET_LOG(extrasObj != nullptr, "", "Failed to create cJSON object");
+    cJSON_AddStringToObject(extrasObj, DlnaExtrasKey::DIDL_LITE.c_str(), didlStr.c_str());
+    cJSON_AddStringToObject(extrasObj, DlnaExtrasKey::CURRENT_URI_METADATA.c_str(), metadataStr.c_str());
 
     char* jsonStr = cJSON_PrintUnformatted(extrasObj);
     std::string result = (jsonStr != nullptr) ? jsonStr : "";
