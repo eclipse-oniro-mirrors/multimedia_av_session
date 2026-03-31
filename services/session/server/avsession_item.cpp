@@ -46,7 +46,7 @@
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
-#include "collaboration_manager.h"
+#include "collaboration_manager_urlcasting.h"
 #endif
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
@@ -203,10 +203,10 @@ void AVSessionItem::DestroyCast(bool continuePlay)
         if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
             serviceCallbackForPhotoCast_(descriptor_.sessionId_, false);
         }
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+        CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         if (!collaborationNeedNetworkId_.empty()) {
-            CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+            CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
                 ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         }
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
@@ -1814,7 +1814,7 @@ int32_t AVSessionItem::CastAddToCollaboration(const OutputDeviceInfo& outputDevi
     CHECK_AND_RETURN_RET_LOG(castDeviceInfoMap_.count(outputDeviceInfo.deviceInfos_[0].deviceId_),
         AVSESSION_ERROR, "deviceId map deviceinfo is not exit");
     DeviceInfo deviceInfo = castDeviceInfoMap_[outputDeviceInfo.deviceInfos_[0].deviceId_];
-    return CollaborationManager::GetInstance().CastAddToCollaboration(deviceInfo);
+    return CollaborationManagerURLCasting::GetInstance().CastAddToCollaboration(deviceInfo);
 }
 
 int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
@@ -1857,6 +1857,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
         }
         if (AVRouter::GetInstance().GetCastSide() == CAST_SIDE::CAST_SOURCE &&
             AVRouter::GetInstance().IsRemoteCasting() &&
+            (!AVRouter::GetInstance().IsHiPlayCasting()) &&
             AVRouter::GetInstance().GetMirrorCastHandle() == -1) {
             return SubStartCast(outputDeviceInfo);
         }
@@ -1942,7 +1943,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
         "session casted already publish service state");
 
     if (castState == authingStateFromCast_) {
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+        CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTING);
     }
     if (castState == connectStateFromCast_) { // 6 is connected status (stream)
@@ -1953,7 +1954,7 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
                 AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+        CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     }
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
@@ -1962,9 +1963,9 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
                 AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+        CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+        CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     }
 }
@@ -2007,7 +2008,7 @@ void AVSessionItem::DealLocalState(const int32_t castState, const OutputDeviceIn
 void AVSessionItem::ListenCollaborationOnStop()
 {
     SLOGI("enter ListenCollaborationOnStop");
-    CollaborationManager::GetInstance().SendCollaborationOnStop([this](void) {
+    CollaborationManagerURLCasting::GetInstance().SendCollaborationOnStop([this](void) {
         if (descriptor_.sessionTag_ == "RemoteCast") {
             SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
             AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -2125,9 +2126,9 @@ int32_t AVSessionItem::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
     std::lock_guard lockGuard(castLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
+        CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
-        CollaborationManager::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
+        CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
         int32_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
@@ -2407,7 +2408,7 @@ void AVSessionItem::SetMultiDeviceState(MultiDeviceState multiDeviceState)
     multiDeviceState_.store(multiDeviceState);
 }
 
-AVSessionItem::MultiDeviceState AVSessionItem::GetMultiDeviceState()
+MultiDeviceState AVSessionItem::GetMultiDeviceState()
 {
     return multiDeviceState_.load();
 }

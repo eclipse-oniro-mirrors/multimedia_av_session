@@ -18,7 +18,10 @@
 #include "avsession_log.h"
 #include "avsession_info.h"
 #include "collaboration_manager_utils.h"
-#include "collaboration_manager.h"
+#include "collaboration_manager_urlcasting.cpp"
+#include "collaboration_manager_hiplay.cpp"
+#include "collaboration_manager_urlcasting.h"
+#include "collaboration_manager_hiplay.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -55,7 +58,7 @@ void CollaborationManagerTest::TearDown()
 static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback001, testing::ext::TestSize.Level1)
 {
     SLOGI("RegisterLifecycleCallback001, start");
-    int32_t ret = CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("RegisterLifecycleCallback001, end");
 }
@@ -71,9 +74,9 @@ static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback002, testing:
     auto registerLifecycleCallback = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
         return static_cast<int32_t>(0);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
         = registerLifecycleCallback;
-    int32_t ret = CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("RegisterLifecycleCallback002, end");
 }
@@ -90,9 +93,9 @@ static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback003, testing:
     auto registerLifecycleCallback = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
         return static_cast<int32_t>(1);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
         = registerLifecycleCallback;
-    int32_t ret = CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("RegisterLifecycleCallback003, end");
 }
@@ -105,11 +108,24 @@ static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback003, testing:
 static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback004, testing::ext::TestSize.Level0)
 {
     SLOGI("RegisterLifecycleCallback004, start");
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
         = nullptr;
-    int32_t ret = CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("RegisterLifecycleCallback004, end");
+}
+
+/**
+ * @tc.name: RegisterLifecycleCallback005
+ * @tc.desc: Test RegisterLifecycleCallback
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback005, testing::ext::TestSize.Level1)
+{
+    SLOGI("RegisterLifecycleCallback005, start");
+    int32_t ret = CollaborationManagerHiPlay::GetInstance().RegisterLifecycleCallback();
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("RegisterLifecycleCallback005, end");
 }
 
 /**
@@ -120,7 +136,7 @@ static HWTEST_F(CollaborationManagerTest, RegisterLifecycleCallback004, testing:
 static HWTEST_F(CollaborationManagerTest, UnRegisterLifecycleCallback001, testing::ext::TestSize.Level1)
 {
     SLOGI("UnRegisterLifecycleCallback001, start");
-    int32_t ret = CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().UnRegisterLifecycleCallback();
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("UnRegisterLifecycleCallback001, end");
 }
@@ -136,9 +152,9 @@ static HWTEST_F(CollaborationManagerTest, UnRegisterLifecycleCallback002, testin
     auto unRegisterLifecycleCallback = [](const char* serviceName) {
         return static_cast<int32_t>(0);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback
         = unRegisterLifecycleCallback;
-    int32_t ret = CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().UnRegisterLifecycleCallback();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("UnRegisterLifecycleCallback002, end");
 }
@@ -154,11 +170,25 @@ static HWTEST_F(CollaborationManagerTest, UnRegisterLifecycleCallback003, testin
     auto unRegisterLifecycleCallback = [](const char* serviceName) {
         return static_cast<int32_t>(1);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_UnRegisterLifecycleCallback
         = unRegisterLifecycleCallback;
-    int32_t ret = CollaborationManager::GetInstance().UnRegisterLifecycleCallback();
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().UnRegisterLifecycleCallback();
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("UnRegisterLifecycleCallback003, end");
+}
+
+/**
+ * @tc.name: UnRegisterLifecycleCallback004
+ * @tc.desc: Test UnRegisterLifecycleCallback
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, UnRegisterLifecycleCallback004, testing::ext::TestSize.Level1)
+{
+    SLOGI("UnRegisterLifecycleCallback004, start");
+    int32_t ret = CollaborationManagerHiPlay::GetInstance().UnRegisterLifecycleCallback();
+    CollaborationManagerHiPlay::ReleaseInstance();
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("UnRegisterLifecycleCallback004, end");
 }
 
 /**
@@ -171,7 +201,7 @@ static HWTEST_F(CollaborationManagerTest, PublishServiceState001, testing::ext::
     SLOGI("PublishServiceState001, start");
     const char* peerNetworkId = "";
     ServiceCollaborationManagerBussinessStatus state = ServiceCollaborationManagerBussinessStatus::SCM_IDLE;
-    int32_t ret = CollaborationManager::GetInstance().PublishServiceState(peerNetworkId, state);
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().PublishServiceState(peerNetworkId, state);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("PublishServiceState001, end");
 }
@@ -190,9 +220,9 @@ static HWTEST_F(CollaborationManagerTest, PublishServiceState002, testing::ext::
         ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId) {
             return static_cast<int32_t>(0);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
         = publishServiceState;
-    int32_t ret = CollaborationManager::GetInstance().PublishServiceState(peerNetworkId, state);
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().PublishServiceState(peerNetworkId, state);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("PublishServiceState002, end");
 }
@@ -211,9 +241,9 @@ static HWTEST_F(CollaborationManagerTest, PublishServiceState003, testing::ext::
         ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId) {
             return static_cast<int32_t>(1);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
         = publishServiceState;
-    int32_t ret = CollaborationManager::GetInstance().PublishServiceState(peerNetworkId, state);
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().PublishServiceState(peerNetworkId, state);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("PublishServiceState003, end");
 }
@@ -226,19 +256,19 @@ static HWTEST_F(CollaborationManagerTest, PublishServiceState003, testing::ext::
 static HWTEST_F(CollaborationManagerTest, PublishServiceState004, testing::ext::TestSize.Level1)
 {
     SLOGI("PublishServiceState004, start");
-    auto originalResourceRequest = CollaborationManager::GetInstance().resourceRequest_;
+    auto originalResourceRequest = CollaborationManagerURLCasting::GetInstance().resourceRequest_;
     auto publishServiceState = [](ServiceCollaborationManager_ServiceStateInfo *serviceStateInfo,
         ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId) {
             return static_cast<int32_t>(0);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_PublishServiceState
         = publishServiceState;
-    CollaborationManager::GetInstance().resourceRequest_ = nullptr;
+    CollaborationManagerURLCasting::GetInstance().resourceRequest_ = nullptr;
     const char* peerNetworkId = "test_network_id";
     ServiceCollaborationManagerBussinessStatus state = ServiceCollaborationManagerBussinessStatus::SCM_IDLE;
-    int32_t ret = CollaborationManager::GetInstance().PublishServiceState(peerNetworkId, state);
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().PublishServiceState(peerNetworkId, state);
     EXPECT_EQ(ret, AVSESSION_ERROR);
-    CollaborationManager::GetInstance().resourceRequest_ = originalResourceRequest;
+    CollaborationManagerURLCasting::GetInstance().resourceRequest_ = originalResourceRequest;
     SLOGI("PublishServiceState004, end");
 }
 
@@ -252,8 +282,10 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource001, testing::ext
     SLOGI("ApplyAdvancedResource001, start");
     const char* peerNetworkId = "";
     DeviceInfo deviceInfo;
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_ERROR);
+    int32_t retHiPlay = CollaborationManagerHiPlay::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    EXPECT_EQ(retHiPlay, AVSESSION_ERROR);
     SLOGI("ApplyAdvancedResource001, end");
 }
 
@@ -272,10 +304,14 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource002, testing::ext
         ServiceCollaborationManager_Callback* callback) {
             return static_cast<int32_t>(0);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
         = applyAdvancedResource;
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    CollaborationManagerHiPlay::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
+        = applyAdvancedResource;
+    int32_t retHiPlay = CollaborationManagerHiPlay::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    EXPECT_EQ(retHiPlay, AVSESSION_SUCCESS);
     SLOGI("ApplyAdvancedResource002, end");
 }
 
@@ -294,10 +330,14 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource003, testing::ext
         ServiceCollaborationManager_Callback* callback) {
             return static_cast<int32_t>(1);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
         = applyAdvancedResource;
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_ERROR);
+    CollaborationManagerHiPlay::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
+        = applyAdvancedResource;
+    int32_t retHiPlay = CollaborationManagerHiPlay::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    EXPECT_EQ(retHiPlay, AVSESSION_ERROR);
     SLOGI("ApplyAdvancedResource003, end");
 }
 
@@ -309,7 +349,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource003, testing::ext
 static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource004, testing::ext::TestSize.Level1)
 {
     SLOGI("ApplyAdvancedResource004, start");
-    auto& instance = CollaborationManager::GetInstance();
+    auto& instance = CollaborationManagerURLCasting::GetInstance();
     auto originalResourceRequest = instance.resourceRequest_;
     const char* peerNetworkId = "";
     DeviceInfo deviceInfo;
@@ -320,7 +360,7 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource004, testing::ext
     };
     instance.exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = applyAdvancedResource;
     instance.resourceRequest_ = nullptr;
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_ERROR);
     instance.resourceRequest_ = originalResourceRequest;
     SLOGI("ApplyAdvancedResource004, end");
@@ -341,14 +381,87 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource005, testing::ext
     auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
         ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
         ServiceCollaborationManager_Callback* callback) {
+            EXPECT_EQ(resourceRequest->linkType, ServiceCollaborationManagerLinkType::UNKNOWN);
+            return static_cast<int32_t>(0);
+    };
+    CollaborationManagerURLCasting::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
+        = applyAdvancedResource;
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("ApplyAdvancedResource005, end");
+}
+
+/**
+ * @tc.name: ApplyAdvancedResource006
+ * @tc.desc: Test ApplyAdvancedResource when resourceRequest_ is nullptr.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource006, testing::ext::TestSize.Level1)
+{
+    SLOGI("ApplyAdvancedResource006, start");
+    auto& instance = CollaborationManagerHiPlay::GetInstance();
+    auto originalResourceRequest = instance.resourceRequest_;
+    const char* peerNetworkId = "";
+    DeviceInfo deviceInfo;
+    auto applyAdvancedResourceHiPlay = [](const char* networkId, const char* serviceName,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
+        ServiceCollaborationManager_Callback* callback) {
+            return static_cast<int32_t>(1);
+    };
+    instance.exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = applyAdvancedResourceHiPlay;
+    instance.resourceRequest_ = nullptr;
+    int32_t ret = CollaborationManagerHiPlay::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    instance.resourceRequest_ = originalResourceRequest;
+    SLOGI("ApplyAdvancedResource006, end");
+}
+
+/**
+ * @tc.name: ApplyAdvancedResource007
+ * @tc.desc: Test ApplyAdvancedResource with HiPlay P2P device.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource007, testing::ext::TestSize.Level1)
+{
+    SLOGI("ApplyAdvancedResource007, start");
+    const char* peerNetworkId = "";
+    DeviceInfo deviceInfo;
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    deviceInfo.ipAddress_ = "";
+    auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
+        ServiceCollaborationManager_Callback* callback) {
             EXPECT_EQ(resourceRequest->linkType, ServiceCollaborationManagerLinkType::NATIVE_P2P);
             return static_cast<int32_t>(0);
     };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
+    CollaborationManagerHiPlay::GetInstance().exportapi_.ServiceCollaborationManager_ApplyAdvancedResource
         = applyAdvancedResource;
-    int32_t ret = CollaborationManager::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
+    int32_t ret = CollaborationManagerHiPlay::GetInstance().ApplyAdvancedResource(peerNetworkId, deviceInfo);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    SLOGI("ApplyAdvancedResource005, end");
+
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_LOCAL;
+    EXPECT_FALSE(CollaborationManagerHiPlay::GetInstance().IsHiPlayDevice(deviceInfo));
+    EXPECT_FALSE(CollaborationManagerHiPlay::GetInstance().IsHiPlayP2PDevice(deviceInfo));
+    CollaborationManagerHiPlay::GetInstance().UpdataLinkType(deviceInfo);
+    EXPECT_EQ(CollaborationManagerHiPlay::GetInstance().resourceRequest_->linkType,
+        ServiceCollaborationManagerLinkType::UNKNOWN);
+
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    deviceInfo.ipAddress_ = "xxxxx";
+    EXPECT_TRUE(CollaborationManagerHiPlay::GetInstance().IsHiPlayDevice(deviceInfo));
+    EXPECT_FALSE(CollaborationManagerHiPlay::GetInstance().IsHiPlayP2PDevice(deviceInfo));
+    CollaborationManagerHiPlay::GetInstance().UpdataLinkType(deviceInfo);
+    EXPECT_EQ(CollaborationManagerHiPlay::GetInstance().resourceRequest_->linkType,
+        ServiceCollaborationManagerLinkType::WLAN);
+
+    deviceInfo.ipAddress_.clear();
+    EXPECT_TRUE(CollaborationManagerHiPlay::GetInstance().IsHiPlayDevice(deviceInfo));
+    EXPECT_TRUE(CollaborationManagerHiPlay::GetInstance().IsHiPlayP2PDevice(deviceInfo));
+    CollaborationManagerHiPlay::GetInstance().UpdataLinkType(deviceInfo);
+    EXPECT_EQ(CollaborationManagerHiPlay::GetInstance().resourceRequest_->linkType,
+        ServiceCollaborationManagerLinkType::NATIVE_P2P);
+
+    SLOGI("ApplyAdvancedResource007, end");
 }
 
 /**
@@ -359,8 +472,9 @@ static HWTEST_F(CollaborationManagerTest, ApplyAdvancedResource005, testing::ext
 static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop001, testing::ext::TestSize.Level4)
 {
     SLOGI("SendCollaborationOnStop001, start");
-    CollaborationManager::GetInstance().SendCollaborationOnStop(nullptr);
-    auto& sendCallback = CollaborationManager::GetInstance().sendCollaborationOnStop_;
+    CollaborationManagerURLCasting::GetInstance().SendCollaborationOnStop(nullptr);
+    auto& sendCallback = CollaborationManagerURLCasting::GetInstance().sendCollaborationOnStop_;
+    OnStopUrlCasting(nullptr);
     EXPECT_EQ(sendCallback, nullptr);
     SLOGI("SendCollaborationOnStop001, end");
 }
@@ -374,14 +488,51 @@ static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop002, testing::e
 {
     SLOGI("SendCollaborationOnStop002, start");
     bool callbackCalled = false;
-    CollaborationManager::GetInstance().SendCollaborationOnStop([&callbackCalled]() {
+    CollaborationManagerURLCasting::GetInstance().SendCollaborationOnStop([&callbackCalled]() {
         callbackCalled = true;
     });
-    auto& saved = CollaborationManager::GetInstance().sendCollaborationOnStop_;
+    auto& saved = CollaborationManagerURLCasting::GetInstance().sendCollaborationOnStop_;
+    OnStopUrlCasting(nullptr);
     EXPECT_NE(saved, nullptr);
     saved();
     EXPECT_TRUE(callbackCalled);
     SLOGI("SendCollaborationOnStop002, end");
+}
+
+
+/**
+ * @tc.name: SendCollaborationOnStop003
+ * @tc.desc: Test SendCollaborationOnStop with null callback.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop003, testing::ext::TestSize.Level4)
+{
+    SLOGI("SendCollaborationOnStop003, start");
+    CollaborationManagerHiPlay::GetInstance().SendCollaborationOnStop(nullptr);
+    auto& sendCallback = CollaborationManagerHiPlay::GetInstance().sendCollaborationOnStop_;
+    OnStopHiPlay(nullptr);
+    EXPECT_EQ(sendCallback, nullptr);
+    SLOGI("SendCollaborationOnStop003, end");
+}
+
+/**
+ * @tc.name: SendCollaborationOnStop004
+ * @tc.desc: Test SendCollaborationOnStop with valid callback and OnStop invocation.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop004, testing::ext::TestSize.Level4)
+{
+    SLOGI("SendCollaborationOnStop004, start");
+    bool callbackCalled = false;
+    CollaborationManagerHiPlay::GetInstance().SendCollaborationOnStop([&callbackCalled]() {
+        callbackCalled = true;
+    });
+    auto& saved = CollaborationManagerHiPlay::GetInstance().sendCollaborationOnStop_;
+    OnStopHiPlay(nullptr);
+    EXPECT_NE(saved, nullptr);
+    saved();
+    EXPECT_TRUE(callbackCalled);
+    SLOGI("SendCollaborationOnStop003, end");
 }
 
 /**
@@ -392,8 +543,10 @@ static HWTEST_F(CollaborationManagerTest, SendCollaborationOnStop002, testing::e
 static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult001, testing::ext::TestSize.Level4)
 {
     SLOGI("SendCollaborationApplyResult001, start");
-    CollaborationManager::GetInstance().SendCollaborationApplyResult(nullptr);
-    auto& callback = CollaborationManager::GetInstance().sendCollaborationApplyResult_;
+    CollaborationManagerURLCasting::GetInstance().SendCollaborationApplyResult(nullptr);
+    auto& callback = CollaborationManagerURLCasting::GetInstance().sendCollaborationApplyResult_;
+    ApplyResultUrlCasting(0, ServiceCollaborationManagerResultCode::REJECT, "REJECT");
+    ApplyResultUrlCasting(0, ServiceCollaborationManagerResultCode::PASS, "PASS");
     EXPECT_EQ(callback, nullptr);
     SLOGI("SendCollaborationApplyResult001, end");
 }
@@ -406,7 +559,7 @@ static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult001, testi
 static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult002, testing::ext::TestSize.Level4)
 {
     SLOGI("SendCollaborationApplyResult002, start");
-    auto& callbackRef = CollaborationManager::GetInstance().sendCollaborationApplyResult_;
+    auto& callbackRef = CollaborationManagerURLCasting::GetInstance().sendCollaborationApplyResult_;
     auto originalCallback = callbackRef;
 
     bool callbackCalled = false;
@@ -417,14 +570,64 @@ static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult002, testi
         receivedCode = code;
     };
     callbackRef = mockCallback;
-    CollaborationManager::GetInstance().SendCollaborationApplyResult(mockCallback);
+    CollaborationManagerURLCasting::GetInstance().SendCollaborationApplyResult(mockCallback);
     if (callbackRef) {
         callbackRef(AVSESSION_SUCCESS);
     }
     EXPECT_TRUE(callbackCalled);
     EXPECT_EQ(receivedCode, AVSESSION_SUCCESS);
     callbackRef = originalCallback;
+    ApplyResultUrlCasting(0, ServiceCollaborationManagerResultCode::REJECT, "REJECT");
+    ApplyResultUrlCasting(0, ServiceCollaborationManagerResultCode::PASS, "PASS");
     SLOGI("SendCollaborationApplyResult002, end");
+}
+
+
+/**
+ * @tc.name: SendCollaborationApplyResult003
+ * @tc.desc: Test SendCollaborationApplyResult with null callback.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult003, testing::ext::TestSize.Level4)
+{
+    SLOGI("SendCollaborationApplyResult003, start");
+    CollaborationManagerHiPlay::GetInstance().SendCollaborationApplyResult(nullptr);
+    auto& callback = CollaborationManagerHiPlay::GetInstance().sendCollaborationApplyResult_;
+    ApplyResultHiPlay(0, ServiceCollaborationManagerResultCode::REJECT, "REJECT");
+    ApplyResultHiPlay(0, ServiceCollaborationManagerResultCode::PASS, "PASS");
+    EXPECT_EQ(callback, nullptr);
+    SLOGI("SendCollaborationApplyResult003, end");
+}
+
+/**
+ * @tc.name: SendCollaborationApplyResult004
+ * @tc.desc: Test SendCollaborationApplyResult with valid callback.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult004, testing::ext::TestSize.Level4)
+{
+    SLOGI("SendCollaborationApplyResult004, start");
+    auto& callbackRef = CollaborationManagerHiPlay::GetInstance().sendCollaborationApplyResult_;
+    auto originalCallback = callbackRef;
+
+    bool callbackCalled = false;
+    int32_t receivedCode = -1;
+    auto mockCallback = [&callbackCalled, &receivedCode](const int32_t code) {
+        SLOGI("Mock SendCollaborationApplyResult004 callback invoked with code: %{public}d", code);
+        callbackCalled = true;
+        receivedCode = code;
+    };
+    callbackRef = mockCallback;
+    CollaborationManagerHiPlay::GetInstance().SendCollaborationApplyResult(mockCallback);
+    if (callbackRef) {
+        callbackRef(AVSESSION_SUCCESS);
+    }
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(receivedCode, AVSESSION_SUCCESS);
+    callbackRef = originalCallback;
+    ApplyResultHiPlay(0, ServiceCollaborationManagerResultCode::REJECT, "REJECT");
+    ApplyResultHiPlay(0, ServiceCollaborationManagerResultCode::PASS, "PASS");
+    SLOGI("SendCollaborationApplyResult004, end");
 }
 
 /**
@@ -435,7 +638,7 @@ static HWTEST_F(CollaborationManagerTest, SendCollaborationApplyResult002, testi
 static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult001, testing::ext::TestSize.Level1)
 {
     SLOGI("ListenCollaborationApplyResult001, start");
-    auto& instance = CollaborationManager::GetInstance();
+    auto& instance = CollaborationManagerURLCasting::GetInstance();
     
     // Reset flags before test
     instance.applyResultFlag_ = false;
@@ -465,7 +668,7 @@ static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult001, tes
 static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult002, testing::ext::TestSize.Level1)
 {
     SLOGI("ListenCollaborationApplyResult002, start");
-    auto& instance = CollaborationManager::GetInstance();
+    auto& instance = CollaborationManagerURLCasting::GetInstance();
     
     // Reset flags before test
     instance.applyResultFlag_ = false;
@@ -495,7 +698,7 @@ static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult002, tes
 static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult003, testing::ext::TestSize.Level1)
 {
     SLOGI("ListenCollaborationApplyResult003, start");
-    auto& instance = CollaborationManager::GetInstance();
+    auto& instance = CollaborationManagerURLCasting::GetInstance();
     
     // Reset flags before test
     instance.applyResultFlag_ = false;
@@ -525,7 +728,7 @@ static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult003, tes
 static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult004, testing::ext::TestSize.Level1)
 {
     SLOGI("ListenCollaborationApplyResult004, start");
-    auto& instance = CollaborationManager::GetInstance();
+    auto& instance = CollaborationManagerURLCasting::GetInstance();
     
     // Reset flags before test
     instance.applyResultFlag_ = false;

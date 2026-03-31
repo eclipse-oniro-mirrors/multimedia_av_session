@@ -22,7 +22,8 @@
       ],
       "features": [
         "av_session_enable_start_stop_on_demand",
-        "av_session_enable_input_redistribute"
+        "av_session_enable_input_redistribute",
+        "av_session_enable_dsoftbus"
       ],
       "adapted_system_type": [ "standard" ],
       "rom": "3000KB",

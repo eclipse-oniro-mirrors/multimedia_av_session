@@ -29,6 +29,7 @@
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
 #include "migrate_avsession_manager.h"
+#include "avrouter_impl.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -48,6 +49,7 @@ static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnActiveSessionChanged = false;
 static bool g_isCallOnTopSessionChange = false;
 static const int32_t ANCO_BROKER_SA_ID = 66849;
+static std::shared_ptr<AVRouterImpl> g_AVRouterImpl {nullptr};
 
 class TestISessionListener : public ISessionListener {
     TestISessionListener() = default;
@@ -984,9 +986,21 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     AAFwk::WantParams commandArgs;
 
     shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    pcmCastSession->collaborationNeedNetworkId_ = "deviceId";
+    pcmCastSession->DealCollaborationPublishState(5, deviceInfo);
+    pcmCastSession->DealCollaborationPublishState(0, deviceInfo);
+    pcmCastSession->DealCollaborationPublishState(6, deviceInfo);
+
     pcmCastSession->OnCastStateChange(5, deviceInfo, false);
     pcmCastSession->OnCastStateChange(0, deviceInfo, false);
-    pcmCastSession->OnCastStateChange(6, deviceInfo, false);
+    pcmCastSession->OnCastStateChange(6, deviceInfo, true);
+
+    pcmCastSession->collaborationNeedNetworkId_.clear();
+    pcmCastSession->DealCollaborationPublishState(5, deviceInfo);
+    pcmCastSession->collaborationNeedNetworkId_.clear();
+    pcmCastSession->DealCollaborationPublishState(0, deviceInfo);
+    pcmCastSession->collaborationNeedNetworkId_.clear();
+    pcmCastSession->DealCollaborationPublishState(6, deviceInfo);
 
     pcmCastSession->CastStateCommandParams(commandArgs);
     pcmCastSession->DestroyTask();
@@ -1014,6 +1028,48 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast002, TestSize.Level
     pcmCastSession->OnSystemCommonEvent(args);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: ServiceStartStopCast003
+ * @tc.desc: Cover if StartCast for pcm device
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OutputDeviceInfo outputDeviceInfo;
+    std::vector<DeviceInfo> deviceInfos_;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "deviceId";
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = 1;
+    deviceInfos_.push_back(deviceInfo);
+    outputDeviceInfo.deviceInfos_ = deviceInfos_;
+ 
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    
+    pcmCastSession->multiDeviceState_ = MultiDeviceState::DEFAULT;
+    pcmCastSession->OnCastStateChange(5, deviceInfo, false);
+ 
+    pcmCastSession->multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
+    pcmCastSession->OnCastStateChange(5, deviceInfo, false);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+static HWTEST_F(AVSessionServiceTestExt, SendStateChangeRequest001, TestSize.Level0)
+{
+    SLOGD("SendStateChangeRequest001 begin!");
+    SessionToken sessionToken;
+    sessionToken.sessionId = "pcmCastSession";
+    sessionToken.uid = 12345;
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    int32_t ret = pcmCastSession->SendStateChangeRequest(sessionToken);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("SendStateChangeRequest001 end!");
 }
 
 /*

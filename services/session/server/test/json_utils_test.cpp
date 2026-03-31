@@ -1482,3 +1482,73 @@ static HWTEST(JsonUtilsTest, SetSessionDescriptorByCJSON001, TestSize.Level0)
     EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("SetSessionDescriptorByCJSON001 end!");
 }
+
+static HWTEST(JsonUtilsTest, GetIntParamFromJsonString001, TestSize.Level0)
+{
+    SLOGI("GetIntParamFromJsonString001 begin!");
+    std::string jsonStr = "";
+    std::string key = "";
+    int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, 0);
+    SLOGI("GetIntParamFromJsonString001 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetIntParamFromJsonString002, TestSize.Level0)
+{
+    SLOGI("GetIntParamFromJsonString002 begin!");
+    std::string jsonStr = "";
+    std::string key = "testKey";
+    int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, 0);
+    SLOGI("GetIntParamFromJsonString002 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetIntParamFromJsonString003, TestSize.Level0)
+{
+    SLOGI("GetIntParamFromJsonString003 begin!");
+    std::string jsonStr = "{\"testKey\": 123}";
+    std::string key = "";
+    int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, 0);
+    SLOGI("GetIntParamFromJsonString003 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetIntParamFromJsonString004, TestSize.Level0)
+{
+    SLOGI("GetIntParamFromJsonString004 begin!");
+    std::string jsonStr = "invalid json";
+    std::string key = "testKey";
+    int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, 0);
+    SLOGI("GetIntParamFromJsonString004 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetIntParamFromJsonString005, TestSize.Level0)
+{
+    SLOGI("GetIntParamFromJsonString005 begin!");
+    std::string jsonStr = "{\"testKey\": 123}";
+    std::string key = "testKey";
+    int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, 123);
+    SLOGI("GetIntParamFromJsonString005 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetIntParamFromJsonString006, TestSize.Level0)
+{
+    SLOGI("GetIntParamFromJsonString006 begin!");
+    std::string jsonStr = "{\"testKey\": \"123\"}";
+    std::string key = "testKey";
+    int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, 0);
+    SLOGI("GetIntParamFromJsonString006 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetIntParamFromJsonString007, TestSize.Level0)
+{
+    SLOGI("GetIntParamFromJsonString007 begin!");
+    std::string jsonStr = "{\"otherKey\": 123}";
+    std::string key = "testKey";
+    int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, 0);
+    SLOGI("GetIntParamFromJsonString007 end!");
+}

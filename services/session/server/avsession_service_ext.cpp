@@ -405,10 +405,13 @@ void AVSessionService::UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo)
                 deviceInfo.hiPlayDeviceInfo_.castMode_ = castMode;
                 int32_t uid = pcmCastSession_->GetUid();
                 deviceInfo.hiPlayDeviceInfo_.castUid_ = uid;
+                SLOGI("UpdateDeviceCastMode success, deviceId: %{public}s, castMode: %{public}d, castUid: %{public}d",
+                    AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str(), castMode, uid);
                 continue;
             }
         }
         deviceInfo.hiPlayDeviceInfo_.castMode_ = deviceInfo.hiPlayDeviceInfo_.supportCastMode_;
+        deviceInfo.hiPlayDeviceInfo_.castUid_ = 0;
  
         int32_t userId = GetUsersManager().GetCurrentUserId();
         std::string fileDir = AVSessionUtils::GetFixedPathNameForDevice(userId);
@@ -494,6 +497,19 @@ void AVSessionService::NotifySystemCommonEvent(const std::string& commonEvent, c
     }
 }
 
+bool AVSessionService::IsHiPlayCasting()
+{
+    if (pcmCastSession_ == nullptr) {
+        SLOGE("pcmCastSession is NULL");
+        return false;
+    }
+
+    if (pcmCastSession_->GetCastHandle() > 0) {
+        return true;
+    }
+    return false;
+}
+
 int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo)
 {
     SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
@@ -573,7 +589,7 @@ int32_t AVSessionService::StopSourceCast()
     for (const auto& session : GetContainer().GetAllSessions()) {
         CHECK_AND_RETURN_RET(session != nullptr, AVSESSION_SUCCESS);
         CHECK_AND_RETURN_RET(session->IsCasting(), AVSESSION_SUCCESS);
-        session->SetMultiDeviceState(AVSessionItem::MultiDeviceState::CASTING_AND_CASTED);
+        session->SetMultiDeviceState(MultiDeviceState::CASTING_AND_CASTED);
         CHECK_AND_RETURN_RET(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR);
     }
 

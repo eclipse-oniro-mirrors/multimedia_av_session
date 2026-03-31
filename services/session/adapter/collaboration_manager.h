@@ -28,37 +28,34 @@
 namespace OHOS::AVSession {
 class CollaborationManager {
 public:
-    static CollaborationManager& GetInstance();
-    static void ReleaseInstance();
     CollaborationManager();
     virtual ~CollaborationManager();
     void SendCollaborationApplyResult(const std::function<void(const int32_t code)>& callback);
     void SendCollaborationOnStop(const std::function<void(void)>& callback);
-    int32_t ReadCollaborationManagerSo();
+    int32_t ReadCollaborationManagerSo(const std::shared_ptr<PluginLib>& pluginLib);
     int32_t RegisterLifecycleCallback();
     int32_t UnRegisterLifecycleCallback();
     int32_t PublishServiceState(const char* peerNetworkId, ServiceCollaborationManagerBussinessStatus state);
     int32_t ApplyAdvancedResource(const char* peerNetworkId, const DeviceInfo& deviceInfo,
         bool checkLinkConflict = true);
-    bool IsHiPlayDevice(const DeviceInfo& deviceInfo);
-    bool IsHiPlayP2PDevice(const DeviceInfo& deviceInfo);
     int32_t CastAddToCollaboration(const DeviceInfo& deviceInfo);
     void ListenCollaborationApplyResult();
 
     std::function<void(const int32_t code)> sendCollaborationApplyResult_;
     std::function<void(void)> sendCollaborationOnStop_;
 
-private:
-    static std::shared_ptr<CollaborationManager> instance_;
-    static std::recursive_mutex instanceLock_;
-    const int32_t remoteHardwareListSize_ = 2;
-    const int32_t localHardwareListSize_ = 0;
-    const std::string serviceName_ = "URLCasting";
-    const std::string dataType_ = "DATA_TYPE_BYTES";
-    PluginLib pluginLib_ {"/system/lib64/libcfwk_allconnect_client.z.so"};
+protected:
+    ServiceCollaborationManager_Callback serviceCollaborationCallback_;
+    std::string serviceName_ = "URLCasting";
     ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest_ =
         new ServiceCollaborationManager_ResourceRequestInfoSets();
     ServiceCollaborationManagerV2_API exportapi_;
+
+private:
+    const int32_t remoteHardwareListSize_ = 2;
+    const int32_t localHardwareListSize_ = 0;
+    const std::string dataType_ = "DATA_TYPE_BYTES";
+    std::shared_ptr<PluginLib> pluginLib_;
 
     using CollaborationManagerExportFunType = int32_t (*)(ServiceCollaborationManagerV2_API *exportapi);
     CollaborationManagerExportFunType collaborationManagerExportFun_;
@@ -74,6 +71,8 @@ private:
     std::condition_variable connectWaitCallbackCond_;
     const int32_t collaborationCallbackTimeOut_ = 10;
     const int32_t collaborationUserCallbackTimeOut_ = 60;
+
+    virtual void UpdataLinkType(const DeviceInfo& deviceInfo) {};
 };
 }   // namespace OHOS::AVSession
 #endif //COLLABORATION_MANAGER_H

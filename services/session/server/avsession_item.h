@@ -99,13 +99,6 @@ public:
 
     void ListenCollaborationOnStop();
 
-    enum class MultiDeviceState {
-        DEFAULT,
-        CASTING_SWITCH_DEVICE,
-        CASTED_AND_CASTING,
-        CASTING_AND_CASTED
-    };
-
     void DestroyCast(bool continuePlay);
 #endif
 

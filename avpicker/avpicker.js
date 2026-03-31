@@ -78,6 +78,7 @@ export class AVCastPicker extends ViewPU {
         this.__isMenuShow = new ObservedPropertySimplePU(false, this, 'isMenuShow');
         this.__touchMenuItemIndex = new ObservedPropertySimplePU(-1, this, 'touchMenuItemIndex');
         this.__textParams = new ObservedPropertyObjectPU({}, this, 'textParams');
+        this.__isAncoSession = new ObservedPropertySimplePU(false, this, 'isAncoSession');
         this.onStateChange = undefined;
         this.extensionProxy = null;
         this.pickerClickTime = -1;
@@ -136,6 +137,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.textParams !== undefined) {
             this.textParams = c11.textParams;
         }  
+        if (c11.isAncoSession !== undefined) {
+            this.isAncoSession = c11.isAncoSession;
+        }
         if (c11.onStateChange !== undefined) {
             this.onStateChange = c11.onStateChange;
         }
@@ -207,6 +211,7 @@ export class AVCastPicker extends ViewPU {
         this.__isMenuShow.purgeDependencyOnElmtId(a11);
         this.__touchMenuItemIndex.purgeDependencyOnElmtId(a11);
         this.__textParams.purgeDependencyOnElmtId(a11);
+        this.__isAncoSession.purgeDependencyOnElmtId(a11);
         this.__configurationColorMode.purgeDependencyOnElmtId(a11);
         this.__deviceInfoType.purgeDependencyOnElmtId(a11);
         this.__maxFontSizeScale.purgeDependencyOnElmtId(a11);
@@ -233,6 +238,7 @@ export class AVCastPicker extends ViewPU {
         this.__isMenuShow.aboutToBeDeleted();
         this.__touchMenuItemIndex.aboutToBeDeleted();
         this.__textParams.aboutToBeDeleted();
+        this.__isAncoSession.aboutToBeDeleted();
         this.__configurationColorMode.aboutToBeDeleted();
         this.__deviceInfoType.aboutToBeDeleted();
         this.__maxFontSizeScale.aboutToBeDeleted();
@@ -335,6 +341,14 @@ export class AVCastPicker extends ViewPU {
  
     set textParams(t10) {
         this.__textParams.set(t10);
+    }
+
+    get isAncoSession() {
+        return this.__isAncoSession.get();
+    }
+ 
+    set isAncoSession(t10) {
+        this.__isAncoSession.set(t10);
     }
 
     get configurationColorMode() {
@@ -702,7 +716,7 @@ export class AVCastPicker extends ViewPU {
                             Flex.pop();
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 If.create();
-                                if (x8.isConnected && x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
+                                if ((x8.isConnected || x8.castUid !== 0) && x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                                     this.ifElseBranchUpdateFunction(0, () => {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Flex.create({
@@ -710,13 +724,15 @@ export class AVCastPicker extends ViewPU {
                                                 alignItems: ItemAlign.Center
                                             });
                                             Flex.onClick(() => {
-                                                this.isDeviceLevel = (x8.castMode === HiPlayCastMode.DEVICE_LEVEL);
-                                                if (this.extensionProxy != null) {
-                                                    this.extensionProxy.send({ 'isShowBadge': false})
-                                                }
-                                                if (!this.isSubMenuExpanded) {
-                                                    this.isSwitch = true;
-                                                    this.isMenuShow = false;
+                                                if (x8.isConnected && !this.isAncoSession) {
+                                                    this.isDeviceLevel = (x8.castMode === HiPlayCastMode.DEVICE_LEVEL);
+                                                    if (this.extensionProxy != null) {
+                                                        this.extensionProxy.send({ 'isShowBadge': false})
+                                                    }
+                                                    if (!this.isSubMenuExpanded) {
+                                                        this.isSwitch = true;
+                                                        this.isMenuShow = false;
+                                                    }
                                                 }
                                             });
                                             Flex.padding({ top: 2.5, right: 4, bottom: 2.5, left: 4 });
@@ -794,53 +810,65 @@ export class AVCastPicker extends ViewPU {
                                         Row.pop();
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             If.create();
-                                            if (x8.bundleInfo?.isShowBadge) {
+                                            if (x8.isConnected && !this.isAncoSession) {
                                                 this.ifElseBranchUpdateFunction(0, () => {
                                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Row.create();
-                                                        Row.margin({ left: 8, right: 8})
-                                                        Row.direction(Direction.Ltr);
-                                                    }, Row);
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Badge.create({
-                                                            value: '',
-                                                            style: { badgeSize: 6, BadgeColor:  {'id': -1, 'type': 10001, params: ['sys.color.warning'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'} }
-                                                        });
-                                                        Badge.width(18);
-                                                        Badge.height(16);
-                                                    }, Badge);
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                                        SymbolGlyph.fontSize('16vp');
-                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-                                                    }, SymbolGlyph);
-                                                    Badge.pop();
-                                                    Row.pop();
+                                                        If.create();
+                                                        if (x8.bundleInfo?.isShowBadge) {
+                                                            this.ifElseBranchUpdateFunction(0, () => {
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    Row.create();
+                                                                    Row.margin({ left: 8, right: 8})
+                                                                    Row.direction(Direction.Ltr);
+                                                                }, Row);
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    Badge.create({
+                                                                        value: '',
+                                                                        style: { badgeSize: 6, BadgeColor:  {'id': -1, 'type': 10001, params: ['sys.color.warning'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'} }
+                                                                    });
+                                                                    Badge.width(18);
+                                                                    Badge.height(16);
+                                                                }, Badge);
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                                    SymbolGlyph.fontSize('16vp');
+                                                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                                }, SymbolGlyph);
+                                                                Badge.pop();
+                                                                Row.pop();
+                                                            });
+                                                        }
+                                                        else {
+                                                            this.ifElseBranchUpdateFunction(1, () => {
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    Row.create();
+                                                                    Row.margin({ left: 8, right: 8})
+                                                                    Row.direction(Direction.Ltr);
+                                                                }, Row);
+                                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                                    SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                                    SymbolGlyph.fontSize('16vp');
+                                                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                                                                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                                }, SymbolGlyph);
+                                                                Row.pop();
+                                                            });
+                                                        }
+                                                    }, If);
+                                                    If.pop();
+                                                    Flex.pop();
                                                 });
                                             }
                                             else {
                                                 this.ifElseBranchUpdateFunction(1, () => {
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        Row.create();
-                                                        Row.margin({ left: 8, right: 8})
-                                                        Row.direction(Direction.Ltr);
-                                                    }, Row);
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.arrowtriangle_down_fill'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                                        SymbolGlyph.fontSize('16vp');
-                                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
-                                                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-                                                    }, SymbolGlyph);
-                                                    Row.pop();
                                                 });
                                             }
                                         }, If);
                                         If.pop();
-                                        Flex.pop();
                                     });
                                 }
                                 else {
@@ -1252,6 +1280,11 @@ export class AVCastPicker extends ViewPU {
                 if (l8.textParams !== undefined) {
                     console.info(TAG, `textParams : ${l8.textParams}`);
                     this.textParams = l8.textParams;
+                }
+
+                if (l8.isAncoSession !== undefined) {
+                    console.info(TAG, `isAncoSession : ${l8.isAncoSession}`);
+                    this.isAncoSession = l8.isAncoSession;
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });

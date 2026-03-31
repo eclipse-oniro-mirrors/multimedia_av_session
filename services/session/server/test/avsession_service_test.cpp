@@ -1982,7 +1982,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand001, TestSize.Level
     SLOGD("SendSystemCommonCommand001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     avservice_->pcmCastSession_ = std::make_shared<PcmCastSession>();
-    std::string commonCommand = "";
+    std::string commonCommand = "CHANGE_CAST_MODE";
     OHOS::AAFwk::WantParams commandArgs;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto result = avservice_->SendSystemCommonCommand(commonCommand, commandArgs);
@@ -2002,7 +2002,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand002, TestSize.Level
     SLOGD("SendSystemCommonCommand002 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     avservice_->pcmCastSession_ = nullptr;
-    std::string commonCommand = "";
+    std::string commonCommand = "CHANGE_CAST_MODE";
     OHOS::AAFwk::WantParams commandArgs;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto result = avservice_->SendSystemCommonCommand(commonCommand, commandArgs);
@@ -2022,7 +2022,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand003, TestSize.Level
 {
     SLOGD("SendSystemCommonCommand003 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
-    std::string commonCommand = "";
+    std::string commonCommand = "CHANGE_CAST_MODE";
     OHOS::AAFwk::WantParams commandArgs;
     #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         avservice_->pcmCastSession_ = std::make_shared<PcmCastSession>();
@@ -2835,6 +2835,103 @@ static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors003, TestSize.Level0)
 
     SLOGI("GetSessionDescriptors003 end!");
 }
+
+/**
+ * @tc.name: GetSessionDescriptors004
+ * @tc.desc: 测试 pcmCastSession_ 非空且 GetCastState() 为真
+ * @tc.type: FUNC
+ * @tc.require: CASTPLUS_CAST_ENGINE_ENABLE
+ */
+HWTEST_F(AVSessionServiceTest, GetSessionDescriptors004, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptors004 begin!");
+    int32_t category = SessionCategory::CATEGORY_HIPLAY;
+    ASSERT_TRUE(avservice_ != nullptr);
+    avservice_->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    avservice_->pcmCastSession_->castState_ = 1;
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = avservice_->GetSessionDescriptors(category, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetSessionDescriptors004 end!");
+}
+
+/**
+ * @tc.name: GetSessionDescriptors005
+ * @tc.desc: 测试 pcmCastSession_ 非空且 GetCastState() 为假
+ * @tc.type: FUNC
+ * @tc.require: CASTPLUS_CAST_ENGINE_ENABLE
+ */
+HWTEST_F(AVSessionServiceTest, GetSessionDescriptors005, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptors005 begin!");
+    int32_t category = SessionCategory::CATEGORY_HIPLAY;
+    ASSERT_TRUE(avservice_ != nullptr);
+    avservice_->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    avservice_->pcmCastSession_->castState_ = 0;
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = avservice_->GetSessionDescriptors(category, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetSessionDescriptors005 end!");
+}
+
+/**
+ * @tc.name: GetSessionDescriptors006
+ * @tc.desc: 测试 pcmCastSession_ 为空
+ * @tc.type: FUNC
+ * @tc.require: CASTPLUS_CAST_ENGINE_ENABLE
+ */
+HWTEST_F(AVSessionServiceTest, GetSessionDescriptors006, TestSize.Level0)
+{
+    SLOGI("GetSessionDescriptors006 begin!");
+    int32_t category = SessionCategory::CATEGORY_HIPLAY;
+    ASSERT_TRUE(avservice_ != nullptr);
+    avservice_->pcmCastSession_ = nullptr;
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = avservice_->GetSessionDescriptors(category, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("GetSessionDescriptors006 end!");
+}
+
+/**
+ * @tc.name: OnClientDied001
+ * @tc.desc: pcmCastSession_ not null GetCastMode()=2
+ * @tc.type: FUNC
+ * @tc.require: CASTPLUS_CAST_ENGINE_ENABLE
+ */
+HWTEST_F(AVSessionServiceTest, OnClientDied001, TestSize.Level0)
+{
+    SLOGI("OnClientDied001 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    avservice_->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    avservice_->pcmCastSession_->castMode_ = 2;
+    avservice_->pcmCastSession_->descriptor_.uid_ = 1;
+    pid_t uid = 1;
+    pid_t pid = 1;
+    avservice_->OnClientDied(pid, uid);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("OnClientDied001 end!");
+}
+
+/**
+ * @tc.name: OnClientDied002
+ * @tc.desc: pcmCastSession_ not null GetCastMode()=1
+ * @tc.type: FUNC
+ * @tc.require: CASTPLUS_CAST_ENGINE_ENABLE
+ */
+HWTEST_F(AVSessionServiceTest, OnClientDied002, TestSize.Level0)
+{
+    SLOGI("OnClientDied002 begin!");
+    ASSERT_TRUE(avservice_ != nullptr);
+    avservice_->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    avservice_->pcmCastSession_->castMode_ = 1;
+    avservice_->pcmCastSession_->descriptor_.uid_ = 1;
+    pid_t uid = 1;
+    pid_t pid = 1;
+    avservice_->OnClientDied(pid, uid);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("OnClientDied002 end!");
+}
+
 
 /**
  * @tc.name: ProcTopSessionPlaying001

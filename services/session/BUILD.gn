@@ -29,7 +29,7 @@ group("avsession_server") {
     "../etc:avsession_service.rc",
     "../etc:ohos.para.dac",
   ]
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     deps += [ ":softbus_manager_dynamic" ]
   }
 }
@@ -155,6 +155,8 @@ av_session_ohos_library("avsession_service") {
     "adapter/audio_adapter.cpp",
     "adapter/bundle_status_adapter.cpp",
     "adapter/collaboration_manager.cpp",
+    "adapter/collaboration_manager_urlcasting.cpp",
+    "adapter/collaboration_manager_hiplay.cpp",
     "adapter/extension_connect_helper.cpp",
     "adapter/key_event_adapter.cpp",
     "adapter/params_config_operator.cpp",
@@ -247,7 +249,7 @@ av_session_ohos_library("avsession_service") {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
   }
 
@@ -333,6 +335,8 @@ if (castplus_cast_engine_enable) {
 
     adapter_sources = [
       "adapter/collaboration_manager.cpp",
+      "adapter/collaboration_manager_urlcasting.cpp",
+      "adapter/collaboration_manager_hiplay.cpp",
       "adapter/plugin_lib.cpp",
     ]
 
@@ -546,7 +550,7 @@ ohos_shared_library("softbus_manager_dynamic") {
     "hilog:libhilog",
   ]
 
-  if (multimedia_av_session_enable_dsoftbus) {
+  if (av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
     external_deps += [ "dsoftbus:softbus_client" ]
   }
@@ -588,6 +592,8 @@ av_session_ohos_library("avsession_item") {
     "adapter/avsession_hianalytics_report.cpp",
     "adapter/bundle_status_adapter.cpp",
     "adapter/collaboration_manager.cpp",
+    "adapter/collaboration_manager_urlcasting.cpp",
+    "adapter/collaboration_manager_hiplay.cpp",
     "adapter/command_send_limit.cpp",
     "adapter/plugin_lib.cpp",
     "adapter/session_xcollie.cpp",

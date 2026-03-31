@@ -24,6 +24,7 @@
 #include "audio_info.h"
 #include "collaborationmanager_fuzzer.h"
 #include "collaboration_manager.h"
+#include "collaboration_manager_urlcasting.h"
 #include "securec.h"
 #include <fuzzer/FuzzedDataProvider.h>
 
@@ -75,23 +76,11 @@ void CollaborationManagerFuzzer::CollaborationManagerFuzzTest(uint8_t* data, siz
     if ((data == nullptr) || (size > MAX_CODE_LEN) || (size < MIN_SIZE_NUM)) {
         return;
     }
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
-
-    auto registerLifecycleCallback1 = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
-        return static_cast<int32_t>(0);
-    };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
-        = registerLifecycleCallback1;
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
-
-    auto registerLifecycleCallback2 = [](const char* serviceName, ServiceCollaborationManager_Callback* callback) {
-        return static_cast<int32_t>(1);
-    };
-    CollaborationManager::GetInstance().exportapi_.ServiceCollaborationManager_RegisterLifecycleCallback
-        = registerLifecycleCallback2;
-    CollaborationManager::GetInstance().RegisterLifecycleCallback();
+    CollaborationManagerURLCasting::GetInstance().RegisterLifecycleCallback();
+    std::shared_ptr<PluginLib> pluginLib = std::make_shared<PluginLib>("/system/lib64/libcfwk_allconnect_client.z.so");
+    CHECK_AND_RETURN_LOG((pluginLib != nullptr), "dlopen lib err");
     CollaborationManager collaborationManager;
-    collaborationManager.ReadCollaborationManagerSo();
+    collaborationManager.ReadCollaborationManagerSo(pluginLib);
     std::string peerNetworkId = std::to_string(GetData<uint8_t>());
     DeviceInfo deviceInfo;
     deviceInfo.supportedProtocols_ = GetData<int32_t>();

@@ -130,6 +130,8 @@ public:
 
     bool IsInMirrorToStreamState() override;
 
+    bool IsHiPlayCasting() override;
+
     bool IsRemoteCasting() override;
 
     void UpdateConnectState(int32_t castState);
