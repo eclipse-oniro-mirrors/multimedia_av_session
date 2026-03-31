@@ -107,6 +107,7 @@ void AVSessionItem::InitListener()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("session init listener");
     cssListener_ = std::make_shared<CssListener>(sptr<AVSessionItem>(this));
+    InitCastEventHandlers();
 #endif
 }
 
@@ -524,6 +525,15 @@ void AVSessionItem::UpdateMetaData(const AVMetaData& meta)
         isMediaChange_ = true;
         isRecommendMediaChange_ = true;
         SetLyricTitle(meta.GetTitle());
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        if (AVRouter::GetInstance().IsStreamToMirrorFromSink()) {
+            isMediaChangeForMirrorToStream_.store(true);
+            if (serviceCallbackForStream_) {
+                SLOGI("AVSessionItem send mirrortostream event to service after metadata change");
+                serviceCallbackForStream_(GetSessionId());
+            }
+        }
+#endif
     }
     std::string oldImageUri = metaData_.GetMediaImageUri();
     CHECK_AND_RETURN_LOG(metaData_.CopyFrom(meta), "AVMetaData set error");
@@ -2102,10 +2112,13 @@ void AVSessionItem::DealOutputDeviceChange(const int32_t castState, const Output
 
 void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 {
-    SLOGI("OnCastEventRecv in with code and msg %{public}dm %{public}s", errorCode, errorMsg.c_str());
-    std::lock_guard lockGuard(castControllersLock_);
-    for (auto controller : castControllers_) {
-        controller->OnPlayerError(errorCode, errorMsg);
+    SLOGI("OnCastEventRecv in with code and msg %{public}d %{public}s", errorCode, errorMsg.c_str());
+    
+    auto it = castEventHandlers_.find(errorCode);
+    if (it != castEventHandlers_.end()) {
+        it->second();
+    } else {
+        SLOGW("Unhandled cast event: %{public}d", errorCode);
     }
 }
 
@@ -2360,6 +2373,16 @@ bool AVSessionItem::IsAppSupportCast()
     AAFwk::Array::ForEach(list, func);
     SLOGI("app support url-cast is %{public}d with filter %{public}d", result, GetMetaDataWithoutImg().GetFilter());
     return result && (GetMetaDataWithoutImg().GetFilter() != 0);
+}
+
+bool AVSessionItem::IsMediaChangeForMirrorToStream() const
+{
+    return isMediaChangeForMirrorToStream_.load();
+}
+
+void AVSessionItem::SetMediaChangeForMirrorToStream(bool isMediaChange)
+{
+    isMediaChangeForMirrorToStream_.store(isMediaChange);
 }
 
 void AVSessionItem::SetServiceCallbackForStream(const std::function<void(std::string)>& callback)
@@ -3406,5 +3429,18 @@ void AVSessionItem::ReportSessionControl(const std::string& bundleName, int32_t 
     }
 }
 #endif
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionItem::InitCastEventHandlers()
+{
+    castEventHandlers_ = {
+        {STREAM_TO_MIRROR_FROM_SINK, [this]() {
+            SLOGI("Stream to mirror from sink event received, stopping cast");
+            StopCast();
+        }},
+    };
+}
+#endif
+
 // LCOV_EXCL_STOP
 } // namespace OHOS::AVSession

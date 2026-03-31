@@ -146,6 +146,12 @@ public:
 
     bool IsDisconnectingOtherSession() override;
 
+    void SetStreamToMirrorFromSink(bool fromSink) override;
+
+    bool IsStreamToMirrorFromSink() override;
+
+    void HandleStreamToMirrorFromSinkEvent();
+
     void SendCommandArgsToCast(const int64_t castHandle, const int32_t commandType,
         const std::string& params) override;
 
@@ -188,6 +194,8 @@ private:
     std::atomic<int32_t> sinkAllConnectResult_ = AVSESSION_SUCCESS;
     std::string sinkDeviceName_;
     std::atomic<bool> disconnectOtherSession_ = false;
+    std::atomic<bool> streamToMirrorFromSink_ = false;
+    DeviceInfo connectedDeviceInfo_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

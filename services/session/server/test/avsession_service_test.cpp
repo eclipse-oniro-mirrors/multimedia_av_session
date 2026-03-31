@@ -704,6 +704,19 @@ static HWTEST_F(AVSessionServiceTest, NotifyMirrorToStreamCast003, TestSize.Leve
     SLOGI("NotifyMirrorToStreamCast003 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, NotifyMirrorToStreamCast004, TestSize.Level0)
+{
+    SLOGI("NotifyMirrorToStreamCast004 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    ASSERT_TRUE(avservice_ != nullptr);
+    AVRouter::GetInstance().SetStreamToMirrorFromSink(true);
+    avservice_->castServiceNameStatePair_.second = "IDLE";
+    avservice_->NotifyMirrorToStreamCast();
+    EXPECT_FALSE(AVRouter::GetInstance().IsStreamToMirrorFromSink());
+#endif
+    SLOGI("NotifyMirrorToStreamCast004 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, RefreshFocusSessionSort001, TestSize.Level0)
 {
     SLOGI("RefreshFocusSessionSort001 begin!");

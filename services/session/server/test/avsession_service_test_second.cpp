@@ -1902,5 +1902,117 @@ static HWTEST_F(AVSessionServiceTestSecond, UploadDesktopLyricOperationInfo001, 
     int32_t ret = g_AVSessionService->UploadDesktopLyricOperationInfo(sessionId, g_testAnotherBundleName, 0);
     EXPECT_NE(ret, AVSESSION_SUCCESS);
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+/**
+ * @tc.name: IsMirrorToStreamCastAllowed001
+ * @tc.desc: test IsMirrorToStreamCastAllowed with StreamToMirrorFromSink true
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTestSecond, IsMirrorToStreamCastAllowed001, TestSize.Level0)
+{
+    SLOGI("IsMirrorToStreamCastAllowed001 begin");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    
+    auto avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("IsMirrorToStreamCastAllowed001 but sessionPre exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
+    
+    auto avsessionHere = CreateSession();
+    ASSERT_TRUE(avsessionHere != nullptr);
+    avsessionHere->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VIDEO;
+    
+    AVRouter::GetInstance().SetStreamToMirrorFromSink(true);
+    avsessionHere->SetMediaChangeForMirrorToStream(false);
+    
+    bool result = g_AVSessionService->IsMirrorToStreamCastAllowed(avsessionHere);
+    EXPECT_FALSE(result);
+    
+    AVRouter::GetInstance().SetStreamToMirrorFromSink(false);
+    avsessionHere->Destroy();
+    SLOGI("IsMirrorToStreamCastAllowed001 end");
+}
+
+/**
+ * @tc.name: IsMirrorToStreamCastAllowed002
+ * @tc.desc: test IsMirrorToStreamCastAllowed with StreamToMirrorFromSink and media changed but not in whitelist
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTestSecond, IsMirrorToStreamCastAllowed002, TestSize.Level0)
+{
+    SLOGI("IsMirrorToStreamCastAllowed002 begin");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    
+    auto avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("IsMirrorToStreamCastAllowed002 but sessionPre exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
+    
+    auto avsessionHere = CreateSession();
+    ASSERT_TRUE(avsessionHere != nullptr);
+    avsessionHere->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VIDEO;
+    
+    AVRouter::GetInstance().SetStreamToMirrorFromSink(true);
+    avsessionHere->SetMediaChangeForMirrorToStream(true);
+    
+    g_AVSessionService->isSupportMirrorToStream_ = true;
+    g_AVSessionService->castServiceNameStatePair_.second = "CONNECT_SUCC";
+    g_AVSessionService->appCastExit_ = false;
+    
+    bool result = g_AVSessionService->IsMirrorToStreamCastAllowed(avsessionHere);
+    EXPECT_FALSE(result);
+    
+    AVRouter::GetInstance().SetStreamToMirrorFromSink(false);
+    avsessionHere->SetMediaChangeForMirrorToStream(false);
+    avsessionHere->Destroy();
+    SLOGI("IsMirrorToStreamCastAllowed002 end");
+}
+
+/**
+ * @tc.name: MirrorToStreamCast002
+ * @tc.desc: test MirrorToStreamCast resets StreamToMirrorFromSink and MediaChangeForMirrorToStream
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTestSecond, MirrorToStreamCast002, TestSize.Level0)
+{
+    SLOGI("MirrorToStreamCast002 begin");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    
+    auto avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("MirrorToStreamCast002 but sessionPre exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
+    
+    auto avsessionHere = CreateSession();
+    ASSERT_TRUE(avsessionHere != nullptr);
+    
+    AVRouter::GetInstance().SetStreamToMirrorFromSink(true);
+    avsessionHere->SetMediaChangeForMirrorToStream(true);
+    
+    g_AVSessionService->isSupportMirrorToStream_ = true;
+    g_AVSessionService->castServiceNameStatePair_.second = "CONNECT_SUCC";
+    
+    auto ret = g_AVSessionService->MirrorToStreamCast(avsessionHere);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    
+    EXPECT_TRUE(AVRouter::GetInstance().IsStreamToMirrorFromSink());
+    EXPECT_TRUE(avsessionHere->IsMediaChangeForMirrorToStream());
+    
+    avsessionHere->Destroy();
+    avsessionPre = g_AVSessionService->GetContainer().GetSession(getpid(), g_testAnotherAbilityName);
+    if (avsessionPre != nullptr) {
+        SLOGE("MirrorToStreamCast002 but sessionPre still exist, try clear");
+        g_AVSessionService->GetContainer().RemoveSession(getpid());
+    }
+    SLOGI("MirrorToStreamCast002 end");
+}
+#endif
 } //AVSession
 } //OHOS

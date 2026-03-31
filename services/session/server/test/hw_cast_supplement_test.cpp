@@ -92,9 +92,18 @@ public:
 
 class AVCastSessionStateListenerDemo : public IAVCastSessionStateListener {
 public:
+    int32_t lastErrorCode_ = -1;
+    std::string lastErrorMsg_;
+    int callCount_ = 0;
+
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) {}
 
-    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) {}
+    void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
+    {
+        callCount_++;
+        lastErrorCode_ = errorCode;
+        lastErrorMsg_ = errorMsg;
+    }
 };
 
 class ICastSessionMock : public CastEngine::ICastSession {
@@ -897,7 +906,7 @@ static HWTEST(HwCastSupplementTest, OnDeviceOffline001, TestSize.Level0)
  */
 static HWTEST(HwCastSupplementTest, OnDeviceOffline002, TestSize.Level0)
 {
-    SLOGI("OnLogEvent002 begin!");
+    SLOGI("OnDeviceOffline002 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
@@ -967,7 +976,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_HwCastProviderSessionR
 
 /**
  * @tc.name: HwCastProviderSession_GetRemoteDrmCapabilities_001
- * @tc.desc: set sesion to not nullptr
+ * @tc.desc: set session to not nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -987,7 +996,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_GetRemoteDrmCapabiliti
 
 /**
  * @tc.name: HwCastProviderSession_GetRemoteNetWorkId_001
- * @tc.desc: set sesion to not nullptr
+ * @tc.desc: set session to not nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1095,7 +1104,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_UnRegisterCastSessionS
  */
 static HWTEST(HwCastSupplementTest, HwCastProviderSession_RegisterCastSessionStateListener_003, TestSize.Level0)
 {
-    SLOGI("HwCastProviderSession_UnRegisterCastSessionStateListener_003 begin!");
+    SLOGI("HwCastProviderSession_RegisterCastSessionStateListener_003 begin!");
     auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
     auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
     hwCastProviderSession->stashDeviceState_ = 1;
@@ -1219,14 +1228,102 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_004, TestSize.
 }
 
 /**
- * @tc.name: HwCastSessonToast001
+ * @tc.name: HwCastProviderSession_OnEvent_005
+ * @tc.desc: eventId in [2000, 2999] with registered non-null listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_005, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_OnEvent_005 begin!");
+    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
+    provideSession->castSessionStateListenerList_.push_back(listener);
+    OHOS::CastEngine::EventId eventId = static_cast<OHOS::CastEngine::EventId>(2500);
+    std::string jsonParam = "test_param";
+    provideSession->OnEvent(eventId, jsonParam);
+    EXPECT_EQ(listener->callCount_, 1);
+    EXPECT_EQ(listener->lastErrorCode_, 2500);
+    EXPECT_EQ(listener->lastErrorMsg_, "test_param");
+    SLOGI("HwCastProviderSession_OnEvent_005 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_OnEvent_006
+ * @tc.desc: eventId at boundary 2999 with mixed nullptr and valid listener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_006, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_OnEvent_006 begin!");
+    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
+    provideSession->castSessionStateListenerList_.push_back(nullptr);
+    provideSession->castSessionStateListenerList_.push_back(listener);
+    OHOS::CastEngine::EventId eventId = static_cast<OHOS::CastEngine::EventId>(3000);
+    std::string jsonParam = "boundary_test";
+    provideSession->OnEvent(eventId, jsonParam);
+    EXPECT_EQ(listener->callCount_, 0);
+    SLOGI("HwCastProviderSession_OnEvent_006 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_OnEvent_007
+ * @tc.desc: eventId in hiplay range triggers OnHiplayEventRecv switch cases
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_007, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_OnEvent_007 begin!");
+    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
+    provideSession->castSessionStateListenerList_.push_back(listener);
+    std::string jsonParam = "test";
+    provideSession->OnEvent(static_cast<OHOS::CastEngine::EventId>(4201), jsonParam);
+    provideSession->OnEvent(static_cast<OHOS::CastEngine::EventId>(4203), jsonParam);
+    provideSession->OnEvent(static_cast<OHOS::CastEngine::EventId>(4205), jsonParam);
+    EXPECT_EQ(listener->callCount_, 0);
+    SLOGI("HwCastProviderSession_OnEvent_007 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_OnEvent_008
+ * @tc.desc: eventId at hiplay boundary 4200 triggers default branch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_008, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_OnEvent_008 begin!");
+    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
+    provideSession->castSessionStateListenerList_.push_back(listener);
+    OHOS::CastEngine::EventId eventId = static_cast<OHOS::CastEngine::EventId>(4200);
+    std::string jsonParam = "test";
+    provideSession->OnEvent(eventId, jsonParam);
+    EXPECT_EQ(listener->callCount_, 0);
+    SLOGI("HwCastProviderSession_OnEvent_008 end!");
+}
+
+/**
+ * @tc.name: HwCastSessionToast001
  * @tc.desc:
  * @tc.type: FUNC
  * @tc.require:
  */
-static HWTEST(HwCastTest, HwCastSessonToast001, TestSize.Level1)
+static HWTEST(HwCastSupplementTest, HwCastSessionToast001, TestSize.Level1)
 {
-    SLOGI("HwCastSessonToast001 begin!");
+    SLOGI("HwCastSessionToast001 begin!");
     auto session = std::make_shared<ICastSessionMock>();
     auto provideSession = std::make_shared<HwCastProviderSession>(session);
     EXPECT_EQ(provideSession != nullptr, true);
@@ -1250,7 +1347,7 @@ static HWTEST(HwCastTest, HwCastSessonToast001, TestSize.Level1)
     stateInfo.deviceState = OHOS::CastEngine::DeviceState::STREAM_TO_MIRROR;
     provideSession->OnDeviceState(stateInfo);
     EXPECT_EQ(provideSession != nullptr, true);
-    SLOGI("HwCastSessonToast001 end!");
+    SLOGI("HwCastSessionToast001 end!");
 }
 
 } // OHOS::AVSession

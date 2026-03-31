@@ -769,6 +769,7 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
     UpdateConnectState(castState);
     switch (castState) {
         case static_cast<int32_t>(CastEngine::DeviceState::STREAM):
+            connectedDeviceInfo_ = deviceInfo;
             if (sinkAllConnectResult_ != AVSESSION_SUCCESS) {
                 sinkAllConnectResult_ = AVSESSION_SUCCESS;
                 DestroyCastSessionCreated();
@@ -810,12 +811,46 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
 
 void AVRouterImpl::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 {
+    if (errorCode == static_cast<int32_t>(CastEngine::EventId::STREAM_TO_MIRROR_FROM_SINK)) {
+        HandleStreamToMirrorFromSinkEvent();
+    }
+
     for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
         if (castHandleInfo.avRouterListener_ != nullptr) {
             SLOGI("trigger the OnCastEventRecv for registered avRouterListener");
             castHandleInfo.avRouterListener_->OnCastEventRecv(errorCode, errorMsg);
         }
     }
+}
+
+void AVRouterImpl::HandleStreamToMirrorFromSinkEvent()
+{
+    SetStreamToMirrorFromSink(true);
+    UpdateConnectState(disconnectStateFromCast_);
+    {
+        std::lock_guard lockGuard(servicePtrLock_);
+        servicePtr_->SetIsSupportMirrorToStream(false);
+    }
+    for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
+        CHECK_AND_CONTINUE(castHandleInfo.avRouterListener_ != nullptr);
+        SLOGI("trigger the OnCastStateChange for registered avRouterListener");
+        std::shared_ptr<IAVRouterListener> listener = castHandleInfo.avRouterListener_;
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([listener, this]() {
+            CHECK_AND_RETURN_LOG(listener != nullptr, "listener is nullptr");
+            listener->OnCastStateChange(disconnectStateFromCast_, connectedDeviceInfo_, false);
+            }, "OnCastStateChange", 0);
+    }
+}
+
+void AVRouterImpl::SetStreamToMirrorFromSink(bool fromSink)
+{
+    SLOGI("SetStreamToMirrorFromSink: %{public}d", fromSink);
+    streamToMirrorFromSink_.store(fromSink);
+}
+
+bool AVRouterImpl::IsStreamToMirrorFromSink()
+{
+    return streamToMirrorFromSink_.load();
 }
 
 bool AVRouterImpl::IsDisconnectingOtherSession()
