@@ -266,7 +266,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     for (auto listener : tempListenerList) {
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = stateInfo.deviceId;
-        deviceInfo.deviceName_ = castRemoteDevice.deviceName;
+        deviceInfo.deviceName_ = "RemoteCast";
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
         deviceInfo.audioCapabilities_.streamInfos_ = streamInfos;
         if (listener != nullptr) {
