@@ -818,6 +818,13 @@ export class AVCastPicker extends ViewPU {
                                                             this.ifElseBranchUpdateFunction(0, () => {
                                                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                                     Row.create();
+                                                                    Row.onDisAppear(() => {
+                                                                        if (x8.bundleInfo?.isShowBadge && x8?.deviceState === 0) {
+                                                                            if (this.extensionProxy != null) {
+                                                                                this.extensionProxy.send({ 'isShowBadge': false})
+                                                                            }
+                                                                        }
+                                                                    })
                                                                     Row.margin({ left: 8, right: 8})
                                                                     Row.direction(Direction.Ltr);
                                                                 }, Row);
