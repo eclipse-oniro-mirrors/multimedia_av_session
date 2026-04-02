@@ -123,6 +123,8 @@ int32_t NapiAVSession::playBackStateRet_ = AVSESSION_ERROR;
 std::shared_ptr<NapiAVSession> NapiAVSession::napiAVSession_ = nullptr;
 std::recursive_mutex NapiAVSession::destroyLock_;
 bool NapiAVSession::isNapiSessionDestroy_ = false;
+std::shared_ptr<NapiAVSession> NapiAVSession::currentNapiSession;
+std::mutex NapiAVSession::currentNapiSessionMutex_;
 
 NapiAVSession::NapiAVSession()
 {
@@ -281,6 +283,17 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     SLOGI("NapiAVSession NewInstance sessionId=%{public}s***, sessionType:%{public}s",
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
+
+    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+    if (currentNapiSession == nullptr) {
+        currentNapiSession = napiAVSession_;
+        SLOGI("Set currentNapiSession, sessionId=%{public}s***, sessionType:%{public}s",
+        napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
+        napiAVSession_->sessionType_.c_str());
+    } else if (currentNapiSession->elementName_ == elementName) {
+        napiAVSession->callback_ = currentNapiSession->callback_;
+        SLOGI("Reuse callback from currentNapiSession.")
+    }
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiAVSession_->sessionId_, property);
