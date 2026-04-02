@@ -284,17 +284,6 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
 
-    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
-    if (currentNapiSession == nullptr) {
-        currentNapiSession = napiAVSession_;
-        SLOGI("Set currentNapiSession, sessionId=%{public}s***, sessionType:%{public}s",
-        napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
-        napiAVSession_->sessionType_.c_str());
-    } else if (currentNapiSession->elementName_ == napiAVSession->elementName_) {
-        napiAVSession->callback_ = currentNapiSession->callback_;
-        SLOGI("Reuse callback from currentNapiSession.")
-    }
-
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiAVSession_->sessionId_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
@@ -319,6 +308,10 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     Rosen::WindowInputRedistributeClient clientInstance;
     clientInstance.RegisterInputEventRedistribute(napiAVSession_->recipientInfo_);
 #endif
+    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+    if (currentNapiSession == nullptr || currentNapiSession->sessionId_ != napiAVSession_->sessionId_) {
+        currentNapiSession = napiAVSession_;
+    }
     out = instance;
     return napi_ok;
 }
@@ -1819,6 +1812,19 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
             context->status = napi_generic_failure;
             context->errMessage = "SetAudioStreamId failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        if (context->extras_. GetIntParam("reuseCallback", 0) != 0) {
+            std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+            auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+            if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
+                npaiSession->callback_ = currentNapiSession->callback_;
+                SLOGI("Reuse callback from currentNapiSession");
+                context->status = napi_ok;
+                return;
+            }
+            context->status = napi_generic_failure;
+            context->errMessage = "elementName not match, cannot reuse callback";
             return;
         }
     };
