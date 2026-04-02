@@ -284,6 +284,11 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
 
+    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+    if (currentNapiSession == nullptr || currentNapiSession->sessionId_ != napiAVSession_->sessionId_) {
+        currentNapiSession = napiAVSession_;
+    }
+
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiAVSession_->sessionId_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
@@ -308,10 +313,6 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     Rosen::WindowInputRedistributeClient clientInstance;
     clientInstance.RegisterInputEventRedistribute(napiAVSession_->recipientInfo_);
 #endif
-    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
-    if (currentNapiSession == nullptr || currentNapiSession->sessionId_ != napiAVSession_->sessionId_) {
-        currentNapiSession = napiAVSession_;
-    }
     out = instance;
     return napi_ok;
 }
@@ -1765,6 +1766,14 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
+        if (context->extras_. GetIntParam("reuseCallback", 0) != 0) {
+            std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+            auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+            if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
+                npaiSession->callback_ = currentNapiSession->callback_;
+                SLOGI("Reuse callback from currentNapiSession");
+            }
+ 	    }
         int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
