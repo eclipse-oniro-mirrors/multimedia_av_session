@@ -290,7 +290,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
         SLOGI("Set currentNapiSession, sessionId=%{public}s***, sessionType:%{public}s",
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
-    } else if (currentNapiSession->elementName_ == elementName) {
+    } else if (currentNapiSession->elementName_ == napiAVSession->elementName_) {
         napiAVSession->callback_ = currentNapiSession->callback_;
         SLOGI("Reuse callback from currentNapiSession.")
     }
