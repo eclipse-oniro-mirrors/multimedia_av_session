@@ -1823,19 +1823,6 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        if (context->extras_. GetIntParam("reuseCallback", 0) != 0) {
-            std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
-            auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-            if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
-                npaiSession->callback_ = currentNapiSession->callback_;
-                SLOGI("Reuse callback from currentNapiSession");
-                context->status = napi_ok;
-                return;
-            }
-            context->status = napi_generic_failure;
-            context->errMessage = "elementName not match, cannot reuse callback";
-            return;
-        }
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
