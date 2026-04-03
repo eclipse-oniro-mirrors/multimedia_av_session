@@ -1747,7 +1747,7 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments", 
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->extras_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get extras failed",
