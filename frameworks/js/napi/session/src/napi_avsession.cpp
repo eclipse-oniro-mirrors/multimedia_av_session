@@ -1760,38 +1760,48 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
         context->sessionHolder_ = napiSession->session_;
     }
     auto executor = [context]() {
-        if (context->sessionHolder_  == nullptr) {
-            context->status = napi_generic_failure;
-            context->errMessage = "SetExtras failed : session is nullptr";
-            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
-            return;
-        }
-        std::string reuseCallback = context->extras_. GetStringParam("reuseCallback");
-        if (reuseCallback == "true" || reuseCallback == "1") {
-            std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
-            auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-            if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
-                npaiSession->callback_ = currentNapiSession->callback_;
-                SLOGI("Reuse callback from currentNapiSession");
-            }
- 	    }
-        int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
-        if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "SetExtras failed : native session not exist";
-            } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "SetExtras failed : native invalid parameters";
-            } else {
-                context->errMessage = "SetExtras failed : native server exception";
-            }
-            context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[ret];
-        }
+        SetExtrasExecutor(context);
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
     };
     return NapiAsyncWork::Enqueue(env, context, "SetExtras", executor, complete);
+}
+
+void NapiAVSession::SetExtrasExecutor(std::shared_ptr<ContextBase> context)
+{
+    struct ConcreteContext : public ContextBase {
+        AAFwk::WantParams extras_;
+        std::shared_ptr<AVSession> sessionHolder_;
+    };
+    auto* concreteContext = static_cast<ConcreteContext*>(context.get());
+    if (concreteContext->sessionHolder_ == nullptr) {
+        context->status = napi_generic_failure;
+        context->errMessage = "SetExtras failed : session is nullptr";
+        context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+        return;
+    }
+    std::string reuseCallback = concreteContext->extras_.GetStringParam("reuseCallback");
+    if (reuseCallback == "true" || reuseCallback == "1") {
+        std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
+            napiSession->callback_ = currentNapiSession->callback_;
+            SLOGI("Reuse callback from currentNapiSession");
+        }
+    }
+    int32_t ret = concreteContext->sessionHolder_->SetExtras(concreteContext->extras_);
+    if (ret != AVSESSION_SUCCESS) {
+        if (ret == ERR_SESSION_NOT_EXIST) {
+            context->errMessage = "SetExtras failed : native session not exist";
+        } else if (ret == ERR_INVALID_PARAM) {
+            context->errMessage = "SetExtras failed : native invalid parameters";
+        } else {
+            context->errMessage = "SetExtras failed : native server exception";
+        }
+        context->status = napi_generic_failure;
+        context->errCode = NapiAVSessionManager::errcode_[ret];
+    }
 }
 
 napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info)
