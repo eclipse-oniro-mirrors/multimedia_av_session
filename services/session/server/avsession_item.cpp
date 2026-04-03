@@ -1842,6 +1842,7 @@ int32_t AVSessionItem::StartCast(const OutputDeviceInfo& outputDeviceInfo)
             return ERR_REPEAT_CAST;
         } else {
             SLOGI("cast check with pre cast alive %{public}lld, unregister callback", (long long)castHandle_);
+            AVSessionUtils::PublishCommonEvent(CASTING_SWITCH_DEVICE);
             multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
             newOutputDeviceInfo_ = outputDeviceInfo;
             ProtocolType protocol = static_cast<ProtocolType>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_);
