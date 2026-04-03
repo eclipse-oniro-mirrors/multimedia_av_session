@@ -1798,7 +1798,7 @@ void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::Wa
         return;
     }
     std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
-    if (napiSes*sion->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
+    if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
         napiSession->callback_ = currentNapiSession->callback_;
         SLOGI("Reuse callback from currentNapiSession");
     }
