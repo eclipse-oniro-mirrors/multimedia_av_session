@@ -1755,7 +1755,7 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_EXTRAS_TASK_ID;
-    if (auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native); napiSession != nullptr) {
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
         context->sessionHolder_ = napiSession->session_;
     }
     auto executor = [context]() {
@@ -1765,7 +1765,7 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        auto napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+        auto *napiSession = reinterpret_cast<NapiAVSession*>(context->native);
         TryReuseCallback(napiSession, context->extras_);
         int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
         if (ret != AVSESSION_SUCCESS) {
@@ -1791,7 +1791,7 @@ void NapiAVSession::SetSetExtrasError(std::shared_ptr<ContextBase> context, int3
     context->errCode = NapiAVSessionManager::errcode_[ret];
 }
 
-void NapiAVSession::TryReuseCallback(NapiAVSession *napiSession, const AAFwk::WantParams& extras)
+void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::WantParams& extras)
 {
     std::string reuseCallback = extras.GetStringParam("reuseCallback");
     if (reuseCallback != "true" && reuseCallback != "1") {
