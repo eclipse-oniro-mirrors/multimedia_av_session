@@ -1766,7 +1766,8 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        if (context->extras_. GetIntParam("reuseCallback", 0) != 0) {
+        std::string reuseCallback = context->extras_. GetStringParam("reuseCallback");
+        if (reuseCallback == "true" || reuseCallback == "1") {
             std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
             auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
             if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
