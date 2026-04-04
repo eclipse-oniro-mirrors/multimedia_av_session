@@ -15,11 +15,13 @@
 
 #include "hw_cast_provider_session.h"
 #include <thread>
+#include <chrono>
 #include "avsession_radar.h"
 #include "avsession_utils.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "av_router.h"
+#include "avsession_sysevent.h"
 
 using namespace OHOS::CastEngine;
 
@@ -237,6 +239,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     
     CastRemoteDevice castRemoteDevice;
     castSession_ ? castSession_->GetRemoteDeviceInfo(stateInfo.deviceId, castRemoteDevice) : static_cast<int32_t>(0);
+    ReportDeviceCastingTime(deviceState, stateInfo.deviceId, castRemoteDevice);
 
     ComputeToastOnDeviceState(stateInfo, castRemoteDevice);
     {
@@ -366,6 +369,38 @@ void HwCastProviderSession::OnHiplayEventRecv(const int32_t eventId, const std::
             break;
         default:
             break;
+    }
+}
+
+void HwCastProviderSession::ReportDeviceCastingTime(int32_t deviceState, const std::string &deviceId,
+    const CastEngine::CastRemoteDevice &castRemoteDevice)
+{
+    if (deviceState == static_cast<int>(CastEngine::DeviceState::STREAM)) {
+        int64_t currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        deviceConnectMap_[deviceId] = currentTime;
+    }
+
+    if (deviceState == static_cast<int>(CastEngine::DeviceState::DISCONNECTED)) {
+        auto it = deviceConnectMap_.find(deviceId);
+        if (it != deviceConnectMap_.end()) {
+            int64_t connectTime = it->second;
+            int64_t currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            int64_t castingTime = currentTime - connectTime;
+            std::string ipAddress = castRemoteDevice.ipAddress;
+            uint32_t castProtocolType = castRemoteDevice.protocolCapabilities;
+            int32_t protocolType = (castProtocolType & ProtocolType::TYPE_CAST_PLUS_STREAM) |
+                (castProtocolType & ProtocolType::TYPE_DLNA) |
+                ((castProtocolType & static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_AUDIO)) ?
+                    ProtocolType::TYPE_CAST_PLUS_AUDIO : 0);
+            HISYSEVENT_BEHAVIOR("DEVICE_CASTING_TIME",
+                "DEVICE_TYPE", static_cast<int>(castRemoteDevice.deviceType),
+                "IS_P2P", ipAddress.empty() ? false : true,
+                "PROTOCOL", protocolType,
+                "SERVICE_DURATION", castingTime);
+            deviceConnectMap_.erase(it);
+        }
     }
 }
 }

@@ -1350,4 +1350,59 @@ static HWTEST(HwCastSupplementTest, HwCastSessionToast001, TestSize.Level1)
     SLOGI("HwCastSessionToast001 end!");
 }
 
+/**
+ * @tc.name: HwCastProviderSession_ReportDeviceCastingTime_001
+ * @tc.desc: test ReportDeviceCastingTime with deviceStateConnection
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_ReportDeviceCastingTime_001, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_ReportDeviceCastingTime_001 begin!");
+    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    OHOS::CastEngine::DeviceStateInfo stateInfo;
+    stateInfo.deviceId = "testDeviceId";
+    int32_t deviceState = static_cast<int32_t>(OHOS::CastEngine::DeviceState::STREAM);
+    OHOS::CastEngine::CastRemoteDevice castRemoteDevice;
+    provideSession->ReportDeviceCastingTime(0, stateInfo.deviceId, castRemoteDevice);
+    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 0);
+    provideSession->ReportDeviceCastingTime(deviceState, stateInfo.deviceId, castRemoteDevice);
+    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 1);
+    provideSession->ReportDeviceCastingTime(0, stateInfo.deviceId, castRemoteDevice);
+    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 1);
+    deviceState = static_cast<int>(CastEngine::DeviceState::DISCONNECTED);
+    provideSession->ReportDeviceCastingTime(deviceState, stateInfo.deviceId, castRemoteDevice);
+    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 0);
+    provideSession->ReportDeviceCastingTime(0, stateInfo.deviceId, castRemoteDevice);
+    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 0);
+    SLOGI("HwCastProviderSession_ReportDeviceCastingTime_001 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_ReportDeviceCastingTime_002
+ * @tc.desc: test ReportDeviceCastingTime with multiple devices
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_ReportDeviceCastingTime_002, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_ReportDeviceCastingTime_002 begin!");
+    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
+    EXPECT_EQ(provideSession != nullptr, true);
+    provideSession->Init();
+    std::string deviceId1 = "testDeviceId1";
+    std::string deviceId2 = "testDeviceId2";
+    int32_t deviceState = static_cast<int>(OHOS::CastEngine::DeviceState::STREAM);
+    OHOS::CastEngine::CastRemoteDevice castRemoteDevice;
+    provideSession->ReportDeviceCastingTime(deviceState, deviceId1, castRemoteDevice);
+    provideSession->ReportDeviceCastingTime(deviceState, deviceId2, castRemoteDevice);
+    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 2);
+    deviceState = static_cast<int>(CastEngine::DeviceState::DISCONNECTED);
+    provideSession->ReportDeviceCastingTime(deviceState, deviceId1, castRemoteDevice);
+    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 1);
+    SLOGI("HwCastProviderSession_ReportDeviceCastingTime_002 end!");
+}
+
 } // OHOS::AVSession
