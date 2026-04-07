@@ -2015,7 +2015,13 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams002, TestSize.Level0
     auto result = hwCastStreamPlayer->GetDlnaExtrasFromWantParams(extras);
     cJSON* json = cJSON_Parse(result.c_str());
     EXPECT_NE(json, nullptr);
-    EXPECT_EQ(cJSON_GetArraySize(json), 0);
+    EXPECT_EQ(cJSON_GetArraySize(json), 2);
+    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
+    cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
+    EXPECT_NE(didlLite, nullptr);
+    EXPECT_NE(uriMetadata, nullptr);
+    EXPECT_STREQ(didlLite->valuestring, "");
+    EXPECT_STREQ(uriMetadata->valuestring, "");
     cJSON_Delete(json);
     SLOGI("GetDlnaExtrasFromWantParams002 end!");
 }
@@ -2038,7 +2044,9 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams003, TestSize.Level0
     cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
     EXPECT_NE(didlLite, nullptr);
     EXPECT_STREQ(didlLite->valuestring, "<DIDL>lite</DIDL>");
-    EXPECT_EQ(cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA), nullptr);
+    cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
+    EXPECT_NE(uriMetadata, nullptr);
+    EXPECT_STREQ(uriMetadata->valuestring, "");
     cJSON_Delete(json);
     SLOGI("GetDlnaExtrasFromWantParams003 end!");
 }
@@ -2061,7 +2069,9 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams004, TestSize.Level0
     cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
     EXPECT_NE(uriMetadata, nullptr);
     EXPECT_STREQ(uriMetadata->valuestring, "uri_metadata");
-    EXPECT_EQ(cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE), nullptr);
+    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
+    EXPECT_NE(didlLite, nullptr);
+    EXPECT_STREQ(didlLite->valuestring, "");
     cJSON_Delete(json);
     SLOGI("GetDlnaExtrasFromWantParams004 end!");
 }
@@ -2082,7 +2092,9 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams005, TestSize.Level0
     auto result = hwCastStreamPlayer->GetDlnaExtrasFromWantParams(extras);
     cJSON* json = cJSON_Parse(result.c_str());
     EXPECT_NE(json, nullptr);
-    EXPECT_EQ(cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE), nullptr);
+    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
+    EXPECT_NE(didlLite, nullptr);
+    EXPECT_STREQ(didlLite->valuestring, "");
     cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
     EXPECT_NE(uriMetadata, nullptr);
     EXPECT_STREQ(uriMetadata->valuestring, "metadata");
