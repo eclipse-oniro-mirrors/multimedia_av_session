@@ -1766,7 +1766,8 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        if (auto *napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        auto *napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession != nullptr) {
             TryReuseCallback(napiSession, context->extras_);
         }
         int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
