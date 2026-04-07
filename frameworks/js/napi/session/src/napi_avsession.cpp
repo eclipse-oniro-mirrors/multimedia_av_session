@@ -1746,6 +1746,7 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
         NapiUtils::ThrowError(env, "SetExtras failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
+
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -1793,12 +1794,17 @@ void NapiAVSession::SetSetExtrasError(std::shared_ptr<ContextBase> context, int3
 
 void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::WantParams& extras)
 {
+    if (napiSession == nullptr) {
+        SLOGE("napiSession is nullptr");
+        return;
+    }
     std::string reuseCallback = extras.GetStringParam("reuseCallback");
-    if (reuseCallback != "true" && reuseCallback != "1") {
+    if (reuseCallback != "1" && reuseCallback != "true") {
         return;
     }
     std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
-    if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
+    if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName() &&
+        currentNapiSession->callback_ != nullptr) {
         napiSession->callback_ = currentNapiSession->callback_;
         SLOGI("Reuse callback from currentNapiSession");
     }
