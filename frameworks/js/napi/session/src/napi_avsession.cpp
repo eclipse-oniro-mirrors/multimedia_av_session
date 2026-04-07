@@ -1766,8 +1766,9 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        auto *napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        TryReuseCallback(napiSession, context->extras_);
+        if (auto *napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+            TryReuseCallback(napiSession, context->extras_);
+        }
         int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
         if (ret != AVSESSION_SUCCESS) {
             SetSetExtrasError(context, ret);
@@ -1794,10 +1795,6 @@ void NapiAVSession::SetSetExtrasError(std::shared_ptr<ContextBase> context, int3
 
 void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::WantParams& extras)
 {
-    if (napiSession == nullptr) {
-        SLOGE("napiSession is nullptr");
-        return;
-    }
     std::string reuseCallback = extras.GetStringParam("reuseCallback");
     if (reuseCallback != "1" && reuseCallback != "true") {
         return;
