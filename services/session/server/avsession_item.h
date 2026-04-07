@@ -638,7 +638,8 @@ private:
     const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";
     const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
-
+    const std::string CASTING_SWITCH_DEVICE = "usual.event.CASTING_SWITCH_DEVICE";
+    
     std::map<ProtocolType, DeviceRemoveAction> deviceRemoveActionMap_ = {
         {ProtocolType::TYPE_CAST_PLUS_STREAM, DeviceRemoveAction::ACTION_TO_SWITCH_STREAM},
         {ProtocolType::TYPE_DLNA, DeviceRemoveAction::ACTION_TO_SWITCH_DLNA},
