@@ -1767,9 +1767,7 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
             return;
         }
         auto *napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession != nullptr) {
-            TryReuseCallback(napiSession, context->extras_);
-        }
+        TryReuseCallback(napiSession, context->extras_);
         int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
         if (ret != AVSESSION_SUCCESS) {
             SetSetExtrasError(context, ret);
@@ -1796,13 +1794,20 @@ void NapiAVSession::SetSetExtrasError(std::shared_ptr<ContextBase> context, int3
 
 void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::WantParams& extras)
 {
+    if (napiSession == nullptr) {
+        SLOGI("napiSession is nullptr");
+        return;
+    }
     std::string reuseCallback = extras.GetStringParam("reuseCallback");
     if (reuseCallback != "1" && reuseCallback != "true") {
         return;
     }
     std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
-    if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName() &&
-        currentNapiSession->callback_ != nullptr) {
+    if (currentNapiSession == nullptr) {
+        SLOGI("currentNapiSession is nullptr");
+        return;
+    }
+    if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
         napiSession->callback_ = currentNapiSession->callback_;
         SLOGI("Reuse callback from currentNapiSession");
     }
