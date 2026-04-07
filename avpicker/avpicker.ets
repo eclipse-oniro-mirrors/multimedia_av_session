@@ -100,6 +100,11 @@ enum HiPlayCastMode {
   APP_LEVEL = 2
 }
 
+enum KeyInputCode {
+  KEYCODE_VOLUME_UP = 16,
+  KEYCODE_VOLUME_DOWN = 17
+}
+
 interface HighQualityParams {
   iconLeft: string,
   iconRight: string,
@@ -137,6 +142,50 @@ export interface AVCastPickerDeviceInfo {
   castMode?: number,
   castUid?: number,
   bundleInfo?: ShowingBundleTS,
+}
+
+/**
+ * 全屋音乐分区信息
+ */
+export interface HomeMusicServicesData {
+  bassWeight: number;
+  playTask: string;
+  acousticsMode: number;
+  volumePercentage: number;
+  description: number;
+  supportMusicLed: boolean;
+  label: string;
+  type: number;
+  roomId: string;
+  limitedVolume: number;
+  volume: number;
+  faultCode: number;
+  supportStereo: number;
+  playState: number;
+  speakerList: string;
+  enable: number;
+  name: string;
+  zoneId: string;
+};
+ 
+export interface HomeMusicServices {
+  st: string;
+  ts: string;
+  sid: string;
+  data: HomeMusicServicesData;
+}
+ 
+export type AnyType = string | boolean | number | bigint | null | object | undefined;
+export interface HomeMusic {
+  devId: string;
+  devName: string;
+  homeId: string;
+  homeName: string;
+  roomId: string;
+  roomName: string;
+  status: string;
+  devInfo: Record<string, AnyType>;
+  services: HomeMusicServices[];
 }
 
 @Component
@@ -235,6 +284,31 @@ export struct AVCastPicker {
    */
   @State accessibilityAudioControlStr: string = '音视频投播';
 
+  // 标题和全屋播放按钮
+  @State houseMusicTitle: string = '';
+  @State houseMusicPlay: string = '';
+  @State houseMusicPlayCancel: string = '';
+  // 房间信息
+  @State @Watch('roomListChange') roomListService: HomeMusicServices[] = [];
+  // 是否全选
+  @State isAllSelecting: boolean = false;
+  // 房间勾选
+  @State timeoutIds: number[] = [];
+  @State @Watch('homeMusicPlayTaskIdChange') playTaskIdStr: string = '';
+  @State roomIsSelect: boolean[] = [];
+  @State isSelectRoomListService: HomeMusicServices[] = [];
+  @State roomSelectStatusPending: boolean[] = [];
+  @State @Watch('selectHomeMusicSys') houseMusicIsSelect: boolean = false;
+  @State @Watch('homeMusicScanStatusChange') scanStatus: number = -1;
+  // 房间音量
+  @State roomVolumeVisible: Visibility[] = [];
+  @State roomCurrVolume: number[] = [];
+  @State roomMaxVolume: number = 0;
+  // 房间信息组件高度
+  @State roomItemHeight: number = 0;
+
+  scroller: Scroller = new Scroller();
+
   @State isPc: boolean = false;
   @State isRTL: boolean = false;
   @State restartUECMessage: number = 1;
@@ -259,11 +333,17 @@ export struct AVCastPicker {
 
   aboutToDisappear(): void {
     AVCastPicker.currentPickerCount -= 1;
+    this.timeoutIds.forEach((id) => {
+      clearTimeout(id);
+    });
+    this.timeoutIds = [];
   }
 
   MenuStateChange() {
     if (this.extensionProxy != null) {
       this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
+      let needListenKeyInput = (this.isMenuShow && this.houseMusicIsSelect);
+      this.extensionProxy.send({ 'isSelectHomeMusicSys': needListenKeyInput });
     }
   }
 
@@ -272,6 +352,450 @@ export struct AVCastPicker {
       return false;
     }
     return (item.supportedProtocols & castPlusAudioType) !== 0;
+  }
+
+  private createNullRoomService(): HomeMusicServices[] {
+    return [{'st':'','ts':'','sid':'','data':{'bassWeight':0,'playTask':'','acousticsMode':0,'volumePercentage':0,'description':0,
+      'supportMusicLed':false,'label':'','type':0,'roomId':'','limitedVolume':0,'volume':0,'faultCode':0,'supportStereo':0,
+      'playState':0,'speakerList':'','enable':0,'name':'','zoneId':''}}];
+  }
+
+  refreshRoomList() {
+    this.timeoutIds.forEach((id) => {
+      clearTimeout(id);
+    });
+    this.timeoutIds = [];
+    let roomListTemp: HomeMusicServices[] = this.roomListService;
+    let isAllRoomSelect: boolean = true;
+    let hasRoomIsSelect: boolean = false;
+    let maxVolumeNum: number = 0;
+    for (let i = 0; i < roomListTemp.length; i++) {
+      this.roomSelectStatusPending[i] = false;
+      this.roomIsSelect[i] = ((roomListTemp[i].data.playTask === this.playTaskIdStr) &&
+        (this.playTaskIdStr !== '')) ? true : false;
+      this.roomCurrVolume[i] = roomListTemp[i].data.volume;
+      this.roomVolumeVisible[i] = this.roomIsSelect[i] ? Visibility.Visible : Visibility.None;
+      if (!this.roomIsSelect[i]) {
+        isAllRoomSelect = false;
+      } else {
+        hasRoomIsSelect = true;
+        if (maxVolumeNum < roomListTemp[i].data.volume) {
+          maxVolumeNum = roomListTemp[i].data.volume;
+        }
+      }
+    }
+    if (isAllRoomSelect && roomListTemp.length > 0) {
+      this.isAllSelecting = true;
+    } else {
+      this.isAllSelecting = false;
+    }
+    this.houseMusicIsSelect = hasRoomIsSelect;
+    if (hasRoomIsSelect) {
+      this.roomMaxVolume = maxVolumeNum;
+      this.roomMaxVolumeChange();
+    }
+  }
+
+  homeMusicPlayTaskIdChange() {
+    this.refreshRoomList();
+  }
+
+  roomListChange() {
+    this.refreshRoomList();
+  }
+
+  selectHomeMusicSys() {
+    if (this.extensionProxy != null) {
+      let needListenKeyInput = (this.isMenuShow && this.houseMusicIsSelect);
+      this.extensionProxy.send({ 'isSelectHomeMusicSys': needListenKeyInput });
+    }
+  }
+
+  homeMusicScanStatusChange() {
+    if (this.scanStatus === 0) {
+      // 全屋播控扫描中，现有房间显示全部需要pending，等待房间扫描刷新即可
+      this.setAllRoomSelectStatusPending();
+    } else {
+      this.roomSelectStatusPendingInit();
+    }
+  }
+
+  roomMaxVolumeChange() {
+    if (this.extensionProxy != null) {
+      this.extensionProxy.send({ 'homeMusicMaxVolumeSync': this.roomMaxVolume });
+    }
+  }
+
+  findRoomMaxVolume() : number {
+    let maxVolumeNum: number = 0;
+    for (let i = 0; i < this.roomListService.length; i++) {
+      if ((maxVolumeNum < this.roomListService[i].data.volume) && this.checkRoomIsSelect(i)) {
+        maxVolumeNum = this.roomListService[i].data.volume;
+      }
+    }
+    return maxVolumeNum;
+  }
+
+  checkRoomIsSelect(index: number): boolean {
+    if((this.roomListService[index].data.playTask === this.playTaskIdStr) &&
+      (this.playTaskIdStr !== '')){
+      return true;
+    }
+    return false;
+  }
+
+  getCurrIsAllSelectStatus() {
+    let isAllSelect: boolean = true;
+    for(let i = 0; i < this.roomListService.length; i++) {
+      if (!this.checkRoomIsSelect(i)) {
+        isAllSelect = false;
+        break;
+      }
+    }
+    if (isAllSelect && (this.roomListService.length > 0)) {
+      return true;
+    }
+    return false;
+  }
+
+  roomSelectStatusPendingInit() {
+    for (let i = 0; i < this.roomListService.length; i++) {
+      this.roomSelectStatusPending[i] =  false;
+    }
+  }
+
+  setAllRoomSelectStatusPending() {
+    for (let i = 0; i < this.roomListService.length; i++) {
+    //全选时处理所有勾选状态转为pending，等待播控中心返回结果
+      this.roomSelectStatusPending[i] = true;
+    }
+  }
+
+  getCurrSelectRoom(index: number, selectStatus: boolean) {
+    // 先清除勾选的房间信息，再处理每个房间的勾选情况
+    this.isSelectRoomListService.length = 0;
+    for(let i = 0; i < this.roomListService.length; i++) {
+      if (i === index) {
+        if (selectStatus) {
+          this.isSelectRoomListService.push(this.roomListService[index]);
+        }
+        continue;
+      }
+      if (this.checkRoomIsSelect(i)) {
+        this.isSelectRoomListService.push(this.roomListService[i]);
+      }
+    }
+  }
+
+  onSliderValueChange(index: number, value: number, mode: SliderChangeMode) {
+    switch(mode) {
+      case SliderChangeMode.Begin:
+      case SliderChangeMode.Moving:
+        break;
+      case SliderChangeMode.End:
+        console.info(TAG, `Slider index:${index} Mode.End value:${value}`);
+        if (index < this.roomListService.length && this.extensionProxy != null) {
+          this.roomListService[index].data.description = index + 1;
+          this.extensionProxy.send({ 'roomVolumeChange': this.roomListService[index] });
+          this.roomMaxVolume = this.findRoomMaxVolume();
+          this.roomMaxVolumeChange();
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  syncToRoomVolume(input: number) {
+    let volumeMin = 0;
+    let volumeStep = 10;
+    let volumeMax = 15;
+    for (let i = 0; i < this.roomListService.length; i++) {
+      if (!this.checkRoomIsSelect(i)) {
+        continue;
+      }
+      let currRoomVolume = Math.round(this.roomListService[i].data.volume * 3 / 2 / volumeStep);
+      let settingVolume = (input === KeyInputCode.KEYCODE_VOLUME_UP) ? currRoomVolume + 1 : currRoomVolume - 1;
+      if (settingVolume <= volumeMin) {
+        settingVolume = volumeMin;
+      } else if (settingVolume < volumeMin + 1) {
+        settingVolume = volumeMin + 1;
+      } else if (settingVolume >= volumeMax) {
+        settingVolume = volumeMax;
+      } else if (settingVolume > volumeMax - 1) {
+        settingVolume = volumeMax - 1;
+      } else {
+        settingVolume = Math.round(settingVolume);
+      }
+      this.roomListService[i].data.volume = Math.round(settingVolume * volumeStep * 2 / 3);
+      this.roomCurrVolume[i] = this.roomListService[i].data.volume;
+    }
+  }
+
+  sendAllRoomVolumeToController() {
+    if (this.extensionProxy != null) {
+      for (let i = 0; i < this.roomListService.length; i++) {
+        this.roomListService[i].data.description = i + 1;
+        this.extensionProxy.send({ 'roomVolumeChange': this.roomListService[i] });
+      }
+    }
+  }
+
+  allSelectOnClickEven() {
+    this.setAllRoomSelectStatusPending();
+    const timeId = setTimeout(() => {
+      this.roomSelectStatusPendingInit();
+    }, 3000);
+    if (typeof timeId === 'number') {
+      this.timeoutIds.push(timeId);
+    }
+    if (this.extensionProxy != null) {
+      if (!this.getCurrIsAllSelectStatus()) {
+          this.extensionProxy.send({ 'roomSelectChange': this.roomListService });
+          this.extensionProxy.send({ 'roomIsSelectAll': true });
+      } else {
+          this.extensionProxy.send({ 'roomSelectChange': this.createNullRoomService() });
+          this.extensionProxy.send({ 'roomIsSelectAll': false });
+      }
+    }
+  }
+
+  /**
+    * 全屋音乐播放标题 '全屋音乐系统'   '全屋播放' / '取消全屋播放'
+    */
+  @Builder HomeMusicSystemTitleBuilder() {
+    Row() {
+      Text(this.houseMusicTitle)
+        .fontColor($r('sys.color.font_primary'))
+        .fontSize($r('sys.float.Subtitle_M'))
+        .fontWeight(FontWeight.Medium)
+        .constraintSize({ maxWidth: '65%' })
+      Text(this.isAllSelecting ? this.houseMusicPlayCancel : this.houseMusicPlay)
+        .fontColor(Color.Blue)
+        .fontSize($r('sys.float.Body_M'))
+        .fontWeight(FontWeight.Medium)
+        .constraintSize({ maxWidth: '35%' })
+        .onClick(() => {
+          this.allSelectOnClickEven();
+        })
+    }
+    .width('100%')
+    .justifyContent(FlexAlign.SpaceBetween)
+    .padding({top: '12vp', right: '24vp', bottom: '4vp', left: '24vp'})
+    .borderRadius({topLeft: '32vp', topRight: '32vp'})
+  }
+
+  /**
+   * 适配大字体(1.75倍以上)全屋音乐播放标题 '全屋音乐系统'   '全屋播放' / '取消全屋播放'
+   */
+  @Builder BigFontHomeMusicSystemTitleBuilder() {
+    Column() {
+      Text(this.houseMusicTitle)
+        .fontColor($r('sys.color.font_primary'))
+        .fontSize($r('sys.float.Subtitle_M'))
+        .fontWeight(FontWeight.Medium)
+      Text(this.isAllSelecting ? this.houseMusicPlayCancel : this.houseMusicPlay)
+        .fontColor(Color.Blue)
+        .fontSize($r('sys.float.Body_M'))
+        .fontWeight(FontWeight.Medium)
+        .onClick(() => {
+          this.allSelectOnClickEven();
+        })
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+    .padding({top: '12vp', right: '24vp', bottom: '4vp', left: '24vp'})
+    .borderRadius({topLeft: '32vp', topRight: '32vp'})
+  }
+
+  /**
+   * 全屋音乐播放列表
+   */
+  @Builder HomeMusicSystemRoomListBuilder() {
+    Scroll(this.scroller) {
+      Column() {
+        ForEach(this.roomListService, (item: HomeMusicServices, index) => {
+          Stack({alignContent: Alignment.Start}) {
+            // 构建一行横向排列的全屋音乐 图标，房间名，音量条，勾选按钮
+            this.RoomItemBuilder(item, index)
+          }
+          .constraintSize({ minHeight: 64 })
+          .width('100%')
+          if (index !== this.roomListService.length - 1) {
+            // 构建行间分割线
+            this.DividerBuilder()
+          }
+        })
+      }
+    }
+    .padding({top: '4vp', right: '24vp', bottom: '4vp', left: '24vp'})
+    .width('100%')
+    .constraintSize({ minHeight: this.roomItemHeight })
+    .align(Alignment.Start)
+    .borderRadius({bottomLeft: '32vp', bottomRight: '32vp'})
+    .scrollBar(BarState.Auto)
+  }
+
+  /**
+   * 全屋音乐信息 - 横向排列 房间图标，房间名，音量条，勾选按钮
+   * @param item
+   * @param index
+   */
+  @Builder RoomItemBuilder(item: HomeMusicServices, index: number) {
+    Flex({alignItems: ItemAlign.Center}) {
+      this.RoomHouseBuilder();
+      this.RoomNameAndVolumeBuilder(item, index);
+      this.RoomCheckBuilder(item, index);
+    }
+  }
+
+  /**
+   * 全屋音乐播放列表
+   *   - 房间图标构建
+   */
+  @Builder RoomHouseBuilder() {
+    SymbolGlyph($r('sys.symbol.music_house_fill'))
+      .fontSize('24vp')
+      .fontColor([Color.Black])
+      .margin({
+        right: $r('sys.float.ohos_id_elements_margin_horizontal_l'),
+        left: 0
+      })
+      .draggable(false)
+      .flexGrow(0)
+      .flexShrink(0)
+      .flexBasis('auto')
+      .renderingStrategy(SymbolRenderingStrategy.SINGLE)
+  }
+
+  /**
+   * 全屋音乐播放列表
+   *   - 房间名+音量条
+   */
+  @Builder RoomNameAndVolumeBuilder(item: HomeMusicServices, index: number) {
+    Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Start }) {
+      Text(item.data.name)
+        .fontWeight('sys.string.ohos_id_text_font_family_medium')
+        .fontSize($r('sys.float.ohos_id_text_size_body1'))
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .wordBreak(WordBreak.BREAK_ALL)
+        .width('100%')
+        .constraintSize({ minHeight: 16 })
+      Slider({
+        value: this.roomCurrVolume[index],
+        min: 0,
+        max: 100,
+        step: 1,
+        style: SliderStyle.NONE,
+        direction: Axis.Horizontal
+      })
+        .visibility(this.roomVolumeVisible[index])
+        .blockColor(Color.Transparent)
+        .showSteps(false)
+        .showTips(false)
+        .blockStyle({
+          type: SliderBlockType.SHAPE,
+          shape: new Path({ commands: 'M60 60 M30 30 L15 56 L45 56 Z' })
+        })
+        .height(16)
+        .onChange((value: number, mode: SliderChangeMode) => {
+          console.info(TAG, `YuBeL room slider onChange: ${value}, mode=${mode}, index=${index}`);
+          this.roomListService[index].data.volume = value;
+          this.roomCurrVolume[index] = value;
+          this.onSliderValueChange(index, value, mode);
+        })
+    }
+  }
+
+  /**
+   * 全屋音乐播放列表
+   *   - 勾选按钮
+   */
+  @Builder RoomCheckBuilder(item: HomeMusicServices, index: number) {
+    //点击勾选按钮触发状态pending状态，等待播控中心下发勾选控制结果
+    if (!this.roomSelectStatusPending[index]) {
+      Checkbox()
+        .select(this.roomIsSelect[index])
+        .shape(CheckBoxShape.CIRCLE)
+        .onClick(() => {
+          this.roomSelectStatusPending[index] = true;
+          const timeId = setTimeout(() => {
+            this.roomSelectStatusPendingInit();
+          }, 3000);
+          if (typeof timeId === 'number') {
+            this.timeoutIds.push(timeId);
+          }
+          this.getCurrSelectRoom(index, !this.roomIsSelect[index]);
+          if (this.isSelectRoomListService.length > 0) {
+            if (this.extensionProxy != null) {
+              this.extensionProxy.send({ 'roomSelectChange': this.isSelectRoomListService });
+            }
+          } else {
+            if (this.extensionProxy != null) {
+              this.extensionProxy.send({ 'roomSelectChange': this.createNullRoomService() });
+            }
+          }
+        })
+        .width(30)
+        .margin({
+          left: '16vp'
+        })
+    } else {
+      LoadingProgress()
+        .width(36)
+        .margin({
+          left: '16vp'
+        })
+    }
+  }
+
+  /**
+   * 分割线构建
+   * - param prefix
+   * - param index
+   */
+  @Builder DividerBuilder() {
+    Row() {
+      Divider()
+        .color($r('sys.color.comp_divider'))
+        .opacity(0.5)
+        .margin({
+          left: $r('sys.float.ohos_id_elements_margin_horizontal_l'),
+          right: 0
+        })
+    }
+    .margin({ left: '24vp' })
+    .zIndex(1)
+  }
+
+  @Builder
+  houseMusicSys() {
+    if (this.roomListService.length > 0) {
+      Column(){
+        if (this.fontSizeScale > 1.75) {
+          this.BigFontHomeMusicSystemTitleBuilder()
+        } else {
+          this.HomeMusicSystemTitleBuilder()
+        }
+        this.HomeMusicSystemRoomListBuilder()
+      }
+      .backgroundColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+        '#FFFFFFFF' : '#FF3F3F3F')
+      .borderRadius({topLeft: '20vp', topRight: '20vp', bottomLeft: '20vp', bottomRight: '20vp'})
+    }
+  }
+
+  @Builder
+  deviceAndHouseMusicSys() {
+    Column({ space: 8 }) {
+      this.deviceMenu()
+      this.houseMusicSys()
+    }
+    .onTouch((event?: TouchEvent) => {
+      event?.stopPropagation();
+    })
+    .width(this.isPc ? 326 : 216)
+    .borderRadius(this.isPc ? 8 : 20)
   }
 
   build() {
@@ -309,7 +833,7 @@ export struct AVCastPicker {
   textBuilder(item: AVCastPickerDeviceInfo) {
     Text(item.deviceName)
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
-      .fontColor(item.isConnected ?
+      .fontColor((item.isConnected && !this.houseMusicIsSelect) ?
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
         $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
@@ -326,7 +850,7 @@ export struct AVCastPicker {
     Row() {
       Text(item.deviceSubName || '')
         .fontSize($r('sys.float.ohos_id_text_size_body2'))
-        .fontColor(item.isConnected ?
+        .fontColor((item.isConnected && !this.houseMusicIsSelect) ?
           (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
           $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
           (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
@@ -487,7 +1011,8 @@ export struct AVCastPicker {
             }
             .alignItems(VerticalAlign.Center)
 
-            if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined) {
+            if (item.isConnected && item.selectedIconName !== null && item.selectedIconName !== undefined &&
+                !this.houseMusicIsSelect) {
               Row() {
                 this.iconBuilder(item, true)
               }
@@ -521,6 +1046,16 @@ export struct AVCastPicker {
         }
         .width('100%')
         .onClick(() => {
+          if (this.extensionProxy !== null && this.houseMusicIsSelect) {
+            this.setAllRoomSelectStatusPending();
+            const timeId = setTimeout(() => {
+              this.roomSelectStatusPendingInit();
+            }, 3000);
+            if (typeof timeId === 'number') {
+              this.timeoutIds.push(timeId);
+            }
+            this.extensionProxy.send({ 'roomSelectChange': this.createNullRoomService() });
+          }
           if (this.extensionProxy != null && !item.isConnected) {
             this.extensionProxy.send({ 'selectedDeviceInfo': item })
           }
@@ -531,6 +1066,8 @@ export struct AVCastPicker {
     }
     .width(this.isPc ? 326 : 216)
     .borderRadius(this.isPc ? 8 : 20)
+    .backgroundColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+      '#FFFFFFFF' : '#FF3F3F3F')
   }
 
   @Builder
@@ -766,12 +1303,45 @@ export struct AVCastPicker {
             console.info(TAG, `isAncoSession : ${JSON.stringify(data['isAncoSession'])}`);
             this.isAncoSession = data['isAncoSession'] as boolean;
           }
+
+          if (data['roomList'] !== undefined) {
+            console.info(TAG, `roomlist : ${JSON.stringify(data['roomList'])}`);
+            this.roomListService = JSON.parse(JSON.stringify(data['roomList']));
+          }
+
+          if (data['HomeMusicPlayTaskId'] !== undefined) {
+            console.info(TAG, `playTaskId : ${JSON.stringify(data['HomeMusicPlayTaskId'])}`);
+            this.playTaskIdStr = data['HomeMusicPlayTaskId'] as string;
+          }
+
+          if (data['keyInputEven'] !== undefined) {
+            console.info(TAG, `keyInputEven : ${JSON.stringify(data['keyInputEven'])}`);
+            let keyInputOpt: number = data['keyInputEven'] as number;
+            this.syncToRoomVolume(keyInputOpt);
+            this.sendAllRoomVolumeToController();
+            this.roomMaxVolume = this.findRoomMaxVolume();
+            this.roomMaxVolumeChange();
+          }
+
+          if (data['houseMusicTitleGroup'] !== undefined) {
+            console.info(TAG, `houseMusicTitleGroup : ${JSON.stringify(data['houseMusicTitleGroup'])}`);
+            let houseMusicTitleGroup: string[] = JSON.parse(JSON.stringify(data['houseMusicTitleGroup']));
+            this.houseMusicTitle = houseMusicTitleGroup[0];
+            this.houseMusicPlay = houseMusicTitleGroup[1];
+            this.houseMusicPlayCancel = houseMusicTitleGroup[2];
+          }
+
+          if (data['HomeMusicScanStatus'] !== undefined) {
+            console.info(TAG, `HomeMusicScanStatus : ${JSON.stringify(data['HomeMusicScanStatus'])}`);
+            this.scanStatus = data['HomeMusicScanStatus'] as number;
+          }
         })
         .size({ width: '100%', height: '100%' })
         .bindMenu(
           this.isSubMenuExpanded? this.isSubMenuExpanded : this.isMenuShow,
-          this.isSubMenuExpanded? this.castModeMenu() : this.deviceMenu(),
+          this.isSubMenuExpanded? this.castModeMenu() : this.deviceAndHouseMusicSys(),
           {
+          backgroundBlurStyle: BlurStyle.NONE,
           placement: Placement.BottomRight,
           showInSubWindow: false,
           enableHoverMode: true,
