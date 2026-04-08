@@ -68,7 +68,10 @@
           "bluetooth",
           "os_account",
           "hicollie",
-          "openssl"
+          "openssl",
+          "bounds_checking_function",
+          "ets_frontend",
+          "CollaborationFwk"
         ],
         "third_party": [
         ]
