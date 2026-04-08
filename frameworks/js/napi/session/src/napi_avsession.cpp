@@ -1770,7 +1770,7 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
         TryReuseCallback(napiSession, context->extras_);
         int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
         if (ret != AVSESSION_SUCCESS) {
-            SetSetExtrasError(context, ret);
+            BuildErrorContext(context, ret);
         }
     };
     auto complete = [env](napi_value& output) {
@@ -1779,8 +1779,9 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
     return NapiAsyncWork::Enqueue(env, context, "SetExtras", executor, complete);
 }
 
-void NapiAVSession::SetSetExtrasError(std::shared_ptr<ContextBase> context, int32_t ret)
+void NapiAVSession::BuildErrorContext(std::shared_ptr<ContextBase> context, int32_t ret)
 {
+    // Build error context from native return code for SetExtras operation
     if (ret == ERR_SESSION_NOT_EXIST) {
         context->errMessage = "SetExtras failed : native session not exist";
     } else if (ret == ERR_INVALID_PARAM) {
@@ -1794,6 +1795,7 @@ void NapiAVSession::SetSetExtrasError(std::shared_ptr<ContextBase> context, int3
 
 void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::WantParams& extras)
 {
+    // Reuse callback from current session when bundle names match
     if (napiSession == nullptr) {
         SLOGI("napiSession is nullptr");
         return;
@@ -1807,9 +1809,11 @@ void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::Wa
         SLOGI("currentNapiSession is nullptr");
         return;
     }
-    if (napiSession->elementName_.GetBundleName() == currentNapiSession->elementName_.GetBundleName()) {
+    std::string napiBundleName = napiSession->elementName_.GetBundleName();
+    std::string currentBundleName = currentNapiSession->elementName_.GetBundleName();
+    if (!napiBundleName.empty() && !currentBundleName.empty() && napiBundleName == currentBundleName) {
         napiSession->callback_ = currentNapiSession->callback_;
-        SLOGI("Reuse callback from currentNapiSession");
+        SLOGI("Reuse callback from currentNapiSession, bundleName=%{public}s", napiBundleName.c_str());
     }
 }
 
