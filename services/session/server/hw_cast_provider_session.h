@@ -17,6 +17,7 @@
 #define HW_CAST_PROVIDER_SESSION_H
 
 #include <mutex>
+#include <map>
 
 #include "i_cast_session.h"
 #include "cast_engine_common.h"
@@ -65,6 +66,8 @@ public:
 private:
     void ComputeToastOnDeviceState(const CastEngine::DeviceStateInfo &stateInfo,
         const CastEngine::CastRemoteDevice &castRemoteDevice);
+    void ReportDeviceCastingTime(int32_t deviceState, const std::string &deviceId,
+        const CastEngine::CastRemoteDevice &castRemoteDevice);
 
     std::shared_ptr<CastEngine::ICastSession> castSession_;
     std::vector<std::shared_ptr<IAVCastSessionStateListener>> castSessionStateListenerList_;
@@ -73,6 +76,7 @@ private:
     std::string stashDeviceId_;
     CastEngine::ProtocolType protocolType_ = CastEngine::ProtocolType::CAST_PLUS_STREAM;
     int32_t avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
+    std::map<std::string, int64_t> deviceConnectMap_;
 
     const int32_t deviceStateConnection = 6;
     const int32_t eventIdStart = 2000;

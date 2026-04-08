@@ -121,6 +121,13 @@ SESSION_CAST:
   DEST_DEVICE_ID: {type: INT32, desc: dest device id}
   DETAILED_MSG: {type: STRING, desc: detailed msg}
 
+DEVICE_CASTING_TIME:
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: device connect duration}
+  DEVICE_TYPE: {type: UINT32, desc: device type}
+  IS_P2P: {type: BOOL, desc: is p2p connection}
+  PROTOCOL: {type: STRING, desc: protocol for device}
+  SERVICE_DURATION: {type: INT64, desc: connection duration}
+
 REMOTE_CONTROL_FAILED:
   __BASE: {type: FAULT, level: MINOR, desc: remote control failed}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
