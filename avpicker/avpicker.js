@@ -120,7 +120,6 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPickerLimit');
         this.__isDeviceLevel = new ObservedPropertySimplePU(true, this, 'isDeviceLevel');
         this.__isSubMenuExpanded = new ObservedPropertySimplePU(false, this, 'isSubMenuExpanded');
-        this.__isSwitch = new ObservedPropertySimplePU(false, this, 'isSwitch');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.declareWatch('roomListService', this.roomListChange);
@@ -269,9 +268,6 @@ export class AVCastPicker extends ViewPU {
         if (c11.isSubMenuExpanded !== undefined) {
             this.isSubMenuExpanded = c11.isSubMenuExpanded;
         }
-        if (c11.isSwitch !== undefined) {
-            this.isSwitch = c11.isSwitch;
-        }
     }
 
     updateStateVars(b11) {
@@ -317,7 +313,6 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit.purgeDependencyOnElmtId(a11);
         this.__isDeviceLevel.purgeDependencyOnElmtId(a11);
         this.__isSubMenuExpanded.purgeDependencyOnElmtId(a11);
-        this.__isSwitch.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -360,7 +355,6 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit.aboutToBeDeleted();
         this.__isDeviceLevel.aboutToBeDeleted();
         this.__isSubMenuExpanded.aboutToBeDeleted();
-        this.__isSwitch.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -673,13 +667,6 @@ export class AVCastPicker extends ViewPU {
     }
     set isSubMenuExpanded(i1) {
         this.__isSubMenuExpanded.set(i1);
-    }
-
-    get isSwitch() {
-        return this.__isSwitch.get();
-    }
-    set isSwitch(i1) {
-        this.__isSwitch.set(i1);
     }
 
     aboutToAppear() {
@@ -1181,8 +1168,8 @@ export class AVCastPicker extends ViewPU {
                                                         this.extensionProxy.send({ 'isShowBadge': false})
                                                     }
                                                     if (!this.isSubMenuExpanded) {
-                                                        this.isSwitch = true;
                                                         this.isMenuShow = false;
+                                                        this.isSubMenuExpanded = true;
                                                     }
                                                 }
                                             });
@@ -1718,6 +1705,10 @@ export class AVCastPicker extends ViewPU {
                 if (this.extensionProxy != null) {
                     this.extensionProxy.send({ 'castMode': HiPlayCastMode.DEVICE_LEVEL });
                 }
+                if (!this.isMenuShow) {
+                    this.isSubMenuExpanded = false;
+                    this.isMenuShow = true;
+                }
             });
         }, Flex);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1792,6 +1783,10 @@ export class AVCastPicker extends ViewPU {
                 this.isDeviceLevel = false;
                 if (this.extensionProxy != null) {
                     this.extensionProxy.send({ 'castMode': HiPlayCastMode.APP_LEVEL });
+                }
+                if (!this.isMenuShow) {
+                    this.isSubMenuExpanded = false;
+                    this.isMenuShow = true;
                 }
             });
         }, Flex);
@@ -1927,6 +1922,23 @@ export class AVCastPicker extends ViewPU {
         }, Button);
         this.observeComponentCreation2((f8, g8) => {
             Column.create();
+            Column.bindMenu(this.isSubMenuExpanded, { builder: () => {
+                this.castModeMenu.call(this);
+            } }, {
+            placement: Placement.BottomRight,
+            showInSubWindow: false,
+            enableHoverMode: true,
+            onDisappear: () => {
+                this.isSubMenuExpanded = false;
+                this.touchMenuItemIndex = -1;
+            },
+            onAppear: () => {
+                if (this.extensionProxy != null && this.pickerClickTime !== -1) {
+                    this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
+                    this.pickerClickTime = -1;
+                }
+            }
+            });
             Column.accessibilityLevel('no-hide-descendants');
             Column.size({ width: '100%', height: '100%' });
         }, Column);
@@ -2009,6 +2021,14 @@ export class AVCastPicker extends ViewPU {
                     }
                 }
 
+                if (l8.isSubMenuExpanded !== undefined) {
+                    console.info(TAG, `isShowMenu : ${l8.isSubMenuExpanded}`);
+                    this.isSubMenuExpanded = l8.isSubMenuExpanded;
+                    if (!this.isSubMenuExpanded) {
+                        this.touchMenuItemIndex = -1;
+                    }
+                }
+
                 if (l8.configurationColorMode !== undefined) {
                     console.info(TAG, `configurationColorMode : ${l8.configurationColorMode}`);
                     this.configurationColorMode = l8.configurationColorMode;
@@ -2083,9 +2103,7 @@ export class AVCastPicker extends ViewPU {
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
-            UIExtensionComponent.bindMenu(this.isSubMenuExpanded ? this.isSubMenuExpanded : this.isMenuShow, this.isSubMenuExpanded ? { builder: () => {
-                this.castModeMenu.call(this);
-            } } : { builder: () => {
+            UIExtensionComponent.bindMenu(this.isMenuShow, { builder: () => {
                 this.deviceAndHouseMusicSys.call(this);
             } }, {
             backgroundBlurStyle: BlurStyle.NONE,
@@ -2093,34 +2111,16 @@ export class AVCastPicker extends ViewPU {
             showInSubWindow: false,
             enableHoverMode: true,
             onDisappear: () => {
-                if (this.isSubMenuExpanded) {
-                    this.isSubMenuExpanded = false;
-                    this.isMenuShow = true;
-                    this.menuShowStateCallback(this.isMenuShow);
-                }
-                else {
-                    this.isMenuShow = false;
-                    this.touchMenuItemIndex = -1;
-                    this.menuShowStateCallback(this.isMenuShow);
-                }
-                if (this.isSwitch) {
-                    this.isSubMenuExpanded = true;
-                    this.isSwitch = false;
-                }
+                this.isMenuShow = false;
+                this.touchMenuItemIndex = -1;
+                this.menuShowStateCallback(this.isMenuShow);
             },
             onAppear: () => {
-                if (this.isSubMenuExpanded) {
-                    this.isMenuShow = false;
-                    this.touchMenuItemIndex = -1;
-                    this.menuShowStateCallback(this.isMenuShow);
+                if (this.extensionProxy != null && this.pickerClickTime !== -1) {
+                    this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
+                    this.pickerClickTime = -1;
                 }
-                else {
-                    if (this.extensionProxy != null && this.pickerClickTime !== -1) {
-                        this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
-                        this.pickerClickTime = -1;
-                    }
-                    this.menuShowStateCallback(this.isMenuShow);
-                }
+                this.menuShowStateCallback(this.isMenuShow);
             }
         });
             UIExtensionComponent.onRelease((releaseCode) => {
