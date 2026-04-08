@@ -103,6 +103,8 @@ private:
     static void AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
         OHOS::AVSession::AVMetaData metaData);
 
+    static void BuildErrorContext(std::shared_ptr<ContextBase> context, int32_t ret);
+    static void TryReuseCallback(NapiAVSession* napiSession, const AAFwk::WantParams& extras);
     static napi_status OnPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnStop(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -179,6 +181,8 @@ private:
     static std::mutex syncMutex_;
     static std::mutex syncAsyncMutex_;
     static std::mutex downloadAVQImgMutex_;
+    static std::mutex currentNapiSessionMutex_;
+    static std::shared_ptr<NapiAVSession> currentNapiSession;
     static std::condition_variable syncCond_;
     static std::condition_variable syncAsyncCond_;
     static int32_t playBackStateRet_;

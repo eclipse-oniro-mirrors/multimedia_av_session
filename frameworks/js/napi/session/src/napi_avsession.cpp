@@ -123,6 +123,8 @@ int32_t NapiAVSession::playBackStateRet_ = AVSESSION_ERROR;
 std::shared_ptr<NapiAVSession> NapiAVSession::napiAVSession_ = nullptr;
 std::recursive_mutex NapiAVSession::destroyLock_;
 bool NapiAVSession::isNapiSessionDestroy_ = false;
+std::shared_ptr<NapiAVSession> NapiAVSession::currentNapiSession;
+std::mutex NapiAVSession::currentNapiSessionMutex_;
 
 NapiAVSession::NapiAVSession()
 {
@@ -281,6 +283,11 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     SLOGI("NapiAVSession NewInstance sessionId=%{public}s***, sessionType:%{public}s",
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
+
+    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+    if (currentNapiSession == nullptr || currentNapiSession->sessionId_ != napiAVSession_->sessionId_) {
+        currentNapiSession = napiAVSession_;
+    }
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, napiAVSession_->sessionId_, property);
@@ -1753,29 +1760,61 @@ napi_value NapiAVSession::SetExtras(napi_env env, napi_callback_info info)
         context->sessionHolder_ = napiSession->session_;
     }
     auto executor = [context]() {
-        if (context->sessionHolder_  == nullptr) {
+        if (context->sessionHolder_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetExtras failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
+        auto *napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        TryReuseCallback(napiSession, context->extras_);
         int32_t ret = context->sessionHolder_->SetExtras(context->extras_);
         if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_SESSION_NOT_EXIST) {
-                context->errMessage = "SetExtras failed : native session not exist";
-            } else if (ret == ERR_INVALID_PARAM) {
-                context->errMessage = "SetExtras failed : native invalid parameters";
-            } else {
-                context->errMessage = "SetExtras failed : native server exception";
-            }
-            context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[ret];
+            BuildErrorContext(context, ret);
         }
     };
     auto complete = [env](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
     };
     return NapiAsyncWork::Enqueue(env, context, "SetExtras", executor, complete);
+}
+
+void NapiAVSession::BuildErrorContext(std::shared_ptr<ContextBase> context, int32_t ret)
+{
+    // Build error context from native return code for SetExtras operation
+    if (ret == ERR_SESSION_NOT_EXIST) {
+        context->errMessage = "SetExtras failed : native session not exist";
+    } else if (ret == ERR_INVALID_PARAM) {
+        context->errMessage = "SetExtras failed : native invalid parameters";
+    } else {
+        context->errMessage = "SetExtras failed : native server exception";
+    }
+    context->status = napi_generic_failure;
+    context->errCode = NapiAVSessionManager::errcode_[ret];
+}
+
+void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::WantParams& extras)
+{
+    // Reuse callback from current session when bundle names match
+    if (napiSession == nullptr) {
+        SLOGI("napiSession is nullptr");
+        return;
+    }
+    std::string reuseCallback = extras.GetStringParam("reuseCallback");
+    if (reuseCallback != "1" && reuseCallback != "true") {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+    if (currentNapiSession == nullptr) {
+        SLOGI("currentNapiSession is nullptr");
+        return;
+    }
+    std::string napiBundleName = napiSession->elementName_.GetBundleName();
+    std::string currentBundleName = currentNapiSession->elementName_.GetBundleName();
+    if (!napiBundleName.empty() && !currentBundleName.empty() && napiBundleName == currentBundleName) {
+        napiSession->callback_ = currentNapiSession->callback_;
+        SLOGI("Reuse callback from currentNapiSession, bundleName=%{public}s", napiBundleName.c_str());
+    }
 }
 
 napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info)
