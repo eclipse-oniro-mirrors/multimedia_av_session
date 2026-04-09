@@ -318,7 +318,6 @@ export struct AVCastPicker {
   @State isDisabledByPickerLimit: boolean = false;
   @State isDeviceLevel: boolean = true;
   @State isSubMenuExpanded: boolean = false;
-  @State isSwitch: boolean = false;
 
   private static currentPickerCount: number = 0;
 
@@ -989,8 +988,8 @@ export struct AVCastPicker {
                         this.extensionProxy.send({'isShowBadge': false});
                       }
                       if (!this.isSubMenuExpanded) {
-                        this.isSwitch = true;
                         this.isMenuShow = false;
+                        this.isSubMenuExpanded = true;
                       }
                     }
                   })
@@ -1110,6 +1109,10 @@ export struct AVCastPicker {
         if (this.extensionProxy != null) {
           this.extensionProxy.send({'castMode': HiPlayCastMode.DEVICE_LEVEL});
         }
+        if (!this.isMenuShow) {
+          this.isSubMenuExpanded = false;
+          this.isMenuShow = true;
+        }
       })
 
       Divider().width(192)
@@ -1150,6 +1153,10 @@ export struct AVCastPicker {
         this.isDeviceLevel = false
         if (this.extensionProxy != null) {
            this.extensionProxy.send({'castMode': HiPlayCastMode.APP_LEVEL});
+        }
+        if (!this.isMenuShow) {
+          this.isSubMenuExpanded = false;
+          this.isMenuShow = true;
         }
       })
     }
@@ -1264,6 +1271,14 @@ export struct AVCastPicker {
             }
           }
 
+          if (data['isSubMenuExpanded'] !== undefined) {
+            console.info(TAG, `isSubMenuExpanded : ${JSON.stringify(data['isSubMenuExpanded'])}`);
+            this.isSubMenuExpanded = data['isSubMenuExpanded'] as boolean;
+            if (!this.isSubMenuExpanded) {
+              this.touchMenuItemIndex = -1;
+            }
+          }
+
           if (data['configurationColorMode'] !== undefined) {
             console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
             this.configurationColorMode = data['configurationColorMode'] as number;
@@ -1338,40 +1353,24 @@ export struct AVCastPicker {
         })
         .size({ width: '100%', height: '100%' })
         .bindMenu(
-          this.isSubMenuExpanded? this.isSubMenuExpanded : this.isMenuShow,
-          this.isSubMenuExpanded? this.castModeMenu() : this.deviceAndHouseMusicSys(),
+          this.isMenuShow,
+          this.deviceAndHouseMusicSys(),
           {
           backgroundBlurStyle: BlurStyle.NONE,
           placement: Placement.BottomRight,
           showInSubWindow: false,
           enableHoverMode: true,
           onDisappear: () => {
-            if (this.isSubMenuExpanded) {
-              this.isSubMenuExpanded = false;
-              this.isMenuShow = true;
-              this.menuShowStateCallback(this.isMenuShow);
-            } else {
-              this.isMenuShow = false;
-              this.touchMenuItemIndex = -1;
-              this.menuShowStateCallback(this.isMenuShow);
-            }
-            if (this.isSwitch) {
-              this.isSubMenuExpanded = true;
-              this.isSwitch = false;
-              }
+            this.isMenuShow = false;
+            this.touchMenuItemIndex = -1;
+            this.menuShowStateCallback(this.isMenuShow);
           },
           onAppear: () => {
-            if (this.isSubMenuExpanded) {
-              this.isMenuShow = false;
-              this.touchMenuItemIndex = -1;
-              this.menuShowStateCallback(this.isMenuShow);
-            } else {
-              if (this.extensionProxy != null && this.pickerClickTime !== -1) {
-                this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
-                this.pickerClickTime = -1;
-              }
-              this.menuShowStateCallback(this.isMenuShow);
+            if (this.extensionProxy != null && this.pickerClickTime !== -1) {
+              this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
+              this.pickerClickTime = -1;
             }
+            this.menuShowStateCallback(this.isMenuShow);
           }
         })
         .onRelease((releaseCode) => {
@@ -1385,6 +1384,24 @@ export struct AVCastPicker {
           this.needToRestart = true;
         })
       }
+      .bindMenu (
+        this.isSubMenuExpanded,
+        this.castModeMenu(),
+        {
+        placement: Placement.BottomRight,
+        showInSubWindow: false,
+        enableHoverMode: true,
+        onDisappear: () => {
+          this.isSubMenuExpanded = false;
+          this.touchMenuItemIndex = -1;
+        },
+        onAppear: () => {
+          if (this.extensionProxy != null && this.pickerClickTime !== -1) {
+            this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
+            this.pickerClickTime = -1;
+          }
+        }
+      })
       .accessibilityLevel('no-hide-descendants')
       .size({ width: '100%', height: '100%' })
     }
