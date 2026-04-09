@@ -2576,7 +2576,7 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
         auto launchWantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
         AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
             0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITIES, flags, wants, nullptr);
-        auto launchAbility = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, 
+        auto launchAbility = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo,
             GetUserId(), GetUid());
         CHECK_AND_RETURN_RET_LOG(launchAbility != nullptr, launchAbility_, "GetWantAgent failed");
         std::lock_guard lockGuard(launchAbilityLock_);
