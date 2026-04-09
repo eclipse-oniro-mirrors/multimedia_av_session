@@ -56,6 +56,7 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
     
     deviceInfo.hiPlayDeviceInfo_.castMode_ = castMode_;
     deviceInfo.hiPlayDeviceInfo_.castUid_ = GetUid();
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = supportCastMode_;
     SLOGI("PcmCastSession OnCastStateChange castUid %{public}d", deviceInfo.hiPlayDeviceInfo_.castUid_);
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
@@ -186,6 +187,7 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
 
     bool isDeviceLevel = (sessionToken.sessionId == "pcmCastSession");
     castMode_ = isDeviceLevel ? HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
+    supportCastMode_ = outputDeviceInfo.deviceInfos_[0].hiPlayDeviceInfo_.supportCastMode_;
     descriptor_.uid_ = isDeviceLevel ? 0 : sessionToken.uid;
     SLOGI("PcmCastSession StartCast castMode: %{public}d", castMode_);
  

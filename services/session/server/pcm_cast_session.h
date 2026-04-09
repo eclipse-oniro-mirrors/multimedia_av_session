@@ -54,6 +54,7 @@ public:
 private:
     int64_t castHandle_ = 0;
     int32_t castMode_ = HiPlayCastMode::DEVICE_LEVEL;
+    int32_t supportCastMode_ = HiPlayCastMode::DEVICE_LEVEL;
     int32_t castState_ = CastState::DISCONNECTED;
     std::recursive_mutex castLock_;
     AVSessionDescriptor descriptor_;
