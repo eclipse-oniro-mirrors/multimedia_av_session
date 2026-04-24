@@ -187,6 +187,9 @@ static napi_value ExportConnectionState(napi_env env)
     (void)SetNamedProperty(env, result, "STATE_CONNECTED", static_cast<int32_t>(ConnectionState::STATE_CONNECTED));
     (void)SetNamedProperty(env, result, "STATE_DISCONNECTED",
                            static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED));
+    (void)SetNamedProperty(env, result, "AUTHING", static_cast<int32_t>(ConnectionState::AUTHING));
+    (void)SetNamedProperty(env, result, "MIRROR_TO_STREAM", static_cast<int32_t>(ConnectionState::MIRROR_TO_STREAM));
+    (void)SetNamedProperty(env, result, "STREAM_TO_MIRROR", static_cast<int32_t>(ConnectionState::STREAM_TO_MIRROR));
 
     napi_object_freeze(env, result);
     return result;
@@ -197,10 +200,14 @@ static napi_value ExportDeviceType(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
 
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_UNKNOWN", DeviceType::DEVICE_TYPE_UNKNOWN);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_LOCAL", DeviceType::DEVICE_TYPE_LOCAL);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_TV", DeviceType::DEVICE_TYPE_TV);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_SMART_SPEAKER", DeviceType::DEVICE_TYPE_SPEAKER);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_BLUETOOTH", DeviceType::DEVICE_TYPE_BLUETOOTH);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_CAR", DeviceType::DEVICE_TYPE_CAR);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_2IN1", DeviceType::DEVICE_TYPE_2IN1);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_HIPLAY", DeviceType::DEVICE_TYPE_HIPLAY);
 
     napi_object_freeze(env, result);
     return result;
@@ -507,10 +514,16 @@ static napi_value ExportExtraKey(napi_env env)
         return nullptr;
     }
 
+    (void)SetNamedProperty(env, result, "REQUIRE_ABILITY_LIST",
+        std::string(ExtraKeyEvent::REQUIRE_ABILITY_LIST));
+    (void)SetNamedProperty(env, result, "SUPPORT_URL_CASTING",
+        std::string(ExtraKeyEvent::SUPPORT_URL_CASTING));
+    (void)SetNamedProperty(env, result, "LIVE_VIEW_HIDDEN_WHEN_KEYGUARD",
+        std::string(ExtraKeyEvent::LIVE_VIEW_HIDDEN_WHEN_KEYGUARD));
     (void)SetNamedProperty(env, result, "DLNA_CURRENT_URI_METADATA",
-        std::string(DlnaExtrasKey::CURRENT_URI_METADATA));
+        std::string(ExtraKeyEvent::CURRENT_URI_METADATA));
     (void)SetNamedProperty(env, result, "DLNA_DIDL_LITE",
-        std::string(DlnaExtrasKey::DIDL_LITE));
+        std::string(ExtraKeyEvent::DIDL_LITE));
 
     napi_object_freeze(env, result);
     return result;

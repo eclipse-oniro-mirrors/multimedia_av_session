@@ -305,10 +305,14 @@ struct AVQueueInfo {
 }
 
 enum DeviceType: i32 {
+  DEVICE_TYPE_UNKNOWN = -1,
   DEVICE_TYPE_LOCAL = 0,
   DEVICE_TYPE_TV = 2,
   DEVICE_TYPE_SMART_SPEAKER = 3,
   DEVICE_TYPE_BLUETOOTH = 10,
+  DEVICE_TYPE_CAR = 131,
+  DEVICE_TYPE_2IN1 = 2607,
+  DEVICE_TYPE_HIPLAY = 2611,
 }
 
 struct DeviceInfo {
@@ -657,6 +661,9 @@ enum ConnectionState: i32 {
   STATE_CONNECTING = 0,
   STATE_CONNECTED = 1,
   STATE_DISCONNECTED = 6,
+  AUTHING = 10,
+  MIRROR_TO_STREAM = 11,
+  STREAM_TO_MIRROR = 12,
 }
 
 struct SessionToken {
@@ -968,6 +975,9 @@ enum BackgroundPlayMode : i32 {
 }
 
 enum ExtraKey : String {
+  REQUIRE_ABILITY_LIST = "requireAbilityList",
+  SUPPORT_URL_CASTING = "url-cast",
+  LIVE_VIEW_HIDDEN_WHEN_KEYGUARD = "hw_live_view_hidden_when_keyguard",
   DLNA_DIDL_LITE = "DIDL-Lite",
   DLNA_CURRENT_URI_METADATA = "CurrentURIMetadata",
 }

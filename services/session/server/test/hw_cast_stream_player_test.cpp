@@ -1985,14 +1985,14 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams001, TestSize.Level0
 {
     SLOGI("GetDlnaExtrasFromWantParams001 begin!");
     auto extras = std::make_shared<AAFwk::WantParams>();
-    extras->SetParam(DlnaExtrasKey::DIDL_LITE, AAFwk::String::Box("<DIDL>test</DIDL>"));
-    extras->SetParam(DlnaExtrasKey::CURRENT_URI_METADATA, AAFwk::String::Box("<metadata>test</metadata>"));
+    extras->SetParam(ExtraKeyEvent::DIDL_LITE, AAFwk::String::Box("<DIDL>test</DIDL>"));
+    extras->SetParam(ExtraKeyEvent::CURRENT_URI_METADATA, AAFwk::String::Box("<metadata>test</metadata>"));
 
     auto result = hwCastStreamPlayer->GetDlnaExtrasFromWantParams(extras);
     cJSON* json = cJSON_Parse(result.c_str());
     EXPECT_NE(json, nullptr);
-    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
-    cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
+    cJSON* didlLite = cJSON_GetObjectItem(json, ExtraKeyEvent::DIDL_LITE);
+    cJSON* uriMetadata = cJSON_GetObjectItem(json, ExtraKeyEvent::CURRENT_URI_METADATA);
     EXPECT_NE(didlLite, nullptr);
     EXPECT_NE(uriMetadata, nullptr);
     EXPECT_STREQ(didlLite->valuestring, "<DIDL>test</DIDL>");
@@ -2016,8 +2016,8 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams002, TestSize.Level0
     cJSON* json = cJSON_Parse(result.c_str());
     EXPECT_NE(json, nullptr);
     EXPECT_EQ(cJSON_GetArraySize(json), 2);
-    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
-    cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
+    cJSON* didlLite = cJSON_GetObjectItem(json, ExtraKeyEvent::DIDL_LITE);
+    cJSON* uriMetadata = cJSON_GetObjectItem(json, ExtraKeyEvent::CURRENT_URI_METADATA);
     EXPECT_NE(didlLite, nullptr);
     EXPECT_NE(uriMetadata, nullptr);
     EXPECT_STREQ(didlLite->valuestring, "");
@@ -2036,15 +2036,15 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams003, TestSize.Level0
 {
     SLOGI("GetDlnaExtrasFromWantParams003 begin!");
     auto extras = std::make_shared<AAFwk::WantParams>();
-    extras->SetParam(DlnaExtrasKey::DIDL_LITE, AAFwk::String::Box("<DIDL>lite</DIDL>"));
+    extras->SetParam(ExtraKeyEvent::DIDL_LITE, AAFwk::String::Box("<DIDL>lite</DIDL>"));
 
     auto result = hwCastStreamPlayer->GetDlnaExtrasFromWantParams(extras);
     cJSON* json = cJSON_Parse(result.c_str());
     EXPECT_NE(json, nullptr);
-    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
+    cJSON* didlLite = cJSON_GetObjectItem(json, ExtraKeyEvent::DIDL_LITE);
     EXPECT_NE(didlLite, nullptr);
     EXPECT_STREQ(didlLite->valuestring, "<DIDL>lite</DIDL>");
-    cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
+    cJSON* uriMetadata = cJSON_GetObjectItem(json, ExtraKeyEvent::CURRENT_URI_METADATA);
     EXPECT_NE(uriMetadata, nullptr);
     EXPECT_STREQ(uriMetadata->valuestring, "");
     cJSON_Delete(json);
@@ -2061,15 +2061,15 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams004, TestSize.Level0
 {
     SLOGI("GetDlnaExtrasFromWantParams004 begin!");
     auto extras = std::make_shared<AAFwk::WantParams>();
-    extras->SetParam(DlnaExtrasKey::CURRENT_URI_METADATA, AAFwk::String::Box("uri_metadata"));
+    extras->SetParam(ExtraKeyEvent::CURRENT_URI_METADATA, AAFwk::String::Box("uri_metadata"));
 
     auto result = hwCastStreamPlayer->GetDlnaExtrasFromWantParams(extras);
     cJSON* json = cJSON_Parse(result.c_str());
     EXPECT_NE(json, nullptr);
-    cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
+    cJSON* uriMetadata = cJSON_GetObjectItem(json, ExtraKeyEvent::CURRENT_URI_METADATA);
     EXPECT_NE(uriMetadata, nullptr);
     EXPECT_STREQ(uriMetadata->valuestring, "uri_metadata");
-    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
+    cJSON* didlLite = cJSON_GetObjectItem(json, ExtraKeyEvent::DIDL_LITE);
     EXPECT_NE(didlLite, nullptr);
     EXPECT_STREQ(didlLite->valuestring, "");
     cJSON_Delete(json);
@@ -2086,16 +2086,16 @@ HWTEST_F(HwCastStreamPlayerTest, GetDlnaExtrasFromWantParams005, TestSize.Level0
 {
     SLOGI("GetDlnaExtrasFromWantParams005 begin!");
     auto extras = std::make_shared<AAFwk::WantParams>();
-    extras->SetParam(DlnaExtrasKey::DIDL_LITE, AAFwk::Integer::Box(123));
-    extras->SetParam(DlnaExtrasKey::CURRENT_URI_METADATA, AAFwk::String::Box("metadata"));
+    extras->SetParam(ExtraKeyEvent::DIDL_LITE, AAFwk::Integer::Box(123));
+    extras->SetParam(ExtraKeyEvent::CURRENT_URI_METADATA, AAFwk::String::Box("metadata"));
 
     auto result = hwCastStreamPlayer->GetDlnaExtrasFromWantParams(extras);
     cJSON* json = cJSON_Parse(result.c_str());
     EXPECT_NE(json, nullptr);
-    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
+    cJSON* didlLite = cJSON_GetObjectItem(json, ExtraKeyEvent::DIDL_LITE);
     EXPECT_NE(didlLite, nullptr);
     EXPECT_STREQ(didlLite->valuestring, "");
-    cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
+    cJSON* uriMetadata = cJSON_GetObjectItem(json, ExtraKeyEvent::CURRENT_URI_METADATA);
     EXPECT_NE(uriMetadata, nullptr);
     EXPECT_STREQ(uriMetadata->valuestring, "metadata");
     cJSON_Delete(json);
@@ -2112,8 +2112,8 @@ HWTEST_F(HwCastStreamPlayerTest, buildCastExtraInfo001, TestSize.Level0)
 {
     SLOGI("buildCastExtraInfo001 begin!");
     auto extras = std::make_shared<AAFwk::WantParams>();
-    extras->SetParam(DlnaExtrasKey::DIDL_LITE, AAFwk::String::Box("<DIDL>cast</DIDL>"));
-    extras->SetParam(DlnaExtrasKey::CURRENT_URI_METADATA, AAFwk::String::Box("cast_metadata"));
+    extras->SetParam(ExtraKeyEvent::DIDL_LITE, AAFwk::String::Box("<DIDL>cast</DIDL>"));
+    extras->SetParam(ExtraKeyEvent::CURRENT_URI_METADATA, AAFwk::String::Box("cast_metadata"));
 
     std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
     description->SetExtras(extras);
@@ -2122,8 +2122,8 @@ HWTEST_F(HwCastStreamPlayerTest, buildCastExtraInfo001, TestSize.Level0)
 
     cJSON* json = cJSON_Parse(mediaInfo.extrasData.c_str());
     EXPECT_NE(json, nullptr);
-    cJSON* didlLite = cJSON_GetObjectItem(json, DlnaExtrasKey::DIDL_LITE);
-    cJSON* uriMetadata = cJSON_GetObjectItem(json, DlnaExtrasKey::CURRENT_URI_METADATA);
+    cJSON* didlLite = cJSON_GetObjectItem(json, ExtraKeyEvent::DIDL_LITE);
+    cJSON* uriMetadata = cJSON_GetObjectItem(json, ExtraKeyEvent::CURRENT_URI_METADATA);
     EXPECT_NE(didlLite, nullptr);
     EXPECT_NE(uriMetadata, nullptr);
     EXPECT_STREQ(didlLite->valuestring, "<DIDL>cast</DIDL>");
@@ -2158,8 +2158,8 @@ HWTEST_F(HwCastStreamPlayerTest, buildCastExtraInfo002, TestSize.Level0)
 HWTEST_F(HwCastStreamPlayerTest, DlnaExtrasKey001, TestSize.Level0)
 {
     SLOGI("DlnaExtrasKey001 begin!");
-    EXPECT_STREQ(DlnaExtrasKey::DIDL_LITE, "DIDL-Lite");
-    EXPECT_STREQ(DlnaExtrasKey::CURRENT_URI_METADATA, "CurrentURIMetadata");
+    EXPECT_STREQ(ExtraKeyEvent::DIDL_LITE, "DIDL-Lite");
+    EXPECT_STREQ(ExtraKeyEvent::CURRENT_URI_METADATA, "CurrentURIMetadata");
     SLOGI("DlnaExtrasKey001 end!");
 }
 } // namespace AVSession

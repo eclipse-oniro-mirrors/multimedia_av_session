@@ -748,6 +748,24 @@ enum ConnectionState {
      * @since 10
      */
     STATE_DISCONNECTED = 6,
+    /**
+     * A connection state indicating the device is in the process of authentication.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 26 dynamic&static
+     */
+    AUTHING = 10,
+    /**
+     * A connection state indicating the device is switching from mirror to stream.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 26 dynamic&static
+     */
+    MIRROR_TO_STREAM = 11,
+    /**
+     * A connection state indicating the device is switching from stream to mirror.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 26 dynamic&static
+     */
+    STREAM_TO_MIRROR = 12,
 };
     
 /**
@@ -788,6 +806,12 @@ struct CallerType {
 
 enum DeviceType {
     /**
+     * A device type indicating the route is unknown.
+     * @since 26 dynamic&static
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     */
+    DEVICE_TYPE_UNKNOWN = -1,
+    /**
      * A device type indicating the route is on internal speakers or audio jacks on the device itself.
      * @since 10
      * @syscap SystemCapability.Multimedia.AVSession.Core
@@ -811,6 +835,24 @@ enum DeviceType {
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     DEVICE_TYPE_BLUETOOTH = 10,
+    /**
+     * A device type indicating the route is on a car device.
+     * @since 26 dynamic&static
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     */
+    DEVICE_TYPE_CAR = 131,
+    /**
+     * A device type indicating the route is on a 2in1 device.
+     * @since 26 dynamic&static
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     */
+    DEVICE_TYPE_2IN1 = 2607,
+    /**
+     * A device type indicating the route is on a HiPlay device.
+     * @since 26 dynamic&static
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     */
+    DEVICE_TYPE_HIPLAY = 2611,
 };
 
 /**
@@ -1724,11 +1766,23 @@ enum BackgroundPlayMode {
 };
 
 /**
- * DLNA extras key constants
+ * ExtraKey constants
  * @syscap SystemCapability.Multimedia.AVSession.AVCast
  * @since 26 dynamic&static
  */
-struct DlnaExtrasKey {
+struct ExtraKeyEvent {
+    /**
+     * @brief Key for require ability list
+     */
+    static constexpr const char* REQUIRE_ABILITY_LIST = "requireAbilityList";
+    /**
+     * @brief Key for support URL casting
+     */
+    static constexpr const char* SUPPORT_URL_CASTING = "url-cast";
+    /**
+     * @brief Key for live view hidden when keyguard
+     */
+    static constexpr const char* LIVE_VIEW_HIDDEN_WHEN_KEYGUARD = "hw_live_view_hidden_when_keyguard";
     /**
      * @brief Key for DLNA DIDL-Lite extra parameter
      */

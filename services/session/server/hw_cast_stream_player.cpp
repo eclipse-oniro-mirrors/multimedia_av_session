@@ -352,15 +352,15 @@ std::string HwCastStreamPlayer::GetDlnaExtrasFromWantParams(
         SLOGI("GetDlnaExtrasFromWantParams: %{public}s length=%{public}zu", key.c_str(), extraStr.length());
         return extraStr;
     };
-    auto didlStr = getExtraStr(DlnaExtrasKey::DIDL_LITE);
-    auto metadataStr = getExtraStr(DlnaExtrasKey::CURRENT_URI_METADATA);
+    auto didlStr = getExtraStr(ExtraKeyEvent::DIDL_LITE);
+    auto metadataStr = getExtraStr(ExtraKeyEvent::CURRENT_URI_METADATA);
     CHECK_AND_RETURN_RET_LOG(didlStr.length() + metadataStr.length() < DLNA_EXTRAS_MAX_LENGTH, "",
         "GetDlnaExtrasFromWantParams total length exceeded max");
 
     cJSON* extrasObj = cJSON_CreateObject();
     CHECK_AND_RETURN_RET_LOG(extrasObj != nullptr, "", "Failed to create cJSON object");
-    cJSON_AddStringToObject(extrasObj, DlnaExtrasKey::DIDL_LITE, didlStr.c_str());
-    cJSON_AddStringToObject(extrasObj, DlnaExtrasKey::CURRENT_URI_METADATA, metadataStr.c_str());
+    cJSON_AddStringToObject(extrasObj, ExtraKeyEvent::DIDL_LITE, didlStr.c_str());
+    cJSON_AddStringToObject(extrasObj, ExtraKeyEvent::CURRENT_URI_METADATA, metadataStr.c_str());
 
     char* jsonStr = cJSON_PrintUnformatted(extrasObj);
     std::string result = (jsonStr != nullptr) ? jsonStr : "";
