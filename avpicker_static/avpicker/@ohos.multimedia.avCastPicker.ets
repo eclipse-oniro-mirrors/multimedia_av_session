@@ -183,7 +183,7 @@ export struct AVCastPicker {
     AVCastPicker.currentPickerCount -= 1;
   }
 
-  MenuStateChange(MenuStateChange: string){
+  MenuStateChange(MenuStateChange: string): void {
     if (this.extensionProxy != null) {
       this.extensionProxy!.send({ 'isMenuShow': this.isMenuShow });
     }
@@ -197,7 +197,7 @@ export struct AVCastPicker {
     return (protocols & castPlusAudioType) !== 0;
   }
 
-  build() {
+  build(): void {
     Column() {
       if (this.customPicker === undefined) {
         this.buildDefaultPicker(false);
@@ -227,7 +227,7 @@ export struct AVCastPicker {
 
 
   @Builder
-  textBuilder(item: AVCastPickerDeviceInfo) {
+  textBuilder(item: AVCastPickerDeviceInfo): void {
     Text(item.deviceName)
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor(item.isConnected ?
@@ -244,7 +244,7 @@ export struct AVCastPicker {
   }
 
   @Builder
-  highQualityIconBuilder(params: HighQualityParams) {
+  highQualityIconBuilder(params: HighQualityParams): void {
     Row() {
       Text(params.iconLeft)
         .highQualityStyles(this.maxFontSizeScale)
@@ -256,7 +256,7 @@ export struct AVCastPicker {
   }
 
   @Builder
-  deviceMenu() {
+  deviceMenu(): void {
     Column() {
       ForEach(this.deviceList, (item: AVCastPickerDeviceInfo, index: int) => {
         Flex({
