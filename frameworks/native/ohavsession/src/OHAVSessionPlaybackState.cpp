@@ -14,6 +14,8 @@
  */
 
 #include "OHAVSessionPlaybackState.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace OHOS::AVSession {
 OHAVSessionPlaybackState::OHAVSessionPlaybackState()
@@ -78,8 +80,14 @@ void OHAVSessionPlaybackState::ConvertFilter(int32_t filter, AVPlaybackState::Pl
 AVSession_ErrCode OH_AVSession_GetPlaybackState(OH_AVSession_AVPlaybackState* playbState,
     AVSession_PlaybackState* state)
 {
-    CHECK_AND_RETURN_RET_LOG(playbState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "playbState is null");
-    CHECK_AND_RETURN_RET_LOG(state != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "state is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(playbState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "playbState is null", true),
+        "playbState is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(state != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "state is null", true),
+        "state is null");
     OHOS::AVSession::OHAVSessionPlaybackState *oh_avsessionplaybackstate =
         (OHOS::AVSession::OHAVSessionPlaybackState *)playbState;
     *state = static_cast<AVSession_PlaybackState>(oh_avsessionplaybackstate->GetState());
@@ -89,8 +97,14 @@ AVSession_ErrCode OH_AVSession_GetPlaybackState(OH_AVSession_AVPlaybackState* pl
 AVSession_ErrCode OH_AVSession_GetPlaybackPosition(OH_AVSession_AVPlaybackState* playbState,
     AVSession_PlaybackPosition* position)
 {
-    CHECK_AND_RETURN_RET_LOG(playbState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "playbState is null");
-    CHECK_AND_RETURN_RET_LOG(position != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "position is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(playbState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "playbState is null", true),
+        "playbState is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(position != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "position is null", true),
+        "position is null");
     OHOS::AVSession::OHAVSessionPlaybackState *oh_avsessionplaybackstate =
         (OHOS::AVSession::OHAVSessionPlaybackState *)playbState;
     OHOS::AVSession::OHAVSessionPlaybackState::Position avPosition = oh_avsessionplaybackstate->GetPosition();
@@ -101,8 +115,14 @@ AVSession_ErrCode OH_AVSession_GetPlaybackPosition(OH_AVSession_AVPlaybackState*
 
 AVSession_ErrCode OH_AVSession_GetPlaybackSpeed(OH_AVSession_AVPlaybackState* playbState, int32_t* speed)
 {
-    CHECK_AND_RETURN_RET_LOG(playbState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "playbState is null");
-    CHECK_AND_RETURN_RET_LOG(speed != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "position is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(playbState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "playbState is null", true),
+        "playbState is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(speed != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "position is null", true),
+        "position is null");
     OHOS::AVSession::OHAVSessionPlaybackState *oh_avsessionplaybackstate =
         (OHOS::AVSession::OHAVSessionPlaybackState *)playbState;
     *speed = static_cast<int32_t>(oh_avsessionplaybackstate->GetSpeed());
@@ -111,8 +131,14 @@ AVSession_ErrCode OH_AVSession_GetPlaybackSpeed(OH_AVSession_AVPlaybackState* pl
 
 AVSession_ErrCode OH_AVSession_GetPlaybackVolume(OH_AVSession_AVPlaybackState* playbState, int32_t* volume)
 {
-    CHECK_AND_RETURN_RET_LOG(playbState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "playbState is null");
-    CHECK_AND_RETURN_RET_LOG(volume != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "volume is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(playbState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "playbState is null", true),
+        "playbState is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(volume != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "volume is null", true),
+        "volume is null");
     OHOS::AVSession::OHAVSessionPlaybackState *oh_avsessionplaybackstate =
         (OHOS::AVSession::OHAVSessionPlaybackState *)playbState;
     *volume = oh_avsessionplaybackstate->GetVolume();

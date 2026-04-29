@@ -14,6 +14,8 @@
  */
 
 #include "OHDeviceInfo.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 int32_t OHDeviceInfo::GetAVCastCategory()
 {
@@ -110,8 +112,14 @@ void OHDeviceInfo::DestroyAVSessionOutputDevice(AVSession_OutputDeviceInfo *arra
 AVSession_ErrCode OH_DeviceInfo_GetAVCastCategory(AVSession_DeviceInfo *deviceInfo,
     AVSession_AVCastCategory *aVCastCategory)
 {
-    CHECK_AND_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "deviceInfo is null");
-    CHECK_AND_RETURN_RET_LOG(aVCastCategory != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "aVCastCategory is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_GET, "deviceInfo is null", true),
+        "deviceInfo is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(aVCastCategory != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_GET, "aVCastCategory is null", true),
+        "aVCastCategory is null");
 
     OHDeviceInfo* oh_deviceInfo = (OHDeviceInfo *)deviceInfo;
     *aVCastCategory = (AVSession_AVCastCategory)oh_deviceInfo->GetAVCastCategory();
@@ -120,8 +128,14 @@ AVSession_ErrCode OH_DeviceInfo_GetAVCastCategory(AVSession_DeviceInfo *deviceIn
 
 AVSession_ErrCode OH_DeviceInfo_GetDeviceId(AVSession_DeviceInfo *deviceInfo, char **deviceId)
 {
-    CHECK_AND_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "deviceInfo is null");
-    CHECK_AND_RETURN_RET_LOG(deviceId != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "deviceId is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "deviceInfo is null", true),
+        "deviceInfo is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceId != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "deviceId is null", true),
+        "deviceId is null");
 
     OHDeviceInfo *oh_deviceInfo = (OHDeviceInfo *)deviceInfo;
     *deviceId = const_cast<char*>((oh_deviceInfo->GetDeviceId()).c_str());
@@ -130,8 +144,14 @@ AVSession_ErrCode OH_DeviceInfo_GetDeviceId(AVSession_DeviceInfo *deviceInfo, ch
 
 AVSession_ErrCode OH_DeviceInfo_GetDeviceName(AVSession_DeviceInfo *deviceInfo, char **deviceName)
 {
-    CHECK_AND_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "deviceInfo is null");
-    CHECK_AND_RETURN_RET_LOG(deviceName != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "deviceName is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "deviceInfo is null", true),
+        "deviceInfo is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceName != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "deviceName is null", true),
+        "deviceName is null");
 
     OHDeviceInfo *oh_deviceInfo = (OHDeviceInfo *)deviceInfo;
     *deviceName = const_cast<char*>((oh_deviceInfo->GetDeviceName()).c_str());
@@ -140,8 +160,14 @@ AVSession_ErrCode OH_DeviceInfo_GetDeviceName(AVSession_DeviceInfo *deviceInfo, 
 
 AVSession_ErrCode OH_DeviceInfo_GetDeviceType(AVSession_DeviceInfo *deviceInfo, AVSession_DeviceType *deviceType)
 {
-    CHECK_AND_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "deviceInfo is null");
-    CHECK_AND_RETURN_RET_LOG(deviceType != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "deviceType is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "deviceInfo is null", true),
+        "deviceInfo is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceType != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "deviceType is null", true),
+        "deviceType is null");
 
     OHDeviceInfo *oh_deviceInfo = (OHDeviceInfo *)deviceInfo;
     *deviceType = (AVSession_DeviceType)oh_deviceInfo->GetDeviceType();
@@ -150,8 +176,13 @@ AVSession_ErrCode OH_DeviceInfo_GetDeviceType(AVSession_DeviceInfo *deviceInfo, 
 
 AVSession_ErrCode OH_DeviceInfo_GetSupportedProtocols(AVSession_DeviceInfo *deviceInfo, uint32_t *deviceProtocolType)
 {
-    CHECK_AND_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "deviceInfo is null");
-    CHECK_AND_RETURN_RET_LOG(deviceProtocolType != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceInfo != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "deviceInfo is null", true),
+        "deviceInfo is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(deviceProtocolType != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "deviceProtocolType is null", true),
         "deviceProtocolType is null");
 
     OHDeviceInfo *oh_deviceInfo = (OHDeviceInfo *)deviceInfo;

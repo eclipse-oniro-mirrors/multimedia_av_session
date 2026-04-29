@@ -23,6 +23,8 @@
 #include "system_ability_definition.h"
 #include "avsession_pixel_map.h"
 #include "avsession_utils.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace OHOS::AVSession {
 const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
@@ -47,7 +49,9 @@ int32_t ExtensionConnectHelper::StartDesktopLyricAbility(const std::string &sess
     if (shouldBeRecreated || item == desktopLyricConnectionMap_.end() || item->second == nullptr) {
         desktopLyricConnectionMap_[userId] = new(std::nothrow) DesktopLyricCallConnection(cb, sessionId,
             handler, userId);
-        CHECK_AND_RETURN_RET_LOG(desktopLyricConnectionMap_[userId] != nullptr, ERR_NO_MEMORY,
+        CHECK_AND_CALL_FUNC_RETURN_RET_LOG(desktopLyricConnectionMap_[userId] != nullptr, ERR_NO_MEMORY,
+            AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_NO_MEMORY_LOCAL_SET, "create desktop lyric connection fail", false),
             "create desktop lyric connection fail");
     }
 
@@ -143,6 +147,8 @@ int32_t ExtensionConnectHelper::ConnectAbilityCommon(const AAFwk::Want &want, sp
     MessageOption option;
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get system ability failed", false);
         return ERR_SERVICE_NOT_EXIST;
     }
     int error = remote->SendRequest(AVSESSION_CONNECT_ABILITY_WITH_TYPE, data, reply, option);
@@ -157,6 +163,8 @@ int32_t ExtensionConnectHelper::DisconnectAbility(const sptr<IRemoteObject> &con
 {
     if (connect == nullptr) {
         SLOGE("null connect");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "null connect", false);
         return ERR_INVALID_PARAM;
     }
 
@@ -174,6 +182,8 @@ int32_t ExtensionConnectHelper::DisconnectAbility(const sptr<IRemoteObject> &con
     MessageOption option;
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get system ability failed", false);
         return ERR_SERVICE_NOT_EXIST;
     }
     auto error = remote->SendRequest(AVSESSION_DISCONNECT_ABILITY, data, reply, option);

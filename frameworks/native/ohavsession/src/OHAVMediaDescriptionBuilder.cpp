@@ -15,6 +15,8 @@
 #include "OHAVMediaDescriptionBuilder.h"
 #include "avsession_log.h"
 #include "OHAVMediaDescription.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 using namespace OHOS::AVSession;
 
@@ -103,6 +105,9 @@ AVQueueItem_Result OHAVMediaDescriptionBuilder::GenerateAVMediaDescription(OHAVM
     *avMediaDescription = new OHAVMediaDescription();
     if (*avMediaDescription == nullptr) {
         SLOGE("Failed to allocate memory for OHAVMediaDescription");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_NO_MEMORY_LOCAL_SET,
+            "Failed to allocate memory for OHAVMediaDescription", true);
         return AVQUEUEITEM_ERROR_NO_MEMORY;
     }
     (*avMediaDescription)->SetAssetId(assetId_);
@@ -129,6 +134,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_Create(OH_AVSession_AV
     OHAVMediaDescriptionBuilder* mediaDescription = new OHAVMediaDescriptionBuilder();
     if (mediaDescription == nullptr) {
         SLOGE("Failed to allocate memory for OHAVMediaDescriptionBuilder");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_NO_MEMORY_LOCAL_SET,
+            "Failed to allocate memory for OHAVMediaDescriptionBuilder", true);
         return AVQUEUEITEM_ERROR_NO_MEMORY;
     }
     *builder = reinterpret_cast<OH_AVSession_AVMediaDescriptionBuilder*>(mediaDescription);
@@ -152,6 +160,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetAssetId(OH_AVSessio
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set assetId: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set assetId: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetAssetId(assetId);
@@ -165,6 +176,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetTitle(OH_AVSession_
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set title: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set title: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetTitle(title);
@@ -178,6 +192,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetSubTitle(OH_AVSessi
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set subtitle: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set subtitle: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetSubtitle(subtitle);
@@ -191,6 +208,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetArtist(OH_AVSession
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set artist: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set artist: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetArtist(artist);
@@ -204,6 +224,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetAlbumCoverUri(
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set mediaImage: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set mediaImage: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetAlbumCoverUri(albumCoverUri);
@@ -217,6 +240,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetMediaType(OH_AVSess
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set mediaType: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set mediaType: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetMediaType(mediaType);
@@ -230,6 +256,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetLyricContent(
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set lyricContent: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set lyricContent: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetLyricContent(lyricContent);
@@ -243,6 +272,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetDuration(OH_AVSessi
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set duration: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set duration: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetDuration(duration);
@@ -256,6 +288,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetMediaUri(OH_AVSessi
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set mediaUri: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set mediaUri: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetMediaUri(mediaUri);
@@ -269,6 +304,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetStartPosition(
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set startPosition: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set startPosition: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetStartPosition(startPosition);
@@ -282,6 +320,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetMediaSize(OH_AVSess
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set mediaSize: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set mediaSize: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetMediaSize(mediaSize);
@@ -295,6 +336,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetAlbumTitle(OH_AVSes
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set albumTitle: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set albumTitle: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetAlbumTitle(albumTitle);
@@ -308,6 +352,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetAppName(OH_AVSessio
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to set appName: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to set appName: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->SetAppName(appName);
@@ -322,6 +369,9 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_GenerateAVMediaDescrip
     OHAVMediaDescriptionBuilder* mediaDescriptionBuilder = reinterpret_cast<OHAVMediaDescriptionBuilder*>(builder);
     if (mediaDescriptionBuilder == nullptr) {
         SLOGE("Failed to generate AvMediaDescription: mediaDescriptionBuilder is null");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Failed to generate AvMediaDescription: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
     return mediaDescriptionBuilder->GenerateAVMediaDescription((OHAVMediaDescription **)avMediaDescription);

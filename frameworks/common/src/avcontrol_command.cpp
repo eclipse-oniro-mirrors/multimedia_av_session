@@ -17,6 +17,8 @@
 #include "avplayback_state.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace OHOS::AVSession {
 AVControlCommand::AVControlCommand()
@@ -153,6 +155,8 @@ bool AVControlCommand::IsValid() const
 int32_t AVControlCommand::SetCommand(int32_t cmd)
 {
     if (cmd <= SESSION_CMD_INVALID || cmd >= SESSION_CMD_MAX) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "invalid command", true);
         return ERR_INVALID_PARAM;
     }
     cmd_ = cmd;
@@ -167,6 +171,8 @@ int32_t AVControlCommand::GetCommand() const
 int32_t AVControlCommand::SetSpeed(double speed)
 {
     if (speed <= 0) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "invalid speed", true);
         return ERR_INVALID_PARAM;
     }
     param_ = speed;
@@ -189,6 +195,8 @@ int32_t AVControlCommand::SetForwardTime(int64_t forwardTime)
     SLOGD("SetForwardTime with time %{public}jd", static_cast<int64_t>(forwardTime));
     if (forwardTime <= 0) {
         SLOGE("SetForwardTime error");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "SetForwardTime error", true);
         return ERR_INVALID_PARAM;
     }
     param_ = forwardTime;
@@ -213,6 +221,8 @@ int32_t AVControlCommand::SetRewindTime(int64_t rewindTime)
     SLOGE("SetRewindTime with time %{public}jd", static_cast<int64_t>(rewindTime));
     if (rewindTime < 0) {
         SLOGE("SetRewindTime error");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "SetRewindTime error", true);
         return ERR_INVALID_PARAM;
     }
     param_ = rewindTime;
@@ -235,6 +245,8 @@ int32_t AVControlCommand::GetRewindTime(int64_t& rewindTime) const
 int32_t AVControlCommand::SetSeekTime(int64_t time)
 {
     if (time < 0) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "invalid seek time", true);
         return ERR_INVALID_PARAM;
     }
     param_ = time;
@@ -255,6 +267,8 @@ int32_t AVControlCommand::GetSeekTime(int64_t& time) const
 int32_t AVControlCommand::SetLoopMode(int32_t mode)
 {
     if (mode < AVPlaybackState::LOOP_MODE_UNDEFINED || mode > AVPlaybackState::LOOP_MODE_CUSTOM) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "invalid loop mode", true);
         return ERR_INVALID_PARAM;
     }
     param_ = mode;
@@ -276,6 +290,8 @@ int32_t AVControlCommand::GetLoopMode(int32_t& mode) const
 int32_t AVControlCommand::SetTargetLoopMode(int32_t targetMode)
 {
     if (targetMode < AVPlaybackState::LOOP_MODE_UNDEFINED || targetMode > AVPlaybackState::LOOP_MODE_CUSTOM) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "invalid target loop mode", true);
         return ERR_INVALID_PARAM;
     }
     param_ = targetMode;
@@ -295,6 +311,8 @@ int32_t AVControlCommand::GetTargetLoopMode(int32_t& targetMode) const
 int32_t AVControlCommand::SetAssetId(const std::string& assetId)
 {
     if (assetId.empty()) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "invalid assetId", true);
         return ERR_INVALID_PARAM;
     }
     param_ = assetId;
@@ -332,6 +350,8 @@ int32_t AVControlCommand::GetPlayFromAssetId(int64_t& playFromAssetId) const
 int32_t AVControlCommand::SetPlayWithAssetId(const std::string& playWithAssetId)
 {
     if (playWithAssetId.empty()) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "invalid playWithAssetId", true);
         return ERR_INVALID_PARAM;
     }
     param_ = playWithAssetId;

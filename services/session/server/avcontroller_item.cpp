@@ -28,6 +28,8 @@
 #include "want_params.h"
 #include "string_wrapper.h"
 #include "bundle_status_adapter.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
 #include <malloc.h>
@@ -106,7 +108,10 @@ int32_t AVControllerItem::GetAVCallState(AVCallState& avCallState)
 int32_t AVControllerItem::GetAVPlaybackState(AVPlaybackState& state)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     state = session_->GetPlaybackState();
     return AVSESSION_SUCCESS;
 }
@@ -118,7 +123,10 @@ int32_t AVControllerItem::ReadImgForMetaData(AVMetaData& data)
         SLOGI("curNoImgFor:%{public}s", AVSessionUtils::GetAnonyTitle(data.GetTitle()).c_str());
         return AVSESSION_SUCCESS;
     }
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "SetImgForMetaData session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "SetImgForMetaData session not exist", false),
+        "SetImgForMetaData session not exist");
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = data.GetMediaImage();
     session_->ReadMetaDataImg(innerPixelMap);
 
@@ -130,7 +138,10 @@ int32_t AVControllerItem::ReadImgForMetaData(AVMetaData& data)
 int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     data = session_->GetMetaDataWithoutImg();
     int32_t ret = ReadImgForMetaData(data);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ReadImgForMetaData with ret:%{public}d", ret);
@@ -139,6 +150,8 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
         if (isFromSession_) {
             data.GetMediaImage()->Clear();
         } else {
+            AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+                AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "media image conflict", false);
             return ERR_INVALID_PARAM;
         }
     }
@@ -160,7 +173,10 @@ void AVControllerItem::DoMetadataImgClean(AVMetaData& data)
 int32_t AVControllerItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     items = session_->GetQueueItems();
     return AVSESSION_SUCCESS;
 }
@@ -168,7 +184,10 @@ int32_t AVControllerItem::GetAVQueueItems(std::vector<AVQueueItem>& items)
 int32_t AVControllerItem::GetAVQueueTitle(std::string& title)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     title = session_->GetQueueTitle();
     return AVSESSION_SUCCESS;
 }
@@ -176,7 +195,10 @@ int32_t AVControllerItem::GetAVQueueTitle(std::string& title)
 int32_t AVControllerItem::SkipToQueueItem(int32_t& itemId)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "session not exist", false),
+        "session not exist");
     session_->HandleSkipToQueueItem(itemId);
     return AVSESSION_SUCCESS;
 }
@@ -184,9 +206,15 @@ int32_t AVControllerItem::SkipToQueueItem(int32_t& itemId)
 int32_t AVControllerItem::GetExtras(AAFwk::WantParams& extras)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
-    CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
-        ERR_COMMAND_SEND_EXCEED_MAX, "command send number exceed max");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(
+        OHOS::IPCSkeleton::GetCallingPid()), ERR_COMMAND_SEND_EXCEED_MAX,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_COMMAND_SEND_EXCEED_MAX_LOCAL_GET,
+        "command send number exceed max", false), "command send number exceed max");
     extras = session_->GetExtras();
     return AVSESSION_SUCCESS;
 }
@@ -201,7 +229,10 @@ int32_t AVControllerItem::GetExtrasWithEvent(const std::string& extraEvent, AAFw
     }
 
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
 
     return AVSESSION_SUCCESS;
 }
@@ -209,7 +240,10 @@ int32_t AVControllerItem::GetExtrasWithEvent(const std::string& extraEvent, AAFw
 int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "session not exist", false),
+        "session not exist");
     session_->HandleMediaKeyEvent(keyEvent);
     return AVSESSION_SUCCESS;
 }
@@ -217,7 +251,10 @@ int32_t AVControllerItem::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     ability = session_->GetLaunchAbility();
     return AVSESSION_SUCCESS;
 }
@@ -225,7 +262,10 @@ int32_t AVControllerItem::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent&
 int32_t AVControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     cmds = session_->GetSupportCommand();
     return AVSESSION_SUCCESS;
 }
@@ -234,7 +274,10 @@ int32_t AVControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 int32_t AVControllerItem::IsSessionActive(bool& isActive)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     isActive = session_->IsActive();
     return AVSESSION_SUCCESS;
 }
@@ -243,14 +286,22 @@ int32_t AVControllerItem::IsSessionActive(bool& isActive)
 int32_t AVControllerItem::SendControlCommand(const AVControlCommand& cmd)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "session not exist", false),
+        "session not exist");
     std::vector<int32_t> cmds = session_->GetSupportCommand();
     if (std::find(cmds.begin(), cmds.end(), cmd.GetCommand()) == cmds.end()) {
         SLOGE("The command that needs to be sent is not supported.");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_COMMAND_NOT_SUPPORT_LOCAL_SET, "The command is not supported", false);
         return ERR_COMMAND_NOT_SUPPORT;
     }
-    CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
-        ERR_COMMAND_SEND_EXCEED_MAX, "command send number exceed max");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(
+        OHOS::IPCSkeleton::GetCallingPid()), ERR_COMMAND_SEND_EXCEED_MAX,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_COMMAND_SEND_EXCEED_MAX_LOCAL_SET,
+        "command send number exceed max", false), "command send number exceed max");
     session_->ExecuteControllerCommand(cmd);
     return AVSESSION_SUCCESS;
 }
@@ -266,9 +317,15 @@ int32_t AVControllerItem::SendCommonCommand(const std::string& commonCommand, co
     }
 
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
-    CHECK_AND_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(OHOS::IPCSkeleton::GetCallingPid()),
-        ERR_COMMAND_SEND_EXCEED_MAX, "common command send number exceed max");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "Session not exist", false),
+        "Session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(CommandSendLimit::GetInstance().IsCommandSendEnable(
+        OHOS::IPCSkeleton::GetCallingPid()), ERR_COMMAND_SEND_EXCEED_MAX,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_COMMAND_SEND_EXCEED_MAX_LOCAL_SET,
+        "common command send number exceed max", false), "common command send number exceed max");
     session_->ExecueCommonCommand(commonCommand, commandArgs);
     return AVSESSION_SUCCESS;
 }
@@ -280,7 +337,10 @@ int32_t AVControllerItem::SendCustomData(const AAFwk::WantParams& data)
     auto value = data.GetParam("customData");
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "Session not exist", false),
+        "Session not exist");
     session_->ExecuteCustomData(data);
     return AVSESSION_SUCCESS;
 }
@@ -606,7 +666,10 @@ void AVControllerItem::HandleExtrasChange(const AAFwk::WantParams& extras)
 int32_t AVControllerItem::GetMediaCenterControlType(std::vector<int32_t>& controlTypes)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     return session_->GetMediaCenterControlType(controlTypes);
 }
 
@@ -625,14 +688,20 @@ void AVControllerItem::HandleMediaCenterControlTypeChange(const std::vector<int3
 int32_t AVControllerItem::GetSupportedPlaySpeeds(std::vector<double>& speeds)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     return session_->GetSupportedPlaySpeeds(speeds);
 }
 
 int32_t AVControllerItem::GetSupportedLoopModes(std::vector<int32_t>& loopModes)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     return session_->GetSupportedLoopModes(loopModes);
 }
 
@@ -725,14 +794,20 @@ std::string AVControllerItem::GetSessionType()
 int32_t AVControllerItem::IsDesktopLyricEnabled(bool &isEnabled)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     return session_->IsDesktopLyricEnabled(isEnabled);
 }
 
 int32_t AVControllerItem::SetDesktopLyricVisible(bool isVisible)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "session not exist", false),
+        "session not exist");
     std::string callingBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
     SLOGI("controller call");
     return session_->SetDesktopLyricVisibleInner(isVisible, callingBundleName);
@@ -741,14 +816,20 @@ int32_t AVControllerItem::SetDesktopLyricVisible(bool isVisible)
 int32_t AVControllerItem::IsDesktopLyricVisible(bool &isVisible)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     return session_->IsDesktopLyricVisible(isVisible);
 }
 
 int32_t AVControllerItem::SetDesktopLyricState(DesktopLyricState state)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "session not exist", false),
+        "session not exist");
     std::string callingBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
     SLOGI("controller call");
     return session_->SetDesktopLyricStateInner(state, callingBundleName);
@@ -757,7 +838,10 @@ int32_t AVControllerItem::SetDesktopLyricState(DesktopLyricState state)
 int32_t AVControllerItem::GetDesktopLyricState(DesktopLyricState &state)
 {
     std::lock_guard lockGuard(sessionMutex_);
-    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session not exist", false),
+        "session not exist");
     return session_->GetDesktopLyricState(state);
 }
 } // namespace OHOS::AVSession

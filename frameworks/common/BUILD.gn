@@ -55,6 +55,8 @@ ohos_shared_library("avsession_common") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:wantagent_innerkits",
+    "audio_framework:audio_client",
+    "audio_framework:audio_common",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",

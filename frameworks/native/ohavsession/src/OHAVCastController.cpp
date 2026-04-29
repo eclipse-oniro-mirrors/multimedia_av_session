@@ -22,6 +22,8 @@
 #include "avmedia_description.h"
 #include "avsession_manager.h"
 #include "avsession_pixel_map_adapter.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace OHOS::AVSession {
 
@@ -61,6 +63,8 @@ AVSession_ErrCode OHAVCastController::Destroy()
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         SLOGE("Destroy avCastController_ is nullptr");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "destroy controller is nullptr", true);
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
     avCastController_->Destroy();
@@ -72,6 +76,9 @@ AVSession_ErrCode OHAVCastController::GetPlaybackState(OH_AVSession_AVPlaybackSt
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         SLOGE("GetPlaybackState avCastController_ is nullptr");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_GET,
+            "get playback state controller is nullptr", true);
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
     AVPlaybackState avPlaybackState;
@@ -82,6 +89,9 @@ AVSession_ErrCode OHAVCastController::GetPlaybackState(OH_AVSession_AVPlaybackSt
 
     if (ohAVSessionPlaybackState_ == nullptr) {
         SLOGE("ohAVSessionPlaybackState is nullptr");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_GET,
+            "get playback state ohAVSessionPlaybackState is nullptr", true);
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
     ohAVSessionPlaybackState_->SetState(avPlaybackState.GetState());
@@ -476,9 +486,14 @@ AVSession_ErrCode OHAVCastController::Prepare(OH_AVSession_AVQueueItem* avqueueI
         errCode, "ConvertOHQueueItemToInner fail");
 
     std::lock_guard<std::mutex> lockGuard(lock_);
-    CHECK_AND_RETURN_RET_LOG(avCastController_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION,
-        "Prepare avCastController_ is nullptr");
-    CHECK_AND_RETURN_RET_LOG(dataTracker_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION, "dataTracker_ is nullptr");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avCastController_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET,
+            "Prepare avCastController_ is nullptr", true), "Prepare avCastController_ is nullptr");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(dataTracker_ != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "dataTracker_ is nullptr", true),
+        "dataTracker_ is nullptr");
 
     if (IsSameAVQueueItem(avQueueItem)) {
         SLOGI("avqueueItem all same");
@@ -508,12 +523,17 @@ AVSession_ErrCode OHAVCastController::Prepare(OH_AVSession_AVQueueItem* avqueueI
 AVSession_ErrCode OHAVCastController::Start(OH_AVSession_AVQueueItem* avqueueItem)
 {
     AVQueueItem avQueueItem;
-    CHECK_AND_RETURN_RET_LOG(AVSessionNdkUtils::ConvertOHQueueItemToInner(avqueueItem, avQueueItem) ==
-        AV_SESSION_ERR_SUCCESS, AV_SESSION_ERR_SERVICE_EXCEPTION, "ConvertOHQueueItemToInner fail");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(AVSessionNdkUtils::ConvertOHQueueItemToInner(avqueueItem, avQueueItem) ==
+        AV_SESSION_ERR_SUCCESS, AV_SESSION_ERR_SERVICE_EXCEPTION,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "ConvertOHQueueItemToInner fail", true),
+        "ConvertOHQueueItemToInner fail");
 
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (avCastController_ == nullptr) {
         SLOGE("Start avCastController_ is nullptr");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "start controller is nullptr", true);
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
     int32_t ret = avCastController_->Start(avQueueItem);
@@ -524,13 +544,18 @@ AVSession_ErrCode OHAVCastController::CheckAndRegister()
 {
     if (avCastController_ == nullptr) {
         SLOGE("CheckAndRegister avCastController_ is nullptr");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET,
+            "CheckAndRegister avCastController_ is nullptr", true);
         return AV_SESSION_ERR_INVALID_PARAMETER;
     }
     if (ohAVCastControllerCallbackImpl_ == nullptr) {
         ohAVCastControllerCallbackImpl_ = std::make_shared<OHAVCastControllerCallbackImpl>();
         AVSession_ErrCode ret =  static_cast<AVSession_ErrCode>(
             avCastController_->RegisterCallback(ohAVCastControllerCallbackImpl_));
-        CHECK_AND_RETURN_RET_LOG(ret == AV_SESSION_ERR_SUCCESS, AV_SESSION_ERR_SERVICE_EXCEPTION,
+        CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret == AV_SESSION_ERR_SUCCESS, AV_SESSION_ERR_SERVICE_EXCEPTION,
+            OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "RegisterCallback failed", true),
             "RegisterCallback failed");
     }
     return AV_SESSION_ERR_SUCCESS;
@@ -577,7 +602,9 @@ void OHAVCastController::PrepareAsyncExecutor(std::shared_ptr<AVCastController> 
 
 AVSession_ErrCode OH_AVCastController_Destroy(OH_AVCastController* avcastcontroller)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
 
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
@@ -592,9 +619,14 @@ AVSession_ErrCode OH_AVCastController_Destroy(OH_AVCastController* avcastcontrol
 AVSession_ErrCode OH_AVCastController_GetPlaybackState(OH_AVCastController* avcastcontroller,
     OH_AVSession_AVPlaybackState** playbackState)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_GET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(playbackState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "PlaybackState is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(playbackState != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_GET, "PlaybackState is null", true),
+        "PlaybackState is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->GetPlaybackState(playbackState);
 }
@@ -602,9 +634,14 @@ AVSession_ErrCode OH_AVCastController_GetPlaybackState(OH_AVCastController* avca
 AVSession_ErrCode OH_AVCastController_RegisterPlaybackStateChangedCallback(OH_AVCastController* avcastcontroller,
     int32_t filter, OH_AVCastControllerCallback_PlaybackStateChanged callback, void* userData)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->RegisterPlaybackStateChangedCallback(filter, callback, userData);
 }
@@ -612,9 +649,14 @@ AVSession_ErrCode OH_AVCastController_RegisterPlaybackStateChangedCallback(OH_AV
 AVSession_ErrCode OH_AVCastController_UnregisterPlaybackStateChangedCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlaybackStateChanged callback)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->UnregisterPlaybackStateChangedCallback(callback);
 }
@@ -622,9 +664,14 @@ AVSession_ErrCode OH_AVCastController_UnregisterPlaybackStateChangedCallback(OH_
 AVSession_ErrCode OH_AVCastController_RegisterMediaItemChangedCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_MediaItemChange callback, void* userData)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->RegisterMediaItemChangedCallback(callback, userData);
 }
@@ -632,9 +679,14 @@ AVSession_ErrCode OH_AVCastController_RegisterMediaItemChangedCallback(OH_AVCast
 AVSession_ErrCode OH_AVCastController_UnregisterMediaItemChangedCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_MediaItemChange callback)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->UnregisterMediaItemChangedCallback(callback);
 }
@@ -642,9 +694,14 @@ AVSession_ErrCode OH_AVCastController_UnregisterMediaItemChangedCallback(OH_AVCa
 AVSession_ErrCode OH_AVCastController_RegisterPlayNextCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlayNext callback, void* userData)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->RegisterPlayNextCallback(callback, userData);
 }
@@ -652,9 +709,14 @@ AVSession_ErrCode OH_AVCastController_RegisterPlayNextCallback(OH_AVCastControll
 AVSession_ErrCode OH_AVCastController_UnregisterPlayNextCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlayNext callback)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->UnregisterPlayNextCallback(callback);
 }
@@ -662,9 +724,14 @@ AVSession_ErrCode OH_AVCastController_UnregisterPlayNextCallback(OH_AVCastContro
 AVSession_ErrCode OH_AVCastController_RegisterPlayPreviousCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlayPrevious callback, void* userData)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->RegisterPlayPreviousCallback(callback, userData);
 }
@@ -672,9 +739,14 @@ AVSession_ErrCode OH_AVCastController_RegisterPlayPreviousCallback(OH_AVCastCont
 AVSession_ErrCode OH_AVCastController_UnregisterPlayPreviousCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_PlayPrevious callback)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->UnregisterPlayPreviousCallback(callback);
 }
@@ -682,9 +754,14 @@ AVSession_ErrCode OH_AVCastController_UnregisterPlayPreviousCallback(OH_AVCastCo
 AVSession_ErrCode OH_AVCastController_RegisterSeekDoneCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_SeekDone callback, void* userData)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->RegisterSeekDoneCallback(callback, userData);
 }
@@ -692,9 +769,14 @@ AVSession_ErrCode OH_AVCastController_RegisterSeekDoneCallback(OH_AVCastControll
 AVSession_ErrCode OH_AVCastController_UnregisterSeekDoneCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_SeekDone callback)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->UnregisterSeekDoneCallback(callback);
 }
@@ -702,9 +784,14 @@ AVSession_ErrCode OH_AVCastController_UnregisterSeekDoneCallback(OH_AVCastContro
 AVSession_ErrCode OH_AVCastController_RegisterEndOfStreamCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_EndOfStream callback, void* userData)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->RegisterEndOfStreamCallback(callback, userData);
 }
@@ -712,9 +799,14 @@ AVSession_ErrCode OH_AVCastController_RegisterEndOfStreamCallback(OH_AVCastContr
 AVSession_ErrCode OH_AVCastController_UnregisterEndOfStreamCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_EndOfStream callback)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->UnregisterEndOfStreamCallback(callback);
 }
@@ -722,9 +814,14 @@ AVSession_ErrCode OH_AVCastController_UnregisterEndOfStreamCallback(OH_AVCastCon
 AVSession_ErrCode OH_AVCastController_RegisterErrorCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_Error callback, void* userData)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->RegisterErrorCallback(callback, userData);
 }
@@ -732,9 +829,14 @@ AVSession_ErrCode OH_AVCastController_RegisterErrorCallback(OH_AVCastController*
 AVSession_ErrCode OH_AVCastController_UnregisterErrorCallback(OH_AVCastController* avcastcontroller,
     OH_AVCastControllerCallback_Error callback)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "callback is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "callback is null", true),
+        "callback is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->UnregisterErrorCallback(callback);
 }
@@ -742,9 +844,13 @@ AVSession_ErrCode OH_AVCastController_UnregisterErrorCallback(OH_AVCastControlle
 AVSession_ErrCode OH_AVCastController_SendCommonCommand(OH_AVCastController* avcastcontroller,
     AVSession_AVCastControlCommandType *avCastControlcommand)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(avCastControlcommand != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avCastControlcommand != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastControlcommand is null", true),
         "AVCastControlcommand is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->SendCommonCommand(avCastControlcommand);
@@ -752,7 +858,9 @@ AVSession_ErrCode OH_AVCastController_SendCommonCommand(OH_AVCastController* avc
 
 AVSession_ErrCode OH_AVCastController_SendSeekCommand(OH_AVCastController* avcastcontroller, int32_t seekTimeMS)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->SendSeekCommand(seekTimeMS);
@@ -761,7 +869,9 @@ AVSession_ErrCode OH_AVCastController_SendSeekCommand(OH_AVCastController* avcas
 AVSession_ErrCode OH_AVCastController_SendFastForwardCommand(OH_AVCastController* avcastcontroller,
     int32_t forwardTimeS)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->SendFastForwardCommand(forwardTimeS);
@@ -769,7 +879,9 @@ AVSession_ErrCode OH_AVCastController_SendFastForwardCommand(OH_AVCastController
 
 AVSession_ErrCode OH_AVCastController_SendRewindCommand(OH_AVCastController* avcastcontroller, int32_t rewindTimeS)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->SendRewindCommand(rewindTimeS);
@@ -778,7 +890,9 @@ AVSession_ErrCode OH_AVCastController_SendRewindCommand(OH_AVCastController* avc
 AVSession_ErrCode OH_AVCastController_SendSetSpeedCommand(OH_AVCastController* avcastcontroller,
     AVSession_PlaybackSpeed speed)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->SendSetSpeedCommand(speed);
@@ -787,7 +901,9 @@ AVSession_ErrCode OH_AVCastController_SendSetSpeedCommand(OH_AVCastController* a
 AVSession_ErrCode OH_AVCastController_SendVolumeCommand(OH_AVCastController* avcastcontroller,
     int32_t volume)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->SendVolumeCommand(volume);
@@ -796,10 +912,14 @@ AVSession_ErrCode OH_AVCastController_SendVolumeCommand(OH_AVCastController* avc
 AVSession_ErrCode OH_AVCastController_Prepare(OH_AVCastController* avcastcontroller,
     OH_AVSession_AVQueueItem* avqueueItem)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(avqueueItem != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVqueueItem is null");
-
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avqueueItem != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVqueueItem is null", true),
+        "AVqueueItem is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->Prepare(avqueueItem);
 }
@@ -807,10 +927,14 @@ AVSession_ErrCode OH_AVCastController_Prepare(OH_AVCastController* avcastcontrol
 AVSession_ErrCode OH_AVCastController_Start(OH_AVCastController* avcastcontroller,
     OH_AVSession_AVQueueItem* avqueueItem)
 {
-    CHECK_AND_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avcastcontroller != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVCastController is null", true),
         "AVCastController is null");
-    CHECK_AND_RETURN_RET_LOG(avqueueItem != nullptr, AV_SESSION_ERR_INVALID_PARAMETER, "AVqueueItem is null");
-
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avqueueItem != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "AVqueueItem is null", true),
+        "AVqueueItem is null");
     OHOS::AVSession::OHAVCastController *oh_avcastcontroller = (OHOS::AVSession::OHAVCastController *)avcastcontroller;
     return oh_avcastcontroller->Start(avqueueItem);
 }

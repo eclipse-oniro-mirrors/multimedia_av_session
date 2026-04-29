@@ -14,6 +14,8 @@
  */
 #include "OHAVMetadataBuilder.h"
 #include "avsession_log.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 using namespace OHOS::AVSession;
 
@@ -99,6 +101,9 @@ AVMetadata_Result OHAVMetadataBuilder::SetSkipIntervals(AVMetadata_SkipIntervals
             return AVMETADATA_SUCCESS;
         default:
             SLOGE("Failed to set skip intervals: Invalid skip intervals value: %d", intervals);
+            OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+                OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+                "Invalid skip intervals value", true);
             return AVMETADATA_ERROR_INVALID_PARAM;
     }
 }
@@ -123,6 +128,9 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
     if (metadata == nullptr) {
         SLOGE("Failed to allocate memory for AVMetaData");
         *avMetadata = nullptr;
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_NO_MEMORY_LOCAL_SET,
+            "Failed to allocate memory for AVMetaData", true);
         return AVMETADATA_ERROR_NO_MEMORY;
     }
 
@@ -141,6 +149,9 @@ AVMetadata_Result OHAVMetadataBuilder::GenerateAVMetadata(OH_AVMetadata** avMeta
             delete metadata;
             metadata = nullptr;
             *avMetadata = nullptr;
+            OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+                OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+                "Unsupported skip intervals", true);
             return AVMETADATA_ERROR_INVALID_PARAM;
     }
 
@@ -171,6 +182,9 @@ AVMetadata_Result OH_AVMetadataBuilder_Create(OH_AVMetadataBuilder** builder)
     OHAVMetadataBuilder* metadata = new OHAVMetadataBuilder();
     if (metadata == nullptr) {
         SLOGE("Failed to allocate memory for OHAVMetadataBuilder");
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_NO_MEMORY_LOCAL_SET,
+            "Failed to allocate memory for OHAVMetadataBuilder", true);
         return AVMETADATA_ERROR_NO_MEMORY;
     }
 
@@ -294,6 +308,9 @@ AVMetadata_Result OH_AVMetadataBuilder_SetDisplayTags(OH_AVMetadataBuilder* buil
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
     if (tags != AVSESSION_DISPLAYTAG_AUDIO_VIVID) {
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET,
+            "Invalid display tags", true);
         return AVMETADATA_ERROR_INVALID_PARAM;
     }
     OHAVMetadataBuilder* metadata = reinterpret_cast<OHAVMetadataBuilder*>(builder);

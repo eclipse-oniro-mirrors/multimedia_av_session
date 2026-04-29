@@ -17,6 +17,8 @@
 #include "avplayback_state.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace OHOS::AVSession {
 AVCastControlCommand::AVCastControlCommand()
@@ -105,6 +107,8 @@ bool AVCastControlCommand::IsValid() const
 int32_t AVCastControlCommand::SetCommand(int32_t cmd)
 {
     if (cmd <= CAST_CONTROL_CMD_INVALID || cmd >= CAST_CONTROL_CMD_MAX) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "invalid cast control command", true);
         return ERR_INVALID_PARAM;
     }
     cmd_ = cmd;
@@ -119,6 +123,8 @@ int32_t AVCastControlCommand::GetCommand() const
 int32_t AVCastControlCommand::SetForwardTime(int32_t forwardTime)
 {
     if (forwardTime <= 0) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "invalid forward time", true);
         return ERR_INVALID_PARAM;
     }
     param_ = forwardTime;
@@ -137,6 +143,8 @@ int32_t AVCastControlCommand::GetForwardTime(int32_t& forwardTime) const
 int32_t AVCastControlCommand::SetRewindTime(int32_t rewindTime)
 {
     if (rewindTime < 0) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "invalid rewind time", true);
         return ERR_INVALID_PARAM;
     }
     param_ = rewindTime;
@@ -155,6 +163,8 @@ int32_t AVCastControlCommand::GetRewindTime(int32_t& rewindTime) const
 int32_t AVCastControlCommand::SetSeekTime(int32_t seekTime)
 {
     if (seekTime < 0) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "invalid seek time", true);
         return ERR_INVALID_PARAM;
     }
     param_ = seekTime;
@@ -188,6 +198,8 @@ int32_t AVCastControlCommand::GetVolume(int32_t& volume) const
 int32_t AVCastControlCommand::SetSpeed(int32_t speed)
 {
     if (speed < 0) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "invalid speed", true);
         return ERR_INVALID_PARAM;
     }
     param_ = speed;
@@ -206,6 +218,8 @@ int32_t AVCastControlCommand::GetSpeed(int32_t& speed) const
 int32_t AVCastControlCommand::SetLoopMode(int32_t loopMode)
 {
     if (loopMode < 0) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "invalid loop mode", true);
         return ERR_INVALID_PARAM;
     }
     param_ = loopMode;

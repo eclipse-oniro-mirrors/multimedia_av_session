@@ -23,6 +23,8 @@
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
 #include "avsession_utils.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace OHOS::AVSession {
 
@@ -176,12 +178,16 @@ int32_t AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CreateSession with ret");
     if (tag.empty() || elementName.GetBundleName().empty() || elementName.GetAbilityName().empty()) {
         SLOGE("param is invalid");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "param is invalid", true);
         return ERR_INVALID_PARAM;
     }
     if (type != AVSession::SESSION_TYPE_AUDIO && type != AVSession::SESSION_TYPE_VIDEO
         && type != AVSession::SESSION_TYPE_VOICE_CALL && type != AVSession::SESSION_TYPE_VIDEO_CALL
         && type != AVSession::SESSION_TYPE_PHOTO) {
         SLOGE("type is invalid");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "type is invalid", true);
         return ERR_INVALID_PARAM;
     }
 
@@ -289,6 +295,8 @@ int32_t AVSessionManagerImpl::CreateController(const std::string& sessionId,
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CreateController");
     if (sessionId.empty()) {
         SLOGE("sessionId is invalid");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "sessionId is invalid", true);
         return ERR_INVALID_PARAM;
     }
 
@@ -303,6 +311,8 @@ int32_t AVSessionManagerImpl::GetAVCastController(const std::string& sessionId,
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::GetAVCastController");
     if (sessionId.empty()) {
         SLOGE("sessionId is invalid");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "sessionId is invalid", true);
         return ERR_INVALID_PARAM;
     }
 

@@ -21,6 +21,8 @@
 #include "avsession_log.h"
 #include "securec.h"
 #include "av_shared_memory_base.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace {
 static std::atomic<uint64_t> g_uniqueSharedMemoryID = 0;
@@ -123,6 +125,8 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
 {
     if (capacity_ <= 0) {
         SLOGE("size is invalid, size = %{public}d", capacity_);
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "size is invalid", true);
         return static_cast<int32_t>(ERR_INVALID_PARAM);
     }
 
@@ -131,6 +135,8 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
         int size = AshmemGetSize(fd_);
         if (size != capacity_) {
             SLOGE("size not equal capacity_, size = %{public}d, capacity_ = %{public}d", size, capacity_);
+            AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+                AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "size not equal capacity", true);
             return static_cast<int32_t>(ERR_INVALID_PARAM);
         }
         isRemote = true;
@@ -138,6 +144,8 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
         fd_ = AshmemCreate(name_.c_str(), static_cast<size_t>(capacity_));
         if (fd_ <= 0) {
             SLOGE("fd is invalid, fd = %{public}d", fd_);
+            AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+                AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "fd is invalid", true);
             return static_cast<int32_t>(ERR_INVALID_PARAM);
         }
     }
@@ -145,6 +153,8 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
         int32_t ret = MapMemory(isRemote);
         if (ret != static_cast<int32_t>(AVSESSION_SUCCESS)) {
             SLOGE("MapMemory failed, ret = %{public}d", ret);
+            AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+                AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "MapMemory failed", true);
             return static_cast<int32_t>(ERR_INVALID_PARAM);
         }
     }
