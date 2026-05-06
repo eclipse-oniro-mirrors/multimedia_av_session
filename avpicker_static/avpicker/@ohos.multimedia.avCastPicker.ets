@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ import Want from '@ohos.app.ability.Want'
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType: number = 8;
 
-enum DeviceSource {
+export enum DeviceSource {
   /**
    * local device
    */
@@ -57,7 +57,7 @@ enum ConfigurationColorMode {
   COLOR_MODE_LIGHT = 1
 }
 
-interface HighQualityParams {
+export interface HighQualityParams {
   iconLeft: string,
   iconRight: string,
 }
