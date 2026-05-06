@@ -354,5 +354,62 @@ HWTEST_F(AVControllerCallbackClientTest, OnDesktopLyricEnabled001, TestSize.Leve
     EXPECT_EQ(ret, 0);
 }
 
+/**
+ * @tc.name: OnMediaCenterControlTypeChanged001
+ * @tc.desc: test OnMediaCenterControlTypeChanged
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+HWTEST_F(AVControllerCallbackClientTest, OnMediaCenterControlTypeChanged001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    ASSERT_NE(ptr, nullptr);
+    std::vector<int32_t> controlTypeArray = {};
+    ptr->OnMediaCenterControlTypeChanged(controlTypeArray);
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    ASSERT_NE(aVControllerCallbackClient, nullptr);
+    ErrCode ret = aVControllerCallbackClient->OnMediaCenterControlTypeChanged(controlTypeArray);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: OnSupportedPlaySpeedsChanged001
+ * @tc.desc: test OnSupportedPlaySpeedsChanged
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+HWTEST_F(AVControllerCallbackClientTest, OnSupportedPlaySpeedsChanged001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    ASSERT_NE(ptr, nullptr);
+    std::vector<double> speedsArray = {};
+    ptr->OnSupportedPlaySpeedsChanged(speedsArray);
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    ASSERT_NE(aVControllerCallbackClient, nullptr);
+    ErrCode ret = aVControllerCallbackClient->OnSupportedPlaySpeedsChanged(speedsArray);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: OnSupportedLoopModesChanged001
+ * @tc.desc: test OnSupportedLoopModesChanged
+ * @tc.type: FUNC
+ * @tc.require: #1998
+ */
+HWTEST_F(AVControllerCallbackClientTest, OnSupportedLoopModesChanged001, TestSize.Level0)
+{
+    std::shared_ptr<AVControllerCallbackDemo> ptr = std::make_shared<AVControllerCallbackDemo>();
+    ASSERT_NE(ptr, nullptr);
+    std::vector<int32_t> loopmodesArray = {};
+    ptr->OnSupportedLoopModesChanged(loopmodesArray);
+    std::shared_ptr<AVControllerCallbackClient> aVControllerCallbackClient =
+        std::make_shared<AVControllerCallbackClient>(ptr);
+    ASSERT_NE(aVControllerCallbackClient, nullptr);
+    ErrCode ret = aVControllerCallbackClient->OnSupportedLoopModesChanged(loopmodesArray);
+    EXPECT_EQ(ret, 0);
+}
+
 } // namespace AVSession
 } // namespace OHOS

@@ -21,6 +21,7 @@
 #include "bundle_mgr_proxy.h"
 #include "bundle_status_callback_host.h"
 #include "bundle_resource_proxy.h"
+#include "cJSON.h"
 
 namespace OHOS::AVSession {
 class BundleStatusAdapter {
@@ -49,10 +50,15 @@ public:
     __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntent(const std::string& bundleName,
         std::string& supportModule, std::string& profile);
 
+    std::string GetAppVersion(const std::string& bundleName);
+
 private:
     void NotifyBundleRemoved(const std::string bundleName, const int32_t userId);
 
-    bool CheckBundleSupport(std::string& profile);
+    bool CheckExecuteModeItem(cJSON* executeModeArray, const std::string& bundleName,
+        const char* insightName);
+
+    bool CheckBundleSupport(const std::string& bundleName, std::string& profile);
 
     sptr<AppExecFwk::IBundleMgr> bundleMgrProxy;
     sptr<AppExecFwk::IBundleResource> bundleResourceProxy;

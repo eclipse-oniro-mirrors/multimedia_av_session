@@ -41,10 +41,7 @@ const std::unordered_map<int32_t, int32_t> CAST_TO_AV_DEVICE_TYPE_MAP = {
 int32_t ConvertCastDeviceTypeToDeviceType(int32_t castDeviceType)
 {
     auto it = CAST_TO_AV_DEVICE_TYPE_MAP.find(castDeviceType);
-    if (it != CAST_TO_AV_DEVICE_TYPE_MAP.end()) {
-        return it->second;
-    }
-    return DeviceType::DEVICE_TYPE_UNKNOWN;
+    return it != CAST_TO_AV_DEVICE_TYPE_MAP.end() ? it->second : DeviceType::DEVICE_TYPE_UNKNOWN;
 }
 
 HwCastProvider::HwCastProvider()
@@ -475,7 +472,7 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.deviceId_ = castRemoteDevice.deviceId;
         deviceInfo.deviceName_ = castRemoteDevice.deviceName;
         deviceInfo.deviceType_ = ConvertCastDeviceTypeToDeviceType(
-            static_cast<int32_t>(castRemoteDevice.deviceType));
+            static_cast<int32_t>(castRemoteDevice.rawDeviceType));
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
         deviceInfo.networkId_ = castRemoteDevice.networkId;
         deviceInfo.manufacturer_ = castRemoteDevice.manufacturerName;

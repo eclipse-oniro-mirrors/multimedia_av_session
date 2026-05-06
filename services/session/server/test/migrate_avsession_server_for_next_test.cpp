@@ -717,3 +717,165 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ConvertAudioDeviceDescriptorT
     EXPECT_EQ(audioDevJson == nullptr, true);
     SLOGE("ConvertAudioDeviceDescriptorToJson002 out");
 }
+
+/**
+ * @tc.name: SendProtocolVersionToNext001
+ * @tc.desc: test SendProtocolVersionToNext function
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, SendProtocolVersionToNext001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->SendProtocolVersionToNext();
+}
+
+/**
+ * @tc.name: SendProtocolVersionToNext002
+ * @tc.desc: test SendProtocolVersionToNext with device connected
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, SendProtocolVersionToNext002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->SendProtocolVersionToNext();
+}
+
+/**
+ * @tc.name: SendLongPauseNotifyToNext001
+ * @tc.desc: test SendLongPauseNotifyToNext with isLongPause true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, SendLongPauseNotifyToNext001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->SendLongPauseNotifyToNext(true);
+    EXPECT_EQ(g_MigrateAVSessionServer->hasLongPauseNotified_.load(), false);
+}
+
+/**
+ * @tc.name: SendLongPauseNotifyToNext002
+ * @tc.desc: test SendLongPauseNotifyToNext with isLongPause false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, SendLongPauseNotifyToNext002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->SendLongPauseNotifyToNext(false);
+    EXPECT_EQ(g_MigrateAVSessionServer->hasLongPauseNotified_.load(), false);
+}
+
+/**
+ * @tc.name: HandleNeedStateTimer001
+ * @tc.desc: test HandleNeedStateTimer function
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleNeedStateTimer001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->HandleNeedStateTimer();
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), false);
+}
+
+/**
+ * @tc.name: HandleNeedStateTimer002
+ * @tc.desc: test HandleNeedStateTimer when already false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleNeedStateTimer002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->HandleNeedStateTimer();
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), false);
+}
+
+/**
+ * @tc.name: HandleLongPauseTimer001
+ * @tc.desc: test HandleLongPauseTimer when not previously notified
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleLongPauseTimer001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(false);
+    g_MigrateAVSessionServer->HandleLongPauseTimer();
+    EXPECT_EQ(g_MigrateAVSessionServer->hasLongPauseNotified_.load(), true);
+}
+
+/**
+ * @tc.name: HandleLongPauseTimer002
+ * @tc.desc: test HandleLongPauseTimer when already notified
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleLongPauseTimer002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(true);
+    g_MigrateAVSessionServer->HandleLongPauseTimer();
+    EXPECT_EQ(g_MigrateAVSessionServer->hasLongPauseNotified_.load(), true);
+}
+
+/**
+ * @tc.name: HandleFocusPlaybackStateChange001
+ * @tc.desc: test HandleFocusPlaybackStateChange with PLAY state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleFocusPlaybackStateChange001, TestSize.Level0)
+{
+    std::string sessionId = "test_session";
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    g_MigrateAVSessionServer->lastSessionId_ = sessionId;
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(true);
+    g_MigrateAVSessionServer->HandleFocusPlaybackStateChange(sessionId, state);
+}
+
+/**
+ * @tc.name: HandleFocusPlaybackStateChange002
+ * @tc.desc: test HandleFocusPlaybackStateChange with PAUSE state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleFocusPlaybackStateChange002, TestSize.Level0)
+{
+    std::string sessionId = "test_session_pause";
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    g_MigrateAVSessionServer->lastSessionId_ = sessionId;
+    g_MigrateAVSessionServer->HandleFocusPlaybackStateChange(sessionId, state);
+}
+
+/**
+ * @tc.name: ProcessMediaControlNeedStateFromNextV2Protocol001
+ * @tc.desc: test ProcessMediaControlNeedStateFromNext with V2 protocol version
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateFromNextV2Protocol001, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, NEED_STATE_TIMER_INTERVAL);
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMediaControlNeedStateFromNextV2Protocol002
+ * @tc.desc: test ProcessMediaControlNeedStateFromNext with custom timeout
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateFromNextV2Protocol002, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, 10000);
+    g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
+    cJSON_Delete(jsonValue);
+}

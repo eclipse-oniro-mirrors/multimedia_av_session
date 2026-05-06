@@ -69,6 +69,12 @@ private:
 
     int32_t HandleGetExtrasWithEvent(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetMediaCenterControlType(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetSupportedPlaySpeeds(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleGetSupportedLoopModes(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetLaunchAbility(MessageParcel& data, MessageParcel& reply);
@@ -141,6 +147,12 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetExtras(data, reply); }},
         {CONTROLLER_CMD_GET_EXTRAS_WITH_EVENT,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetExtrasWithEvent(data, reply); }},
+        {CONTROLLER_CMD_GET_MEDIA_CENTER_CONTROL_TYPE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetMediaCenterControlType(data, reply); }},
+        {CONTROLLER_CMD_GET_SUPPORTED_PLAY_SPEEDS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSupportedPlaySpeeds(data, reply); }},
+        {CONTROLLER_CMD_GET_SUPPORTED_LOOP_MODES,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSupportedLoopModes(data, reply); }},
         {CONTROLLER_CMD_GET_AVCALL_META_DATA,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCallMetaData(data, reply); }},
         {CONTROLLER_CMD_SET_AVCALL_META_FILTER,
@@ -180,6 +192,9 @@ private:
         {CONTROLLER_CMD_SKIP_TO_QUEUE_ITEM, "HandleSkipToQueueItem"},
         {CONTROLLER_CMD_GET_EXTRAS, "HandleGetExtras"},
         {CONTROLLER_CMD_GET_EXTRAS_WITH_EVENT, "HandleGetExtrasWithEvent"},
+        {CONTROLLER_CMD_GET_MEDIA_CENTER_CONTROL_TYPE, "HandleGetMediaCenterControlType"},
+        {CONTROLLER_CMD_GET_SUPPORTED_PLAY_SPEEDS, "HandleGetSupportedPlaySpeeds"},
+        {CONTROLLER_CMD_GET_SUPPORTED_LOOP_MODES, "HandleGetSupportedLoopModes"},
         {CONTROLLER_CMD_GET_AVCALL_META_DATA, "HandleGetAVCallMetaData"},
         {CONTROLLER_CMD_SET_AVCALL_META_FILTER, "HandleSetAVCallMetaFilter"},
         {CONTROLLER_CMD_GET_AVCALL_STATE, "HandleGetAVCallState"},

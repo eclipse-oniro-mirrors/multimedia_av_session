@@ -980,6 +980,63 @@ void AVSessionImpl::SetBackgroundPlayModeSync(BackgroundPlayMode mode)
     }
 }
 
+void AVSessionImpl::SetMediaCenterControlTypeSync(array_view<string> controlTypes)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::SetMediaCenterControlTypeSync");
+    if (session_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_SESSION_NOT_EXIST],
+            "SetMediaCenterControlTypeSync failed : session is nullptr");
+        return;
+    }
+    std::vector<int32_t> typesNum = OHOS::AVSession::MediaCenterTypesToNums(
+        std::vector<std::string>(controlTypes.begin(), controlTypes.end()));
+    if (typesNum.size() != controlTypes.size()) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "invalid controlType string");
+        return;
+    }
+    int32_t ret = session_->SetMediaCenterControlType(typesNum);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "SetMediaCenterControlType", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+    }
+}
+
+void AVSessionImpl::SetSupportedPlaySpeedsSync(array_view<double> speeds)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::SetSupportedPlaySpeedsSync");
+    if (session_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_SESSION_NOT_EXIST],
+            "SetSupportedPlaySpeedsSync failed : session is nullptr");
+        return;
+    }
+    std::vector<double> speedVector(speeds.begin(), speeds.end());
+    int32_t ret = session_->SetSupportedPlaySpeeds(speedVector);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "SetSupportedPlaySpeeds", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+    }
+}
+
+void AVSessionImpl::SetSupportedLoopModesSync(array_view<int32_t> loopModes)
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::SetSupportedLoopModesSync");
+    if (session_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_SESSION_NOT_EXIST],
+            "SetSupportedLoopModesSync failed : session is nullptr");
+        return;
+    }
+    std::vector<int32_t> loopModeVector(loopModes.begin(), loopModes.end());
+    int32_t ret = session_->SetSupportedLoopModes(loopModeVector);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "SetSupportedLoopModes", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+    }
+}
+
 void AddRegisterEvent(std::string eventName)
 {
     std::lock_guard lockGuard(registerEventLock_);

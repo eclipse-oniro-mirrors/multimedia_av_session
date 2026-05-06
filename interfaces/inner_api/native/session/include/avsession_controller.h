@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "avcontrol_command.h"
+#include "avmedia_center_control_type.h"
 #include "avsession_info.h"
 #include "avsession_errors.h"
 #include "key_event.h"
@@ -228,6 +229,33 @@ public:
      * @since 16
     */
     virtual int32_t GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras) = 0;
+
+/**
+     * @brief Get media center control types of the session.
+     *
+     * @param controlTypes Output vector of control type numbers.
+     * @return Return whether the getting is successful.
+     * @since 26
+    */
+    virtual int32_t GetMediaCenterControlType(std::vector<int32_t>& controlTypes) { return AVSESSION_SUCCESS; };
+
+    /**
+     * @brief Get supported playback speeds of the session.
+     *
+     * @param speeds Output vector of supported playback speeds.
+     * @return Return whether the getting is successful.
+     * @since 26
+    */
+    virtual int32_t GetSupportedPlaySpeeds(std::vector<double>& speeds) { return AVSESSION_SUCCESS; };
+
+    /**
+     * @brief Get supported loop modes of the session.
+     *
+     * @param loopModes Output vector of supported loop modes.
+     * @return Return whether the getting is successful.
+     * @since 26
+    */
+    virtual int32_t GetSupportedLoopModes(std::vector<int32_t>& loopModes) { return AVSESSION_SUCCESS; };
 
     /**
      * @brief Get desktop lyric enable.

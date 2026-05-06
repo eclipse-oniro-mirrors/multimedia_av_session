@@ -42,7 +42,8 @@ AVCastControllerItem::~AVCastControllerItem()
 
 void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castControllerProxy,
     const std::function<void(int32_t, std::vector<int32_t>&)>& validCommandsChangecallback,
-    const std::function<void()>& preparecallback)
+    const std::function<void()>& preparecallback,
+    const std::function<void(int32_t, const std::string&)>& playerErrorCallback)
 {
     std::lock_guard lockGuard(castControllerLock_);
     castControllerProxy_ = castControllerProxy;
@@ -51,6 +52,7 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
     }
     validCommandsChangecallback_ = validCommandsChangecallback;
     preparecallback_ = preparecallback;
+    playerErrorCallback_ = playerErrorCallback;
     {
         std::lock_guard<std::mutex> lock(callbackToSessionLock_);
         isSessionCallbackAvailable_ = true;
@@ -66,6 +68,7 @@ void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& stat
             AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
             AVSessionRadar::GetInstance().PlayerStarted(info);
             isPlayingState_ = true;
+            AVSessionSysEvent::GetInstance().updatePlayCallbackTime(sessionId_);
         } else {
             AVSessionRadarInfo info("AVCastControllerItem::OnCastPlaybackStateChange");
             AVSessionRadar::GetInstance().ControlCommandRespond(info);
@@ -147,6 +150,9 @@ void AVCastControllerItem::OnVideoSizeChange(const int32_t width, const int32_t 
 void AVCastControllerItem::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
 {
     SLOGI("OnPlayerError error:%{public}d", errorCode);
+    if (playerErrorCallback_ != nullptr) {
+        playerErrorCallback_(errorCode, errorMsg);
+    }
     AVSessionRadarInfo info("AVCastControllerItem::OnPlayerError");
     info.errorCode_ = errorCode;
     AVSessionRadar::GetInstance().ControlCommandError(info);
@@ -353,6 +359,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     auto ret = castControllerProxy_->Prepare(avQueueItem);
     ReportPrepare(ret, avQueueItem);
     preparecallback_();
+    AVSessionSysEvent::GetInstance().updatePrepareTime(sessionId_);
     return AVSESSION_SUCCESS;
 }
 

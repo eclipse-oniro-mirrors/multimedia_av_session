@@ -1276,6 +1276,24 @@ taihe::array<uint8_t> TaiheUtils::ToTaiheUint8Array(const std::vector<uint8_t> &
     return taihe::array<uint8_t>(resultVec);
 }
 
+taihe::array<int32_t> TaiheUtils::ToTaiheInt32Array(const std::vector<int32_t> &in)
+{
+    std::vector<int32_t> resultVec;
+    for (const auto &item : in) {
+        resultVec.emplace_back(item);
+    }
+    return taihe::array<int32_t>(resultVec);
+}
+
+taihe::array<double> TaiheUtils::ToTaiheDoubleArray(const std::vector<double> &in)
+{
+    std::vector<double> resultVec;
+    for (const auto &item : in) {
+        resultVec.emplace_back(item);
+    }
+    return taihe::array<double>(resultVec);
+}
+
 ani_object TaiheUtils::ToBusinessError(ani_env *env, int32_t code, const std::string &message)
 {
     CHECK_ERROR_RETURN_RET_LOG(env != nullptr, ani_object {}, "env is nullptr");

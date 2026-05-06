@@ -119,6 +119,8 @@ void HandleControllerCallback()
         AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO,
         SESSION_COLD_START_FROM_PROXY,
         SESSION_SET_MEDIACONTROL_NEED_STATE,
+        AUDIO_GET_VERSION,
+        SESSION_SET_MEDIACONTROL_SYNC_TIME,
         AUDIO_MAC_ADDRESS
     };
     auto func = g_MigrateAVSessionProxy->MigrateAVSessionProxyControllerCallback();
@@ -142,9 +144,12 @@ void HandleControllerCallbackExt()
     extras.SetParam(AUDIO_SELECT_OUTPUT_DEVICE, deviceStr);
     auto isNeed = OHOS::AAFwk::Boolean::Box(GetData<bool>());
     extras.SetParam(MEDIACONTROL_NEED_STATE, isNeed);
+    auto timeoutMs = OHOS::AAFwk::Integer::Box(GetData<int32_t>());
+    extras.SetParam(MEDIACONTROL_NEED_STATE_TIMEOUT_MS, timeoutMs);
     g_MigrateAVSessionProxy->SetVolume(extras);
     g_MigrateAVSessionProxy->SelectOutputDevice(extras);
     g_MigrateAVSessionProxy->NotifyMediaControlNeedStateChange(extras);
+    g_MigrateAVSessionProxy->NotifyMediaControlSyncTime(extras);
     g_MigrateAVSessionProxy->CheckMediaAlive();
 }
 
@@ -282,6 +287,44 @@ void ProcessImgTest()
     g_MigrateAVSessionProxy->ProcessMediaImage(strImg);
 }
 
+void ProcessProtocolVersionFuzzTest()
+{
+    if (g_MigrateAVSessionProxy == nullptr) {
+        return;
+    }
+
+    g_MigrateAVSessionProxy->ProcessProtocolVersion(nullptr, "");
+
+    auto jsonValue = CJsonUniquePtr(SoftbusSessionUtils::GetNewCJSONObject());
+    if (jsonValue == nullptr) {
+        return;
+    }
+
+    std::string deviceId = std::to_string(GetData<uint32_t>());
+    SoftbusSessionUtils::AddIntToJson(jsonValue.get(), "protocolVersion", AVSESSION_PROXY_VERSION);
+    g_MigrateAVSessionProxy->ProcessProtocolVersion(jsonValue.get(), deviceId);
+
+    SoftbusSessionUtils::AddIntToJson(jsonValue.get(), "protocolVersion", GetData<int32_t>());
+    g_MigrateAVSessionProxy->ProcessProtocolVersion(jsonValue.get(), deviceId);
+}
+
+void ProcessLongPauseNotifyFuzzTest()
+{
+    if (g_MigrateAVSessionProxy == nullptr) {
+        return;
+    }
+
+    g_MigrateAVSessionProxy->ProcessLongPauseNotify(nullptr);
+
+    auto jsonValue = CJsonUniquePtr(SoftbusSessionUtils::GetNewCJSONObject());
+    if (jsonValue == nullptr) {
+        return;
+    }
+
+    SoftbusSessionUtils::AddBoolToJson(jsonValue.get(), LONG_PAUSE_STATE, GetData<bool>());
+    g_MigrateAVSessionProxy->ProcessLongPauseNotify(jsonValue.get());
+}
+
 void TestFunc()
 {
     HandlePlayStateCbTest();
@@ -294,6 +337,8 @@ void TestFunc()
     ProcessVolumeControlCommandTest();
     ProcessDevicesTest();
     ProcessImgTest();
+    ProcessProtocolVersionFuzzTest();
+    ProcessLongPauseNotifyFuzzTest();
 }
 
 void MigrateAVSessionProxyFuzzerTest(const uint8_t* rawData, size_t size)

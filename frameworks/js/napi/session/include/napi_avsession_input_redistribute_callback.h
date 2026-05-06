@@ -24,7 +24,7 @@ class NapiAVSessionInputRedistributeCallback : public Rosen::IInputEventRecipien
 public:
     Rosen::InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     Rosen::InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
-    std::shared_ptr<AVSession> nativeSession;
+    std::weak_ptr<AVSession> nativeSession;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_INPUT_REDISTRIBUTE_CALLBACK_H

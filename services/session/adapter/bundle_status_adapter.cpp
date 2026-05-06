@@ -23,6 +23,7 @@
 #include "want_params_wrapper.h"
 #include "string_wrapper.h"
 #include "array_wrapper.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 std::shared_ptr<BundleStatusAdapter> BundleStatusAdapter::instance_;
@@ -199,7 +200,41 @@ int32_t BundleStatusAdapter::GetUidFromBundleName(const std::string bundleName, 
     return bundleInfo.uid;
 }
 
-bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
+std::string BundleStatusAdapter::GetAppVersion(const std::string& bundleName)
+{
+    std::string appVersion = "default";
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
+    if (bundleMgrProxy != nullptr && !bundleName.empty()) {
+        AppExecFwk::BundleInfo bundleInfo;
+        if (bundleMgrProxy->GetBundleInfo(bundleName, getBundleInfoWithHapModule, bundleInfo, startUserId)) {
+            std::string tmpVersion = bundleInfo.versionName;
+            if (!tmpVersion.empty()) {
+                appVersion = tmpVersion;
+            }
+        }
+    }
+    return appVersion;
+}
+
+bool BundleStatusAdapter::CheckExecuteModeItem(cJSON* executeModeArray, const std::string& bundleName,
+    const char* insightName)
+{
+    cJSON* modeItem = nullptr;
+    cJSON_ArrayForEach(modeItem, executeModeArray) {
+        if (cJSON_IsString(modeItem) && modeItem->valuestring != nullptr &&
+            strcmp(modeItem->valuestring, "background") == 0) {
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+            if (insightName != nullptr) {
+                AVSessionSysEvent::GetInstance().UpdateSupportIntent(bundleName, std::string(insightName));
+            }
+#endif
+            return true;
+        }
+    }
+    return false;
+}
+
+bool BundleStatusAdapter::CheckBundleSupport(const std::string& bundleName, std::string& profile)
 {
     // check bundle support background mode & playmusiclist intent
     cJSON* profileValues = cJSON_Parse(profile.c_str());
@@ -240,13 +275,9 @@ bool BundleStatusAdapter::CheckBundleSupport(std::string& profile)
             cJSON_Delete(profileValues);
             return false;
         }
-        cJSON* modeItem = nullptr;
-        cJSON_ArrayForEach(modeItem, executeModeArray) {
-            if (cJSON_IsString(modeItem) && modeItem->valuestring != nullptr &&
-                strcmp(modeItem->valuestring, "background") == 0) {
-                cJSON_Delete(profileValues);
-                return true;
-            }
+        if (CheckExecuteModeItem(executeModeArray, bundleName, insightName)) {
+            cJSON_Delete(profileValues);
+            return true;
         }
     }
     cJSON_Delete(profileValues);
@@ -280,7 +311,7 @@ __attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayInten
         SLOGE("Bundle=%{public}s does not support insight", bundleName.c_str());
         return false;
     }
-    return CheckBundleSupport(profile);
+    return CheckBundleSupport(bundleName, profile);
 }
 
 BundleStatusCallbackImpl::BundleStatusCallbackImpl(

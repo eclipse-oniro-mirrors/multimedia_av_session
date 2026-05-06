@@ -90,7 +90,7 @@ void AVRouterImplTest::TearDown() {}
 
 class AVRouterListenerMock : public IAVRouterListener {
 public:
-    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove) {}
+    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode) {}
 
     virtual void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) {}
 
@@ -427,7 +427,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange001, TestSize.Level0)
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
     int32_t castState = g_AVRouterImpl->disconnectStateFromCast_;
-    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
+    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo, 0);
 
     EXPECT_TRUE(castHandleInfo.avRouterListener_ != nullptr);
     SLOGI("OnCastStateChange001 end");
@@ -454,7 +454,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange002, TestSize.Level0)
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
     int32_t castState = g_AVRouterImpl->connectStateFromCast_;
-    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
+    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo, 0);
 
     EXPECT_TRUE(castHandleInfo.avRouterListener_ != nullptr);
     SLOGI("OnCastStateChange002 end");
@@ -480,7 +480,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange003, TestSize.Level0)
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
     int32_t castState = g_AVRouterImpl->connectStateFromCast_;
-    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
+    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo, 0);
 
     EXPECT_TRUE(castHandleInfo.avRouterListener_ == nullptr);
     SLOGI("OnCastStateChange003 end");
@@ -507,7 +507,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange004, TestSize.Level0)
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
     int32_t castState = 11;
-    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
+    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo, 0);
 
     EXPECT_TRUE(g_AVRouterImpl->IsInMirrorToStreamState());
     SLOGI("OnCastStateChange004 end");
@@ -534,7 +534,7 @@ static HWTEST_F(AVRouterImplTest, OnCastStateChange005, TestSize.Level0)
     g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
 
     int32_t castState = 12;
-    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo);
+    g_AVRouterImpl->OnCastStateChange(castState, deviceInfo, 0);
 
     EXPECT_TRUE(g_AVRouterImpl->IsInMirrorToStreamState() == false);
     SLOGI("OnCastStateChange005 end");

@@ -14,6 +14,7 @@
  */
 
 #include "napi_avcontroller_callback.h"
+#include "avmedia_center_control_type.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
 #include "avsession_utils.h"
@@ -199,6 +200,38 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
     }
 }
 
+template<typename T>
+void NapiAVControllerCallback::HandleEventEx(int32_t event, std::string callBackName, const T& param)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("not register callback event=%{public}d", event);
+        return;
+    }
+    SLOGI("handle for event: %{public}d with size: %{public}d", event, static_cast<int>(callbacks_[event].size()));
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event %{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
+                return hasFunc;
+            }, callBackName,
+            [param](napi_env env, int& argc, napi_value *argv) {
+                argc = NapiUtils::ARGC_ONE;
+                auto status = NapiUtils::SetValueEx(env, param, *argv);
+                CHECK_RETURN_VOID(status == napi_ok, "ControllerCallback SetValueEx invalid");
+            });
+    }
+}
+
 void NapiAVControllerCallback::CallWithThreadSafe(napi_ref& method, std::shared_ptr<bool> isValid, int state,
     napi_threadsafe_function threadSafeFunction, const std::function<bool()>& checkCallbackValid, NapiArgsGetter getter)
 {
@@ -375,6 +408,28 @@ void NapiAVControllerCallback::OnDesktopLyricEnabled(bool isEnabled)
     std::string callBackName = "NapiAVControllerCallback::OnDesktopLyricEnabled";
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnDesktopLyricEnabled");
     HandleEvent(EVENT_DESKTOP_LYRIC_ENABLED, callBackName, isEnabled);
+}
+
+void NapiAVControllerCallback::OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes)
+{
+    std::string callBackName = "NapiAVControllerCallback::OnMediaCenterControlTypeChanged";
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnMediaCenterControlTypeChanged");
+    std::vector<std::string> controlTypesStr = MediaCenterTypesToStrs(controlTypes);
+    HandleEvent(EVENT_MEDIA_CENTER_CONTROL_TYPE_CHANGED, callBackName, controlTypesStr);
+}
+
+void NapiAVControllerCallback::OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds)
+{
+    std::string callBackName = "NapiAVControllerCallback::OnSupportedPlaySpeedsChanged";
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnSupportedPlaySpeedsChanged");
+    HandleEventEx(EVENT_SUPPORTED_PLAY_SPEEDS_CHANGED, callBackName, speeds);
+}
+
+void NapiAVControllerCallback::OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes)
+{
+    std::string callBackName = "NapiAVControllerCallback::OnSupportedLoopModesChanged";
+    AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnSupportedLoopModesChanged");
+    HandleEventEx(EVENT_SUPPORTED_LOOP_MODES_CHANGED, callBackName, loopModes);
 }
 
 napi_status NapiAVControllerCallback::AddCallback(napi_env env, int32_t event, napi_value callback)

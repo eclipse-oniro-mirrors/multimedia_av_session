@@ -30,6 +30,7 @@
 #include "want_params_wrapper.h"
 #include "migrate_avsession_manager.h"
 #include "avrouter_impl.h"
+#include "pcm_cast_session.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -991,9 +992,9 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     pcmCastSession->DealCollaborationPublishState(0, deviceInfo);
     pcmCastSession->DealCollaborationPublishState(6, deviceInfo);
 
-    pcmCastSession->OnCastStateChange(5, deviceInfo, false);
-    pcmCastSession->OnCastStateChange(0, deviceInfo, false);
-    pcmCastSession->OnCastStateChange(6, deviceInfo, true);
+    pcmCastSession->OnCastStateChange(5, deviceInfo, false, 0);
+    pcmCastSession->OnCastStateChange(0, deviceInfo, false, 0);
+    pcmCastSession->OnCastStateChange(6, deviceInfo, true, 0);
 
     pcmCastSession->collaborationNeedNetworkId_.clear();
     pcmCastSession->DealCollaborationPublishState(5, deviceInfo);
@@ -1052,10 +1053,10 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast003, TestSize.Level
     shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
     
     pcmCastSession->multiDeviceState_ = MultiDeviceState::DEFAULT;
-    pcmCastSession->OnCastStateChange(5, deviceInfo, false);
- 
+    pcmCastSession->OnCastStateChange(5, deviceInfo, false, 0);
+
     pcmCastSession->multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
-    pcmCastSession->OnCastStateChange(5, deviceInfo, false);
+    pcmCastSession->OnCastStateChange(5, deviceInfo, false, 0);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
 }
@@ -1348,6 +1349,186 @@ static HWTEST_F(AVSessionServiceTestExt, QueryCommandParams001, TestSize.Level0)
     pcmCastSession->QueryCommandParams(commandArgs);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionReportSessionCast001
+ * @tc.desc: Test PcmCastSession::ReportSessionCast with deviceInfo
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionReportSessionCast001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    int castState = 10;
+    int reasonCode = 0;
+    pcmCastSession->ReportSessionCast(castState, reasonCode);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionReportSessionCast002
+ * @tc.desc: Test PcmCastSession::ReportSessionCast
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionReportSessionCast002, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    int castState = 10;
+    int reasonCode = 10014;
+    pcmCastSession->ReportSessionCast(castState, reasonCode);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionReportSessionCast003
+ * @tc.desc: Test PcmCastSession::ReportSessionCast
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionReportSessionCast003, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    int castState = 0;
+    int reasonCode = 10014;
+    pcmCastSession->ReportSessionCast(castState, reasonCode);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionSubStartCast001
+ * @tc.desc: Test PcmCastSession::SubStartCast with valid outputDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionSubStartCast001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    sessionToken.sessionId = "testSessionId";
+    int32_t ret = pcmCastSession->SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    pcmCastSession->DestroyTask();
+    EXPECT_NE(ret, AVSESSION_SUCCESS);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionSubStartCast002
+ * @tc.desc: Test PcmCastSession::SubStartCast with empty outputDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionSubStartCast002, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    int32_t ret = pcmCastSession->SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    pcmCastSession->DestroyTask();
+    EXPECT_NE(ret, AVSESSION_SUCCESS);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: SetPcMode001
+ * @tc.desc: Test SetPcMode with isPcMode true
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, SetPcMode001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionService->SetPcMode(true);
+    EXPECT_EQ(g_AVSessionService->isPcMode_.load(), true);
+}
+
+/**
+ * @tc.name: SetPcMode002
+ * @tc.desc: Test SetPcMode with isPcMode false
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, SetPcMode002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionService->SetPcMode(false);
+    EXPECT_EQ(g_AVSessionService->isPcMode_.load(), false);
+}
+
+/**
+ * @tc.name: NotifySupportExtendedScreen001
+ * @tc.desc: Test NotifySupportExtendedScreen with isSupport true
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, NotifySupportExtendedScreen001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    session->SetSupportExtendedScreen(false);
+    g_AVSessionService->NotifySupportExtendedScreen(true);
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = session->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: NotifySupportExtendedScreen002
+ * @tc.desc: Test NotifySupportExtendedScreen with isSupport false
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, NotifySupportExtendedScreen002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    g_AVSessionService->NotifySupportExtendedScreen(false);
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = session->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(castDisplays.size(), 0);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
 }
 } // AVSession
 } // OHOS

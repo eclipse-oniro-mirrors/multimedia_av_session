@@ -454,6 +454,18 @@ interface AVSession {
   @gen_promise("setBackgroundPlayMode")
   SetBackgroundPlayModeSync(mode: BackgroundPlayMode): void;
 
+  @gen_async("setMediaCenterControlType")
+  @gen_promise("setMediaCenterControlType")
+  SetMediaCenterControlTypeSync(controlTypes: Array<String>): void;
+
+  @gen_async("setSupportedPlaySpeeds")
+  @gen_promise("setSupportedPlaySpeeds")
+  SetSupportedPlaySpeedsSync(speeds: Array<f64>): void;
+
+  @gen_async("setSupportedLoopModes")
+  @gen_promise("setSupportedLoopModes")
+  SetSupportedLoopModesSync(loopModes: Array<i32>): void;
+
   OnPlay(callback: (commandInfo: CommandInfo) => void): void;
   OnPause(callback: () => void): void;
   OnStop(callback: () => void): void;
@@ -595,6 +607,15 @@ interface AVSessionController {
   @gen_promise("getDesktopLyricState")
   GetDesktopLyricStateSync(): DesktopLyricState;
 
+  @gen_promise("getMediaCenterControlType")
+  GetMediaCenterControlTypeSync(): Array<String>;
+
+  @gen_promise("getSupportedPlaySpeeds")
+  GetSupportedPlaySpeedsSync(): Array<f64>;
+
+  @gen_promise("getSupportedLoopModes")
+  GetSupportedLoopModesSync(): Array<i32>;
+
   OnMetadataChange(filter: Array<String>, callback: (data: AVMetadata) => void): void;
   OnMetadataChangeAll(callback: (data: AVMetadata) => void): void;
   OnPlaybackStateChange(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
@@ -615,6 +636,9 @@ interface AVSessionController {
   OnDesktopLyricVisibilityChanged(callback: (data: bool) => void): void;
   OnDesktopLyricStateChanged(callback: (data: DesktopLyricState) => void): void;
   OnDesktopLyricEnabled(callback: (data: bool) => void): void;
+  OnMediaCenterControlTypeChanged(callback: (data: Array<String>) => void): void;
+  OnSupportedPlaySpeedsChange(callback: (data: Array<f64>) => void): void;
+  OnSupportedLoopModesChange(callback: (data: Array<i32>) => void): void;
 
   OffMetadataChange(callback: Optional<(data: AVMetadata) => void>): void;
   OffPlaybackStateChange(callback: Optional<(data: AVPlaybackState) => void>): void;
@@ -632,6 +656,9 @@ interface AVSessionController {
   OffDesktopLyricVisibilityChanged(callback: Optional<(data: bool) => void>): void;
   OffDesktopLyricStateChanged(callback: Optional<(data: DesktopLyricState) => void>): void;
   OffDesktopLyricEnabled(callback: Optional<(data: bool) => void>): void;
+  OffMediaCenterControlTypeChanged(callback: Optional<(data: Array<String>) => void>): void;
+  OffSupportedPlaySpeedsChange(callback: Optional<(data: Array<f64>) => void>): void;
+  OffSupportedLoopModesChange(callback: Optional<(data: Array<i32>) => void>): void;
 }
 
 struct AVSessionDescriptor {
@@ -661,9 +688,9 @@ enum ConnectionState: i32 {
   STATE_CONNECTING = 0,
   STATE_CONNECTED = 1,
   STATE_DISCONNECTED = 6,
-  AUTHING = 10,
-  MIRROR_TO_STREAM = 11,
-  STREAM_TO_MIRROR = 12,
+  STATE_AUTHENTICATING = 10,
+  STATE_MIRROR_TO_STREAM = 11,
+  STATE_STREAM_TO_MIRROR = 12,
 }
 
 struct SessionToken {

@@ -121,13 +121,6 @@ SESSION_CAST:
   DEST_DEVICE_ID: {type: INT32, desc: dest device id}
   DETAILED_MSG: {type: STRING, desc: detailed msg}
 
-DEVICE_CASTING_TIME:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: device connect duration}
-  DEVICE_TYPE: {type: UINT32, desc: device type}
-  IS_P2P: {type: BOOL, desc: is p2p connection}
-  PROTOCOL: {type: STRING, desc: protocol for device}
-  SERVICE_DURATION: {type: INT64, desc: connection duration}
-
 REMOTE_CONTROL_FAILED:
   __BASE: {type: FAULT, level: MINOR, desc: remote control failed}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
@@ -147,7 +140,7 @@ SESSION_INPUT_REDISTRIBUTE_SUCC:
   BUNDLE_NAME: {type: STRING, desc: bundle name}
 
 SESSION_API_BEHAVIOR:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: session API behavior}
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: session API behavior}
   API_NAME: {type: STRING, desc: api name}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   SESSION_ID: {type: STRING, desc: session id}
@@ -157,19 +150,27 @@ SESSION_API_BEHAVIOR:
   ERROR_CODE: {type: INT32, desc: error code}
   ERROR_MSG: {type: STRING, desc: error msg}
   APP_VERSION_NAME: {type: STRING, desc: app version name}
-  COST_TIME: {type: STRING, desc: cost time}
+  COST_TIME: {type: INT32, desc: cost time}
   OS_VERSION: {type: STRING, desc: os version}
-  SDK_VERSION: {type: STRING, desc: sdk version}
+  SDK_VERSION: {type: INT32, desc: sdk version}
 
 SESSION_CAST_CONTROL:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: session register listener}
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: session cast control}
   CONTROL_TYPE: {type: STRING, desc: control type}
   PEER_DEVICE_ID: {type: STRING, desc: peer device id}
   PEER_DEVICE_NAME: {type: STRING, desc: device name}
-  PEER_DEVICE_TYPE: {type: STRING, desc: device type}
+  PEER_DEVICE_TYPE: {type: INT32, desc: device type}
   PEER_NETWORK_ID: {type: STRING, desc: peer network id}
   PEER_SUPPORTED_PROTOCOL: {type: INT32, desc: supported protocol}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
+  PACKAGE_VERSION: {type: STRING, desc: app version}
+  APP_TYPE: {type: STRING, desc: app type}
+  IS_P2P: {type: BOOL, desc: is p2p connection}
+  START_CAST_LATENCY: {type: INT64, desc: startcast latency}
+  PREPARE_LATENCY: {type: INT64, desc: prepare latency}
+  PLAY_LATENCY: {type: INT64, desc: play latency}
+  ALL_LATENCY: {type: INT64, desc: all latency}
+  SERVICE_DURATION: {type: INT64, desc: connection duration}
 
 PLAYING_COMBIND_AVSESSION_STATIS:
   __BASE: {type: STATISTIC, level: MINOR, desc: low quality check statistics}
@@ -204,3 +205,6 @@ PLAYING_AVSESSION_STATS:
   AVSESSION_CONTROL: {type: UINT8, arrsize: 100, desc: avsession controller command}
   AVSESSION_CONTROL_BUNDLE_NAME: {type: STRING, arrsize: 100, desc: avsession controller caller bundle name}
   AVSESSION_CONTROL_TIMESTAMP: {type: UINT64, arrsize: 100, desc: send avsession control timestamp}
+  APP_TYPE: {type: STRING, desc: app type}
+  SUPPORT_INTENT: {type: STRING, desc: support intent name}
+  SUPPORT_AVQUEUE: {type: BOOL, desc: has avqueue}

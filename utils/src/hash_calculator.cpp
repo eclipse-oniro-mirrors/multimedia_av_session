@@ -224,6 +224,7 @@ static bool AlgoFinal(unsigned char *md, AlgoCTX* c)
 {
     unsigned char tmp[64];
     size_t len = c->num;
+    CHECK_AND_RETURN_RET_LOG(len < sizeof(tmp), false, "len over size:%{public}zu", len);
 
     // copy remaining data
     if (len > 0) {

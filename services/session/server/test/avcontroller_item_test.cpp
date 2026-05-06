@@ -135,6 +135,18 @@ class IAVControllerCallbackTest : public IAVControllerCallback {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes) override
+    {
+        return AVSESSION_SUCCESS;
+    };
     OHOS::sptr<IRemoteObject> AsObject() override
     {
         OHOS::AppExecFwk::ElementName elementName;
@@ -581,6 +593,54 @@ HWTEST_F(AVControllerItemTest, HandleDesktopLyricEnabled001, TestSize.Level0)
     controller->callback_ = callback;
     controller->HandleDesktopLyricEnabled(false);
     EXPECT_NE(controller->session_, nullptr);
+}
+
+/**
+* @tc.name: GetMediaCenterControlType_001
+* @tc.desc: get media center control type
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVControllerItemTest, GetMediaCenterControlType_001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    std::vector<int32_t> controlTypeArray = {};
+    int32_t res = controller->GetMediaCenterControlType(controlTypeArray);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: GetSupportedPlaySpeeds_001
+* @tc.desc: get supported play speeds
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVControllerItemTest, GetSupportedPlaySpeeds_001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    std::vector<double> speedsArray = {};
+    int32_t res = controller->GetSupportedPlaySpeeds(speedsArray);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: GetSupportedLoopModes_001
+* @tc.desc: get supported loopmodes
+* @tc.type: FUNC
+* @tc.require: #1990
+*/
+HWTEST_F(AVControllerItemTest, GetSupportedLoopModes_001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    std::vector<int32_t> loopmodesArray = {};
+    int32_t res = controller->GetSupportedLoopModes(loopmodesArray);
+    EXPECT_EQ(res, AVSESSION_SUCCESS);
 }
 } //AVSession
 } //OHOS

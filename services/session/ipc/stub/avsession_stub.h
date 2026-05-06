@@ -51,6 +51,8 @@ public:
 #endif
 
 private:
+    static constexpr size_t maxArrSize = 100;
+
     int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetSessionType(MessageParcel& data, MessageParcel& reply);
@@ -115,6 +117,12 @@ private:
 
     int32_t HandleSendCustomData(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleSetMediaCenterControlType(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSetSupportedPlaySpeeds(MessageParcel& data, MessageParcel& reply);
+
+    int32_t HandleSetSupportedLoopModes(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleEnableDesktopLyric(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleSetDesktopLyricVisible(MessageParcel &data, MessageParcel &reply);
@@ -161,6 +169,12 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetController(data, reply); }},
         {SESSION_CMD_SEND_CUSTOM_DATA,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSendCustomData(data, reply); }},
+        {SESSION_CMD_SET_MEDIA_CENTER_CONTROL_TYPE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetMediaCenterControlType(data, reply); }},
+        {SESSION_CMD_SET_SUPPORTED_PLAY_SPEEDS,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetSupportedPlaySpeeds(data, reply); }},
+        {SESSION_CMD_SET_SUPPORTED_LOOP_MODES,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleSetSupportedLoopModes(data, reply); }},
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         {SESSION_CMD_GET_AVCAST_CONTROLLER,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCastController(data, reply); }},
@@ -226,6 +240,9 @@ private:
         {SESSION_CMD_SET_LAUNCH_ABILITY, "HandleSetLaunchAbility"},
         {SESSION_CMD_GET_CONTROLLER, "HandleGetController"},
         {SESSION_CMD_SEND_CUSTOM_DATA, "HandleSendCustomData"},
+        {SESSION_CMD_SET_MEDIA_CENTER_CONTROL_TYPE, "HandleSetMediaCenterControlType"},
+        {SESSION_CMD_SET_SUPPORTED_PLAY_SPEEDS, "HandleSetSupportedPlaySpeeds"},
+        {SESSION_CMD_SET_SUPPORTED_LOOP_MODES, "HandleSetSupportedLoopModes"},
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         {SESSION_CMD_GET_AVCAST_CONTROLLER, "HandleGetAVCastController"},
         {SESSION_CMD_START_CAST_DISPLAY_LISTENER, "HandleStartCastDisplayListener"},

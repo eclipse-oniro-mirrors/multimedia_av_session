@@ -277,21 +277,6 @@ typedef enum AVSession_ConnectionState {
      * @brief The default connection state indicating the device is disconnected.
      */
     STATE_DISCONNECTED = 6,
-
-    /**
-     * @brief A connection state indicating the device is in the process of authentication.
-     */
-    AUTHING = 10,
-
-    /**
-     * @brief A connection state indicating the device is switching from mirror to stream.
-     */
-    MIRROR_TO_STREAM = 11,
-
-    /**
-     * @brief A connection state indicating the device is switching from stream to mirror.
-     */
-    STREAM_TO_MIRROR = 12,
 } AVSession_ConnectionState;
 
 /**

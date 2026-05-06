@@ -252,6 +252,63 @@ int32_t AVSessionStub::HandleSendCustomData(MessageParcel& data, MessageParcel& 
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleSetMediaCenterControlType(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::SetMediaCenterControlType");
+    std::vector<int32_t> controlTypes;
+    if (!data.ReadInt32Vector(&controlTypes)) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "ReadInt32Vector failed");
+        return ERR_NONE;
+    }
+    if (controlTypes.size() > maxArrSize) {
+        SLOGE("SetMediaCenterControlType size=%{public}zu exceeds limit", controlTypes.size());
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "size exceeds max limit");
+        return ERR_NONE;
+    }
+    SLOGI("SetMediaCenterControlType size=%{public}zu", controlTypes.size());
+    int32_t ret = SetMediaCenterControlType(controlTypes);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetSupportedPlaySpeeds(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::SetSupportedPlaySpeeds");
+    std::vector<double> speeds;
+    if (!data.ReadDoubleVector(&speeds)) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "ReadDoubleVector failed");
+        return ERR_NONE;
+    }
+    if (speeds.size() > maxArrSize) {
+        SLOGE("SetSupportedPlaySpeeds size=%{public}zu exceeds limit", speeds.size());
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "size exceeds max limit");
+        return ERR_NONE;
+    }
+    SLOGI("SetSupportedPlaySpeeds size=%{public}zu", speeds.size());
+    int32_t ret = SetSupportedPlaySpeeds(speeds);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionStub::HandleSetSupportedLoopModes(MessageParcel& data, MessageParcel& reply)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionStub::SetSupportedLoopModes");
+    std::vector<int32_t> loopModes;
+    if (!data.ReadInt32Vector(&loopModes)) {
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "ReadInt32Vector failed");
+        return ERR_NONE;
+    }
+    if (loopModes.size() > maxArrSize) {
+        SLOGE("SetSupportedLoopModes size=%{public}zu exceeds limit", loopModes.size());
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "size exceeds max limit");
+        return ERR_NONE;
+    }
+    SLOGI("SetSupportedLoopModes size=%{public}zu", loopModes.size());
+    int32_t ret = SetSupportedLoopModes(loopModes);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionStub::HandleGetExtras(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionStub::HandleGetExtras");

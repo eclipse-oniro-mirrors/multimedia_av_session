@@ -183,6 +183,8 @@ public:
         const OHOS::AVSession::AVCallState &in);
     static taihe::array<string> ToTaiheStringArray(const std::vector<std::string> &in);
     static taihe::array<uint8_t> ToTaiheUint8Array(const std::vector<uint8_t> &in);
+    static taihe::array<int32_t> ToTaiheInt32Array(const std::vector<int32_t> &in);
+    static taihe::array<double> ToTaiheDoubleArray(const std::vector<double> &in);
     static ani_object ToBusinessError(ani_env *env, int32_t code, const std::string &message);
     static taihe::array<AVSessionController> ToTaiheAVSessionControllerArray(
         const std::vector<std::shared_ptr<OHOS::AVSession::AVSessionController>> &in);

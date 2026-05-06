@@ -387,6 +387,55 @@ void TaiheAVControllerCallback::OnDesktopLyricEnabled(bool isEnabled)
     HandleEvent(EVENT_DESKTOP_LYRIC_ENABLED, execute);
 }
 
+void TaiheAVControllerCallback::OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnMediaCenterControlTypeChanged");
+    std::vector<std::string> controlTypesStr = OHOS::AVSession::MediaCenterTypesToStrs(controlTypes);
+    auto execute = [controlTypesStr](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        array<string> controlTypesTaihe = TaiheUtils::ToTaiheStringArray(controlTypesStr);
+        array_view<string> controlTypesView = controlTypesTaihe;
+        std::shared_ptr<taihe::callback<void(array_view<string>)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(array_view<string>)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(controlTypesView);
+    };
+    HandleEvent(EVENT_MEDIA_CENTER_CONTROL_TYPE_CHANGED, execute);
+}
+
+void TaiheAVControllerCallback::OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnSupportedPlaySpeedsChanged");
+    auto execute = [speeds](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        array<double> speedsTaihe = TaiheUtils::ToTaiheDoubleArray(speeds);
+        array_view<double> speedsView = speedsTaihe;
+        std::shared_ptr<taihe::callback<void(array_view<double>)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(array_view<double>)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(speedsView);
+    };
+    HandleEvent(EVENT_SUPPORTED_PLAY_SPEEDS_CHANGED, execute);
+}
+
+void TaiheAVControllerCallback::OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes)
+{
+    OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnSupportedLoopModesChanged");
+    auto execute = [loopModes](std::shared_ptr<uintptr_t> method) {
+        env_guard guard;
+        CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
+        array<int32_t> loopModesTaihe = TaiheUtils::ToTaiheInt32Array(loopModes);
+        array_view<int32_t> loopModesView = loopModesTaihe;
+        std::shared_ptr<taihe::callback<void(array_view<int32_t>)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(array_view<int32_t>)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(loopModesView);
+    };
+    HandleEvent(EVENT_SUPPORTED_LOOP_MODES_CHANGED, execute);
+}
+
 int32_t TaiheAVControllerCallback::AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

@@ -284,6 +284,74 @@ int32_t AVSessionControllerProxy::GetExtrasWithEvent(const std::string& extraEve
     return ret;
 }
 
+int32_t AVSessionControllerProxy::GetMediaCenterControlType(std::vector<int32_t>& controlTypes)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_MEDIA_CENTER_CONTROL_TYPE, parcel,
+        reply, option) == 0, ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "get controlTypes failed");
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32Vector(&controlTypes), ERR_UNMARSHALLING, "read controlTypes failed");
+    return ret;
+}
+
+int32_t AVSessionControllerProxy::GetSupportedPlaySpeeds(std::vector<double>& speeds)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_SUPPORTED_PLAY_SPEEDS, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "get speeds failed");
+    CHECK_AND_RETURN_RET_LOG(reply.ReadDoubleVector(&speeds), ERR_UNMARSHALLING, "read speeds failed");
+    SLOGI("GetSupportedPlaySpeeds size=%{public}zu", speeds.size());
+    return ret;
+}
+
+int32_t AVSessionControllerProxy::GetSupportedLoopModes(std::vector<int32_t>& loopModes)
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_SUPPORTED_LOOP_MODES, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "get loopModes failed");
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32Vector(&loopModes), ERR_UNMARSHALLING, "read loopModes failed");
+    SLOGI("GetSupportedLoopModes size=%{public}zu", loopModes.size());
+    return ret;
+}
+
 int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     std::lock_guard lockGuard(controllerProxyLock_);

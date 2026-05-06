@@ -125,6 +125,9 @@ public:
     int32_t DeleteSupportCommand(const int32_t cmd) override { return 0; };
     int32_t SetSessionEvent(const std::string &event, const OHOS::AAFwk::WantParams &args) override { return 0; };
     int32_t UpdateAVQueueInfo(const AVQueueInfo& info) override { return 0; };
+    int32_t SetMediaCenterControlType(const std::vector<int32_t>& controlTypes) override { return 0; };
+    int32_t SetSupportedPlaySpeeds(const std::vector<double>& speeds) override { return 0; };
+    int32_t SetSupportedLoopModes(const std::vector<int32_t>& loopModes) override { return 0; };
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> GetAVCastController() override { return nullptr; };
@@ -470,4 +473,178 @@ static HWTEST(AVSessionStubTest, HandleUpdateAVQueueInfoEvent002, TestSize.Level
     int ret = avSessionStub.HandleUpdateAVQueueInfoEvent(data, reply);
     EXPECT_NE(ret, OHOS::ERR_NONE);
     SLOGI("HandleUpdateAVQueueInfoEvent002 end!");
+}
+
+/**
+ * @tc.name: HandleSetMediaCenterControlType001
+ * @tc.desc: Test HandleSetMediaCenterControlType
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetMediaCenterControlType001, TestSize.Level1)
+{
+    SLOGI("HandleSetMediaCenterControlType001 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<int32_t> controlTypes = {0, 1, 2, 3};
+    OHOS::MessageParcel data;
+    data.WriteInt32Vector(controlTypes);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetMediaCenterControlType(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSetMediaCenterControlType001 end!");
+}
+
+/**
+ * @tc.name: HandleSetSupportedPlaySpeeds001
+ * @tc.desc: Test HandleSetSupportedPlaySpeeds
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetSupportedPlaySpeeds001, TestSize.Level1)
+{
+    SLOGI("HandleSetSupportedPlaySpeeds001 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<double> speeds = {0.5, 1.0, 1.5, 2.0};
+    OHOS::MessageParcel data;
+    data.WriteInt32(speeds.size());
+    for (auto speed : speeds) {
+        data.WriteDouble(speed);
+    }
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetSupportedPlaySpeeds(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSetSupportedPlaySpeeds001 end!");
+}
+
+/**
+ * @tc.name: HandleSetMediaCenterControlType002
+ * @tc.desc: Test HandleSetMediaCenterControlType with size exceeds limit
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetMediaCenterControlType002, TestSize.Level1)
+{
+    SLOGI("HandleSetMediaCenterControlType002 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<int32_t> controlTypes(101, 0);
+    OHOS::MessageParcel data;
+    data.WriteInt32Vector(controlTypes);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetMediaCenterControlType(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    int32_t result = 0;
+    reply.ReadInt32(result);
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+    SLOGI("HandleSetMediaCenterControlType002 end!");
+}
+
+/**
+ * @tc.name: HandleSetSupportedPlaySpeeds002
+ * @tc.desc: Test HandleSetSupportedPlaySpeeds with size exceeds limit
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetSupportedPlaySpeeds002, TestSize.Level1)
+{
+    SLOGI("HandleSetSupportedPlaySpeeds002 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<double> speeds(101, 1.0);
+    OHOS::MessageParcel data;
+    data.WriteDoubleVector(speeds);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetSupportedPlaySpeeds(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    int32_t result = 0;
+    reply.ReadInt32(result);
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+    SLOGI("HandleSetSupportedPlaySpeeds002 end!");
+}
+
+/**
+ * @tc.name: HandleSetSupportedLoopModes001
+ * @tc.desc: Test HandleSetSupportedLoopModes with normal size
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetSupportedLoopModes001, TestSize.Level1)
+{
+    SLOGI("HandleSetSupportedLoopModes001 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<int32_t> loopModes = {0, 1, 2, 3};
+    OHOS::MessageParcel data;
+    data.WriteInt32Vector(loopModes);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetSupportedLoopModes(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSetSupportedLoopModes001 end!");
+}
+
+/**
+ * @tc.name: HandleSetSupportedLoopModes002
+ * @tc.desc: Test HandleSetSupportedLoopModes with size exceeds limit
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetSupportedLoopModes002, TestSize.Level1)
+{
+    SLOGI("HandleSetSupportedLoopModes002 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<int32_t> loopModes(101, 0);
+    OHOS::MessageParcel data;
+    data.WriteInt32Vector(loopModes);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetSupportedLoopModes(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    int32_t result = 0;
+    reply.ReadInt32(result);
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+    SLOGI("HandleSetSupportedLoopModes002 end!");
+}
+
+/**
+ * @tc.name: HandleSetMediaCenterControlType003
+ * @tc.desc: Test HandleSetMediaCenterControlType with empty array
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetMediaCenterControlType003, TestSize.Level1)
+{
+    SLOGI("HandleSetMediaCenterControlType003 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<int32_t> controlTypes = {};
+    OHOS::MessageParcel data;
+    data.WriteInt32Vector(controlTypes);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetMediaCenterControlType(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSetMediaCenterControlType003 end!");
+}
+
+/**
+ * @tc.name: HandleSetSupportedPlaySpeeds003
+ * @tc.desc: Test HandleSetSupportedPlaySpeeds with empty array
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetSupportedPlaySpeeds003, TestSize.Level1)
+{
+    SLOGI("HandleSetSupportedPlaySpeeds003 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<double> speeds = {};
+    OHOS::MessageParcel data;
+    data.WriteInt32(speeds.size());
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetSupportedPlaySpeeds(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSetSupportedPlaySpeeds003 end!");
+}
+
+/**
+ * @tc.name: HandleSetSupportedLoopModes003
+ * @tc.desc: Test HandleSetSupportedLoopModes with empty array
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleSetSupportedLoopModes003, TestSize.Level1)
+{
+    SLOGI("HandleSetSupportedLoopModes003 begin!");
+    AVSessionStubDemo avSessionStub;
+    std::vector<int32_t> loopModes = {};
+    OHOS::MessageParcel data;
+    data.WriteInt32Vector(loopModes);
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleSetSupportedLoopModes(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleSetSupportedLoopModes003 end!");
 }

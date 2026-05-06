@@ -75,6 +75,12 @@ public:
 
     int32_t GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras) override;
 
+    int32_t GetMediaCenterControlType(std::vector<int32_t>& controlTypes) override;
+
+    int32_t GetSupportedPlaySpeeds(std::vector<double>& speeds) override;
+
+    int32_t GetSupportedLoopModes(std::vector<int32_t>& loopModes) override;
+
     int32_t Destroy() override;
 
     std::string GetSessionId() override;

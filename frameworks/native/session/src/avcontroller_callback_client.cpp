@@ -201,6 +201,39 @@ ErrCode AVControllerCallbackClient::OnDesktopLyricEnabled(bool isEnabled)
     return AVSESSION_SUCCESS;
 }
 
+ErrCode AVControllerCallbackClient::OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes)
+{
+    CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, controlTypes]() { callback->OnMediaCenterControlTypeChanged(controlTypes); },
+        EVENT_NAME), "AVControllerCallbackClient handler postTask failed");
+    return AVSESSION_SUCCESS;
+}
+
+ErrCode AVControllerCallbackClient::OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds)
+{
+    CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, speeds]() { callback->OnSupportedPlaySpeedsChanged(speeds); },
+        EVENT_NAME), "AVControllerCallbackClient handler postTask failed");
+    return AVSESSION_SUCCESS;
+}
+
+ErrCode AVControllerCallbackClient::OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes)
+{
+    CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
+
+    auto callback = callback_;
+    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask([callback, loopModes]() { callback->OnSupportedLoopModesChanged(loopModes); },
+        EVENT_NAME), "AVControllerCallbackClient handler postTask failed");
+    return AVSESSION_SUCCESS;
+}
+
 ErrCode AVControllerCallbackClient::AddListenerForPlaybackState(
     const std::function<void(const AVPlaybackState&)>& listener)
 {

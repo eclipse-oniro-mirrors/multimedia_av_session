@@ -123,6 +123,9 @@ void MigrateAVSessionProxy::OnBytesReceived(const std::string &deviceId, const s
     CHECK_AND_RETURN_LOG(SoftbusSessionUtils::TransferStrToJson(jsonStr, jsonValue), "OnBytes err parse json");
 
     switch (infoType) {
+        case SYNC_PROTOCOL_VERSION:
+            ProcessProtocolVersion(jsonValue, deviceId);
+            break;
         case SYNC_FOCUS_SESSION_INFO:
             ProcessSessionInfo(jsonValue);
             break;
@@ -143,6 +146,9 @@ void MigrateAVSessionProxy::OnBytesReceived(const std::string &deviceId, const s
             break;
         case SYNC_CURRENT_DEVICE:
             ProcessPreferredOutputDevice(jsonValue);
+            break;
+        case SYNC_LONG_PAUSE_NOTIFY:
+            ProcessLongPauseNotify(jsonValue);
             break;
         default:
             SLOGE("OnBytesReceived with unknow infoType:%{public}d", infoType);
@@ -294,6 +300,12 @@ const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxy::Migrate
             case SESSION_NUM_SET_MEDIACONTROL_NEED_STATE:
                 NotifyMediaControlNeedStateChange(extras);
                 break;
+            case SESSION_NUM_SET_MEDIACONTROL_SYNC_TIME:
+                NotifyMediaControlSyncTime(extras);
+                break;
+            case AUDIO_NUM_GET_VERSION:
+                GetVersion(extras);
+                break;
             default:
                 break;
         }
@@ -399,6 +411,19 @@ void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantP
     }
     extras.SetParam(AUDIO_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, OHOS::AAFwk::String::Box(jsonStr));
     cJSON_Delete(jsonData);
+}
+
+void MigrateAVSessionProxy::GetVersion(AAFwk::WantParams& extras)
+{
+    std::lock_guard<std::mutex> lock(versionMapMtx_);
+    auto it = deviceVersionMap_.find(deviceId_);
+    if (it != deviceVersionMap_.end()) {
+        SLOGI("GetVersion for device:%{public}s version:%{public}d", deviceId_.c_str(), it->second);
+        extras.SetParam(AUDIO_GET_VERSION, OHOS::AAFwk::Integer::Box(it->second));
+    } else {
+        SLOGI("GetVersion no version for device:%{public}s", deviceId_.c_str());
+        extras.SetParam(AUDIO_GET_VERSION, OHOS::AAFwk::Integer::Box(AVSESSION_DEFAULT_VERSION));
+    }
 }
 
 void MigrateAVSessionProxy::ColdStartFromProxy()
@@ -747,6 +772,37 @@ void MigrateAVSessionProxy::ProcessMediaImage(std::string mediaImageStr)
     sessionItem->SetAVMetaData(metaData);
 }
 
+void MigrateAVSessionProxy::ProcessProtocolVersion(cJSON* jsonValue, const std::string& deviceId)
+{
+    SLOGI("Received protocol version from phone");
+    int32_t newVersion = SoftbusSessionUtils::GetIntFromJson(jsonValue, "protocolVersion");
+
+    bool versionChanged = false;
+    {
+        std::lock_guard<std::mutex> lock(versionMapMtx_);
+        auto it = deviceVersionMap_.find(deviceId);
+        if (it == deviceVersionMap_.end() || it->second != newVersion) {
+            versionChanged = true;
+        }
+        deviceVersionMap_[deviceId] = newVersion;
+    }
+
+    if (versionChanged && preSetController_ != nullptr) {
+        AAFwk::WantParams args;
+        args.SetParam(AUDIO_GET_VERSION, OHOS::AAFwk::Integer::Box(newVersion));
+        preSetController_->HandleSetSessionEvent(AUDIO_GET_VERSION, args);
+        SLOGI("Protocol version changed, notify controller");
+    }
+}
+
+void MigrateAVSessionProxy::ProcessLongPauseNotify(cJSON* jsonValue)
+{
+    bool isLongPause = SoftbusSessionUtils::GetBoolFromJson(jsonValue, LONG_PAUSE_STATE);
+    SLOGI("ProcessLongPauseNotify isLongPause:%{public}d", isLongPause);
+    int32_t event = isLongPause ? REMOTE_MEDIA_LONG_PAUSE : REMOTE_MEDIA_LONG_PAUSE_RESUME;
+    servicePtr_->PublishMediaControlState(event);
+}
+
 void MigrateAVSessionProxy::SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr)
 {
     SLOGI("SendControlCommandMsg with code:%{public}d", commandCode);
@@ -785,6 +841,35 @@ void MigrateAVSessionProxy::SendMediaControlNeedStateMsg(bool isMock)
     }
     if (!SoftbusSessionUtils::AddBoolToJson(controlMsg, NEED_STATE, isMock ? true : isNeedByMediaControl.load())) {
         SLOGE("AddBoolToJson with key:%{public}s|value:%{public}d fail", NEED_STATE, isNeedByMediaControl.load());
+        cJSON_Delete(controlMsg);
+        return;
+    }
+
+    SoftbusSessionUtils::TransferJsonToStr(controlMsg, msg);
+    SendByteForNext(deviceId_, msg);
+    cJSON_Delete(controlMsg);
+}
+
+void MigrateAVSessionProxy::SendMediaControlSyncTime(int32_t timeoutMs)
+{
+    SLOGI("SendMediaControlSyncTime with state:%{public}d|timeout:%{public}d",
+        isNeedByMediaControl.load(), timeoutMs);
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_MEDIA_CONTROL_NEED_STATE});
+
+    cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
+    if (controlMsg == nullptr) {
+        SLOGE("get controlMsg fail");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(controlMsg, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION)) {
+        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail",
+            AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+        cJSON_Delete(controlMsg);
+        return;
+    }
+    if (!SoftbusSessionUtils::AddIntToJson(controlMsg, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, timeoutMs)) {
+        SLOGE("AddIntToJson with key:%{public}s|value:%{public}d fail",
+            MEDIACONTROL_NEED_STATE_TIMEOUT_MS, timeoutMs);
         cJSON_Delete(controlMsg);
         return;
     }
@@ -850,6 +935,28 @@ void MigrateAVSessionProxy::NotifyMediaControlNeedStateChange(AAFwk::WantParams&
     SLOGI("refresh NeedState:%{public}d", isNeed);
     isNeedByMediaControl.store(isNeed);
     SendMediaControlNeedStateMsg();
+}
+
+void MigrateAVSessionProxy::NotifyMediaControlSyncTime(AAFwk::WantParams& extras)
+{
+    CHECK_AND_RETURN_LOG(extras.HasParam(MEDIACONTROL_NEED_STATE), "extras not have NeedState");
+    auto value = extras.GetParam(MEDIACONTROL_NEED_STATE);
+    AAFwk::IBoolean* boolValue = AAFwk::IBoolean::Query(value);
+    CHECK_AND_RETURN_LOG(boolValue != nullptr, "extras have no NeedState after query");
+    bool isNeed = OHOS::AAFwk::Boolean::Unbox(boolValue);
+    SLOGI("refresh NeedStateWithTimeout:%{public}d", isNeed);
+    isNeedByMediaControl.store(isNeed);
+
+    int32_t timeoutMs = NEED_STATE_TIMER_INTERVAL;
+    if (extras.HasParam(MEDIACONTROL_NEED_STATE_TIMEOUT_MS)) {
+        auto timeoutValue = extras.GetParam(MEDIACONTROL_NEED_STATE_TIMEOUT_MS);
+        AAFwk::IInteger* timeoutInt = AAFwk::IInteger::Query(timeoutValue);
+        if (timeoutInt != nullptr) {
+            timeoutMs = OHOS::AAFwk::Integer::Unbox(timeoutInt);
+            SLOGI("Use custom timeout:%{public}d ms", timeoutMs);
+        }
+    }
+    SendMediaControlSyncTime(timeoutMs);
 }
 
 AVSessionObserver::AVSessionObserver(const std::string &playerId, std::weak_ptr<MigrateAVSessionProxy> migrateProxy)

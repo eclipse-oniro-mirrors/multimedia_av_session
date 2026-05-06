@@ -224,6 +224,36 @@ int32_t AVSessionControllerStub::HandleGetExtrasWithEvent(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int32_t AVSessionControllerStub::HandleGetMediaCenterControlType(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> controlTypes;
+    int32_t ret = GetMediaCenterControlType(controlTypes);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "get controlTypes failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32Vector(controlTypes), ERR_NONE, "write controlTypes failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleGetSupportedPlaySpeeds(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<double> speeds;
+    int32_t ret = GetSupportedPlaySpeeds(speeds);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "get speeds failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteDoubleVector(speeds), ERR_NONE, "write speeds failed");
+    return ERR_NONE;
+}
+
+int32_t AVSessionControllerStub::HandleGetSupportedLoopModes(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> loopModes;
+    int32_t ret = GetSupportedLoopModes(loopModes);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "get loopModes failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32Vector(loopModes), ERR_NONE, "write loopModes failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel& data, MessageParcel& reply)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionControllerStub::SendAVKeyEvent");

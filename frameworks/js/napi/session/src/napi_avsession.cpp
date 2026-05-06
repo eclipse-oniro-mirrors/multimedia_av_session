@@ -170,6 +170,9 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setAVQueueItems", SetAVQueueItems),
         DECLARE_NAPI_FUNCTION("setAVQueueTitle", SetAVQueueTitle),
         DECLARE_NAPI_FUNCTION("sendCustomData", SendCustomData),
+        DECLARE_NAPI_FUNCTION("setMediaCenterControlType", SetMediaCenterControlType),
+        DECLARE_NAPI_FUNCTION("setSupportedPlaySpeeds", SetSupportedPlaySpeeds),
+        DECLARE_NAPI_FUNCTION("setSupportedLoopModes", SetSupportedLoopModes),
         DECLARE_NAPI_FUNCTION("getAVCastController", GetAVCastController),
         DECLARE_NAPI_FUNCTION("stopCasting", ReleaseCast),
         DECLARE_NAPI_FUNCTION("getAllCastDisplays", GetAllCastDisplays),
@@ -1531,6 +1534,109 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SendCustomData", executor, complete);
+}
+
+napi_value NapiAVSession::SetMediaCenterControlType(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<std::string> controlTypes_;
+        std::vector<int32_t> controlTypesNum_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->controlTypes_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get controlTypes failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetMediaCenterControlType failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        context->controlTypesNum_ = MediaCenterTypesToNums(context->controlTypes_);
+        CHECK_ARGS_RETURN_VOID(context, context->controlTypesNum_.size() == context->controlTypes_.size(),
+            "invalid controlType string", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        int32_t ret = napiSession->session_->SetMediaCenterControlType(context->controlTypesNum_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->errMessage = "SetMediaCenterControlType failed : native server exception";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+    return NapiAsyncWork::Enqueue(env, context, "SetMediaCenterControlType", executor, complete);
+}
+
+napi_value NapiAVSession::SetSupportedPlaySpeeds(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<double> speeds_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValueEx(env, argv[ARGV_FIRST], context->speeds_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get speeds failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetSupportedPlaySpeeds failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SetSupportedPlaySpeeds(context->speeds_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->errMessage = "SetSupportedPlaySpeeds failed : native server exception";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+    return NapiAsyncWork::Enqueue(env, context, "SetSupportedPlaySpeeds", executor, complete);
+}
+
+napi_value NapiAVSession::SetSupportedLoopModes(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<int32_t> loopModes_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValueEx(env, argv[ARGV_FIRST], context->loopModes_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get loopModes failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    auto executor = [context]() {
+        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errMessage = "SetSupportedLoopModes failed : session is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiSession->session_->SetSupportedLoopModes(context->loopModes_);
+        if (ret != AVSESSION_SUCCESS) {
+            context->errMessage = "SetSupportedLoopModes failed : native server exception";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+    return NapiAsyncWork::Enqueue(env, context, "SetSupportedLoopModes", executor, complete);
 }
 
 napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info info)

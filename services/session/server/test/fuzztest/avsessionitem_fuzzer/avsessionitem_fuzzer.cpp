@@ -233,7 +233,6 @@ void AvSessionItemTestImpl(sptr<AVSessionItem> avSessionItem)
     avSessionItem->GetUid();
     avSessionItem->GetAbilityName();
     avSessionItem->GetRemoteSource();
-    avSessionItem->GetAnonymousDeviceId(GetString());
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     avSessionItem->RegisterListenerStreamToCast(std::make_pair(GetString(), GetString()), deviceInfo);
 #endif

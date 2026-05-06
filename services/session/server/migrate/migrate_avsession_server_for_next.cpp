@@ -146,6 +146,29 @@ void MigrateAVSessionServer::CheckPostClean(bool resetOnlySessionInfo)
 
 void MigrateAVSessionServer::HandleFocusPlaybackStateChange(const std::string &sessionId, const AVPlaybackState &state)
 {
+    // Long pause detection logic
+    int32_t newState = state.GetState();
+    if (state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_STATE)) {
+        if (newState == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
+            // Start a re-entrant 5-minute timer when paused, reset on each pause
+            AVSessionEventHandler::GetInstance().AVSessionRemoveTask("LongPauseTimer");
+            auto timerCallback = [this]() { HandleLongPauseTimer(); };
+            AVSessionEventHandler::GetInstance().AVSessionPostTask(timerCallback, "LongPauseTimer",
+                longPauseTimerInterval);
+            SLOGI("HandleFocusPlaybackStateChange start 5min long pause timer");
+        } else if (newState == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+            // Reset timer to 0 on resume, notify resume if long pause was already published
+            AVSessionEventHandler::GetInstance().AVSessionRemoveTask("LongPauseTimer");
+            SLOGI("HandleFocusPlaybackStateChange reset long pause timer");
+            if (hasLongPauseNotified_.load()) {
+                // Forward long pause resume state to watch
+                SendLongPauseNotifyToNext(false);
+                SLOGI("HandleFocusPlaybackStateChange send long pause resume to watch");
+                hasLongPauseNotified_.store(false);
+            }
+        }
+    }
+
     DoPlaybackStateSyncToRemote(state);
 }
 
@@ -607,7 +630,29 @@ void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* command
         return;
     }
 
-    if (cJSON_HasObjectItem(commandJsonValue, NEED_STATE)) {
+    // New version logic: check version number first
+    if (cJSON_HasObjectItem(commandJsonValue, AVSESSION_PROXY_CURRENT_VERSION)) {
+        int32_t version = SoftbusSessionUtils::GetIntFromJson(commandJsonValue, AVSESSION_PROXY_CURRENT_VERSION);
+        if (version == AVSESSION_PROXY_VERSION) {
+            // Set timer when music info is visible, auto set to false after 6 seconds
+            if (!isNeedByRemote.load()) {
+                SLOGI("isNeed refresh data with V2");
+                isNeedByRemote.store(true);
+                LocalFrontSessionArrive(lastSessionId_);
+                TriggerAudioCallback();
+            }
+            AVSessionEventHandler::GetInstance().AVSessionRemoveTask("NeedStateTimer");
+            auto timerCallback = [this]() { HandleNeedStateTimer(); };
+            int32_t timeoutMs = NEED_STATE_TIMER_INTERVAL;
+            if (cJSON_HasObjectItem(commandJsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS)) {
+                timeoutMs = SoftbusSessionUtils::GetIntFromJson(commandJsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS);
+                SLOGI("Use custom timeout:%{public}d ms from V2 interface", timeoutMs);
+            }
+            AVSessionEventHandler::GetInstance().AVSessionPostTask(timerCallback, "NeedStateTimer", timeoutMs);
+            SLOGI("isNeedSet V2, start %{public}d ms timer", timeoutMs);
+        }
+    } else if (cJSON_HasObjectItem(commandJsonValue, NEED_STATE)) {
+        // Legacy version compatibility logic
         bool newListenerSetState = SoftbusSessionUtils::GetBoolFromJson(commandJsonValue, NEED_STATE);
         if (!isNeedByRemote.load() && newListenerSetState) {
             SLOGI("isNeed refresh data");
@@ -870,5 +915,45 @@ bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Cal
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(name);
     return AVSessionEventHandler::GetInstance().AVSessionPostTask(callback, name);
 }
+
+void MigrateAVSessionServer::HandleNeedStateTimer()
+{
+    isNeedByRemote.store(false);
+    SLOGI("HandleNeedStateTimer out, isNeedByRemote:%{public}d", isNeedByRemote.load());
 }
 
+void MigrateAVSessionServer::HandleLongPauseTimer()
+{
+    SLOGI("HandleLongPauseTimer in, hasLongPauseNotified:%{public}d", hasLongPauseNotified_.load());
+    if (!hasLongPauseNotified_.load()) {
+        hasLongPauseNotified_.store(true);
+        SendLongPauseNotifyToNext(true);
+        SLOGI("HandleLongPauseTimer send long pause state to watch");
+    }
+}
+
+void MigrateAVSessionServer::SendLongPauseNotifyToNext(bool isLongPause)
+{
+    SLOGI("SendLongPauseNotifyToNext isLongPause:%{public}d", isLongPause);
+    std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_LONG_PAUSE_NOTIFY});
+
+    cJSON* notifyMsg = SoftbusSessionUtils::GetNewCJSONObject();
+    if (notifyMsg == nullptr) {
+        SLOGE("get notifyMsg fail");
+        return;
+    }
+    if (!SoftbusSessionUtils::AddBoolToJson(notifyMsg, LONG_PAUSE_STATE, isLongPause)) {
+        SLOGE("AddBoolToJson fail");
+        cJSON_Delete(notifyMsg);
+        return;
+    }
+
+    SoftbusSessionUtils::TransferJsonToStr(notifyMsg, msg);
+    MigratePostTask(
+        [this, msg]() {
+            SendByteForNext(deviceId_, msg);
+        },
+        "SYNC_LONG_PAUSE_NOTIFY");
+    cJSON_Delete(notifyMsg);
+}
+}

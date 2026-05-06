@@ -17,6 +17,7 @@
 #define HW_CAST_DISPLAY_LISTENER_H
 
 #include <mutex>
+#include <atomic>
 #include "avsession_descriptor.h"
 #include "screen_manager_lite.h"
 #include "display_manager_lite.h"
@@ -26,21 +27,26 @@
 namespace OHOS::AVSession {
 class HwCastDisplayListener : public Rosen::ScreenManagerLite::IScreenListener {
 public:
-    explicit HwCastDisplayListener(sptr<IAVSessionCallback> callback) : listener_(callback) {};
+    explicit HwCastDisplayListener(sptr<IAVSessionCallback> callback, bool isPcMode)
+        : listener_(callback), isSupportExtendedScreen_(isPcMode) {};
     void OnConnect(Rosen::DisplayId displayId) override;
     void OnDisconnect(Rosen::DisplayId displayId) override;
     void OnChange(Rosen::DisplayId displayId) override;
     void SetDisplayInfo(sptr<Rosen::DisplayInfo> displayInfo);
     sptr<Rosen::DisplayInfo> GetDisplayInfo();
     void SetAppCastDisplayId(Rosen::DisplayId displayId);
+    void SetSupportExtendedScreen(bool isSupport);
+    bool IsSupportExtendedScreen();
 
 private:
     void ReportCastDisplay(sptr<Rosen::DisplayInfo> displayInfo, CastDisplayState displayState);
 
     sptr<IAVSessionCallback> listener_;
     sptr<Rosen::DisplayInfo> curDisplayInfo_;
+    sptr<Rosen::DisplayInfo> stashedDisplayInfo_;
     uint64_t appCastId_ = 0;
-    std::mutex dataMutex_;
+    std::atomic<bool> isSupportExtendedScreen_ {false};
+    std::recursive_mutex dataMutex_;
 };
 } // namespace OHOS::AVSession
 #endif // HW_CAST_DISPLAY_LISTENER_H

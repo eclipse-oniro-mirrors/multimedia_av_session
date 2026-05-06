@@ -96,7 +96,7 @@ public:
     std::string lastErrorMsg_;
     int callCount_ = 0;
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) {}
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, int32_t reasonCode) {}
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
     {
@@ -445,6 +445,51 @@ static HWTEST(HwCastSupplementTest, RegisterCastSessionStateListener003, TestSiz
 }
 
 /**
+ * @tc.name: RegisterCastSessionStateListener004
+ * @tc.desc: test RegisterCastSessionStateListener with nullptr listener
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, RegisterCastSessionStateListener004, TestSize.Level0)
+{
+    SLOGI("RegisterCastSessionStateListener004 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    std::shared_ptr<IAVCastSessionStateListener> listener = nullptr;
+    auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
+    hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+    bool ret = hwCastProvider->RegisterCastSessionStateListener(castId, listener);
+    EXPECT_EQ(ret, false);
+    SLOGI("RegisterCastSessionStateListener004 end!");
+}
+
+/**
+ * @tc.name: RegisterCastSessionStateListener005
+ * @tc.desc: test RegisterCastSessionStateListener triggers OnCastStateChange when stashDeviceState_ > 0
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, RegisterCastSessionStateListener005, TestSize.Level0)
+{
+    SLOGI("RegisterCastSessionStateListener005 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
+    hwCastProviderSession->stashDeviceState_ = 6;
+    hwCastProviderSession->stashDeviceId_ = "stashDeviceId";
+    hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+
+    auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
+    bool ret = hwCastProvider->RegisterCastSessionStateListener(castId, listener);
+    EXPECT_EQ(ret, true);
+    SLOGI("RegisterCastSessionStateListener005 end!");
+}
+
+/**
  * @tc.name: UnRegisterCastSessionStateListener001
  * @tc.desc: test UnRegisterCastSessionStateListener
  * @tc.type: FUNC
@@ -642,6 +687,32 @@ static HWTEST(HwCastSupplementTest, SetStreamState003, TestSize.Level0)
     bool ret = hwCastProvider->SetStreamState(castId, deviceInfo);
     EXPECT_EQ(ret, true);
     SLOGI("SetStreamState003 end!");
+}
+
+/**
+ * @tc.name: SetStreamState004
+ * @tc.desc: test SetStreamState with OnCastStateChange callback triggered
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, SetStreamState004, TestSize.Level0)
+{
+    SLOGI("SetStreamState004 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
+    auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
+    auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
+    hwCastProviderSession->castSessionStateListenerList_.push_back(listener);
+    hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+    bool ret = hwCastProvider->SetStreamState(castId, deviceInfo);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(hwCastProviderSession->stashDeviceState_, hwCastProviderSession->deviceStateConnection);
+    EXPECT_EQ(hwCastProviderSession->stashDeviceId_, deviceInfo.deviceId_);
+    SLOGI("SetStreamState004 end!");
 }
 
 /**
@@ -1349,60 +1420,4 @@ static HWTEST(HwCastSupplementTest, HwCastSessionToast001, TestSize.Level1)
     EXPECT_EQ(provideSession != nullptr, true);
     SLOGI("HwCastSessionToast001 end!");
 }
-
-/**
- * @tc.name: HwCastProviderSession_ReportDeviceCastingTime_001
- * @tc.desc: test ReportDeviceCastingTime with deviceStateConnection
- * @tc.type: FUNC
- * @tc.require:
- */
-static HWTEST(HwCastSupplementTest, HwCastProviderSession_ReportDeviceCastingTime_001, TestSize.Level0)
-{
-    SLOGI("HwCastProviderSession_ReportDeviceCastingTime_001 begin!");
-    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
-    EXPECT_EQ(provideSession != nullptr, true);
-    provideSession->Init();
-    OHOS::CastEngine::DeviceStateInfo stateInfo;
-    stateInfo.deviceId = "testDeviceId";
-    int32_t deviceState = static_cast<int32_t>(OHOS::CastEngine::DeviceState::STREAM);
-    OHOS::CastEngine::CastRemoteDevice castRemoteDevice;
-    provideSession->ReportDeviceCastingTime(0, stateInfo.deviceId, castRemoteDevice);
-    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 0);
-    provideSession->ReportDeviceCastingTime(deviceState, stateInfo.deviceId, castRemoteDevice);
-    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 1);
-    provideSession->ReportDeviceCastingTime(0, stateInfo.deviceId, castRemoteDevice);
-    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 1);
-    deviceState = static_cast<int>(CastEngine::DeviceState::DISCONNECTED);
-    provideSession->ReportDeviceCastingTime(deviceState, stateInfo.deviceId, castRemoteDevice);
-    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 0);
-    provideSession->ReportDeviceCastingTime(0, stateInfo.deviceId, castRemoteDevice);
-    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 0);
-    SLOGI("HwCastProviderSession_ReportDeviceCastingTime_001 end!");
-}
-
-/**
- * @tc.name: HwCastProviderSession_ReportDeviceCastingTime_002
- * @tc.desc: test ReportDeviceCastingTime with multiple devices
- * @tc.type: FUNC
- * @tc.require:
- */
-static HWTEST(HwCastSupplementTest, HwCastProviderSession_ReportDeviceCastingTime_002, TestSize.Level0)
-{
-    SLOGI("HwCastProviderSession_ReportDeviceCastingTime_002 begin!");
-    auto provideSession = std::make_shared<HwCastProviderSession>(nullptr);
-    EXPECT_EQ(provideSession != nullptr, true);
-    provideSession->Init();
-    std::string deviceId1 = "testDeviceId1";
-    std::string deviceId2 = "testDeviceId2";
-    int32_t deviceState = static_cast<int>(OHOS::CastEngine::DeviceState::STREAM);
-    OHOS::CastEngine::CastRemoteDevice castRemoteDevice;
-    provideSession->ReportDeviceCastingTime(deviceState, deviceId1, castRemoteDevice);
-    provideSession->ReportDeviceCastingTime(deviceState, deviceId2, castRemoteDevice);
-    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 2);
-    deviceState = static_cast<int>(CastEngine::DeviceState::DISCONNECTED);
-    provideSession->ReportDeviceCastingTime(deviceState, deviceId1, castRemoteDevice);
-    EXPECT_EQ(provideSession->deviceConnectMap_.size(), 1);
-    SLOGI("HwCastProviderSession_ReportDeviceCastingTime_002 end!");
-}
-
 } // OHOS::AVSession

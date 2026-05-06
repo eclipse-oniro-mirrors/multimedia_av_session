@@ -38,6 +38,20 @@ static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::st
     return status;
 }
 
+static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, double value)
+{
+    napi_value property = nullptr;
+    napi_status status = napi_create_double(env, value, &property);
+    if (status != napi_ok) {
+        return status;
+    }
+    status = napi_set_named_property(env, obj, name.c_str(), property);
+    if (status != napi_ok) {
+        return status;
+    }
+    return status;
+}
+
 static napi_status SetNamedProperty(napi_env env, napi_value& obj, const std::string& name, const std::string& value)
 {
     napi_value property = nullptr;
@@ -187,9 +201,12 @@ static napi_value ExportConnectionState(napi_env env)
     (void)SetNamedProperty(env, result, "STATE_CONNECTED", static_cast<int32_t>(ConnectionState::STATE_CONNECTED));
     (void)SetNamedProperty(env, result, "STATE_DISCONNECTED",
                            static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED));
-    (void)SetNamedProperty(env, result, "AUTHING", static_cast<int32_t>(ConnectionState::AUTHING));
-    (void)SetNamedProperty(env, result, "MIRROR_TO_STREAM", static_cast<int32_t>(ConnectionState::MIRROR_TO_STREAM));
-    (void)SetNamedProperty(env, result, "STREAM_TO_MIRROR", static_cast<int32_t>(ConnectionState::STREAM_TO_MIRROR));
+    (void)SetNamedProperty(env, result, "STATE_AUTHENTICATING",
+        static_cast<int32_t>(ConnectionState::STATE_AUTHENTICATING));
+    (void)SetNamedProperty(env, result, "STATE_MIRROR_TO_STREAM",
+        static_cast<int32_t>(ConnectionState::STATE_MIRROR_TO_STREAM));
+    (void)SetNamedProperty(env, result, "STATE_STREAM_TO_MIRROR",
+        static_cast<int32_t>(ConnectionState::STATE_STREAM_TO_MIRROR));
 
     napi_object_freeze(env, result);
     return result;
@@ -471,6 +488,30 @@ static napi_value ExportDistributedSessionType(napi_env env)
     return result;
 }
 
+static napi_value ExportPlaybackSpeed(napi_env env)
+{
+    napi_value result = nullptr;
+    napi_status status = napi_create_object(env, &result);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+
+    (void)SetNamedProperty(env, result, "SPEED_0_125_X", AVPlaybackState::SPEED_0_125_X);
+    (void)SetNamedProperty(env, result, "SPEED_0_25_X", AVPlaybackState::SPEED_0_25_X);
+    (void)SetNamedProperty(env, result, "SPEED_0_50_X", AVPlaybackState::SPEED_0_50_X);
+    (void)SetNamedProperty(env, result, "SPEED_0_75_X", AVPlaybackState::SPEED_0_75_X);
+    (void)SetNamedProperty(env, result, "SPEED_1_00_X", AVPlaybackState::SPEED_1_00_X);
+    (void)SetNamedProperty(env, result, "SPEED_1_25_X", AVPlaybackState::SPEED_1_25_X);
+    (void)SetNamedProperty(env, result, "SPEED_1_50_X", AVPlaybackState::SPEED_1_50_X);
+    (void)SetNamedProperty(env, result, "SPEED_1_75_X", AVPlaybackState::SPEED_1_75_X);
+    (void)SetNamedProperty(env, result, "SPEED_2_00_X", AVPlaybackState::SPEED_2_00_X);
+    (void)SetNamedProperty(env, result, "SPEED_3_00_X", AVPlaybackState::SPEED_3_00_X);
+    (void)SetNamedProperty(env, result, "SPEED_4_00_X", AVPlaybackState::SPEED_4_00_X);
+
+    napi_object_freeze(env, result);
+    return result;
+}
+
 static napi_value ExportSessionCategory(napi_env env)
 {
     napi_value result = nullptr;
@@ -552,7 +593,8 @@ napi_status InitEnums(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("CallerType", ExportCallerType(env)),
         DECLARE_NAPI_PROPERTY("SessionCategory", ExportSessionCategory(env)),
         DECLARE_NAPI_PROPERTY("BackgroundPlayMode", ExportBackgroundPlayMode(env)),
-        DECLARE_NAPI_PROPERTY("ExtraKey", ExportExtraKey(env))
+        DECLARE_NAPI_PROPERTY("ExtraKey", ExportExtraKey(env)),
+        DECLARE_NAPI_PROPERTY("PlaybackSpeed", ExportPlaybackSpeed(env))
     };
 
     size_t count = sizeof(properties) / sizeof(napi_property_descriptor);

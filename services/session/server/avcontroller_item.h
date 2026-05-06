@@ -51,6 +51,12 @@ public:
 
     int32_t GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras) override;
 
+    int32_t GetMediaCenterControlType(std::vector<int32_t>& controlTypes) override;
+
+    int32_t GetSupportedPlaySpeeds(std::vector<double>& speeds) override;
+
+    int32_t GetSupportedLoopModes(std::vector<int32_t>& loopModes) override;
+
     int32_t SendAVKeyEvent(const MMI::KeyEvent& keyEvent) override;
 
     int32_t GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability) override;
@@ -123,6 +129,12 @@ public:
     void HandleQueueTitleChange(const std::string& title);
 
     void HandleExtrasChange(const AAFwk::WantParams& extras);
+
+    void HandleMediaCenterControlTypeChange(const std::vector<int32_t>& controlTypes);
+
+    void HandleSupportedPlaySpeedsChange(const std::vector<double>& speeds);
+
+    void HandleSupportedLoopModesChange(const std::vector<int32_t>& loopModes);
 
     void HandleCustomData(const AAFwk::WantParams& data);
 

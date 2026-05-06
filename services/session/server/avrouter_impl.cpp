@@ -342,7 +342,7 @@ int32_t AVRouterImpl::OnCastServerDied(int32_t providerNumber)
         providerManagerMap_.clear();
 
         DeviceInfo deviceInfo(AVCastCategory::CATEGORY_LOCAL, "-1", "RemoteCast");
-        OnCastStateChange(disconnectStateFromCast_, deviceInfo);
+        OnCastStateChange(disconnectStateFromCast_, deviceInfo, noReasonCode_);
         castHandleToInfoMap_.clear();
 
         CHECK_AND_RETURN_RET(deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE, AVSESSION_SUCCESS);
@@ -574,10 +574,10 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
                 castHandleInfo.avRouterListener_ != nullptr) {
                 SLOGI("trigger the OnCastStateChange for disconnected/connected avRouterListener");
                 castHandleInfo.avRouterListener_->OnCastStateChange(disconnectStateFromCast_,
-                    castHandleInfo.outputDeviceInfo_.deviceInfos_[0], false);
+                    castHandleInfo.outputDeviceInfo_.deviceInfos_[0], false, noReasonCode_);
                 castHandleToInfoMap_[castHandle].avRouterListener_ = callback;
                 callback->OnCastStateChange(connectStateFromCast_,
-                    castHandleInfo.outputDeviceInfo_.deviceInfos_[0], false);
+                    castHandleInfo.outputDeviceInfo_.deviceInfos_[0], false, noReasonCode_);
                 return AVSESSION_SUCCESS;
             }
         }
@@ -599,7 +599,7 @@ int32_t AVRouterImpl::RegisterCallback(int64_t castHandle, const std::shared_ptr
         } else {
             mirrorSessionMap_[sessionId] = callback;
         }
-        callback->OnCastStateChange(connectStateFromCast_, deviceInfo, false);
+        callback->OnCastStateChange(connectStateFromCast_, deviceInfo, false, noReasonCode_);
     }
     SLOGD("AVRouter impl register callback finished");
     return AVSESSION_SUCCESS;
@@ -764,7 +764,7 @@ void AVRouterImpl::UpdateConnectState(int32_t castState)
     }
 }
 
-void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, int32_t reasonCode)
 {
     UpdateConnectState(castState);
     switch (castState) {
@@ -789,9 +789,9 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
         if (castHandleInfo.avRouterListener_ != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered avRouterListener");
             std::shared_ptr<IAVRouterListener> listener = castHandleInfo.avRouterListener_;
-            AVSessionEventHandler::GetInstance().AVSessionPostTask([listener, castState, deviceInfo]() {
+            AVSessionEventHandler::GetInstance().AVSessionPostTask([listener, castState, deviceInfo, reasonCode]() {
                 CHECK_AND_RETURN_LOG(listener != nullptr, "listener is nullptr");
-                listener->OnCastStateChange(castState, deviceInfo, true);
+                listener->OnCastStateChange(castState, deviceInfo, true, reasonCode);
                 }, "OnCastStateChange", 0);
             if (castState == disconnectStateFromCast_) {
                 OutputDeviceInfo localDevice;
@@ -837,7 +837,7 @@ void AVRouterImpl::HandleStreamToMirrorFromSinkEvent()
         std::shared_ptr<IAVRouterListener> listener = castHandleInfo.avRouterListener_;
         AVSessionEventHandler::GetInstance().AVSessionPostTask([listener, this]() {
             CHECK_AND_RETURN_LOG(listener != nullptr, "listener is nullptr");
-            listener->OnCastStateChange(disconnectStateFromCast_, connectedDeviceInfo_, false);
+            listener->OnCastStateChange(disconnectStateFromCast_, connectedDeviceInfo_, false, noReasonCode_);
             }, "OnCastStateChange", 0);
     }
 }
@@ -883,14 +883,15 @@ void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo devi
     disconnectOtherSession_.store(true);
     for (const auto& [string, avRouterListener] : mirrorSessionMap_) {
         if (string != sessionId && avRouterListener != nullptr) {
-            avRouterListener->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false);
+            avRouterListener->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false, noReasonCode_);
         }
     }
     for (auto& [number, castHandleInfo] : castHandleToInfoMap_) {
         CHECK_AND_CONTINUE(castHandleInfo.sessionId_ != sessionId);
         CHECK_AND_CONTINUE(castHandleInfo.avRouterListener_ != nullptr);
         CHECK_AND_CONTINUE(mirrorSessionMap_[sessionId] != nullptr);
-        castHandleInfo.avRouterListener_->OnCastStateChange(disconnectStateFromCast_, deviceInfo, false);
+        castHandleInfo.avRouterListener_->OnCastStateChange(disconnectStateFromCast_,
+            deviceInfo, false, noReasonCode_);
         castHandleInfo.sessionId_ = sessionId;
         castHandleInfo.avRouterListener_ = mirrorSessionMap_[sessionId];
     }

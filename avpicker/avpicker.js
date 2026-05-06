@@ -111,6 +111,7 @@ export class AVCastPicker extends ViewPU {
         this.__roomMaxVolume = new ObservedPropertySimplePU(0, this, 'roomMaxVolume');
         this.__roomItemHeight = new ObservedPropertySimplePU(0, this, 'roomItemHeight');
         this.scroller = new Scroller();
+        this.__isShowHomeAudio = new ObservedPropertySimplePU(false, this, 'isShowHomeAudio');
         this.__isPc = new ObservedPropertySimplePU(false, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
         this.__restartUECMessage = new ObservedPropertySimplePU(1, this, 'restartUECMessage');
@@ -122,6 +123,7 @@ export class AVCastPicker extends ViewPU {
         this.__isSubMenuExpanded = new ObservedPropertySimplePU(false, this, 'isSubMenuExpanded');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
+        this.declareWatch('isSubMenuExpanded', this.MenuStateChange);
         this.declareWatch('roomListService', this.roomListChange);
         this.declareWatch('playTaskIdStr', this.homeMusicPlayTaskIdChange);
         this.declareWatch('houseMusicIsSelect', this.selectHomeMusicSys);
@@ -241,6 +243,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.scroller !== undefined) {
             this.scroller = c11.scroller;
         }
+        if (c11.isShowHomeAudio !== undefined) {
+            this.isShowHomeAudio = c11.isShowHomeAudio;
+        }
         if (c11.isPc !== undefined) {
             this.isPc = c11.isPc;
         }
@@ -306,6 +311,7 @@ export class AVCastPicker extends ViewPU {
         this.__roomCurrVolume.purgeDependencyOnElmtId(a11);
         this.__roomMaxVolume.purgeDependencyOnElmtId(a11);
         this.__roomItemHeight.purgeDependencyOnElmtId(a11);
+        this.__isShowHomeAudio.purgeDependencyOnElmtId(a11);
         this.__isPc.purgeDependencyOnElmtId(a11);
         this.__isRTL.purgeDependencyOnElmtId(a11);
         this.__restartUECMessage.purgeDependencyOnElmtId(a11);
@@ -348,6 +354,7 @@ export class AVCastPicker extends ViewPU {
         this.__roomCurrVolume.aboutToBeDeleted();
         this.__roomMaxVolume.aboutToBeDeleted();
         this.__roomItemHeight.aboutToBeDeleted();
+        this.__isShowHomeAudio.aboutToBeDeleted();
         this.__isPc.aboutToBeDeleted();
         this.__isRTL.aboutToBeDeleted();
         this.__restartUECMessage.aboutToBeDeleted();
@@ -615,6 +622,14 @@ export class AVCastPicker extends ViewPU {
         this.__roomItemHeight.set(newValue);
     }
 
+    get isShowHomeAudio() {
+        return this.__isShowHomeAudio.get();
+    }
+
+    set isShowHomeAudio(newValue) {
+        this.__isShowHomeAudio.set(newValue);
+    }
+
     get isPc() {
         return this.__isPc.get();
     }
@@ -689,6 +704,7 @@ export class AVCastPicker extends ViewPU {
     MenuStateChange() {
         if (this.extensionProxy != null) {
             this.extensionProxy.send({ 'isMenuShow': this.isMenuShow });
+            this.extensionProxy.send({ 'isSubMenuExpanded': this.isSubMenuExpanded });
             let d3 = (this.isMenuShow && this.houseMusicIsSelect);
             this.extensionProxy.send({ 'isSelectHomeMusicSys': d3 });
         }
@@ -716,6 +732,7 @@ export class AVCastPicker extends ViewPU {
         let w1 = true;
         let l2 = false;
         let o2 = 0;
+        this.isShowHomeAudio = (k3.length > 0) ? true : false;
         for (let z1 = 0; z1 < k3.length; z1++) {
             this.roomSelectStatusPending[z1] = false;
             this.roomIsSelect[z1] = ((k3[z1].data.playTask === this.playTaskIdStr) &&
@@ -1050,8 +1067,9 @@ export class AVCastPicker extends ViewPU {
             Column.create();
             Column.width(this.isPc ? 326 : 216);
             Column.borderRadius(this.isPc ? 8 : 20);
-            Column.backgroundColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-                '#FFFFFFFF' : '#FF3F3F3F');
+            Column.backgroundColor(this.isShowHomeAudio ? { 'id': -1, 'type': 10001,
+                params: ['sys.color.background_primary'], 'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__' } : '#00000000');
         }, Column);
         this.observeComponentCreation2((r8, s8) => {
             ForEach.create();
@@ -1398,7 +1416,7 @@ export class AVCastPicker extends ViewPU {
             Row.create();
             Row.width('100%');
             Row.justifyContent(FlexAlign.SpaceBetween);
-            Row.padding({ top: '12vp', right: '24vp', bottom: '4vp', left: '24vp' });
+            Row.padding({ top: '12vp', right: '16vp', bottom: '4vp', left: '16vp' });
             Row.borderRadius({ topLeft: '32vp', topRight: '32vp' });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1413,7 +1431,8 @@ export class AVCastPicker extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.isAllSelecting ? this.houseMusicPlayCancel : this.houseMusicPlay);
-            Text.fontColor(Color.Blue);
+            Text.fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+                '#FF0A59F7' : '#FF317AF7');
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontWeight(FontWeight.Medium);
@@ -1431,7 +1450,7 @@ export class AVCastPicker extends ViewPU {
             Column.create();
             Column.width('100%');
             Column.alignItems(HorizontalAlign.Start);
-            Column.padding({ top: '12vp', right: '24vp', bottom: '4vp', left: '24vp' });
+            Column.padding({ top: '12vp', right: '16vp', bottom: '4vp', left: '16vp' });
             Column.borderRadius({ topLeft: '32vp', topRight: '32vp' });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1445,7 +1464,8 @@ export class AVCastPicker extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.isAllSelecting ? this.houseMusicPlayCancel : this.houseMusicPlay);
-            Text.fontColor(Color.Blue);
+            Text.fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+                '#FF0A59F7' : '#FF317AF7');
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontWeight(FontWeight.Medium);
@@ -1460,7 +1480,7 @@ export class AVCastPicker extends ViewPU {
     HomeMusicSystemRoomListBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Scroll.create(this.scroller);
-            Scroll.padding({ top: '4vp', right: '24vp', bottom: '4vp', left: '24vp' });
+            Scroll.padding({ top: '4vp', right: '16vp', bottom: '4vp', left: '16vp' });
             Scroll.width('100%');
             Scroll.constraintSize({ minHeight: this.roomItemHeight });
             Scroll.align(Alignment.Start);
@@ -1517,7 +1537,11 @@ export class AVCastPicker extends ViewPU {
             SymbolGlyph.create({ 'id': -1, 'type': 40000, params: ['sys.symbol.music_house_fill'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             SymbolGlyph.fontSize('24vp');
-            SymbolGlyph.fontColor([Color.Black]);
+            SymbolGlyph.fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+                [{ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
+                [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
             SymbolGlyph.margin({
                 right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
                     'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
@@ -1653,9 +1677,13 @@ export class AVCastPicker extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Column.backgroundColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-                            '#FFFFFFFF' : '#FF3F3F3F');
-                        Column.borderRadius({ topLeft: '20vp', topRight: '20vp', bottomLeft: '20vp', bottomRight: '20vp' });
+                        Column.onTouch((event) => {
+                            event?.stopPropagation();
+                        });
+                        Column.backgroundColor({ 'id': -1, 'type': 10001,
+                            params: ['sys.color.background_primary'], 'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__' });
+                        Column.borderRadius(this.isPc ? 8 : 20);
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
@@ -1686,14 +1714,23 @@ export class AVCastPicker extends ViewPU {
     deviceAndHouseMusicSys(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create({space: 8});
-            Column.onTouch((event) => {
-                event?.stopPropagation();
-            });
             Column.width(this.isPc ? 326 : 216);
             Column.borderRadius(this.isPc ? 8 : 20);
         }, Column);
         this.deviceMenu.bind(this)();
-        this.houseMusicSys.bind(this)();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call') {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.houseMusicSys.bind(this)();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
         Column.pop();
     }
 
@@ -2118,7 +2155,11 @@ export class AVCastPicker extends ViewPU {
             UIExtensionComponent.bindMenu(this.isMenuShow, { builder: () => {
                 this.deviceAndHouseMusicSys.call(this);
             } }, {
-            backgroundBlurStyle: BlurStyle.NONE,
+                backgroundBlurStyle: (this.isShowHomeAudio ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
+                backgroundColor: (this.isShowHomeAudio ? '#00000000' :
+                    (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? { 'id': -1, 'type': 10001,
+                    params: ['sys.color.background_primary'], 'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__' } : '#00FFFFFF'),
             placement: Placement.BottomRight,
             showInSubWindow: false,
             enableHoverMode: true,

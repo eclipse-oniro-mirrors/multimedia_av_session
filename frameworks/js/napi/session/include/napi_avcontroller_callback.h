@@ -43,6 +43,9 @@ public:
         EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
         EVENT_DESKTOP_LYRIC_STATE_CHANGED,
         EVENT_DESKTOP_LYRIC_ENABLED,
+        EVENT_MEDIA_CENTER_CONTROL_TYPE_CHANGED,
+        EVENT_SUPPORTED_PLAY_SPEEDS_CHANGED,
+        EVENT_SUPPORTED_LOOP_MODES_CHANGED,
         EVENT_TYPE_MAX,
     };
 
@@ -65,6 +68,9 @@ public:
     void OnDesktopLyricVisibilityChanged(bool isVisible) override;
     void OnDesktopLyricStateChanged(const DesktopLyricState &state) override;
     void OnDesktopLyricEnabled(bool isEnabled) override;
+    void OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes) override;
+    void OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds) override;
+    void OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes) override;
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);
@@ -84,6 +90,9 @@ private:
 
     template<typename T>
     void HandleEventWithThreadSafe(int32_t event, int state, const T& param);
+
+    template<typename T>
+    void HandleEventEx(int32_t event, std::string callBackName, const T& param);
 
     using NapiArgsGetter = std::function<void(napi_env env, int& argc, napi_value* argv)>;
 

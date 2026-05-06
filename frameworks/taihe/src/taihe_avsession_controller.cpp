@@ -18,6 +18,7 @@
 
 #include "taihe_avsession_controller.h"
 
+#include "avmedia_center_control_type.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
@@ -47,6 +48,9 @@ std::set<std::string> AVSessionControllerImpl::eventHandlers_ = {
     "desktopLyricVisibilityChanged",
     "desktopLyricStateChanged",
     "desktopLyricEnabled",
+    "mediaCenterControlTypeChanged",
+    "supportedPlaySpeedsChange",
+    "supportedLoopModesChange",
 };
 std::map<std::string, std::shared_ptr<AVSessionControllerImpl>> AVSessionControllerImpl::controllerList_ = {};
 std::mutex AVSessionControllerImpl::uvMutex_;
@@ -839,6 +843,67 @@ DesktopLyricState AVSessionControllerImpl::GetDesktopLyricStateSync()
     return TaiheUtils::ToTaiheDesktopLyricState(state);
 }
 
+array<string> AVSessionControllerImpl::GetMediaCenterControlTypeSync()
+{
+    array<string> undefinedArray{};
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::GetMediaCenterControlTypeSync");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "GetMediaCenterControlTypeSync failed : controller is nullptr");
+        return undefinedArray;
+    }
+    std::vector<int32_t> controlTypesNum;
+    int32_t ret = controller_->GetMediaCenterControlType(controlTypesNum);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "GetMediaCenterControlType", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return undefinedArray;
+    }
+    std::vector<std::string> controlTypes = OHOS::AVSession::MediaCenterTypesToStrs(controlTypesNum);
+    return array<string>(TaiheUtils::ToTaiheStringArray(controlTypes));
+}
+
+array<double> AVSessionControllerImpl::GetSupportedPlaySpeedsSync()
+{
+    array<double> undefinedArray{};
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::GetSupportedPlaySpeedsSync");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "GetSupportedPlaySpeedsSync failed : controller is nullptr");
+        return undefinedArray;
+    }
+    std::vector<double> speeds;
+    int32_t ret = controller_->GetSupportedPlaySpeeds(speeds);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "GetSupportedPlaySpeeds", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return undefinedArray;
+    }
+    return array<double>(speeds);
+}
+
+array<int32_t> AVSessionControllerImpl::GetSupportedLoopModesSync()
+{
+    array<int32_t> undefinedArray{};
+    OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::GetSupportedLoopModesSync");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "GetSupportedLoopModesSync failed : controller is nullptr");
+        return undefinedArray;
+    }
+    std::vector<int32_t> loopModes;
+    int32_t ret = controller_->GetSupportedLoopModes(loopModes);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "GetSupportedLoopModes", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return undefinedArray;
+    }
+    return array<int32_t>(loopModes);
+}
+
 void AVSessionControllerImpl::OnMetadataChange(array_view<string> filter,
     callback_view<void(AVMetadata const&)> callback)
 {
@@ -1071,6 +1136,45 @@ void AVSessionControllerImpl::OnDesktopLyricEnabled(callback_view<void(bool)> ca
     }
 }
 
+void AVSessionControllerImpl::OnMediaCenterControlTypeChanged(callback_view<void(array_view<string>)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("mediaCenterControlTypeChanged", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_MEDIA_CENTER_CONTROL_TYPE_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+    } else {
+        SLOGE("OnMediaCenterControlTypeChanged OnEvent failed");
+    }
+}
+
+void AVSessionControllerImpl::OnSupportedPlaySpeedsChange(callback_view<void(array_view<double>)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("supportedPlaySpeedsChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_SUPPORTED_PLAY_SPEEDS_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+    } else {
+        SLOGE("OnSupportedPlaySpeedsChange OnEvent failed");
+    }
+}
+
+void AVSessionControllerImpl::OnSupportedLoopModesChange(callback_view<void(array_view<int32_t>)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("supportedLoopModesChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVControllerCallback::EVENT_SUPPORTED_LOOP_MODES_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "AddCallback failed");
+    } else {
+        SLOGE("OnSupportedLoopModesChange OnEvent failed");
+    }
+}
+
 void AVSessionControllerImpl::OffMetadataChange(optional_view<callback<void(AVMetadata const&)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
@@ -1286,6 +1390,55 @@ void AVSessionControllerImpl::OffDesktopLyricEnabled(optional_view<callback<void
         int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_DESKTOP_LYRIC_ENABLED,
             cacheCallback);
         CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    }
+}
+
+void AVSessionControllerImpl::OffMediaCenterControlTypeChanged(
+    optional_view<callback<void(array_view<string>)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("mediaCenterControlTypeChanged", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_MEDIA_CENTER_CONTROL_TYPE_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    } else {
+        SLOGE("OffMediaCenterControlTypeChanged OffEvent failed");
+    }
+}
+
+void AVSessionControllerImpl::OffSupportedPlaySpeedsChange(optional_view<callback<void(array_view<double>)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("supportedPlaySpeedsChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_SUPPORTED_PLAY_SPEEDS_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    } else {
+        SLOGE("OffSupportedPlaySpeedsChange OffEvent failed");
+    }
+}
+
+void AVSessionControllerImpl::OffSupportedLoopModesChange(optional_view<callback<void(array_view<int32_t>)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("supportedLoopModesChange", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVControllerCallback::EVENT_SUPPORTED_LOOP_MODES_CHANGED,
+            cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "RemoveCallback failed");
+    } else {
+        SLOGE("OffSupportedLoopModesChange OffEvent failed");
     }
 }
 

@@ -68,6 +68,8 @@ public:
         AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO = 4,
         SESSION_NUM_COLD_START_FROM_PROXY = 5,
         SESSION_NUM_SET_MEDIACONTROL_NEED_STATE = 6,
+        AUDIO_NUM_GET_VERSION = 7,
+        SESSION_NUM_SET_MEDIACONTROL_SYNC_TIME = 8,
     };
 
     const std::map<const std::string, int32_t> AUDIO_EVENT_MAPS = {
@@ -79,6 +81,8 @@ public:
             AUDIO_NUM_GET_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO},
         {SESSION_COLD_START_FROM_PROXY, SESSION_NUM_COLD_START_FROM_PROXY},
         {SESSION_SET_MEDIACONTROL_NEED_STATE, SESSION_NUM_SET_MEDIACONTROL_NEED_STATE},
+        {AUDIO_GET_VERSION, AUDIO_NUM_GET_VERSION},
+        {SESSION_SET_MEDIACONTROL_SYNC_TIME, SESSION_NUM_SET_MEDIACONTROL_SYNC_TIME},
     };
 
 private:
@@ -95,9 +99,12 @@ private:
     void ProcessPreferredOutputDevice(cJSON* jsonValue);
     void ProcessBundleImg(std::string bundleIconStr);
     void ProcessMediaImage(std::string mediaImageStr);
+    void ProcessLongPauseNotify(cJSON* jsonValue);
+    void ProcessProtocolVersion(cJSON* jsonValue, const std::string& deviceId);
     void SendControlCommandMsg(int32_t commandCode, std::string commandArgsStr);
     void SendSpecialKeepAliveData();
     void SendMediaControlNeedStateMsg(bool isMock = false);
+    void SendMediaControlSyncTime(int32_t timeoutMs);
 
     const MigrateAVSessionProxyControllerCallbackFunc MigrateAVSessionProxyControllerCallback();
 
@@ -107,8 +114,10 @@ private:
     void GetVolume(AAFwk::WantParams& extras);
     void GetAvailableDevices(AAFwk::WantParams& extras);
     void GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras);
+    void GetVersion(AAFwk::WantParams& extras);
     void ColdStartFromProxy();
     void NotifyMediaControlNeedStateChange(AAFwk::WantParams& extras);
+    void NotifyMediaControlSyncTime(AAFwk::WantParams& extras);
     int32_t OnConnectForSuper();
     int32_t OnDisconnectForSuper();
     int32_t OnBytesRecvForSuper(const std::string &deviceId, const std::string &data);
@@ -140,6 +149,8 @@ private:
     MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback_;
 
     std::atomic<bool> isNeedByMediaControl = false;
+    std::map<std::string, int32_t> deviceVersionMap_;
+    std::mutex versionMapMtx_;
     std::thread keepAliveWorker_;
     std::thread checkConnectWorker_;
     std::recursive_mutex migrateProxyDeviceIdLock_;

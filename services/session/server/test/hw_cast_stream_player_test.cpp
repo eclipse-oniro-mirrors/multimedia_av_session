@@ -2158,6 +2158,9 @@ HWTEST_F(HwCastStreamPlayerTest, buildCastExtraInfo002, TestSize.Level0)
 HWTEST_F(HwCastStreamPlayerTest, DlnaExtrasKey001, TestSize.Level0)
 {
     SLOGI("DlnaExtrasKey001 begin!");
+    EXPECT_STREQ(ExtraKeyEvent::REQUIRE_ABILITY_LIST, "requireAbilityList");
+    EXPECT_STREQ(ExtraKeyEvent::SUPPORT_URL_CASTING, "url-cast");
+    EXPECT_STREQ(ExtraKeyEvent::LIVE_VIEW_HIDDEN_WHEN_KEYGUARD, "hw_live_view_hidden_when_keyguard");
     EXPECT_STREQ(ExtraKeyEvent::DIDL_LITE, "DIDL-Lite");
     EXPECT_STREQ(ExtraKeyEvent::CURRENT_URI_METADATA, "CurrentURIMetadata");
     SLOGI("DlnaExtrasKey001 end!");

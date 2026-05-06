@@ -87,6 +87,8 @@ public:
     void DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands);
     void DoBundleInfoSyncToRemote(sptr<AVControllerItem> controller);
     void DoPostTasksClear();
+    void SendProtocolVersionToNext();
+    void SendLongPauseNotifyToNext(bool isLongPause);
     bool MigratePostTask(const AppExecFwk::EventHandler::Callback &callback, const std::string &name,
         int64_t delayTime = 0);
     void RefreshDeviceId(std::string deviceId);
@@ -191,6 +193,12 @@ private:
 
     std::string GenerateClearAVSessionMsg();
     std::atomic<bool> isNeedByRemote = false;
+
+    void HandleNeedStateTimer();
+
+    static constexpr int64_t longPauseTimerInterval = 5 * 60 * 1000; // 5 minutes
+    void HandleLongPauseTimer();
+    std::atomic<bool> hasLongPauseNotified_ = false;
 
     std::string sessionIdCache_ = "";
     std::string mediaImgTopicStr_ = "";

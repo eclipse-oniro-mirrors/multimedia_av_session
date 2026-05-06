@@ -146,7 +146,27 @@ void AVSessionService::SplitExtraInfo(std::string info)
     bool deviceTypeItemFlag = (deviceTypeItem != nullptr) && !cJSON_IsInvalid(deviceTypeItem) &&
         !cJSON_IsNull(deviceTypeItem) && cJSON_IsNumber(deviceTypeItem);
     castDeviceType_ = deviceTypeItemFlag ? deviceTypeItem->valueint : 0;
+
+    cJSON* modeChangeItem = cJSON_GetObjectItem(extraInfo, "modeChange");
+    if (modeChangeItem != nullptr && !cJSON_IsInvalid(modeChangeItem) &&
+        !cJSON_IsNull(modeChangeItem) && cJSON_IsString(modeChangeItem) && modeChangeItem->valuestring != nullptr) {
+        bool isSupportExtendedScreen = (std::string(modeChangeItem->valuestring) == "phone");
+        SLOGI("modeChange %{public}s, isSupportExtendedScreen %{public}d",
+            modeChangeItem->valuestring, isSupportExtendedScreen);
+        NotifySupportExtendedScreen(isSupportExtendedScreen);
+    }
+
     cJSON_Delete(extraInfo);
+}
+
+void AVSessionService::NotifySupportExtendedScreen(bool isSupport)
+{
+    SLOGI("NotifySupportExtendedScreen %{public}d", isSupport);
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session != nullptr) {
+            session->SetSupportExtendedScreen(isSupport);
+        }
+    }
 }
 #endif
 
@@ -1099,5 +1119,10 @@ int32_t AVSessionService::ProcessSuperLauncherDisconnect(std::string deviceId, s
         SLOGE("ProcessSuperLauncherDisconnect find networkId not exist");
     }
     return AVSESSION_SUCCESS;
+}
+
+void AVSessionService::PublishMediaControlState(int32_t mediaPlayState)
+{
+    PublishEvent(mediaPlayState);
 }
 }

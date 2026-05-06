@@ -25,6 +25,7 @@
 #include "want_params.h"
 #include "avsession_controller.h"
 #include "avqueue_info.h"
+#include "avmedia_center_control_type.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller.h"
@@ -267,6 +268,36 @@ public:
      * @since 20
     */
     virtual int32_t UpdateAVQueueInfo(const AVQueueInfo& info) {return 0;};
+
+    /**
+     * @brief Set media center control types supported by this session.
+     *
+     * @param controlTypes Vector of control type numbers.
+     * @return Return whether the setting is successful.
+     * @since 26
+    */
+    virtual int32_t SetMediaCenterControlType(const std::vector<int32_t>& controlTypes)
+    {
+        return AVSESSION_SUCCESS;
+    };
+
+    /**
+     * @brief Set supported playback speeds for this session.
+     *
+     * @param speeds Vector of supported playback speeds.
+     * @return Return whether the setting is successful.
+     * @since 26
+    */
+    virtual int32_t SetSupportedPlaySpeeds(const std::vector<double>& speeds) { return AVSESSION_SUCCESS; };
+
+    /**
+     * @brief Set supported loop modes for this session.
+     *
+     * @param loopModes Vector of supported loop modes.
+     * @return Return whether the setting is successful.
+     * @since 26
+    */
+    virtual int32_t SetSupportedLoopModes(const std::vector<int32_t>& loopModes) { return AVSESSION_SUCCESS; };
 
     /**
      * @brief Enable desktop lyric.

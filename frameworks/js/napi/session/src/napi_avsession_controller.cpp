@@ -100,12 +100,21 @@ napi_value NapiAVSessionController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isDesktopLyricVisible", IsDesktopLyricVisible),
         DECLARE_NAPI_FUNCTION("setDesktopLyricState", SetDesktopLyricState),
         DECLARE_NAPI_FUNCTION("getDesktopLyricState", GetDesktopLyricState),
+        DECLARE_NAPI_FUNCTION("getMediaCenterControlType", GetMediaCenterControlType),
+        DECLARE_NAPI_FUNCTION("getSupportedPlaySpeeds", GetSupportedPlaySpeeds),
+        DECLARE_NAPI_FUNCTION("getSupportedLoopModes", GetSupportedLoopModes),
         DECLARE_NAPI_FUNCTION("onDesktopLyricVisibilityChanged", OnDesktopLyricVisibilityChanged),
         DECLARE_NAPI_FUNCTION("offDesktopLyricVisibilityChanged", OffDesktopLyricVisibilityChanged),
         DECLARE_NAPI_FUNCTION("onDesktopLyricStateChanged", OnDesktopLyricStateChanged),
         DECLARE_NAPI_FUNCTION("offDesktopLyricStateChanged", OffDesktopLyricStateChanged),
         DECLARE_NAPI_FUNCTION("onDesktopLyricEnabled", OnDesktopLyricEnabled),
         DECLARE_NAPI_FUNCTION("offDesktopLyricEnabled", OffDesktopLyricEnabled),
+        DECLARE_NAPI_FUNCTION("onMediaCenterControlTypeChanged", OnMediaCenterControlTypeChanged),
+        DECLARE_NAPI_FUNCTION("offMediaCenterControlTypeChanged", OffMediaCenterControlTypeChanged),
+        DECLARE_NAPI_FUNCTION("onSupportedPlaySpeedsChange", OnSupportedPlaySpeedsChanged),
+        DECLARE_NAPI_FUNCTION("offSupportedPlaySpeedsChange", OffSupportedPlaySpeedsChanged),
+        DECLARE_NAPI_FUNCTION("onSupportedLoopModesChange", OnSupportedLoopModesChanged),
+        DECLARE_NAPI_FUNCTION("offSupportedLoopModesChange", OffSupportedLoopModesChanged),
     };
 
     auto property_count = sizeof(descriptors) / sizeof(napi_property_descriptor);
@@ -1453,6 +1462,123 @@ napi_value NapiAVSessionController::GetDesktopLyricState(napi_env env, napi_call
     return NapiAsyncWork::Enqueue(env, context, "GetDesktopLyricState", executor, complete);
 }
 
+napi_value NapiAVSessionController::GetMediaCenterControlType(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<int32_t> controlTypesNum_;
+        std::vector<std::string> controlTypes_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("GetMediaCenterControlType failed : no memory");
+        NapiUtils::ThrowError(env, "GetMediaCenterControlType failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    context->GetCbInfo(env, info);
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
+            SLOGE("GetMediaCenterControlType failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetMediaCenterControlType failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetMediaCenterControlType(context->controlTypesNum_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("controller GetMediaCenterControlType failed:%{public}d", ret);
+            context->errMessage = "GetMediaCenterControlType failed : native server exception";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+            return;
+        }
+        context->controlTypes_ = MediaCenterTypesToStrs(context->controlTypesNum_);
+    };
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->controlTypes_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetMediaCenterControlType", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetSupportedPlaySpeeds(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<double> speeds_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("GetSupportedPlaySpeeds failed : no memory");
+        NapiUtils::ThrowError(env, "GetSupportedPlaySpeeds failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    context->GetCbInfo(env, info);
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
+            SLOGE("GetSupportedPlaySpeeds failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetSupportedPlaySpeeds failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetSupportedPlaySpeeds(context->speeds_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("controller GetSupportedPlaySpeeds failed:%{public}d", ret);
+            context->errMessage = "GetSupportedPlaySpeeds failed : native server exception";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValueEx(env, context->speeds_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetSupportedPlaySpeeds", executor, complete);
+}
+
+napi_value NapiAVSessionController::GetSupportedLoopModes(napi_env env, napi_callback_info info)
+{
+    struct ConcreteContext : public ContextBase {
+        std::vector<int32_t> loopModes_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("GetSupportedLoopModes failed : no memory");
+        NapiUtils::ThrowError(env, "GetSupportedLoopModes failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    context->GetCbInfo(env, info);
+    auto executor = [context]() {
+        auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
+            SLOGE("GetSupportedLoopModes failed : controller is nullptr");
+            context->status = napi_generic_failure;
+            context->errMessage = "GetSupportedLoopModes failed : controller is nullptr";
+            context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+            return;
+        }
+        int32_t ret = napiController->controller_->GetSupportedLoopModes(context->loopModes_);
+        if (ret != AVSESSION_SUCCESS) {
+            SLOGE("controller GetSupportedLoopModes failed:%{public}d", ret);
+            context->errMessage = "GetSupportedLoopModes failed : native server exception";
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValueEx(env, context->loopModes_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "GetSupportedLoopModes", executor, complete);
+}
+
 napi_value NapiAVSessionController::OnDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
@@ -1749,7 +1875,6 @@ napi_value NapiAVSessionController::OffDesktopLyricEnabled(napi_env env, napi_ca
 
     return NapiUtils::GetUndefinedValue(env);
 }
-
 
 void NapiAVSessionController::ErrCodeToMessage(int32_t errCode, std::string& message)
 {
@@ -2446,5 +2571,305 @@ napi_status NapiAVSessionController::OffExtrasChange(napi_env env, NapiAVSession
         "callback has not been registered");
     return napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_EXTRAS_CHANGE,
         callback);
+}
+
+napi_value NapiAVSessionController::OnMediaCenterControlTypeChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnMediaCenterControlTypeChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OnMediaCenterControlTypeChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, env, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+            "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        SLOGE("check OnMediaCenterControlTypeChanged with status err");
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController == nullptr) {
+        SLOGI("controller is nullptr");
+        NapiUtils::ThrowError(env, "controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    if (DoRegisterCallback(env, napiController) != napi_ok) {
+        SLOGE("do register callback fail!");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiController->callback_->AddCallback(env,
+        NapiAVControllerCallback::EVENT_MEDIA_CENTER_CONTROL_TYPE_CHANGED, callback) != napi_ok) {
+        SLOGE("add event callback failed");
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionController::OffMediaCenterControlTypeChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffMediaCenterControlTypeChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OffMediaCenterControlTypeChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, env, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            napi_valuetype type = napi_undefined;
+            context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            callback = argv[ARGV_FIRST];
+        }
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        SLOGE("check OffMediaCenterControlTypeChanged with status err");
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController == nullptr) {
+        SLOGI("controller is nullptr");
+        NapiUtils::ThrowError(env, "controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    if (napiController->callback_ == nullptr) {
+        SLOGI("function not register yet");
+        NapiUtils::ThrowError(env, "callback not register yet",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiController->callback_->RemoveCallback(env,
+        NapiAVControllerCallback::EVENT_MEDIA_CENTER_CONTROL_TYPE_CHANGED, callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionController::OnSupportedPlaySpeedsChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnSupportedPlaySpeedsChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OnSupportedPlaySpeedsChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, env, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+            "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        SLOGE("check OnSupportedPlaySpeedsChanged with status err");
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController == nullptr) {
+        SLOGI("controller is nullptr");
+        NapiUtils::ThrowError(env, "controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    if (DoRegisterCallback(env, napiController) != napi_ok) {
+        SLOGE("do register callback fail!");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_SUPPORTED_PLAY_SPEEDS_CHANGED,
+        callback) != napi_ok) {
+        SLOGE("add event callback failed");
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionController::OffSupportedPlaySpeedsChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffSupportedPlaySpeedsChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OffSupportedPlaySpeedsChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, env, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            napi_valuetype type = napi_undefined;
+            context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            callback = argv[ARGV_FIRST];
+        }
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        SLOGE("check OffSupportedPlaySpeedsChanged with status err");
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController == nullptr) {
+        SLOGI("controller is nullptr");
+        NapiUtils::ThrowError(env, "controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    if (napiController->callback_ == nullptr) {
+        SLOGI("function not register yet");
+        NapiUtils::ThrowError(env, "callback not register yet",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SUPPORTED_PLAY_SPEEDS_CHANGED,
+        callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionController::OnSupportedLoopModesChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnSupportedLoopModesChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OnSupportedLoopModesChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, env, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+            "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        SLOGE("check OnSupportedLoopModesChanged with status err");
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController == nullptr) {
+        SLOGI("controller is nullptr");
+        NapiUtils::ThrowError(env, "controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    if (DoRegisterCallback(env, napiController) != napi_ok) {
+        SLOGE("do register callback fail!");
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiController->callback_->AddCallback(env, NapiAVControllerCallback::EVENT_SUPPORTED_LOOP_MODES_CHANGED,
+        callback) != napi_ok) {
+        SLOGE("add event callback failed");
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSessionController::OffSupportedLoopModesChanged(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffSupportedLoopModesChanged failed : no memory");
+        NapiUtils::ThrowError(env, "OffSupportedLoopModesChanged failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, env, &callback](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            napi_valuetype type = napi_undefined;
+            context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            callback = argv[ARGV_FIRST];
+        }
+    };
+
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        SLOGE("check OffSupportedLoopModesChanged with status err");
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
+    if (napiController == nullptr) {
+        SLOGI("controller is nullptr");
+        NapiUtils::ThrowError(env, "controller is nullptr",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    if (napiController->callback_ == nullptr) {
+        SLOGI("function not register yet");
+        NapiUtils::ThrowError(env, "callback not register yet",
+            NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiController->callback_->RemoveCallback(env, NapiAVControllerCallback::EVENT_SUPPORTED_LOOP_MODES_CHANGED,
+        callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
 }
 }

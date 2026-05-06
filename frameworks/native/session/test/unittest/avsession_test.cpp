@@ -165,6 +165,9 @@ public:
     int32_t AddSupportCommand(const int32_t cmd) override;
     int32_t DeleteSupportCommand(const int32_t cmd) override;
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
+    int32_t SetMediaCenterControlType(const std::vector<int32_t>& controlTypes) override;
+    int32_t SetSupportedPlaySpeeds(const std::vector<double>& speeds) override;
+    int32_t SetSupportedLoopModes(const std::vector<int32_t>& loopModes) override;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> GetAVCastController() override;
     int32_t ReleaseCast(bool continuePlay = false) override;
@@ -290,6 +293,21 @@ int32_t AVSessionDemo::DeleteSupportCommand(const int32_t cmd)
 }
 
 int32_t AVSessionDemo::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetMediaCenterControlType(const std::vector<int32_t>& controlTypes)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetSupportedPlaySpeeds(const std::vector<double>& speeds)
+{
+    return 0;
+}
+
+int32_t AVSessionDemo::SetSupportedLoopModes(const std::vector<int32_t>& loopModes)
 {
     return 0;
 }
@@ -6518,6 +6536,132 @@ HWTEST_F(AvsessionTest, AVSessionDemoSetBackgroundPlayMode001, TestSize.Level1)
     AVSessionDemo avsessionDemo = AVSessionDemo();
     EXPECT_EQ(avsessionDemo.SetBackgroundPlayMode(0), AVSESSION_SUCCESS);
     SLOGD("AVSessionDemoSetBackgroundPlayMode001 End");
+}
+
+/**
+* @tc.name: SetMediaCenterControlType001
+* @tc.desc: set media center control type
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetMediaCenterControlType001, TestSize.Level1)
+{
+    SLOGD("SetMediaCenterControlType001 Begin");
+    std::vector<int32_t> controlTypes = {0, 1, 2, 3};
+    EXPECT_EQ(avsession_->SetMediaCenterControlType(controlTypes), AVSESSION_SUCCESS);
+    SLOGD("SetMediaCenterControlType001 End");
+}
+
+/**
+* @tc.name: SetSupportedPlaySpeeds001
+* @tc.desc: set supported play speeds
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetSupportedPlaySpeeds001, TestSize.Level1)
+{
+    SLOGD("SetSupportedPlaySpeeds001 Begin");
+    std::vector<double> speeds = {0.5, 1.0, 1.5, 2.0};
+    EXPECT_EQ(avsession_->SetSupportedPlaySpeeds(speeds), AVSESSION_SUCCESS);
+    SLOGD("SetSupportedPlaySpeeds001 End");
+}
+
+/**
+* @tc.name: SetMediaCenterControlType002
+* @tc.desc: set media center control type with empty array
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetMediaCenterControlType002, TestSize.Level1)
+{
+    SLOGD("SetMediaCenterControlType002 Begin");
+    std::vector<int32_t> controlTypes = {};
+    EXPECT_EQ(avsession_->SetMediaCenterControlType(controlTypes), AVSESSION_SUCCESS);
+    SLOGD("SetMediaCenterControlType002 End");
+}
+
+/**
+* @tc.name: SetSupportedPlaySpeeds002
+* @tc.desc: set supported play speeds with empty array
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetSupportedPlaySpeeds002, TestSize.Level1)
+{
+    SLOGD("SetSupportedPlaySpeeds002 Begin");
+    std::vector<double> speeds = {};
+    EXPECT_EQ(avsession_->SetSupportedPlaySpeeds(speeds), AVSESSION_SUCCESS);
+    SLOGD("SetSupportedPlaySpeeds002 End");
+}
+
+/**
+* @tc.name: SetSupportedLoopModes001
+* @tc.desc: set supported loop modes
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetSupportedLoopModes001, TestSize.Level1)
+{
+    SLOGD("SetSupportedLoopModes001 Begin");
+    std::vector<int32_t> loopModes = {0, 1, 2, 3};
+    EXPECT_EQ(avsession_->SetSupportedLoopModes(loopModes), AVSESSION_SUCCESS);
+    SLOGD("SetSupportedLoopModes001 End");
+}
+
+/**
+* @tc.name: SetSupportedLoopModes002
+* @tc.desc: set supported loop modes with empty array
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetSupportedLoopModes002, TestSize.Level1)
+{
+    SLOGD("SetSupportedLoopModes002 Begin");
+    std::vector<int32_t> loopModes = {};
+    EXPECT_EQ(avsession_->SetSupportedLoopModes(loopModes), AVSESSION_SUCCESS);
+    SLOGD("SetSupportedLoopModes002 End");
+}
+
+/**
+* @tc.name: SetMediaCenterControlType003
+* @tc.desc: set media center control type with invalid type
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetMediaCenterControlType003, TestSize.Level1)
+{
+    SLOGD("SetMediaCenterControlType003 Begin");
+    std::vector<int32_t> controlTypes = {100, 200};
+    EXPECT_EQ(avsession_->SetMediaCenterControlType(controlTypes), ERR_INVALID_PARAM);
+    SLOGD("SetMediaCenterControlType003 End");
+}
+
+/**
+* @tc.name: SetSupportedPlaySpeeds003
+* @tc.desc: set supported play speeds with invalid speed
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetSupportedPlaySpeeds003, TestSize.Level1)
+{
+    SLOGD("SetSupportedPlaySpeeds003 Begin");
+    std::vector<double> speeds = {5.0, 10.0};
+    EXPECT_EQ(avsession_->SetSupportedPlaySpeeds(speeds), ERR_INVALID_PARAM);
+    SLOGD("SetSupportedPlaySpeeds003 End");
+}
+
+/**
+* @tc.name: SetSupportedLoopModes003
+* @tc.desc: set supported loop modes with invalid mode
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, SetSupportedLoopModes003, TestSize.Level1)
+{
+    SLOGD("SetSupportedLoopModes003 Begin");
+    std::vector<int32_t> loopModes = {-1, 100};
+    EXPECT_EQ(avsession_->SetSupportedLoopModes(loopModes), ERR_INVALID_PARAM);
+    SLOGD("SetSupportedLoopModes003 End");
 }
 } // namespace AVSession
 } // namespace OHOS

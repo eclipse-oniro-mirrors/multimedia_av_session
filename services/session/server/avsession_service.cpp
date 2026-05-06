@@ -313,6 +313,14 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 #endif
     } else if (action.compare("usual.event.DESKTOP_LYRIC_DESTROY") == 0) {
         servicePtr_->StopDesktopLyricAbility();
+    } else if (action.compare("usual.event.MEDIA_NTF_SWITCH") == 0) {
+        bool isMediaNtfEnable = want.GetBoolParam("isMediaNtfEnable", true);
+        servicePtr_->UpdateNtfEnable(isMediaNtfEnable);
+    } else if (action.compare("HybridModeSwitchEvent") == 0) {
+        int32_t targetMode = want.GetIntParam("targetMode", 0);
+        // pcMode=1, phoneMode=0
+        SLOGI("on receiveEvent HybridModeSwitchEvent %{public}d", targetMode);
+        servicePtr_->SetPcMode(targetMode == 1);
     }
 }
 
@@ -452,6 +460,8 @@ bool AVSessionService::SubscribeCommonEvent()
         "usual.event.PACKAGE_REMOVED",
         "usual.event.CAST_SESSION_CREATE",
         "usual.event.DESKTOP_LYRIC_DESTROY",
+        "usual.event.MEDIA_NTF_SWITCH",
+        "HybridModeSwitchEvent",
     };
 
     EventFwk::MatchingSkills matchingSkills;
@@ -1565,6 +1575,10 @@ void AVSessionService::AddCastServiceCallback(sptr<AVSessionItem>& sessionItem)
                 session->GetDescriptor().userId_, ret);
         }
     });
+
+    sessionItem->SetServiceCallbackForPcMode([this]() {
+        return isPcMode_.load();
+    });
 #endif // CASTPLUS_CAST_ENGINE_ENABLE
 }
 
@@ -2496,6 +2510,9 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
         DoMetadataImgClean(meta);
         return;
     }
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+    AVSessionSysEvent::GetInstance().UpdateSupportAvqueue(session.GetBundleName(), true);
+#endif
     if (!SaveAvQueueInfo(oldContent, bundleName, meta, userId)) {
         SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
         DoMetadataImgClean(meta);
@@ -4365,6 +4382,43 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     return isCustomer ? launWantAgent : AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
 }
 
+void AVSessionService::SetPcMode(bool isPcMode)
+{
+    isPcMode_.store(isPcMode);
+    isPcMode ? HandlePcModeRemoveNotification() : HandlePcModeAddNotification();
+}
+
+void AVSessionService::HandlePcModeRemoveNotification()
+{
+    std::lock_guard lockGuard(sessionServiceLock_);
+    CHECK_AND_RETURN_LOG(topSession_ != nullptr, "topSession_ is nullptr");
+    
+    int32_t userId = topSession_->GetUserId();
+    if (GetUsersManager().GetTopSession(userId).GetRefPtr() == topSession_.GetRefPtr()) {
+        hasMediaCapsule_ = false;
+        int32_t ret = Notification::NotificationHelper::CancelNotification(
+            std::to_string(userId), mediacontrollerNotifyId);
+        SLOGI("HandlePcModeRemoveNotification CancelNotification userId:%{public}d, ret=%{public}d", userId, ret);
+    }
+}
+
+void AVSessionService::HandlePcModeAddNotification()
+{
+    std::lock_guard lockGuard(sessionServiceLock_);
+    CHECK_AND_RETURN_LOG(topSession_ != nullptr, "topSession_ is nullptr");
+    
+    bool isPlaying = false;
+    if (topSession_->IsCastConnected()) {
+        isPlaying = topSession_->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY;
+    } else {
+        isPlaying = IsLocalSessionPlaying(topSession_);
+    }
+    
+    if (isPlaying) {
+        NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
+    }
+}
+
 bool AVSessionService::IsCapsuleNeeded()
 {
     CHECK_AND_RETURN_RET_LOG(topSession_ != nullptr, false, "audio broker capsule");
@@ -4578,7 +4632,8 @@ std::string AVSessionService::GetLocalTitle()
             AVSessionUtils::GetAnonyTitle(songName.c_str()).c_str());
     }
     std::string localTitle = (isTitleLyric || isAncoLyric) && !songName.empty() ? songName : meta.GetTitle();
-    SLOGI("GetLocalTitle localTitle:%{public}s", AVSessionUtils::GetAnonyTitle(songName).c_str());
+    SLOGI("GetLocalTitle localTitle:%{public}s|songName empty:%{public}d",
+        AVSessionUtils::GetAnonyTitle(localTitle).c_str(), songName.empty());
     return localTitle;
 }
 
@@ -4606,13 +4661,15 @@ void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool add
 #ifdef DEVICE_MANAGER_ENABLE
     bool is2in1 = (GetLocalDeviceType() == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
 #endif
-    bool ispcmode = system::GetParameter("const.window.support_window_pcmode_switch", "false") == "true" &&
-     (system::GetParameter("persist.sceneboard.ispcmode", "false") == "true");
+    bool isPcMode = system::GetParameter("const.window.support_window_pcmode_switch", "false") == "true" &&
+        system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
 #ifdef DEVICE_MANAGER_ENABLE
-    CHECK_AND_RETURN_LOG(!is2in1 && !ispcmode, "2in1 not support.");
+    CHECK_AND_RETURN_LOG(!is2in1 && !isPcMode, "2in1 not support.");
 #else
-    CHECK_AND_RETURN_LOG(!isCastableDevice_ && !ispcmode, "2in1 not support.");
+    isPcMode = isPcMode_.load();
+    CHECK_AND_RETURN_LOG(!isCastableDevice_ && !isPcMode, "pc device not support.");
 #endif
+    CHECK_AND_RETURN_LOG(isNtfEnabled_.load(), "ntf settings off");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
     SLOGI("NotifySystemUI photoSession %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d",
@@ -4817,51 +4874,26 @@ int32_t AVSessionService::UploadDesktopLyricOperationInfo(const std::string &ses
         userId);
 }
 
-#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-static std::string GetVersionName(const std::string& bundleName)
-{
-    std::string versionName = "";
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgr == nullptr) {
-        SLOGE("Get ability manager failed");
-        return versionName;
+void AVSessionService::UpdateNtfEnable(bool isMediaNtfEnable) {
+    SLOGI("UpdateNtfEnable %{public}d", isMediaNtfEnable);
+    isNtfEnabled_.store(isMediaNtfEnable);
+    if (!isMediaNtfEnable) {
+        int32_t userId = GetUsersManager().GetCurrentUserId();
+        Notification::NotificationHelper::CancelNotification(std::to_string(userId),  mediacontrollerNotifyId);
+        Notification::NotificationHelper::CancelNotification(std::to_string(userId),  photoNotifyId);
     }
-
-    sptr<IRemoteObject> object = samgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (object == nullptr) {
-        SLOGE("object is NULL.");
-        return versionName;
-    }
-
-    sptr<OHOS::AppExecFwk::IBundleMgr> bms = iface_cast<OHOS::AppExecFwk::IBundleMgr>(object);
-    if (bms == nullptr) {
-        SLOGE("bundle manager service is NULL.");
-        return versionName;
-    }
-
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!bms->GetBundleInfo(bundleName,
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
-        bundleInfo, AppExecFwk::Constants::ALL_USERID)) {
-            SLOGE("GetBundleInfo=%{public}s fail", bundleName.c_str());
-            return versionName;
-    }
-    versionName = bundleInfo.versionName;
-    if (versionName.empty()) {
-        SLOGE("get versionName form application failed.");
-        return versionName;
-    }
-    return versionName;
 }
 
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, SessionState state)
 {
     if (session == nullptr) {
         SLOGE("ReportSessionState session is null");
         return;
     }
-    AVSessionSysEvent::GetInstance().UpdateState(session->GetBundleName(),
-        GetVersionName(session->GetBundleName()), state);
+    std::string bundleName = session->GetBundleName();
+    AVSessionSysEvent::GetInstance().UpdateState(bundleName,
+        BundleStatusAdapter::GetInstance().GetAppVersion(bundleName), state, session->GetSessionType());
 }
 
 void AVSessionService::ReportSessionControl(const std::string& bundleName, int32_t cmd)
@@ -4869,8 +4901,10 @@ void AVSessionService::ReportSessionControl(const std::string& bundleName, int32
     if (cmd == AVControlCommand::SESSION_CMD_PLAY ||
         cmd == AVControlCommand::SESSION_CMD_PAUSE ||
         cmd == CONTROL_COLD_START) {
+        auto uid = GetCallingUid();
+        auto callerBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid);
         AVSessionSysEvent::GetInstance().UpdateControl(bundleName, cmd,
-            BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid()));
+            callerBundleName.empty() ? std::to_string(uid) : callerBundleName);
     }
 }
 

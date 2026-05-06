@@ -76,6 +76,7 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
         CheckPostClean();
         LocalFrontSessionArrive(lastSessionId_);
         RegisterAudioCallbackAndTrigger();
+        SendProtocolVersionToNext();
         return;
     }
     ObserveControllerChanged(deviceId);
@@ -1147,6 +1148,28 @@ void MigrateAVSessionServer::SendSpecialKeepaliveData()
             SLOGI("send special mediamession data to proxy exit");
         }
     }).detach();
+}
+
+void MigrateAVSessionServer::SendProtocolVersionToNext()
+{
+    cJSON *versionJson = cJSON_CreateObject();
+    if (versionJson == nullptr) {
+        SLOGE("create version json failed");
+        return;
+    }
+    cJSON_AddNumberToObject(versionJson, "protocolVersion", AVSESSION_VERSION_POWER_SAVE);
+    std::string msg;
+    char header[] = {MSG_HEAD_MODE_FOR_NEXT, SYNC_PROTOCOL_VERSION, '\0'};
+    msg = std::string(header);
+    SoftbusSessionUtils::TransferJsonToStr(versionJson, msg);
+    cJSON_Delete(versionJson);
+
+    MigratePostTask(
+        [this, msg]() {
+            SendByteForNext(deviceId_, msg);
+        },
+        "SYNC_PROTOCOL_VERSION");
+    SLOGI("send protocol version to next device");
 }
 
 void MigrateAVSessionServer::SendCommandProc(const std::string &command, sptr<AVControllerItem> controller)

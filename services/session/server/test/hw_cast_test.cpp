@@ -29,7 +29,7 @@ class IAVCastSessionStateListenerTest : public IAVCastSessionStateListener {
 public:
     IAVCastSessionStateListenerTest() = default;
     virtual ~IAVCastSessionStateListenerTest() = default;
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) override {};
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, int32_t reasonCode) override {};
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) override {};
 };
 
@@ -1467,10 +1467,11 @@ static HWTEST(HwCastTest, HwCastDisplayListenerOnConnect001, TestSize.Level1)
 {
     SLOGI("HwCastDisplayListenerOnConnect001 begin!");
     OHOS::sptr<IAVSessionCallback> callback;
-    auto listener = new HwCastDisplayListener(callback);
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, true);
     EXPECT_EQ(listener != nullptr, true);
     OHOS::Rosen::DisplayId displayId = 1000;
     listener->OnConnect(displayId);
+    listener = nullptr;
     SLOGI("HwCastDisplayListenerOnConnect001 end!");
 }
 
@@ -1484,14 +1485,85 @@ static HWTEST(HwCastTest, HwCastDisplayListenerOnDisconnect001, TestSize.Level1)
 {
     SLOGI("HwCastDisplayListenerOnDisconnect001 begin!");
     OHOS::sptr<IAVSessionCallback> callback;
-    auto listener = new HwCastDisplayListener(callback);
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, true);
     EXPECT_EQ(listener != nullptr, true);
     OHOS::Rosen::DisplayId displayId = 0;
     listener->SetDisplayInfo(nullptr);
     listener->OnDisconnect(displayId);
+    listener = nullptr;
     SLOGI("HwCastDisplayListenerOnDisconnect001 end!");
 }
- 
+
+/**
+ * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen001
+ * @tc.desc: test SetSupportExtendedScreen with false and verify state changed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen001, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen001 begin!");
+    OHOS::sptr<IAVSessionCallback> callback;
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, true);
+    EXPECT_EQ(listener != nullptr, true);
+    listener->SetSupportExtendedScreen(false);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), false);
+    listener = nullptr;
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen001 end!");
+}
+
+/**
+ * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen002
+ * @tc.desc: test SetSupportExtendedScreen with true and verify state changed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen002, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen002 begin!");
+    OHOS::sptr<IAVSessionCallback> callback;
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
+    EXPECT_EQ(listener != nullptr, true);
+    listener->SetSupportExtendedScreen(true);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
+    listener = nullptr;
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen002 end!");
+}
+
+/**
+ * @tc.name: HwCastDisplayListenerIsSupportExtendedScreen001
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerIsSupportExtendedScreen001, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerIsSupportExtendedScreen001 begin!");
+    OHOS::sptr<IAVSessionCallback> callback;
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, true);
+    EXPECT_EQ(listener != nullptr, true);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
+    listener = nullptr;
+    SLOGI("HwCastDisplayListenerIsSupportExtendedScreen001 end!");
+}
+
+/**
+ * @tc.name: HwCastDisplayListenerIsSupportExtendedScreen002
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerIsSupportExtendedScreen002, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerIsSupportExtendedScreen002 begin!");
+    OHOS::sptr<IAVSessionCallback> callback;
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
+    EXPECT_EQ(listener != nullptr, true);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), false);
+    listener = nullptr;
+    SLOGI("HwCastDisplayListenerIsSupportExtendedScreen002 end!");
+}
+
 /**
  * @tc.name: HwCastProviderSendCommandArgsToCast001
  * @tc.desc:

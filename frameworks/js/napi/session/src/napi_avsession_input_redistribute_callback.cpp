@@ -25,13 +25,18 @@ Rosen::InputAfterRedistributeBehavior NapiAVSessionInputRedistributeCallback::On
     if (keyEvent == nullptr) {
         return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
     }
+    auto session = nativeSession.lock();
+    if (session == nullptr) {
+        SLOGW("OnInputEvent: nativeSession has been destroyed");
+        return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
+    }
     int32_t keyAction = keyEvent->GetKeyAction();
-    if (keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && nativeSession != nullptr) {
+    if (keyAction == MMI::KeyEvent::KEY_ACTION_DOWN) {
         std::string event = "InputRedistributeEvent";
         int32_t keyCode = keyEvent->GetKeyCode();
         AAFwk::WantParams args;
         args.SetParam("keyCode", AAFwk::Integer::Box(static_cast<int32_t>(keyCode)));
-        int32_t result = nativeSession->SetSessionEvent(event, args);
+        int32_t result = session->SetSessionEvent(event, args);
         SLOGI("InputRedistributeCallback keyCode %{public}d result %{public}d", keyCode, result);
         return result == 0 ? Rosen::InputAfterRedistributeBehavior::BEHAVIOR_INTERCEPT :
                             Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;

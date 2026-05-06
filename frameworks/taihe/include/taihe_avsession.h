@@ -79,6 +79,9 @@ public:
     void SetDesktopLyricStateSync(DesktopLyricState const& state);
     DesktopLyricState GetDesktopLyricStateSync();
     void SetBackgroundPlayModeSync(BackgroundPlayMode mode);
+    void SetMediaCenterControlTypeSync(array_view<string> controlTypes);
+    void SetSupportedPlaySpeedsSync(array_view<double> speeds);
+    void SetSupportedLoopModesSync(array_view<int32_t> loopModes);
 
     void OnPlay(callback_view<void(CommandInfo const& commandInfo)> callback);
     void OnPause(callback_view<void()> callback);

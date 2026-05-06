@@ -17,6 +17,7 @@
 #define MIGRATE_AVSESSION_PROXY_FUZZER_H
 
 #include "migrate_avsession_proxy.h"
+#include "migrate_avsession_constant.h"
 #include "avsession_service.h"
 
 namespace OHOS::AVSession {

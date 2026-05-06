@@ -26,6 +26,9 @@
 #include "avsession_errors.h"
 #include "avsession_item.h"
 #include "avsession_log.h"
+#include "bool_wrapper.h"
+#include "want_params.h"
+#include "int_wrapper.h"
 #include "migrate_avsession_constant.h"
 #include "migrate_avsession_manager.h"
 #include "migrate_avsession_proxy.h"
@@ -635,4 +638,181 @@ static HWTEST_F(MigrateAVSessionProxyTest, PrepareSessionFromRemote_WhenValidBun
     g_MigrateAVSessionProxy->PrepareSessionFromRemote();
     EXPECT_NE(g_MigrateAVSessionProxy->preSetController_, nullptr);
     g_MigrateAVSessionProxy->ProcessMediaImage(bundleIconStr);
+}
+
+/**
+ * @tc.name: ProcessProtocolVersion001
+ * @tc.desc: test the member of ProcessProtocolVersion with null json
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessProtocolVersion001, TestSize.Level0)
+{
+    std::string deviceId = "test_device";
+    g_MigrateAVSessionProxy->ProcessProtocolVersion(nullptr, deviceId);
+    EXPECT_EQ(deviceId.size() > 0, true);
+}
+
+/**
+ * @tc.name: ProcessProtocolVersion002
+ * @tc.desc: test the member of ProcessProtocolVersion with valid json
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessProtocolVersion002, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    std::string deviceId = "test_device";
+    SoftbusSessionUtils::AddIntToJson(jsonValue, "protocolVersion", AVSESSION_PROXY_VERSION);
+    g_MigrateAVSessionProxy->ProcessProtocolVersion(jsonValue, deviceId);
+    cJSON_Delete(jsonValue);
+    EXPECT_EQ(deviceId.size() > 0, true);
+}
+
+/**
+ * @tc.name: ProcessProtocolVersion003
+ * @tc.desc: test the member of ProcessProtocolVersion with version change
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessProtocolVersion003, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    std::string deviceId = "test_device_v3";
+
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    ASSERT_NE(g_MigrateAVSessionProxy->preSetController_, nullptr);
+
+    SoftbusSessionUtils::AddIntToJson(jsonValue, "protocolVersion", AVSESSION_PROXY_VERSION);
+    g_MigrateAVSessionProxy->ProcessProtocolVersion(jsonValue, deviceId);
+    cJSON_Delete(jsonValue);
+    EXPECT_EQ(deviceId.size() > 0, true);
+}
+
+/**
+ * @tc.name: ProcessLongPauseNotify001
+ * @tc.desc: test the member of ProcessLongPauseNotify with isLongPause true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessLongPauseNotify001, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddBoolToJson(jsonValue, LONG_PAUSE_STATE, true);
+    g_MigrateAVSessionProxy->ProcessLongPauseNotify(jsonValue);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessLongPauseNotify002
+ * @tc.desc: test the member of ProcessLongPauseNotify with isLongPause false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessLongPauseNotify002, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddBoolToJson(jsonValue, LONG_PAUSE_STATE, false);
+    g_MigrateAVSessionProxy->ProcessLongPauseNotify(jsonValue);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: GetVersion001
+ * @tc.desc: test the member of GetVersion with version in map
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, GetVersion001, TestSize.Level0)
+{
+    OHOS::AAFwk::WantParams extras;
+    g_MigrateAVSessionProxy->GetVersion(extras);
+    EXPECT_TRUE(extras.HasParam(AUDIO_GET_VERSION));
+}
+
+/**
+ * @tc.name: GetVersion002
+ * @tc.desc: test the member of GetVersion without version in map
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, GetVersion002, TestSize.Level0)
+{
+    OHOS::AAFwk::WantParams extras;
+    g_MigrateAVSessionProxy->GetVersion(extras);
+    EXPECT_TRUE(extras.HasParam(AUDIO_GET_VERSION));
+}
+
+/**
+ * @tc.name: NotifyMediaControlSyncTime001
+ * @tc.desc: test the member of NotifyMediaControlSyncTime with NeedState param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, NotifyMediaControlSyncTime001, TestSize.Level0)
+{
+    OHOS::AAFwk::WantParams extras;
+    bool valueBool = true;
+    auto isNeed = OHOS::AAFwk::Boolean::Box(valueBool);
+    extras.SetParam(MEDIACONTROL_NEED_STATE, isNeed);
+    g_MigrateAVSessionProxy->NotifyMediaControlSyncTime(extras);
+    EXPECT_EQ(extras.HasParam(MEDIACONTROL_NEED_STATE), true);
+}
+
+/**
+ * @tc.name: NotifyMediaControlSyncTime002
+ * @tc.desc: test the member of NotifyMediaControlSyncTime with timeout param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, NotifyMediaControlSyncTime002, TestSize.Level0)
+{
+    OHOS::AAFwk::WantParams extras;
+    bool valueBool = false;
+    auto isNeed = OHOS::AAFwk::Boolean::Box(valueBool);
+    extras.SetParam(MEDIACONTROL_NEED_STATE, isNeed);
+    int32_t valueInt = 10000;
+    auto timeoutMs = OHOS::AAFwk::Integer::Box(valueInt);
+    extras.SetParam(MEDIACONTROL_NEED_STATE_TIMEOUT_MS, timeoutMs);
+    g_MigrateAVSessionProxy->NotifyMediaControlSyncTime(extras);
+    EXPECT_EQ(extras.HasParam(MEDIACONTROL_NEED_STATE), true);
+}
+
+/**
+ * @tc.name: NotifyMediaControlSyncTime003
+ * @tc.desc: test the member of NotifyMediaControlSyncTime without NeedState param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, NotifyMediaControlSyncTime003, TestSize.Level0)
+{
+    OHOS::AAFwk::WantParams extras;
+    g_MigrateAVSessionProxy->NotifyMediaControlSyncTime(extras);
+    EXPECT_EQ(extras.HasParam(MEDIACONTROL_NEED_STATE), false);
+}
+
+/**
+ * @tc.name: SendMediaControlSyncTime001
+ * @tc.desc: test the member of SendMediaControlSyncTime with default interval
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, SendMediaControlSyncTime001, TestSize.Level0)
+{
+    g_MigrateAVSessionProxy->SendMediaControlSyncTime(NEED_STATE_TIMER_INTERVAL);
+}
+
+/**
+ * @tc.name: SendMediaControlSyncTime002
+ * @tc.desc: test the member of SendMediaControlSyncTime with custom interval
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, SendMediaControlSyncTime002, TestSize.Level0)
+{
+    g_MigrateAVSessionProxy->SendMediaControlSyncTime(3000);
 }

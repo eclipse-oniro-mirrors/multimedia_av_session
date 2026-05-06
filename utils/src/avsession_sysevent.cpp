@@ -15,6 +15,10 @@
 
 #include "avsession_sysevent.h"
 #include "avsession_log.h"
+#include "parameter.h"
+#include "parameters.h"
+#include "system_ability_definition.h"
+#include "avsession_utils.h"
 
 namespace OHOS::AVSession {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
@@ -210,7 +214,10 @@ void AVSessionSysEvent::ReportPlayingState(const std::string& bundleName)
             "AVSESSION_PLAYSTATE_TIMESTAMP", playingStateInfo->playbackStateTime_,
             "AVSESSION_CONTROL", playingStateInfo->control_,
             "AVSESSION_CONTROL_BUNDLE_NAME", playingStateInfo->callerBundleName_,
-            "AVSESSION_CONTROL_TIMESTAMP", playingStateInfo->controlTime_);
+            "AVSESSION_CONTROL_TIMESTAMP", playingStateInfo->controlTime_,
+            "APP_TYPE", playingStateInfo->appType_,
+            "SUPPORT_INTENT", playingStateInfo->supportIntent_,
+            "SUPPORT_AVQUEUE", playingStateInfo->supportAvqueue_);
     }
     playingStateInfos_.erase(bundleName);
 }
@@ -246,7 +253,8 @@ PlayingStateInfo* AVSessionSysEvent::GetPlayingStateInfo(const std::string& bund
     return playingStateInfos_[bundleName].get();
 }
 
-void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::string& appVersion, SessionState state)
+void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::string& appVersion,
+    SessionState state, const std::string& appType)
 {
     std::lock_guard lockGuard(lock_);
     PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
@@ -254,6 +262,7 @@ void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::st
     CHECK_AND_RETURN(isPlayInfoValid);
     playingStateInfo->bundleName_ = bundleName;
     playingStateInfo->appVersion_ = appVersion;
+    playingStateInfo->appType_ = appType;
     playingStateInfo->updateState(state);
     bool isReportOverSize = playingStateInfo->state_.size() >= REPORT_SIZE;
     CHECK_AND_RETURN(isReportOverSize);
@@ -306,6 +315,126 @@ void AVSessionSysEvent::UpdateControl(const std::string& bundleName, uint8_t con
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
+void AVSessionSysEvent::UpdateSupportIntent(const std::string& bundleName, const std::string& supportIntent)
+{
+    std::lock_guard lockGuard(lock_);
+    PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
+    CHECK_AND_RETURN(playingStateInfo != nullptr);
+    playingStateInfo->updateSupportIntent(supportIntent);
+}
+
+void AVSessionSysEvent::UpdateSupportAvqueue(const std::string& bundleName, bool supportAvqueue)
+{
+    std::lock_guard lockGuard(lock_);
+    PlayingStateInfo* playingStateInfo = GetPlayingStateInfo(bundleName);
+    CHECK_AND_RETURN(playingStateInfo != nullptr);
+    playingStateInfo->updateSupportAvqueue(supportAvqueue);
+}
+
+CastControlInfo* AVSessionSysEvent::GetCastControlInfo(const std::string& sessionId, bool needInsert)
+{
+    std::lock_guard lockGuard(lock_);
+    if (castControlInfos_.find(sessionId) == castControlInfos_.end() && needInsert) {
+        castControlInfos_.insert({sessionId, std::make_unique<CastControlInfo>()});
+    }
+    if (castControlInfos_.find(sessionId) != castControlInfos_.end()) {
+        return castControlInfos_[sessionId].get();
+    }
+    return nullptr;
+}
+
+void AVSessionSysEvent::updateStartCastTime(const std::string& sessionId, const std::string& bundleName,
+    const std::string& packageVersion, const std::string& appType)
+{
+    std::lock_guard lockGuard(lock_);
+    CastControlInfo* castControlInfo = GetCastControlInfo(sessionId, true);
+    CHECK_AND_RETURN(castControlInfo != nullptr);
+    castControlInfo->bundleName_ = bundleName;
+    castControlInfo->packageVersion_ = packageVersion;
+    castControlInfo->appType_ = appType;
+    castControlInfo->updateStartCastTime();
+}
+
+void AVSessionSysEvent::updateDeviceConnectTime(const std::string& sessionId)
+{
+    std::lock_guard lockGuard(lock_);
+    CastControlInfo* castControlInfo = GetCastControlInfo(sessionId, false);
+    CHECK_AND_RETURN(castControlInfo != nullptr);
+    castControlInfo->updateDeviceConnectTime();
+}
+
+void AVSessionSysEvent::updatePrepareTime(const std::string& sessionId)
+{
+    std::lock_guard lockGuard(lock_);
+    CastControlInfo* castControlInfo = GetCastControlInfo(sessionId, false);
+    CHECK_AND_RETURN(castControlInfo != nullptr);
+    castControlInfo->updatePrepareTime();
+}
+
+void AVSessionSysEvent::updatePlayCallbackTime(const std::string& sessionId)
+{
+    std::lock_guard lockGuard(lock_);
+    CastControlInfo* castControlInfo = GetCastControlInfo(sessionId, false);
+    CHECK_AND_RETURN(castControlInfo != nullptr);
+    castControlInfo->updatePlayCallbackTime();
+}
+
+void AVSessionSysEvent::clearCastControlInfo(const std::string& sessionId)
+{
+    std::lock_guard lockGuard(lock_);
+    if (!castControlInfos_.empty() && castControlInfos_.find(sessionId) != castControlInfos_.end()) {
+        castControlInfos_.erase(sessionId);
+    }
+}
+
+void AVSessionSysEvent::ReportSessionCastControl(const std::string& controlType,
+    const std::string& sessionId, const DeviceInfo& deviceInfo)
+{
+    std::lock_guard lockGuard(lock_);
+    CHECK_AND_RETURN(!castControlInfos_.empty() && castControlInfos_.find(sessionId) != castControlInfos_.end());
+    auto castControlInfo = castControlInfos_[sessionId].get();
+    if (castControlInfo != nullptr) {
+        std::string ipAddress = deviceInfo.ipAddress_;
+        int64_t deviceDisConnectTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        HiSysWriteBehavior("SESSION_CAST_CONTROL",
+            "CONTROL_TYPE", controlType,
+            "PEER_DEVICE_ID", AVSessionUtils::GetAnonymousDeviceId(deviceInfo.deviceId_),
+            "PEER_DEVICE_NAME", AVSessionUtils::GetAnonymousDeviceId(deviceInfo.deviceName_),
+            "PEER_DEVICE_TYPE", deviceInfo.deviceType_,
+            "PEER_NETWORK_ID", AVSessionUtils::GetAnonymousDeviceId(deviceInfo.networkId_),
+            "PEER_SUPPORTED_PROTOCOL", deviceInfo.supportedProtocols_,
+            "BUNDLE_NAME", castControlInfo->bundleName_,
+            "APP_TYPE", castControlInfo->appType_,
+            "PACKAGE_VERSION", castControlInfo->packageVersion_,
+            "IS_P2P", ipAddress.empty(),
+            "START_CAST_LATENCY", (castControlInfo->deviceConnectTime_ - castControlInfo->startCastTime_),
+            "PREPARE_LATENCY", (castControlInfo->prepareTime_ - castControlInfo->deviceConnectTime_),
+            "PLAY_LATENCY", (castControlInfo->playCallbackTime_ - castControlInfo->prepareTime_),
+            "ALL_LATENCY", (castControlInfo->playCallbackTime_ - castControlInfo->startCastTime_),
+            "SERVICE_DURATION", (deviceDisConnectTime - castControlInfo->deviceConnectTime_));
+    }
+    castControlInfos_.erase(sessionId);
+}
+
+std::string AVSessionSysEvent::GetOsVersion()
+{
+    std::lock_guard lockGuard(lock_);
+    if (osVersion.empty()) {
+        osVersion = system::GetParameter("const.product.software.version", "0");
+    }
+    return osVersion;
+}
+
+int32_t AVSessionSysEvent::GetSdkVersion()
+{
+    std::lock_guard lockGuard(lock_);
+    if (sdkVersion == 0) {
+        sdkVersion = GetSdkApiVersion();
+    }
+    return sdkVersion;
+}
+
 void PlayingStateInfo::updateState(SessionState state)
 {
     std::lock_guard lockGuard(lock_);
@@ -353,5 +482,57 @@ void PlayingStateInfo::updateControl(uint8_t control, std::string callerBundleNa
         controlTime_.push_back(UTCTimeMilliSeconds());
     }
 }
+
+void PlayingStateInfo::updateSupportIntent(const std::string& supportIntent)
+{
+    std::lock_guard lockGuard(lock_);
+    supportIntent_ = supportIntent;
+}
+
+void PlayingStateInfo::updateSupportAvqueue(bool supportAvqueue)
+{
+    std::lock_guard lockGuard(lock_);
+    supportAvqueue_ = supportAvqueue;
+}
+
+void CastControlInfo::updateStartCastTime()
+{
+    std::lock_guard lockGuard(lock_);
+    isNeedRecordPrepare_ = true;
+    isNeedRecordPlay_ = true;
+    deviceConnectTime_ = 0;
+    prepareTime_ = 0;
+    playCallbackTime_ = 0;
+    startCastTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+void CastControlInfo::updateDeviceConnectTime()
+{
+    std::lock_guard lockGuard(lock_);
+    deviceConnectTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+void CastControlInfo::updatePrepareTime()
+{
+    std::lock_guard lockGuard(lock_);
+    if (isNeedRecordPrepare_) {
+        prepareTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        isNeedRecordPrepare_ = false;
+    }
+}
+
+void CastControlInfo::updatePlayCallbackTime()
+{
+    std::lock_guard lockGuard(lock_);
+    if (isNeedRecordPlay_) {
+        playCallbackTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        isNeedRecordPlay_ = false;
+    }
+}
+
 #endif
 } // namespace OHOS::AVSession

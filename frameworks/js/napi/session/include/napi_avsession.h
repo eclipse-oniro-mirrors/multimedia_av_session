@@ -76,6 +76,9 @@ private:
     static napi_value ReleaseCast(napi_env env, napi_callback_info info);
     static napi_value GetAllCastDisplays(napi_env env, napi_callback_info info);
     static napi_value SendCustomData(napi_env env, napi_callback_info info);
+    static napi_value SetMediaCenterControlType(napi_env env, napi_callback_info info);
+    static napi_value SetSupportedPlaySpeeds(napi_env env, napi_callback_info info);
+    static napi_value SetSupportedLoopModes(napi_env env, napi_callback_info info);
     static napi_value EnableDesktopLyric(napi_env env, napi_callback_info info);
     static napi_value SetDesktopLyricVisible(napi_env env, napi_callback_info info);
     static napi_value IsDesktopLyricVisible(napi_env env, napi_callback_info info);

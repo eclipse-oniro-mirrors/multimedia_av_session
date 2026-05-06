@@ -20,6 +20,9 @@
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "avsession_trace.h"
+#include "avplayback_state.h"
+#include "avmedia_center_control_type.h"
+#include <algorithm>
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "avcast_controller_proxy.h"
@@ -359,6 +362,69 @@ int32_t AVSessionProxy::SendCustomData(const AAFwk::WantParams& customData)
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SEND_CUSTOM_DATA, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionProxy::SetMediaCenterControlType(const std::vector<int32_t>& controlTypes)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    SLOGI("SetMediaCenterControlType size=%{public}zu", controlTypes.size());
+    CHECK_AND_RETURN_RET_LOG(std::all_of(controlTypes.begin(), controlTypes.end(),
+        IsValidMediaCenterControlTypeNum), ERR_INVALID_PARAM, "invalid controlType");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32Vector(controlTypes),
+        ERR_MARSHALLING, "Write controlTypes failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_MEDIA_CENTER_CONTROL_TYPE, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionProxy::SetSupportedPlaySpeeds(const std::vector<double>& speeds)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    SLOGI("SetSupportedPlaySpeeds size=%{public}zu", speeds.size());
+    CHECK_AND_RETURN_RET_LOG(std::all_of(speeds.begin(), speeds.end(),
+        AVPlaybackState::IsValidSpeed), ERR_INVALID_PARAM, "invalid speed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteDoubleVector(speeds),
+        ERR_MARSHALLING, "Write speeds failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_SUPPORTED_PLAY_SPEEDS, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
+int32_t AVSessionProxy::SetSupportedLoopModes(const std::vector<int32_t>& loopModes)
+{
+    CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
+    SLOGI("SetSupportedLoopModes size=%{public}zu", loopModes.size());
+    CHECK_AND_RETURN_RET_LOG(std::all_of(loopModes.begin(), loopModes.end(),
+        AVPlaybackState::IsValidLoopMode), ERR_INVALID_PARAM, "invalid loopMode");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32Vector(loopModes),
+        ERR_MARSHALLING, "Write loopModes failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_SET_SUPPORTED_LOOP_MODES, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }

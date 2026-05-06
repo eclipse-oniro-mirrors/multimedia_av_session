@@ -64,6 +64,12 @@ public:
 
     int32_t SendCustomData(const AAFwk::WantParams& data) override;
 
+    int32_t SetMediaCenterControlType(const std::vector<int32_t>& controlTypes) override;
+
+    int32_t SetSupportedPlaySpeeds(const std::vector<double>& speeds) override;
+
+    int32_t SetSupportedLoopModes(const std::vector<int32_t>& loopModes) override;
+
     int32_t SetLaunchAbility(const AbilityRuntime::WantAgent::WantAgent& ability) override;
 
     int32_t GetExtras(AAFwk::WantParams& extras) override;

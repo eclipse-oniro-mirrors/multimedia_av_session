@@ -17,7 +17,6 @@
 #define HW_CAST_PROVIDER_SESSION_H
 
 #include <mutex>
-#include <map>
 
 #include "i_cast_session.h"
 #include "cast_engine_common.h"
@@ -31,13 +30,13 @@ class HwCastProviderSession : public CastEngine::ICastSessionListener,
 public:
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,
-        BYPASS_NUM_COMMAND = 1,
-        QUERY_NUM_COMMAND = 2,
+        BYPASS_COMMAND_NUM = 1,
+        QUERY_COMMAND_NUM = 2,
     };
 
     enum {
-        HIPLAY_NUM_BYPASS_DATA = 4201,
-        HIPLAY_NUM_QUERY_RESPONSE = 4203,
+        HIPLAY_BYPASS_DATA_NUM = 4201,
+        HIPLAY_QUERY_RESPONSE_NUM = 4203,
         HIPLAY_CONFIG_MODE_RESULT = 4205,
     };
 
@@ -67,8 +66,6 @@ public:
 private:
     void ComputeToastOnDeviceState(const CastEngine::DeviceStateInfo &stateInfo,
         const CastEngine::CastRemoteDevice &castRemoteDevice);
-    void ReportDeviceCastingTime(int32_t deviceState, const std::string &deviceId,
-        const CastEngine::CastRemoteDevice &castRemoteDevice);
 
     std::shared_ptr<CastEngine::ICastSession> castSession_;
     std::vector<std::shared_ptr<IAVCastSessionStateListener>> castSessionStateListenerList_;
@@ -77,9 +74,9 @@ private:
     std::string stashDeviceId_;
     CastEngine::ProtocolType protocolType_ = CastEngine::ProtocolType::CAST_PLUS_STREAM;
     int32_t avToastDeviceState_ = ConnectionState::STATE_DISCONNECTED;
-    std::map<std::string, int64_t> deviceConnectMap_;
 
     const int32_t deviceStateConnection = 6;
+    const int32_t noReasonCode = 0;
     const int32_t eventIdStart = 2000;
     const int32_t eventIdEnd = 2999;
     const int32_t hiplayEventIdStart = 4200;

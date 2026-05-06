@@ -218,6 +218,21 @@ public:
         }
     };
     int32_t GetLaunchAbilityInner(OHOS::AbilityRuntime::WantAgent::WantAgent*& ability) override { return 0; }
+    int32_t GetMediaCenterControlType(std::vector<int32_t>& controlTypes) override
+    {
+        controlTypes = {0, 1, 2, 3};
+        return isSuccess ? AVSESSION_SUCCESS : 0;
+    };
+    int32_t GetSupportedPlaySpeeds(std::vector<double>& speeds) override
+    {
+        speeds = {0.5, 1.0, 1.5, 2.0};
+        return isSuccess ? AVSESSION_SUCCESS : 0;
+    };
+    int32_t GetSupportedLoopModes(std::vector<int32_t>& loopModes) override
+    {
+        loopModes = {0, 1, 2, 3};
+        return isSuccess ? AVSESSION_SUCCESS : 0;
+    };
     bool isSuccess = true;
 };
 
@@ -1495,4 +1510,52 @@ static HWTEST_F(AVSessionControllerStubTest, HandleSetPlaybackFilter003, TestSiz
     int ret = avSessionControllerStub.HandleSetPlaybackFilter(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetPlaybackFilter003 end!");
+}
+
+/**
+ * @tc.name: HandleGetMediaCenterControlType001
+ * @tc.desc: Test HandleGetMediaCenterControlType
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleGetMediaCenterControlType001, TestSize.Level1)
+{
+    SLOGI("HandleGetMediaCenterControlType001 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int ret = avSessionControllerStub.HandleGetMediaCenterControlType(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleGetMediaCenterControlType001 end!");
+}
+
+/**
+ * @tc.name: HandleGetSupportedPlaySpeeds001
+ * @tc.desc: Test HandleGetSupportedPlaySpeeds
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleGetSupportedPlaySpeeds001, TestSize.Level1)
+{
+    SLOGI("HandleGetSupportedPlaySpeeds001 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int ret = avSessionControllerStub.HandleGetSupportedPlaySpeeds(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleGetSupportedPlaySpeeds001 end!");
+}
+
+/**
+ * @tc.name: HandleGetSupportedLoopModes001
+ * @tc.desc: Test HandleGetSupportedLoopModes
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionControllerStubTest, HandleGetSupportedLoopModes001, TestSize.Level1)
+{
+    SLOGI("HandleGetSupportedLoopModes001 begin!");
+    AVSessionControllerStubDemo avSessionControllerStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int ret = avSessionControllerStub.HandleGetSupportedLoopModes(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleGetSupportedLoopModes001 end!");
 }

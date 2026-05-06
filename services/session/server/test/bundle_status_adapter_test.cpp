@@ -198,7 +198,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport001, testing::ext::Te
     SLOGI("CheckBundleSupport001, start");
     BundleStatusAdapter::GetInstance().Init();
     std::string profile = "";
-    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
+    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport("default", profile);
     EXPECT_EQ(ret, false);
     SLOGI("CheckBundleSupport001, end");
 }
@@ -222,7 +222,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport002, testing::ext::Te
             }
         ]
     })";
-    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
+    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport("default", profile);
     EXPECT_EQ(ret, false);
     SLOGI("CheckBundleSupport002, end");
 }
@@ -246,7 +246,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport003, testing::ext::Te
             }
         ]
     })";
-    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
+    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport("default", profile);
     EXPECT_EQ(ret, false);
     SLOGI("CheckBundleSupport003, end");
 }
@@ -270,7 +270,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport004, testing::ext::Te
             }
         ]
     })";
-    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
+    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport("default", profile);
     EXPECT_EQ(ret, false);
     SLOGI("CheckBundleSupport004, end");
 }
@@ -499,7 +499,7 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport005, testing::ext::Te
             }
         ]
     })";
-    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
+    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport("default", profile);
     EXPECT_EQ(ret, true);
     SLOGI("CheckBundleSupport005 end");
 }
@@ -523,9 +523,39 @@ static HWTEST_F(BundleStatusAdapterTest, CheckBundleSupport006, testing::ext::Te
             }
         ]
     })";
-    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport(profile);
+    bool ret = BundleStatusAdapter::GetInstance().CheckBundleSupport("default", profile);
     EXPECT_EQ(ret, true);
     SLOGI("CheckBundleSupport006 end");
+}
+
+/**
+* @tc.name: GetAppVersion001
+* @tc.desc: Test GetAppVersion with empty bundleName
+* @tc.type: FUNC
+*/
+static HWTEST_F(BundleStatusAdapterTest, GetAppVersion001, testing::ext::TestSize.Level0)
+{
+    SLOGI("GetAppVersion001 start");
+    BundleStatusAdapter::GetInstance().Init();
+    std::string bundleName = "";
+    std::string version = BundleStatusAdapter::GetInstance().GetAppVersion(bundleName);
+    EXPECT_EQ(version, "default");
+    SLOGI("GetAppVersion001 end");
+}
+
+/**
+* @tc.name: GetAppVersion002
+* @tc.desc: Test GetAppVersion with invalid bundleName
+* @tc.type: FUNC
+*/
+static HWTEST_F(BundleStatusAdapterTest, GetAppVersion002, testing::ext::TestSize.Level0)
+{
+    SLOGI("GetAppVersion002 start");
+    BundleStatusAdapter::GetInstance().Init();
+    std::string bundleName = "invalid.bundle.name";
+    std::string version = BundleStatusAdapter::GetInstance().GetAppVersion(bundleName);
+    EXPECT_EQ(version, "default");
+    SLOGI("GetAppVersion002 end");
 }
 
 } // namespace AVSession

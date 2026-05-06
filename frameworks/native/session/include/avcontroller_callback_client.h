@@ -60,6 +60,13 @@ public:
     ErrCode OnDesktopLyricStateChanged(const DesktopLyricState& state) override;
 
     ErrCode OnDesktopLyricEnabled(bool isEnabled) override;
+
+    ErrCode OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes) override;
+
+    ErrCode OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds) override;
+
+    ErrCode OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes) override;
+
 private:
     std::shared_ptr<AVControllerCallback> callback_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;

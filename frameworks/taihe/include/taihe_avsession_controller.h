@@ -66,6 +66,9 @@ public:
     bool IsDesktopLyricVisibleSync();
     void SetDesktopLyricStateSync(DesktopLyricState const& state);
     DesktopLyricState GetDesktopLyricStateSync();
+    array<string> GetMediaCenterControlTypeSync();
+    array<double> GetSupportedPlaySpeedsSync();
+    array<int32_t> GetSupportedLoopModesSync();
 
     void OnMetadataChange(array_view<string> filter, callback_view<void(AVMetadata const&)> callback);
     void OnMetadataChangeAll(callback_view<void(AVMetadata const&)> callback);
@@ -87,6 +90,9 @@ public:
     void OnDesktopLyricVisibilityChanged(callback_view<void(bool)> callback);
     void OnDesktopLyricStateChanged(callback_view<void(DesktopLyricState const&)> callback);
     void OnDesktopLyricEnabled(callback_view<void(bool)> callback);
+    void OnMediaCenterControlTypeChanged(callback_view<void(array_view<string>)> callback);
+    void OnSupportedPlaySpeedsChange(callback_view<void(array_view<double>)> callback);
+    void OnSupportedLoopModesChange(callback_view<void(array_view<int32_t>)> callback);
 
     void OffMetadataChange(optional_view<callback<void(AVMetadata const&)>> callback);
     void OffPlaybackStateChange(optional_view<callback<void(AVPlaybackState const&)>> callback);
@@ -104,6 +110,9 @@ public:
     void OffDesktopLyricVisibilityChanged(optional_view<callback<void(bool)>> callback);
     void OffDesktopLyricStateChanged(optional_view<callback<void(DesktopLyricState const&)>> callback);
     void OffDesktopLyricEnabled(optional_view<callback<void(bool)>> callback);
+    void OffMediaCenterControlTypeChanged(optional_view<callback<void(array_view<string>)>> callback);
+    void OffSupportedPlaySpeedsChange(optional_view<callback<void(array_view<double>)>> callback);
+    void OffSupportedLoopModesChange(optional_view<callback<void(array_view<int32_t>)>> callback);
 
 private:
     static int32_t DoRegisterCallback(std::shared_ptr<AVSessionControllerImpl> &taiheController);

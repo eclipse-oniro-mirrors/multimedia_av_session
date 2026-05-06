@@ -70,18 +70,69 @@ void HwCastDisplayListener::SetAppCastDisplayId(Rosen::DisplayId displayId)
     appCastId_ = displayId;
 }
 
+void HwCastDisplayListener::SetSupportExtendedScreen(bool isSupport)
+{
+    sptr<Rosen::DisplayInfo> displayInfo;
+    Rosen::DisplayId displayId;
+    std::string displayName;
+    
+    if (!isSupport) {
+        {
+            std::lock_guard<std::recursive_mutex> lock(dataMutex_);
+            CHECK_AND_RETURN_LOG(isSupportExtendedScreen_.load(), "isSupportExtendedScreen already false, skip");
+            CHECK_AND_RETURN_LOG(curDisplayInfo_ != nullptr, "curDisplayInfo_ is nullptr");
+            displayInfo = curDisplayInfo_;
+            displayId = curDisplayInfo_->GetDisplayId();
+            displayName = curDisplayInfo_->GetName();
+        }
+        auto flag = Rosen::DisplayManagerLite::GetInstance().GetVirtualScreenFlag(displayId);
+        CHECK_AND_RETURN_LOG(flag == Rosen::VirtualScreenFlag::CAST, "curDisplayInfo is not cast screen");
+        SLOGI("SetSupportExtendedScreen false, disconnect cast display: %{public}s", displayName.c_str());
+        ReportCastDisplay(displayInfo, CastDisplayState::STATE_OFF);
+        {
+            std::lock_guard<std::recursive_mutex> lock(dataMutex_);
+            stashedDisplayInfo_ = curDisplayInfo_;
+            isSupportExtendedScreen_.store(isSupport);
+        }
+    }
+    if (isSupport) {
+        {
+            std::lock_guard<std::recursive_mutex> lock(dataMutex_);
+            CHECK_AND_RETURN_LOG(!isSupportExtendedScreen_.load(), "isSupportExtendedScreen already true, skip");
+            CHECK_AND_RETURN_LOG(stashedDisplayInfo_ != nullptr, "stashedDisplayInfo_ is nullptr");
+            displayInfo = stashedDisplayInfo_;
+            displayId = stashedDisplayInfo_->GetDisplayId();
+            displayName = stashedDisplayInfo_->GetName();
+        }
+        auto flag = Rosen::DisplayManagerLite::GetInstance().GetVirtualScreenFlag(displayId);
+        CHECK_AND_RETURN_LOG(flag == Rosen::VirtualScreenFlag::CAST, "stashedDisplayInfo is not cast screen");
+        SLOGI("SetSupportExtendedScreen true, connect cast display: %{public}s", displayName.c_str());
+        ReportCastDisplay(displayInfo, CastDisplayState::STATE_ON);
+        {
+            std::lock_guard<std::recursive_mutex> lock(dataMutex_);
+            curDisplayInfo_ = stashedDisplayInfo_;
+            isSupportExtendedScreen_.store(isSupport);
+        }
+    }
+}
+
 // LCOV_EXCL_START
 void HwCastDisplayListener::SetDisplayInfo(sptr<Rosen::DisplayInfo> displayInfo)
 {
-    std::lock_guard<std::mutex> lock(dataMutex_);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex_);
     curDisplayInfo_ = displayInfo;
 }
 // LCOV_EXCL_STOP
 
 sptr<Rosen::DisplayInfo> HwCastDisplayListener::GetDisplayInfo()
 {
-    std::lock_guard<std::mutex> lock(dataMutex_);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex_);
     return curDisplayInfo_;
+}
+
+bool HwCastDisplayListener::IsSupportExtendedScreen()
+{
+    return isSupportExtendedScreen_.load();
 }
 
 // LCOV_EXCL_START

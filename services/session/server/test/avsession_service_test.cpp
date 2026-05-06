@@ -1144,6 +1144,22 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent005, TestSize.Level1)
     SLOGD("OnReceiveEvent005 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, OnReceiveEvent006, TestSize.Level1)
+{
+    SLOGD("OnReceiveEvent006 begin!");
+    OHOS::EventFwk::CommonEventData eventData;
+    string action = "usual.event.MEDIA_NTF_SWITCH";
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avservice_);
+    eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_TRUE(avservice_ != nullptr);
+    SLOGD("OnReceiveEvent006 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, UnSubscribeCommonEvent001, TestSize.Level0)
 {
     SLOGI("SubscribeCommonEvent001 begin!");
@@ -3789,4 +3805,14 @@ static HWTEST_F(AVSessionServiceTest, PlayParam001, TestSize.Level0)
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(paramIn, paramOut);
     SLOGD("PlayParam001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, UpdateNtfEnable001, TestSize.Level0)
+{
+    SLOGD("UpdateNtfEnable001 begin!");
+    avservice_->UpdateNtfEnable(false);
+    EXPECT_EQ(avservice_->isNtfEnabled_, false);
+    avservice_->UpdateNtfEnable(true);
+    EXPECT_EQ(avservice_->isNtfEnabled_, true);
+    SLOGD("UpdateNtfEnable001 end!");
 }

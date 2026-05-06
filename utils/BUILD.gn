@@ -52,6 +52,7 @@ ohos_shared_library("avsession_utils") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "init:libbegetutil",
   ]
 
   cflags = []

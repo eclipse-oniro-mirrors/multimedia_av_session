@@ -75,6 +75,9 @@ private:
     static napi_value IsDesktopLyricVisible(napi_env env, napi_callback_info info);
     static napi_value SetDesktopLyricState(napi_env env, napi_callback_info info);
     static napi_value GetDesktopLyricState(napi_env env, napi_callback_info info);
+    static napi_value GetMediaCenterControlType(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedPlaySpeeds(napi_env env, napi_callback_info info);
+    static napi_value GetSupportedLoopModes(napi_env env, napi_callback_info info);
 
     static napi_status OnAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
         napi_value param, napi_value callback);
@@ -105,6 +108,9 @@ private:
     static napi_value OnDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
     static napi_value OnDesktopLyricStateChanged(napi_env env, napi_callback_info info);
     static napi_value OnDesktopLyricEnabled(napi_env env, napi_callback_info info);
+    static napi_value OnMediaCenterControlTypeChanged(napi_env env, napi_callback_info info);
+    static napi_value OnSupportedPlaySpeedsChanged(napi_env env, napi_callback_info info);
+    static napi_value OnSupportedLoopModesChanged(napi_env env, napi_callback_info info);
 
     static napi_status OffAVCallMetaDataChange(napi_env env, NapiAVSessionController* napiController,
         napi_value callback);
@@ -132,6 +138,9 @@ private:
     static napi_value OffDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
     static napi_value OffDesktopLyricStateChanged(napi_env env, napi_callback_info info);
     static napi_value OffDesktopLyricEnabled(napi_env env, napi_callback_info info);
+    static napi_value OffMediaCenterControlTypeChanged(napi_env env, napi_callback_info info);
+    static napi_value OffSupportedPlaySpeedsChanged(napi_env env, napi_callback_info info);
+    static napi_value OffSupportedLoopModesChanged(napi_env env, napi_callback_info info);
 
     static napi_status SetAVCallMetaFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);
     static napi_status SetAVCallStateFilter(napi_env env, NapiAVSessionController* napiController, napi_value filter);

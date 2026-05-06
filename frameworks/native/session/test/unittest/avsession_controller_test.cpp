@@ -218,6 +218,9 @@ public:
     int32_t SkipToQueueItem(int32_t& itemId) override;
     int32_t GetExtras(OHOS::AAFwk::WantParams& extras) override;
     int32_t GetExtrasWithEvent(const std::string& extraEvent, OHOS::AAFwk::WantParams& extras) override;
+    int32_t GetMediaCenterControlType(std::vector<int32_t>& controlTypes) override;
+    int32_t GetSupportedPlaySpeeds(std::vector<double>& speeds) override;
+    int32_t GetSupportedLoopModes(std::vector<int32_t>& loopModes) override;
     int32_t Destroy() override;
     std::string GetSessionId() override;
     int32_t RegisterCallbackInner(const OHOS::sptr<IRemoteObject>& callback) override;
@@ -326,6 +329,24 @@ int32_t AVSessionControllerStubTest::GetExtras(OHOS::AAFwk::WantParams& extras)
 int32_t AVSessionControllerStubTest::GetExtrasWithEvent(
     const std::string& extraEvent, OHOS::AAFwk::WantParams& extras)
 {
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetSupportedPlaySpeeds(std::vector<double>& speeds)
+{
+    speeds = {0.5, 1.0, 1.5, 2.0};
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetMediaCenterControlType(std::vector<int32_t>& controlTypes)
+{
+    controlTypes = {0, 1, 2};
+    return 0;
+}
+
+int32_t AVSessionControllerStubTest::GetSupportedLoopModes(std::vector<int32_t>& loopModes)
+{
+    loopModes = {0, 1, 2, 3};
     return 0;
 }
 
@@ -1499,6 +1520,45 @@ HWTEST_F(AVSessionControllerTest, DesktopLyricState001, TestSize.Level1)
     auto ptr = std::shared_ptr<DesktopLyricState>(DesktopLyricState::Unmarshalling(parcel));
     ASSERT_NE(ptr, nullptr);
     EXPECT_EQ(ptr->isLocked_, state.isLocked_);
+}
+
+/**
+* @tc.name: GetSupportedPlaySpeeds001
+* @tc.desc: Get supported play speeds from controller
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerTest, GetSupportedPlaySpeeds001, TestSize.Level1)
+{
+    std::vector<double> speeds;
+    EXPECT_EQ(controller_->GetSupportedPlaySpeeds(speeds), AVSESSION_SUCCESS);
+    EXPECT_EQ(speeds.size() > 0, true);
+}
+
+/**
+* @tc.name: GetMediaCenterControlType001
+* @tc.desc: Get media center control type from controller
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerTest, GetMediaCenterControlType001, TestSize.Level1)
+{
+    std::vector<int32_t> controlTypes;
+    EXPECT_EQ(controller_->GetMediaCenterControlType(controlTypes), AVSESSION_SUCCESS);
+    EXPECT_EQ(controlTypes.size() > 0, true);
+}
+
+/**
+* @tc.name: GetSupportedLoopModes001
+* @tc.desc: Get supported loop modes from controller
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerTest, GetSupportedLoopModes001, TestSize.Level1)
+{
+    std::vector<int32_t> loopModes;
+    EXPECT_EQ(controller_->GetSupportedLoopModes(loopModes), AVSESSION_SUCCESS);
+    EXPECT_EQ(loopModes.size() > 0, true);
 }
 } // namespace AVSession
 } // namespace OHOS

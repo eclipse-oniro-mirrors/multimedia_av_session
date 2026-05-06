@@ -55,4 +55,10 @@
    [oneway] void OnDesktopLyricStateChanged([in] DesktopLyricState state);
 
    [oneway] void OnDesktopLyricEnabled([in] boolean isEnabled);
- }
+
+   [oneway] void OnMediaCenterControlTypeChanged([in] int[] controlTypes);
+
+   [oneway] void OnSupportedPlaySpeedsChanged([in] double[] speeds);
+
+   [oneway] void OnSupportedLoopModesChanged([in] int[] loopModes);
+}

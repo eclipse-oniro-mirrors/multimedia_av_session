@@ -311,7 +311,9 @@ void OnBytesReceivedTest()
         SYNC_CONTROLLER_LIST,
         SYNC_COMMAND,
         SYNC_HEARTBEAT,
-        COLD_START
+        COLD_START,
+        SYNC_PROTOCOL_VERSION,
+        SYNC_LONG_PAUSE_NOTIFY
     };
     data[1] = commands[static_cast<uint32_t> (randomNum) % commands.size()];
     migrateServer_->OnBytesReceived(deviceId, data);
@@ -332,6 +334,7 @@ void ProcFromNextTest()
         SYNC_SWITCH_AUDIO_DEVICE_COMMAND,
         COLD_START,
         SYNC_MEDIA_CONTROL_NEED_STATE,
+        SYNC_LONG_PAUSE_NOTIFY,
         provider.ConsumeIntegral<int32_t>()
     };
     data[1]  = messageType[provider.ConsumeIntegral<uint32_t>() % messageType.size()];
@@ -511,6 +514,66 @@ void ProcessMediaControlNeedStateFromNextExt()
     migrateServer_->isNeedByRemote.store(false);
     migrateServer_->ProcessMediaControlNeedStateFromNext(json);
     cJSON_Delete(json);
+
+    cJSON* jsonV2 = cJSON_CreateObject();
+    if (jsonV2 == nullptr) {
+        return;
+    }
+    cJSON_AddNumberToObject(jsonV2, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    cJSON_AddNumberToObject(jsonV2, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, NEED_STATE_TIMER_INTERVAL);
+    migrateServer_->isNeedByRemote.store(false);
+    migrateServer_->ProcessMediaControlNeedStateFromNext(jsonV2);
+    cJSON_Delete(jsonV2);
+}
+
+void SendProtocolVersionToNextFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    migrateServer_->SendProtocolVersionToNext();
+}
+
+void SendLongPauseNotifyToNextFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    migrateServer_->SendLongPauseNotifyToNext(GetData<bool>());
+}
+
+void HandleNeedStateTimerFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    migrateServer_->isNeedByRemote.store(GetData<bool>());
+    migrateServer_->HandleNeedStateTimer();
+}
+
+void HandleLongPauseTimerFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    migrateServer_->hasLongPauseNotified_.store(GetData<bool>());
+    migrateServer_->HandleLongPauseTimer();
+}
+
+void ProcessMediaControlNeedStateFromNextV2FuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+
+    cJSON* jsonV2 = cJSON_CreateObject();
+    if (jsonV2 == nullptr) {
+        return;
+    }
+    cJSON_AddNumberToObject(jsonV2, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    cJSON_AddNumberToObject(jsonV2, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, GetData<int32_t>());
+    migrateServer_->ProcessMediaControlNeedStateFromNext(jsonV2);
+    cJSON_Delete(jsonV2);
 }
 
 void TestFunc()
@@ -541,6 +604,11 @@ void TestFunc()
     CoverExceptionPathTest();
     ProcControlCommandFromNextTestExt();
     ProcessMediaControlNeedStateFromNextExt();
+    SendProtocolVersionToNextFuzzTest();
+    SendLongPauseNotifyToNextFuzzTest();
+    HandleNeedStateTimerFuzzTest();
+    HandleLongPauseTimerFuzzTest();
+    ProcessMediaControlNeedStateFromNextV2FuzzTest();
 }
 
 void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)

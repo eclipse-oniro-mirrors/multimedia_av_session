@@ -24,6 +24,7 @@
 #include "avsession_utils.h"
 #include "permission_checker.h"
 #include "avsession_sysevent.h"
+#include "avmedia_center_control_type.h"
 #include "want_params.h"
 #include "string_wrapper.h"
 #include "bundle_status_adapter.h"
@@ -134,7 +135,8 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     int32_t ret = ReadImgForMetaData(data);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ReadImgForMetaData with ret:%{public}d", ret);
     if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
-        SLOGI("isFromSession %{public}d|%{public}d", isFromSession_, data.GetMediaImageTopic());
+        SLOGI("isFromSession %{public}d|%{public}d|%{public}s", isFromSession_, data.GetMediaImageTopic(),
+            AVSessionUtils::GetAnonyTitle(data.GetTitle()).c_str());
         if (isFromSession_) {
             data.GetMediaImage()->Clear();
         } else {
@@ -599,6 +601,63 @@ void AVControllerItem::HandleExtrasChange(const AAFwk::WantParams& extras)
     AVSESSION_TRACE_SYNC_START("AVControllerItem::OnSetExtras");
     if (callback_ != nullptr) {
         callback_->OnExtrasChange(extras);
+    }
+}
+
+int32_t AVControllerItem::GetMediaCenterControlType(std::vector<int32_t>& controlTypes)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    return session_->GetMediaCenterControlType(controlTypes);
+}
+
+void AVControllerItem::HandleMediaCenterControlTypeChange(const std::vector<int32_t>& controlTypes)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    SLOGI("HandleMediaCenterControlTypeChange size=%{public}zu", controlTypes.size());
+    if (callback_ != nullptr) {
+        callback_->OnMediaCenterControlTypeChanged(controlTypes);
+    }
+    if (innerCallback_ != nullptr) {
+        innerCallback_->OnMediaCenterControlTypeChanged(controlTypes);
+    }
+}
+
+int32_t AVControllerItem::GetSupportedPlaySpeeds(std::vector<double>& speeds)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    return session_->GetSupportedPlaySpeeds(speeds);
+}
+
+int32_t AVControllerItem::GetSupportedLoopModes(std::vector<int32_t>& loopModes)
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, ERR_SESSION_NOT_EXIST, "session not exist");
+    return session_->GetSupportedLoopModes(loopModes);
+}
+
+void AVControllerItem::HandleSupportedPlaySpeedsChange(const std::vector<double>& speeds)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    SLOGI("HandleSupportedPlaySpeedsChange size=%{public}zu", speeds.size());
+    if (callback_ != nullptr) {
+        callback_->OnSupportedPlaySpeedsChanged(speeds);
+    }
+    if (innerCallback_ != nullptr) {
+        innerCallback_->OnSupportedPlaySpeedsChanged(speeds);
+    }
+}
+
+void AVControllerItem::HandleSupportedLoopModesChange(const std::vector<int32_t>& loopModes)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    SLOGI("HandleSupportedLoopModesChange size=%{public}zu", loopModes.size());
+    if (callback_ != nullptr) {
+        callback_->OnSupportedLoopModesChanged(loopModes);
+    }
+    if (innerCallback_ != nullptr) {
+        innerCallback_->OnSupportedLoopModesChanged(loopModes);
     }
 }
 // LCOV_EXCL_STOP

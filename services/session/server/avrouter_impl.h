@@ -31,9 +31,9 @@ public:
         ptr_ = ptr;
     }
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo)
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, int32_t reasonCode)
     {
-        ptr_->OnCastStateChange(castState, deviceInfo);
+        ptr_->OnCastStateChange(castState, deviceInfo, reasonCode);
     }
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
@@ -122,7 +122,7 @@ public:
 
     void SetSinkCastSessionInfo(const AAFwk::Want &want) override;
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo);
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, int32_t reasonCode);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
@@ -196,6 +196,7 @@ private:
     std::atomic<bool> disconnectOtherSession_ = false;
     std::atomic<bool> streamToMirrorFromSink_ = false;
     DeviceInfo connectedDeviceInfo_;
+    const int32_t noReasonCode_ = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

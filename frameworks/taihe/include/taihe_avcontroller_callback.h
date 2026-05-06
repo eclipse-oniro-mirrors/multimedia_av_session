@@ -50,6 +50,9 @@ public:
         EVENT_DESKTOP_LYRIC_VISIBILITY_CHANGED,
         EVENT_DESKTOP_LYRIC_STATE_CHANGED,
         EVENT_DESKTOP_LYRIC_ENABLED,
+        EVENT_MEDIA_CENTER_CONTROL_TYPE_CHANGED,
+        EVENT_SUPPORTED_PLAY_SPEEDS_CHANGED,
+        EVENT_SUPPORTED_LOOP_MODES_CHANGED,
         EVENT_TYPE_MAX,
     };
 
@@ -72,6 +75,9 @@ public:
     void OnDesktopLyricVisibilityChanged(bool isVisible) override;
     void OnDesktopLyricStateChanged(const OHOS::AVSession::DesktopLyricState &state) override;
     void OnDesktopLyricEnabled(bool isEnabled) override;
+    void OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes) override;
+    void OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds) override;
+    void OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes) override;
 
     int32_t AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback);
     int32_t RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> callback);

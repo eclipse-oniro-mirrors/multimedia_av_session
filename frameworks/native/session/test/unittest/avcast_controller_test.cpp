@@ -159,7 +159,10 @@ void AVCastControllerTest::SetUp()
     auto preparecallback = []() {
         SLOGI("prepare callback");
     };
-    castController_->Init(HwCastStreamPlayer_, validCallback, preparecallback);
+    auto playerErrorCallback = [](int32_t errorCode, const std::string& errorMsg) {
+        SLOGI("player error callback");
+    };
+    castController_->Init(HwCastStreamPlayer_, validCallback, preparecallback, playerErrorCallback);
 }
 
 void AVCastControllerTest::TearDown()
@@ -1418,7 +1421,10 @@ HWTEST_F(AVCastControllerTest, AddAvailableCommand002, TestSize.Level1)
     auto preparecallback = []() {
         SLOGI("prepare callback");
     };
-    castController->Init(hwCastStreamPlayer, validCallback, preparecallback);
+    auto playerErrorCallback = [](int32_t errorCode, const std::string& errorMsg) {
+        SLOGI("player error callback");
+    };
+    castController->Init(hwCastStreamPlayer, validCallback, preparecallback, playerErrorCallback);
     EXPECT_EQ(castController->AddAvailableCommand(0), AVSESSION_SUCCESS);
 }
 
@@ -1441,7 +1447,10 @@ HWTEST_F(AVCastControllerTest, RemoveAvailableCommand002, TestSize.Level1)
     auto preparecallback = []() {
         SLOGI("prepare callback");
     };
-    castController->Init(hwCastStreamPlayer, validCallback, preparecallback);
+    auto playerErrorCallback = [](int32_t errorCode, const std::string& errorMsg) {
+        SLOGI("player error callback");
+    };
+    castController->Init(hwCastStreamPlayer, validCallback, preparecallback, playerErrorCallback);
     EXPECT_EQ(castController->RemoveAvailableCommand(0), AVSESSION_SUCCESS);
 }
 

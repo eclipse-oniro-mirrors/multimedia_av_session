@@ -56,13 +56,13 @@ public:
         ptr_ = ptr;
     }
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove)
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode)
     {
         std::unique_lock lock(mutex_);
         sptr<AVSessionItem> sharedPtr = ptr_.promote();
         lock.unlock();
         CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "sptr is nullptr in OnCastStateChange");
-        sharedPtr->OnCastStateChange(castState, deviceInfo, isNeedRemove);
+        sharedPtr->OnCastStateChange(castState, deviceInfo, isNeedRemove, reasonCode);
     }
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
@@ -93,7 +93,7 @@ public:
 
     void DealLocalState(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo);
 
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove);
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode);
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg);
 
@@ -151,6 +151,24 @@ public:
     int32_t AddSupportCommand(int32_t cmd) override;
 
     int32_t DeleteSupportCommand(int32_t cmd) override;
+
+    int32_t SetMediaCenterControlType(const std::vector<int32_t>& controlTypes) override;
+
+    int32_t GetMediaCenterControlType(std::vector<int32_t>& controlTypes);
+
+    void HandleMediaCenterControlTypeChange(const std::vector<int32_t>& controlTypes);
+
+    int32_t SetSupportedPlaySpeeds(const std::vector<double>& speeds) override;
+
+    int32_t GetSupportedPlaySpeeds(std::vector<double>& speeds);
+
+    void HandleSupportedPlaySpeedsChange(const std::vector<double>& speeds);
+
+    int32_t SetSupportedLoopModes(const std::vector<int32_t>& loopModes) override;
+
+    int32_t GetSupportedLoopModes(std::vector<int32_t>& loopModes);
+
+    void HandleSupportedLoopModesChange(const std::vector<int32_t>& loopModes);
 
     int32_t DestroyTask(bool continuePlay = false);
 
@@ -211,6 +229,9 @@ public:
     void HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const CommandInfo& cmdInfo = CommandInfo{});
 
     void HandleOutputDeviceChange(const int32_t connectionState, const OutputDeviceInfo& outputDeviceInfo);
+
+    void ResetCastControlInfo(int32_t castState, int32_t reasonCode,
+        const OutputDeviceInfo& outputDeviceInfo);
 
     void DealOutputDeviceChange(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo);
 
@@ -365,6 +386,8 @@ public:
 
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
 
+    void SubSetExtrasInner();
+
     void SetExtrasInner(AAFwk::IArray* list);
 
     bool IsAppSupportCast();
@@ -388,6 +411,10 @@ public:
     MultiDeviceState GetMultiDeviceState();
 
     void SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback);
+
+    void SetServiceCallbackForPcMode(const std::function<bool()>& callback);
+
+    void SetSupportExtendedScreen(bool isSupport);
 #endif
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
@@ -434,8 +461,8 @@ private:
     int32_t DoContinuousTaskRegister();
     int32_t DoContinuousTaskUnregister();
     void ReportSetAVMetaDataInfo(const AVMetaData& meta);
-    std::string GetAnonymousDeviceId(std::string deviceId);
     void ReportAVCastControllerInfo();
+    void ReportOnPlayerError(int32_t errorCode, const std::string& errorMsg);
     void InitAVCastControllerProxy();
     bool CheckTitleChange(const AVMetaData& meta);
     void CheckUseAVMetaData(const AVMetaData& meta);
@@ -520,6 +547,9 @@ private:
     AAFwk::WantParams extras_;
     std::vector<int32_t> supportedCmd_;
     std::vector<int32_t> supportedCastCmds_;
+    std::vector<int32_t> mediaCenterControlTypes_;
+    std::vector<double> supportedPlaySpeeds_;
+    std::vector<int32_t> supportedLoopModes_;
     sptr<IAVSessionCallback> callback_;
     std::shared_ptr<AVSessionCallback> callbackForMigrate_;
     std::function<void(AVSessionItem&)> serviceCallback_;
@@ -553,8 +583,13 @@ private:
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
     int32_t authingStateFromCast_ = 10;
+    int32_t mirrorToStream_ = 11;
     int32_t castDisconnectStateInAVSession_ = 6;
     int32_t removeCmdStep_ = 1000;
+    int32_t reasonShowTrustSelectUI_ = 10003;
+    int32_t noReasonCode_ = 0;
+    std::string mirrorToStreamCast_ = "MirrorToStreamCast";
+    std::string streamCast_ = "StreamCast";
 
     volatile bool isDestroyed_ = false;
 
@@ -635,6 +670,7 @@ private:
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
     std::function<void()> serviceCallbackStopSinkCast_;
     std::function<void(std::string, bool)> serviceCallbackForPhotoCast_;
+    std::function<bool()> serviceCallbackForPcMode_;
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string SCENE_BOARD_BUNDLENAME = "com.ohos.sceneboard";

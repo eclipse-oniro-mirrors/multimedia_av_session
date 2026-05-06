@@ -331,7 +331,7 @@ public:
      * @param isNeedRemove is need remove cast device
      * @since 13
     */
-    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove);
+    void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode);
 
     /**
      * @brief Listen to the change of cast event.

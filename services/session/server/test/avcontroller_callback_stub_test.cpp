@@ -160,6 +160,18 @@ class AVControllerCallbackStubDemo : public AVControllerCallbackStub {
     {
         return AVSESSION_SUCCESS;
     };
+    ErrCode OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes) override
+    {
+        return AVSESSION_SUCCESS;
+    };
 };
 
 /**

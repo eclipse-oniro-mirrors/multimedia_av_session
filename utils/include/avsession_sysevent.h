@@ -21,6 +21,7 @@
 #include "avcontrol_command.h"
 #include "hisysevent.h"
 #include "timer.h"
+#include "avsession_descriptor.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -67,6 +68,8 @@ public:
     void updateCommandQuality(uint32_t commandQuality);
     void updatePlaybackState(uint8_t playbackState);
     void updateControl(uint8_t control, std::string callerBundleName);
+    void updateSupportIntent(const std::string& supportIntent);
+    void updateSupportAvqueue(bool supportAvqueue);
 
     std::string bundleName_ = "";
     std::string appVersion_ = "";
@@ -81,11 +84,34 @@ public:
     std::vector<uint8_t> control_;
     std::vector<std::string> callerBundleName_;
     std::vector<uint64_t> controlTime_;
+    std::string appType_ = "default";
+    std::string supportIntent_ = "default";
+    bool supportAvqueue_ = false;
 private:
     SessionState lastState_ = SessionState::STATE_INITIAL;
     uint32_t lastCommandQuality_ = 0;
     uint8_t lastPlaybackState_ = 0;
     uint8_t lastControl_ = AVControlCommand::SESSION_CMD_MAX;
+    std::recursive_mutex lock_;
+};
+
+class CastControlInfo {
+public:
+    void updateStartCastTime();
+    void updateDeviceConnectTime();
+    void updatePrepareTime();
+    void updatePlayCallbackTime();
+
+    std::string bundleName_ = "";
+    std::string packageVersion_ = "";
+    std::string appType_ = "";
+    int64_t startCastTime_ = 0;
+    int64_t deviceConnectTime_ = 0;
+    int64_t prepareTime_ = 0;
+    int64_t playCallbackTime_ = 0;
+private:
+    bool isNeedRecordPrepare_ = false;
+    bool isNeedRecordPlay_ = false;
     std::recursive_mutex lock_;
 };
 
@@ -160,14 +186,28 @@ public:
 
     void ReportPlayingState(const std::string& bundleName);
     void ReportPlayingStateAll();
-    void UpdateState(const std::string& bundleName, const std::string& appVersion, SessionState state);
+    void UpdateState(const std::string& bundleName, const std::string& appVersion,
+        SessionState state, const std::string& appType);
     void UpdateMetaQuality(const std::string& bundleName, MetadataQuality metaQuality);
     void UpdateCommandQuality(const std::string& bundleName, uint32_t commandQuality);
     void UpdatePlaybackState(const std::string& bundleName, uint8_t playbackState);
     void UpdateControl(const std::string& bundleName, uint8_t control, std::string callerBundleName);
+    void UpdateSupportIntent(const std::string& bundleName, const std::string& supportIntent);
+    void UpdateSupportAvqueue(const std::string& bundleName, bool supportAvqueue);
+    std::string GetOsVersion();
+    int32_t GetSdkVersion();
+    void updateStartCastTime(const std::string& sessionId, const std::string& bundleName,
+        const std::string& packageVersion, const std::string& appType);
+    void updateDeviceConnectTime(const std::string& sessionId);
+    void updatePrepareTime(const std::string& sessionId);
+    void updatePlayCallbackTime(const std::string& sessionId);
+    void clearCastControlInfo(const std::string& sessionId);
+    void ReportSessionCastControl(const std::string& controlType,
+        const std::string& sessionId, const DeviceInfo& deviceInfo);
 
 private:
     PlayingStateInfo* GetPlayingStateInfo(const std::string& bundleName);
+    CastControlInfo* GetCastControlInfo(const std::string& sessionId, bool needInsert);
     std::map<pid_t, int32_t> audioStatuses_;
     AVSessionSysEvent();
     ~AVSessionSysEvent();
@@ -181,7 +221,10 @@ private:
     std::list<AVSessionSysEvent::ControllerCommandInfo> controllerCommandInfos_;
     std::map<std::string, AVSessionSysEvent::BackControlReportInfo> lowQualityInfos_;
     std::map<std::string, std::unique_ptr<PlayingStateInfo>> playingStateInfos_;
+    std::map<std::string, std::unique_ptr<CastControlInfo>> castControlInfos_;
     static constexpr float MULTIPLE = 1.0f;
+    std::string osVersion;
+    int32_t sdkVersion = 0;
 };
 #endif
 

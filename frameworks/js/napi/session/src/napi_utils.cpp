@@ -774,7 +774,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<std::st
 
     uint32_t length = 0;
     napi_status status = napi_get_array_length(env, in, &length);
-    CHECK_RETURN((status == napi_ok) && (length > 0 || length == 0), "get_array failed!", napi_invalid_arg);
+    CHECK_RETURN(status == napi_ok, "get_array failed!", napi_invalid_arg);
     for (uint32_t i = 0; i < length; ++i) {
         napi_value item = nullptr;
         status = napi_get_element(env, in, i, &item);
@@ -1028,6 +1028,64 @@ napi_status NapiUtils::SetValue(napi_env env, const std::vector<int32_t>& in, na
     return status;
 }
 
+napi_status NapiUtils::GetValueEx(napi_env env, napi_value in, std::vector<int32_t>& out)
+{
+    out.clear();
+    bool isTypedArray = false;
+    napi_status status = napi_is_typedarray(env, in, &isTypedArray);
+    SLOGD("GetValueEx int32_t input %{public}s a TypedArray", isTypedArray ? "is" : "is not");
+
+    if (isTypedArray) {
+        napi_typedarray_type type = napi_biguint64_array;
+        size_t length = 0;
+        napi_value buffer = nullptr;
+        size_t offset = 0;
+        uint8_t* data = nullptr;
+        status = napi_get_typedarray_info(env, in, &type, &length,
+                                          reinterpret_cast<void**>(&data), &buffer, &offset);
+        SLOGD("GetValueEx type=%{public}d length=%{public}zu", static_cast<int>(type), length);
+        CHECK_RETURN(status == napi_ok, "napi_get_typedarray_info failed!", napi_invalid_arg);
+        CHECK_RETURN(type <= napi_int32_array, "is not int32 supported typed array!", napi_invalid_arg);
+        if (data != nullptr) {
+            TypedArray2Vector<int32_t>(data, length, type, out);
+        }
+    } else {
+        bool isArray = false;
+        status = napi_is_array(env, in, &isArray);
+        SLOGD("GetValueEx int32_t input %{public}s an Array", isArray ? "is" : "is not");
+        CHECK_RETURN((status == napi_ok) && isArray, "invalid data!", napi_invalid_arg);
+        uint32_t length = 0;
+        status = napi_get_array_length(env, in, &length);
+        CHECK_RETURN(status == napi_ok, "get array length failed!", napi_invalid_arg);
+        for (uint32_t i = 0; i < length; ++i) {
+            napi_value item = nullptr;
+            status = napi_get_element(env, in, i, &item);
+            CHECK_RETURN((item != nullptr) && (status == napi_ok), "no element", napi_invalid_arg);
+            int32_t vi = 0;
+            status = napi_get_value_int32(env, item, &vi);
+            CHECK_RETURN(status == napi_ok, "element not a int32", napi_invalid_arg);
+            out.push_back(vi);
+        }
+    }
+    return status;
+}
+
+napi_status NapiUtils::SetValueEx(napi_env env, const std::vector<int32_t>& in, napi_value& out)
+{
+    SLOGD("SetValueEx napi_value <- std::vector<int32_t>");
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN(status == napi_ok, "create array failed!", status);
+    int index = 0;
+    for (auto& item : in) {
+        napi_value element = nullptr;
+        status = napi_create_int32(env, item, &element);
+        CHECK_RETURN(status == napi_ok, "napi_create_int32 failed!", status);
+        status = napi_set_element(env, out, index++, element);
+        CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);
+    }
+    return status;
+}
+
 /* napi_value <-> std::vector<uint32_t> */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<uint32_t>& out)
 {
@@ -1150,11 +1208,76 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<double>
 napi_status NapiUtils::SetValue(napi_env env, const std::vector<double>& in, napi_value& out)
 {
     SLOGD("napi_value <- std::vector<double> ");
-    (void)(env);
-    (void)(in);
-    (void)(out);
-    CHECK_RETURN(false, "std::vector<double> to napi_value, unsupported!", napi_invalid_arg);
-    return napi_invalid_arg;
+    size_t bytes = in.size() * sizeof(double);
+    void* data = nullptr;
+    napi_value buffer = nullptr;
+    napi_status status = napi_create_arraybuffer(env, bytes, &data, &buffer);
+    CHECK_RETURN((status == napi_ok), "invalid buffer", status);
+
+    if (bytes > 0 && memcpy_s(data, bytes, in.data(), bytes) != EOK) {
+        SLOGE("memcpy_s not EOK");
+        return napi_invalid_arg;
+    }
+    status = napi_create_typedarray(env, napi_float64_array, in.size(), buffer, 0, &out);
+    CHECK_RETURN((status == napi_ok), "invalid buffer", status);
+    return status;
+}
+
+napi_status NapiUtils::GetValueEx(napi_env env, napi_value in, std::vector<double>& out)
+{
+    out.clear();
+    bool isTypedArray = false;
+    napi_status status = napi_is_typedarray(env, in, &isTypedArray);
+    SLOGD("GetValueEx double input %{public}s a TypedArray", isTypedArray ? "is" : "is not");
+    CHECK_RETURN((status == napi_ok), "napi_is_typedarray failed!", status);
+
+    if (isTypedArray) {
+        napi_typedarray_type type = napi_biguint64_array;
+        size_t length = 0;
+        napi_value buffer = nullptr;
+        size_t offset = 0;
+        uint8_t* data = nullptr;
+        status = napi_get_typedarray_info(env, in, &type, &length, reinterpret_cast<void**>(&data), &buffer, &offset);
+        SLOGD("GetValueEx type=%{public}d length=%{public}zu", static_cast<int>(type), length);
+        CHECK_RETURN(status == napi_ok, "napi_get_typedarray_info failed!", napi_invalid_arg);
+        if (data != nullptr) {
+            TypedArray2Vector<double>(data, length, type, out);
+        }
+    } else {
+        bool isArray = false;
+        status = napi_is_array(env, in, &isArray);
+        SLOGD("GetValueEx double input %{public}s an Array", isArray ? "is" : "is not");
+        CHECK_RETURN((status == napi_ok) && isArray, "invalid data!", napi_invalid_arg);
+        uint32_t length = 0;
+        status = napi_get_array_length(env, in, &length);
+        CHECK_RETURN(status == napi_ok, "get array length failed!", napi_invalid_arg);
+        for (uint32_t i = 0; i < length; ++i) {
+            napi_value item = nullptr;
+            status = napi_get_element(env, in, i, &item);
+            CHECK_RETURN((item != nullptr) && (status == napi_ok), "no element", napi_invalid_arg);
+            double vi = 0.0f;
+            status = napi_get_value_double(env, item, &vi);
+            CHECK_RETURN(status == napi_ok, "element not a double", napi_invalid_arg);
+            out.push_back(vi);
+        }
+    }
+    return status;
+}
+
+napi_status NapiUtils::SetValueEx(napi_env env, const std::vector<double>& in, napi_value& out)
+{
+    SLOGD("SetValueEx napi_value <- std::vector<double>");
+    napi_status status = napi_create_array_with_length(env, in.size(), &out);
+    CHECK_RETURN(status == napi_ok, "create array failed!", status);
+    int index = 0;
+    for (auto& item : in) {
+        napi_value element = nullptr;
+        status = napi_create_double(env, item, &element);
+        CHECK_RETURN(status == napi_ok, "napi_create_double failed!", status);
+        status = napi_set_element(env, out, index++, element);
+        CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);
+    }
+    return status;
 }
 
 /* std::vector<AVSessionDescriptor> <-> napi_value */

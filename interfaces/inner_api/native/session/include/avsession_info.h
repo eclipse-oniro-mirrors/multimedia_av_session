@@ -466,6 +466,30 @@ public:
     virtual void OnExtrasChange(const AAFwk::WantParams& extras) = 0;
 
     /**
+     * @brief Listen for media center control type change events.
+     *
+     * @param controlTypes Changed control types.
+     * @since 20
+     */
+    virtual void OnMediaCenterControlTypeChanged(const std::vector<int32_t>& controlTypes) {};
+
+    /**
+     * @brief Listen for supported playback speeds change events.
+     *
+     * @param speeds Changed supported playback speeds.
+     * @since 20
+     */
+    virtual void OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds) {};
+
+    /**
+     * @brief Listen for supported loop modes change events.
+     *
+     * @param loopModes The changed supported loop modes.
+     * @since 20
+     */
+    virtual void OnSupportedLoopModesChanged(const std::vector<int32_t>& loopModes) {};
+
+    /**
      * @brief Session custom media packet for 4k change callback.
      *
      * @param data The changed custom media packet.
@@ -532,7 +556,7 @@ public:
      * @param deviceInfo The device info.
      * @since 9
     */
-    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo) = 0;
+    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, int32_t reasonCode) = 0;
 
     /**
      * @brief Listen to the change of cast event.
@@ -561,7 +585,7 @@ public:
      * @param isNeedRemove is need remove cast device
      * @since 13
     */
-    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove) = 0;
+    virtual void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode) = 0;
 
     /**
      * @brief Listen to the change of cast event.
@@ -753,19 +777,19 @@ enum ConnectionState {
      * @syscap SystemCapability.Multimedia.AVSession.Core
      * @since 26 dynamic&static
      */
-    AUTHING = 10,
+    STATE_AUTHENTICATING = 10,
     /**
      * A connection state indicating the device is switching from mirror to stream.
      * @syscap SystemCapability.Multimedia.AVSession.Core
      * @since 26 dynamic&static
      */
-    MIRROR_TO_STREAM = 11,
+    STATE_MIRROR_TO_STREAM = 11,
     /**
      * A connection state indicating the device is switching from stream to mirror.
      * @syscap SystemCapability.Multimedia.AVSession.Core
      * @since 26 dynamic&static
      */
-    STREAM_TO_MIRROR = 12,
+    STATE_STREAM_TO_MIRROR = 12,
 };
     
 /**

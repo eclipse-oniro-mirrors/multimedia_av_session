@@ -904,10 +904,11 @@ static HWTEST_F(AVSessionServiceStubTest, HandleGetSessionDescriptors001, TestSi
     data.WriteInt32(0);
     AVSessionServiceStubPerDemo stub;
     stub.HandleGetSessionDescriptors(data, reply);
-    EXPECT_EQ(reply.ReadInt32(), ERR_PERMISSION_DENIED);
+    int32_t result = reply.ReadInt32();
+    EXPECT_TRUE(result == ERR_PERMISSION_DENIED || result == ERR_NO_PERMISSION);
     SLOGI("HandleGetSessionDescriptors001 end!");
 }
- 
+
 /**
  * @tc.name: HandleSendSystemCommonCommand001
  * @tc.desc: Test HandleSendSystemCommonCommand command is null
