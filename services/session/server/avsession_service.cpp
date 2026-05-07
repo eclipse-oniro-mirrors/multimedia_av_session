@@ -4366,8 +4366,9 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
         abilityName = isCustomer ? want->GetElement().GetAbilityName() : topSession_->GetAbilityName();
         isAnco = topSession_->GetUid() == audioBrokerUid;
     }
-    SLOGI("CreateWantAgent bundleName:%{public}s,abilityName:%{public}s,isCustomer:%{public}d",
-        bundleName.c_str(), abilityName.c_str(), isCustomer);
+    int32_t userId = GetUserIdFromCallingUid(uid);
+    SLOGI("CreateWantAgent bundleName:%{public}s,abilityName:%{public}s,userId:%{public}d,isCustomer:%{public}d",
+        bundleName.c_str(), abilityName.c_str(), userId, isCustomer);
     if (!isCustomer) {
         AppExecFwk::ElementName element("", bundleName, abilityName);
         want->SetElement(element);
@@ -4379,7 +4380,8 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
         0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITY, flags, wants, nullptr);
-    return isCustomer ? launWantAgent : AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
+    return isCustomer ?
+        launWantAgent : AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, userId, uid);
 }
 
 void AVSessionService::SetPcMode(bool isPcMode)
@@ -4609,7 +4611,9 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateNf
         wants,
         nullptr
     );
-    return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, uid);
+    int32_t userId = GetUserIdFromCallingUid(uid);
+    SLOGI("CreateNftRemoveWant with userId:%{public}d|uid:%{public}d", userId, uid);
+    return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, userId, uid);
 }
 
 std::string AVSessionService::GetLocalTitle()
