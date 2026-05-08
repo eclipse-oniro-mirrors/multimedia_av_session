@@ -70,6 +70,150 @@ static HapPolicyParams g_policy = {
     }
 };
 
+class AVSessionControllerDemo : public AVSessionController {
+public:
+    int32_t GetAVCallState(AVCallState& avCallState) override;
+    int32_t GetAVCallMetaData(AVCallMetaData& avCallMetaData) override;
+    int32_t SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter) override;
+    int32_t SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter) override;
+    int32_t GetAVPlaybackState(AVPlaybackState& state) override;
+    int32_t GetAVMetaData(AVMetaData& data) override;
+    int32_t SendAVKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override;
+    int32_t GetValidCommands(std::vector<int32_t>& cmds) override;
+    int32_t IsSessionActive(bool& isActive) override;
+    int32_t SendControlCommand(const AVControlCommand& cmd) override;
+    int32_t SendCommonCommand(const std::string& commonCommand, const OHOS::AAFwk::WantParams& commandArgs) override;
+    int32_t RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback) override;
+    int32_t SetMetaFilter(const AVMetaData::MetaMaskType& filter) override;
+    int32_t SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
+    int32_t GetAVQueueItems(std::vector<AVQueueItem>& items) override;
+    int32_t GetAVQueueTitle(std::string& title) override;
+    int32_t SkipToQueueItem(int32_t& itemId) override;
+    int32_t GetExtras(OHOS::AAFwk::WantParams& extras) override;
+    int32_t GetExtrasWithEvent(const std::string& extraEvent, OHOS::AAFwk::WantParams& extras) override;
+    int32_t Destroy() override;
+    std::string GetSessionId() override;
+    int64_t GetRealPlaybackPosition() override;
+    bool IsDestroy() override;
+};
+
+int32_t AVSessionControllerDemo::GetAVCallState(AVCallState& avCallState)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::GetAVCallMetaData(AVCallMetaData& avCallMetaData)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::SetAVCallMetaFilter(const AVCallMetaData::AVCallMetaMaskType& filter)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::SetAVCallStateFilter(const AVCallState::AVCallStateMaskType& filter)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::GetAVPlaybackState(AVPlaybackState& state)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::GetAVMetaData(AVMetaData& data)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::SendAVKeyEvent(const OHOS::MMI::KeyEvent& keyEvent)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::GetValidCommands(std::vector<int32_t>& cmds)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::IsSessionActive(bool& isActive)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::SendControlCommand(const AVControlCommand& cmd)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::SendCommonCommand(const std::string& commonCommand,
+    const OHOS::AAFwk::WantParams& commandArgs)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::GetAVQueueItems(std::vector<AVQueueItem>& items)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::GetAVQueueTitle(std::string& title)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::SkipToQueueItem(int32_t& itemId)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::GetExtras(OHOS::AAFwk::WantParams& extras)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::GetExtrasWithEvent(
+    const std::string& extraEvent, OHOS::AAFwk::WantParams& extras)
+{
+    return 0;
+}
+
+int32_t AVSessionControllerDemo::Destroy()
+{
+    return 0;
+}
+
+std::string AVSessionControllerDemo::GetSessionId()
+{
+    return NULL;
+}
+
+int64_t AVSessionControllerDemo::GetRealPlaybackPosition()
+{
+    return 0;
+}
+
+bool AVSessionControllerDemo::IsDestroy()
+{
+    return false;
+}
+
 class AVSessionControllerClientTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -136,6 +280,51 @@ HWTEST_F(AVSessionControllerClientTest, IsSessionActive001, TestSize.Level1)
         ASSERT_EQ(res, AVSESSION_SUCCESS);
         EXPECT_EQ(descriptors.size() <= 0, true);
     }
+}
+
+/**
+* @tc.name: AVSessionControllerDemoGetSupportedPlaySpeeds001
+* @tc.desc: Get supported play speeds in demo class
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerClientTest, AVSessionControllerDemoGetSupportedPlaySpeeds001, TestSize.Level1)
+{
+    SLOGD("AVSessionControllerDemoGetSupportedPlaySpeeds001 Begin");
+    AVSessionControllerDemo avsessionControllerDemo = AVSessionControllerDemo();
+    std::vector<double> speeds = {};
+    EXPECT_EQ(avsessionControllerDemo.GetSupportedPlaySpeeds(speeds), AVSESSION_SUCCESS);
+    SLOGD("AVSessionControllerDemoGetSupportedPlaySpeeds001 End");
+}
+
+/**
+* @tc.name: AVSessionControllerDemoGetMediaCenterControlType001
+* @tc.desc: Get media center control type in demo class
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerClientTest, AVSessionControllerDemoGetMediaCenterControlType001, TestSize.Level1)
+{
+    SLOGD("AVSessionControllerDemoGetMediaCenterControlType001 Begin");
+    AVSessionControllerDemo avsessionControllerDemo = AVSessionControllerDemo();
+    std::vector<int32_t> controlTypes = {};
+    EXPECT_EQ(avsessionControllerDemo.GetMediaCenterControlType(controlTypes), AVSESSION_SUCCESS);
+    SLOGD("AVSessionControllerDemoGetMediaCenterControlType001 End");
+}
+
+/**
+* @tc.name: AVSessionControllerDemoGetSupportedLoopModes001
+* @tc.desc: Get supported loopmodes in demo class
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerClientTest, AVSessionControllerDemoGetSupportedLoopModes001, TestSize.Level1)
+{
+    SLOGD("AVSessionControllerDemoGetSupportedLoopModes001 Begin");
+    AVSessionControllerDemo avsessionControllerDemo = AVSessionControllerDemo();
+    std::vector<int32_t> loopModes = {};
+    EXPECT_EQ(avsessionControllerDemo.GetSupportedLoopModes(loopModes), AVSESSION_SUCCESS);
+    SLOGD("AVSessionControllerDemoGetSupportedLoopModes001 End");
 }
 } // namespace AVSession
 } // namespace OHOS

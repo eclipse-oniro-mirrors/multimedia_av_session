@@ -165,9 +165,6 @@ public:
     int32_t AddSupportCommand(const int32_t cmd) override;
     int32_t DeleteSupportCommand(const int32_t cmd) override;
     int32_t SetSessionEvent(const std::string& event, const AAFwk::WantParams& args) override;
-    int32_t SetMediaCenterControlType(const std::vector<int32_t>& controlTypes) override;
-    int32_t SetSupportedPlaySpeeds(const std::vector<double>& speeds) override;
-    int32_t SetSupportedLoopModes(const std::vector<int32_t>& loopModes) override;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> GetAVCastController() override;
     int32_t ReleaseCast(bool continuePlay = false) override;
@@ -293,21 +290,6 @@ int32_t AVSessionDemo::DeleteSupportCommand(const int32_t cmd)
 }
 
 int32_t AVSessionDemo::SetSessionEvent(const std::string& event, const AAFwk::WantParams& args)
-{
-    return 0;
-}
-
-int32_t AVSessionDemo::SetMediaCenterControlType(const std::vector<int32_t>& controlTypes)
-{
-    return 0;
-}
-
-int32_t AVSessionDemo::SetSupportedPlaySpeeds(const std::vector<double>& speeds)
-{
-    return 0;
-}
-
-int32_t AVSessionDemo::SetSupportedLoopModes(const std::vector<int32_t>& loopModes)
 {
     return 0;
 }
@@ -6662,6 +6644,51 @@ HWTEST_F(AvsessionTest, SetSupportedLoopModes003, TestSize.Level1)
     std::vector<int32_t> loopModes = {-1, 100};
     EXPECT_EQ(avsession_->SetSupportedLoopModes(loopModes), ERR_INVALID_PARAM);
     SLOGD("SetSupportedLoopModes003 End");
+}
+
+/**
+* @tc.name: AVSessionDemoSetSupportedPlaySpeeds001
+* @tc.desc: set supported play speeds in demo class
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, AVSessionDemoSetSupportedPlaySpeeds001, TestSize.Level1)
+{
+    SLOGD("AVSessionDemoSetSupportedPlaySpeeds001 Begin");
+    AVSessionDemo avsessionDemo = AVSessionDemo();
+    std::vector<double> speeds = {};
+    EXPECT_EQ(avsessionDemo.SetSupportedPlaySpeeds(speeds), AVSESSION_SUCCESS);
+    SLOGD("AVSessionDemoSetSupportedPlaySpeeds001 End");
+}
+
+/**
+* @tc.name: AVSessionDemoSetMediaCenterControlType001
+* @tc.desc: set media center control type in demo class
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, AVSessionDemoSetMediaCenterControlType001, TestSize.Level1)
+{
+    SLOGD("AVSessionDemoSetMediaCenterControlType001 Begin");
+    AVSessionDemo avsessionDemo = AVSessionDemo();
+    std::vector<int32_t> controlTypes = {};
+    EXPECT_EQ(avsessionDemo.SetMediaCenterControlType(controlTypes), AVSESSION_SUCCESS);
+    SLOGD("AVSessionDemoSetMediaCenterControlType001 End");
+}
+
+/**
+* @tc.name: AVSessionDemoSetSupportedLoopModes001
+* @tc.desc: set supported loopmodes in demo class
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AvsessionTest, AVSessionDemoSetSupportedLoopModes001, TestSize.Level1)
+{
+    SLOGD("AVSessionDemoSetSupportedLoopModes001 Begin");
+    AVSessionDemo avsessionDemo = AVSessionDemo();
+    std::vector<int32_t> loopModes = {};
+    EXPECT_EQ(avsessionDemo.SetSupportedLoopModes(loopModes), AVSESSION_SUCCESS);
+    SLOGD("AVSessionDemoSetSupportedLoopModes001 End");
 }
 } // namespace AVSession
 } // namespace OHOS
