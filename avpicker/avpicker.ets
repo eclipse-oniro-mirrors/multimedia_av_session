@@ -322,6 +322,7 @@ export struct AVCastPicker {
   @State isDisabledByPickerLimit: boolean = false;
   @State isDeviceLevel: boolean = true;
   @State @Watch('MenuStateChange') isSubMenuExpanded: boolean = false;
+  @State hasReceivedDeviceList: boolean = false;
 
   private static currentPickerCount: number = 0;
 
@@ -1245,6 +1246,9 @@ export struct AVCastPicker {
           if (data['deviceList'] !== undefined) {
             console.info(TAG, `picker device list : ${JSON.stringify(data['deviceList'])}`);
             this.deviceList = JSON.parse(JSON.stringify(data['deviceList']));
+            if (this.isMenuShow && !this.hasReceivedDeviceList) {
+              this.hasReceivedDeviceList = true;
+            }
             let hasOnlySpeakerAndEarpiece: boolean = this.deviceList.length === 2 &&
               !this.hasExtDevice(this.deviceList);
             let hasNoDevices: boolean = this.deviceList === null || this.deviceList.length === 0;
@@ -1374,7 +1378,7 @@ export struct AVCastPicker {
         })
         .size({ width: '100%', height: '100%' })
         .bindMenu(
-          this.isMenuShow,
+          this.isMenuShow && this.hasReceivedDeviceList,
           this.deviceAndHouseMusicSys(),
           {
           backgroundBlurStyle: (this.isShowHomeAudio ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
@@ -1386,6 +1390,7 @@ export struct AVCastPicker {
           enableHoverMode: true,
           onDisappear: () => {
             this.isMenuShow = false;
+            this.hasReceivedDeviceList = false;
             this.touchMenuItemIndex = -1;
             this.menuShowStateCallback(this.isMenuShow);
           },
@@ -1456,6 +1461,10 @@ export struct AVCastPicker {
           }
         } else {
           this.isMenuShow = !this.isMenuShow;
+          if (!this.isMenuShow && !this.hasReceivedDeviceList) {
+            console.info(TAG, 'hasReceivedDeviceList empty on previous isMenuShow');
+            this.isMenuShow = true;
+          }
           if (this.isMenuShow) {
             this.pickerClickTime = new Date().getTime();
           } else {
