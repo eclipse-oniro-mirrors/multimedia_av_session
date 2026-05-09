@@ -1530,5 +1530,262 @@ static HWTEST_F(AVSessionServiceTestExt, NotifySupportExtendedScreen002, TestSiz
     g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 #endif
 }
+
+/**
+ * @tc.name: NotifySupportExtendedScreen003
+ * @tc.desc: Test NotifySupportExtendedScreen with no session in container
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, NotifySupportExtendedScreen003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    g_AVSessionService->NotifySupportExtendedScreen(true);
+    g_AVSessionService->NotifySupportExtendedScreen(false);
+    EXPECT_TRUE(true);
+#endif
+}
+
+/**
+ * @tc.name: NotifySupportExtendedScreen004
+ * @tc.desc: Test NotifySupportExtendedScreen with multiple sessions
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, NotifySupportExtendedScreen004, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName1;
+    elementName1.SetBundleName("testBundle1");
+    elementName1.SetAbilityName("testAbility1");
+    OHOS::sptr<AVSessionItem> session1 = g_AVSessionService->CreateSessionInner(
+        "testTag1", AVSession::SESSION_TYPE_AUDIO, false, elementName1);
+    CHECK_AND_RETURN(session1 != nullptr);
+    
+    OHOS::AppExecFwk::ElementName elementName2;
+    elementName2.SetBundleName("testBundle2");
+    elementName2.SetAbilityName("testAbility2");
+    OHOS::sptr<AVSessionItem> session2 = g_AVSessionService->CreateSessionInner(
+        "testTag2", AVSession::SESSION_TYPE_AUDIO, false, elementName2);
+    CHECK_AND_RETURN(session2 != nullptr);
+    
+    g_AVSessionService->NotifySupportExtendedScreen(true);
+    
+    std::vector<CastDisplayInfo> castDisplays1;
+    int32_t ret1 = session1->GetAllCastDisplays(castDisplays1);
+    EXPECT_EQ(ret1, AVSESSION_SUCCESS);
+    
+    std::vector<CastDisplayInfo> castDisplays2;
+    int32_t ret2 = session2->GetAllCastDisplays(castDisplays2);
+    EXPECT_EQ(ret2, AVSESSION_SUCCESS);
+    
+    g_AVSessionService->HandleSessionRelease(session1->GetSessionId());
+    g_AVSessionService->HandleSessionRelease(session2->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: HandlePcModeRemoveNotification001
+ * @tc.desc: Test HandlePcModeRemoveNotification with topSession_ nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandlePcModeRemoveNotification001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionService->topSession_ = nullptr;
+    g_AVSessionService->HandlePcModeRemoveNotification();
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+}
+
+/**
+ * @tc.name: HandlePcModeRemoveNotification002
+ * @tc.desc: Test HandlePcModeRemoveNotification with topSession_ valid and matching GetTopSession
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandlePcModeRemoveNotification002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    g_AVSessionService->topSession_ = session;
+    g_AVSessionService->hasMediaCapsule_.store(true);
+    g_AVSessionService->HandlePcModeRemoveNotification();
+    EXPECT_EQ(g_AVSessionService->hasMediaCapsule_.load(), false);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: HandlePcModeRemoveNotification003
+ * @tc.desc: Test HandlePcModeRemoveNotification with topSession_ not matching GetTopSession
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandlePcModeRemoveNotification003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName1;
+    elementName1.SetBundleName("testBundle1");
+    elementName1.SetAbilityName("testAbility1");
+    OHOS::sptr<AVSessionItem> session1 = g_AVSessionService->CreateSessionInner(
+        "testTag1", AVSession::SESSION_TYPE_AUDIO, false, elementName1);
+    CHECK_AND_RETURN(session1 != nullptr);
+    
+    OHOS::AppExecFwk::ElementName elementName2;
+    elementName2.SetBundleName("testBundle2");
+    elementName2.SetAbilityName("testAbility2");
+    OHOS::sptr<AVSessionItem> session2 = g_AVSessionService->CreateSessionInner(
+        "testTag2", AVSession::SESSION_TYPE_AUDIO, false, elementName2);
+    CHECK_AND_RETURN(session2 != nullptr);
+    
+    g_AVSessionService->topSession_ = session1;
+    g_AVSessionService->hasMediaCapsule_.store(true);
+    g_AVSessionService->HandlePcModeRemoveNotification();
+    EXPECT_EQ(g_AVSessionService->topSession_, session1);
+    
+    g_AVSessionService->HandleSessionRelease(session1->GetSessionId());
+    g_AVSessionService->HandleSessionRelease(session2->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: HandlePcModeAddNotification001
+ * @tc.desc: Test HandlePcModeAddNotification with topSession_ nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionService->topSession_ = nullptr;
+    g_AVSessionService->HandlePcModeAddNotification();
+    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+}
+
+/**
+ * @tc.name: HandlePcModeAddNotification002
+ * @tc.desc: Test HandlePcModeAddNotification with topSession_ not nullptr but not playing
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    g_AVSessionService->topSession_ = session;
+    g_AVSessionService->HandlePcModeAddNotification();
+    EXPECT_EQ(g_AVSessionService->topSession_, session);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: HandlePcModeAddNotification003
+ * @tc.desc: Test HandlePcModeAddNotification with topSession_ playing state
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    g_AVSessionService->topSession_ = session;
+    
+    AVPlaybackState playbackState;
+    playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    session->SetAVPlaybackState(playbackState);
+    
+    g_AVSessionService->HandlePcModeAddNotification();
+    EXPECT_EQ(g_AVSessionService->topSession_, session);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: HandlePcModeAddNotification004
+ * @tc.desc: Test HandlePcModeAddNotification with topSession_ pause state
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification004, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    g_AVSessionService->topSession_ = session;
+    
+    AVPlaybackState playbackState;
+    playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    session->SetAVPlaybackState(playbackState);
+    
+    g_AVSessionService->HandlePcModeAddNotification();
+    EXPECT_EQ(g_AVSessionService->topSession_, session);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: SetPcMode003
+ * @tc.desc: Test SetPcMode with topSession_ nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, SetPcMode003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionService->topSession_ = nullptr;
+    g_AVSessionService->SetPcMode(true);
+    EXPECT_EQ(g_AVSessionService->isPcMode_.load(), true);
+    g_AVSessionService->SetPcMode(false);
+    EXPECT_EQ(g_AVSessionService->isPcMode_.load(), false);
+}
+
+/**
+ * @tc.name: OnReceiveEvent003
+ * @tc.desc: Test OnReceiveEvent with HybridModeSwitchEvent action
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::EventFwk::CommonEventData eventData;
+    std::string action = "HybridModeSwitchEvent";
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
+    eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
+}
 } // AVSession
 } // OHOS

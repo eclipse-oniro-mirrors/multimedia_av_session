@@ -292,6 +292,8 @@ public:
 
     void SplitExtraInfo(std::string info);
 
+    void ExtendedScreenSplitExtraInfo(std::string info);
+
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
     int32_t StopCast(const SessionToken& sessionToken) override;
@@ -840,6 +842,12 @@ private:
     std::map<std::string, std::shared_ptr<MigrateAVSessionServer>> migrateAVSessionServerMap_;
     std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
     std::recursive_mutex migrateProxyMapLock_;
+    // screenCast service name list
+    std::unordered_set<std::string> mirrorServiceNames_ = {"HuaweiCast", "HuaweiCast-Dual", "Miracast"};
+    // mirrorToStream service name list
+    std::unordered_set<std::string> mirrorToStreamServiceNames_ = {"HuaweiCast", "HuaweiCast-Dual"};
+    // service name state list
+    std::unordered_set<std::string> allconnectStates_ = {"IDLE", "CONNECT_SUCC"};
     std::set<std::string> controlListForNtf_ = {"com.ohos.mediacontroller"};
 
     std::map<int32_t, int32_t> desktopLyricAbilityStateMap_;

@@ -1510,6 +1510,238 @@ static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher003, TestSize.Level0)
 }
 
 /**
+* @tc.name: SuperLauncher004
+* @tc.desc: Verifying SuperLauncher with mirrorServiceNames and valid state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher004, TestSize.Level0)
+{
+    std::string extraInfo = R"({"modeChange": "phone"})";
+    g_AVSessionService->SuperLauncher("adcdef", "HuaweiCast", extraInfo, "IDLE");
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+}
+
+/**
+* @tc.name: SuperLauncher005
+* @tc.desc: Verifying SuperLauncher with mirrorServiceNames and CONNECT_SUCC state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher005, TestSize.Level0)
+{
+    std::string extraInfo = R"({"modeChange": "phone"})";
+    g_AVSessionService->SuperLauncher("adcdef", "Miracast", extraInfo, "CONNECT_SUCC");
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+}
+
+/**
+* @tc.name: SuperLauncher006
+* @tc.desc: Verifying SuperLauncher with mirrorToStreamServiceNames and valid state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher006, TestSize.Level0)
+{
+    std::string extraInfo = R"({"SUPPORT_MIRROR_TO_STREAM": true})";
+    g_AVSessionService->SuperLauncher("adcdef", "HuaweiCast-Dual", extraInfo, "CONNECT_SUCC");
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, true);
+}
+
+/**
+* @tc.name: SuperLauncher007
+* @tc.desc: Verifying SuperLauncher with invalid serviceName
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher007, TestSize.Level0)
+{
+    std::string extraInfo = R"({"modeChange": "phone"})";
+    g_AVSessionService->SuperLauncher("adcdef", "InvalidService", extraInfo, "IDLE");
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+}
+
+/**
+* @tc.name: SuperLauncher008
+* @tc.desc: Verifying SuperLauncher with invalid state
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher008, TestSize.Level0)
+{
+    std::string extraInfo = R"({"modeChange": "phone"})";
+    g_AVSessionService->SuperLauncher("adcdef", "HuaweiCast", extraInfo, "INVALID_STATE");
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+}
+
+/**
+* @tc.name: ExtendedScreenSplitExtraInfo001
+* @tc.desc: Verifying ExtendedScreenSplitExtraInfo with valid json and modeChange phone
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, ExtendedScreenSplitExtraInfo001, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    session->SetSupportExtendedScreen(false);
+    
+    std::string info = R"({"modeChange": "phone"})";
+    g_AVSessionService->ExtendedScreenSplitExtraInfo(info);
+    
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = session->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+* @tc.name: ExtendedScreenSplitExtraInfo002
+* @tc.desc: Verifying ExtendedScreenSplitExtraInfo with invalid json
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, ExtendedScreenSplitExtraInfo002, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    session->SetSupportExtendedScreen(false);
+    
+    std::string info = "invalid json string";
+    g_AVSessionService->ExtendedScreenSplitExtraInfo(info);
+    
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = session->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(castDisplays.size(), 0);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+* @tc.name: ExtendedScreenSplitExtraInfo003
+* @tc.desc: Verifying ExtendedScreenSplitExtraInfo with empty string
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, ExtendedScreenSplitExtraInfo003, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    session->SetSupportExtendedScreen(false);
+    
+    std::string info = "";
+    g_AVSessionService->ExtendedScreenSplitExtraInfo(info);
+    
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = session->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(castDisplays.size(), 0);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+* @tc.name: ExtendedScreenSplitExtraInfo004
+* @tc.desc: Verifying ExtendedScreenSplitExtraInfo with modeChange not phone
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, ExtendedScreenSplitExtraInfo004, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    session->SetSupportExtendedScreen(false);
+    
+    std::string info = R"({"modeChange": "tablet"})";
+    g_AVSessionService->ExtendedScreenSplitExtraInfo(info);
+    
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = session->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(castDisplays.size(), 0);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+* @tc.name: ExtendedScreenSplitExtraInfo005
+* @tc.desc: Verifying ExtendedScreenSplitExtraInfo without modeChange field
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, ExtendedScreenSplitExtraInfo005, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    session->SetSupportExtendedScreen(false);
+    
+    std::string info = R"({"otherField": "value"})";
+    g_AVSessionService->ExtendedScreenSplitExtraInfo(info);
+    
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = session->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(castDisplays.size(), 0);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
+* @tc.name: ExtendedScreenSplitExtraInfo006
+* @tc.desc: Verifying ExtendedScreenSplitExtraInfo with null modeChange
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, ExtendedScreenSplitExtraInfo006, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    session->SetSupportExtendedScreen(false);
+    
+    std::string info = R"({"modeChange": null})";
+    g_AVSessionService->ExtendedScreenSplitExtraInfo(info);
+    
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = session->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(castDisplays.size(), 0);
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+#endif
+}
+
+/**
 * @tc.name: NotifyMigrateStop001
 * @tc.desc: Verifying NotifyMigrateStop with init state
 * @tc.type: FUNC
@@ -1547,6 +1779,178 @@ static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo001, TestSize.Level0)
     const string deviceTypeInfo = "deviceType : 1";
     g_AVSessionService->SplitExtraInfo(deviceTypeInfo);
     EXPECT_EQ(g_AVSessionService->castDeviceType_, 0);
+}
+
+/**
+* @tc.name: SplitExtraInfo002
+* @tc.desc: Verifying SplitExtraInfo with valid json and correct parsing
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo002, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::string info = R"({
+        "SUPPORT_MIRROR_TO_STREAM": true,
+        "appCastExit": true,
+        "deviceId": "testDevice123",
+        "deviceName": "TestDevice",
+        "deviceType": 5
+    })";
+    g_AVSessionService->SplitExtraInfo(info);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, true);
+    EXPECT_EQ(g_AVSessionService->appCastExit_, true);
+    EXPECT_EQ(g_AVSessionService->castDeviceId_, "testDevice123");
+    EXPECT_EQ(g_AVSessionService->castDeviceName_, "TestDevice");
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 5);
+#endif
+}
+
+/**
+* @tc.name: SplitExtraInfo003
+* @tc.desc: Verifying SplitExtraInfo with valid json and false values
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo003, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::string info = R"({
+        "SUPPORT_MIRROR_TO_STREAM": false,
+        "appCastExit": false,
+        "deviceId": "device456",
+        "deviceName": "MyDevice",
+        "deviceType": 10
+    })";
+    g_AVSessionService->SplitExtraInfo(info);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+    EXPECT_EQ(g_AVSessionService->appCastExit_, false);
+    EXPECT_EQ(g_AVSessionService->castDeviceId_, "device456");
+    EXPECT_EQ(g_AVSessionService->castDeviceName_, "MyDevice");
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 10);
+#endif
+}
+
+/**
+* @tc.name: SplitExtraInfo004
+* @tc.desc: Verifying SplitExtraInfo with invalid json string
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo004, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    g_AVSessionService->isSupportMirrorToStream_ = false;
+    g_AVSessionService->appCastExit_ = false;
+    g_AVSessionService->castDeviceId_ = "0";
+    g_AVSessionService->castDeviceName_ = " ";
+    g_AVSessionService->castDeviceType_ = 0;
+
+    std::string info = "invalid json string {{{}";
+    g_AVSessionService->SplitExtraInfo(info);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+    EXPECT_EQ(g_AVSessionService->appCastExit_, false);
+    EXPECT_EQ(g_AVSessionService->castDeviceId_, "0");
+    EXPECT_EQ(g_AVSessionService->castDeviceName_, " ");
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 0);
+#endif
+}
+
+/**
+* @tc.name: SplitExtraInfo005
+* @tc.desc: Verifying SplitExtraInfo with empty string
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo005, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    g_AVSessionService->isSupportMirrorToStream_ = false;
+    g_AVSessionService->appCastExit_ = false;
+    g_AVSessionService->castDeviceId_ = "0";
+    g_AVSessionService->castDeviceName_ = " ";
+    g_AVSessionService->castDeviceType_ = 0;
+
+    std::string info = "";
+    g_AVSessionService->SplitExtraInfo(info);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+    EXPECT_EQ(g_AVSessionService->appCastExit_, false);
+    EXPECT_EQ(g_AVSessionService->castDeviceId_, "0");
+    EXPECT_EQ(g_AVSessionService->castDeviceName_, " ");
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 0);
+#endif
+}
+
+/**
+* @tc.name: SplitExtraInfo006
+* @tc.desc: Verifying SplitExtraInfo with partial valid fields
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo006, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::string info = R"({
+        "SUPPORT_MIRROR_TO_STREAM": true,
+        "deviceId": "partialDevice"
+    })";
+    g_AVSessionService->SplitExtraInfo(info);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, true);
+    EXPECT_EQ(g_AVSessionService->appCastExit_, false);
+    EXPECT_EQ(g_AVSessionService->castDeviceId_, "partialDevice");
+    EXPECT_EQ(g_AVSessionService->castDeviceName_, " ");
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 0);
+#endif
+}
+
+/**
+* @tc.name: SplitExtraInfo007
+* @tc.desc: Verifying SplitExtraInfo with null json fields
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo007, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::string info = R"({
+        "SUPPORT_MIRROR_TO_STREAM": null,
+        "appCastExit": null,
+        "deviceId": null,
+        "deviceName": null,
+        "deviceType": null
+    })";
+    g_AVSessionService->SplitExtraInfo(info);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+    EXPECT_EQ(g_AVSessionService->appCastExit_, false);
+    EXPECT_EQ(g_AVSessionService->castDeviceId_, "0");
+    EXPECT_EQ(g_AVSessionService->castDeviceName_, " ");
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 0);
+#endif
+}
+
+/**
+* @tc.name: SplitExtraInfo008
+* @tc.desc: Verifying SplitExtraInfo with wrong type fields
+* @tc.type: FUNC
+* @tc.require: #I5Y4MZ
+*/
+static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo008, TestSize.Level0)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::string info = R"({
+        "SUPPORT_MIRROR_TO_STREAM": "true",
+        "appCastExit": "false",
+        "deviceId": 123,
+        "deviceName": 456,
+        "deviceType": "string"
+    })";
+    g_AVSessionService->SplitExtraInfo(info);
+    EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
+    EXPECT_EQ(g_AVSessionService->appCastExit_, false);
+    EXPECT_EQ(g_AVSessionService->castDeviceId_, "0");
+    EXPECT_EQ(g_AVSessionService->castDeviceName_, " ");
+    EXPECT_EQ(g_AVSessionService->castDeviceType_, 0);
+#endif
 }
 
 /**
