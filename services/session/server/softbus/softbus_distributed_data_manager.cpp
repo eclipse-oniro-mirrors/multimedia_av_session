@@ -52,6 +52,7 @@ void SoftbusDistributedDataManager::SessionOpened(int32_t socket, SoftbusPeerSoc
     peerSocketInfo.networkId = info.networkId;
     peerSocketInfo.pkgName = info.pkgName;
     peerSocketInfo.dataType = info.dataType;
+    peerNetworkIdCache_ = info.networkId ? std::string(info.networkId) : "";
     if (isServer_) {
         OnSessionServerOpened();
     }
@@ -255,7 +256,7 @@ void SoftbusDistributedDataManager::OnSessionServerOpened()
 {
 #ifdef DSOFTBUS_ENABLE
     SLOGI("OnSessionServerOpened: the peer device id is %{public}s.",
-        SoftbusSessionUtils::AnonymizeDeviceId(peerSocketInfo.networkId).c_str());
+        SoftbusSessionUtils::AnonymizeDeviceId(peerNetworkIdCache_).c_str());
 #endif
 }
 
@@ -263,7 +264,7 @@ void SoftbusDistributedDataManager::OnSessionServerClosed(int32_t socket)
 {
 #ifdef DSOFTBUS_ENABLE
     SLOGI("OnSessionServerClosed: the peer device id is %{public}s.",
-        SoftbusSessionUtils::AnonymizeDeviceId(peerSocketInfo.networkId).c_str());
+        SoftbusSessionUtils::AnonymizeDeviceId(peerNetworkIdCache_).c_str());
 #endif
     std::lock_guard lockGuard(softbusDistributedDataLock_);
     for (auto it = serverMap_.begin(); it != serverMap_.end(); it++) {

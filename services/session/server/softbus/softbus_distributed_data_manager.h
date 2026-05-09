@@ -121,6 +121,7 @@ private:
         .pkgName = nullptr,
         .dataType = DATA_TYPE_BYTES,
     };
+    std::string peerNetworkIdCache_;
 #endif
     std::string socketNameCache_;
 
