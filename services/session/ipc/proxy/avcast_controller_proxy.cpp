@@ -20,6 +20,8 @@
 #include "avsession_trace.h"
 #include "media_info_holder.h"
 #include "surface_utils.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace OHOS::AVSession {
 AVCastControllerProxy::AVCastControllerProxy(const sptr<IRemoteObject>& impl)
@@ -37,14 +39,20 @@ AVCastControllerProxy::~AVCastControllerProxy()
 int32_t AVCastControllerProxy::SendCustomData(const AAFwk::WantParams& data)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendCustomData");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&data), ERR_MARSHALLING, "write data failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SEND_CUSTOM_DATA, parcel, reply, option) == 0,
@@ -57,15 +65,24 @@ int32_t AVCastControllerProxy::SendCustomData(const AAFwk::WantParams& data)
 int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendControlCommand");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
-    CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_COMMAND_NOT_SUPPORT, "command not valid");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(cmd.IsValid(), ERR_COMMAND_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_COMMAND_NOT_SUPPORT_CAST_SET, "command not valid", false),
+        "command not valid");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&cmd), ERR_MARSHALLING, "write cmd failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND, parcel, reply, option) == 0,
@@ -77,7 +94,10 @@ int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cm
 
 int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
 {
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     parcel.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -88,7 +108,10 @@ int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
     SLOGI("Start received fd %{public}d", avQueueItem.GetDescription()->GetFdSrc().fd_);
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_START, parcel, reply, option) == 0,
@@ -99,7 +122,10 @@ int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
 
 int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
 {
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     parcel.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -115,7 +141,10 @@ int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
     SLOGI("Prepare received fd %{public}d", avQueueItem.GetDescription()->GetFdSrc().fd_);
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_PREPARE, parcel, reply, option) == 0,
@@ -131,7 +160,10 @@ int32_t AVCastControllerProxy::GetDuration(int32_t& duration)
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_DURATION, parcel, reply, option) == 0,
@@ -199,7 +231,10 @@ int32_t AVCastControllerProxy::GetRecommendedResolutionLevel(std::string& decode
     CHECK_AND_RETURN_RET_LOG(parcel.WriteString(decoderType), ERR_MARSHALLING, "write filter failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_GET_RECOMMEND_RESOLUTION_LEVEL, parcel, reply,
@@ -287,7 +322,10 @@ int32_t AVCastControllerProxy::GetCurrentItem(AVQueueItem& currentItem)
 
 int32_t AVCastControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
 {
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
@@ -313,6 +351,8 @@ int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
     errno = 0;
     uint64_t surfaceUniqueId = static_cast<uint64_t>(std::strtoll(surfaceId.c_str(), nullptr, 10));
     if (errno == ERANGE) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "surfaceId conversion error", false);
         return ERR_INVALID_PARAM;
     }
 
@@ -390,14 +430,20 @@ int32_t AVCastControllerProxy::ProcessMediaKeyResponse(const std::string& assetI
 
 int32_t AVCastControllerProxy::SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteString(filter.to_string()), ERR_MARSHALLING, "write filter failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SET_CAST_PLAYBACK_FILTER, parcel, reply,
@@ -410,7 +456,10 @@ int32_t AVCastControllerProxy::SetCastPlaybackFilter(const AVPlaybackState::Play
 int32_t AVCastControllerProxy::AddAvailableCommand(const int32_t cmd)
 {
     SLOGI("add available command in");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
     CHECK_AND_RETURN_RET_LOG(cmd > AVCastControlCommand::CAST_CONTROL_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVCastControlCommand::CAST_CONTROL_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     MessageParcel parcel;
@@ -433,7 +482,10 @@ int32_t AVCastControllerProxy::AddAvailableCommand(const int32_t cmd)
 int32_t AVCastControllerProxy::RemoveAvailableCommand(const int32_t cmd)
 {
     SLOGI("remove available command in");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
     CHECK_AND_RETURN_RET_LOG(cmd > AVCastControlCommand::CAST_CONTROL_CMD_INVALID, AVSESSION_ERROR, "invalid cmd");
     CHECK_AND_RETURN_RET_LOG(cmd < AVCastControlCommand::CAST_CONTROL_CMD_MAX, AVSESSION_ERROR, "invalid cmd");
     MessageParcel parcel;
@@ -455,11 +507,17 @@ int32_t AVCastControllerProxy::RemoveAvailableCommand(const int32_t cmd)
 
 int32_t AVCastControllerProxy::RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback)
 {
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
 
     sptr<AVCastControllerCallbackClient> callback_;
     callback_ = new(std::nothrow) AVCastControllerCallbackClient(callback);
-    CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVCastControllerCallbackClient failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_NO_MEMORY_CAST_SET, "new AVCastControllerCallbackClient failed", false),
+        "new AVCastControllerCallbackClient failed");
 
     return RegisterCallbackInner(callback_);
 }
@@ -473,7 +531,10 @@ int32_t AVCastControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject>& 
         "write remote object failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_REGISTER_CALLBACK, parcel, reply, option) == 0,
@@ -485,13 +546,19 @@ int32_t AVCastControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject>& 
 
 int32_t AVCastControllerProxy::Destroy()
 {
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_DESTROY, parcel, reply, option) == 0,

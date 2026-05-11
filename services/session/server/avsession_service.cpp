@@ -51,6 +51,8 @@
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_dynamic_insight.h"
 #include "audio_system_manager.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -1787,6 +1789,8 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
                                              sptr<AVSessionItem>& sessionItem)
 {
     if (!IsParamInvalid(tag, type, elementName)) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "param invalid", false);
         return ERR_INVALID_PARAM;
     }
     RefreshUserFromAnco(tag, elementName);
@@ -1796,6 +1800,8 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     if (AbilityHasSession(pid, userId)) {
         SLOGE("process %{public}d %{public}s already has one session.", pid, elementName.GetAbilityName().c_str());
         CheckAndUpdateAncoMediaSession(elementName);
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_SESSION_IS_EXIST_LOCAL_SET, "process already has one session", false);
         return ERR_SESSION_IS_EXIST;
     }
 
@@ -1807,6 +1813,8 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         }
         HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "CALLER_PID", pid, "TAG", tag, "TYPE", type, "BUNDLE_NAME",
             elementName.GetBundleName(), "ERROR_MSG", "avsessionservice createsessioninner create new session failed");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_NO_MEMORY_LOCAL_SET, "create new session failed", false);
         return ERR_NO_MEMORY;
     }
     CHECK_AND_RETURN_RET_LOG(
@@ -2881,6 +2889,8 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     sptr<AVSessionItem> session = GetUsersManager().GetContainerFromUser(userId).GetSessionById(sessionId);
     if (session == nullptr) {
         SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "no session", false);
         return ERR_SESSION_NOT_EXIST;
     }
     if (pid < 0 || GetCallingPid() != getpid()) {
@@ -2890,11 +2900,16 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     if (existController != nullptr) {
         SLOGI("Controller is already existed.");
         object = existController;
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_CONTROLLER_IS_EXIST_LOCAL_SET,
+            "Controller is already existed", false);
         return ERR_CONTROLLER_IS_EXIST;
     }
     sptr<AVControllerItem> newController = CreateNewControllerForSession(pid, session);
     if (newController == nullptr) {
         SLOGE("Create new controller failed.");
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_NO_MEMORY_LOCAL_SET, "Create new controller failed", false);
         return ERR_NO_MEMORY;
     }
 

@@ -15,6 +15,8 @@
 
 #include "avsession_service_proxy.h"
 #include "avsession_log.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 #ifndef CLIENT_LITE
 #include "avsession_proxy.h"
@@ -145,7 +147,10 @@ int32_t AVSessionServiceProxy::GetAllSessionDescriptors(std::vector<AVSessionDes
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
                              "write interface token failed");
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
@@ -155,8 +160,12 @@ int32_t AVSessionServiceProxy::GetAllSessionDescriptors(std::vector<AVSessionDes
 
     int32_t ret = AVSESSION_ERROR;
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_NO_PERMISSION_LOCAL_GET, "no permission", false), "no permission");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_PERMISSION_DENIED_LOCAL_GET, "permission denied", false), "permission denied");
     if (ret == AVSESSION_SUCCESS) {
         uint32_t size {};
         CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
@@ -399,8 +408,12 @@ int32_t AVSessionServiceProxy::CreateController(const std::string& sessionId,
     auto ret = AVSessionServiceProxy::CreateControllerInner(sessionId, object);
     CHECK_AND_RETURN_RET_LOG((ret == AVSESSION_SUCCESS || ret == ERR_CONTROLLER_IS_EXIST),
         ret, "CreateControllerInner failed");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
-    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_NO_PERMISSION_LOCAL_SET, "no permission", true), "no permission");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_PERMISSION_DENIED_LOCAL_SET, "permission denied", true), "permission denied");
     auto controllerObject = iface_cast<IAVSessionController>(object);
     CHECK_AND_RETURN_RET_LOG(controllerObject, AVSESSION_ERROR, "controllerObject is nullptr");
 
@@ -417,7 +430,10 @@ int32_t AVSessionServiceProxy::CreateControllerInner(const std::string& sessionI
     CHECK_AND_RETURN_RET_LOG(data.WriteString(sessionId), ERR_UNMARSHALLING, "write sessionId failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
@@ -483,7 +499,10 @@ int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListen
     CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(listener->AsObject()), ERR_MARSHALLING, "write tag failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
@@ -502,7 +521,10 @@ int32_t AVSessionServiceProxy::RegisterSessionListenerForAllUsers(const sptr<ISe
     CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(listener->AsObject()), ERR_MARSHALLING, "write tag failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
@@ -885,7 +907,10 @@ int32_t AVSessionServiceProxy::IsDesktopLyricSupported(bool &isSupported)
                              "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(static_cast<uint32_t>(

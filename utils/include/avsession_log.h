@@ -51,6 +51,15 @@
         }                                              \
     } while (0)
 
+#define CHECK_AND_CALL_FUNC_RETURN_RET_LOG(cond, ret, func, fmt, ...)  \
+    do {                                               \
+        if (!(cond)) {                                 \
+            SLOGE(fmt, ##__VA_ARGS__);                 \
+            func;                                      \
+            return ret;                                \
+        }                                              \
+    } while (0)
+
 #define CHECK_AND_RETURN_LOG(cond, fmt, ...)           \
     do {                                               \
         if (!(cond)) {                                 \

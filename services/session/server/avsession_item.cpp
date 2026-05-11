@@ -40,6 +40,8 @@
 #include "avsession_hianalytics_report.h"
 #include "avmedia_center_control_type.h"
 #include "avsession_whitelist_config_manager.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 #include <filesystem>
 
 #include <cinttypes>
@@ -884,8 +886,10 @@ void AVSessionItem::SetDesktopLyricFeatureSupported(bool isSupported)
 
 int32_t AVSessionItem::EnableDesktopLyric(bool isEnabled)
 {
-    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
-        "The desktop lyrics feature is not supported.");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_SUPPORT_LOCAL_SET,
+        "The desktop lyrics feature is not supported", false), "The desktop lyrics feature is not supported.");
     SLOGI("enable desktop lyrics: isEnable=%{public}d", isEnabled);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
         "API_NAME", "EnableDesktopLyric", "BUNDLE_NAME", GetBundleName(),
@@ -910,8 +914,10 @@ int32_t AVSessionItem::EnableDesktopLyric(bool isEnabled)
 
 int32_t AVSessionItem::IsDesktopLyricEnabled(bool &isEnabled)
 {
-    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
-        "The desktop lyrics feature is not supported.");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_SUPPORT_LOCAL_GET,
+        "The desktop lyrics feature is not supported", false), "The desktop lyrics feature is not supported.");
     SLOGI("Entry");
     isEnabled = isEnabledDesktopLyric_;
     return AVSESSION_SUCCESS;
@@ -924,9 +930,14 @@ int32_t AVSessionItem::SetDesktopLyricVisible(bool isVisible)
 
 int32_t AVSessionItem::IsDesktopLyricVisible(bool &isVisible)
 {
-    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
-        "The desktop lyrics feature is not supported.");
-    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_SUPPORT_LOCAL_GET,
+        "The desktop lyrics feature is not supported", false), "The desktop lyrics feature is not supported.");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_ENABLE_LOCAL_GET,
+        "The desktop lyrics feature is not enabled", false),
         "The desktop lyrics feature of this application is not enabled.");
     SLOGI("Entry");
     std::lock_guard<std::mutex> lock(desktopLyricVisibleMutex_);
@@ -941,9 +952,15 @@ int32_t AVSessionItem::SetDesktopLyricState(DesktopLyricState state)
 
 int32_t AVSessionItem::GetDesktopLyricState(DesktopLyricState &state)
 {
-    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_SUPPORT_LOCAL_GET,
+        "The desktop lyrics feature is not supported", false),
         "The desktop lyrics feature is not supported.");
-    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_ENABLE_LOCAL_GET,
+        "The desktop lyrics feature is not enabled", false),
         "The desktop lyrics feature of this application is not enabled.");
     SLOGI("entry");
     std::lock_guard<std::mutex> lock(desktopLyricStateMutex_);
@@ -953,9 +970,15 @@ int32_t AVSessionItem::GetDesktopLyricState(DesktopLyricState &state)
 
 int32_t AVSessionItem::SetDesktopLyricVisibleInner(bool isVisible, const std::string &handler)
 {
-    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_SUPPORT_LOCAL_SET,
+        "The desktop lyrics feature is not supported", false),
         "The desktop lyrics feature is not supported.");
-    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_ENABLE_LOCAL_SET,
+        "The desktop lyrics feature is not enabled", false),
         "The desktop lyrics feature of this application is not enabled.");
     CHECK_AND_RETURN_RET_LOG(extension_ != nullptr, AVSESSION_ERROR, "not support extension ability.");
 
@@ -977,9 +1000,15 @@ int32_t AVSessionItem::SetDesktopLyricVisibleInner(bool isVisible, const std::st
 
 int32_t AVSessionItem::SetDesktopLyricStateInner(const DesktopLyricState &state, const std::string &handler)
 {
-    CHECK_AND_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isSupportedDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_SUPPORT_LOCAL_SET,
+        "The desktop lyrics feature is not supported", false),
         "The desktop lyrics feature is not supported.");
-    CHECK_AND_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isEnabledDesktopLyric_.load(), ERR_DESKTOPLYRIC_NOT_ENABLE,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_DESKTOPLYRIC_NOT_ENABLE_LOCAL_SET,
+        "The desktop lyrics feature is not enabled", false),
         "The desktop lyrics feature of this application is not enabled.");
     CHECK_AND_RETURN_RET_LOG(extension_ != nullptr, AVSESSION_ERROR, "not support extension ability.");
 

@@ -18,6 +18,8 @@
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
+#include "stream_dfx_manager.h"
+#include "audio_errors.h"
 
 namespace OHOS::AVSession {
 AVSessionControllerProxy::AVSessionControllerProxy(const sptr<IRemoteObject>& impl)
@@ -88,13 +90,19 @@ int32_t AVSessionControllerProxy::GetAVCallState(AVCallState& avCallState)
 int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_PLAYBACK_STATE, parcel, reply, option) == 0,
@@ -123,13 +131,19 @@ int32_t AVSessionControllerProxy::GetAVPlaybackState(AVPlaybackState& state)
 int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     reply.SetMaxCapacity(defaultIpcCapacity);
@@ -148,13 +162,19 @@ int32_t AVSessionControllerProxy::GetAVMetaData(AVMetaData& data)
 int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& items)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_QUEUE_ITEMS, parcel, reply, option) == 0,
@@ -187,13 +207,19 @@ int32_t AVSessionControllerProxy::GetAVQueueItems(std::vector<AVQueueItem>& item
 int32_t AVSessionControllerProxy::GetAVQueueTitle(std::string& title)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_AV_QUEUE_TITLE, parcel, reply, option) == 0,
@@ -212,13 +238,19 @@ int32_t AVSessionControllerProxy::GetAVQueueTitle(std::string& title)
 int32_t AVSessionControllerProxy::SkipToQueueItem(int32_t& itemId)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(itemId), ERR_MARSHALLING, "write interface token failed");
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SKIP_TO_QUEUE_ITEM, parcel, reply, option) == 0,
@@ -230,17 +262,26 @@ int32_t AVSessionControllerProxy::SkipToQueueItem(int32_t& itemId)
 int32_t AVSessionControllerProxy::GetExtras(AAFwk::WantParams& extras)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     SLOGI("prepare to get extras sendRequest");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "check again controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "check again controller is destroy", false),
+        "check again controller is destroy");
     SLOGI("get extras sendRequest");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_EXTRAS, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
@@ -258,18 +299,27 @@ int32_t AVSessionControllerProxy::GetExtras(AAFwk::WantParams& extras)
 int32_t AVSessionControllerProxy::GetExtrasWithEvent(const std::string& extraEvent, AAFwk::WantParams& extras)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteString(extraEvent), ERR_MARSHALLING, "Write extraEvent string failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     SLOGI("prepare to get extras with event sendRequest");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "check again controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "check again controller is destroy", false),
+        "check again controller is destroy");
     SLOGI("get extras with event sendRequest");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_EXTRAS_WITH_EVENT, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
@@ -287,13 +337,19 @@ int32_t AVSessionControllerProxy::GetExtrasWithEvent(const std::string& extraEve
 int32_t AVSessionControllerProxy::GetMediaCenterControlType(std::vector<int32_t>& controlTypes)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_MEDIA_CENTER_CONTROL_TYPE, parcel,
@@ -309,13 +365,19 @@ int32_t AVSessionControllerProxy::GetMediaCenterControlType(std::vector<int32_t>
 int32_t AVSessionControllerProxy::GetSupportedPlaySpeeds(std::vector<double>& speeds)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_SUPPORTED_PLAY_SPEEDS, parcel, reply, option) == 0,
@@ -332,13 +394,19 @@ int32_t AVSessionControllerProxy::GetSupportedPlaySpeeds(std::vector<double>& sp
 int32_t AVSessionControllerProxy::GetSupportedLoopModes(std::vector<int32_t>& loopModes)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_SUPPORTED_LOOP_MODES, parcel, reply, option) == 0,
@@ -356,13 +424,22 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendAVKeyEvent");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
-    CHECK_AND_RETURN_RET_LOG(keyEvent.IsValid(), ERR_COMMAND_NOT_SUPPORT, "keyEvent not valid");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(keyEvent.IsValid(), ERR_COMMAND_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_COMMAND_NOT_SUPPORT_LOCAL_SET, "keyEvent not valid", false),
+        "keyEvent not valid");
     bool isActive = false;
     int32_t retForIsActive = IsSessionActive(isActive);
     CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, retForIsActive,
         "IsSessionActive check Fail:%{public}d", retForIsActive);
-    CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_DEACTIVE_LOCAL_SET, "session is deactivate", false),
+        "session is deactivate");
 
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -370,7 +447,10 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
     CHECK_AND_RETURN_RET_LOG(keyEvent.WriteToParcel(parcel), ERR_MARSHALLING, "write keyEvent failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_AV_KEYEVENT, parcel, reply, option) == 0,
@@ -384,13 +464,19 @@ int32_t AVSessionControllerProxy::SendAVKeyEvent(const MMI::KeyEvent& keyEvent)
 int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::WantAgent& ability)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_LAUNCH_ABILITY, parcel, reply, option) == 0,
@@ -410,13 +496,19 @@ int32_t AVSessionControllerProxy::GetLaunchAbility(AbilityRuntime::WantAgent::Wa
 int32_t AVSessionControllerProxy::GetLaunchAbilityInner(AbilityRuntime::WantAgent::WantAgent*& ability)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_LAUNCH_ABILITY, parcel, reply, option) == 0,
@@ -437,13 +529,19 @@ int32_t AVSessionControllerProxy::GetLaunchAbilityInner(AbilityRuntime::WantAgen
 int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_VALID_COMMANDS, parcel, reply, option) == 0,
@@ -460,13 +558,19 @@ int32_t AVSessionControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
 int32_t AVSessionControllerProxy::IsSessionActive(bool& isActive)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_IS_SESSION_ACTIVE, parcel, reply, option) == 0,
@@ -484,23 +588,38 @@ int32_t AVSessionControllerProxy::SendControlCommand(const AVControlCommand& cmd
 {
     std::lock_guard lockGuard(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendControlCommand");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
-    CHECK_AND_RETURN_RET_LOG(cmd.IsValid(), ERR_COMMAND_NOT_SUPPORT, "command not valid");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(cmd.IsValid(), ERR_COMMAND_NOT_SUPPORT,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_COMMAND_NOT_SUPPORT_LOCAL_SET, "command not valid", false),
+        "command not valid");
     bool isActive = false;
     int32_t retForIsActive = IsSessionActive(isActive);
     CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, retForIsActive,
         "IsSessionActive check Fail:%{public}d", retForIsActive);
-    CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_DEACTIVE_LOCAL_SET, "session is deactivate", false),
+        "session is deactivate");
 
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&cmd), ERR_MARSHALLING, "write cmd failed");
 
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
     SLOGI("check destroy bef get remote");
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
 
@@ -516,12 +635,18 @@ int32_t AVSessionControllerProxy::SendCommonCommand(const std::string& commonCom
 {
     std::lock_guard lockGuard(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendCommonCommand");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "Controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "Controller is destroy", false),
+        "Controller is destroy");
     bool isActive = false;
     int32_t retForIsActive = IsSessionActive(isActive);
     CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, retForIsActive,
         "IsSessionActive check Fail:%{public}d", retForIsActive);
-    CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_DEACTIVE_LOCAL_SET, "session is deactivate", false),
+        "session is deactivate");
 
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -531,7 +656,10 @@ int32_t AVSessionControllerProxy::SendCommonCommand(const std::string& commonCom
         ERR_MARSHALLING, "Write args failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "Get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "Get remote service failed", true),
+        "Get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_COMMON_COMMAND, parcel, reply, option) == 0,
@@ -545,12 +673,18 @@ int32_t AVSessionControllerProxy::SendCustomData(const AAFwk::WantParams& data)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVSessionControllerProxy::SendCustomData");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "Controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "Controller is destroy", false),
+        "Controller is destroy");
     bool isActive = false;
     int32_t retForIsActive = IsSessionActive(isActive);
     CHECK_AND_RETURN_RET_LOG(retForIsActive == AVSESSION_SUCCESS, retForIsActive,
         "IsSessionActive check Fail:%{public}d", retForIsActive);
-    CHECK_AND_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE, "session is deactivate");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(isActive, ERR_SESSION_DEACTIVE,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_DEACTIVE_LOCAL_SET, "session is deactivate", false),
+        "session is deactivate");
 
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -559,7 +693,10 @@ int32_t AVSessionControllerProxy::SendCustomData(const AAFwk::WantParams& data)
         ERR_MARSHALLING, "Write args failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "Get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "Get remote service failed", true),
+        "Get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SEND_CUSTOM_DATA, parcel, reply, option) == 0,
@@ -612,14 +749,20 @@ int32_t AVSessionControllerProxy::SetAVCallStateFilter(const AVCallState::AVCall
 int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType& filter)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteString(filter.to_string()), ERR_MARSHALLING, "write filter failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_META_FILTER, parcel, reply, option) == 0,
@@ -632,14 +775,20 @@ int32_t AVSessionControllerProxy::SetMetaFilter(const AVMetaData::MetaMaskType& 
 int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteString(filter.to_string()), ERR_MARSHALLING, "write filter failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_PLAYBACK_FILTER, parcel, reply, option) == 0,
@@ -652,10 +801,16 @@ int32_t AVSessionControllerProxy::SetPlaybackFilter(const AVPlaybackState::Playb
 int32_t AVSessionControllerProxy::RegisterCallback(const std::shared_ptr<AVControllerCallback>& callback)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
 
     callback_ = new(std::nothrow) AVControllerCallbackClient(callback);
-    CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY, "new AVControllerCallbackClient failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_NO_MEMORY_LOCAL_SET, "new AVControllerCallbackClient failed", false),
+        "new AVControllerCallbackClient failed");
 
     callback_->AddListenerForPlaybackState([this](const AVPlaybackState& state) {
         std::lock_guard lockGuard(currentStateLock_);
@@ -675,7 +830,10 @@ int32_t AVSessionControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject
         "write remote object failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_REGISTER_CALLBACK, parcel, reply, option) == 0,
@@ -689,14 +847,20 @@ int32_t AVSessionControllerProxy::Destroy()
 {
     std::lock_guard lockGuard(controllerProxyLock_);
     SLOGI("Proxy received destroy event");
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     SLOGI("check lock bef destroy in");
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
 
@@ -754,13 +918,19 @@ bool AVSessionControllerProxy::IsDestroy()
 int32_t AVSessionControllerProxy::IsDesktopLyricEnabled(bool &isEnabled)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_IS_DESKTOP_LYRIC_ENABLED,
@@ -777,14 +947,20 @@ int32_t AVSessionControllerProxy::IsDesktopLyricEnabled(bool &isEnabled)
 int32_t AVSessionControllerProxy::SetDesktopLyricVisible(bool isVisible)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteBool(isVisible), ERR_MARSHALLING, "write isVisible failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_DESKTOP_LYRIC_VISIBLE,
@@ -797,13 +973,19 @@ int32_t AVSessionControllerProxy::SetDesktopLyricVisible(bool isVisible)
 int32_t AVSessionControllerProxy::IsDesktopLyricVisible(bool &isVisible)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_IS_DESKTOP_LYRIC_VISIBLE,
@@ -820,14 +1002,20 @@ int32_t AVSessionControllerProxy::IsDesktopLyricVisible(bool &isVisible)
 int32_t AVSessionControllerProxy::SetDesktopLyricState(DesktopLyricState state)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_SET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
     CHECK_AND_RETURN_RET_LOG(state.Marshalling(parcel), ERR_MARSHALLING, "write state failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_SET_DESKTOP_LYRIC_STATE, parcel, reply, option) == 0,
@@ -840,13 +1028,19 @@ int32_t AVSessionControllerProxy::SetDesktopLyricState(DesktopLyricState state)
 int32_t AVSessionControllerProxy::GetDesktopLyricState(DesktopLyricState &state)
 {
     std::lock_guard lockGuard(controllerProxyLock_);
-    CHECK_AND_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST, "controller is destroy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_LOCAL_GET, "controller is destroy", false),
+        "controller is destroy");
     MessageParcel parcel;
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
 
     auto remote = Remote();
-    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_GET, "get remote service failed", false),
+        "get remote service failed");
     MessageParcel reply;
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_DESKTOP_LYRIC_STATE,

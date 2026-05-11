@@ -61,6 +61,7 @@ ohos_shared_library("ohavsession") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_client",
+    "audio_framework:audio_common",
     "c_utils:utils",
     "curl:curl_shared",
     "hilog:libhilog",
