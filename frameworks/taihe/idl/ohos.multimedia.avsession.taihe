@@ -55,7 +55,7 @@ class MediaAVDataSrcDescriptorImpl implements media.AVDataSrcDescriptor {
   }
 }
 
-class AudioStreamInfoImpl implements audio.AudioStreamInfo {
+class AudioStreamInfoImpl {
   samplingRate: audio.AudioSamplingRate;
   channels: audio.AudioChannel;
   sampleFormat: audio.AudioSampleFormat;
