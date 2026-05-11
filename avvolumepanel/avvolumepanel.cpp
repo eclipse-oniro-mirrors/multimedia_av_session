@@ -39,7 +39,7 @@ static napi_module avVolumePanelModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_modname = "multimedia.avVolumePanel",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = {0},
 };
 

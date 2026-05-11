@@ -157,13 +157,13 @@ void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
     std::lock_guard lockGuard(lock_);
     std::string deviceId = AudioDeviceManager::GetInstance().GetDeviceId();
     if (AudioStandard::LOCAL_NETWORK_ID == deviceDesc->networkId_) {
-        if (AUDIO_OUTPUT_SOURCE == AudioDeviceManager::GetInstance().GetAudioState()) {
+        if (AudioDeviceManager::GetInstance().GetAudioState() == AUDIO_OUTPUT_SOURCE) {
             return;
         }
         AudioDeviceManager::GetInstance().ClearRemoteAvSessionInfo(deviceId);
         AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SOURCE);
     } else {
-        if (AUDIO_OUTPUT_SINK == AudioDeviceManager::GetInstance().GetAudioState()) {
+        if (AudioDeviceManager::GetInstance().GetAudioState() == AUDIO_OUTPUT_SINK) {
             return;
         }
         SLOGI("receive OnPreferedOutputDeviceUpdated send remote session");
