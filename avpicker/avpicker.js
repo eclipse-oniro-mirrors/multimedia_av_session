@@ -121,6 +121,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit = new ObservedPropertySimplePU(false, this, 'isDisabledByPickerLimit');
         this.__isDeviceLevel = new ObservedPropertySimplePU(true, this, 'isDeviceLevel');
         this.__isSubMenuExpanded = new ObservedPropertySimplePU(false, this, 'isSubMenuExpanded');
+        this.__hasReceivedDeviceList = new ObservedPropertySimplePU(false, this, 'hasReceivedDeviceList');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.declareWatch('isSubMenuExpanded', this.MenuStateChange);
@@ -273,6 +274,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.isSubMenuExpanded !== undefined) {
             this.isSubMenuExpanded = c11.isSubMenuExpanded;
         }
+        if (c11.hasReceivedDeviceList !== undefined) {
+            this.hasReceivedDeviceList = c11.hasReceivedDeviceList;
+        }
     }
 
     updateStateVars(b11) {
@@ -319,6 +323,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit.purgeDependencyOnElmtId(a11);
         this.__isDeviceLevel.purgeDependencyOnElmtId(a11);
         this.__isSubMenuExpanded.purgeDependencyOnElmtId(a11);
+        this.__hasReceivedDeviceList.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -362,6 +367,7 @@ export class AVCastPicker extends ViewPU {
         this.__isDisabledByPickerLimit.aboutToBeDeleted();
         this.__isDeviceLevel.aboutToBeDeleted();
         this.__isSubMenuExpanded.aboutToBeDeleted();
+        this.__hasReceivedDeviceList.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -682,6 +688,14 @@ export class AVCastPicker extends ViewPU {
     }
     set isSubMenuExpanded(i1) {
         this.__isSubMenuExpanded.set(i1);
+    }
+
+    get hasReceivedDeviceList() {
+        return this.__hasReceivedDeviceList.get();
+    }
+
+    set hasReceivedDeviceList(j1) {
+        this.__hasReceivedDeviceList.set(j1);
     }
 
     aboutToAppear() {
@@ -1961,6 +1975,10 @@ export class AVCastPicker extends ViewPU {
                     this.extensionProxy.send({'clickEvent': true});
                 } else {
                     this.isMenuShow = !this.isMenuShow;
+                    if (!this.isMenuShow && !this.hasReceivedDeviceList) {
+                        console.info(TAG, 'hasReceivedDeviceList empty on previous isMenuShow');
+                        this.isMenuShow = true;
+                    }
                     if (this.isMenuShow) {
                         this.pickerClickTime = new Date().getTime();
                     } else {
@@ -2025,6 +2043,9 @@ export class AVCastPicker extends ViewPU {
                 if (l8.deviceList !== undefined) {
                     console.info(TAG, `picker device list : ${JSON.stringify(l8.deviceList)}`);
                     this.deviceList = JSON.parse(JSON.stringify(l8.deviceList));
+                    if (this.isMenuShow && !this.hasReceivedDeviceList) {
+                        this.hasReceivedDeviceList = true;
+                    }
                     let u = this.deviceList.length === 2 && !this.hasExtDevice(ObservedObject.GetRawObject(this.deviceList));
                     let v = this.deviceList === null || this.deviceList.length === 0;
                     let w = this.sessionType === 'voice_call' || this.sessionType === 'video_call';
@@ -2152,7 +2173,7 @@ export class AVCastPicker extends ViewPU {
                 }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
-            UIExtensionComponent.bindMenu(this.isMenuShow, { builder: () => {
+            UIExtensionComponent.bindMenu(this.isMenuShow && this.hasReceivedDeviceList, { builder: () => {
                 this.deviceAndHouseMusicSys.call(this);
             } }, {
                 backgroundBlurStyle: (this.isShowHomeAudio ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
@@ -2165,6 +2186,7 @@ export class AVCastPicker extends ViewPU {
             enableHoverMode: true,
             onDisappear: () => {
                 this.isMenuShow = false;
+                this.hasReceivedDeviceList = false;
                 this.touchMenuItemIndex = -1;
                 this.menuShowStateCallback(this.isMenuShow);
             },
