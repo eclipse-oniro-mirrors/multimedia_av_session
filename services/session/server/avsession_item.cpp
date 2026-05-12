@@ -902,6 +902,10 @@ int32_t AVSessionItem::EnableDesktopLyric(bool isEnabled)
         "SDK_VERSION", AVSessionSysEvent::GetInstance().GetSdkVersion(),
         "ERROR_CODE", AVSESSION_SUCCESS, "ERROR_MSG", "SUCCESS");
     isEnabledDesktopLyric_ = isEnabled;
+    if (isEnabledDesktopLyric_ == false) {
+        isDesktopLyricVisible_ = false;
+        desktopLyricState_.isLocked_ = false;
+    }
     {
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
