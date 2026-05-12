@@ -4779,7 +4779,8 @@ void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool add
 void AVSessionService::NotifyRemoteDistributedSessionControllersChanged(
     const std::vector<sptr<IRemoteObject>>& sessionControllers)
 {
-    SLOGI("NotifyRemoteDistributedSessionControllersChanged size: %{public}d", static_cast<int>(sessionControllers.size()));
+    SLOGI("NotifyRemoteDistributedSessionControllersChanged size: %{public}d",
+          static_cast<int>(sessionControllers.size()));
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
