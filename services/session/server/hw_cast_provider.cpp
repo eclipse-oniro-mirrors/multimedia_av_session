@@ -15,6 +15,7 @@
 
 #include "hw_cast_provider.h"
 #include <thread>
+#include <unordered_map>
 #include "cast_session_manager.h"
 #include "hw_cast_stream_player.h"
 #include "avsession_log.h"
@@ -28,6 +29,20 @@ using namespace OHOS::CastEngine;
 namespace OHOS::AVSession {
 const uint32_t UNTRUSTED_DEVICE = 0;
 const uint32_t TRUSTED_DEVICE = 1;
+
+const std::unordered_map<int32_t, int32_t> CAST_TO_AV_DEVICE_TYPE_MAP = {
+    { 0x9C,   DeviceType::DEVICE_TYPE_TV },
+    { 0x11,   DeviceType::DEVICE_TYPE_UNKNOWN },
+    { 0x83,   DeviceType::DEVICE_TYPE_CAR },
+    { 0xA2F,  DeviceType::DEVICE_TYPE_2IN1 },
+    { 0xA33,  DeviceType::DEVICE_TYPE_HIPLAY },
+};
+
+int32_t ConvertCastDeviceTypeToDeviceType(int32_t castDeviceType)
+{
+    auto it = CAST_TO_AV_DEVICE_TYPE_MAP.find(castDeviceType);
+    return it != CAST_TO_AV_DEVICE_TYPE_MAP.end() ? it->second : DeviceType::DEVICE_TYPE_UNKNOWN;
+}
 
 HwCastProvider::HwCastProvider()
 {
@@ -456,7 +471,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         deviceInfo.deviceId_ = castRemoteDevice.deviceId;
         deviceInfo.deviceName_ = castRemoteDevice.deviceName;
-        deviceInfo.deviceType_ = static_cast<int>(castRemoteDevice.deviceType);
+        deviceInfo.deviceType_ = ConvertCastDeviceTypeToDeviceType(
+            static_cast<int32_t>(castRemoteDevice.rawDeviceType));
         deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
         deviceInfo.networkId_ = castRemoteDevice.networkId;
         deviceInfo.manufacturer_ = castRemoteDevice.manufacturerName;
