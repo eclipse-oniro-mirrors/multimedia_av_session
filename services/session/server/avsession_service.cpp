@@ -2266,7 +2266,7 @@ int32_t AVSessionService::GetHistoricalSessionDescriptors(int32_t maxSize,
         maxSize = unSetHistoryNum;
     }
     for (auto iterator = tempDescriptors.begin(); iterator != tempDescriptors.end(); ++iterator) {
-        if (descriptors.size() >= (size_t)maxSize) {
+        if (descriptors.size() >= static_cast<size_t>(maxSize)) {
             break;
         }
         std::string sessionId(iterator->sessionId_);
@@ -4779,7 +4779,8 @@ void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool add
 void AVSessionService::NotifyRemoteDistributedSessionControllersChanged(
     const std::vector<sptr<IRemoteObject>>& sessionControllers)
 {
-    SLOGI("NotifyRemoteDistributedSessionControllersChanged size: %{public}d", (int) sessionControllers.size());
+    SLOGI("NotifyRemoteDistributedSessionControllersChanged size: %{public}d",
+          static_cast<int>(sessionControllers.size()));
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {

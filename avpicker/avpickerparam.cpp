@@ -39,7 +39,7 @@ static napi_module avCastPickerParamModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_modname = "multimedia.avCastPickerParam",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = {0},
 };
 

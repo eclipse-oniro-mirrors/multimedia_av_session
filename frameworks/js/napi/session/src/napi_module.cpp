@@ -46,7 +46,7 @@ static napi_module module = {
     .nm_filename = nullptr,
     .nm_register_func = Export,
     .nm_modname = "multimedia.avsession",
-    .nm_priv = ((void*)nullptr),
+    .nm_priv = nullptr,
     .reserved = {nullptr}
 };
 
