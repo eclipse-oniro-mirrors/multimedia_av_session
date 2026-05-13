@@ -873,8 +873,8 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
 {
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "sessionItem get nullptr!");
     int32_t userId = sessionItem->GetUserId();
-    SLOGI("UpdateFrontSession with bundle=%{public}s,userId=%{public}d,isAdd=%{public}d",
-        sessionItem->GetBundleName().c_str(), userId, isAdd);
+    HILOG_COMM_INFO("UpdateFrontSession with bundle=%{public}s, isAdd=%{public}d",
+        sessionItem->GetBundleName().c_str(), isAdd);
     {
         std::lock_guard lockGuard(controlListLock_);
         CHECK_AND_RETURN_LOG(controlBundleNameSet_.find(sessionItem->GetBundleName()) == controlBundleNameSet_.end(),
@@ -1629,8 +1629,8 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
                                                        const AppExecFwk::ElementName& elementName)
 {
-    SLOGI("%{public}s %{public}d %{public}s %{public}s thirdPartyApp=%{public}d", tag.c_str(), type,
-          elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str(), thirdPartyApp);
+    HILOG_COMM_INFO("%{public}s %{public}d %{public}s %{public}s thirdPartyApp=%{public}d", tag.c_str(), type,
+        elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str(), thirdPartyApp);
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = AllocSessionId();
     if (descriptor.sessionId_.empty()) {
@@ -3545,7 +3545,6 @@ void AVSessionService::HandleTopSessionRelease(int32_t userId, sptr<AVSessionIte
 
 void AVSessionService::HandleSessionRelease(std::string sessionId, bool continuePlay)
 {
-    SLOGI("HandleSessionRelease, sessionId=%{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         std::lock_guard frontLockGuard(sessionFrontLock_);
@@ -3554,6 +3553,8 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         int32_t userId = sessionItem->GetUserId();
         userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
         SLOGD("HandleSessionRelease with userId:%{public}d", userId);
+        HILOG_COMM_INFO("HandleSessionRelease, sessionId=%{public}s, bundleName=%{public}s",
+            AVSessionUtils::GetAnonySessionId(sessionId).c_str(), sessionItem->GetBundleName().c_str());
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
         ReportSessionState(sessionItem, SessionState::STATE_RELEASE);
 #endif
@@ -4914,6 +4915,8 @@ void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, Se
 
 void AVSessionService::ReportSessionControl(const std::string& bundleName, int32_t cmd)
 {
+    HILOG_COMM_INFO("HandleControl from %{public}d to %{public}s with %{public}d",
+        GetCallingUid(), bundleName.c_str(), cmd);
     if (cmd == AVControlCommand::SESSION_CMD_PLAY ||
         cmd == AVControlCommand::SESSION_CMD_PAUSE ||
         cmd == CONTROL_COLD_START) {

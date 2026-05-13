@@ -324,7 +324,7 @@ void HwCastProviderSession::ComputeToastOnDeviceState(const CastEngine::DeviceSt
 
 void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInfo &stateInfo)
 {
-    SLOGI("OnDeviceStateChange from cast with deviceId %{public}s, state %{public}d, reasonCode %{public}d",
+    HILOG_COMM_INFO("OnDeviceStateChange from cast with deviceId %{public}s, state %{public}d, reasonCode %{public}d",
         AVSessionUtils::GetAnonyNetworkId(stateInfo.deviceId).c_str(),
             static_cast<int32_t>(stateInfo.deviceState), static_cast<int32_t>(stateInfo.reasonCode));
 

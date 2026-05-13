@@ -287,7 +287,7 @@ void NapiAVSessionCallback::OnOutputDeviceChange(const int32_t connectionState,
         outputDeviceInfo.deviceInfos_[0].castCategory_ == AVCastCategory::CATEGORY_REMOTE) ?
         outputDeviceInfo : outputDeviceInfo_;
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
-    SLOGI("OnOutputDeviceChange with connectionState %{public}d", connectionState);
+    HILOG_COMM_INFO("OnOutputDeviceChange with connectionState %{public}d", connectionState);
     HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, callBackName, connectionState, outputDeviceInfo);
 }
 
