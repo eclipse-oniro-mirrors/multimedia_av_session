@@ -297,6 +297,9 @@ export struct AVCastPicker {
   @State isAllSelecting: boolean = false;
   // 房间勾选
   @State timeoutIds: number[] = [];
+  @State isSelectProcessing: boolean = false;
+  @State isAllCancel: boolean = false;
+  @State @Watch('scanDelayChange') scanDelay: boolean = false;
   @State @Watch('homeMusicPlayTaskIdChange') playTaskIdStr: string = '';
   @State roomIsSelect: boolean[] = [];
   @State isSelectRoomListService: HomeMusicServices[] = [];
@@ -310,7 +313,6 @@ export struct AVCastPicker {
   // 房间信息组件高度
   @State roomItemHeight: number = 0;
 
-  scroller: Scroller = new Scroller();
   @State isShowHomeAudio: boolean = false;
 
   @State isPc: boolean = false;
@@ -333,14 +335,15 @@ export struct AVCastPicker {
       console.info(TAG, 'disable picker');
       this.isDisabledByPickerLimit = true;
     }
+    this.isSelectProcessing = false;
+    this.isAllCancel = false;
   }
 
   aboutToDisappear(): void {
     AVCastPicker.currentPickerCount -= 1;
-    this.timeoutIds.forEach((id) => {
-      clearTimeout(id);
-    });
-    this.timeoutIds = [];
+    this.clearTimer();
+    this.isSelectProcessing = false;
+    this.isAllCancel = false;
   }
 
   MenuStateChange() {
@@ -365,18 +368,39 @@ export struct AVCastPicker {
       'playState':0,'speakerList':'','enable':0,'name':'','zoneId':''}}];
   }
 
+  refreshShowHomeAudioStatus() {
+    this.isShowHomeAudio = ((this.sessionType !== 'voice_call') && (this.sessionType !== 'video_call') &&
+      (this.roomListService.length > 0)) ? true : false;
+  }
+
+  refreshHomeMusicSelectStatus() {
+    if ((this.sessionType === 'voice_call') || (this.sessionType === 'video_call')) {
+      this.houseMusicIsSelect = false;
+      return;
+    }
+    let roomListTemp: HomeMusicServices[] = this.roomListService;
+    for (let i = 0; i < roomListTemp.length; i++) {
+      if ((roomListTemp[i].data.playTask === this.playTaskIdStr) && (this.playTaskIdStr !== '')) {
+        this.houseMusicIsSelect = true;
+        return;
+      }
+    }
+    this.houseMusicIsSelect = false;
+  }
+
   refreshRoomList() {
-    this.timeoutIds.forEach((id) => {
-      clearTimeout(id);
-    });
-    this.timeoutIds = [];
+    if (!this.isAllCancel) {
+      this.clearTimer();
+    }
     let roomListTemp: HomeMusicServices[] = this.roomListService;
     let isAllRoomSelect: boolean = true;
     let hasRoomIsSelect: boolean = false;
     let maxVolumeNum: number = 0;
-    this.isShowHomeAudio = (roomListTemp.length > 0) ? true : false;
+    this.refreshShowHomeAudioStatus();
     for (let i = 0; i < roomListTemp.length; i++) {
-      this.roomSelectStatusPending[i] = false;
+      if (!this.isAllCancel) {
+        this.roomSelectStatusPending[i] = false;
+      }
       this.roomIsSelect[i] = ((roomListTemp[i].data.playTask === this.playTaskIdStr) &&
         (this.playTaskIdStr !== '')) ? true : false;
       this.roomCurrVolume[i] = roomListTemp[i].data.volume;
@@ -390,12 +414,16 @@ export struct AVCastPicker {
         }
       }
     }
+    if (!this.isAllCancel) {
+      this.isSelectProcessing = false;
+    }
     if (isAllRoomSelect && roomListTemp.length > 0) {
       this.isAllSelecting = true;
     } else {
       this.isAllSelecting = false;
     }
-    this.houseMusicIsSelect = hasRoomIsSelect;
+    this.houseMusicIsSelect = (hasRoomIsSelect && (this.sessionType !== 'voice_call') &&
+      (this.sessionType !== 'video_call'));
     if (hasRoomIsSelect) {
       this.roomMaxVolume = maxVolumeNum;
       this.roomMaxVolumeChange();
@@ -419,10 +447,30 @@ export struct AVCastPicker {
 
   homeMusicScanStatusChange() {
     if (this.scanStatus === 0) {
+      this.clearTimer();
       // 全屋播控扫描中，现有房间显示全部需要pending，等待房间扫描刷新即可
       this.setAllRoomSelectStatusPending();
+      this.isAllCancel = true;
+      this.scanDelay = false;
+      const timeId = setTimeout(() => {
+        this.scanDelay = true;
+      }, 13000);
+      if (typeof timeId === 'number') {
+        this.timeoutIds.push(timeId);
+      }
+      if (this.extensionProxy != null) {
+        this.extensionProxy.send({ 'getHomeMusicInfo': 1 });
+      }
     } else {
+      this.scanDelayChange();
+    }
+  }
+
+  scanDelayChange() {
+    if (this.scanStatus !== 0 && this.scanDelay) {
       this.roomSelectStatusPendingInit();
+      this.isAllCancel = false;
+      this.scanDelay = false;
     }
   }
 
@@ -464,16 +512,29 @@ export struct AVCastPicker {
     return false;
   }
 
+  clearTimer() {
+    this.timeoutIds.forEach((id) => {
+      clearTimeout(id);
+    });
+    this.timeoutIds = [];
+  }
+
   roomSelectStatusPendingInit() {
     for (let i = 0; i < this.roomListService.length; i++) {
       this.roomSelectStatusPending[i] =  false;
+      this.roomVolumeVisible[i] = this.checkRoomIsSelect(i) ? Visibility.Visible : Visibility.None;
     }
+    this.isSelectProcessing = false;
   }
 
   setAllRoomSelectStatusPending() {
+    this.isSelectProcessing = true;
     for (let i = 0; i < this.roomListService.length; i++) {
     //全选时处理所有勾选状态转为pending，等待播控中心返回结果
       this.roomSelectStatusPending[i] = true;
+      if (this.roomVolumeVisible[i] !== Visibility.None) {
+        this.roomVolumeVisible[i] = Visibility.None;
+      }
     }
   }
 
@@ -548,6 +609,9 @@ export struct AVCastPicker {
   }
 
   allSelectOnClickEven() {
+    if (this.isSelectProcessing) {
+      return;
+    }
     this.setAllRoomSelectStatusPending();
     const timeId = setTimeout(() => {
       this.roomSelectStatusPendingInit();
@@ -620,28 +684,25 @@ export struct AVCastPicker {
    * 全屋音乐播放列表
    */
   @Builder HomeMusicSystemRoomListBuilder() {
-    Scroll(this.scroller) {
-      Column() {
-        ForEach(this.roomListService, (item: HomeMusicServices, index) => {
-          Stack({alignContent: Alignment.Start}) {
-            // 构建一行横向排列的全屋音乐 图标，房间名，音量条，勾选按钮
-            this.RoomItemBuilder(item, index)
-          }
-          .constraintSize({ minHeight: 64 })
-          .width('100%')
-          if (index !== this.roomListService.length - 1) {
-            // 构建行间分割线
-            this.DividerBuilder()
-          }
-        })
-      }
+    Column() {
+      ForEach(this.roomListService, (item: HomeMusicServices, index) => {
+        Stack({alignContent: Alignment.Start}) {
+          // 构建一行横向排列的全屋音乐 图标，房间名，音量条，勾选按钮
+          this.RoomItemBuilder(item, index)
+        }
+        .constraintSize({ minHeight: 64 })
+        .width('100%')
+        if (index !== this.roomListService.length - 1) {
+          // 构建行间分割线
+          this.DividerBuilder()
+        }
+      })
     }
     .padding({top: '4vp', right: '16vp', bottom: '4vp', left: '16vp'})
     .width('100%')
     .constraintSize({ minHeight: this.roomItemHeight })
     .align(Alignment.Start)
     .borderRadius({bottomLeft: '32vp', bottomRight: '32vp'})
-    .scrollBar(BarState.Auto)
   }
 
   /**
@@ -650,11 +711,35 @@ export struct AVCastPicker {
    * @param index
    */
   @Builder RoomItemBuilder(item: HomeMusicServices, index: number) {
-    Flex({alignItems: ItemAlign.Center}) {
-      this.RoomHouseBuilder();
-      this.RoomNameAndVolumeBuilder(item, index);
-      this.RoomCheckBuilder(item, index);
+    Column() {
+      Flex({alignItems: ItemAlign.Center}) {
+        this.RoomHouseBuilder();
+        this.RoomNameAndVolumeBuilder(item, index);
+        this.RoomCheckBuilder(item, index);
+      }
     }
+    .onClick(() => {
+      if (this.isSelectProcessing) {
+        return;
+      }
+      this.setAllRoomSelectStatusPending();
+      const timeId = setTimeout(() => {
+        this.roomSelectStatusPendingInit();
+      }, 3000);
+      if (typeof timeId === 'number') {
+        this.timeoutIds.push(timeId);
+      }
+      this.getCurrSelectRoom(index, !this.roomIsSelect[index]);
+      if (this.isSelectRoomListService.length > 0) {
+        if (this.extensionProxy != null) {
+          this.extensionProxy.send({ 'roomSelectChange': this.isSelectRoomListService });
+        }
+      } else {
+        if (this.extensionProxy != null) {
+          this.extensionProxy.send({ 'roomSelectChange': this.createNullRoomService() });
+        }
+      }
+    })
   }
 
   /**
@@ -727,7 +812,7 @@ export struct AVCastPicker {
         .select(this.roomIsSelect[index])
         .shape(CheckBoxShape.CIRCLE)
         .onClick(() => {
-          this.roomSelectStatusPending[index] = true;
+          this.setAllRoomSelectStatusPending();
           const timeId = setTimeout(() => {
             this.roomSelectStatusPendingInit();
           }, 3000);
@@ -1286,6 +1371,8 @@ export struct AVCastPicker {
           if (data['sessionType'] !== undefined) {
             console.info(TAG, `session type : ${JSON.stringify(data['sessionType'])}`);
             this.sessionType = data['sessionType'] as string;
+            this.refreshShowHomeAudioStatus();
+            this.refreshHomeMusicSelectStatus();
           }
 
           if (data['isShowMenu'] !== undefined) {
@@ -1399,6 +1486,7 @@ export struct AVCastPicker {
               this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
               this.pickerClickTime = -1;
             }
+            this.refreshShowHomeAudioStatus();
             this.menuShowStateCallback(this.isMenuShow);
           }
         })
@@ -1466,6 +1554,7 @@ export struct AVCastPicker {
             this.isMenuShow = true;
           }
           if (this.isMenuShow) {
+            this.refreshShowHomeAudioStatus();
             this.pickerClickTime = new Date().getTime();
           } else {
             this.touchMenuItemIndex = -1;

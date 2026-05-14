@@ -100,6 +100,9 @@ export class AVCastPicker extends ViewPU {
         this.__roomListService = new ObservedPropertyObjectPU([], this, 'roomListService');
         this.__isAllSelecting = new ObservedPropertySimplePU(false, this, 'isAllSelecting');
         this.__timeoutIds = new ObservedPropertyObjectPU([], this, 'timeoutIds');
+        this.__isSelectProcessing = new ObservedPropertySimplePU(false, this, 'isSelectProcessing');
+        this.__isAllCancel = new ObservedPropertySimplePU(false, this, 'isAllCancel');
+        this.__scanDelay = new ObservedPropertySimplePU(false, this, 'scanDelay');
         this.__playTaskIdStr = new ObservedPropertySimplePU('', this, 'playTaskIdStr');
         this.__roomIsSelect = new ObservedPropertyObjectPU([], this, 'roomIsSelect');
         this.__isSelectRoomListService = new ObservedPropertyObjectPU([], this, 'isSelectRoomListService');
@@ -110,7 +113,6 @@ export class AVCastPicker extends ViewPU {
         this.__roomCurrVolume = new ObservedPropertyObjectPU([], this, 'roomCurrVolume');
         this.__roomMaxVolume = new ObservedPropertySimplePU(0, this, 'roomMaxVolume');
         this.__roomItemHeight = new ObservedPropertySimplePU(0, this, 'roomItemHeight');
-        this.scroller = new Scroller();
         this.__isShowHomeAudio = new ObservedPropertySimplePU(false, this, 'isShowHomeAudio');
         this.__isPc = new ObservedPropertySimplePU(false, this, 'isPc');
         this.__isRTL = new ObservedPropertySimplePU(false, this, 'isRTL');
@@ -126,6 +128,7 @@ export class AVCastPicker extends ViewPU {
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.declareWatch('isSubMenuExpanded', this.MenuStateChange);
         this.declareWatch('roomListService', this.roomListChange);
+        this.declareWatch('scanDelay', this.scanDelayChange);
         this.declareWatch('playTaskIdStr', this.homeMusicPlayTaskIdChange);
         this.declareWatch('houseMusicIsSelect', this.selectHomeMusicSys);
         this.declareWatch('scanStatus', this.homeMusicScanStatusChange);
@@ -211,6 +214,15 @@ export class AVCastPicker extends ViewPU {
         if (c11.timeoutIds !== undefined) {
             this.timeoutIds = c11.timeoutIds;
         }
+        if (c11.isSelectProcessing !== undefined) {
+            this.isSelectProcessing = c11.isSelectProcessing;
+        }
+        if (c11.isAllCancel !== undefined) {
+            this.isAllCancel = c11.isAllCancel;
+        }
+        if (c11.scanDelay !== undefined) {
+            this.scanDelay = c11.scanDelay;
+        }
         if (c11.playTaskIdStr !== undefined) {
             this.playTaskIdStr = c11.playTaskIdStr;
         }
@@ -240,9 +252,6 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.roomItemHeight !== undefined) {
             this.roomItemHeight = c11.roomItemHeight;
-        }
-        if (c11.scroller !== undefined) {
-            this.scroller = c11.scroller;
         }
         if (c11.isShowHomeAudio !== undefined) {
             this.isShowHomeAudio = c11.isShowHomeAudio;
@@ -305,6 +314,9 @@ export class AVCastPicker extends ViewPU {
         this.__roomListService.purgeDependencyOnElmtId(a11);
         this.__isAllSelecting.purgeDependencyOnElmtId(a11);
         this.__timeoutIds.purgeDependencyOnElmtId(a11);
+        this.__isSelectProcessing.purgeDependencyOnElmtId(a11);
+        this.__isAllCancel.purgeDependencyOnElmtId(a11);
+        this.__scanDelay.purgeDependencyOnElmtId(a11);
         this.__playTaskIdStr.purgeDependencyOnElmtId(a11);
         this.__roomIsSelect.purgeDependencyOnElmtId(a11);
         this.__isSelectRoomListService.purgeDependencyOnElmtId(a11);
@@ -349,6 +361,9 @@ export class AVCastPicker extends ViewPU {
         this.__roomListService.aboutToBeDeleted();
         this.__isAllSelecting.aboutToBeDeleted();
         this.__timeoutIds.aboutToBeDeleted();
+        this.__isSelectProcessing.aboutToBeDeleted();
+        this.__isAllCancel.aboutToBeDeleted();
+        this.__scanDelay.aboutToBeDeleted();
         this.__playTaskIdStr.aboutToBeDeleted();
         this.__roomIsSelect.aboutToBeDeleted();
         this.__isSelectRoomListService.aboutToBeDeleted();
@@ -548,6 +563,30 @@ export class AVCastPicker extends ViewPU {
         this.__timeoutIds.set(newValue);
     }
 
+    get isSelectProcessing() {
+        return this.__isSelectProcessing.get();
+    }
+
+    set isSelectProcessing(newValue) {
+        this.__isSelectProcessing.set(newValue);
+    }
+
+    get isAllCancel() {
+        return this.__isAllCancel.get();
+    }
+
+    set isAllCancel(newValue) {
+        this.__isAllCancel.set(newValue);
+    }
+
+    get scanDelay() {
+        return this.__scanDelay.get();
+    }
+
+    set scanDelay(newValue) {
+        this.__scanDelay.set(newValue);
+    }
+
     get playTaskIdStr() {
         return this.__playTaskIdStr.get();
     }
@@ -705,14 +744,15 @@ export class AVCastPicker extends ViewPU {
             console.info(TAG, 'disable picker');
             this.isDisabledByPickerLimit = true;
         }
+        this.isSelectProcessing = false;
+        this.isAllCancel = false;
     }
 
     aboutToDisappear() {
         AVCastPicker.currentPickerCount -= 1;
-        this.timeoutIds.forEach((id) => {
-            clearTimeout(id);
-        });
-        this.timeoutIds = [];
+        this.clearTimer();
+        this.isSelectProcessing = false;
+        this.isAllCancel = false;
     }
 
     MenuStateChange() {
@@ -736,19 +776,37 @@ export class AVCastPicker extends ViewPU {
             'supportMusicLed': false, 'label': '', 'type': 0, 'roomId': '', 'limitedVolume': 0, 'volume': 0, 'faultCode': 0, 'supportStereo': 0,
             'playState': 0, 'speakerList': '', 'enable': 0, 'name': '', 'zoneId': '' } }];
     }
-
+    refreshShowHomeAudioStatus() {
+        this.isShowHomeAudio = ((this.sessionType !== 'voice_call') && (this.sessionType !== 'video_call') &&
+            (this.roomListService.length > 0)) ? true : false;
+    }
+    refreshHomeMusicSelectStatus() {
+        if ((this.sessionType === 'voice_call') || (this.sessionType === 'video_call')) {
+            this.houseMusicIsSelect = false;
+            return;
+        }
+        let d3 = this.roomListService;
+        for (let e3 = 0; e3 < d3.length; e3++) {
+            if ((d3[e3].data.playTask === this.playTaskIdStr) && (this.playTaskIdStr !== '')) {
+                this.houseMusicIsSelect = true;
+                return;
+            }
+        }
+        this.houseMusicIsSelect = false;
+    }
     refreshRoomList() {
-        this.timeoutIds.forEach((id) => {
-            clearTimeout(id);
-        });
-        this.timeoutIds = [];
+        if (!this.isAllCancel) {
+            this.clearTimer();
+        }
         let k3 = this.roomListService;
         let w1 = true;
         let l2 = false;
         let o2 = 0;
-        this.isShowHomeAudio = (k3.length > 0) ? true : false;
+        this.refreshShowHomeAudioStatus();
         for (let z1 = 0; z1 < k3.length; z1++) {
-            this.roomSelectStatusPending[z1] = false;
+            if (!this.isAllCancel) {
+                this.roomSelectStatusPending[z1] = false;
+            }
             this.roomIsSelect[z1] = ((k3[z1].data.playTask === this.playTaskIdStr) &&
                 (this.playTaskIdStr !== '')) ? true : false;
             this.roomCurrVolume[z1] = k3[z1].data.volume;
@@ -762,13 +820,17 @@ export class AVCastPicker extends ViewPU {
                 }
             }
         }
+        if (!this.isAllCancel) {
+            this.isSelectProcessing = false;
+        }
         if (w1 && k3.length > 0) {
             this.isAllSelecting = true;
         }
         else {
             this.isAllSelecting = false;
         }
-        this.houseMusicIsSelect = l2;
+        this.houseMusicIsSelect = (l2 && (this.sessionType !== 'voice_call') &&
+            (this.sessionType !== 'video_call'));
         if (l2) {
             this.roomMaxVolume = o2;
             this.roomMaxVolumeChange();
@@ -788,10 +850,29 @@ export class AVCastPicker extends ViewPU {
     }
     homeMusicScanStatusChange() {
         if (this.scanStatus === 0) {
+            this.clearTimer();
             this.setAllRoomSelectStatusPending();
+            this.isAllCancel = true;
+            this.scanDelay = false;
+            const v2 = setTimeout(() => {
+                this.scanDelay = true;
+            }, 13000);
+            if (typeof v2 === 'number') {
+                this.timeoutIds.push(v2);
+            }
+            if (this.extensionProxy != null) {
+                this.extensionProxy.send({ 'getHomeMusicInfo': 1 });
+            }
         }
         else {
+            this.scanDelayChange();
+        }
+    }
+    scanDelayChange() {
+        if (this.scanStatus !== 0 && this.scanDelay) {
             this.roomSelectStatusPendingInit();
+            this.isAllCancel = false;
+            this.scanDelay = false;
         }
     }
     roomMaxVolumeChange() {
@@ -828,14 +909,26 @@ export class AVCastPicker extends ViewPU {
         }
         return false;
     }
+    clearTimer() {
+        this.timeoutIds.forEach((id) => {
+            clearTimeout(id);
+        });
+        this.timeoutIds = [];
+    }
     roomSelectStatusPendingInit() {
         for (let b2 = 0; b2 < this.roomListService.length; b2++) {
             this.roomSelectStatusPending[b2] = false;
+            this.roomVolumeVisible[b2] = this.checkRoomIsSelect(b2) ? Visibility.Visible : Visibility.None;
         }
+        this.isSelectProcessing = false;
     }
     setAllRoomSelectStatusPending() {
+        this.isSelectProcessing = true;
         for (let a2 = 0; a2 < this.roomListService.length; a2++) {
             this.roomSelectStatusPending[a2] = true;
+            if (this.roomVolumeVisible[a2] !== Visibility.None) {
+                this.roomVolumeVisible[a2] = Visibility.None;
+            }
         }
     }
     getCurrSelectRoom(index, e2) {
@@ -908,6 +1001,9 @@ export class AVCastPicker extends ViewPU {
         }
     }
     allSelectOnClickEven() {
+        if (this.isSelectProcessing) {
+            return;
+        }
         this.setAllRoomSelectStatusPending();
         const d2 = setTimeout(() => {
             this.roomSelectStatusPendingInit();
@@ -1493,16 +1589,12 @@ export class AVCastPicker extends ViewPU {
 
     HomeMusicSystemRoomListBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Scroll.create(this.scroller);
-            Scroll.padding({ top: '4vp', right: '16vp', bottom: '4vp', left: '16vp' });
-            Scroll.width('100%');
-            Scroll.constraintSize({ minHeight: this.roomItemHeight });
-            Scroll.align(Alignment.Start);
-            Scroll.borderRadius({ bottomLeft: '32vp', bottomRight: '32vp' });
-            Scroll.scrollBar(BarState.Auto);
-        }, Scroll);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
+            Column.padding({ top: '4vp', right: '16vp', bottom: '4vp', left: '16vp' });
+            Column.width('100%');
+            Column.constraintSize({ minHeight: this.roomItemHeight });
+            Column.align(Alignment.Start);
+            Column.borderRadius({ bottomLeft: '32vp', bottomRight: '32vp' });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
@@ -1533,10 +1625,35 @@ export class AVCastPicker extends ViewPU {
         }, ForEach);
         ForEach.pop();
         Column.pop();
-        Scroll.pop();
     }
 
     RoomItemBuilder(item, index, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.onClick(() => {
+                if (this.isSelectProcessing) {
+                    return;
+                }
+                this.setAllRoomSelectStatusPending();
+                const e2 = setTimeout(() => {
+                    this.roomSelectStatusPendingInit();
+                }, 3000);
+                if (typeof e2 === 'number') {
+                    this.timeoutIds.push(e2);
+                }
+                this.getCurrSelectRoom(index, !this.roomIsSelect[index]);
+                if (this.isSelectRoomListService.length > 0) {
+                    if (this.extensionProxy != null) {
+                        this.extensionProxy.send({ 'roomSelectChange': this.isSelectRoomListService });
+                    }
+                }
+                else {
+                    if (this.extensionProxy != null) {
+                        this.extensionProxy.send({ 'roomSelectChange': this.createNullRoomService() });
+                    }
+                }
+            });
+        }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create({ alignItems: ItemAlign.Center });
         }, Flex);
@@ -1544,6 +1661,7 @@ export class AVCastPicker extends ViewPU {
         this.RoomNameAndVolumeBuilder.bind(this)(item, index);
         this.RoomCheckBuilder.bind(this)(item, index);
         Flex.pop();
+        Column.pop();
     }
 
     RoomHouseBuilder(parent = null) {
@@ -1622,7 +1740,7 @@ export class AVCastPicker extends ViewPU {
                         Checkbox.select(this.roomIsSelect[index]);
                         Checkbox.shape(CheckBoxShape.CIRCLE);
                         Checkbox.onClick(() => {
-                            this.roomSelectStatusPending[index] = true;
+                            this.setAllRoomSelectStatusPending();
                             const w1 = setTimeout(() => {
                                 this.roomSelectStatusPendingInit();
                             }, 3000);
@@ -1980,6 +2098,7 @@ export class AVCastPicker extends ViewPU {
                         this.isMenuShow = true;
                     }
                     if (this.isMenuShow) {
+                        this.refreshShowHomeAudioStatus();
                         this.pickerClickTime = new Date().getTime();
                     } else {
                         this.touchMenuItemIndex = -1;
@@ -2081,6 +2200,8 @@ export class AVCastPicker extends ViewPU {
                 if (l8.sessionType !== undefined) {
                     console.info(TAG, `session type : ${JSON.stringify(l8.sessionType)}`);
                     this.sessionType = l8.sessionType;
+                    this.refreshShowHomeAudioStatus();
+                    this.refreshHomeMusicSelectStatus();
                 }
 
                 if (l8.isShowMenu !== undefined) {
@@ -2195,6 +2316,7 @@ export class AVCastPicker extends ViewPU {
                     this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
                     this.pickerClickTime = -1;
                 }
+                this.refreshShowHomeAudioStatus();
                 this.menuShowStateCallback(this.isMenuShow);
             }
         });
