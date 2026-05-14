@@ -356,6 +356,7 @@ int32_t AVCastPickerHelperInnerImpl::RemoveCallback(int32_t event, std::shared_p
 
 bool AVCastPickerHelperInnerImpl::IsCallbacksEmpty(int32_t event)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     return callbacks_[event].empty();
 }
 

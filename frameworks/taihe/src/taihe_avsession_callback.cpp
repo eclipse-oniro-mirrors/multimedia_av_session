@@ -451,6 +451,7 @@ int32_t TaiheAVSessionCallback::RemoveCallback(int32_t event, std::shared_ptr<ui
 
 bool TaiheAVSessionCallback::IsCallbacksEmpty(int32_t event)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     return callbacks_[event].empty();
 }
 } // namespace ANI::AVSession

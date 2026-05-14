@@ -510,6 +510,7 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
 
 bool NapiAVCastControllerCallback::IsCallbacksEmpty(int32_t event)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_CAST_TYPE_MAX, true, "has no event");
     return callbacks_[event].empty();
 }

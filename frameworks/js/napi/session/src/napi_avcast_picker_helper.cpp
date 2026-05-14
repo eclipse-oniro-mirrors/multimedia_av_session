@@ -393,6 +393,7 @@ napi_status NapiAVCastPickerHelper::RemoveCallback(napi_env env, int32_t event, 
 
 bool NapiAVCastPickerHelper::IsCallbacksEmpty(int32_t event)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     CHECK_AND_RETURN_RET_LOG(event == EVENT_PICPKER_STATE_CHANGE, true, "has no event");
     return callbacks_[event].empty();
 }
