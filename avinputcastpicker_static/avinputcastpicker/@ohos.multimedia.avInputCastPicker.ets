@@ -101,7 +101,7 @@ export struct AVInputCastPicker {
   }
 
   @Builder
-  textBuilder(item: AVInputCastPickerDeviceInfo) {
+  textBuilder(item: AVInputCastPickerDeviceInfo): void {
     Text(item.deviceName)
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor(item.isConnected ? (!this.isDarkMode ? $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
@@ -120,7 +120,7 @@ export struct AVInputCastPicker {
   }
 
   @Builder
-  deviceMenu() {
+  deviceMenu(): void {
     Column() {
       ForEach(this.deviceInfoList.slice(), (item: AVInputCastPickerDeviceInfo, index: int) => {
         Flex({
@@ -274,7 +274,7 @@ export struct AVInputCastPicker {
     .size({ width: '100%', height: '100%' })
   }
 
-  build() {
+  build(): void {
     Column() {
       if (this.customPicker === undefined) {
         this.buildDefaultPicker(false);
