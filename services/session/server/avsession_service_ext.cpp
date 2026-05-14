@@ -46,8 +46,14 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         }
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if ((serviceName == "HuaweiCast" || serviceName == "HuaweiCast-Dual") &&
-        (state == "IDLE" || state == "CONNECT_SUCC")) {
+    bool isMirrorService = mirrorServiceNames_.count(serviceName) > 0 && allconnectStates_.count(state) > 0;
+    bool isMirrorToStreamService = mirrorToStreamServiceNames_.count(serviceName) > 0 &&
+        allconnectStates_.count(state) > 0;
+    if (isMirrorService) {
+        // split extendedScreen extraInfo
+        ExtendedScreenSplitExtraInfo(extraInfo);
+    }
+    if (isMirrorToStreamService) {
         castServiceNameStatePair_ = std::make_pair(serviceName, state);
         isSupportMirrorToStream_ = false;
         appCastExit_ = false;
@@ -147,6 +153,19 @@ void AVSessionService::SplitExtraInfo(std::string info)
         !cJSON_IsNull(deviceTypeItem) && cJSON_IsNumber(deviceTypeItem);
     castDeviceType_ = deviceTypeItemFlag ? deviceTypeItem->valueint : 0;
 
+    cJSON_Delete(extraInfo);
+}
+
+void AVSessionService::ExtendedScreenSplitExtraInfo(std::string info)
+{
+    cJSON* extraInfo = cJSON_Parse(info.c_str());
+    bool extraInfoFlag = (extraInfo == nullptr) || cJSON_IsInvalid(extraInfo) || cJSON_IsNull(extraInfo);
+    if (extraInfoFlag) {
+        SLOGE("extraInfo parse is not valid json");
+        cJSON_Delete(extraInfo);
+        return;
+    }
+    
     cJSON* modeChangeItem = cJSON_GetObjectItem(extraInfo, "modeChange");
     if (modeChangeItem != nullptr && !cJSON_IsInvalid(modeChangeItem) &&
         !cJSON_IsNull(modeChangeItem) && cJSON_IsString(modeChangeItem) && modeChangeItem->valuestring != nullptr) {
