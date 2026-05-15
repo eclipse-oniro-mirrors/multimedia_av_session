@@ -101,7 +101,8 @@
             "//foundation/multimedia/av_session/services/session:avsession_item",
             "//foundation/multimedia/av_session/services/session:avsession_server",
             "//foundation/multimedia/av_session/services/session/server/remote:remote_session_source",
-            "//foundation/multimedia/av_session/services/session/server/remote:remote_session_sink"
+            "//foundation/multimedia/av_session/services/session/server/remote:remote_session_sink",
+            "//foundation/multimedia/av_session/tools/ohos-avsession-manager:ohos-avsession-manager"
           ]
         },
         "inner_kits": [
