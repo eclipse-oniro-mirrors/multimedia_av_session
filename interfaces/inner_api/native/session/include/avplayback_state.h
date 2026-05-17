@@ -70,18 +70,6 @@ public:
         LOOP_MODE_CUSTOM = 4
     };
 
-    static constexpr double SPEED_0_125_X = 0.125;
-    static constexpr double SPEED_0_25_X = 0.25;
-    static constexpr double SPEED_0_50_X = 0.5;
-    static constexpr double SPEED_0_75_X = 0.75;
-    static constexpr double SPEED_1_00_X = 1.0;
-    static constexpr double SPEED_1_25_X = 1.25;
-    static constexpr double SPEED_1_50_X = 1.5;
-    static constexpr double SPEED_1_75_X = 1.75;
-    static constexpr double SPEED_2_00_X = 2.0;
-    static constexpr double SPEED_3_00_X = 3.0;
-    static constexpr double SPEED_4_00_X = 4.0;
-
     struct Position {
         int64_t elapsedTime_ {};
         int64_t updateTime_ {};
@@ -97,7 +85,6 @@ public:
 
     bool IsValid() const;
 
-    static bool IsValidSpeed(double speed);
     static bool IsValidLoopMode(int32_t loopMode);
 
     void SetState(int32_t state);

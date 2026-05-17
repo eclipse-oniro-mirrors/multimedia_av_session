@@ -466,8 +466,6 @@ int32_t AVSessionProxy::SetSupportedPlaySpeeds(const std::vector<double>& speeds
         AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "session is destroyed", false),
         "session is destroyed");
     SLOGI("SetSupportedPlaySpeeds size=%{public}zu", speeds.size());
-    CHECK_AND_RETURN_RET_LOG(std::all_of(speeds.begin(), speeds.end(),
-        AVPlaybackState::IsValidSpeed), ERR_INVALID_PARAM, "invalid speed");
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");

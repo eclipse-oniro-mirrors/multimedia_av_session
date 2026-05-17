@@ -291,16 +291,6 @@ bool AVPlaybackState::CopyFrom(const AVPlaybackState& in)
     return result;
 }
 
-bool AVPlaybackState::IsValidSpeed(double speed)
-{
-    static const std::vector<double> validSpeeds = {
-        SPEED_0_125_X, SPEED_0_25_X, SPEED_0_50_X, SPEED_0_75_X,
-        SPEED_1_00_X, SPEED_1_25_X, SPEED_1_50_X, SPEED_1_75_X,
-        SPEED_2_00_X, SPEED_3_00_X, SPEED_4_00_X
-    };
-    return std::find(validSpeeds.begin(), validSpeeds.end(), speed) != validSpeeds.end();
-}
-
 bool AVPlaybackState::IsValidLoopMode(int32_t loopMode)
 {
     return loopMode >= LOOP_MODE_SEQUENCE && loopMode <= LOOP_MODE_CUSTOM;
