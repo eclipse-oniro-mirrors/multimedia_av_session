@@ -439,7 +439,7 @@ int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& ou
     }
     bool ret = providerManagerMap_[outputDeviceInfo.deviceInfos_[0].providerId_]->provider_->AddCastDevice(castId,
         outputDeviceInfo.deviceInfos_[0], spid);
-    SLOGI("AVRouterImpl AddDevice process with ret %{public}d", static_cast<int32_t>(ret));
+    HILOG_COMM_INFO("AVRouterImpl AddDevice process with ret %{public}d", static_cast<int32_t>(ret));
     if (ret && castHandleToInfoMap_.find(castHandle) != castHandleToInfoMap_.end()) {
         castHandleToInfoMap_[castHandle].outputDeviceInfo_ = outputDeviceInfo;
     }

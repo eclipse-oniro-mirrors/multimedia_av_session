@@ -184,7 +184,7 @@ int HwCastProvider::StartCastSession(bool isHiStream)
 
 void HwCastProvider::StopCastSession(int castId)
 {
-    SLOGI("StopCastSession begin");
+    HILOG_COMM_INFO("StopCastSession begin");
     std::lock_guard lockGuard(mutexLock_);
     SLOGI("StopCastSession check lock");
     auto hwCastStreamPlayer = avCastControllerMap_[castId];
