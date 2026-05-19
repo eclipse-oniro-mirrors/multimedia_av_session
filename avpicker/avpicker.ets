@@ -13,11 +13,44 @@
  * limitations under the License.
  */
 import image from '@ohos.multimedia.image';
+import { hdsMaterial } from '@hms.hds.hdsMaterial';
 
 const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
 const MAX_PICKER_LIMIT = 20;
 const HIGH_QUALITY_MAX_SCALE = 1.5;
+
+const _isSupportHds = hdsMaterial.getSystemMaterialTypes().length > 0;
+console.info(TAG, `isSupportHds: ${_isSupportHds}`);
+
+interface MaterialUtil {
+  isSupportHds: () => boolean;
+  getMaterialStroke: (isDarkMode?: boolean) => hdsMaterial.Material | undefined;
+}
+
+const materialUtil: MaterialUtil = {
+  isSupportHds: () => {
+    return _isSupportHds;
+  },
+  getMaterialStroke: (isDarkMode?: boolean) => {
+    try {
+      if (_isSupportHds) {
+        return;
+      }
+      return new hdsMaterial.Material({
+        backgroundMaterial: {
+          type: hdsMaterial.MaterialType.ADAPTIVE,
+          scenario: hdsMaterial.ScenarioType.THICK,
+          darkMode: isDarkMode === undefined ? undefined : 
+            (isDarkMode ? hdsMaterial.DarkMode.ALWAYS_DARK : hdsMaterial.DarkMode.ALWAYS_LIGHT),
+        }
+      });
+    } catch (e) {
+      console.info(TAG, `getMaterialStroke err: ${e?.code}, ${e?.message}`);
+    }
+  }
+}
+
 
 /**
  * Definition of av cast picker state.
@@ -1468,10 +1501,14 @@ export struct AVCastPicker {
           this.isMenuShow && this.hasReceivedDeviceList,
           this.deviceAndHouseMusicSys(),
           {
-          backgroundBlurStyle: (this.isShowHomeAudio ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
-          backgroundColor: (this.isShowHomeAudio ? '#00000000':
+          backgroundBlurStyle: ((this.isShowHomeAudio || materialUtil.isSupportHds()) ? 
+            BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
+          backgroundColor: (this.isShowHomeAudio ? '#00000000': materialUtil.isSupportHds() ? undefined :
             (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
             $r('sys.color.background_primary') : '#00FFFFFF'),
+          systemMaterial: this.isShowHomeAudio ? undefined : materialUtil.getMaterialStroke(
+            (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? undefined : true
+          ),
           placement: Placement.BottomRight,
           showInSubWindow: false,
           enableHoverMode: true,
@@ -1517,7 +1554,8 @@ export struct AVCastPicker {
             this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
             this.pickerClickTime = -1;
           }
-        }
+        },
+        systemMaterial: materialUtil.getMaterialStroke(),
       })
       .accessibilityLevel('no-hide-descendants')
       .size({ width: '100%', height: '100%' })

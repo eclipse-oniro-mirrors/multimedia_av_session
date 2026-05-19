@@ -22,6 +22,75 @@ const castPlusAudioType = 8;
 const t = 20;
 const HIGH_QUALITY_MAX_SCALE = 1.5;
 
+const materialUtil = {
+    isSupportHds: function() {
+        return false;
+    },
+    getMaterialStroke: function() {},
+};
+(function() {
+    let hdsMaterial = {};
+    try {
+        const __HDSMaterial__ = requireNapi('hms.hds.HdsMaterialNapi');
+        const HDSMaterialNapiClass = new __HDSMaterial__.HdsMaterialNapi();
+        class Material extends __HDSMaterial__.HdsMaterial {
+            constructor(options) {
+                super(options);
+            }
+        }
+
+        hdsMaterial = {
+            Material: Material,
+            MaterialType: {
+                ADAPTIVE: 100,
+            },
+            ScenarioType: {
+                THICK: 104,
+            },
+            DarkMode: {
+                ADAPTIVE: 0,
+                ALWAYS_LIGHT: 1,
+                ALWAYS_DARK: 2,
+            },
+            getSystemMaterialTypes: () => {
+                return HDSMaterialNapiClass.getSystemMaterialTypes();
+            }
+        };
+    } catch (e) {
+        console.info(TAG, `getMaterialStroke err: ${e?.code}, ${e?.message}`);
+    }
+
+    // 是否支持hds材质
+    let _isSupportHds = false;
+    try {
+        _isSupportHds = hdsMaterial.getSystemMaterialTypes().length > 0;
+        console.info(TAG, `isSupportHds: ${_isSupportHds}`);
+    } catch (e) {
+        console.info(TAG, `isSupportHds err: ${e?.code}, ${e?.message}`);
+    }
+
+    function getMaterialStroke(isDarkMode) {
+        try {
+            if (_isSupportHds) {
+                return new hdsMaterial.Material({
+                    backgroundMaterial: {
+                        type: hdsMaterial.MaterialType.ADAPTIVE,
+                        scenario: hdsMaterial.ScenarioType.THICK,
+                        darkMode: isDarkMode === undefined ? undefined : 
+                            (isDarkMode ? hdsMaterial.DarkMode.ALWAYS_DARK : hdsMaterial.DarkMode.ALWAYS_LIGHT),
+                    }
+                });
+            }
+        } catch (e) {
+            console.info(TAG, `getMaterialStroke err: ${e?.code}, ${e?.message}`);
+        }
+    }
+    materialUtil.isSupportHds = function() {
+        return _isSupportHds;
+    };
+    materialUtil.getMaterialStroke = getMaterialStroke;
+})();
+
 export let AVCastPickerState;
 (function(l11) {
     l11[l11.STATE_APPEARING = 0] = 'STATE_APPEARING';
@@ -2123,7 +2192,8 @@ export class AVCastPicker extends ViewPU {
                     this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
                     this.pickerClickTime = -1;
                 }
-            }
+            },
+            systemMaterial: materialUtil.getMaterialStroke(),
             });
             Column.accessibilityLevel('no-hide-descendants');
             Column.size({ width: '100%', height: '100%' });
@@ -2297,11 +2367,14 @@ export class AVCastPicker extends ViewPU {
             UIExtensionComponent.bindMenu(this.isMenuShow && this.hasReceivedDeviceList, { builder: () => {
                 this.deviceAndHouseMusicSys.call(this);
             } }, {
-                backgroundBlurStyle: (this.isShowHomeAudio ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
-                backgroundColor: (this.isShowHomeAudio ? '#00000000' :
+                backgroundBlurStyle: ((this.isShowHomeAudio || materialUtil.isSupportHds()) ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
+                backgroundColor: (this.isShowHomeAudio ? '#00000000' : materialUtil.isSupportHds() ? undefined :
                     (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? { 'id': -1, 'type': 10001,
                     params: ['sys.color.background_primary'], 'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__' } : '#00FFFFFF'),
+                systemMaterial: this.isShowHomeAudio ? undefined : materialUtil.getMaterialStroke(
+                    (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? undefined : true
+                ),
             placement: Placement.BottomRight,
             showInSubWindow: false,
             enableHoverMode: true,
