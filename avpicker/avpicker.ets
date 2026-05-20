@@ -1622,13 +1622,24 @@ export struct AVCastPicker {
     }
   }
 
+  private getLoadingColor() {
+    console.info(TAG, `loading activeColor: ${this.activeColor}`);
+    if (this.activeColor === 'activeLightColor') {
+      return '#99FFFFFF';
+    }
+    if (this.activeColor === 'activeDarkColor') {
+      return '#99000000';
+    }
+    return $r('sys.color.icon_secondary');
+  }
+
   @Builder
   private buildCustomPicker() {
     Stack({ alignContent: Alignment.Center}) {
       Column() {
         if (this.isShowLoadingProgress) {
           LoadingProgress()
-            .color(this.activeColor === 'liveCardLoadingColor' ? '#FFFFFFFF' : $r('sys.color.icon_secondary'))
+            .color(this.getLoadingColor())
             .width('20vp')
             .height('20vp')
         } else {
