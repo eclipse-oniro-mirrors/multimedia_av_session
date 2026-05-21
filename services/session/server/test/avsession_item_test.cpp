@@ -1580,6 +1580,73 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetServiceCallbackForPcMode_001, TestS
 }
 
 /**
+* @tc.name: AVSessionItem_GetDisplayListener_001
+* @tc.desc: test GetDisplayListener with serviceCallbackForPcMode_ returning false
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetDisplayListener_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_GetDisplayListener_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    g_AVSessionItem->displayListener_ = nullptr;
+    auto callback = []() { return false; };
+    g_AVSessionItem->SetServiceCallbackForPcMode(callback);
+    
+    sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
+    g_AVSessionItem->GetDisplayListener(sessionCallback);
+    
+    EXPECT_NE(g_AVSessionItem->displayListener_, nullptr);
+    SLOGI("AVSessionItem_GetDisplayListener_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_GetDisplayListener_002
+* @tc.desc: test GetDisplayListener with serviceCallbackForPcMode_ nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetDisplayListener_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_GetDisplayListener_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    g_AVSessionItem->displayListener_ = nullptr;
+    g_AVSessionItem->SetServiceCallbackForPcMode(nullptr);
+    
+    sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
+    g_AVSessionItem->GetDisplayListener(sessionCallback);
+    
+    EXPECT_NE(g_AVSessionItem->displayListener_, nullptr);
+    SLOGI("AVSessionItem_GetDisplayListener_002 End");
+}
+
+/**
+* @tc.name: AVSessionItem_GetDisplayListener_003
+* @tc.desc: test GetDisplayListener when displayListener already exists
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetDisplayListener_003, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_GetDisplayListener_003 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    sptr<AVSessionCallbackImpl> sessionCallback1 = new AVSessionCallbackImpl();
+    g_AVSessionItem->GetDisplayListener(sessionCallback1);
+    auto firstListener = g_AVSessionItem->displayListener_;
+    EXPECT_NE(firstListener, nullptr);
+    
+    sptr<AVSessionCallbackImpl> sessionCallback2 = new AVSessionCallbackImpl();
+    g_AVSessionItem->GetDisplayListener(sessionCallback2);
+    auto secondListener = g_AVSessionItem->displayListener_;
+    
+    EXPECT_EQ(firstListener.GetRefPtr(), secondListener.GetRefPtr());
+    SLOGI("AVSessionItem_GetDisplayListener_003 End");
+}
+
+/**
 * @tc.name: AVSessionItem_SetSupportExtendedScreen_001
 * @tc.desc: test SetSupportExtendedScreen with isSupport true and verify displayListener state
 * @tc.type: FUNC
@@ -1620,6 +1687,70 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetSupportExtendedScreen_002, TestSize
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(castDisplays.size(), 0);
     SLOGI("AVSessionItem_SetSupportExtendedScreen_002 End");
+}
+
+/**
+* @tc.name: AVSessionItem_SetSupportExtendedScreen_003
+* @tc.desc: test SetSupportExtendedScreen when displayListener is nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSupportExtendedScreen_003, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetSupportExtendedScreen_003 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    g_AVSessionItem->displayListener_ = nullptr;
+    
+    g_AVSessionItem->SetSupportExtendedScreen(true);
+    EXPECT_EQ(g_AVSessionItem->displayListener_, nullptr);
+    
+    g_AVSessionItem->SetSupportExtendedScreen(false);
+    EXPECT_EQ(g_AVSessionItem->displayListener_, nullptr);
+    SLOGI("AVSessionItem_SetSupportExtendedScreen_003 End");
+}
+
+/**
+* @tc.name: AVSessionItem_GetAllCastDisplays_001
+* @tc.desc: test GetAllCastDisplays with support extended screen returns display list
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetAllCastDisplays_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_GetAllCastDisplays_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
+    g_AVSessionItem->GetDisplayListener(sessionCallback);
+    g_AVSessionItem->SetSupportExtendedScreen(true);
+    
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = g_AVSessionItem->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("AVSessionItem_GetAllCastDisplays_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_GetAllCastDisplays_002
+* @tc.desc: test GetAllCastDisplays without support extended screen returns empty list
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetAllCastDisplays_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_GetAllCastDisplays_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
+    g_AVSessionItem->GetDisplayListener(sessionCallback);
+    g_AVSessionItem->SetSupportExtendedScreen(false);
+    
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = g_AVSessionItem->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(castDisplays.size(), 0);
+    SLOGI("AVSessionItem_GetAllCastDisplays_002 End");
 }
 #endif
 } //AVSession
