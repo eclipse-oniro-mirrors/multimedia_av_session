@@ -2429,6 +2429,18 @@ export class AVCastPicker extends ViewPU {
         }
     }
 
+    getLoadingColor() {
+        console.info(TAG, `loading activeColor: ${this.activeColor}`);
+        if (this.activeColor === 'activeLightColor') {
+            return '#99FFFFFF';
+        }
+        if (this.activeColor === 'activeDarkColor') {
+            return '#99000000';
+        }
+        return {'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'],
+            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'};
+    }
+
     buildCustomPicker(s7 = null) {
         this.observeComponentCreation2((a8, b8) => {
             Stack.create({ alignContent: Alignment.Center});
@@ -2447,10 +2459,7 @@ export class AVCastPicker extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((c7, s7) => {
                         LoadingProgress.create();
-                        LoadingProgress.color(this.activeColor === 'liveCardLoadingColor' 
-                            ? '#FFFFFFFF' 
-                            : {'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'});
+                        LoadingProgress.color(this.getLoadingColor());
                         LoadingProgress.width('20vp');
                         LoadingProgress.height('20vp');
                     }, LoadingProgress);
