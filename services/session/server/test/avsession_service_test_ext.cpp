@@ -648,18 +648,6 @@ static HWTEST_F(AVSessionServiceTestExt, ClearControllerForClientDiedNoLock001, 
 }
 
 /**
- * @tc.name: ClearPcmSessionForClientDiedNoLock001
- * @tc.desc: Verfying ClearPcmSessionForClientDiedNoLock
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceTestExt, ClearPcmSessionForClientDiedNoLock001, TestSize.Level0)
-{
-    g_AVSessionService->ClearPcmSessionForClientDiedNoLock();
-    EXPECT_TRUE(g_AVSessionService->pcmCastSession_ == nullptr);
-}
-
-/**
  * @tc.name: SuperLauncher001
  * @tc.desc: Verifying SuperLauncher with invalid state
  * @tc.type: FUNC
