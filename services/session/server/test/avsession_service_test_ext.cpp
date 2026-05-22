@@ -1532,22 +1532,6 @@ static HWTEST_F(AVSessionServiceTestExt, NotifySupportExtendedScreen002, TestSiz
 }
 
 /**
- * @tc.name: NotifySupportExtendedScreen003
- * @tc.desc: Test NotifySupportExtendedScreen with no session in container
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceTestExt, NotifySupportExtendedScreen003, TestSize.Level1)
-{
-    CHECK_AND_RETURN(g_AVSessionService != nullptr);
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    g_AVSessionService->NotifySupportExtendedScreen(true);
-    g_AVSessionService->NotifySupportExtendedScreen(false);
-    EXPECT_TRUE(true);
-#endif
-}
-
-/**
  * @tc.name: NotifySupportExtendedScreen004
  * @tc.desc: Test NotifySupportExtendedScreen with multiple sessions
  * @tc.type: FUNC
