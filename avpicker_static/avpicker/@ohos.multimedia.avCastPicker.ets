@@ -40,7 +40,7 @@ export enum DeviceSource {
   CAST
 }
 
-enum ConfigurationColorMode {
+export enum ConfigurationColorMode {
   /**
    * the color mode is not set.
    */
@@ -150,7 +150,7 @@ export struct AVCastPicker {
   /**
    * Configuration color mode.
    */
-  @State configurationColorMode: number = ConfigurationColorMode.COLOR_MODE_NOT_SET;
+  @State configurationColorMode: ConfigurationColorMode = ConfigurationColorMode.COLOR_MODE_NOT_SET;
 
   @State deviceInfoType: string = '';
 
@@ -364,7 +364,7 @@ export struct AVCastPicker {
             console.info(TAG, 'onRemoteReady');
             this.extensionProxy = proxy;
           })
-          .onReceive((data) => {
+          .onReceive((data: Record<string, RecordData>) => {
             if (JSON.stringify(data['deviceInfoType']) !== undefined) {
               console.info(TAG, `deviceInfoType : ${JSON.stringify(data['deviceInfoType'])}`);
               this.deviceInfoType = data['deviceInfoType'] as string;
@@ -428,7 +428,7 @@ export struct AVCastPicker {
 
             if (JSON.stringify(data['configurationColorMode']) !== undefined) {
               console.info(TAG, `configurationColorMode : ${JSON.stringify(data['configurationColorMode'])}`);
-              this.configurationColorMode = data['configurationColorMode'] as number;
+              this.configurationColorMode = ConfigurationColorMode.fromValue((data['configurationColorMode'] as number).toInt());
             }
 
             if (JSON.stringify(data['accessConnected']) !== undefined) {
