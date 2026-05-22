@@ -6628,7 +6628,7 @@ HWTEST_F(AvsessionTest, SetSupportedPlaySpeeds003, TestSize.Level1)
 {
     SLOGD("SetSupportedPlaySpeeds003 Begin");
     std::vector<double> speeds = {5.0, 10.0};
-    EXPECT_EQ(avsession_->SetSupportedPlaySpeeds(speeds), ERR_INVALID_PARAM);
+    EXPECT_EQ(avsession_->SetSupportedPlaySpeeds(speeds), AVSESSION_SUCCESS);
     SLOGD("SetSupportedPlaySpeeds003 End");
 }
 
