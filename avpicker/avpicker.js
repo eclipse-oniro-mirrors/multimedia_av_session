@@ -847,7 +847,7 @@ export class AVCastPicker extends ViewPU {
     }
     refreshShowHomeAudioStatus() {
         this.isShowHomeAudio = ((this.sessionType !== 'voice_call') && (this.sessionType !== 'video_call') &&
-            (this.roomListService.length > 0)) ? true : false;
+            (this.roomListService.length > 0));
     }
     refreshHomeMusicSelectStatus() {
         if ((this.sessionType === 'voice_call') || (this.sessionType === 'video_call')) {
@@ -2383,14 +2383,20 @@ export class AVCastPicker extends ViewPU {
                 this.hasReceivedDeviceList = false;
                 this.touchMenuItemIndex = -1;
                 this.menuShowStateCallback(this.isMenuShow);
+                if (this.extensionProxy !== null) {
+                    this.extensionProxy.send({ 'clearAVPickerRoomList': 1 });
+                }
             },
             onAppear: () => {
                 if (this.extensionProxy != null && this.pickerClickTime !== -1) {
                     this.extensionProxy.send({ 'timeCost': new Date().getTime() - this.pickerClickTime });
                     this.pickerClickTime = -1;
                 }
-                this.refreshShowHomeAudioStatus();
+                if (this.extensionProxy !== null && this.roomListService.length > 0) {
+                    this.extensionProxy.send({ 'getHomeMusicInfo': 1 });
+                }
                 this.menuShowStateCallback(this.isMenuShow);
+                this.refreshShowHomeAudioStatus();
             }
         });
             UIExtensionComponent.onRelease((releaseCode) => {
