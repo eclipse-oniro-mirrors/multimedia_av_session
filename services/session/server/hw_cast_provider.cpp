@@ -32,7 +32,7 @@ const uint32_t TRUSTED_DEVICE = 1;
 
 const std::unordered_map<int32_t, int32_t> CAST_TO_AV_DEVICE_TYPE_MAP = {
     { 0x9C,   DeviceType::DEVICE_TYPE_TV },
-    { 0x11,   DeviceType::DEVICE_TYPE_UNKNOWN },
+    { 0x11,   DeviceType::DEVICE_TYPE_PAD },
     { 0x83,   DeviceType::DEVICE_TYPE_CAR },
     { 0xA2F,  DeviceType::DEVICE_TYPE_2IN1 },
     { 0xA33,  DeviceType::DEVICE_TYPE_HIPLAY },
@@ -41,7 +41,7 @@ const std::unordered_map<int32_t, int32_t> CAST_TO_AV_DEVICE_TYPE_MAP = {
 int32_t ConvertCastDeviceTypeToDeviceType(int32_t castDeviceType)
 {
     auto it = CAST_TO_AV_DEVICE_TYPE_MAP.find(castDeviceType);
-    return it != CAST_TO_AV_DEVICE_TYPE_MAP.end() ? it->second : DeviceType::DEVICE_TYPE_UNKNOWN;
+    return it != CAST_TO_AV_DEVICE_TYPE_MAP.end() ? it->second : DeviceType::DEVICE_TYPE_DEFAULT_CAST_PLUS_STREAM;
 }
 
 HwCastProvider::HwCastProvider()
