@@ -830,12 +830,6 @@ struct CallerType {
 
 enum DeviceType {
     /**
-     * A device type indicating the route is unknown.
-     * @since 26 dynamic&static
-     * @syscap SystemCapability.Multimedia.AVSession.Core
-     */
-    DEVICE_TYPE_UNKNOWN = -1,
-    /**
      * A device type indicating the route is on internal speakers or audio jacks on the device itself.
      * @since 10
      * @syscap SystemCapability.Multimedia.AVSession.Core
@@ -854,29 +848,41 @@ enum DeviceType {
      */
     DEVICE_TYPE_SPEAKER = 3,
     /**
+     * A device type indicating the route is on a car device.
+     * @since 26 dynamic&static
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     */
+    DEVICE_TYPE_CAR = 4,
+    /**
+     * A device type indicating the route is on a pad device.
+     * @since 26 dynamic&static
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     */
+    DEVICE_TYPE_PAD = 6,
+    /**
+     * A default device which supports Cast+ Stream protocol.
+     * @since 26 dynamic&static
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     */
+    DEVICE_TYPE_DEFAULT_CAST_PLUS_STREAM = 7,
+    /**
+     * A device type indicating the route is on a 2in1 device.
+     * @since 26 dynamic&static
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
+     */
+    DEVICE_TYPE_2IN1 = 8,
+    /**
      * A device type indicating the route is on a bluetooth device.
      * @since 10
      * @syscap SystemCapability.Multimedia.AVSession.Core
      */
     DEVICE_TYPE_BLUETOOTH = 10,
     /**
-     * A device type indicating the route is on a car device.
-     * @since 26 dynamic&static
-     * @syscap SystemCapability.Multimedia.AVSession.Core
-     */
-    DEVICE_TYPE_CAR = 131,
-    /**
-     * A device type indicating the route is on a 2in1 device.
-     * @since 26 dynamic&static
-     * @syscap SystemCapability.Multimedia.AVSession.Core
-     */
-    DEVICE_TYPE_2IN1 = 2607,
-    /**
      * A device type indicating the route is on a HiPlay device.
      * @since 26 dynamic&static
-     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @syscap SystemCapability.Multimedia.AVSession.AVCast
      */
-    DEVICE_TYPE_HIPLAY = 2611,
+    DEVICE_TYPE_HIPLAY = 15,
 };
 
 /**

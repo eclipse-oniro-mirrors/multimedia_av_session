@@ -203,13 +203,15 @@ static napi_value ExportDeviceType(napi_env env)
     napi_value result = nullptr;
     napi_create_object(env, &result);
 
-    (void)SetNamedProperty(env, result, "DEVICE_TYPE_UNKNOWN", DeviceType::DEVICE_TYPE_UNKNOWN);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_LOCAL", DeviceType::DEVICE_TYPE_LOCAL);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_TV", DeviceType::DEVICE_TYPE_TV);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_SMART_SPEAKER", DeviceType::DEVICE_TYPE_SPEAKER);
-    (void)SetNamedProperty(env, result, "DEVICE_TYPE_BLUETOOTH", DeviceType::DEVICE_TYPE_BLUETOOTH);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_CAR", DeviceType::DEVICE_TYPE_CAR);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_PAD", DeviceType::DEVICE_TYPE_PAD);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_DEFAULT_CAST_PLUS_STREAM",
+        DeviceType::DEVICE_TYPE_DEFAULT_CAST_PLUS_STREAM);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_2IN1", DeviceType::DEVICE_TYPE_2IN1);
+    (void)SetNamedProperty(env, result, "DEVICE_TYPE_BLUETOOTH", DeviceType::DEVICE_TYPE_BLUETOOTH);
     (void)SetNamedProperty(env, result, "DEVICE_TYPE_HIPLAY", DeviceType::DEVICE_TYPE_HIPLAY);
 
     napi_object_freeze(env, result);
