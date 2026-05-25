@@ -4410,31 +4410,26 @@ void AVSessionService::HandlePcModeRemoveNotification()
 {
     std::lock_guard lockGuard(sessionServiceLock_);
     CHECK_AND_RETURN_LOG(topSession_ != nullptr, "topSession_ is nullptr");
-    
+
     int32_t userId = topSession_->GetUserId();
-    if (GetUsersManager().GetTopSession(userId).GetRefPtr() == topSession_.GetRefPtr()) {
-        hasMediaCapsule_ = false;
-        int32_t ret = Notification::NotificationHelper::CancelNotification(
-            std::to_string(userId), mediacontrollerNotifyId);
-        SLOGI("HandlePcModeRemoveNotification CancelNotification userId:%{public}d, ret=%{public}d", userId, ret);
-    }
+    CHECK_AND_RETURN_LOG(GetUsersManager().GetTopSession(userId).GetRefPtr() == topSession_.GetRefPtr(),
+        "topSession_ is not the top session");
+    hasMediaCapsule_ = false;
+    int32_t ret = Notification::NotificationHelper::CancelNotification(
+        std::to_string(userId), mediacontrollerNotifyId);
+    SLOGI("HandlePcModeRemoveNotification CancelNotification userId:%{public}d, ret=%{public}d", userId, ret);
 }
 
 void AVSessionService::HandlePcModeAddNotification()
 {
     std::lock_guard lockGuard(sessionServiceLock_);
     CHECK_AND_RETURN_LOG(topSession_ != nullptr, "topSession_ is nullptr");
-    
-    bool isPlaying = false;
-    if (topSession_->IsCastConnected()) {
-        isPlaying = topSession_->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY;
-    } else {
-        isPlaying = IsLocalSessionPlaying(topSession_);
-    }
-    
-    if (isPlaying) {
-        NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
-    }
+
+    bool isPlaying = topSession_->IsCastConnected()
+        ? topSession_->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY
+        : IsLocalSessionPlaying(topSession_);
+    CHECK_AND_RETURN_LOG(!isPlaying, "topSession is not playing");
+    NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
 }
 
 bool AVSessionService::IsCapsuleNeeded()

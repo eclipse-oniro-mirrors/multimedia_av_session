@@ -43,7 +43,6 @@ private:
 
     sptr<IAVSessionCallback> listener_;
     sptr<Rosen::DisplayInfo> curDisplayInfo_;
-    sptr<Rosen::DisplayInfo> stashedDisplayInfo_;
     uint64_t appCastId_ = 0;
     std::atomic<bool> isSupportExtendedScreen_ {false};
     std::recursive_mutex dataMutex_;

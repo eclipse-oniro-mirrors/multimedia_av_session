@@ -1496,7 +1496,7 @@ static HWTEST(HwCastTest, HwCastDisplayListenerOnDisconnect001, TestSize.Level1)
 
 /**
  * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen001
- * @tc.desc: test SetSupportExtendedScreen with false when no curDisplayInfo, state should remain unchanged
+ * @tc.desc: test SetSupportExtendedScreen with false
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1507,14 +1507,14 @@ static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen001, Test
     OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, true);
     EXPECT_EQ(listener != nullptr, true);
     listener->SetSupportExtendedScreen(false);
-    EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), false);
     listener = nullptr;
     SLOGI("HwCastDisplayListenerSetSupportExtendedScreen001 end!");
 }
 
 /**
  * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen002
- * @tc.desc: test SetSupportExtendedScreen with true when no stashedDisplayInfo, state should remain unchanged
+ * @tc.desc: test SetSupportExtendedScreen with true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1525,7 +1525,7 @@ static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen002, Test
     OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
     EXPECT_EQ(listener != nullptr, true);
     listener->SetSupportExtendedScreen(true);
-    EXPECT_EQ(listener->IsSupportExtendedScreen(), false);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
     listener = nullptr;
     SLOGI("HwCastDisplayListenerSetSupportExtendedScreen002 end!");
 }

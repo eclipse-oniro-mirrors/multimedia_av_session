@@ -2451,11 +2451,6 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
         std::lock_guard displayListenerLockGuard(displayListenerLock_);
         displayListener = displayListener_;
     }
-    if (displayListener != nullptr && !displayListener->IsSupportExtendedScreen()) {
-        SLOGI("GetAllCastDisplays not support extended screen, return empty");
-        castDisplays.clear();
-        return AVSESSION_SUCCESS;
-    }
     std::vector<Rosen::DisplayId> allDisplayIds = Rosen::DisplayManagerLite::GetInstance().GetAllDisplayIds();
     std::vector<CastDisplayInfo> displays;
     for (auto &displayId : allDisplayIds) {
@@ -2486,6 +2481,10 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
         }
     }
     castDisplays = displays;
+    if (displayListener != nullptr && !displayListener->IsSupportExtendedScreen()) {
+        SLOGI("GetAllCastDisplays not support extended screen, return empty");
+        castDisplays.clear();
+    }
     SLOGI("GetAllCastDisplays out");
     return AVSESSION_SUCCESS;
 }
@@ -2625,10 +2624,17 @@ void AVSessionItem::SetServiceCallbackForPhotoCast(const std::function<void(std:
 void AVSessionItem::SetSupportExtendedScreen(bool isSupport)
 {
     SLOGI("SetSupportExtendedScreen %{public}d", isSupport);
-    std::lock_guard displayListenerLockGuard(displayListenerLock_);
-    if (displayListener_ != nullptr) {
-        displayListener_->SetSupportExtendedScreen(isSupport);
+    sptr<HwCastDisplayListener> displayListener;
+    {
+        std::lock_guard displayListenerLockGuard(displayListenerLock_);
+        displayListener = displayListener_;
     }
+    CHECK_AND_RETURN_LOG(displayListener != nullptr, "displayListener_ is null");
+    if (isSupport) {
+        std::vector<CastDisplayInfo> castDisplays;
+        GetAllCastDisplays(castDisplays);
+    }
+    displayListener->SetSupportExtendedScreen(isSupport);
 }
 
 void AVSessionItem::SetServiceCallbackForPcMode(const std::function<bool()>& callback)
