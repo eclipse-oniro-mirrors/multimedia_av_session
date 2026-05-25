@@ -391,6 +391,7 @@ int32_t MigrateAVSessionServer::GetAllControllers(std::vector<sptr<AVControllerI
         if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             iter->elementName_.GetBundleName().empty() ||
             iter->elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            iter->sessionTag_ == ANCO_AUDIO_SESSION_TAG ||
             releaseSessionId_.compare(iter->sessionId_) == 0) {
             continue;
         }
