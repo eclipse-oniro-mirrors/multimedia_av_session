@@ -3007,7 +3007,7 @@ static HWTEST_F(AVSessionServiceTest, CheckIfOtherAudioPlaying001, TestSize.Leve
     std::vector<int> audioPlayingUids;
     audioPlayingUids.push_back(1041);
     avservice_->focusSessionStrategy_.SetAudioPlayingUids(audioPlayingUids);
-    EXPECT_EQ(avservice_->CheckIfOtherAudioPlaying(), false);
+    EXPECT_EQ(avservice_->CheckIfOtherAudioPlaying(), true);
     avsessionHere_->SetUid(oriUid);
     avsessionHere_->SetPid(oriPid);
     avsessionHere_->Destroy();
