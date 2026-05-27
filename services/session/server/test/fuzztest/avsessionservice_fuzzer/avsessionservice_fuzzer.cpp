@@ -928,17 +928,22 @@ void handleusereventTest(sptr<AVSessionService> service)
 void OnReceiveEventTest(sptr<AVSessionService> service)
 {
     const std::vector<std::string> actions = {
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF,
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON,
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_FOREGROUND,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED,
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
         EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED,
         EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
+        EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED,
         "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW",
         "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE",
-        "usual.event.PACKAGE_REMOVED",
         "usual.event.CAST_SESSION_CREATE",
-        "usual.event.DESKTOP_LYRIC_DESTROY",
+        "usual.event.MEDIA_NTF_SWITCH",
+        "HybridModeSwitchEvent",
         GetString()
     };
     FuzzSessionListener listener;

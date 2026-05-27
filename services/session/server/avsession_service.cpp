@@ -297,7 +297,7 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         std::string param = eventData.GetData();
         SLOGI("OnReceiveEvent notify data:%{public}s", param.c_str());
         servicePtr_->HandleMediaCardStateChangeEvent(param);
-    } else if (action.compare("usual.event.PACKAGE_REMOVED") == 0) {
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) == 0) {
         std::string bundleName = want.GetElement().GetBundleName();
         SLOGI("package remove %{public}s", bundleName.c_str());
         servicePtr_->HandleBundleRemoveEvent(bundleName);
@@ -313,8 +313,6 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
             AVRouter::GetInstance().NotifyCastSessionCreated();
         }
 #endif
-    } else if (action.compare("usual.event.DESKTOP_LYRIC_DESTROY") == 0) {
-        servicePtr_->StopDesktopLyricAbility();
     } else if (action.compare("usual.event.MEDIA_NTF_SWITCH") == 0) {
         bool isMediaNtfEnable = want.GetBoolParam("isMediaNtfEnable", true);
         servicePtr_->UpdateNtfEnable(isMediaNtfEnable);
@@ -446,7 +444,7 @@ void AVSessionService::HandleBundleRemoveEvent(const std::string bundleName)
 
 bool AVSessionService::SubscribeCommonEvent()
 {
-    const std::vector<std::string> events = {
+    const std::vector<std::string> systemEvents = {
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF,
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON,
         EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED,
@@ -457,35 +455,55 @@ bool AVSessionService::SubscribeCommonEvent()
         EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED,
         EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED,
         EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
-        "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW",
-        "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE",
-        "usual.event.PACKAGE_REMOVED",
-        "usual.event.CAST_SESSION_CREATE",
-        "usual.event.DESKTOP_LYRIC_DESTROY",
-        "usual.event.MEDIA_NTF_SWITCH",
-        "HybridModeSwitchEvent",
+        EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED,
     };
 
-    EventFwk::MatchingSkills matchingSkills;
-    for (auto event : events) {
-        matchingSkills.AddEvent(event);
+    EventFwk::MatchingSkills systemSkills;
+    for (auto &event : systemEvents) {
+        systemSkills.AddEvent(event);
     }
-    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    EventFwk::CommonEventSubscribeInfo systemSubscribeInfo(systemSkills);
+    CHECK_AND_RETURN_RET_LOG(systemSubscriber_ == nullptr, true, "already have systemSubscriber");
+    systemSubscriber_ = std::make_shared<EventSubscriber>(systemSubscribeInfo, this);
+    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(systemSubscriber_);
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret, false, UnSubscribeCommonEvent(),
+        "SubscribeCommonEvent system events failed!");
 
-    CHECK_AND_RETURN_RET_LOG(subscriber_ == nullptr, true, "already have subscriber");
-    subscriber_ = std::make_shared<EventSubscriber>(subscribeInfo, this);
-    return EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    const std::map<std::string, std::string> customizedEventPermissionMap = {
+        { "usual.event.CAST_SESSION_CREATE", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
+        { "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
+        { "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
+        { "usual.event.MEDIA_NTF_SWITCH", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
+        { "HybridModeSwitchEvent", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
+    };
+    for (const auto &[event, permission] : customizedEventPermissionMap) {
+        EventFwk::MatchingSkills customSkills;
+        customSkills.AddEvent(event);
+        EventFwk::CommonEventSubscribeInfo customSubscribeInfo(customSkills);
+        customSubscribeInfo.SetPermission(permission);
+        auto customSubscriber = std::make_shared<EventSubscriber>(customSubscribeInfo, this);
+        ret = EventFwk::CommonEventManager::SubscribeCommonEvent(customSubscriber);
+        CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret, false, UnSubscribeCommonEvent(),
+            "SubscribeCommonEvent custom event %{public}s failed!", event.c_str());
+        customSubscribers_.push_back(customSubscriber);
+    }
+    return ret;
 }
 
 bool AVSessionService::UnSubscribeCommonEvent()
 {
     bool subscribeResult = false;
-    if (subscriber_ != nullptr) {
-        subscribeResult = EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
-        subscriber_ = nullptr;
+    if (systemSubscriber_ != nullptr) {
+        subscribeResult = EventFwk::CommonEventManager::UnSubscribeCommonEvent(systemSubscriber_);
+        systemSubscriber_ = nullptr;
     }
     SLOGI("UnSubscribeCommonEvent subscribeResult = %{public}d", subscribeResult);
 
+    for (const auto &customSubscriber : customSubscribers_) {
+        subscribeResult = EventFwk::CommonEventManager::UnSubscribeCommonEvent(customSubscriber);
+        SLOGI("UnSubscribeCustomEvent subscribeResult = %{public}d", subscribeResult);
+    }
+    customSubscribers_.clear();
     return subscribeResult;
 }
 
