@@ -3077,10 +3077,6 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const st
             return AVSESSION_SUCCESS;
         }
     }
-    if (CheckIfOtherAudioPlaying()) {
-        SLOGE("control block for OtherAudioPlaying for key:%{public}d", keyEvent.GetKeyCode());
-        return AVSESSION_SUCCESS;
-    }
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
         keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
         pressCount_++;
@@ -3192,6 +3188,7 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
             bundleName = bundleName + "_" + std::to_string(session->GetAppIndex());
         }
 
+        CHECK_AND_RETURN_LOG(!CheckIfOtherAudioPlaying(), "audioplaying control block");
         if (deviceId.length() == 0) {
             ret = StartAVPlayback(bundleName, "", "");
         } else {
@@ -3207,35 +3204,12 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
 bool AVSessionService::CheckIfOtherAudioPlaying()
 {
     std::vector<int> audioPlayingUids = focusSessionStrategy_.GetAudioPlayingUids();
-    CHECK_AND_RETURN_RET_LOG(!audioPlayingUids.empty(), false, "no other audio playing quit.");
-    std::lock_guard lockGuard(sessionServiceLock_);
-    std::lock_guard frontLockGuard(sessionFrontLock_);
-    std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
-    CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, false, "sessionListForFront ptr nullptr quit");
-    CHECK_AND_RETURN_RET_LOG(sessionListForFront->empty() && topSession_ == nullptr && !IsAncoValid(), false,
-        "has sessions:%{public}d for audioUid:%{public}d",
-        static_cast<int>(sessionListForFront->size()), audioPlayingUids[0]);
-    bool isAncoPlaying = false;
-    for (int uid : audioPlayingUids) {
-        if (uid == ancoUid) {
-            isAncoPlaying = true;
-        }
-        if (GetUsersManager().GetContainerFromAll().UidHasSession(uid)) {
-            SLOGI("audioplaying but session alive:%{public}d", uid);
-            return false;
-        }
-        SLOGI("audioPlaying and no session:%{public}d", uid);
-    }
-    CHECK_AND_RETURN_RET_LOG(!isAncoPlaying, false, "ancoMediaSession Playing.");
-    return true;
+    CHECK_AND_RETURN_RET_LOG(audioPlayingUids.empty(), true, "other audio playing:%{public}d", audioPlayingUids[0]);
+    return false;
 }
 
 int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &command)
 {
-    if (CheckIfOtherAudioPlaying()) {
-        SLOGE("control block for OtherAudioPlaying with cmd:%{public}d", command.GetCommand());
-        return AVSESSION_SUCCESS;
-    }
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         SLOGI("SendSystemControlCommand with cmd:%{public}d, topSession alive:%{public}d",
