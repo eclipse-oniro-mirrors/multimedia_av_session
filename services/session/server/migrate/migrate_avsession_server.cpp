@@ -160,7 +160,8 @@ void MigrateAVSessionServer::ObserveControllerChanged(const std::string &deviceI
     for (auto &item : descriptors) {
         if (item.sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             item.elementName_.GetBundleName().empty() ||
-            item.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME) {
+            item.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            item.sessionTag_ == ANCO_AUDIO_SESSION_TAG) {
             continue;
         }
         if (item.isTopSession_) {
@@ -391,6 +392,7 @@ int32_t MigrateAVSessionServer::GetAllControllers(std::vector<sptr<AVControllerI
         if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             iter->elementName_.GetBundleName().empty() ||
             iter->elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            iter->sessionTag_ == ANCO_AUDIO_SESSION_TAG ||
             releaseSessionId_.compare(iter->sessionId_) == 0) {
             continue;
         }
@@ -438,7 +440,8 @@ void MigrateAVSessionServer::OnSessionCreate(const AVSessionDescriptor &descript
     }
     if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
         descriptor.elementName_.GetBundleName().empty() ||
-        descriptor.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME) {
+        descriptor.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+        descriptor.sessionTag_ == ANCO_AUDIO_SESSION_TAG) {
         SLOGI("not audio avsession or anco audio");
         return;
     }
@@ -479,7 +482,8 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
         std::lock_guard lockGuard(topSessionLock_);
         if (descriptor.sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             descriptor.elementName_.GetBundleName().empty() ||
-            descriptor.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME) {
+            descriptor.elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            descriptor.sessionTag_ == ANCO_AUDIO_SESSION_TAG) {
             SLOGI("not audio avsession or anco audio");
             return;
         }
@@ -622,6 +626,7 @@ bool MigrateAVSessionServer::ConvertReleaseSessionToCJSON(cJSON* jsonArray,
         if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             iter->elementName_.GetBundleName().empty() ||
             iter->elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            iter->sessionTag_ == ANCO_AUDIO_SESSION_TAG ||
             releaseSessionId_.compare(iter->sessionId_) == 0) {
             continue;
         }
@@ -667,6 +672,7 @@ bool MigrateAVSessionServer::ConvertHisSessionDescriptorsToCJSON(cJSON* jsonArra
         if (iter->sessionType_ != AVSession::SESSION_TYPE_AUDIO ||
             iter->elementName_.GetBundleName().empty() ||
             iter->elementName_.GetBundleName() == ANCO_AUDIO_BUNDLE_NAME ||
+            iter->sessionTag_ == ANCO_AUDIO_SESSION_TAG ||
             releaseSessionId_.compare(iter->sessionId_) == 0) {
             continue;
         }
