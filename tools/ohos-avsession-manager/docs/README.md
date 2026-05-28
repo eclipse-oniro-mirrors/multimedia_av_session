@@ -165,8 +165,8 @@ Send control command to a specific session.
 - `--command` - Control command (required): `play`, `pause`, `stop`, `play_next`, `play_previous`, `fast_forward`, `rewind`, `seek`, `set_speed`, `set_loop_mode`, `set_target_loop_mode`, `toggle_favorite`
 - `--time` - Time in milliseconds (required for `seek`, default 15000 for `fast_forward`/`rewind`)
 - `--speed` - Playback speed for `set_speed` command (optional, default 1.0)
-- `--mode` - Loop mode for `set_loop_mode`: 0=undefined, 1=sequence, 2=single, 3=list, 4=shuffle (optional)
-- `--target-mode` - Target loop mode for `set_target_loop_mode`: 0=undefined, 1=sequence, 2=single, 3=list, 4=shuffle (optional)
+- `--mode` - Loop mode for `set_loop_mode`: -1=undefined, 0=sequence, 1=single, 2=list, 3=shuffle, 4=custom (optional, default 0)
+- `--target-mode` - Target loop mode for `set_target_loop_mode`: -1=undefined, 0=sequence, 1=single, 2=list, 3=shuffle, 4=custom (optional, default 0)
 - `--asset-id` - Asset ID for `toggle_favorite` command (required)
 
 **Example:**
@@ -176,7 +176,7 @@ ohos-avsession-manager send-control-command-to-session --session-id session_001 
 ohos-avsession-manager send-control-command-to-session --session-id session_001 --command fast_forward --time 10000
 ohos-avsession-manager send-control-command-to-session --session-id session_001 --command set_speed --speed 1.5
 ohos-avsession-manager send-control-command-to-session --session-id session_001 --command set_loop_mode --mode 3
-ohos-avsession-manager send-control-command-to-session --session-id session_001 --command set_target_loop_mode --target-mode 2
+ohos-avsession-manager send-control-command-to-session --session-id session_001 --command set_target_loop_mode --target-mode 1
 ohos-avsession-manager send-control-command-to-session --session-id session_001 --command toggle_favorite --asset-id "song_001"
 ```
 

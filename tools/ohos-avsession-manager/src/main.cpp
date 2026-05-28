@@ -46,7 +46,7 @@ constexpr int SUBCOMMAND_ARG_INDEX = 2;
 constexpr int64_t DEFAULT_FORWARD_TIME = 15000;
 constexpr int64_t DEFAULT_REWIND_TIME = 15000;
 constexpr double DEFAULT_SPEED = 1.0;
-constexpr int32_t DEFAULT_LOOP_MODE = 1;
+constexpr int32_t DEFAULT_LOOP_MODE = 0;
 
 using CommandHandler = std::function<int(int, char**)>;
 
@@ -124,8 +124,8 @@ static nlohmann::json GetSendControlCommandToSessionHelp()
             {"--command", "Control command (required)"},
             {"--time", "Time in ms: required for seek, optional for fast_forward/rewind (default 15000)"},
             {"--speed", "Speed value: optional for set_speed (default 1.0)"},
-            {"--mode", "Loop mode: optional for set_loop_mode (0-4, default 1)"},
-            {"--target-mode", "Target loop mode: optional for set_target_loop_mode (0-4, default 1)"},
+            {"--mode", "Loop mode: optional for set_loop_mode (-1 to 4, default 0)"},
+            {"--target-mode", "Target loop mode: optional for set_target_loop_mode (-1 to 4, default 0)"},
             {"--asset-id", "Asset ID: required for toggle_favorite"}
         }},
         {"available_commands", {
@@ -134,11 +134,12 @@ static nlohmann::json GetSendControlCommandToSessionHelp()
             "set_loop_mode", "set_target_loop_mode", "toggle_favorite"
         }},
         {"loop_modes", {
-            {"0", "LOOP_MODE_UNDEFINED"},
-            {"1", "LOOP_MODE_SEQUENCE"},
-            {"2", "LOOP_MODE_SINGLE"},
-            {"3", "LOOP_MODE_LIST"},
-            {"4", "LOOP_MODE_SHUFFLE"}
+            {"-1", "LOOP_MODE_UNDEFINED"},
+            {"0", "LOOP_MODE_SEQUENCE"},
+            {"1", "LOOP_MODE_SINGLE"},
+            {"2", "LOOP_MODE_LIST"},
+            {"3", "LOOP_MODE_SHUFFLE"},
+            {"4", "LOOP_MODE_CUSTOM"}
         }},
         {"examples", {
             "ohos-avsession-manager send-control-command-to-session --session-id <id> --command play",
