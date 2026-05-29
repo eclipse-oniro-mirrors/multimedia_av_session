@@ -463,8 +463,8 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
 bool MigrateAVSessionServer::CheckPostSessionInfo(std::string sessionId)
 {
     std::lock_guard lockGuard(cacheJsonLock_);
-    CHECK_AND_RETURN_RET_LOG(sessionIdCache_ != sessionId, false,
-        "session:%{public}s no change", SoftbusSessionUtils::AnonymizeDeviceId(sessionIdCache_).c_str());
+    CHECK_AND_RETURN_RET_LOG(sessionIdCache_ != sessionId, false, "session:%{public}s no change",
+        SoftbusSessionUtils::AnonymizeDeviceId(sessionIdCache_).c_str());
     sessionIdCache_ = sessionId;
     return true;
 }
