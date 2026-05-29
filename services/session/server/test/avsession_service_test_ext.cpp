@@ -1741,7 +1741,7 @@ static HWTEST_F(AVSessionServiceTestExt, SetPcMode003, TestSize.Level1)
 
 /**
  * @tc.name: OnReceiveEvent003
- * @tc.desc: Test OnReceiveEvent with HybridModeSwitchEvent action
+ * @tc.desc: Test OnReceiveEvent with HYBRID_MODE_SWITCH action
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
@@ -1749,7 +1749,7 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent003, TestSize.Level1)
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
     OHOS::EventFwk::CommonEventData eventData;
-    std::string action = "HybridModeSwitchEvent";
+    std::string action = "HYBRID_MODE_SWITCH";
     OHOS::AAFwk::Want want = eventData.GetWant();
     want.SetAction(action);
     eventData.SetWant(want);

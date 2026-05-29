@@ -316,10 +316,10 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     } else if (action.compare("usual.event.MEDIA_NTF_SWITCH") == 0) {
         bool isMediaNtfEnable = want.GetBoolParam("isMediaNtfEnable", true);
         servicePtr_->UpdateNtfEnable(isMediaNtfEnable);
-    } else if (action.compare("HybridModeSwitchEvent") == 0) {
+    } else if (action.compare("HYBRID_MODE_SWITCH") == 0) {
         int32_t targetMode = want.GetIntParam("targetMode", 0);
         // pcMode=1, phoneMode=0
-        SLOGI("on receiveEvent HybridModeSwitchEvent %{public}d", targetMode);
+        SLOGI("on receiveEvent HYBRID_MODE_SWITCH %{public}d", targetMode);
         servicePtr_->SetPcMode(targetMode == 1);
     }
 }
@@ -474,7 +474,7 @@ bool AVSessionService::SubscribeCommonEvent()
         { "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
         { "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
         { "usual.event.MEDIA_NTF_SWITCH", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
-        { "HybridModeSwitchEvent", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
+        { "HYBRID_MODE_SWITCH", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
     };
     for (const auto &[event, permission] : customizedEventPermissionMap) {
         EventFwk::MatchingSkills customSkills;
@@ -4420,7 +4420,7 @@ void AVSessionService::HandlePcModeAddNotification()
     bool isPlaying = topSession_->IsCastConnected()
         ? topSession_->GetCastAVPlaybackState().GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY
         : IsLocalSessionPlaying(topSession_);
-    CHECK_AND_RETURN_LOG(!isPlaying, "topSession is not playing");
+    CHECK_AND_RETURN_LOG(isPlaying, "topSession is not playing");
     NotifySystemUI(nullptr, IsCapsuleNeeded(), false);
 }
 
