@@ -244,11 +244,11 @@
           },
           "mode": {
             "type": "integer",
-            "description": "Loop mode for set_loop_mode: 0=undefined, 1=sequence, 2=single, 3=list, 4=shuffle"
+            "description": "Loop mode for set_loop_mode: -1=undefined, 0=sequence, 1=single, 2=list, 3=shuffle, 4=custom"
           },
           "target-mode": {
             "type": "integer",
-            "description": "Target loop mode for set_target_loop_mode: 0=undefined, 1=sequence, 2=single, 3=list, 4=shuffle"
+            "description": "Target loop mode for set_target_loop_mode: -1=undefined, 0=sequence, 1=single, 2=list, 3=shuffle, 4=custom"
           },
           "asset-id": {
             "type": "string",
