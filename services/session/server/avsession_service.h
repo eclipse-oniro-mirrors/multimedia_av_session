@@ -741,7 +741,8 @@ private:
     std::unique_ptr<AVSessionDumper> dumpHelper_ {};
     friend class AVSessionDumper;
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession_;
-    std::shared_ptr<EventSubscriber> subscriber_;
+    std::shared_ptr<EventSubscriber> systemSubscriber_;
+    std::vector<std::shared_ptr<EventSubscriber>> customSubscribers_;
     bool isScreenOn_ = false;
     bool isScreenLocked_ = true;
     std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
