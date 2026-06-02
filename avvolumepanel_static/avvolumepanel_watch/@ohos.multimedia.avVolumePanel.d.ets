@@ -18,7 +18,7 @@ import { Watch, PropRef } from '@ohos.arkui.stateManagement'
 import Want from '@ohos.app.ability.Want'
 import { RecordData } from '@ohos.base';
 
-const TAG = 'AVVolumePanel';
+declare const TAG: string;
 
 export class AVVolumePanelParameter {
   public position?: Position;
