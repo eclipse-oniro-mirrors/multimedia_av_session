@@ -457,7 +457,6 @@ bool AVSessionService::SubscribeCommonEvent()
         EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED,
         EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED,
     };
-
     EventFwk::MatchingSkills systemSkills;
     for (auto &event : systemEvents) {
         systemSkills.AddEvent(event);
@@ -469,6 +468,7 @@ bool AVSessionService::SubscribeCommonEvent()
     CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret, false, UnSubscribeCommonEvent(),
         "SubscribeCommonEvent system events failed!");
 
+    CHECK_AND_RETURN_RET_LOG(customSubscribers_.empty(), true, "already have customSubscribers");
     const std::map<std::string, std::string> customizedEventPermissionMap = {
         { "usual.event.CAST_SESSION_CREATE", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
         { "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
