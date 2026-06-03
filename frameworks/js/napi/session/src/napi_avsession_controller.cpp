@@ -2602,7 +2602,7 @@ napi_value NapiAVSessionController::OnMediaCenterControlTypeChanged(napi_env env
     }
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGI("controller is nullptr");
         NapiUtils::ThrowError(env, "controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -2702,7 +2702,7 @@ napi_value NapiAVSessionController::OnSupportedPlaySpeedsChanged(napi_env env, n
     }
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGI("controller is nullptr");
         NapiUtils::ThrowError(env, "controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -2802,7 +2802,7 @@ napi_value NapiAVSessionController::OnSupportedLoopModesChanged(napi_env env, na
     }
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGI("controller is nullptr");
         NapiUtils::ThrowError(env, "controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
