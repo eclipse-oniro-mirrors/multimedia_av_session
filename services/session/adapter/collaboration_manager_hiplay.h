@@ -25,6 +25,8 @@ public:
     CollaborationManagerHiPlay();
     static CollaborationManagerHiPlay& GetInstance();
     static void ReleaseInstance();
+    int32_t PublishServiceState(const char* peerNetworkId,
+        ServiceCollaborationManagerBussinessStatus state, std::string extraInfo = "");
 
 private:
     static std::shared_ptr<CollaborationManagerHiPlay> instance_;

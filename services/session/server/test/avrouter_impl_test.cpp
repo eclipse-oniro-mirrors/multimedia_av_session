@@ -351,6 +351,134 @@ static HWTEST_F(AVRouterImplTest, AddDevice004, TestSize.Level0)
 }
 
 /**
+* @tc.name: AddDeviceWithConnectionConfig001
+* @tc.desc: success to add device
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, AddDeviceWithConnectionConfig001, TestSize.Level0)
+{
+    SLOGI("AddDeviceWithConnectionConfig001 begin");
+    int32_t tempId = g_AVRouterImpl->providerNumber_;
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = tempId;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    int32_t castId = 1;
+    uint32_t spid = 33;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
+        static_cast<uint32_t>(castId));
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
+
+    CastEngine::ConnectionConfig connectionConfig = {};
+
+    int32_t ret = g_AVRouterImpl->AddDeviceWithConnectionConfig(castId, outputDeviceInfo, spid, connectionConfig);
+    EXPECT_TRUE(ret == AVSESSION_SUCCESS);
+    SLOGI("AddDeviceWithConnectionConfig001 end");
+}
+
+/**
+* @tc.name: AddDeviceWithConnectionConfig002
+* @tc.desc: fail to add device
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, AddDeviceWithConnectionConfig002, TestSize.Level0)
+{
+    SLOGI("AddDeviceWithConnectionConfig002 begin");
+    int32_t tempId = g_AVRouterImpl->providerNumber_;
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = tempId;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    int32_t castId = 1;
+    uint32_t spid = 33;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
+        static_cast<uint32_t>(castId));
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle + 100, castHandleInfo});
+
+    CastEngine::ConnectionConfig connectionConfig = {};
+
+    int32_t ret = g_AVRouterImpl->AddDeviceWithConnectionConfig(castId, outputDeviceInfo, spid, connectionConfig);
+    EXPECT_TRUE(ret == AVSESSION_SUCCESS);
+    SLOGI("AddDeviceWithConnectionConfig002 end");
+}
+
+/**
+* @tc.name: AddDeviceWithConnectionConfig003
+* @tc.desc: fail to add device
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, AddDeviceWithConnectionConfig003, TestSize.Level0)
+{
+    SLOGI("AddDeviceWithConnectionConfig003 begin");
+    int32_t tempId = g_AVRouterImpl->providerNumber_;
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = tempId;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    int32_t castId = 1;
+    uint32_t spid = 33;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
+        static_cast<uint32_t>(castId));
+
+    AVRouter::CastHandleInfo castHandleInfo;
+    g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
+
+    CastEngine::ConnectionConfig connectionConfig = {};
+
+    int32_t ret = g_AVRouterImpl->AddDeviceWithConnectionConfig(castId, outputDeviceInfo, spid, connectionConfig);
+    EXPECT_TRUE(ret == AVSESSION_SUCCESS);
+    SLOGI("AddDeviceWithConnectionConfig003 end");
+}
+
+/**
+* @tc.name: AddDeviceWithConnectionConfig004
+* @tc.desc: fail to add device
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, AddDeviceWithConnectionConfig004, TestSize.Level0)
+{
+    SLOGI("AddDeviceWithConnectionConfig004 begin");
+    int32_t tempId = g_AVRouterImpl->providerNumber_;
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = tempId;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    int32_t castId = 1;
+    uint32_t spid = 33;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
+        static_cast<uint32_t>(castId));
+    
+    OutputDeviceInfo outputDeviceInfo2;
+    DeviceInfo deviceInfo2;
+    deviceInfo2.providerId_ = 12321;
+    outputDeviceInfo2.deviceInfos_.push_back(deviceInfo2);
+    
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo2;
+    g_AVRouterImpl->castHandleToInfoMap_.insert({castHandle, castHandleInfo});
+
+    CastEngine::ConnectionConfig connectionConfig = {};
+
+    int32_t ret = g_AVRouterImpl->AddDeviceWithConnectionConfig(castId, outputDeviceInfo, spid, connectionConfig);
+    EXPECT_TRUE(ret == AVSESSION_SUCCESS);
+    SLOGI("AddDeviceWithConnectionConfig004 end");
+}
+
+/**
 * @tc.name: SetServiceAllConnectState001
 * @tc.desc: success to set connect state
 * @tc.type: FUNC
@@ -1109,6 +1237,72 @@ static HWTEST_F(AVRouterImplTest, AddDevice006, TestSize.Level0)
 }
 
 /**
+* @tc.name: AddDeviceWithConnectionConfig005
+* @tc.desc: success to add device
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, AddDeviceWithConnectionConfig005, TestSize.Level0)
+{
+    SLOGI("AddDeviceWithConnectionConfig005 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    int32_t castId = 1;
+    uint32_t spid = 33;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+    
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    CastEngine::ConnectionConfig connectionConfig = {};
+
+    int32_t ret = g_AVRouterImpl->AddDeviceWithConnectionConfig(castId, outputDeviceInfo, spid, connectionConfig);
+    EXPECT_TRUE(ret == AVSESSION_SUCCESS);
+    SLOGI("AddDeviceWithConnectionConfig005 end");
+}
+
+/**
+* @tc.name: AddDeviceWithConnectionConfig006
+* @tc.desc: fail to add device
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, AddDeviceWithConnectionConfig006, TestSize.Level0)
+{
+    SLOGI("AddDeviceWithConnectionConfig006 begin");
+    g_AVRouterImpl->providerNumber_ = 1;
+    int32_t providerNumber = g_AVRouterImpl->providerNumber_;
+
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.providerId_ = providerNumber;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+
+    int32_t castId = 1;
+    uint32_t spid = 33;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+    
+    AVRouter::CastHandleInfo castHandleInfo;
+    castHandleInfo.outputDeviceInfo_ = outputDeviceInfo;
+    g_AVRouterImpl->castHandleToInfoMap_[castHandle] = castHandleInfo;
+
+    CastEngine::ConnectionConfig connectionConfig = {};
+
+    int32_t ret = g_AVRouterImpl->AddDeviceWithConnectionConfig(castId + 1, outputDeviceInfo, spid, connectionConfig);
+    EXPECT_TRUE(ret == ERR_DEVICE_CONNECTION_FAILED);
+    SLOGI("AddDeviceWithConnectionConfig006 end");
+}
+
+/**
 * @tc.name: StopCast001
 * @tc.desc: success to stop cast
 * @tc.type: FUNC
@@ -1712,6 +1906,68 @@ static HWTEST_F(AVRouterImplTest, SendCommandArgsToCast003, TestSize.Level0)
     g_AVRouterImpl->SendCommandArgsToCast(castHandle, commandType, params);
     EXPECT_TRUE(providerNumber == 20);
     SLOGI("SendCommandArgsToCast003 end");
+}
+
+/**
+* @tc.name: QueryCastSessionId001
+* @tc.desc: set commandType not changed
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, QueryCastSessionId001, TestSize.Level0)
+{
+    SLOGI("QueryCastSessionId001 begin");
+    int32_t providerNumber = 20;
+    int32_t castId = 20;
+    g_AVRouterImpl->providerNumber_ = providerNumber;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    auto avCastProviderManager = std::make_shared<AVCastProviderManager>();
+    auto hwCastProvider = std::make_shared<HwCastProvider>();
+    avCastProviderManager->Init(providerNumber, hwCastProvider);
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = avCastProviderManager;
+
+    g_AVRouterImpl->QueryCastSessionId(castHandle);
+    EXPECT_TRUE(providerNumber == 20);
+    SLOGI("QueryCastSessionId001 end");
+}
+
+/**
+* @tc.name: QueryCastSessionId002
+* @tc.desc: found no provider in map
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, QueryCastSessionId002, TestSize.Level0)
+{
+    SLOGI("QueryCastSessionId002 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    int64_t castHandle = 0;
+    g_AVRouterImpl->QueryCastSessionId(castHandle);
+    EXPECT_TRUE(castHandle == 0);
+    SLOGI("QueryCastSessionId002 end");
+}
+
+/**
+* @tc.name: QueryCastSessionId003
+* @tc.desc: found provider is nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, QueryCastSessionId003, TestSize.Level0)
+{
+    SLOGI("QueryCastSessionId003 begin");
+    int32_t providerNumber = 20;
+    int32_t castId = 20;
+    g_AVRouterImpl->providerNumber_ = providerNumber;
+    int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(providerNumber) << 32) |
+        static_cast<uint32_t>(castId));
+
+    g_AVRouterImpl->providerManagerMap_[providerNumber] = nullptr;
+    g_AVRouterImpl->QueryCastSessionId(castHandle);
+    EXPECT_TRUE(providerNumber == 20);
+    SLOGI("QueryCastSessionId003 end");
 }
 
 /**
