@@ -844,17 +844,19 @@ void AVSessionService::DoRemoteAVSessionLoad(std::string remoteDeviceId)
 {
     SLOGI("DoRemoteAVSessionLoad async with deviceId:%{public}s.",
         AVSessionUtils::GetAnonySessionId(remoteDeviceId).c_str());
-    std::thread([this, remoteDeviceId]() {
+    const int32_t clickTimeout = CLICK_TIMEOUT;
+    const uint8_t retryTime = doRemoteLoadRetryTime;
+    std::thread([remoteDeviceId, clickTimeout, retryTime]() {
         auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (mgr == nullptr) {
             SLOGE("DoRemoteAVSessionLoad get SystemAbilityManager fail");
             return;
         }
         sptr<IRemoteObject> remoteObject = nullptr;
-        uint8_t outOfTime = doRemoteLoadRetryTime;
+        uint8_t outOfTime = retryTime;
         while (remoteObject == nullptr && outOfTime > 0) {
             outOfTime--;
-            std::this_thread::sleep_for(std::chrono::milliseconds(CLICK_TIMEOUT));
+            std::this_thread::sleep_for(std::chrono::milliseconds(clickTimeout));
             remoteObject = mgr->CheckSystemAbility(AVSESSION_SERVICE_ID, remoteDeviceId);
             if (remoteObject != nullptr) {
                 SLOGI("DoRemoteAVSessionLoad done with remoteObject get");
