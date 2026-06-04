@@ -2194,6 +2194,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     SLOGI("OnCastStateChange in with BundleName: %{public}s | state: %{public}d | id: %{public}s",
         GetBundleName().c_str(), static_cast<int32_t>(castState),
         AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
+    CHECK_AND_RETURN_LOG(validCastStates_.count(castState) > 0, "castState is invalid");
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
@@ -2201,7 +2202,6 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
-
     if (SearchSpidInCapability(deviceInfo.deviceId_)) {
         deviceInfo.supportedPullClients_.clear();
         deviceInfo.supportedPullClients_.push_back(GetSpid());
@@ -2209,15 +2209,12 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     }
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
-    if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
-        if (static_cast<uint32_t>(castDeviceInfoMap_[deviceInfo.deviceId_].supportedProtocols_) &
-            ProtocolType::TYPE_CAST_PLUS_AUDIO) {
-            castDeviceInfoMap_[deviceInfo.deviceId_].audioCapabilities_ = deviceInfo.audioCapabilities_;
-        }
-        outputDeviceInfo.deviceInfos_.emplace_back(castDeviceInfoMap_[deviceInfo.deviceId_]);
-    } else {
-        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    bool hasDevice = castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0;
+    if (hasDevice && (static_cast<uint32_t>(castDeviceInfoMap_[deviceInfo.deviceId_].supportedProtocols_) &
+        ProtocolType::TYPE_CAST_PLUS_AUDIO)) {
+        castDeviceInfoMap_[deviceInfo.deviceId_].audioCapabilities_ = deviceInfo.audioCapabilities_;
     }
+    outputDeviceInfo.deviceInfos_.emplace_back(hasDevice ? castDeviceInfoMap_[deviceInfo.deviceId_] : deviceInfo);
     PublishAVCastHa(castState, deviceInfo);
     if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
