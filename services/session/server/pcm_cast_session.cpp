@@ -156,6 +156,15 @@ void PcmCastSession::OnSystemCommonEvent(const std::string& args)
     WriteCastPairToFile(deviceId, tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
 }
 
+void PcmCastSession::OnDeviceNameSystemCommonEvent(const std::string& args)
+{
+    std::string deviceName = JsonUtils::GetStringParamFromJsonString(args, "DEVICE_NAME");
+    SLOGI("Received UPDATE_DEVICE_NAME: deviceName:%{public}s", deviceName.c_str());
+
+    tempDeviceInfo_.deviceName_ = deviceName;
+    descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ = deviceName;
+}
+
 void PcmCastSession::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 {
     SLOGI("PcmCastSession OnCastEventRecv errorCode %{public}d errorMsg %{public}s", errorCode, errorMsg.c_str());
@@ -300,6 +309,9 @@ void PcmCastSession::ExecuteCommonCommand(const std::string& commonCommand, cons
         case QUERY_COMMAND_NUM:
             QueryCommandParams(commandArgs);
             break;
+        case UPDATE_DEVICE_NAME_COMMAND:
+            UpdateDeviceNameCommandParams(commandArgs);
+            break;
         default:
             break;
     }
@@ -388,6 +400,13 @@ void PcmCastSession::QueryCommandParams(const AAFwk::WantParams& commandArgs)
         default:
             break;
     }
+}
+
+void PcmCastSession::UpdateDeviceNameCommandParams(const AAFwk::WantParams& commandArgs)
+{
+    SLOGI("PcmCastSession UpdateDeviceNameCommandParams process");
+    std::string params = commandArgs.ToString();
+    OnDeviceNameSystemCommonEvent(params);
 }
  
 } // namespace OHOS::AVSession
