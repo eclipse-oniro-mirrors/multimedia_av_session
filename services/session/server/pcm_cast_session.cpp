@@ -498,7 +498,6 @@ void PcmCastSession::UpdateDeviceNameCommandParams(const AAFwk::WantParams& comm
     OnDeviceNameSystemCommonEvent(params);
 }
 
-
 void PcmCastSession::QueryData(const AAFwk::WantParams& commandBody)
 {
     std::string key = commandBody.GetStringParam(KEY);
