@@ -29,6 +29,9 @@ public:
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
+    
+    int32_t StartScreenCast(const OutputDeviceInfo& outputDeviceInfo,
+        std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
 
     void StopCast(const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
 
@@ -51,11 +54,27 @@ public:
 
     void QueryCommandParams(const AAFwk::WantParams& commandArgs);
 
+    void ControlCommandParams(const AAFwk::WantParams& commandArgs);
+
+    void QueryData(const AAFwk::WantParams& commandArgs);
+    void QueryCastSessionId();
+    void SaveDataInPcm(const AAFwk::WantParams& commandBody);
+    void SavePinCode(const AAFwk::WantParams& commandBody);
+
+    void CreateStreamPlayer(const AAFwk::WantParams& commandBody);
+    void ReleaseStreamPlayer();
+
+    void CreateExtraInfo(std::string deviceType, std::string scenario);
+
 private:
     int64_t castHandle_ = 0;
     int32_t castState_ = CastState::DISCONNECTED;
     std::recursive_mutex castLock_;
+    std::mutex screenLock_;
+    std::condition_variable startCastCondition_;
+
     AVSessionDescriptor descriptor_;
+    std::string pinCode_ = "";
     std::string castHandleDeviceId_ = "-100";
     std::string collaborationNeedDeviceId_;
     std::string collaborationNeedNetworkId_;
@@ -66,6 +85,8 @@ private:
     SessionToken newSessionToken_;
     std::pair<std::string, std::string> newServiceNameStatePair_;
     DeviceInfo tempDeviceInfo_;
+    std::string sessionId_;
+    std::string extraInfo_;
 
     const std::string COMMAND_TYPE = "command_type";
     const std::string COMMAND_BODY = "command_body";
@@ -73,15 +94,30 @@ private:
     const std::string CHANGE_CAST_MODE = "CHANGE_CAST_MODE";
     const std::string BYPASS_COMMAND = "BYPASS_COMMAND";
     const std::string QUERY_COMMAND = "QUERY_COMMAND";
+    const std::string CONTROL_COMMAND = "CONTROL_COMMAND";
 
     const std::string BYPASS_TO_CAST = "BYPASS_TO_CAST";
 
     const std::string QUERY_TO_CAST = "QUERY_TO_CAST";
+    const std::string QUERY_TO_AVSESSION = "QUERY_TO_AVSESSION";
+
+    const std::string SAVE_TO_PCM = "SAVE_TO_PCM";
+    const std::string CREATE_STREAM_PLAYER = "CREATE_STREAM_PLAYER";
+    const std::string RELEASE_STREAM_PLAYER = "RELEASE_STREAM_PLAYER";
+    const std::string CHANGE_SCREEN_MODE = "CHANGE_SCREEN_MODE";
+
+    const std::string KEY = "KEY";
+    const std::string VALUE = "VALUE";
+    const std::string CAST_SESSION_ID = "CAST_SESSION_ID";
+    const std::string PIN_CODE = "PIN_CODE";
+    const std::string SESSION_CREATED = "SESSION_CREATED";
+    const std::string SESSION_ID = "SESSION_ID";
 
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,
         BYPASS_COMMAND_NUM = 1,
         QUERY_COMMAND_NUM = 2,
+        CONTROL_COMMAND_NUM = 3,
     };
 
     enum CastState {
@@ -93,6 +129,7 @@ private:
         {CHANGE_CAST_MODE, CAST_MODE_CHANGE_COMMAND},
         {BYPASS_COMMAND, BYPASS_COMMAND_NUM},
         {QUERY_COMMAND, QUERY_COMMAND_NUM},
+        {CONTROL_COMMAND, CONTROL_COMMAND_NUM},
     };
 
     enum {
@@ -105,10 +142,36 @@ private:
 
     enum {
         QUERY_TO_CAST_NUM = 0,
+        QUERY_TO_AVSESSION_NUM = 1,
     };
 
     const std::map<const std::string, int32_t> QUERY_COMMAND_MAPS = {
         {QUERY_TO_CAST, QUERY_TO_CAST_NUM},
+        {QUERY_TO_AVSESSION, QUERY_TO_AVSESSION_NUM},
+    };
+
+    enum {
+        SAVE_TO_PCM_NUM = 0,
+        CREATE_STREAM_PLAYER_NUM = 1,
+        RELEASE_STREAM_PLAYER_NUM = 2,
+        CHANGE_SCREEN_MODE_NUM = 3,
+    };
+
+    const std::map<const std::string, int32_t> CONTROL_COMMAND_MAPS = {
+        {SAVE_TO_PCM, SAVE_TO_PCM_NUM},
+        {CREATE_STREAM_PLAYER, CREATE_STREAM_PLAYER_NUM},
+        {RELEASE_STREAM_PLAYER, RELEASE_STREAM_PLAYER_NUM},
+        {CHANGE_SCREEN_MODE, CHANGE_SCREEN_MODE_NUM},
+    };
+
+    enum {
+        CAST_SESSION_ID_NUM = 0,
+        PIN_CODE_NUM = 1,
+    };
+
+    const std::map<const std::string, int32_t> DATA_KEY_MAPS = {
+        {CAST_SESSION_ID, CAST_SESSION_ID_NUM},
+        {PIN_CODE, PIN_CODE_NUM},
     };
 
     void WriteCastPairToFile(const std::string& deviceId, int32_t castMode);

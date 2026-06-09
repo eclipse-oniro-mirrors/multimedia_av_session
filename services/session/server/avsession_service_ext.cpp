@@ -557,7 +557,10 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool isPcm = (static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
             ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0;
-    if (isPcm) {
+    bool isPcmScreen = (sessionToken.sessionId == "pcmCastSession") &&
+        ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
+        ProtocolType::TYPE_CAST_PLUS_STREAM) != 0);
+    if (isPcm || isPcmScreen) {
         if (pcmCastSession_ == nullptr) {
             SLOGI("Create pcmCastSession");
             pcmCastSession_ = std::make_shared<PcmCastSession>();

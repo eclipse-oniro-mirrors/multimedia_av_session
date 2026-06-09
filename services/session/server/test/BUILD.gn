@@ -1825,6 +1825,7 @@ ohos_unittest("AVSessionDumperTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../session:avsession_router_static",
     ]
+    external_deps += [ "cast_engine:cast_engine_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -2080,6 +2081,7 @@ ohos_unittest("MigrateAVSessionTest") {
     external_deps += [
       "cast_engine:cast_engine_client",
       "window_manager:libdm_lite",
+      "image_framework:image_native",
     ]
   }
 
@@ -2667,6 +2669,7 @@ ohos_unittest("AVRouterTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../session:avsession_router_static",
     ]
+    external_deps += [ "cast_engine:cast_engine_client" ]
   }
 
   public_configs = ["../../../../services/session:avsession_ipc_config"]

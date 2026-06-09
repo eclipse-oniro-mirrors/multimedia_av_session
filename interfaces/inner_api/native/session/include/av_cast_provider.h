@@ -126,6 +126,19 @@ public:
     virtual bool AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t spid) = 0;
 
     /**
+     * @brief Notify CastEngine to add (connect) remote devices with connection config.
+     *
+     * @param { int32_t } castId - Find the corresponding provider through this ID.
+     * @param { DeviceInfo } deviceInfo - Devices to be connected.
+     * @param { uint32_t } spid - app id for pulling client.
+     * @param { CastEngine::ConnectionConfig } connectionConfig - config for connection.
+     * @return { bool } Whether the operation was successful.
+     * @since 10
+    */
+    virtual bool AddCastDeviceWithConnectionConfig(int castId, DeviceInfo deviceInfo, uint32_t spid,
+        CastEngine::ConnectionConfig connectionConfig) = 0;
+
+    /**
      * @brief Notify CastEngine to remove (disconnect) remote devices.
      *
      * @param { int32_t } castId - Find the corresponding provider through this ID.
@@ -140,11 +153,12 @@ public:
     /**
      * @brief Start cast process.
      *
-     * @param { bool } isHiStream - whether session is hi stream.
+     * @param { uint32_t } prototype - session used prototype.
+     * @param { bool } isPcm - isPcmCastSession.
      * @return { int } Whether the operation was successful.
      * @since 10
     */
-    virtual int StartCastSession(bool isHiStream) = 0;
+    virtual int StartCastSession(uint32_t prototype, bool isPcm) = 0;
 
     /**
      * @brief Stop cast process.
@@ -246,6 +260,15 @@ public:
     */
     virtual void SendCommandArgsToCast(const int32_t castId, const int32_t commandType,
         const std::string& params) = 0;
+    
+    /**
+     * @brief query cast session id in hwcastprovidersession.
+     *
+     * @param {int32_t} castId - The ID of the castprovider.
+     * @return {std::string} cast session id
+     * @since 24
+    */
+    virtual std::string QueryCastSessionId(const int32_t castId) = 0;
 };
 } // namespace OHOS::AVSession
 #endif

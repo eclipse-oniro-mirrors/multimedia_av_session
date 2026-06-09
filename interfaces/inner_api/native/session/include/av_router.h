@@ -22,6 +22,7 @@
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
+#include "cast_engine_common.h"
 #endif
 
 /**
@@ -216,6 +217,19 @@ public:
     */
     virtual int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
         uint32_t spid) = 0;
+
+    /**
+     * @brief Notify CastEngine to add (connect) remote devices with connection config.
+     *
+     * @param { int32_t } castId - Find the corresponding provider through this ID.
+     * @param { OutputDeviceInfo } outputDeviceInfo - Devices to be connected.
+     * @param { uint32_t } spid - app id for pulling client.
+     * @param { CastEngine::ConnectionConfig } connectionConfig - config for connection.
+     * @return { int32_t } Whether the operation was successful.
+     * @since 24
+    */
+    virtual int32_t AddDeviceWithConnectionConfig(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
+        uint32_t spid, CastEngine::ConnectionConfig connectionConfig) = 0;
 
     /**
      * @brief Stop cast process.
@@ -472,6 +486,15 @@ public:
     */
     virtual void SendCommandArgsToCast(const int64_t castHandle, const int32_t commandType,
         const std::string& params) = 0;
+    
+    /**
+     * @brief query cast session id in hwcastprovidersession
+     *
+     * @param {int64_t} castHandle - The ID of the castprovider.
+     * @return {std::string} cast session id.
+     * @since 24
+    */
+    virtual std::string QueryCastSessionId(const int64_t castHandle) = 0;
 
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;

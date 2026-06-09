@@ -837,6 +837,7 @@ private:
     int32_t targetDeviceType_ = OHOS::DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
 #endif
     const std::string serviceName = "av_session";
+    const std::string SESSION_RELEASE = "SESSION_RELEASE";
     std::string deviceIdForMigrate_ = "";
     std::string localFrontSessionId_ = "";
     bool isMigrateTargetFound_ = false;

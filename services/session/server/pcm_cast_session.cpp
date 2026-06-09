@@ -68,6 +68,11 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         castState_ = CastState::CONNECTED;
     }
 
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED)) {
+        descriptor_.outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
+        castState_ = CastState::CONNECTED;
+    }
+
     collaborationNeedDeviceId_ = deviceInfo.deviceId_;
     if (isNeedRemove) { // same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
@@ -106,7 +111,8 @@ void PcmCastSession::DealCollaborationPublishState(int32_t castState, DeviceInfo
         CollaborationManagerHiPlay::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTING);
     }
-    if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) { // 6 is connected status (stream)
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM) || // 6 is connected status (stream)
+        castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED)) { // 1 is connected status (screen)
         AVRouter::GetInstance().GetRemoteNetWorkId(
             castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {
@@ -115,7 +121,7 @@ void PcmCastSession::DealCollaborationPublishState(int32_t castState, DeviceInfo
             collaborationNeedNetworkId_ = deviceInfo.deviceId_;
         }
         CollaborationManagerHiPlay::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
-            ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
+            ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED, extraInfo_);
     }
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) { // 5 is disconnected status
         if (collaborationNeedNetworkId_.empty()) {
@@ -167,7 +173,14 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     SLOGI("PcmCastSession StartCast");
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
     descriptor_.sessionId_ = sessionToken.sessionId;
-    if (castHandle_ > 0) {
+    bool isPcmScreen = (sessionToken.sessionId == "pcmCastSession" &&
+        ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
+        ProtocolType::TYPE_CAST_PLUS_STREAM) != 0));
+    if (isPcmScreen) {
+        AVRouter::GetInstance().OnSystemCommonEvent(SESSION_CREATED, "");
+    }
+
+    if (castHandle_ > 0 && !isPcmScreen) {
         if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
             SLOGI("repeat startcast %{public}" PRId64, castHandle_);
             SendStateChangeRequest(sessionToken);
@@ -197,7 +210,45 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         SLOGE("Collaboration to start cast failed");
         return sourceAllConnectResult;
     }
-    return SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    return isPcmScreen ? StartScreenCast(outputDeviceInfo, serviceNameStatePair, sessionToken) :
+        SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+}
+
+int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo,
+    std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
+{
+    SLOGI("PcmCastSession StartCastScreen");
+
+    // add mutex
+    std::unique_lock<std::mutex> lock(screenLock_);
+    bool hasPinCode = startCastCondition_.wait_for(lock, std::chrono::seconds(1), [this] {
+        return !pinCode_.empty();
+    });
+    if (!hasPinCode) {
+        SLOGI("cannot get the pincode");
+        return AVSESSION_ERROR;
+    }
+
+    castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, serviceNameStatePair, "pcmCastSession");
+    CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+    AVRouter::GetInstance().RegisterCallback(castHandle_, shared_from_this(),
+        "pcmCastSession", outputDeviceInfo.deviceInfos_[0]);
+
+    tempDeviceInfo_ = outputDeviceInfo.deviceInfos_[0];
+    int32_t castId = static_cast<int32_t>(castHandle_);
+    CastEngine::ConnectionConfig connectionConfig = {};
+    connectionConfig.triggerType = CastEngine::TriggerType::HIPLAY_SCAN_QRCODE;
+    connectionConfig.pinCode = pinCode_;
+    int32_t ret = AVRouter::GetInstance().AddDeviceWithConnectionConfig(castId, outputDeviceInfo, 0, connectionConfig);
+    if (ret == AVSESSION_SUCCESS) {
+        castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+        SLOGI("PcmCastSession StartCast castHandleDeviceId_: %{public}s", castHandleDeviceId_.c_str());
+        CreateExtraInfo("TV", "hotel");
+    } else {
+        DestroyTask();
+    }
+    SLOGI("PcmCastSession StartCast ret %{public}d", ret);
+    return ret;
 }
 
 int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
@@ -225,6 +276,7 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
     if (ret == AVSESSION_SUCCESS) {
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
         SLOGI("PcmCastSession start cast check handle set to %{public}" PRId64, castHandle_);
+        CreateExtraInfo("SPEAKER", "default");
     } else {
         DestroyTask();
     }
@@ -235,6 +287,7 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
 void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
     SLOGI("PcmCastSession StopCast");
+    ReleaseStreamPlayer();
     int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);
     SLOGI("StopCast with unchange castHandle is %{public}lld", static_cast<long long>(castHandle_));
     CHECK_AND_RETURN_LOG(ret != AVSESSION_ERROR, "StopCast failed");
@@ -299,6 +352,9 @@ void PcmCastSession::ExecuteCommonCommand(const std::string& commonCommand, cons
             break;
         case QUERY_COMMAND_NUM:
             QueryCommandParams(commandArgs);
+            break;
+        case CONTROL_COMMAND_NUM:
+            ControlCommandParams(commandArgs);
             break;
         default:
             break;
@@ -385,9 +441,158 @@ void PcmCastSession::QueryCommandParams(const AAFwk::WantParams& commandArgs)
         case QUERY_TO_CAST_NUM:
             AVRouter::GetInstance().SendCommandArgsToCast(castHandle_, QUERY_COMMAND_NUM, params);
             break;
+        case QUERY_TO_AVSESSION_NUM:
+            QueryData(commandBody);
+            break;
         default:
             break;
     }
 }
- 
+
+void PcmCastSession::ControlCommandParams(const AAFwk::WantParams& commandArgs)
+{
+    std::string commandType = commandArgs.GetStringParam(COMMAND_TYPE);
+    const auto& it = CONTROL_COMMAND_MAPS.find(commandType);
+    CHECK_AND_RETURN_LOG(it != CONTROL_COMMAND_MAPS.end(), "controlCommand is not support");
+
+    AAFwk::WantParams commandBody = commandArgs.GetWantParams(COMMAND_BODY);
+    std::string params = commandBody.ToString();
+
+    switch (it->second) {
+        case SAVE_TO_PCM_NUM:
+            SaveDataInPcm(commandBody);
+            break;
+        case CREATE_STREAM_PLAYER_NUM:
+            SLOGI("Start to create stream player");
+            CreateStreamPlayer(commandBody);
+            break;
+        case RELEASE_STREAM_PLAYER_NUM:
+            SLOGI("Start to release stream player");
+            ReleaseStreamPlayer();
+            break;
+        case CHANGE_SCREEN_MODE_NUM:
+            ReleaseStreamPlayer();
+            AVRouter::GetInstance().SendCommandArgsToCast(castHandle_, CONTROL_COMMAND_NUM, params);
+            break;
+        default:
+            break;
+    }
+}
+
+void PcmCastSession::QueryData(const AAFwk::WantParams& commandBody)
+{
+    std::string key = commandBody.GetStringParam(KEY);
+    const auto& it = DATA_KEY_MAPS.find(key);
+    CHECK_AND_RETURN_LOG(it != DATA_KEY_MAPS.end(), "data key is not support");
+
+    switch (it->second) {
+        case CAST_SESSION_ID_NUM:
+            QueryCastSessionId();
+            break;
+        default:
+            break;
+    }
+}
+
+void PcmCastSession::QueryCastSessionId()
+{
+    std::string castSessionId = AVRouter::GetInstance().QueryCastSessionId(castHandle_);
+    cJSON* jsonObj = cJSON_CreateObject();
+    if (!jsonObj) {
+        SLOGE("Failed to create cJSON object");
+        return;
+    }
+
+    cJSON_AddItemToObject(jsonObj, "VALUE", cJSON_CreateString(castSessionId.c_str()));
+    char* jsonStr = cJSON_Print(jsonObj);
+    if (jsonStr != nullptr) {
+        std::string jsonParams(jsonStr);
+        cJSON_free(jsonStr);
+        AVRouter::GetInstance().OnSystemCommonEvent(CAST_SESSION_ID, jsonParams);
+    }
+    cJSON_Delete(jsonObj);
+}
+
+void PcmCastSession::SaveDataInPcm(const AAFwk::WantParams& commandBody)
+{
+    std::string key = commandBody.GetStringParam(KEY);
+    const auto& it = DATA_KEY_MAPS.find(key);
+    CHECK_AND_RETURN_LOG(it != DATA_KEY_MAPS.end(), "data key is not support");
+
+    switch (it->second) {
+        case PIN_CODE_NUM:
+            SavePinCode(commandBody);
+            break;
+        default:
+            break;
+    }
+}
+
+void PcmCastSession::SavePinCode(const AAFwk::WantParams& commandBody)
+{
+    std::string value = commandBody.GetStringParam(VALUE);
+    std::lock_guard<std::mutex> lock(screenLock_);
+    pinCode_ = value;
+    startCastCondition_.notify_all();
+}
+
+void PcmCastSession::CreateStreamPlayer(const AAFwk::WantParams& commandBody)
+{
+    sessionId_ = commandBody.GetStringParam(SESSION_ID);
+    OutputDeviceInfo outputDeviceInfo;
+    outputDeviceInfo.deviceInfos_.emplace_back(tempDeviceInfo_);
+    sptr<AVSessionItem> session =
+        AVSessionService::GetUsersManager().GetContainerFromAll().GetSessionById(sessionId_);
+    CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
+
+    SLOGI("start to dealoutputdevicechange");
+    session->SetCastHandle(castHandle_);
+    session->DealOutputDeviceChange(ConnectionState::STATE_CONNECTED, outputDeviceInfo);
+    descriptor_.sessionId_ = sessionId_;
+}
+
+void PcmCastSession::ReleaseStreamPlayer()
+{
+    OutputDeviceInfo outputDeviceInfo;
+    outputDeviceInfo.deviceInfos_.emplace_back(tempDeviceInfo_);
+    sptr<AVSessionItem> session =
+        AVSessionService::GetUsersManager().GetContainerFromAll().GetSessionById(sessionId_);
+    CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
+
+    SLOGI("start to dealoutputdevicechange");
+    session->DealOutputDeviceChange(ConnectionState::STATE_DISCONNECTED, outputDeviceInfo);
+    OutputDeviceInfo localDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.deviceId_ = "0";
+    deviceInfo.deviceName_ = "LocalDevice";
+    localDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+    session->DealOutputDeviceChange(ConnectionState::STATE_CONNECTED, localDeviceInfo);
+    session->ReleaseAVCastControllerInner();
+    session->SetCastHandle(-1);
+    sessionId_ = "";
+    descriptor_.sessionId_ = "pcmCastSession";
+}
+
+void PcmCastSession::CreateExtraInfo(std::string deviceType, std::string scenario)
+{
+    cJSON* jsonObj = cJSON_CreateObject();
+    if (!jsonObj) {
+        SLOGE("Failed to create cJSON object");
+        return;
+    }
+
+    cJSON_AddItemToObject(jsonObj, "deviceType", cJSON_CreateString(deviceType.c_str()));
+    cJSON_AddItemToObject(jsonObj, "scenario", cJSON_CreateString(scenario.c_str()));
+    if (deviceType == "TV" && scenario == "hotel") {
+        cJSON_AddItemToObject(jsonObj, "needFastCastControl", cJSON_CreateString("true"));
+    }
+    char* jsonStr = cJSON_Print(jsonObj);
+    if (jsonStr != nullptr) {
+        std::string jsonParams(jsonStr);
+        cJSON_free(jsonStr);
+        extraInfo_ = jsonParams;
+    }
+    cJSON_Delete(jsonObj);
+}
 } // namespace OHOS::AVSession

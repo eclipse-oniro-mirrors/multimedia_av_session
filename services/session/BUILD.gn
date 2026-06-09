@@ -410,6 +410,7 @@ if (castplus_cast_engine_enable) {
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "window_manager:libdm_lite",
     ]
 
     if (multimedia_av_session_enable_device_manager) {

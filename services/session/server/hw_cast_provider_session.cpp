@@ -90,6 +90,27 @@ bool HwCastProviderSession::AddDevice(const DeviceInfo deviceInfo, uint32_t spid
     return (ret == 0) ? true : false;
 }
 
+bool HwCastProviderSession::AddDeviceWithConnectionConfig(const DeviceInfo deviceInfo, uint32_t spid,
+    CastEngine::ConnectionConfig connectionConfig)
+{
+    SLOGI("AddDeviceWithConnectionConfig in HwCastProviderSession");
+    if (!castSession_) {
+        SLOGE("castSession_ is not exist");
+        return false;
+    }
+    CastRemoteDevice castRemoteDevice = {};
+    castRemoteDevice.deviceId = deviceInfo.deviceId_;
+    castRemoteDevice.bleMac = deviceInfo.bleMac_;
+    castRemoteDevice.triggerType = static_cast<CastEngine::TriggerType>(deviceInfo.triggerType_);
+    castRemoteDevice.spid = spid;
+
+    avToastDeviceState_ = ConnectionState::STATE_CONNECTING;
+    int32_t ret = castSession_->AddDevice(castRemoteDevice, connectionConfig);
+    avToastDeviceState_ = (ret == 0) ? avToastDeviceState_ : ConnectionState::STATE_DISCONNECTED;
+    SLOGI("AddDeviceWithConnectionConfig in HwCastProviderSession with ret %{public}d", ret);
+    return (ret == 0) ? true : false;
+}
+
 void HwCastProviderSession::SendCommandArgsToCast(const int32_t commandType, const std::string& params)
 {
     std::string parStr = params;
@@ -104,9 +125,24 @@ void HwCastProviderSession::SendCommandArgsToCast(const int32_t commandType, con
         case QUERY_COMMAND_NUM:
             castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_QUERY_REQUEST, parStr);
             break;
+        case CONTROL_COMMAND_NUM:
+            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_MODE_CHANGE, parStr);
+            break;
         default:
             break;
     }
+}
+
+std::string HwCastProviderSession::QueryCastSessionId()
+{
+    std::string sessionId = "";
+    if (!castSession_) {
+        SLOGE("castSession_ is not exist");
+        return sessionId;
+    }
+    castSession_->GetSessionId(sessionId);
+    SLOGI("QueryCastSessionId is %{public}s", sessionId.c_str());
+    return sessionId;
 }
 
 bool HwCastProviderSession::RemoveDevice(std::string deviceId, const DeviceRemoveAction deviceRemoveAction)

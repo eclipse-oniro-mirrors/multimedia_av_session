@@ -86,6 +86,7 @@ ohos_fuzztest("AudioDeviceManagerFuzzTest") {
       "../../../../../../frameworks/native/session:avsession_cast_client",
       "../../../../../session:avsession_cast_item",
     ]
+    external_deps += [ "cast_engine:cast_engine_client" ]
   }
 
   if (bluetooth_part_enable) {

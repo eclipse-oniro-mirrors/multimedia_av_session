@@ -92,6 +92,9 @@ public:
 
     int32_t AddDevice(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
         uint32_t spid) override;
+    
+    int32_t AddDeviceWithConnectionConfig(const int32_t castId, const OutputDeviceInfo& outputDeviceInfo,
+        uint32_t spid, CastEngine::ConnectionConfig connectionConfig) override;
 
     int32_t StopCast(const int64_t castHandle,
         const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT) override;
@@ -155,6 +158,8 @@ public:
     void SendCommandArgsToCast(const int64_t castHandle, const int32_t commandType,
         const std::string& params) override;
 
+    std::string QueryCastSessionId(const int64_t castHandle) override;
+
 protected:
 
 private:
@@ -197,6 +202,7 @@ private:
     std::atomic<bool> streamToMirrorFromSink_ = false;
     DeviceInfo connectedDeviceInfo_;
     const int32_t noReasonCode_ = 0;
+    const std::string pcmCastSession = "pcmCastSession";
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H
