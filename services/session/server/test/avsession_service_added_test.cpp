@@ -271,6 +271,32 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast001, TestSize.Level0)
     SLOGD("StartCast001 end!");
 }
 
+/**
+ * @tc.name: StartCast002
+ * @tc.desc: test StartCast for pcmScreen
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, StartCast002, TestSize.Level0)
+{
+    SLOGD("StartCast002 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AVSession::SessionToken sessionToken;
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "-100";
+    deviceInfo.supportedProtocols_ = 2;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    sessionToken.sessionId = "pcmCastSession";
+    sessionToken.pid = 1234;
+    sessionToken.uid = 5678;
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo);
+    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
+#endif
+    SLOGD("StartCast002 end!");
+}
 
 /**
  * @tc.name: ProcessTargetMigrateTest001

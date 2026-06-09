@@ -92,4 +92,27 @@ void CollaborationManagerHiPlay::UpdataLinkType(const DeviceInfo& deviceInfo)
         }
     }
 }
+
+int32_t CollaborationManagerHiPlay::PublishServiceState(const char* peerNetworkId,
+    ServiceCollaborationManagerBussinessStatus state, std::string extraInfo)
+{
+    SLOGI("enter PublishServiceState");
+    if (exportapi_.ServiceCollaborationManager_PublishServiceState == nullptr) {
+        SLOGE("PublishServiceState function sptr nullptr");
+        return AVSESSION_ERROR;
+    }
+    if (resourceRequest_ == nullptr) {
+        SLOGE("resourceRequest_ is nullptr");
+        return AVSESSION_ERROR;
+    }
+    ServiceCollaborationManager_ServiceStateInfo serviceStateInfo;
+    serviceStateInfo.peerNetworkId = peerNetworkId;
+    serviceStateInfo.serviceName = serviceName_.c_str();
+    serviceStateInfo.extraInfo = extraInfo.c_str();
+    serviceStateInfo.state = state;
+    if (exportapi_.ServiceCollaborationManager_PublishServiceState(&serviceStateInfo, resourceRequest_, -1)) {
+        return AVSESSION_ERROR;
+    }
+    return AVSESSION_SUCCESS;
+}
 }   // namespace OHOS::AVSession

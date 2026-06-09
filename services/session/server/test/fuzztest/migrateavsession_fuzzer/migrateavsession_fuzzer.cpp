@@ -576,6 +576,36 @@ void ProcessMediaControlNeedStateFromNextV2FuzzTest()
     cJSON_Delete(jsonV2);
 }
 
+void HandleLongPauseDetectionFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    int32_t state = GetData<int32_t>();
+    AVPlaybackState playbackState;
+    if (state == AVPlaybackState::PLAYBACK_STATE_PAUSE) {
+        playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    } else if (state == AVPlaybackState::PLAYBACK_STATE_PLAY) {
+        playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    }
+    migrateServer_->HandleLongPauseDetection(playbackState);
+}
+
+void ProcessMediaControlTimerRequestFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    cJSON* jsonV2 = cJSON_CreateObject();
+    if (jsonV2 == nullptr) {
+        return;
+    }
+    cJSON_AddNumberToObject(jsonV2, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    cJSON_AddNumberToObject(jsonV2, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, GetData<int32_t>());
+    migrateServer_->ProcessMediaControlTimerRequest(jsonV2);
+    cJSON_Delete(jsonV2);
+}
+
 void TestFunc()
 {
     ConnectProxyTest();
@@ -609,6 +639,8 @@ void TestFunc()
     HandleNeedStateTimerFuzzTest();
     HandleLongPauseTimerFuzzTest();
     ProcessMediaControlNeedStateFromNextV2FuzzTest();
+    HandleLongPauseDetectionFuzzTest();
+    ProcessMediaControlTimerRequestFuzzTest();
 }
 
 void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)

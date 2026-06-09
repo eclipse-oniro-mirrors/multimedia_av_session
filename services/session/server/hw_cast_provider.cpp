@@ -22,6 +22,8 @@
 #include "avsession_errors.h"
 #include "avsession_event_handler.h"
 #include "avsession_radar.h"
+#include "display_manager_lite.h"
+#include "display_info.h"
 
 using namespace OHOS::CastEngine::CastEngineClient;
 using namespace OHOS::CastEngine;
@@ -136,12 +138,12 @@ void HwCastProvider::Release()
     SLOGD("provider release done");
 }
 
-int HwCastProvider::StartCastSession(bool isHiStream)
+int HwCastProvider::StartCastSession(uint32_t prototype, bool isPcm)
 {
     SLOGI("StartCastSession begin");
-    CastSessionProperty property = {
-        isHiStream ? CastEngine::ProtocolType::CAST_PLUS_AUDIO : CastEngine::ProtocolType::CAST_PLUS_STREAM,
-        CastEngine::EndType::CAST_SOURCE};
+    CastSessionProperty property = {};
+    InitCastSessionProperty(prototype, isPcm, property);
+    bool isHiStream = (prototype & ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0;
     std::shared_ptr<ICastSession> castSession = nullptr;
     int ret = CastSessionManager::GetInstance().CreateCastSession(property, castSession);
     if (ret != AVSESSION_SUCCESS) {
@@ -225,6 +227,26 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t s
     }
 
     return hwCastProviderSession->AddDevice(deviceInfo, spid);
+}
+
+bool HwCastProvider::AddCastDeviceWithConnectionConfig(int castId, DeviceInfo deviceInfo, uint32_t spid,
+    CastEngine::ConnectionConfig connectionConfig)
+{
+    SLOGI("AddCastDeviceWithConnectionConfig with config castSession and corresponding castId is %{public}d", castId);
+    std::lock_guard lockGuard(mutexLock_);
+    SLOGI("add device check lock done");
+
+    if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
+        SLOGE("the castId corresonding to castSession is not exist");
+        return false;
+    }
+    auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
+    if (!hwCastProviderSession) {
+        SLOGE("the castId corresonding to castSession is nullptr");
+        return false;
+    }
+
+    return hwCastProviderSession->AddDeviceWithConnectionConfig(deviceInfo, spid, connectionConfig);
 }
 
 bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo, const DeviceRemoveAction deviceRemoveAction)
@@ -387,6 +409,22 @@ void HwCastProvider::SendCommandArgsToCast(int castId, const int32_t commandType
         "Can not find corresponding castId");
     CHECK_AND_RETURN_LOG(hwCastProviderSessionMap_[castId] != nullptr, "castSession is nullptr");
     hwCastProviderSessionMap_[castId]->SendCommandArgsToCast(commandType, params);
+}
+
+std::string HwCastProvider::QueryCastSessionId(const int32_t castId)
+{
+    SLOGI("QueryCastSessionId with config castSession and corresponding castId is %{public}d", castId);
+
+    if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
+        SLOGI("Can not find corresponding castId");
+        return "";
+    }
+    if (hwCastProviderSessionMap_[castId] == nullptr) {
+        SLOGI("castSession is nullptr");
+        return "";
+    }
+
+    return hwCastProviderSessionMap_[castId]->QueryCastSessionId();
 }
 
 bool HwCastProvider::RegisterCastSessionStateListener(int castId,
@@ -641,5 +679,29 @@ int HwCastProvider::GetCastProtocolType(int castCapability)
         (capability & ProtocolType::TYPE_CAST_PLUS_AUDIO ?
         static_cast<uint32_t>(CastEngine::ProtocolType::CAST_PLUS_AUDIO) : 0));
     return castProtocolType;
+}
+
+void HwCastProvider::InitCastSessionProperty(uint32_t prototype, bool isPcm, CastSessionProperty& property)
+{
+    property.protocolType = CastEngine::ProtocolType::CAST_PLUS_STREAM;
+    bool isHiScreen = (prototype & ProtocolType::TYPE_CAST_PLUS_STREAM) != 0;
+    if (isPcm) {
+        property.protocolType = isHiScreen ? CastEngine::ProtocolType::CAST_PLUS_MIRROR :
+            CastEngine::ProtocolType::CAST_PLUS_AUDIO;
+    }
+    property.endType = CastEngine::EndType::CAST_SOURCE;
+    if (isPcm && isHiScreen) {
+        property.audioProperty.codec = 1;
+        property.videoProperty.codecType = CastEngine::VideoCodecType::H265;
+        sptr<Rosen::DisplayLite> display = Rosen::DisplayManagerLite::GetInstance().GetDefaultDisplay();
+        auto displayInfo = display->GetDisplayInfo();
+        int32_t width = displayInfo->GetWidth();
+        int32_t height = displayInfo->GetHeight();
+        property.windowProperty.startX = 0;
+        property.windowProperty.startY = 0;
+        property.windowProperty.width = static_cast<uint32_t>(width);
+        property.windowProperty.height = static_cast<uint32_t>(height);
+        SLOGI("get the displayInfo width %{public}d, height %{public}d", width, height);
+    }
 }
 } // namespace OHOS::AVSession

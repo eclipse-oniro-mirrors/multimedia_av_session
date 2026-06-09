@@ -879,3 +879,89 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateF
     g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
     cJSON_Delete(jsonValue);
 }
+
+/**
+ * @tc.name: HandleLongPauseDetection001
+ * @tc.desc: test HandleLongPauseDetection with PAUSE state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleLongPauseDetection001, TestSize.Level0)
+{
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    g_MigrateAVSessionServer->lastPlaybackState_ = AVPlaybackState::PLAYBACK_STATE_PLAY;
+    g_MigrateAVSessionServer->HandleLongPauseDetection(state);
+    EXPECT_EQ(g_MigrateAVSessionServer->lastPlaybackState_, AVPlaybackState::PLAYBACK_STATE_PAUSE);
+}
+
+/**
+ * @tc.name: HandleLongPauseDetection002
+ * @tc.desc: test HandleLongPauseDetection with PLAY state when not notified
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleLongPauseDetection002, TestSize.Level0)
+{
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(false);
+    g_MigrateAVSessionServer->lastPlaybackState_ = AVPlaybackState::PLAYBACK_STATE_PAUSE;
+    g_MigrateAVSessionServer->HandleLongPauseDetection(state);
+    EXPECT_EQ(g_MigrateAVSessionServer->lastPlaybackState_, AVPlaybackState::PLAYBACK_STATE_PLAY);
+    EXPECT_EQ(g_MigrateAVSessionServer->hasLongPauseNotified_.load(), false);
+}
+
+/**
+ * @tc.name: HandleLongPauseDetection003
+ * @tc.desc: test HandleLongPauseDetection with PLAY state when already notified
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, HandleLongPauseDetection003, TestSize.Level0)
+{
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(true);
+    g_MigrateAVSessionServer->lastSessionId_ = "test_session";
+    g_MigrateAVSessionServer->lastPlaybackState_ = AVPlaybackState::PLAYBACK_STATE_PAUSE;
+    g_MigrateAVSessionServer->HandleLongPauseDetection(state);
+    EXPECT_EQ(g_MigrateAVSessionServer->lastPlaybackState_, AVPlaybackState::PLAYBACK_STATE_PLAY);
+    EXPECT_EQ(g_MigrateAVSessionServer->hasLongPauseNotified_.load(), false);
+}
+
+/**
+ * @tc.name: ProcessMediaControlTimerRequest001
+ * @tc.desc: test ProcessMediaControlTimerRequest with valid V2 protocol
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlTimerRequest001, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, NEED_STATE_TIMER_INTERVAL);
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->ProcessMediaControlTimerRequest(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMediaControlTimerRequest002
+ * @tc.desc: test ProcessMediaControlTimerRequest with custom timeout
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlTimerRequest002, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, 10000);
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->ProcessMediaControlTimerRequest(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
+    cJSON_Delete(jsonValue);
+}

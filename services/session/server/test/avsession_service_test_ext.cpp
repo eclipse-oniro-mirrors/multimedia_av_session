@@ -979,6 +979,7 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     pcmCastSession->DealCollaborationPublishState(5, deviceInfo);
     pcmCastSession->DealCollaborationPublishState(0, deviceInfo);
     pcmCastSession->DealCollaborationPublishState(6, deviceInfo);
+    pcmCastSession->DealCollaborationPublishState(1, deviceInfo);
 
     pcmCastSession->OnCastStateChange(5, deviceInfo, false, 0);
     pcmCastSession->OnCastStateChange(0, deviceInfo, false, 0);
@@ -990,6 +991,8 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     pcmCastSession->DealCollaborationPublishState(0, deviceInfo);
     pcmCastSession->collaborationNeedNetworkId_.clear();
     pcmCastSession->DealCollaborationPublishState(6, deviceInfo);
+    pcmCastSession->collaborationNeedNetworkId_.clear();
+    pcmCastSession->DealCollaborationPublishState(1, deviceInfo);
 
     pcmCastSession->CastStateCommandParams(commandArgs);
     pcmCastSession->DestroyTask();
@@ -1339,6 +1342,90 @@ static HWTEST_F(AVSessionServiceTestExt, QueryCommandParams001, TestSize.Level0)
     EXPECT_NE(g_AVSessionService, nullptr);
 }
 
+/*
+ * @tc.name: ControlCommandParams001
+ * @tc.desc: Test ControlCommandParams
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ControlCommandParams001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OHOS::AAFwk::WantParams commandArgs;
+    commandArgs.SetParam("command_type", OHOS::AAFwk::String::Box("SAVE_TO_PCM"));
+    OHOS::AAFwk::WantParams commandBody;
+    commandBody.SetParam("test", OHOS::AAFwk::String::Box("test001"));
+    commandArgs.SetParam("command_body", OHOS::AAFwk::WantParamWrapper::Box(commandBody));
+    pcmCastSession->ControlCommandParams(commandArgs);
+
+    commandArgs.SetParam("command_type", OHOS::AAFwk::String::Box("CREATE_STREAM_PLAYER"));
+    pcmCastSession->ControlCommandParams(commandArgs);
+
+    commandArgs.SetParam("command_type", OHOS::AAFwk::String::Box("RELEASE_STREAM_PLAYER"));
+    pcmCastSession->ControlCommandParams(commandArgs);
+
+    commandArgs.SetParam("command_type", OHOS::AAFwk::String::Box("CHANGE_SCREEN_MODE"));
+    pcmCastSession->ControlCommandParams(commandArgs);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/*
+ * @tc.name: QueryData001
+ * @tc.desc: Test QueryData
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, QueryData001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OHOS::AAFwk::WantParams commandBody;
+    commandBody.SetParam("KEY", OHOS::AAFwk::String::Box("CAST_SESSION_ID"));
+    pcmCastSession->QueryData(commandBody);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/*
+ * @tc.name: SaveDataInPcm001
+ * @tc.desc: Test SaveDataInPcm
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, SaveDataInPcm001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OHOS::AAFwk::WantParams commandBody;
+    commandBody.SetParam("KEY", OHOS::AAFwk::String::Box("PIN_CODE"));
+    pcmCastSession->SaveDataInPcm(commandBody);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/*
+ * @tc.name: CreateExtraInfo001
+ * @tc.desc: Test CreateExtraInfo
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, CreateExtraInfo001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    pcmCastSession->CreateExtraInfo("SPEAKER", "default");
+    pcmCastSession->CreateExtraInfo("TV", "default");
+    pcmCastSession->CreateExtraInfo("TV", "hotel");
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
 /**
  * @tc.name: PcmCastSessionReportSessionCast001
  * @tc.desc: Test PcmCastSession::ReportSessionCast with deviceInfo
@@ -1391,6 +1478,105 @@ static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionReportSessionCast003, Tes
     int castState = 0;
     int reasonCode = 10014;
     pcmCastSession->ReportSessionCast(castState, reasonCode);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionStartCast001
+ * @tc.desc: Test PcmCastSession::StartCast with valid hiplay outputDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionStartCast001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.supportedProtocols_ = 2;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    sessionToken.sessionId = "pcmCastSession";
+    pcmCastSession->StartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionStartCast002
+ * @tc.desc: Test PcmCastSession::StartCast with valid hiplay outputDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionStartCast002, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.supportedProtocols_ = 8;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    sessionToken.sessionId = "pcmCastSession";
+    pcmCastSession->StartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionStartScreenCast001
+ * @tc.desc: Test PcmCastSession::SubStartCast with pinCode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionStartScreenCast001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    sessionToken.sessionId = "testSessionId";
+    OHOS::AAFwk::WantParams commandBody;
+    commandBody.SetParam("VALUE", OHOS::AAFwk::String::Box("123456"));
+    pcmCastSession->SavePinCode(commandBody);
+    pcmCastSession->StartScreenCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionStartScreenCast002
+ * @tc.desc: Test PcmCastSession::SubStartCast with empty pinCode
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionStartScreenCast002, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    pcmCastSession->StartScreenCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
     pcmCastSession->DestroyTask();
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);

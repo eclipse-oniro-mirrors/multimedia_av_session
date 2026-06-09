@@ -40,9 +40,11 @@ public:
     void StopDiscovery() override;
     int32_t SetDiscoverable(const bool enable) override;
     void Release() override;
-    int StartCastSession(bool isHiStream) override;
+    int StartCastSession(uint32_t prototype, bool isPcm) override;
     void StopCastSession(int castId) override;
     bool AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t spid) override;
+    bool AddCastDeviceWithConnectionConfig(int castId, DeviceInfo deviceInfo, uint32_t spid,
+        CastEngine::ConnectionConfig connectionConfig) override;
     bool RemoveCastDevice(int castId, DeviceInfo deviceInfo,
         const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT) override;
     std::shared_ptr<IAVCastControllerProxy> GetRemoteController(int castId) override;
@@ -66,10 +68,13 @@ public:
     int32_t GetProtocolType(uint32_t castProtocolType) override;
 
     void SendCommandArgsToCast(int castId, const int32_t commandType, const std::string& params) override;
+    std::string QueryCastSessionId(const int32_t castId) override;
 
     int GetCastProtocolType(int castCapability);
 
     void SetMirrorCastHandle(int64_t castHandle);
+
+    void InitCastSessionProperty(uint32_t prototype, bool isPcm, CastEngine::CastSessionProperty& property);
 
 private:
     std::vector<uint32_t> ParsePullClients(const std::string& str);

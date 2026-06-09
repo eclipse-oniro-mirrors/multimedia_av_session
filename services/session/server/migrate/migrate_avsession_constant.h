@@ -93,6 +93,8 @@ constexpr int32_t AVSESSION_PROXY_VERSION = 200;
 constexpr int32_t REMOTE_MEDIA_LONG_PAUSE = 5;
 constexpr int32_t REMOTE_MEDIA_LONG_PAUSE_RESUME = 6;
 constexpr int64_t NEED_STATE_TIMER_INTERVAL = 6000;
+constexpr int64_t NEED_STATE_TIMER_MIN_INTERVAL = 1000;
+constexpr int64_t NEED_STATE_TIMER_MAX_INTERVAL = 30000;
 
 
 namespace {

@@ -112,7 +112,8 @@ public:
     virtual ~ICastSessionMock() {};
     virtual int32_t RegisterListener(std::shared_ptr<ICastSessionListener> listener) { return 0; }
     virtual int32_t UnregisterListener() { return 0; }
-    virtual int32_t AddDevice(const CastRemoteDevice &remoteDevice) { return 0; }
+    virtual int32_t AddDevice(const CastRemoteDevice &remoteDevice,
+        const ConnectionConfig &connectionConfig = ConnectionConfig{}) { return 0; }
     virtual int32_t RemoveDevice(const std::string &deviceId, const CastEngine::DeviceRemoveAction &actionType =
         CastEngine::DeviceRemoveAction::ACTION_DISCONNECT) { return 0; }
     virtual int32_t StartAuth(const AuthInfo &authInfo) { return 0; }
@@ -243,6 +244,72 @@ static HWTEST(HwCastSupplementTest, AddCastDevice003, TestSize.Level0)
     bool ret = hwCastProvider->AddCastDevice(castId, deviceInfo, spid);
     EXPECT_EQ(ret, false);
     SLOGI("AddCastDevice003 end!");
+}
+
+/**
+ * @tc.name: AddCastDeviceWithConnectionConfig001
+ * @tc.desc: test AddCastDeviceWithConnectionConfig
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, AddCastDeviceWithConnectionConfig001, TestSize.Level0)
+{
+    SLOGI("AddCastDeviceWithConnectionConfig001 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int32_t castId = 0;
+    uint32_t spid = 33;
+    DeviceInfo deviceInfo;
+    CastEngine::ConnectionConfig connectionConfig = {};
+    bool ret = hwCastProvider->AddCastDeviceWithConnectionConfig(castId, deviceInfo, spid, connectionConfig);
+    EXPECT_EQ(ret, false);
+    SLOGI("AddCastDeviceWithConnectionConfig001 end!");
+}
+
+/**
+ * @tc.name: AddCastDeviceWithConnectionConfig002
+ * @tc.desc: test AddCastDeviceWithConnectionConfig
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, AddCastDeviceWithConnectionConfig002, TestSize.Level0)
+{
+    SLOGI("AddCastDeviceWithConnectionConfig002 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int32_t castId = 0;
+    uint32_t spid = 33;
+    DeviceInfo deviceInfo;
+    hwCastProvider->hwCastProviderSessionMap_[castId] = nullptr;
+    CastEngine::ConnectionConfig connectionConfig = {};
+    bool ret = hwCastProvider->AddCastDeviceWithConnectionConfig(castId, deviceInfo, spid, connectionConfig);
+    EXPECT_EQ(ret, false);
+    SLOGI("AddCastDeviceWithConnectionConfig002 end!");
+}
+
+/**
+ * @tc.name: AddCastDeviceWithConnectionConfig003
+ * @tc.desc: test AddCastDeviceWithConnectionConfig
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, AddCastDeviceWithConnectionConfig003, TestSize.Level0)
+{
+    SLOGI("AddCastDeviceWithConnectionConfig003 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int32_t castId = 0;
+    uint32_t spid = 33;
+    DeviceInfo deviceInfo;
+    auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
+    hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+    CastEngine::ConnectionConfig connectionConfig = {};
+    bool ret = hwCastProvider->AddCastDeviceWithConnectionConfig(castId, deviceInfo, spid, connectionConfig);
+    EXPECT_EQ(ret, false);
+    SLOGI("AddCastDeviceWithConnectionConfig003 end!");
 }
 
 /**
@@ -839,6 +906,63 @@ static HWTEST(HwCastSupplementTest, GetRemoteDrmCapabilities003, TestSize.Level0
     bool ret = hwCastProvider->GetRemoteDrmCapabilities(castId, deviceId, drmCapabilities);
     EXPECT_EQ(ret, false);
     SLOGI("GetRemoteDrmCapabilities003 end!");
+}
+
+/**
+ * @tc.name: QueryCastSessionId001
+ * @tc.desc: test QueryCastSessionId
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, QueryCastSessionId001, TestSize.Level0)
+{
+    SLOGI("QueryCastSessionId001 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    hwCastProvider->QueryCastSessionId(castId);
+    EXPECT_TRUE(castId == 0);
+    SLOGI("QueryCastSessionId001 end!");
+}
+
+/**
+ * @tc.name: QueryCastSessionId002
+ * @tc.desc: test QueryCastSessionId
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, QueryCastSessionId002, TestSize.Level0)
+{
+    SLOGI("QueryCastSessionId002 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    hwCastProvider->hwCastProviderSessionMap_[castId] = nullptr;
+    hwCastProvider->QueryCastSessionId(castId);
+    EXPECT_TRUE(castId == 0);
+    SLOGI("QueryCastSessionId002 end!");
+}
+
+/**
+ * @tc.name: QueryCastSessionId003
+ * @tc.desc: test QueryCastSessionId
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, QueryCastSessionId003, TestSize.Level0)
+{
+    SLOGI("QueryCastSessionId003 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    int castId = 0;
+    auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(nullptr);
+    hwCastProvider->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
+    hwCastProvider->QueryCastSessionId(castId);
+    EXPECT_TRUE(castId == 0);
+    SLOGI("QueryCastSessionId003 end!");
 }
 
 /**

@@ -85,6 +85,7 @@ public:
     void DoMetaDataSyncToRemote(const AVMetaData& data);
     void DoMediaImageSyncToRemote(std::shared_ptr<AVSessionPixelMap> innerPixelMap);
     void DoPlaybackStateSyncToRemote(const AVPlaybackState& state);
+    void HandleLongPauseDetection(const AVPlaybackState& state);
     void DoValidCommandsSyncToRemote(const std::vector<int32_t>& commands);
     void DoBundleInfoSyncToRemote(sptr<AVControllerItem> controller);
     void DoPostTasksClear();
@@ -133,6 +134,7 @@ private:
     void SwitchAudioDeviceCommand(cJSON* jsonObject);
     void ProcessColdStartFromNext(cJSON* commandJsonValue);
     void ProcessMediaControlNeedStateFromNext(cJSON* commandJsonValue);
+    void ProcessMediaControlTimerRequest(cJSON* commandJsonValue);
     void SendCommandProc(const std::string &command, sptr<AVControllerItem> controller);
     void MediaButtonEventProc(const std::string &command, sptr<AVControllerItem> controller);
     void CommandWithExtrasProc(int mediaCommand, const std::string &extrasCommand, const std::string &extras,
@@ -200,6 +202,8 @@ private:
     static constexpr int64_t longPauseTimerInterval = 5 * 60 * 1000; // 5 minutes
     void HandleLongPauseTimer();
     std::atomic<bool> hasLongPauseNotified_ = false;
+    std::atomic<int32_t> lastPlaybackState_ = -1;
+    std::mutex longPauseLock_;
 
     std::string sessionIdCache_ = "";
     std::string mediaImgTopicStr_ = "";

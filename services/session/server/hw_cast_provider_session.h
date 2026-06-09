@@ -32,6 +32,7 @@ public:
         CAST_MODE_CHANGE_COMMAND = 0,
         BYPASS_COMMAND_NUM = 1,
         QUERY_COMMAND_NUM = 2,
+        CONTROL_COMMAND_NUM = 3,
     };
 
     enum {
@@ -49,6 +50,8 @@ public:
     int32_t Init();
     void Release();
     bool AddDevice(const DeviceInfo deviceInfo, uint32_t spid);
+    bool AddDeviceWithConnectionConfig(const DeviceInfo deviceInfo, uint32_t spid,
+        CastEngine::ConnectionConfig connectionConfig);
     bool RemoveDevice(std::string deviceId,
         const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
     std::shared_ptr<CastEngine::IStreamPlayer> CreateStreamPlayer();
@@ -62,6 +65,7 @@ public:
     void SendCommandArgsToCast(const int32_t commandType, const std::string& params);
     void OnHiplayEventRecv(const int32_t eventId, const std::string& jsonParam);
     int32_t GetProtocolType(uint32_t castProtocolType);
+    std::string QueryCastSessionId();
 
 private:
     void ComputeToastOnDeviceState(const CastEngine::DeviceStateInfo &stateInfo,

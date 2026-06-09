@@ -816,7 +816,7 @@ HWTEST_F(AVCastControllerTest, StartCastSession001, TestSize.Level1)
 {
     HwCastProvider hwCastProvider;
     // StartCastSession may fail with -1003
-    int32_t ret = hwCastProvider.StartCastSession(false);
+    int32_t ret = hwCastProvider.StartCastSession(static_cast<uint32_t>(ProtocolType::TYPE_CAST_PLUS_STREAM), false);
     SLOGI("StartCastSession001 with ret %{public}d", ret);
     EXPECT_TRUE(ret != AVSESSION_SUCCESS);
 }
