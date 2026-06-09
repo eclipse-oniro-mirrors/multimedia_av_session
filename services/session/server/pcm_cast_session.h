@@ -50,11 +50,15 @@ public:
 
     void OnSystemCommonEvent(const std::string& args);
 
+    void OnDeviceNameSystemCommonEvent(const std::string& args);
+
     void BypassCommandParams(const AAFwk::WantParams& commandArgs);
 
     void QueryCommandParams(const AAFwk::WantParams& commandArgs);
 
     void ControlCommandParams(const AAFwk::WantParams& commandArgs);
+
+    void UpdateDeviceNameCommandParams(const AAFwk::WantParams& commandArgs);
 
     void QueryData(const AAFwk::WantParams& commandArgs);
     void QueryCastSessionId();
@@ -95,6 +99,7 @@ private:
     const std::string BYPASS_COMMAND = "BYPASS_COMMAND";
     const std::string QUERY_COMMAND = "QUERY_COMMAND";
     const std::string CONTROL_COMMAND = "CONTROL_COMMAND";
+    const std::string UPDATE_DEVICE_NAME = "UPDATE_DEVICE_NAME";
 
     const std::string BYPASS_TO_CAST = "BYPASS_TO_CAST";
 
@@ -118,6 +123,7 @@ private:
         BYPASS_COMMAND_NUM = 1,
         QUERY_COMMAND_NUM = 2,
         CONTROL_COMMAND_NUM = 3,
+        UPDATE_DEVICE_NAME_COMMAND = 4,
     };
 
     enum CastState {
@@ -130,6 +136,7 @@ private:
         {BYPASS_COMMAND, BYPASS_COMMAND_NUM},
         {QUERY_COMMAND, QUERY_COMMAND_NUM},
         {CONTROL_COMMAND, CONTROL_COMMAND_NUM},
+        {UPDATE_DEVICE_NAME, UPDATE_DEVICE_NAME_COMMAND}
     };
 
     enum {
