@@ -30,6 +30,8 @@ public:
 
     void AVSessionRemoveTask(const std::string &name);
 
+    bool AVSessionReplaceTask(const Callback &callback, const std::string &name, int64_t delayTime);
+
     void AVSessionRemoveHandler();
 
 private:
