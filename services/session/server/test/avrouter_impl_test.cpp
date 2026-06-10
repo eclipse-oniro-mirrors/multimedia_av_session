@@ -111,6 +111,7 @@ public:
         void SetIsSupportMirrorToStream(bool isSupportMirrorToStream) {}
         int32_t checkEnableCast(bool enable) { return 0; }
         bool IsHiPlayCasting() { return false; }
+        int32_t PcmCastSessionReleasePlayer() { return 0; }
 #endif
     virtual ~AVSessionServiceListenerMock() {}
 };

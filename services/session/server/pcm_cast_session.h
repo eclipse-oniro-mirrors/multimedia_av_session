@@ -70,6 +70,8 @@ public:
 
     void CreateExtraInfo(std::string deviceType, std::string scenario);
 
+    void SendModeChangeToCast(int32_t screenMode);
+
 private:
     int64_t castHandle_ = 0;
     int32_t castState_ = CastState::DISCONNECTED;
@@ -89,7 +91,7 @@ private:
     SessionToken newSessionToken_;
     std::pair<std::string, std::string> newServiceNameStatePair_;
     DeviceInfo tempDeviceInfo_;
-    std::string sessionId_;
+    std::string streamCastingSessionId_;
     std::string extraInfo_;
 
     const std::string COMMAND_TYPE = "command_type";
@@ -115,7 +117,7 @@ private:
     const std::string VALUE = "VALUE";
     const std::string CAST_SESSION_ID = "CAST_SESSION_ID";
     const std::string PIN_CODE = "PIN_CODE";
-    const std::string SESSION_CREATED = "SESSION_CREATED";
+    const std::string QUERY_PINCODE = "QUERY_PINCODE";
     const std::string SESSION_ID = "SESSION_ID";
 
     enum {

@@ -694,6 +694,7 @@ void HwCastProvider::InitCastSessionProperty(uint32_t prototype, bool isPcm, Cas
         property.audioProperty.codec = 1;
         property.videoProperty.codecType = CastEngine::VideoCodecType::H265;
         sptr<Rosen::DisplayLite> display = Rosen::DisplayManagerLite::GetInstance().GetDefaultDisplay();
+        CHECK_AND_RETURN_LOG(display != nullptr, "display is nullptr");
         auto displayInfo = display->GetDisplayInfo();
         int32_t width = displayInfo->GetWidth();
         int32_t height = displayInfo->GetHeight();

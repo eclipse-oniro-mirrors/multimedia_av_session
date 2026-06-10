@@ -922,6 +922,13 @@ std::string AVRouterImpl::QueryCastSessionId(const int64_t castHandle)
     return providerManagerMap_[providerNumber]->provider_->QueryCastSessionId(castId);
 }
 
+int32_t AVRouterImpl::PcmCastSessionReleasePlayer()
+{
+    CHECK_AND_RETURN_RET_LOG(servicePtr_ != nullptr, AVSESSION_ERROR, "servicePtr_ is nullptr");
+
+    return servicePtr_->PcmCastSessionReleasePlayer();
+}
+
 void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo)
 {
     disconnectOtherSession_.store(true);

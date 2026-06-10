@@ -305,6 +305,8 @@ public:
     int32_t checkEnableCast(bool enable) override;
 
     void setInCast(bool isInCast) override;
+
+    int32_t PcmCastSessionReleasePlayer() override;
 #endif
 
     int32_t Close(void) override;
@@ -793,6 +795,7 @@ private:
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const std::string deviceStateDisconnection = "IDLE";
     const std::string seperator = ",";
+    const std::string CAST_SESSION_RELEASED = "CAST_SESSION_RELEASED";
     int appState = -1;
     std::atomic<bool> isSupportMirrorToStream_ = false;
     std::atomic<bool> appCastExit_ = false;
@@ -806,6 +809,7 @@ private:
     std::condition_variable enableCastCond_;
     const int32_t castReleaseTimeOut_ = 120;
     shared_ptr<PcmCastSession> pcmCastSession_ = nullptr;
+    const int32_t CONNECTING_MODE = 0;
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";

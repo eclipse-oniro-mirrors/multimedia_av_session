@@ -299,6 +299,34 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: StartCast003
+ * @tc.desc: test StartCast for not found device
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, StartCast003, TestSize.Level0)
+{
+    SLOGD("StartCast003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem =
+        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_VIDEO, false, elementName);
+
+    OHOS::AVSession::SessionToken sessionToken;
+    sessionToken.sessionId = avsessionItem->GetSessionId();
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "-100";
+    deviceInfo.supportedProtocols_ = 2;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("StartCast003 end!");
+}
+
+/**
  * @tc.name: ProcessTargetMigrateTest001
  * @tc.desc: Test for deviceTypeId mismatch.
  * @tc.type: FUNC

@@ -283,6 +283,8 @@ public:
 
     void SetOutputDevice(const OutputDeviceInfo& info);
 
+    void SetAndDealOutputDeviceChange(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo);
+
     void GetOutputDevice(OutputDeviceInfo& info);
 
     int32_t CastAudioToRemote(const std::string& sourceDevice, const std::string& sinkDevice,
@@ -411,6 +413,8 @@ public:
     MultiDeviceState GetMultiDeviceState();
 
     void SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback);
+
+    void SetIsHiPlayStreamCasting(bool isHiPlayStreamCasting);
 
     void SetServiceCallbackForPcMode(const std::function<bool()>& callback);
 
@@ -666,6 +670,7 @@ private:
     std::atomic<MultiDeviceState> multiDeviceState_ = MultiDeviceState::DEFAULT;
     OutputDeviceInfo newOutputDeviceInfo_;
     bool isFirstCallback_ = true;
+    bool isHiPlayStreamCasting_ = false;
     const int32_t SWITCH_WAIT_TIME = 300;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
     std::function<void()> serviceCallbackStopSinkCast_;

@@ -115,6 +115,14 @@ public:
      * @since 24
     */
     virtual bool IsHiPlayCasting() = 0;
+
+    /**
+     * Get pcmcastsession to release stream player
+     *
+     * @param
+     * @since 24
+     */
+    virtual int32_t PcmCastSessionReleasePlayer() = 0;
 #endif
 };
 } // namespace OHOS::AVSession

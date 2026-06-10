@@ -496,6 +496,15 @@ public:
     */
     virtual std::string QueryCastSessionId(const int64_t castHandle) = 0;
 
+    /**
+     * @brief use pcmcastsession to release stream player
+     *
+     * @param
+     * @return {int32_t} release result
+     * @since 24
+     */
+    virtual int32_t PcmCastSessionReleasePlayer() = 0;
+
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
     std::string sessionId_ = "-1";

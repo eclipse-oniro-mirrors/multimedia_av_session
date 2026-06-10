@@ -482,7 +482,6 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_RegisterListenerStreamToCast_005, Test
     SLOGD("AVSessionItem_RegisterListenerStreamToCast_005 end!");
 }
 
-
 /**
  * @tc.name: AVSessionItem_SetOutputDevice_001
  * @tc.desc: Test SetOutputDevice with controllers not empty.
@@ -527,6 +526,54 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetOutputDevice_002, TestSize.Level0)
     EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ == "DeviceName1");
     EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceType_ == 1);
     SLOGD("AVSessionItem_SetOutputDevice_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetAndDealOutputDeviceChange_001
+ * @tc.desc: Test SetAndDealOutputDeviceChange with controllers not empty.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetAndDealOutputDeviceChange_001, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_SetAndDealOutputDeviceChange_001 begin!");
+    OutputDeviceInfo info;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "DeviceId1";
+    deviceInfo.deviceName_ = "DeviceName1";
+    deviceInfo.deviceType_ = 1;
+    info.deviceInfos_.push_back(deviceInfo);
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(1, g_AVSessionItem);
+    int32_t castState = static_cast<int32_t>(ConnectionState::STATE_CONNECTED);
+    g_AVSessionItem->SetAndDealOutputDeviceChange(castState, info);
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceId_ == "DeviceId1");
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ == "DeviceName1");
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceType_ == 1);
+    SLOGD("AVSessionItem_SetAndDealOutputDeviceChange_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_SetAndDealOutputDeviceChange_002
+ * @tc.desc: Test SetAndDealOutputDeviceChange with controllers empty.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetAndDealOutputDeviceChange_002, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_SetAndDealOutputDeviceChange_002 begin!");
+    OutputDeviceInfo info;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "DeviceId1";
+    deviceInfo.deviceName_ = "DeviceName1";
+    deviceInfo.deviceType_ = 1;
+    info.deviceInfos_.push_back(deviceInfo);
+    g_AVSessionItem->controllers_.clear();
+    int32_t castState = static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED);
+    g_AVSessionItem->SetAndDealOutputDeviceChange(castState, info);
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceId_ == "DeviceId1");
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ == "DeviceName1");
+    EXPECT_TRUE(g_AVSessionItem->descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceType_ == 1);
+    SLOGD("AVSessionItem_SetAndDealOutputDeviceChange_002 end!");
 }
 
 /**
