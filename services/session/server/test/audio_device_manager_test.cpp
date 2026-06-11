@@ -55,20 +55,6 @@ static HWTEST(AudioDeviceManagerTest, InitAudioStateCallback001, TestSize.Level0
 }
 
 /**
- * @tc.name: RegisterPreferedOutputDeviceChangeCallback001
- * @tc.desc: audioPreferedOutputDeviceChangeCallback_ have registered
- * @tc.type: FUNC
- */
-static HWTEST(AudioDeviceManagerTest, RegisterPreferedOutputDeviceChangeCallback001, TestSize.Level0)
-{
-    SLOGI("RegisterPreferedOutputDeviceChangeCallback001 begin!");
-    AudioDeviceManager::GetInstance().audioPreferedOutputDeviceChangeCallback_
-          = std::make_shared<OutputDeviceChangeCallback>();
-    AudioDeviceManager::GetInstance().RegisterPreferedOutputDeviceChangeCallback();
-    EXPECT_TRUE(AudioDeviceManager::GetInstance().audioPreferedOutputDeviceChangeCallback_ != nullptr);
-}
-
-/**
  * @tc.name: RegisterAudioDeviceChangeCallback001
  * @tc.desc: audioDeviceChangeCallback_ have registered
  * @tc.type: FUNC

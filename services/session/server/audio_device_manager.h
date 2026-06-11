@@ -17,9 +17,10 @@
 #define OHOS_AUDIO_DEVICE_MANAGER_H
  
 #include "audio_device_info.h"
+#include "audio_adapter.h"
 #include "audio_routing_manager.h"
 #include "migrate_avsession_server.h"
- 
+
 namespace OHOS::AVSession {
 enum OutputDevice {
     AUDIO_OUTPUT_SINK = 0,
@@ -42,17 +43,16 @@ public:
     std::string GetDeviceId();
  
 private:
-    void RegisterPreferedOutputDeviceChangeCallback();
-    void UnRegisterPreferedOutputDeviceChangeCallback();
     void RegisterAudioDeviceChangeCallback();
     int32_t UnRegisterAudioDeviceChangeCallback();
-    std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> audioPreferedOutputDeviceChangeCallback_;
     std::shared_ptr<AudioStandard::AudioManagerDeviceChangeCallback> audioDeviceChangeCallback_;
+    std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> preferredOutputDeviceChangeCallback_;
 
     bool isRegistered_ = false;
     std::shared_ptr<MigrateAVSessionServer> migrateSession_;
     std::string deviceId_;
     int32_t outputDevice_ = AUDIO_OUTPUT_SOURCE;
+    std::recursive_mutex callbackLock_;
 };
 
 class OutputDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDeviceChangeCallback {

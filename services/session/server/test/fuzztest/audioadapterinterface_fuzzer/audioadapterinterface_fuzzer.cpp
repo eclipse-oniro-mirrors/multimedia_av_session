@@ -74,7 +74,6 @@ void AudioAdapterTest002(FuzzedDataProvider& provider)
     audioAdapter.MuteAudioStream(uid, pid);
     audioAdapter.UnsetAvailableDeviceChangeCallback();
     audioAdapter.UnregisterVolumeKeyEventCallback();
-    audioAdapter.UnsetPreferredOutputDeviceChangeCallback();
 }
 
 void AudioAdapterTest003(FuzzedDataProvider& provider)
@@ -90,7 +89,6 @@ void AudioAdapterTest003(FuzzedDataProvider& provider)
 
     OHOS::AVSession::AudioAdapter::StateListener StateListener;
     audioAdapter.AddStreamRendererStateListener(StateListener);
-    audioAdapter.UnsetPreferredOutputDeviceChangeCallback();
 }
 
 void AudioAdapterTest004(FuzzedDataProvider& provider)
@@ -137,13 +135,14 @@ void AudioAdapterTest005(FuzzedDataProvider& provider)
         provider.ConsumeIntegralInRange<int32_t>(0, OHOS::AudioStandard::STREAM_USAGE_MAX));
 
     auto callback = [](const OHOS::AVSession::AudioDeviceDescriptors&) {};
+    auto preferredCallback = std::make_shared<AudioPreferredDeviceChangeCallback>(callback);
     OHOS::AVSession::AudioAdapter::PreferOutputDeviceChangeListener listener;
 
     auto &audioAdapter = OHOS::AVSession::AudioAdapter::GetInstance();
     audioAdapter.MuteAudioStream(uid, usage);
     audioAdapter.PauseAudioStream(uid, usage);
     audioAdapter.SetAvailableDeviceChangeCallback(callback);
-    audioAdapter.SetPreferredOutputDeviceChangeCallback(callback);
+    audioAdapter.AddPreferredOutputDeviceChangeCallback(preferredCallback);
     audioAdapter.UnMuteAudioStream(uid, usage);
     audioAdapter.AddDeviceChangeListener(listener);
 }

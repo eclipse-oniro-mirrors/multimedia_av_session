@@ -987,11 +987,12 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange001, TestSize.Level
 {
     SLOGD("OnPreferredOutputDeviceChange001 begin!");
     bool ret = false;
-    AudioAdapter::GetInstance().SetPreferredOutputDeviceChangeCallback(
+    auto callback = std::make_shared<AudioPreferredDeviceChangeCallback>(
         [&ret] (const AudioDeviceDescriptors &desc) {
         auto device = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
         ret = device.empty();
     });
+    AudioAdapter::GetInstance().AddPreferredOutputDeviceChangeCallback(callback);
 
     auto& audioAdapter = AudioAdapter::GetInstance();
     AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
@@ -999,6 +1000,7 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange001, TestSize.Level
     audioAdapter.SelectOutputDevice(availableDevices[0]);
     sleep(1);
     EXPECT_FALSE(ret);
+    AudioAdapter::GetInstance().RemovePreferredOutputDeviceChangeCallback(callback);
 }
 
 /**
@@ -1011,12 +1013,13 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange002, TestSize.Level
 {
     SLOGD("OnPreferredOutputDeviceChange002 begin!");
     bool ret = false;
-    AudioAdapter::GetInstance().SetPreferredOutputDeviceChangeCallback(
+    auto callback = std::make_shared<AudioPreferredDeviceChangeCallback>(
         [&ret] (const AudioDeviceDescriptors &desc) {
         auto device = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
         ret = device.empty();
     });
-    AudioAdapter::GetInstance().UnsetPreferredOutputDeviceChangeCallback();
+    AudioAdapter::GetInstance().AddPreferredOutputDeviceChangeCallback(callback);
+    AudioAdapter::GetInstance().RemovePreferredOutputDeviceChangeCallback(callback);
 
     auto& audioAdapter = AudioAdapter::GetInstance();
     AudioDeviceDescriptors availableDevices = audioAdapter.GetAvailableDevices();
@@ -1062,4 +1065,31 @@ static HWTEST(AudioAdapterTest, SelectOutputDevice002, TestSize.Level0)
     EXPECT_NE(desc->deviceType_, testDevice->deviceType_);
     int32_t ret = audioAdapter.SelectOutputDevice(desc);
     EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
+ * @tc.name: PreferredOutputDeviceChangeCallback001
+ * @tc.desc: Notify add and remove PreferredOutputDeviceChangeCallback.
+ * @tc.type: FUNC
+ * @tc.require: AR000H31KJ
+ */
+static HWTEST(AudioAdapterTest, PreferredOutputDeviceChangeCallback001, TestSize.Level0)
+{
+    SLOGI("PreferredOutputDeviceChangeCallback001 begin!");
+    AudioAdapter::GetInstance().Init();
+    auto& audioAdapter = AudioAdapter::GetInstance();
+    std::shared_ptr<AudioPreferredDeviceChangeCallback> callbackPtr1 =
+        std::make_shared<AudioPreferredDeviceChangeCallback>([](const AudioDeviceDescriptors& devices) {
+            SLOGI("callbackPtr1 devices size:%{public}zu", devices.size());
+        });
+    std::shared_ptr<AudioPreferredDeviceChangeCallback> callbackPtr2 =
+        std::make_shared<AudioPreferredDeviceChangeCallback>([](const AudioDeviceDescriptors& devices) {
+            SLOGI("callbackPtr2 devices size:%{public}zu", devices.size());
+        });
+    audioAdapter.AddPreferredOutputDeviceChangeCallback(callbackPtr1);
+    audioAdapter.AddPreferredOutputDeviceChangeCallback(callbackPtr2);
+    EXPECT_EQ(audioAdapter.preferredOutputDeviceCallbacks_.size(), 2);
+    audioAdapter.RemovePreferredOutputDeviceChangeCallback(callbackPtr2);
+    EXPECT_EQ(audioAdapter.preferredOutputDeviceCallbacks_.size(), 1);
+    SLOGI("PreferredOutputDeviceChangeCallback001 end!");
 }
