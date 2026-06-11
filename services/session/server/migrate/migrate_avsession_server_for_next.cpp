@@ -922,6 +922,8 @@ void MigrateAVSessionServer::DoPostTasksClear()
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_SET_VOLUME_COMMAND");
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_AVAIL_DEVICES_LIST");
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_CURRENT_DEVICE");
+    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_PROTOCOL_VERSION");
+    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_LONG_PAUSE_NOTIFY");
 }
 
 bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Callback &callback,
