@@ -84,6 +84,7 @@ const materialUtil = {
         } catch (e) {
             console.info(TAG, `getMaterialStroke err: ${e?.code}, ${e?.message}`);
         }
+        return undefined;
     }
     materialUtil.isSupportHds = function() {
         return _isSupportHds;
