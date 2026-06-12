@@ -1943,6 +1943,29 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent003, TestSize.Level1)
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
     eventSubscriber.OnReceiveEvent(eventData);
+EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveEvent004
+ * @tc.desc: Test OnReceiveEvent with HybridModeSwitchEvent action, targetMode=0 and stage=2
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent004, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::EventFwk::CommonEventData eventData;
+    std::string action = "HybridModeSwitchEvent";
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    want.SetParam("targetMode", 0);
+    want.SetParam("stage", 2);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
+    eventSubscriber.OnReceiveEvent(eventData);
     EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
 }
 } // AVSession

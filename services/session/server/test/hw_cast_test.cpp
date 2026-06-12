@@ -1620,7 +1620,43 @@ static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen002, Test
     listener->SetSupportExtendedScreen(true);
     EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
     listener = nullptr;
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen002 end!");
+SLOGI("HwCastDisplayListenerSetSupportExtendedScreen002 end!");
+}
+
+/**
+ * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen003
+ * @tc.desc: test SetSupportExtendedScreen with isHotSwitch true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen003, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen003 begin!");
+    OHOS::sptr<IAVSessionCallback> callback;
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
+    EXPECT_EQ(listener != nullptr, true);
+    listener->SetSupportExtendedScreen(true, true);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
+    listener = nullptr;
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen003 end!");
+}
+
+/**
+ * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen004
+ * @tc.desc: test SetSupportExtendedScreen with isHotSwitch false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen004, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen004 begin!");
+    OHOS::sptr<IAVSessionCallback> callback;
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
+    EXPECT_EQ(listener != nullptr, true);
+    listener->SetSupportExtendedScreen(false, false);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), false);
+    listener = nullptr;
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen004 end!");
 }
 
 /**

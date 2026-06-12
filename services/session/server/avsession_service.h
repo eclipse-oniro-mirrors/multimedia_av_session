@@ -360,7 +360,9 @@ public:
 
     static AVSessionUsersManager& GetUsersManager();
 
-    void SetPcMode(bool isPcMode);
+void SetPcMode(bool isPcMode);
+
+    void HotSwitchReportCastDisplay();
 
 private:
     void NotifyProcessStatus(bool isStart);

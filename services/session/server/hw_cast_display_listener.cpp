@@ -17,6 +17,8 @@
 #include "avsession_log.h"
 
 namespace OHOS::AVSession {
+static const int32_t MIN_VIRTUAL_SCREEN_ID = 500;
+
 // LCOV_EXCL_START
 void HwCastDisplayListener::OnConnect(Rosen::DisplayId displayId)
 {
@@ -70,7 +72,7 @@ void HwCastDisplayListener::SetAppCastDisplayId(Rosen::DisplayId displayId)
     appCastId_ = displayId;
 }
 
-void HwCastDisplayListener::SetSupportExtendedScreen(bool isSupport)
+void HwCastDisplayListener::SetSupportExtendedScreen(bool isSupport, bool isHotSwitch)
 {
     sptr<Rosen::DisplayInfo> curDisplayInfo;
     {
@@ -80,10 +82,13 @@ void HwCastDisplayListener::SetSupportExtendedScreen(bool isSupport)
     }
     CHECK_AND_RETURN_LOG(curDisplayInfo != nullptr, "curDisplayInfo_ is nullptr");
     auto displayName = curDisplayInfo->GetName();
+    auto displayId = curDisplayInfo->GetDisplayId();
     auto displayState = isSupport ? CastDisplayState::STATE_ON : CastDisplayState::STATE_OFF;
     SLOGI("SetSupportExtendedScreen %{public}s, %{public}s cast display: %{public}s",
           isSupport ? "true" : "false", isSupport ? "connect" : "disconnect", displayName.c_str());
-    ReportCastDisplay(curDisplayInfo, displayState);
+    if (!isHotSwitch || displayId < MIN_VIRTUAL_SCREEN_ID) {
+        ReportCastDisplay(curDisplayInfo, displayState);
+    }
 }
 
 // LCOV_EXCL_START
