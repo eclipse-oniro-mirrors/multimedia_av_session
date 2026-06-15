@@ -1943,7 +1943,7 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent003, TestSize.Level1)
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
     eventSubscriber.OnReceiveEvent(eventData);
-EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
+    EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
 }
 
 /**
