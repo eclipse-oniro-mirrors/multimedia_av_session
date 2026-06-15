@@ -32,6 +32,7 @@
 #include "system_ability_definition.h"
 #include "collaboration_manager_utils.h"
 #include "avsession_item_extension.h"
+#include "avsession_info.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include <condition_variable>
@@ -687,6 +688,12 @@ private:
     std::atomic<bool> isMediaChangeForMirrorToStream_ = false;
     void InitCastEventHandlers();
     std::unordered_map<int32_t, std::function<void()>> castEventHandlers_;
+    std::unordered_set<int32_t> validCastStates_ = {
+        CastEngineConnectState::CONNECTING, CastEngineConnectState::PAUSED,
+        CastEngineConnectState::PLAYING, CastEngineConnectState::DISCONNECTED,
+        CastEngineConnectState::STREAM, CastEngineConnectState::AUTHING,
+        CastEngineConnectState::MIRROR_TO_STREAM, CastEngineConnectState::STREAM_TO_MIRROR
+    };
     
     static constexpr int32_t STREAM_TO_MIRROR_FROM_SINK = 2005;
 #endif

@@ -1108,7 +1108,10 @@ enum CastEngineConnectState {
     MIRROR_TO_UI = 7,
     UI_TO_MIRROR = 8,
     UICAST = 9,
-    DEVICE_STATE_MAX = 10,
+    AUTHING = 10,
+    MIRROR_TO_STREAM = 11,
+    STREAM_TO_MIRROR = 12,
+    DEVICE_STATE_MAX = 13,
 };
 
 /**
