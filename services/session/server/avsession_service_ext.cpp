@@ -724,6 +724,15 @@ void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceIn
         AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
     }
 }
+
+void AVSessionService::HotSwitchReportCastDisplay()
+{
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session != nullptr) {
+            session->SetSupportExtendedScreen(true, true);
+        }
+    }
+}
 #endif
 
 AVSessionSystemAbilityLoadCallback::AVSessionSystemAbilityLoadCallback(AVSessionService *ptr)
