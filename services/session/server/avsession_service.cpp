@@ -323,9 +323,11 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         // pcMode=1, phoneMode=0, hotSwitchStage=2, dms init done
         SLOGI("on receiveEvent HYBRID_MODE_SWITCH %{public}d, hotSwitchStage %{public}d", targetMode, hotSwitchStage);
         servicePtr_->SetPcMode(targetMode == 1);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
         if (targetMode == 0 && hotSwitchStage == AFTER_SCREEN_ON_TREE) {
             servicePtr_->HotSwitchReportCastDisplay();
         }
+#endif
     }
 }
 
