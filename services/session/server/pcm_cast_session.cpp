@@ -165,7 +165,7 @@ void PcmCastSession::OnSystemCommonEvent(const std::string& args)
 void PcmCastSession::OnDeviceNameSystemCommonEvent(const std::string& args)
 {
     std::string deviceName = JsonUtils::GetStringParamFromJsonString(args, "DEVICE_NAME");
-    SLOGI("Received UPDATE_DEVICE_NAME: deviceName:%{public}s", deviceName.c_str());
+    SLOGI("Received UPDATE_DEVICE_NAME: deviceName:%{public}s", AVSessionUtils::GetAnonyDeviceName(deviceName).c_str());
 
     tempDeviceInfo_.deviceName_ = deviceName;
     descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ = deviceName;

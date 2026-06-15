@@ -369,27 +369,77 @@ public:
 
         return title.substr(0, start_idx) + "***" + title.substr(end_idx);
     }
-    
-static std::string GetAnonyNetworkId(const std::string& networkId)
-{
-    if (networkId.empty()) {
-        return "";
+
+    static std::string GetAnonyDeviceName(const std::string& deviceName)
+    {
+        CHECK_AND_RETURN_RET_LOG(!deviceName.empty(), "", "GetAnonyDeviceName deviceName is empty");
+        constexpr unsigned char UTF8_CONTINUATION_BYTE_MASK = 0xC0;
+        constexpr unsigned char UTF8_CONTINUATION_BYTE_VALUE = 0x80;
+        constexpr size_t CHAR_COUNT_MIN_THRESHOLD = 3;
+        constexpr size_t CHAR_COUNT_LEVEL_1 = 6;
+        constexpr size_t CHAR_COUNT_LEVEL_2 = 9;
+        constexpr size_t CHAR_COUNT_LEVEL_3 = 16;
+        constexpr size_t KEEP_COUNT_1 = 1;
+        constexpr size_t KEEP_COUNT_2 = 2;
+        constexpr size_t KEEP_COUNT_3 = 3;
+        constexpr size_t KEEP_COUNT_4 = 4;
+
+        std::vector<size_t> char_positions;
+        for (size_t i = 0; i < deviceName.size(); ++i) {
+            unsigned char byte = static_cast<unsigned char>(deviceName[i]);
+            if ((byte & UTF8_CONTINUATION_BYTE_MASK) != UTF8_CONTINUATION_BYTE_VALUE) {
+                char_positions.push_back(i);
+            }
+        }
+        const size_t char_count = char_positions.size();
+        if (char_count == 0) {
+            return "****";
+        }
+        size_t first_char_len = (char_count >= 2) ?
+            (char_positions[1] - char_positions[0]) : (deviceName.size() - char_positions[0]);
+        std::string first_char = deviceName.substr(char_positions[0], first_char_len);
+        if (char_count < CHAR_COUNT_MIN_THRESHOLD) {
+            return first_char + "****";
+        }
+        size_t keep_front = KEEP_COUNT_2;
+        size_t keep_back = KEEP_COUNT_1;
+        if (char_count >= CHAR_COUNT_LEVEL_1) {
+            keep_front = KEEP_COUNT_2;
+            keep_back = KEEP_COUNT_2;
+        }
+        if (char_count >= CHAR_COUNT_LEVEL_2) {
+            keep_front = KEEP_COUNT_3;
+            keep_back = KEEP_COUNT_2;
+        }
+        if (char_count >= CHAR_COUNT_LEVEL_3) {
+            keep_front = KEEP_COUNT_4;
+            keep_back = KEEP_COUNT_3;
+        }
+        std::string front_part = deviceName.substr(0, char_positions[keep_front]);
+        std::string back_part = deviceName.substr(char_positions[char_count - keep_back]);
+        return front_part + "****" + back_part;
     }
+    
+    static std::string GetAnonyNetworkId(const std::string& networkId)
+    {
+        if (networkId.empty()) {
+            return "";
+        }
 
-    const size_t total_length = networkId.length();
-    int PREFIX_LENGTH = 4;
-    int SUFFIX_LENGTH = 4;
-    CHECK_AND_RETURN_RET(total_length >= static_cast<size_t>(PREFIX_LENGTH + SUFFIX_LENGTH), networkId);
+        const size_t total_length = networkId.length();
+        int PREFIX_LENGTH = 4;
+        int SUFFIX_LENGTH = 4;
+        CHECK_AND_RETURN_RET(total_length >= static_cast<size_t>(PREFIX_LENGTH + SUFFIX_LENGTH), networkId);
 
-    std::string result;
-    result.reserve(total_length);
+        std::string result;
+        result.reserve(total_length);
 
-    result += networkId.substr(0, PREFIX_LENGTH);
-    result.append(total_length - PREFIX_LENGTH - SUFFIX_LENGTH, '*');
-    result += networkId.substr(total_length - SUFFIX_LENGTH);
+        result += networkId.substr(0, PREFIX_LENGTH);
+        result.append(total_length - PREFIX_LENGTH - SUFFIX_LENGTH, '*');
+        result += networkId.substr(total_length - SUFFIX_LENGTH);
 
-    return result;
-}
+        return result;
+    }
 private:
     static constexpr const int32_t RSS_UID = 1096;
     static constexpr const char* DATA_PATH_NAME = "/data/service/el2/";
