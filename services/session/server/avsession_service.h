@@ -305,6 +305,8 @@ public:
     int32_t checkEnableCast(bool enable) override;
 
     void setInCast(bool isInCast) override;
+
+    void HotSwitchReportCastDisplay();
 #endif
 
     int32_t Close(void) override;
@@ -361,8 +363,6 @@ public:
     static AVSessionUsersManager& GetUsersManager();
 
     void SetPcMode(bool isPcMode);
-
-    void HotSwitchReportCastDisplay();
 
 private:
     void NotifyProcessStatus(bool isStart);
