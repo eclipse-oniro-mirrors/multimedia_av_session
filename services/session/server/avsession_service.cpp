@@ -331,15 +331,6 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     }
 }
 
-void AVSessionService::HotSwitchReportCastDisplay()
-{
-    for (const auto& session : GetContainer().GetAllSessions()) {
-        if (session != nullptr) {
-            session->SetSupportExtendedScreen(true, true);
-        }
-    }
-}
-
 std::string AVSessionService::GetAVQueueDir(int32_t userId)
 {
     return GetUsersManager().GetDirForCurrentUser(userId) + AVQUEUE_FILE_NAME;
