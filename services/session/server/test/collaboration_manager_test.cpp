@@ -14,6 +14,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <future>
+#include <thread>
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_info.h"
@@ -750,4 +752,55 @@ static HWTEST_F(CollaborationManagerTest, ListenCollaborationApplyResult004, tes
     EXPECT_FALSE(instance.collaborationRejectFlag_);
     EXPECT_FALSE(instance.waitUserDecisionFlag_);
     SLOGI("ListenCollaborationApplyResult004, end");
+}
+
+/**
+ * @tc.name: CastAddToCollaboration001
+ * @tc.desc: Test CastAddToCollaboration with empty deviceId.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, CastAddToCollaboration001, testing::ext::TestSize.Level1)
+{
+    SLOGI("CastAddToCollaboration001, start");
+    DeviceInfo deviceInfo;
+    deviceInfo.realDeviceId_ = "";
+    int32_t ret = CollaborationManagerURLCasting::GetInstance().CastAddToCollaboration(deviceInfo);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("CastAddToCollaboration001, end");
+}
+
+/**
+ * @tc.name: CastAddToCollaboration002
+ * @tc.desc: Test CastAddToCollaboration with timeout.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(CollaborationManagerTest, CastAddToCollaboration002, testing::ext::TestSize.Level1)
+{
+    SLOGI("CastAddToCollaboration002, start");
+    auto& instance = CollaborationManagerURLCasting::GetInstance();
+    instance.applyResultFlag_ = false;
+    instance.applyUserResultFlag_ = false;
+    instance.collaborationRejectFlag_ = false;
+    instance.waitUserDecisionFlag_ = false;
+
+    DeviceInfo deviceInfo;
+    deviceInfo.realDeviceId_ = "test_device_id";
+    auto applyAdvancedResource = [](const char* peerNetworkId, const char* serviceName,
+        ServiceCollaborationManager_ResourceRequestInfoSets* resourceRequest, int32_t userId,
+        ServiceCollaborationManager_Callback* callback) {
+            return static_cast<int32_t>(0);
+    };
+    instance.exportapi_.ServiceCollaborationManager_ApplyAdvancedResource = applyAdvancedResource;
+
+    std::future<int32_t> future = std::async(std::launch::async, [&instance, &deviceInfo]() {
+        return instance.CastAddToCollaboration(deviceInfo);
+    });
+    std::future_status status = future.wait_for(std::chrono::seconds(12));
+    if (status == std::future_status::ready) {
+        int32_t ret = future.get();
+        EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
+    } else {
+        future.wait();
+    }
+    SLOGI("CastAddToCollaboration002, end");
 }

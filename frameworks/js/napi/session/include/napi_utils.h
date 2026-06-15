@@ -226,6 +226,7 @@ public:
     static napi_status SetValue(napi_env env, const DeviceInfo& in, napi_value& out);
     static napi_status ProcessDeviceInfoParams(napi_env env, napi_value in, DeviceInfo& out);
     static napi_status ProcessDeviceInfoParamsExtra(napi_env env, napi_value in, DeviceInfo& out);
+    static napi_status ProcessDeviceInfoParamsMore(napi_env env, napi_value in, DeviceInfo& out);
 
     /* MediaInfoHolder <-> napi_value */
     static napi_status GetValue(napi_env env, napi_value in, MediaInfoHolder& out);
@@ -344,6 +345,7 @@ public:
     static constexpr size_t TIME_OUT_SECOND = 5;
     static constexpr int HTTP_ERROR_CODE = 400;
     static constexpr int COAP = 2;
+    static constexpr int NO_SCREEN_ID = -1;
 };
 }
 #endif // NAPI_UTILS_H

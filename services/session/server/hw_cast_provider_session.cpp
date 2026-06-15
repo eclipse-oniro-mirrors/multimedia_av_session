@@ -78,10 +78,16 @@ bool HwCastProviderSession::AddDevice(const DeviceInfo deviceInfo, uint32_t spid
         return false;
     }
     CastRemoteDevice castRemoteDevice = {};
-    castRemoteDevice.deviceId = deviceInfo.deviceId_;
+    castRemoteDevice.deviceId = deviceInfo.realDeviceId_;
     castRemoteDevice.bleMac = deviceInfo.bleMac_;
     castRemoteDevice.triggerType = static_cast<CastEngine::TriggerType>(deviceInfo.triggerType_);
     castRemoteDevice.spid = spid;
+
+    std::vector<CastEngine::ServiceInfo> infos;
+    CastEngine::ServiceInfo serviceInfo;
+    serviceInfo.screenId = deviceInfo.screenId_;
+    infos.emplace_back(serviceInfo);
+    castRemoteDevice.serviceInfos = infos;
 
     avToastDeviceState_ = ConnectionState::STATE_CONNECTING;
     int32_t ret = castSession_->AddDevice(castRemoteDevice);
@@ -262,32 +268,9 @@ bool HwCastProviderSession::UnRegisterCastSessionStateListener(std::shared_ptr<I
     return false;
 }
 
-void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &stateInfo)
+std::vector<AudioStreamInfo> HwCastProviderSession::BuildAudioStreamInfos(
+    const CastEngine::CastRemoteDevice &castRemoteDevice)
 {
-    int32_t deviceState = static_cast<int32_t>(stateInfo.deviceState);
-    std::vector<std::shared_ptr<IAVCastSessionStateListener>> tempListenerList;
-    SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(deviceState));
-    if (stashDeviceState_ == deviceState) {
-        SLOGI("duplicate devicestate");
-        return;
-    }
-    
-    CastRemoteDevice castRemoteDevice;
-    castSession_ ? castSession_->GetRemoteDeviceInfo(stateInfo.deviceId, castRemoteDevice) : static_cast<int32_t>(0);
-
-    ComputeToastOnDeviceState(stateInfo, castRemoteDevice);
-    {
-        std::lock_guard lockGuard(mutex_);
-        if (castSessionStateListenerList_.size() == 0) {
-            SLOGI("current has not registered listener, stash state: %{public}d", deviceState);
-            stashDeviceState_ = deviceState;
-            stashDeviceId_ = stateInfo.deviceId;
-            return;
-        }
-        stashDeviceState_ = -1;
-        tempListenerList = castSessionStateListenerList_;
-    }
-
     std::vector<AudioStreamInfo> streamInfos;
     if (protocolType_ == CastEngine::ProtocolType::CAST_PLUS_AUDIO) {
         SLOGI("OnDeviceState CAST_PLUS_AUDIO GetRemoteDeviceInfo");
@@ -299,14 +282,45 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         audioStreamInfo.channelLayout = static_cast<AudioChannelLayout>(castRemoteDevice.audioCapability.channelLayout);
         streamInfos.push_back(audioStreamInfo);
     }
+    return streamInfos;
+}
+
+void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &stateInfo)
+{
+    int32_t deviceState = static_cast<int32_t>(stateInfo.deviceState);
+    std::vector<std::shared_ptr<IAVCastSessionStateListener>> tempListenerList;
+    SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(deviceState));
+    if (stashDeviceState_ == deviceState) {
+        SLOGI("duplicate devicestate");
+        return;
+    }
+
+    CastRemoteDevice castRemoteDevice;
+    castSession_ ? castSession_->GetRemoteDeviceInfo(stateInfo.deviceId, castRemoteDevice) : static_cast<int32_t>(0);
+
+    ComputeToastOnDeviceState(stateInfo, castRemoteDevice);
+    {
+        std::lock_guard lockGuard(mutex_);
+        if (castSessionStateListenerList_.size() == 0) {
+            SLOGI("current has not registered listener, stash state: %{public}d", deviceState);
+            stashDeviceState_ = deviceState;
+            stashDeviceId_ = GetDeviceId(stateInfo);
+            return;
+        }
+        stashDeviceState_ = -1;
+        tempListenerList = castSessionStateListenerList_;
+    }
+
+    auto streamInfos = BuildAudioStreamInfos(castRemoteDevice);
 
     for (auto listener : tempListenerList) {
         DeviceInfo deviceInfo;
-        deviceInfo.deviceId_ = stateInfo.deviceId;
+        deviceInfo.deviceId_ = GetDeviceId(stateInfo);
         deviceInfo.deviceName_ = "RemoteCast";
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
         deviceInfo.audioCapabilities_.streamInfos_ = streamInfos;
         deviceInfo.supportedProtocols_ = GetProtocolType(castRemoteDevice.protocolCapabilities);
+        deviceInfo.realDeviceId_ = stateInfo.deviceId;
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for ListSize %{public}d", static_cast<int>(tempListenerList.size()));
             listener->OnCastStateChange(static_cast<int>(deviceState), deviceInfo,
@@ -365,7 +379,7 @@ void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInf
             static_cast<int32_t>(stateInfo.deviceState), static_cast<int32_t>(stateInfo.reasonCode));
 
     DeviceState deviceState;
-    deviceState.deviceId = stateInfo.deviceId;
+    deviceState.deviceId = GetDeviceId(stateInfo);
     deviceState.deviceState = static_cast<int32_t>(stateInfo.deviceState);
     deviceState.reasonCode = static_cast<int32_t>(stateInfo.reasonCode);
     deviceState.radarErrorCode = stateInfo.radarErrCode;
@@ -415,5 +429,12 @@ int32_t HwCastProviderSession::GetProtocolType(uint32_t castProtocolType)
         ((castProtocolType & static_cast<int>(CastEngine::ProtocolType::CAST_PLUS_AUDIO)) ?
             ProtocolType::TYPE_CAST_PLUS_AUDIO : 0);
     return protocolType;
+}
+
+std::string HwCastProviderSession::GetDeviceId(const CastEngine::DeviceStateInfo &stateInfo)
+{
+    std::string deviceId = (stateInfo.screenId == noScreenId) ? stateInfo.deviceId :
+        (stateInfo.deviceId + std::to_string(stateInfo.screenId));
+    return deviceId;
 }
 }

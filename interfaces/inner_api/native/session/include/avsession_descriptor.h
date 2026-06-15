@@ -52,7 +52,7 @@ public:
     static DeviceInfo* Unmarshalling(Parcel& in);
 
     int32_t castCategory_ {};
-    std::string deviceId_;
+    std::string deviceId_; // car is castRemoteDevice.deviceId+serviceInfo.screenId, other is castRemoteDevice.deviceId
     std::string deviceName_;
     std::string networkId_;
     std::string ipAddress_;
@@ -71,6 +71,8 @@ public:
     int32_t triggerType_ {};
     std::string uuid_;
     HiPlayDeviceInfo hiPlayDeviceInfo_ {};
+    std::string realDeviceId_; // castRemoteDevice.deviceId
+    int32_t screenId_ = -1; // car is serviceInfo.screenId, other is -1
 };
 
 class OutputDeviceInfo : public Parcelable {

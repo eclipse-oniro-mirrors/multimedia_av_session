@@ -1465,6 +1465,16 @@ napi_status NapiUtils::SetValue(napi_env env, const DeviceInfo& in, napi_value& 
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
     status = napi_set_named_property(env, out, "hiPlayDeviceInfo", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+	
+    status = SetValue(env, in.realDeviceId_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "realDeviceId", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
+    status = SetValue(env, in.screenId_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "screenId", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
     return napi_ok;
 }
@@ -1905,6 +1915,9 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     status = ProcessDeviceInfoParamsExtra(env, in, out);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo ProcessDeviceInfoParamsExtra failed", status);
 
+    status = ProcessDeviceInfoParamsMore(env, in, out);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo ProcessDeviceInfoParamsMore failed", status);
+
     return napi_ok;
 }
 
@@ -2008,6 +2021,31 @@ napi_status NapiUtils::ProcessDeviceInfoParamsExtra(napi_env env, napi_value in,
     }
     return napi_ok;
 }
+
+napi_status NapiUtils::ProcessDeviceInfoParamsMore(napi_env env, napi_value in, DeviceInfo& out)
+{
+    napi_value value {};
+    bool hasKey = false;
+    napi_status status = napi_ok;
+    napi_has_named_property(env, in, "realDeviceId", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "realDeviceId", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo realDeviceId failed", status);
+        status = GetValue(env, value, out.realDeviceId_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo realDeviceId value failed", status);
+    }
+    napi_has_named_property(env, in, "screenId", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "screenId", &value);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo screenId failed", status);
+        status = GetValue(env, value, out.screenId_);
+        CHECK_RETURN(status == napi_ok, "get DeviceInfo screenId value failed", status);
+    } else {
+        out.screenId_ = NO_SCREEN_ID;
+    }
+    return napi_ok;
+}
+
 
 /* napi_value -> OutputDeviceInfo */
 napi_status NapiUtils::GetValue(napi_env env, napi_value in, OutputDeviceInfo& out)
