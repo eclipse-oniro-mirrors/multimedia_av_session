@@ -43,13 +43,14 @@ bool AVMetaData::WriteToParcel(MessageParcel& parcel) const
         SetAVQueueLength(avQueueImageLength);
     }
     int32_t twoImageLength = mediaImageLength + avQueueImageLength;
-    SLOGI("twoImageLength:%{public}d|%{public}d|%{public}d", twoImageLength, mediaImageLength, GetMediaImageTopic());
+    HILOG_INFO(LOG_CORE, "writeTwoImg:%{public}d|%{public}d|%{public}d",
+        twoImageLength, mediaImageLength, GetMediaImageTopic());
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(twoImageLength), false, "write twoImageLength failed");
     CHECK_AND_RETURN_RET_LOG(MarshallingExceptImg(parcel), false, "MarshallingExceptImg failed");
 
     int32_t maxImageSize = 10 * 1024 *1024;
     bool isImageValid = twoImageLength > 0 && twoImageLength <= maxImageSize;
-    CHECK_AND_RETURN_RET(isImageValid, true);
+    CHECK_AND_RETURN_RET_LOG(isImageValid, true, "imgErr");
 
     unsigned char *buffer = new (std::nothrow) unsigned char[twoImageLength];
     CHECK_AND_RETURN_RET_LOG(buffer != nullptr, false, "new buffer failed");
@@ -86,7 +87,7 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& in)
     }
     int32_t maxImageSize = 10 * 1024 *1024;
     bool isImageValid = twoImageLength > 0 && twoImageLength <= maxImageSize;
-    CHECK_AND_RETURN_RET(isImageValid, metaData);
+    CHECK_AND_RETURN_RET_LOG(isImageValid, metaData, "imgInvalid");
     if (!metaData->ReadFromParcel(static_cast<MessageParcel&>(in), twoImageLength)) {
         SLOGI("ReadFromParcel failed");
         delete metaData;
@@ -111,10 +112,12 @@ bool AVMetaData::ReadFromParcel(MessageParcel& in, int32_t twoImageLength)
     }
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
     (mediaImageLength > 0) ? SetMediaImage(mediaPixelMap) : (void)0;
-    SLOGI("twoImageLength:%{public}d|%{public}d|%{public}d", twoImageLength, mediaImageLength, GetMediaImageTopic());
+    HILOG_INFO(LOG_CORE, "readTwoImg:%{public}d|%{public}d|%{public}d",
+        twoImageLength, mediaImageLength, GetMediaImageTopic());
 
-    CHECK_AND_RETURN_RET_LOG(twoImageLength > mediaImageLength, true,
-                             "twoImageLength <= mediaImageLength");
+    if (twoImageLength <= mediaImageLength) {
+        return true;
+    }
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = std::make_shared<AVSessionPixelMap>();
     std::vector<uint8_t> avQueueImageBuffer;
     for (int j = mediaImageLength; j < twoImageLength; j++) {
@@ -423,7 +426,9 @@ std::shared_ptr<AVSessionPixelMap> AVMetaData::GetMediaImage() const
 
 int AVMetaData::GetMediaImageTopic() const
 {
-    CHECK_AND_RETURN_RET(mediaImage_ != nullptr, -1);
+    if (mediaImage_ == nullptr) {
+        return -1;
+    }
     std::vector<uint8_t> imgBuffer = mediaImage_->GetInnerImgBuffer();
     CHECK_AND_RETURN_RET(imgBuffer.size() <= INT_MAX, -1);
     int imgSize = static_cast<int>(imgBuffer.size());

@@ -36,7 +36,7 @@ ErrCode AVCastControllerCallbackClient::OnCastPlaybackStateChange(const AVPlayba
     if (castPlaybackStateListener_) {
         castPlaybackStateListener_(state);
     }
-    SLOGI("OnCastPlaybackStateChange done with state: %{public}d", state.GetState());
+    SLOGI("done with state: %{public}d", state.GetState());
     return AVSESSION_SUCCESS;
 }
 

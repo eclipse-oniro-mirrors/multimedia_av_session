@@ -318,7 +318,7 @@ void NapiAVCastPickerHelper::HandleEvent(int32_t event, std::string callBackName
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("pickerNotRegister:%{public}d", event);
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {

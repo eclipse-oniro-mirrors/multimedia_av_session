@@ -44,7 +44,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBa
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("castNotRegister:%{public}d", event);
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
@@ -75,11 +75,11 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBa
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("castNotRegister:%{public}d", event);
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        SLOGI("call with flag for event %{public}d", event);
+        SLOGI("callCastEvent:%{public}d", event);
         asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref), callBackName,
             [param](napi_env env, int& argc, napi_value *argv) {
                 argc = NapiUtils::ARGC_ONE;
@@ -95,7 +95,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event,
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("castNotRegister:%{public}d", event);
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
@@ -116,7 +116,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBa
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("castNotRegister:%{public}d", event);
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
@@ -136,7 +136,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBa
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("castNotRegister:%{public}d", event);
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
@@ -158,7 +158,7 @@ void NapiAVCastControllerCallback::HandleErrorEvent(int32_t event, const int32_t
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("castNotRegister:%{public}d", event);
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
@@ -185,7 +185,7 @@ void NapiAVCastControllerCallback::OnCastPlaybackStateChange(const AVPlaybackSta
 {
     std::string callBackName = "NapiAVCastControllerCallback::OnCastPlaybackStateChange";
     AVSESSION_TRACE_SYNC_START("NapiAVCastControllerCallback::OnCastPlaybackStateChange");
-    SLOGI("Start handle OnCastPlaybackStateChange event with state: %{public}d", state.GetState());
+    SLOGI("Start handle event with state: %{public}d", state.GetState());
     HandleEvent(EVENT_CAST_PLAYBACK_STATE_CHANGE, callBackName, state);
 }
 

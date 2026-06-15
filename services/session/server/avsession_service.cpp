@@ -4378,7 +4378,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> AVSessionService::CreateWa
         isAnco = topSession_->GetUid() == audioBrokerUid;
     }
     int32_t userId = GetUserIdFromCallingUid(uid);
-    SLOGI("CreateWantAgent bundleName:%{public}s,abilityName:%{public}s,userId:%{public}d,isCustomer:%{public}d",
+    SLOGI("CreateWantAgent bundle:%{public}s,ability:%{public}s,userId:%{public}d,Customer:%{public}d",
         bundleName.c_str(), abilityName.c_str(), userId, isCustomer);
     if (!isCustomer) {
         AppExecFwk::ElementName element("", bundleName, abilityName);

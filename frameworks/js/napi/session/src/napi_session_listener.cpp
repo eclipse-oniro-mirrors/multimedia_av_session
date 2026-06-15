@@ -41,12 +41,12 @@ void NapiSessionListener::HandleEvent(int32_t event, std::string callBackName, c
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("managerNotRegister:%{public}d", event);
         return;
     }
 
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        SLOGI("call with flag for event %{public}d", event);
+        SLOGI("callEvent:%{public}d", event);
         asyncCallback_->CallWithFunc(*ref, isValid_,
             [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
@@ -74,11 +74,11 @@ void NapiSessionListener::HandleEvent(int32_t event, std::string callBackName, c
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("managerNotRegister:%{public}d", event);
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        SLOGI("call with flag for event %{public}d", event);
+        SLOGI("callEventCheck:%{public}d", event);
         asyncCallback_->CallWithFunc(*ref, isValid_,
             [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
@@ -108,12 +108,12 @@ void NapiSessionListener::HandleEvent(int32_t event,
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("managerNotRegister:%{public}d", event);
         return;
     }
 
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        SLOGI("call with flag for event %{public}d", event);
+        SLOGI("callEventSec:%{public}d", event);
         asyncCallback_->CallWithFunc(*ref, isValid_,
             [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);

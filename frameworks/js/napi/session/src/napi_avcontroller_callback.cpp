@@ -42,7 +42,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("controllerNotRegister:%{public}d", event);
         return;
     }
     SLOGI("handle event for %{public}d", event);
@@ -69,7 +69,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("controllerNotRegister:%{public}d", event);
         return;
     }
     SLOGI("handle for event: %{public}d with size: %{public}d", event, static_cast<int>(callbacks_[event].size()));
@@ -102,7 +102,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("controllerNotRegister:%{public}d", event);
         return;
     }
     SLOGI("handle event for %{public}d", event);
@@ -138,7 +138,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("controllerNotRegister:%{public}d", event);
         return;
     }
     SLOGI("handle event for %{public}d", event);
@@ -173,10 +173,10 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        HILOG_ERROR(LOG_CORE, "threadSafeNotRegister:%{public}d", event);
         return;
     }
-    SLOGI("event:%{public}d|num:%{public}d|state:%{public}d",
+    HILOG_INFO(LOG_CORE, "threadSafeEvent:%{public}d|num:%{public}d|state:%{public}d",
         event, static_cast<int>(callbacks_[event].size()), state);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction_,
@@ -205,7 +205,7 @@ void NapiAVControllerCallback::HandleEventEx(int32_t event, std::string callBack
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("controllerNotRegister:%{public}d", event);
         return;
     }
     SLOGI("handle for event: %{public}d with size: %{public}d", event, static_cast<int>(callbacks_[event].size()));
@@ -329,7 +329,7 @@ void NapiAVControllerCallback::OnCustomData(const AAFwk::WantParams& data)
 void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& state)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnPlaybackStateChange");
-    SLOGD("OnPlaybackStateChange %{public}d", state.GetState());
+    SLOGD("OnPlaybackStateChange:%{public}d", state.GetState());
     HandleEventWithThreadSafe(EVENT_PLAYBACK_STATE_CHANGE,
         state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_STATE) ? state.GetState() : -1, state);
 }
@@ -337,7 +337,7 @@ void NapiAVControllerCallback::OnPlaybackStateChange(const AVPlaybackState& stat
 void NapiAVControllerCallback::OnMetaDataChange(const AVMetaData& data)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVControllerCallback::OnMetaDataChange");
-    SLOGI("do metadata change notify with title %{public}s",
+    SLOGI("metaTitle:%{public}s",
         AVSessionUtils::GetAnonyTitle(data.GetTitle().c_str()).c_str());
     HandleEventWithThreadSafe(EVENT_META_DATA_CHANGE, -1, data);
 }
@@ -350,7 +350,7 @@ void NapiAVControllerCallback::OnActiveStateChange(bool isActive)
 
 void NapiAVControllerCallback::OnValidCommandChange(const std::vector<int32_t>& cmds)
 {
-    SLOGI("do OnValidCommandChange in NapiCallback with size %{public}d", static_cast<int>(cmds.size()));
+    SLOGI("validCmdsSize:%{public}d", static_cast<int>(cmds.size()));
     std::vector<std::string> stringCmds = NapiControlCommand::ConvertCommands(cmds);
     HandleEventWithThreadSafe(EVENT_VALID_COMMAND_CHANGE, static_cast<int>(cmds.size()), stringCmds);
 }

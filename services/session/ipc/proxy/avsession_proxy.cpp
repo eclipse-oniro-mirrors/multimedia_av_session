@@ -547,7 +547,7 @@ int32_t AVSessionProxy::SetAVPlaybackState(const AVPlaybackState& state)
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "state not valid", false), "state not valid");
     std::lock_guard lockGuard(setPlaybackLock_);
-    SLOGI("SetAVPlaybackState:%{public}d.",
+    HILOG_INFO(LOG_CORE, "SetAVPlaybackState:%{public}d.",
         state.GetMask().test(AVPlaybackState::PLAYBACK_KEY_STATE) ? state.GetState() : -1);
 
     CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST,
