@@ -71,7 +71,9 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t ANCO_BROKER_SA_ID = 66849;
 static const int32_t AVSESSION_CONTINUE = 1;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
 static const int32_t AFTER_SCREEN_ON_TREE = 2;
+#endif
 #ifndef START_STOP_ON_DEMAND_ENABLE
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 #endif
