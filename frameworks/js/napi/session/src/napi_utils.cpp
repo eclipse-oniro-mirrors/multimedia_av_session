@@ -769,8 +769,9 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<std::st
     SLOGD("napi_value -> std::vector<std::string>");
     out.clear();
     bool isArray = false;
-    napi_is_array(env, in, &isArray);
-    CHECK_RETURN(isArray, "not an array", napi_invalid_arg);
+    napi_status ret = napi_is_array(env, in, &isArray);
+    CHECK_RETURN(ret == napi_ok, "napi_is_array check fail", napi_invalid_arg);
+    CHECK_RETURN(isArray, "not an array, check if proxy", GetValueFromProxy(env, in, out));
 
     uint32_t length = 0;
     napi_status status = napi_get_array_length(env, in, &length);
@@ -785,6 +786,35 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::vector<std::st
         out.push_back(value);
     }
     return status;
+}
+
+/* napi_value proxy <-> std::vector<std::string> */
+napi_status NapiUtils::GetValueFromProxy(napi_env env, napi_value in, std::vector<std::string>& out)
+{
+    SLOGD("napi_value from proxy -> std::vector<std::string>");
+    napi_value lengthProp = nullptr;
+    napi_status status = napi_get_named_property(env, in, "length", &lengthProp);
+    CHECK_RETURN((status == napi_ok) && (lengthProp != nullptr), "get length property failed", status);
+    uint32_t len = 0;
+    status = napi_get_value_uint32(env, lengthProp, &len);
+    CHECK_RETURN(status == napi_ok, "get napi_get_value_int32 for length failed", status);
+    CHECK_RETURN(len > 0, "get array empty, return", napi_ok);
+    out.reserve(len);
+    for (uint32_t i = 0; i < len; ++i) {
+        napi_value item = nullptr;
+        status = napi_get_element(env, in, i, &item);
+        CHECK_RETURN((item != nullptr) && (status == napi_ok), "no element", napi_invalid_arg);
+        std::string value;
+        status = GetValue(env, item, value);
+        CHECK_RETURN(status == napi_ok, "not a string", napi_invalid_arg);
+        out.push_back(value);
+    }
+    if (out.size() == len) {
+        return napi_ok;
+    }
+    SLOGE("get array not complete");
+    out.clear();
+    return napi_invalid_arg;
 }
 
 napi_status NapiUtils::SetValue(napi_env env, const std::vector<std::string>& in, napi_value& out)
@@ -1053,7 +1083,8 @@ napi_status NapiUtils::GetValueEx(napi_env env, napi_value in, std::vector<int32
         bool isArray = false;
         status = napi_is_array(env, in, &isArray);
         SLOGD("GetValueEx int32_t input %{public}s an Array", isArray ? "is" : "is not");
-        CHECK_RETURN((status == napi_ok) && isArray, "invalid data!", napi_invalid_arg);
+        CHECK_RETURN(status == napi_ok, "napi_is_array check fail", napi_invalid_arg);
+        CHECK_RETURN(isArray, "not an array, check if proxy", GetValueFromProxy(env, in, out));
         uint32_t length = 0;
         status = napi_get_array_length(env, in, &length);
         CHECK_RETURN(status == napi_ok, "get array length failed!", napi_invalid_arg);
@@ -1068,6 +1099,35 @@ napi_status NapiUtils::GetValueEx(napi_env env, napi_value in, std::vector<int32
         }
     }
     return status;
+}
+
+/* napi_value proxy <-> std::vector<int32_t> */
+napi_status NapiUtils::GetValueFromProxy(napi_env env, napi_value in, std::vector<int32_t>& out)
+{
+    SLOGD("napi_value from proxy -> std::vector<int32_t>");
+    napi_value lengthProp = nullptr;
+    napi_status status = napi_get_named_property(env, in, "length", &lengthProp);
+    CHECK_RETURN((status == napi_ok) && (lengthProp != nullptr), "get length property failed", status);
+    uint32_t len = 0;
+    status = napi_get_value_uint32(env, lengthProp, &len);
+    CHECK_RETURN(status == napi_ok, "get napi_get_value_int32 for length failed", status);
+    CHECK_RETURN(len > 0, "get array empty, return", napi_ok);
+    out.reserve(len);
+    for (uint32_t i = 0; i < len; ++i) {
+        napi_value item = nullptr;
+        status = napi_get_element(env, in, i, &item);
+        CHECK_RETURN((item != nullptr) && (status == napi_ok), "no element", napi_invalid_arg);
+        int32_t vi = 0;
+        status = napi_get_value_int32(env, item, &vi);
+        CHECK_RETURN(status == napi_ok, "element not a int32", napi_invalid_arg);
+        out.push_back(vi);
+    }
+    if (out.size() == len) {
+        return napi_ok;
+    }
+    SLOGE("get array not complete");
+    out.clear();
+    return napi_invalid_arg;
 }
 
 napi_status NapiUtils::SetValueEx(napi_env env, const std::vector<int32_t>& in, napi_value& out)
@@ -1247,7 +1307,8 @@ napi_status NapiUtils::GetValueEx(napi_env env, napi_value in, std::vector<doubl
         bool isArray = false;
         status = napi_is_array(env, in, &isArray);
         SLOGD("GetValueEx double input %{public}s an Array", isArray ? "is" : "is not");
-        CHECK_RETURN((status == napi_ok) && isArray, "invalid data!", napi_invalid_arg);
+        CHECK_RETURN(status == napi_ok, "napi_is_array check fail", napi_invalid_arg);
+        CHECK_RETURN(isArray, "not an array, check if proxy", GetValueFromProxy(env, in, out));
         uint32_t length = 0;
         status = napi_get_array_length(env, in, &length);
         CHECK_RETURN(status == napi_ok, "get array length failed!", napi_invalid_arg);
@@ -1262,6 +1323,35 @@ napi_status NapiUtils::GetValueEx(napi_env env, napi_value in, std::vector<doubl
         }
     }
     return status;
+}
+
+/* napi_value proxy <-> std::vector<double> */
+napi_status NapiUtils::GetValueFromProxy(napi_env env, napi_value in, std::vector<double>& out)
+{
+    SLOGD("napi_value from proxy -> std::vector<double>");
+    napi_value lengthProp = nullptr;
+    napi_status status = napi_get_named_property(env, in, "length", &lengthProp);
+    CHECK_RETURN((status == napi_ok) && (lengthProp != nullptr), "get length property failed", status);
+    uint32_t len = 0;
+    status = napi_get_value_uint32(env, lengthProp, &len);
+    CHECK_RETURN(status == napi_ok, "get napi_get_value_int32 for length failed", status);
+    CHECK_RETURN(len > 0, "get array empty, return", napi_ok);
+    out.reserve(len);
+    for (uint32_t i = 0; i < len; ++i) {
+        napi_value item = nullptr;
+        status = napi_get_element(env, in, i, &item);
+        CHECK_RETURN((item != nullptr) && (status == napi_ok), "no element", napi_invalid_arg);
+        double vi = 0.0f;
+        status = napi_get_value_double(env, item, &vi);
+        CHECK_RETURN(status == napi_ok, "element not a double", napi_invalid_arg);
+        out.push_back(vi);
+    }
+    if (out.size() == len) {
+        return napi_ok;
+    }
+    SLOGE("get array not complete");
+    out.clear();
+    return napi_invalid_arg;
 }
 
 napi_status NapiUtils::SetValueEx(napi_env env, const std::vector<double>& in, napi_value& out)
