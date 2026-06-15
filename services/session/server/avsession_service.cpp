@@ -50,6 +50,7 @@
 #include "image_source.h"
 #include "avsession_pixel_map_adapter.h"
 #include "avsession_dynamic_insight.h"
+#include "avsession_utils.h"
 #include "audio_system_manager.h"
 #include "stream_dfx_manager.h"
 #include "audio_errors.h"
@@ -3766,7 +3767,8 @@ void AVSessionService::SetDeviceInfo(const std::vector<AudioStandard::AudioDevic
         deviceInfo.castCategory_ = castCategory;
         deviceInfo.deviceId_ = std::to_string(audioDescriptor.deviceId_);
         deviceInfo.deviceName_ = audioDescriptor.deviceName_;
-        SLOGI("SetDeviceInfo the deviceName is %{public}s", audioDescriptor.deviceName_.c_str());
+        SLOGI("SetDeviceInfo the deviceName is %{public}s",
+            AVSessionUtils::GetAnonyDeviceName(audioDescriptor.deviceName_).c_str());
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
     }
     session->SetOutputDevice(outputDeviceInfo);
@@ -3915,7 +3917,7 @@ int32_t AVSessionService::CastAudioInner(const std::vector<AudioStandard::AudioD
             "SESSION_TYPE", session->GetDescriptor().sessionType_,
             "CAST_TYPE", 0,
             "DEST_DEVICE_TYPE", sinkAudioDescriptor.deviceType_,
-            "DEST_DEVICE_NAME", sinkAudioDescriptor.deviceName_.c_str(),
+            "DEST_DEVICE_NAME", AVSessionUtils::GetAnonyDeviceName(sinkAudioDescriptor.deviceName_).c_str(),
             "DEST_DEVICE_ID", sinkAudioDescriptor.deviceId_,
             "DETAILED_MSG", "avsession service cast audio");
         ret = SelectOutputDevice(session->GetUid(), sinkAudioDescriptor);
