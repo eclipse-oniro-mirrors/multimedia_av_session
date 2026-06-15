@@ -1620,7 +1620,7 @@ static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen002, Test
     listener->SetSupportExtendedScreen(true);
     EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
     listener = nullptr;
-SLOGI("HwCastDisplayListenerSetSupportExtendedScreen002 end!");
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen002 end!");
 }
 
 /**
