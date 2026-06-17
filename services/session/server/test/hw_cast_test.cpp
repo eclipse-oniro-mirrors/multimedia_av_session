@@ -1384,6 +1384,50 @@ static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen003
+ * @tc.desc: test SetSupportExtendedScreen with isHotSwitch true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen003, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen003 begin!");
+    OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
+    EXPECT_EQ(listener != nullptr, true);
+    auto display = OHOS::Rosen::DisplayManagerLite::GetInstance().GetDisplayById(0);
+    EXPECT_EQ(display != nullptr, true);
+    auto displayInfo = display->GetDisplayInfo();
+    listener->SetDisplayInfo(displayInfo);
+    listener->SetSupportExtendedScreen(true, true);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
+    listener = nullptr;
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen003 end!");
+}
+
+/**
+ * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen004
+ * @tc.desc: test SetSupportExtendedScreen with isHotSwitch false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen004, TestSize.Level1)
+{
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen004 begin!");
+    OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
+    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
+    EXPECT_EQ(listener != nullptr, true);
+    auto display = OHOS::Rosen::DisplayManagerLite::GetInstance().GetDisplayById(0);
+    EXPECT_EQ(display != nullptr, true);
+    auto displayInfo = display->GetDisplayInfo();
+    listener->SetDisplayInfo(displayInfo);
+    listener->SetSupportExtendedScreen(false, false);
+    EXPECT_EQ(listener->IsSupportExtendedScreen(), false);
+    listener = nullptr;
+    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen004 end!");
+}
+
+/**
  * @tc.name: HwCastProviderNotifyCastSessionCreated001
  * @tc.desc:
  * @tc.type: FUNC
@@ -1656,50 +1700,6 @@ static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen002, Test
     EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
     listener = nullptr;
     SLOGI("HwCastDisplayListenerSetSupportExtendedScreen002 end!");
-}
-
-/**
- * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen003
- * @tc.desc: test SetSupportExtendedScreen with isHotSwitch true
- * @tc.type: FUNC
- * @tc.require:
- */
-static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen003, TestSize.Level1)
-{
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen003 begin!");
-    OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
-    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
-    EXPECT_EQ(listener != nullptr, true);
-    auto display = OHOS::Rosen::DisplayManagerLite::GetInstance().GetDisplayById(0);
-    EXPECT_EQ(display != nullptr, true);
-    auto displayInfo = display->GetDisplayInfo();
-    listener->SetDisplayInfo(displayInfo);
-    listener->SetSupportExtendedScreen(true, true);
-    EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
-    listener = nullptr;
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen003 end!");
-}
-
-/**
- * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen004
- * @tc.desc: test SetSupportExtendedScreen with isHotSwitch false
- * @tc.type: FUNC
- * @tc.require:
- */
-static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen004, TestSize.Level1)
-{
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen004 begin!");
-    OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
-    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
-    EXPECT_EQ(listener != nullptr, true);
-    auto display = OHOS::Rosen::DisplayManagerLite::GetInstance().GetDisplayById(0);
-    EXPECT_EQ(display != nullptr, true);
-    auto displayInfo = display->GetDisplayInfo();
-    listener->SetDisplayInfo(displayInfo);
-    listener->SetSupportExtendedScreen(false, false);
-    EXPECT_EQ(listener->IsSupportExtendedScreen(), false);
-    listener = nullptr;
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen004 end!");
 }
 
 /**
