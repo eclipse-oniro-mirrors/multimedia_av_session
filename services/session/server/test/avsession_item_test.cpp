@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define private public
+#define protected public
 
 #include <gtest/gtest.h>
 #include <chrono>
@@ -1708,6 +1710,33 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetSupportExtendedScreen_003, TestSize
     g_AVSessionItem->SetSupportExtendedScreen(false);
     EXPECT_EQ(g_AVSessionItem->displayListener_, nullptr);
     SLOGI("AVSessionItem_SetSupportExtendedScreen_003 End");
+}
+
+/**
+* @tc.name: AVSessionItem_SetSupportExtendedScreen_004
+* @tc.desc: test SetSupportExtendedScreen with isSupport false and verify GetAllCastDisplays returns empty
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetSupportExtendedScreen_004, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetSupportExtendedScreen_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
+    g_AVSessionItem->GetDisplayListener(sessionCallback);
+    
+    auto display = OHOS::Rosen::DisplayManagerLite::GetInstance().GetDisplayById(0);
+    EXPECT_EQ(display != nullptr, true);
+    auto displayInfo = display->GetDisplayInfo();
+    g_AVSessionItem->displayListener_->SetDisplayInfo(displayInfo);
+
+    g_AVSessionItem->SetSupportExtendedScreen(true, true);
+    std::vector<CastDisplayInfo> castDisplays;
+    int32_t ret = g_AVSessionItem->GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(castDisplays.size(), 0);
+    SLOGI("AVSessionItem_SetSupportExtendedScreen_002 End");
 }
 
 /**
