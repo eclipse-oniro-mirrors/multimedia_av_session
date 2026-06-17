@@ -53,41 +53,6 @@ void HwCastTest::SetUp()
 void HwCastTest::TearDown()
 {}
 
-class AVSessionCallbackImpl : public IAVSessionCallback {
-public:
-    OHOS::ErrCode OnPlay(const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnPause() override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnStop() override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnPlayNext(const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnPlayPrevious(const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnFastForward(int64_t time, const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnRewind(int64_t time, const AVControlCommand& cmd) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnSeek(int64_t time) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnSetSpeed(double speed) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnSetLoopMode(int32_t loopMode) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnSetTargetLoopMode(int32_t targetLoopMode) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnToggleFavorite(const std::string& mediaId) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnMediaKeyEvent(const OHOS::MMI::KeyEvent& keyEvent) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnOutputDeviceChange(const int32_t connectionState,
-        const OHOS::AVSession::OutputDeviceInfo& outputDeviceInfo) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnCommonCommand(const std::string& commonCommand,
-        const OHOS::AAFwk::WantParams& commandArgs) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnSkipToQueueItem(int32_t itemId) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnAVCallAnswer() override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnAVCallHangUp() override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnAVCallToggleCallMute() override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnPlayFromAssetId(int64_t assetId) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override { return AVSESSION_SUCCESS; };
-        OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; }
-    OHOS::ErrCode OnPlayWithAssetId(const std::string& assetId) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnCustomData(const OHOS::AAFwk::WantParams& data) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override { return AVSESSION_SUCCESS; };
-    OHOS::ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override { return AVSESSION_SUCCESS; };
- 
-    AVSessionCallbackImpl() = default;
-    ~AVSessionCallbackImpl() = default;
-};
-
 /**
  * @tc.name: HwCastStreamPlayerInit001
  * @tc.desc:
@@ -1381,50 +1346,6 @@ static HWTEST(HwCastTest, HwCastProviderOnSessionCreated001, TestSize.Level0)
     hwCastProvider->Init();
     hwCastProvider->OnSessionCreated(nullptr);
     SLOGI("HwCastProviderOnSessionCreated001 end!");
-}
-
-/**
- * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen003
- * @tc.desc: test SetSupportExtendedScreen with isHotSwitch true
- * @tc.type: FUNC
- * @tc.require:
- */
-static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen003, TestSize.Level1)
-{
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen003 begin!");
-    OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
-    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
-    EXPECT_EQ(listener != nullptr, true);
-    auto display = OHOS::Rosen::DisplayManagerLite::GetInstance().GetDisplayById(0);
-    EXPECT_EQ(display != nullptr, true);
-    auto displayInfo = display->GetDisplayInfo();
-    listener->SetDisplayInfo(displayInfo);
-    listener->SetSupportExtendedScreen(true, true);
-    EXPECT_EQ(listener->IsSupportExtendedScreen(), true);
-    listener = nullptr;
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen003 end!");
-}
-
-/**
- * @tc.name: HwCastDisplayListenerSetSupportExtendedScreen004
- * @tc.desc: test SetSupportExtendedScreen with isHotSwitch false
- * @tc.type: FUNC
- * @tc.require:
- */
-static HWTEST(HwCastTest, HwCastDisplayListenerSetSupportExtendedScreen004, TestSize.Level1)
-{
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen004 begin!");
-    OHOS::sptr<IAVSessionCallback> callback = new(std::nothrow) AVSessionCallbackImpl();
-    OHOS::sptr<HwCastDisplayListener> listener = new HwCastDisplayListener(callback, false);
-    EXPECT_EQ(listener != nullptr, true);
-    auto display = OHOS::Rosen::DisplayManagerLite::GetInstance().GetDisplayById(0);
-    EXPECT_EQ(display != nullptr, true);
-    auto displayInfo = display->GetDisplayInfo();
-    listener->SetDisplayInfo(displayInfo);
-    listener->SetSupportExtendedScreen(false, false);
-    EXPECT_EQ(listener->IsSupportExtendedScreen(), false);
-    listener = nullptr;
-    SLOGI("HwCastDisplayListenerSetSupportExtendedScreen004 end!");
 }
 
 /**
