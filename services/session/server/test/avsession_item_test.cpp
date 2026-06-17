@@ -1730,6 +1730,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_SetSupportExtendedScreen_004, TestSize
     g_AVSessionItem->displayListener_->SetDisplayInfo(displayInfo);
 
     g_AVSessionItem->SetSupportExtendedScreen(true, true);
+    g_AVSessionItem->SetSupportExtendedScreen(true, false);
     std::vector<CastDisplayInfo> castDisplays;
     int32_t ret = g_AVSessionItem->GetAllCastDisplays(castDisplays);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
