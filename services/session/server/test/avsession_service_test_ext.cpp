@@ -1955,7 +1955,6 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent003, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent004, TestSize.Level1)
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName("testBundle");
     elementName.SetAbilityName("testAbility");
@@ -1974,7 +1973,6 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent004, TestSize.Level1)
     EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
     eventSubscriber.OnReceiveEvent(eventData);
     EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
-#endif
 }
 
 /**
