@@ -1976,5 +1976,24 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent004, TestSize.Level1)
     EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
 #endif
 }
+
+/**
+ * @tc.name: HotSwitchReportCastDisplay001
+ * @tc.desc: Test HotSwitchReportCastDisplay with one session
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HotSwitchReportCastDisplay001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    g_AVSessionService->HotSwitchReportCastDisplay();
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
+}
 } // AVSession
 } // OHOS
