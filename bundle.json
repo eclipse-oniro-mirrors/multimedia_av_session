@@ -70,8 +70,7 @@
           "hicollie",
           "openssl",
           "bounds_checking_function",
-          "ets_frontend",
-          "CollaborationFwk"
+          "ets_frontend"
         ],
         "third_party": [
         ]
