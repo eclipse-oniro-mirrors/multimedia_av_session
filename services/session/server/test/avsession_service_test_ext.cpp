@@ -1948,15 +1948,22 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent003, TestSize.Level1)
 
 /**
  * @tc.name: OnReceiveEvent004
- * @tc.desc: Test OnReceiveEvent with HybridModeSwitchEvent action, targetMode=0 and stage=2
+ * @tc.desc: Test OnReceiveEvent with HYBRID_MODE_SWITCH action, targetMode=0 and stage=2
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
 static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent004, TestSize.Level1)
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
     OHOS::EventFwk::CommonEventData eventData;
-    std::string action = "HybridModeSwitchEvent";
+    std::string action = "HYBRID_MODE_SWITCH";
     OHOS::AAFwk::Want want = eventData.GetWant();
     want.SetAction(action);
     want.SetParam("targetMode", 0);
@@ -1967,6 +1974,7 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent004, TestSize.Level1)
     EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
     eventSubscriber.OnReceiveEvent(eventData);
     EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
+#endif
 }
 } // AVSession
 } // OHOS
