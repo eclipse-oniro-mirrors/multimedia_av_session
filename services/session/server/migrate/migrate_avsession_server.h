@@ -66,7 +66,10 @@ public:
     void OnHistoricalRecordChange() override;
 
     void OnMetaDataChange(const std::string &playerId, const AVMetaData &data);
+    void OnPlaybackStateChange(const std::string &playerId, const AVPlaybackState &state);
     void OnPlaybackStateChanged(const std::string &playerId, const AVPlaybackState &state);
+    int32_t OnValidCommandChanged(const std::string &playerId, const std::vector<int32_t> &cmds,
+        cJSON* metaObj = nullptr);
     void StopObserveControllerChanged(const std::string &deviceId);
     void SendRemoteControllerList(const std::string &deviceId);
     void SendRemoteControllerInfo(const std::string &deviceId, std::string msg);
@@ -142,7 +145,7 @@ private:
     void PlaybackCommandDataProc(int mediaCommand, const std::string &extrasCommand, sptr<AVControllerItem> controller);
     void SendSpecialKeepaliveData();
     std::string GetBundleName(std::string sessionId);
-    bool CompressToJPEG(const AVMetaData &metadata, std::vector<uint8_t> &outputData);
+    bool CompressToJPEG(std::shared_ptr<AVSessionPixelMap> inputData, std::vector<uint8_t> &outputData);
     void DelaySendMetaData();
     int32_t DelaySendPlaybackState();
     bool GetVehicleRelatingState(std::string playerId);

@@ -272,22 +272,28 @@ public:
 
     static std::string TransformInt64ToStr(const int64_t num)
     {
-        std::string stringFromNum(sizeof(int64_t), '\0');
-        errno_t ret = memcpy_s(&stringFromNum[0], sizeof(int64_t), &num, sizeof(int64_t));
-        return ret == EOK ? stringFromNum : "";
+        std::string stringFromNum = std::to_string(num);
+        return stringFromNum;
     }
 
     static int64_t TransformStrToInt64(const std::string str)
     {
-        int64_t intFromStr;
-        if (str.size() < sizeof(int64_t)) {
+        if (str.empty()) {
             return -1;
         }
-        errno_t ret = memcpy_s(&intFromStr, sizeof(int64_t), str.data(), sizeof(int64_t));
-        if (ret != EOK) {
+        size_t pos = 0;
+        if (str[0] == '-' || str[0] == '+') {
+            pos = 1;
+        }
+        if (pos >= str.size()) {
             return -1;
         }
-        return intFromStr;
+        for (size_t i = 0; i < str.size(); ++i) {
+            if (str[i] < '0' || str[i] > '9') {
+                return -1;
+            }
+        }
+        return std::stoll(str);
     }
 
 private:

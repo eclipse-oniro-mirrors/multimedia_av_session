@@ -3121,9 +3121,12 @@ void AVSessionItem::HandleOnSeek(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSeek");
     std::lock_guard callbackLockGuard(callbackLock_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int64_t time = 0;
     CHECK_AND_RETURN_LOG(cmd.GetSeekTime(time) == AVSESSION_SUCCESS, "GetSeekTime failed");
+    if (callbackForMigrate_) {
+        callbackForMigrate_->OnSeek(time);
+    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnSeek(time);
 }
 
@@ -3148,9 +3151,12 @@ void AVSessionItem::HandleOnSetLoopMode(const AVControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnSetLoopMode");
     std::lock_guard callbackLockGuard(callbackLock_);
-    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     int32_t loopMode = AVSESSION_ERROR;
     CHECK_AND_RETURN_LOG(cmd.GetLoopMode(loopMode) == AVSESSION_SUCCESS, "GetLoopMode failed");
+    if (callbackForMigrate_) {
+        callbackForMigrate_->OnSetLoopMode(loopMode);
+    }
+    CHECK_AND_RETURN_LOG(callback_ != nullptr, "callback_ is nullptr");
     callback_->OnSetLoopMode(loopMode);
 }
 

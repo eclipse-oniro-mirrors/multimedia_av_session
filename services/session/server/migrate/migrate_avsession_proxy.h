@@ -55,9 +55,11 @@ public:
     int32_t HandlePlayPreviousForSuper(const std::string& playerId);
     int32_t HandleToggleFavoriteForSuper(const std::string& playerId, const std::string& mediaId);
     int32_t HandleSeekForSuper(const std::string& playerId, const int64_t time);
+    int32_t HandleSetLoopModeForSuper(const std::string& playerId, const int32_t loopMode);
     void HandleCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs);
     void GetDistributedSessionControllerList(std::vector<sptr<IRemoteObject>>& controllerList);
     int32_t GetControllerListForSuper(std::vector<sptr<IRemoteObject>>& controllerList);
+    void GetControllerListForNext(std::vector<sptr<IRemoteObject>>& controllerList);
     bool CheckMediaAlive();
 
     enum {
@@ -119,18 +121,25 @@ private:
     void NotifyMediaControlNeedStateChange(AAFwk::WantParams& extras);
     void NotifyMediaControlSyncTime(AAFwk::WantParams& extras);
     int32_t OnConnectForSuper();
+    void OnConnectForNext();
     int32_t OnDisconnectForSuper();
+    void OnDisconnectForNext();
     int32_t OnBytesRecvForSuper(const std::string &deviceId, const std::string &data);
+    void OnBytesRecvForNext(const std::string &deviceId, const std::string &data);
+    int32_t ProcessHistoryMediaInfoListForSuper(cJSON* jsonValue);
     int32_t ProcessControllerListForSuper(cJSON* jsonValue);
     int32_t ProcessControllerForSuper(cJSON* jsonValue);
     int32_t ProcessSessionInfoForSuper(cJSON* jsonValue);
+    int32_t ProcessBundleIconForSuper(cJSON* jsonValue);
     int32_t ProcessControllerInfoForSuper(cJSON* jsonValue);
     int32_t ProcessMetaDataForSuper(cJSON* jsonValue);
+    int32_t ProcessValidCommandsForSuper(cJSON* jsonValue);
     int32_t ProcessPlaybackStateForSuper(cJSON* jsonValue);
     int32_t SendControlCommandMsgForSuper(int32_t commandCode, const std::string& sessionId,
         std::string commandArgsStr = "");
     int32_t ColdStartForSuper(AAFwk::WantParams& extras);
-    int32_t CompressFromJPEG(AVMetaData &metadata, const std::vector<uint8_t> &inputData);
+    int32_t CompressFromJPEG(const std::vector<uint8_t> &inputData,
+        std::shared_ptr<AVSessionPixelMap>& outputData, bool isMediaImage = false);
     int32_t ConvertStateFromDoubleToSingle(int32_t state);
 
     int32_t mMode_ = 0;
@@ -140,6 +149,7 @@ private:
     sptr<AVControllerItem> preSetController_ = nullptr;
     std::map<std::string, sptr<AVSessionItem>> sessionStackForMigrateIn_;
     std::map<std::string, sptr<AVControllerItem>> controllerStackForMigrateIn_;
+    std::vector<std::string> sessionRefreshList_;
     AVSessionService *servicePtr_ = nullptr;
     AppExecFwk::ElementName elementName_;
 
@@ -184,7 +194,7 @@ public:
     void OnRewind(int64_t time, const AVControlCommand& cmd) override {}
     void OnSeek(int64_t time) override;
     void OnSetSpeed(double speed) override {}
-    void OnSetLoopMode(int32_t loopMode) override {}
+    void OnSetLoopMode(int32_t loopMode) override;
     void OnSetTargetLoopMode(int32_t targetLoopMode) override {}
     void OnToggleFavorite(const std::string& mediaId) override;
     void OnMediaKeyEvent(const MMI::KeyEvent& keyEvent) override {}
