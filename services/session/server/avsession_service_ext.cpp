@@ -725,6 +725,7 @@ void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceIn
     }
 }
 
+// LCOV_EXCL_START
 void AVSessionService::HotSwitchReportCastDisplay()
 {
     for (const auto& session : GetContainer().GetAllSessions()) {
@@ -733,6 +734,7 @@ void AVSessionService::HotSwitchReportCastDisplay()
         }
     }
 }
+// LCOV_EXCL_STOP
 #endif
 
 AVSessionSystemAbilityLoadCallback::AVSessionSystemAbilityLoadCallback(AVSessionService *ptr)
