@@ -339,6 +339,11 @@ void HwCastProviderSession::ComputeToastOnDeviceState(const CastEngine::DeviceSt
         AVRouter::GetInstance().SetCastingDeviceName("");
         return;
     }
+    if (state == CastEngine::DeviceState::CONNECTED || state == CastEngine::DeviceState::PLAYING) {
+        avToastDeviceState_ = prepareState;
+        AVRouter::GetInstance().SetCastingDeviceName("");
+        return;
+    }
     if (state != CastEngine::DeviceState::DISCONNECTED) {
         return;
     }
