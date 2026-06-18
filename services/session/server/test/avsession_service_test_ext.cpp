@@ -1943,6 +1943,28 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent003, TestSize.Level1)
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
     eventSubscriber.OnReceiveEvent(eventData);
+
+    OHOS::AAFwk::Want want1 = eventData.GetWant();
+    want1.SetAction(action);
+    want1.SetParam("targetMode", 0);
+    want1.SetParam("stage", 1);
+    eventData.SetWant(want1);
+    eventSubscriber.OnReceiveEvent(eventData);
+
+    OHOS::AAFwk::Want want2 = eventData.GetWant();
+    want2.SetAction(action);
+    want2.SetParam("targetMode", 0);
+    want2.SetParam("stage", 2);
+    eventData.SetWant(want2);
+    eventSubscriber.OnReceiveEvent(eventData);
+
+    OHOS::AAFwk::Want want3 = eventData.GetWant();
+    want3.SetAction(action);
+    want3.SetParam("targetMode", 1);
+    want3.SetParam("stage", 2);
+    eventData.SetWant(want3);
+    eventSubscriber.OnReceiveEvent(eventData);
+
     EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
 }
 
