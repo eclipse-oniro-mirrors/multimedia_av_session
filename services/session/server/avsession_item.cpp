@@ -2627,7 +2627,7 @@ void AVSessionItem::SetIsHiPlayStreamCasting(bool isHiPlayStreamCasting)
     isHiPlayStreamCasting_ = isHiPlayStreamCasting;
 }
 
-void AVSessionItem::SetSupportExtendedScreen(bool isSupport)
+void AVSessionItem::SetSupportExtendedScreen(bool isSupport, bool isHotSwitch)
 {
     SLOGI("SetSupportExtendedScreen %{public}d", isSupport);
     sptr<HwCastDisplayListener> displayListener;
@@ -2640,7 +2640,7 @@ void AVSessionItem::SetSupportExtendedScreen(bool isSupport)
         std::vector<CastDisplayInfo> castDisplays;
         GetAllCastDisplays(castDisplays);
     }
-    displayListener->SetSupportExtendedScreen(isSupport);
+    displayListener->SetSupportExtendedScreen(isSupport, isHotSwitch);
 }
 
 void AVSessionItem::SetServiceCallbackForPcMode(const std::function<bool()>& callback)

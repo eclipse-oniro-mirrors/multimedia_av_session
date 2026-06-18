@@ -306,6 +306,8 @@ public:
 
     void setInCast(bool isInCast) override;
 
+    void HotSwitchReportCastDisplay();
+
     int32_t PcmCastSessionReleasePlayer() override;
 #endif
 

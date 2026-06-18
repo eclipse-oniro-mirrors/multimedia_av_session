@@ -72,6 +72,9 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t ANCO_BROKER_SA_ID = 66849;
 static const int32_t AVSESSION_CONTINUE = 1;
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+static const int32_t AFTER_SCREEN_ON_TREE = 2;
+#endif
 #ifndef START_STOP_ON_DEMAND_ENABLE
 const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservice.ready";
 #endif
@@ -319,9 +322,15 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         servicePtr_->UpdateNtfEnable(isMediaNtfEnable);
     } else if (action.compare("HYBRID_MODE_SWITCH") == 0) {
         int32_t targetMode = want.GetIntParam("targetMode", 0);
-        // pcMode=1, phoneMode=0
-        SLOGI("on receiveEvent HYBRID_MODE_SWITCH %{public}d", targetMode);
+        int32_t hotSwitchStage = want.GetIntParam("stage", 0);
+        // pcMode=1, phoneMode=0, hotSwitchStage=2, dms init done
+        SLOGI("on receiveEvent HYBRID_MODE_SWITCH %{public}d, hotSwitchStage %{public}d", targetMode, hotSwitchStage);
         servicePtr_->SetPcMode(targetMode == 1);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        if (targetMode == 0 && hotSwitchStage == AFTER_SCREEN_ON_TREE) {
+            servicePtr_->HotSwitchReportCastDisplay();
+        }
+#endif
     }
 }
 

@@ -1943,7 +1943,77 @@ static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent003, TestSize.Level1)
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
     eventSubscriber.OnReceiveEvent(eventData);
+
+    OHOS::AAFwk::Want want1 = eventData.GetWant();
+    want1.SetAction(action);
+    want1.SetParam("targetMode", 0);
+    want1.SetParam("stage", 1);
+    eventData.SetWant(want1);
+    eventSubscriber.OnReceiveEvent(eventData);
+
+    OHOS::AAFwk::Want want2 = eventData.GetWant();
+    want2.SetAction(action);
+    want2.SetParam("targetMode", 0);
+    want2.SetParam("stage", 2);
+    eventData.SetWant(want2);
+    eventSubscriber.OnReceiveEvent(eventData);
+
+    OHOS::AAFwk::Want want3 = eventData.GetWant();
+    want3.SetAction(action);
+    want3.SetParam("targetMode", 1);
+    want3.SetParam("stage", 2);
+    eventData.SetWant(want3);
+    eventSubscriber.OnReceiveEvent(eventData);
+
     EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveEvent004
+ * @tc.desc: Test OnReceiveEvent with HYBRID_MODE_SWITCH action, targetMode=0 and stage=2
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, OnReceiveEvent004, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    OHOS::EventFwk::CommonEventData eventData;
+    std::string action = "HYBRID_MODE_SWITCH";
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    want.SetParam("targetMode", 0);
+    want.SetParam("stage", 2);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, g_AVSessionService);
+    eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_NE(eventSubscriber.servicePtr_, nullptr);
+}
+
+/**
+ * @tc.name: HotSwitchReportCastDisplay001
+ * @tc.desc: Test HotSwitchReportCastDisplay with one session
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HotSwitchReportCastDisplay001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("testBundle");
+    elementName.SetAbilityName("testAbility");
+    OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
+        "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(session != nullptr);
+    g_AVSessionService->HotSwitchReportCastDisplay();
+    g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 }
 } // AVSession
 } // OHOS

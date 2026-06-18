@@ -419,7 +419,7 @@ public:
 
     void SetServiceCallbackForPcMode(const std::function<bool()>& callback);
 
-    void SetSupportExtendedScreen(bool isSupport);
+    void SetSupportExtendedScreen(bool isSupport, bool isHotSwitch = false);
 #endif
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL

@@ -733,6 +733,17 @@ void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceIn
         AVSessionRadar::GetInstance().FailToStartCast(outputDeviceInfo, info);
     }
 }
+
+// LCOV_EXCL_START
+void AVSessionService::HotSwitchReportCastDisplay()
+{
+    for (const auto& session : GetContainer().GetAllSessions()) {
+        if (session != nullptr) {
+            session->SetSupportExtendedScreen(true, true);
+        }
+    }
+}
+// LCOV_EXCL_STOP
 #endif
 
 AVSessionSystemAbilityLoadCallback::AVSessionSystemAbilityLoadCallback(AVSessionService *ptr)

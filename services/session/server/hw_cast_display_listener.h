@@ -35,7 +35,7 @@ public:
     void SetDisplayInfo(sptr<Rosen::DisplayInfo> displayInfo);
     sptr<Rosen::DisplayInfo> GetDisplayInfo();
     void SetAppCastDisplayId(Rosen::DisplayId displayId);
-    void SetSupportExtendedScreen(bool isSupport);
+    void SetSupportExtendedScreen(bool isSupport, bool isHotSwitch = false);
     bool IsSupportExtendedScreen();
 
 private:
