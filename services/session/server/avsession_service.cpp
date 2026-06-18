@@ -925,7 +925,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         HandleTopSessionRelease(userId, sessionItem);
         sessionListForFront->remove(sessionItem);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-            NotifySystemCommonEvent(SESSION_RELEASE, "");
+        NotifySystemCommonEvent(SESSION_RELEASE, "");
 #endif
         SLOGI("sessionListForFront with size %{public}d", static_cast<int32_t>(sessionListForFront->size()));
     }

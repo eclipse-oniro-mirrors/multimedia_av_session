@@ -340,6 +340,17 @@ void AVSessionService::setInCast(bool isInCast)
     isInCast_ = isInCast;
 }
 
+int32_t AVSessionService::PcmCastSessionReleasePlayer()
+{
+    SLOGI("PcmCastSessionReleasePlayer in");
+    CHECK_AND_RETURN_RET_LOG(pcmCastSession_ != nullptr, AVSESSION_ERROR, "pcmCastSession_ is nullptr");
+
+    pcmCastSession_->SendModeChangeToCast(CONNECTING_MODE);
+    pcmCastSession_->ReleaseStreamPlayer();
+    AVRouter::GetInstance().OnSystemCommonEvent(CAST_SESSION_RELEASED, "");
+    return AVSESSION_SUCCESS;
+}
+
 // LCOV_EXCL_START
 void AVSessionService::ReleaseCastSession()
 {
@@ -555,12 +566,10 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    bool isPcm = (static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
-            ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0;
-    bool isPcmScreen = (sessionToken.sessionId == "pcmCastSession") &&
+    bool isPcm = (sessionToken.sessionId == "pcmCastSession") ||
         ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
-        ProtocolType::TYPE_CAST_PLUS_STREAM) != 0);
-    if (isPcm || isPcmScreen) {
+        ProtocolType::TYPE_CAST_PLUS_AUDIO)) != 0;
+    if (isPcm) {
         if (pcmCastSession_ == nullptr) {
             SLOGI("Create pcmCastSession");
             pcmCastSession_ = std::make_shared<PcmCastSession>();

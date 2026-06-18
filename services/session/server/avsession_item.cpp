@@ -2295,6 +2295,9 @@ void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 
 int32_t AVSessionItem::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
+    if (isHiPlayStreamCasting_) {
+        return AVRouter::GetInstance().PcmCastSessionReleasePlayer();
+    }
     std::lock_guard lockGuard(castLock_);
     if (descriptor_.sessionTag_ == "RemoteCast") {
         CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
@@ -2616,6 +2619,12 @@ void AVSessionItem::SetServiceCallbackForPhotoCast(const std::function<void(std:
 {
     SLOGI("SetServiceCallbackForPhotoCast in");
     serviceCallbackForPhotoCast_ = callback;
+}
+
+void AVSessionItem::SetIsHiPlayStreamCasting(bool isHiPlayStreamCasting)
+{
+    SLOGI("SetIsHiPlayStreamCasting in");
+    isHiPlayStreamCasting_ = isHiPlayStreamCasting;
 }
 
 void AVSessionItem::SetSupportExtendedScreen(bool isSupport)
@@ -3370,6 +3379,22 @@ void AVSessionItem::SetOutputDevice(const OutputDeviceInfo& info)
         }
     }
     SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(info.deviceInfos_.size()));
+}
+
+void AVSessionItem::SetAndDealOutputDeviceChange(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo)
+{
+    if (castState == ConnectionState::STATE_CONNECTED) {
+        descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+    }
+    HandleOutputDeviceChange(castState, outputDeviceInfo);
+    std::lock_guard controllersLockGuard(controllersLock_);
+    CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");
+    for (const auto& controller : controllers_) {
+        if (controller.second != nullptr) {
+            controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
+        }
+    }
+    SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size()));
 }
 
 // LCOV_EXCL_START
