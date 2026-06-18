@@ -32,6 +32,7 @@
 #include "system_ability_definition.h"
 #include "collaboration_manager_utils.h"
 #include "avsession_item_extension.h"
+#include "avsession_info.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include <condition_variable>
@@ -283,6 +284,8 @@ public:
 
     void SetOutputDevice(const OutputDeviceInfo& info);
 
+    void SetAndDealOutputDeviceChange(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo);
+
     void GetOutputDevice(OutputDeviceInfo& info);
 
     int32_t CastAudioToRemote(const std::string& sourceDevice, const std::string& sinkDevice,
@@ -411,6 +414,8 @@ public:
     MultiDeviceState GetMultiDeviceState();
 
     void SetServiceCallbackForPhotoCast(const std::function<void(std::string, bool)>& callback);
+
+    void SetIsHiPlayStreamCasting(bool isHiPlayStreamCasting);
 
     void SetServiceCallbackForPcMode(const std::function<bool()>& callback);
 
@@ -666,6 +671,7 @@ private:
     std::atomic<MultiDeviceState> multiDeviceState_ = MultiDeviceState::DEFAULT;
     OutputDeviceInfo newOutputDeviceInfo_;
     bool isFirstCallback_ = true;
+    bool isHiPlayStreamCasting_ = false;
     const int32_t SWITCH_WAIT_TIME = 300;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
     std::function<void()> serviceCallbackStopSinkCast_;
@@ -687,6 +693,12 @@ private:
     std::atomic<bool> isMediaChangeForMirrorToStream_ = false;
     void InitCastEventHandlers();
     std::unordered_map<int32_t, std::function<void()>> castEventHandlers_;
+    std::unordered_set<int32_t> validCastStates_ = {
+        CastEngineConnectState::CONNECTING, CastEngineConnectState::PAUSED,
+        CastEngineConnectState::PLAYING, CastEngineConnectState::DISCONNECTED,
+        CastEngineConnectState::STREAM, CastEngineConnectState::AUTHING,
+        CastEngineConnectState::MIRROR_TO_STREAM, CastEngineConnectState::STREAM_TO_MIRROR
+    };
     
     static constexpr int32_t STREAM_TO_MIRROR_FROM_SINK = 2005;
 #endif

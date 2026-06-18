@@ -160,6 +160,8 @@ public:
 
     std::string QueryCastSessionId(const int64_t castHandle) override;
 
+    int32_t PcmCastSessionReleasePlayer() override;
+
 protected:
 
 private:

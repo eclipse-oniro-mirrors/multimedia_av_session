@@ -22,6 +22,7 @@
 #include "avsession_errors.h"
 #include "avsession_event_handler.h"
 #include "avsession_radar.h"
+#include "avsession_utils.h"
 #include "display_manager_lite.h"
 #include "display_info.h"
 
@@ -504,7 +505,8 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     }
     SLOGI("get deviceList size %{public}zu", deviceList.size());
     for (const CastRemoteDevice& castRemoteDevice : deviceList) {
-        SLOGI("get devices with deviceName %{public}s", castRemoteDevice.deviceName.c_str());
+        SLOGI("get devices with deviceName %{public}s",
+            AVSessionUtils::GetAnonyDeviceName(castRemoteDevice.deviceName).c_str());
         DeviceInfo deviceInfo;
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
         deviceInfo.deviceId_ = castRemoteDevice.deviceId;
@@ -694,6 +696,7 @@ void HwCastProvider::InitCastSessionProperty(uint32_t prototype, bool isPcm, Cas
         property.audioProperty.codec = 1;
         property.videoProperty.codecType = CastEngine::VideoCodecType::H265;
         sptr<Rosen::DisplayLite> display = Rosen::DisplayManagerLite::GetInstance().GetDefaultDisplay();
+        CHECK_AND_RETURN_LOG(display != nullptr, "display is nullptr");
         auto displayInfo = display->GetDisplayInfo();
         int32_t width = displayInfo->GetWidth();
         int32_t height = displayInfo->GetHeight();

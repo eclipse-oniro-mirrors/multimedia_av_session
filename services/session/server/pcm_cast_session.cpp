@@ -57,13 +57,15 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
     }
     
     deviceInfo.deviceName_ = tempDeviceInfo_.deviceName_;
+    deviceInfo.supportedProtocols_ = tempDeviceInfo_.supportedProtocols_;
     deviceInfo.hiPlayDeviceInfo_.castMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
     deviceInfo.hiPlayDeviceInfo_.castUid_ = GetUid();
     deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.supportCastMode_;
     SLOGI("PcmCastSession OnCastStateChange castUid %{public}d", deviceInfo.hiPlayDeviceInfo_.castUid_);
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM) ||
+        castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED)) {
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         castState_ = CastState::CONNECTED;
     }
@@ -165,7 +167,7 @@ void PcmCastSession::OnSystemCommonEvent(const std::string& args)
 void PcmCastSession::OnDeviceNameSystemCommonEvent(const std::string& args)
 {
     std::string deviceName = JsonUtils::GetStringParamFromJsonString(args, "DEVICE_NAME");
-    SLOGI("Received UPDATE_DEVICE_NAME: deviceName:%{public}s", deviceName.c_str());
+    SLOGI("Received UPDATE_DEVICE_NAME: deviceName:%{public}s", AVSessionUtils::GetAnonyDeviceName(deviceName).c_str());
 
     tempDeviceInfo_.deviceName_ = deviceName;
     descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ = deviceName;
@@ -186,7 +188,7 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
         ProtocolType::TYPE_CAST_PLUS_STREAM) != 0));
     if (isPcmScreen) {
-        AVRouter::GetInstance().OnSystemCommonEvent(SESSION_CREATED, "");
+        AVRouter::GetInstance().OnSystemCommonEvent(QUERY_PINCODE, "");
     }
 
     if (castHandle_ > 0 && !isPcmScreen) {
@@ -557,17 +559,18 @@ void PcmCastSession::SavePinCode(const AAFwk::WantParams& commandBody)
 
 void PcmCastSession::CreateStreamPlayer(const AAFwk::WantParams& commandBody)
 {
-    sessionId_ = commandBody.GetStringParam(SESSION_ID);
+    streamCastingSessionId_ = commandBody.GetStringParam(SESSION_ID);
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(tempDeviceInfo_);
     sptr<AVSessionItem> session =
-        AVSessionService::GetUsersManager().GetContainerFromAll().GetSessionById(sessionId_);
+        AVSessionService::GetUsersManager().GetContainerFromAll().GetSessionById(streamCastingSessionId_);
     CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
 
     SLOGI("start to dealoutputdevicechange");
+    session->SetIsHiPlayStreamCasting(true);
     session->SetCastHandle(castHandle_);
-    session->DealOutputDeviceChange(ConnectionState::STATE_CONNECTED, outputDeviceInfo);
-    descriptor_.sessionId_ = sessionId_;
+    session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, outputDeviceInfo);
+    descriptor_.sessionId_ = streamCastingSessionId_;
 }
 
 void PcmCastSession::ReleaseStreamPlayer()
@@ -575,7 +578,7 @@ void PcmCastSession::ReleaseStreamPlayer()
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(tempDeviceInfo_);
     sptr<AVSessionItem> session =
-        AVSessionService::GetUsersManager().GetContainerFromAll().GetSessionById(sessionId_);
+        AVSessionService::GetUsersManager().GetContainerFromAll().GetSessionById(streamCastingSessionId_);
     CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
 
     SLOGI("start to dealoutputdevicechange");
@@ -586,10 +589,11 @@ void PcmCastSession::ReleaseStreamPlayer()
     deviceInfo.deviceId_ = "0";
     deviceInfo.deviceName_ = "LocalDevice";
     localDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    session->DealOutputDeviceChange(ConnectionState::STATE_CONNECTED, localDeviceInfo);
+    session->SetIsHiPlayStreamCasting(false);
+    session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, localDeviceInfo);
     session->ReleaseAVCastControllerInner();
     session->SetCastHandle(-1);
-    sessionId_ = "";
+    streamCastingSessionId_ = "";
     descriptor_.sessionId_ = "pcmCastSession";
 }
 
@@ -611,6 +615,24 @@ void PcmCastSession::CreateExtraInfo(std::string deviceType, std::string scenari
         std::string jsonParams(jsonStr);
         cJSON_free(jsonStr);
         extraInfo_ = jsonParams;
+    }
+    cJSON_Delete(jsonObj);
+}
+
+void PcmCastSession::SendModeChangeToCast(int32_t screenMode)
+{
+    cJSON* jsonObj = cJSON_CreateObject();
+    if (!jsonObj) {
+        SLOGE("Failed to create JSON object");
+        return;
+    }
+
+    cJSON_AddItemToObject(jsonObj, "mode", cJSON_CreateNumber(screenMode));
+    char* jsonStr = cJSON_Print(jsonObj);
+    if (jsonStr != nullptr) {
+        std::string jsonParams(jsonStr);
+        cJSON_free(jsonStr);
+        AVRouter::GetInstance().SendCommandArgsToCast(castHandle_, CONTROL_COMMAND_NUM, jsonParams);
     }
     cJSON_Delete(jsonObj);
 }

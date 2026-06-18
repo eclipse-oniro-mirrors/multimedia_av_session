@@ -151,8 +151,6 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
         if (isFromSession_) {
             data.GetMediaImage()->Clear();
         } else {
-            AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
-                AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "media image conflict", false);
             return ERR_INVALID_PARAM;
         }
     }

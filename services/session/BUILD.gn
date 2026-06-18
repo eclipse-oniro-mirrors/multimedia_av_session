@@ -104,6 +104,7 @@ idl_gen_interface("idl_avsession_service_interface") {
 }
 
 av_session_ohos_library("avsession_service") {
+  shlib_type = "sa"
   stack_protector_ret = true
   install_enable = true
   sanitize = {
