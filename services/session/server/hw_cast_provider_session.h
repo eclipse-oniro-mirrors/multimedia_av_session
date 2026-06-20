@@ -85,6 +85,7 @@ private:
     const int32_t eventIdEnd = 2999;
     const int32_t hiplayEventIdStart = 4200;
     const int32_t hiplayEventIdEnd = 4250;
+    const int32_t prepareState = 2;
     const std::string MEDIA_CAST_DISCONNECT = "usual.event.MEDIA_CAST_DISCONNECT";
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
     const std::string MEDIA_SERIES_CAST_CONFLICT = "usual.event.MEDIA_SERIES_CAST_CONFLICT";
