@@ -1207,10 +1207,12 @@ void AVSessionItem::CheckSupportColdStartExtra(const AAFwk::WantParams& extras)
 
 sptr<IRemoteObject> AVSessionItem::GetControllerInner()
 {
-    std::lock_guard controllerLockGuard(controllersLock_);
-    auto iter = controllers_.find(GetPid());
-    if (iter != controllers_.end()) {
-        return iter->second;
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        auto iter = controllers_.find(GetPid());
+        if (iter != controllers_.end()) {
+            return iter->second;
+        }
     }
 
     sptr<AVSessionItem> session(this);
@@ -1218,7 +1220,15 @@ sptr<IRemoteObject> AVSessionItem::GetControllerInner()
     CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "malloc controller failed");
     result->isFromSession_ = true;
     SLOGI("New controller from sessionItem:%{public}d when get controller.", static_cast<int>(GetPid()));
-    controllers_.insert({GetPid(), result});
+
+    {
+        std::lock_guard controllerLockGuard(controllersLock_);
+        auto iter = controllers_.find(GetPid());
+        if (iter != controllers_.end()) {
+            return iter->second;
+        }
+        controllers_.insert({GetPid(), result});
+    }
     return result;
 }
 
