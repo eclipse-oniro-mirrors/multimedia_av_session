@@ -251,22 +251,26 @@ All commands output JSON format:
 |------------|-------------|
 | 0 | Success |
 | -1 | General error |
-| -2 | No memory |
-| -3 | Invalid parameter |
-| -4 | Service not exist |
-| -5 | Session listener already exist |
-| -6 | Marshalling error |
-| -7 | Unmarshalling error |
-| -8 | IPC send request error |
-| -9 | Session exceed maximum |
-| -10 | Session not exist |
-| -11 | Command not support |
-| -12 | Controller not exist |
-| -13 | No permission |
-| -14 | Session deactive |
-| -15 | Controller already exist |
-| -1001 | Missing required parameter |
-| -1002 | Invalid parameter value |
+| -1001 | No memory |
+| -1002 | Invalid parameter |
+| -1003 | Service not exist |
+| -1004 | Session listener already exist |
+| -1005 | Marshalling error |
+| -1006 | Unmarshalling error |
+| -1007 | IPC send request error |
+| -1008 | Session exceed maximum |
+| -1009 | Session not exist |
+| -1010 | Command not support |
+| -1011 | Controller not exist |
+| -1012 | No permission |
+| -1013 | Session deactive |
+| -1014 | Controller already exist |
+| -1015 | Start ability is running |
+| -1016 | Ability not available |
+| -1017 | Start ability timeout |
+| -1018 | Command send exceed max |
+| -1022 | Session is exist |
+| -1023 | Permission denied |
 
 ## Integration
 

@@ -35,7 +35,7 @@
 
 namespace OHOS::AVSession::Cli {
 
-constexpr int32_t ERR_ARG_MISSING = -1001;
+constexpr int32_t ERR_ARG_MISSING = -1002;
 constexpr int32_t ERR_ARG_INVALID = -1002;
 
 constexpr int JSON_DUMP_INDENT = 2;
