@@ -15,6 +15,7 @@
 
 #include "avsession_users_manager.h"
 #include "account_manager_adapter.h"
+#include "avsession_storage_event.h"
 #include "avsession_utils.h"
 
 namespace OHOS::AVSession {
@@ -205,9 +206,11 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(pid_t pid, co
     GetContainerFromUser(userId).RemoveSession(pid, abilityName);
     std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameLocal);
+    STORAGE_EVENT_RECORD_FILE_DELETE(fileNameLocal, userId);
     std::string fileNameCast =
         AVSessionUtils::GetCachePathNameForCast(userId) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameCast);
+    STORAGE_EVENT_RECORD_FILE_DELETE(fileNameCast, userId);
     return result;
 }
 
@@ -222,9 +225,11 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(const std::st
     GetContainerFromUser(userId).RemoveSession(sessionId);
     std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameLocal);
+    STORAGE_EVENT_RECORD_FILE_DELETE(fileNameLocal, userId);
     std::string fileNameCast =
         AVSessionUtils::GetCachePathNameForCast(userId) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameCast);
+    STORAGE_EVENT_RECORD_FILE_DELETE(fileNameCast, userId);
     return result;
 }
 

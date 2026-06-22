@@ -44,6 +44,7 @@
 #include "extension_connect_helper.h"
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
+#include "avsession_storage_event.h"
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "int_wrapper.h"
@@ -197,6 +198,7 @@ void AVSessionService::OnStartProcess()
     AddSystemAbilityListener(ANCO_BROKER_SA_ID);
 
     HISYSEVENT_REGITER;
+    STORAGE_EVENT_INIT();
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
 #ifndef START_STOP_ON_DEMAND_ENABLE
@@ -258,6 +260,7 @@ void AVSessionService::OnStop()
     CollaborationManagerHiPlay::ReleaseInstance();
 #endif
     CommandSendLimit::GetInstance().StopTimer();
+    STORAGE_EVENT_UNINIT();
     NotifyProcessStatus(false);
     UnSubscribeCommonEvent();
     BundleStatusAdapter::ReleaseInstance();
