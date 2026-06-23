@@ -52,7 +52,7 @@ public:
     bool UnRegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener) override;
     bool RegisterCastSessionStateListener(int castId, std::shared_ptr<IAVCastSessionStateListener> listener) override;
     bool UnRegisterCastSessionStateListener(int castId, std::shared_ptr<IAVCastSessionStateListener> listener) override;
-
+    void buildDeviceInfo(const CastEngine::CastRemoteDevice& castRemoteDevice, DeviceInfo& deviceInfo);
     void OnDeviceFound(const std::vector<CastEngine::CastRemoteDevice> &deviceList) override;
     void OnLogEvent(const int32_t eventId, const int64_t param) override;
     void OnDeviceOffline(const std::string &deviceId) override;

@@ -265,7 +265,7 @@ bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo, const D
         return false;
     }
 
-    return hwCastProviderSession->RemoveDevice(deviceInfo.deviceId_, deviceRemoveAction);
+    return hwCastProviderSession->RemoveDevice(deviceInfo.realDeviceId_, deviceRemoveAction);
 }
 
 bool HwCastProvider::RegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener)
@@ -496,6 +496,27 @@ std::vector<uint32_t> HwCastProvider::ParsePullClients(const std::string& str)
     return ret;
 }
 
+void HwCastProvider::buildDeviceInfo(const CastEngine::CastRemoteDevice& castRemoteDevice, DeviceInfo& deviceInfo)
+{
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+    deviceInfo.deviceType_ = ConvertCastDeviceTypeToDeviceType(static_cast<int32_t>(castRemoteDevice.rawDeviceType));
+    deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
+    deviceInfo.networkId_ = castRemoteDevice.networkId;
+    deviceInfo.manufacturer_ = castRemoteDevice.manufacturerName;
+    deviceInfo.modelName_ = castRemoteDevice.modelName;
+    deviceInfo.supportedProtocols_ = GetProtocolType(castRemoteDevice.protocolCapabilities);
+    deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
+    deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
+    deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
+    SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
+    deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
+    deviceInfo.bleMac_ = castRemoteDevice.bleMac;
+    deviceInfo.uuid_ = castRemoteDevice.uuid;
+    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = castRemoteDevice.isSupportDeviceCast ?
+        HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
+    deviceInfo.realDeviceId_ = castRemoteDevice.deviceId;
+}
+
 void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceList)
 {
     std::vector<DeviceInfo> deviceInfoList;
@@ -507,28 +528,25 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     for (const CastRemoteDevice& castRemoteDevice : deviceList) {
         SLOGI("get devices with deviceName %{public}s",
             AVSessionUtils::GetAnonyDeviceName(castRemoteDevice.deviceName).c_str());
-        DeviceInfo deviceInfo;
-        deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
-        deviceInfo.deviceId_ = castRemoteDevice.deviceId;
-        deviceInfo.deviceName_ = castRemoteDevice.deviceName;
-        deviceInfo.deviceType_ = ConvertCastDeviceTypeToDeviceType(
-            static_cast<int32_t>(castRemoteDevice.rawDeviceType));
-        deviceInfo.ipAddress_ = castRemoteDevice.ipAddress;
-        deviceInfo.networkId_ = castRemoteDevice.networkId;
-        deviceInfo.manufacturer_ = castRemoteDevice.manufacturerName;
-        deviceInfo.modelName_ = castRemoteDevice.modelName;
-        deviceInfo.supportedProtocols_ = GetProtocolType(castRemoteDevice.protocolCapabilities);
-        deviceInfo.authenticationStatus_ = castRemoteDevice.isTrushed ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
-        deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
-        deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
-        deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
-        SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
-        deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
-        deviceInfo.bleMac_ = castRemoteDevice.bleMac;
-        deviceInfo.uuid_ = castRemoteDevice.uuid;
-        deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = castRemoteDevice.isSupportDeviceCast ?
-            HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
-        deviceInfoList.emplace_back(deviceInfo);
+        if (castRemoteDevice.serviceInfos.empty()) { // not car device
+            DeviceInfo deviceInfo;
+            deviceInfo.deviceId_ = castRemoteDevice.deviceId;
+            deviceInfo.deviceName_ = castRemoteDevice.deviceName;
+            deviceInfo.authenticationStatus_ = castRemoteDevice.isTrushed ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
+            buildDeviceInfo(castRemoteDevice, deviceInfo);
+            deviceInfoList.emplace_back(deviceInfo);
+        } else { // car device
+            for (const ServiceInfo& info : castRemoteDevice.serviceInfos) {
+                DeviceInfo deviceInfo;
+                std::string screenId = std::to_string(info.screenId);
+                deviceInfo.deviceId_ = castRemoteDevice.deviceId + screenId;
+                deviceInfo.deviceName_ = castRemoteDevice.deviceName + info.serviceName;
+                deviceInfo.authenticationStatus_ = info.isTrusted ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
+                deviceInfo.screenId_ = info.screenId;
+                buildDeviceInfo(castRemoteDevice, deviceInfo);
+                deviceInfoList.emplace_back(deviceInfo);
+            }
+        }
     }
     for (auto listener : castStateListenerList_) {
         if (listener != nullptr) {

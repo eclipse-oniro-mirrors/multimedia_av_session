@@ -1012,6 +1012,56 @@ static HWTEST(HwCastSupplementTest, OnDeviceFound002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnDeviceFound003
+ * @tc.desc: test OnDeviceFound with empty deviceList
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, OnDeviceFound003, TestSize.Level0)
+{
+    SLOGI("OnDeviceFound003 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    std::vector<CastEngine::CastRemoteDevice> deviceList;
+    std::shared_ptr<AVCastProviderManager> ptr = std::make_shared<AVCastProviderManager>();
+    hwCastProvider->castStateListenerList_.push_back(ptr);
+
+    hwCastProvider->OnDeviceFound(deviceList);
+    SLOGI("OnDeviceFound003 end!");
+}
+
+/**
+ * @tc.name: OnDeviceFound004
+ * @tc.desc: test OnDeviceFound with serviceInfos
+ * @tc.type: FUNC
+ */
+static HWTEST(HwCastSupplementTest, OnDeviceFound004, TestSize.Level0)
+{
+    SLOGI("OnDeviceFound004 begin!");
+    std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(hwCastProvider != nullptr, true);
+    hwCastProvider->Init();
+
+    CastEngine::CastRemoteDevice castRemoteDevice;
+    castRemoteDevice.deviceId = "testDeviceId";
+    castRemoteDevice.deviceName = "testDeviceName";
+    CastEngine::ServiceInfo serviceInfo;
+    serviceInfo.screenId = 1;
+    serviceInfo.serviceName = "testService";
+    serviceInfo.isTrusted = true;
+    castRemoteDevice.serviceInfos.push_back(serviceInfo);
+    std::vector<CastEngine::CastRemoteDevice> deviceList;
+    deviceList.push_back(castRemoteDevice);
+
+    std::shared_ptr<AVCastProviderManager> ptr = std::make_shared<AVCastProviderManager>();
+    hwCastProvider->castStateListenerList_.push_back(ptr);
+
+    hwCastProvider->OnDeviceFound(deviceList);
+    SLOGI("OnDeviceFound004 end!");
+}
+
+/**
  * @tc.name: OnLogEvent001
  * @tc.desc: test OnLogEvent
  * @tc.type: FUNC

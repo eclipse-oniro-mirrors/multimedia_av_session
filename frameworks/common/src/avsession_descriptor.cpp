@@ -79,14 +79,15 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.supportedPullClients_.size()), false,
             "write supportedPullClients size failed");
         for (auto supportedPullClient : deviceInfo.supportedPullClients_) {
-            CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false,
-                "write supportedPullClient failed");
+            CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false, "write supportedPullClient failed");
         }
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.bleMac_), false, "write bleMac failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.triggerType_), false, "write triggerType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.uuid_), false, "write uuid failed");
         CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.WriteToParcel(out), false,
             "write hiPlayDeviceInfo failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.realDeviceId_), false, "write realDeviceId failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.screenId_), false, "write screenId failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -122,8 +123,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.manufacturer_), false, "Read manufacturer failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.supportedProtocols_), false,
-        "Read supportedProtocols failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.supportedProtocols_), false, "Read supportedProtocols failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.authenticationStatus_), false,
         "Read authenticationStatus failed");
     int32_t supportedDrmCapabilityLen = 0;
@@ -160,6 +160,8 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.triggerType_), false, "Read triggerType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.uuid_), false, "Read uuid failed");
     CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.ReadFromParcel(in), false, "Read hiPlayDeviceInfo failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.realDeviceId_), false, "Read realDeviceId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.screenId_), false, "Read screenId failed");
     outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
@@ -225,6 +227,8 @@ bool DeviceInfo::Marshalling(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(triggerType_), false, "write triggerType failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(uuid_), false, "write uuid failed");
     CHECK_AND_RETURN_RET_LOG(hiPlayDeviceInfo_.WriteToParcel(out), false, "write hiPlayDeviceInfo failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(realDeviceId_), false, "write realDeviceId failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(screenId_), false, "write screenId failed");
     return true;
 }
 
@@ -246,10 +250,8 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadString(manufacturer_), false, "Read manufacturer failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(modelName_), false, "Read modelName failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(providerId_), false, "Read providerId failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedProtocols_), false,
-        "Read supportedProtocols failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(authenticationStatus_), false,
-        "Read authenticationStatus failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedProtocols_), false, "Read supportedProtocols failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(authenticationStatus_), false, "Read authenticationStatus failed");
     int32_t supportedDrmCapabilityLen = 0;
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
         "read supportedDrmCapabilityLen failed");
@@ -286,6 +288,8 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(triggerType_), false, "Read triggerType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(uuid_), false, "Read uuid failed");
     CHECK_AND_RETURN_RET_LOG(hiPlayDeviceInfo_.ReadFromParcel(in), false, "Read hiPlayDeviceInfo failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(realDeviceId_), false, "Read realDeviceId failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(screenId_), false, "Read screenId failed");
     return true;
 }
 

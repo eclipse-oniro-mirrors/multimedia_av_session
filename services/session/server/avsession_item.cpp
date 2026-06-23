@@ -1761,7 +1761,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
         SetCastHandle(AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameStatePair_, GetSessionId()));
         CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId(), deviceInfo);
-        AVRouter::GetInstance().GetRemoteDrmCapabilities(castHandle_, deviceInfo.deviceId_,
+        AVRouter::GetInstance().GetRemoteDrmCapabilities(castHandle_, deviceInfo.realDeviceId_,
             deviceInfo.supportedDrmCapabilities_);
         AVRouter::GetInstance().SetServiceAllConnectState(castHandle_, deviceInfo);
         mirrorToStreamOnceFlag_ = true;
@@ -2105,11 +2105,11 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     }
     if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
-            castHandle_, deviceInfo.deviceId_, collaborationNeedNetworkId_);
+            castHandle_, deviceInfo.realDeviceId_, collaborationNeedNetworkId_);
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
-            collaborationNeedNetworkId_ = deviceInfo.deviceId_;
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.realDeviceId_).c_str());
+            collaborationNeedNetworkId_ = deviceInfo.realDeviceId_;
         }
         CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
@@ -2117,8 +2117,8 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
-            collaborationNeedNetworkId_ = deviceInfo.deviceId_;
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.realDeviceId_).c_str());
+            collaborationNeedNetworkId_ = deviceInfo.realDeviceId_;
         }
         CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
@@ -2198,7 +2198,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
-    collaborationNeedDeviceId_ = deviceInfo.deviceId_;
+    collaborationNeedDeviceId_ = deviceInfo.realDeviceId_;
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }

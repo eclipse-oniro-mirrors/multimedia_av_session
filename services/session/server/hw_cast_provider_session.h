@@ -70,6 +70,8 @@ public:
 private:
     void ComputeToastOnDeviceState(const CastEngine::DeviceStateInfo &stateInfo,
         const CastEngine::CastRemoteDevice &castRemoteDevice);
+    std::vector<AudioStreamInfo> BuildAudioStreamInfos(const CastEngine::CastRemoteDevice &castRemoteDevice);
+    std::string GetDeviceId(const CastEngine::DeviceStateInfo &stateInfo);
 
     std::shared_ptr<CastEngine::ICastSession> castSession_;
     std::vector<std::shared_ptr<IAVCastSessionStateListener>> castSessionStateListenerList_;
@@ -81,6 +83,7 @@ private:
 
     const int32_t deviceStateConnection = 6;
     const int32_t noReasonCode = 0;
+    const int32_t noScreenId = -1;
     const int32_t eventIdStart = 2000;
     const int32_t eventIdEnd = 2999;
     const int32_t hiplayEventIdStart = 4200;
