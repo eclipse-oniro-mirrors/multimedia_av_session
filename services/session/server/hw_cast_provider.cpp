@@ -506,7 +506,7 @@ void HwCastProvider::buildDeviceInfo(const CastEngine::CastRemoteDevice& castRem
     deviceInfo.modelName_ = castRemoteDevice.modelName;
     deviceInfo.supportedProtocols_ = GetProtocolType(castRemoteDevice.protocolCapabilities);
     deviceInfo.supportedDrmCapabilities_ = castRemoteDevice.drmCapabilities;
-    deviceInfo.isLegacy_ = castRemoteDevice.isLeagacy;
+    deviceInfo.isLegacy_ = castRemoteDevice.isLegacy;
     deviceInfo.mediumTypes_ = static_cast<int32_t>(castRemoteDevice.mediumTypes);
     SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
     deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
