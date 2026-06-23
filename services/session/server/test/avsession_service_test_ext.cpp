@@ -984,6 +984,8 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     pcmCastSession->OnCastStateChange(5, deviceInfo, false, 0);
     pcmCastSession->OnCastStateChange(0, deviceInfo, false, 0);
     pcmCastSession->OnCastStateChange(6, deviceInfo, true, 0);
+    pcmCastSession->OnCastStateChange(1, deviceInfo, true, 0);
+    pcmCastSession->OnCastStateChange(3, deviceInfo, true, 0);
 
     pcmCastSession->collaborationNeedNetworkId_.clear();
     pcmCastSession->DealCollaborationPublishState(5, deviceInfo);
@@ -997,7 +999,7 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     pcmCastSession->CastStateCommandParams(commandArgs);
     pcmCastSession->DestroyTask();
     pcmCastSession->GetCastMode();
-    pcmCastSession->GetCastState();
+    pcmCastSession->CheckIsCasting();
     pcmCastSession->GetDescriptor();
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
@@ -1422,6 +1424,26 @@ static HWTEST_F(AVSessionServiceTestExt, CreateExtraInfo001, TestSize.Level0)
     pcmCastSession->CreateExtraInfo("SPEAKER", "default");
     pcmCastSession->CreateExtraInfo("TV", "default");
     pcmCastSession->CreateExtraInfo("TV", "hotel");
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/*
+ * @tc.name: CreateStreamPlayer001
+ * @tc.desc: Test CreateStreamPlayer
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, CreateStreamPlayer001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OHOS::AAFwk::WantParams commandBody;
+    pcmCastSession->CreateStreamPlayer(commandBody);
+    DeviceInfo deviceInfo;
+    pcmCastSession->OnCastStateChange(6, deviceInfo, false, 0);
+    pcmCastSession->CreateStreamPlayer(commandBody);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
 }
