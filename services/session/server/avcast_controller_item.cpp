@@ -355,9 +355,8 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetIcon() != nullptr) {
         std::string fileDir = AVSessionUtils::GetCachePathNameForCast(userId_);
         std::string fileName = sessionId_ + AVSessionUtils::GetFileSuffix();
-        int64_t fileSize = static_cast<int64_t>(avQueueItem.GetDescription()->GetIcon()->GetInnerImgBuffer().size());
         AVSessionUtils::WriteImageToFile(avQueueItem.GetDescription()->GetIcon(), fileDir, fileName);
-        STORAGE_EVENT_RECORD_FILE_WRITE(fileDir + fileName, fileSize, bundleName, userId_);
+        STORAGE_EVENT_RECORD_FILE_WRITE(fileDir + fileName, bundleName, userId_);
     }
     auto ret = castControllerProxy_->Prepare(avQueueItem);
     ReportPrepare(ret, avQueueItem);

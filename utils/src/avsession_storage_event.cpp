@@ -17,16 +17,51 @@
 #include "avsession_log.h"
 #include "avsession_sysevent.h"
 #include "avsession_utils.h"
-#include "directory_ex.h"
 #include <sys/stat.h>
 #include <dirent.h>
+#include <filesystem>
 #include <climits>
 #include <cerrno>
 #include <cstdlib>
+#include <ctime>
 #include <set>
 
 namespace OHOS::AVSession {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+
+// Returns the on-disk size in bytes of the given file, or 0 on failure.
+static int64_t GetFileSizeBytes(const std::string& path)
+{
+    struct stat st {};
+    if (stat(path.c_str(), &st) != 0) {
+        return 0;
+    }
+    return static_cast<int64_t>(st.st_size);
+}
+
+// Returns current time in milliseconds since epoch.
+static int64_t GetCurrentTimestampMs()
+{
+    auto now = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        now.time_since_epoch()).count();
+}
+
+// Formats a millisecond timestamp as "YYYY-MM-DD HH:MM:SS.mmm" in local time.
+static std::string FormatTimestamp(int64_t ms)
+{
+    time_t sec = static_cast<time_t>(ms / 1000);
+    int64_t millis = ms % 1000;
+    struct tm tmResult {};
+    if (localtime_r(&sec, &tmResult) == nullptr) {
+        return std::to_string(ms);
+    }
+    char buf[40] = {0};
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tmResult);
+    char tail[8] = {0};
+    snprintf(tail, sizeof(tail), ".%03lld", static_cast<long long>(millis));
+    return std::string(buf) + tail;
+}
 
 AVSessionStorageEvent& AVSessionStorageEvent::GetInstance()
 {
@@ -81,13 +116,13 @@ void AVSessionStorageEvent::StopPeriodicReport()
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask(PERIODIC_TASK_NAME);
 }
 
-void StorageUserData::AddFileInfo(const std::string& fileName, int64_t fileSizeKB, const std::string& bundleName)
+void StorageUserData::AddFileInfo(const std::string& fileName, const std::string& bundleName)
 {
     std::lock_guard<std::recursive_mutex> lockGuard(lock_);
     StorageFileInfo info;
-    info.fileSizeKB_ = fileSizeKB;
     info.bundleName_ = bundleName;
-    fileInfoMap_[fileName] = info;
+    info.timestamp_ = GetCurrentTimestampMs();
+    fileInfoMap_[fileName] = info;  // overwrite if exists, updating timestamp
 }
 
 void StorageUserData::RemoveFileInfo(const std::string& fileName)
@@ -108,12 +143,12 @@ size_t StorageUserData::GetTotalFileCount()
     return fileInfoMap_.size();
 }
 
-int64_t StorageUserData::GetTotalStorageKB()
+int64_t StorageUserData::GetTotalStorageBytes()
 {
     std::lock_guard<std::recursive_mutex> lockGuard(lock_);
     int64_t total = 0;
     for (const auto& pair : fileInfoMap_) {
-        total += pair.second.fileSizeKB_;
+        total += GetFileSizeBytes(pair.first);
     }
     return total;
 }
@@ -123,8 +158,9 @@ void StorageUserData::AppendFileInfoStrings(std::vector<std::string>& bundleName
     for (const auto& pair : fileInfoMap_) {
         const StorageFileInfo& info = pair.second;
         std::string item = "FILE";
+        item += "|TIME=" + FormatTimestamp(info.timestamp_);
         item += "|NAME=" + pair.first;
-        item += "|SIZE=" + std::to_string(info.fileSizeKB_);
+        item += "|SIZE=" + std::to_string(GetFileSizeBytes(pair.first));
         item += "|BUNDLE=" + info.bundleName_;
         bundleNames.push_back(item);
     }
@@ -140,24 +176,20 @@ StorageUserData& AVSessionStorageEvent::GetOrCreateStorageUserData(int32_t userI
     return *(it->second);
 }
 
-int64_t AVSessionStorageEvent::BytesToKB(int64_t bytes)
-{
-    constexpr int64_t KB_FACTOR = 1024;
-    return (bytes > 0) ? (bytes / KB_FACTOR) : 0;
-}
-
-void AVSessionStorageEvent::RecordFileWrite(const std::string& fileName, int64_t fileSizeBytes,
+void AVSessionStorageEvent::RecordFileWrite(const std::string& fileName,
     const std::string& bundleName, int32_t userId)
 {
     std::lock_guard<std::recursive_mutex> lockGuard(lock_);
 
-    SLOGD("RecordFileWrite: fileName=%{public}s, size=%{public}lld bytes, bundle=%{public}s, user=%{public}d",
-        fileName.c_str(), static_cast<long long>(fileSizeBytes), bundleName.c_str(), userId);
+    SLOGD("RecordFileWrite: fileName=%{public}s, bundle=%{public}s, user=%{public}d",
+        fileName.c_str(), bundleName.c_str(), userId);
 
+    // Only record the file path + bundleName. File size is intentionally NOT stored
+    // here — it is stat()ed from disk at report time (in AppendFileInfoStrings and
+    // GetTotalStorageBytes) so the reported value always reflects the real on-disk
+    // footprint rather than the in-memory buffer size that may differ.
     StorageUserData& userData = GetOrCreateStorageUserData(userId);
-    int64_t fileSizeKB = BytesToKB(fileSizeBytes);
-
-    userData.AddFileInfo(fileName, fileSizeKB, bundleName);
+    userData.AddFileInfo(fileName, bundleName);
 
     if (userData.GetTotalFileCount() >= MAX_RECORD_COUNT) {
         SLOGI("Record count reaches %{public}zu, trigger immediate report for user %{public}d",
@@ -187,65 +219,56 @@ void AVSessionStorageEvent::ScanStorageStatistics(int32_t userId, StorageStatist
 {
     stats = StorageStatistics{};
     const std::string suffix = AVSessionUtils::GetFileSuffix();
-
-    // Helper: get file size in bytes, return 0 on failure.
-    auto fileSizeBytes = [](const std::string& path) -> int64_t {
-        struct stat st {};
-        if (stat(path.c_str(), &st) != 0) {
-            return 0;
-        }
-        return static_cast<int64_t>(st.st_size);
-    };
-
-    // 1. Scan cache/ directory for LOCAL and CAST images.
-    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
-    std::vector<std::string> cacheFiles;
-    GetDirFiles(cacheDir, cacheFiles);
     const std::string castPrefix = "cast_";
-    for (const auto& file : cacheFiles) {
-        if (file.find(suffix) == std::string::npos) {
+
+    // Use std::filesystem to traverse the av_session/ directory tree. This is the same
+    // mechanism already used in production (avsession_item.cpp, avsession_service_ext.cpp),
+    // so it works under the service's SELinux policy. recursive_directory_iterator covers
+    // cache/ and any cast_* subdirectories automatically.
+    std::set<std::string> allFiles;
+    std::error_code ec;
+    std::string rootDir = AVSessionUtils::GetFixedPathName(userId);
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(rootDir, ec)) {
+        if (ec) {
             continue;
         }
-        // Extract the base file name to check the cast_ prefix.
-        size_t pos = file.find_last_of('/');
-        std::string baseName = (pos != std::string::npos) ? file.substr(pos + 1) : file;
-        int64_t sizeKB = BytesToKB(fileSizeBytes(file));
-        if (baseName.compare(0, castPrefix.size(), castPrefix) == 0) {
-            stats.castCount++;
-            stats.castSizeKB += sizeKB;
-        } else {
-            stats.localCount++;
-            stats.localSizeKB += sizeKB;
+        if (!entry.is_regular_file(ec)) {
+            continue;
         }
-        stats.totalCount++;
-        stats.totalSizeKB += sizeKB;
+        allFiles.insert(entry.path().string());
     }
 
-    // 2. Scan av_session/ direct children for HISTORY images (non-recursive into cache/).
-    std::string fixedDir = AVSessionUtils::GetFixedPathName(userId);
-    DIR* dir = opendir(fixedDir.c_str());
-    if (dir == nullptr) {
-        SLOGW("ScanStorageStatistics: opendir failed for %{public}s", fixedDir.c_str());
-        return;
+    // Also include in-memory recorded paths as a reliable fallback.
+    auto it = storageUserDataMap_.find(userId);
+    if (it != storageUserDataMap_.end()) {
+        for (const auto& pair : it->second->GetFileInfoMapForScan()) {
+            allFiles.insert(pair.first);
+        }
     }
-    struct dirent* entry = nullptr;
-    while ((entry = readdir(dir)) != nullptr) {
-        // Only regular files (skip ".", "..", and subdirectories like cache/).
-        if (entry->d_type != DT_REG) {
+
+    // Classify each unique file by path and name.
+    for (const auto& full : allFiles) {
+        if (full.find(suffix) == std::string::npos) {
             continue;
         }
-        std::string name(entry->d_name);
-        if (name.find(suffix) == std::string::npos) {
-            continue;
+        int64_t size = GetFileSizeBytes(full);
+        bool inCache = (full.find("/cache/") != std::string::npos);
+        size_t slashPos = full.find_last_of('/');
+        std::string baseName = (slashPos != std::string::npos) ? full.substr(slashPos + 1) : full;
+        bool isCast = (baseName.compare(0, castPrefix.size(), castPrefix) == 0);
+        if (inCache && isCast) {
+            stats.castCount++;
+            stats.castSize += size;
+        } else if (inCache) {
+            stats.localCount++;
+            stats.localSize += size;
+        } else {
+            stats.historyCount++;
+            stats.historySize += size;
         }
-        std::string full = fixedDir + name;
-        int64_t sizeKB = BytesToKB(fileSizeBytes(full));
-        stats.historyCount++;
-        stats.historySizeKB += sizeKB;
         stats.totalCount++;
-        stats.totalSizeKB += sizeKB;
+        stats.totalSize += size;
     }
-    closedir(dir);
 }
 
 std::vector<int32_t> AVSessionStorageEvent::EnumerateUserIds()
@@ -293,15 +316,15 @@ std::vector<std::string> AVSessionStorageEvent::BuildControlBundleNames(int32_t 
     std::string summary = "SUMMARY";
     summary += "|USER_ID=" + std::to_string(userId);
     summary += "|TOTAL_COUNT=" + std::to_string(stats.totalCount);
-    summary += "|TOTAL_SIZE=" + std::to_string(stats.totalSizeKB);
+    summary += "|TOTAL_SIZE=" + std::to_string(stats.totalSize);
     summary += "|LOCAL_COUNT=" + std::to_string(stats.localCount);
-    summary += "|LOCAL_SIZE=" + std::to_string(stats.localSizeKB);
+    summary += "|LOCAL_SIZE=" + std::to_string(stats.localSize);
     summary += "|CAST_COUNT=" + std::to_string(stats.castCount);
-    summary += "|CAST_SIZE=" + std::to_string(stats.castSizeKB);
+    summary += "|CAST_SIZE=" + std::to_string(stats.castSize);
     summary += "|HISTORY_COUNT=" + std::to_string(stats.historyCount);
-    summary += "|HISTORY_SIZE=" + std::to_string(stats.historySizeKB);
+    summary += "|HISTORY_SIZE=" + std::to_string(stats.historySize);
     summary += "|RECORD_COUNT=" + std::to_string(stats.recordCount);
-    summary += "|RECORD_SIZE=" + std::to_string(stats.recordSizeKB);
+    summary += "|RECORD_SIZE=" + std::to_string(stats.recordSize);
     bundleNames.push_back(summary);
 
     // Element [1..N]: per-file detail from the in-memory map.
@@ -334,10 +357,11 @@ void AVSessionStorageEvent::ReportStorageStatistics()
     }
 }
 
-void AVSessionStorageEvent::ReportStorageStatisticsForUser(int32_t userId)
+void AVSessionStorageEvent::ReportStorageStatisticsForUser(int32_t userId, bool clearAfterReport)
 {
-    // Scan on-disk directories first so we report even when no in-memory record exists
-    // (covers files written before this feature, or after a service restart).
+    std::lock_guard<std::recursive_mutex> lockGuard(lock_);
+
+    // Build SUMMARY statistics from in-memory file records + disk stat().
     StorageStatistics stats;
     ScanStorageStatistics(userId, stats);
 
@@ -345,10 +369,10 @@ void AVSessionStorageEvent::ReportStorageStatisticsForUser(int32_t userId)
     StorageUserData* userData = (it != storageUserDataMap_.end()) ? it->second.get() : nullptr;
 
     // Fill in-memory bookkeeping totals so the receiver can distinguish new writes this
-    // period (recordCount/recordSizeKB) from total on-disk files (totalCount/totalSizeKB).
+    // period (recordCount/recordSize) from total on-disk files (totalCount/totalSize).
     if (userData != nullptr) {
         stats.recordCount = userData->GetTotalFileCount();
-        stats.recordSizeKB = userData->GetTotalStorageKB();
+        stats.recordSize = userData->GetTotalStorageBytes();
     }
 
     // Report only when there is something to say: on-disk files OR in-memory records.
@@ -363,13 +387,13 @@ void AVSessionStorageEvent::ReportStorageStatisticsForUser(int32_t userId)
         return;
     }
 
-    SLOGI("Report storage statistics for user %{public}d: total=%{public}zu files/%{public}lldKB, "
-        "local=%{public}zu/%{public}lldKB, cast=%{public}zu/%{public}lldKB, history=%{public}zu/%{public}lldKB",
+    SLOGI("Report storage statistics for user %{public}d: total=%{public}zu files/%{public}lldB, "
+        "local=%{public}zu/%{public}lldB, cast=%{public}zu/%{public}lldB, history=%{public}zu/%{public}lldB",
         userId,
-        stats.totalCount, static_cast<long long>(stats.totalSizeKB),
-        stats.localCount, static_cast<long long>(stats.localSizeKB),
-        stats.castCount, static_cast<long long>(stats.castSizeKB),
-        stats.historyCount, static_cast<long long>(stats.historySizeKB));
+        stats.totalCount, static_cast<long long>(stats.totalSize),
+        stats.localCount, static_cast<long long>(stats.localSize),
+        stats.castCount, static_cast<long long>(stats.castSize),
+        stats.historyCount, static_cast<long long>(stats.historySize));
 
     // Report via the PLAYING_AVSESSION_STATS statistic event. Storage statistics are
     // carried in the AVSESSION_CONTROL_BUNDLE_NAME string array; other fields are left
@@ -395,7 +419,12 @@ void AVSessionStorageEvent::ReportStorageStatisticsForUser(int32_t userId)
         "SUPPORT_INTENT", "",
         "SUPPORT_AVQUEUE", false);
 
-    if (userData != nullptr) {
+    // Clear in-memory records only when triggered by the 99-record emergency flush
+    // (to bound memory and avoid re-triggering on every subsequent write). The periodic
+    // 24h timer deliberately does NOT clear, so it keeps reporting as long as files
+    // remain on disk — the in-memory paths also serve as a reliable fallback for the
+    // disk scan.
+    if (clearAfterReport && userData != nullptr) {
         userData->ClearFileInfo();
     }
 }
