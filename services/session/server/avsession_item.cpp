@@ -104,6 +104,7 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t user
         std::lock_guard aliveLockGuard(isAliveLock_);
         isAlivePtr_ = std::make_shared<bool>(true);
     }
+    STORAGE_EVENT_RECORD_SESSION(descriptor_.sessionId_, GetBundleName(), userId_);
 }
 
 void AVSessionItem::InitListener()
@@ -119,6 +120,7 @@ AVSessionItem::~AVSessionItem()
 {
     SLOGI("destroy with aliveLock session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
+    STORAGE_EVENT_REMOVE_SESSION(descriptor_.sessionId_);
     if (IsActive()) {
         Deactivate();
     }
