@@ -2854,7 +2854,7 @@ static HWTEST_F(AVSessionServiceTest, GetSessionDescriptors003, TestSize.Level0)
 
 /**
  * @tc.name: GetSessionDescriptors004
- * @tc.desc: 测试 pcmCastSession_ 非空且 GetCastState() 为真
+ * @tc.desc: 测试 pcmCastSession_ 非空且 CheckIsCasting() 为真
  * @tc.type: FUNC
  * @tc.require: CASTPLUS_CAST_ENGINE_ENABLE
  */
@@ -2875,7 +2875,7 @@ HWTEST_F(AVSessionServiceTest, GetSessionDescriptors004, TestSize.Level0)
 
 /**
  * @tc.name: GetSessionDescriptors005
- * @tc.desc: 测试 pcmCastSession_ 非空且 GetCastState() 为假
+ * @tc.desc: 测试 pcmCastSession_ 非空且 CheckIsCasting() 为假
  * @tc.type: FUNC
  * @tc.require: CASTPLUS_CAST_ENGINE_ENABLE
  */

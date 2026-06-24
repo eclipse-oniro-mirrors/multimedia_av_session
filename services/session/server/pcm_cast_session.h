@@ -24,6 +24,7 @@ namespace OHOS::AVSession {
 class PcmCastSession : public IAVRouterListener, public std::enable_shared_from_this<PcmCastSession> {
 public:
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode) override;
+    void HandleDeviceDisconnect();
 
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) override;
 
@@ -44,7 +45,7 @@ public:
 
     int32_t GetCastMode() const;
     pid_t GetUid() const;
-    int32_t GetCastState() const;
+    bool CheckIsCasting() const;
     int64_t GetCastHandle() const;
     AVSessionDescriptor GetDescriptor();
 
@@ -67,6 +68,7 @@ public:
 
     void CreateStreamPlayer(const AAFwk::WantParams& commandBody);
     void ReleaseStreamPlayer();
+    void FindSessionAndStreamCasting();
 
     void CreateExtraInfo(std::string deviceType, std::string scenario);
 
@@ -93,6 +95,7 @@ private:
     DeviceInfo tempDeviceInfo_;
     std::string streamCastingSessionId_;
     std::string extraInfo_;
+    bool needStreamCasting_ = false;
 
     const std::string COMMAND_TYPE = "command_type";
     const std::string COMMAND_BODY = "command_body";
@@ -130,7 +133,8 @@ private:
 
     enum CastState {
         DISCONNECTED = 0,
-        CONNECTED = 1,
+        PREPARE = 1,
+        STREAM = 2,
     };
 
     const std::map<const std::string, int32_t> COMMON_COMMAND_MAPS = {

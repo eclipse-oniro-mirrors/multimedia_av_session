@@ -2153,7 +2153,7 @@ int32_t AVSessionService::GetSessionDescriptors(int32_t category, std::vector<AV
             break;
 # ifdef CASTPLUS_CAST_ENGINE_ENABLE
         case SessionCategory::CATEGORY_HIPLAY:
-            if (pcmCastSession_ != nullptr && pcmCastSession_->GetCastState()) {
+            if (pcmCastSession_ != nullptr && pcmCastSession_->CheckIsCasting()) {
                 AVSessionDescriptor descriptor = pcmCastSession_->GetDescriptor();
                 descriptors.push_back(descriptor);
             }
