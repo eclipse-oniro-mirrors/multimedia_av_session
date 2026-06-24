@@ -721,6 +721,7 @@ void AVRouterImpl::NotifyCastSessionCreated()
     if (deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1) {
         DeviceInfo deviceInfo;
         deviceInfo.deviceId_ = sourceDeviceId_;
+        deviceInfo.realDeviceId_ = sourceDeviceId_;
         deviceInfo.supportedProtocols_ = sourceProtocols_;
         SLOGI("sourceProtocols_ is %{public}d", sourceProtocols_);
         castSide_ = CAST_SIDE::CAST_SINK;  // prohibit cast preempt mirror toast disconnect
