@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 #include "hisysevent.h"
-#include "avsession_event_handler.h"
+#include "timer.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -66,7 +66,8 @@ public:
     // obtained from disk (stat) at report time, NOT from the in-memory buffer size, so
     // it reflects the real on-disk footprint. Each string is formatted as
     // "FILE|NAME=..|SIZE=..|BUNDLE=..|TIME=..".
-    void AppendFileInfoStrings(std::vector<std::string>& bundleNames) const;
+    // Appends FILE entries for recorded files. Stops when bundleNames reaches maxCount.
+    void AppendFileInfoStrings(std::vector<std::string>& bundleNames, size_t maxCount) const;
     // Returns total bytes of all recorded files by stat()ing each one on disk.
     int64_t GetTotalStorageBytes();
     // Read-only access to the internal map (for path-based disk scan by AVSessionStorageEvent).
@@ -89,8 +90,11 @@ public:
 
     void RecordFileWrite(const std::string& fileName, const std::string& bundleName, int32_t userId);
     void RecordFileDelete(const std::string& fileName, int32_t userId);
+    // Collects statistics for ALL users and reports them in a single HiSysEvent.
     void ReportStorageStatistics();
-    void ReportStorageStatisticsForUser(int32_t userId, bool clearAfterReport = true);
+    // Called when the 99-record threshold is reached for a single user: triggers an
+    // immediate report (same single-event aggregation as the periodic one).
+    void TriggerImmediateReport();
 
 private:
     AVSessionStorageEvent();
@@ -98,7 +102,6 @@ private:
 
     // Returns a reference to the per-user bucket, creating it on demand.
     StorageUserData& GetOrCreateStorageUserData(int32_t userId);
-    std::vector<std::string> BuildControlBundleNames(int32_t userId, const StorageStatistics& stats);
     // Scans the AVSession directories for the given user and fills aggregated statistics.
     void ScanStorageStatistics(int32_t userId, StorageStatistics& stats);
     // Enumerates userIds that have an AVSession directory under /data/service/el2/.
@@ -108,12 +111,15 @@ private:
 
     std::unordered_map<int32_t, std::unique_ptr<StorageUserData>> storageUserDataMap_;
     std::recursive_mutex lock_;
+    // Uses OHOS::Utils::Timer (native thread) instead of EventHandler so the periodic
+    // report still fires when the screen is locked (EventRunner threads may be suspended).
+    std::unique_ptr<Utils::Timer> timer_;
+    uint32_t timerId_ = 0;
     static constexpr uint32_t REPORT_INTERVAL_MS = 24 * 60 * 60 * 1000;
-    // The per-user emergency-flush threshold. The reported array is [SUMMARY, file1, ..., fileN]
-    // and is carried in AVSESSION_CONTROL_BUNDLE_NAME whose yaml arrsize is 100, so N must be
-    // at most 99 to leave room for the SUMMARY entry.
-    static constexpr size_t MAX_RECORD_COUNT = 99;
-    static constexpr const char* PERIODIC_TASK_NAME = "StorageEventPeriodicReport";
+    // AVSESSION_CONTROL_BUNDLE_NAME yaml arrsize is 100. SUMMARY + FILE entries share
+    // this limit; SUMMARY entries are added first (one per user), FILE entries fill the
+    // remaining slots. When the total reaches this limit an immediate report is triggered.
+    static constexpr size_t MAX_BUNDLE_NAMES = 100;
 };
 
 // Macros expand directly to AVSessionStorageEvent::GetInstance().XXX(), matching the

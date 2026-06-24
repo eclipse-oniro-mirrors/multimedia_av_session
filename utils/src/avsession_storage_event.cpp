@@ -17,9 +17,9 @@
 #include "avsession_log.h"
 #include "avsession_sysevent.h"
 #include "avsession_utils.h"
+#include "directory_ex.h"
 #include <sys/stat.h>
 #include <dirent.h>
-#include <filesystem>
 #include <climits>
 #include <cerrno>
 #include <cstdlib>
@@ -95,25 +95,30 @@ void AVSessionStorageEvent::Uninit()
 
 void AVSessionStorageEvent::StartPeriodicReport()
 {
-    auto callback = [this]() {
-        std::lock_guard<std::recursive_mutex> lockGuard(lock_);
+    if (timer_ != nullptr) {
+        return;
+    }
+    // Use OHOS::Utils::Timer (a native thread timer) instead of AVSessionEventHandler,
+    // because the EventHandler's EventRunner thread may be suspended when the screen is
+    // locked, causing the 24h callback to be missed. Utils::Timer runs its own thread
+    // and is not affected by screen state.
+    timer_ = std::make_unique<Utils::Timer>("StorageEventTimer");
+    Utils::Timer::TimerCallback timerCallback = [this]() {
         SLOGI("Periodic storage statistics report triggered");
-        // Re-arm the next cycle BEFORE doing the actual report. This way, even if the
-        // report throws or hangs, the timer is already scheduled for the next 24h and
-        // won't be permanently lost. AVSessionReplaceTask is non-blocking (just enqueues).
-        StartPeriodicReport();
         ReportStorageStatistics();
     };
-
-    if (!AVSessionEventHandler::GetInstance().AVSessionReplaceTask(
-        callback, PERIODIC_TASK_NAME, REPORT_INTERVAL_MS)) {
-        SLOGE("Failed to start periodic report task");
-    }
+    // Third arg = false means periodic (same convention as AVSessionSysEvent::Regiter).
+    timerId_ = timer_->Register(timerCallback, REPORT_INTERVAL_MS, false);
+    timer_->Setup();
 }
 
 void AVSessionStorageEvent::StopPeriodicReport()
 {
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask(PERIODIC_TASK_NAME);
+    if (timer_ != nullptr) {
+        timer_->Shutdown();
+        timer_->Unregister(timerId_);
+        timer_ = nullptr;
+    }
 }
 
 void StorageUserData::AddFileInfo(const std::string& fileName, const std::string& bundleName)
@@ -153,9 +158,12 @@ int64_t StorageUserData::GetTotalStorageBytes()
     return total;
 }
 
-void StorageUserData::AppendFileInfoStrings(std::vector<std::string>& bundleNames) const
+void StorageUserData::AppendFileInfoStrings(std::vector<std::string>& bundleNames, size_t maxCount) const
 {
     for (const auto& pair : fileInfoMap_) {
+        if (bundleNames.size() >= maxCount) {
+            break;
+        }
         const StorageFileInfo& info = pair.second;
         std::string item = "FILE";
         item += "|TIME=" + FormatTimestamp(info.timestamp_);
@@ -191,14 +199,19 @@ void AVSessionStorageEvent::RecordFileWrite(const std::string& fileName,
     StorageUserData& userData = GetOrCreateStorageUserData(userId);
     userData.AddFileInfo(fileName, bundleName);
 
-    if (userData.GetTotalFileCount() >= MAX_RECORD_COUNT) {
-        SLOGI("Record count reaches %{public}zu, trigger immediate report for user %{public}d",
-            MAX_RECORD_COUNT, userId);
-        ReportStorageStatisticsForUser(userId);
-        // Do NOT reset the global periodic timer here: the 100-record threshold is a
-        // per-user emergency flush, while the 24h timer is a shared backstop for all
-        // users. Resetting it would silently postpone other users' reports every time
-        // this user fills up. The timer keeps its original countdown.
+    // Check if the total bundle size (SUMMARY entries per user + FILE entries across all
+    // users) would exceed MAX_BUNDLE_NAMES. Each user contributes 1 SUMMARY + N FILEs.
+    // When the limit is reached, trigger an immediate report and clear all maps.
+    size_t totalFileRecords = 0;
+    for (const auto& pair : storageUserDataMap_) {
+        totalFileRecords += pair.second->GetTotalFileCount();
+    }
+    size_t summaryCount = storageUserDataMap_.size();
+    if (summaryCount + totalFileRecords >= MAX_BUNDLE_NAMES) {
+        SLOGI("Bundle size reaches %{public}zu (summary=%{public}zu + files=%{public}zu), "
+            "trigger immediate report", summaryCount + totalFileRecords, summaryCount, totalFileRecords);
+        // TriggerImmediateReport reports all users in a single event and clears all maps.
+        TriggerImmediateReport();
     }
 }
 
@@ -221,24 +234,29 @@ void AVSessionStorageEvent::ScanStorageStatistics(int32_t userId, StorageStatist
     const std::string suffix = AVSessionUtils::GetFileSuffix();
     const std::string castPrefix = "cast_";
 
-    // Use std::filesystem to traverse the av_session/ directory tree. This is the same
-    // mechanism already used in production (avsession_item.cpp, avsession_service_ext.cpp),
-    // so it works under the service's SELinux policy. recursive_directory_iterator covers
-    // cache/ and any cast_* subdirectories automatically.
+    // Collect file paths from two sources and de-duplicate via a set:
+    //   1. Directory scan via GetDirFiles — covers upgrade-leftover files and files
+    //      written before the current service run. Requires SELinux read permission on
+    //      the directory (data_service_el2_file:dir { read } in av_session.te).
+    //   2. In-memory recorded paths — reliable fallback for files written this session.
     std::set<std::string> allFiles;
-    std::error_code ec;
-    std::string rootDir = AVSessionUtils::GetFixedPathName(userId);
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(rootDir, ec)) {
-        if (ec) {
-            continue;
-        }
-        if (!entry.is_regular_file(ec)) {
-            continue;
-        }
-        allFiles.insert(entry.path().string());
+
+    // Scan both cache/ and av_session/ separately to maximize coverage.
+    std::vector<std::string> cacheFiles;
+    OHOS::GetDirFiles(AVSessionUtils::GetCachePathName(userId), cacheFiles);
+    std::vector<std::string> fixedFiles;
+    OHOS::GetDirFiles(AVSessionUtils::GetFixedPathName(userId), fixedFiles);
+    SLOGI("ScanStorageStatistics: userId=%{public}d, cacheDir=%{public}s found=%{public}zu, "
+        "fixedDir=%{public}s found=%{public}zu",
+        userId, AVSessionUtils::GetCachePathName(userId).c_str(), cacheFiles.size(),
+        AVSessionUtils::GetFixedPathName(userId).c_str(), fixedFiles.size());
+    for (const auto& f : cacheFiles) {
+        allFiles.insert(f);
+    }
+    for (const auto& f : fixedFiles) {
+        allFiles.insert(f);
     }
 
-    // Also include in-memory recorded paths as a reliable fallback.
     auto it = storageUserDataMap_.find(userId);
     if (it != storageUserDataMap_.end()) {
         for (const auto& pair : it->second->GetFileInfoMapForScan()) {
@@ -305,99 +323,87 @@ std::vector<int32_t> AVSessionStorageEvent::EnumerateUserIds()
     return userIds;
 }
 
-std::vector<std::string> AVSessionStorageEvent::BuildControlBundleNames(int32_t userId,
-    const StorageStatistics& stats)
-{
-    std::lock_guard<std::recursive_mutex> lockGuard(lock_);
-    std::vector<std::string> bundleNames;
-
-    // Element [0]: aggregated statistics summary.
-    // Format: SUMMARY|TOTAL_COUNT=..|TOTAL_SIZE=..|LOCAL_COUNT=..|...|RECORD_COUNT=..|RECORD_SIZE=..
-    std::string summary = "SUMMARY";
-    summary += "|USER_ID=" + std::to_string(userId);
-    summary += "|TOTAL_COUNT=" + std::to_string(stats.totalCount);
-    summary += "|TOTAL_SIZE=" + std::to_string(stats.totalSize);
-    summary += "|LOCAL_COUNT=" + std::to_string(stats.localCount);
-    summary += "|LOCAL_SIZE=" + std::to_string(stats.localSize);
-    summary += "|CAST_COUNT=" + std::to_string(stats.castCount);
-    summary += "|CAST_SIZE=" + std::to_string(stats.castSize);
-    summary += "|HISTORY_COUNT=" + std::to_string(stats.historyCount);
-    summary += "|HISTORY_SIZE=" + std::to_string(stats.historySize);
-    summary += "|RECORD_COUNT=" + std::to_string(stats.recordCount);
-    summary += "|RECORD_SIZE=" + std::to_string(stats.recordSize);
-    bundleNames.push_back(summary);
-
-    // Element [1..N]: per-file detail from the in-memory map.
-    // Format: FILE|NAME=..|SIZE=..|BUNDLE=..
-    auto it = storageUserDataMap_.find(userId);
-    if (it != storageUserDataMap_.end()) {
-        it->second->AppendFileInfoStrings(bundleNames);
-    }
-
-    return bundleNames;
-}
-
 void AVSessionStorageEvent::ReportStorageStatistics()
 {
-    SLOGI("ReportStorageStatistics for all users");
-    // Enumerate users from disk so we cover files written by previous versions or before
-    // a service restart — not just users that have an in-memory record.
-    std::vector<int32_t> diskUsers = EnumerateUserIds();
-
-    // Merge with users that have in-memory records (in case their dir was removed but
-    // they still have something to flush from the map).
+    SLOGI("ReportStorageStatistics for all users in a single event");
     std::lock_guard<std::recursive_mutex> lockGuard(lock_);
+
+    // Enumerate users from disk (covers files written before this feature / by previous
+    // runs) and merge with users that have in-memory records.
+    std::vector<int32_t> diskUsers = EnumerateUserIds();
     std::set<int32_t> allUsers(diskUsers.begin(), diskUsers.end());
     for (const auto& pair : storageUserDataMap_) {
         allUsers.insert(pair.first);
     }
 
+    // Build SUMMARY + FILE entries into a single AVSESSION_CONTROL_BUNDLE_NAME array.
+    // SUMMARY entries (one per user) are added first; FILE entries fill the remaining
+    // slots up to MAX_BUNDLE_NAMES. This guarantees that when the total would exceed the
+    // yaml arrsize limit, every user's SUMMARY is still emitted while FILE detail is
+    // truncated.
+    std::vector<std::string> bundleNames;
+
+    // First pass: compute stats for each user and emit SUMMARY entries.
+    struct PerUserData {
+        int32_t userId;
+        StorageStatistics stats;
+        StorageUserData* userData;
+    };
+    std::vector<PerUserData> perUser;
     for (int32_t userId : allUsers) {
-        ReportStorageStatisticsForUser(userId);
+        PerUserData pud;
+        pud.userId = userId;
+        ScanStorageStatistics(userId, pud.stats);
+
+        auto it = storageUserDataMap_.find(userId);
+        pud.userData = (it != storageUserDataMap_.end()) ? it->second.get() : nullptr;
+        if (pud.userData != nullptr) {
+            pud.stats.recordCount = pud.userData->GetTotalFileCount();
+            pud.stats.recordSize = pud.userData->GetTotalStorageBytes();
+        }
+
+        SLOGI("Storage stats for user %{public}d: total=%{public}zu/%{public}lldB, "
+            "local=%{public}zu/%{public}lldB, cast=%{public}zu/%{public}lldB, history=%{public}zu/%{public}lldB",
+            userId, pud.stats.totalCount, static_cast<long long>(pud.stats.totalSize),
+            pud.stats.localCount, static_cast<long long>(pud.stats.localSize),
+            pud.stats.castCount, static_cast<long long>(pud.stats.castSize),
+            pud.stats.historyCount, static_cast<long long>(pud.stats.historySize));
+
+        // Emit SUMMARY entry immediately.
+        std::string summary = "SUMMARY";
+        summary += "|USER_ID=" + std::to_string(userId);
+        summary += "|TOTAL_COUNT=" + std::to_string(pud.stats.totalCount);
+        summary += "|TOTAL_SIZE=" + std::to_string(pud.stats.totalSize);
+        summary += "|LOCAL_COUNT=" + std::to_string(pud.stats.localCount);
+        summary += "|LOCAL_SIZE=" + std::to_string(pud.stats.localSize);
+        summary += "|CAST_COUNT=" + std::to_string(pud.stats.castCount);
+        summary += "|CAST_SIZE=" + std::to_string(pud.stats.castSize);
+        summary += "|HISTORY_COUNT=" + std::to_string(pud.stats.historyCount);
+        summary += "|HISTORY_SIZE=" + std::to_string(pud.stats.historySize);
+        summary += "|RECORD_COUNT=" + std::to_string(pud.stats.recordCount);
+        summary += "|RECORD_SIZE=" + std::to_string(pud.stats.recordSize);
+        bundleNames.push_back(summary);
+
+        perUser.push_back(std::move(pud));
     }
-}
 
-void AVSessionStorageEvent::ReportStorageStatisticsForUser(int32_t userId, bool clearAfterReport)
-{
-    std::lock_guard<std::recursive_mutex> lockGuard(lock_);
-
-    // Build SUMMARY statistics from in-memory file records + disk stat().
-    StorageStatistics stats;
-    ScanStorageStatistics(userId, stats);
-
-    auto it = storageUserDataMap_.find(userId);
-    StorageUserData* userData = (it != storageUserDataMap_.end()) ? it->second.get() : nullptr;
-
-    // Fill in-memory bookkeeping totals so the receiver can distinguish new writes this
-    // period (recordCount/recordSize) from total on-disk files (totalCount/totalSize).
-    if (userData != nullptr) {
-        stats.recordCount = userData->GetTotalFileCount();
-        stats.recordSize = userData->GetTotalStorageBytes();
+    // Second pass: fill FILE detail entries into remaining slots.
+    for (const auto& pud : perUser) {
+        if (bundleNames.size() >= MAX_BUNDLE_NAMES) {
+            break;
+        }
+        if (pud.userData != nullptr) {
+            pud.userData->AppendFileInfoStrings(bundleNames, MAX_BUNDLE_NAMES);
+        }
     }
 
-    // Report only when there is something to say: on-disk files OR in-memory records.
-    if (stats.totalCount == 0 && stats.recordCount == 0) {
-        SLOGD("nothing to report for user %{public}d", userId);
-        return;
+    // Even when there is no data at all (empty disk, empty map), the periodic timer must
+    // still emit a heartbeat event so the receiver knows the service is alive.
+    if (bundleNames.empty()) {
+        bundleNames.push_back("SUMMARY|USER_ID=-1|TOTAL_COUNT=0|TOTAL_SIZE=0|LOCAL_COUNT=0|LOCAL_SIZE=0"
+            "|CAST_COUNT=0|CAST_SIZE=0|HISTORY_COUNT=0|HISTORY_SIZE=0|RECORD_COUNT=0|RECORD_SIZE=0");
     }
 
-    std::vector<std::string> controlBundleNames = BuildControlBundleNames(userId, stats);
-    if (controlBundleNames.empty()) {
-        SLOGW("BuildControlBundleNames failed for user %{public}d", userId);
-        return;
-    }
-
-    SLOGI("Report storage statistics for user %{public}d: total=%{public}zu files/%{public}lldB, "
-        "local=%{public}zu/%{public}lldB, cast=%{public}zu/%{public}lldB, history=%{public}zu/%{public}lldB",
-        userId,
-        stats.totalCount, static_cast<long long>(stats.totalSize),
-        stats.localCount, static_cast<long long>(stats.localSize),
-        stats.castCount, static_cast<long long>(stats.castSize),
-        stats.historyCount, static_cast<long long>(stats.historySize));
-
-    // Report via the PLAYING_AVSESSION_STATS statistic event. Storage statistics are
-    // carried in the AVSESSION_CONTROL_BUNDLE_NAME string array; other fields are left
-    // empty as this event is reused purely as the carrier for storage data.
     std::vector<uint8_t> emptyU8;
     std::vector<uint32_t> emptyU32;
     std::vector<uint64_t> emptyU64;
@@ -413,20 +419,23 @@ void AVSessionStorageEvent::ReportStorageStatisticsForUser(int32_t userId, bool 
         "AVSESSION_PLAYSTATE", emptyU8,
         "AVSESSION_PLAYSTATE_TIMESTAMP", emptyU64,
         "AVSESSION_CONTROL", emptyU8,
-        "AVSESSION_CONTROL_BUNDLE_NAME", controlBundleNames,
+        "AVSESSION_CONTROL_BUNDLE_NAME", bundleNames,
         "AVSESSION_CONTROL_TIMESTAMP", emptyU64,
         "APP_TYPE", "storage_stats",
         "SUPPORT_INTENT", "",
         "SUPPORT_AVQUEUE", false);
 
-    // Clear in-memory records only when triggered by the 99-record emergency flush
-    // (to bound memory and avoid re-triggering on every subsequent write). The periodic
-    // 24h timer deliberately does NOT clear, so it keeps reporting as long as files
-    // remain on disk — the in-memory paths also serve as a reliable fallback for the
-    // disk scan.
-    if (clearAfterReport && userData != nullptr) {
-        userData->ClearFileInfo();
+    // Clear all in-memory maps after reporting.
+    for (auto& pair : storageUserDataMap_) {
+        pair.second->ClearFileInfo();
     }
+}
+
+void AVSessionStorageEvent::TriggerImmediateReport()
+{
+    // Called when a single user hits the 99-record threshold. Report all users in one
+    // event (same path as the periodic timer), then clear all maps.
+    ReportStorageStatistics();
 }
 
 #endif
