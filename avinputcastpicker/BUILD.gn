@@ -34,6 +34,7 @@ ohos_shared_library("avinputcastpicker") {
   sources = [ "avinputcastpicker.cpp" ]
   deps = [ ":avinputcastpicker_abc" ]
 
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

@@ -18,6 +18,7 @@ import("../../../castplus_cast_engine_part.gni")
 ohos_shared_library("ohavsession") {
   install_enable = true
 
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
