@@ -1383,7 +1383,7 @@ keyEvent::KeyEvent TaiheUtils::ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in)
     int32_t unicodeChar = (key == std::nullopt) ? 0 : static_cast<int32_t>(key->GetUnicode());
     keyEvent::KeyEvent out = {
         .base = ToTaiheInputEvent(in),
-        .action = keyEvent::Action::from_value(in.GetKeyAction()),
+        .action = keyEvent::Action::from_value(in.GetKeyAction() - KEYEVENT_ACTION_JS_NATIVE_DELTA),
         .key = ToTaiheKey(key),
         .unicodeChar = unicodeChar,
         .keys = ToTaiheKeys(in.GetKeyItems()),
