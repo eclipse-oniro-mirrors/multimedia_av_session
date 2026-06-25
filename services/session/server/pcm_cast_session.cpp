@@ -70,8 +70,11 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
 
     ReportSessionCast(castState, reasonCode);
 
-    CollaborationManagerHiPlay::GetInstance().SendCollaborationOnStop([this](void) {
-        StopCast();
+    std::weak_ptr<PcmCastSession> weakPtr = shared_from_this();
+    CollaborationManagerHiPlay::GetInstance().SendCollaborationOnStop([weakPtr](void) {
+        auto sharedPtr = weakPtr.lock();
+        CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "PcmCastSession is null in SendCollaborationOnStop");
+        sharedPtr->StopCast();
     });
 }
 
