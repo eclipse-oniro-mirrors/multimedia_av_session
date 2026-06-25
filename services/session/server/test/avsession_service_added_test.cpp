@@ -259,6 +259,7 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast001, TestSize.Level0)
     OHOS::AVSession::DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = 1;
     deviceInfo.deviceId_ = "-100";
+    deviceInfo.realDeviceId_ = "-100";
     deviceInfo.supportedProtocols_ = 8;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     sessionToken.sessionId = "pcmCastSession";
@@ -286,6 +287,7 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast002, TestSize.Level0)
     OHOS::AVSession::DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = 1;
     deviceInfo.deviceId_ = "-100";
+    deviceInfo.realDeviceId_ = "-100";
     deviceInfo.supportedProtocols_ = 2;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     sessionToken.sessionId = "pcmCastSession";
@@ -319,6 +321,7 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast003, TestSize.Level0)
     OHOS::AVSession::DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = 1;
     deviceInfo.deviceId_ = "-100";
+    deviceInfo.realDeviceId_ = "-100";
     deviceInfo.supportedProtocols_ = 2;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo);

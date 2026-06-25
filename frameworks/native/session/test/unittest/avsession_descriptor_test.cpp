@@ -374,6 +374,7 @@ HWTEST_F(AVSessionDescriptorTest, DeviceInfo_ReadFromParcel001, TestSize.Level1)
     in.WriteString("testUuid");
     in.WriteInt32(0);
     in.WriteInt32(0);
+    in.WriteInt32(0);
     in.WriteString("testRealDeviceId");
     in.WriteInt32(1);
 
@@ -385,12 +386,12 @@ HWTEST_F(AVSessionDescriptorTest, DeviceInfo_ReadFromParcel001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DeviceInfo_ReadFromParcel003
+ * @tc.name: DeviceInfo_ReadFromParcel002
  * @tc.desc: test DeviceInfo ReadFromParcel with empty parcel
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AVSessionDescriptorTest, DeviceInfo_ReadFromParcel003, TestSize.Level1)
+HWTEST_F(AVSessionDescriptorTest, DeviceInfo_ReadFromParcel002, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
     DeviceInfo deviceInfo;
