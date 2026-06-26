@@ -2178,12 +2178,19 @@ void AVSessionItem::DealLocalState(const int32_t castState, const OutputDeviceIn
 void AVSessionItem::ListenCollaborationOnStop()
 {
     SLOGI("enter ListenCollaborationOnStop");
-    CollaborationManagerURLCasting::GetInstance().SendCollaborationOnStop([this](void) {
-        if (descriptor_.sessionTag_ == "RemoteCast") {
+    auto weakSelf = wptr<AVSessionItem>(this);
+    CollaborationManagerURLCasting::GetInstance().SendCollaborationOnStop([weakSelf](void) {
+        auto sharedPtr = weakSelf.promote();
+        CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "AVSessionItem is null in ListenCollaborationOnStop");
+        {
+            std::lock_guard lockGuard(sharedPtr->destroyLock_);
+            CHECK_AND_RETURN_LOG(!sharedPtr->isDestroyed_, "AVSessionItem is destroyed, skip StopCast");
+        }
+        if (sharedPtr->descriptor_.sessionTag_ == "RemoteCast") {
             SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
-            AVRouter::GetInstance().StopCastSession(castHandle_);
+            AVRouter::GetInstance().StopCastSession(sharedPtr->castHandle_);
         } else {
-            StopCast();
+            sharedPtr->StopCast();
         }
     });
 }
