@@ -65,7 +65,6 @@ static std::string AnonymizeFilePath(const std::string& path)
 {
     static constexpr const char* EL2_PREFIX = "/data/service/el2/";
     std::string shortPath = (path.find(EL2_PREFIX) == 0) ? path.substr(strlen(EL2_PREFIX)) : path;
-
     size_t slash = shortPath.find_last_of('/');
     if (slash == std::string::npos) {
         return shortPath;
@@ -74,21 +73,14 @@ static std::string AnonymizeFilePath(const std::string& path)
     std::string fileName = shortPath.substr(slash + 1);
     std::string suffix = AVSessionUtils::GetFileSuffix();
     size_t suffixPos = fileName.rfind(suffix);
-    if (suffixPos == std::string::npos || suffixPos == 0) {
-        return shortPath;
-    }
-    std::string stem = fileName.substr(0, suffixPos);
-    if (stem.find("cast_") == 0) {
-        std::string sessionId = stem.substr(5);
-        return dir + "cast_" + AVSessionUtils::GetAnonySessionId(sessionId) + suffix;
-    }
-    size_t underscore = stem.find('_');
-    if (underscore != std::string::npos) {
-        std::string bundleName = stem.substr(0, underscore);
-        std::string queueId = stem.substr(underscore + 1);
-        return dir + bundleName + "_" + queueId + suffix;
-    }
-    return dir + AVSessionUtils::GetAnonySessionId(stem) + suffix;
+    std::string stem = (suffixPos != std::string::npos && suffixPos > 0)
+        ? fileName.substr(0, suffixPos) : fileName;
+    std::string anonyStem = (stem.find("cast_") == 0)
+        ? "cast_" + AVSessionUtils::GetAnonySessionId(stem.substr(5))
+        : (stem.find('_') != std::string::npos)
+            ? stem
+            : AVSessionUtils::GetAnonySessionId(stem);
+    return dir + anonyStem + suffix;
 }
 
 AVSessionStorageEvent& AVSessionStorageEvent::GetInstance()
@@ -148,6 +140,7 @@ void StorageUserData::AddFileInfo(const std::string& fileName, const std::string
     std::lock_guard<std::recursive_mutex> lockGuard(lock_);
     StorageFileInfo info;
     info.bundleName_ = bundleName;
+    info.fileSize_ = GetFileSizeBytes(fileName);
     info.timestamp_ = GetCurrentTimestampMs();
     fileInfoMap_[fileName] = info;
 }
@@ -175,7 +168,7 @@ int64_t StorageUserData::GetTotalStorageBytes()
     std::lock_guard<std::recursive_mutex> lockGuard(lock_);
     int64_t total = 0;
     for (const auto& pair : fileInfoMap_) {
-        total += GetFileSizeBytes(pair.first);
+        total += pair.second.fileSize_;
     }
     return total;
 }
@@ -190,7 +183,7 @@ void StorageUserData::AppendFileInfoStrings(std::vector<std::string>& bundleName
         std::string item = "FILE";
         item += "|TIME=" + FormatTimestamp(info.timestamp_);
         item += "|NAME=" + AnonymizeFilePath(pair.first);
-        item += "|SIZE=" + std::to_string(GetFileSizeBytes(pair.first));
+        item += "|SIZE=" + std::to_string(info.fileSize_);
         item += "|BUNDLE=" + info.bundleName_;
         bundleNames.push_back(item);
     }
@@ -255,18 +248,16 @@ void AVSessionStorageEvent::ScanStorageStatistics(int32_t userId, StorageStatist
     const std::string castPrefix = "cast_";
 
     std::set<std::string> allFiles;
-    std::vector<std::string> cacheFiles;
-    std::vector<std::string> fixedFiles;
-    OHOS::GetDirFiles(AVSessionUtils::GetCachePathName(userId), cacheFiles);
-    OHOS::GetDirFiles(AVSessionUtils::GetFixedPathName(userId), fixedFiles);
+    std::vector<std::string> dirFiles;
+    OHOS::GetDirFiles(AVSessionUtils::GetCachePathName(userId), dirFiles);
+    OHOS::GetDirFiles(AVSessionUtils::GetFixedPathName(userId), dirFiles);
     auto it = storageUserDataMap_.find(userId);
     if (it != storageUserDataMap_.end()) {
         for (const auto& pair : it->second->GetFileInfoMapForScan()) {
             allFiles.insert(pair.first);
         }
     }
-    for (const auto& f : cacheFiles) { allFiles.insert(f); }
-    for (const auto& f : fixedFiles) { allFiles.insert(f); }
+    for (const auto& f : dirFiles) { allFiles.insert(f); }
 
     for (const auto& full : allFiles) {
         if (full.find(suffix) == std::string::npos) {
@@ -308,14 +299,15 @@ std::vector<int32_t> AVSessionStorageEvent::EnumerateUserIds()
         if (name == "." || name == ".." || name == PUBLIC_DIR) {
             continue;
         }
+        if (entry->d_type != DT_DIR && entry->d_type != DT_UNKNOWN) {
+            continue;
+        }
         if (entry->d_type == DT_UNKNOWN) {
             struct stat st {};
             std::string full = std::string(EL2_ROOT) + name;
             if (stat(full.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) {
                 continue;
             }
-        } else if (entry->d_type != DT_DIR) {
-            continue;
         }
         char* endPtr = nullptr;
         errno = 0;
@@ -387,7 +379,7 @@ void AVSessionStorageEvent::EmitStorageEvent(const std::vector<std::string>& bun
         "AVSESSION_CONTROL_BUNDLE_NAME", bundleNames,
         "AVSESSION_CONTROL_TIMESTAMP", emptyU64,
         "APP_TYPE", "storage_stats",
-        "SUPPORT_INTENT", "false",
+        "SUPPORT_INTENT", "0",
         "SUPPORT_AVQUEUE", false);
 }
 

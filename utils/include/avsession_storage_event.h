@@ -31,6 +31,7 @@ namespace OHOS::AVSession {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 struct StorageFileInfo {
     std::string bundleName_;
+    int64_t fileSize_ = 0;
     int64_t timestamp_ = 0;  // milliseconds since epoch
 };
 
@@ -79,6 +80,8 @@ public:
 private:
     AVSessionStorageEvent();
     ~AVSessionStorageEvent();
+    AVSessionStorageEvent(const AVSessionStorageEvent&) = delete;
+    AVSessionStorageEvent& operator=(const AVSessionStorageEvent&) = delete;
 
     StorageUserData& GetOrCreateStorageUserData(int32_t userId);
     void ScanStorageStatistics(int32_t userId, StorageStatistics& stats);

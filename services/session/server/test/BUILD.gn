@@ -1480,6 +1480,30 @@ ohos_unittest("AVsessionSyseventTest") {
   public_configs = ["../../../../services/session:avsession_ipc_config"]
 }
 
+ohos_unittest("AVSessionStorageEventTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_storage_event_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags_cc += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+}
+
 ohos_unittest("PermissionCheckerTest") {
   module_out_path = module_output_path
 
@@ -3160,6 +3184,7 @@ group("av_session_server_unittest") {
     ":AVSessionUsersManagerTest",
     ":AVSharedMemoryBaseTest",
     ":AVSessionUtilsTest",
+    ":AVSessionStorageEventTest",
     ":AVsessionSyseventTest",
     ":AbilityConnectHelperTest",
     ":AbilityManagerAdapterDemoTest",

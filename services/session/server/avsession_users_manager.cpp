@@ -204,6 +204,7 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(pid_t pid, co
     std::string sessionId = result->GetSessionId();
     int32_t userId = result->GetUserId();
     GetContainerFromUser(userId).RemoveSession(pid, abilityName);
+    STORAGE_EVENT_REMOVE_SESSION(sessionId);
     std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameLocal);
     STORAGE_EVENT_RECORD_FILE_DELETE(fileNameLocal, userId);
@@ -223,6 +224,7 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(const std::st
     CHECK_AND_RETURN_RET_LOG(result != nullptr, result, "remove session from all get nullptr");
     int32_t userId = result->GetUserId();
     GetContainerFromUser(userId).RemoveSession(sessionId);
+    STORAGE_EVENT_REMOVE_SESSION(sessionId);
     std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameLocal);
     STORAGE_EVENT_RECORD_FILE_DELETE(fileNameLocal, userId);
@@ -245,6 +247,7 @@ std::vector<sptr<AVSessionItem>> AVSessionUsersManager::RemoveSessionForAllUser(
         int32_t userId = sessionItem->GetUserId();
         GetContainerFromUser(userId).RemoveSession(sessionId);
         GetContainerFromAll().RemoveSession(sessionId);
+        STORAGE_EVENT_REMOVE_SESSION(sessionId);
     }
     return result;
 }
