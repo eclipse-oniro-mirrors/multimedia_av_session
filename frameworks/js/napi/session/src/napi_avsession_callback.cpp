@@ -37,7 +37,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, std::string callBackName)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("sessionNotRegister:%{public}d", event);
         return;
     }
     SLOGI("send control command %{public}d to session with callback size %{public}d",
@@ -65,7 +65,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, std::string callBackName,
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callbacks_[event].empty()) {
-        SLOGE("not register callback event=%{public}d", event);
+        SLOGE("sessionNotRegister:%{public}d", event);
         return;
     }
     SLOGI("send control command %{public}d size:%{public}d with param",

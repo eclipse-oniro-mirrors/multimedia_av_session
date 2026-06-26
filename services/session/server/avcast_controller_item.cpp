@@ -61,7 +61,7 @@ void AVCastControllerItem::Init(std::shared_ptr<IAVCastControllerProxy> castCont
 
 void AVCastControllerItem::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
-    SLOGI("State:%{public}d", state.GetState());
+    HILOG_INFO(LOG_CORE, "castState:%{public}d", state.GetState());
     if (state.GetState() != currentState_) {
         currentState_ = state.GetState();
         if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
@@ -209,7 +209,7 @@ int32_t AVCastControllerItem::SendControlCommand(const AVCastControlCommand& cmd
 {
     SLOGI("Call SendControlCommand of cast controller proxy");
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     AVSessionRadarInfo info("AVCastControllerItem::SendControlCommand");
     AVSessionRadar::GetInstance().SendControlCommandBegin(info);
     castControllerProxy_->SendControlCommand(cmd);
@@ -232,7 +232,7 @@ int32_t AVCastControllerItem::SendCustomData(const AAFwk::WantParams& data)
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "customData is an invalid string");
 
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     std::string str = AAFwk::String::Unbox(stringValue);
     castControllerProxy_->SendCustomData(str);
     return AVSESSION_SUCCESS;
@@ -241,7 +241,7 @@ int32_t AVCastControllerItem::SendCustomData(const AAFwk::WantParams& data)
 int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
 {
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     AVSessionRadarInfo info("AVCastControllerItem::Start");
     buildExtraCastInfo(avQueueItem);
     SetQueueItemDataSrc(avQueueItem);
@@ -344,7 +344,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
 {
     SLOGI("Call prepare of cast controller proxy");
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     buildExtraCastInfo(avQueueItem);
     SetQueueItemDataSrc(avQueueItem);
     if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetAppName().empty()) {
@@ -402,14 +402,14 @@ void AVCastControllerItem::SetQueueItemDataSrc(const AVQueueItem& avQueueItem)
 int32_t AVCastControllerItem::GetDuration(int32_t& duration)
 {
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     return castControllerProxy_->GetDuration(duration);
 }
 
 int32_t AVCastControllerItem::GetCastAVPlaybackState(AVPlaybackState& avPlaybackState)
 {
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     auto ret = castControllerProxy_->GetCastAVPlaybackState(avPlaybackState);
     std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "GetCastAVPlaybackState failed";
     int64_t avElapsedTime = avPlaybackState.GetPosition().elapsedTime_;
@@ -433,7 +433,7 @@ int32_t AVCastControllerItem::GetSupportedDecoders(std::vector<std::string>& dec
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
-        "cast controller proxy is nullptr");
+        "streamPlayer null");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_->GetSupportedDecoders(decoderTypes) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "GetSupportedDecoders fail");
     return AVSESSION_SUCCESS;
@@ -443,7 +443,7 @@ int32_t AVCastControllerItem::GetRecommendedResolutionLevel(std::string& decoder
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
-        "cast controller proxy is nullptr");
+        "streamPlayer null");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_->GetRecommendedResolutionLevel(decoderType, resolutionLevel) ==
         AVSESSION_SUCCESS, AVSESSION_ERROR, "GetRecommendedResolutionLevel fail");
     return AVSESSION_SUCCESS;
@@ -453,7 +453,7 @@ int32_t AVCastControllerItem::GetSupportedHdrCapabilities(std::vector<HDRFormat>
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
-        "cast controller proxy is nullptr");
+        "streamPlayer null");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_->GetSupportedHdrCapabilities(hdrFormats) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "GetSupportedHdrCapabilities fail");
     return AVSESSION_SUCCESS;
@@ -462,7 +462,7 @@ int32_t AVCastControllerItem::GetSupportedHdrCapabilities(std::vector<HDRFormat>
 int32_t AVCastControllerItem::GetSupportedPlaySpeeds(std::vector<float>& playSpeeds)
 {
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_->GetSupportedPlaySpeeds(playSpeeds) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "GetSupportedPlaySpeeds fail");
     return AVSESSION_SUCCESS;
@@ -472,7 +472,7 @@ int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
-        "cast controller proxy is nullptr");
+        "streamPlayer null");
     currentItem =  castControllerProxy_->GetCurrentItem();
     return AVSESSION_SUCCESS;
 }
@@ -482,7 +482,7 @@ int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
     if (sessionTag_ == "RemoteCast") {
         std::lock_guard lockGuard(castControllerLock_);
         CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
-            "cast controller proxy is nullptr");
+            "streamPlayer null");
         castControllerProxy_->GetValidAbility(cmds);
         SLOGI("get available commands from cast with size %{public}zd", cmds.size());
         return AVSESSION_SUCCESS;
@@ -499,7 +499,7 @@ int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 int32_t AVCastControllerItem::SetDisplaySurface(std::string& surfaceId)
 {
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     return castControllerProxy_->SetDisplaySurface(surfaceId);
 }
 
@@ -512,7 +512,7 @@ int32_t AVCastControllerItem::SetCastPlaybackFilter(const AVPlaybackState::Playb
 int32_t AVCastControllerItem::ProcessMediaKeyResponse(const std::string &assetId, const std::vector<uint8_t> &response)
 {
     std::lock_guard lockGuard(castControllerLock_);
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     auto ret =  castControllerProxy_->ProcessMediaKeyResponse(assetId, response);
     std::string API_PARAM_STRING = "assetId: " + assetId;
     std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "ProcessMediaKeyResponse failed";
@@ -541,7 +541,7 @@ int32_t AVCastControllerItem::AddAvailableCommand(const int32_t cmd)
     } else {
         std::lock_guard lockGuard(castControllerLock_);
         CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
-            "cast controller proxy is nullptr");
+            "streamPlayer null");
         auto ret = castControllerProxy_->SetValidAbility(cmds);
         std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "onCastEvent failed";
         std::string API_PARAM_STRING = "cmd: " + std::to_string(cmd);
@@ -570,7 +570,7 @@ int32_t AVCastControllerItem::RemoveAvailableCommand(const int32_t cmd)
     } else {
         std::lock_guard lockGuard(castControllerLock_);
         CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
-            "cast controller proxy is nullptr");
+            "streamPlayer null");
         auto ret = castControllerProxy_->SetValidAbility(cmds);
         std::string errMsg = (ret == AVSESSION_SUCCESS) ? "SUCCESS" : "offCastEvent failed";
         std::string API_PARAM_STRING = "cmd: " + std::to_string(cmd);
@@ -611,7 +611,7 @@ void AVCastControllerItem::SetUserId(const int32_t userId)
 bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
 {
     SLOGI("Call RegisterControllerListener of cast controller proxy");
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy != nullptr, AVSESSION_ERROR, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy != nullptr, AVSESSION_ERROR, "streamPlayer null");
     return castControllerProxy->RegisterControllerListener(shared_from_this());
 }
 

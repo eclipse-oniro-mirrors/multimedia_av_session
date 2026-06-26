@@ -429,7 +429,7 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
         context->status = NapiMetaData::SetValue(env, context->data, output);
         CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
             NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
-        SLOGI("metadata get done, clear cache");
+        SLOGI("metaClear");
         context->data.Reset();
     };
 

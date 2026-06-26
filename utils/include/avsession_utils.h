@@ -144,7 +144,6 @@ public:
         const std::string& fileDir, const std::string& fileName)
     {
         if (innerPixelMap == nullptr) {
-            SLOGE("PixelNull:%{public}s", fileDir.c_str());
             return;
         }
 

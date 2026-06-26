@@ -327,7 +327,7 @@ int32_t AVSessionItem::GetAVMetaData(AVMetaData& meta)
 // LCOV_EXCL_START
 int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 {
-    SLOGI("ProcessFrontSession with directly handle %{public}s ", source.c_str());
+    SLOGI("directlyHandle %{public}s ", source.c_str());
     HandleFrontSession();
     return AVSESSION_SUCCESS;
 }
@@ -376,8 +376,8 @@ void AVSessionItem::HandleFrontSession()
         GetCurrentCastItem(item);
         isCastMetaEmpty = (item.GetDescription() == nullptr ||
             (item.GetDescription()->GetTitle().empty() && item.GetDescription()->GetIconUri().empty()));
-        SLOGI("frontSession bundle=%{public}s isMetaEmpty=%{public}d isCastMetaEmpty=%{public}d Cmd=%{public}d "
-            "castCmd=%{public}d firstAdd=%{public}d",
+        SLOGI("bundle=%{public}s MetaEmpty=%{public}d CastMetaEmpty=%{public}d Cmd=%{public}d "
+            "castCmd=%{public}d first%{public}d",
             GetBundleName().c_str(), isMetaEmpty, isCastMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
             static_cast<int32_t>(supportedCastCmds_.size()), isFirstAddToFront_);
     }
@@ -720,7 +720,9 @@ int32_t AVSessionItem::SendCustomData(const AAFwk::WantParams& data)
 
 void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
 {
-    CHECK_AND_RETURN_LOG(GetUid() == audioBrokerUid, "not audio broker");
+    if (GetUid() != audioBrokerUid) {
+        return;
+    }
     if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY && (!isPlayingState_ || isMediaChange_)) {
         isPlayingState_ = true;
         {
@@ -3619,7 +3621,7 @@ bool AVSessionItem::IsCastConnected()
 void AVSessionItem::GetCurrentCastItem(AVQueueItem& currentItem)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "streamPlayer null");
     currentItem = castControllerProxy_->GetCurrentItem();
 #endif
     return;
@@ -3629,7 +3631,7 @@ AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
 {
     AVPlaybackState playbackState;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, playbackState, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, playbackState, "streamPlayer null");
     auto ret = castControllerProxy_->GetCastAVPlaybackState(playbackState);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, playbackState, "getstate error");
 #endif
@@ -3639,7 +3641,7 @@ AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
 void AVSessionItem::SendControlCommandToCast(AVCastControlCommand cmd)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "cast controller proxy is nullptr");
+    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "streamPlayer null");
     castControllerProxy_->SendControlCommand(cmd);
 #endif
 }

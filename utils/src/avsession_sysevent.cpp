@@ -265,7 +265,7 @@ void AVSessionSysEvent::UpdateState(const std::string& bundleName, const std::st
     playingStateInfo->appType_ = appType;
     playingStateInfo->updateState(state);
     bool isReportOverSize = playingStateInfo->state_.size() >= REPORT_SIZE;
-    CHECK_AND_RETURN(isReportOverSize);
+    CHECK_AND_RETURN_LOG(isReportOverSize, "oversize");
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
@@ -277,7 +277,7 @@ void AVSessionSysEvent::UpdateMetaQuality(const std::string& bundleName, Metadat
     CHECK_AND_RETURN(isPlayInfoValid);
     playingStateInfo->updateMetaQuality(metaQuality);
     bool isReportOverSize = playingStateInfo->metaQuality_.size() >= REPORT_SIZE;
-    CHECK_AND_RETURN(isReportOverSize);
+    CHECK_AND_RETURN_LOG(isReportOverSize, "oversize");
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
@@ -289,7 +289,7 @@ void AVSessionSysEvent::UpdateCommandQuality(const std::string& bundleName, uint
     CHECK_AND_RETURN(isPlayInfoValid);
     playingStateInfo->updateCommandQuality(commandQuality);
     bool isReportOverSize = playingStateInfo->commandQuality_.size() >= REPORT_SIZE;
-    CHECK_AND_RETURN(isReportOverSize);
+    CHECK_AND_RETURN_LOG(isReportOverSize, "oversize");
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
@@ -301,7 +301,9 @@ void AVSessionSysEvent::UpdatePlaybackState(const std::string& bundleName, uint8
     CHECK_AND_RETURN(isPlayInfoValid);
     playingStateInfo->updatePlaybackState(playbackState);
     bool isReportOverSize = playingStateInfo->playbackState_.size() >= REPORT_SIZE;
-    CHECK_AND_RETURN(isReportOverSize);
+    if (!isReportOverSize) {
+        return;
+    }
     AVSessionSysEvent::GetInstance().ReportPlayingState(bundleName);
 }
 
