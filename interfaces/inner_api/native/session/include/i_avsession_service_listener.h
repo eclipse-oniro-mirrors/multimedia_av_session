@@ -121,7 +121,7 @@ public:
      *
      * @param
      * @since 24
-     */
+    */
     virtual int32_t PcmCastSessionReleasePlayer() = 0;
 #endif
 };

@@ -491,7 +491,7 @@ public:
      * @brief query cast session id in hwcastprovidersession
      *
      * @param {int64_t} castHandle - The ID of the castprovider.
-     * @return {std::string} cast session id.
+     * @return {std::string} cast session id
      * @since 24
     */
     virtual std::string QueryCastSessionId(const int64_t castHandle) = 0;
@@ -502,7 +502,7 @@ public:
      * @param
      * @return {int32_t} release result
      * @since 24
-     */
+    */
     virtual int32_t PcmCastSessionReleasePlayer() = 0;
 
 struct CastHandleInfo {

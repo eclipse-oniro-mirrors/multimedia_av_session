@@ -32,9 +32,7 @@ copy_taihe_idl("copy_taihe") {
   ]
   external_deps = [
     "image_framework:copy_image_taihe",
-    "input:input_event_taihe",
-    "input:key_code_taihe",
-    "input:key_event_taihe",
+    "input:key_event_taihe"
   ]
   deps = [ ":copy_taihe_deps" ]
 }
