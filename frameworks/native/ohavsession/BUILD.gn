@@ -64,6 +64,7 @@ ohos_shared_library("ohavsession") {
     "audio_framework:audio_common",
     "c_utils:utils",
     "curl:curl_shared",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
