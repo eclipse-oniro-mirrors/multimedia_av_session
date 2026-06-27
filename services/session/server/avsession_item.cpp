@@ -51,6 +51,7 @@
 #include "avcast_controller_proxy.h"
 #include "avcast_controller_item.h"
 #include "collaboration_manager_urlcasting.h"
+#include "cast_session_manager.h"
 #endif
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
@@ -59,6 +60,10 @@
 #endif
 
 using namespace OHOS::AudioStandard;
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+using namespace OHOS::CastEngine::CastEngineClient;
+#endif
 
 namespace OHOS::AVSession {
 
@@ -2495,7 +2500,10 @@ int32_t AVSessionItem::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
             break;
         }
         auto flag = Rosen::DisplayManagerLite::GetInstance().GetVirtualScreenFlag(displayInfo->GetDisplayId());
-        if (flag == Rosen::VirtualScreenFlag::CAST) {
+        uint8_t state;
+        CastSessionManager::GetInstance().GetSessionStateByDisplayId(displayInfo->GetDisplayId(), state);
+        int32_t sessionState = static_cast<int32_t>(state);
+        if (flag == Rosen::VirtualScreenFlag::CAST && sessionState == PLAYING) {
             SLOGI("ReportCastDisplay start in");
             CastDisplayInfo castDisplayInfo;
             castDisplayInfo.displayState = CastDisplayState::STATE_ON;
