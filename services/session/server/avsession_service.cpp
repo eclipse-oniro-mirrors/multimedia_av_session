@@ -3588,7 +3588,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         UpdateFrontSession(sessionItem, false);
         {
             std::lock_guard lockGuard(keyEventListLock_);
-            std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
+            std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList(userId);
             CHECK_AND_RETURN_LOG(keyEventList != nullptr, "keyEventList ptr nullptr!");
             auto it = std::find(keyEventList->begin(), keyEventList->end(), sessionItem);
             if (it != keyEventList->end()) {
