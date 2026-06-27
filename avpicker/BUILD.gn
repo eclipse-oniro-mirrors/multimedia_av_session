@@ -49,6 +49,7 @@ gen_obj("avpicker_abc_preview") {
 ohos_shared_library("avcastpicker") {
   sources = [ "avpicker.cpp" ]
 
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -111,7 +112,7 @@ gen_obj("avpickerparam_abc_preview") {
 ohos_shared_library("avcastpickerparam") {
   sources = [ "avpickerparam.cpp" ]
 
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

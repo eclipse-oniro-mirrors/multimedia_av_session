@@ -107,6 +107,7 @@ av_session_ohos_library("avsession_service") {
   shlib_type = "sa"
   stack_protector_ret = true
   install_enable = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     boundary_sanitize = true
     cfi = true
@@ -316,6 +317,7 @@ av_session_ohos_library("avsession_service") {
 if (castplus_cast_engine_enable) {
   av_session_ohos_library("avsession_router") {
     install_enable = true
+    branch_protector_ret = "pac_ret"
     sanitize = {
       boundary_sanitize = true
       cfi = true
@@ -447,6 +449,7 @@ if (castplus_cast_engine_enable) {
 
 ohos_shared_library("avsession_dynamic_insight") {
   install_enable = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     boundary_sanitize = true
     cfi = true
@@ -509,6 +512,7 @@ ohos_shared_library("avsession_dynamic_insight") {
 
 ohos_shared_library("softbus_manager_dynamic") {
   install_enable = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -566,6 +570,7 @@ ohos_shared_library("softbus_manager_dynamic") {
 
 av_session_ohos_library("avsession_item") {
   install_enable = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     boundary_sanitize = true
     cfi = true
@@ -745,6 +750,7 @@ av_session_ohos_library("avsession_item") {
 
 av_session_ohos_library("avsession_cast_item") {
   install_enable = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     boundary_sanitize = true
     cfi = true

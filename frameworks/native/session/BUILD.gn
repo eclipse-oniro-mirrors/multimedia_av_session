@@ -64,6 +64,7 @@ ohos_shared_library("avsession_client") {
     "../../../frameworks/common/src/command_info.cpp"
   ]
 
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -139,6 +140,7 @@ ohos_static_library("avsession_client_static") {
     "src/session_listener_client.cpp",
   ]
 
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -202,6 +204,7 @@ ohos_static_library("avsession_client_static") {
 
 ohos_shared_library("avsession_cast_client") {
   install_enable = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true

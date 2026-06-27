@@ -17,6 +17,7 @@ import("../../../../castplus_cast_engine_part.gni")
 import("../../../../config.gni")
 
 ohos_shared_library("avsession_napi") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
