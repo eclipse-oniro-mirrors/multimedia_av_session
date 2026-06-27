@@ -15,6 +15,7 @@
 
 #include "avcast_controller_item.h"
 #include "avsession_radar.h"
+#include "avsession_storage_event.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_trace.h"
@@ -347,14 +348,15 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
     buildExtraCastInfo(avQueueItem);
     SetQueueItemDataSrc(avQueueItem);
+    std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
     if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetAppName().empty()) {
-        std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
         avQueueItem.GetDescription()->SetAppName(bundleName);
     }
     if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetIcon() != nullptr) {
         std::string fileDir = AVSessionUtils::GetCachePathNameForCast(userId_);
-        AVSessionUtils::WriteImageToFile(avQueueItem.GetDescription()->GetIcon(),
-            fileDir, sessionId_ + AVSessionUtils::GetFileSuffix());
+        std::string fileName = sessionId_ + AVSessionUtils::GetFileSuffix();
+        AVSessionUtils::WriteImageToFile(avQueueItem.GetDescription()->GetIcon(), fileDir, fileName);
+        STORAGE_EVENT_RECORD_FILE_WRITE(fileDir + fileName, bundleName, userId_);
     }
     auto ret = castControllerProxy_->Prepare(avQueueItem);
     ReportPrepare(ret, avQueueItem);

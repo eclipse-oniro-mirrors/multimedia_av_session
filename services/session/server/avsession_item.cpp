@@ -21,6 +21,7 @@
 #include "avsession_descriptor.h"
 #include "avsession_trace.h"
 #include "avsession_sysevent.h"
+#include "avsession_storage_event.h"
 #include "avsession_utils.h"
 #include "remote_session_sink.h"
 #include "remote_session_source.h"
@@ -103,6 +104,7 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t user
         std::lock_guard aliveLockGuard(isAliveLock_);
         isAlivePtr_ = std::make_shared<bool>(true);
     }
+    STORAGE_EVENT_RECORD_SESSION(descriptor_.sessionId_, GetBundleName(), userId_);
 }
 
 void AVSessionItem::InitListener()
@@ -118,6 +120,7 @@ AVSessionItem::~AVSessionItem()
 {
     SLOGI("destroy with aliveLock session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
+    STORAGE_EVENT_REMOVE_SESSION(descriptor_.sessionId_);
     if (IsActive()) {
         Deactivate();
     }
@@ -230,9 +233,11 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
     std::string sessionId = descriptor_.sessionId_;
     std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameLocal);
+    STORAGE_EVENT_RECORD_FILE_DELETE(fileNameLocal, userId_);
     std::string fileNameCast =
         AVSessionUtils::GetCachePathNameForCast(userId_) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameCast);
+    STORAGE_EVENT_RECORD_FILE_DELETE(fileNameCast, userId_);
     DelRecommend();
     std::list<sptr<AVControllerItem>> controllerList;
     {
@@ -273,7 +278,9 @@ int32_t AVSessionItem::SetAVCallMetaData(const AVCallMetaData& avCallMetaData)
         if (innerPixelMap != nullptr) {
             std::string sessionId = GetSessionId();
             std::string fileDir = AVSessionUtils::GetCachePathName(userId_);
-            AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, sessionId + AVSessionUtils::GetFileSuffix());
+            std::string fileName = sessionId + AVSessionUtils::GetFileSuffix();
+            AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
+            STORAGE_EVENT_RECORD_FILE_WRITE(fileDir + fileName, GetBundleName(), userId_);
             innerPixelMap->Clear();
             avCallMetaData_.SetMediaImage(innerPixelMap);
         }
@@ -493,6 +500,7 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
             std::string fileName = GetBundleName() + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
             SLOGI("save avQueueImg to file for %{public}s", meta.GetAVQueueId().c_str());
             AVSessionUtils::WriteImageToFile(avQueueImg, fileDir, fileName);
+            STORAGE_EVENT_RECORD_FILE_WRITE(fileDir + fileName, GetBundleName(), userId_);
             avQueueImg->Clear();
         }
     }
@@ -515,6 +523,7 @@ int32_t AVSessionItem::UpdateAVQueueInfo(const AVQueueInfo& info)
             "check fileName not valid");
         SLOGI("write image to file for %{public}s", info.GetAVQueueId().c_str());
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
+        STORAGE_EVENT_RECORD_FILE_WRITE(filePath, GetBundleName(), userId_);
         innerPixelMap->Clear();
     }
     return AVSESSION_SUCCESS;
@@ -553,6 +562,7 @@ void AVSessionItem::UpdateMetaData(const AVMetaData& meta)
             isMediaChange_ = true;
         }
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
+        STORAGE_EVENT_RECORD_FILE_WRITE(fileDir + fileName, GetBundleName(), userId_);
         innerPixelMap->Clear();
         metaData_.SetMediaImage(innerPixelMap);
     }
