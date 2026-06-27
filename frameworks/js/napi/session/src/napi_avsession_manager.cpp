@@ -1409,7 +1409,7 @@ napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_call
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SEND_SYSTEM_COMMON_COMMAND_TASK_ID;
- 
+
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().SendSystemCommonCommand(context->commonCommand_,
             context->commandArgs_);
@@ -1419,7 +1419,7 @@ napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_call
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
- 
+
     return NapiAsyncWork::Enqueue(env, context, "SendSystemCommonCommand", executor);
 }
 

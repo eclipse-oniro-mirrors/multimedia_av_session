@@ -183,7 +183,6 @@ public:
     void SetAudioStatus(pid_t uid, int32_t rendererState);
     int32_t GetAudioStatus(pid_t uid);
     void ReportLowQuality();
-
     void ReportPlayingState(const std::string& bundleName);
     void ReportPlayingStateAll();
     void UpdateState(const std::string& bundleName, const std::string& appVersion,

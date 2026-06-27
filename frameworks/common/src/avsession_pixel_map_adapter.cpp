@@ -219,7 +219,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
         float scaleRatio = sqrt(static_cast<float>(MAX_PIXEL_BUFFER_SIZE) / static_cast<float>(originalPixelMapBytes_));
         pixelMapTemp->scale(scaleRatio, scaleRatio);
         originalPixelMapBytes_ = pixelMapTemp->GetByteCount();
-        SLOGI("imgBufferSize exceeds limited: %{public}d scaled to:%{public}d", originSize, originalPixelMapBytes_);
+        SLOGI("imgBufferSize exceeds limited: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = ConvertAndSetInnerImgBuffer(pixelMapTemp);
     free(dataAddr);
@@ -237,6 +237,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
     Media::ImageInfo imageInfoTemp;
     pixelMap->GetImageInfo(imageInfoTemp);
     const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
+    CHECK_AND_RETURN_RET_LOG(pixelMapTemp != nullptr, nullptr, "pixelMapTemp nullptr");
     pixelMapTemp->SetImageInfo(imageInfoTemp);
     uint32_t dataSize = static_cast<uint32_t>(originalPixelMapBytes_);
     void* dataAddr = malloc(dataSize);
