@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "avsession_utils.h"
+#include "file_ex.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -523,4 +524,112 @@ HWTEST_F(AVSessionUtilsTest, GetAnonyTitle_VeryLongText_MaxFileSize_4MB_001, Tes
     std::string result = AVSessionUtils::GetAnonyTitle(longText);
     EXPECT_EQ(result, "zz***zz");
     SLOGI("GetAnonyTitle_VeryLongText_MaxFileSize_4MB_001 end!");
+}
+
+/**
+ * @tc.name: DeleteCacheFilesExcluding_001
+ * @tc.desc: keep alive local/cast files, delete stale ones
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUtilsTest, DeleteCacheFilesExcluding_001, TestSize.Level0)
+{
+    SLOGI("DeleteCacheFilesExcluding_001 begin!");
+    std::string testDir = "/data/service/el2/100/av_session/cache_unittest_excl/";
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(testDir));
+    // alive session: local + cast files must be preserved
+    std::string keepLocal = testDir + "abcdef123456.image.dat";
+    std::string keepCast = testDir + "cast_abcdef123456.image.dat";
+    // stale session: local + cast files must be deleted
+    std::string staleLocal = testDir + "zzzzzzzzzzzz.image.dat";
+    std::string staleCast = testDir + "cast_yyyyyyyyyyyy.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(keepLocal, "keep"));
+    ASSERT_TRUE(OHOS::SaveStringToFile(keepCast, "keep"));
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleLocal, "stale"));
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleCast, "stale"));
+
+    std::set<std::string> retained = {"abcdef123456"};
+    AVSessionUtils::DeleteCacheFilesExcluding(testDir, retained);
+    EXPECT_TRUE(OHOS::FileExists(keepLocal));
+    EXPECT_TRUE(OHOS::FileExists(keepCast));
+    EXPECT_FALSE(OHOS::FileExists(staleLocal));
+    EXPECT_FALSE(OHOS::FileExists(staleCast));
+
+    AVSessionUtils::DeleteFile(keepLocal);
+    AVSessionUtils::DeleteFile(keepCast);
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(testDir));
+    SLOGI("DeleteCacheFilesExcluding_001 end!");
+}
+
+/**
+ * @tc.name: DeleteCacheFilesExcluding_002
+ * @tc.desc: empty retained set deletes every *.image.dat file
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUtilsTest, DeleteCacheFilesExcluding_002, TestSize.Level0)
+{
+    SLOGI("DeleteCacheFilesExcluding_002 begin!");
+    std::string testDir = "/data/service/el2/100/av_session/cache_unittest_empty/";
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(testDir));
+    std::string fileA = testDir + "aaaaaaaaaaaa.image.dat";
+    std::string fileB = testDir + "cast_bbbbbbbbbbbb.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(fileA, "a"));
+    ASSERT_TRUE(OHOS::SaveStringToFile(fileB, "b"));
+
+    AVSessionUtils::DeleteCacheFilesExcluding(testDir, {});
+    EXPECT_FALSE(OHOS::FileExists(fileA));
+    EXPECT_FALSE(OHOS::FileExists(fileB));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(testDir));
+    SLOGI("DeleteCacheFilesExcluding_002 end!");
+}
+
+/**
+ * @tc.name: DeleteCacheFilesExcluding_003
+ * @tc.desc: non-suffix files are skipped; empty dir is a no-op
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUtilsTest, DeleteCacheFilesExcluding_003, TestSize.Level0)
+{
+    SLOGI("DeleteCacheFilesExcluding_003 begin!");
+    // empty directory: loop body never executes
+    std::string emptyDir = "/data/service/el2/100/av_session/cache_unittest_emptydir/";
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(emptyDir));
+    AVSessionUtils::DeleteCacheFilesExcluding(emptyDir, {});
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(emptyDir));
+
+    // non-existent dir: GetDirFiles returns empty, no crash
+    AVSessionUtils::DeleteCacheFilesExcluding("/data/service/el2/100/av_session/nonexistent_dir/", {});
+    SLOGI("DeleteCacheFilesExcluding_003 end!");
+}
+
+/**
+ * @tc.name: DeleteCacheFilesExcluding_004
+ * @tc.desc: non-image files are skipped; cast prefix is stripped before retention check
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUtilsTest, DeleteCacheFilesExcluding_004, TestSize.Level0)
+{
+    SLOGI("DeleteCacheFilesExcluding_004 begin!");
+    std::string testDir = "/data/service/el2/100/av_session/cache_unittest_nonsuffix/";
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(testDir));
+    // a file without .image.dat suffix must be left untouched
+    std::string keepNonSuffix = testDir + "keepme.txt";
+    // cast_ file of an alive session: prefix stripped, then matched and preserved
+    std::string keepCast = testDir + "cast_abcdef123456.image.dat";
+    // bare ".image.dat" (empty stem, suffix at pos 0) is still treated as a cache file
+    std::string dotOnly = testDir + ".image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(keepNonSuffix, "txt"));
+    ASSERT_TRUE(OHOS::SaveStringToFile(keepCast, "keep"));
+    ASSERT_TRUE(OHOS::SaveStringToFile(dotOnly, "x"));
+
+    std::set<std::string> retained = {"abcdef123456"};
+    AVSessionUtils::DeleteCacheFilesExcluding(testDir, retained);
+    EXPECT_TRUE(OHOS::FileExists(keepNonSuffix));
+    EXPECT_TRUE(OHOS::FileExists(keepCast));
+    // empty-stem file is not retained, so it is deleted
+    EXPECT_FALSE(OHOS::FileExists(dotOnly));
+
+    AVSessionUtils::DeleteFile(keepNonSuffix);
+    AVSessionUtils::DeleteFile(keepCast);
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(testDir));
+    SLOGI("DeleteCacheFilesExcluding_004 end!");
 }

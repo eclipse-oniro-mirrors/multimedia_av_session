@@ -293,6 +293,7 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
         int32_t userId = eventData.GetCode();
         servicePtr_->RegisterBundleDeleteEventForHistory(userId);
+        servicePtr_->HandleUserUnlockedEvent(userId);
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0 ||
         action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED) == 0) {
         servicePtr_->InitCastEngineService();
@@ -453,6 +454,16 @@ void AVSessionService::HandleBundleRemoveEvent(const std::string bundleName)
 {
     int32_t curUserId = GetUsersManager().GetCurrentUserId();
     DeleteHistoricalRecord(bundleName, curUserId);
+}
+
+void AVSessionService::HandleUserUnlockedEvent(int32_t userId)
+{
+    // USER_UNLOCKED fires once per user per boot, so no once-guard is needed.
+    if (userId <= 0) {
+        userId = GetUsersManager().GetCurrentUserId();
+    }
+    SLOGI("HandleUserUnlockedEvent clean cache for user %{public}d on first unlock", userId);
+    GetUsersManager().CleanupCacheOnUnlock(userId);
 }
 
 bool AVSessionService::SubscribeCommonEvent()

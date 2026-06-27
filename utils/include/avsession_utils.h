@@ -20,6 +20,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <set>
 #include <regex>
 
 #ifndef CLIENT_LITE
@@ -193,6 +194,33 @@ public:
             if (file.find(AVSessionUtils::GetFileSuffix()) != std::string::npos) {
                 DeleteFile(file);
             }
+        }
+    }
+
+    static void DeleteCacheFilesExcluding(const std::string& path,
+        const std::set<std::string>& retainedSessionIds)
+    {
+        std::vector<std::string> fileList;
+        OHOS::GetDirFiles(path, fileList);
+        for (const auto& file : fileList) {
+            if (file.find(AVSessionUtils::GetFileSuffix()) == std::string::npos) {
+                continue;
+            }
+            size_t slashPos = file.find_last_of('/');
+            std::string baseName = (slashPos != std::string::npos) ? file.substr(slashPos + 1) : file;
+            size_t suffixPos = baseName.rfind(AVSessionUtils::GetFileSuffix());
+            std::string stem = (suffixPos != std::string::npos && suffixPos > 0)
+                ? baseName.substr(0, suffixPos) : baseName;
+            std::string sessionId = stem;
+            std::string castPrefix(CAST_PREFIX);
+            if (castPrefix.size() < stem.size() && stem.compare(0, castPrefix.size(), castPrefix) == 0) {
+                sessionId = stem.substr(castPrefix.size());
+            }
+            if (retainedSessionIds.find(sessionId) != retainedSessionIds.end()) {
+                SLOGI("skip alive session cache file %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+                continue;
+            }
+            DeleteFile(file);
         }
     }
 
