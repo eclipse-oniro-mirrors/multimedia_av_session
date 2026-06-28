@@ -18,6 +18,8 @@
 #include "avsession_storage_event.h"
 #include "avsession_utils.h"
 
+#include <set>
+
 namespace OHOS::AVSession {
 AVSessionUsersManager& AVSessionUsersManager::GetInstance()
 {
@@ -349,5 +351,26 @@ void AVSessionUsersManager::ClearCache()
         std::string cachePath(AVSessionUtils::GetCachePathName(userId));
         AVSessionUtils::DeleteCacheFiles(cachePath);
     }
+}
+
+void AVSessionUsersManager::CleanupCacheOnUnlock(int32_t userId)
+{
+    std::lock_guard lockGuard(userLock_);
+    userId = (userId <= 0) ? curUserId_ : userId;
+    SLOGI("CleanupCacheOnUnlock for user %{public}d", userId);
+    auto iter = sessionStackMapByUserId_.find(userId);
+    std::set<std::string> aliveSessionIds;
+    if (iter != sessionStackMapByUserId_.end() && iter->second != nullptr) {
+        for (auto& session : iter->second->GetAllSessions()) {
+            CHECK_AND_CONTINUE(session != nullptr);
+            aliveSessionIds.insert(session->GetSessionId());
+        }
+    }
+    SLOGI("CleanupCacheOnUnlock keep %{public}zu alive session image files", aliveSessionIds.size());
+    // Local files live in the cache dir, cast files in the cache/cast_ subdir; clean both.
+    std::string cachePath(AVSessionUtils::GetCachePathName(userId));
+    AVSessionUtils::DeleteCacheFilesExcluding(cachePath, aliveSessionIds);
+    std::string castCachePath(AVSessionUtils::GetCachePathNameForCast(userId));
+    AVSessionUtils::DeleteCacheFilesExcluding(castCachePath, aliveSessionIds);
 }
 }

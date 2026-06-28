@@ -18,6 +18,8 @@
 #include "account_manager_adapter.h"
 #include "avsession_users_manager.h"
 #include "avsession_service.h"
+#include "avsession_utils.h"
+#include "file_ex.h"
 #include "isession_listener.h"
 
 using namespace testing::ext;
@@ -192,6 +194,155 @@ HWTEST_F(AVSessionUsersManagerTest, GetCurSessionListForKeyEvent001, TestSize.Le
     int32_t userId = 1;
     AVSessionUsersManager::GetInstance().GetCurSessionListForKeyEvent(userId);
     EXPECT_EQ(AVSessionUsersManager::GetInstance().curUserId_, userId);
+}
+
+/**
+ * @tc.name: CleanupCacheOnUnlock_001
+ * @tc.desc: delete stale files, keep alive session local/cast image files
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_001, TestSize.Level0)
+{
+    auto& manager = AVSessionUsersManager::GetInstance();
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession.cleanup");
+    elementName.SetAbilityName("test.ability.cleanup");
+    AVSessionService* avSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    ASSERT_TRUE(avSessionService != nullptr);
+    OHOS::sptr<AVSessionItem> item =
+        avSessionService->CreateSessionInner("cleanup", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(item != nullptr);
+    item->SetPid(getpid());
+    item->SetUid(manager.GetCurrentUserId());
+    std::string sessionId = item->GetDescriptor().sessionId_;
+    int32_t userId = item->GetUserId();
+    if (userId <= 0) {
+        userId = manager.GetCurrentUserId();
+    }
+
+    std::shared_ptr<SessionStack> stack = std::make_shared<SessionStack>();
+    stack->AddSession(getpid(), elementName.GetAbilityName(), item);
+    manager.sessionStackMapByUserId_[userId] = stack;
+
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string keepLocal = cacheDir + sessionId + AVSessionUtils::GetFileSuffix();
+    std::string keepCast = cacheDir + "cast_" + sessionId + AVSessionUtils::GetFileSuffix();
+    std::string stale = cacheDir + "stalefile123456.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(keepLocal, "keep"));
+    ASSERT_TRUE(OHOS::SaveStringToFile(keepCast, "keep"));
+    ASSERT_TRUE(OHOS::SaveStringToFile(stale, "stale"));
+
+    manager.CleanupCacheOnUnlock(userId);
+
+    EXPECT_TRUE(OHOS::FileExists(keepLocal));
+    EXPECT_TRUE(OHOS::FileExists(keepCast));
+    EXPECT_FALSE(OHOS::FileExists(stale));
+
+    AVSessionUtils::DeleteFile(keepLocal);
+    AVSessionUtils::DeleteFile(keepCast);
+    avSessionService->HandleSessionRelease(sessionId);
+    manager.sessionStackMapByUserId_.erase(userId);
+    delete avSessionService;
+}
+
+/**
+ * @tc.name: CleanupCacheOnUnlock_002
+ * @tc.desc: user absent from session map -> no alive session, all cache files deleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_002, TestSize.Level0)
+{
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t userId = 1357; // a user with no entry in sessionStackMapByUserId_
+    manager.sessionStackMapByUserId_.erase(userId);
+
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string stale = cacheDir + "stalenosession123.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(stale, "stale"));
+
+    manager.CleanupCacheOnUnlock(userId);
+
+    EXPECT_FALSE(OHOS::FileExists(stale));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    SLOGI("CleanupCacheOnUnlock_002 end!");
+}
+
+/**
+ * @tc.name: CleanupCacheOnUnlock_003
+ * @tc.desc: user present but stack is nullptr -> treated as no alive session
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_003, TestSize.Level0)
+{
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t userId = 2468;
+    // present in map but with a null session stack
+    manager.sessionStackMapByUserId_[userId] = nullptr;
+
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string stale = cacheDir + "stalenullstack123.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(stale, "stale"));
+
+    manager.CleanupCacheOnUnlock(userId);
+
+    EXPECT_FALSE(OHOS::FileExists(stale));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    manager.sessionStackMapByUserId_.erase(userId);
+    SLOGI("CleanupCacheOnUnlock_003 end!");
+}
+
+/**
+ * @tc.name: CleanupCacheOnUnlock_004
+ * @tc.desc: userId <= 0 resolves to current user
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_004, TestSize.Level0)
+{
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t curUserId = manager.curUserId_;
+    std::string cacheDir = AVSessionUtils::GetCachePathName(curUserId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string stale = cacheDir + "staleuserid0_12345.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(stale, "stale"));
+
+    // userId <= 0 should fall back to curUserId_ and clean that user's cache
+    manager.CleanupCacheOnUnlock(0);
+
+    EXPECT_FALSE(OHOS::FileExists(stale));
+    // restore parity: the cache dir is left clean, no stale residue
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    SLOGI("CleanupCacheOnUnlock_004 end!");
+}
+
+/**
+ * @tc.name: CleanupCacheOnUnlock_005
+ * @tc.desc: a null session entry in the stack is skipped, its image file is not protected
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_005, TestSize.Level0)
+{
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t userId = 3579;
+    std::shared_ptr<SessionStack> stack = std::make_shared<SessionStack>();
+    // inject a null session directly into the stack list to exercise CHECK_AND_CONTINUE
+    stack->stack_.push_back(OHOS::sptr<AVSessionItem>(nullptr));
+    manager.sessionStackMapByUserId_[userId] = stack;
+
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string stale = cacheDir + "stalenullsession123.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(stale, "stale"));
+
+    // null session contributes no sessionId, so the file is treated as stale and deleted
+    manager.CleanupCacheOnUnlock(userId);
+
+    EXPECT_FALSE(OHOS::FileExists(stale));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    manager.sessionStackMapByUserId_.erase(userId);
+    SLOGI("CleanupCacheOnUnlock_005 end!");
 }
 } //AVSession
 } //OHOS

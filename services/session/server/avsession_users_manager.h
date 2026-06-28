@@ -81,6 +81,8 @@ public:
 
     void ClearCache();
 
+    void CleanupCacheOnUnlock(int32_t userId = 0);
+
     static constexpr const char* accountEventSwitched = "SWITCHED";
     static constexpr const char* accountEventRemoved = "REMOVED";
 

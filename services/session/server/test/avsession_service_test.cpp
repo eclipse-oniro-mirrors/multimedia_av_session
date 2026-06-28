@@ -1109,6 +1109,54 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent002, TestSize.Level0)
     SLOGI("OnReceiveEvent002 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, HandleUserUnlockedEvent001, TestSize.Level0)
+{
+    SLOGI("HandleUserUnlockedEvent001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string staleFile = cacheDir + "staleuserunlock123.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+
+    // explicit userId > 0: cleanup runs against the given user
+    avservice_->HandleUserUnlockedEvent(userId);
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    SLOGI("HandleUserUnlockedEvent001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, HandleUserUnlockedEvent002, TestSize.Level0)
+{
+    SLOGI("HandleUserUnlockedEvent002 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string staleFile = cacheDir + "staleuserunlock000.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+
+    // userId <= 0: falls back to current user, cleanup still runs
+    avservice_->HandleUserUnlockedEvent(0);
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    SLOGI("HandleUserUnlockedEvent002 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlocked001, TestSize.Level0)
+{
+    SLOGI("OnReceiveEventUserUnlocked001 begin!");
+    OHOS::EventFwk::CommonEventData eventData;
+    string action = OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED;
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(action);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avservice_);
+    eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("OnReceiveEventUserUnlocked001 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, OnReceiveEvent004, TestSize.Level1)
 {
     SLOGD("OnReceiveEvent004 begin!");
