@@ -1144,16 +1144,22 @@ static HWTEST_F(AVSessionServiceTest, HandleUserUnlockedEvent002, TestSize.Level
 static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlocked001, TestSize.Level0)
 {
     SLOGI("OnReceiveEventUserUnlocked001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string staleFile = cacheDir + "staleunlockevent123.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+
     OHOS::EventFwk::CommonEventData eventData;
-    string action = OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED;
     OHOS::AAFwk::Want want = eventData.GetWant();
-    want.SetAction(action);
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     eventData.SetWant(want);
     OHOS::EventFwk::MatchingSkills matchingSkills;
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, avservice_);
     eventSubscriber.OnReceiveEvent(eventData);
-    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
     SLOGI("OnReceiveEventUserUnlocked001 end!");
 }
 
