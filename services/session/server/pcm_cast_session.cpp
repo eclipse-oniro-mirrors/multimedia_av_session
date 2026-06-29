@@ -59,7 +59,7 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
 
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED) ||
         castState == static_cast<int32_t>(CastEngine::DeviceState::PLAYING)) {
-        descriptor_.outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
+        descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         castState_ = CastState::PREPARE;
     }
 
@@ -434,7 +434,7 @@ int64_t PcmCastSession::GetCastHandle() const
  
 bool PcmCastSession::CheckIsCasting() const
 {
-    return castState_ == CastState::DISCONNECTED;
+    return castState_ != CastState::DISCONNECTED;
 }
  
 AVSessionDescriptor PcmCastSession::GetDescriptor()
@@ -594,7 +594,7 @@ void PcmCastSession::ReleaseStreamPlayer()
     CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
 
     SLOGI("start to dealoutputdevicechange");
-    session->DealOutputDeviceChange(ConnectionState::STATE_DISCONNECTED, outputDeviceInfo);
+    session->SetAndDealOutputDeviceChange(ConnectionState::STATE_DISCONNECTED, outputDeviceInfo);
     OutputDeviceInfo localDeviceInfo;
     DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
@@ -621,7 +621,6 @@ void PcmCastSession::FindSessionAndStreamCasting()
     session->SetIsHiPlayStreamCasting(true);
     session->SetCastHandle(castHandle_);
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, outputDeviceInfo);
-    descriptor_.sessionId_ = streamCastingSessionId_;
 }
 
 void PcmCastSession::CreateExtraInfo(std::string deviceType, std::string scenario)
