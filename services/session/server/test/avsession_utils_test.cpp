@@ -556,6 +556,8 @@ HWTEST_F(AVSessionUtilsTest, DeleteCacheFilesExcluding_001, TestSize.Level0)
 
     AVSessionUtils::DeleteFile(keepLocal);
     AVSessionUtils::DeleteFile(keepCast);
+    EXPECT_FALSE(OHOS::FileExists(keepLocal));
+    EXPECT_FALSE(OHOS::FileExists(keepCast));
     EXPECT_TRUE(OHOS::ForceRemoveDirectory(testDir));
     SLOGI("DeleteCacheFilesExcluding_001 end!");
 }
@@ -630,6 +632,8 @@ HWTEST_F(AVSessionUtilsTest, DeleteCacheFilesExcluding_004, TestSize.Level0)
 
     AVSessionUtils::DeleteFile(keepNonSuffix);
     AVSessionUtils::DeleteFile(keepCast);
+    EXPECT_FALSE(OHOS::FileExists(keepNonSuffix));
+    EXPECT_FALSE(OHOS::FileExists(keepCast));
     EXPECT_TRUE(OHOS::ForceRemoveDirectory(testDir));
     SLOGI("DeleteCacheFilesExcluding_004 end!");
 }

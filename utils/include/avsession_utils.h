@@ -264,7 +264,12 @@ public:
         return PAIR_FILE_SUFFIX;
     }
 
-    static std::string GetAnonySessionId(std::string sessionId)
+    static const char* GetCastPrefix()
+    {
+        return CAST_PREFIX;
+    }
+
+    static std::string GetAnonySessionId(const std::string& sessionId)
     {
         constexpr size_t PRE_LEN = 3;
         constexpr size_t MAX_LEN = 100;

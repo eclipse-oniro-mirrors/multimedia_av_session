@@ -241,6 +241,8 @@ HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_001, TestSize.Level0)
 
     AVSessionUtils::DeleteFile(keepLocal);
     AVSessionUtils::DeleteFile(keepCast);
+    EXPECT_FALSE(OHOS::FileExists(keepLocal));
+    EXPECT_FALSE(OHOS::FileExists(keepCast));
     avSessionService->HandleSessionRelease(sessionId);
     manager.sessionStackMapByUserId_.erase(userId);
     delete avSessionService;

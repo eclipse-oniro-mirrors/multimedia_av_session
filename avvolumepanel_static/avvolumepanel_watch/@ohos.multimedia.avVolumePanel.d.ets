@@ -18,7 +18,7 @@ import { Watch, PropRef } from '@ohos.arkui.stateManagement'
 import Want from '@ohos.app.ability.Want'
 import { RecordData } from '@ohos.base';
 
-declare const TAG: string;
+const TAG = 'AVVolumePanel';
 
 export class AVVolumePanelParameter {
   public position?: Position;
@@ -39,7 +39,7 @@ export struct AVVolumePanel {
 
   private static currentPanelCount: number = 0;
 
-  volumeChange(volumeChange : string) {
+  volumeChange(volumeChange : string): void {
     if (this.volumeCallback != null) {
       console.info(TAG, `volumeChange volumeLevel = ` + this.volumeLevel);
       this.volumeCallback.send({'volume': this.volumeLevel});
@@ -55,7 +55,7 @@ export struct AVVolumePanel {
     AVVolumePanel.currentPanelCount -= 1;
   }
 
-  build() {
+  build(): void {
     Column() {
       UIExtensionComponent(
         {

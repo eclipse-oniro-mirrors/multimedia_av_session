@@ -75,8 +75,9 @@ static std::string AnonymizeFilePath(const std::string& path)
     size_t suffixPos = fileName.rfind(suffix);
     std::string stem = (suffixPos != std::string::npos && suffixPos > 0)
         ? fileName.substr(0, suffixPos) : fileName;
-    std::string anonyStem = (stem.find("cast_") == 0)
-        ? "cast_" + AVSessionUtils::GetAnonySessionId(stem.substr(5))
+    std::string castPrefix = AVSessionUtils::GetCastPrefix();
+    std::string anonyStem = (stem.find(castPrefix) == 0)
+        ? castPrefix + AVSessionUtils::GetAnonySessionId(stem.substr(castPrefix.length()))
         : (stem.find('_') != std::string::npos)
             ? stem
             : AVSessionUtils::GetAnonySessionId(stem);
@@ -245,7 +246,7 @@ void AVSessionStorageEvent::ScanStorageStatistics(int32_t userId, StorageStatist
 {
     stats = StorageStatistics{};
     const std::string suffix = AVSessionUtils::GetFileSuffix();
-    const std::string castPrefix = "cast_";
+    const std::string castPrefix = AVSessionUtils::GetCastPrefix();
 
     std::set<std::string> allFiles;
     std::vector<std::string> dirFiles;
