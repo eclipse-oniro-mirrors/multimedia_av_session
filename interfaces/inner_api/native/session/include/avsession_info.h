@@ -1755,10 +1755,10 @@ enum SessionCategory {
     CATEGORY_ALL = 3,
 
     /**
-     * The session category which is HiPlay AVSession.
-     * @syscap SystemCapability.Multimedia.AVSession.Manager
-     * @systemapi
-     * @since 24 dynamic&static
+    * The session category which is HiPlay AVSession.
+    * @syscap SystemCapability.Multimedia.AVSession.Manager
+    * @systemapi
+    * @since 24 dynamic&static
     */
     CATEGORY_HIPLAY = 4,
 };

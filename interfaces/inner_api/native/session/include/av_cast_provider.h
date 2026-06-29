@@ -267,7 +267,7 @@ public:
      * @param {int32_t} castId - The ID of the castprovider.
      * @return {std::string} cast session id
      * @since 24
-    */
+     */
     virtual std::string QueryCastSessionId(const int32_t castId) = 0;
 };
 } // namespace OHOS::AVSession

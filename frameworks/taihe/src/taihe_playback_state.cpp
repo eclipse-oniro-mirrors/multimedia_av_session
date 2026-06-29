@@ -18,8 +18,6 @@
 
 #include "taihe_playback_state.h"
 
-#include <cinttypes>
-
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "taihe_utils.h"
