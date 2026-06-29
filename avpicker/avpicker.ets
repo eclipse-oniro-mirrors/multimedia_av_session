@@ -1306,6 +1306,7 @@ export struct AVCastPicker {
 @Builder SmallPicIcon(appIcon : image.PixelMap | undefined) {
   Column() {
     Image(appIcon)
+      .syncLoad(true)
       .size({ width: '100%', height: '100%' })
       .backgroundColor('#00ffffff')
       .draggable(false)

@@ -2118,6 +2118,7 @@ export class AVCastPicker extends ViewPU {
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(q8);
+            Image.syncLoad(true);
             Image.size({ width: '100%', height: '100%' });
             Image.backgroundColor('#00ffffff');
             Image.draggable(false);
