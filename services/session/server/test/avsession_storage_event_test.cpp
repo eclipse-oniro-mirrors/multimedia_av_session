@@ -429,7 +429,7 @@ HWTEST_F(AVSessionStorageEventTest, RecordFileWrite003, testing::ext::TestSize.L
     evt.Uninit();
     evt.storageUserDataMap_.clear();
     evt.sessionInfoMap_.clear();
-    for (size_t i = 0; i < 100; i++) {
+    for (size_t i = 0; i < AVSessionStorageEvent::MAX_BUNDLE_NAMES - 1; i++) {
         std::string path = "/data/service/el2/100/av_session/cache/file" + std::to_string(i) + ".image.dat";
         evt.RecordFileWrite(path, "com.test.app", 100);
     }
