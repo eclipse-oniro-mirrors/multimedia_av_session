@@ -755,7 +755,9 @@ export struct AVCastPicker {
       if (this.isSelectProcessing) {
         return;
       }
-      this.setAllRoomSelectStatusPending();
+      this.roomSelectStatusPending[index] = true;
+      this.roomVolumeVisible[index] = Visibility.None;
+      this.isSelectProcessing = true;
       const timeId = setTimeout(() => {
         this.roomSelectStatusPendingInit();
       }, 3000);
@@ -824,6 +826,13 @@ export struct AVCastPicker {
           type: SliderBlockType.SHAPE,
           shape: new Path({ commands: 'M60 60 M30 30 L15 56 L45 56 Z' })
         })
+        .responseRegion({
+          x: '0',
+          y: '-50%',
+          width: '100%',
+          height: '200%'
+        })
+        .zIndex(1)
         .height(16)
         .onChange((value: number, mode: SliderChangeMode) => {
           console.info(TAG, `YuBeL room slider onChange: ${value}, mode=${mode}, index=${index}`);
@@ -845,7 +854,9 @@ export struct AVCastPicker {
         .select(this.roomIsSelect[index])
         .shape(CheckBoxShape.CIRCLE)
         .onClick(() => {
-          this.setAllRoomSelectStatusPending();
+          this.roomSelectStatusPending[index] = true;
+          this.roomVolumeVisible[index] = Visibility.None;
+          this.isSelectProcessing = true;
           const timeId = setTimeout(() => {
             this.roomSelectStatusPendingInit();
           }, 3000);

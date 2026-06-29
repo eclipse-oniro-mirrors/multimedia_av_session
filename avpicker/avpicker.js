@@ -1704,7 +1704,9 @@ export class AVCastPicker extends ViewPU {
                 if (this.isSelectProcessing) {
                     return;
                 }
-                this.setAllRoomSelectStatusPending();
+                this.roomSelectStatusPending[index] = true;
+                this.roomVolumeVisible[index] = Visibility.None;
+                this.isSelectProcessing = true;
                 const e2 = setTimeout(() => {
                     this.roomSelectStatusPendingInit();
                 }, 3000);
@@ -1789,6 +1791,13 @@ export class AVCastPicker extends ViewPU {
                 type: SliderBlockType.SHAPE,
                 shape: new Path({ commands: 'M60 60 M30 30 L15 56 L45 56 Z' })
             });
+            Slider.responseRegion({
+                x: '0',
+                y: '-50%',
+                width: '100%',
+                height: '200%'
+                });
+            Slider.zIndex(1);
             Slider.height(16);
             Slider.onChange((value, mode) => {
                 console.info(TAG, `room slider onChange: ${value}, mode=${mode}, index=${index}`);
@@ -1810,7 +1819,9 @@ export class AVCastPicker extends ViewPU {
                         Checkbox.select(this.roomIsSelect[index]);
                         Checkbox.shape(CheckBoxShape.CIRCLE);
                         Checkbox.onClick(() => {
-                            this.setAllRoomSelectStatusPending();
+                            this.roomSelectStatusPending[index] = true;
+                            this.roomVolumeVisible[index] = Visibility.None;
+                            this.isSelectProcessing = true;
                             const w1 = setTimeout(() => {
                                 this.roomSelectStatusPendingInit();
                             }, 3000);
