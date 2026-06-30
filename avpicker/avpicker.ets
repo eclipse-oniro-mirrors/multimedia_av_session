@@ -756,7 +756,6 @@ export struct AVCastPicker {
         return;
       }
       this.roomSelectStatusPending[index] = true;
-      this.roomVolumeVisible[index] = Visibility.None;
       this.isSelectProcessing = true;
       const timeId = setTimeout(() => {
         this.roomSelectStatusPendingInit();
@@ -855,7 +854,6 @@ export struct AVCastPicker {
         .shape(CheckBoxShape.CIRCLE)
         .onClick(() => {
           this.roomSelectStatusPending[index] = true;
-          this.roomVolumeVisible[index] = Visibility.None;
           this.isSelectProcessing = true;
           const timeId = setTimeout(() => {
             this.roomSelectStatusPendingInit();
