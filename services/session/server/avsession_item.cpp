@@ -120,7 +120,6 @@ AVSessionItem::~AVSessionItem()
 {
     SLOGI("destroy with aliveLock session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
-    STORAGE_EVENT_REMOVE_SESSION(descriptor_.sessionId_);
     if (IsActive()) {
         Deactivate();
     }
