@@ -16,6 +16,7 @@
 #include "avsession_storage_event.h"
 #include "avsession_log.h"
 #include "avsession_sysevent.h"
+#include "avsession_timer_holder.h"
 #include "avsession_utils.h"
 #include "directory_ex.h"
 #include <sys/stat.h>
@@ -116,24 +117,19 @@ void AVSessionStorageEvent::Uninit()
 
 void AVSessionStorageEvent::StartPeriodicReport()
 {
-    if (timer_ != nullptr) {
+    if (timerId_ != 0) {
         return;
     }
-    timer_ = std::make_unique<Utils::Timer>("StorageEventTimer");
     Utils::Timer::TimerCallback timerCallback = [this]() {
         ReportStorageStatistics();
     };
-    timerId_ = timer_->Register(timerCallback, REPORT_INTERVAL_MS, false);
-    timer_->Setup();
+    timerId_ = AVSessionTimerHolder::GetInstance().Register(timerCallback, REPORT_INTERVAL_MS);
 }
 
 void AVSessionStorageEvent::StopPeriodicReport()
 {
-    if (timer_ != nullptr) {
-        timer_->Shutdown();
-        timer_->Unregister(timerId_);
-        timer_ = nullptr;
-    }
+    AVSessionTimerHolder::GetInstance().Unregister(timerId_);
+    timerId_ = 0;
 }
 
 void StorageUserData::AddFileInfo(const std::string& fileName, const std::string& bundleName)

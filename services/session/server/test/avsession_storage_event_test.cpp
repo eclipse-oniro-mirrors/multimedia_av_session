@@ -19,6 +19,7 @@
 #include <string>
 
 #include "avsession_storage_event.h"
+#include "avsession_timer_holder.h"
 #include "avsession_utils.h"
 
 using namespace OHOS;
@@ -181,11 +182,11 @@ HWTEST_F(AVSessionStorageEventTest, InitUninit001, testing::ext::TestSize.Level0
 {
     auto& evt = AVSessionStorageEvent::GetInstance();
     evt.Uninit();
-    EXPECT_EQ(evt.timer_, nullptr);
+    EXPECT_EQ(evt.timerId_, 0u);
     evt.Init();
-    EXPECT_NE(evt.timer_, nullptr);
+    EXPECT_NE(evt.timerId_, 0u);
     evt.Uninit();
-    EXPECT_EQ(evt.timer_, nullptr);
+    EXPECT_EQ(evt.timerId_, 0u);
 }
 
 /**
@@ -398,9 +399,9 @@ HWTEST_F(AVSessionStorageEventTest, InitUninit002, testing::ext::TestSize.Level0
     auto& evt = AVSessionStorageEvent::GetInstance();
     evt.Uninit();
     evt.Init();
-    EXPECT_NE(evt.timer_, nullptr);
+    EXPECT_NE(evt.timerId_, 0u);
     evt.Init();
-    EXPECT_NE(evt.timer_, nullptr);
+    EXPECT_NE(evt.timerId_, 0u);
     evt.Uninit();
 }
 
@@ -413,9 +414,9 @@ HWTEST_F(AVSessionStorageEventTest, StopPeriodicReport001, testing::ext::TestSiz
 {
     auto& evt = AVSessionStorageEvent::GetInstance();
     evt.Uninit();
-    EXPECT_EQ(evt.timer_, nullptr);
+    EXPECT_EQ(evt.timerId_, 0u);
     evt.StopPeriodicReport();
-    EXPECT_EQ(evt.timer_, nullptr);
+    EXPECT_EQ(evt.timerId_, 0u);
 }
 
 /**
@@ -627,6 +628,89 @@ HWTEST_F(AVSessionStorageEventTest, BuildSummary003, testing::ext::TestSize.Leve
     EXPECT_NE(summary.find("com.app2"), std::string::npos);
     EXPECT_NE(summary.find(";"), std::string::npos);
     evt.sessionInfoMap_.clear();
+}
+
+/**
+ * @tc.name: TimerHolder_Register001
+ * @tc.desc: test Register lazily sets up the shared timer and returns unique ids
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionStorageEventTest, TimerHolder_Register001, testing::ext::TestSize.Level0)
+{
+    auto& holder = AVSessionTimerHolder::GetInstance();
+    holder.Shutdown();
+    EXPECT_EQ(holder.timer_, nullptr);
+    // first Register lazily creates and sets up the shared timer
+    uint32_t id1 = holder.Register([]() {}, 60000); // 60000ms: won't fire during the test
+    EXPECT_NE(id1, 0u);
+    EXPECT_NE(holder.timer_, nullptr);
+    // second Register reuses the same shared timer; ids are monotonic and unique
+    uint32_t id2 = holder.Register([]() {}, 60000);
+    EXPECT_NE(id2, 0u);
+    EXPECT_NE(id1, id2);
+    holder.Unregister(id1);
+    holder.Unregister(id2);
+    holder.Shutdown();
+}
+
+/**
+ * @tc.name: TimerHolder_Register002
+ * @tc.desc: test Register rejects interval 0 to avoid a periodic timer spinning the CPU
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionStorageEventTest, TimerHolder_Register002, testing::ext::TestSize.Level0)
+{
+    auto& holder = AVSessionTimerHolder::GetInstance();
+    holder.Shutdown();
+    EXPECT_EQ(holder.timer_, nullptr);
+    // interval 0 is rejected before touching the shared timer; no timer is created
+    uint32_t id = holder.Register([]() {}, 0);
+    EXPECT_EQ(id, 0u);
+    EXPECT_EQ(holder.timer_, nullptr);
+    holder.Shutdown();
+}
+
+/**
+ * @tc.name: TimerHolder_Unregister001
+ * @tc.desc: test Unregister is a safe no-op for zero/unknown ids or unstarted timer
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionStorageEventTest, TimerHolder_Unregister001, testing::ext::TestSize.Level0)
+{
+    auto& holder = AVSessionTimerHolder::GetInstance();
+    holder.Shutdown();
+    EXPECT_EQ(holder.timer_, nullptr);
+    // timer not running: both early-return, no crash
+    holder.Unregister(0);
+    holder.Unregister(999999);
+    // even with a running timer, zero/unknown ids are tolerated by Utils::Timer
+    uint32_t id = holder.Register([]() {}, 60000);
+    EXPECT_NE(id, 0u);
+    holder.Unregister(0);
+    holder.Unregister(999999);
+    holder.Unregister(id);
+    holder.Shutdown();
+}
+
+/**
+ * @tc.name: TimerHolder_Shutdown001
+ * @tc.desc: test Shutdown is idempotent and a later Register rebuilds the timer
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionStorageEventTest, TimerHolder_Shutdown001, testing::ext::TestSize.Level0)
+{
+    auto& holder = AVSessionTimerHolder::GetInstance();
+    holder.Shutdown();
+    EXPECT_EQ(holder.timer_, nullptr);
+    // Shutdown when already stopped is a no-op (early-return branch)
+    holder.Shutdown();
+    EXPECT_EQ(holder.timer_, nullptr);
+    // rebuild after shutdown
+    uint32_t id = holder.Register([]() {}, 60000);
+    EXPECT_NE(id, 0u);
+    EXPECT_NE(holder.timer_, nullptr);
+    holder.Shutdown();
+    EXPECT_EQ(holder.timer_, nullptr);
 }
 
 #endif

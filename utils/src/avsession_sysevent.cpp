@@ -31,7 +31,7 @@ AVSessionSysEvent& AVSessionSysEvent::GetInstance()
 }
 
 AVSessionSysEvent::AVSessionSysEvent() : optCounts_ {},
-    timer_(nullptr), timerId_(0), lifeCycleInfos_ {}, controllerCommandInfos_ {}, lowQualityInfos_ {}
+    timerId_(0), lifeCycleInfos_ {}, controllerCommandInfos_ {}, lowQualityInfos_ {}
 {
 }
 
@@ -80,9 +80,8 @@ void AVSessionSysEvent::ReportLowQuality()
 
 void AVSessionSysEvent::Regiter()
 {
-    CHECK_AND_RETURN(timer_ == nullptr);
+    CHECK_AND_RETURN(timerId_ == 0);
 
-    timer_ = std::make_unique<OHOS::Utils::Timer>("EventStatisticTimer");
     auto timeCallback = [this]() {
         std::lock_guard lockGuard(lock_);
         HiSysWriteStatistic("CONTROL_COMMAND_STATISTICS", "PLAY_COUNT", optCounts_[Operation::OPT_PLAY],
@@ -134,18 +133,14 @@ void AVSessionSysEvent::Regiter()
             playingStateTriggerCount = 0;
         }
     };
-    timerId_ = timer_->Register(timeCallback, NOTIFY_TIME_INTERVAL, false);
-    timer_->Setup();
+    timerId_ = AVSessionTimerHolder::GetInstance().Register(timeCallback, NOTIFY_TIME_INTERVAL);
 }
 
 // LCOV_EXCL_START
 void AVSessionSysEvent::Unregister()
 {
-    if (timer_ != nullptr) {
-        timer_->Shutdown();
-        timer_->Unregister(timerId_);
-        timer_ = nullptr;
-    }
+    AVSessionTimerHolder::GetInstance().Unregister(timerId_);
+    timerId_ = 0;
 }
 // LCOV_EXCL_STOP
 

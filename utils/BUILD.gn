@@ -32,6 +32,7 @@ ohos_shared_library("avsession_utils") {
     "src/avsession_radar.cpp",
     "src/avsession_storage_event.cpp",
     "src/avsession_sysevent.cpp",
+    "src/avsession_timer_holder.cpp",
     "src/hash_calculator.cpp",
     "src/permission_checker.cpp",
   ]

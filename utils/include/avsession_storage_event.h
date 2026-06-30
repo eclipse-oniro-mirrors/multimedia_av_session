@@ -24,7 +24,7 @@
 #include <vector>
 #include <string>
 #include "hisysevent.h"
-#include "timer.h"
+#include "avsession_timer_holder.h"
 #endif
 
 namespace OHOS::AVSession {
@@ -95,7 +95,6 @@ private:
     std::unordered_map<int32_t, std::unique_ptr<StorageUserData>> storageUserDataMap_;
     std::unordered_map<int32_t, std::unordered_map<std::string, std::string>> sessionInfoMap_;
     std::recursive_mutex lock_;
-    std::unique_ptr<Utils::Timer> timer_;
     uint32_t timerId_ = 0;
     static constexpr uint32_t REPORT_INTERVAL_MS = 24 * 60 * 60 * 1000;
     static constexpr size_t MAX_BUNDLE_NAMES = 100;
@@ -112,12 +111,12 @@ private:
         OHOS::AVSession::AVSessionStorageEvent::GetInstance().RecordFileDelete(fileName, userId);  \
     } while (0)
 
-#define STORAGE_EVENT_INIT()                                                                       \
+#define STORAGE_EVENT_INIT                                                                         \
     do {                                                                                           \
         OHOS::AVSession::AVSessionStorageEvent::GetInstance().Init();                              \
     } while (0)
 
-#define STORAGE_EVENT_UNINIT()                                                                     \
+#define STORAGE_EVENT_UNINIT                                                                       \
     do {                                                                                           \
         OHOS::AVSession::AVSessionStorageEvent::GetInstance().Uninit();                            \
     } while (0)
@@ -138,8 +137,8 @@ private:
     do { (void)(fileName); (void)(bundleName); (void)(userId); } while (0)
 #define STORAGE_EVENT_RECORD_FILE_DELETE(fileName, userId) \
     do { (void)(fileName); (void)(userId); } while (0)
-#define STORAGE_EVENT_INIT() do {} while (0)
-#define STORAGE_EVENT_UNINIT() do {} while (0)
+#define STORAGE_EVENT_INIT do {} while (0)
+#define STORAGE_EVENT_UNINIT do {} while (0)
 #define STORAGE_EVENT_RECORD_SESSION(sessionId, bundleName, userId) \
     do { (void)(sessionId); (void)(bundleName); (void)(userId); } while (0)
 #define STORAGE_EVENT_REMOVE_SESSION(sessionId) \
