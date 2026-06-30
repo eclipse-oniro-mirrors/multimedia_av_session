@@ -1361,6 +1361,7 @@ static HWTEST(HwCastTest, HwCastProviderNotifyCastSessionCreated001, TestSize.Le
     EXPECT_EQ(hwCastProvider != nullptr, true);
     hwCastProvider->Init();
     hwCastProvider->NotifyCastSessionCreated("123456");
+    usleep(2000000);
     SLOGI("HwCastProviderNotifyCastSessionCreated001 end!");
 }
 
