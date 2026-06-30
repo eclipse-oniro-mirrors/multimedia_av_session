@@ -1705,7 +1705,6 @@ export class AVCastPicker extends ViewPU {
                     return;
                 }
                 this.roomSelectStatusPending[index] = true;
-                this.roomVolumeVisible[index] = Visibility.None;
                 this.isSelectProcessing = true;
                 const e2 = setTimeout(() => {
                     this.roomSelectStatusPendingInit();
@@ -1820,7 +1819,6 @@ export class AVCastPicker extends ViewPU {
                         Checkbox.shape(CheckBoxShape.CIRCLE);
                         Checkbox.onClick(() => {
                             this.roomSelectStatusPending[index] = true;
-                            this.roomVolumeVisible[index] = Visibility.None;
                             this.isSelectProcessing = true;
                             const w1 = setTimeout(() => {
                                 this.roomSelectStatusPendingInit();
