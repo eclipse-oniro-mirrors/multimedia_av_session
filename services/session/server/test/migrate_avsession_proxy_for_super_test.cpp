@@ -58,7 +58,8 @@ void MigrateAVSessionProxyForSuperTest::SetUpTestCase()
 
 void MigrateAVSessionProxyForSuperTest::TearDownTestCase()
 {
-    SLOGI("MigrateAVSessionProxyForSuperTest TearDownTestCase");
+    g_migrateAVSessionProxyForSuper = nullptr;
+    SLOGI("MigrateAVSessionProxyForSuperTest TearDownTestCase done");
 }
 
 void MigrateAVSessionProxyForSuperTest::SetUp()
@@ -960,9 +961,9 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, ColdStartForSuper002, TestSiz
  */
 static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG001, TestSize.Level0)
 {
-    AVMetaData metadata;
+    std::shared_ptr<AVSessionPixelMap> pixelMap = nullptr;
     std::vector<uint8_t> inputData;
-    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(metadata, inputData);
+    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(inputData, pixelMap);
     EXPECT_EQ(ret, AVSESSION_ERROR);
 }
 
@@ -974,9 +975,9 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG001, TestSize
  */
 static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG002, TestSize.Level1)
 {
-    AVMetaData metadata;
+    std::shared_ptr<AVSessionPixelMap> pixelMap = nullptr;
     std::vector<uint8_t> inputData = {0x00, 0x01, 0x02, 0x03};
-    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(metadata, inputData);
+    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(inputData, pixelMap);
     // Will fail because it's not valid JPEG data
     EXPECT_EQ(ret, AVSESSION_ERROR);
 }
@@ -2236,9 +2237,9 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, ColdStartForSuper006, TestSiz
  */
 static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG003, TestSize.Level0)
 {
-    AVMetaData metadata;
+    std::shared_ptr<AVSessionPixelMap> pixelMap = nullptr;
     std::vector<uint8_t> inputData = {0xFF}; // Minimal data
-    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(metadata, inputData);
+    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(inputData, pixelMap);
     EXPECT_EQ(ret, AVSESSION_ERROR);
 }
 
@@ -2250,10 +2251,10 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG003, TestSize
  */
 static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG004, TestSize.Level1)
 {
-    AVMetaData metadata;
+    std::shared_ptr<AVSessionPixelMap> pixelMap = nullptr;
     // JPEG SOI marker
     std::vector<uint8_t> inputData = {0xFF, 0xD8};
-    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(metadata, inputData);
+    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(inputData, pixelMap);
     EXPECT_EQ(ret, AVSESSION_ERROR);
 }
 
@@ -2265,10 +2266,10 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG004, TestSize
  */
 static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG005, TestSize.Level1)
 {
-    AVMetaData metadata;
+    std::shared_ptr<AVSessionPixelMap> pixelMap = nullptr;
     // PNG header
     std::vector<uint8_t> inputData = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
-    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(metadata, inputData);
+    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(inputData, pixelMap);
     EXPECT_EQ(ret, AVSESSION_ERROR);
 }
 
@@ -2280,9 +2281,9 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG005, TestSize
  */
 static HWTEST_F(MigrateAVSessionProxyForSuperTest, CompressFromJPEG006, TestSize.Level1)
 {
-    AVMetaData metadata;
+    std::shared_ptr<AVSessionPixelMap> pixelMap = nullptr;
     std::vector<uint8_t> inputData(1024, 0x00); // 1KB of zeros
-    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(metadata, inputData);
+    int32_t ret = g_migrateAVSessionProxyForSuper->CompressFromJPEG(inputData, pixelMap);
     EXPECT_EQ(ret, AVSESSION_ERROR);
 }
 

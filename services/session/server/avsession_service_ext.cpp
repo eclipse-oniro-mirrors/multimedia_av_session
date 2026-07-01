@@ -1130,6 +1130,7 @@ int32_t AVSessionService::ProcessSuperLauncherConnect(std::string deviceId, std:
     SLOGI("ProcessSuperLauncherConnect with:%{public}s|%{public}s",
         AVSessionUtils::GetAnonySessionId(deviceId).c_str(), AVSessionUtils::GetAnonySessionId(extraInfo).c_str());
     std::string networkId = JsonUtils::GetStringParamFromJsonString(extraInfo, "mDeviceId");
+    CHECK_AND_RETURN_RET_LOG(!networkId.empty(), AVSESSION_ERROR, "get networkId empty");
     std::lock_guard lockGuard(migrateProxyMapLock_);
     if (migrateAVSessionProxyMap_.find(networkId) == migrateAVSessionProxyMap_.end()) {
         std::string localDevId;
@@ -1151,6 +1152,7 @@ int32_t AVSessionService::ProcessSuperLauncherDisconnect(std::string deviceId, s
     SLOGI("ProcessSuperLauncherDisconnect with:%{public}s|%{public}s",
         AVSessionUtils::GetAnonySessionId(deviceId).c_str(), AVSessionUtils::GetAnonySessionId(extraInfo).c_str());
     std::string networkId = JsonUtils::GetStringParamFromJsonString(extraInfo, "mDeviceId");
+    CHECK_AND_RETURN_RET_LOG(!networkId.empty(), AVSESSION_ERROR, "get networkId empty");
     MigrateAVSessionManager::GetInstance().ReleaseRemoteSessionProxy(networkId,
         MigrateAVSessionManager::migrateSceneNext);
     std::lock_guard lockGuard(migrateProxyMapLock_);
