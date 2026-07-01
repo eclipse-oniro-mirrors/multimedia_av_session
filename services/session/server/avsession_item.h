@@ -699,8 +699,6 @@ private:
         CastEngineConnectState::STREAM, CastEngineConnectState::AUTHING,
         CastEngineConnectState::MIRROR_TO_STREAM, CastEngineConnectState::STREAM_TO_MIRROR
     };
-
-    const int32_t PLAYING = 4;
     
     static constexpr int32_t STREAM_TO_MIRROR_FROM_SINK = 2005;
 #endif
