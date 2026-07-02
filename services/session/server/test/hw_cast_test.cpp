@@ -1359,9 +1359,9 @@ static HWTEST(HwCastTest, HwCastProviderNotifyCastSessionCreated001, TestSize.Le
     SLOGI("HwCastProviderNotifyCastSessionCreated001 begin!");
     std::shared_ptr<HwCastProvider> hwCastProvider = std::make_shared<HwCastProvider>();
     EXPECT_EQ(hwCastProvider != nullptr, true);
-    hwCastProvider->Init();
+    int32_t ret = hwCastProvider->Init();
+    CHECK_AND_RETURN_LOG(ret == 0, "hwCastProvider init failed");
     hwCastProvider->NotifyCastSessionCreated("123456");
-    usleep(2000000);
     SLOGI("HwCastProviderNotifyCastSessionCreated001 end!");
 }
 
