@@ -39,6 +39,7 @@ public:
         std::string deviceId = "");
     ~MigrateAVSessionProxy();
 
+    void SetUserId(int32_t userId);
     void OnConnectServer(const std::string &deviceId) override;
     void OnDisconnectServer(const std::string &deviceId) override;
     int32_t GetCharacteristic() override;
@@ -61,6 +62,7 @@ public:
     int32_t GetControllerListForSuper(std::vector<sptr<IRemoteObject>>& controllerList);
     void GetControllerListForNext(std::vector<sptr<IRemoteObject>>& controllerList);
     bool CheckMediaAlive();
+    void NotifyControllerGone(pid_t pid);
 
     enum {
         AUDIO_NUM_SET_VOLUME = 0,
@@ -142,6 +144,7 @@ private:
         std::shared_ptr<AVSessionPixelMap>& outputData, bool isMediaImage = false);
     int32_t ConvertStateFromDoubleToSingle(int32_t state);
 
+    int32_t userId_ = 0;
     int32_t mMode_ = 0;
     std::string deviceId_;
     std::string localDeviceId_;

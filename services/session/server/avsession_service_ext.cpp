@@ -1125,11 +1125,18 @@ void AVSessionService::NotifyRemoteBundleChange(const std::string bundleName)
     PublishEvent(bundleName.empty() ? remoteMediaNone : remoteMediaAlive);
 }
 
+void AVSessionService::PublishMediaControlState(int32_t mediaPlayState)
+{
+    PublishEvent(mediaPlayState);
+}
+
 int32_t AVSessionService::ProcessSuperLauncherConnect(std::string deviceId, std::string extraInfo)
 {
     SLOGI("ProcessSuperLauncherConnect with:%{public}s|%{public}s",
         AVSessionUtils::GetAnonySessionId(deviceId).c_str(), AVSessionUtils::GetAnonySessionId(extraInfo).c_str());
     std::string networkId = JsonUtils::GetStringParamFromJsonString(extraInfo, "mDeviceId");
+    int32_t mUserId = JsonUtils::GetIntParamFromJsonString(extraInfo, "mUserId");
+    SLOGD("recv mUserId:%{public}d", mUserId);
     CHECK_AND_RETURN_RET_LOG(!networkId.empty(), AVSESSION_ERROR, "get networkId empty");
     std::lock_guard lockGuard(migrateProxyMapLock_);
     if (migrateAVSessionProxyMap_.find(networkId) == migrateAVSessionProxyMap_.end()) {
@@ -1137,6 +1144,7 @@ int32_t AVSessionService::ProcessSuperLauncherConnect(std::string deviceId, std:
         GetLocalNetworkId(localDevId);
         std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
             std::make_shared<MigrateAVSessionProxy>(this, MigrateAVSessionManager::MSG_HEAD_MODE, localDevId);
+        migrateAVSessionProxy->SetUserId(mUserId);
         MigrateAVSessionManager::GetInstance().CreateRemoteSessionProxy(networkId,
             MigrateAVSessionManager::migrateSceneNext, migrateAVSessionProxy);
         migrateAVSessionProxyMap_.insert({networkId, std::static_pointer_cast<SoftbusSession>(migrateAVSessionProxy)});
@@ -1167,8 +1175,18 @@ int32_t AVSessionService::ProcessSuperLauncherDisconnect(std::string deviceId, s
     return AVSESSION_SUCCESS;
 }
 
-void AVSessionService::PublishMediaControlState(int32_t mediaPlayState)
+void AVSessionService::NotifyClientDieForMigrateProxy(pid_t pid)
 {
-    PublishEvent(mediaPlayState);
+    std::lock_guard lockGuard(migrateProxyMapLock_);
+    CHECK_AND_RETURN_LOG(!migrateAVSessionProxyMap_.empty(), "no migrate proxy to notify");
+    for (const auto& pair : migrateAVSessionProxyMap_) {
+        std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
+            std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
+        CHECK_AND_CONTINUE(migrateAVSessionProxy != nullptr);
+        bool isMigrateProxyForSuper =
+            (migrateAVSessionProxy->GetCharacteristic() == MigrateAVSessionManager::MSG_HEAD_MODE);
+        CHECK_AND_CONTINUE(isMigrateProxyForSuper);
+        migrateAVSessionProxy->NotifyControllerGone(pid);
+    }
 }
 }

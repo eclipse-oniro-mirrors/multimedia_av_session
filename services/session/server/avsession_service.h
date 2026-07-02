@@ -723,6 +723,8 @@ private:
 
     int32_t GetUserIdFromCallingUid(const int32_t uid);
 
+    void NotifyClientDieForMigrateProxy(pid_t pid);
+
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;

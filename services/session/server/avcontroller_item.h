@@ -161,17 +161,22 @@ public:
 
     std::string GetSessionType();
 
+    int32_t RemoveCallbackForMigrate(pid_t pid);
+
     bool isFromSession_ = false;
 protected:
     int32_t RegisterCallbackInner(const sptr<IRemoteObject>& callback) override;
 
 private:
+    void DealMetaDataChangeForMigrate(const AVMetaData& data);
+
     static const int32_t DEFAULT_USER_ID = 100;
     pid_t pid_;
     sptr<AVSessionItem> session_;
     std::string sessionId_;
     int32_t userId_ = 0;
     sptr<IAVControllerCallback> callback_;
+    std::map<pid_t, sptr<IAVControllerCallback>> callbackListForMigrate_;
     std::shared_ptr<AVControllerCallback> innerCallback_;
     AVCallMetaData::AVCallMetaMaskType avCallMetaMask_;
     AVCallState::AVCallStateMaskType avCallStateMask_;

@@ -107,6 +107,7 @@ int32_t MigrateAVSessionProxy::HandleSetLoopModeForSuper(const std::string& play
 
 int32_t MigrateAVSessionProxy::GetControllerListForSuper(std::vector<sptr<IRemoteObject>>& controllerList)
 {
+    std::lock_guard lockGuard(migrateProxySessionIdLock_);
     for (const auto& pair : controllerStackForMigrateIn_) {
         controllerList.push_back(pair.second);
     }
@@ -182,6 +183,7 @@ int32_t MigrateAVSessionProxy::ProcessHistoryMediaInfoListForSuper(cJSON* jsonVa
             AVSESSION_ERROR, "ProcessSessionInfoForSuper fail");
         SLOGI("ProcessBundleIconForSuper ret:%{public}d", ProcessBundleIconForSuper(mediaInfoObj));
     }
+    std::lock_guard lockGuard(migrateProxySessionIdLock_);
     for (auto it = sessionStackForMigrateIn_.begin(); it != sessionStackForMigrateIn_.end();) {
         if (std::find(sessionRefreshList_.begin(), sessionRefreshList_.end(), it->first) == sessionRefreshList_.end()) {
             SLOGI("remove session:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(it->first).c_str());
@@ -229,6 +231,7 @@ int32_t MigrateAVSessionProxy::ProcessControllerListForSuper(cJSON* jsonValue)
         SLOGD("Process media info ret:%{public}d|%{public}d|%{public}d",
             retForProcessMeta, retForProcessState, retForProcessCmd);
     }
+    std::lock_guard lockGuard(migrateProxySessionIdLock_);
     std::vector<sptr<IRemoteObject>> sessionControllers;
     for (const auto& pair : controllerStackForMigrateIn_) {
         sessionControllers.push_back(pair.second);
@@ -344,7 +347,7 @@ int32_t MigrateAVSessionProxy::ProcessControllerInfoForSuper(cJSON* jsonValue)
         AVSESSION_ERROR, "create controller but session no found:%{public}s",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str());
     sptr<AVSessionItem> sessionItem = iter->second;
-    sptr<AVControllerItem> controllerItem = new(std::nothrow) AVControllerItem(DEFAULT_NUM, sessionItem);
+    sptr<AVControllerItem> controllerItem = new(std::nothrow) AVControllerItem(DEFAULT_NUM, sessionItem, userId_);
     CHECK_AND_RETURN_RET_LOG(controllerItem != nullptr, AVSESSION_ERROR, "get controller null");
     MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback = MigrateAVSessionProxyControllerCallback();
     controllerItem->RegisterMigrateAVSessionProxyCallback(migrateProxyCallback);
@@ -566,5 +569,15 @@ int32_t MigrateAVSessionProxy::ConvertStateFromDoubleToSingle(int32_t state)
             break;
     }
     return state;
+}
+
+void MigrateAVSessionProxy::NotifyControllerGone(pid_t pid)
+{
+    std::lock_guard lockGuard(migrateProxySessionIdLock_);
+    for (const auto& pair : controllerStackForMigrateIn_) {
+        sptr<AVControllerItem> controllerItem = pair.second;
+        CHECK_AND_CONTINUE(controllerItem != nullptr);
+        controllerItem->RemoveCallbackForMigrate(pid);
+    }
 }
 } // namespace OHOS::AVSession
