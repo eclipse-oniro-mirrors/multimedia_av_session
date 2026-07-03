@@ -1109,46 +1109,108 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent002, TestSize.Level0)
     SLOGI("OnReceiveEvent002 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, HandleUserUnlockedEvent001, TestSize.Level0)
+static std::string GetUnlockCleanFlagPath(int32_t userId)
 {
-    SLOGI("HandleUserUnlockedEvent001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
-    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
-    std::string staleFile = cacheDir + "staleuserunlock123.image.dat";
-    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
-
-    // explicit userId > 0: cleanup runs against the given user
-    avservice_->HandleUserUnlockedEvent(userId);
-    EXPECT_FALSE(OHOS::FileExists(staleFile));
-    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
-    SLOGI("HandleUserUnlockedEvent001 end!");
+    return cacheDir.substr(0, cacheDir.find("cache/")) + "unlock_clean_flag";
 }
 
-static HWTEST_F(AVSessionServiceTest, HandleUserUnlockedEvent002, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanup001, TestSize.Level0)
 {
-    SLOGI("HandleUserUnlockedEvent002 begin!");
+    SLOGI("HandleFirstUnlockCleanup001 begin!");
     int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
-    std::string staleFile = cacheDir + "staleuserunlock000.image.dat";
+    std::string staleFile = cacheDir + "staleclean001.image.dat";
     ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    OHOS::RemoveFile(flagPath);
 
-    // userId <= 0: falls back to current user, cleanup still runs
-    avservice_->HandleUserUnlockedEvent(0);
+    avservice_->HandleFirstUnlockCleanup(userId);
     EXPECT_FALSE(OHOS::FileExists(staleFile));
     EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
-    SLOGI("HandleUserUnlockedEvent002 end!");
+    OHOS::RemoveFile(flagPath);
+    SLOGI("HandleFirstUnlockCleanup001 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlocked001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanup002, TestSize.Level0)
 {
-    SLOGI("OnReceiveEventUserUnlocked001 begin!");
+    SLOGI("HandleFirstUnlockCleanup002 begin!");
     int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
-    std::string staleFile = cacheDir + "staleunlockevent123.image.dat";
+    std::string staleFile = cacheDir + "staleclean002.image.dat";
     ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    OHOS::RemoveFile(flagPath);
+
+    avservice_->HandleFirstUnlockCleanup(0);
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(flagPath);
+    SLOGI("HandleFirstUnlockCleanup002 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupDedup001, TestSize.Level0)
+{
+    SLOGI("HandleFirstUnlockCleanupDedup001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    OHOS::RemoveFile(flagPath);
+
+    std::string firstFile = cacheDir + "dedupfirst.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(firstFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_FALSE(OHOS::FileExists(firstFile));
+    EXPECT_TRUE(OHOS::FileExists(flagPath));
+
+    std::string secondFile = cacheDir + "dedupsecond.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(secondFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_TRUE(OHOS::FileExists(secondFile));
+
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(flagPath);
+    SLOGI("HandleFirstUnlockCleanupDedup001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, OnReceiveEventScreenUnlocked001, TestSize.Level0)
+{
+    SLOGI("OnReceiveEventScreenUnlocked001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string staleFile = cacheDir + "screenunlock001.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    OHOS::RemoveFile(flagPath);
+
+    OHOS::EventFwk::CommonEventData eventData;
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avservice_);
+    eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(flagPath);
+    SLOGI("OnReceiveEventScreenUnlocked001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlockedNoCleanup001, TestSize.Level0)
+{
+    SLOGI("OnReceiveEventUserUnlockedNoCleanup001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string staleFile = cacheDir + "userlockednoclean.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    OHOS::RemoveFile(flagPath);
 
     OHOS::EventFwk::CommonEventData eventData;
     OHOS::AAFwk::Want want = eventData.GetWant();
@@ -1158,9 +1220,11 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlocked001, TestSize.Le
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, avservice_);
     eventSubscriber.OnReceiveEvent(eventData);
-    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    // USER_UNLOCKED must NOT trigger cleanup, so the stale file remains.
+    EXPECT_TRUE(OHOS::FileExists(staleFile));
     EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
-    SLOGI("OnReceiveEventUserUnlocked001 end!");
+    OHOS::RemoveFile(flagPath);
+    SLOGI("OnReceiveEventUserUnlockedNoCleanup001 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, OnReceiveEvent004, TestSize.Level1)

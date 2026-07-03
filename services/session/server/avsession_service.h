@@ -325,7 +325,7 @@ public:
 
     void HandleBundleRemoveEvent(const std::string bundleName);
 
-    void HandleUserUnlockedEvent(int32_t userId = 0);
+    void HandleFirstUnlockCleanup(int32_t userId = 0);
 
     void HandleMediaCardStateChangeEvent(std::string isAppear);
 

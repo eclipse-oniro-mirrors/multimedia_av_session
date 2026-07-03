@@ -294,7 +294,9 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
         int32_t userId = eventData.GetCode();
         servicePtr_->RegisterBundleDeleteEventForHistory(userId);
-        servicePtr_->HandleUserUnlockedEvent(userId);
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) == 0) {
+        int32_t userId = servicePtr_->GetUsersManager().GetCurrentUserId();
+        servicePtr_->HandleFirstUnlockCleanup(userId);
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0 ||
         action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED) == 0) {
         servicePtr_->InitCastEngineService();
@@ -457,14 +459,23 @@ void AVSessionService::HandleBundleRemoveEvent(const std::string bundleName)
     DeleteHistoricalRecord(bundleName, curUserId);
 }
 
-void AVSessionService::HandleUserUnlockedEvent(int32_t userId)
+void AVSessionService::HandleFirstUnlockCleanup(int32_t userId)
 {
-    // USER_UNLOCKED fires once per user per boot, so no once-guard is needed.
     if (userId <= 0) {
         userId = GetUsersManager().GetCurrentUserId();
     }
-    SLOGI("HandleUserUnlockedEvent clean cache for user %{public}d on first unlock", userId);
+    int32_t bootCount = OHOS::system::GetIntParameter("persist.startup.bootcount", -1);
+    std::string flagPath = GetUsersManager().GetDirForCurrentUser(userId) + "unlock_clean_flag";
+    int32_t recorded = -1;
+    std::ifstream(flagPath) >> recorded;
+    if (bootCount >= 0 && recorded == bootCount) {
+        return;
+    }
+    SLOGI("HandleFirstUnlockCleanup clean cache for user %{public}d, bootcount=%{public}d", userId, bootCount);
     GetUsersManager().CleanupCacheOnUnlock(userId);
+    if (bootCount >= 0) {
+        std::ofstream(flagPath, std::ios::trunc) << bootCount;
+    }
 }
 
 bool AVSessionService::SubscribeCommonEvent()
