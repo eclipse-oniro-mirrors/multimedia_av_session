@@ -1553,6 +1553,7 @@ export struct AVCastPicker {
           console.error(TAG, 'onError ready to restart');
           this.needToRestart = true;
         })
+        .focusable(false)
       }
       .bindMenu (
         this.isSubMenuExpanded,
