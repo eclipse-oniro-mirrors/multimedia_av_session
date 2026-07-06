@@ -205,6 +205,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
     pixelMapTemp->SetImageInfo(imageInfoTemp);
     uint32_t dataSize = static_cast<uint32_t>(originalPixelMapBytes_);
+    CHECK_AND_RETURN_RET_LOG(dataSize >= 0, nullptr, "create dataSize with null, return");
     void* dataAddr = malloc(dataSize);
     CHECK_AND_RETURN_RET_LOG(dataAddr != nullptr, nullptr, "create dataSize with null, return");
 
@@ -240,6 +241,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
     CHECK_AND_RETURN_RET_LOG(pixelMapTemp != nullptr, nullptr, "pixelMapTemp nullptr");
     pixelMapTemp->SetImageInfo(imageInfoTemp);
     uint32_t dataSize = static_cast<uint32_t>(originalPixelMapBytes_);
+    CHECK_AND_RETURN_RET_LOG(dataSize >= 0, nullptr, "create dataSize with null, return");
     void* dataAddr = malloc(dataSize);
     CHECK_AND_RETURN_RET_LOG(dataAddr != nullptr, nullptr, "create dataSize with null, return");
 
