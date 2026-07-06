@@ -373,12 +373,12 @@ public:
     */
     virtual bool IsInMirrorToStreamState() = 0;
 
-    /**
-     * @brief check is in stream state.
-     *
-     * @return { bool } is in stream state.
-     * @since 24
-    */
+     /**
+ 	  * @brief Is HiPlay Casting
+      *
+ 	  * @return { bool } enable - enable cast.
+      * @since 24
+ 	 */
     virtual bool IsHiPlayCasting() = 0;
 
     /**
