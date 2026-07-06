@@ -27,6 +27,7 @@
 #include "avsession_errors.h"
 #include "json_utils.h"
 #include "avsession_service.h"
+#include "avsession_event_handler.h"
 
 namespace OHOS::AVSession {
 
@@ -76,6 +77,10 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "PcmCastSession is null in SendCollaborationOnStop");
         sharedPtr->StopCast();
     });
+
+    if (needHandleTimer_) {
+        HandleTimerByCastState(castState);
+    }
 }
 
 void PcmCastSession::HandleDeviceDisconnect()
@@ -97,6 +102,22 @@ void PcmCastSession::HandleDeviceDisconnect()
                 newOutputDeviceInfo_.deviceInfos_[0], false, noReasonCode_);
             AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
         }
+    }
+}
+
+void PcmCastSession::HandleTimerByCastState(int32_t castState)
+{
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED)) {
+        AVSessionEventHandler::GetInstance().AVSessionPostTask(
+            [this]() {
+                AVRouter::GetInstance().OnSystemCommonEvent(STOP_CAST, "");
+            }, "HandleHiPlayStreamCastStateChange", hiPlayHotelTimeoutMs);
+    }
+
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED) ||
+        castState == static_cast<int32_t>(CastEngine::DeviceState::PLAYING) ||
+        castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("HandleHiPlayStreamCastStateChange");
     }
 }
 
@@ -269,6 +290,7 @@ int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
         SLOGI("PcmCastSession StartCast castHandleDeviceId_: %{public}s", castHandleDeviceId_.c_str());
         CreateExtraInfo("TV", "hotel");
+        needHandleTimer_ = true;
     } else {
         DestroyTask();
     }

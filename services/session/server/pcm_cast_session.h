@@ -74,6 +74,8 @@ public:
 
     void SendModeChangeToCast(int32_t screenMode);
 
+    void HandleTimerByCastState(int32_t castState);
+
 private:
     int64_t castHandle_ = 0;
     int32_t castState_ = CastState::DISCONNECTED;
@@ -96,6 +98,7 @@ private:
     std::string streamCastingSessionId_;
     std::string extraInfo_;
     bool needStreamCasting_ = false;
+    bool needHandleTimer_ = false;
 
     const std::string COMMAND_TYPE = "command_type";
     const std::string COMMAND_BODY = "command_body";
@@ -122,6 +125,8 @@ private:
     const std::string PIN_CODE = "PIN_CODE";
     const std::string QUERY_PINCODE = "QUERY_PINCODE";
     const std::string SESSION_ID = "SESSION_ID";
+
+    const std::string STOP_CAST = "STOP_CAST";
 
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,
@@ -195,6 +200,8 @@ private:
     const std::string PCM_CAST_SESSION = "PCMCast";
     int32_t noReasonCode_ = 0;
     int32_t reasonDeviceIsUntrusted_ = 10014;
+
+    const int32_t hiPlayHotelTimeoutMs = 30 * 60 * 1000;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_PCM_CAST_SESSION_H
