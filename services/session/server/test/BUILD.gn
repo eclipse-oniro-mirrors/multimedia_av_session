@@ -2228,6 +2228,7 @@ ohos_unittest("AVSessionServiceTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",
+    "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
     "googletest:gtest_main",

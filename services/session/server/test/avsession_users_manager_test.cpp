@@ -245,7 +245,6 @@ HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_001, TestSize.Level0)
     EXPECT_FALSE(OHOS::FileExists(keepCast));
     avSessionService->HandleSessionRelease(sessionId);
     manager.sessionStackMapByUserId_.erase(userId);
-    delete avSessionService;
 }
 
 /**

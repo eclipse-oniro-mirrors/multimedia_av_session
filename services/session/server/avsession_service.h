@@ -837,6 +837,8 @@ private:
     bool isAudioBrokerStart_ = false;
     bool isAncoMediaSessionChange_ = false;
 
+    std::map<int32_t, int32_t> cleanedBootCountByUser_;
+
     void *migrateStubFuncHandle_ = nullptr;
 
 #ifdef DEVICE_MANAGER_ENABLE

@@ -465,16 +465,27 @@ void AVSessionService::HandleFirstUnlockCleanup(int32_t userId)
         userId = GetUsersManager().GetCurrentUserId();
     }
     int32_t bootCount = OHOS::system::GetIntParameter("persist.startup.bootcount", -1);
-    std::string flagPath = GetUsersManager().GetDirForCurrentUser(userId) + "unlock_clean_flag";
-    int32_t recorded = -1;
-    std::ifstream(flagPath) >> recorded;
-    if (bootCount >= 0 && recorded == bootCount) {
+    auto it = cleanedBootCountByUser_.find(userId);
+    bool cleanedThisBoot = (bootCount >= 0) && (it != cleanedBootCountByUser_.end()) && (it->second == bootCount);
+    CHECK_AND_RETURN_LOG(!cleanedThisBoot,
+        "already cleaned this boot for user %{public}d, bootcount=%{public}d", userId, bootCount);
+    
+    std::string fileDir = GetUsersManager().GetDirForCurrentUser(userId);
+    std::string fileName = "unlock_clean_flag";
+    std::pair<std::string, int32_t> readPair;
+    int32_t recordedBootCount =
+        AVSessionUtils::ReadPairFromFile(readPair, fileDir, fileName) ? readPair.second : -1;
+    if (bootCount >= 0 && recordedBootCount == bootCount) {
+        cleanedBootCountByUser_[userId] = bootCount;
         return;
     }
+
     SLOGI("HandleFirstUnlockCleanup clean cache for user %{public}d, bootcount=%{public}d", userId, bootCount);
     GetUsersManager().CleanupCacheOnUnlock(userId);
     if (bootCount >= 0) {
-        std::ofstream(flagPath, std::ios::trunc) << bootCount;
+        std::pair<std::string, int32_t> writePair{"boot", bootCount};
+        AVSessionUtils::WritePairToFile(writePair, fileDir, fileName);
+        cleanedBootCountByUser_[userId] = bootCount;
     }
 }
 
