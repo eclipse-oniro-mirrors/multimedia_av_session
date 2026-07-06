@@ -32,9 +32,13 @@ SoftbusDistributedDataManager::~SoftbusDistributedDataManager() {}
 void SoftbusDistributedDataManager::Init()
 {
     std::weak_ptr<SoftbusDistributedDataManager> managerWeak(shared_from_this());
-    std::lock_guard lockGuard(softbusDistributedDataLock_);
-    ssListener_ = std::make_shared<SSListener>(managerWeak);
-    SoftbusSessionManager::GetInstance().AddSessionListener(ssListener_);
+    std::shared_ptr<SSListener> listener;
+    {
+        std::lock_guard lockGuard(softbusDistributedDataLock_);
+        ssListener_ = std::make_shared<SSListener>(managerWeak);
+        listener = ssListener_;
+    }
+    SoftbusSessionManager::GetInstance().AddSessionListener(listener);
 }
 
 #ifdef DSOFTBUS_ENABLE
