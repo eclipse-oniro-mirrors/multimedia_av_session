@@ -1028,10 +1028,7 @@ void AVSessionImpl::SetSupportedLoopModesSync(array_view<LoopMode> loopModes)
             "SetSupportedLoopModesSync failed : session is nullptr");
         return;
     }
-    std::vector<int32_t> loopModeVector(loopModes.size());
-    for (size_t i = 0; i < loopModes.size(); i++) {
-        loopModeVector.push_back(loopModes[i]);
-    }
+    std::vector<int32_t> loopModeVector(loopModes.begin(), loopModes.end());
     int32_t ret = session_->SetSupportedLoopModes(loopModeVector);
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
         std::string errMessage;
