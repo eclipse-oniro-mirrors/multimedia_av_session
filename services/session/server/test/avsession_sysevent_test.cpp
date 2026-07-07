@@ -51,7 +51,7 @@ void AVsessionSyseventTest::TearDown()
 static HWTEST_F(AVsessionSyseventTest, Regiter001, testing::ext::TestSize.Level0)
 {
     AVSessionSysEvent::GetInstance().Unregister();
-    EXPECT_EQ(AVSessionSysEvent::GetInstance().timer_, nullptr);
+    EXPECT_EQ(AVSessionSysEvent::GetInstance().timerId_, 0u);
     AVSessionSysEvent::GetInstance().Regiter();
     AVSessionSysEvent::GetInstance().Regiter();
     AVSessionSysEvent::GetInstance().Unregister();

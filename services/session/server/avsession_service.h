@@ -325,7 +325,7 @@ public:
 
     void HandleBundleRemoveEvent(const std::string bundleName);
 
-    void HandleUserUnlockedEvent(int32_t userId = 0);
+    void HandleFirstUnlockCleanup(int32_t userId = 0);
 
     void HandleMediaCardStateChangeEvent(std::string isAppear);
 
@@ -836,6 +836,8 @@ private:
     bool isCastableDevice_ = false;
     bool isAudioBrokerStart_ = false;
     bool isAncoMediaSessionChange_ = false;
+
+    std::map<int32_t, int32_t> cleanedBootCountByUser_;
 
     void *migrateStubFuncHandle_ = nullptr;
 

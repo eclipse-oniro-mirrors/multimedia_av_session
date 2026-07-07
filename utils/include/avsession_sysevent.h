@@ -20,7 +20,7 @@
 #include <mutex>
 #include "avcontrol_command.h"
 #include "hisysevent.h"
-#include "timer.h"
+#include "avsession_timer_holder.h"
 #include "avsession_descriptor.h"
 #endif
 
@@ -211,7 +211,6 @@ private:
     AVSessionSysEvent();
     ~AVSessionSysEvent();
     std::map<Operation, uint32_t> optCounts_;
-    std::unique_ptr<Utils::Timer> timer_;
     uint32_t timerId_ = 0;
     std::recursive_mutex lock_;
     static constexpr uint32_t NOTIFY_TIME_INTERVAL = 1 * 60 * 60 * 1000; // retry after 1 hours

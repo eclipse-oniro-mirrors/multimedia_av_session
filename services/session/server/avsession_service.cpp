@@ -198,7 +198,7 @@ void AVSessionService::OnStartProcess()
     AddSystemAbilityListener(ANCO_BROKER_SA_ID);
 
     HISYSEVENT_REGITER;
-    STORAGE_EVENT_INIT();
+    STORAGE_EVENT_INIT;
     HISYSEVENT_BEHAVIOR("SESSION_SERVICE_START", "SERVICE_NAME", "AVSessionService",
         "SERVICE_ID", AVSESSION_SERVICE_ID, "DETAILED_MSG", "avsession service start success");
 #ifndef START_STOP_ON_DEMAND_ENABLE
@@ -260,7 +260,8 @@ void AVSessionService::OnStop()
     CollaborationManagerHiPlay::ReleaseInstance();
 #endif
     CommandSendLimit::GetInstance().StopTimer();
-    STORAGE_EVENT_UNINIT();
+    STORAGE_EVENT_UNINIT;
+    HISYSEVENT_UNREGISTER;
     NotifyProcessStatus(false);
     UnSubscribeCommonEvent();
     BundleStatusAdapter::ReleaseInstance();
@@ -293,7 +294,9 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) == 0) {
         int32_t userId = eventData.GetCode();
         servicePtr_->RegisterBundleDeleteEventForHistory(userId);
-        servicePtr_->HandleUserUnlockedEvent(userId);
+    } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) == 0) {
+        int32_t userId = servicePtr_->GetUsersManager().GetCurrentUserId();
+        servicePtr_->HandleFirstUnlockCleanup(userId);
     } else if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0 ||
         action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_LOCKED_BOOT_COMPLETED) == 0) {
         servicePtr_->InitCastEngineService();
@@ -456,14 +459,34 @@ void AVSessionService::HandleBundleRemoveEvent(const std::string bundleName)
     DeleteHistoricalRecord(bundleName, curUserId);
 }
 
-void AVSessionService::HandleUserUnlockedEvent(int32_t userId)
+void AVSessionService::HandleFirstUnlockCleanup(int32_t userId)
 {
-    // USER_UNLOCKED fires once per user per boot, so no once-guard is needed.
     if (userId <= 0) {
         userId = GetUsersManager().GetCurrentUserId();
     }
-    SLOGI("HandleUserUnlockedEvent clean cache for user %{public}d on first unlock", userId);
+    int32_t bootCount = OHOS::system::GetIntParameter("persist.startup.bootcount", -1);
+    auto it = cleanedBootCountByUser_.find(userId);
+    bool cleanedThisBoot = (bootCount >= 0) && (it != cleanedBootCountByUser_.end()) && (it->second == bootCount);
+    CHECK_AND_RETURN_LOG(!cleanedThisBoot,
+        "already cleaned this boot for user %{public}d, bootcount=%{public}d", userId, bootCount);
+    
+    std::string fileDir = GetUsersManager().GetDirForCurrentUser(userId);
+    std::string fileName = "unlock_clean_flag";
+    std::pair<std::string, int32_t> readPair;
+    int32_t recordedBootCount =
+        AVSessionUtils::ReadPairFromFile(readPair, fileDir, fileName) ? readPair.second : -1;
+    if (bootCount >= 0 && recordedBootCount == bootCount) {
+        cleanedBootCountByUser_[userId] = bootCount;
+        return;
+    }
+
+    SLOGI("HandleFirstUnlockCleanup clean cache for user %{public}d, bootcount=%{public}d", userId, bootCount);
     GetUsersManager().CleanupCacheOnUnlock(userId);
+    if (bootCount >= 0) {
+        std::pair<std::string, int32_t> writePair{"boot", bootCount};
+        AVSessionUtils::WritePairToFile(writePair, fileDir, fileName);
+        cleanedBootCountByUser_[userId] = bootCount;
+    }
 }
 
 bool AVSessionService::SubscribeCommonEvent()

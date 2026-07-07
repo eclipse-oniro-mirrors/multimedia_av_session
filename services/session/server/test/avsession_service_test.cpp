@@ -35,6 +35,7 @@
 #include "accesstoken_kit.h"
 #include "system_ability_definition.h"
 #include "system_ability_ondemand_reason.h"
+#include "parameters.h"
 #include "audio_info.h"
 #include "avsession_callback_client.h"
 #include "avsession_pixel_map.h"
@@ -1109,46 +1110,217 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent002, TestSize.Level0)
     SLOGI("OnReceiveEvent002 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, HandleUserUnlockedEvent001, TestSize.Level0)
+static std::string GetUnlockCleanFlagPath(int32_t userId)
 {
-    SLOGI("HandleUserUnlockedEvent001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
-    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
-    std::string staleFile = cacheDir + "staleuserunlock123.image.dat";
-    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
-
-    // explicit userId > 0: cleanup runs against the given user
-    avservice_->HandleUserUnlockedEvent(userId);
-    EXPECT_FALSE(OHOS::FileExists(staleFile));
-    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
-    SLOGI("HandleUserUnlockedEvent001 end!");
+    return cacheDir.substr(0, cacheDir.find("cache/")) + "unlock_clean_flag";
 }
 
-static HWTEST_F(AVSessionServiceTest, HandleUserUnlockedEvent002, TestSize.Level0)
+// Reset both in-memory cache and on-disk flag so a case starts from a "never cleaned this boot" state.
+// The in-memory members are private; this UT uses `#define private public` so they are reachable.
+static void ResetFirstUnlockCleanupState(int32_t userId)
 {
-    SLOGI("HandleUserUnlockedEvent002 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
-    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
-    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
-    std::string staleFile = cacheDir + "staleuserunlock000.image.dat";
-    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
-
-    // userId <= 0: falls back to current user, cleanup still runs
-    avservice_->HandleUserUnlockedEvent(0);
-    EXPECT_FALSE(OHOS::FileExists(staleFile));
-    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
-    SLOGI("HandleUserUnlockedEvent002 end!");
+    avservice_->cleanedBootCountByUser_.clear();
+    OHOS::RemoveFile(GetUnlockCleanFlagPath(userId));
 }
 
-static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlocked001, TestSize.Level0)
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanup001, TestSize.Level0)
 {
-    SLOGI("OnReceiveEventUserUnlocked001 begin!");
+    SLOGI("HandleFirstUnlockCleanup001 begin!");
     int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
-    std::string staleFile = cacheDir + "staleunlockevent123.image.dat";
+    std::string staleFile = cacheDir + "staleclean001.image.dat";
     ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    ResetFirstUnlockCleanupState(userId);
+
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(GetUnlockCleanFlagPath(userId));
+    SLOGI("HandleFirstUnlockCleanup001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanup002, TestSize.Level0)
+{
+    SLOGI("HandleFirstUnlockCleanup002 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string staleFile = cacheDir + "staleclean002.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    ResetFirstUnlockCleanupState(userId);
+
+    avservice_->HandleFirstUnlockCleanup(0);
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(GetUnlockCleanFlagPath(userId));
+    SLOGI("HandleFirstUnlockCleanup002 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupDedup001, TestSize.Level0)
+{
+    SLOGI("HandleFirstUnlockCleanupDedup001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    ResetFirstUnlockCleanupState(userId);
+
+    std::string firstFile = cacheDir + "dedupfirst.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(firstFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_FALSE(OHOS::FileExists(firstFile));
+    EXPECT_TRUE(OHOS::FileExists(flagPath));
+
+    std::string secondFile = cacheDir + "dedupsecond.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(secondFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_TRUE(OHOS::FileExists(secondFile));
+
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(flagPath);
+    SLOGI("HandleFirstUnlockCleanupDedup001 end!");
+}
+
+// Verify the in-memory fast path: after the first cleanup this boot, the user is cached and a second
+// call returns without touching the flag file even if the file is recreated.
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupMemCache001, TestSize.Level0)
+{
+    SLOGI("HandleFirstUnlockCleanupMemCache001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    ResetFirstUnlockCleanupState(userId);
+
+    std::string firstFile = cacheDir + "memcache1.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(firstFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_FALSE(OHOS::FileExists(firstFile));
+    int32_t realBootCount = OHOS::system::GetIntParameter("persist.startup.bootcount", -1);
+    auto it = avservice_->cleanedBootCountByUser_.find(userId);
+    ASSERT_TRUE(it != avservice_->cleanedBootCountByUser_.end());
+    EXPECT_EQ(it->second, realBootCount);
+
+    // Second call: in-memory cache should short-circuit; a new stale file survives.
+    std::string secondFile = cacheDir + "memcache2.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(secondFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_TRUE(OHOS::FileExists(secondFile));
+
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(flagPath);
+    SLOGI("HandleFirstUnlockCleanupMemCache001 end!");
+}
+
+// Verify the reboot-handling branch: the in-memory cache stores the bootcount at which each user was
+// last cleaned. When that stored value no longer matches the current bootcount (simulating a real
+// reboot), the cache simply misses and cleanup runs again -- no explicit reset step is needed.
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupBootCountChange001, TestSize.Level0)
+{
+    SLOGI("HandleFirstUnlockCleanupBootCountChange001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t realBootCount = OHOS::system::GetIntParameter("persist.startup.bootcount", -1);
+    ASSERT_GE(realBootCount, 0); // bootcount must be readable for this case to be meaningful
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    ResetFirstUnlockCleanupState(userId);
+
+    // Simulate "already cleaned during a previous boot" by storing a stale bootcount in the cache and
+    // removing the flag file. The mismatch means this boot has not cleaned yet.
+    avservice_->cleanedBootCountByUser_[userId] = realBootCount + 1; // different boot -> miss
+    OHOS::RemoveFile(flagPath);
+
+    std::string staleFile = cacheDir + "bootchg1.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    // Cache missed on the bootcount mismatch, so cleanup ran and the stale file is gone.
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    // Cache refreshed to the real bootcount, so a second call now short-circuits.
+    EXPECT_EQ(avservice_->cleanedBootCountByUser_[userId], realBootCount);
+
+    std::string secondFile = cacheDir + "bootchg2.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(secondFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_TRUE(OHOS::FileExists(secondFile));
+
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(flagPath);
+    SLOGI("HandleFirstUnlockCleanupBootCountChange001 end!");
+}
+
+// Verify the on-disk dedup path: after a cleanup, if the in-memory cache is lost (simulating a
+// process crash/restart within the same boot), the on-disk flag still suppresses re-cleanup.
+static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupDiskDedup001, TestSize.Level0)
+{
+    SLOGI("HandleFirstUnlockCleanupDiskDedup001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    ResetFirstUnlockCleanupState(userId);
+
+    // First call: cleanup runs and writes the on-disk flag.
+    std::string firstFile = cacheDir + "diskdedup1.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(firstFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_FALSE(OHOS::FileExists(firstFile));
+
+    // Simulate a process crash: wipe the in-memory cache but keep the on-disk flag.
+    avservice_->cleanedBootCountByUser_.clear();
+
+    // Second call: in-memory miss, but the on-disk flag matches the current bootcount, so cleanup
+    // must be skipped and a new stale file survives.
+    std::string secondFile = cacheDir + "diskdedup2.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(secondFile, "stale"));
+    avservice_->HandleFirstUnlockCleanup(userId);
+    EXPECT_TRUE(OHOS::FileExists(secondFile));
+    // The in-memory cache is repopulated from the on-disk flag.
+    int32_t realBootCount = OHOS::system::GetIntParameter("persist.startup.bootcount", -1);
+    EXPECT_EQ(avservice_->cleanedBootCountByUser_[userId], realBootCount);
+
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(flagPath);
+    SLOGI("HandleFirstUnlockCleanupDiskDedup001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, OnReceiveEventScreenUnlocked001, TestSize.Level0)
+{
+    SLOGI("OnReceiveEventScreenUnlocked001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string staleFile = cacheDir + "screenunlock001.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    ResetFirstUnlockCleanupState(userId);
+
+    OHOS::EventFwk::CommonEventData eventData;
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avservice_);
+    eventSubscriber.OnReceiveEvent(eventData);
+    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
+    OHOS::RemoveFile(flagPath);
+    SLOGI("OnReceiveEventScreenUnlocked001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlockedNoCleanup001, TestSize.Level0)
+{
+    SLOGI("OnReceiveEventUserUnlockedNoCleanup001 begin!");
+    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
+    ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
+    std::string staleFile = cacheDir + "userlockednoclean.image.dat";
+    ASSERT_TRUE(OHOS::SaveStringToFile(staleFile, "stale"));
+    std::string flagPath = GetUnlockCleanFlagPath(userId);
+    ResetFirstUnlockCleanupState(userId);
 
     OHOS::EventFwk::CommonEventData eventData;
     OHOS::AAFwk::Want want = eventData.GetWant();
@@ -1158,9 +1330,11 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlocked001, TestSize.Le
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     EventSubscriber eventSubscriber(subscriberInfo, avservice_);
     eventSubscriber.OnReceiveEvent(eventData);
-    EXPECT_FALSE(OHOS::FileExists(staleFile));
+    // USER_UNLOCKED must NOT trigger cleanup, so the stale file remains.
+    EXPECT_TRUE(OHOS::FileExists(staleFile));
     EXPECT_TRUE(OHOS::ForceRemoveDirectory(cacheDir));
-    SLOGI("OnReceiveEventUserUnlocked001 end!");
+    OHOS::RemoveFile(flagPath);
+    SLOGI("OnReceiveEventUserUnlockedNoCleanup001 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, OnReceiveEvent004, TestSize.Level1)

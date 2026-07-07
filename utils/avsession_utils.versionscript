@@ -16,6 +16,7 @@
     *AVSessionUtils*;
     *AVSessionSysEvent*;
     *AVSessionStorageEvent*;
+    *AVSessionTimerHolder*;
     *StorageUserData*;
     *StorageFileInfo*;
     *StorageStatistics*;
