@@ -706,6 +706,7 @@ __attribute__((no_sanitize("cfi"))) int32_t AVSessionService::MirrorToStreamCast
     deviceInfo.castCategory_ = AVCastCategory::CATEGORY_REMOTE;
     deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_STREAM;
     deviceInfo.providerId_ = 1;
+    deviceInfo.realDeviceId_ = castDeviceId_;
     return session->RegisterListenerStreamToCast(castServiceNameStatePair_, deviceInfo);
 }
 
