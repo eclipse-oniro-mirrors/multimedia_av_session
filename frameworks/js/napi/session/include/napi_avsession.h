@@ -49,6 +49,7 @@ public:
     using OffEventHandlerType = std::function<napi_status(napi_env, NapiAVSession*, napi_value)>;
 
     static constexpr size_t TIME_OUT_SECOND = 5;
+    static std::string bundleName_;
 
 private:
     static napi_value ConstructorCallback(napi_env env, napi_callback_info info);

@@ -126,6 +126,7 @@ bool NapiAVSession::isNapiSessionDestroy_ = false;
 std::string NapiAVSession::currentSessionId_;
 std::shared_ptr<NapiAVSession> NapiAVSession::currentNapiSession_;
 std::mutex NapiAVSession::currentNapiSessionMutex_;
+std::string NapiAVSession::bundleName_;
 
 NapiAVSession::NapiAVSession()
 {
@@ -288,6 +289,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
     napiAVSession_->sessionTag_ = tag;
     napiAVSession_->elementName_ = elementName;
+    bundleName_ = elementName.GetBundleName();
     SLOGI("NapiAVSession NewInstance sessionId=%{public}s***, sessionType:%{public}s",
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
@@ -1280,7 +1282,7 @@ int32_t DoDownload(AVMetaData& meta, const std::string uri)
         AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str());
 
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri);
+    bool ret = NapiUtils::DoDownloadInCommon(pixelMap, uri, NapiAVSession::bundleName_);
     SLOGI("DoDownload with ret %{public}d, %{public}d", static_cast<int>(ret), static_cast<int>(pixelMap == nullptr));
     if (ret && pixelMap != nullptr) {
         SLOGI("DoDownload success and ResetToBaseMeta");
@@ -1474,7 +1476,7 @@ void NapiAVSession::AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
 
     CHECK_AND_RETURN_LOG(napiSession->latestDownloadedAVQueueId_ != metaData.GetAVQueueId(), "repeat avqId return");
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    bool ret = NapiUtils::DoDownloadInCommon(pixelMap, metaData.GetAVQueueImageUri());
+    bool ret = NapiUtils::DoDownloadInCommon(pixelMap, metaData.GetAVQueueImageUri(), NapiAVSession::bundleName_);
     CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "aft avq download NoSession");
     CHECK_AND_RETURN_LOG(ret && pixelMap != nullptr, "download avqImg fail");
     napiSession->latestDownloadedAVQueueId_ = metaData.GetAVQueueId();
