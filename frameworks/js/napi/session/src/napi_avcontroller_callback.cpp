@@ -176,7 +176,7 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
         HILOG_ERROR(LOG_CORE, "threadSafeNotRegister:%{public}d", event);
         return;
     }
-    HILOG_INFO(LOG_CORE, "threadSafeEvent:%{public}d|num:%{public}d|state:%{public}d",
+    SLOGD("threadSafeEvent:%{public}d|num:%{public}d|state:%{public}d",
         event, static_cast<int>(callbacks_[event].size()), state);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction_,

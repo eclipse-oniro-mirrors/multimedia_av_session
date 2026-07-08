@@ -43,15 +43,16 @@ bool AVMetaData::WriteToParcel(MessageParcel& parcel) const
         SetAVQueueLength(avQueueImageLength);
     }
     int32_t twoImageLength = mediaImageLength + avQueueImageLength;
-    HILOG_INFO(LOG_CORE, "writeTwoImg:%{public}d|%{public}d|%{public}d",
+    HILOG_INFO(LOG_CORE, "WTImg:%{public}d|%{public}d|%{public}d",
         twoImageLength, mediaImageLength, GetMediaImageTopic());
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(twoImageLength), false, "write twoImageLength failed");
     CHECK_AND_RETURN_RET_LOG(MarshallingExceptImg(parcel), false, "MarshallingExceptImg failed");
 
     int32_t maxImageSize = 10 * 1024 *1024;
     bool isImageValid = twoImageLength > 0 && twoImageLength <= maxImageSize;
-    CHECK_AND_RETURN_RET_LOG(isImageValid, true, "imgErr");
-
+    if (!isImageValid) {
+        return true;
+    }
     unsigned char *buffer = new (std::nothrow) unsigned char[twoImageLength];
     CHECK_AND_RETURN_RET_LOG(buffer != nullptr, false, "new buffer failed");
     for (int i = 0; i < mediaImageLength; i++) {
@@ -87,7 +88,9 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& in)
     }
     int32_t maxImageSize = 10 * 1024 *1024;
     bool isImageValid = twoImageLength > 0 && twoImageLength <= maxImageSize;
-    CHECK_AND_RETURN_RET_LOG(isImageValid, metaData, "imgInvalid");
+    if (!isImageValid) {
+        return metaData;
+    }
     if (!metaData->ReadFromParcel(static_cast<MessageParcel&>(in), twoImageLength)) {
         SLOGI("ReadFromParcel failed");
         delete metaData;
@@ -112,7 +115,7 @@ bool AVMetaData::ReadFromParcel(MessageParcel& in, int32_t twoImageLength)
     }
     mediaPixelMap->SetInnerImgBuffer(mediaImageBuffer);
     (mediaImageLength > 0) ? SetMediaImage(mediaPixelMap) : (void)0;
-    HILOG_INFO(LOG_CORE, "readTwoImg:%{public}d|%{public}d|%{public}d",
+    HILOG_INFO(LOG_CORE, "RTImg:%{public}d|%{public}d|%{public}d",
         twoImageLength, mediaImageLength, GetMediaImageTopic());
 
     if (twoImageLength <= mediaImageLength) {

@@ -42,7 +42,7 @@ extern "C" __attribute__((destructor)) void AVSessionManagerImpl::DetachCallback
 
 sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
 {
-    SLOGI("in");
+    SLOGD("in");
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (service_) {
         return service_;

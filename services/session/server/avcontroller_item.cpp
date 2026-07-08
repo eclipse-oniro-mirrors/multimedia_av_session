@@ -146,7 +146,7 @@ int32_t AVControllerItem::GetAVMetaData(AVMetaData& data)
     int32_t ret = ReadImgForMetaData(data);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ReadImgForMetaData with ret:%{public}d", ret);
     if (data.GetMediaImage() != nullptr && !data.GetMediaImageUri().empty()) {
-        SLOGI("isFromSession %{public}d|%{public}d|%{public}s", isFromSession_, data.GetMediaImageTopic(),
+        SLOGD("isFromSession %{public}d|%{public}d|%{public}s", isFromSession_, data.GetMediaImageTopic(),
             AVSessionUtils::GetAnonyTitle(data.GetTitle()).c_str());
         if (isFromSession_) {
             data.GetMediaImage()->Clear();
@@ -163,7 +163,7 @@ void AVControllerItem::DoMetadataImgClean(AVMetaData& data)
     SLOGD("still clear media img in DoMetadataImgClean");
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
     AVSessionPixelMapAdapter::CleanAVSessionPixelMap(innerQueuePixelMap);
-    SLOGI("ImgClean:%{public}d", data.GetMediaImageTopic());
+    SLOGD("ImgClean:%{public}d", data.GetMediaImageTopic());
     std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = data.GetMediaImage();
     AVSessionPixelMapAdapter::CleanAVSessionPixelMap(innerMediaPixelMap);
 }
