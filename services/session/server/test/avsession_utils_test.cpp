@@ -527,6 +527,34 @@ HWTEST_F(AVSessionUtilsTest, GetAnonyTitle_VeryLongText_MaxFileSize_4MB_001, Tes
 }
 
 /**
+ * @tc.name: GetAnonyTitle_AllContinuationBytes_001
+ * @tc.desc: test GetAnonyTitle with all UTF-8 continuation bytes (illegal UTF-8, char_positions empty)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUtilsTest, GetAnonyTitle_AllContinuationBytes_001, TestSize.Level0)
+{
+    SLOGI("GetAnonyTitle_AllContinuationBytes_001 begin!");
+    std::string title = "\x80\x81\x82";
+    std::string result = AVSessionUtils::GetAnonyTitle(title);
+    EXPECT_EQ(result, "***");
+    SLOGI("GetAnonyTitle_AllContinuationBytes_001 end!");
+}
+
+/**
+ * @tc.name: GetAnonyTitle_SingleContinuationByte_001
+ * @tc.desc: test GetAnonyTitle with a single UTF-8 continuation byte (illegal UTF-8)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUtilsTest, GetAnonyTitle_SingleContinuationByte_001, TestSize.Level0)
+{
+    SLOGI("GetAnonyTitle_SingleContinuationByte_001 begin!");
+    std::string title = "\xBF";
+    std::string result = AVSessionUtils::GetAnonyTitle(title);
+    EXPECT_EQ(result, "***");
+    SLOGI("GetAnonyTitle_SingleContinuationByte_001 end!");
+}
+
+/**
  * @tc.name: DeleteCacheFilesExcluding_001
  * @tc.desc: keep alive local/cast files, delete stale ones
  * @tc.type: FUNC
