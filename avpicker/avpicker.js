@@ -21,6 +21,8 @@ const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
 const t = 20;
 const HIGH_QUALITY_MAX_SCALE = 1.5;
+const ZONE_ABNORMAL = 1;
+const ZONE_ABNORMAL_OPACITY = 0.4;
 
 const materialUtil = {
     isSupportHds: function() {
@@ -1700,6 +1702,8 @@ export class AVCastPicker extends ViewPU {
     RoomItemBuilder(item, index, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
+            Column.opacity(item.data.faultCode === ZONE_ABNORMAL ? ZONE_ABNORMAL_OPACITY : 1);
+            Colume.enable(item.data.faultCode === ZONE_ABNORMAL ? false : true);
             Column.onClick(() => {
                 if (this.isSelectProcessing) {
                     return;
@@ -1842,6 +1846,7 @@ export class AVCastPicker extends ViewPU {
                         Checkbox.margin({
                             left: '16vp'
                         });
+                        Checkbox.visibility(item.data.faultCode === ZONE_ABNORMAL ? Visibility.Hidden : Visibility.Visible);
                     }, Checkbox);
                     Checkbox.pop();
                 });
@@ -1854,6 +1859,7 @@ export class AVCastPicker extends ViewPU {
                         LoadingProgress.margin({
                             left: '16vp'
                         });
+                        LoadingProgress.visibility(item.data.faultCode === ZONE_ABNORMAL ? Visibility.Hidden : Visibility.Visible);
                     }, LoadingProgress);
                 });
             }

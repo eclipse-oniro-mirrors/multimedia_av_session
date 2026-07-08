@@ -19,6 +19,8 @@ const TAG = 'avcastpicker_component ';
 const castPlusAudioType = 8;
 const MAX_PICKER_LIMIT = 20;
 const HIGH_QUALITY_MAX_SCALE = 1.5;
+const ZONE_ABNORMAL = 1;
+const ZONE_ABNORMAL_OPACITY = 0.4;
 
 const _isSupportHds = hdsMaterial.getSystemMaterialTypes().length > 0;
 console.info(TAG, `isSupportHds: ${_isSupportHds}`);
@@ -751,6 +753,8 @@ export struct AVCastPicker {
         this.RoomCheckBuilder(item, index);
       }
     }
+    .opacity(item.data.faultCode === ZONE_ABNORMAL ? ZONE_ABNORMAL_OPACITY : 1);
+    .enable(item.data.faultCode === ZONE_ABNORMAL ? false : true);
     .onClick(() => {
       if (this.isSelectProcessing) {
         return;
@@ -876,12 +880,14 @@ export struct AVCastPicker {
         .margin({
           left: '16vp'
         })
+        .visibility(item.data.faultCode === ZONE_ABNORMAL ? Visibility.Hidden : Visibility.Visible)
     } else {
       LoadingProgress()
         .width(36)
         .margin({
           left: '16vp'
         })
+        .visibility(item.data.faultCode === ZONE_ABNORMAL ? Visibility.Hidden : Visibility.Visible)
     }
   }
 
