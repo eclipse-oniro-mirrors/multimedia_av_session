@@ -41,6 +41,7 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
     }
     
     deviceInfo.deviceName_ = tempDeviceInfo_.deviceName_;
+    deviceInfo.deviceType_ = tempDeviceInfo_.deviceType_;
     deviceInfo.supportedProtocols_ = tempDeviceInfo_.supportedProtocols_;
     deviceInfo.hiPlayDeviceInfo_.castMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
     deviceInfo.hiPlayDeviceInfo_.castUid_ = GetUid();
@@ -85,6 +86,8 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
 
 void PcmCastSession::HandleDeviceDisconnect()
 {
+    ReleaseStreamPlayer();
+    needHandleTimer_ = false;
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
     AVRouter::GetInstance().StopCastSession(castHandle_);
     castHandle_ = -1;
@@ -335,6 +338,7 @@ void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
     SLOGI("PcmCastSession StopCast");
     ReleaseStreamPlayer();
+    needHandleTimer_ = false;
     int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);
     SLOGI("StopCast with unchange castHandle is %{public}lld", static_cast<long long>(castHandle_));
     CHECK_AND_RETURN_LOG(ret != AVSESSION_ERROR, "StopCast failed");
