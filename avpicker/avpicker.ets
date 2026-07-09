@@ -753,8 +753,8 @@ export struct AVCastPicker {
         this.RoomCheckBuilder(item, index);
       }
     }
-    .opacity(item.data.faultCode === ZONE_ABNORMAL ? ZONE_ABNORMAL_OPACITY : 1);
-    .enable(item.data.faultCode === ZONE_ABNORMAL ? false : true);
+    .opacity(item.data.faultCode === ZONE_ABNORMAL ? ZONE_ABNORMAL_OPACITY : 1)
+    .enabled(item.data.faultCode === ZONE_ABNORMAL ? false : true)
     .onClick(() => {
       if (this.isSelectProcessing) {
         return;
