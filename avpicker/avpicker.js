@@ -1703,7 +1703,7 @@ export class AVCastPicker extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.opacity(item.data.faultCode === ZONE_ABNORMAL ? ZONE_ABNORMAL_OPACITY : 1);
-            Colume.enable(item.data.faultCode === ZONE_ABNORMAL ? false : true);
+            Column.enabled(item.data.faultCode === ZONE_ABNORMAL ? false : true);
             Column.onClick(() => {
                 if (this.isSelectProcessing) {
                     return;
