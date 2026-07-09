@@ -358,6 +358,7 @@ export struct AVCastPicker {
   @State isDeviceLevel: boolean = true;
   @State @Watch('MenuStateChange') isSubMenuExpanded: boolean = false;
   @State hasReceivedDeviceList: boolean = false;
+  @State deviceModelType: string = '';
 
   private static currentPickerCount: number = 0;
 
@@ -1402,7 +1403,7 @@ export struct AVCastPicker {
             let isPanelForMedia: boolean = !isCalling &&
               (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
               this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
-            if (this.onStateChange != null && isPanelForMedia) {
+            if (this.onStateChange != null && (isPanelForMedia || this.isWatch())) {
               if (parseInt(JSON.stringify(data['state'])) === AVCastPickerState.STATE_APPEARING) {
                 this.onStateChange(AVCastPickerState.STATE_APPEARING);
               } else {
@@ -1505,6 +1506,11 @@ export struct AVCastPicker {
             console.info(TAG, `HomeMusicScanStatus : ${JSON.stringify(data['HomeMusicScanStatus'])}`);
             this.scanStatus = data['HomeMusicScanStatus'] as number;
           }
+
+          if (data['deviceModelType'] !== undefined) {
+            console.info(TAG, `deviceModelType : ${JSON.stringify(data['deviceModelType'])}`);
+            this.deviceModelType = data['deviceModelType'] as string;
+          }
         })
         .size({ width: '100%', height: '100%' })
         .bindMenu(
@@ -1596,7 +1602,11 @@ export struct AVCastPicker {
         let isPanelForMedia: boolean = !isCalling &&
           (this.pickerStyle === AVCastPickerStyle.STYLE_PANEL &&
             this.pickerStyleFromMediaController === AVCastPickerStyle.STYLE_PANEL);
-        if (isExtMenuScene || isPanelForMedia) {
+        if (this.isWatch()) {
+          if (this.extensionProxy != null) {
+            this.extensionProxy.send({'clickEvent': true});
+          }
+        } else if (isExtMenuScene || isPanelForMedia) {
           this.isMenuShow = false;
           this.touchMenuItemIndex = -1;
           if (this.extensionProxy != null) {
@@ -1616,6 +1626,18 @@ export struct AVCastPicker {
           }
         }
       })
+      .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
+        console.info(TAG, `onVisibleAreaChange visible: ${isVisible}, cRatio: ${currentRatio}, dMType: ${this.deviceModelType}, restart: ${this.needToRestart}`);
+        if (this.isWatch() && this.needToRestart && isVisible && currentRatio >= 1.0) {
+          console.info(TAG, `restart uix ${this.restartUECMessage}`);
+          this.needToRestart = false;
+          this.restartUECMessage += 1;
+        }
+      })
+  }
+
+  private isWatch() {
+    return this.deviceModelType === 'wearable';
   }
 
   private hasExtDevice(allDevice: Array<AVCastPickerDeviceInfo>): boolean {
