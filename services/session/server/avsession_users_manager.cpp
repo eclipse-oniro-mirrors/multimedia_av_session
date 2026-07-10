@@ -47,6 +47,12 @@ void AVSessionUsersManager::Init()
     aliveUsers_.push_back(curUserId_);
 }
 
+std::list<int32_t> AVSessionUsersManager::GetAliveUserList()
+{
+    std::lock_guard lockGuard(userLock_);
+    return aliveUsers_;
+}
+
 void AVSessionUsersManager::HandleUserRemoved(int32_t userId)
 {
     std::lock_guard lockGuard(userLock_);

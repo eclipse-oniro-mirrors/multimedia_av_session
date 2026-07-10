@@ -3405,6 +3405,7 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
     AVSessionSysEvent::GetInstance().ReportPlayingState(
         BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid));
 #endif
+    NotifyClientDieForMigrateProxy(pid);
 }
 
 // LCOV_EXCL_START
@@ -4822,19 +4823,21 @@ void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool add
 void AVSessionService::NotifyRemoteDistributedSessionControllersChanged(
     const std::vector<sptr<IRemoteObject>>& sessionControllers)
 {
-    SLOGI("NotifyRemoteDistributedSessionControllersChanged size: %{public}d",
-          static_cast<int>(sessionControllers.size()));
     std::lock_guard lockGuard(sessionListenersLock_);
-    std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
-    for (const auto& [pid, listener] : listenerMap) {
-        AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
-        if (listener != nullptr) {
+    std::list<int32_t> allUserList = GetUsersManager().GetAliveUserList();
+    SLOGI("NotifyRemoteDistributedSessionControllersChanged size: %{public}zu|%{public}zu",
+          sessionControllers.size(), allUserList.size());
+    for (int32_t& userId : allUserList) {
+        std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(userId);
+        for (const auto& [pid, listener] : listenerMap) {
+            CHECK_AND_CONTINUE(listener != nullptr);
+            AVSESSION_TRACE_SYNC_START("AVSessionService::OnRemoteDistributedSessionChange");
             listener->OnRemoteDistributedSessionChange(sessionControllers);
         }
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
     for (const auto& [pid, listener] : listenerMapForAll) {
-        AVSESSION_TRACE_SYNC_START("AVSessionService::OnSessionCreate");
+        AVSESSION_TRACE_SYNC_START("AVSessionService::OnRemoteDistributedSessionChange");
         if (listener != nullptr) {
             listener->OnRemoteDistributedSessionChange(sessionControllers);
         }

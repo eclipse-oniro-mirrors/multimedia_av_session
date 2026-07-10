@@ -31,7 +31,7 @@ public:
 
     void Init();
 
-    bool CheckUserIdAlive();
+    std::list<int32_t> GetAliveUserList();
 
     SessionStack& GetContainer();
 

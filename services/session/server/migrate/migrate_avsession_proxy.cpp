@@ -47,6 +47,11 @@ MigrateAVSessionProxy::~MigrateAVSessionProxy()
     OnDisconnectServer(deviceId_);
 }
 
+void MigrateAVSessionProxy::SetUserId(int32_t userId)
+{
+    userId_ = userId;
+}
+
 void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
 {
     SLOGI("MigrateAVSessionProxy OnConnectServer:%{public}s.",

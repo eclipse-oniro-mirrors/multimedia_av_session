@@ -58,8 +58,20 @@ int32_t AVControllerItem::RegisterCallbackInner(const sptr<IRemoteObject>& callb
 {
     std::lock_guard lockGuard(callbackMutex_);
     SLOGD("do register callback for controller %{public}d", static_cast<int>(pid_));
+    if (pid_ == 0 && migrateProxyCallback_ != nullptr && callback != nullptr) {
+        callbackListForMigrate_[OHOS::IPCSkeleton::GetCallingPid()] = iface_cast<IAVControllerCallback>(callback);
+        return AVSESSION_SUCCESS;
+    }
     callback_ = iface_cast<IAVControllerCallback>(callback);
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "RegisterCallbackInner callback_ is nullptr");
+    return AVSESSION_SUCCESS;
+}
+
+int32_t AVControllerItem::RemoveCallbackForMigrate(pid_t pid)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    SLOGI("remove migrate callback for %{public}d", static_cast<int32_t>(pid));
+    callbackListForMigrate_.erase(pid);
     return AVSESSION_SUCCESS;
 }
 
@@ -541,6 +553,10 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state,
         if (innerCallback_ != nullptr) {
             innerCallback_->OnPlaybackStateChange(stateOut);
         }
+        for (const auto& [pid, listener] : callbackListForMigrate_) {
+            CHECK_AND_CONTINUE(listener != nullptr);
+            listener->OnPlaybackStateChange(stateOut);
+        }
     }
 }
 
@@ -583,6 +599,7 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMeta
         if (innerCallback_ != nullptr) {
             innerCallback_->OnMetaDataChange(metaOut);
         }
+        DealMetaDataChangeForMigrate(metaOut);
     }
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = metaOut.GetAVQueueImage();
     if (innerQueuePixelMap != nullptr) {
@@ -591,6 +608,15 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMeta
     std::shared_ptr<AVSessionPixelMap> innerMediaPixelMap = metaOut.GetMediaImage();
     if (innerMediaPixelMap != nullptr) {
         innerMediaPixelMap->Clear();
+    }
+}
+
+void AVControllerItem::DealMetaDataChangeForMigrate(const AVMetaData& data)
+{
+    std::lock_guard lockGuard(callbackMutex_);
+    for (const auto& [pid, listener] : callbackListForMigrate_) {
+        CHECK_AND_CONTINUE(listener != nullptr);
+        listener->OnMetaDataChange(data);
     }
 }
 
@@ -622,6 +648,10 @@ void AVControllerItem::HandleValidCommandChange(const std::vector<int32_t>& cmds
     }
     if (innerCallback_ != nullptr) {
         innerCallback_->OnValidCommandChange(cmds);
+    }
+    for (const auto& [pid, listener] : callbackListForMigrate_) {
+        CHECK_AND_CONTINUE(listener != nullptr);
+        listener->OnValidCommandChange(cmds);
     }
 }
 // LCOV_EXCL_STOP
