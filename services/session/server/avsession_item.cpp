@@ -2601,7 +2601,7 @@ bool AVSessionItem::IsAppSupportCast()
         result = (AAFwk::String::Unbox(stringValue) == "url-cast");
     };
     AAFwk::Array::ForEach(list, func);
-    SLOGI("app support url-cast is %{public}d with filter %{public}d", result, GetMetaDataWithoutImg().GetFilter());
+    SLOGI("url-cast:%{public}d|filter:%{public}d", result, GetMetaDataWithoutImg().GetFilter());
     return result && (GetMetaDataWithoutImg().GetFilter() != 0);
 }
 

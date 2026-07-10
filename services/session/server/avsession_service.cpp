@@ -2590,7 +2590,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
     AVSessionSysEvent::GetInstance().UpdateSupportAvqueue(session.GetBundleName(), true);
 #endif
     if (!SaveAvQueueInfo(oldContent, bundleName, meta, userId)) {
-        SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
+        SLOGD("SaveAvQueueInfo same avqueueinfo, Return!");
         DoMetadataImgClean(meta);
         return;
     }
@@ -2600,7 +2600,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
 
 void AVSessionService::DoMetadataImgClean(AVMetaData& data)
 {
-    SLOGI("clear media img in DoMetadataImgClean");
+    SLOGD("clear media img in DoMetadataImgClean");
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
     if (innerQueuePixelMap != nullptr) {
         innerQueuePixelMap->Clear();

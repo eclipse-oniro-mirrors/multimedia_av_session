@@ -301,7 +301,7 @@ __attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayInten
         auto ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::INTENT_PROFILE, bundleName, module,
             profile, startUserId);
         if (ret == 0) {
-            SLOGI("GetJsonProfile success, profile=%{public}s", profile.c_str());
+            SLOGD("GetJsonProfile success, profile=%{public}s", profile.c_str());
             isSupportIntent = true;
             supportModule = module;
             break;
