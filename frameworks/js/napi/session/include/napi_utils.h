@@ -38,6 +38,7 @@
 #include "avqueue_info.h"
 #include "avsession_controller.h"
 #include "av_data_src_descriptor.h"
+#include "curl/curl.h"
 
 /* check condition related to argc/argv, return and logging. */
 #define CHECK_ARGS_RETURN_VOID(context, condition, message, code)               \
@@ -328,8 +329,11 @@ public:
         napi_env env, const std::vector<std::shared_ptr<AVSessionController>>& in, napi_value& out);
 
     static size_t WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer);
-    static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri);
-    static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri);
+    static bool CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri,
+        const std::string& bundleName);
+    static bool DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri,
+        const std::string& bundleName = "");
+    static void ReportCertIssuerNameIfNeeded(CURL* easyHandle, const std::string& bundleName);
     static bool JudgeNumString(const std::string& str);
 
     static constexpr int KEYEVENT_ACTION_JS_NATIVE_DELTA = 1;
@@ -349,6 +353,9 @@ public:
     static constexpr int HTTP_ERROR_CODE = 400;
     static constexpr int COAP = 2;
     static constexpr int NO_SCREEN_ID = -1;
+    static constexpr int32_t CURL_MAX_CERTNUM = 4;
+    static constexpr int32_t CURL_MAX_ISSUERNAME = 256;
+    static bool isNeedReportIssuerName;
 };
 }
 #endif // NAPI_UTILS_H

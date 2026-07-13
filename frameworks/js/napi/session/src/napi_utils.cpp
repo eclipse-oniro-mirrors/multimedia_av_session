@@ -33,14 +33,15 @@
 #include "napi_media_info_holder.h"
 #include "pixel_map_napi.h"
 #include "avsession_pixel_map_adapter.h"
-#include "curl/curl.h"
 #include "image_source.h"
 #include "pixel_map.h"
 #include "napi_avsession_controller.h"
+#include "avsession_sysevent.h"
 
 namespace OHOS::AVSession {
 static constexpr int32_t STR_MAX_LENGTH = 40960;
 static constexpr size_t STR_TAIL_LENGTH = 1;
+bool NapiUtils::isNeedReportIssuerName = true;
 
 size_t NapiUtils::WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer)
 {
@@ -52,7 +53,18 @@ size_t NapiUtils::WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, st
     return realsize;
 }
 
-bool NapiUtils::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri)
+void NapiUtils::ReportCertIssuerNameIfNeeded(CURL* easyHandle, const std::string& bundleName)
+{
+    if (isNeedReportIssuerName) {
+        char certIssuerNames[CURL_MAX_CERTNUM][CURL_MAX_ISSUERNAME] {{}};
+        // CURLINFO_ISSUER_NAMES
+        AVSessionSysEvent::GetInstance().ReportCertIssuerName(certIssuerNames, bundleName);
+        isNeedReportIssuerName = false;
+    }
+}
+
+bool NapiUtils::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, const std::string uri,
+    const std::string& bundleName)
 {
     CURL *easyHandle_ = curl_easy_init();
     if (easyHandle_) {
@@ -63,6 +75,7 @@ bool NapiUtils::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, cons
         curl_easy_setopt(easyHandle_, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(easyHandle_, CURLOPT_CAINFO, "/etc/ssl/certs/" "cacert.pem");
         curl_easy_setopt(easyHandle_, CURLOPT_HTTPGET, 1L);
+        // CURLOPT_GET_ISSUER_NAME
         curl_easy_setopt(easyHandle_, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(easyHandle_, CURLOPT_WRITEDATA, &imgBuffer);
 
@@ -78,6 +91,9 @@ bool NapiUtils::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, cons
             curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
             SLOGI("DoDownload Http result " "%{public}" PRId64, httpCode);
             CHECK_AND_RETURN_RET_LOG(httpCode < NapiUtils::HTTP_ERROR_CODE, false, "recv Http ERROR");
+
+            ReportCertIssuerNameIfNeeded(easyHandle_, bundleName);
+
             curl_easy_cleanup(easyHandle_);
             easyHandle_ = nullptr;
             return true;
@@ -86,12 +102,13 @@ bool NapiUtils::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, cons
     return false;
 }
 
-bool NapiUtils::DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri)
+bool NapiUtils::DoDownloadInCommon(std::shared_ptr<Media::PixelMap>& pixelMap, const std::string uri,
+    const std::string& bundleName)
 {
     SLOGI("DoDownloadInCommon with uri");
 
     std::vector<std::uint8_t> imgBuffer(0);
-    if (CurlSetRequestOptions(imgBuffer, uri) == true) {
+    if (CurlSetRequestOptions(imgBuffer, uri, bundleName) == true) {
         std::uint8_t* buffer = (std::uint8_t*) calloc(imgBuffer.size(), sizeof(uint8_t));
         if (buffer == nullptr) {
             SLOGE("buffer malloc fail");

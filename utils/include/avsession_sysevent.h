@@ -203,6 +203,7 @@ public:
     void clearCastControlInfo(const std::string& sessionId);
     void ReportSessionCastControl(const std::string& controlType,
         const std::string& sessionId, const DeviceInfo& deviceInfo);
+    void ReportCertIssuerName(const char certIssuerNames[4][256], const std::string& bundleName);
 
 private:
     PlayingStateInfo* GetPlayingStateInfo(const std::string& bundleName);
@@ -223,6 +224,7 @@ private:
     static constexpr float MULTIPLE = 1.0f;
     std::string osVersion;
     int32_t sdkVersion = 0;
+    static constexpr const char *CURL_ISSUER_NAME = "curlIssuerName";
 };
 #endif
 

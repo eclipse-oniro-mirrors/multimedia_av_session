@@ -85,7 +85,7 @@ ohos_shared_library("avsession_napi") {
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
-    "curl:curl_shared",
+    "curl:curl_shared_http3",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
@@ -97,7 +97,9 @@ ohos_shared_library("avsession_napi") {
     "window_manager:libwm",
   ]
 
-  cflags = []
+  cflags = [
+    "-DUSE_ARES",
+  ]
 
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]

@@ -23,6 +23,7 @@
 namespace OHOS::AVSession {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t REPORT_SIZE = 100;
+static const int32_t CURL_MAX_CERT_NUM = 4;
 
 AVSessionSysEvent& AVSessionSysEvent::GetInstance()
 {
@@ -430,6 +431,40 @@ int32_t AVSessionSysEvent::GetSdkVersion()
         sdkVersion = GetSdkApiVersion();
     }
     return sdkVersion;
+}
+
+void AVSessionSysEvent::ReportCertIssuerName(const char certIssuerNames[4][256],
+    const std::string& bundleName)
+{
+    std::lock_guard lockGuard(lock_);
+    CHECK_AND_RETURN(!bundleName.empty());
+    std::vector<uint8_t> emptyU8;
+    std::vector<uint32_t> emptyU32;
+    std::vector<uint64_t> emptyU64;
+    std::vector<std::string> emptyString;
+    std::string result;
+    for (int i = 0; i < CURL_MAX_CERT_NUM; i++) {
+        std::string certIssuerName(certIssuerNames[i]);
+        std::string issuerName = (certIssuerName.empty() ? "undefined" : certIssuerName) + ";";
+        result += issuerName;
+    }
+    HiSysWriteStatistic("PLAYING_AVSESSION_STATS",
+        "APP_NAME", bundleName,
+        "APP_VERSION", CURL_ISSUER_NAME,
+        "AVSESSION_STATE", emptyU8,
+        "AVSESSION_STATE_TIMESTAMP", emptyU64,
+        "AVSESSION_META_QUALITY", emptyU8,
+        "AVSESSION_META_QUALITY_TIMESTAMP", emptyU64,
+        "AVSESSION_COMMAND_QUALITY", emptyU32,
+        "AVSESSION_COMMAND_QUA_TIMESTAMP", emptyU64,
+        "AVSESSION_PLAYSTATE", emptyU8,
+        "AVSESSION_PLAYSTATE_TIMESTAMP", emptyU64,
+        "AVSESSION_CONTROL", emptyU8,
+        "AVSESSION_CONTROL_BUNDLE_NAME", emptyString,
+        "AVSESSION_CONTROL_TIMESTAMP", emptyU64,
+        "APP_TYPE", CURL_ISSUER_NAME,
+        "SUPPORT_INTENT", result,
+        "SUPPORT_AVQUEUE", false);
 }
 
 void PlayingStateInfo::updateState(SessionState state)
