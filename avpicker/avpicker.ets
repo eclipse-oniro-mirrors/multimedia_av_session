@@ -361,7 +361,7 @@ export struct AVCastPicker {
   @State @Watch('MenuStateChange') isSubMenuExpanded: boolean = false;
   @State hasReceivedDeviceList: boolean = false;
   @State deviceModelType: string = '';
-
+  @State isHdsThin: boolean = false;
   private static currentPickerCount: number = 0;
 
   aboutToAppear(): void {
@@ -1517,6 +1517,11 @@ export struct AVCastPicker {
             console.info(TAG, `deviceModelType : ${JSON.stringify(data['deviceModelType'])}`);
             this.deviceModelType = data['deviceModelType'] as string;
           }
+
+          if (data['isHdsThin'] !== undefined) {
+            console.info(TAG, `isHdsThin : ${JSON.stringify(data['isHdsThin'])}`);
+            this.isHdsThin = data['isHdsThin'] as boolean;
+          }
         })
         .size({ width: '100%', height: '100%' })
         .bindMenu(
@@ -1684,7 +1689,7 @@ export struct AVCastPicker {
       Column() {
         if (this.isShowLoadingProgress) {
           LoadingProgress()
-            .color(this.getLoadingColor())
+            .color(this.activeColor === 'liveCardLoadingColor' || this.isHdsThin ? '#FFFFFFFF' : $r('sys.color.icon_secondary'))
             .width('20vp')
             .height('20vp')
         } else {
