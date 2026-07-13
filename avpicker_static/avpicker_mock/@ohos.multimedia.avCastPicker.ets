@@ -28,7 +28,7 @@ export struct AVCastPicker {
    */
   @BuilderParam customPicker: () => void = () => {};
 
-  build() {
+  build(): void {
     Column() {
       if (this.customPicker === undefined) {
         this.buildDefaultPicker();

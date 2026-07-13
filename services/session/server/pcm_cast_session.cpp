@@ -197,7 +197,7 @@ void PcmCastSession::OnSystemCommonEvent(const std::string& args)
         descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = uid;
         descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::APP_LEVEL;
     }
- 
+
     WriteCastPairToFile(deviceId, tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
 }
 
@@ -274,7 +274,7 @@ int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo
         return !pinCode_.empty();
     });
     if (!hasPinCode) {
-        SLOGI("cannot get the pincode");
+        SLOGI("cannot get the pinCode");
         return AVSESSION_ERROR;
     }
 
@@ -317,10 +317,10 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
         HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
     descriptor_.uid_ = isDeviceLevel ? 0 : sessionToken.uid;
     SLOGI("PcmCastSession StartCast castMode: %{public}d", tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
- 
+
     SendStateChangeRequest(sessionToken);
     WriteCastPairToFile(outputDeviceInfo.deviceInfos_[0].deviceId_, tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
- 
+
     int32_t castId = static_cast<int32_t>(castHandle_);
     int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo, 0);
     if (ret == AVSESSION_SUCCESS) {
@@ -343,7 +343,7 @@ void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
     SLOGI("StopCast with unchange castHandle is %{public}lld", static_cast<long long>(castHandle_));
     CHECK_AND_RETURN_LOG(ret != AVSESSION_ERROR, "StopCast failed");
 }
- 
+
 void PcmCastSession::WriteCastPairToFile(const std::string& deviceId, int32_t castMode)
 {
     CHECK_AND_RETURN_RET_LOG(!deviceId.empty(), void(), "deviceId is empty.");
@@ -355,15 +355,15 @@ void PcmCastSession::WriteCastPairToFile(const std::string& deviceId, int32_t ca
     std::pair<std::string, int32_t> castPair = { deviceId, castMode };
     SLOGI("PcmCastSession castPair: deviceId=%{public}s, castMode=%{public}d",
         AVSessionUtils::GetAnonymousDeviceId(castPair.first).c_str(), castPair.second);
- 
+
     int32_t userId = AVSessionService::GetUsersManager().GetCurrentUserId();
     std::string fileDir = AVSessionUtils::GetFixedPathNameForDevice(userId);
     std::string fileName = deviceId + "_cast_pair" + AVSessionUtils::GetPairFileSuffix();
- 
+
     AVSessionUtils::WritePairToFile(castPair, fileDir, fileName);
     SLOGI("PcmCastSession ExecuteCommonCommand finished.");
 }
- 
+
 int32_t PcmCastSession::SendStateChangeRequest(const SessionToken& sessionToken)
 {
     cJSON* jsonObj = cJSON_CreateObject();
@@ -371,14 +371,14 @@ int32_t PcmCastSession::SendStateChangeRequest(const SessionToken& sessionToken)
         SLOGE("Failed to create cJSON object");
         return AVSESSION_ERROR;
     }
- 
+
     cJSON_AddItemToObject(jsonObj, "mode", cJSON_CreateNumber(tempDeviceInfo_.hiPlayDeviceInfo_.castMode_));
     cJSON_AddItemToObject(jsonObj, "sessionId", cJSON_CreateString(sessionToken.sessionId.c_str()));
     cJSON_AddItemToObject(jsonObj, "uid", cJSON_CreateNumber(sessionToken.uid));
     SLOGI("SendStateChangeRequest, sessionId=%{public}s, uid=%{public}d, castMode=%{public}d",
         AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str(), sessionToken.uid,
         tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
- 
+
     char* jsonStr = cJSON_Print(jsonObj);
     if (jsonStr != nullptr) {
         std::string params(jsonStr);
@@ -392,12 +392,12 @@ int32_t PcmCastSession::SendStateChangeRequest(const SessionToken& sessionToken)
     cJSON_Delete(jsonObj);
     return AVSESSION_SUCCESS;
 }
- 
+
 void PcmCastSession::ExecuteCommonCommand(const std::string& commonCommand, const AAFwk::WantParams& commandArgs)
 {
     const auto& it = COMMON_COMMAND_MAPS.find(commonCommand);
     CHECK_AND_RETURN_LOG(it != COMMON_COMMAND_MAPS.end(), "commonCommand is not support");
- 
+
     switch (it->second) {
         case CAST_MODE_CHANGE_COMMAND:
             CastStateCommandParams(commandArgs);
@@ -418,14 +418,14 @@ void PcmCastSession::ExecuteCommonCommand(const std::string& commonCommand, cons
             break;
     }
 }
- 
+
 void PcmCastSession::CastStateCommandParams(const AAFwk::WantParams& commandArgs)
 {
     SLOGI("PcmCastSession ExecuteCommonCommand process");
     std::string params = commandArgs.ToString();
     AVRouter::GetInstance().SendCommandArgsToCast(castHandle_, CAST_MODE_CHANGE_COMMAND, params);
 }
- 
+
 void PcmCastSession::DestroyTask()
 {
     SLOGI("PcmCastSession DestroyTask process");
@@ -442,12 +442,12 @@ void PcmCastSession::DestroyTask()
     castHandleDeviceId_ = "-100";
     descriptor_.uid_ = 0;
 }
- 
+
 int32_t PcmCastSession::GetCastMode() const
 {
     return tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
 }
- 
+
 pid_t PcmCastSession::GetUid() const
 {
     return descriptor_.uid_;
@@ -457,12 +457,12 @@ int64_t PcmCastSession::GetCastHandle() const
 {
     return castHandle_;
 }
- 
+
 bool PcmCastSession::CheckIsCasting() const
 {
     return castState_ != CastState::DISCONNECTED;
 }
- 
+
 AVSessionDescriptor PcmCastSession::GetDescriptor()
 {
     return descriptor_;
@@ -675,7 +675,7 @@ void PcmCastSession::SendModeChangeToCast(int32_t screenMode)
 {
     cJSON* jsonObj = cJSON_CreateObject();
     if (!jsonObj) {
-        SLOGE("Failed to create JSON object");
+        SLOGE("Failed to create cJSON object");
         return;
     }
 
