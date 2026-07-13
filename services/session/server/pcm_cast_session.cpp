@@ -252,15 +252,26 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         }
     }
 
+    OutputDeviceInfo connectOutputDeviceInfo = ConstructConnectOutputDeviceInfo(outputDeviceInfo);
     int sourceAllConnectResult = CollaborationManagerHiPlay::GetInstance().CastAddToCollaboration(
-        outputDeviceInfo.deviceInfos_[0]);
+        connectOutputDeviceInfo.deviceInfos_[0]);
     if (sourceAllConnectResult != AVSESSION_SUCCESS) {
         AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
         SLOGE("Collaboration to start cast failed");
         return sourceAllConnectResult;
     }
-    return isPcmScreen ? StartScreenCast(outputDeviceInfo, serviceNameStatePair, sessionToken) :
-        SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    return isPcmScreen ? StartScreenCast(connectOutputDeviceInfo, serviceNameStatePair, sessionToken) :
+        SubStartCast(connectOutputDeviceInfo, serviceNameStatePair, sessionToken);
+}
+
+OutputDeviceInfo PcmCastSession::ConstructConnectOutputDeviceInfo(const OutputDeviceInfo& outputDeviceInfo)
+{
+    OutputDeviceInfo connectOutputDeviceInfo = outputDeviceInfo;
+    if ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
+        ProtocolType::TYPE_CAST_PLUS_STREAM) != 0) {
+        connectOutputDeviceInfo.deviceInfos_[0].realDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+    }
+    return connectOutputDeviceInfo;
 }
 
 int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo,
