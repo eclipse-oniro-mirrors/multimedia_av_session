@@ -197,6 +197,7 @@ export class AVCastPicker extends ViewPU {
         this.__isSubMenuExpanded = new ObservedPropertySimplePU(false, this, 'isSubMenuExpanded');
         this.__hasReceivedDeviceList = new ObservedPropertySimplePU(false, this, 'hasReceivedDeviceList');
         this.__deviceModelType = new ObservedPropertySimplePU('', this, 'deviceModelType');
+        this.__isHdsThin = new ObservedPropertySimplePU(false, this, 'isHdsThin');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.declareWatch('isSubMenuExpanded', this.MenuStateChange);
@@ -362,6 +363,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.deviceModelType !== undefined) {
             this.deviceModelType = c11.deviceModelType;
         }
+        if (c11.isHdsThin !== undefined) {
+            this.isHdsThin = c11.isHdsThin;
+        }
     }
 
     updateStateVars(b11) {
@@ -413,6 +417,7 @@ export class AVCastPicker extends ViewPU {
         this.__isSubMenuExpanded.purgeDependencyOnElmtId(a11);
         this.__hasReceivedDeviceList.purgeDependencyOnElmtId(a11);
         this.__deviceModelType.purgeDependencyOnElmtId(a11);
+        this.__isHdsThin.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -461,6 +466,7 @@ export class AVCastPicker extends ViewPU {
         this.__isSubMenuExpanded.aboutToBeDeleted();
         this.__hasReceivedDeviceList.aboutToBeDeleted();
         this.__deviceModelType.aboutToBeDeleted();
+        this.__isHdsThin.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -821,6 +827,14 @@ export class AVCastPicker extends ViewPU {
 
     set deviceModelType(j1) {
         this.__deviceModelType.set(j1);
+    }
+
+    get isHdsThin() {
+        return this.__isHdsThin.get();
+    }
+
+    set isHdsThin(h1) {
+        this.__isHdsThin.set(h1);
     }
 
     aboutToAppear() {
@@ -2410,6 +2424,11 @@ export class AVCastPicker extends ViewPU {
                     console.info(TAG, `deviceModelType : ${JSON.stringify(l8.deviceModelType)}`);
                     this.deviceModelType = l8.deviceModelType;
                 }
+
+                if (l8.isHdsThin !== undefined) {
+                    console.info(TAG, `isHdsThin : ${l8.isHdsThin}`);
+                    this.isHdsThin = l8.isHdsThin;
+                }
             });
             UIExtensionComponent.size({ width: '100%', height: '100%' });
             UIExtensionComponent.bindMenu(this.isMenuShow && this.hasReceivedDeviceList, { builder: () => {
@@ -2518,7 +2537,10 @@ export class AVCastPicker extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((c7, s7) => {
                         LoadingProgress.create();
-                        LoadingProgress.color(this.getLoadingColor());
+                        LoadingProgress.color(this.activeColor === 'liveCardLoadingColor' || this.isHdsThin
+                            ? '#FFFFFFFF'
+                            : {'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'});
                         LoadingProgress.width('20vp');
                         LoadingProgress.height('20vp');
                     }, LoadingProgress);
