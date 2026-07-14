@@ -527,6 +527,118 @@ void AVCastControllerImpl::ReleaseSync()
     }
 }
 
+
+void AVCastControllerImpl::SetDisplaySurfaceAsync(string_view surfaceId)
+{
+    return SetDisplaySurfaceSync(surfaceId);
+}
+
+void AVCastControllerImpl::SetDisplaySurfacePromise(string_view surfaceId)
+{
+    return SetDisplaySurfaceSync(surfaceId);
+}
+
+array<DecoderType> AVCastControllerImpl::GetSupportedDecodersPromise()
+{
+    return GetSupportedDecodersSync();
+}
+
+ResolutionLevel AVCastControllerImpl::GetRecommendedResolutionLevelPromise(DecoderType decoderType)
+{
+    return GetRecommendedResolutionLevelSync(decoderType);
+}
+
+array<uintptr_t> AVCastControllerImpl::GetSupportedHdrCapabilitiesPromise()
+{
+    return GetSupportedHdrCapabilitiesSync();
+}
+
+array<double> AVCastControllerImpl::GetSupportedPlaySpeedsPromise()
+{
+    return GetSupportedPlaySpeedsSync();
+}
+
+void AVCastControllerImpl::SendControlCommandAsync(AVCastControlCommand const &command)
+{
+    return SendControlCommandSync(command);
+}
+
+void AVCastControllerImpl::SendControlCommandPromise(AVCastControlCommand const &command)
+{
+    return SendControlCommandSync(command);
+}
+
+void AVCastControllerImpl::StartAsync(AVQueueItem const& item)
+{
+    return StartSync(item);
+}
+
+void AVCastControllerImpl::StartPromise(AVQueueItem const& item)
+{
+    return StartSync(item);
+}
+
+void AVCastControllerImpl::PrepareAsync(AVQueueItem const& item)
+{
+    return PrepareSync(item);
+}
+
+void AVCastControllerImpl::PreparePromise(AVQueueItem const& item)
+{
+    return PrepareSync(item);
+}
+
+AVQueueItem AVCastControllerImpl::GetCurrentItemAsync()
+{
+    return GetCurrentItemSync();
+}
+
+AVQueueItem AVCastControllerImpl::GetCurrentItemPromise()
+{
+    return GetCurrentItemSync();
+}
+
+void AVCastControllerImpl::ProcessMediaKeyResponsePromise(string_view assetId, array_view<uint8_t> response)
+{
+    return ProcessMediaKeyResponseSync(assetId, response);
+}
+
+void AVCastControllerImpl::ReleaseAsync()
+{
+    return ReleaseSync();
+}
+
+void AVCastControllerImpl::ReleasePromise()
+{
+    return ReleaseSync();
+}
+
+AVPlaybackState AVCastControllerImpl::GetAVPlaybackStateAsync()
+{
+    return GetAVPlaybackStateSync();
+}
+
+AVPlaybackState AVCastControllerImpl::GetAVPlaybackStatePromise()
+{
+    return GetAVPlaybackStateSync();
+}
+
+array<string> AVCastControllerImpl::GetValidCommandsAsync()
+{
+    return GetValidCommandsSync();
+}
+
+array<string> AVCastControllerImpl::GetValidCommandsPromise()
+{
+    return GetValidCommandsSync();
+}
+
+void AVCastControllerImpl::SendCustomDataPromise(uintptr_t data)
+{
+    return SendCustomDataSync(data);
+}
+
+
 void AVCastControllerImpl::OnPlaybackStateChange(array_view<string> filter,
     callback_view<void(AVPlaybackState const&)> callback)
 {

@@ -83,7 +83,9 @@ public:
     explicit AVCastPickerHelperInnerImpl(OHOS::Ace::UIContent* uiContent);
     ~AVCastPickerHelperInnerImpl();
 
+    void SelectPromise(optional_view<AVCastPickerOptions> options);
     void SelectSync(optional_view<AVCastPickerOptions> options);
+    void ResetCommunicationDevicePromise();
     void ResetCommunicationDeviceSync();
     void OnPickerStateChange(callback_view<void(AVCastPickerState)> callback);
     void OffPickerStateChange(optional_view<callback<void(AVCastPickerState)>> callback);

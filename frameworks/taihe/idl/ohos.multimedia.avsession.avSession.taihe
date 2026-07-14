@@ -126,54 +126,76 @@ struct AudioCapabilities {
 }
 
 interface AVCastController {
-  @gen_async("setDisplaySurface")
-  @gen_promise("setDisplaySurface")
+  @async @rename("setDisplaySurface")
+  SetDisplaySurfaceAsync(surfaceId: String): void;
+  @promise @rename("setDisplaySurface")
+  SetDisplaySurfacePromise(surfaceId: String): void;
   SetDisplaySurfaceSync(surfaceId: String): void;
 
-  @gen_promise("getSupportedDecoders")
+  @promise @rename("getSupportedDecoders")
+  GetSupportedDecodersPromise(): Array<DecoderType>;
   GetSupportedDecodersSync(): Array<DecoderType>;
 
-  @gen_promise("getRecommendedResolutionLevel")
+  @promise @rename("getRecommendedResolutionLevel")
+  GetRecommendedResolutionLevelPromise(decoderType: DecoderType): ResolutionLevel;
   GetRecommendedResolutionLevelSync(decoderType: DecoderType): ResolutionLevel;
 
-  @gen_promise("getSupportedHdrCapabilities")
+  @promise @rename("getSupportedHdrCapabilities")
+  GetSupportedHdrCapabilitiesPromise(): Array<@sts_type("hdrCapability.HDRFormat") Opaque>;
   GetSupportedHdrCapabilitiesSync(): Array<@sts_type("hdrCapability.HDRFormat") Opaque>;
 
-  @gen_promise("getSupportedPlaySpeeds")
+  @promise @rename("getSupportedPlaySpeeds")
+  GetSupportedPlaySpeedsPromise(): Array<f64>;
   GetSupportedPlaySpeedsSync(): Array<f64>;
 
-  @gen_async("sendControlCommand")
-  @gen_promise("sendControlCommand")
+  @async @rename("sendControlCommand")
+  SendControlCommandAsync(command: AVCastControlCommand): void;
+  @promise @rename("sendControlCommand")
+  SendControlCommandPromise(command: AVCastControlCommand): void;
   SendControlCommandSync(command: AVCastControlCommand): void;
 
-  @gen_async("start")
-  @gen_promise("start")
+  @async @rename("start")
+  StartAsync(item: AVQueueItem): void;
+  @promise @rename("start")
+  StartPromise(item: AVQueueItem): void;
   StartSync(item: AVQueueItem): void;
 
-  @gen_async("prepare")
-  @gen_promise("prepare")
+  @async @rename("prepare")
+  PrepareAsync(item: AVQueueItem): void;
+  @promise @rename("prepare")
+  PreparePromise(item: AVQueueItem): void;
   PrepareSync(item: AVQueueItem): void;
 
-  @gen_async("getCurrentItem")
-  @gen_promise("getCurrentItem")
+  @async @rename("getCurrentItem")
+  GetCurrentItemAsync(): AVQueueItem;
+  @promise @rename("getCurrentItem")
+  GetCurrentItemPromise(): AVQueueItem;
   GetCurrentItemSync(): AVQueueItem;
 
-  @gen_promise("processMediaKeyResponse")
+  @promise @rename("processMediaKeyResponse")
+  ProcessMediaKeyResponsePromise(assetId: String, response: @arraybuffer Array<u8>): void;
   ProcessMediaKeyResponseSync(assetId: String, response: @arraybuffer Array<u8>): void;
 
-  @gen_async("release")
-  @gen_promise("release")
+  @async @rename("release")
+  ReleaseAsync(): void;
+  @promise @rename("release")
+  ReleasePromise(): void;
   ReleaseSync(): void;
 
-  @gen_async("getAVPlaybackState")
-  @gen_promise("getAVPlaybackState")
+  @async @rename("getAVPlaybackState")
+  GetAVPlaybackStateAsync(): AVPlaybackState;
+  @promise @rename("getAVPlaybackState")
+  GetAVPlaybackStatePromise(): AVPlaybackState;
   GetAVPlaybackStateSync(): AVPlaybackState;
 
-  @gen_async("getValidCommands")
-  @gen_promise("getValidCommands")
+  @async @rename("getValidCommands")
+  GetValidCommandsAsync(): Array<String>;
+  @promise @rename("getValidCommands")
+  GetValidCommandsPromise(): Array<String>;
   GetValidCommandsSync(): Array<String>;
 
-  @gen_promise("sendCustomData")
+  @promise @rename("sendCustomData")
+  SendCustomDataPromise(data: @sts_type("Record<String, Object>") Opaque): void;
   SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
 
   OnPlaybackStateChange(filter: Array<String>, callback: (data: AVPlaybackState) => void): void;
@@ -367,104 +389,150 @@ interface AVSession {
   @get GetSessionType(): String;
   @get GetSessionTag(): String;
 
-  @gen_async("setAVMetadata")
-  @gen_promise("setAVMetadata")
+  @async @rename("setAVMetadata")
+  SetAVMetadataAsync(data: AVMetadata): void;
+  @promise @rename("setAVMetadata")
+  SetAVMetadataPromise(data: AVMetadata): void;
   SetAVMetadataSync(data: AVMetadata): void;
 
-  @gen_async("setCallMetadata")
-  @gen_promise("setCallMetadata")
+  @async @rename("setCallMetadata")
+  SetCallMetadataAsync(data: CallMetadata): void;
+  @promise @rename("setCallMetadata")
+  SetCallMetadataPromise(data: CallMetadata): void;
   SetCallMetadataSync(data: CallMetadata): void;
 
-  @gen_async("setAVPlaybackState")
-  @gen_promise("setAVPlaybackState")
+  @async @rename("setAVPlaybackState")
+  SetAVPlaybackStateAsync(state: AVPlaybackState): void;
+  @promise @rename("setAVPlaybackState")
+  SetAVPlaybackStatePromise(state: AVPlaybackState): void;
   SetAVPlaybackStateSync(state: AVPlaybackState): void;
 
-  @gen_async("setAVCallState")
-  @gen_promise("setAVCallState")
+  @async @rename("setAVCallState")
+  SetAVCallStateAsync(state: AVCallState): void;
+  @promise @rename("setAVCallState")
+  SetAVCallStatePromise(state: AVCallState): void;
   SetAVCallStateSync(state: AVCallState): void;
 
-  @gen_async("setLaunchAbility")
-  @gen_promise("setLaunchAbility")
+  @async @rename("setLaunchAbility")
+  SetLaunchAbilityAsync(ability: @sts_type("WantAgent") Opaque): void;
+  @promise @rename("setLaunchAbility")
+  SetLaunchAbilityPromise(ability: @sts_type("WantAgent") Opaque): void;
   SetLaunchAbilitySync(ability: @sts_type("WantAgent") Opaque): void;
 
-  @gen_async("dispatchSessionEvent")
-  @gen_promise("dispatchSessionEvent")
+  @async @rename("dispatchSessionEvent")
+  DispatchSessionEventAsync(event: String, args: @sts_type("Record<String, Object>") Opaque): void;
+  @promise @rename("dispatchSessionEvent")
+  DispatchSessionEventPromise(event: String, args: @sts_type("Record<String, Object>") Opaque): void;
   DispatchSessionEventSync(event: String, args: @sts_type("Record<String, Object>") Opaque): void;
 
-  @gen_async("setAVQueueItems")
-  @gen_promise("setAVQueueItems")
+  @async @rename("setAVQueueItems")
+  SetAVQueueItemsAsync(items: Array<AVQueueItem>): void;
+  @promise @rename("setAVQueueItems")
+  SetAVQueueItemsPromise(items: Array<AVQueueItem>): void;
   SetAVQueueItemsSync(items: Array<AVQueueItem>): void;
 
-  @gen_async("setAVQueueTitle")
-  @gen_promise("setAVQueueTitle")
+  @async @rename("setAVQueueTitle")
+  SetAVQueueTitleAsync(title: String): void;
+  @promise @rename("setAVQueueTitle")
+  SetAVQueueTitlePromise(title: String): void;
   SetAVQueueTitleSync(title: String): void;
 
-  @gen_async("setExtras")
-  @gen_promise("setExtras")
+  @async @rename("setExtras")
+  SetExtrasAsync(extras: @sts_type("Record<String, Object>") Opaque): void;
+  @promise @rename("setExtras")
+  SetExtrasPromise(extras: @sts_type("Record<String, Object>") Opaque): void;
   SetExtrasSync(extras: @sts_type("Record<String, Object>") Opaque): void;
 
-  @gen_async("getController")
-  @gen_promise("getController")
+  @async @rename("getController")
+  GetControllerAsync(): AVSessionController;
+  @promise @rename("getController")
+  GetControllerPromise(): AVSessionController;
   GetControllerSync(): AVSessionController;
 
-  @gen_async("getAVCastController")
-  @gen_promise("getAVCastController")
+  @async @rename("getAVCastController")
+  GetAVCastControllerAsync(): Optional<AVCastController>;
+  @promise @rename("getAVCastController")
+  GetAVCastControllerPromise(): Optional<AVCastController>;
   GetAVCastControllerSync(): Optional<AVCastController>;
 
-  @gen_async("getOutputDevice")
-  @gen_promise("getOutputDevice")
+  @async @rename("getOutputDevice")
+  GetOutputDeviceAsync(): OutputDeviceInfo;
+  @promise @rename("getOutputDevice")
+  GetOutputDevicePromise(): OutputDeviceInfo;
   GetOutputDeviceSync(): OutputDeviceInfo;
 
-  @gen_promise("getAllCastDisplays")
+  @promise @rename("getAllCastDisplays")
+  GetAllCastDisplaysPromise(): Array<CastDisplayInfo>;
   GetAllCastDisplaysSync(): Array<CastDisplayInfo>;
 
-  @gen_async("stopCasting")
-  @gen_promise("stopCasting")
+  @async @rename("stopCasting")
+  StopCastingAsync(): void;
+  @promise @rename("stopCasting")
+  StopCastingPromise(): void;
   StopCastingSync(): void;
 
-  @gen_async("activate")
-  @gen_promise("activate")
+  @async @rename("activate")
+  ActivateAsync(): void;
+  @promise @rename("activate")
+  ActivatePromise(): void;
   ActivateSync(): void;
 
-  @gen_async("deactivate")
-  @gen_promise("deactivate")
+  @async @rename("deactivate")
+  DeactivateAsync(): void;
+  @promise @rename("deactivate")
+  DeactivatePromise(): void;
   DeactivateSync(): void;
 
-  @gen_async("destroy")
-  @gen_promise("destroy")
+  @async @rename("destroy")
+  DestroyAsync(): void;
+  @promise @rename("destroy")
+  DestroyPromise(): void;
   DestroySync(): void;
 
-  @gen_promise("sendCustomData")
+  @promise @rename("sendCustomData")
+  SendCustomDataPromise(data: @sts_type("Record<String, Object>") Opaque): void;
   SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
 
-  @gen_promise("enableDesktopLyric")
+  @promise @rename("enableDesktopLyric")
+  EnableDesktopLyricPromise(enable: bool): void;
   EnableDesktopLyricSync(enable: bool): void;
 
-  @gen_promise("setDesktopLyricVisible")
+  @promise @rename("setDesktopLyricVisible")
+  SetDesktopLyricVisiblePromise(visible: bool): void;
   SetDesktopLyricVisibleSync(visible: bool): void;
 
-  @gen_promise("isDesktopLyricVisible")
+  @promise @rename("isDesktopLyricVisible")
+  IsDesktopLyricVisiblePromise(): bool;
   IsDesktopLyricVisibleSync(): bool;
 
-  @gen_promise("setDesktopLyricState")
+  @promise @rename("setDesktopLyricState")
+  SetDesktopLyricStatePromise(state: DesktopLyricState): void;
   SetDesktopLyricStateSync(state: DesktopLyricState): void;
 
-  @gen_promise("getDesktopLyricState")
+  @promise @rename("getDesktopLyricState")
+  GetDesktopLyricStatePromise(): DesktopLyricState;
   GetDesktopLyricStateSync(): DesktopLyricState;
 
-  @gen_promise("setBackgroundPlayMode")
+  @promise @rename("setBackgroundPlayMode")
+  SetBackgroundPlayModePromise(mode: BackgroundPlayMode): void;
   SetBackgroundPlayModeSync(mode: BackgroundPlayMode): void;
 
-  @gen_async("setMediaCenterControlType")
-  @gen_promise("setMediaCenterControlType")
+  @async @rename("setMediaCenterControlType")
+  SetMediaCenterControlTypeAsync(controlTypes: Array<String>): void;
+  @promise @rename("setMediaCenterControlType")
+  SetMediaCenterControlTypePromise(controlTypes: Array<String>): void;
   SetMediaCenterControlTypeSync(controlTypes: Array<String>): void;
 
-  @gen_async("setSupportedPlaySpeeds")
-  @gen_promise("setSupportedPlaySpeeds")
+  @async @rename("setSupportedPlaySpeeds")
+  SetSupportedPlaySpeedsAsync(speeds: Array<f64>): void;
+  @promise @rename("setSupportedPlaySpeeds")
+  SetSupportedPlaySpeedsPromise(speeds: Array<f64>): void;
   SetSupportedPlaySpeedsSync(speeds: Array<f64>): void;
 
-  @gen_async("setSupportedLoopModes")
-  @gen_promise("setSupportedLoopModes")
+  @async @rename("setSupportedLoopModes")
+  SetSupportedLoopModesAsync(loopModes: Array<LoopMode>): void;
+  @promise @rename("setSupportedLoopModes")
+  SetSupportedLoopModesPromise(loopModes: Array<LoopMode>): void;
   SetSupportedLoopModesSync(loopModes: Array<LoopMode>): void;
 
   OnPlay(callback: (commandInfo: CommandInfo) => void): void;
@@ -521,100 +589,142 @@ interface AVSession {
 interface AVSessionController {
   @get GetSessionId(): String;
 
-  @gen_async("getAVPlaybackState")
-  @gen_promise("getAVPlaybackState")
+  @async @rename("getAVPlaybackState")
+  GetAVPlaybackStateAsync(): AVPlaybackState;
+  @promise @rename("getAVPlaybackState")
+  GetAVPlaybackStatePromise(): AVPlaybackState;
   GetAVPlaybackStateSync(): AVPlaybackState;
 
-  @gen_async("getAVMetadata")
-  @gen_promise("getAVMetadata")
+  @async @rename("getAVMetadata")
+  GetAVMetadataAsync(): AVMetadata;
+  @promise @rename("getAVMetadata")
+  GetAVMetadataPromise(): AVMetadata;
   GetAVMetadataSync(): AVMetadata;
 
-  @gen_async("getAVCallState")
-  @gen_promise("getAVCallState")
+  @async @rename("getAVCallState")
+  GetAVCallStateAsync(): AVCallState;
+  @promise @rename("getAVCallState")
+  GetAVCallStatePromise(): AVCallState;
   GetAVCallStateSync(): AVCallState;
 
-  @gen_async("getCallMetadata")
-  @gen_promise("getCallMetadata")
+  @async @rename("getCallMetadata")
+  GetCallMetadataAsync(): CallMetadata;
+  @promise @rename("getCallMetadata")
+  GetCallMetadataPromise(): CallMetadata;
   GetCallMetadataSync(): CallMetadata;
 
-  @gen_async("getAVQueueTitle")
-  @gen_promise("getAVQueueTitle")
+  @async @rename("getAVQueueTitle")
+  GetAVQueueTitleAsync(): String;
+  @promise @rename("getAVQueueTitle")
+  GetAVQueueTitlePromise(): String;
   GetAVQueueTitleSync(): String;
 
-  @gen_async("getAVQueueItems")
-  @gen_promise("getAVQueueItems")
+  @async @rename("getAVQueueItems")
+  GetAVQueueItemsAsync(): Array<AVQueueItem>;
+  @promise @rename("getAVQueueItems")
+  GetAVQueueItemsPromise(): Array<AVQueueItem>;
   GetAVQueueItemsSync(): Array<AVQueueItem>;
 
-  @gen_async("skipToQueueItem")
-  @gen_promise("skipToQueueItem")
+  @async @rename("skipToQueueItem")
+  SkipToQueueItemAsync(itemId: i32): void;
+  @promise @rename("skipToQueueItem")
+  SkipToQueueItemPromise(itemId: i32): void;
   SkipToQueueItemSync(itemId: i32): void;
 
-  @gen_async("getOutputDevice")
-  @gen_promise("getOutputDevice")
+  @async @rename("getOutputDevice")
+  GetOutputDeviceAsync(): OutputDeviceInfo;
+  @promise @rename("getOutputDevice")
+  GetOutputDevicePromise(): OutputDeviceInfo;
   GetOutputDeviceSync(): OutputDeviceInfo;
 
-  @gen_async("sendAVKeyEvent")
-  @gen_promise("sendAVKeyEvent")
+  @async @rename("sendAVKeyEvent")
+  SendAVKeyEventAsync(event: KeyEvent): void;
+  @promise @rename("sendAVKeyEvent")
+  SendAVKeyEventPromise(event: KeyEvent): void;
   SendAVKeyEventSync(event: KeyEvent): void;
 
-  @gen_async("getLaunchAbility")
-  @gen_promise("getLaunchAbility")
+  @async @rename("getLaunchAbility")
+  GetLaunchAbilityAsync(): @sts_type("WantAgent") Opaque;
+  @promise @rename("getLaunchAbility")
+  GetLaunchAbilityPromise(): @sts_type("WantAgent") Opaque;
   GetLaunchAbilitySync(): @sts_type("WantAgent") Opaque;
 
   GetRealPlaybackPositionSync(): i64;
 
-  @gen_async("isActive")
-  @gen_promise("isActive")
+  @async @rename("isActive")
+  IsActiveAsync(): bool;
+  @promise @rename("isActive")
+  IsActivePromise(): bool;
   IsActiveSync(): bool;
 
-  @gen_async("destroy")
-  @gen_promise("destroy")
+  @async @rename("destroy")
+  DestroyAsync(): void;
+  @promise @rename("destroy")
+  DestroyPromise(): void;
   DestroySync(): void;
 
-  @gen_async("getValidCommands")
-  @gen_promise("getValidCommands")
+  @async @rename("getValidCommands")
+  GetValidCommandsAsync(): Array<String>;
+  @promise @rename("getValidCommands")
+  GetValidCommandsPromise(): Array<String>;
   GetValidCommandsSync(): Array<String>;
 
-  @gen_async("sendControlCommand")
-  @gen_promise("sendControlCommand")
+  @async @rename("sendControlCommand")
+  SendControlCommandAsync(command: AVControlCommand): void;
+  @promise @rename("sendControlCommand")
+  SendControlCommandPromise(command: AVControlCommand): void;
   SendControlCommandSync(command: AVControlCommand): void;
 
-  @gen_async("sendCommonCommand")
-  @gen_promise("sendCommonCommand")
+  @async @rename("sendCommonCommand")
+  SendCommonCommandAsync(command: String, args: @sts_type("Record<String, Object>") Opaque): void;
+  @promise @rename("sendCommonCommand")
+  SendCommonCommandPromise(command: String, args: @sts_type("Record<String, Object>") Opaque): void;
   SendCommonCommandSync(command: String, args: @sts_type("Record<String, Object>") Opaque): void;
 
-  @gen_async("getExtras")
-  @gen_promise("getExtras")
+  @async @rename("getExtras")
+  GetExtrasAsync(): @sts_type("Record<String, Object>") Opaque;
+  @promise @rename("getExtras")
+  GetExtrasPromise(): @sts_type("Record<String, Object>") Opaque;
   GetExtrasSync(): @sts_type("Record<String, Object>") Opaque;
 
-  @gen_promise("getExtrasWithEvent")
+  @promise @rename("getExtrasWithEvent")
+  GetExtrasWithEventPromise(extraEvent: String): @sts_type("Record<String, Object>") Opaque;
   GetExtrasWithEventSync(extraEvent: String): @sts_type("Record<String, Object>") Opaque;
 
-  @gen_promise("sendCustomData")
+  @promise @rename("sendCustomData")
+  SendCustomDataPromise(data: @sts_type("Record<String, Object>") Opaque): void;
   SendCustomDataSync(data: @sts_type("Record<String, Object>") Opaque): void;
 
-  @gen_promise("isDesktopLyricEnabled")
+  @promise @rename("isDesktopLyricEnabled")
+  IsDesktopLyricEnabledPromise(): bool;
   IsDesktopLyricEnabledSync(): bool;
 
-  @gen_promise("setDesktopLyricVisible")
+  @promise @rename("setDesktopLyricVisible")
+  SetDesktopLyricVisiblePromise(visible: bool): void;
   SetDesktopLyricVisibleSync(visible: bool): void;
 
-  @gen_promise("isDesktopLyricVisible")
+  @promise @rename("isDesktopLyricVisible")
+  IsDesktopLyricVisiblePromise(): bool;
   IsDesktopLyricVisibleSync(): bool;
 
-  @gen_promise("setDesktopLyricState")
+  @promise @rename("setDesktopLyricState")
+  SetDesktopLyricStatePromise(state: DesktopLyricState): void;
   SetDesktopLyricStateSync(state: DesktopLyricState): void;
 
-  @gen_promise("getDesktopLyricState")
+  @promise @rename("getDesktopLyricState")
+  GetDesktopLyricStatePromise(): DesktopLyricState;
   GetDesktopLyricStateSync(): DesktopLyricState;
 
-  @gen_promise("getMediaCenterControlType")
+  @promise @rename("getMediaCenterControlType")
+  GetMediaCenterControlTypePromise(): Array<String>;
   GetMediaCenterControlTypeSync(): Array<String>;
 
-  @gen_promise("getSupportedPlaySpeeds")
+  @promise @rename("getSupportedPlaySpeeds")
+  GetSupportedPlaySpeedsPromise(): Array<f64>;
   GetSupportedPlaySpeedsSync(): Array<f64>;
 
-  @gen_promise("getSupportedLoopModes")
+  @promise @rename("getSupportedLoopModes")
+  GetSupportedLoopModesPromise(): Array<i32>;
   GetSupportedLoopModesSync(): Array<i32>;
 
   OnMetadataChange(filter: Array<String>, callback: (data: AVMetadata) => void): void;
@@ -707,14 +817,16 @@ struct AVCastPickerOptions {
 }
 
 interface AVCastPickerHelperInner {
-  @gen_promise("select")
+  @promise @rename("select")
+  SelectPromise(options: Optional<AVCastPickerOptions>): void;
   SelectSync(options: Optional<AVCastPickerOptions>): void;
 
   OnPickerStateChange(callback: (data: AVCastPickerState) => void): void;
 
   OffPickerStateChange(callback: Optional<(data: AVCastPickerState) => void>): void;
 
-  @gen_promise("resetCommunicationDevice")
+  @promise @rename("resetCommunicationDevice")
+  ResetCommunicationDevicePromise(): void;
   ResetCommunicationDeviceSync(): void;
 }
 
@@ -761,100 +873,140 @@ class AVCastPickerHelper {
 }
 """)
 
-@gen_async("createAVSession")
-@gen_promise("createAVSession")
+@async @rename("createAVSession")
+function CreateAVSessionAsync(context: @sts_type("Context") Opaque, tag: String, type: String): AVSession;
+@promise @rename("createAVSession")
+function CreateAVSessionPromise(context: @sts_type("Context") Opaque, tag: String, type: String): AVSession;
 function CreateAVSessionSync(context: @sts_type("Context") Opaque, tag: String, type: String): AVSession;
 
-@gen_promise("getAVSession")
+@promise @rename("getAVSession")
+function GetAVSessionPromise(context: @sts_type("Context") Opaque): AVSession;
 function GetAVSessionSync(context: @sts_type("Context") Opaque): AVSession;
 
-@gen_async("getAllSessionDescriptors")
-@gen_promise("getAllSessionDescriptors")
+@async @rename("getAllSessionDescriptors")
+function GetAllSessionDescriptorsAsync(): Array<AVSessionDescriptor>;
+@promise @rename("getAllSessionDescriptors")
+function GetAllSessionDescriptorsPromise(): Array<AVSessionDescriptor>;
 function GetAllSessionDescriptorsSync(): Array<AVSessionDescriptor>;
 
-@gen_async("getHistoricalSessionDescriptors")
+@async @rename("getHistoricalSessionDescriptors")
+function GetHistoricalSessionDescriptorsAsync(maxSize: i32): Array<AVSessionDescriptor>;
 function GetHistoricalSessionDescriptorsSync(maxSize: i32): Array<AVSessionDescriptor>;
 
-@gen_promise("getHistoricalSessionDescriptors")
+@promise @rename("getHistoricalSessionDescriptors")
+function GetHistoricalSessionDescriptorsOptionalPromise(maxSize: Optional<i32>): Array<AVSessionDescriptor>;
 function GetHistoricalSessionDescriptorsOptionalSync(maxSize: Optional<i32>): Array<AVSessionDescriptor>;
 
-@gen_async("getHistoricalAVQueueInfos")
-@gen_promise("getHistoricalAVQueueInfos")
+@async @rename("getHistoricalAVQueueInfos")
+function GetHistoricalAVQueueInfosAsync(maxSize: i32, maxAppSize: i32): Array<AVQueueInfo>;
+@promise @rename("getHistoricalAVQueueInfos")
+function GetHistoricalAVQueueInfosPromise(maxSize: i32, maxAppSize: i32): Array<AVQueueInfo>;
 function GetHistoricalAVQueueInfosSync(maxSize: i32, maxAppSize: i32): Array<AVQueueInfo>;
 
-@gen_async("createController")
-@gen_promise("createController")
+@async @rename("createController")
+function CreateControllerAsync(sessionId: String): AVSessionController;
+@promise @rename("createController")
+function CreateControllerPromise(sessionId: String): AVSessionController;
 function CreateControllerSync(sessionId: String): AVSessionController;
 
-@gen_promise("startAVPlayback")
+@promise @rename("startAVPlayback")
+function StartAVPlaybackPromise(bundleName: String, assetId: String): void;
 function StartAVPlaybackSync(bundleName: String, assetId: String): void;
 
-@gen_promise("startAVPlayback")
+@promise @rename("startAVPlayback")
+function StartAVPlaybackInfoPromise(bundleName: String, assetId: String, info: CommandInfo): void;
 function StartAVPlaybackInfoSync(bundleName: String, assetId: String, info: CommandInfo): void;
 
-@gen_async("getAVCastController")
-@gen_promise("getAVCastController")
+@async @rename("getAVCastController")
+function GetAVCastControllerAsync(sessionId: String): Optional<AVCastController>;
+@promise @rename("getAVCastController")
+function GetAVCastControllerPromise(sessionId: String): Optional<AVCastController>;
 function GetAVCastControllerSync(sessionId: String): Optional<AVCastController>;
 
-@gen_async("startCasting")
-@gen_promise("startCasting")
+@async @rename("startCasting")
+function StartCastingAsync(session: SessionToken, device: OutputDeviceInfo): void;
+@promise @rename("startCasting")
+function StartCastingPromise(session: SessionToken, device: OutputDeviceInfo): void;
 function StartCastingSync(session: SessionToken, device: OutputDeviceInfo): void;
 
-@gen_async("stopCasting")
-@gen_promise("stopCasting")
+@async @rename("stopCasting")
+function StopCastingAsync(session: SessionToken): void;
+@promise @rename("stopCasting")
+function StopCastingPromise(session: SessionToken): void;
 function StopCastingSync(session: SessionToken): void;
 
-@gen_async("startCastDeviceDiscovery")
+@async @rename("startCastDeviceDiscovery")
+function StartCastDeviceDiscoveryAsync(): void;
 function StartCastDeviceDiscoverySync(): void;
 
-@gen_async("startCastDeviceDiscovery")
+@async @rename("startCastDeviceDiscovery")
+function StartCastDeviceDiscoveryFilterAsync(filter: i32): void;
 function StartCastDeviceDiscoveryFilter(filter: i32): void;
 
-@gen_promise("startCastDeviceDiscovery")
+@promise @rename("startCastDeviceDiscovery")
+function StartCastDeviceDiscoveryFilterDrmPromise(filter: Optional<i32>, drmSchemes: Optional<Array<String>>): void;
 function StartCastDeviceDiscoveryFilterDrm(filter: Optional<i32>, drmSchemes: Optional<Array<String>>): void;
 
-@gen_async("stopCastDeviceDiscovery")
-@gen_promise("stopCastDeviceDiscovery")
+@async @rename("stopCastDeviceDiscovery")
+function StopCastDeviceDiscoveryAsync(): void;
+@promise @rename("stopCastDeviceDiscovery")
+function StopCastDeviceDiscoveryPromise(): void;
 function StopCastDeviceDiscoverySync(): void;
 
-@gen_async("setDiscoverable")
-@gen_promise("setDiscoverable")
+@async @rename("setDiscoverable")
+function SetDiscoverableAsync(enable: bool): void;
+@promise @rename("setDiscoverable")
+function SetDiscoverablePromise(enable: bool): void;
 function SetDiscoverableSync(enable: bool): void;
 
-@gen_async("castAudioSession")
-@gen_promise("castAudioSession")
+@async @rename("castAudioSession")
+function CastAudioAsync(session: SessionToken, audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
+@promise @rename("castAudioSession")
+function CastAudioPromise(session: SessionToken, audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
 function CastAudioSync(session: SessionToken, audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
 
-@gen_promise("castAudioSessionAll")
+@promise @rename("castAudioSessionAll")
+function CastAudioAllPromise(audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
 function CastAudioAllSync(audioDevices: Array<@sts_type("audio.AudioDeviceDescriptor") Opaque>): void;
 
-@gen_promise("getDistributedSessionController")
+@promise @rename("getDistributedSessionController")
+function GetDistributedSessionControllerPromise(distributedSessionType: DistributedSessionType): Array<AVSessionController>;
 function GetDistributedSessionControllerSync(distributedSessionType: DistributedSessionType): Array<AVSessionController>;
 
-@gen_promise("isDesktopLyricSupported")
+@promise @rename("isDesktopLyricSupported")
+function IsDesktopLyricSupportedPromise(): bool;
 function IsDesktopLyricSupportedSync(): bool;
 
-@gen_async("sendSystemAVKeyEvent")
-@gen_promise("sendSystemAVKeyEvent")
+@async @rename("sendSystemAVKeyEvent")
+function SendSystemAVKeyEventAsync(event: KeyEvent): void;
+@promise @rename("sendSystemAVKeyEvent")
+function SendSystemAVKeyEventPromise(event: KeyEvent): void;
 function SendSystemAVKeyEventSync(event: KeyEvent): void;
 
-@gen_async("sendSystemControlCommand")
-@gen_promise("sendSystemControlCommand")
+@async @rename("sendSystemControlCommand")
+function SendSystemControlCommandAsync(command: AVControlCommand): void;
+@promise @rename("sendSystemControlCommand")
+function SendSystemControlCommandPromise(command: AVControlCommand): void;
 function SendSystemControlCommandSync(command: AVControlCommand): void;
 
-@gen_async("sendSystemCommonCommand")
-@gen_promise("sendSystemCommonCommand")
+@async @rename("sendSystemCommonCommand")
+function SendSystemCommonCommandAsync(commonCommand: String, data: @sts_type("Record<String, Object>") Opaque): void;
+@promise @rename("sendSystemCommonCommand")
+function SendSystemCommonCommandPromise(commonCommand: String, data: @sts_type("Record<String, Object>") Opaque): void;
 function SendSystemCommonCommandSync(commonCommand: String, data: @sts_type("Record<String, Object>") Opaque): void;
 
-@gen_promise("startDeviceLogging")
+@promise @rename("startDeviceLogging")
+function StartDeviceLoggingPromise(url: String, maxSize: Optional<i32>): void;
 function StartDeviceLoggingSync(url: String, maxSize: Optional<i32>): void;
 
-@gen_promise("stopDeviceLogging")
+@promise @rename("stopDeviceLogging")
+function StopDeviceLoggingPromise(): void;
 function StopDeviceLoggingSync(): void;
 
 function CreateAVKeyEventSync(nativePtr: i64): KeyEvent;
 
-@gen_promise("getSessionDescriptors")
+@promise @rename("getSessionDescriptors")
+function GetSessionDescriptorsPromise(category: SessionCategory): Array<AVSessionDescriptor>;
 function GetSessionDescriptorsSync(category: SessionCategory): Array<AVSessionDescriptor>;
 
 enum DistributedSessionType :i32 {
