@@ -163,16 +163,6 @@ string AVSessionControllerImpl::GetSessionId()
     return taihe::string(sessionId_);
 }
 
-AVPlaybackState AVSessionControllerImpl::GetAVPlaybackStateAsync()
-{
-    return GetAVPlaybackStateSync();
-}
-
-AVPlaybackState AVSessionControllerImpl::GetAVPlaybackStatePromise()
-{
-    return GetAVPlaybackStateSync();
-}
-
 AVPlaybackState AVSessionControllerImpl::GetAVPlaybackStateSync()
 {
     AVPlaybackState undefinedState = TaihePlaybackState::CreateUndefinedAVPlaybackState();
@@ -205,16 +195,6 @@ AVPlaybackState AVSessionControllerImpl::GetAVPlaybackStateSync()
         return undefinedState;
     }
     return output;
-}
-
-AVMetadata AVSessionControllerImpl::GetAVMetadataAsync()
-{
-    return GetAVMetadataSync();
-}
-
-AVMetadata AVSessionControllerImpl::GetAVMetadataPromise()
-{
-    return GetAVMetadataSync();
 }
 
 AVMetadata AVSessionControllerImpl::GetAVMetadataSync()
@@ -251,16 +231,6 @@ AVMetadata AVSessionControllerImpl::GetAVMetadataSync()
     return output;
 }
 
-AVCallState AVSessionControllerImpl::GetAVCallStateAsync()
-{
-    return GetAVCallStateSync();
-}
-
-AVCallState AVSessionControllerImpl::GetAVCallStatePromise()
-{
-    return GetAVCallStateSync();
-}
-
 AVCallState AVSessionControllerImpl::GetAVCallStateSync()
 {
     AVCallState undefinedAVCallState = TaiheAVCallState::CreateUndefinedAVCallState();
@@ -293,16 +263,6 @@ AVCallState AVSessionControllerImpl::GetAVCallStateSync()
         return undefinedAVCallState;
     }
     return output;
-}
-
-CallMetadata AVSessionControllerImpl::GetCallMetadataAsync()
-{
-    return GetCallMetadataSync();
-}
-
-CallMetadata AVSessionControllerImpl::GetCallMetadataPromise()
-{
-    return GetCallMetadataSync();
 }
 
 CallMetadata AVSessionControllerImpl::GetCallMetadataSync()
@@ -339,16 +299,6 @@ CallMetadata AVSessionControllerImpl::GetCallMetadataSync()
     return output;
 }
 
-string AVSessionControllerImpl::GetAVQueueTitleAsync()
-{
-    return GetAVQueueTitleSync();
-}
-
-string AVSessionControllerImpl::GetAVQueueTitlePromise()
-{
-    return GetAVQueueTitleSync();
-}
-
 string AVSessionControllerImpl::GetAVQueueTitleSync()
 {
     SLOGD("Start GetAVQueueTitleSync");
@@ -372,16 +322,6 @@ string AVSessionControllerImpl::GetAVQueueTitleSync()
         return taihe::string("");
     }
     return taihe::string(title);
-}
-
-array<AVQueueItem> AVSessionControllerImpl::GetAVQueueItemsAsync()
-{
-    return GetAVQueueItemsSync();
-}
-
-array<AVQueueItem> AVSessionControllerImpl::GetAVQueueItemsPromise()
-{
-    return GetAVQueueItemsSync();
 }
 
 array<AVQueueItem> AVSessionControllerImpl::GetAVQueueItemsSync()
@@ -410,16 +350,6 @@ array<AVQueueItem> AVSessionControllerImpl::GetAVQueueItemsSync()
     return TaiheUtils::ToTaiheAVQueueItemArray(items);
 }
 
-void AVSessionControllerImpl::SkipToQueueItemAsync(int32_t itemId)
-{
-    return SkipToQueueItemSync(itemId);
-}
-
-void AVSessionControllerImpl::SkipToQueueItemPromise(int32_t itemId)
-{
-    return SkipToQueueItemSync(itemId);
-}
-
 void AVSessionControllerImpl::SkipToQueueItemSync(int32_t itemId)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::SkipToQueueItemSync");
@@ -445,16 +375,6 @@ void AVSessionControllerImpl::SkipToQueueItemSync(int32_t itemId)
     }
 }
 
-OutputDeviceInfo AVSessionControllerImpl::GetOutputDeviceAsync()
-{
-    return GetOutputDeviceSync();
-}
-
-OutputDeviceInfo AVSessionControllerImpl::GetOutputDevicePromise()
-{
-    return GetOutputDeviceSync();
-}
-
 OutputDeviceInfo AVSessionControllerImpl::GetOutputDeviceSync()
 {
     OutputDeviceInfo undefinedOutput = TaiheUtils::CreateUndefinedOutputDeviceInfo();
@@ -474,16 +394,6 @@ OutputDeviceInfo AVSessionControllerImpl::GetOutputDeviceSync()
     }
 
     return TaiheUtils::ToTaiheOutputDeviceInfo(descriptor.outputDeviceInfo_);
-}
-
-void AVSessionControllerImpl::SendAVKeyEventAsync(keyEvent::KeyEvent const &event)
-{
-    return SendAVKeyEventSync(event);
-}
-
-void AVSessionControllerImpl::SendAVKeyEventPromise(keyEvent::KeyEvent const &event)
-{
-    return SendAVKeyEventSync(event);
 }
 
 void AVSessionControllerImpl::SendAVKeyEventSync(keyEvent::KeyEvent const &event)
@@ -521,16 +431,6 @@ void AVSessionControllerImpl::SendAVKeyEventSync(keyEvent::KeyEvent const &event
     }
 }
 
-uintptr_t AVSessionControllerImpl::GetLaunchAbilityAsync()
-{
-    return GetLaunchAbilitySync();
-}
-
-uintptr_t AVSessionControllerImpl::GetLaunchAbilityPromise()
-{
-    return GetLaunchAbilitySync();
-}
-
 uintptr_t AVSessionControllerImpl::GetLaunchAbilitySync()
 {
     uintptr_t undefinedAbility = reinterpret_cast<uintptr_t>(nullptr);
@@ -560,16 +460,6 @@ uintptr_t AVSessionControllerImpl::GetLaunchAbilitySync()
     return reinterpret_cast<uintptr_t>(result);
 }
 
-int64_t AVSessionControllerImpl::GetRealPlaybackPositionAsync()
-{
-    return GetRealPlaybackPositionSync();
-}
-
-int64_t AVSessionControllerImpl::GetRealPlaybackPositionPromise()
-{
-    return GetRealPlaybackPositionSync();
-}
-
 int64_t AVSessionControllerImpl::GetRealPlaybackPositionSync()
 {
     if (controller_ == nullptr) {
@@ -579,16 +469,6 @@ int64_t AVSessionControllerImpl::GetRealPlaybackPositionSync()
     }
 
     return controller_->GetRealPlaybackPosition();
-}
-
-bool AVSessionControllerImpl::IsActiveAsync()
-{
-    return IsActiveSync();
-}
-
-bool AVSessionControllerImpl::IsActivePromise()
-{
-    return IsActiveSync();
 }
 
 bool AVSessionControllerImpl::IsActiveSync()
@@ -617,16 +497,6 @@ bool AVSessionControllerImpl::IsActiveSync()
         return false;
     }
     return isActive;
-}
-
-void AVSessionControllerImpl::DestroyAsync()
-{
-    return DestroySync();
-}
-
-void AVSessionControllerImpl::DestroyPromise()
-{
-    return DestroySync();
 }
 
 void AVSessionControllerImpl::DestroySync()
@@ -666,16 +536,6 @@ void AVSessionControllerImpl::DestroySync()
     }
 }
 
-array<string> AVSessionControllerImpl::GetValidCommandsAsync()
-{
-    return GetValidCommandsSync();
-}
-
-array<string> AVSessionControllerImpl::GetValidCommandsPromise()
-{
-    return GetValidCommandsSync();
-}
-
 array<string> AVSessionControllerImpl::GetValidCommandsSync()
 {
     std::vector<string> emptyCmds;
@@ -702,16 +562,6 @@ array<string> AVSessionControllerImpl::GetValidCommandsSync()
 
     std::vector<std::string> stringCmds = TaiheControlCommand::ConvertCommands(cmds);
     return array<string>(TaiheUtils::ToTaiheStringArray(stringCmds));
-}
-
-void AVSessionControllerImpl::SendControlCommandAsync(AVControlCommand const &command)
-{
-    return SendControlCommandSync(command);
-}
-
-void AVSessionControllerImpl::SendControlCommandPromise(AVControlCommand const &command)
-{
-    return SendControlCommandSync(command);
 }
 
 void AVSessionControllerImpl::SendControlCommandSync(AVControlCommand const &command)
@@ -751,16 +601,6 @@ void AVSessionControllerImpl::SendControlCommandSync(AVControlCommand const &com
     }
 }
 
-void AVSessionControllerImpl::SendCommonCommandAsync(string_view command, uintptr_t args)
-{
-    return SendCommonCommandSync(command, args);
-}
-
-void AVSessionControllerImpl::SendCommonCommandPromise(string_view command, uintptr_t args)
-{
-    return SendCommonCommandSync(command, args);
-}
-
 void AVSessionControllerImpl::SendCommonCommandSync(string_view command, uintptr_t args)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::SendCommonCommandSync");
@@ -798,11 +638,6 @@ void AVSessionControllerImpl::SendCommonCommandSync(string_view command, uintptr
     }
 }
 
-void AVSessionControllerImpl::SendCustomDataPromise(uintptr_t data)
-{
-    return SendCustomDataSync(data);
-}
-
 void AVSessionControllerImpl::SendCustomDataSync(uintptr_t data)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::SendCustomData");
@@ -832,16 +667,6 @@ void AVSessionControllerImpl::SendCustomDataSync(uintptr_t data)
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
         return;
     }
-}
-
-uintptr_t AVSessionControllerImpl::GetExtrasAsync()
-{
-    return GetExtrasSync();
-}
-
-uintptr_t AVSessionControllerImpl::GetExtrasPromise()
-{
-    return GetExtrasSync();
 }
 
 uintptr_t AVSessionControllerImpl::GetExtrasSync()
@@ -878,11 +703,6 @@ uintptr_t AVSessionControllerImpl::GetExtrasSync()
         return undefinedExtras;
     }
     return reinterpret_cast<uintptr_t>(result);
-}
-
-uintptr_t AVSessionControllerImpl::GetExtrasWithEventPromise(string_view extraEvent)
-{
-    return GetExtrasWithEventSync(extraEvent);
 }
 
 uintptr_t AVSessionControllerImpl::GetExtrasWithEventSync(string_view extraEvent)
@@ -926,11 +746,6 @@ uintptr_t AVSessionControllerImpl::GetExtrasWithEventSync(string_view extraEvent
     return reinterpret_cast<uintptr_t>(result);
 }
 
-bool AVSessionControllerImpl::IsDesktopLyricEnabledPromise()
-{
-    return IsDesktopLyricEnabledSync();
-}
-
 bool AVSessionControllerImpl::IsDesktopLyricEnabledSync()
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::IsDesktopLyricEnabled");
@@ -951,11 +766,6 @@ bool AVSessionControllerImpl::IsDesktopLyricEnabledSync()
     return isEnabled;
 }
 
-void AVSessionControllerImpl::SetDesktopLyricVisiblePromise(bool visible)
-{
-    return SetDesktopLyricVisibleSync(visible);
-}
-
 void AVSessionControllerImpl::SetDesktopLyricVisibleSync(bool visible)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::SetDesktopLyricVisible");
@@ -971,11 +781,6 @@ void AVSessionControllerImpl::SetDesktopLyricVisibleSync(bool visible)
         ErrCodeToMessage(ret, "SetDesktopLyricVisible", errMessage);
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
     }
-}
-
-bool AVSessionControllerImpl::IsDesktopLyricVisiblePromise()
-{
-    return IsDesktopLyricVisibleSync();
 }
 
 bool AVSessionControllerImpl::IsDesktopLyricVisibleSync()
@@ -998,11 +803,6 @@ bool AVSessionControllerImpl::IsDesktopLyricVisibleSync()
     return isVisible;
 }
 
-void AVSessionControllerImpl::SetDesktopLyricStatePromise(DesktopLyricState const& state)
-{
-    return SetDesktopLyricStateSync(state);
-}
-
 void AVSessionControllerImpl::SetDesktopLyricStateSync(DesktopLyricState const& state)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::SetDesktopLyricState");
@@ -1020,11 +820,6 @@ void AVSessionControllerImpl::SetDesktopLyricStateSync(DesktopLyricState const& 
         ErrCodeToMessage(ret, "SetDesktopLyricState", errMessage);
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
     }
-}
-
-DesktopLyricState AVSessionControllerImpl::GetDesktopLyricStatePromise()
-{
-    return GetDesktopLyricStateSync();
 }
 
 DesktopLyricState AVSessionControllerImpl::GetDesktopLyricStateSync()
@@ -1048,11 +843,6 @@ DesktopLyricState AVSessionControllerImpl::GetDesktopLyricStateSync()
     return TaiheUtils::ToTaiheDesktopLyricState(state);
 }
 
-array<string> AVSessionControllerImpl::GetMediaCenterControlTypePromise()
-{
-    return GetMediaCenterControlTypeSync();
-}
-
 array<string> AVSessionControllerImpl::GetMediaCenterControlTypeSync()
 {
     array<string> undefinedArray{};
@@ -1074,11 +864,6 @@ array<string> AVSessionControllerImpl::GetMediaCenterControlTypeSync()
     return array<string>(TaiheUtils::ToTaiheStringArray(controlTypes));
 }
 
-array<double> AVSessionControllerImpl::GetSupportedPlaySpeedsPromise()
-{
-    return GetSupportedPlaySpeedsSync();
-}
-
 array<double> AVSessionControllerImpl::GetSupportedPlaySpeedsSync()
 {
     array<double> undefinedArray{};
@@ -1097,11 +882,6 @@ array<double> AVSessionControllerImpl::GetSupportedPlaySpeedsSync()
         return undefinedArray;
     }
     return array<double>(speeds);
-}
-
-array<int32_t> AVSessionControllerImpl::GetSupportedLoopModesPromise()
-{
-    return GetSupportedLoopModesSync();
 }
 
 array<int32_t> AVSessionControllerImpl::GetSupportedLoopModesSync()
