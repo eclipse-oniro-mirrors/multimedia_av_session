@@ -48,6 +48,8 @@ class MigrateAVSessionServer : public SessionListener, public SoftbusSessionServ
     public HistoricalRecordListener,
     public std::enable_shared_from_this<MigrateAVSessionServer> {
 public:
+    using PreferredDeviceChangeCallbackPtr = std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback>;
+
     explicit MigrateAVSessionServer(int32_t migrateMode = 0, std::string deviceId = "");
     ~MigrateAVSessionServer();
 
@@ -157,10 +159,12 @@ private:
     void RegisterAudioCallbackAndTrigger();
     void TriggerAudioCallback();
     void UnregisterAudioCallback();
+    void BuildAndTriggerPerferredDeviceChangeCallback();
+    void ReleasePerferredDeviceChangeCallback();
     
     std::function<void(int32_t)> GetVolumeKeyEventCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc GetAvailableDeviceChangeCallbackFunc();
-    AudioDeviceDescriptorsCallbackFunc GetPreferredDeviceChangeCallbackFunc();
+    PreferredDeviceChangeCallbackPtr GetPreferredDeviceChangeCallback();
 
     bool ConvertSessionDescriptorsToCJSON(cJSON* jsonArray, int32_t& descriptorNums);
     bool ConvertReleaseSessionToCJSON(cJSON* jsonArray, std::vector<AVSessionDescriptor>& sessionDescriptors,
@@ -187,12 +191,13 @@ private:
     std::recursive_mutex topSessionLock_;
     std::recursive_mutex historySessionLock_;
     std::recursive_mutex migrateDeviceChangeLock_;
+    std::recursive_mutex migrateAudioCallbackLock_;
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
     std::string curAssetId_;
 
     std::function<void(int32_t)> volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
-    AudioDeviceDescriptorsCallbackFunc preferredDeviceChangeCallbackFunc_ = GetPreferredDeviceChangeCallbackFunc();
+    PreferredDeviceChangeCallbackPtr preferredDeviceChangeCallback_ = nullptr;
     AVMetaData metaDataCache_;
     AVPlaybackState playbackStateCache_;
     std::recursive_mutex cacheJsonLock_;

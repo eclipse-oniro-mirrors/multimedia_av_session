@@ -763,9 +763,10 @@ bool MigrateAVSessionServer::CheckPostPreferredDevice(std::string& msg)
     return true;
 }
 
-AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceChangeCallbackFunc()
+MigrateAVSessionServer::PreferredDeviceChangeCallbackPtr MigrateAVSessionServer::GetPreferredDeviceChangeCallback()
 {
-    return [this](const AudioDeviceDescriptors& devices) {
+    std::lock_guard lockGuard(migrateAudioCallbackLock_);
+    return std::make_shared<AudioPreferredDeviceChangeCallback>([this](const AudioDeviceDescriptors& devices) {
         std::lock_guard lockGuard(migrateDeviceChangeLock_);
         cJSON* value = ConvertAudioDeviceDescriptorsToJson(devices);
         CHECK_AND_RETURN_LOG(value != nullptr, "get value json with nullptr");
@@ -785,7 +786,7 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetPreferredDeviceCha
             },
             "SYNC_CURRENT_DEVICE");
         volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
-    };
+    });
 }
 
 cJSON* MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(

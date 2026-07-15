@@ -57,6 +57,7 @@ MigrateAVSessionServer::~MigrateAVSessionServer()
         playbackStateCache_.SetState(0);
         playbackStateCache_.SetFavorite(0);
     }
+    ReleasePerferredDeviceChangeCallback();
     SLOGI("MigrateAVSessionServer quit with mode:%{public}d|deviceId:%{public}s.", migrateMode_,
         SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
 }
@@ -117,18 +118,17 @@ void MigrateAVSessionServer::RegisterAudioCallbackAndTrigger()
     AudioAdapter::GetInstance().SetAvailableDeviceChangeCallback(availableDeviceChangeCallbackFunc_);
     availableDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetAvailableDevices());
 
-    AudioAdapter::GetInstance().SetPreferredOutputDeviceChangeCallback(preferredDeviceChangeCallbackFunc_);
-    preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
+    BuildAndTriggerPerferredDeviceChangeCallback();
 }
 
 void MigrateAVSessionServer::TriggerAudioCallback()
 {
     CHECK_AND_RETURN_LOG(volumeKeyEventCallbackFunc_ != nullptr, "VolumeKeyEventCallback nullptr");
     CHECK_AND_RETURN_LOG(availableDeviceChangeCallbackFunc_ != nullptr, "AvailableDeviceChangeCallback nullptr");
-    CHECK_AND_RETURN_LOG(preferredDeviceChangeCallbackFunc_ != nullptr, "PreferredOutputDeviceChangeCallback nullptr");
+    CHECK_AND_RETURN_LOG(preferredDeviceChangeCallback_ != nullptr, "PreferredOutputDeviceChangeCallback nullptr");
     volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
     availableDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetAvailableDevices());
-    preferredDeviceChangeCallbackFunc_(AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
+    BuildAndTriggerPerferredDeviceChangeCallback();
 }
 
 void MigrateAVSessionServer::UnregisterAudioCallback()
@@ -136,7 +136,27 @@ void MigrateAVSessionServer::UnregisterAudioCallback()
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
         AudioAdapter::GetInstance().UnregisterVolumeKeyEventCallback();
         AudioAdapter::GetInstance().UnsetAvailableDeviceChangeCallback();
-        AudioAdapter::GetInstance().UnsetPreferredOutputDeviceChangeCallback();
+        ReleasePerferredDeviceChangeCallback();
+    }
+}
+
+void MigrateAVSessionServer::BuildAndTriggerPerferredDeviceChangeCallback()
+{
+    std::lock_guard lockGuard(migrateAudioCallbackLock_);
+    if (preferredDeviceChangeCallback_ == nullptr) {
+        preferredDeviceChangeCallback_ = GetPreferredDeviceChangeCallback();
+    }
+    AudioAdapter::GetInstance().AddPreferredOutputDeviceChangeCallback(preferredDeviceChangeCallback_);
+    preferredDeviceChangeCallback_->OnPreferredOutputDeviceUpdated(
+        AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo());
+}
+
+void MigrateAVSessionServer::ReleasePerferredDeviceChangeCallback()
+{
+    std::lock_guard lockGuard(migrateAudioCallbackLock_);
+    if (preferredDeviceChangeCallback_ != nullptr) {
+        AudioAdapter::GetInstance().RemovePreferredOutputDeviceChangeCallback(preferredDeviceChangeCallback_);
+        preferredDeviceChangeCallback_ = nullptr;
     }
 }
 

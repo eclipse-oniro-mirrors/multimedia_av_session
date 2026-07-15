@@ -70,7 +70,34 @@ void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
 
 void AudioAdapter::AddDeviceChangeListener(const PreferOutputDeviceChangeListener& listener)
 {
+    std::lock_guard lockGuard(listenersLock_);
     deviceChangeListeners_.push_back(listener);
+}
+
+void AudioAdapter::AddPreferredOutputDeviceChangeCallback(
+    std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> callback)
+{
+    std::lock_guard lockGuard(listenersLock_);
+    auto it = std::find_if(preferredOutputDeviceCallbacks_.begin(), preferredOutputDeviceCallbacks_.end(),
+        [&callback](const std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback>& item) {
+            return item.get() == callback.get();
+        });
+    CHECK_AND_RETURN_LOG(it == preferredOutputDeviceCallbacks_.end(), "already has callback");
+    preferredOutputDeviceCallbacks_.push_back(callback);
+    SLOGD("add callback done");
+}
+
+void AudioAdapter::RemovePreferredOutputDeviceChangeCallback(
+    std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> callback)
+{
+    std::lock_guard lockGuard(listenersLock_);
+    auto it = std::find_if(preferredOutputDeviceCallbacks_.begin(), preferredOutputDeviceCallbacks_.end(),
+        [&callback](const std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback>& item) {
+            return item.get() == callback.get();
+        });
+    CHECK_AND_RETURN_LOG(it != preferredOutputDeviceCallbacks_.end(), "no callback found");
+    preferredOutputDeviceCallbacks_.erase(it);
+    SLOGD("remove callback done");
 }
 
 int32_t AudioAdapter::MuteAudioStream(int32_t uid, int32_t pid)
@@ -189,9 +216,15 @@ void AudioAdapter::OnAvailableDeviceChange(const AudioStandard::AudioDeviceUsage
 
 void AudioAdapter::OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& desc)
 {
+    std::lock_guard lockGuard(listenersLock_);
     for (const auto& listener : deviceChangeListeners_) {
         if (listener) {
             listener(desc);
+        }
+    }
+    for (const auto& callback : preferredOutputDeviceCallbacks_) {
+        if (callback != nullptr) {
+            callback->OnPreferredOutputDeviceUpdated(desc);
         }
     }
 }
@@ -321,24 +354,6 @@ AudioDeviceDescriptors AudioAdapter::GetPreferredOutputDeviceForRendererInfo()
             static_cast<int32_t>(device->deviceCategory_), static_cast<int32_t>(device->deviceType_));
     }
     return outDeviceDescriptors;
-}
-
-int32_t AudioAdapter::SetPreferredOutputDeviceChangeCallback(const AudioDeviceDescriptorsCallbackFunc& callback)
-{
-    preferredDeviceChangeCallback_ = std::make_shared<AudioPreferredDeviceChangeCallback>(callback);
-    AudioStandard::AudioRendererInfo rendererInfo = {};
-    rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
-    auto ret = AudioStandard::AudioRoutingManager::GetInstance()->SetPreferredOutputDeviceChangeCallback(
-        rendererInfo, preferredDeviceChangeCallback_);
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetPreferredOutputDeviceChangeCallback failed");
-    return AVSESSION_SUCCESS;
-}
-
-int32_t AudioAdapter::UnsetPreferredOutputDeviceChangeCallback()
-{
-    auto ret = AudioStandard::AudioRoutingManager::GetInstance()->UnsetPreferredOutputDeviceChangeCallback();
-    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UnsetPreferredOutputDeviceChangeCallback failed");
-    return AVSESSION_SUCCESS;
 }
 
 AudioDeviceDescriptorWithSptr AudioAdapter::FindRenderDeviceForUsage(const AudioDeviceDescriptors& devices,

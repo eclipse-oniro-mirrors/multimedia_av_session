@@ -56,6 +56,11 @@ public:
 
     void AddDeviceChangeListener(const PreferOutputDeviceChangeListener& listener);
 
+    void AddPreferredOutputDeviceChangeCallback(
+        std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> callback);
+    void RemovePreferredOutputDeviceChangeCallback(
+        std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback> callback);
+
     int32_t MuteAudioStream(int32_t uid, int32_t pid);
 
     int32_t UnMuteAudioStream(int32_t uid);
@@ -92,9 +97,6 @@ public:
     int32_t UnsetDeviceChangeCallback();
 
     AudioDeviceDescriptors GetPreferredOutputDeviceForRendererInfo();
-    int32_t SetPreferredOutputDeviceChangeCallback(const std::function<void(
-        const AudioDeviceDescriptors&)>& callback);
-    int32_t UnsetPreferredOutputDeviceChangeCallback();
 
     int32_t SelectOutputDevice(const AudioDeviceDescriptorWithSptr& desc);
     AudioDeviceDescriptorWithSptr FindRenderDeviceForUsage(const AudioDeviceDescriptors& devices,
@@ -106,6 +108,8 @@ private:
     static std::once_flag onceFlag_;
     std::vector<StateListener> listeners_;
     std::vector<PreferOutputDeviceChangeListener> deviceChangeListeners_;
+    std::vector<std::shared_ptr<AudioStandard::AudioPreferredOutputDeviceChangeCallback>>
+        preferredOutputDeviceCallbacks_;
     const std::vector<AudioStandard::StreamUsage> BACKGROUND_MUTE_STREAM_USAGE {
         AudioStandard::STREAM_USAGE_MUSIC,
         AudioStandard::STREAM_USAGE_MOVIE,
@@ -118,7 +122,6 @@ private:
     int32_t volumeMax_ = 0;
     int32_t volumeMin_ = 0;
     std::shared_ptr<AudioVolumeKeyEventCallback> volumeCallback_;
-    std::shared_ptr<AudioPreferredDeviceChangeCallback> preferredDeviceChangeCallback_;
 
     AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
     std::shared_ptr<AudioAllowedPlaybackCallback> playbackCallback_;
@@ -141,8 +144,8 @@ private:
 
 class AudioPreferredDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDeviceChangeCallback {
 public:
-    explicit AudioPreferredDeviceChangeCallback(const std::function<void(
-        const AudioDeviceDescriptors&)>& callback) : callback_(callback) { }
+    explicit AudioPreferredDeviceChangeCallback(const AudioDeviceDescriptorsCallbackFunc& callback)
+        : callback_(callback) { }
     ~AudioPreferredDeviceChangeCallback() = default;
 
     void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& desc) override

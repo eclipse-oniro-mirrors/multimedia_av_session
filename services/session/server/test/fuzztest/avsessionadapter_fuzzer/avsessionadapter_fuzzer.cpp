@@ -183,7 +183,6 @@ void AVSessionAudioAdapterTest()
     audioAdapter.UnsetAvailableDeviceChangeCallback();
     audioAdapter.GetDevices();
     audioAdapter.GetPreferredOutputDeviceForRendererInfo();
-    audioAdapter.UnsetPreferredOutputDeviceChangeCallback();
     AudioDeviceDescriptorWithSptr desc;
     audioAdapter.FindRenderDeviceForUsage(deviceDescriptors, desc);
 }

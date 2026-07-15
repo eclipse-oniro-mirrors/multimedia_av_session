@@ -37,7 +37,14 @@ void AudioDeviceManager::InitAudioStateCallback(std::shared_ptr<MigrateAVSession
         SLOGW("device change callback already registered");
         return;
     }
-    RegisterPreferedOutputDeviceChangeCallback();
+    {
+        std::lock_guard lockGuard(callbackLock_);
+        if (preferredOutputDeviceChangeCallback_ == nullptr) {
+            preferredOutputDeviceChangeCallback_ = std::make_shared<OutputDeviceChangeCallback>();
+        }
+    }
+
+    AudioAdapter::GetInstance().AddPreferredOutputDeviceChangeCallback(preferredOutputDeviceChangeCallback_);
     RegisterAudioDeviceChangeCallback();
     migrateSession_ = migrateAVSession;
     isRegistered_ = true;
@@ -46,40 +53,12 @@ void AudioDeviceManager::InitAudioStateCallback(std::shared_ptr<MigrateAVSession
 
 void AudioDeviceManager::UnInitAudioStateCallback()
 {
-    UnRegisterPreferedOutputDeviceChangeCallback();
+    AudioAdapter::GetInstance().RemovePreferredOutputDeviceChangeCallback(preferredOutputDeviceChangeCallback_);
     UnRegisterAudioDeviceChangeCallback();
-    audioPreferedOutputDeviceChangeCallback_ = nullptr;
+    preferredOutputDeviceChangeCallback_ = nullptr;
     audioDeviceChangeCallback_ = nullptr;
     isRegistered_ = false;
     outputDevice_ = AUDIO_OUTPUT_SOURCE;
-}
-
-void AudioDeviceManager::RegisterPreferedOutputDeviceChangeCallback()
-{
-    if (audioPreferedOutputDeviceChangeCallback_ == nullptr) {
-        audioPreferedOutputDeviceChangeCallback_ = std::make_shared<OutputDeviceChangeCallback>();
-    }
-    AudioStandard::AudioRoutingManager *audioRoutingManager =
-        AudioStandard::AudioRoutingManager::GetInstance();
-    if (audioRoutingManager == nullptr) {
-        SLOGE("audioRoutingManager is null");
-        return;
-    }
-    AudioStandard::AudioRendererInfo rendererInfo;
-    rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
-    audioRoutingManager->SetPreferredOutputDeviceChangeCallback(rendererInfo,
-        audioPreferedOutputDeviceChangeCallback_);
-}
-
-void AudioDeviceManager::UnRegisterPreferedOutputDeviceChangeCallback()
-{
-    SLOGI("enter UnRegisterPreferedOutputDeviceChangeCallback");
-    AudioStandard::AudioRoutingManager *audioRoutingManager = AudioStandard::AudioRoutingManager::GetInstance();
-    if (audioRoutingManager == nullptr) {
-        SLOGE("audioRoutingManger is null");
-        return;
-    }
-    audioRoutingManager->UnsetPreferredOutputDeviceChangeCallback();
 }
 
 void AudioDeviceManager::RegisterAudioDeviceChangeCallback()
@@ -143,7 +122,7 @@ void AudioDeviceManager::SetAudioState(int32_t state)
 void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
     const std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> &desc)
 {
-    SLOGI("receive OnPreferedOutputDeviceUpdated");
+    SLOGI("receive OnPreferredOutputDeviceUpdated");
     if (desc.empty()) {
         SLOGE("device is empty");
         return;
@@ -166,11 +145,12 @@ void OutputDeviceChangeCallback::OnPreferredOutputDeviceUpdated(
         if (AudioDeviceManager::GetInstance().GetAudioState() == AUDIO_OUTPUT_SINK) {
             return;
         }
-        SLOGI("receive OnPreferedOutputDeviceUpdated send remote session");
+        SLOGI("receive OnPreferredOutputDeviceUpdated send remote session");
         AudioDeviceManager::GetInstance().SetAudioState(AUDIO_OUTPUT_SINK);
         AudioDeviceManager::GetInstance().SendRemoteAvSessionInfo(deviceId);
     }
 }
+
 void DeviceChangeCallback::OnDeviceChange(const AudioStandard::DeviceChangeAction &deviceChangeAction)
 {
     std::vector<std::shared_ptr<AudioStandard::AudioDeviceDescriptor>> descs = deviceChangeAction.deviceDescriptors;
