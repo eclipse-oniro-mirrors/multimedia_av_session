@@ -36,28 +36,6 @@ public:
         AVCastController &out);
     static constexpr size_t TIME_OUT_SECOND = 5;
 
-    void SetDisplaySurfaceAsync(string_view surfaceId);
-    void SetDisplaySurfacePromise(string_view surfaceId);
-    array<DecoderType> GetSupportedDecodersPromise();
-    ResolutionLevel GetRecommendedResolutionLevelPromise(DecoderType decoderType);
-    array<uintptr_t> GetSupportedHdrCapabilitiesPromise();
-    array<double> GetSupportedPlaySpeedsPromise();
-    void SendControlCommandAsync(AVCastControlCommand const &command);
-    void SendControlCommandPromise(AVCastControlCommand const &command);
-    void StartAsync(AVQueueItem const& item);
-    void StartPromise(AVQueueItem const& item);
-    void PrepareAsync(AVQueueItem const& item);
-    void PreparePromise(AVQueueItem const& item);
-    AVQueueItem GetCurrentItemAsync();
-    AVQueueItem GetCurrentItemPromise();
-    void ProcessMediaKeyResponsePromise(string_view assetId, array_view<uint8_t> response);
-    void ReleaseAsync();
-    void ReleasePromise();
-    AVPlaybackState GetAVPlaybackStateAsync();
-    AVPlaybackState GetAVPlaybackStatePromise();
-    array<string> GetValidCommandsAsync();
-    array<string> GetValidCommandsPromise();
-    void SendCustomDataPromise(uintptr_t data);
     void SetDisplaySurfaceSync(string_view surfaceId);
     array<DecoderType> GetSupportedDecodersSync();
     ResolutionLevel GetRecommendedResolutionLevelSync(DecoderType decoderType);

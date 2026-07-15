@@ -109,16 +109,6 @@ static int32_t GetTaiheAVCastPickerOptions(const AVCastPickerOptions &in, TaiheA
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
-void AVCastPickerHelperInnerImpl::SelectPromise(optional_view<AVCastPickerOptions> options)
-{
-    return SelectSync(options);
-}
-
-void AVCastPickerHelperInnerImpl::ResetCommunicationDevicePromise()
-{
-    return ResetCommunicationDeviceSync();
-}
-
 void AVCastPickerHelperInnerImpl::SelectSync(optional_view<AVCastPickerOptions> options)
 {
     TaiheAVCastPickerOptions taiheAVCastPickerOptions;
