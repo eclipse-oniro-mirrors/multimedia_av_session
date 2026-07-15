@@ -93,6 +93,8 @@ private:
 
     int32_t HandleGetSessionId(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleGetUserId(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleIsDesktopLyricEnabled(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleSetDesktopLyricVisible(MessageParcel &data, MessageParcel &reply);
@@ -137,6 +139,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleIsSessionActive(data, reply); }},
         {CONTROLLER_CMD_GET_SESSION_ID,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetSessionId(data, reply); }},
+        {CONTROLLER_CMD_GET_USER_ID,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleGetUserId(data, reply); }},
         {CONTROLLER_CMD_GET_AV_QUEUE_ITEMS,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVQueueItems(data, reply); }},
         {CONTROLLER_CMD_GET_AV_QUEUE_TITLE,
@@ -187,6 +191,7 @@ private:
         {CONTROLLER_CMD_SET_PLAYBACK_FILTER, "HandleSetPlaybackFilter"},
         {CONTROLLER_CMD_IS_SESSION_ACTIVE, "HandleIsSessionActive"},
         {CONTROLLER_CMD_GET_SESSION_ID, "HandleGetSessionId"},
+        {CONTROLLER_CMD_GET_USER_ID, "HandleGetUserId"},
         {CONTROLLER_CMD_GET_AV_QUEUE_ITEMS, "HandleGetAVQueueItems"},
         {CONTROLLER_CMD_GET_AV_QUEUE_TITLE, "HandleGetAVQueueTitle"},
         {CONTROLLER_CMD_SKIP_TO_QUEUE_ITEM, "HandleSkipToQueueItem"},

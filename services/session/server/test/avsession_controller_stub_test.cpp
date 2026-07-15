@@ -233,6 +233,10 @@ public:
         loopModes = {0, 1, 2, 3};
         return isSuccess ? AVSESSION_SUCCESS : 0;
     };
+    int32_t GetUserId() override
+    {
+        return 0;
+    };
     bool isSuccess = true;
 };
 

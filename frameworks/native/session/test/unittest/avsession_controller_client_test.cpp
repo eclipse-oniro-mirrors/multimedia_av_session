@@ -326,5 +326,19 @@ HWTEST_F(AVSessionControllerClientTest, AVSessionControllerDemoGetSupportedLoopM
     EXPECT_EQ(avsessionControllerDemo.GetSupportedLoopModes(loopModes), AVSESSION_SUCCESS);
     SLOGD("AVSessionControllerDemoGetSupportedLoopModes001 End");
 }
+
+/**
+* @tc.name: AVSessionControllerDemoGetUserId001
+* @tc.desc: Get UserId in demo class
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerClientTest, AVSessionControllerDemoGetUserId001, TestSize.Level1)
+{
+    SLOGD("AVSessionControllerDemoGetUserId001 Begin");
+    AVSessionControllerDemo avsessionControllerDemo = AVSessionControllerDemo();
+    EXPECT_EQ(avsessionControllerDemo.GetUserId(), AVSESSION_SUCCESS);
+    SLOGD("AVSessionControllerDemoGetUserId001 End");
+}
 } // namespace AVSession
 } // namespace OHOS

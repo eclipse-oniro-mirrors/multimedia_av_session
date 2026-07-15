@@ -319,6 +319,14 @@ public:
     virtual std::string GetSessionId() = 0;
 
     /**
+     * @brief Get user id.
+     *
+     * @return Returns user id.
+     * @since 9
+    */
+    virtual int32_t GetUserId() { return AVSESSION_SUCCESS; };
+
+    /**
      * @brief Get current playback position.
      *
      * @return Returns current playback position.

@@ -167,6 +167,7 @@ napi_status NapiAVSessionController::NewInstance(
     NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiController)), napi_generic_failure);
     napiController->controller_ = std::move(nativeController);
     napiController->sessionId_ = napiController->controller_->GetSessionId();
+    napiController->userId_ = napiController->controller_->GetUserId();
 
     CHECK_RETURN(DoRegisterCallback(env, napiController, true) == napi_ok, "add callback failed", napi_generic_failure);
     SLOGD("add napiController instance prelock for sessionId: %{public}s***",
@@ -179,6 +180,9 @@ napi_status NapiAVSessionController::NewInstance(
     auto status = NapiUtils::SetValue(env, napiController->sessionId_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionId", property), napi_generic_failure);
+    status = NapiUtils::SetValue(env, napiController->userId_, property);
+    CHECK_RETURN(status == napi_ok, "create object userId failed", napi_generic_failure);
+    NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "userId", property), napi_generic_failure);
 
     out = instance;
     return napi_ok;

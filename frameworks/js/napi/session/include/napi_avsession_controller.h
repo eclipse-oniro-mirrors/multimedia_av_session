@@ -156,6 +156,7 @@ private:
 
     napi_ref wrapperRef_ {};
     std::string sessionId_;
+    int32_t userId_ = 0;
     std::shared_ptr<AVSessionController> controller_;
     std::shared_ptr<NapiAVControllerCallback> callback_;
     static std::mutex uvMutex_;

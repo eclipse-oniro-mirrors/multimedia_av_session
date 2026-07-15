@@ -49,7 +49,7 @@ AVControllerItem::~AVControllerItem()
 {
 }
 
-int32_t AVControllerItem::GetUserId() const
+int32_t AVControllerItem::GetUserId()
 {
     return userId_;
 }

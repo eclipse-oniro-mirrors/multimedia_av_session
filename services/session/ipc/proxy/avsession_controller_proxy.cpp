@@ -890,6 +890,24 @@ std::string AVSessionControllerProxy::GetSessionId()
     return reply.ReadString(result) ? result : "";
 }
 
+int32_t AVSessionControllerProxy::GetUserId()
+{
+    std::lock_guard lockGuard(controllerProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(!isDestroy_, -1, "controller is destroy");
+    MessageParcel parcel;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), -1, "write interface token failed");
+
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, -1, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CONTROLLER_CMD_GET_USER_ID, parcel, reply, option) == 0,
+        -1, "send request failed");
+
+    int32_t result;
+    return reply.ReadInt32(result) ? result : -1;
+}
+
 int64_t AVSessionControllerProxy::GetRealPlaybackPosition()
 {
     std::lock_guard lockGuard(controllerProxyLock_);

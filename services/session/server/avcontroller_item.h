@@ -31,7 +31,7 @@ public:
 
     ~AVControllerItem() override;
 
-    int32_t GetUserId() const;
+    int32_t GetUserId() override;
 
     int32_t GetAVCallState(AVCallState& avCallState) override;
 
