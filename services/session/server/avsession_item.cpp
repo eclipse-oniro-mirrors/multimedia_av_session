@@ -563,7 +563,8 @@ void AVSessionItem::UpdateMetaData(const AVMetaData& meta)
         AVSessionUtils::WriteImageToFile(innerPixelMap, fileDir, fileName);
         STORAGE_EVENT_RECORD_FILE_WRITE(fileDir + fileName, GetBundleName(), userId_);
         innerPixelMap->Clear();
-        metaData_.SetMediaImage(innerPixelMap);
+        std::shared_ptr<AVSessionPixelMap> newPixelMap = std::make_shared<AVSessionPixelMap>();
+        metaData_.SetMediaImage(newPixelMap);
     }
 }
 

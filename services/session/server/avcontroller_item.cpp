@@ -139,9 +139,10 @@ int32_t AVControllerItem::ReadImgForMetaData(AVMetaData& data)
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "SetImgForMetaData session not exist", false),
         "SetImgForMetaData session not exist");
-    std::shared_ptr<AVSessionPixelMap> innerPixelMap = data.GetMediaImage();
+    std::shared_ptr<AVSessionPixelMap> innerPixelMap = std::make_shared<AVSessionPixelMap>();
     session_->ReadMetaDataImg(innerPixelMap);
-
+    data.SetMediaImage(innerPixelMap);
+    
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = data.GetAVQueueImage();
     session_->ReadMetaDataAVQueueImg(avQueuePixelMap);
     return AVSESSION_SUCCESS;
