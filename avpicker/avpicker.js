@@ -1539,7 +1539,6 @@ export class AVCastPicker extends ViewPU {
                                                         }
                                                     }, If);
                                                     If.pop();
-                                                    Flex.pop();
                                                 });
                                             }
                                             else {
@@ -1548,6 +1547,7 @@ export class AVCastPicker extends ViewPU {
                                             }
                                         }, If);
                                         If.pop();
+                                        Flex.pop();
                                     });
                                 }
                                 else {
