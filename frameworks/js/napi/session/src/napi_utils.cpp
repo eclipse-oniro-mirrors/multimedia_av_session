@@ -234,7 +234,12 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
 
     size_t maxLen = STR_MAX_LENGTH;
     status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
-    if (status != napi_ok || maxLen >= STR_MAX_LENGTH) {
+    if (status != napi_ok) {
+        SLOGE("get string length failed, status=%{public}d", static_cast<int>(status));
+        return napi_invalid_arg;
+    }
+    if (maxLen >= STR_MAX_LENGTH) {
+        SLOGE("length %{public}zu exceeds max limit %{public}d, string will be ignored", maxLen, STR_MAX_LENGTH);
         return napi_invalid_arg;
     }
 
@@ -761,6 +766,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, AVCastPlayerState& 
     size_t maxLen = STR_MAX_LENGTH;
     status = napi_get_value_string_utf8(env, in, nullptr, 0, &maxLen);
     if (maxLen >= STR_MAX_LENGTH) {
+        SLOGE("cast player state string length %{public}zu exceeds max limit %{public}d", maxLen, STR_MAX_LENGTH);
         return napi_invalid_arg;
     }
 
@@ -1959,6 +1965,7 @@ napi_status NapiUtils::GetOptionalString(napi_env env, napi_value in, DeviceInfo
             out.ipAddress_ = "";
         } else {
             if (maxLen >= static_cast<size_t>(STR_MAX_LENGTH)) {
+                SLOGE("DeviceInfo ipAddress length %{public}zu exceeds max limit %{public}d", maxLen, STR_MAX_LENGTH);
                 return napi_invalid_arg;
             }
             char buf[STR_MAX_LENGTH + STR_TAIL_LENGTH] {};
