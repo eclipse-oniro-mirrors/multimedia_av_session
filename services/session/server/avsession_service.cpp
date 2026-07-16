@@ -82,6 +82,7 @@ const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservic
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t CONTROL_COLD_START = 2;
 #endif
+static const int32_t DEFAULT_IMAGE_SIZE = 256;
 const std::string PAD_DEVICE_TYPE = "tablet";
 const std::string PC_DEVICE_TYPE = "2in1";
 const std::string PHONE_DEVICE_TYPE = "phone";
@@ -4571,6 +4572,8 @@ std::shared_ptr<Media::PixelMap> ConvertDefaultImage()
     if (imageSource != nullptr) {
         Media::DecodeOptions dOpts;
         dOpts.allocatorType = Media::AllocatorType::HEAP_ALLOC;
+        dOpts.desiredSize.width = DEFAULT_IMAGE_SIZE;
+        dOpts.desiredSize.height = DEFAULT_IMAGE_SIZE;
         g_defaultMediaImage = imageSource->CreatePixelMap(dOpts, errorCode);
         if (g_defaultMediaImage != nullptr) {
             SLOGI("ConvertDefaultImage CreatePixelMap success");
