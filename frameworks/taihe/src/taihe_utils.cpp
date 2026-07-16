@@ -541,6 +541,7 @@ int32_t TaiheUtils::GetStageElementName(uintptr_t context, OHOS::AppExecFwk::Ele
 int32_t TaiheUtils::GetString(string_view in, std::string &out)
 {
     if (in.size() >= STR_MAX_LENGTH) {
+        SLOGE("length %{public}zu exceeds max limit %{public}zu, string will be ignored", in.size(), STR_MAX_LENGTH);
         return OHOS::AVSession::ERR_INVALID_PARAM;
     }
     out = std::string(in);
