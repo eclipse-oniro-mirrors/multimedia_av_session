@@ -2126,13 +2126,6 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTING);
     }
     if (castState == connectStateFromCast_) { // 6 is connected status (stream)
-        AVRouter::GetInstance().GetRemoteNetWorkId(
-            castHandle_, deviceInfo.realDeviceId_, collaborationNeedNetworkId_);
-        if (collaborationNeedNetworkId_.empty()) {
-            SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkId(deviceInfo.realDeviceId_).c_str());
-            collaborationNeedNetworkId_ = deviceInfo.realDeviceId_;
-        }
         CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_CONNECTED);
     }
@@ -2218,6 +2211,20 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
     }
 }
 
+void AVSessionItem::BuildCollaborationPublishStateParam(int32_t castState, DeviceInfo deviceInfo)
+{
+    if (castState == connectStateFromCast_) { // 6 is connected status (stream)
+        AVRouter::GetInstance().GetRemoteNetWorkId(
+            castHandle_, deviceInfo.realDeviceId_, collaborationNeedNetworkId_);
+        if (collaborationNeedNetworkId_.empty()) {
+            SLOGI("networkId is empty, try use deviceId:%{public}s",
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.realDeviceId_).c_str());
+            collaborationNeedNetworkId_ = deviceInfo.realDeviceId_;
+        }
+        collaborationNeedDeviceId_ = deviceInfo.realDeviceId_;
+    }
+}
+
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode)
 {
     SLOGI("OnCastStateChange in with BundleName: %{public}s | state: %{public}d | id: %{public}s",
@@ -2227,7 +2234,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
-    collaborationNeedDeviceId_ = deviceInfo.realDeviceId_;
+    BuildCollaborationPublishStateParam(castState, deviceInfo);
     if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
         DealCollaborationPublishState(castState, deviceInfo);
     }
