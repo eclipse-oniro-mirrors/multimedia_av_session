@@ -864,13 +864,6 @@ export class AVCastPicker extends ViewPU {
         }
     }
 
-    showHighQuality(item) {
-        if (item.supportedProtocols === undefined) {
-            return false;
-        }
-        return (item.supportedProtocols & castPlusAudioType) !== 0;
-    }
-
     createNullRoomService() {
         return [{ 'st': '', 'ts': '', 'sid': '', 'data': { 'bassWeight': 0, 'playTask': '', 'acousticsMode': 0, 'volumePercentage': 0, 'description': 0,
             'supportMusicLed': false, 'label': '', 'type': 0, 'roomId': '', 'limitedVolume': 0, 'volume': 0, 'faultCode': 0, 'supportStereo': 0,
@@ -1346,9 +1339,9 @@ export class AVCastPicker extends ViewPU {
                     Flex.width(this.isPc ? 254 : 144);
                     Flex.padding({
                         left: 8,
-                        top: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                        top: this.isPc ? 11 : (x8.isHiPlay ? 7 : 17),
                         right: 8,
-                        bottom: this.isPc ? 11 : (this.showHighQuality(x8) ? 7 : 17),
+                        bottom: this.isPc ? 11 : (x8.isHiPlay ? 7 : 17),
                     });
                 }, Flex);
                 this.textBuilder.bind(this)(x8);
@@ -1359,7 +1352,7 @@ export class AVCastPicker extends ViewPU {
                             this.subTextBuilder.bind(this)(x8);
                         });
                     }
-                    else if (x8.highQualityParams !== undefined && this.showHighQuality(x8)) {
+                    else if (x8.highQualityParams !== undefined && x8.isHiPlay) {
                         this.ifElseBranchUpdateFunction(1, () => {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 Flex.create();

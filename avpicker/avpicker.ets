@@ -391,13 +391,6 @@ export struct AVCastPicker {
     }
   }
 
-  private showHighQuality(item: AVCastPickerDeviceInfo): boolean {
-    if (item.supportedProtocols === undefined) {
-      return false;
-    }
-    return (item.supportedProtocols & castPlusAudioType) !== 0;
-  }
-
   private createNullRoomService(): HomeMusicServices[] {
     return [{'st':'','ts':'','sid':'','data':{'bassWeight':0,'playTask':'','acousticsMode':0,'volumePercentage':0,'description':0,
       'supportMusicLed':false,'label':'','type':0,'roomId':'','limitedVolume':0,'volume':0,'faultCode':0,'supportStereo':0,
@@ -1039,7 +1032,7 @@ export struct AVCastPicker {
                 this.textBuilder(item)
                 if (item.fromCall) {
                   this.subTextBuilder(item)
-                } else if (item.highQualityParams !== undefined && this.showHighQuality(item)) {
+                } else if (item.highQualityParams !== undefined && item.isHiPlay) {
                   Flex() {
                     this.highQualityIconBuilder(item.highQualityParams)
                   }
@@ -1154,9 +1147,9 @@ export struct AVCastPicker {
               .width(this.isPc ? 254 : 144)
               .padding({
                 left: 8,
-                top: this.isPc ? 11 : (this.showHighQuality(item) ? 7 : 17),
+                top: this.isPc ? 11 : (item.isHiPlay ? 7 : 17),
                 right: 8,
-                bottom: this.isPc ? 11 : (this.showHighQuality(item) ? 7 : 17),
+                bottom: this.isPc ? 11 : (item.isHiPlay ? 7 : 17),
               })
             }
             .alignItems(VerticalAlign.Center)
