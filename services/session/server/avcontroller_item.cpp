@@ -663,6 +663,10 @@ void AVControllerItem::HandleSetSessionEvent(const std::string& event, const AAF
     if (callback_ != nullptr) {
         callback_->OnSessionEventChange(event, args);
     }
+    for (const auto& [pid, listener] : callbackListForMigrate_) {
+        CHECK_AND_CONTINUE(listener != nullptr);
+        listener->OnSessionEventChange(event, args);
+    }
 }
 
 // LCOV_EXCL_START
