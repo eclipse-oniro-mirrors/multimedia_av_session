@@ -93,6 +93,8 @@ public:
     void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
 
     void DealLocalState(const int32_t castState, const OutputDeviceInfo& outputDeviceInfo);
+    
+    void BuildCollaborationPublishStateParam(int32_t castState, DeviceInfo deviceInfo);
 
     void OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode);
 
