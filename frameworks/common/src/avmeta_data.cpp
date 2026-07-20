@@ -86,6 +86,12 @@ AVMetaData *AVMetaData::Unmarshalling(Parcel& in)
         metaData = nullptr;
         return nullptr;
     }
+    if (metaData->displayTags_ < 0 || metaData->displayTags_ > DISPLAY_TAG_ALL) {
+        SLOGE("read AVMetaData with invalid displayTags");
+        delete metaData;
+        metaData = nullptr;
+        return nullptr;
+    }
     int32_t maxImageSize = 10 * 1024 *1024;
     bool isImageValid = twoImageLength > 0 && twoImageLength <= maxImageSize;
     if (!isImageValid) {
@@ -218,6 +224,9 @@ bool AVMetaData::UnmarshallingExceptImg(MessageParcel& data)
 
 bool AVMetaData::WriteDrmSchemes(Parcel& parcel) const
 {
+    int32_t maxDrmSchemesLen = 10;
+    CHECK_AND_RETURN_RET_LOG(drmSchemes_.size() <= static_cast<size_t>(maxDrmSchemesLen), false,
+        "drmSchemes size is illegal");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(drmSchemes_.size()), false,
         "write drmSchemes size failed");
     for (auto drmScheme : drmSchemes_) {
@@ -228,6 +237,9 @@ bool AVMetaData::WriteDrmSchemes(Parcel& parcel) const
 
 bool AVMetaData::WriteDrmSchemes(MessageParcel& parcel)
 {
+    int32_t maxDrmSchemesLen = 10;
+    CHECK_AND_RETURN_RET_LOG(drmSchemes_.size() <= static_cast<size_t>(maxDrmSchemesLen), false,
+        "drmSchemes size is illegal");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(drmSchemes_.size()), false,
         "write drmSchemes size failed");
     for (auto drmScheme : drmSchemes_) {
@@ -607,6 +619,10 @@ int32_t AVMetaData::GetAVQueueLength() const
 void AVMetaData::SetDisplayTags(int32_t displayTags)
 {
     SLOGD("SetDisplayTags %{public}d", static_cast<int32_t>(displayTags));
+    if (displayTags < 0 || displayTags > AVMetaData::DISPLAY_TAG_ALL) {
+        SLOGE("SetDisplayTags with invalid displayTags %{public}d", static_cast<int32_t>(displayTags));
+        return;
+    }
     displayTags_ = displayTags;
     metaMask_.set(META_KEY_DISPLAY_TAGS);
 }

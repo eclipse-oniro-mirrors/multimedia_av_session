@@ -293,7 +293,8 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
     SLOGI("mediaDescription duration is %{public}d startPosition is %{public}d",
         mediaInfo.duration, mediaInfo.startPosition);
-    mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
+    mediaInfo.closingCreditsPosition =
+        static_cast<uint32_t>(std::max(mediaDescription->GetCreditsPosition(), 0));
     mediaInfo.albumCoverUrl = mediaDescription->GetIconUri() == "" ?
         mediaDescription->GetAlbumCoverUri() : mediaDescription->GetIconUri();
     mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();

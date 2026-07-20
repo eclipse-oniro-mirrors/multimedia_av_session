@@ -91,6 +91,8 @@ public:
     };
 
 private:
+    int32_t SetParamFromParcel(int32_t cmd, Parcel& data);
+
     int32_t cmd_ = CAST_CONTROL_CMD_INVALID;
     std::variant<int32_t, double, int64_t, bool> param_;
 };
