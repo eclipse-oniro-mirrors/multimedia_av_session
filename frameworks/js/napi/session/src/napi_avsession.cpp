@@ -1369,9 +1369,7 @@ bool NapiAVSession::CheckMetaOutOfDate(NapiAVSession* napiAVSession, OHOS::AVSes
 napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
 {
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVMetadata");
-    struct ConcreteContext : public ContextBase {
-        AVMetaData metaData;
-    };
+    struct ConcreteContext : public ContextBase { AVMetaData metaData; };
     auto context = std::make_shared<ConcreteContext>();
     CHECK_AND_RETURN_RET_LOG(context != nullptr, NapiUtils::GetUndefinedValue(env), "SetAVMetaData failed: no memory");
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
@@ -1386,22 +1384,29 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     auto* napiAvSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiAvSession == nullptr || napiAvSession->metaData_.EqualWithUri((context->metaData))) {
         SLOGI("Session nullptr or metadata all same");
-        auto executor = []() {};
-        return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", executor, complete);
+        return NapiAsyncWork::Enqueue(env, context, "SetAVMetaData", []() {}, complete);
     }
     napiAvSession->metaData_ = context->metaData;
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
     DoLastMetaDataRefresh(napiAvSession);
 
-    std::thread([napiAvSession, metaData = context->metaData]() {
-        AVQueueImgDownloadSyncExecutor(napiAvSession, metaData);
+    std::thread([sessionWeak = std::weak_ptr<AVSession>(napiAvSession->session_),
+        avQueueId = napiAvSession->latestDownloadedAVQueueId_, metaData = context->metaData]() {
+        AVQueueImgDownloadSyncExecutor(sessionWeak, avQueueId, metaData);
     }).detach();
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        bool isRepeatDownload = napiSession->latestDownloadedAssetId_ == napiSession->latestMetadataAssetId_ &&
-            napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
-        bool res = doMetaDataSetNapi(context, napiSession->session_, context->metaData, isRepeatDownload);
+        CHECK_AND_RETURN_LOG(napiSession != nullptr, "SetAVMetaData executor without napiSession");
+        std::shared_ptr<AVSession> sessionHolder;
+        bool isRepeatDownload;
+        {
+            std::lock_guard<std::mutex> lockGuard(lock_);
+            isRepeatDownload = napiSession->latestDownloadedAssetId_ == napiSession->latestMetadataAssetId_ &&
+                napiSession->latestDownloadedUri_ == napiSession->latestMetadataUri_;
+            sessionHolder = napiSession->session_;
+        }
+        bool res = doMetaDataSetNapi(context, sessionHolder, context->metaData, isRepeatDownload);
         {
             std::lock_guard<std::mutex> lockGuard(lock_);
             bool isOutOfDate = CheckMetaOutOfDate(napiSession, context->metaData);
@@ -1464,27 +1469,28 @@ std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<
     };
 }
 
-void NapiAVSession::AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
-    OHOS::AVSession::AVMetaData metaData)
+void NapiAVSession::AVQueueImgDownloadSyncExecutor(std::weak_ptr<AVSession> sessionWeak,
+    std::shared_ptr<std::string> latestDownloadedAVQueueId, OHOS::AVSession::AVMetaData metaData)
 {
     std::lock_guard<std::mutex> lockGuard(downloadAVQImgMutex_);
     SLOGI("doAVQueueImgDownload:%{public}s", metaData.GetAssetId().c_str());
     AVQueueInfo info = AVQueueInfo();
-    CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "avqImg download NoSession");
+    CHECK_AND_RETURN_LOG(sessionWeak.lock() != nullptr && latestDownloadedAVQueueId != nullptr,
+        "avqImg download NoSession");
     CHECK_AND_RETURN_LOG(!metaData.GetAVQueueImageUri().empty() && metaData.GetAVQueueImage() == nullptr,
         "avqImg not match download conditions");
 
-    CHECK_AND_RETURN_LOG(napiSession->latestDownloadedAVQueueId_ != metaData.GetAVQueueId(), "repeat avqId return");
+    CHECK_AND_RETURN_LOG(*latestDownloadedAVQueueId != metaData.GetAVQueueId(), "repeat avqId return");
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     bool ret = NapiUtils::DoDownloadInCommon(pixelMap, metaData.GetAVQueueImageUri(), NapiAVSession::bundleName_);
-    CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "aft avq download NoSession");
     CHECK_AND_RETURN_LOG(ret && pixelMap != nullptr, "download avqImg fail");
-    napiSession->latestDownloadedAVQueueId_ = metaData.GetAVQueueId();
+    *latestDownloadedAVQueueId = metaData.GetAVQueueId();
     info.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(pixelMap, true));
     info.SetAVQueueId(metaData.GetAVQueueId());
     info.SetAVQueueName(metaData.GetAVQueueName());
-    CHECK_AND_RETURN_LOG(napiSession != nullptr && napiSession->session_ != nullptr, "aft avq convert NoSession");
-    napiSession->session_->UpdateAVQueueInfo(info);
+    auto session = sessionWeak.lock();
+    CHECK_AND_RETURN_LOG(session != nullptr, "aft avq download NoSession");
+    session->UpdateAVQueueInfo(info);
 }
 
 napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
@@ -2210,9 +2216,7 @@ napi_value NapiAVSession::Deactivate(napi_env env, napi_callback_info info)
 
 napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
 {
-    struct ConcreteContext : public ContextBase {
-        std::shared_ptr<AVSession> sessionHolder_;
-    };
+    struct ConcreteContext : public ContextBase { std::shared_ptr<AVSession> sessionHolder_; };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("Destroy failed : no memory");
@@ -2238,6 +2242,7 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
         }
         int32_t ret = context->sessionHolder_->Destroy();
         if (napiSession != nullptr && ret == AVSESSION_SUCCESS) {
+            std::lock_guard<std::mutex> lockGuard(lock_);
             napiSession->session_ = nullptr;
             napiSession->callback_ = nullptr;
         } else if (ret == ERR_SESSION_NOT_EXIST) {
@@ -2254,9 +2259,7 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
     };
-    auto complete = [env](napi_value& output) {
-        output = NapiUtils::GetUndefinedValue(env);
-    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "Destroy", executor, complete);
 }
 
