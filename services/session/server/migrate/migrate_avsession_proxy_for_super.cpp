@@ -566,9 +566,8 @@ int32_t MigrateAVSessionProxy::ConvertStateFromDoubleToSingle(int32_t state)
             return AVPlaybackState::PLAYBACK_STATE_ERROR;
         default:
             SLOGW("unknowState: %{public}d", state);
-            break;
+            return AVPlaybackState::PLAYBACK_STATE_ERROR;
     }
-    return state;
 }
 
 void MigrateAVSessionProxy::NotifyControllerGone(pid_t pid)

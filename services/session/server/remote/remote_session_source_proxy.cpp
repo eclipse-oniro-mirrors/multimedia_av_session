@@ -65,6 +65,7 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
         if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
             dlclose(handle_);
+            handle_ = nullptr;
 #endif
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s",
@@ -75,6 +76,7 @@ int32_t RemoteSessionSourceProxy::UnLoadSourceImplement() __attribute__((no_sani
     if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
         dlclose(handle_);
+        handle_ = nullptr;
 #endif
     }
     return AVSESSION_SUCCESS;

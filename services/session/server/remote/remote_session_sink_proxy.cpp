@@ -65,6 +65,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
         if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
             dlclose(handle_);
+            handle_ = nullptr;
 #endif
         }
         SLOGE("Failed to get extension symbol %{public}s in %{public}s", "DestroyRemoteSessionSinkImpl",
@@ -76,6 +77,7 @@ int32_t RemoteSessionSinkProxy::UnLoadSinkImplement() __attribute__((no_sanitize
     if (handle_ != nullptr) {
 #ifndef TEST_COVERAGE
         dlclose(handle_);
+        handle_ = nullptr;
 #endif
     }
     return AVSESSION_SUCCESS;

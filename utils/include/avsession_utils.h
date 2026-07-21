@@ -72,6 +72,13 @@ public:
     static bool ReadPairFromFile(std::pair<std::string, int32_t>& castPair,
         const std::string& fileDir, const std::string& fileName)
     {
+        if (fileName.find("..") != std::string::npos ||
+            fileName.find("/") != std::string::npos ||
+            fileName.find("\\") != std::string::npos) {
+            SLOGE("Invalid fileName: contains path traversal characters");
+            return false;
+        }
+
         std::string filePath = fileDir + fileName;
 
         char realPath[PATH_MAX] = { 0x00 };
@@ -110,6 +117,13 @@ public:
     {
         if (innerPixelMap == nullptr) {
             SLOGE("innerPixelMap is nullptr");
+            return;
+        }
+        
+        if (fileName.find("..") != std::string::npos ||
+            fileName.find("/") != std::string::npos ||
+            fileName.find("\\") != std::string::npos) {
+            SLOGE("Invalid fileName: contains path traversal characters");
             return;
         }
 
