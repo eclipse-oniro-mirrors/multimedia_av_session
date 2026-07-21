@@ -102,6 +102,8 @@ int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
     parcel.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(avQueueItem.GetDescription() != nullptr, ERR_INVALID_PARAM,
+        "description is nullptr");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteFileDescriptor(avQueueItem.GetDescription()->GetFdSrc().fd_),
         ERR_UNMARSHALLING, "Write avQueueItem failed");
@@ -130,6 +132,8 @@ int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
     parcel.SetMaxCapacity(defaultIpcCapacity);
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
         "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(avQueueItem.GetDescription() != nullptr, ERR_INVALID_PARAM,
+        "description is nullptr");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
     if (avQueueItem.GetDescription()->GetFdSrc().fd_ == 0) {
         parcel.WriteBool(false);

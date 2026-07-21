@@ -30,7 +30,9 @@ ContextBase::~ContextBase()
         if (callbackRef != nullptr) {
             napi_delete_reference(env, callbackRef);
         }
-        napi_delete_reference(env, selfRef);
+        if (selfRef != nullptr) {
+            napi_delete_reference(env, selfRef);
+        }
         env = nullptr;
         callbackRef = nullptr;
         selfRef = nullptr;
@@ -51,6 +53,8 @@ void ContextBase::GetCbInfo(napi_env envi, napi_callback_info info, NapiCbInfoPa
     napi_create_reference(env, self, 1, &selfRef);
     status = napi_unwrap(env, self, &native);
     CHECK_STATUS_RETURN_VOID(this, "self unwrap failed!", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    CHECK_ARGS_RETURN_VOID(this, native != nullptr, "self native is nullptr!",
+        NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
 
     if (!sync && (argc > 0)) {
         // get the last arguments :: <callback>

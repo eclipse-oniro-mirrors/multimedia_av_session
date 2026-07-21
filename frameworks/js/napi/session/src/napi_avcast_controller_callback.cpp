@@ -428,6 +428,10 @@ int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, const std::share
         SLOGE("dataSrcRef_ nullptr");
         return 0;
     }
+    if (mem == nullptr) {
+        SLOGE("mem nullptr");
+        return 0;
+    }
     DataContextForThreadSafe* data =
         new DataContextForThreadSafe { dataSrcRef_, mem->GetBase(), length, pos, &result, dataSrcSyncCond_ };
     napi_status status = napi_call_threadsafe_function(threadSafeReadDataSrcFunc_, data, napi_tsfn_blocking);

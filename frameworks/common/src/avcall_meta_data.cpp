@@ -39,6 +39,9 @@ AVCallMetaData *AVCallMetaData::Unmarshalling(Parcel& data)
         !data.ReadString(result->phoneNumber_) ||
         !data.ReadString(result->mediaImageUri_)) {
         SLOGE("read AVCallMetaData name phoneNumber or mediaImageUri failed.");
+        delete result;
+        result = nullptr;
+        return nullptr;
     }
     result->mediaImage_ = std::shared_ptr<AVSessionPixelMap>(data.ReadParcelable<AVSessionPixelMap>());
     if (result->callMetaMask_.test(AVCALL_META_KEY_MEDIA_IMAGE) && result->mediaImage_ == nullptr) {

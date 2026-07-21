@@ -99,6 +99,10 @@ napi_status NapiQueueItem::GetDescription(napi_env env, napi_value in, AVQueueIt
 
 napi_status NapiQueueItem::SetDescription(napi_env env, const AVQueueItem& in, napi_value& out)
 {
+    if (in.GetDescription() == nullptr) {
+        SLOGE("description is nullptr");
+        return napi_invalid_arg;
+    }
     napi_value property {};
     auto status = NapiUtils::SetValue(env, *(in.GetDescription()), property);
     CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);

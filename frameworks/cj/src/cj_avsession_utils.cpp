@@ -937,6 +937,11 @@ int32_t ConvertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&c
 int32_t ConvertNativeToCJStruct(const AVQueueItem& native, CAVQueueItem& cj)
 {
     cj.itemId = native.GetItemId();
+    if (native.GetDescription() == nullptr) {
+        SLOGE("description is nullptr");
+        cj.description = {};
+        return CJNO_ERROR;
+    }
     return ConvertNativeToCJStruct(*native.GetDescription(), cj.description);
 }
 
@@ -949,7 +954,14 @@ int32_t ConvertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescri
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetDescription(), cj.description); });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetMediaUri(), cj.mediaUri); });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetMediaType(), cj.mediaType); });
-    steps.push_back([&]() { return ConvertNativeToCJStruct(*native.GetExtras(), cj.extras); });
+    steps.push_back([&]() {
+        if (native.GetExtras() == nullptr) {
+            SLOGE("extras is nullptr");
+            cj.extras = {};
+            return CJNO_ERROR;
+        }
+        return ConvertNativeToCJStruct(*native.GetExtras(), cj.extras);
+    });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAlbumTitle(), cj.albumTitle); });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAlbumCoverUri(), cj.albumCoverUri); });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetLyricContent(), cj.lyricContent); });
@@ -1009,6 +1021,11 @@ int32_t ConvertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState&
     cj.duration = native.GetDuration();
     cj.videoWidth = native.GetVideoWidth();
     cj.videoHeight = native.GetVideoHeight();
+    if (native.GetExtras() == nullptr) {
+        SLOGE("extras is nullptr");
+        cj.extras = {};
+        return CJNO_ERROR;
+    }
     return ConvertNativeToCJStruct(*native.GetExtras(), cj.extras);
 }
 

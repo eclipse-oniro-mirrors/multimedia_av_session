@@ -379,7 +379,7 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
         return ThrowErrorAndReturn(env, "event name invalid", ERR_INVALID_PARAM);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession->session_ == nullptr) {
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
         SLOGE("OnEvent failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
@@ -1249,7 +1249,7 @@ napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVCallState failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1517,7 +1517,7 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
     context->taskId = NAPI_SEND_CUSTOM_DATA_TASK_ID;
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SendCustomData failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1961,7 +1961,7 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAudioStreamId failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1990,7 +1990,7 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "GetController failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2110,7 +2110,7 @@ napi_value NapiAVSession::GetOutputDeviceSync(napi_env env, napi_callback_info i
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession->session_ == nullptr) {
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
         SLOGE("NapiAVSession GetOutputDeviceSync fail:session nullptr");
         NapiUtils::ThrowError(env, "NapiAVSession GetOutputDeviceSync failed : session is nullptr",
             NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);

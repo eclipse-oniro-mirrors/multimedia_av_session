@@ -541,7 +541,7 @@ napi_value NapiAVSessionController::GetAVQueueItemsSync(napi_env env, napi_callb
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("GetAVQueueItemsSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetAVQueueItemsSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -979,7 +979,7 @@ napi_value NapiAVSessionController::GetValidCommandsSync(napi_env env, napi_call
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("GetValidCommandsSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetValidCommandsSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -1982,7 +1982,7 @@ napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, na
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGI("GetRealPlaybackPositionSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetRealPlaybackPositionSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
