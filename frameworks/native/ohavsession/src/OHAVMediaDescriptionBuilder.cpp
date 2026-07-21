@@ -229,7 +229,8 @@ AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetAlbumCoverUri(
             "Failed to set mediaImage: mediaDescriptionBuilder is null", true);
         return AVQUEUEITEM_ERROR_INVALID_PARAM;
     }
-    return mediaDescriptionBuilder->SetAlbumCoverUri(albumCoverUri);
+    size_t uriLen = strlen(albumCoverUri);
+    return mediaDescriptionBuilder->SetAlbumCoverUri(std::string(albumCoverUri, uriLen));
 }
 
 AVQueueItem_Result OH_AVSession_AVMediaDescriptionBuilder_SetMediaType(OH_AVSession_AVMediaDescriptionBuilder* builder,

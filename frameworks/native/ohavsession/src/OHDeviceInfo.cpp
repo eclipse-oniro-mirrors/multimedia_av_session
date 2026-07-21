@@ -73,8 +73,8 @@ AVSession_OutputDeviceInfo* OHDeviceInfo::ConvertDesc(const OHOS::AVSession::Out
         int32_t deviceType = (*it).deviceType_;
         int32_t supportedProtocols = (*it).supportedProtocols_;
 
-        deviceInfoPtr[index] =
-            (OHDeviceInfo *)(new OHDeviceInfo(castCategory, deviceId, deviceName, deviceType, supportedProtocols));
+        deviceInfoPtr[index] = (OHDeviceInfo *)(new(std::nothrow) OHDeviceInfo(
+            castCategory, deviceId, deviceName, deviceType, supportedProtocols));
         if (deviceInfoPtr[index] == nullptr) {
             for (uint32_t j = 0; j < index; ++j) {
                 delete deviceInfoPtr[j];
