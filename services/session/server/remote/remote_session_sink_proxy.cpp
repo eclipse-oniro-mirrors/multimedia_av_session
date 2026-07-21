@@ -52,6 +52,12 @@ int32_t RemoteSessionSinkProxy::LoadSinkImplement() __attribute__((no_sanitize("
     }
 
     sinkImpl_ = createRemoteSessionSinkImpl();
+    if (sinkImpl_ == nullptr) {
+        SLOGE("createRemoteSessionSinkImpl returned nullptr");
+        dlclose(handle_);
+        handle_ = nullptr;
+        return AVSESSION_ERROR;
+    }
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP

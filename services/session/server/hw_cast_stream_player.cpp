@@ -204,6 +204,7 @@ int32_t HwCastStreamPlayer::RefreshCurrentAVQueueItem(const AVQueueItem& avQueue
 int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
 {
     std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
+    CHECK_AND_RETURN_RET_LOG(mediaDescription != nullptr, AVSESSION_ERROR, "mediaDescription is nullptr");
     CastEngine::MediaInfo mediaInfo;
     buildCastInfo(mediaDescription, mediaInfo);
 

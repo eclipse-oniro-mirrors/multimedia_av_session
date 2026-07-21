@@ -138,6 +138,10 @@ void AVSessionRadar::InitBMS()
 void AVSessionRadar::GetJsonCastDeviceList(const OutputDeviceInfo &deviceInfo, std::string& deviceList)
 {
     cJSON* jDeviceInfos = cJSON_CreateArray();
+    if (jDeviceInfos == nullptr) {
+        SLOGE("fail create jDeviceInfos");
+        return;
+    }
     for (const DeviceInfo& deviceInfo : deviceInfo.deviceInfos_) {
         cJSON* jDeviceInfo = cJSON_CreateObject();
         if (jDeviceInfo == nullptr) {

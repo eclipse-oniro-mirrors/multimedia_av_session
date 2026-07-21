@@ -66,6 +66,10 @@ static void OnShutdown(int32_t socket, ShutdownReason reason)
 static void OnBytes(int socket, const void *data, unsigned int dataLen)
 {
     SLOGI("SoftbusClient OnBytesReceived sessionId[%{public}d], datalen[%{public}d]", socket, dataLen);
+    if (data == nullptr || dataLen == 0) {
+        SLOGE("OnBytes: invalid params, data is null or dataLen is zero");
+        return;
+    }
     if (callbackFunc_ != nullptr) {
         callbackFunc_->OnBytes(socket, data, dataLen);
     }

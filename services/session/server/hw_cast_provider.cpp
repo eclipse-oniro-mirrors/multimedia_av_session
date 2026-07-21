@@ -716,6 +716,7 @@ void HwCastProvider::InitCastSessionProperty(uint32_t prototype, bool isPcm, Cas
         sptr<Rosen::DisplayLite> display = Rosen::DisplayManagerLite::GetInstance().GetDefaultDisplay();
         CHECK_AND_RETURN_LOG(display != nullptr, "display is nullptr");
         auto displayInfo = display->GetDisplayInfo();
+        CHECK_AND_RETURN_LOG(displayInfo != nullptr, "displayInfo is nullptr");
         int32_t width = displayInfo->GetWidth();
         int32_t height = displayInfo->GetHeight();
         property.windowProperty.startX = 0;

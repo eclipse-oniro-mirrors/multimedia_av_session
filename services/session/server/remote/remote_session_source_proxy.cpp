@@ -52,6 +52,12 @@ int32_t RemoteSessionSourceProxy::LoadSourceImplement() __attribute__((no_saniti
     }
 
     sourceImpl_ = createRemoteSessionSourceImpl();
+    if (sourceImpl_ == nullptr) {
+        SLOGE("createRemoteSessionSourceImpl returned nullptr");
+        dlclose(handle_);
+        handle_ = nullptr;
+        return AVSESSION_ERROR;
+    }
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
