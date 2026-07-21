@@ -32,6 +32,10 @@ NapiAVCastControllerCallback::NapiAVCastControllerCallback()
 
 NapiAVCastControllerCallback::~NapiAVCastControllerCallback()
 {
+    if (isValid_ != nullptr) {
+        SLOGI("destroy with isValid_ set false");
+        *isValid_ = false;
+    }
     if (dataSrcRef_ != nullptr) {
         napi_ref ref = dataSrcRef_;
         dataSrcRef_ = nullptr;

@@ -104,8 +104,8 @@ private:
     static std::function<void()> PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
         AVPlaybackState playBackState);
     static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context);
-    static void AVQueueImgDownloadSyncExecutor(NapiAVSession* napiSession,
-        OHOS::AVSession::AVMetaData metaData);
+    static void AVQueueImgDownloadSyncExecutor(std::weak_ptr<AVSession> sessionWeak,
+        std::shared_ptr<std::string> latestDownloadedAVQueueId, OHOS::AVSession::AVMetaData metaData);
 
     static void BuildErrorContext(std::shared_ptr<ContextBase> context, int32_t ret);
     static void TryReuseCallback(NapiAVSession* napiSession, const AAFwk::WantParams& extras);
@@ -177,7 +177,8 @@ private:
     std::string latestMetadataAssetId_;
     std::string latestDownloadedUri_;
     std::string latestDownloadedAssetId_;
-    std::string latestDownloadedAVQueueId_;
+    // shared_ptr keeps the dedup id alive for the detached download thread after this object is destroyed
+    std::shared_ptr<std::string> latestDownloadedAVQueueId_ = std::make_shared<std::string>();
     AVMetaData metaData_;
     Rosen::IInputEventRecipientInfo recipientInfo_;
 
