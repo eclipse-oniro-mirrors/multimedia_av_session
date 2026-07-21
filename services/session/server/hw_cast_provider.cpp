@@ -127,14 +127,13 @@ void HwCastProvider::Release()
         avCastControllerMap_.clear();
         castStateListenerList_.clear();
         castFlag_.clear();
-    }
-    if (!isRelease_) {
-        SLOGI("release in with check pass");
+        if (isRelease_) {
+            SLOGW("already in release, check return");
+            return;
+        }
         isRelease_ = true;
-    } else {
-        SLOGW("already in release, check return");
-        return;
     }
+    SLOGI("release in with check pass");
     CastSessionManager::GetInstance().UnregisterListener();
     SLOGD("provider release done");
 }
@@ -345,9 +344,10 @@ std::shared_ptr<IAVCastControllerProxy> HwCastProvider::GetRemoteController(int 
 
 bool HwCastProvider::SetStreamState(int64_t castHandle, DeviceInfo deviceInfo)
 {
+    std::lock_guard lockGuard(mutexLock_);
     int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
-    mirrorCastHandle = castHandle;
-    SLOGI("mirrorCastHandle is %{public}lld", static_cast<long long>(mirrorCastHandle));
+    mirrorCastHandle.store(castHandle);
+    SLOGI("mirrorCastHandle is %{public}lld", static_cast<long long>(mirrorCastHandle.load()));
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("SetStreamState failed for the castSession corresponding to castId is not exit");
         return false;
@@ -363,6 +363,7 @@ bool HwCastProvider::SetStreamState(int64_t castHandle, DeviceInfo deviceInfo)
 bool HwCastProvider::GetRemoteNetWorkId(int32_t castId, std::string deviceId, std::string &networkId)
 {
     SLOGI("enter GetRemoteNetWorkId");
+    std::lock_guard lockGuard(mutexLock_);
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("GetRemoteNetWorkId failed for the castSession corresponding to castId is not exit");
         return false;
@@ -379,6 +380,7 @@ bool HwCastProvider::GetRemoteDrmCapabilities(int32_t castId, std::string device
     std::vector<std::string> &drmCapabilities)
 {
     SLOGI("enter GetRemoteDrmCapabilities");
+    std::lock_guard lockGuard(mutexLock_);
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGE("GetRemoteDrmCapabilities failed for the castSession corresponding to castId is not exit");
         return false;
@@ -405,7 +407,7 @@ void HwCastProvider::SetMirrorCastHandle(int64_t castHandle)
 void HwCastProvider::SendCommandArgsToCast(int castId, const int32_t commandType, const std::string& params)
 {
     SLOGI("SendCommandArgsToCast with config castSession and corresponding castId is %{public}d", castId);
- 
+    std::lock_guard lockGuard(mutexLock_);
     CHECK_AND_RETURN_LOG(hwCastProviderSessionMap_.find(castId) != hwCastProviderSessionMap_.end(),
         "Can not find corresponding castId");
     CHECK_AND_RETURN_LOG(hwCastProviderSessionMap_[castId] != nullptr, "castSession is nullptr");
@@ -528,14 +530,14 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     for (const CastRemoteDevice& castRemoteDevice : deviceList) {
         SLOGI("get devices with deviceName %{public}s",
             AVSessionUtils::GetAnonyDeviceName(castRemoteDevice.deviceName).c_str());
-        if (castRemoteDevice.serviceInfos.empty()) { // not car device
+        if (castRemoteDevice.serviceInfos.empty()) {
             DeviceInfo deviceInfo;
             deviceInfo.deviceId_ = castRemoteDevice.deviceId;
             deviceInfo.deviceName_ = castRemoteDevice.deviceName;
             deviceInfo.authenticationStatus_ = castRemoteDevice.isTrushed ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
             buildDeviceInfo(castRemoteDevice, deviceInfo);
             deviceInfoList.emplace_back(deviceInfo);
-        } else { // car device
+        } else {
             for (const ServiceInfo& info : castRemoteDevice.serviceInfos) {
                 DeviceInfo deviceInfo;
                 std::string screenId = std::to_string(info.screenId);
