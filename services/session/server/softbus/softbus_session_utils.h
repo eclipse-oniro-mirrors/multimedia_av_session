@@ -293,7 +293,13 @@ public:
                 return -1;
             }
         }
-        return std::stoll(str);
+        try {
+            return std::stoll(str);
+        } catch (const std::out_of_range&) {
+            return -1;
+        } catch (const std::invalid_argument&) {
+            return -1;
+        }
     }
 
 private:
