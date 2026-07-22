@@ -174,6 +174,7 @@ private:
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const int64_t noMirrorCastHandle_ = -1;
     int32_t providerNumber_ = 0;
+    std::recursive_mutex castHandleToInfoMapLock_;
     std::map<int64_t, CastHandleInfo> castHandleToInfoMap_;
     std::shared_ptr<HwCastProvider> hwProvider_;
     std::map<std::string, std::shared_ptr<IAVRouterListener>> mirrorSessionMap_;

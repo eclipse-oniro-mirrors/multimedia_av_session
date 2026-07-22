@@ -582,8 +582,8 @@ private:
     bool isMediaChange_ = true;
     bool isRecommendMediaChange_ = false;
     bool isRecommend_ = false;
-    bool isPlayingState_ = false;
-    bool isSetLaunchAbility_ = false;
+    std::atomic<bool> isPlayingState_ {false};
+    std::atomic<bool> isSetLaunchAbility_ {false};
 
     int32_t disconnectStateFromCast_ = 5;
     int32_t connectStateFromCast_ = 6;
@@ -596,7 +596,7 @@ private:
     std::string mirrorToStreamCast_ = "MirrorToStreamCast";
     std::string streamCast_ = "StreamCast";
 
-    volatile bool isDestroyed_ = false;
+    std::atomic<bool> isDestroyed_ {false};
 
     static const int32_t DEFAULT_USER_ID = 100;
     static constexpr const int32_t audioBrokerUid = 5557;
@@ -671,7 +671,7 @@ private:
     std::atomic<MultiDeviceState> multiDeviceState_ = MultiDeviceState::DEFAULT;
     OutputDeviceInfo newOutputDeviceInfo_;
     bool isFirstCallback_ = true;
-    bool isHiPlayStreamCasting_ = false;
+    std::atomic<bool> isHiPlayStreamCasting_ {false};
     const int32_t SWITCH_WAIT_TIME = 300;
     std::function<void(std::string, bool, bool)> serviceCallbackForCastNtf_;
     std::function<void()> serviceCallbackStopSinkCast_;
