@@ -631,10 +631,13 @@ bool MigrateAVSessionServer::ConvertSessionDescriptorsToCJSON(cJSON* jsonArray, 
         }
         if (!SoftbusSessionUtils::AddJsonToJsonArray(jsonArray, descriptorNums, releaseData)) {
             SLOGE("AddJsonToJsonArray with index:%{public}d fail", descriptorNums);
+            cJSON_Delete(releaseData);
             return false;
         }
         SLOGI("packageName : %{public}s", releaseSessionBundleName_.c_str());
         descriptorNums++;
+    } else {
+        cJSON_Delete(releaseData);
     }
     return true;
 }

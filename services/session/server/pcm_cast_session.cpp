@@ -207,6 +207,7 @@ void PcmCastSession::OnDeviceNameSystemCommonEvent(const std::string& args)
     SLOGI("Received UPDATE_DEVICE_NAME: deviceName:%{public}s", AVSessionUtils::GetAnonyDeviceName(deviceName).c_str());
 
     tempDeviceInfo_.deviceName_ = deviceName;
+    CHECK_AND_RETURN_LOG(!descriptor_.outputDeviceInfo_.deviceInfos_.empty(), "deviceInfos is empty");
     descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ = deviceName;
 }
 
