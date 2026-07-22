@@ -4179,10 +4179,9 @@ void AVSessionService::ClearPcmSessionForClientDiedNoLock()
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("clear PcmSession in ");
-    if (pcmCastSession_ != nullptr) {
-        pcmCastSession_->DestroyTask();
-        pcmCastSession_ = nullptr;
-    }
+    CHECK_AND_RETURN_LOG(pcmCastSession_ != nullptr, "pcmCastSession_ is nullptr");
+    pcmCastSession_->DestroyTask();
+    pcmCastSession_ = nullptr;
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 }
 
