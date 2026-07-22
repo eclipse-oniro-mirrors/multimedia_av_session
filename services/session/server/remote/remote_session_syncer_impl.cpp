@@ -17,6 +17,7 @@
 #include <sstream>
 #include "avsession_trace.h"
 #include "hash_calculator.h"
+#include "message_parcel.h"
 #include "parcel.h"
 #include "remote_session_syncer_impl.h"
 
@@ -91,7 +92,7 @@ int32_t RemoteSessionSyncerImpl::GetData(const std::string &key, std::vector<uin
 int32_t RemoteSessionSyncerImpl::PutAVMetaData(const AVMetaData& metaData)
 {
     AVSESSION_TRACE_SYNC_START("RemoteSessionSyncerImpl::PutAVMetaData");
-    Parcel data;
+    MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(metaData.Marshalling(data), AVSESSION_ERROR, "metaData Marshalling error");
     uint8_t *parcelData = reinterpret_cast<uint8_t*>(data.GetData());
     std::vector<uint8_t> dataVector(data.GetDataSize());
@@ -111,7 +112,7 @@ int32_t RemoteSessionSyncerImpl::GetAVMetaData(AVMetaData& metaData)
     uint8_t *allocateData = reinterpret_cast<uint8_t*>(allocator.Alloc(dataVector.size()));
     CHECK_AND_RETURN_RET_LOG(allocateData != nullptr, AVSESSION_ERROR, "alloc data fail");
     std::copy(dataVector.begin(), dataVector.end(), allocateData);
-    Parcel parcelData;
+    MessageParcel parcelData;
     CHECK_AND_RETURN_RET_LOG(parcelData.ParseFrom(reinterpret_cast<uintptr_t>(allocateData), dataVector.size()),
                              AVSESSION_ERROR, "parse parcel error");
     AVMetaData *data = AVMetaData::Unmarshalling(parcelData);

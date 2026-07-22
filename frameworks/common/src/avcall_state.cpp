@@ -46,6 +46,12 @@ AVCallState *AVCallState::Unmarshalling(Parcel& parcel)
         result = nullptr;
         return nullptr;
     }
+    if (!result->IsValid()) {
+        SLOGE("AVCallState is invalid");
+        delete result;
+        result = nullptr;
+        return nullptr;
+    }
     return result;
 }
 
