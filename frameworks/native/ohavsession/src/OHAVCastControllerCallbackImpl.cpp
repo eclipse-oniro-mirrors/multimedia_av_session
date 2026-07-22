@@ -93,7 +93,8 @@ void OHAVCastControllerCallbackImpl::OnMediaItemChange(const AVQueueItem& avQueu
     ohAVMediaDescription_->SetMediaSize(avMediaDescription_->GetMediaSize());
     ohAVMediaDescription_->SetAlbumTitle(avMediaDescription_->GetAlbumTitle());
     ohAVMediaDescription_->SetAppName(avMediaDescription_->GetAppName());
-    ohAVSessionAVQueueItem_->description = (OH_AVSession_AVMediaDescription *)(ohAVMediaDescription_.get());
+    ohAVSessionAVQueueItem_->description =
+        reinterpret_cast<OH_AVSession_AVMediaDescription*>(ohAVMediaDescription_.get());
 
     for (auto it = mediaItemChangedCallbacks_.begin(); it != mediaItemChangedCallbacks_.end(); ++it) {
         if (it->first == nullptr || avCastController_ == nullptr) {

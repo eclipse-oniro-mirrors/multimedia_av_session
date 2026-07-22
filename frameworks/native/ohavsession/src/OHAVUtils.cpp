@@ -32,7 +32,9 @@ AVSession_ErrCode AVSessionNdkUtils::ConvertOHQueueItemToInner(OH_AVSession_AVQu
 
     dstItem.SetItemId(static_cast<int32_t>(srcItem->itemId));
     OHOS::AVSession::OHAVMediaDescription *oh_description =
-        (OHOS::AVSession::OHAVMediaDescription *)(srcItem->description);
+        reinterpret_cast<OHOS::AVSession::OHAVMediaDescription *>(srcItem->description);
+    CHECK_AND_RETURN_RET_LOG(oh_description != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        "description is invalid");
     auto avMediaDescription = std::make_shared<AVMediaDescription>();
     CHECK_AND_RETURN_RET_LOG(avMediaDescription != nullptr, AV_SESSION_ERR_SERVICE_EXCEPTION,
         "create avMediaDescription fail");
