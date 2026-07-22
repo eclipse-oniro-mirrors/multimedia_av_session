@@ -179,7 +179,7 @@ AVMetadata_Result OH_AVMetadataBuilder_Create(OH_AVMetadataBuilder** builder)
 {
     CHECK_AND_RETURN_RET_LOG(builder != nullptr, AVMETADATA_ERROR_INVALID_PARAM, "builder is null");
 
-    OHAVMetadataBuilder* metadata = new OHAVMetadataBuilder();
+    OHAVMetadataBuilder* metadata = new(std::nothrow) OHAVMetadataBuilder();
     if (metadata == nullptr) {
         SLOGE("Failed to allocate memory for OHAVMetadataBuilder");
         OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),

@@ -37,7 +37,7 @@ Rosen::InputAfterRedistributeBehavior NapiAVSessionInputRedistributeCallback::On
         AAFwk::WantParams args;
         args.SetParam("keyCode", AAFwk::Integer::Box(static_cast<int32_t>(keyCode)));
         int32_t result = session->SetSessionEvent(event, args);
-        SLOGI("InputRedistributeCallback keyCode %{public}d result %{public}d", keyCode, result);
+        SLOGI("InputRedistributeCallback result %{public}d", result);
         return result == 0 ? Rosen::InputAfterRedistributeBehavior::BEHAVIOR_INTERCEPT :
                             Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
     }
