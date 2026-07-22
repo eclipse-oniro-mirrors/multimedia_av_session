@@ -29,7 +29,7 @@ namespace OHOS::AVSession {
 NapiAVControllerCallback::NapiAVControllerCallback()
 {
     SLOGI("Construct NapiAVControllerCallback");
-    isValid_ = std::make_shared<bool>(true);
+    isValid_ = std::make_shared<std::atomic<bool>>(true);
 }
 
 NapiAVControllerCallback::~NapiAVControllerCallback()
@@ -48,7 +48,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
     SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -56,7 +56,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -75,7 +75,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
     SLOGI("handle for event: %{public}d with size: %{public}d", event, static_cast<int>(callbacks_[event].size()));
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -83,7 +83,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -108,7 +108,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
     SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -116,7 +116,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -144,7 +144,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
     SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -152,7 +152,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -180,14 +180,14 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
         event, static_cast<int>(callbacks_[event].size()), state);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
                     return false;
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -211,7 +211,7 @@ void NapiAVControllerCallback::HandleEventEx(int32_t event, std::string callBack
     SLOGI("handle for event: %{public}d with size: %{public}d", event, static_cast<int>(callbacks_[event].size()));
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -219,7 +219,7 @@ void NapiAVControllerCallback::HandleEventEx(int32_t event, std::string callBack
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -232,7 +232,8 @@ void NapiAVControllerCallback::HandleEventEx(int32_t event, std::string callBack
     }
 }
 
-void NapiAVControllerCallback::CallWithThreadSafe(napi_ref& method, std::shared_ptr<bool> isValid, int state,
+void NapiAVControllerCallback::CallWithThreadSafe(napi_ref& method, std::shared_ptr<std::atomic<bool>> isValid,
+    int state,
     napi_threadsafe_function threadSafeFunction, const std::function<bool()>& checkCallbackValid, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
@@ -311,10 +312,17 @@ void NapiAVControllerCallback::OnSessionDestroy()
     std::string callBackName = "NapiAVControllerCallback::OnSessionDestroy";
     HandleEvent(EVENT_SESSION_DESTROY, callBackName);
     SLOGD("callback for sessionDestroy, check callback");
-    if (sessionDestroyCallback_ != nullptr) {
-        SLOGI("notify session Destroy for repeat");
-        sessionDestroyCallback_();
-        sessionDestroyCallback_ = nullptr;
+    std::function<void(void)> destroyCallback = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (sessionDestroyCallback_ != nullptr) {
+            SLOGI("notify session Destroy for repeat");
+            destroyCallback = sessionDestroyCallback_;
+            sessionDestroyCallback_ = nullptr;
+        }
+    }
+    if (destroyCallback != nullptr) {
+        destroyCallback();
         SLOGD("notify session Destroy for repeat done");
     }
 }
@@ -491,6 +499,7 @@ napi_status NapiAVControllerCallback::RemoveCallback(napi_env env, int32_t event
 
 void NapiAVControllerCallback::AddCallbackForSessionDestroy(const std::function<void(void)>& sessionDestroyCallback)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGE("add callback for session destroy notify");
     sessionDestroyCallback_ = sessionDestroyCallback;
 }

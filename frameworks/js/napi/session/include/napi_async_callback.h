@@ -16,8 +16,10 @@
 #ifndef OHOS_NAPI_UV_QUEUE_H
 #define OHOS_NAPI_UV_QUEUE_H
 
+#include <atomic>
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <semaphore.h>
 #include "avsession_log.h"
 #include "napi/native_api.h"
@@ -37,9 +39,10 @@ public:
 
     void Call(napi_ref& method, std::string callbackName, NapiArgsGetter getter = NapiArgsGetter());
 
-    void CallWithFlag(napi_ref& method, std::shared_ptr<bool> isValid, NapiArgsGetter getter = NapiArgsGetter());
+    void CallWithFlag(napi_ref& method, std::shared_ptr<std::atomic<bool>> isValid,
+        NapiArgsGetter getter = NapiArgsGetter());
 
-    void CallWithFunc(napi_ref& method, std::shared_ptr<bool> isValid,
+    void CallWithFunc(napi_ref& method, std::shared_ptr<std::atomic<bool>> isValid,
         const std::function<bool()>& checkCallbackValid,
         std::string callbackName,
         NapiArgsGetter getter = NapiArgsGetter());
@@ -53,13 +56,13 @@ private:
     struct DataContextWithFlag {
         napi_env env;
         napi_ref& method;
-        std::shared_ptr<bool> isValid;
+        std::shared_ptr<std::atomic<bool>> isValid;
         NapiArgsGetter getter;
     };
     struct DataContextWithFunc {
         napi_env env;
         napi_ref& method;
-        std::shared_ptr<bool> isValid;
+        std::shared_ptr<std::atomic<bool>> isValid;
         NapiArgsGetter getter;
         std::function<bool()> checkCallbackValid;
     };

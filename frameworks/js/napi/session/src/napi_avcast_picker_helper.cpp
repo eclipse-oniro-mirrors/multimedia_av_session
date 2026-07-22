@@ -33,7 +33,7 @@ NapiAVCastPickerHelper::NapiAVCastPickerHelper(Ace::UIContent* uiContent)
 {
     SLOGI("construct");
     uiContent_ = uiContent;
-    isValid_ = std::make_shared<bool>(true);
+    isValid_ = std::make_shared<std::atomic<bool>>(true);
     audioRoutingMngr_ = AudioStandard::AudioRoutingManager::GetInstance();
 }
 
@@ -323,7 +323,7 @@ void NapiAVCastPickerHelper::HandleEvent(int32_t event, std::string callBackName
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event=%{public}d", event);
@@ -331,7 +331,7 @@ void NapiAVCastPickerHelper::HandleEvent(int32_t event, std::string callBackName
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 if (!hasFunc) {
                     SLOGE("checkCallbackValid res false for event=%{public}d", event);

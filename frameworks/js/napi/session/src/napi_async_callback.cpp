@@ -88,7 +88,8 @@ void NapiAsyncCallback::Call(napi_ref& method, std::string callbackName, NapiArg
     }
 }
 
-void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<bool> isValid, NapiArgsGetter getter)
+void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<std::atomic<bool>> isValid,
+    NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
@@ -141,7 +142,7 @@ void NapiAsyncCallback::CallWithFlag(napi_ref& method, std::shared_ptr<bool> isV
     }
 }
 
-void NapiAsyncCallback::CallWithFunc(napi_ref& method, std::shared_ptr<bool> isValid,
+void NapiAsyncCallback::CallWithFunc(napi_ref& method, std::shared_ptr<std::atomic<bool>> isValid,
     const std::function<bool()>& checkCallbackValid, std::string callbackName, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(loop_ != nullptr && method != nullptr, "loop_ or method is nullptr");

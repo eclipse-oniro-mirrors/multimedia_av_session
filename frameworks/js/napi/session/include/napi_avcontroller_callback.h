@@ -16,6 +16,7 @@
 #ifndef OHOS_NAPI_AVCONTROLLER_CALLBACK_H
 #define OHOS_NAPI_AVCONTROLLER_CALLBACK_H
 
+#include <atomic>
 #include <list>
 #include "avsession_info.h"
 #include "avsession_log.h"
@@ -96,7 +97,7 @@ private:
 
     using NapiArgsGetter = std::function<void(napi_env env, int& argc, napi_value* argv)>;
 
-    static void CallWithThreadSafe(napi_ref& method, std::shared_ptr<bool> isValid, int state,
+    static void CallWithThreadSafe(napi_ref& method, std::shared_ptr<std::atomic<bool>> isValid, int state,
         napi_threadsafe_function threadSafeFunction, const std::function<bool()>& checkCallbackValid,
         NapiArgsGetter getter = NapiArgsGetter());
     static void ThreadSafeCallback(napi_env env, napi_value js_cb, void* context, void* data);
@@ -104,7 +105,7 @@ private:
     struct DataContextForThreadSafe {
         napi_ref& method;
         int state;
-        std::shared_ptr<bool> isValid;
+        std::shared_ptr<std::atomic<bool>> isValid;
         NapiArgsGetter getter;
         std::function<bool()> checkCallbackValid;
     };
@@ -112,7 +113,7 @@ private:
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
-    std::shared_ptr<bool> isValid_;
+    std::shared_ptr<std::atomic<bool>> isValid_;
     std::function<void(void)> sessionDestroyCallback_;
     napi_threadsafe_function threadSafeFunction_ = nullptr;
     static constexpr size_t ARGC_MAX = 6;

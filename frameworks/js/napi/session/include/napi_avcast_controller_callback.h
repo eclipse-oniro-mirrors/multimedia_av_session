@@ -16,6 +16,7 @@
 #ifndef OHOS_NAPI_AVCAST_CONTROLLER_CALLBACK_H
 #define OHOS_NAPI_AVCAST_CONTROLLER_CALLBACK_H
 
+#include <atomic>
 #include <list>
 #include "avsession_info.h"
 #include "avsession_log.h"
@@ -526,7 +527,7 @@ private:
     void HandleEvent(int32_t event, std::string callBackName);
     void HandlePlayerErrorAPI13(const int32_t errorCode, const std::string& errorMsg);
 
-    std::function<bool()> CheckCallbackValid(int32_t event, const std::list<napi_ref>::iterator& ref);
+    std::function<bool()> CheckCallbackValid(int32_t event, napi_ref ref);
 
     template<typename T>
     void HandleEvent(int32_t event, std::string callBackName, const T& param);
@@ -557,7 +558,7 @@ private:
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_CAST_TYPE_MAX] {};
-    std::shared_ptr<bool> isValid_;
+    std::shared_ptr<std::atomic<bool>> isValid_;
 
     std::mutex dataSrcSyncLock_;
     std::condition_variable dataSrcSyncCond_;

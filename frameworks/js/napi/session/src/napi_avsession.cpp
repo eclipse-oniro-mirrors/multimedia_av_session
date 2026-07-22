@@ -141,8 +141,11 @@ NapiAVSession::~NapiAVSession()
     Rosen::WindowInputRedistributeClient clientInstance;
     clientInstance.UnRegisterInputEventRedistribute(recipientInfo_);
 #endif
-    std::lock_guard lockGuard(registerEventLock_);
-    registerEventList_.clear();
+    {
+        std::lock_guard lockGuard(registerEventLock_);
+        registerEventList_.clear();
+    }
+    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
     if (currentNapiSession_ != nullptr && currentSessionId_ == sessionId_) {
         currentNapiSession_ = nullptr;
         currentSessionId_.clear();
@@ -1426,11 +1429,14 @@ std::function<void()> NapiAVSession::PlaybackStateSyncExecutor(std::shared_ptr<A
     AVPlaybackState playBackState)
 {
     return [session, playBackState]() {
-        if (session == nullptr) {
-            playBackStateRet_ = ERR_SESSION_NOT_EXIST;
-            return;
+        {
+            std::lock_guard<std::mutex> lock(syncMutex_);
+            if (session == nullptr) {
+                playBackStateRet_ = ERR_SESSION_NOT_EXIST;
+                return;
+            }
+            playBackStateRet_ = session->SetAVPlaybackState(playBackState);
         }
-        playBackStateRet_ = session->SetAVPlaybackState(playBackState);
         syncCond_.notify_one();
         std::unique_lock<std::mutex> lock(syncAsyncMutex_);
         auto waitStatus = syncAsyncCond_.wait_for(lock, std::chrono::milliseconds(100));
@@ -1751,6 +1757,7 @@ napi_value NapiAVSession::SetAVQueueTitle(napi_env env, napi_callback_info info)
     AVSESSION_TRACE_SYNC_START("NapiAVSession::SetAVQueueTitle");
     struct ConcreteContext : public ContextBase {
         std::string title;
+        std::shared_ptr<AVSession> sessionHolder_;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
@@ -1769,16 +1776,18 @@ napi_value NapiAVSession::SetAVQueueTitle(napi_env env, napi_callback_info info)
     };
     context->GetCbInfo(env, info, inputParser);
     context->taskId = NAPI_SET_AV_QUEUE_TITLE_TASK_ID;
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        context->sessionHolder_ = napiSession->session_;
+    }
 
     auto executor = [context]() {
-        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (context->sessionHolder_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVQueueTitle failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        int32_t ret = napiSession->session_->SetAVQueueTitle(context->title);
+        int32_t ret = context->sessionHolder_->SetAVQueueTitle(context->title);
         if (ret != AVSESSION_SUCCESS) {
             if (ret == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "SetAVQueueTitle failed : native session not exist";
@@ -2019,6 +2028,7 @@ napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info i
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     struct ConcreteContext : public ContextBase {
         std::shared_ptr<AVCastController> castController_;
+        std::shared_ptr<AVSession> sessionHolder_;
     };
     auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
@@ -2029,16 +2039,18 @@ napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info i
     }
 
     context->GetCbInfo(env, info);
+    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+        context->sessionHolder_ = napiSession->session_;
+    }
 
     auto executor = [context]() {
-        auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (context->sessionHolder_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "GetAVCastController failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             return;
         }
-        context->castController_ = napiSession->session_->GetAVCastController();
+        context->castController_ = context->sessionHolder_->GetAVCastController();
         if (context->castController_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "GetAVCastController failed : native get controller failed";
@@ -2228,9 +2240,9 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
     {
         std::lock_guard lockGuard(destroyLock_);
         isNapiSessionDestroy_ = true;
-    }
-    if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
-        context->sessionHolder_ = napiSession->session_;
+        if (auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native); napiSession != nullptr) {
+            context->sessionHolder_ = napiSession->session_;
+        }
     }
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
@@ -2242,7 +2254,7 @@ napi_value NapiAVSession::Destroy(napi_env env, napi_callback_info info)
         }
         int32_t ret = context->sessionHolder_->Destroy();
         if (napiSession != nullptr && ret == AVSESSION_SUCCESS) {
-            std::lock_guard<std::mutex> lockGuard(lock_);
+            std::lock_guard lockGuard(destroyLock_);
             napiSession->session_ = nullptr;
             napiSession->callback_ = nullptr;
         } else if (ret == ERR_SESSION_NOT_EXIST) {

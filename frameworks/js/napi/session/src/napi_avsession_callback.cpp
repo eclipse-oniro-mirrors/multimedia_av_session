@@ -21,10 +21,11 @@
 namespace OHOS::AVSession {
 
 OutputDeviceInfo outputDeviceInfo_ = OutputDeviceInfo();
+std::mutex outputDeviceInfoMutex_;
 NapiAVSessionCallback::NapiAVSessionCallback()
 {
     SLOGI("construct NapiAVSessionCallback");
-    isValid_ = std::make_shared<bool>(true);
+    isValid_ = std::make_shared<std::atomic<bool>>(true);
 }
 
 NapiAVSessionCallback::~NapiAVSessionCallback()
@@ -44,7 +45,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, std::string callBackName)
         event, static_cast<int>(callbacks_[event].size()));
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGI("checkCallbackValid with empty list for event %{public}d", event);
@@ -52,7 +53,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, std::string callBackName)
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -72,7 +73,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, std::string callBackName,
         event, static_cast<int>(callbacks_[event].size()));
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event=%{public}d", event);
@@ -80,7 +81,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, std::string callBackName,
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 if (!hasFunc) {
                     SLOGE("checkCallbackValid res false for event=%{public}d", event);
@@ -105,7 +106,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, std::string callBackName,
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGI("checkCallbackValid with empty list for event %{public}d", event);
@@ -113,7 +114,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event, std::string callBackName,
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -139,7 +140,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event,
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, ref, event]() {
+            [this, callbackRef = *ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGI("checkCallbackValid with empty list for event %{public}d", event);
@@ -147,7 +148,7 @@ void NapiAVSessionCallback::HandleEvent(int32_t event,
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (ref == it ? true : hasFunc);
+                    hasFunc = (*it == callbackRef ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -282,10 +283,13 @@ void NapiAVSessionCallback::OnOutputDeviceChange(const int32_t connectionState,
     const OutputDeviceInfo& outputDeviceInfo)
 {
     std::string callBackName = "NapiAVSessionCallback::OnOutputDeviceChange";
-    outputDeviceInfo_ = (connectionState == ConnectionState::STATE_CONNECTED &&
-        !outputDeviceInfo.deviceInfos_.empty() &&
-        outputDeviceInfo.deviceInfos_[0].castCategory_ == AVCastCategory::CATEGORY_REMOTE) ?
-        outputDeviceInfo : outputDeviceInfo_;
+    {
+        std::lock_guard lockGuard(outputDeviceInfoMutex_);
+        outputDeviceInfo_ = (connectionState == ConnectionState::STATE_CONNECTED &&
+            !outputDeviceInfo.deviceInfos_.empty() &&
+            outputDeviceInfo.deviceInfos_[0].castCategory_ == AVCastCategory::CATEGORY_REMOTE) ?
+            outputDeviceInfo : outputDeviceInfo_;
+    }
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
     HILOG_COMM_INFO("OnOutputDeviceChange with connectionState %{public}d", connectionState);
     HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, callBackName, connectionState, outputDeviceInfo);
@@ -293,14 +297,20 @@ void NapiAVSessionCallback::OnOutputDeviceChange(const int32_t connectionState,
 
 void NapiAVSessionCallback::RestartSessionDisconnect()
 {
-    if (outputDeviceInfo_.deviceInfos_.empty()) {
-        return;
+    OutputDeviceInfo outputDeviceInfoSnapshot;
+    {
+        std::lock_guard lockGuard(outputDeviceInfoMutex_);
+        if (outputDeviceInfo_.deviceInfos_.empty()) {
+            return;
+        }
+        SLOGI("RestartSessionDisconnect start");
+        outputDeviceInfo_.deviceInfos_[0].castCategory_ = AVCastCategory::CATEGORY_REMOTE;
+        outputDeviceInfoSnapshot = outputDeviceInfo_;
     }
-    SLOGI("RestartSessionDisconnect start");
-    outputDeviceInfo_.deviceInfos_[0].castCategory_ = AVCastCategory::CATEGORY_REMOTE;
     std::string callBackName = "NapiAVSessionCallback::OnOutputDeviceChange";
     AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOutputDeviceChange");
-    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, callBackName, ConnectionState::STATE_DISCONNECTED, outputDeviceInfo_);
+    HandleEvent(EVENT_OUTPUT_DEVICE_CHANGE, callBackName, ConnectionState::STATE_DISCONNECTED,
+        outputDeviceInfoSnapshot);
 
     OutputDeviceInfo localDeviceInfo;
     DeviceInfo deviceInfo;
