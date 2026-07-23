@@ -52,7 +52,7 @@ private:
     std::shared_ptr<MigrateAVSessionServer> migrateSession_;
     std::string deviceId_;
     int32_t outputDevice_ = AUDIO_OUTPUT_SOURCE;
-    std::recursive_mutex callbackLock_;
+    std::recursive_mutex audioDeviceLock_;
 };
 
 class OutputDeviceChangeCallback : public AudioStandard::AudioPreferredOutputDeviceChangeCallback {

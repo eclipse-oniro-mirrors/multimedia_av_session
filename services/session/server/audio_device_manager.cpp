@@ -26,6 +26,7 @@ AudioDeviceManager &AudioDeviceManager::GetInstance()
 
 bool AudioDeviceManager::GetSessionInfoSyncState()
 {
+    std::lock_guard lockGuard(audioDeviceLock_);
     return AUDIO_OUTPUT_SOURCE == outputDevice_;
 }
 
@@ -33,32 +34,35 @@ void AudioDeviceManager::InitAudioStateCallback(std::shared_ptr<MigrateAVSession
     std::string deviceId)
 {
     SLOGI("enter InitAudioStateCallback");
-    if (isRegistered_) {
-        SLOGW("device change callback already registered");
-        return;
-    }
     {
-        std::lock_guard lockGuard(callbackLock_);
+        std::lock_guard lockGuard(audioDeviceLock_);
+        if (isRegistered_) {
+            SLOGW("device change callback already registered");
+            return;
+        }
         if (preferredOutputDeviceChangeCallback_ == nullptr) {
             preferredOutputDeviceChangeCallback_ = std::make_shared<OutputDeviceChangeCallback>();
         }
+        migrateSession_ = migrateAVSession;
+        isRegistered_ = true;
+        deviceId_ = deviceId;
     }
 
     AudioAdapter::GetInstance().AddPreferredOutputDeviceChangeCallback(preferredOutputDeviceChangeCallback_);
     RegisterAudioDeviceChangeCallback();
-    migrateSession_ = migrateAVSession;
-    isRegistered_ = true;
-    deviceId_ = deviceId;
 }
 
 void AudioDeviceManager::UnInitAudioStateCallback()
 {
     AudioAdapter::GetInstance().RemovePreferredOutputDeviceChangeCallback(preferredOutputDeviceChangeCallback_);
     UnRegisterAudioDeviceChangeCallback();
-    preferredOutputDeviceChangeCallback_ = nullptr;
-    audioDeviceChangeCallback_ = nullptr;
-    isRegistered_ = false;
-    outputDevice_ = AUDIO_OUTPUT_SOURCE;
+    {
+        std::lock_guard lockGuard(audioDeviceLock_);
+        preferredOutputDeviceChangeCallback_ = nullptr;
+        audioDeviceChangeCallback_ = nullptr;
+        isRegistered_ = false;
+        outputDevice_ = AUDIO_OUTPUT_SOURCE;
+    }
 }
 
 void AudioDeviceManager::RegisterAudioDeviceChangeCallback()
@@ -105,17 +109,20 @@ void AudioDeviceManager::ClearRemoteAvSessionInfo(const std::string &deviceId)
 
 std::string AudioDeviceManager::GetDeviceId()
 {
+    std::lock_guard lockGuard(audioDeviceLock_);
     return deviceId_;
 }
 
 int32_t AudioDeviceManager::GetAudioState()
 {
+    std::lock_guard lockGuard(audioDeviceLock_);
     return outputDevice_;
 }
 
 void AudioDeviceManager::SetAudioState(int32_t state)
 {
     SLOGI("current set audio is %{public}d", state);
+    std::lock_guard lockGuard(audioDeviceLock_);
     outputDevice_ = state;
 }
 

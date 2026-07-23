@@ -74,41 +74,61 @@ void AVSessionService::ReleaseSuperLauncher(std::string serviceName)
 {
     AudioDeviceManager::GetInstance().UnInitAudioStateCallback();
     MigrateAVSessionManager::GetInstance().ReleaseLocalSessionStub(serviceName);
-    if (migrateAVSession_ != nullptr) {
-        RemoveInnerSessionListener(migrateAVSession_.get());
-        RemoveHistoricalRecordListener(migrateAVSession_.get());
+    std::shared_ptr<MigrateAVSessionServer> migrateAVSession;
+    {
+        std::lock_guard lockGuard(migrateAVSessionLock_);
+        migrateAVSession = migrateAVSession_;
+    }
+    if (migrateAVSession != nullptr) {
+        RemoveInnerSessionListener(migrateAVSession.get());
+        RemoveHistoricalRecordListener(migrateAVSession.get());
     }
 }
 
 void AVSessionService::ConnectSuperLauncher(std::string deviceId, std::string serviceName)
 {
-    if (migrateAVSession_ == nullptr) {
-        migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+    std::shared_ptr<MigrateAVSessionServer> migrateAVSession;
+    {
+        std::lock_guard lockGuard(migrateAVSessionLock_);
+        if (migrateAVSession_ == nullptr) {
+            migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+        }
+        migrateAVSession = migrateAVSession_;
     }
-    migrateAVSession_->Init(this);
-    MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession_);
-    AddInnerSessionListener(migrateAVSession_.get());
-    AddHistoricalRecordListener(migrateAVSession_.get());
-    AudioDeviceManager::GetInstance().InitAudioStateCallback(migrateAVSession_, deviceId);
+    migrateAVSession->Init(this);
+    MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession);
+    AddInnerSessionListener(migrateAVSession.get());
+    AddHistoricalRecordListener(migrateAVSession.get());
+    AudioDeviceManager::GetInstance().InitAudioStateCallback(migrateAVSession, deviceId);
 }
 
 void AVSessionService::SucceedSuperLauncher(std::string deviceId, std::string extraInfo)
 {
-    if (migrateAVSession_ == nullptr) {
-        migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+    std::shared_ptr<MigrateAVSessionServer> migrateAVSession;
+    {
+        std::lock_guard lockGuard(migrateAVSessionLock_);
+        if (migrateAVSession_ == nullptr) {
+            migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+        }
+        migrateAVSession = migrateAVSession_;
     }
-    migrateAVSession_->ResetSupportCrossMediaPlay(extraInfo);
-    migrateAVSession_->SendRemoteHistorySessionList(deviceId);
+    migrateAVSession->ResetSupportCrossMediaPlay(extraInfo);
+    migrateAVSession->SendRemoteHistorySessionList(deviceId);
 }
 
 void AVSessionService::NotifyMigrateStop(const std::string &deviceId)
 {
-    if (migrateAVSession_ == nullptr) {
-        SLOGI("NotifyMigrateStop without migrate, create new");
-        migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+    std::shared_ptr<MigrateAVSessionServer> migrateAVSession;
+    {
+        std::lock_guard lockGuard(migrateAVSessionLock_);
+        if (migrateAVSession_ == nullptr) {
+            SLOGI("NotifyMigrateStop without migrate, create new");
+            migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
+        }
+        migrateAVSession = migrateAVSession_;
     }
     std::lock_guard lockGuard(sessionServiceLock_);
-    migrateAVSession_->StopObserveControllerChanged(deviceId);
+    migrateAVSession->StopObserveControllerChanged(deviceId);
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -570,9 +590,14 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
         ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
         ProtocolType::TYPE_CAST_PLUS_AUDIO)) != 0;
     if (isPcm) {
-        if (pcmCastSession_ == nullptr) {
-            SLOGI("Create pcmCastSession");
-            pcmCastSession_ = std::make_shared<PcmCastSession>();
+        std::shared_ptr<PcmCastSession> pcmCastSession;
+        {
+            std::lock_guard lockGuard(sessionServiceLock_);
+            if (pcmCastSession_ == nullptr) {
+                SLOGI("Create pcmCastSession");
+                pcmCastSession_ = std::make_shared<PcmCastSession>();
+            }
+            pcmCastSession = pcmCastSession_;
         }
         
         SessionToken pcmSessionToken;
@@ -585,7 +610,7 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
             pcmSessionToken.uid = session->GetUid();
             SLOGI("GetUid success, uid = %{public}d", pcmSessionToken.uid);
         }
-        return pcmCastSession_->StartCast(outputDeviceInfo, castServiceNameStatePair_, pcmSessionToken);
+        return pcmCastSession->StartCast(outputDeviceInfo, castServiceNameStatePair_, pcmSessionToken);
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 
@@ -615,9 +640,16 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
     if ((session != nullptr && session->GetDescriptor().sessionType_ != AVSession::SESSION_TYPE_VOICE_CALL &&
         session->GetDescriptor().sessionType_ != AVSession::SESSION_TYPE_VIDEO_CALL) || (session == nullptr)) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        if (pcmCastSession_ != nullptr) {
-            pcmCastSession_->StopCast();
-            pcmCastSession_ = nullptr;
+        std::shared_ptr<PcmCastSession> pcmCastSession;
+        {
+            std::lock_guard lockGuard(sessionServiceLock_);
+            if (pcmCastSession_ != nullptr) {
+                pcmCastSession = pcmCastSession_;
+                pcmCastSession_ = nullptr;
+            }
+        }
+        if (pcmCastSession != nullptr) {
+            pcmCastSession->StopCast();
         }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
     }
@@ -1119,9 +1151,12 @@ int32_t AVSessionService::GetDistributedSessionControllersInner(const Distribute
 
 void AVSessionService::NotifyRemoteBundleChange(const std::string bundleName)
 {
-    if (migrateAVSessionProxyMap_.empty()) {
-        SLOGE("not in migrate proxy scene, return");
-        return;
+    {
+        std::lock_guard lockGuard(migrateProxyMapLock_);
+        if (migrateAVSessionProxyMap_.empty()) {
+            SLOGE("not in migrate proxy scene, return");
+            return;
+        }
     }
     PublishEvent(bundleName.empty() ? remoteMediaNone : remoteMediaAlive);
 }

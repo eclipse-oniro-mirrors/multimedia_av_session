@@ -225,6 +225,7 @@ int32_t AVSessionService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
         SLOGI("IPC is not used for a long time, there are %{public}d sessions.", ret);
         return -1;
     }
+    std::lock_guard lockGuard(migrateProxyMapLock_);
     for (const auto& pair : migrateAVSessionProxyMap_) {
         std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
             std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
@@ -3050,20 +3051,21 @@ AVControlCommand AVSessionService::GetSessionProcCommand()
 
 void AVSessionService::HandleEventHandlerCallBack()
 {
-    SLOGI("handle eventHandler callback isFirstPress_=%{public}d, pressCount_:%{public}d", isFirstPress_, pressCount_);
+    SLOGI("handle eventHandler callback isFirstPress_=%{public}d, pressCount_:%{public}d",
+        isFirstPress_.load(), pressCount_.load());
     AVControlCommand cmd;
     bool shouldColdPlay = false;
     {
         std::lock_guard lockGuard(sessionServiceLock_);
-        if (pressCount_ >= THREE_CLICK) {
+        if (pressCount_.load() >= THREE_CLICK) {
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
-        } else if (pressCount_ == DOUBLE_CLICK) {
+        } else if (pressCount_.load() == DOUBLE_CLICK) {
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
-        } else if (pressCount_ == ONE_CLICK) {
+        } else if (pressCount_.load() == ONE_CLICK) {
             cmd = GetSessionProcCommand();
         } else {
-            pressCount_ = 0;
-            isFirstPress_ = true;
+            pressCount_.store(0);
+            isFirstPress_.store(true);
             SLOGI("press invalid return, topSession alive:%{public}d", static_cast<int>(topSession_ != nullptr));
             return;
         }
@@ -3085,8 +3087,8 @@ void AVSessionService::HandleEventHandlerCallBack()
     if (shouldColdPlay) {
         HandleSystemKeyColdStart(cmd);
     }
-    pressCount_ = 0;
-    isFirstPress_ = true;
+    pressCount_.store(0);
+    isFirstPress_.store(true);
 }
 // LCOV_EXCL_STOP
 
@@ -3148,14 +3150,13 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const st
     }
     if (keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_HEADSETHOOK ||
         keyEvent.GetKeyCode() == MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
-        pressCount_++;
-        SLOGI("isFirstPress_=%{public}d", isFirstPress_);
-        if (isFirstPress_) {
+        pressCount_.fetch_add(1);
+        SLOGI("isFirstPress_=%{public}d", isFirstPress_.load());
+        if (isFirstPress_.exchange(false)) {
             auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
                 HandleEventHandlerCallBack();
             }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
             CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
-            isFirstPress_ = false;
         }
         return AVSESSION_SUCCESS;
     }
@@ -3389,10 +3390,13 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
 {
     ClearClientResources(pid, true);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (pcmCastSession_ != nullptr && pcmCastSession_->GetCastMode() == HiPlayCastMode::APP_LEVEL
-        && pcmCastSession_->GetUid() == uid) {
-        ClearPcmSessionForClientDiedNoLock();
+    {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        if (pcmCastSession_ != nullptr && pcmCastSession_->GetCastMode() == HiPlayCastMode::APP_LEVEL
+            && pcmCastSession_->GetUid() == uid) {
+            ClearPcmSessionForClientDiedNoLock();
         }
+    }
     AVRouter::GetInstance().IsStopCastDiscovery(pid);
     {
         std::lock_guard lockGuard(checkEnableCastLock_);

@@ -769,6 +769,8 @@ private:
 
     std::recursive_mutex migrateListenersLock_;
 
+    std::recursive_mutex migrateAVSessionLock_;
+
     std::recursive_mutex sessionFileLock_;
 
     std::recursive_mutex avQueueFileLock_;
@@ -831,9 +833,9 @@ private:
     const std::string MEDIA_CONTROL_STATE = "usual.event.MEDIA_CONTROL_STATE";
     const std::string MEDIA_PLAY_STATE = "MediaPlaybackState";
 
-    int32_t pressCount_ {};
+    std::atomic<int32_t> pressCount_ {0};
     int32_t maxHistoryNums_ = 10;
-    bool isFirstPress_ = true;
+    std::atomic<bool> isFirstPress_ {true};
     bool isInCast_ = false;
     bool isCastableDevice_ = false;
     bool isAudioBrokerStart_ = false;

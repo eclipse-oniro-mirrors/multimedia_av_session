@@ -171,7 +171,7 @@ int32_t AVSessionItem::Destroy()
     SLOGI("AVSessionItem check service destroy event with service, check serviceCallback exist");
     {
         std::lock_guard lockGuard(destroyLock_);
-        if (isDestroyed_) {
+        if (isDestroyed_.load()) {
             SLOGE("AVSessionItem Destroy process but check already destroyed");
             return AVSESSION_SUCCESS;
         }
@@ -225,8 +225,8 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
 {
     {
         std::lock_guard lockGuard(destroyLock_);
-        CHECK_AND_RETURN_RET_LOG(!isDestroyed_, AVSESSION_SUCCESS, "session is already destroyed.");
-        isDestroyed_ = true;
+        CHECK_AND_RETURN_RET_LOG(!isDestroyed_.load(), AVSESSION_SUCCESS, "session is already destroyed.");
+        isDestroyed_.store(true);
     }
 
     std::string sessionId = descriptor_.sessionId_;
@@ -375,6 +375,8 @@ void AVSessionItem::HandleFrontSession()
 {
     bool isMetaEmpty;
     bool isCastMetaEmpty;
+    bool isSupportedCmdEmpty;
+    bool isSupportedCastCmdsEmpty;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
         isMetaEmpty = (metaData_.GetTitle().empty() && metaData_.GetMediaImage() == nullptr);
@@ -382,6 +384,8 @@ void AVSessionItem::HandleFrontSession()
         GetCurrentCastItem(item);
         isCastMetaEmpty = (item.GetDescription() == nullptr ||
             (item.GetDescription()->GetTitle().empty() && item.GetDescription()->GetIconUri().empty()));
+        isSupportedCmdEmpty = supportedCmd_.empty();
+        isSupportedCastCmdsEmpty = supportedCastCmds_.empty();
         SLOGI("bundle=%{public}s MetaEmpty=%{public}d CastMetaEmpty=%{public}d Cmd=%{public}d "
             "castCmd=%{public}d first%{public}d",
             GetBundleName().c_str(), isMetaEmpty, isCastMetaEmpty, static_cast<int32_t>(supportedCmd_.size()),
@@ -392,10 +396,10 @@ void AVSessionItem::HandleFrontSession()
     // stream to mirror state remove notification
     needRemoveNtfInMirror = !AVRouter::GetInstance().IsInMirrorToStreamState() &&
                             (AVRouter::GetInstance().GetMirrorCastHandle() != -1) &&
-                            (isMetaEmpty || (supportedCmd_.size() == 0));
+                            (isMetaEmpty || isSupportedCmdEmpty);
 #endif
     if ((isMetaEmpty && isCastMetaEmpty) ||
-        (supportedCmd_.size() == 0 && supportedCastCmds_.size() == 0) || needRemoveNtfInMirror) {
+        (isSupportedCmdEmpty && isSupportedCastCmdsEmpty) || needRemoveNtfInMirror) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
             serviceCallbackForUpdateSession_(GetSessionId(), false);
             isFirstAddToFront_ = true;
@@ -753,7 +757,7 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
                 CHECK_AND_RETURN_LOG(shardPtr != nullptr, "CheckIfSendCapsule session is null");
                 {
                     std::lock_guard lockGuard(shardPtr->destroyLock_);
-                    CHECK_AND_RETURN_LOG(!shardPtr->isDestroyed_, "CheckIfSendCapsule session is destroy");
+                    CHECK_AND_RETURN_LOG(!shardPtr->isDestroyed_.load(), "CheckIfSendCapsule session is destroy");
                 }
                 std::lock_guard mediaSessionLockGuard(shardPtr->mediaSessionCallbackLock_);
                 if (shardPtr->serviceCallbackForMediaSession_ && !shardPtr->isPlayingState_) {
@@ -1090,7 +1094,7 @@ int32_t AVSessionItem::SetLaunchAbility(const AbilityRuntime::WantAgent::WantAge
 {
     {
         std::lock_guard lockGuard(avsessionItemLock_);
-        isSetLaunchAbility_ = true;
+        isSetLaunchAbility_.store(true);
     }
     GetCurrentAppIndexForSession();
     {
@@ -1312,7 +1316,11 @@ void AVSessionItem::dealValidCallback(int32_t cmd, std::vector<int32_t>& support
 sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 {
     InitAVCastControllerProxy();
-    auto castControllerProxy = castControllerProxy_;
+    std::shared_ptr<IAVCastControllerProxy> castControllerProxy;
+    {
+        std::lock_guard lockGuard(castLock_);
+        castControllerProxy = castControllerProxy_;
+    }
     CHECK_AND_RETURN_RET_LOG(castControllerProxy != nullptr, nullptr,
         "castControllerProxy_ is null when get avCastController");
     sptr<AVCastControllerItem> castController = new (std::nothrow) AVCastControllerItem();
@@ -1324,11 +1332,14 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     auto validCallback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
         dealValidCallback(cmd, supportedCastCmds);
     };
-    auto preparecallback = [this]() {
-        if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && isFirstCallback_) {
-            isFirstCallback_ = false;
-            AVRouter::GetInstance().DisconnectOtherSession(GetSessionId(),
-                GetDescriptor().outputDeviceInfo_.deviceInfos_[0]);
+    auto weakThis = wptr<AVSessionItem>(this);
+    auto preparecallback = [weakThis]() {
+        auto sharedThis = weakThis.promote();
+        CHECK_AND_RETURN_LOG(sharedThis != nullptr, "AVSessionItem is already destroyed");
+        if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && sharedThis->isFirstCallback_) {
+            sharedThis->isFirstCallback_ = false;
+            AVRouter::GetInstance().DisconnectOtherSession(sharedThis->GetSessionId(),
+                sharedThis->GetDescriptor().outputDeviceInfo_.deviceInfos_[0]);
         }
     };
     auto playerErrorCallback = [this](int32_t errorCode, const std::string& errorMsg) {
@@ -1380,7 +1391,10 @@ void AVSessionItem::ReleaseAVCastControllerInner()
             controller->Destroy();
         }
     }
-    castControllerProxy_ = nullptr;
+    {
+        std::lock_guard castLockGuard(castLock_);
+        castControllerProxy_ = nullptr;
+    }
     isFirstCallback_ = true;
 }
 #endif
@@ -2094,7 +2108,10 @@ void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
     }
     SetCastHandle(-1);
     castHandleDeviceId_ = "-100";
-    castControllerProxy_ = nullptr;
+    {
+        std::lock_guard lockGuard(castLock_);
+        castControllerProxy_ = nullptr;
+    }
     isFirstCallback_ = true;
     castServiceNameStatePair_ = {};
     if (multiDeviceState_ != MultiDeviceState::CASTING_SWITCH_DEVICE) {
@@ -2187,7 +2204,7 @@ void AVSessionItem::ListenCollaborationOnStop()
         CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "AVSessionItem is null in ListenCollaborationOnStop");
         {
             std::lock_guard lockGuard(sharedPtr->destroyLock_);
-            CHECK_AND_RETURN_LOG(!sharedPtr->isDestroyed_, "AVSessionItem is destroyed, skip StopCast");
+            CHECK_AND_RETURN_LOG(!sharedPtr->isDestroyed_.load(), "AVSessionItem is destroyed, skip StopCast");
         }
         if (sharedPtr->descriptor_.sessionTag_ == "RemoteCast") {
             SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
@@ -2331,7 +2348,7 @@ void AVSessionItem::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 
 int32_t AVSessionItem::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
-    if (isHiPlayStreamCasting_) {
+    if (isHiPlayStreamCasting_.load()) {
         return AVRouter::GetInstance().PcmCastSessionReleasePlayer();
     }
     std::lock_guard lockGuard(castLock_);
@@ -2660,7 +2677,7 @@ void AVSessionItem::SetServiceCallbackForPhotoCast(const std::function<void(std:
 void AVSessionItem::SetIsHiPlayStreamCasting(bool isHiPlayStreamCasting)
 {
     SLOGI("SetIsHiPlayStreamCasting in");
-    isHiPlayStreamCasting_ = isHiPlayStreamCasting;
+    isHiPlayStreamCasting_.store(isHiPlayStreamCasting);
 }
 
 void AVSessionItem::SetSupportExtendedScreen(bool isSupport, bool isHotSwitch)
@@ -2823,10 +2840,10 @@ int32_t AVSessionItem::GetAppIndex()
 
 AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
 {
-    if (!isSetLaunchAbility_) {
+    if (!isSetLaunchAbility_.load()) {
         {
             std::lock_guard lockGuard(avsessionItemLock_);
-            isSetLaunchAbility_ = true;
+            isSetLaunchAbility_.store(true);
         }
         GetCurrentAppIndexForSession();
         std::vector<std::shared_ptr<AAFwk::Want>> wants;

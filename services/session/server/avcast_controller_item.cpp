@@ -507,6 +507,7 @@ int32_t AVCastControllerItem::SetDisplaySurface(std::string& surfaceId)
 
 int32_t AVCastControllerItem::SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
+    std::lock_guard lockGuard(castControllerCallbackLock_);
     castPlaybackMask_ = filter;
     return AVSESSION_SUCCESS;
 }

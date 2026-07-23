@@ -314,6 +314,7 @@ std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListen
 
 std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListenerForAllUsers()
 {
+    std::lock_guard lockGuard(userLock_);
     return sessionListenersMap_;
 }
 
