@@ -162,9 +162,6 @@ int HwCastProvider::StartCastSession(uint32_t prototype, bool isPcm)
         std::vector<bool>::iterator iter = find(castFlag_.begin(), castFlag_.end(), false);
         if (iter == castFlag_.end()) {
             SLOGE("StartCastSession failed");
-            if (castSession) {
-                castSession->Release();
-            }
             return AVSESSION_ERROR;
         }
         *iter = true;
