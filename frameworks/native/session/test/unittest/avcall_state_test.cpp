@@ -166,5 +166,41 @@ HWTEST_F(AVCallStateTest, CopyFrom002, TestSize.Level0)
     auto ret = stateTest.CopyFrom(stateOut);
     EXPECT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: Unmarshalling001
+ * @tc.desc: Test Unmarshalling when avCallState_ equals AVCALL_STATE_MAX,
+ *           IsValid() returns false and Unmarshalling returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVCallStateTest, Unmarshalling001, TestSize.Level0)
+{
+    auto *parcel = new (std::nothrow) OHOS::Parcel();
+    EXPECT_NE(parcel, nullptr);
+    ASSERT_TRUE(parcel->WriteString("11"));
+    ASSERT_TRUE(parcel->WriteInt32(AVCallState::AVCALL_STATE_MAX));
+    ASSERT_TRUE(parcel->WriteBool(false));
+    AVCallState *result = AVCallState::Unmarshalling(*parcel);
+    EXPECT_EQ(result, nullptr);
+    delete parcel;
+}
+
+/**
+ * @tc.name: Unmarshalling002
+ * @tc.desc: Test Unmarshalling when avCallState_ is negative,
+ *           IsValid() returns false and Unmarshalling returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVCallStateTest, Unmarshalling002, TestSize.Level0)
+{
+    auto *parcel = new (std::nothrow) OHOS::Parcel();
+    EXPECT_NE(parcel, nullptr);
+    ASSERT_TRUE(parcel->WriteString("11"));
+    ASSERT_TRUE(parcel->WriteInt32(-1));
+    ASSERT_TRUE(parcel->WriteBool(false));
+    AVCallState *result = AVCallState::Unmarshalling(*parcel);
+    EXPECT_EQ(result, nullptr);
+    delete parcel;
+}
 } // namespace AVSession
 } // namespace OHOS

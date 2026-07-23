@@ -437,13 +437,11 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, MMI::KeyEvent::KeyI
     int32_t code {};
     auto status = GetNamedProperty(env, in, "code", code);
     CHECK_RETURN(status == napi_ok, "get code property failed", status);
-    SLOGI("code=%{public}d", code);
     out.SetKeyCode(code);
 
     int64_t pressedTime {};
     status = GetNamedProperty(env, in, "pressedTime", pressedTime);
     CHECK_RETURN(status == napi_ok, "get pressedTime property failed", status);
-    SLOGI("pressedTime=%{public}" PRIu64, pressedTime);
     out.SetDownTime(pressedTime);
 
     int32_t deviceId {};
@@ -638,7 +636,12 @@ napi_status NapiUtils::SetValue(napi_env env, AbilityRuntime::WantAgent::WantAge
         ability = nullptr;
     };
     status = napi_wrap(env, out, static_cast<void*>(in), finalizecb, nullptr, nullptr);
-    CHECK_RETURN(status == napi_ok, "wrap object failed", napi_generic_failure);
+    if (status != napi_ok) {
+        SLOGE("wrap object failed");
+        delete in;
+        in = nullptr;
+        return napi_generic_failure;
+    }
     return status;
 }
 
@@ -1744,6 +1747,7 @@ napi_status NapiUtils::GetStageElementName(napi_env env, napi_value in, AppExecF
                      napi_generic_failure);
         abilityInfo = extensionContext->GetAbilityInfo();
     }
+    CHECK_RETURN(abilityInfo != nullptr, "abilityInfo is nullptr", napi_generic_failure);
     out.SetBundleName(abilityInfo->bundleName);
     out.SetAbilityName(abilityInfo->name);
     return napi_ok;
@@ -1845,8 +1849,9 @@ napi_status NapiUtils::GetChannels(napi_env env, napi_value in, AudioStandard::A
 {
     napi_value value {};
     auto status = napi_get_named_property(env, in, "channelCounts", &value);
+    CHECK_RETURN(status == napi_ok, "get channelCounts property failed", status);
     uint32_t length {};
-    napi_get_array_length(env, value, &length);
+    status = napi_get_array_length(env, value, &length);
     CHECK_RETURN(status == napi_ok, "get array length failed", status);
     if (length > 0) {
         napi_value element {};

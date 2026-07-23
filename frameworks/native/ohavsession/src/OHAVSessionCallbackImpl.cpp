@@ -28,6 +28,7 @@ OHAVSessionCallbackImpl::~OHAVSessionCallbackImpl()
 
 void OHAVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = playCallbacks_.begin(); it != playCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY, it->second);
     }
@@ -35,6 +36,7 @@ void OHAVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 
 void OHAVSessionCallbackImpl::OnPause()
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = pauseCallbacks_.begin(); it != pauseCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PAUSE, it->second);
     }
@@ -42,6 +44,7 @@ void OHAVSessionCallbackImpl::OnPause()
 
 void OHAVSessionCallbackImpl::OnStop()
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = stopCallbacks_.begin(); it != stopCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_STOP, it->second);
     }
@@ -49,6 +52,7 @@ void OHAVSessionCallbackImpl::OnStop()
 
 void OHAVSessionCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = playNextCallbacks_.begin(); it != playNextCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY_NEXT, it->second);
     }
@@ -56,6 +60,7 @@ void OHAVSessionCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 
 void OHAVSessionCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = playPreviousCallbacks_.begin(); it != playPreviousCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY_PREVIOUS, it->second);
     }
@@ -63,6 +68,7 @@ void OHAVSessionCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 
 void OHAVSessionCallbackImpl::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = forwardCallbacks_.begin(); it != forwardCallbacks_.end(); ++it) {
         it->first(avsession_, time, it->second);
     }
@@ -70,6 +76,7 @@ void OHAVSessionCallbackImpl::OnFastForward(int64_t time, const AVControlCommand
 
 void OHAVSessionCallbackImpl::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = rewindCallbacks_.begin(); it != rewindCallbacks_.end(); ++it) {
         it->first(avsession_, time, it->second);
     }
@@ -77,6 +84,7 @@ void OHAVSessionCallbackImpl::OnRewind(int64_t time, const AVControlCommand& cmd
 
 void OHAVSessionCallbackImpl::OnSeek(int64_t time)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = seekCallbacks_.begin(); it != seekCallbacks_.end(); ++it) {
         it->first(avsession_, time, it->second);
     }
@@ -84,6 +92,7 @@ void OHAVSessionCallbackImpl::OnSeek(int64_t time)
 
 void OHAVSessionCallbackImpl::OnSetLoopMode(int32_t loopMode)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = setLoopModeCallbacks_.begin(); it != setLoopModeCallbacks_.end(); ++it) {
         it->first(avsession_, static_cast<AVSession_LoopMode>(loopMode), it->second);
     }
@@ -91,6 +100,7 @@ void OHAVSessionCallbackImpl::OnSetLoopMode(int32_t loopMode)
 
 void OHAVSessionCallbackImpl::OnToggleFavorite(const std::string& mediaId)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = toggleFavoriteCallbacks_.begin(); it != toggleFavoriteCallbacks_.end(); ++it) {
         it->first(avsession_, mediaId.c_str(), it->second);
     }
@@ -106,6 +116,7 @@ void OHAVSessionCallbackImpl::OnOutputDeviceChange(const int32_t connectionState
     CHECK_AND_CONTINUE_LOG(avSessionOutputDeviceInfo != nullptr,
         "OnOutputDeviceChange avSession OutputDeviceInfo is nullptr.");
     CHECK_AND_CONTINUE_LOG(avsession_ != nullptr, "OnOutputDeviceChange avsession is nullptr.");
+    std::lock_guard<std::mutex> lockGuard(lock_);
     for (auto it = outputDeviceChangeCallbacks_.begin(); it != outputDeviceChangeCallbacks_.end(); ++it) {
         (*it)(avsession_, (AVSession_ConnectionState)connectionState, avSessionOutputDeviceInfo.get());
     }
@@ -114,6 +125,7 @@ void OHAVSessionCallbackImpl::OnOutputDeviceChange(const int32_t connectionState
 AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -130,6 +142,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayCallback(OH_AVSession* avsessi
 AVSession_ErrCode OHAVSessionCallbackImpl::SetPauseCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -146,6 +159,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetPauseCallback(OH_AVSession* avsess
 AVSession_ErrCode OHAVSessionCallbackImpl::SetStopCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -162,6 +176,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetStopCallback(OH_AVSession* avsessi
 AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayNextCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -178,6 +193,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayNextCallback(OH_AVSession* avs
 AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayPreviousCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -194,56 +210,67 @@ AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayPreviousCallback(OH_AVSession*
 AVSession_ErrCode OHAVSessionCallbackImpl::UnSetPlayCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback)
 {
-    std::remove_if (playCallbacks_.begin(), playCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(playCallbacks_.begin(), playCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
+    playCallbacks_.erase(it, playCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::UnSetPauseCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback)
 {
-    std::remove_if (pauseCallbacks_.begin(), pauseCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(pauseCallbacks_.begin(), pauseCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
+    pauseCallbacks_.erase(it, pauseCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::UnSetStopCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback)
 {
-    std::remove_if (stopCallbacks_.begin(), stopCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(stopCallbacks_.begin(), stopCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
+    stopCallbacks_.erase(it, stopCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::UnSetPlayNextCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback)
 {
-    std::remove_if (playNextCallbacks_.begin(), playNextCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(playNextCallbacks_.begin(), playNextCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
+    playNextCallbacks_.erase(it, playNextCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::UnSetPlayPreviousCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback)
 {
-    std::remove_if (playPreviousCallbacks_.begin(), playPreviousCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(playPreviousCallbacks_.begin(), playPreviousCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnCommand, void*> &element) {
             return element.first == callback;
         });
+    playPreviousCallbacks_.erase(it, playPreviousCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::RegisterForwardCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -260,16 +287,19 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterForwardCallback(OH_AVSession*
 AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterForwardCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnFastForward callback)
 {
-    std::remove_if (forwardCallbacks_.begin(), forwardCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(forwardCallbacks_.begin(), forwardCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnFastForward, void*> &element) {
             return element.first == callback;
         });
+    forwardCallbacks_.erase(it, forwardCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::RegisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnRewind callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -286,16 +316,19 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterRewindCallback(OH_AVSession* 
 AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterRewindCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnRewind callback)
 {
-    std::remove_if (rewindCallbacks_.begin(), rewindCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(rewindCallbacks_.begin(), rewindCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnRewind, void*> &element) {
             return element.first == callback;
         });
+    rewindCallbacks_.erase(it, rewindCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -312,16 +345,19 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSeekCallback(OH_AVSession* av
 AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterSeekCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSeek callback)
 {
-    std::remove_if (seekCallbacks_.begin(), seekCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(seekCallbacks_.begin(), seekCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnSeek, void*> &element) {
             return element.first == callback;
         });
+    seekCallbacks_.erase(it, seekCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSetLoopModeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetLoopMode callback, void*userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -338,6 +374,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterSetLoopModeCallback(OH_AVSess
 AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterSetLoopModeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnSetLoopMode callback)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     std::remove_if (setLoopModeCallbacks_.begin(), setLoopModeCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnSetLoopMode, void*> &element) {
             return element.first == callback;
@@ -348,6 +385,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterSetLoopModeCallback(OH_AVSe
 AVSession_ErrCode OHAVSessionCallbackImpl::RegisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback, void* userData)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = avsession;
     }
@@ -364,16 +402,19 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterToggleFavoriteCallback(OH_AVS
 AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterToggleFavoriteCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OnToggleFavorite callback)
 {
-    std::remove_if (toggleFavoriteCallbacks_.begin(), toggleFavoriteCallbacks_.end(),
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::remove_if(toggleFavoriteCallbacks_.begin(), toggleFavoriteCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnToggleFavorite, void*> &element) {
             return element.first == callback;
         });
+    toggleFavoriteCallbacks_.erase(it, toggleFavoriteCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 
 AVSession_ErrCode OHAVSessionCallbackImpl::RegisterOutputDeviceChangeCallback(OH_AVSession* session,
     OH_AVSessionCallback_OutputDeviceChange callback)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (avsession_ == nullptr) {
         avsession_ = session;
     }
@@ -393,6 +434,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterOutputDeviceChangeCallback(OH
 AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterOutputDeviceChangeCallback(OH_AVSession* session,
     OH_AVSessionCallback_OutputDeviceChange callback)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     auto it = outputDeviceChangeCallbacks_.begin();
     for (; it != outputDeviceChangeCallbacks_.end(); ++it) {
         if (*it == callback) {

@@ -295,5 +295,71 @@ HWTEST_F(AVPlaybackStateTest, AVPlaybackStateCheckExtrasChange001, TestSize.Leve
     ret = AVPlaybackState::CheckExtrasChange(oldState, newState);
     EXPECT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: Unmarshalling001
+ * @tc.desc: Test Unmarshalling when state_ is negative (less than PLAYBACK_STATE_INITIAL),
+ *           Unmarshalling returns nullptr to block invalid IPC input
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVPlaybackStateTest, Unmarshalling001, TestSize.Level0)
+{
+    auto *parcel = new (std::nothrow) OHOS::Parcel();
+    EXPECT_NE(parcel, nullptr);
+    AVPlaybackState::PlaybackStateMaskType mask;
+    mask.set();
+    ASSERT_TRUE(parcel->WriteString(mask.to_string()));
+    ASSERT_TRUE(parcel->WriteInt32(-1));
+    EXPECT_TRUE(parcel->WriteDouble(3.0));
+    EXPECT_TRUE(parcel->WriteInt64(30));
+    EXPECT_TRUE(parcel->WriteInt64(3));
+    EXPECT_TRUE(parcel->WriteInt64(3));
+    EXPECT_TRUE(parcel->WriteInt32(3));
+    EXPECT_TRUE(parcel->WriteBool(true));
+    EXPECT_TRUE(parcel->WriteInt32(7));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+    EXPECT_TRUE(parcel->WriteBool(false));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+
+    AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);
+    EXPECT_EQ(result, nullptr);
+    delete parcel;
+}
+
+/**
+ * @tc.name: Unmarshalling002
+ * @tc.desc: Test Unmarshalling when state_ equals PLAYBACK_STATE_MAX,
+ *           Unmarshalling returns nullptr to block invalid IPC input
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVPlaybackStateTest, Unmarshalling002, TestSize.Level0)
+{
+    auto *parcel = new (std::nothrow) OHOS::Parcel();
+    EXPECT_NE(parcel, nullptr);
+    AVPlaybackState::PlaybackStateMaskType mask;
+    mask.set();
+    ASSERT_TRUE(parcel->WriteString(mask.to_string()));
+    ASSERT_TRUE(parcel->WriteInt32(AVPlaybackState::PLAYBACK_STATE_MAX));
+    EXPECT_TRUE(parcel->WriteDouble(3.0));
+    EXPECT_TRUE(parcel->WriteInt64(30));
+    EXPECT_TRUE(parcel->WriteInt64(3));
+    EXPECT_TRUE(parcel->WriteInt64(3));
+    EXPECT_TRUE(parcel->WriteInt32(3));
+    EXPECT_TRUE(parcel->WriteBool(true));
+    EXPECT_TRUE(parcel->WriteInt32(7));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+    EXPECT_TRUE(parcel->WriteBool(false));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+    EXPECT_TRUE(parcel->WriteInt32(0));
+
+    AVPlaybackState *result = AVPlaybackState::Unmarshalling(*parcel);
+    EXPECT_EQ(result, nullptr);
+    delete parcel;
+}
 } // namespace AVSession
 } // namespace OHOS

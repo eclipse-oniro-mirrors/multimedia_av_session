@@ -399,6 +399,7 @@ napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi
         asyncCallback_ = std::make_shared<NapiAsyncCallback>(env);
         if (asyncCallback_ == nullptr) {
             SLOGE("no memory");
+            napi_delete_reference(env, ref);
             return napi_generic_failure;
         }
     }

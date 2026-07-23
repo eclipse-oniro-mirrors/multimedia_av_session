@@ -120,18 +120,30 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
 
 bool AVSessionPixelMapAdapter::CopyPixMapToDst(Media::PixelMap &source, void* dstPixels, uint32_t bufferSize)
 {
+    CHECK_AND_RETURN_RET_LOG(dstPixels != nullptr, false, "dstPixels is nullptr");
     if (source.GetAllocatorType() == AllocatorType::DMA_ALLOC) {
         SLOGD("CopyPixMapToDst in dma");
         ImageInfo imageInfo;
         source.GetImageInfo(imageInfo);
-        for (int i = 0; i < imageInfo.size.height; ++i) {
-            if (memcpy_s(dstPixels, source.GetRowBytes(),
-                source.GetPixels() + i * source.GetRowStride(), source.GetRowBytes()) != 0) {
+        const uint8_t *srcPixels = source.GetPixels();
+        int32_t rowStride = source.GetRowStride();
+        int32_t signedRowBytes = source.GetRowBytes();
+        CHECK_AND_RETURN_RET_LOG(srcPixels != nullptr, false, "dma source pixels is nullptr");
+        CHECK_AND_RETURN_RET_LOG(imageInfo.size.height >= 0 && signedRowBytes > 0 && rowStride >= 0,
+            false, "dma image info is invalid");
+        uint32_t rowBytes = static_cast<uint32_t>(signedRowBytes);
+        CHECK_AND_RETURN_RET_LOG(
+            static_cast<uint64_t>(imageInfo.size.height) * rowBytes <= bufferSize, false,
+            "dma copy size exceeds bufferSize");
+        for (int32_t i = 0; i < imageInfo.size.height; ++i) {
+            uint32_t remainingSize = bufferSize - static_cast<uint32_t>(i) * rowBytes;
+            if (memcpy_s(dstPixels, remainingSize,
+                srcPixels + static_cast<size_t>(i) * static_cast<uint32_t>(rowStride), rowBytes) != 0) {
                 SLOGE("copy source memory size %{public}u fail", bufferSize);
                 return false;
             }
             // Move the destination buffer pointer to the next row
-            dstPixels = reinterpret_cast<uint8_t *>(dstPixels) + source.GetRowBytes();
+            dstPixels = reinterpret_cast<uint8_t *>(dstPixels) + rowBytes;
         }
     } else  {
         SLOGI("CopyPixMapToDst in normal way with bufferSize %{public}u", bufferSize);

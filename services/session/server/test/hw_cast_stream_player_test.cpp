@@ -460,6 +460,30 @@ HWTEST_F(HwCastStreamPlayerTest, GetRecommendedResolutionLevel001, TestSize.Leve
 }
 
 /**
+ * @tc.name: GetRecommendedResolutionLevel002
+ * @tc.desc: decoderType exists in map but resolutionLevels is empty,
+ *           triggers empty list check and returns AVSESSION_ERROR (UB protection)
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, GetRecommendedResolutionLevel002, TestSize.Level0)
+{
+    SLOGI("GetRecommendedResolutionLevel002 begin!");
+    ASSERT_NE(nullptr, hwCastStreamPlayer->jsonCapabilitiesSptr_);
+    std::string decoderType = "test_empty";
+    // Ensure the map is non-empty to avoid triggering GetMediaCapabilities()
+    // which could overwrite the test-configured emptyLevels.
+    hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderSupportResolutions_["dummy"] = { RESOLUTION_480P };
+    std::vector<ResolutionLevel> emptyLevels;
+    hwCastStreamPlayer->jsonCapabilitiesSptr_->decoderSupportResolutions_[decoderType] = emptyLevels;
+    ResolutionLevel resolutionLevel = RESOLUTION_2K;
+    auto ret = hwCastStreamPlayer->GetRecommendedResolutionLevel(decoderType, resolutionLevel);
+    EXPECT_EQ(AVSESSION_ERROR, ret);
+    EXPECT_EQ(resolutionLevel, RESOLUTION_2K) << "resolutionLevel should not be modified on error";
+    SLOGI("GetRecommendedResolutionLevel002 end!");
+}
+
+/**
  * @tc.name: GetSupportedHdrCapabilities001
  * @tc.desc: failed to data from map
  * @tc.type: FUNC

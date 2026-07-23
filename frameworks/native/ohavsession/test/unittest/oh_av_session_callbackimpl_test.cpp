@@ -19,6 +19,7 @@
 #include "OHAVSessionCallbackImpl.h"
 #include "avsession_log.h"
 #include "avsession_manager.h"
+#include "avcontrol_command.h"
 
 using namespace testing::ext;
 
@@ -628,5 +629,277 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterOutputDeviceChangeCallback001, Tes
     auto ret = g_ohAVSessionCallbackImpl.RegisterOutputDeviceChangeCallback(avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     SLOGI("RegisterOutputDeviceChangeCallback001 End");
+}
+
+/**
+ * @tc.name: OnPlay001
+ * @tc.desc: test OnPlay
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnPlay001, TestSize.Level0)
+{
+    SLOGI("OnPlay001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnPlay001", "com.xxx.hmxx", "ndkxx", &avsession);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.SetPlayCallback(avsession, command, callback, (void *)(&userData));
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    g_ohAVSessionCallbackImpl.OnPlay(cmd);
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.playCallbacks_.size() > 0);
+    SLOGI("OnPlay001 End");
+}
+
+/**
+ * @tc.name: OnPause001
+ * @tc.desc: test OnPause
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnPause001, TestSize.Level0)
+{
+    SLOGI("OnPause001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnPause001", "com.xxx.hmxx", "ndkxx", &avsession);
+    AVSession_ControlCommand command = CONTROL_CMD_PAUSE;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.SetPauseCallback(avsession, command, callback, (void *)(&userData));
+    g_ohAVSessionCallbackImpl.OnPause();
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.pauseCallbacks_.size() > 0);
+    SLOGI("OnPause001 End");
+}
+
+/**
+ * @tc.name: OnStop001
+ * @tc.desc: test OnStop
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnStop001, TestSize.Level0)
+{
+    SLOGI("OnStop001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnStop001", "com.xxx.hmxx", "ndkxx", &avsession);
+    AVSession_ControlCommand command = CONTROL_CMD_STOP;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.SetStopCallback(avsession, command, callback, (void *)(&userData));
+    g_ohAVSessionCallbackImpl.OnStop();
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.stopCallbacks_.size() > 0);
+    SLOGI("OnStop001 End");
+}
+
+/**
+ * @tc.name: OnPlayNext001
+ * @tc.desc: test OnPlayNext
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnPlayNext001, TestSize.Level0)
+{
+    SLOGI("OnPlayNext001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnPlayNext001", "com.xxx.hmxx", "ndkxx", &avsession);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY_NEXT;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.SetPlayNextCallback(avsession, command, callback, (void *)(&userData));
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
+    g_ohAVSessionCallbackImpl.OnPlayNext(cmd);
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.playNextCallbacks_.size() > 0);
+    SLOGI("OnPlayNext001 End");
+}
+
+/**
+ * @tc.name: OnPlayPrevious001
+ * @tc.desc: test OnPlayPrevious
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnPlayPrevious001, TestSize.Level0)
+{
+    SLOGI("OnPlayPrevious001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnPlayPrevious001", "com.xxx.hmxx", "ndkxx", &avsession);
+    AVSession_ControlCommand command = CONTROL_CMD_PLAY_PREVIOUS;
+    OH_AVSessionCallback_OnCommand callback = [](OH_AVSession* session, AVSession_ControlCommand command,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.SetPlayPreviousCallback(avsession, command, callback, (void *)(&userData));
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+    g_ohAVSessionCallbackImpl.OnPlayPrevious(cmd);
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.playPreviousCallbacks_.size() > 0);
+    SLOGI("OnPlayPrevious001 End");
+}
+
+/**
+ * @tc.name: OnFastForward001
+ * @tc.desc: test OnFastForward
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnFastForward001, TestSize.Level0)
+{
+    SLOGI("OnFastForward001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnFastForward001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnFastForward callback = [](OH_AVSession* session, uint32_t seekTime,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.RegisterForwardCallback(avsession, callback, (void *)(&userData));
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_FAST_FORWARD);
+    cmd.SetForwardTime(1000);
+    g_ohAVSessionCallbackImpl.OnFastForward(1000, cmd);
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.forwardCallbacks_.size() > 0);
+    SLOGI("OnFastForward001 End");
+}
+
+/**
+ * @tc.name: OnRewind001
+ * @tc.desc: test OnRewind
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnRewind001, TestSize.Level0)
+{
+    SLOGI("OnRewind001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnRewind001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnRewind callback = [](OH_AVSession* session, uint32_t seekTime,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.RegisterRewindCallback(avsession, callback, (void *)(&userData));
+    AVControlCommand cmd;
+    cmd.SetCommand(AVControlCommand::SESSION_CMD_REWIND);
+    cmd.SetRewindTime(1000);
+    g_ohAVSessionCallbackImpl.OnRewind(1000, cmd);
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.rewindCallbacks_.size() > 0);
+    SLOGI("OnRewind001 End");
+}
+
+/**
+ * @tc.name: OnSeek001
+ * @tc.desc: test OnSeek
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnSeek001, TestSize.Level0)
+{
+    SLOGI("OnSeek001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnSeek001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnSeek callback = [](OH_AVSession* session, uint64_t seekTime,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.RegisterSeekCallback(avsession, callback, (void *)(&userData));
+    g_ohAVSessionCallbackImpl.OnSeek(10000);
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.seekCallbacks_.size() > 0);
+    SLOGI("OnSeek001 End");
+}
+
+/**
+ * @tc.name: OnSetLoopMode001
+ * @tc.desc: test OnSetLoopMode
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnSetLoopMode001, TestSize.Level0)
+{
+    SLOGI("OnSetLoopMode001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnSetLoopMode001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnSetLoopMode callback = [](OH_AVSession* session, AVSession_LoopMode curLoopMode,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.RegisterSetLoopModeCallback(avsession, callback, (void *)(&userData));
+    g_ohAVSessionCallbackImpl.OnSetLoopMode(static_cast<int32_t>(LOOP_MODE_SINGLE));
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.size() > 0);
+    SLOGI("OnSetLoopMode001 End");
+}
+
+/**
+ * @tc.name: OnToggleFavorite001
+ * @tc.desc: test OnToggleFavorite
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnToggleFavorite001, TestSize.Level0)
+{
+    SLOGI("OnToggleFavorite001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnToggleFavorite001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OnToggleFavorite callback = [](OH_AVSession* session, const char* assetId,
+        void* userData) -> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    int userData = 1;
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    g_ohAVSessionCallbackImpl.RegisterToggleFavoriteCallback(avsession, callback, (void *)(&userData));
+    std::string mediaId = "test_media_id";
+    g_ohAVSessionCallbackImpl.OnToggleFavorite(mediaId);
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.toggleFavoriteCallbacks_.size() > 0);
+    SLOGI("OnToggleFavorite001 End");
+}
+
+/**
+ * @tc.name: OnOutputDeviceChange001
+ * @tc.desc: test OnOutputDeviceChange
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, OnOutputDeviceChange001, TestSize.Level0)
+{
+    SLOGI("OnOutputDeviceChange001 Begin");
+    OH_AVSession* avsession = nullptr;
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnOutputDeviceChange001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_OutputDeviceChange callback = [](OH_AVSession* session,
+        AVSession_ConnectionState state, AVSession_OutputDeviceInfo* outputDeviceInfo)-> AVSessionCallback_Result {
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    g_ohAVSessionCallbackImpl.avsession_ = avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterOutputDeviceChangeCallback(avsession, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    OutputDeviceInfo outputDeviceInfo;
+    g_ohAVSessionCallbackImpl.OnOutputDeviceChange(0, outputDeviceInfo);
+    EXPECT_TRUE(g_ohAVSessionCallbackImpl.outputDeviceChangeCallbacks_.size() > 0);
+    SLOGI("OnOutputDeviceChange001 End");
 }
 } //OHOS::AVSession

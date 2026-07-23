@@ -131,7 +131,7 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
     }
 
     bool isRemote = false;
-    if (fd_ > 0) {
+    if (fd_ >= 0) {
         int size = AshmemGetSize(fd_);
         if (size != capacity_) {
             SLOGE("size not equal capacity_, size = %{public}d, capacity_ = %{public}d", size, capacity_);
@@ -142,7 +142,7 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
         isRemote = true;
     } else {
         fd_ = AshmemCreate(name_.c_str(), static_cast<size_t>(capacity_));
-        if (fd_ <= 0) {
+        if (fd_ < 0) {
             SLOGE("fd is invalid, fd = %{public}d", fd_);
             AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
                 AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "fd is invalid", true);
@@ -193,7 +193,7 @@ void AVSharedMemoryBase::Close() noexcept
         flags_ = 0;
         size_ = 0;
     }
-    if (fd_ > 0) {
+    if (fd_ >= 0) {
         (void)::close(fd_);
         fd_ = -1;
     }

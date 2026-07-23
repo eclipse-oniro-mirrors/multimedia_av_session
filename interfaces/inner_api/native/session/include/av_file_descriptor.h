@@ -24,9 +24,9 @@ struct AVFileDescriptor {
     bool WriteToParcel(Parcel& out) const;
     bool ReadFromParcel(Parcel& in);
 
-    int32_t fd_;
-    int64_t offset_;
-    int64_t length_;
+    int32_t fd_ = -1;
+    int64_t offset_ = 0;
+    int64_t length_ = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AV_FILE_DESCRIPTOR_H

@@ -1900,6 +1900,8 @@ napi_status NapiAVSessionManager::OnDeviceAvailable(napi_env env, napi_value cal
 
 napi_status NapiAVSessionManager::OnDeviceLogEvent(napi_env env, napi_value callback)
 {
+    std::lock_guard lockGuard(listenersMutex_);
+    CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_LOG_EVENT, callback);
 }
 
@@ -1912,6 +1914,7 @@ napi_status NapiAVSessionManager::OnDeviceOffline(napi_env env, napi_value callb
 
 napi_status NapiAVSessionManager::OnServiceDie(napi_env env, napi_value callback)
 {
+    std::lock_guard lockGuard(listenersMutex_);
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, serviceDiedCallbacks_, callback, ref),
                              napi_generic_failure, "get callback reference failed");
@@ -1936,6 +1939,7 @@ napi_status NapiAVSessionManager::OnServiceDie(napi_env env, napi_value callback
 napi_status NapiAVSessionManager::OnRemoteDistributedSessionChange(napi_env env, napi_value callback)
 {
     SLOGI("OnRemoteDistributedSessionChange AddCallback");
+    std::lock_guard lockGuard(listenersMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callback);
 }
@@ -1943,6 +1947,7 @@ napi_status NapiAVSessionManager::OnRemoteDistributedSessionChange(napi_env env,
 napi_status NapiAVSessionManager::OnDeviceStateChanged(napi_env env, napi_value callback)
 {
     SLOGI("OnDeviceStateChanged AddCallback");
+    std::lock_guard lockGuard(listenersMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->AddCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
@@ -1950,13 +1955,13 @@ napi_status NapiAVSessionManager::OnDeviceStateChanged(napi_env env, napi_value 
 void NapiAVSessionManager::HandleServiceDied()
 {
     std::string callBackName = "NapiAVSessionManager::HandleServiceDied";
+    std::lock_guard lockGuard(listenersMutex_);
     if (!serviceDiedCallbacks_.empty() && asyncCallback_ != nullptr) {
         for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
              ++callbackRef) {
             asyncCallback_->Call(*callbackRef, callBackName);
         }
     }
-    std::lock_guard lockGuard(listenersMutex_);
     if (listener_ != nullptr) {
         SLOGI("clear listener for service die");
         listener_ = nullptr;
@@ -2006,6 +2011,7 @@ napi_status NapiAVSessionManager::OffDeviceAvailable(napi_env env, napi_value ca
 
 napi_status NapiAVSessionManager::OffDeviceLogEvent(napi_env env, napi_value callback)
 {
+    std::lock_guard lockGuard(listenersMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_LOG_EVENT, callback);
 }
@@ -2020,6 +2026,7 @@ napi_status NapiAVSessionManager::OffDeviceOffline(napi_env env, napi_value call
 napi_status NapiAVSessionManager::OffRemoteDistributedSessionChange(napi_env env, napi_value callback)
 {
     SLOGI("OffRemoteDistributedSessionChange RemoveCallback");
+    std::lock_guard lockGuard(listenersMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_REMOTE_DISTRIBUTED_SESSION_CHANGED, callback);
 }
@@ -2027,6 +2034,7 @@ napi_status NapiAVSessionManager::OffRemoteDistributedSessionChange(napi_env env
 napi_status NapiAVSessionManager::OffDeviceStateChanged(napi_env env, napi_value callback)
 {
     SLOGI("OffDeviceStateChanged RemoveCallback");
+    std::lock_guard lockGuard(listenersMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, napi_generic_failure, "callback has not been registered");
     return listener_->RemoveCallback(env, NapiSessionListener::EVENT_DEVICE_STATE_CHANGED, callback);
 }
@@ -2034,6 +2042,7 @@ napi_status NapiAVSessionManager::OffDeviceStateChanged(napi_env env, napi_value
 napi_status NapiAVSessionManager::OffServiceDie(napi_env env, napi_value callback)
 {
     SLOGI("OffServiceDie but no longer UnregisterServiceDeathCallback");
+    std::lock_guard lockGuard(listenersMutex_);
     if (callback == nullptr) {
         for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
              ++callbackRef) {
