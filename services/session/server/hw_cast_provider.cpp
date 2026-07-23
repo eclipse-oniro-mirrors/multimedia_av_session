@@ -127,10 +127,8 @@ void HwCastProvider::Release()
         avCastControllerMap_.clear();
         castStateListenerList_.clear();
         castFlag_.clear();
-        if (isRelease_) {
-            SLOGW("already in release, check return");
-            return;
-        }
+        CHECK_AND_RETURN_LOG(!isRelease_, "already in release, check return");
+        SLOGI("release in with check pass");
         isRelease_ = true;
     }
     SLOGI("release in with check pass");
@@ -530,14 +528,14 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
     for (const CastRemoteDevice& castRemoteDevice : deviceList) {
         SLOGI("get devices with deviceName %{public}s",
             AVSessionUtils::GetAnonyDeviceName(castRemoteDevice.deviceName).c_str());
-        if (castRemoteDevice.serviceInfos.empty()) {
+        if (castRemoteDevice.serviceInfos.empty()) { // not car device
             DeviceInfo deviceInfo;
             deviceInfo.deviceId_ = castRemoteDevice.deviceId;
             deviceInfo.deviceName_ = castRemoteDevice.deviceName;
             deviceInfo.authenticationStatus_ = castRemoteDevice.isTrushed ? TRUSTED_DEVICE : UNTRUSTED_DEVICE;
             buildDeviceInfo(castRemoteDevice, deviceInfo);
             deviceInfoList.emplace_back(deviceInfo);
-        } else {
+        } else { // car device
             for (const ServiceInfo& info : castRemoteDevice.serviceInfos) {
                 DeviceInfo deviceInfo;
                 std::string screenId = std::to_string(info.screenId);
