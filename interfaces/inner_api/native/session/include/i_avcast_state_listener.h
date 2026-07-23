@@ -26,8 +26,10 @@
 namespace OHOS::AVSession {
 class IAVCastStateListener {
 public:
+    virtual ~IAVCastStateListener() = default;
+
     /**
-     * Notify Router that the device has been discovered.
+      * Notify Router that the device has been discovered.
      *
      * @param { std::vector<DeviceInfo> } deviceInfos - Discovered device infos.
      * @since 10

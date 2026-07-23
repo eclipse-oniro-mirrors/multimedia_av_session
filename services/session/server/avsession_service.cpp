@@ -2459,7 +2459,12 @@ bool AVSessionService::InsertAvQueueInfoToCJSONAndPrint(const std::string &bundl
     cJSON_AddStringToObject(newValue, "avQueueImageName", fileName.c_str());
     cJSON_AddStringToObject(newValue, "avQueueImageUri", meta.GetAVQueueImageUri().c_str());
     if (cJSON_IsInvalid(newValue)) {
-        SLOGE("get valuesArray nullptr");
+        SLOGE("get newValue nullptr");
+        cJSON_Delete(newValue);
+        return false;
+    }
+    if (cJSON_IsInvalid(valuesArray)) {
+        SLOGE("get valuesArray invalid");
         cJSON_Delete(newValue);
         return false;
     }
@@ -2467,10 +2472,6 @@ bool AVSessionService::InsertAvQueueInfoToCJSONAndPrint(const std::string &bundl
         cJSON_AddItemToArray(valuesArray, newValue);
     } else {
         cJSON_InsertItemInArray(valuesArray, 0, newValue);
-    }
-    if (cJSON_IsInvalid(valuesArray)) {
-        SLOGE("get newValueArray invalid");
-        return false;
     }
 
     char* newAvqueueContent = cJSON_Print(valuesArray);
@@ -3854,10 +3855,9 @@ void AVSessionService::GetDeviceInfo(const sptr <AVSessionItem>& session,
     OutputDeviceInfo tempOutputDeviceInfo;
     session->GetOutputDevice(tempOutputDeviceInfo);
     // If not in remote, return directly
-    if (tempOutputDeviceInfo.deviceInfos_.size() == 0 || tempOutputDeviceInfo.deviceInfos_[0].castCategory_ == 1) {
-        SLOGI("castCategory is %{public}d, no need to cancel", tempOutputDeviceInfo.deviceInfos_[0].castCategory_);
-        return;
-    }
+    CHECK_AND_RETURN_LOG(tempOutputDeviceInfo.deviceInfos_.size() != 0, "deviceInfos size is 0, no need to cancel");
+    CHECK_AND_RETURN_LOG(tempOutputDeviceInfo.deviceInfos_[0].castCategory_ != 1,
+        "castCategory is %{public}d, no need to cancel", tempOutputDeviceInfo.deviceInfos_[0].castCategory_);
     int32_t ret = GetAudioDescriptor(session->GetDescriptor().outputDeviceInfo_.deviceInfos_[0].deviceId_,
                                      cancelSinkDescriptors);
     CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "get cancelSinkDescriptors failed");
