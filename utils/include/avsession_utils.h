@@ -72,12 +72,11 @@ public:
     static bool ReadPairFromFile(std::pair<std::string, int32_t>& castPair,
         const std::string& fileDir, const std::string& fileName)
     {
-        if (fileName.find("..") != std::string::npos ||
-            fileName.find("/") != std::string::npos ||
-            fileName.find("\\") != std::string::npos) {
-            SLOGE("Invalid fileName: contains path traversal characters");
-            return false;
-        }
+        CHECK_AND_RETURN_RET_LOG(
+            fileName.find("..") == std::string::npos &&
+            fileName.find("/") == std::string::npos &&
+            fileName.find("\\") == std::string::npos,
+            false, "Invalid fileName: contains path traversal characters");
 
         std::string filePath = fileDir + fileName;
 
@@ -120,12 +119,11 @@ public:
             return;
         }
         
-        if (fileName.find("..") != std::string::npos ||
-            fileName.find("/") != std::string::npos ||
-            fileName.find("\\") != std::string::npos) {
-            SLOGE("Invalid fileName: contains path traversal characters");
-            return;
-        }
+        CHECK_AND_RETURN_LOG(
+            fileName.find("..") == std::string::npos &&
+            fileName.find("/") == std::string::npos &&
+            fileName.find("\\") == std::string::npos,
+            "Invalid fileName: contains path traversal characters");
 
         char realPath[PATH_MAX] = { 0x00 };
         if (realpath(fileDir.c_str(), realPath) == nullptr &&
