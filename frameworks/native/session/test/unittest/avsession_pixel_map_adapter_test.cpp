@@ -214,5 +214,107 @@ HWTEST_F(AVSessionPixelMapAdapterTest, ConvertToInnerWithLimitedSize_001, TestSi
     EXPECT_EQ(result, nullptr);
     SLOGD("ConvertToInnerWithLimitedSize_001 end!");
 }
+
+/**
+ * @tc.name: CopyPixMapToDst_DmaInvalidInfo001
+ * @tc.desc: Test CopyPixMapToDst DMA branch when image info is invalid (width=0 leads to
+ *           rowBytes=0), triggers "dma image info is invalid" check and returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst_DmaInvalidInfo001, TestSize.Level0)
+{
+    SLOGD("CopyPixMapToDst_DmaInvalidInfo001 begin!");
+    OHOS::Media::PixelMap source;
+    OHOS::Media::ImageInfo imageInfo = {
+        .size = {0, 3},
+        .pixelFormat = OHOS::Media::PixelFormat::RGB_888,
+        .colorSpace = OHOS::Media::ColorSpace::SRGB,
+        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
+        .baseDensity = 0,
+        .encodedFormat = ""
+    };
+    source.SetImageInfo(imageInfo);
+    uint8_t srcBuf[16] = {0};
+    source.SetPixelsAddr(srcBuf, nullptr, 16, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
+    std::vector<uint8_t> dstPixels(64, 0);
+    bool result = AVSessionPixelMapAdapter::CopyPixMapToDst(source, dstPixels.data(), 64);
+    EXPECT_FALSE(result);
+    SLOGD("CopyPixMapToDst_DmaInvalidInfo001 end!");
+}
+
+/**
+ * @tc.name: CopyPixMapToDst_DmaExceedBuffer001
+ * @tc.desc: Test CopyPixMapToDst DMA branch when height*rowBytes exceeds bufferSize,
+ *           triggers "dma copy size exceeds bufferSize" check and returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst_DmaExceedBuffer001, TestSize.Level0)
+{
+    SLOGD("CopyPixMapToDst_DmaExceedBuffer001 begin!");
+    OHOS::Media::PixelMap source;
+    OHOS::Media::ImageInfo imageInfo = {
+        .size = {4, 3},
+        .pixelFormat = OHOS::Media::PixelFormat::RGB_888,
+        .colorSpace = OHOS::Media::ColorSpace::SRGB,
+        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
+        .baseDensity = 0,
+        .encodedFormat = ""
+    };
+    source.SetImageInfo(imageInfo);
+    uint32_t rowBytes = source.GetRowBytes();
+    int32_t height = source.GetHeight();
+    ASSERT_GT(rowBytes, 0u);
+    ASSERT_GT(height, 0);
+    uint32_t needSize = rowBytes * static_cast<uint32_t>(height);
+    uint32_t srcSize = needSize + 16;
+    std::vector<uint8_t> srcPixels(srcSize, 0x03);
+    source.SetPixelsAddr(srcPixels.data(), nullptr, srcSize, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
+    std::vector<uint8_t> dstPixels(srcSize, 0);
+    bool result = AVSessionPixelMapAdapter::CopyPixMapToDst(source, dstPixels.data(), needSize - 1);
+    EXPECT_FALSE(result);
+    SLOGD("CopyPixMapToDst_DmaExceedBuffer001 end!");
+}
+
+/**
+ * @tc.name: CopyPixMapToDst_DmaSuccess001
+ * @tc.desc: Test CopyPixMapToDst DMA branch with valid image info and sufficient buffer,
+ *           all checks pass and row-by-row copy succeeds, returns true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst_DmaSuccess001, TestSize.Level0)
+{
+    SLOGD("CopyPixMapToDst_DmaSuccess001 begin!");
+    OHOS::Media::PixelMap source;
+    OHOS::Media::ImageInfo imageInfo = {
+        .size = {4, 3},
+        .pixelFormat = OHOS::Media::PixelFormat::RGB_888,
+        .colorSpace = OHOS::Media::ColorSpace::SRGB,
+        .alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN,
+        .baseDensity = 0,
+        .encodedFormat = ""
+    };
+    source.SetImageInfo(imageInfo);
+    uint32_t rowBytes = source.GetRowBytes();
+    int32_t height = source.GetHeight();
+    int32_t rowStride = source.GetRowStride();
+    ASSERT_GT(rowBytes, 0u);
+    ASSERT_GT(height, 0);
+    ASSERT_GE(rowStride, 0);
+    uint32_t needSize = rowBytes * static_cast<uint32_t>(height);
+    uint32_t strideSize = static_cast<uint32_t>(rowStride) * static_cast<uint32_t>(height);
+    uint32_t srcSize = (needSize > strideSize) ? (needSize + 16) : (strideSize + 16);
+    std::vector<uint8_t> srcPixels(srcSize, 0x03);
+    source.SetPixelsAddr(srcPixels.data(), nullptr, srcSize, OHOS::Media::AllocatorType::DMA_ALLOC, nullptr);
+    std::vector<uint8_t> dstPixels(srcSize, 0);
+    bool result = AVSessionPixelMapAdapter::CopyPixMapToDst(source, dstPixels.data(), srcSize);
+    EXPECT_TRUE(result);
+    // 验证拷贝的数据正确性：逐行对比 dstPixels 与 srcPixels 对应行数据
+    for (uint32_t i = 0; i < static_cast<uint32_t>(height); ++i) {
+        uint8_t* dstRow = dstPixels.data() + i * rowBytes;
+        uint8_t* srcRow = srcPixels.data() + i * static_cast<uint32_t>(rowStride);
+        EXPECT_EQ(memcmp(dstRow, srcRow, rowBytes), 0) << "Row " << i << " data mismatch";
+    }
+    SLOGD("CopyPixMapToDst_DmaSuccess001 end!");
+}
 } // namespace AVSESSION
 } // namespace OHOS
