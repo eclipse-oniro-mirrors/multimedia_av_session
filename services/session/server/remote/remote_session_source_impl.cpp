@@ -128,6 +128,8 @@ int32_t  RemoteSessionSourceImpl::CancelCastAudio(const std::string& sinkDevice)
             iter->second->Destroy();
             iter->second = nullptr;
             iter = syncers_.erase(iter);
+        } else {
+            ++iter;
         }
     }
     SLOGI("success");
