@@ -161,6 +161,7 @@ ErrCode AVCastControllerCallbackClient::OnCastValidCommandChanged(const std::vec
 ErrCode AVCastControllerCallbackClient::onDataSrcRead(const std::shared_ptr<AVSharedMemoryBase>& mem,
                                                       uint32_t length, int64_t pos, int32_t& result)
 {
+    CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
     auto callback = callback_;
     callback->onDataSrcRead(mem, length, pos, result);
     return AVSESSION_SUCCESS;
