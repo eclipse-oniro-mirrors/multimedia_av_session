@@ -51,6 +51,8 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
 
     RemoteSessionCapabilitySet::GetInstance().AddRemoteCapability(session->GetSessionId(), sinkDevice, sinkCapability);
 
+    CHECK_AND_RETURN_RET_LOG(!syncers_.empty(), AVSESSION_ERROR, "syncers size is empty");
+
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         auto sessionSyncer = iter->second;
 #ifdef DATA_OBJECT_ENABLE
