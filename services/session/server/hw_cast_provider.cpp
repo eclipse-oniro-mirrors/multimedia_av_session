@@ -127,11 +127,14 @@ void HwCastProvider::Release()
         avCastControllerMap_.clear();
         castStateListenerList_.clear();
         castFlag_.clear();
-        CHECK_AND_RETURN_LOG(!isRelease_, "already in release, check return");
+    }
+    if (!isRelease_) {
         SLOGI("release in with check pass");
         isRelease_ = true;
+    } else {
+        SLOGW("already in release, check return");
+        return;
     }
-    SLOGI("release in with check pass");
     CastSessionManager::GetInstance().UnregisterListener();
     SLOGD("provider release done");
 }
