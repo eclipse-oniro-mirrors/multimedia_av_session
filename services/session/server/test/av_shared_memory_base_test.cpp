@@ -722,5 +722,53 @@ static HWTEST(AVSharedMemoryBaseTest, MapMemory006, TestSize.Level4)
     EXPECT_EQ(ret, static_cast<int32_t>(AVSESSION_ERROR));
     EXPECT_EQ(memory->base_, nullptr);
 }
+
+/**
+ * @tc.name: Init006
+ * @tc.desc: Test Init() when fd_ == 0 (>= 0), enters isRemote branch,
+ *           AshmemGetSize(0) returns -1 which != capacity_, returns ERR_INVALID_PARAM.
+ *           Verifies fd_ == 0 is now treated as valid (>= 0) and enters remote path
+ *           instead of AshmemCreate path (fd_ unchanged).
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Init006, TestSize.Level4)
+{
+    SLOGI("Init006 begin!");
+    int32_t size = 4096;
+    uint32_t flags = 0;
+    const std::string name = "test_fd_zero";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    ASSERT_NE(memory, nullptr);
+    memory->fd_ = 0;
+    int32_t ret = memory->Init();
+    EXPECT_EQ(ret, static_cast<int32_t>(ERR_INVALID_PARAM));
+    EXPECT_EQ(memory->fd_, 0);
+}
+
+/**
+ * @tc.name: Close001
+ * @tc.desc: Test Close() when fd_ == 0 (>= 0), enters close branch and sets fd_ = -1.
+ *           Verifies fd_ == 0 is treated as valid descriptor that can be closed.
+ *           Saves/restores stdin to avoid side effects of close(0).
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSharedMemoryBaseTest, Close001, TestSize.Level4)
+{
+    SLOGI("Close001 begin!");
+    int32_t size = 10;
+    uint32_t flags = 1;
+    const std::string name = "test_close_fd_zero";
+    auto memory = std::make_shared<AVSharedMemoryBase>(size, flags, name);
+    ASSERT_NE(memory, nullptr);
+    int savedStdin = dup(0);
+    bool stdinValid = (savedStdin >= 0);
+    memory->fd_ = 0;
+    memory->Close();
+    EXPECT_EQ(memory->fd_, -1);
+    if (stdinValid) {
+        dup2(savedStdin, 0);
+        close(savedStdin);
+    }
+}
 } //AVSession
 } //OHOS
