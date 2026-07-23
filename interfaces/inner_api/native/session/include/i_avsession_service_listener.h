@@ -26,6 +26,7 @@
 namespace OHOS::AVSession {
 class IAVSessionServiceListener {
 public:
+    virtual ~IAVSessionServiceListener() = default;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 

@@ -605,9 +605,11 @@ public:
 
 class HistoricalRecordListener {
 public:
+    virtual ~HistoricalRecordListener() = default;
+
     /**
-     * @brief Listen to the change of historical record.
-     */
+      * @brief Listen to the change of historical record.
+      */
     virtual void OnHistoricalRecordChange() = 0;
 };
 
