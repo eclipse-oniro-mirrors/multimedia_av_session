@@ -473,6 +473,24 @@ public:
 
         return result;
     }
+
+    static bool IsValidFileName(const std::string& fileName)
+    {
+        if (fileName.empty()) {
+            return false;
+        }
+        if (fileName.find('/') != std::string::npos) {
+            return false;
+        }
+        if (fileName.find('\\') != std::string::npos) {
+            return false;
+        }
+        if (fileName.find("..") != std::string::npos) {
+            return false;
+        }
+        return true;
+    }
+
 private:
     static constexpr const int32_t RSS_UID = 1096;
     static constexpr const char* DATA_PATH_NAME = "/data/service/el2/";

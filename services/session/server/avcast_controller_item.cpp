@@ -475,7 +475,7 @@ int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
         "streamPlayer null");
-    currentItem =  castControllerProxy_->GetCurrentItem();
+    currentItem = castControllerProxy_->GetCurrentItem();
     return AVSESSION_SUCCESS;
 }
 

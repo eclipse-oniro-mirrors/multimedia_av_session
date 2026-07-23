@@ -427,15 +427,18 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     }
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& listener : innerSessionListeners_) {
+        CHECK_AND_CONTINUE(listener != nullptr);
         listener->OnDeviceAvailable(outputDeviceInfo);
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
+        CHECK_AND_CONTINUE(listener != nullptr);
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
         listener->OnDeviceAvailable(outputDeviceInfo);
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
     for (const auto& [pid, listener] : listenerMapForAll) {
+        CHECK_AND_CONTINUE(listener != nullptr);
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceAvailable");
         listener->OnDeviceAvailable(outputDeviceInfo);
     }
@@ -486,11 +489,13 @@ void AVSessionService::NotifyDeviceLogEvent(const DeviceLogEventCode eventId, co
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
+        CHECK_AND_CONTINUE(listener != nullptr);
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
         listener->OnDeviceLogEvent(eventId, param);
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
     for (const auto& [pid, listener] : listenerMapForAll) {
+        CHECK_AND_CONTINUE(listener != nullptr);
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceLogEvent");
         listener->OnDeviceLogEvent(eventId, param);
     }
@@ -501,16 +506,19 @@ void AVSessionService::NotifyDeviceOffline(const std::string& deviceId)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     for (const auto& listener : innerSessionListeners_) {
+        CHECK_AND_CONTINUE(listener != nullptr);
         listener->OnDeviceOffline(deviceId);
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
+        CHECK_AND_CONTINUE(listener != nullptr);
         SLOGI("notify device offline with pid %{public}d", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
         listener->OnDeviceOffline(deviceId);
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
     for (const auto& [pid, listener] : listenerMapForAll) {
+        CHECK_AND_CONTINUE(listener != nullptr);
         SLOGI("notify device offline with pid %{public}d across users", static_cast<int>(pid));
         AVSESSION_TRACE_SYNC_START("AVSessionService::OnDeviceOffline");
         listener->OnDeviceOffline(deviceId);

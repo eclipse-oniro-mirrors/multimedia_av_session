@@ -28,6 +28,7 @@
 #include "json_utils.h"
 #include "avsession_service.h"
 #include "avsession_event_handler.h"
+#include <filesystem>
 
 namespace OHOS::AVSession {
 
@@ -357,11 +358,8 @@ void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
 
 void PcmCastSession::WriteCastPairToFile(const std::string& deviceId, int32_t castMode)
 {
-    CHECK_AND_RETURN_RET_LOG(!deviceId.empty(), void(), "deviceId is empty.");
-    for (char c : deviceId) {
-        CHECK_AND_RETURN_RET_LOG(c != '.' && c != '/' && c != '\\' && c != '\0', void(),
-            "deviceId contains invalid path characters");
-    }
+    CHECK_AND_RETURN_LOG(AVSessionUtils::IsValidFileName(deviceId), "deviceId is not a valid file name");
+
     SLOGI("PcmCastSession start write file");
     std::pair<std::string, int32_t> castPair = { deviceId, castMode };
     SLOGI("PcmCastSession castPair: deviceId=%{public}s, castMode=%{public}d",

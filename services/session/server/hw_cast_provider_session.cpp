@@ -120,6 +120,7 @@ bool HwCastProviderSession::AddDeviceWithConnectionConfig(const DeviceInfo devic
 
 void HwCastProviderSession::SendCommandArgsToCast(const int32_t commandType, const std::string& params)
 {
+    CHECK_AND_RETURN_LOG(castSession_ != nullptr, "castSession_ is nullptr");
     std::string parStr = params;
     switch (commandType) {
         case CAST_MODE_CHANGE_COMMAND:

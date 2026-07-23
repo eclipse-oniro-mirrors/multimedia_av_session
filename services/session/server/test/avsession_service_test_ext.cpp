@@ -618,6 +618,60 @@ static HWTEST_F(AVSessionServiceTestExt, HandleSystemKeyColdStart001, TestSize.L
 }
 
 /**
+ * @tc.name: HandleSystemKeyColdStart002
+ * @tc.desc: Verifying HandleSystemKeyColdStart when ancoSession_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandleSystemKeyColdStart002, TestSize.Level0)
+{
+    SLOGI("HandleSystemKeyColdStart002 Begin");
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_NE(avsessionHere, nullptr);
+    g_AVSessionService->GetUsersManager().frontSessionListMapByUserId_.clear();
+    g_AVSessionService->ancoSession_ = nullptr;
+    AVControlCommand command;
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    g_AVSessionService->HandleSystemKeyColdStart(command);
+    g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    SLOGI("HandleSystemKeyColdStart002 End");
+}
+
+/**
+ * @tc.name: HandleSystemKeyColdStart003
+ * @tc.desc: Verifying HandleSystemKeyColdStart when ancoSession_ is not nullptr but inactive
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandleSystemKeyColdStart003, TestSize.Level0)
+{
+    SLOGI("HandleSystemKeyColdStart003 Begin");
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_NE(avsessionHere, nullptr);
+    g_AVSessionService->GetUsersManager().frontSessionListMapByUserId_.clear();
+    g_AVSessionService->ancoSession_ = avsessionHere;
+    g_AVSessionService->ancoSession_->Deactivate();
+    AVControlCommand command;
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    g_AVSessionService->HandleSystemKeyColdStart(command);
+    EXPECT_FALSE(g_AVSessionService->ancoSession_->IsActive());
+    g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    SLOGI("HandleSystemKeyColdStart003 End");
+}
+
+/**
  * @tc.name: OnClientDied001
  * @tc.desc: Verfying OnClientDied when BundleStatusAdapter::GetInstance().GetBundleNameFromUid(uid) == ""
  * @tc.type: FUNC
