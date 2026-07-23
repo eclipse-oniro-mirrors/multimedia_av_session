@@ -143,6 +143,7 @@ int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
     SLOGI("start");
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
+        CHECK_AND_CONTINUE(iter->second != nullptr);
         SLOGI("iter %{public}s", iter->first.c_str());
         AVMetaData sinkMetaData;
         auto mask = GetSinkMetaMaskType(iter->first);
@@ -170,6 +171,7 @@ int32_t RemoteSessionSourceImpl::SetAVPlaybackState(const AVPlaybackState& state
     SLOGI("start");
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
+        CHECK_AND_CONTINUE(iter->second != nullptr);
         SLOGI("syncer %{public}s", iter->first.c_str());
         AVPlaybackState sinkState;
         auto mask = GetSinkPlaybackStateMaskType(iter->first);

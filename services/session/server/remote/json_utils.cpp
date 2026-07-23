@@ -235,6 +235,7 @@ int32_t JsonUtils::SetSessionCapabilitySet(cJSON* jsonObj, const AVSessionBasicI
     cJSON* capabilitySetItem = cJSON_GetObjectItem(jsonObj, "capabilitySet");
     if (capabilitySetItem == nullptr || cJSON_IsInvalid(capabilitySetItem) || cJSON_IsNull(capabilitySetItem)) {
         capabilitySetItem = cJSON_CreateObject();
+        CHECK_AND_RETURN_RET_LOG(capabilitySetItem != nullptr, AVSESSION_ERROR, "capabilitySetItem is nullptr");
         cJSON_AddItemToObject(jsonObj, "capabilitySet", capabilitySetItem);
     }
 
@@ -281,6 +282,7 @@ int32_t JsonUtils::SetSessionCompatibility(cJSON* jsonObj, const AVSessionBasicI
     cJSON* compatibilityItem = cJSON_GetObjectItem(jsonObj, "compatibility");
     if (compatibilityItem == nullptr || cJSON_IsInvalid(compatibilityItem) || cJSON_IsNull(compatibilityItem)) {
         compatibilityItem = cJSON_CreateObject();
+        CHECK_AND_RETURN_RET_LOG(compatibilityItem != nullptr, AVSESSION_ERROR, "compatibilityItem is nullptr");
         cJSON_AddItemToObject(jsonObj, "compatibility", compatibilityItem);
     }
     cJSON_AddStringToObject(compatibilityItem, "networkId", basicInfo.networkId_.c_str());
@@ -336,6 +338,7 @@ int32_t JsonUtils::SetSessionData(cJSON* jsonObj, const AVSessionBasicInfo& basi
     }
     cJSON_AddNumberToObject(dataItem, "systemTime", static_cast<long long>(basicInfo.systemTime_));
     cJSON* extendArray = cJSON_CreateArray();
+    CHECK_AND_RETURN_RET_LOG(extendArray != nullptr, AVSESSION_ERROR, "extendArray is nullptr");
     for (int32_t val : basicInfo.extend_) {
         cJSON* valItem = cJSON_CreateNumber(val);
         if (valItem == nullptr) {
@@ -566,6 +569,7 @@ int32_t JsonUtils::SetSessionDescriptors(std::string& sessionInfo, const std::ve
     cJSON* descriptorsArray = cJSON_GetObjectItem(dataItem, "sessionDescriptors");
     if (descriptorsArray == nullptr || cJSON_IsInvalid(descriptorsArray) || !cJSON_IsArray(descriptorsArray)) {
         descriptorsArray = cJSON_CreateArray();
+        CHECK_AND_RETURN_RET_LOG(descriptorsArray != nullptr, AVSESSION_ERROR, "descriptorsArray is nullptr");
         cJSON_AddItemToObject(dataItem, "sessionDescriptors", descriptorsArray);
     }
     for (uint32_t i = 0; i < descriptors.size(); i++) {

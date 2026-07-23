@@ -44,14 +44,14 @@ void SoftbusDistributedDataManager::Init()
 #ifdef DSOFTBUS_ENABLE
 void SoftbusDistributedDataManager::SessionOpened(int32_t socket, SoftbusPeerSocketInfo info)
 {
-    std::string sessionName = info.name;
+    std::string sessionName = info.name ? info.name : "";
     if (sessionName != CONFIG_SOFTBUS_SESSION_TAG) {
         SLOGE("onSessionOpened: the group id is not match the media session group. sessionName is %{public}s",
             sessionName.c_str());
         return;
     }
-    SLOGI("socket:%{public}d set sessionName to:%{public}s onSessionOpened", socket, info.name);
-    socketNameCache_.assign(info.name);
+    SLOGI("socket:%{public}d set sessionName to:%{public}s onSessionOpened", socket, info.name ? info.name : "");
+    socketNameCache_.assign(info.name ? info.name : "");
     peerSocketInfo.name = info.name;
     peerSocketInfo.networkId = info.networkId;
     peerSocketInfo.pkgName = info.pkgName;
@@ -279,7 +279,7 @@ void SoftbusDistributedDataManager::OnSessionServerClosed(int32_t socket)
 void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, const std::string &data)
 {
 #ifdef DSOFTBUS_ENABLE
-    std::string deviceId = peerSocketInfo.networkId;
+    std::string deviceId = peerSocketInfo.networkId ? peerSocketInfo.networkId : "";
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onMessageHandleReceived: %{public}s", anonymizeDeviceId.c_str());
 #endif
@@ -299,7 +299,7 @@ void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, cons
 void SoftbusDistributedDataManager::OnBytesServerReceived(int32_t socket, const std::string &data)
 {
 #ifdef DSOFTBUS_ENABLE
-    std::string deviceId = peerSocketInfo.networkId;
+    std::string deviceId = peerSocketInfo.networkId ? peerSocketInfo.networkId : "";
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onBytesServerReceived: %{public}s", anonymizeDeviceId.c_str());
 #endif

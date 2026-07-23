@@ -72,6 +72,7 @@ void MigrateAVSessionManager::CreateRemoteSessionProxy(std::string &networkId, s
         SLOGW("CreateRemoteSessionProxy error, scene: %{public}s", scene.c_str());
         return;
     }
+    std::lock_guard lockGuard(migrateServerMapLock_);
     if (proxyMap_.find(scene) != proxyMap_.end()) {
         SLOGW("CreateRemoteSessionProxy error, %{public}s scene already exist", scene.c_str());
         return;
