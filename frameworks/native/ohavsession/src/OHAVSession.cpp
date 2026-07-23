@@ -181,6 +181,7 @@ AVSession_ErrCode OHAVSession::SetFavorite(bool favorite)
 {
     AVPlaybackState avPlaybackState;
     avPlaybackState.SetFavorite(favorite);
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     int32_t ret = avSession_->SetAVPlaybackState(avPlaybackState);
     return GetEncodeErrcode(ret);
 }
@@ -210,6 +211,7 @@ AVSession_ErrCode OHAVSession::RegisterCommandCallback(AVSession_ControlCommand 
 {
     int32_t ret = 0;
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     if (ohAVSessionCallbackImpl_ == nullptr) {
         ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
         ret = avSession_->RegisterCallback(ohAVSessionCallbackImpl_);
@@ -277,6 +279,7 @@ AVSession_ErrCode OHAVSession::CheckAndRegister()
 {
     if (ohAVSessionCallbackImpl_ == nullptr) {
         ohAVSessionCallbackImpl_ = std::make_shared<OHAVSessionCallbackImpl>();
+        CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
         AVSession_ErrCode ret =  static_cast<AVSession_ErrCode>(
             avSession_->RegisterCallback(ohAVSessionCallbackImpl_));
         CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret == AV_SESSION_ERR_SUCCESS, AV_SESSION_ERR_SERVICE_EXCEPTION,
@@ -305,6 +308,7 @@ AVSession_ErrCode OHAVSession::UnregisterForwardCallback(OH_AVSessionCallback_On
         return AV_SESSION_ERR_SUCCESS;
     }
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_FAST_FORWARD));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
@@ -317,6 +321,7 @@ AVSession_ErrCode OHAVSession::RegisterRewindCallback(OH_AVSessionCallback_OnRew
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_REWIND));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
@@ -343,6 +348,7 @@ AVSession_ErrCode OHAVSession::RegisterSeekCallback(OH_AVSessionCallback_OnSeek 
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SEEK));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
@@ -383,6 +389,7 @@ AVSession_ErrCode OHAVSession::UnregisterSetLoopModeCallback(OH_AVSessionCallbac
         return AV_SESSION_ERR_SUCCESS;
     }
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_SET_LOOP_MODE));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
@@ -396,6 +403,7 @@ AVSession_ErrCode OHAVSession::RegisterToggleFavoriteCallback(OH_AVSessionCallba
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     CheckAndRegister();
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
@@ -410,6 +418,7 @@ AVSession_ErrCode OHAVSession::UnregisterToggleFavoriteCallback(OH_AVSessionCall
         return AV_SESSION_ERR_SUCCESS;
     }
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     int32_t ret = avSession_->DeleteSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
         return GetEncodeErrcode(ret);
@@ -543,6 +552,7 @@ AVSession_ErrCode OHAVSession::ReleaseOutputDevice(AVSession_OutputDeviceInfo *o
 
 AVSession_ErrCode OHAVSession::Destroy()
 {
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     avSession_->Destroy();
     return AV_SESSION_ERR_SUCCESS;
 }
@@ -1065,7 +1075,7 @@ AVSession_ErrCode OH_AVSession_AcquireSession(const char* sessionTag, const char
             OHOS::AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "session is nullptr", true);
         return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
     }
-    OHOS::AVSession::OHAVSession *oh_avsession = new OHOS::AVSession::OHAVSession();
+    OHOS::AVSession::OHAVSession *oh_avsession = new(std::nothrow) OHOS::AVSession::OHAVSession();
     if (oh_avsession == nullptr) {
         OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
             OHOS::AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_GET, "oh_avsession is nullptr", true);

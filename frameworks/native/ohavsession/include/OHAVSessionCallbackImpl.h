@@ -16,6 +16,7 @@
 #ifndef OHOS_OHAVSESSION_CALLBACKIMPL_H
 #define OHOS_OHAVSESSION_CALLBACKIMPL_H
 
+#include <mutex>
 #include "native_avmetadata.h"
 #include "native_avsession.h"
 #include "avsession_info.h"
@@ -97,6 +98,7 @@ public:
         OH_AVSessionCallback_OutputDeviceChange callback);
 
 private:
+    std::mutex lock_;
     OH_AVSession* avsession_ = {nullptr};
     std::vector<std::pair<OH_AVSessionCallback_OnCommand, void*>> playCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnCommand, void*>> pauseCallbacks_;
