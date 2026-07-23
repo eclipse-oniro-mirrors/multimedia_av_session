@@ -256,6 +256,7 @@ void AVRouterImpl::ReleaseCurrentCastSession()
 {
     SLOGI("Start ReleaseCurrentCastSession");
     std::lock_guard lockGuard(servicePtrLock_);
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "servicePtr_ is nullptr");
     servicePtr_->ReleaseCastSession();
 }
 
@@ -932,17 +933,25 @@ void AVRouterImpl::HandleStreamToMirrorFromSinkEvent()
 {
     SetStreamToMirrorFromSink(true);
     UpdateConnectState(disconnectStateFromCast_);
+    int32_t disconnectState;
+    DeviceInfo connectedDeviceInfo;
+    int32_t noReasonCode;
     {
         std::lock_guard lockGuard(servicePtrLock_);
+        CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "servicePtr_ is nullptr");
+        disconnectState = disconnectStateFromCast_;
+        connectedDeviceInfo = connectedDeviceInfo_;
+        noReasonCode = noReasonCode_;
         servicePtr_->SetIsSupportMirrorToStream(false);
     }
     for (const auto& [number, castHandleInfo] : castHandleToInfoMap_) {
         CHECK_AND_CONTINUE(castHandleInfo.avRouterListener_ != nullptr);
         SLOGI("trigger the OnCastStateChange for registered avRouterListener");
         std::shared_ptr<IAVRouterListener> listener = castHandleInfo.avRouterListener_;
-        AVSessionEventHandler::GetInstance().AVSessionPostTask([listener, this]() {
+        AVSessionEventHandler::GetInstance().AVSessionPostTask([listener, disconnectState,
+            connectedDeviceInfo, noReasonCode]() {
             CHECK_AND_RETURN_LOG(listener != nullptr, "listener is nullptr");
-            listener->OnCastStateChange(disconnectStateFromCast_, connectedDeviceInfo_, false, noReasonCode_);
+            listener->OnCastStateChange(disconnectState, connectedDeviceInfo, false, noReasonCode);
             }, "OnCastStateChange", 0);
     }
 }

@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
+#include <atomic>
 
 #include "avsession_stub.h"
 #include "av_session_callback_proxy.h"

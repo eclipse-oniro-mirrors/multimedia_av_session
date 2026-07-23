@@ -76,6 +76,8 @@ std::map<int32_t, std::string> AVSessionDumper::loopMode_ = {
 
 std::vector<std::string> AVSessionDumper::errMessage_ = {};
 
+std::mutex AVSessionDumper::errMessageMutex_;
+
 std::map<int32_t, std::string> AVSessionDumper::sessionTypeMap_ = {
     {AVSession::SESSION_TYPE_AUDIO, "audio"},
     {AVSession::SESSION_TYPE_VIDEO, "video"},
@@ -270,11 +272,13 @@ void AVSessionDumper::SetErrorInfo(const std::string& inErrMsg)
     auto time  = tempTime;
     std::string msgInfo;
     msgInfo.append(time + inErrMsg);
+    std::lock_guard<std::mutex> lock(errMessageMutex_);
     errMessage_.push_back(msgInfo);
 }
 
 void AVSessionDumper::ShowErrorInfo(std::string& result, const AVSessionService& sessionService)
 {
+    std::lock_guard<std::mutex> lock(errMessageMutex_);
     if (errMessage_.empty()) {
         result.append("No Error Information!\n");
         return;

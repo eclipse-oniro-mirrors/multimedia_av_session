@@ -856,6 +856,7 @@ private:
     std::string localFrontSessionId_ = "";
     bool isMigrateTargetFound_ = false;
     std::map<std::string, std::shared_ptr<MigrateAVSessionServer>> migrateAVSessionServerMap_;
+    std::recursive_mutex migrateServerMapLock_;
     std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap_;
     std::recursive_mutex migrateProxyMapLock_;
     // screenCast service name list
