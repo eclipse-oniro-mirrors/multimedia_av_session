@@ -4044,3 +4044,176 @@ static HWTEST_F(AVSessionServiceTest, UpdateNtfEnable001, TestSize.Level0)
     EXPECT_EQ(avservice_->isNtfEnabled_, true);
     SLOGD("UpdateNtfEnable001 end!");
 }
+
+/**
+ * @tc.name: AVSessionService_InsertAvQueueInfoToCJSONAndPrint_001
+ * @tc.desc: Test InsertAvQueueInfoToCJSONAndPrint with nullptr valuesArray
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONAndPrint_001, TestSize.Level1)
+{
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_001 Begin");
+    ASSERT_NE(avservice_, nullptr);
+    AVMetaData meta;
+    meta.SetAVQueueId("testQueueId");
+    meta.SetAVQueueName("testQueueName");
+    bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, nullptr);
+    EXPECT_EQ(result, false);
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_001 End");
+}
+
+/**
+ * @tc.name: AVSessionService_InsertAvQueueInfoToCJSONAndPrint_002
+ * @tc.desc: Test InsertAvQueueInfoToCJSONAndPrint with empty array (size <= 0)
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONAndPrint_002, TestSize.Level1)
+{
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_002 Begin");
+    ASSERT_NE(avservice_, nullptr);
+    cJSON* valuesArray = cJSON_CreateArray();
+    ASSERT_NE(valuesArray, nullptr);
+    AVMetaData meta;
+    meta.SetAVQueueId("testQueueId");
+    meta.SetAVQueueName("testQueueName");
+    bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
+    EXPECT_EQ(result, true);
+    cJSON_Delete(valuesArray);
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_002 End");
+}
+
+/**
+ * @tc.name: AVSessionService_InsertAvQueueInfoToCJSONAndPrint_003
+ * @tc.desc: Test InsertAvQueueInfoToCJSONAndPrint with non-empty array (size > 0)
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONAndPrint_003, TestSize.Level1)
+{
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_003 Begin");
+    ASSERT_NE(avservice_, nullptr);
+    cJSON* valuesArray = cJSON_CreateArray();
+    ASSERT_NE(valuesArray, nullptr);
+    cJSON* existingItem = cJSON_CreateObject();
+    ASSERT_NE(existingItem, nullptr);
+    cJSON_AddStringToObject(existingItem, "bundleName", "existingBundle");
+    cJSON_AddStringToObject(existingItem, "avQueueId", "existingQueueId");
+    cJSON_AddItemToArray(valuesArray, existingItem);
+    AVMetaData meta;
+    meta.SetAVQueueId("testQueueId");
+    meta.SetAVQueueName("testQueueName");
+    bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
+    EXPECT_EQ(result, true);
+    cJSON_Delete(valuesArray);
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_003 End");
+}
+
+/**
+ * @tc.name: AVSessionService_InsertAvQueueInfoToCJSONAndPrint_004
+ * @tc.desc: Test InsertAvQueueInfoToCJSONAndPrint with pixelMap
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONAndPrint_004, TestSize.Level1)
+{
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_004 Begin");
+    ASSERT_NE(avservice_, nullptr);
+    cJSON* valuesArray = cJSON_CreateArray();
+    ASSERT_NE(valuesArray, nullptr);
+    AVMetaData meta;
+    meta.SetAVQueueId("testQueueId");
+    meta.SetAVQueueName("testQueueName");
+    std::shared_ptr<AVSessionPixelMap> pixelMap = std::make_shared<AVSessionPixelMap>();
+    ASSERT_NE(pixelMap, nullptr);
+    meta.SetAVQueueImage(pixelMap);
+    bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
+    EXPECT_EQ(result, true);
+    cJSON_Delete(valuesArray);
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_004 End");
+}
+
+/**
+ * @tc.name: AVSessionService_InsertAvQueueInfoToCJSONAndPrint_005
+ * @tc.desc: Test InsertAvQueueInfoToCJSONAndPrint with empty AVQueueId
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONAndPrint_005, TestSize.Level1)
+{
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_005 Begin");
+    ASSERT_NE(avservice_, nullptr);
+    cJSON* valuesArray = cJSON_CreateArray();
+    ASSERT_NE(valuesArray, nullptr);
+    AVMetaData meta;
+    meta.SetAVQueueId("");
+    meta.SetAVQueueName("testQueueName");
+    bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
+    EXPECT_EQ(result, true);
+    cJSON_Delete(valuesArray);
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_005 End");
+}
+
+/**
+ * @tc.name: AVSessionService_InsertAvQueueInfoToCJSONAndPrint_006
+ * @tc.desc: Test InsertAvQueueInfoToCJSONAndPrint with empty AVQueueName
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONAndPrint_006, TestSize.Level1)
+{
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_006 Begin");
+    ASSERT_NE(avservice_, nullptr);
+    cJSON* valuesArray = cJSON_CreateArray();
+    ASSERT_NE(valuesArray, nullptr);
+    AVMetaData meta;
+    meta.SetAVQueueId("testQueueId");
+    meta.SetAVQueueName("");
+    bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
+    EXPECT_EQ(result, true);
+    cJSON_Delete(valuesArray);
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_006 End");
+}
+
+/**
+ * @tc.name: AVSessionService_InsertAvQueueInfoToCJSONAndPrint_007
+ * @tc.desc: Test InsertAvQueueInfoToCJSONAndPrint with empty bundleName
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONAndPrint_007, TestSize.Level1)
+{
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_007 Begin");
+    ASSERT_NE(avservice_, nullptr);
+    cJSON* valuesArray = cJSON_CreateArray();
+    ASSERT_NE(valuesArray, nullptr);
+    AVMetaData meta;
+    meta.SetAVQueueId("testQueueId");
+    meta.SetAVQueueName("testQueueName");
+    bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("", meta, 100, valuesArray);
+    EXPECT_EQ(result, true);
+    cJSON_Delete(valuesArray);
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_007 End");
+}
+
+/**
+ * @tc.name: AVSessionService_InsertAvQueueInfoToCJSONAndPrint_008
+ * @tc.desc: Test InsertAvQueueInfoToCJSONAndPrint with special characters in names
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONAndPrint_008, TestSize.Level1)
+{
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_008 Begin");
+    ASSERT_NE(avservice_, nullptr);
+    cJSON* valuesArray = cJSON_CreateArray();
+    ASSERT_NE(valuesArray, nullptr);
+    AVMetaData meta;
+    meta.SetAVQueueId("test@Queue#Id$%");
+    meta.SetAVQueueName("测试队列名称");
+    bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("test.bundle.name", meta, 100, valuesArray);
+    EXPECT_EQ(result, true);
+    cJSON_Delete(valuesArray);
+    SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_008 End");
+}
