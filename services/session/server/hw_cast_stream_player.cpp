@@ -595,10 +595,8 @@ int32_t HwCastStreamPlayer::GetRecommendedResolutionLevel(std::string& decoderTy
     auto it = jsonCapabilitiesSptr_->decoderSupportResolutions_.find(decoderType);
     if (it != jsonCapabilitiesSptr_->decoderSupportResolutions_.end()) {
         std::vector<ResolutionLevel> resolutionLevels = jsonCapabilitiesSptr_->decoderSupportResolutions_[decoderType];
-        if (resolutionLevels.empty()) {
-            SLOGE("resolutionLevels is empty for decoderType: %{public}s", decoderType.c_str());
-            return AVSESSION_ERROR;
-        }
+        CHECK_AND_RETURN_RET_LOG(!resolutionLevels.empty(), AVSESSION_ERROR,
+            "resolutionLevels is empty for decoderType: %{public}s", decoderType.c_str());
         auto maxResolutionLevel = *std::max_element(resolutionLevels.begin(), resolutionLevels.end());
         SLOGI("find %{public}s map to %{public}d", decoderType.c_str(), maxResolutionLevel);
         resolutionLevel = static_cast<ResolutionLevel>(maxResolutionLevel);
