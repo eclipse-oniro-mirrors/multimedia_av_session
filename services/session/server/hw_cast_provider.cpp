@@ -172,6 +172,7 @@ int HwCastProvider::StartCastSession(uint32_t prototype, bool isPcm)
                 SLOGI("CastSession init successed");
             } else {
                 hwCastProviderSession->Release();
+                castFlag_[castId] = false;
                 return AVSESSION_ERROR;
             }
             if (isHiStream) {
