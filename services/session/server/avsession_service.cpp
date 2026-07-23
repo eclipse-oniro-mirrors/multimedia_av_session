@@ -2457,7 +2457,12 @@ bool AVSessionService::InsertAvQueueInfoToCJSONAndPrint(const std::string &bundl
     cJSON_AddStringToObject(newValue, "avQueueImageName", fileName.c_str());
     cJSON_AddStringToObject(newValue, "avQueueImageUri", meta.GetAVQueueImageUri().c_str());
     if (cJSON_IsInvalid(newValue)) {
-        SLOGE("get valuesArray nullptr");
+        SLOGE("get newValue nullptr");
+        cJSON_Delete(newValue);
+        return false;
+    }
+    if (cJSON_IsInvalid(valuesArray)) {
+        SLOGE("get valuesArray invalid");
         cJSON_Delete(newValue);
         return false;
     }
@@ -2465,11 +2470,6 @@ bool AVSessionService::InsertAvQueueInfoToCJSONAndPrint(const std::string &bundl
         cJSON_AddItemToArray(valuesArray, newValue);
     } else {
         cJSON_InsertItemInArray(valuesArray, 0, newValue);
-    }
-    if (cJSON_IsInvalid(valuesArray)) {
-        SLOGE("get newValueArray invalid");
-        cJSON_Delete(valuesArray);
-        return false;
     }
 
     char* newAvqueueContent = cJSON_Print(valuesArray);
