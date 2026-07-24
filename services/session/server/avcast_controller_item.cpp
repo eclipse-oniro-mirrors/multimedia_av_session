@@ -385,9 +385,11 @@ void AVCastControllerItem::SetQueueItemDataSrc(const AVQueueItem& avQueueItem)
         dataSrcNew.callback_ =
             [this](void* ptr, uint32_t length, int64_t pos) -> int32_t {
                 CastEngine::CastSharedMemoryBase* memPtr = static_cast<CastEngine::CastSharedMemoryBase*>(ptr);
+                CHECK_AND_RETURN_RET_LOG(memPtr != nullptr, -1, "memPtr is nullptr");
                 SLOGE("called dataSrc callback mem size %{public}d", memPtr->GetSize());
                 std::shared_ptr<AVSharedMemoryBase> mem = AVSharedMemoryBase::CreateFromLocal(memPtr->GetSize(),
                     memPtr->GetFlags(), memPtr->GetName());
+                CHECK_AND_RETURN_RET_LOG(mem != nullptr, -1, "CreateFromLocal failed");
                 int32_t readSize = 0;
                 onDataSrcRead(mem, length, pos, readSize);
                 errno_t rc = memcpy_s(memPtr->GetBase(), static_cast<size_t>(mem->GetSize()), mem->GetBase(),

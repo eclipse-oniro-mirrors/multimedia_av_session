@@ -738,8 +738,8 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
     if (GetUid() != audioBrokerUid) {
         return;
     }
-    if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY && (!isPlayingState_ || isMediaChange_)) {
-        isPlayingState_ = true;
+    if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY && (!isPlayingState_.load() || isMediaChange_)) {
+        isPlayingState_.store(true);
         {
             std::lock_guard mediaSessionLockGuard(mediaSessionCallbackLock_);
             if (serviceCallbackForMediaSession_) {
@@ -749,7 +749,7 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
         }
     } else if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PAUSE ||
         state.GetState() == AVPlaybackState::PLAYBACK_STATE_STOP) {
-        isPlayingState_ = false;
+        isPlayingState_.store(false);
         AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CancelAncoMediaCapsule");
         auto weakSelf = wptr<AVSessionItem>(this);
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
@@ -761,7 +761,7 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
                     CHECK_AND_RETURN_LOG(!shardPtr->isDestroyed_.load(), "CheckIfSendCapsule session is destroy");
                 }
                 std::lock_guard mediaSessionLockGuard(shardPtr->mediaSessionCallbackLock_);
-                if (shardPtr->serviceCallbackForMediaSession_ && !shardPtr->isPlayingState_) {
+                if (shardPtr->serviceCallbackForMediaSession_ && !shardPtr->isPlayingState_.load()) {
                     SLOGI("anco capsule del for %{public}s", shardPtr->GetBundleName().c_str());
                     shardPtr->serviceCallbackForMediaSession_(shardPtr->GetSessionId(), false, false);
                 }
@@ -1788,10 +1788,10 @@ int32_t AVSessionItem::UpdateVolume(bool up)
 int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string, std::string>& serviceNameStatePair,
     DeviceInfo deviceInfo)
 {
+    std::lock_guard lockGuard(castLock_);
     if (castHandle_ > 0) {
         return AVSESSION_ERROR;
     }
-    std::lock_guard lockGuard(castLock_);
     castServiceNameStatePair_ = serviceNameStatePair;
     OutputDeviceInfo outputDeviceInfo;
     outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);

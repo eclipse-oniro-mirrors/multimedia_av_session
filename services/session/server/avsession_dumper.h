@@ -17,6 +17,7 @@
 #define OHOS_AVSESSION_DUMP_HELPER_H
 
 #include <string>
+#include <mutex>
 
 #include "avsession_service.h"
 
@@ -43,6 +44,7 @@ private:
     static std::map<int32_t, std::string> playBackStates_;
     static std::map<int32_t, std::string> loopMode_;
     static std::vector<std::string> errMessage_;
+    static std::mutex errMessageMutex_;
     static std::map<int32_t, std::string> deviceTypeId_;
     static std::map<int32_t, std::string> sessionTypeMap_;
 };

@@ -62,13 +62,13 @@ std::vector<int> FocusSessionStrategy::GetAudioPlayingUids()
 
 void FocusSessionStrategy::AddControlBundle(int32_t uid, int32_t pid)
 {
-    std::lock_guard lockGuard(controlLock_);
+    std::lock_guard lockGuard(audioPlayingLock_);
     controlBundleList_.insert(std::make_pair(uid, pid));
 }
 
 void FocusSessionStrategy::RemoveControlBundle(int32_t uid, int32_t pid)
 {
-    std::lock_guard lockGuard(controlLock_);
+    std::lock_guard lockGuard(audioPlayingLock_);
     std::pair<int32_t, int32_t> controlKey = std::make_pair(uid, pid);
     if (controlBundleList_.find(controlKey) != controlBundleList_.end()) {
         controlBundleList_.erase(controlKey);

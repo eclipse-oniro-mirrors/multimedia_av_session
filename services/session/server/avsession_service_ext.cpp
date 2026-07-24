@@ -948,6 +948,7 @@ void AVSessionService::DoConnectProcessWithMigrateServer(const OHOS::Distributed
     SLOGI("DoConnectProcessWithMigrateServer with deviceType:%{public}d|deviceId:%{public}s.",
         deviceInfo.deviceTypeId,
         AVSessionUtils::GetAnonySessionId(networkId).c_str());
+    std::lock_guard<std::recursive_mutex> lockGuard(migrateServerMapLock_);
     if (migrateAVSessionServerMap_.find(networkId) == migrateAVSessionServerMap_.end()) {
         CHECK_AND_RETURN_LOG(DoHisMigrateServerTransform(networkId) == ERR_SESSION_NOT_EXIST,
             "hisMigrate transform done");
@@ -1000,6 +1001,7 @@ void AVSessionService::DoDisconnectProcessWithMigrateServer(const OHOS::Distribu
     std::string networkId = std::string(deviceInfo.networkId);
     SLOGI("DoDisconnectMigrateServer networkId:%{public}s|%{public}d",
         AVSessionUtils::GetAnonySessionId(networkId).c_str(), static_cast<int>(migrateAVSessionServerMap_.size()));
+    std::lock_guard<std::recursive_mutex> lockGuard(migrateServerMapLock_);
     if (migrateAVSessionServerMap_.find(networkId) != migrateAVSessionServerMap_.end()) {
         std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer =
             migrateAVSessionServerMap_[networkId];
@@ -1035,6 +1037,7 @@ void AVSessionService::DoDisconnectProcessWithMigrateProxy(const OHOS::Distribut
 int32_t AVSessionService::DoHisMigrateServerTransform(std::string networkId)
 {
     SLOGI("DoHisMigrateServerTransform size:%{public}d", static_cast<int>(migrateAVSessionServerMap_.size()));
+    std::lock_guard<std::recursive_mutex> lockGuard(migrateServerMapLock_);
     auto it = migrateAVSessionServerMap_.begin();
     if (it != migrateAVSessionServerMap_.end()) {
         std::shared_ptr<MigrateAVSessionServer> migrateAVSessionServer = it->second;
@@ -1081,6 +1084,7 @@ void AVSessionService::NotifyLocalFrontSessionChangeForMigrate(std::string local
         AVSessionUtils::GetAnonySessionId(localFrontSessionIdUpdate).c_str(),
         AVSessionUtils::GetAnonySessionId(localFrontSessionId_).c_str(),
         static_cast<int>(migrateAVSessionServerMap_.size()));
+    std::lock_guard<std::recursive_mutex> lockGuard(migrateServerMapLock_);
     if (migrateAVSessionServerMap_.size() <= 0) {
         SLOGE("NotifyLocalFrontSessionChangeForMigrate with no migrate");
         localFrontSessionId_ = localFrontSessionIdUpdate;

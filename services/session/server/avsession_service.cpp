@@ -2224,7 +2224,7 @@ int32_t AVSessionService::GetSessionDescriptorsBySessionId(const std::string& se
     if (err != ERR_NONE) {
         SLOGE("GetSessionDescriptorsBySessionId: CheckPermission failed!");
         HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
-            "CALLER_PID", GetCallingUid(), "SESSION_ID", sessionId,
+            "CALLER_PID", GetCallingPid(), "SESSION_ID", sessionId,
             "ERROR_MSG", "avsessionservice getsessiondescriptors by sessionid checkpermission failed");
         return err;
     }
@@ -4074,7 +4074,6 @@ int32_t AVSessionService::ProcessCastAudioCommand(const RemoteServiceCommand com
 
 int32_t AVSessionService::RemoteCastAudioInner(const std::string& sourceSessionInfo, std::string& sinkSessionInfo)
 {
-    SLOGI("sourceInfo : %{public}s", sourceSessionInfo.c_str());
     AVSessionDescriptor sourceDescriptor;
     int32_t ret = JsonUtils::GetSessionDescriptor(sourceSessionInfo, sourceDescriptor);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetSessionDescriptor failed");
@@ -4109,7 +4108,6 @@ int32_t AVSessionService::RemoteCastAudioInner(const std::string& sourceSessionI
 
 int32_t AVSessionService::RemoteCancelCastAudioInner(const std::string& sessionInfo)
 {
-    SLOGI("sessionInfo is %{public}s", sessionInfo.c_str());
     AVSessionBasicInfo sourceDeviceInfo;
     int32_t ret = JsonUtils::GetSessionBasicInfo(sessionInfo, sourceDeviceInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "GetBasicInfo failed");
@@ -4352,7 +4350,6 @@ bool AVSessionService::SaveStringToFileEx(const std::string& filePath, const std
 
 bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
 {
-    SLOGD("file check for path:%{public}s", filePath.c_str());
     string content {};
     ifstream fileRead(filePath.c_str());
     if (!fileRead.is_open()) {
@@ -4366,7 +4363,6 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
     content.clear();
     fileRead.seekg(0, ios::beg);
     copy(istreambuf_iterator<char>(fileRead), istreambuf_iterator<char>(), back_inserter(content));
-    SLOGD("check content pre clean it: %{public}s", content.c_str());
     cJSON* checkValuesItem = cJSON_Parse(content.c_str());
     bool isJsonDiscarded = false;
     if (checkValuesItem == nullptr) {
@@ -4379,7 +4375,7 @@ bool AVSessionService::CheckStringAndCleanFile(const std::string& filePath)
         cJSON_Delete(checkValuesItem);
     }
     if (isJsonDiscarded) {
-        SLOGE("check content discarded or not array! content %{public}s", content.c_str());
+        SLOGE("check content discarded or not array!");
         ofstream fileWrite;
         fileWrite.open(filePath.c_str(), ios::out | ios::trunc);
         if (!fileWrite.is_open()) {
