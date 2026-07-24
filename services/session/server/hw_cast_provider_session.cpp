@@ -298,7 +298,7 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
         return;
     }
 
-    CastRemoteDevice castRemoteDevice;
+    CastRemoteDevice castRemoteDevice = {};
     if (castSession_) {
         int32_t ret = castSession_->GetRemoteDeviceInfo(stateInfo.deviceId, castRemoteDevice);
         CHECK_AND_RETURN_LOG(ret == AVSESSION_SUCCESS, "GetRemoteDeviceInfo failed");

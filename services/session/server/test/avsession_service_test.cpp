@@ -4080,6 +4080,18 @@ static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONA
     meta.SetAVQueueName("testQueueName");
     bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
     EXPECT_EQ(result, true);
+    EXPECT_EQ(cJSON_GetArraySize(valuesArray), 1);
+    cJSON* item = cJSON_GetArrayItem(valuesArray, 0);
+    ASSERT_NE(item, nullptr);
+    cJSON* bundleNameItem = cJSON_GetObjectItem(item, "bundleName");
+    ASSERT_NE(bundleNameItem, nullptr);
+    EXPECT_STREQ(bundleNameItem->valuestring, "testBundle");
+    cJSON* avQueueIdItem = cJSON_GetObjectItem(item, "avQueueId");
+    ASSERT_NE(avQueueIdItem, nullptr);
+    EXPECT_STREQ(avQueueIdItem->valuestring, "testQueueId");
+    cJSON* avQueueNameItem = cJSON_GetObjectItem(item, "avQueueName");
+    ASSERT_NE(avQueueNameItem, nullptr);
+    EXPECT_STREQ(avQueueNameItem->valuestring, "testQueueName");
     cJSON_Delete(valuesArray);
     SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_002 End");
 }
@@ -4106,6 +4118,17 @@ static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONA
     meta.SetAVQueueName("testQueueName");
     bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
     EXPECT_EQ(result, true);
+    EXPECT_EQ(cJSON_GetArraySize(valuesArray), 2);
+    cJSON* newItem = cJSON_GetArrayItem(valuesArray, 0);
+    ASSERT_NE(newItem, nullptr);
+    cJSON* bundleNameItem = cJSON_GetObjectItem(newItem, "bundleName");
+    ASSERT_NE(bundleNameItem, nullptr);
+    EXPECT_STREQ(bundleNameItem->valuestring, "testBundle");
+    cJSON* oldItem = cJSON_GetArrayItem(valuesArray, 1);
+    ASSERT_NE(oldItem, nullptr);
+    cJSON* oldBundleName = cJSON_GetObjectItem(oldItem, "bundleName");
+    ASSERT_NE(oldBundleName, nullptr);
+    EXPECT_STREQ(oldBundleName->valuestring, "existingBundle");
     cJSON_Delete(valuesArray);
     SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_003 End");
 }
@@ -4130,6 +4153,15 @@ static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONA
     meta.SetAVQueueImage(pixelMap);
     bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
     EXPECT_EQ(result, true);
+    EXPECT_EQ(cJSON_GetArraySize(valuesArray), 1);
+    cJSON* item = cJSON_GetArrayItem(valuesArray, 0);
+    ASSERT_NE(item, nullptr);
+    cJSON* imageDirItem = cJSON_GetObjectItem(item, "avQueueImageDir");
+    ASSERT_NE(imageDirItem, nullptr);
+    EXPECT_TRUE(cJSON_IsString(imageDirItem));
+    cJSON* imageNameItem = cJSON_GetObjectItem(item, "avQueueImageName");
+    ASSERT_NE(imageNameItem, nullptr);
+    EXPECT_TRUE(cJSON_IsString(imageNameItem));
     cJSON_Delete(valuesArray);
     SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_004 End");
 }
@@ -4151,6 +4183,12 @@ static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONA
     meta.SetAVQueueName("testQueueName");
     bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
     EXPECT_EQ(result, true);
+    EXPECT_EQ(cJSON_GetArraySize(valuesArray), 1);
+    cJSON* item = cJSON_GetArrayItem(valuesArray, 0);
+    ASSERT_NE(item, nullptr);
+    cJSON* avQueueIdItem = cJSON_GetObjectItem(item, "avQueueId");
+    ASSERT_NE(avQueueIdItem, nullptr);
+    EXPECT_STREQ(avQueueIdItem->valuestring, "");
     cJSON_Delete(valuesArray);
     SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_005 End");
 }
@@ -4172,6 +4210,12 @@ static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONA
     meta.SetAVQueueName("");
     bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("testBundle", meta, 100, valuesArray);
     EXPECT_EQ(result, true);
+    EXPECT_EQ(cJSON_GetArraySize(valuesArray), 1);
+    cJSON* item = cJSON_GetArrayItem(valuesArray, 0);
+    ASSERT_NE(item, nullptr);
+    cJSON* avQueueNameItem = cJSON_GetObjectItem(item, "avQueueName");
+    ASSERT_NE(avQueueNameItem, nullptr);
+    EXPECT_STREQ(avQueueNameItem->valuestring, "");
     cJSON_Delete(valuesArray);
     SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_006 End");
 }
@@ -4193,6 +4237,12 @@ static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONA
     meta.SetAVQueueName("testQueueName");
     bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("", meta, 100, valuesArray);
     EXPECT_EQ(result, true);
+    EXPECT_EQ(cJSON_GetArraySize(valuesArray), 1);
+    cJSON* item = cJSON_GetArrayItem(valuesArray, 0);
+    ASSERT_NE(item, nullptr);
+    cJSON* bundleNameItem = cJSON_GetObjectItem(item, "bundleName");
+    ASSERT_NE(bundleNameItem, nullptr);
+    EXPECT_STREQ(bundleNameItem->valuestring, "");
     cJSON_Delete(valuesArray);
     SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_007 End");
 }
@@ -4214,6 +4264,18 @@ static HWTEST_F(AVSessionServiceTest, AVSessionService_InsertAvQueueInfoToCJSONA
     meta.SetAVQueueName("测试队列名称");
     bool result = avservice_->InsertAvQueueInfoToCJSONAndPrint("test.bundle.name", meta, 100, valuesArray);
     EXPECT_EQ(result, true);
+    EXPECT_EQ(cJSON_GetArraySize(valuesArray), 1);
+    cJSON* item = cJSON_GetArrayItem(valuesArray, 0);
+    ASSERT_NE(item, nullptr);
+    cJSON* bundleNameItem = cJSON_GetObjectItem(item, "bundleName");
+    ASSERT_NE(bundleNameItem, nullptr);
+    EXPECT_STREQ(bundleNameItem->valuestring, "test.bundle.name");
+    cJSON* avQueueIdItem = cJSON_GetObjectItem(item, "avQueueId");
+    ASSERT_NE(avQueueIdItem, nullptr);
+    EXPECT_STREQ(avQueueIdItem->valuestring, "test@Queue#Id$%");
+    cJSON* avQueueNameItem = cJSON_GetObjectItem(item, "avQueueName");
+    ASSERT_NE(avQueueNameItem, nullptr);
+    EXPECT_STREQ(avQueueNameItem->valuestring, "测试队列名称");
     cJSON_Delete(valuesArray);
     SLOGI("AVSessionService_InsertAvQueueInfoToCJSONAndPrint_008 End");
 }
