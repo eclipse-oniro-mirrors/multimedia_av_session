@@ -269,6 +269,7 @@ ohos_unittest("AVMetaDataTest") {
 
   sources = [
     "avmeta_data_test.cpp",
+    "avmeta_data_marshalling_test.cpp",
     "avsession_descriptor_test.cpp",
   ]
 

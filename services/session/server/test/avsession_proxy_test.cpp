@@ -516,6 +516,8 @@ static HWTEST_F(AVSessionProxyTest, GetAVQueueItems002, testing::ext::TestSize.L
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+static constexpr int32_t ILLEGAL_DISPLAY_STATE = 999;
+
 /**
  * @tc.name: GetAVCastController001
  * @tc.desc: Test GetAVCastController
@@ -585,7 +587,7 @@ public:
         if (code == SESSION_CMD_GET_ALL_CAST_DISPLAYS) {
             reply.WriteInt32(AVSESSION_SUCCESS);
             reply.WriteInt32(1);
-            reply.WriteInt32(999);
+            reply.WriteInt32(ILLEGAL_DISPLAY_STATE);
         }
         return 0;
     }
