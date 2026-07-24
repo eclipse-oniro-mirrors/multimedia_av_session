@@ -328,6 +328,8 @@ bool OutputDeviceInfo::ReadFromParcel(Parcel& in)
 bool AudioCapabilities::WriteToParcel(Parcel& out) const
 {
     int32_t streamInfoSize = static_cast<int32_t>(streamInfos_.size());
+    int32_t maxStreamInfoSize = 1000;
+    CHECK_AND_RETURN_RET_LOG(streamInfoSize < maxStreamInfoSize, false, "streamInfoSize is illegal");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(streamInfoSize), false, "write streamInfoSize failed");
     for (AudioStreamInfo streamInfo : streamInfos_) {
         CHECK_AND_RETURN_RET_LOG(streamInfo.WriteToParcel(out), false, "write streamInfo failed");

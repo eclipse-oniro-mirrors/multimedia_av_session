@@ -186,7 +186,7 @@ private:
     static std::mutex syncMutex_;
     static std::mutex syncAsyncMutex_;
     static std::mutex downloadAVQImgMutex_;
-    static std::mutex currentNapiSessionMutex_;
+    static std::recursive_mutex currentNapiSessionMutex_;
     static std::shared_ptr<NapiAVSession> currentNapiSession_;
     static std::condition_variable syncCond_;
     static std::condition_variable syncAsyncCond_;

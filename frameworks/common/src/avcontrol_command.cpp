@@ -37,53 +37,67 @@ void AVControlCommand::UnmarshalCommonInfo(AVControlCommand* cmd, Parcel& data)
     cmd->SetCommandInfo(commandInfo);
 }
 
+int32_t AVControlCommand::SetParamFromParcel(int32_t cmd, Parcel& data)
+{
+    int64_t timeParam = 0;
+    double speedParam = 0.0;
+    int32_t modeParam = 0;
+    std::string strParam;
+    switch (cmd) {
+        case SESSION_CMD_FAST_FORWARD:
+            data.ReadInt64(timeParam);
+            AVControlCommand::UnmarshalCommonInfo(this, data);
+            return SetForwardTime(timeParam);
+        case SESSION_CMD_REWIND:
+            data.ReadInt64(timeParam);
+            AVControlCommand::UnmarshalCommonInfo(this, data);
+            return SetRewindTime(timeParam);
+        case SESSION_CMD_SEEK:
+            data.ReadInt64(timeParam);
+            return SetSeekTime(timeParam);
+        case SESSION_CMD_SET_SPEED:
+            data.ReadDouble(speedParam);
+            return SetSpeed(speedParam);
+        case SESSION_CMD_SET_LOOP_MODE:
+            data.ReadInt32(modeParam);
+            return SetLoopMode(modeParam);
+        case SESSION_CMD_SET_TARGET_LOOP_MODE:
+            data.ReadInt32(modeParam);
+            return SetTargetLoopMode(modeParam);
+        case SESSION_CMD_TOGGLE_FAVORITE:
+            data.ReadString(strParam);
+            return SetAssetId(strParam);
+        case SESSION_CMD_PLAY_FROM_ASSETID:
+            data.ReadInt64(timeParam);
+            return SetPlayFromAssetId(timeParam);
+        case SESSION_CMD_PLAY_WITH_ASSETID:
+            data.ReadString(strParam);
+            return SetPlayWithAssetId(strParam);
+        case SESSION_CMD_PLAY:
+            data.ReadString(strParam);
+            AVControlCommand::UnmarshalCommonInfo(this, data);
+            return SetPlayParam(strParam);
+        case SESSION_CMD_PLAY_NEXT:
+        case SESSION_CMD_PLAY_PREVIOUS:
+            AVControlCommand::UnmarshalCommonInfo(this, data);
+            return AVSESSION_SUCCESS;
+        default:
+            return AVSESSION_SUCCESS;
+    }
+}
+
 AVControlCommand *AVControlCommand::Unmarshalling(Parcel& data)
 {
     auto result = new (std::nothrow) AVControlCommand();
-    if (result != nullptr) {
-        int32_t cmd = data.ReadInt32();
-        result->SetCommand(cmd);
-        switch (cmd) {
-            case SESSION_CMD_FAST_FORWARD:
-                result->SetForwardTime(data.ReadInt64());
-                AVControlCommand::UnmarshalCommonInfo(result, data);
-                break;
-            case SESSION_CMD_REWIND:
-                result->SetRewindTime(data.ReadInt64());
-                AVControlCommand::UnmarshalCommonInfo(result, data);
-                break;
-            case SESSION_CMD_SEEK:
-                result->SetSeekTime(data.ReadInt64());
-                break;
-            case SESSION_CMD_SET_SPEED:
-                result->SetSpeed(data.ReadDouble());
-                break;
-            case SESSION_CMD_SET_LOOP_MODE:
-                result->SetLoopMode(data.ReadInt32());
-                break;
-            case SESSION_CMD_SET_TARGET_LOOP_MODE:
-                result->SetTargetLoopMode(data.ReadInt32());
-                break;
-            case SESSION_CMD_TOGGLE_FAVORITE:
-                result->SetAssetId(data.ReadString());
-                break;
-            case SESSION_CMD_PLAY_FROM_ASSETID:
-                result->SetPlayFromAssetId(data.ReadInt64());
-                break;
-            case SESSION_CMD_PLAY_WITH_ASSETID:
-                result->SetPlayWithAssetId(data.ReadString());
-                break;
-            case SESSION_CMD_PLAY:
-                result->SetPlayParam(data.ReadString());
-                AVControlCommand::UnmarshalCommonInfo(result, data);
-                break;
-            case SESSION_CMD_PLAY_NEXT:
-            case SESSION_CMD_PLAY_PREVIOUS:
-                AVControlCommand::UnmarshalCommonInfo(result, data);
-                break;
-            default:
-                break;
-        }
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVControlCommand failed");
+    int32_t cmd = 0;
+    bool isValid = data.ReadInt32(cmd) && result->SetCommand(cmd) == AVSESSION_SUCCESS &&
+        result->SetParamFromParcel(cmd, data) == AVSESSION_SUCCESS;
+    if (!isValid) {
+        SLOGE("unmarshalling control command failed");
+        delete result;
+        result = nullptr;
+        return nullptr;
     }
     return result;
 }

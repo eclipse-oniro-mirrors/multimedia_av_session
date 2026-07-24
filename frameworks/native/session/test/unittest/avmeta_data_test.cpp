@@ -2741,5 +2741,113 @@ HWTEST_F(AVMetaDataTest, AVMetaDataCheckBundleIconChange001, TestSize.Level4)
     EXPECT_EQ(ret, false);
     SLOGI("AVMetaDataCheckBundleIconChange001 End");
 }
+
+/**
+* @tc.name: SetDisplayTags001
+* @tc.desc: set display tags with invalid value, check it is ignored
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVMetaDataTest, SetDisplayTags001, TestSize.Level0)
+{
+    SLOGI("SetDisplayTags001 Begin");
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetDisplayTags(AVMetaData::DISPLAY_TAG_AUDIO_VIVID);
+    EXPECT_EQ(AVMetaData::DISPLAY_TAG_AUDIO_VIVID, metaData.GetDisplayTags());
+    metaData.SetDisplayTags(-1);
+    EXPECT_EQ(AVMetaData::DISPLAY_TAG_AUDIO_VIVID, metaData.GetDisplayTags());
+    metaData.SetDisplayTags(AVMetaData::DISPLAY_TAG_ALL + 1);
+    EXPECT_EQ(AVMetaData::DISPLAY_TAG_AUDIO_VIVID, metaData.GetDisplayTags());
+    SLOGI("SetDisplayTags001 End");
+}
+
+/**
+* @tc.name: AVMetaDataUnmarshalling002
+* @tc.desc: unmarshalling with displayTags negative, should return nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling002, TestSize.Level0)
+{
+    SLOGI("AVMetaDataUnmarshalling002 Begin");
+    MessageParcel parcel;
+    parcel.WriteInt32(0);
+    parcel.WriteString("1");
+    parcel.WriteString("123");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteInt64(0);
+    parcel.WriteString("");
+    parcel.WriteDouble(0);
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteInt32(15);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(2);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(-1);
+    parcel.WriteBool(false);
+    parcel.WriteInt32(0);
+    auto *ret = AVMetaData::Unmarshalling(parcel);
+    EXPECT_EQ(ret, nullptr);
+    SLOGI("AVMetaDataUnmarshalling002 End");
+}
+
+/**
+* @tc.name: AVMetaDataUnmarshalling003
+* @tc.desc: unmarshalling with displayTags exceeding DISPLAY_TAG_ALL, should return nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVMetaDataTest, AVMetaDataUnmarshalling003, TestSize.Level0)
+{
+    SLOGI("AVMetaDataUnmarshalling003 Begin");
+    MessageParcel parcel;
+    parcel.WriteInt32(0);
+    parcel.WriteString("1");
+    parcel.WriteString("123");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteInt64(0);
+    parcel.WriteString("");
+    parcel.WriteDouble(0);
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteString("");
+    parcel.WriteInt32(15);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(2);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(AVMetaData::DISPLAY_TAG_ALL + 1);
+    parcel.WriteBool(false);
+    parcel.WriteInt32(0);
+    auto *ret = AVMetaData::Unmarshalling(parcel);
+    EXPECT_EQ(ret, nullptr);
+    SLOGI("AVMetaDataUnmarshalling003 End");
+}
 } // namespace AVSession
 } // namespace OHOS

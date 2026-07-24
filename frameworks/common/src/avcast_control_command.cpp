@@ -30,34 +30,45 @@ AVCastControlCommand::~AVCastControlCommand()
 {
 }
 
+int32_t AVCastControlCommand::SetParamFromParcel(int32_t cmd, Parcel& data)
+{
+    int32_t param = 0;
+    switch (cmd) {
+        case CAST_CONTROL_CMD_FAST_FORWARD:
+            data.ReadInt32(param);
+            return SetForwardTime(param);
+        case CAST_CONTROL_CMD_REWIND:
+            data.ReadInt32(param);
+            return SetRewindTime(param);
+        case CAST_CONTROL_CMD_SEEK:
+            data.ReadInt32(param);
+            return SetSeekTime(param);
+        case CAST_CONTROL_CMD_SET_VOLUME:
+            data.ReadInt32(param);
+            return SetVolume(param);
+        case CAST_CONTROL_CMD_SET_SPEED:
+            data.ReadInt32(param);
+            return SetSpeed(param);
+        case CAST_CONTROL_CMD_SET_LOOP_MODE:
+            data.ReadInt32(param);
+            return SetLoopMode(param);
+        default:
+            return AVSESSION_SUCCESS;
+    }
+}
+
 AVCastControlCommand *AVCastControlCommand::Unmarshalling(Parcel& data)
 {
     auto result = new (std::nothrow) AVCastControlCommand();
-    if (result != nullptr) {
-        int32_t cmd = data.ReadInt32();
-        result->SetCommand(cmd);
-        switch (cmd) {
-            case CAST_CONTROL_CMD_FAST_FORWARD:
-                result->SetForwardTime(data.ReadInt32());
-                break;
-            case CAST_CONTROL_CMD_REWIND:
-                result->SetRewindTime(data.ReadInt32());
-                break;
-            case CAST_CONTROL_CMD_SEEK:
-                result->SetSeekTime(data.ReadInt32());
-                break;
-            case CAST_CONTROL_CMD_SET_VOLUME:
-                result->SetVolume(data.ReadInt32());
-                break;
-            case CAST_CONTROL_CMD_SET_SPEED:
-                result->SetSpeed(data.ReadInt32());
-                break;
-            case CAST_CONTROL_CMD_SET_LOOP_MODE:
-                result->SetLoopMode(data.ReadInt32());
-                break;
-            default:
-                break;
-        }
+    CHECK_AND_RETURN_RET_LOG(result != nullptr, nullptr, "new AVCastControlCommand failed");
+    int32_t cmd = 0;
+    bool isValid = data.ReadInt32(cmd) && result->SetCommand(cmd) == AVSESSION_SUCCESS &&
+        result->SetParamFromParcel(cmd, data) == AVSESSION_SUCCESS;
+    if (!isValid) {
+        SLOGE("unmarshalling cast control command failed");
+        delete result;
+        result = nullptr;
+        return nullptr;
     }
     return result;
 }
@@ -182,6 +193,11 @@ int32_t AVCastControlCommand::GetSeekTime(int32_t& seekTime) const
 
 int32_t AVCastControlCommand::SetVolume(int32_t volume)
 {
+    if (volume < 0) {
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+            AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "invalid volume", true);
+        return ERR_INVALID_PARAM;
+    }
     param_ = volume;
     return AVSESSION_SUCCESS;
 }

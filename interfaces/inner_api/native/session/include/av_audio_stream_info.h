@@ -220,11 +220,22 @@ public:
     }
     bool ReadFromParcel(Parcel &parcel)
     {
-        samplingRate = static_cast<AudioSamplingRate>(parcel.ReadInt32());
-        encoding = static_cast<AudioEncodingType>(parcel.ReadInt32());
-        format = static_cast<AudioSampleFormat>(parcel.ReadInt32());
-        channels = static_cast<AudioChannel>(parcel.ReadInt32());
-        channelLayout = static_cast<AudioChannelLayout>(parcel.ReadUint64());
+        int32_t samplingRateValue = 0;
+        int32_t encodingValue = 0;
+        int32_t formatValue = 0;
+        int32_t channelsValue = 0;
+        uint64_t channelLayoutValue = 0;
+        bool ret = parcel.ReadInt32(samplingRateValue) && parcel.ReadInt32(encodingValue) &&
+            parcel.ReadInt32(formatValue) && parcel.ReadInt32(channelsValue) &&
+            parcel.ReadUint64(channelLayoutValue);
+        if (!ret) {
+            return false;
+        }
+        samplingRate = static_cast<AudioSamplingRate>(samplingRateValue);
+        encoding = static_cast<AudioEncodingType>(encodingValue);
+        format = static_cast<AudioSampleFormat>(formatValue);
+        channels = static_cast<AudioChannel>(channelsValue);
+        channelLayout = static_cast<AudioChannelLayout>(channelLayoutValue);
         return true;
     }
 };

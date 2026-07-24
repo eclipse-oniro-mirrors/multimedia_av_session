@@ -135,6 +135,8 @@ public:
     };
 
 private:
+    int32_t SetParamFromParcel(int32_t cmd, Parcel& data);
+
     int32_t cmd_ = SESSION_CMD_INVALID;
     std::variant<int32_t, double, int64_t, bool, std::string> param_;
     CommandInfo commandInfo_;

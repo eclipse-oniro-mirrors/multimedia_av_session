@@ -1070,6 +1070,266 @@ HWTEST_F(AVSessionControllerTest, SendControlCommand015, TestSize.Level1)
 }
 
 /**
+* @tc.name: SendControlCommand016
+* @tc.desc: unmarshalling control command with FAST_FORWARD param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand016, TestSize.Level1)
+{
+    AVControlCommand command;
+    int64_t forward = -1;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_FAST_FORWARD), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetForwardTime(1000), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_FAST_FORWARD);
+    EXPECT_EQ(ret->GetForwardTime(forward), AVSESSION_SUCCESS);
+    EXPECT_EQ(forward, 1000);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand017
+* @tc.desc: unmarshalling control command with REWIND param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand017, TestSize.Level1)
+{
+    AVControlCommand command;
+    int64_t rewind = -1;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_REWIND), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetRewindTime(1000), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_REWIND);
+    EXPECT_EQ(ret->GetRewindTime(rewind), AVSESSION_SUCCESS);
+    EXPECT_EQ(rewind, 1000);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand018
+* @tc.desc: unmarshalling control command with SEEK param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand018, TestSize.Level1)
+{
+    AVControlCommand command;
+    int64_t seek = -1;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_SEEK), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetSeekTime(1000), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_SEEK);
+    EXPECT_EQ(ret->GetSeekTime(seek), AVSESSION_SUCCESS);
+    EXPECT_EQ(seek, 1000);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand019
+* @tc.desc: unmarshalling control command with SET_SPEED param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand019, TestSize.Level1)
+{
+    AVControlCommand command;
+    double speed = 0.0;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_SET_SPEED), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetSpeed(1.0), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_SET_SPEED);
+    EXPECT_EQ(ret->GetSpeed(speed), AVSESSION_SUCCESS);
+    EXPECT_EQ(std::fabs(speed - 1.0) < 1e-6, true);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand020
+* @tc.desc: unmarshalling control command with TOGGLE_FAVORITE param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand020, TestSize.Level1)
+{
+    AVControlCommand command;
+    std::string assetId;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetAssetId("123456"), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
+    EXPECT_EQ(ret->GetAssetId(assetId), AVSESSION_SUCCESS);
+    EXPECT_EQ(assetId, "123456");
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand021
+* @tc.desc: unmarshalling control command with PLAY_FROM_ASSETID param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand021, TestSize.Level1)
+{
+    AVControlCommand command;
+    int64_t assetId = 0;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetPlayFromAssetId(123456), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID);
+    EXPECT_EQ(ret->GetPlayFromAssetId(assetId), AVSESSION_SUCCESS);
+    EXPECT_EQ(assetId, 123456);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand022
+* @tc.desc: unmarshalling control command with PLAY_WITH_ASSETID param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand022, TestSize.Level1)
+{
+    AVControlCommand command;
+    std::string playWithAssetId;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetPlayWithAssetId("123456"), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID);
+    EXPECT_EQ(ret->GetPlayWithAssetId(playWithAssetId), AVSESSION_SUCCESS);
+    EXPECT_EQ(playWithAssetId, "123456");
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand023
+* @tc.desc: unmarshalling control command with PLAY param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand023, TestSize.Level1)
+{
+    AVControlCommand command;
+    std::string playParam;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_PLAY), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetPlayParam("play_param"), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_PLAY);
+    EXPECT_EQ(ret->GetPlayParam(playParam), AVSESSION_SUCCESS);
+    EXPECT_EQ(playParam, "play_param");
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand024
+* @tc.desc: unmarshalling control command with PLAY_NEXT param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand024, TestSize.Level1)
+{
+    AVControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_PLAY_NEXT);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand025
+* @tc.desc: unmarshalling control command with PLAY_PREVIOUS param case
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand025, TestSize.Level1)
+{
+    AVControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand026
+* @tc.desc: unmarshalling control command with default param case (PAUSE)
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand026, TestSize.Level1)
+{
+    AVControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_PAUSE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_PAUSE);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand027
+* @tc.desc: unmarshalling control command with default param case (STOP)
+* @tc.type: FUNC
+* @tc.require: AR000H31JH
+*/
+HWTEST_F(AVSessionControllerTest, SendControlCommand027, TestSize.Level1)
+{
+    AVControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVControlCommand::SESSION_CMD_STOP), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVControlCommand *ret = AVControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVControlCommand::SESSION_CMD_STOP);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
 * @tc.name: SendCommonCommand001
 * @tc.desc: Send common command - session is activate
 * @tc.type: FUNC
