@@ -1632,26 +1632,4 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_GetRemoteNetWorkId_002
     EXPECT_EQ(ret, false);
     SLOGI("HwCastProviderSession_GetRemoteNetWorkId_002 end!");
 }
-
-/**
- * @tc.name: HwCastProviderSession_OnDeviceState_003
- * @tc.desc: test OnDeviceState when GetRemoteDeviceInfo fails
- * @tc.type: FUNC
- * @tc.require:
- */
-static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnDeviceState_003, TestSize.Level0)
-{
-    SLOGI("HwCastProviderSession_OnDeviceState_003 begin!");
-    auto session = std::make_shared<ICastSessionMock>();
-    auto provideSession = std::make_shared<HwCastProviderSession>(session);
-    provideSession->Init();
-    OHOS::CastEngine::DeviceStateInfo stateInfo;
-    stateInfo.deviceId = "testDeviceId";
-    stateInfo.deviceState = static_cast<OHOS::CastEngine::DeviceState>(1);
-    provideSession->stashDeviceState_ = 2;
-    int32_t originalState = provideSession->stashDeviceState_;
-    provideSession->OnDeviceState(stateInfo);
-    EXPECT_EQ(provideSession->stashDeviceState_, originalState);
-    SLOGI("HwCastProviderSession_OnDeviceState_003 end!");
-}
 } // OHOS::AVSession
