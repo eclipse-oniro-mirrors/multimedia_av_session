@@ -242,8 +242,11 @@ bool HwCastStreamPlayer::RepeatPrepare(std::shared_ptr<AVMediaDescription>& medi
             hasIcon = true;
         }
     }
-    if (hasIcon && sessionCallbackForCastNtf_ && isPlayingState_) {
-        sessionCallbackForCastNtf_(true, true);
+    {
+        std::lock_guard<std::recursive_mutex> lockGuard(sessionCallbackLock_);
+        if (hasIcon && sessionCallbackForCastNtf_ && isPlayingState_) {
+            sessionCallbackForCastNtf_(true, true);
+        }
     }
     return hasIcon;
 }
@@ -727,6 +730,7 @@ int32_t HwCastStreamPlayer::SetValidAbility(const std::vector<int32_t>& validCmd
 
 void HwCastStreamPlayer::SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback)
 {
+    std::lock_guard<std::recursive_mutex> lockGuard(sessionCallbackLock_);
     sessionCallbackForCastNtf_ = callback;
 }
 
@@ -739,6 +743,7 @@ void HwCastStreamPlayer::CheckIfCancelCastCapsule()
         [weakSelf]() {
             auto shardPtr = weakSelf.lock();
             CHECK_AND_RETURN_LOG(shardPtr != nullptr, "CheckIfCancelCastCapsule player is null");
+            std::lock_guard<std::recursive_mutex> lockGuard(shardPtr->sessionCallbackLock_);
             CHECK_AND_RETURN_LOG(shardPtr->sessionCallbackForCastNtf_ && !shardPtr->isPlayingState_,
                 "CheckIfCancelCastCapsule return");
             SLOGI("MediaCapsule delCastCapsule isPlayingState_ %{public}d", shardPtr->isPlayingState_);
@@ -759,6 +764,7 @@ void HwCastStreamPlayer::OnStateChanged(const CastEngine::PlayerStates playbackS
     if (avCastPlaybackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
         // play state try notify cast notification
         isPlayingState_ = true;
+        std::lock_guard<std::recursive_mutex> lockGuard(sessionCallbackLock_);
         if (sessionCallbackForCastNtf_) {
             SLOGI("MediaCapsule addCastCapsule");
             sessionCallbackForCastNtf_(true, false);

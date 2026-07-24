@@ -836,7 +836,7 @@ private:
     std::atomic<int32_t> pressCount_ {0};
     int32_t maxHistoryNums_ = 10;
     std::atomic<bool> isFirstPress_ {true};
-    bool isInCast_ = false;
+    std::atomic<bool> isInCast_ {false};
     bool isCastableDevice_ = false;
     bool isAudioBrokerStart_ = false;
     bool isAncoMediaSessionChange_ = false;

@@ -127,6 +127,7 @@ private:
     std::vector<std::shared_ptr<IAVCastControllerProxyListener>> streamPlayerListenerList_;
     AVQueueItem currentAVQueueItem_;
     std::shared_ptr<HwCastDataSourceDescriptor> castDataSrc_ = nullptr;
+    std::recursive_mutex sessionCallbackLock_;
     std::function<void(bool, bool)> sessionCallbackForCastNtf_;
     std::map<CastEngine::PlayerStates, int32_t> castPlusStateToString_ = {
         {CastEngine::PlayerStates::PLAYER_STATE_ERROR, AVPlaybackState::PLAYBACK_STATE_ERROR},

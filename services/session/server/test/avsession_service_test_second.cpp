@@ -1962,9 +1962,9 @@ static HWTEST_F(AVSessionServiceTestSecond, SplitExtraInfo008, TestSize.Level0)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 static HWTEST_F(AVSessionServiceTestSecond, checkEnableCast001, TestSize.Level0)
 {
-    g_AVSessionService->isInCast_ = true;
+    g_AVSessionService->isInCast_.store(true);
     auto ret = g_AVSessionService->checkEnableCast(true);
-    g_AVSessionService->isInCast_ = false;
+    g_AVSessionService->isInCast_.store(false);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 #endif
@@ -2008,7 +2008,7 @@ static HWTEST_F(AVSessionServiceTestSecond, StopCast001, TestSize.Level0)
     avsessionHere->descriptor_.sessionTag_ = "RemoteCast";
     SessionToken sessionToken;
     sessionToken.sessionId = avsessionHere->GetSessionId();
-    g_AVSessionService->isInCast_ = false;
+    g_AVSessionService->isInCast_.store(false);
     auto ret = g_AVSessionService->StopCast(sessionToken);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     avsessionHere->Destroy();

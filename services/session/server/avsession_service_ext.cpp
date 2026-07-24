@@ -321,7 +321,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
 {
     std::lock_guard lockGuard(checkEnableCastLock_);
     SLOGI("checkEnableCast enable:%{public}d, isInCast:%{public}d, calling pid:%{public}d",
-        enable, isInCast_, GetCallingPid());
+        enable, isInCast_.load(), GetCallingPid());
     enable ? (void)cacheEnableCastPids_.insert(GetCallingPid()) : (void)cacheEnableCastPids_.erase(GetCallingPid());
     GetCallingUid() == avSessionUid ? (void)cacheEnableCastPids_.erase(GetCallingPid()) : (void)0;
     if (enable && !cancelCastRelease_) {
@@ -329,9 +329,9 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         enableCastCond_.notify_all();
     }
     
-    if (enable == true && isInCast_ == false) {
-        isInCast_ = AVRouter::GetInstance().Init(this) == AVSESSION_SUCCESS ? true : false;
-    } else if (enable == false && isInCast_ == true) {
+    if (enable == true && isInCast_.load() == false) {
+        isInCast_.store(AVRouter::GetInstance().Init(this) == AVSESSION_SUCCESS ? true : false);
+    } else if (enable == false && isInCast_.load() == true) {
         CHECK_AND_RETURN_RET_LOG(cacheEnableCastPids_.empty(), AVSESSION_ERROR,
             "can not create task release cast with pid still calling");
         cancelCastRelease_ = false;
@@ -346,7 +346,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
                 "can not release cast with casting");
             CHECK_AND_RETURN_LOG(cacheEnableCastPids_.empty(),
                 "can not release cast with pid still calling");
-            isInCast_ = AVRouter::GetInstance().Release();
+            isInCast_.store(AVRouter::GetInstance().Release());
         }).detach();
     } else {
         SLOGD("AVRouter Init in nothing change");
@@ -357,7 +357,7 @@ int32_t AVSessionService::checkEnableCast(bool enable)
 void AVSessionService::setInCast(bool isInCast)
 {
     SLOGI("setInCast, isInCast:%{public}d", isInCast);
-    isInCast_ = isInCast;
+    isInCast_.store(isInCast);
 }
 
 int32_t AVSessionService::PcmCastSessionReleasePlayer()
