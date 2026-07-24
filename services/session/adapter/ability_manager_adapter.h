@@ -47,6 +47,7 @@ private:
     static constexpr const char *defaultBundleName = "com.example.himusicdemo";
     std::condition_variable syncCon_;
     std::mutex syncMutex_;
+    std::mutex sessionMutex_;
     std::atomic<Status> status_ = Status::ABILITY_STATUS_INIT;
     std::string bundleName_;
     std::string abilityName_;

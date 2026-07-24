@@ -388,8 +388,8 @@ static int32_t DownloadCastImg(std::shared_ptr<OHOS::AVSession::AVMediaDescripti
     return OHOS::AVSession::AVSESSION_ERROR;
 }
 
-static std::function<void()> PrepareAsyncExecutor(OHOS::AVSession::AVCastController* castController,
-    OHOS::AVSession::AVQueueItem& data)
+static std::function<void()> PrepareAsyncExecutor(std::shared_ptr<OHOS::AVSession::AVCastController> castController,
+    OHOS::AVSession::AVQueueItem data)
 {
     return [castController, data]() {
         if (castController == nullptr) {
@@ -434,7 +434,7 @@ void AVCastControllerImpl::PrepareSync(AVQueueItem const& item)
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
         return;
     }
-    auto asyncExecutor = PrepareAsyncExecutor(castController_.get(), avQueueItem);
+    auto asyncExecutor = PrepareAsyncExecutor(castController_, avQueueItem);
     CHECK_AND_PRINT_LOG(OHOS::AVSession::AVSessionEventHandler::GetInstance()
         .AVSessionPostTask(asyncExecutor, "PrepareAsync"),
         "AVCastControllerImpl PrepareAsync handler postTask failed");

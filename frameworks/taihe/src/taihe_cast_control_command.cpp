@@ -70,6 +70,12 @@ static int32_t GetParameterLoopMode(const taihe::optional<AVCastParameterType> &
 
 static taihe::optional<AVCastParameterType> ToTaiheParameterLoopMode(int32_t in)
 {
+    auto undefinedResult = taihe::optional<AVCastParameterType>(std::nullopt);
+    CHECK_AND_RETURN_RET_LOG(
+        in >= static_cast<int32_t>(OHOS::AVSession::AVPlaybackState::LOOP_MODE_SEQUENCE) &&
+        in <= static_cast<int32_t>(OHOS::AVSession::AVPlaybackState::LOOP_MODE_CUSTOM),
+        undefinedResult,
+        "ToTaiheParameterLoopMode: loopMode out of range");
     LoopMode mode = LoopMode::from_value(in);
     AVCastParameterType parameter = AVCastParameterType::make_typeLoopMode(mode);
     return taihe::optional<AVCastParameterType>(std::in_place_t {}, parameter);
@@ -274,7 +280,10 @@ int32_t TaiheCastControlCommand::SetSpeed(OHOS::AVSession::AVCastControlCommand 
     CHECK_AND_RETURN_RET_LOG(in.GetSpeed(speed) == OHOS::AVSession::AVSESSION_SUCCESS,
         OHOS::AVSession::ERR_INVALID_PARAM, "get speed failed");
 
-    out.parameter = ToTaiheParameterPlaybackSpeed(speed);
+    auto result = ToTaiheParameterPlaybackSpeed(speed);
+    CHECK_AND_RETURN_RET_LOG(result.has_value(),
+        OHOS::AVSession::ERR_INVALID_PARAM, "ToTaiheParameterPlaybackSpeed failed");
+    out.parameter = result;
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 
@@ -350,7 +359,10 @@ int32_t TaiheCastControlCommand::SetLoopMode(
     CHECK_AND_RETURN_RET_LOG(in.GetLoopMode(loopMode) == OHOS::AVSession::AVSESSION_SUCCESS,
         OHOS::AVSession::ERR_INVALID_PARAM, "get loopMode failed");
 
-    out.parameter = ToTaiheParameterLoopMode(loopMode);
+    auto result = ToTaiheParameterLoopMode(loopMode);
+    CHECK_AND_RETURN_RET_LOG(result.has_value(),
+        OHOS::AVSession::ERR_INVALID_PARAM, "ToTaiheParameterLoopMode failed");
+    out.parameter = result;
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
 } // namespace ANI::AVSession

@@ -234,6 +234,7 @@ int32_t AVCastControllerStub::HandleSetDisplaySurface(MessageParcel& data, Messa
     }
 
     sptr<IBufferProducer> producer = iface_cast<IBufferProducer>(remoteObj);
+    CHECK_AND_RETURN_RET_LOG(producer != nullptr, ERR_NULL_OBJECT, "iface_cast IBufferProducer failed");
 
     auto pSurface = Surface::CreateSurfaceAsProducer(producer);
     CHECK_AND_RETURN_RET_LOG(pSurface != nullptr, AVSESSION_ERROR, "Surface provider is null");
@@ -297,7 +298,8 @@ int32_t AVCastControllerStub::HandleAddAvailableCommand(MessageParcel& data, Mes
 
 int32_t AVCastControllerStub::HandleRemoveAvailableCommand(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t cmd = data.ReadInt32();
+    int32_t cmd = 0;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(cmd), ERR_NONE, "Read cmd failed");
     int32_t ret = RemoveAvailableCommand(cmd);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ERR_NONE, "RemoveAvailableCommand failed");

@@ -708,6 +708,7 @@ uintptr_t AVSessionControllerImpl::GetExtrasSync()
 uintptr_t AVSessionControllerImpl::GetExtrasWithEventSync(string_view extraEvent)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionControllerImpl::GetExtrasWithEventSync");
+    std::lock_guard<std::mutex> lock(uvMutex_);
     SLOGI("Start AVSessionControllerImpl GetExtrasWithEventSync process");
     ani_object undefinedAniExtras = TaiheUtils::CreateAniEmptyRecord();
     uintptr_t undefinedExtras = reinterpret_cast<uintptr_t>(undefinedAniExtras);

@@ -33,7 +33,7 @@ __attribute__((no_sanitize("cfi")))static int32_t ApplyResultUrlCasting(int32_t 
 {
     SLOGI("enter ApplyResultUrlCasting");
     if (result == ServiceCollaborationManagerResultCode::REJECT) {
-        SLOGE("return connect reject and reson:%{public}s", reason);
+        SLOGE("return connect reject");
     }
     CHECK_AND_RETURN_RET_LOG(CollaborationManagerURLCasting::GetInstance().sendCollaborationApplyResult_ != nullptr,
         AVSESSION_ERROR, "sendCollaborationApplyResult_ function ptr is nullptr");

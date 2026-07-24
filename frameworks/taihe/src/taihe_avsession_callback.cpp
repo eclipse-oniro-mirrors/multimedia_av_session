@@ -213,8 +213,8 @@ void TaiheAVSessionCallback::OnToggleFavorite(const std::string &assertId)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnToggleFavorite");
     dataContext_.assetId = assertId;
-    string_view assertIdTaihe = dataContext_.assetId;
-    auto execute = [assertIdTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [assertId](std::shared_ptr<uintptr_t> method) {
+        string_view assertIdTaihe = assertId;
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -261,11 +261,12 @@ void TaiheAVSessionCallback::OnCommonCommand(const std::string &commonCommand,
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnCommonCommand");
     dataContext_.commonCommand = string(commonCommand);
-    string_view commonCommandTaihe = dataContext_.commonCommand;
-    auto execute = [commonCommandTaihe, commandArgs](std::shared_ptr<uintptr_t> method) {
+    OHOS::AAFwk::WantParams commandArgsCopy(commandArgs);
+    auto execute = [commonCommand, commandArgsCopy](std::shared_ptr<uintptr_t> method) {
+        string_view commonCommandTaihe = commonCommand;
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
-        auto commandArgsAni = TaiheUtils::ToAniWantParams(commandArgs);
+        auto commandArgsAni = TaiheUtils::ToAniWantParams(commandArgsCopy);
         CHECK_RETURN_VOID(commandArgsAni != nullptr, "convert WantParams to ani object failed");
         uintptr_t commandArgsTaihe = reinterpret_cast<uintptr_t>(commandArgsAni);
         std::shared_ptr<taihe::callback<void(string_view, uintptr_t)>> cacheCallback =
@@ -340,8 +341,8 @@ void TaiheAVSessionCallback::OnPlayWithAssetId(const std::string &assetId)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnPlayWithAssetId");
     dataContext_.playAssetId = string(assetId);
-    string_view assetIdTaihe = dataContext_.playAssetId;
-    auto execute = [assetIdTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [assetId](std::shared_ptr<uintptr_t> method) {
+        string_view assetIdTaihe = assetId;
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -407,6 +408,10 @@ void TaiheAVSessionCallback::OnDesktopLyricStateChanged(const OHOS::AVSession::D
 
 int32_t TaiheAVSessionCallback::AddCallback(int32_t event, std::shared_ptr<uintptr_t> callback)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX,
+        OHOS::AVSession::AVSESSION_ERROR, "no event:%{public}d", event);
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr,
+        OHOS::AVSession::AVSESSION_ERROR, "get callback null for event:%{public}d", event);
     SLOGI("Add callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     std::shared_ptr<uintptr_t> targetCb;
@@ -430,6 +435,8 @@ int32_t TaiheAVSessionCallback::AddCallback(int32_t event, std::shared_ptr<uintp
 
 int32_t TaiheAVSessionCallback::RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> callback)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX,
+        OHOS::AVSession::AVSESSION_ERROR, "no event:%{public}d", event);
     SLOGI("Remove callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callback == nullptr) {

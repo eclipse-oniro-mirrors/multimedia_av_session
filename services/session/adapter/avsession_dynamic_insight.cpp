@@ -154,7 +154,9 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
         return;
     }
     wantParam->SetParam("startPlayInfo", OHOS::AAFwk::WantParamWrapper::Box(startPlayInfoParam));
-    wantParam->SetParam("startPlayType", OHOS::AAFwk::String::Box(StartPlayTypeToString.at(startPlayType)));
+    auto it = StartPlayTypeToString.find(startPlayType);
+    std::string typeStr = (it == StartPlayTypeToString.end()) ? "app" : StartPlayTypeToString.at(startPlayType);
+    wantParam->SetParam("startPlayType", OHOS::AAFwk::String::Box(typeStr));
 }
 
 std::shared_ptr<AppExecFwk::WantParams> InsightAdapter::GetPlayIntentParamWithWantProcess(std::string& insightName,
@@ -201,10 +203,8 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
     cJSON* insightIntentsItem = nullptr;
     cJSON_ArrayForEach(insightIntentsItem, insightIntentsArray) {
         cJSON* intentNameItem = cJSON_GetObjectItem(insightIntentsItem, "intentName");
-        if (intentNameItem == nullptr || !cJSON_IsString(intentNameItem)) {
-            SLOGE("json do not contain intentName");
-            continue;
-        }
+        CHECK_AND_CONTINUE(intentNameItem != nullptr && cJSON_IsString(intentNameItem));
+        CHECK_AND_CONTINUE(intentNameItem->valuestring != nullptr);
         std::string insightName(intentNameItem->valuestring);
         if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
             continue;

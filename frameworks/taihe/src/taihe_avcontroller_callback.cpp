@@ -29,6 +29,7 @@ namespace ANI::AVSession {
 std::mutex TaiheAVControllerCallback::sWorkerMutex_;
 TaiheAVControllerCallback::TaiheAVControllerCallback(ani_env* env)
 {
+    std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("Construct TaiheAVControllerCallback");
     isValid_ = std::make_shared<bool>(true);
     if (env != nullptr) {
@@ -38,6 +39,7 @@ TaiheAVControllerCallback::TaiheAVControllerCallback(ani_env* env)
 
 TaiheAVControllerCallback::~TaiheAVControllerCallback()
 {
+    std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("Destroy TaiheAVControllerCallback");
     if (isValid_) {
         *isValid_ = false;
@@ -85,6 +87,7 @@ void TaiheAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int32_t
     for (auto callback = callbacks_[event].begin(); callback != callbacks_[event].end(); ++callback) {
         CallWithThreadSafe(*callback, isValid_, state,
             [this, callback, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
                     return false;
@@ -114,7 +117,13 @@ void TaiheAVControllerCallback::CallWithThreadSafe(std::shared_ptr<uintptr_t> me
             sharePtr->ThreadSafeCallback(this->env_, data);
         }
     };
-    mainHandler_->PostTask(task, "CallWithThreadSafe", 0, OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE, {});
+    bool postSuccess = mainHandler_->PostTask(task, "CallWithThreadSafe", 0,
+        OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE, {});
+    if (!postSuccess) {
+        SLOGE("PostTask failed in CallWithThreadSafe, delete DataContextForThreadSafe to prevent memory leak");
+        delete data;
+        data = nullptr;
+    }
 }
 
 void TaiheAVControllerCallback::ThreadSafeCallback(ani_env *env, DataContextForThreadSafe *data)
@@ -186,6 +195,7 @@ void TaiheAVControllerCallback::OnSessionDestroy()
     };
     HandleEvent(EVENT_SESSION_DESTROY, execute);
     SLOGD("callback for sessionDestroy, check callback");
+    std::lock_guard lock(destroyCallbackLock_);
     if (sessionDestroyCallback_ != nullptr) {
         SLOGI("notify session Destroy for repeat");
         sessionDestroyCallback_();
@@ -243,14 +253,14 @@ void TaiheAVControllerCallback::OnValidCommandChange(const std::vector<int32_t> 
     SLOGI("do OnValidCommandChange in TaiheCallback with size %{public}d", static_cast<int32_t>(cmds.size()));
     std::vector<std::string> stringCmds = TaiheControlCommand::ConvertCommands(cmds);
     dataContext_.cmds = TaiheUtils::ToTaiheStringArray(stringCmds);
-    array_view<string> cmdsTaihe = dataContext_.cmds;
-    auto execute = [cmdsTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [stringCmds](std::shared_ptr<uintptr_t> method) {
+        array_view<string> cmdsTaihe = TaiheUtils::ToTaiheStringArray(stringCmds);
         std::shared_ptr<taihe::callback<void(array_view<string>)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(array_view<string>)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
         (*cacheCallback)(cmdsTaihe);
     };
-    HandleEventWithThreadSafe(EVENT_VALID_COMMAND_CHANGE, static_cast<int32_t>(cmdsTaihe.size()), execute);
+    HandleEventWithThreadSafe(EVENT_VALID_COMMAND_CHANGE, static_cast<int32_t>(stringCmds.size()), execute);
 }
 
 void TaiheAVControllerCallback::OnOutputDeviceChange(const int32_t connectionState,
@@ -271,8 +281,8 @@ void TaiheAVControllerCallback::OnSessionEventChange(const std::string &event, c
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnSessionEventChange");
     dataContext_.sessionEvent = string(event);
-    string_view eventTaihe = dataContext_.sessionEvent;
-    auto execute = [eventTaihe, args](std::shared_ptr<uintptr_t> method) {
+    auto execute = [event, args](std::shared_ptr<uintptr_t> method) {
+        string_view eventTaihe = event;
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
         auto argsAni = TaiheUtils::ToAniWantParams(args);
@@ -306,8 +316,8 @@ void TaiheAVControllerCallback::OnQueueTitleChange(const std::string &title)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnQueueTitleChange");
     dataContext_.queueTitle = string(title);
-    string_view titleTaihe = dataContext_.queueTitle;
-    auto execute = [titleTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [title](std::shared_ptr<uintptr_t> method) {
+        string_view titleTaihe = title;
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -407,6 +417,7 @@ void TaiheAVControllerCallback::OnMediaCenterControlTypeChanged(const std::vecto
 void TaiheAVControllerCallback::OnSupportedPlaySpeedsChanged(const std::vector<double>& speeds)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVControllerCallback::OnSupportedPlaySpeedsChanged");
+
     auto execute = [speeds](std::shared_ptr<uintptr_t> method) {
         env_guard guard;
         CHECK_RETURN_VOID(guard.get_env() != nullptr, "guard env is nullptr");
@@ -440,6 +451,10 @@ int32_t TaiheAVControllerCallback::AddCallback(int32_t event, std::shared_ptr<ui
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     std::shared_ptr<uintptr_t> targetCb;
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, OHOS::AVSession::AVSESSION_ERROR,
+        "Invalid event parameter: %{public}d", event);
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr,
+        OHOS::AVSession::AVSESSION_ERROR, "get callback null for event:%{public}d", event);
     CHECK_AND_RETURN_RET_LOG(OHOS::AVSession::AVSESSION_SUCCESS == TaiheUtils::GetRefByCallback(
         callbacks_[event], callback, targetCb), OHOS::AVSession::AVSESSION_ERROR, "get callback reference failed");
     CHECK_AND_RETURN_RET_LOG(targetCb == nullptr, OHOS::AVSession::AVSESSION_SUCCESS, "callback has been registered");
@@ -460,6 +475,8 @@ int32_t TaiheAVControllerCallback::AddCallback(int32_t event, std::shared_ptr<ui
 
 int32_t TaiheAVControllerCallback::RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> callback)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, OHOS::AVSession::AVSESSION_ERROR,
+        "Invalid event parameter: %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGI("remove callback for event %{public}d", event);
     if (callback == nullptr) {
@@ -482,6 +499,7 @@ int32_t TaiheAVControllerCallback::RemoveCallback(int32_t event, std::shared_ptr
 void TaiheAVControllerCallback::AddCallbackForSessionDestroy(const std::function<void(void)> &sessionDestroyCallback)
 {
     SLOGE("add callback for session destroy notify");
+    std::lock_guard lock(destroyCallbackLock_);
     sessionDestroyCallback_ = sessionDestroyCallback;
 }
 } // namespace ANI::AVSession

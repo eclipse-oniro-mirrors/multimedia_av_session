@@ -86,6 +86,7 @@ int32_t AVSessionProxy::RegisterCallback(const std::shared_ptr<AVSessionCallback
     CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, ERR_INVALID_PARAM,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "callback is nullptr", false), "callback is nullptr");
+    std::lock_guard lockGuard(callbackLock_);
     callback_ = new(std::nothrow) AVSessionCallbackClient(callback);
     CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback_ != nullptr, ERR_NO_MEMORY,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
@@ -271,6 +272,10 @@ int32_t AVSessionProxy::UpdateAVQueueInfo(const AVQueueInfo& info)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(info.MarshallingMessageParcel(data), ERR_MARSHALLING, "Write info failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_UPDATE_QUEUE_INFO, data, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");

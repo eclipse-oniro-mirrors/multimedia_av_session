@@ -56,7 +56,13 @@ void TaiheAsyncCallback::Call(std::shared_ptr<uintptr_t> method, TaiheFuncExecut
             sharePtr->ThreadCallbackWork(this->env_, data);
         }
     };
-    mainHandler_->PostTask(taskCall, "Call", 0, OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE, {});
+    bool postSuccess = mainHandler_->PostTask(taskCall, "Call", 0,
+        OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE, {});
+    if (!postSuccess) {
+        SLOGE("PostTask failed in Call, delete DataContext to prevent memory leak");
+        delete data;
+        data = nullptr;
+    }
 }
 
 void TaiheAsyncCallback::CallWithFunc(std::shared_ptr<uintptr_t> method, std::shared_ptr<bool> isValid,
@@ -72,7 +78,13 @@ void TaiheAsyncCallback::CallWithFunc(std::shared_ptr<uintptr_t> method, std::sh
             sharePtr->ThreadSafeCallbackWork(this->env_, data);
         }
     };
-    mainHandler_->PostTask(taskCallWithFunc, "CallWithFunc", 0, OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE, {});
+    bool postSuccess = mainHandler_->PostTask(taskCallWithFunc, "CallWithFunc", 0,
+        OHOS::AppExecFwk::EventQueue::Priority::IMMEDIATE, {});
+    if (!postSuccess) {
+        SLOGE("PostTask failed in CallWithFunc, delete DataContextWithFunc to prevent memory leak");
+        delete data;
+        data = nullptr;
+    }
 }
 
 void TaiheAsyncCallback::ThreadSafeCallbackWork(ani_env* env, DataContextWithFunc* data)

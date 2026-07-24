@@ -37,10 +37,11 @@
 namespace ANI::AVSession {
 std::mutex AVSessionImpl::executeMutex_;
 std::mutex AVSessionImpl::completeMutex_;
+std::recursive_mutex AVSessionImpl::sessionInfoMutex_;;
 std::condition_variable AVSessionImpl::executeCond_;
 std::condition_variable AVSessionImpl::completeCond_;
 std::recursive_mutex registerEventLock_;
-int32_t AVSessionImpl::playBackStateRet_ = OHOS::AVSession::AVSESSION_ERROR;
+std::atomic<int32_t> AVSessionImpl::playBackStateRet_ = OHOS::AVSession::AVSESSION_ERROR;
 std::shared_ptr<AVSessionImpl> AVSessionImpl::taiheAVSession_ = nullptr;
 std::list<int32_t> registerEventList_;
 std::set<std::string> AVSessionImpl::onEventHandlers_ = {
@@ -111,7 +112,8 @@ std::map<std::string, int32_t> convertEventType_ = {
     { "toggleFavorite", OHOS::AVSession::AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE },
     { "handleKeyEvent", OHOS::AVSession::AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT },
     { "playFromAssetId", OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_FROM_ASSETID },
-    { "playWithAssetId", OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID }
+    { "playWithAssetId", OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY_WITH_ASSETID },
+    { "answer", OHOS::AVSession::AVControlCommand::SESSION_CMD_AVCALL_ANSWER }
 };
 
 int32_t AVSessionImpl::NewInstance(std::shared_ptr<OHOS::AVSession::AVSession> &nativeSession,
@@ -131,12 +133,15 @@ int32_t AVSessionImpl::ReCreateInstance(std::shared_ptr<OHOS::AVSession::AVSessi
     if (taiheAVSession_ == nullptr || nativeSession == nullptr) {
         return OHOS::AVSession::AVSESSION_ERROR;
     }
-    SLOGI("sessionId=%{public}s", taiheAVSession_->sessionId_.c_str());
-    taiheAVSession_->sessionId_ = nativeSession->GetSessionId();
-    taiheAVSession_->sessionType_ = nativeSession->GetSessionType();
-    taiheAVSession_->session_ = std::move(nativeSession);
-    if (taiheAVSession_->callback_ == nullptr) {
-        taiheAVSession_->callback_ = std::make_shared<TaiheAVSessionCallback>(get_env());
+    {
+        std::unique_lock lock(sessionInfoMutex_);
+        SLOGI("sessionId=%{public}s", taiheAVSession_->sessionId_.c_str());
+        taiheAVSession_->sessionId_ = nativeSession->GetSessionId();
+        taiheAVSession_->sessionType_ = nativeSession->GetSessionType();
+        taiheAVSession_->session_ = std::move(nativeSession);
+        if (taiheAVSession_->callback_ == nullptr) {
+            taiheAVSession_->callback_ = std::make_shared<TaiheAVSessionCallback>(get_env());
+        }
     }
     if (taiheAVSession_->session_ == nullptr) {
         return OHOS::AVSession::AVSESSION_ERROR;
@@ -202,51 +207,61 @@ taihe::string AVSessionImpl::GetSessionId()
 
 taihe::string AVSessionImpl::GetSessionType()
 {
+    std::unique_lock lock(sessionInfoMutex_);
     return taihe::string(sessionType_);
 }
 
 taihe::string AVSessionImpl::GetSessionTag()
 {
+    std::unique_lock lock(sessionInfoMutex_);
     return taihe::string(sessionTag_);
 }
 
 std::string AVSessionImpl::GetSessionIdInner()
 {
+    std::unique_lock lock(sessionInfoMutex_);
     return sessionId_;
 }
 
 void AVSessionImpl::SetSessionIdInner(std::string sessionId)
 {
+    std::unique_lock lock(sessionInfoMutex_);
     sessionId_ = sessionId;
 }
 
 std::string AVSessionImpl::GetSessionTypeInner()
 {
+    std::unique_lock lock(sessionInfoMutex_);
     return sessionType_;
 }
 
 void AVSessionImpl::SetSessionTypeInner(std::string sessionType)
 {
+    std::unique_lock lock(sessionInfoMutex_);
     sessionType_ = sessionType;
 }
 
 std::string AVSessionImpl::GetSessionTagInner()
 {
+    std::unique_lock lock(sessionInfoMutex_);
     return sessionTag_;
 }
 
 void AVSessionImpl::SetSessionTagInner(std::string sessionTag)
 {
+    std::unique_lock lock(sessionInfoMutex_);
     sessionTag_ = sessionTag;
 }
 
 OHOS::AppExecFwk::ElementName AVSessionImpl::GetSessionElement()
 {
+    std::unique_lock lock(sessionInfoMutex_);
     return elementName_;
 }
 
 void AVSessionImpl::SetSessionElement(OHOS::AppExecFwk::ElementName elementName)
 {
+    std::unique_lock lock(sessionInfoMutex_);
     elementName_ = elementName;
 }
 
@@ -385,11 +400,14 @@ std::function<void()> AVSessionImpl::PlaybackStateExecute(const std::shared_ptr<
 {
     return [session, playBackState]() {
         if (session == nullptr) {
-            playBackStateRet_ = OHOS::AVSession::ERR_SESSION_NOT_EXIST;
+            playBackStateRet_.store(OHOS::AVSession::ERR_SESSION_NOT_EXIST);
             return;
         }
-        playBackStateRet_ = session->SetAVPlaybackState(playBackState);
-        executeCond_.notify_one();
+        {
+            std::unique_lock<std::mutex> lock(executeMutex_);
+            playBackStateRet_.store(session->SetAVPlaybackState(playBackState));
+            executeCond_.notify_one();
+        }
         std::unique_lock<std::mutex> lock(completeMutex_);
         auto waitStatus = completeCond_.wait_for(lock, std::chrono::milliseconds(100));
         if (waitStatus == std::cv_status::timeout) {
@@ -402,24 +420,26 @@ std::function<void()> AVSessionImpl::PlaybackStateExecute(const std::shared_ptr<
 std::function<void()> AVSessionImpl::PlaybackStateComplete()
 {
     return []() {
-        std::unique_lock<std::mutex> lock(executeMutex_);
-        auto waitStatus = executeCond_.wait_for(lock, std::chrono::milliseconds(100));
-        if (waitStatus == std::cv_status::timeout) {
-            SLOGE("SetAVPlaybackStateSync in PlaybackStateComplete timeout");
-            return;
+        {
+            std::unique_lock<std::mutex> lock(executeMutex_);
+            auto waitStatus = executeCond_.wait_for(lock, std::chrono::milliseconds(100));
+            if (waitStatus == std::cv_status::timeout) {
+                SLOGE("SetAVPlaybackStateSync in PlaybackStateComplete timeout");
+                return;
+            }
         }
-
-        if (playBackStateRet_ != OHOS::AVSession::AVSESSION_SUCCESS) {
+        if (playBackStateRet_.load() != OHOS::AVSession::AVSESSION_SUCCESS) {
             std::string errMessage = "SetAVPlaybackState failed : native server exception";
-            if (playBackStateRet_ == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
+            if (playBackStateRet_.load() == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
                 errMessage = "SetAVPlaybackState failed : native session not exist";
-            } else if (playBackStateRet_ == OHOS::AVSession::ERR_INVALID_PARAM) {
+            } else if (playBackStateRet_.load() == OHOS::AVSession::ERR_INVALID_PARAM) {
                 errMessage = "SetAVPlaybackState failed : native invalid parameters";
-            } else if (playBackStateRet_ == OHOS::AVSession::ERR_NO_PERMISSION) {
+            } else if (playBackStateRet_.load() == OHOS::AVSession::ERR_NO_PERMISSION) {
                 errMessage = "SetAVPlaybackState failed : native no permission";
             }
-            TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[playBackStateRet_], errMessage);
+            TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[playBackStateRet_.load()], errMessage);
         }
+        std::unique_lock<std::mutex> lock(completeMutex_);
         completeCond_.notify_one();
     };
 }
@@ -847,6 +867,8 @@ void AVSessionImpl::SendCustomDataSync(uintptr_t data)
             "SendCustomDataSync failed : invalid command args");
         return;
     }
+
+    std::string dataStr = dataArgs.ToString();
     int32_t ret = session_->SendCustomData(dataArgs);
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
         std::string errMessage = "SendCustomData failed : native server exception, \
@@ -912,6 +934,8 @@ bool AVSessionImpl::IsDesktopLyricVisibleSync()
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
         std::string errMessage;
         ErrCodeToMessage(ret, "IsDesktopLyricVisible", errMessage);
+        ret = TaiheAVSessionManager::errcode_.find(ret) != TaiheAVSessionManager::errcode_.end() ?
+            ret : OHOS::AVSession::ERR_INVALID_PARAM;
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
     }
     return isVisible;
@@ -1870,7 +1894,7 @@ int32_t AVSessionImpl::OnEvent(const std::string& event, AVSessionImpl *taiheSes
     auto it = onEventHandlers_.find(eventName);
     if (it == onEventHandlers_.end()) {
         SLOGE("event name invalid");
-        ThrowErrorAndReturn("event name invalid", OHOS::AVSession::ERR_INVALID_PARAM);
+        return ThrowErrorAndReturn("event name invalid", OHOS::AVSession::ERR_INVALID_PARAM);
     }
     if (taiheSession->session_ == nullptr) {
         SLOGE("OnEvent failed : session is nullptr");

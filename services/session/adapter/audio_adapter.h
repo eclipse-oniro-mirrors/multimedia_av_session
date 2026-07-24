@@ -117,6 +117,7 @@ private:
         AudioStandard::STREAM_USAGE_AUDIOBOOK
     };
     std::recursive_mutex listenersLock_;
+    std::recursive_mutex callbackLock_;
     bool isCastableDevice_ {false};
 
     int32_t volumeMax_ = 0;
@@ -151,7 +152,9 @@ public:
     void OnPreferredOutputDeviceUpdated(const AudioDeviceDescriptors& desc) override
     {
         auto device = AudioAdapter::GetInstance().GetPreferredOutputDeviceForRendererInfo();
-        callback_(device);
+        if (callback_) {
+            callback_(device);
+        }
     }
 
 private:

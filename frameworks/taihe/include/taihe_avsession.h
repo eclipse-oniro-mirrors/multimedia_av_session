@@ -175,9 +175,10 @@ private:
 
     static std::mutex executeMutex_;
     static std::mutex completeMutex_;
+    static std::recursive_mutex sessionInfoMutex_;
     static std::condition_variable executeCond_;
     static std::condition_variable completeCond_;
-    static int32_t playBackStateRet_;
+    static std::atomic<int32_t> playBackStateRet_;
     static std::shared_ptr<AVSessionImpl> taiheAVSession_;
 
     static std::set<std::string> onEventHandlers_;

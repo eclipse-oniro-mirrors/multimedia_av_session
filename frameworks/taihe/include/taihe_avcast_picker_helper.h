@@ -107,6 +107,7 @@ private:
 
     ani_env *env_ = nullptr;
     std::mutex lock_;
+    std::mutex validLock_;
     std::shared_ptr<TaiheAsyncCallback> asyncCallback_;
     std::list<std::shared_ptr<uintptr_t>> callbacks_[EVENT_TYPE_MAX] {};
     std::shared_ptr<bool> isValid_;

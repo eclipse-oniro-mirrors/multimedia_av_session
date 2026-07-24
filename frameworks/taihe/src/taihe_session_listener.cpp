@@ -30,12 +30,14 @@
 namespace ANI::AVSession {
 TaiheSessionListener::TaiheSessionListener()
 {
+    std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("construct");
     isValid_ = std::make_shared<bool>(true);
 }
 
 TaiheSessionListener::~TaiheSessionListener()
 {
+    std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("destroy");
     if (isValid_) {
         *isValid_ = false;
@@ -159,8 +161,8 @@ void TaiheSessionListener::OnDeviceOffline(const std::string& deviceId)
     OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnDeviceOffline");
     SLOGI("Start handle device offline event");
     dataContext_.deviceId = string(deviceId);
-    string_view deviceIdTaihe = dataContext_.deviceId;
-    auto execute = [deviceIdTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [deviceId](std::shared_ptr<uintptr_t> method) {
+        string_view deviceIdTaihe = deviceId;
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -194,8 +196,8 @@ void TaiheSessionListener::OnSystemCommonEvent(const std::string& commonEvent, c
     OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnSystemCommonEvent");
     SLOGI("Start handle system common event");
     dataContext_.commonEvent = string(commonEvent);
-    string_view commonEventTaihe = dataContext_.commonEvent;
-    auto execute = [commonEventTaihe](std::shared_ptr<uintptr_t> method) {
+    auto execute = [commonEvent](std::shared_ptr<uintptr_t> method) {
+        string_view commonEventTaihe = commonEvent;
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
@@ -245,6 +247,8 @@ void TaiheSessionListener::OnActiveSessionChanged(
 
 int32_t TaiheSessionListener::AddCallback(int32_t event, std::shared_ptr<uintptr_t> ref)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX,
+        OHOS::AVSession::AVSESSION_ERROR, "no event:%{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     std::shared_ptr<uintptr_t> targetCb;
     CHECK_AND_RETURN_RET_LOG(OHOS::AVSession::AVSESSION_SUCCESS == TaiheUtils::GetRefByCallback(
@@ -263,6 +267,8 @@ int32_t TaiheSessionListener::AddCallback(int32_t event, std::shared_ptr<uintptr
 
 int32_t TaiheSessionListener::RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> ref)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX,
+        OHOS::AVSession::AVSESSION_ERROR, "no event:%{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGI("remove callback %{public}d", static_cast<int32_t>(event));
 

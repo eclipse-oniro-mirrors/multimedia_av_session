@@ -89,6 +89,7 @@ std::string OHAVSession::GetSessionType()
 const std::string& OHAVSession::GetSessionId()
 {
     if (sessionId_.empty()) {
+        CHECK_AND_RETURN_RET_LOG(avSession_ != nullptr, sessionId_, "avsession nullptr");
         sessionId_ = avSession_->GetSessionId();
     }
     return sessionId_;

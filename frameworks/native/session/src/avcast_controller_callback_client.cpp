@@ -163,6 +163,7 @@ ErrCode AVCastControllerCallbackClient::onDataSrcRead(const std::shared_ptr<AVSh
 {
     CHECK_AND_RETURN_RET_LOG(callback_, AVSESSION_ERROR, "callback is null");
     auto callback = callback_;
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr, AVSESSION_ERROR, "callback is null");
     callback->onDataSrcRead(mem, length, pos, result);
     return AVSESSION_SUCCESS;
 }

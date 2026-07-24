@@ -57,7 +57,9 @@ DistributedObjectAdapter::~DistributedObjectAdapter()
 {
     SLOGI("destroy");
     if (object_ != nullptr) {
-        ObjectStore::DistributedObjectStore::GetInstance(AVSESSION_NAME)->DeleteObject(name_);
+        auto store = ObjectStore::DistributedObjectStore::GetInstance(AVSESSION_NAME);
+        CHECK_AND_RETURN_LOG(store != nullptr, "DistributedObjectStore::GetInstance return nullptr");
+        store->DeleteObject(name_);
     }
 }
 
@@ -98,7 +100,9 @@ void DistributedObjectAdapter::SetCallback(const ObjectCallbackType &callback)
         SLOGE("object is nullptr");
         return;
     }
-    ObjectStore::DistributedObjectStore::GetInstance()->Watch(
+    auto store = ObjectStore::DistributedObjectStore::GetInstance();
+    CHECK_AND_RETURN_LOG(store != nullptr, "DistributedObjectStore::GetInstance return nullptr");
+    store->Watch(
         object_, std::make_shared<AVSessionObjectWatcher>(callback));
 }
 
@@ -108,7 +112,9 @@ void DistributedObjectAdapter::SetDisconnectNotifier(const ObjectDisconnectNotif
         SLOGE("object is nullptr");
         return;
     }
-    ObjectStore::DistributedObjectStore::GetInstance()->SetStatusNotifier(
+    auto store = ObjectStore::DistributedObjectStore::GetInstance();
+    CHECK_AND_RETURN_LOG(store != nullptr, "DistributedObjectStore::GetInstance return nullptr");
+    store->SetStatusNotifier(
         std::make_shared<AVSessionStatusNotifier>(notifer));
 }
 }

@@ -98,7 +98,9 @@ int32_t TaiheAVCallMetaData::SetCallMetadata(const OHOS::AVSession::AVCallMetaDa
         if (!mask.test(i)) {
             continue;
         }
-        auto setter = setterMap_[i];
+        auto it = setterMap_.find(i);
+        CHECK_AND_CONTINUE(it != setterMap_.end());
+        auto setter = it->second;
         if (setter(in, out) != OHOS::AVSession::AVSESSION_SUCCESS) {
             SLOGE("SetAVCallMetaData set property %{public}d failed", i);
             return OHOS::AVSession::ERR_INVALID_PARAM;

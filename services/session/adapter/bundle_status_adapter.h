@@ -85,6 +85,7 @@ private:
     static std::shared_ptr<BundleStatusAdapter> instance_;
 
     static std::recursive_mutex instanceLock_;
+    static std::recursive_mutex listenerLock_;
 };
 
 class BundleStatusCallbackImpl : public AppExecFwk::BundleStatusCallbackHost {
