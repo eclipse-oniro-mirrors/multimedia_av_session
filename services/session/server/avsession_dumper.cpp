@@ -153,7 +153,9 @@ void AVSessionDumper::ShowTrustedDevicesInfo(std::string& result, const AVSessio
         result.append("\n        device name            : ");
         result.append(buff + "  ");
 
-        result.append("\n        device type id         : " + deviceTypeId_.find(device.deviceTypeId)->second);
+        auto it = deviceTypeId_.find(device.deviceTypeId);
+        std::string deviceType = (it != deviceTypeId_.end()) ? it->second : "unknown";
+        result.append("\n        device type id         : " + deviceType);
 
         buff = AVSessionUtils::GetAnonyNetworkId(device.networkId);
         result.append("\n        network  id            : ");

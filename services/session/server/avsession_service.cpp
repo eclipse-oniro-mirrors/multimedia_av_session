@@ -3238,10 +3238,13 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         }
     }
 
-    if (IsAncoValid()) {
-        SLOGI("ExecuteCommand %{public}d for anco_audio without top and frontlist", command.GetCommand());
-        ancoSession_->ExecuteControllerCommand(command);
-        return;
+    {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        if (ancoSession_ != nullptr && ancoSession_->IsActive()) {
+            SLOGI("ExecuteCommand %{public}d for anco_audio without top and frontlist", command.GetCommand());
+            ancoSession_->ExecuteControllerCommand(command);
+            return;
+        }
     }
 
     std::vector<AVSessionDescriptor> coldStartDescriptors;
@@ -3260,11 +3263,8 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         }
 
         CHECK_AND_RETURN_LOG(!CheckIfOtherAudioPlaying(), "audioplaying control block");
-        if (deviceId.length() == 0) {
-            ret = StartAVPlayback(bundleName, "", "");
-        } else {
-            ret = StartAVPlayback(bundleName, "", "", deviceId);
-        }
+        ret = deviceId.empty() ? StartAVPlayback(bundleName, "", "")
+            : StartAVPlayback(bundleName, "", "", deviceId);
         SLOGI("Cold play %{public}s ret=%{public}d", bundleName.c_str(), ret);
     } else {
         SLOGI("Cold start command=%{public}d, coldStartDescriptorsSize=%{public}d return", command.GetCommand(),

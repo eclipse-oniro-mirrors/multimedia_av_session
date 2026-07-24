@@ -501,6 +501,7 @@ void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
             !metaData_.GetAVQueueName().empty() && !metaData_.GetAVQueueId().empty()) {
             std::string fileDir = AVSessionUtils::GetFixedPathName(userId_);
             std::string fileName = GetBundleName() + "_" + meta.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+            CHECK_AND_RETURN_LOG(AVSessionUtils::IsValidFileName(fileName), "fileName is not valid");
             SLOGI("save avQueueImg to file for %{public}s", meta.GetAVQueueId().c_str());
             AVSessionUtils::WriteImageToFile(avQueueImg, fileDir, fileName);
             STORAGE_EVENT_RECORD_FILE_WRITE(fileDir + fileName, GetBundleName(), userId_);
@@ -1706,6 +1707,7 @@ int32_t AVSessionItem::ProcessInputRedistributeEvent(const int32_t keyCode)
     if (!IsKeyEventSupported(GetBundleName())) {
         return AVSESSION_ERROR;
     }
+    std::lock_guard callbackLockGuard(callbackLock_);
     if (keyCode == MMI::KeyEvent::KEYCODE_SPACE) {
         SLOGI("ProcessInputRedistributeEvent playbackState %{public}d", playbackState_.GetState());
         if (playbackState_.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY) {
@@ -2403,6 +2405,7 @@ void AVSessionItem::SetCastHandle(const int64_t castHandle)
 
 void AVSessionItem::RegisterDeviceStateCallback()
 {
+    CHECK_AND_RETURN_LOG(cssListener_ != nullptr, "cssListener_ is nullptr");
     OutputDeviceInfo localDevice;
     DeviceInfo localInfo;
     localInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
@@ -2416,6 +2419,7 @@ void AVSessionItem::RegisterDeviceStateCallback()
 
 void AVSessionItem::UnRegisterDeviceStateCallback()
 {
+    CHECK_AND_RETURN_LOG(cssListener_ != nullptr, "cssListener_ is nullptr");
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
 }
 
@@ -2770,6 +2774,7 @@ void AVSessionItem::ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& a
         avQueueFileName = GetBundleName() + "_" + std::to_string(appIndex_) + "_" + metaData_.GetAVQueueId() +
             AVSessionUtils::GetFileSuffix();
     }
+    CHECK_AND_RETURN_LOG(AVSessionUtils::IsValidFileName(avQueueFileName), "avQueueFileName is not valid");
     AVSessionUtils::ReadImageFromFile(avQueuePixelMap, avQueueFileDir, avQueueFileName);
 }
 
@@ -3607,6 +3612,11 @@ int32_t AVSessionItem::DoContinuousTaskRegister()
     typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
         const std::string bundleName, int32_t taskState, int32_t serviceId);
     handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
+    if (reportContinuousTaskEventEx == nullptr) {
+        SLOGE("dlsym ReportContinuousTaskEventEx failed");
+        dlclose(handle_);
+        return AVSESSION_ERROR;
+    }
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 1, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done, result: %{public}d", errCode);
 #ifndef TEST_COVERAGE
@@ -3636,6 +3646,11 @@ int32_t AVSessionItem::DoContinuousTaskUnregister()
     typedef ErrCode (*handler) (int32_t eventType, int32_t uid, int32_t pid,
         const std::string bundleName, int32_t taskState, int32_t serviceId);
     handler reportContinuousTaskEventEx = reinterpret_cast<handler>(dlsym(handle_, "ReportContinuousTaskEventEx"));
+    if (reportContinuousTaskEventEx == nullptr) {
+        SLOGE("dlsym ReportContinuousTaskEventEx failed");
+        dlclose(handle_);
+        return AVSESSION_ERROR;
+    }
     ErrCode errCode = reportContinuousTaskEventEx(0, uid, pid, bundleName, 2, AVSESSION_SERVICE_ID);
     SLOGI("reportContinuousTaskEventEx done when stop cast, result: %{public}d", errCode);
 #ifndef TEST_COVERAGE
