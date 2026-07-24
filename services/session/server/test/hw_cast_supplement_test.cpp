@@ -1658,7 +1658,9 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnDeviceState_003, Tes
     stateInfo.deviceId = "testDeviceId";
     stateInfo.deviceState = static_cast<OHOS::CastEngine::DeviceState>(1);
     provideSession->stashDeviceState_ = 2;
+    int32_t originalState = provideSession->stashDeviceState_;
     provideSession->OnDeviceState(stateInfo);
+    EXPECT_EQ(provideSession->stashDeviceState_, originalState);
     SLOGI("HwCastProviderSession_OnDeviceState_003 end!");
 }
 } // OHOS::AVSession
