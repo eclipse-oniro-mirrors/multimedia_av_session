@@ -1357,7 +1357,7 @@ napi_value NapiAVSessionManager::SendSystemControlCommand(napi_env env, napi_cal
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
             double speed = 0.0;
             int64_t time = 0;
-            int32_t mode = AVPlaybackState::LOOP_MODE_SEQUENCE;
+            int32_t mode = AVPlaybackState::LOOP_MODE_UNDEFINED;
             std::string assetId;
             context->command.GetSpeed(speed);
             context->command.GetSeekTime(time);

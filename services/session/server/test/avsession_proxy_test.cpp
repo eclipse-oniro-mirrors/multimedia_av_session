@@ -24,6 +24,7 @@
 #include "av_session_callback_proxy.h"
 #include "avsession_controller_proxy.h"
 #include "avsession_proxy.h"
+#include "avsession_stub.h"
 #include "avsession_service.h"
 
 
@@ -540,6 +541,75 @@ static HWTEST_F(AVSessionProxyTest, GetAllCastDisplays001, testing::ext::TestSiz
     auto ret = g_AVSessionProxy->GetAllCastDisplays(castDisplays);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetAllCastDisplays001, end");
+}
+
+class MockCastDisplayStub : public AVSessionStub {
+public:
+    std::string GetSessionId() override { return ""; }
+    std::string GetSessionType() override { return ""; }
+    int32_t GetAVMetaData(AVMetaData &meta) override { return 0; }
+    int32_t SetAVMetaData(const AVMetaData &meta) override { return 0; }
+    int32_t SetAVCallMetaData(const AVCallMetaData &meta) override { return 0; }
+    int32_t SetAVCallState(const AVCallState &avCallState) override { return 0; }
+    int32_t GetAVPlaybackState(AVPlaybackState &state) override { return 0; }
+    int32_t SetAVPlaybackState(const AVPlaybackState &state) override { return 0; }
+    int32_t GetAVQueueItems(std::vector<AVQueueItem> &items) override { return 0; }
+    int32_t SetAVQueueItems(const std::vector<AVQueueItem> &items) override { return 0; }
+    int32_t GetAVQueueTitle(std::string &title) override { return 0; }
+    int32_t SetAVQueueTitle(const std::string &title) override { return 0; }
+    int32_t SetLaunchAbility(const OHOS::AbilityRuntime::WantAgent::WantAgent &ability) override { return 0; }
+    int32_t GetExtras(OHOS::AAFwk::WantParams &extras) override { return 0; }
+    int32_t SetExtras(const OHOS::AAFwk::WantParams &extras) override { return 0; }
+    std::shared_ptr<AVSessionController> GetController() override { return nullptr; }
+    int32_t RegisterCallback(const std::shared_ptr<AVSessionCallback> &callback) override { return 0; }
+    int32_t Activate() override { return 0; }
+    int32_t Deactivate() override { return 0; }
+    bool IsActive() override { return true; }
+    int32_t Destroy() override { return 0; }
+    int32_t AddSupportCommand(const int32_t cmd) override { return 0; }
+    int32_t DeleteSupportCommand(const int32_t cmd) override { return 0; }
+    int32_t SetSessionEvent(const std::string &event, const OHOS::AAFwk::WantParams &args) override { return 0; }
+    int32_t UpdateAVQueueInfo(const AVQueueInfo& info) override { return 0; }
+    int32_t SetMediaCenterControlType(const std::vector<int32_t>& controlTypes) override { return 0; }
+    int32_t SetSupportedPlaySpeeds(const std::vector<double>& speeds) override { return 0; }
+    int32_t SetSupportedLoopModes(const std::vector<int32_t>& loopModes) override { return 0; }
+    std::shared_ptr<AVCastController> GetAVCastController() override { return nullptr; }
+    int32_t ReleaseCast(bool continuePlay = false) override { return 0; }
+    int32_t StartCastDisplayListener() override { return 0; }
+    int32_t StopCastDisplayListener() override { return 0; }
+    int32_t GetAllCastDisplays(std::vector<CastDisplayInfo> &castDisplays) override { return 0; }
+
+    int32_t SendRequest(uint32_t code, OHOS::MessageParcel &data, OHOS::MessageParcel &reply,
+        OHOS::MessageOption &option) override
+    {
+        if (code == SESSION_CMD_GET_ALL_CAST_DISPLAYS) {
+            reply.WriteInt32(AVSESSION_SUCCESS);
+            reply.WriteInt32(1);
+            reply.WriteInt32(999);
+        }
+        return 0;
+    }
+
+protected:
+    int32_t RegisterCallbackInner(const OHOS::sptr<IAVSessionCallback> &callback) override { return 0; }
+    OHOS::sptr<IRemoteObject> GetControllerInner() override { return nullptr; }
+    OHOS::sptr<IRemoteObject> GetAVCastControllerInner() override { return nullptr; }
+};
+
+/**
+ * @tc.name: GetAllCastDisplays002
+ * @tc.desc: Test GetAllCastDisplays with illegal displayState returns ERR_MARSHALLING
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionProxyTest, GetAllCastDisplays002, testing::ext::TestSize.Level1)
+{
+    SLOGI("GetAllCastDisplays002, start");
+    sptr<IRemoteObject> remote = new MockCastDisplayStub();
+    AVSessionProxy proxy(remote);
+    std::vector<CastDisplayInfo> castDisplays;
+    auto ret = proxy.GetAllCastDisplays(castDisplays);
+    EXPECT_EQ(ret, ERR_MARSHALLING);
+    SLOGI("GetAllCastDisplays002, end");
 }
 #endif
 

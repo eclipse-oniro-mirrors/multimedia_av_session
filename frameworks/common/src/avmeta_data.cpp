@@ -25,11 +25,16 @@ bool AVMetaData::Marshalling(Parcel& parcel) const
 
 bool AVMetaData::WriteToParcel(MessageParcel& parcel) const
 {
+    int32_t maxImageSize = 10 * 1024 * 1024;
     int mediaImageLength = 0;
     std::vector<uint8_t> mediaImageBuffer;
     std::shared_ptr<AVSessionPixelMap> mediaPixelMap = GetMediaImage();
     if (mediaPixelMap != nullptr) {
         mediaImageBuffer = mediaPixelMap->GetInnerImgBuffer();
+        if (mediaImageBuffer.size() > static_cast<size_t>(maxImageSize)) {
+            SLOGW("media image size exceeds limit, ignore it");
+            mediaImageBuffer.clear();
+        }
         mediaImageLength = static_cast<int>(mediaImageBuffer.size());
         SetMediaLength(mediaImageLength);
     }
@@ -39,6 +44,10 @@ bool AVMetaData::WriteToParcel(MessageParcel& parcel) const
     std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = GetAVQueueImage();
     if (avQueuePixelMap != nullptr) {
         avQueueImageBuffer = avQueuePixelMap->GetInnerImgBuffer();
+        if (avQueueImageBuffer.size() > static_cast<size_t>(maxImageSize)) {
+            SLOGW("avqueue image size exceeds limit, ignore it");
+            avQueueImageBuffer.clear();
+        }
         avQueueImageLength = static_cast<int>(avQueueImageBuffer.size());
         SetAVQueueLength(avQueueImageLength);
     }
@@ -48,7 +57,6 @@ bool AVMetaData::WriteToParcel(MessageParcel& parcel) const
     CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(twoImageLength), false, "write twoImageLength failed");
     CHECK_AND_RETURN_RET_LOG(MarshallingExceptImg(parcel), false, "MarshallingExceptImg failed");
 
-    int32_t maxImageSize = 10 * 1024 *1024;
     bool isImageValid = twoImageLength > 0 && twoImageLength <= maxImageSize;
     if (!isImageValid) {
         return true;

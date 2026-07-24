@@ -201,5 +201,35 @@ HWTEST_F(AVCallMetaDataTest, AVCallMetaDataCopyDataByMask001, TestSize.Level0)
     EXPECT_EQ(metaOut.GetPhoneNumber(), g_avcallMetaDataCloneTest.GetPhoneNumber());
     SLOGI("AVCallMetaDataCopyDataByMask001 End");
 }
+
+/**
+ * @tc.name: AVCallMetaDataUnmarshalling002
+ * @tc.desc: avcallmetadata unmarshalling with incomplete parcel returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVCallMetaDataTest, AVCallMetaDataUnmarshalling002, TestSize.Level0)
+{
+    SLOGI("AVCallMetaDataUnmarshalling002 Begin");
+    OHOS::Parcel parcel;
+    parcel.WriteString("0000");
+    auto* result = g_callMetaData.Unmarshalling(parcel);
+    EXPECT_EQ(result, nullptr);
+    SLOGI("AVCallMetaDataUnmarshalling002 End");
+}
+
+/**
+ * @tc.name: AVCallMetaDataMarshalling002
+ * @tc.desc: avcallmetadata marshalling with zero capacity parcel returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVCallMetaDataTest, AVCallMetaDataMarshalling002, TestSize.Level0)
+{
+    SLOGI("AVCallMetaDataMarshalling002 Begin");
+    OHOS::Parcel parcel;
+    parcel.SetMaxCapacity(0);
+    auto ret = g_callMetaData.Marshalling(parcel);
+    EXPECT_EQ(ret, false);
+    SLOGI("AVCallMetaDataMarshalling002 End");
+}
 } // namespace AVSession
 } // namespace OHOS

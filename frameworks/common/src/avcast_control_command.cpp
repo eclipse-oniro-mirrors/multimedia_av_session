@@ -78,7 +78,7 @@ bool AVCastControlCommand::Marshalling(Parcel& parcel) const
             break;
         case CAST_CONTROL_CMD_SEEK:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
-                && parcel.WriteInt64(std::get<int32_t>(param_)), false, "write seek time failed");
+                && parcel.WriteInt32(std::get<int32_t>(param_)), false, "write seek time failed");
             break;
         case CAST_CONTROL_CMD_SET_VOLUME:
             CHECK_AND_RETURN_RET_LOG(std::holds_alternative<int32_t>(param_)
