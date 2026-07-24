@@ -175,7 +175,7 @@ napi_value NapiAVCastController::SendCustomData(napi_env env, napi_callback_info
     context->taskId = NAPI_CAST_CONTROLLER_SEND_CUSTOM_DATA_TASK_ID;
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("SendCustomData failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "SendCustomData failed : controller is nullptr";
@@ -216,7 +216,7 @@ napi_value NapiAVCastController::SendControlCommand(napi_env env, napi_callback_
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("SendControlCommand failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "SendControlCommand failed : controller is nullptr";
@@ -256,7 +256,7 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
         CheckStartReportRadar((argc == ARGC_ONE), ERR_INVALID_PARAM);
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments", napiErr);
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->callback_ != nullptr) {
+        if (napiCastController != nullptr && napiCastController->callback_ != nullptr) {
             napiCastController->callback_->saveDataSrc(env, argv[ARGV_FIRST]);
         }
 
@@ -269,7 +269,7 @@ napi_value NapiAVCastController::Start(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("Start failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "Start failed : castController_ is nullptr";
@@ -357,7 +357,7 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->callback_ != nullptr) {
+        if (napiCastController != nullptr && napiCastController->callback_ != nullptr) {
             napiCastController->callback_->saveDataSrc(env, argv[ARGV_FIRST]);
         }
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->avQueueItem_);
@@ -369,7 +369,7 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("Prepare failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "Prepare failed : castController_ is nullptr";
@@ -407,7 +407,7 @@ napi_value NapiAVCastController::GetDuration(napi_env env, napi_callback_info in
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("GetDuration failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetDuration failed : controller is nullptr";
@@ -450,7 +450,7 @@ napi_value NapiAVCastController::GetCastAVPlaybackState(napi_env env, napi_callb
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("GetCastAVPlaybackState failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetCastAVPlaybackState failed : controller is nullptr";
@@ -493,7 +493,7 @@ napi_value NapiAVCastController::GetSupportedDecoders(napi_env env, napi_callbac
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("GetSupportedDecoders failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetSupportedDecoders failed : controller is nullptr";
@@ -545,7 +545,7 @@ napi_value NapiAVCastController::GetRecommendedResolutionLevel(napi_env env, nap
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("GetRecommendedResolutionLevel failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetRecommendedResolutionLevel failed : controller is nullptr";
@@ -589,7 +589,7 @@ napi_value NapiAVCastController::GetSupportedHdrCapabilities(napi_env env, napi_
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("GetSupportedHdrCapabilities failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetSupportedHdrCapabilities failed : controller is nullptr";
@@ -632,7 +632,7 @@ napi_value NapiAVCastController::GetSupportedPlaySpeeds(napi_env env, napi_callb
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("GetSupportedPlaySpeeds failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetSupportedPlaySpeeds failed : controller is nullptr";
@@ -675,7 +675,7 @@ napi_value NapiAVCastController::GetCurrentItem(napi_env env, napi_callback_info
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("GetCurrentItem failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetCurrentItem failed : controller is nullptr";
@@ -718,7 +718,7 @@ napi_value NapiAVCastController::GetValidCommands(napi_env env, napi_callback_in
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("GetValidCommands failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetValidCommands failed : controller is nullptr";
@@ -765,7 +765,7 @@ napi_value NapiAVCastController::Release(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("release failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "release failed : controller is nullptr";
@@ -812,7 +812,7 @@ napi_value NapiAVCastController::SetDisplaySurface(napi_env env, napi_callback_i
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("SetDisplaySurface failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "SetDisplaySurface failed : controller is nullptr";
@@ -868,7 +868,7 @@ napi_value NapiAVCastController::ProcessMediaKeyResponse(napi_env env, napi_call
 
     auto executor = [context]() {
         auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-        if (napiCastController->castController_ == nullptr) {
+        if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
             SLOGE("ProcessMediaKeyResponse failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "ProcessMediaKeyResponse failed : controller is nullptr";
@@ -905,7 +905,7 @@ napi_status NapiAVCastController::RegisterCallback(napi_env env, const std::shar
         return napi_generic_failure;
     }
     auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-    if (napiCastController->castController_ == nullptr) {
+    if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
         SLOGE("OnEvent failed : controller is nullptr");
         NapiUtils::ThrowError(env, "OnEvent failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -1043,7 +1043,7 @@ napi_value NapiAVCastController::OffEvent(napi_env env, napi_callback_info info)
     }
 
     auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
-    if (napiCastController->callback_ == nullptr) {
+    if (napiCastController == nullptr || napiCastController->callback_ == nullptr) {
         SLOGI("function %{public}s not register yet", eventName.c_str());
         return NapiUtils::GetUndefinedValue(env);
     }

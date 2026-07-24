@@ -1196,7 +1196,7 @@ napi_value NapiAVSession::SetAVCallMetaData(napi_env env, napi_callback_info inf
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVCallMetaData failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1719,7 +1719,7 @@ napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
     context->taskId = NAPI_SET_AV_QUEUE_ITEMS_TASK_ID;
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVQueueItems failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1772,7 +1772,7 @@ napi_value NapiAVSession::SetAVQueueTitle(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVQueueTitle failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1827,7 +1827,7 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetLaunchAbility failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2032,7 +2032,7 @@ napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info i
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "GetAVCastController failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2076,7 +2076,7 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "GetOutputDevice failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2292,7 +2292,7 @@ napi_value NapiAVSession::SetSessionEvent(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetSessionEvent failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2374,7 +2374,7 @@ napi_value NapiAVSession::GetAllCastDisplays(napi_env env, napi_callback_info in
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession->session_ == nullptr) {
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "GetAllCastDisplays failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
