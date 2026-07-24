@@ -1714,4 +1714,3 @@ static HWTEST(HwCastTest, HwCastProviderSessionOnHiplayEventRecv001, TestSize.Le
     EXPECT_TRUE(eventId == 0);
     SLOGI("HwCastProviderSessionOnHiplayEventRecv001 end!");
 }
-
