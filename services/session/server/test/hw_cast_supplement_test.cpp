@@ -1194,6 +1194,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_HwCastProviderSessionR
     SLOGI("HwCastProviderSession_HwCastProviderSessionRemoveDevice_001 begin!");
     auto session = std::make_shared<ICastSessionMock>();
     auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
     std::string deviceId = "test";
     EXPECT_EQ(provideSession->RemoveDevice(deviceId), false);
@@ -1211,6 +1212,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_HwCastProviderSessionR
     SLOGI("HwCastProviderSession_HwCastProviderSessionRemoveDevice_002 begin!");
     auto session = std::make_shared<ICastSessionMock>();
     auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
     std::string deviceId = "test";
     EXPECT_EQ(provideSession->RemoveDevice(deviceId), false);
@@ -1228,6 +1230,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_GetRemoteDrmCapabiliti
     SLOGI("HwCastProviderSession_GetRemoteDrmCapabilities_001 begin!");
     auto session = std::make_shared<ICastSessionMock>();
     auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
     std::string deviceId = "001";
     std::vector<std::string> drmCapabilities = {"testDrmCapabilities"};
@@ -1247,6 +1250,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_GetRemoteNetWorkId_001
     SLOGI("HwCastProviderSession_GetRemoteNetWorkId_001 begin!");
     auto session = std::make_shared<ICastSessionMock>();
     auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
     std::string deviceId = "001";
     std::string networkId = "0.0.0.0";
@@ -1266,6 +1270,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_RegisterCastSessionSta
     SLOGI("HwCastProviderSession_RegisterCastSessionStateListener_001 begin!");
     auto session = std::make_shared<ICastSessionMock>();
     auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
     bool ret = provideSession->RegisterCastSessionStateListener(nullptr);
     EXPECT_EQ(ret, false);
@@ -1283,6 +1288,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_RegisterCastSessionSta
     SLOGI("HwCastProviderSession_RegisterCastSessionStateListener_002 begin!");
     auto session = std::make_shared<ICastSessionMock>();
     auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    EXPECT_EQ(provideSession != nullptr, true);
     provideSession->Init();
     auto listener = std::make_shared<AVCastSessionStateListenerDemo>();
     bool ret = provideSession->RegisterCastSessionStateListener(listener);
