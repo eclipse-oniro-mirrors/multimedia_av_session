@@ -300,6 +300,7 @@ HWTEST_F(AVCastControllerTest, SendControlCommand001, TestSize.Level1)
     EXPECT_EQ(command.SetForwardTime(0), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetRewindTime(-1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetSeekTime(-1), ERR_INVALID_PARAM);
+    EXPECT_EQ(command.SetVolume(-1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetSpeed(-1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetLoopMode(-1), ERR_INVALID_PARAM);
 }
@@ -452,6 +453,101 @@ HWTEST_F(AVCastControllerTest, SendControlCommand008, TestSize.Level1)
 {
     AVCastControlCommand command;
     EXPECT_EQ(castController_->SendControlCommand(command), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: SendControlCommand009
+* @tc.desc: unmarshalling cast command with default param case (PLAY)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, SendControlCommand009, TestSize.Level1)
+{
+    AVCastControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVCastControlCommand *ret = AVCastControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVCastControlCommand::CAST_CONTROL_CMD_PLAY);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand010
+* @tc.desc: unmarshalling cast command with default param case (PAUSE)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, SendControlCommand010, TestSize.Level1)
+{
+    AVCastControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVCastControlCommand *ret = AVCastControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand011
+* @tc.desc: unmarshalling cast command with default param case (STOP)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, SendControlCommand011, TestSize.Level1)
+{
+    AVCastControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_STOP), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVCastControlCommand *ret = AVCastControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVCastControlCommand::CAST_CONTROL_CMD_STOP);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand012
+* @tc.desc: unmarshalling cast command with default param case (PLAY_NEXT)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, SendControlCommand012, TestSize.Level1)
+{
+    AVCastControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVCastControlCommand *ret = AVCastControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVCastControlCommand::CAST_CONTROL_CMD_PLAY_NEXT);
+    delete ret;
+    ret = nullptr;
+}
+
+/**
+* @tc.name: SendControlCommand013
+* @tc.desc: unmarshalling cast command with default param case (PLAY_PREVIOUS)
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, SendControlCommand013, TestSize.Level1)
+{
+    AVCastControlCommand command;
+    OHOS::Parcel parcel;
+    EXPECT_EQ(command.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.Marshalling(parcel), true);
+    AVCastControlCommand *ret = AVCastControlCommand::Unmarshalling(parcel);
+    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetCommand(), AVCastControlCommand::CAST_CONTROL_CMD_PLAY_PREVIOUS);
+    delete ret;
+    ret = nullptr;
 }
 
 /**

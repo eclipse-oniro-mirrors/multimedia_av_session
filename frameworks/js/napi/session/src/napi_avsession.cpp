@@ -125,7 +125,7 @@ std::recursive_mutex NapiAVSession::destroyLock_;
 bool NapiAVSession::isNapiSessionDestroy_ = false;
 std::string NapiAVSession::currentSessionId_;
 std::shared_ptr<NapiAVSession> NapiAVSession::currentNapiSession_;
-std::mutex NapiAVSession::currentNapiSessionMutex_;
+std::recursive_mutex NapiAVSession::currentNapiSessionMutex_;
 std::string NapiAVSession::bundleName_;
 
 NapiAVSession::NapiAVSession()
@@ -145,7 +145,7 @@ NapiAVSession::~NapiAVSession()
         std::lock_guard lockGuard(registerEventLock_);
         registerEventList_.clear();
     }
-    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+    std::lock_guard<std::recursive_mutex> lock(currentNapiSessionMutex_);
     if (currentNapiSession_ != nullptr && currentSessionId_ == sessionId_) {
         currentNapiSession_ = nullptr;
         currentSessionId_.clear();
@@ -297,7 +297,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
         napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
         napiAVSession_->sessionType_.c_str());
 
-    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+    std::lock_guard<std::recursive_mutex> lock(currentNapiSessionMutex_);
     if (currentNapiSession_ == nullptr || currentSessionId_ != napiAVSession_->sessionId_) {
         currentNapiSession_ = napiAVSession_;
         currentSessionId_ =  napiAVSession_->sessionId_;
@@ -1933,7 +1933,7 @@ void NapiAVSession::TryReuseCallback(NapiAVSession* napiSession, const AAFwk::Wa
         SLOGI("TryReuseCallback: reuseCallback param not set");
         return;
     }
-    std::lock_guard<std::mutex> lock(currentNapiSessionMutex_);
+    std::lock_guard<std::recursive_mutex> lock(currentNapiSessionMutex_);
     if (currentNapiSession_ == nullptr) {
         SLOGI("currentNapiSession_ is nullptr");
         return;
