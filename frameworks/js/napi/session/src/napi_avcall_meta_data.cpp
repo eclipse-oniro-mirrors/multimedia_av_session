@@ -223,7 +223,7 @@ napi_status NapiAVCallMetaData::SetMediaImageUri(napi_env env, const AVCallMetaD
 
     napi_value property {};
     auto status = NapiUtils::SetValue(env, uri, property);
-    CHECK_RETURN(status == napi_ok, "create property failed", status);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create property failed", status);
     status = napi_set_named_property(env, out, "avtar", property);
     CHECK_RETURN(status == napi_ok, "set property failed", status);
     return status;

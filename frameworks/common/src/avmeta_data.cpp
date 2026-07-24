@@ -238,6 +238,7 @@ bool AVMetaData::WriteDrmSchemes(MessageParcel& parcel)
 
 bool AVMetaData::ReadDrmSchemes(Parcel& parcel, AVMetaData* metaData)
 {
+    CHECK_AND_RETURN_RET_LOG(metaData != nullptr, false, "metaData is nullptr");
     int32_t drmSchemesLen = 0;
     CHECK_AND_RETURN_RET_LOG(parcel.ReadInt32(drmSchemesLen), false, "read drmSchemesLen failed");
     std::vector<std::string> drmSchemes;

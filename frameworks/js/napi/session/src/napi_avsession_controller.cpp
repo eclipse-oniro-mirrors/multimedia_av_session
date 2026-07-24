@@ -225,7 +225,7 @@ napi_value NapiAVSessionController::GetAVPlaybackState(napi_env env, napi_callba
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetAVPlaybackState failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetAVPlaybackState failed : controller is nullptr";
@@ -268,7 +268,7 @@ napi_value NapiAVSessionController::GetAVPlaybackStateSync(napi_env env, napi_ca
     }
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGI("GetAVPlaybackStateSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetAVPlaybackStateSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -316,7 +316,7 @@ napi_value NapiAVSessionController::GetAVCallMetaData(napi_env env, napi_callbac
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetAVCallMetaData failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetAVCallMetaData failed : controller is nullptr";
@@ -359,7 +359,7 @@ napi_value NapiAVSessionController::GetAVCallState(napi_env env, napi_callback_i
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetAVCallState failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetAVCallState failed : controller is nullptr";
@@ -401,7 +401,7 @@ napi_value NapiAVSessionController::GetAVMetaData(napi_env env, napi_callback_in
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetAVMetaData failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetAVMetaData failed : controller is nullptr";
@@ -449,7 +449,7 @@ napi_value NapiAVSessionController::GetAVMetaDataSync(napi_env env, napi_callbac
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("GetAVMetaDataSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetAVMetaDataSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -495,7 +495,7 @@ napi_value NapiAVSessionController::GetAVQueueItems(napi_env env, napi_callback_
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetAVQueueItems failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetAVQueueItems failed : controller is nullptr";
@@ -541,7 +541,7 @@ napi_value NapiAVSessionController::GetAVQueueItemsSync(napi_env env, napi_callb
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("GetAVQueueItemsSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetAVQueueItemsSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -588,7 +588,7 @@ napi_value NapiAVSessionController::GetAVQueueTitle(napi_env env, napi_callback_
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetAVQueueTitle failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetAVQueueTitle failed : controller is nullptr";
@@ -634,7 +634,7 @@ napi_value NapiAVSessionController::GetAVQueueTitleSync(napi_env env, napi_callb
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("GetAVQueueTitleSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetAVQueueTitleSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -694,7 +694,7 @@ napi_value NapiAVSessionController::SkipToQueueItem(napi_env env, napi_callback_
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("SkipToQueueItem failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "SkipToQueueItem failed : controller is nullptr";
@@ -736,7 +736,7 @@ napi_value NapiAVSessionController::GetExtras(napi_env env, napi_callback_info i
         std::lock_guard<std::mutex> lock(uvMutex_);
         SLOGI("Start NapiAVSessionController GetExtras process");
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetExtras failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetExtras failed : controller is nullptr";
@@ -792,7 +792,7 @@ napi_value NapiAVSessionController::GetExtrasWithEvent(napi_env env, napi_callba
         std::lock_guard<std::mutex> lock(uvMutex_);
         SLOGI("Start NapiAVSessionController GetExtrasWithEvent process");
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetExtrasWithEvent failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetExtrasWithEvent failed : controller is nullptr";
@@ -845,7 +845,7 @@ napi_value NapiAVSessionController::SendAVKeyEvent(napi_env env, napi_callback_i
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("SendAVKeyEvent failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "SendAVKeyEvent failed : controller is nullptr";
@@ -930,7 +930,7 @@ napi_value NapiAVSessionController::GetValidCommands(napi_env env, napi_callback
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetValidCommands failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetValidCommands failed : controller is nullptr";
@@ -979,7 +979,7 @@ napi_value NapiAVSessionController::GetValidCommandsSync(napi_env env, napi_call
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("GetValidCommandsSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetValidCommandsSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -1028,7 +1028,7 @@ napi_value NapiAVSessionController::IsSessionActive(napi_env env, napi_callback_
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("IsSessionActive failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "IsSessionActive failed : controller is nullptr";
@@ -1074,7 +1074,7 @@ napi_value NapiAVSessionController::IsSessionActiveSync(napi_env env, napi_callb
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("IsSessionActiveSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "IsSessionActiveSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -1130,7 +1130,7 @@ napi_value NapiAVSessionController::SendControlCommand(napi_env env, napi_callba
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("SendControlCommand failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "SendControlCommand failed : controller is nullptr";
@@ -1193,7 +1193,7 @@ napi_value NapiAVSessionController::SendCommonCommand(napi_env env, napi_callbac
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("SendCommonCommand failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "SendCommonCommand failed : controller is nullptr";
@@ -1242,7 +1242,7 @@ napi_value NapiAVSessionController::SendCustomData(napi_env env, napi_callback_i
 
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("SendCustomData failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "SendCustomData failed : controller is nullptr";
@@ -1405,7 +1405,7 @@ napi_value NapiAVSessionController::SetDesktopLyricState(napi_env env, napi_call
     context->GetCbInfo(env, info, input);
     auto executor = [context]() {
         auto* napiController = reinterpret_cast<NapiAVSessionController *>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("SetDesktopLyricState failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
@@ -1439,7 +1439,7 @@ napi_value NapiAVSessionController::GetDesktopLyricState(napi_env env, napi_call
     context->GetCbInfo(env, info);
     auto executor = [context]() {
         auto *napiController = reinterpret_cast<NapiAVSessionController *>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetDesktopLyricState failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
@@ -1932,7 +1932,7 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
         std::lock_guard<std::mutex> lock(uvMutex_);
         SLOGI("Start NapiAVSessionController destroy process");
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("Destroy controller failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "Destroy controller failed : controller is nullptr";
@@ -1982,7 +1982,7 @@ napi_value NapiAVSessionController::GetRealPlaybackPositionSync(napi_env env, na
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGI("GetRealPlaybackPositionSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetRealPlaybackPositionSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -2015,7 +2015,7 @@ napi_value NapiAVSessionController::GetOutputDevice(napi_env env, napi_callback_
             return;
         }
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-        if (napiController->controller_ == nullptr) {
+        if (napiController == nullptr || napiController->controller_ == nullptr) {
             SLOGE("GetOutputDevice failed : controller is nullptr");
             context->status = napi_generic_failure;
             context->errMessage = "GetOutputDevice failed : controller is nullptr";
@@ -2050,7 +2050,7 @@ napi_value NapiAVSessionController::GetOutputDeviceSync(napi_env env, napi_callb
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("GetOutputDeviceSync failed : controller is nullptr");
         NapiUtils::ThrowError(env, "GetOutputDeviceSync failed : controller is nullptr",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
@@ -2186,7 +2186,7 @@ napi_status NapiAVSessionController::RegisterCallback(napi_env env,
     std::lock_guard<std::mutex> lock(uvMutex_);
     SLOGD("NapiAVSessionController RegisterCallback process");
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->controller_ == nullptr) {
+    if (napiController == nullptr || napiController->controller_ == nullptr) {
         SLOGE("OnEvent failed : controller is nullptr");
         NapiUtils::ThrowError(env, "OnEvent CTL null", NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
         return napi_generic_failure;
@@ -2296,7 +2296,7 @@ napi_value NapiAVSessionController::OffEvent(napi_env env, napi_callback_info in
     }
 
     auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
-    if (napiController->callback_ == nullptr) {
+    if (napiController == nullptr || napiController->callback_ == nullptr) {
         SLOGI("function %{public}s not register yet", eventName.c_str());
         NapiUtils::ThrowError(env, "callback not register yet",
             NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST]);
