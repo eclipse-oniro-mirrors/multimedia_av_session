@@ -560,9 +560,12 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
     } else {
         SendByteToAll(msg);
     }
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
-        DelaySendPlaybackState();
-        DelaySendMetaData();
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [weakThis = std::weak_ptr<MigrateAVSessionServer>(shared_from_this())]() {
+            auto sharedThis = weakThis.lock();
+            CHECK_AND_RETURN_LOG(sharedThis, "MigrateAVSessionServer already destroyed");
+            sharedThis->DelaySendPlaybackState();
+            sharedThis->DelaySendMetaData();
         }, "DelaySendMetaData", DELAY_TIME);
 }
 

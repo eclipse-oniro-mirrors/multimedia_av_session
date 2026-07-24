@@ -263,8 +263,10 @@ void MigrateAVSessionServer::DoMediaImageSyncToRemote(std::shared_ptr<AVSessionP
     msg += imgStrMin;
 
     MigratePostTask(
-        [this, msg]() {
-            SendByteForNext(deviceId_, msg);
+        [weakThis = std::weak_ptr<MigrateAVSessionServer>(shared_from_this()), msg]() {
+            auto sharedThis = weakThis.lock();
+            CHECK_AND_RETURN_LOG(sharedThis, "MigrateAVSessionServer already destroyed");
+            sharedThis->SendByteForNext(sharedThis->deviceId_, msg);
         },
         "SYNC_FOCUS_MEDIA_IMAGE");
     SLOGI("DoMediaImageSyncToRemote async size:%{public}d", static_cast<int>(msg.size()));
