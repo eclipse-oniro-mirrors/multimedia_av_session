@@ -483,13 +483,6 @@ private:
     void CheckIfSendCapsule(const AVPlaybackState& state);
     void CheckSupportColdStartExtra(const AAFwk::WantParams& extras);
     int32_t ProcessInputRedistributeEvent(const int32_t keyCode);
-    int32_t HandleOtherKeyEvent(const int32_t keyCode,
-        const sptr<IAVSessionCallback>& callback,
-        const std::shared_ptr<AVSessionCallback>& callbackForMigrate);
-    int32_t HandleSpaceKey(const sptr<IAVSessionCallback>& callback,
-        const std::shared_ptr<AVSessionCallback>& callbackForMigrate);
-    int32_t HandleRewindKey(const sptr<IAVSessionCallback>& callback);
-    int32_t HandleForwardKey(const sptr<IAVSessionCallback>& callback);
     bool IsKeyEventSupported(const std::string &bundleName);
     int32_t UpdateVolume(bool up);
     void GetCurrentAppIndexForSession();

@@ -33,8 +33,6 @@ namespace {
 }
 
 int32_t AVSessionPixelMapAdapter::originalPixelMapBytes_ = 0;
-int32_t AVSessionPixelMapAdapter::originalWidth_ = 0;
-int32_t AVSessionPixelMapAdapter::originalHeight_ = 0;
 std::mutex AVSessionPixelMapAdapter::pixelMapLock_;
 
 void AVSessionPixelMapAdapter::CleanAVSessionPixelMap(std::shared_ptr<AVSessionPixelMap>& innerPixelMap)
@@ -107,12 +105,13 @@ std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertFromInner(
     pixelMap->SetPixelsAddr(dataAddr, nullptr, dataSize, Media::AllocatorType::CUSTOM_ALLOC, nullptr);
     uint8_t imgTopicNumber = innerImgBuffer[innerImgSize / 2] + innerImgBuffer[innerImgSize / 2 + 1];
     SLOGI("%{public}u|%{public}d-%{public}d|%{public}d-%{public}d",
-        imgTopicNumber, pixelMap->GetWidth(), pixelMap->GetHeight(), originalWidth_, originalHeight_);
+        imgTopicNumber, pixelMap->GetWidth(), pixelMap->GetHeight(),
+        innerPixelMap->GetOriginalWidth(), innerPixelMap->GetOriginalHeight());
     Media::InitializationOptions options;
     options.alphaType = imageInfo.alphaType;
     options.pixelFormat = imageInfo.pixelFormat;
-    options.size.width = isSizeLimited ? originalWidth_ : 0;
-    options.size.height = isSizeLimited ? originalHeight_ : 0;
+    options.size.width = isSizeLimited ? innerPixelMap->GetOriginalWidth() : 0;
+    options.size.height = isSizeLimited ? innerPixelMap->GetOriginalHeight() : 0;
     options.editable = true;
     auto result = Media::PixelMap::Create(*pixelMap, options);
     return std::move(result);
@@ -210,8 +209,8 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
     }
 
     originalPixelMapBytes_ = pixelMapExlAstc->GetByteCount();
-    originalWidth_ = pixelMapExlAstc->GetWidth();
-    originalHeight_ = pixelMapExlAstc->GetHeight();
+    int32_t width = pixelMapExlAstc->GetWidth();
+    int32_t height = pixelMapExlAstc->GetHeight();
     Media::ImageInfo imageInfoTemp;
     pixelMapExlAstc->GetImageInfo(imageInfoTemp);
     const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
@@ -235,6 +234,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInner(
         SLOGI("imgBufferSize exceeds limited: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = ConvertAndSetInnerImgBuffer(pixelMapTemp);
+    innerPixelMap->SetOriginalSize(width, height);
     free(dataAddr);
     return innerPixelMap;
 }
@@ -245,8 +245,8 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
     std::lock_guard<std::mutex> lockGuard(pixelMapLock_);
     CHECK_AND_RETURN_RET_LOG(pixelMap != nullptr, nullptr, "invalid parameter");
     originalPixelMapBytes_ = pixelMap->GetByteCount();
-    originalWidth_ = pixelMap->GetWidth();
-    originalHeight_ = pixelMap->GetHeight();
+    int32_t width = pixelMap->GetWidth();
+    int32_t height = pixelMap->GetHeight();
     Media::ImageInfo imageInfoTemp;
     pixelMap->GetImageInfo(imageInfoTemp);
     const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
@@ -274,6 +274,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithL
             limitedSize, originSize, originalPixelMapBytes_);
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = ConvertAndSetInnerImgBuffer(pixelMapTemp);
+    innerPixelMap->SetOriginalSize(width, height);
     free(dataAddr);
     return innerPixelMap;
 }
@@ -284,8 +285,8 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithM
     std::lock_guard<std::mutex> lockGuard(pixelMapLock_);
     CHECK_AND_RETURN_RET_LOG(pixelMap != nullptr, nullptr, "invalid parameter");
     originalPixelMapBytes_ = pixelMap->GetByteCount();
-    originalWidth_ = pixelMap->GetWidth();
-    originalHeight_ = pixelMap->GetHeight();
+    int32_t width = pixelMap->GetWidth();
+    int32_t height = pixelMap->GetHeight();
     Media::ImageInfo imageInfoTemp;
     pixelMap->GetImageInfo(imageInfoTemp);
     const std::shared_ptr<Media::PixelMap>& pixelMapTemp = std::make_shared<Media::PixelMap>();
@@ -309,6 +310,7 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithM
         SLOGI("imgBufferSize exceeds limitedMin: %{public}d scaled to %{public}d", originSize, originalPixelMapBytes_);
     }
     std::shared_ptr<AVSessionPixelMap> innerPixelMap = ConvertAndSetInnerImgBuffer(pixelMapTemp);
+    innerPixelMap->SetOriginalSize(width, height);
     free(dataAddr);
     return innerPixelMap;
 }

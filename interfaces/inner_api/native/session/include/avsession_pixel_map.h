@@ -60,6 +60,22 @@ public:
         innerImgBuffer_ = imgBuffer;
     }
 
+    void SetOriginalSize(int32_t width, int32_t height)
+    {
+        originalWidth_ = width;
+        originalHeight_ = height;
+    }
+
+    int32_t GetOriginalWidth() const
+    {
+        return originalWidth_;
+    }
+
+    int32_t GetOriginalHeight() const
+    {
+        return originalHeight_;
+    }
+
     bool Equals(AVSessionPixelMap& other)
     {
         std::unique_lock lock1(bufferLock_, std::defer_lock);
@@ -71,6 +87,8 @@ public:
 private:
     std::vector<uint8_t> innerImgBuffer_;
     std::recursive_mutex bufferLock_;
+    int32_t originalWidth_ = 0;
+    int32_t originalHeight_ = 0;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_PIXEL_MAP_H

@@ -202,7 +202,7 @@ static HWTEST_F(AVSessionServiceAddedTest, checkEnableCast001, TestSize.Level0)
 {
     SLOGD("checkEnableCast001 begin!");
     bool enable = true;
-    g_AVSessionService->isInCast_ = false;
+    g_AVSessionService->isInCast_.store(false);
     auto ret = g_AVSessionService->checkEnableCast(enable);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGD("checkEnableCast001 end!");
@@ -218,7 +218,7 @@ static HWTEST_F(AVSessionServiceAddedTest, checkEnableCast002, TestSize.Level0)
 {
     SLOGD("checkEnableCast002 begin!");
     bool enable = false;
-    g_AVSessionService->isInCast_ = true;
+    g_AVSessionService->isInCast_.store(true);
     auto ret = g_AVSessionService->checkEnableCast(enable);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGD("checkEnableCast002 end!");

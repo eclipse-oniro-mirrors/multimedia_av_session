@@ -183,6 +183,7 @@ bool SessionStack::IsEmpty()
 
 int32_t SessionStack::getAllSessionNum()
 {
+    std::lock_guard sessionStackLockGuard(sessionStackLock_);
     return static_cast<int32_t>(stack_.size());
 }
 
