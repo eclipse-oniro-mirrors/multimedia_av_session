@@ -32,6 +32,7 @@ RemoteSessionSyncerImpl::RemoteSessionSyncerImpl(const std::string& sourceSessio
 
 void RemoteSessionSyncerImpl::OnChanged(const std::string &sessionId, const std::vector<std::string>& keys)
 {
+    CHECK_AND_RETURN_LOG(!keys.empty(), "keys is empty");
     SLOGI("sessionId is %{public}s key is %{public}s", sessionId.c_str(), keys[0].c_str());
     CHECK_AND_RETURN_LOG(objectDataNotifier_ != nullptr, "objectDataNotifier_ is nullptr");
     for (const auto& key : keys) {
