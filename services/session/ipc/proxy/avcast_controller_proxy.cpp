@@ -105,7 +105,8 @@ int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_RET_LOG(avQueueItem.GetDescription() != nullptr, ERR_INVALID_PARAM,
         "description is nullptr");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteFileDescriptor(avQueueItem.GetDescription()->GetFdSrc().fd_),
+    int32_t startFd = avQueueItem.GetDescription()->GetFdSrc().fd_;
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteFileDescriptor(startFd < 0 ? 0 : startFd),
         ERR_UNMARSHALLING, "Write avQueueItem failed");
     SLOGI("Start received fd %{public}d", avQueueItem.GetDescription()->GetFdSrc().fd_);
 
@@ -135,7 +136,7 @@ int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
     CHECK_AND_RETURN_RET_LOG(avQueueItem.GetDescription() != nullptr, ERR_INVALID_PARAM,
         "description is nullptr");
     CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
-    if (avQueueItem.GetDescription()->GetFdSrc().fd_ == 0) {
+    if (avQueueItem.GetDescription()->GetFdSrc().fd_ <= 0) {
         parcel.WriteBool(false);
     } else {
         parcel.WriteBool(true);

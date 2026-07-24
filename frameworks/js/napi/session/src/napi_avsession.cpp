@@ -1772,7 +1772,7 @@ napi_value NapiAVSession::SetAVQueueTitle(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVQueueTitle failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2032,7 +2032,7 @@ napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info i
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (napiSession->session_ == nullptr) {
             context->status = napi_generic_failure;
             context->errMessage = "GetAVCastController failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];

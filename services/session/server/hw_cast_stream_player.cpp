@@ -279,7 +279,7 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     mediaInfo.mediaName = mediaDescription->GetTitle();
     mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
     if (mediaDescription->GetMediaUri() == "") {
-        if (mediaDescription->GetFdSrc().fd_ == 0) {
+        if (mediaDescription->GetFdSrc().fd_ <= 0) {
             SLOGW("No media id and fd src");
             mediaInfo.mediaUrl = "http:";
             mediaDescription->SetMediaUri("http:");
