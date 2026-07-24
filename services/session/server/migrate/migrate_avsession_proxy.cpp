@@ -657,7 +657,9 @@ void MigrateAVSessionProxy::ProcessVolumeControlCommand(cJSON* jsonValue)
         return;
     }
 
-    volumeNum_.store(SoftbusSessionUtils::GetIntFromJson(jsonValue, AUDIO_VOLUME));
+    int32_t volume = SoftbusSessionUtils::GetIntFromJson(jsonValue, AUDIO_VOLUME);
+    CHECK_AND_RETURN_LOG(volume >= 0, "Invalid volume value: %{public}d", volume);
+    volumeNum_.store(volume);
 
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_.load()));

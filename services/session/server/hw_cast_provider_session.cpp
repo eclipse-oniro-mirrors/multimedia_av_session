@@ -187,7 +187,8 @@ bool HwCastProviderSession::GetRemoteDrmCapabilities(std::string deviceId, std::
         return false;
     }
     CastRemoteDevice castRemoteDevice = {};
-    castSession_->GetRemoteDeviceInfo(deviceId, castRemoteDevice);
+    int32_t ret = castSession_->GetRemoteDeviceInfo(deviceId, castRemoteDevice);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, false, "GetRemoteDeviceInfo failed");
     drmCapabilities = castRemoteDevice.drmCapabilities;
     return true;
 }
@@ -200,7 +201,8 @@ bool HwCastProviderSession::GetRemoteNetWorkId(std::string deviceId, std::string
         return false;
     }
     CastRemoteDevice castRemoteDevice = {};
-    castSession_->GetRemoteDeviceInfo(deviceId, castRemoteDevice);
+    int32_t ret = castSession_->GetRemoteDeviceInfo(deviceId, castRemoteDevice);
+    CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, false, "GetRemoteDeviceInfo failed");
     networkId = castRemoteDevice.networkId;
     return true;
 }

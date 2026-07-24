@@ -1600,4 +1600,42 @@ static HWTEST(HwCastSupplementTest, HwCastSessionToast001, TestSize.Level1)
     EXPECT_EQ(provideSession != nullptr, true);
     SLOGI("HwCastSessionToast001 end!");
 }
+
+/**
+ * @tc.name: HwCastProviderSession_GetRemoteDrmCapabilities_002
+ * @tc.desc: test GetRemoteDrmCapabilities when GetRemoteDeviceInfo fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_GetRemoteDrmCapabilities_002, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_GetRemoteDrmCapabilities_002 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    provideSession->Init();
+    std::string deviceId = "001";
+    std::vector<std::string> drmCapabilities;
+    bool ret = provideSession->GetRemoteDrmCapabilities(deviceId, drmCapabilities);
+    EXPECT_EQ(ret, false);
+    SLOGI("HwCastProviderSession_GetRemoteDrmCapabilities_002 end!");
+}
+
+/**
+ * @tc.name: HwCastProviderSession_GetRemoteNetWorkId_002
+ * @tc.desc: test GetRemoteNetWorkId when GetRemoteDeviceInfo fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST(HwCastSupplementTest, HwCastProviderSession_GetRemoteNetWorkId_002, TestSize.Level0)
+{
+    SLOGI("HwCastProviderSession_GetRemoteNetWorkId_002 begin!");
+    auto session = std::make_shared<ICastSessionMock>();
+    auto provideSession = std::make_shared<HwCastProviderSession>(session);
+    provideSession->Init();
+    std::string deviceId = "001";
+    std::string networkId;
+    bool ret = provideSession->GetRemoteNetWorkId(deviceId, networkId);
+    EXPECT_EQ(ret, false);
+    SLOGI("HwCastProviderSession_GetRemoteNetWorkId_002 end!");
+}
 } // OHOS::AVSession

@@ -110,6 +110,7 @@ void SoftbusDistributedDataManager::InitSessionServer(const std::string &pkg)
     std::lock_guard lockGuard(softbusDistributedDataLock_);
 #ifdef DSOFTBUS_ENABLE
     int32_t socket = SoftbusSessionManager::GetInstance().Socket(pkg);
+    CHECK_AND_RETURN_LOG(socket >= 0, "Socket failed for pkg: %{public}s", pkg.c_str());
     mServerSocketMap_.insert({pkg, socket});
 #endif
 }
