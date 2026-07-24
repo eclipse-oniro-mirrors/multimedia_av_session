@@ -85,6 +85,8 @@ void NapiAsyncCallback::Call(napi_ref& method, std::string callbackName, NapiArg
     };
     if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_immediate, callbackName.c_str())) {
         SLOGE("Call: napi_send_event fail");
+        delete static_cast<DataContext*>(work->data);
+        work->data = nullptr;
     }
 }
 

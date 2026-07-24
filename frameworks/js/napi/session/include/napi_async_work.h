@@ -73,6 +73,8 @@ private:
         RESULT_ALL = 2
     };
     static void GenerateOutput(ContextBase* ctxt);
+    static void ExecuteCallback(napi_env env, void* data);
+    static void CompleteCallback(napi_env env, napi_status status, void* data);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_ASYNC_WORK_H

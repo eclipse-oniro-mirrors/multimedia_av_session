@@ -203,4 +203,31 @@ static HWTEST_F(AVCastControllerProxyTest, RemoveAvailableCommand001, testing::e
     SLOGI("RemoveAvailableCommand001, end");
 }
 
+/**
+ * @tc.name: Start001
+ * @tc.desc: Test Start with nullptr description returns ERR_INVALID_PARAM
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVCastControllerProxyTest, Start001, testing::ext::TestSize.Level0)
+{
+    SLOGI("Start001, start");
+    AVQueueItem avQueueItem;
+    int32_t ret = avCastControllerProxy_->Start(avQueueItem);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    SLOGI("Start001, end");
+}
+
+/**
+ * @tc.name: Prepare001
+ * @tc.desc: Test Prepare with nullptr description returns ERR_INVALID_PARAM
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVCastControllerProxyTest, Prepare001, testing::ext::TestSize.Level0)
+{
+    SLOGI("Prepare001, start");
+    AVQueueItem avQueueItem;
+    int32_t ret = avCastControllerProxy_->Prepare(avQueueItem);
+    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    SLOGI("Prepare001, end");
+}
 } // namespace OHOS::AVSession

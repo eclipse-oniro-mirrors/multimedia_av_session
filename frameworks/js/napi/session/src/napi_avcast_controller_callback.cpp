@@ -376,8 +376,9 @@ napi_status NapiAVCastControllerCallback::saveDataSrc(napi_env env, napi_value a
         napi_value resourceName = nullptr;
         napi_create_string_utf8(env, "ThreadSafeFunction in NapiAVCastControllerCallback",
             NAPI_AUTO_LENGTH, &resourceName);
-        napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
+        status = napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
             nullptr, threadSafeReadDataSrcCb, &threadSafeReadDataSrcFunc_);
+        CHECK_RETURN(status == napi_ok, "napi_create_threadsafe_function failed", status);
     }
     return napi_ok;
 }

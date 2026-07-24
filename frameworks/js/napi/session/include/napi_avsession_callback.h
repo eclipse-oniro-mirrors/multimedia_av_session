@@ -103,6 +103,9 @@ private:
     template<typename T>
     void HandleEvent(int32_t event, std::string callBackName, const int32_t firstParam, const T& secondParam);
 
+    template<typename T>
+    void HandleEvent(int32_t event, std::string callBackName, const int64_t firstParam, const T& secondParam);
+
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};

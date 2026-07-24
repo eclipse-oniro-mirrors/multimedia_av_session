@@ -20,6 +20,7 @@
 #include "avsession_manager.h"
 #include "av_session.h"
 #include "avsession_errors.h"
+#include "avsession_pixel_map.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -156,6 +157,25 @@ HWTEST_F(AVMediaDescriptionTest, AVmediaDescriptionUnmarshalling001, TestSize.Le
     auto unmarshallingPtr = g_mediaDescription.Unmarshalling(parcel);
     EXPECT_NE(unmarshallingPtr, nullptr);
     SLOGI("AVmediaDescriptionUnmarshalling001 End");
+}
+
+/**
+ * @tc.name: AVmediaDescriptionMarshalling002
+ * @tc.desc: mediaDescription marshalling with icon exceeding limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVMediaDescriptionTest, AVmediaDescriptionMarshalling002, TestSize.Level0)
+{
+    SLOGI("AVmediaDescriptionMarshalling002 Begin");
+    OHOS::Parcel parcel;
+    auto pixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> bigBuffer(10 * 1024 * 1024 + 1, 0x01);
+    pixelMap->SetInnerImgBuffer(bigBuffer);
+    AVMediaDescription mediaDescription;
+    mediaDescription.SetIcon(pixelMap);
+    auto ret = mediaDescription.Marshalling(parcel);
+    EXPECT_EQ(ret, true);
+    SLOGI("AVmediaDescriptionMarshalling002 End");
 }
 } // namespace AVSession
 } // namespace OHOS

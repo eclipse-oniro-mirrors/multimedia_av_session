@@ -44,6 +44,11 @@ bool AVMediaDescription::Marshalling(Parcel& parcel) const
         parcel.WriteBool(pcmSrc_);
 
     std::vector<uint8_t> iconBuffer = (icon_ == nullptr) ? std::vector<uint8_t>() : icon_->GetInnerImgBuffer();
+    int32_t maxIconSize = 10 * 1024 * 1024;
+    if (iconBuffer.size() > static_cast<size_t>(maxIconSize)) {
+        SLOGW("icon size exceeds limit, marshall as no icon");
+        iconBuffer.clear();
+    }
     int32_t iconSize = static_cast<int32_t>(iconBuffer.size());
     res &= parcel.WriteInt32(iconSize);
     CHECK_AND_RETURN_RET_LOG(iconSize > 0, res,
@@ -211,7 +216,7 @@ std::string AVMediaDescription::GetMediaType() const
 
 void AVMediaDescription::SetMediaSize(const int32_t mediaSize)
 {
-    mediaSize_ = mediaSize;
+    mediaSize_ = mediaSize < 0 ? 0 : mediaSize;
 }
 
 int32_t AVMediaDescription::GetMediaSize() const

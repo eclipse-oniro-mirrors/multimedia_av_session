@@ -1263,9 +1263,9 @@ void SendSystemControlCommandSync(AVControlCommand command)
     }
     int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().SendSystemControlCommand(controlCommand);
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-    double speed;
-    int64_t time;
-    int32_t mode;
+    double speed = 0.0;
+    int64_t time = 0;
+    int32_t mode = OHOS::AVSession::AVPlaybackState::LOOP_MODE_UNDEFINED;
     std::string assetId;
     controlCommand.GetSpeed(speed);
     controlCommand.GetSeekTime(time);

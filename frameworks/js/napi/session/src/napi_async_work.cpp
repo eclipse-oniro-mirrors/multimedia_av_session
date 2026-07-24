@@ -98,36 +98,45 @@ napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctx
 
     napi_value resource = nullptr;
     napi_create_string_utf8(ctxt->env, name.c_str(), NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(
-        ctxt->env, nullptr, resource,
-        [](napi_env env, void* data) {
-            CHECK_RETURN_VOID(data != nullptr, "napi_async_execute_callback nullptr");
-            auto ctxt = reinterpret_cast<ContextBase*>(data);
-            if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
-                AVSESSION_TRACE_ASYNC_START("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
-            }
-            if (ctxt->execute && ctxt->status == napi_ok) {
-                ctxt->execute();
-            }
-        },
-        [](napi_env env, napi_status status, void* data) {
-            CHECK_RETURN_VOID(data != nullptr, "napi_async_complete_callback nullptr");
-            auto ctxt = reinterpret_cast<ContextBase*>(data);
-            if ((status != napi_ok) && (ctxt->status == napi_ok)) {
-                ctxt->status = status;
-            }
-            if ((ctxt->complete) && (status == napi_ok) && (ctxt->status == napi_ok)) {
-                ctxt->complete(ctxt->output);
-            }
-            if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
-                AVSESSION_TRACE_ASYNC_END("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
-            }
-            GenerateOutput(ctxt);
-        },
-        reinterpret_cast<void*>(ctxt.get()), &ctxt->work);
+    napi_status workStatus = napi_create_async_work(ctxt->env, nullptr, resource, ExecuteCallback,
+        CompleteCallback, reinterpret_cast<void*>(ctxt.get()), &ctxt->work);
+    if (workStatus != napi_ok) {
+        SLOGE("napi_create_async_work failed %{public}d", static_cast<int>(workStatus));
+        NapiUtils::ThrowError(env, "napi_create_async_work failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
     napi_queue_async_work_with_qos(ctxt->env, ctxt->work, napi_qos_user_initiated);
     ctxt->hold = ctxt; // save crossing-thread ctxt.
     return promise;
+}
+
+void NapiAsyncWork::ExecuteCallback(napi_env env, void* data)
+{
+    CHECK_RETURN_VOID(data != nullptr, "napi_async_execute_callback nullptr");
+    auto ctxt = reinterpret_cast<ContextBase*>(data);
+    if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
+        AVSESSION_TRACE_ASYNC_START("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
+    }
+    if (ctxt->execute && ctxt->status == napi_ok) {
+        ctxt->execute();
+    }
+}
+
+void NapiAsyncWork::CompleteCallback(napi_env env, napi_status status, void* data)
+{
+    CHECK_RETURN_VOID(data != nullptr, "napi_async_complete_callback nullptr");
+    auto ctxt = reinterpret_cast<ContextBase*>(data);
+    if ((status != napi_ok) && (ctxt->status == napi_ok)) {
+        ctxt->status = status;
+    }
+    if ((ctxt->complete) && (status == napi_ok) && (ctxt->status == napi_ok)) {
+        ctxt->complete(ctxt->output);
+    }
+    if (!ctxt->taskName.empty() && ctxt->taskId > INVALID_TASK_ID) {
+        AVSESSION_TRACE_ASYNC_END("NapiAsyncWork::" + ctxt->taskName, ctxt->taskId);
+    }
+    GenerateOutput(ctxt);
 }
 
 void NapiAsyncWork::GenerateOutput(ContextBase* ctxt)

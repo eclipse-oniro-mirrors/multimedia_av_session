@@ -293,7 +293,8 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
     mediaInfo.mediaType = mediaDescription->GetMediaType();
     mediaInfo.mediaSize = static_cast<uint32_t>(mediaDescription->GetMediaSize());
     mediaInfo.startPosition = static_cast<uint32_t>(mediaDescription->GetStartPosition());
-    mediaInfo.duration = static_cast<uint32_t>(mediaDescription->GetDuration());
+    int32_t mediaDuration = mediaDescription->GetDuration();
+    mediaInfo.duration = static_cast<uint32_t>(mediaDuration < 0 ? 0 : mediaDuration);
     SLOGI("mediaDescription duration is %{public}d startPosition is %{public}d",
         mediaInfo.duration, mediaInfo.startPosition);
     mediaInfo.closingCreditsPosition = static_cast<uint32_t>(mediaDescription->GetCreditsPosition());
