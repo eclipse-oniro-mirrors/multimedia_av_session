@@ -178,9 +178,12 @@ void PcmCastSession::DealCollaborationPublishState(int32_t castState, DeviceInfo
  
 void PcmCastSession::OnSystemCommonEvent(const std::string& args)
 {
+    std::lock_guard lockGuard(castLock_);
     int32_t code = JsonUtils::GetIntParamFromJsonString(args, "code");
     CHECK_AND_RETURN_RET_LOG(CheckIsCasting(), void(), "First connection, castState is 0.");
     CHECK_AND_RETURN_RET_LOG(code == 0, void(), "Castmode changes fail, code is %{public}d", code);
+    CHECK_AND_RETURN_RET_LOG(!descriptor_.outputDeviceInfo_.deviceInfos_.empty(), void(),
+        "DeviceInfos is empty");
     int32_t castMode = JsonUtils::GetIntParamFromJsonString(args, "mode");
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
@@ -206,7 +209,8 @@ void PcmCastSession::OnDeviceNameSystemCommonEvent(const std::string& args)
 {
     std::string deviceName = JsonUtils::GetStringParamFromJsonString(args, "DEVICE_NAME");
     SLOGI("Received UPDATE_DEVICE_NAME: deviceName:%{public}s", AVSessionUtils::GetAnonyDeviceName(deviceName).c_str());
-
+    CHECK_AND_RETURN_RET_LOG(!descriptor_.outputDeviceInfo_.deviceInfos_.empty(), void(),
+        "DeviceInfos is empty");
     tempDeviceInfo_.deviceName_ = deviceName;
     CHECK_AND_RETURN_LOG(!descriptor_.outputDeviceInfo_.deviceInfos_.empty(), "deviceInfos is empty");
     descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceName_ = deviceName;
@@ -221,6 +225,7 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
 {
     SLOGI("PcmCastSession StartCast");
+    std::lock_guard lockGuard(castLock_);
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
     descriptor_.sessionId_ = sessionToken.sessionId;
     bool isPcmScreen = (sessionToken.sessionId == "pcmCastSession" &&
@@ -350,6 +355,7 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
 void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
     SLOGI("PcmCastSession StopCast");
+    std::lock_guard lockGuard(castLock_);
     ReleaseStreamPlayer();
     needHandleTimer_ = false;
     int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);
