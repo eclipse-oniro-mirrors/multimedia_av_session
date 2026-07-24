@@ -2957,7 +2957,12 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     SLOGI("CreateControllerInner for sessionId:%{public}s|%{public}d|%{public}d|%{public}d",
         AVSessionUtils::GetAnonySessionId(sessionId).c_str(), pid, GetCallingPid(), userId);
+#ifdef CAR_FEATURE_ENABLE
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
     sptr<AVSessionItem> session = GetUsersManager().GetContainerFromUser(userId).GetSessionById(sessionId);
+#endif
+
     if (session == nullptr) {
         SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),

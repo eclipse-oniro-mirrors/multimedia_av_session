@@ -309,6 +309,10 @@ av_session_ohos_library("avsession_service") {
     public_external_deps += [ "data_object:distributeddataobject_impl" ]
   }
 
+  if (av_session_enable_multi_user_audio_zone_feature) {
+    defines += [ "CAR_FEATURE_ENABLE" ]
+  }
+
   subsystem_name = "multimedia"
   part_name = "av_session"
   version_script = "avsession_service.versionscript"
