@@ -110,7 +110,7 @@ private:
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
-    std::shared_ptr<bool> isValid_;
+    std::shared_ptr<std::atomic<bool>> isValid_;
 
     Ace::UIContent *uiContent_;
     napi_ref wrapperRef_{ nullptr };
