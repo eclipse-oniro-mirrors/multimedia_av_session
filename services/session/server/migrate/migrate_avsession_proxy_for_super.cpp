@@ -565,7 +565,7 @@ int32_t MigrateAVSessionProxy::ConvertStateFromDoubleToSingle(int32_t state)
         case MEDIA_SESSION_PLAYBACK_STATE_ERROR:
             return AVPlaybackState::PLAYBACK_STATE_ERROR;
         default:
-            SLOGW("unknowState: %{public}d", state);	 
+            SLOGW("unknowState: %{public}d", state);
             break;
     }
     return state;
