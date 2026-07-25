@@ -1167,21 +1167,14 @@ static HWTEST_F(AVSessionServiceTestExt, ProcessSuperLauncherConnect001, TestSiz
     }
     
     int32_t result = g_AVSessionService->ProcessSuperLauncherConnect(deviceId, extraInfo);
-    // Should still succeed but networkid will be empty
-    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    // Invalid JSON leads to empty networkId, the function should return AVSESSION_ERROR
+    EXPECT_EQ(result, AVSESSION_ERROR);
 
-    // For invalid JSON case, networkId will be empty string
-    // Clean up safely
-    std::shared_ptr<SoftbusSession> proxyPtr;
+    // Early return on error, no proxy should be inserted
     {
         std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
-        auto it = g_AVSessionService->migrateAVSessionProxyMap_.find("");
-        if (it != g_AVSessionService->migrateAVSessionProxyMap_.end()) {
-            proxyPtr = it->second;
-            g_AVSessionService->migrateAVSessionProxyMap_.erase(it);
-        }
+        EXPECT_TRUE(g_AVSessionService->migrateAVSessionProxyMap_.empty());
     }
-    proxyPtr.reset();
 }
 
 /**
