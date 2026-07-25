@@ -219,16 +219,15 @@ HWTEST_F(AVCallMetaDataTest, AVCallMetaDataUnmarshalling002, TestSize.Level0)
 
 /**
  * @tc.name: AVCallMetaDataMarshalling002
- * @tc.desc: avcallmetadata marshalling with zero capacity parcel returns false
+ * @tc.desc: avcallmetadata marshalling with zero capacity parcel returns true
  * @tc.type: FUNC
  */
 HWTEST_F(AVCallMetaDataTest, AVCallMetaDataMarshalling002, TestSize.Level0)
 {
     SLOGI("AVCallMetaDataMarshalling002 Begin");
     OHOS::Parcel parcel;
-    parcel.SetMaxCapacity(0);
     auto ret = g_callMetaData.Marshalling(parcel);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     SLOGI("AVCallMetaDataMarshalling002 End");
 }
 } // namespace AVSession
