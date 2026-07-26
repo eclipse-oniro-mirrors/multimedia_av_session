@@ -70,7 +70,11 @@ ohos_shared_library("avvolumepanel") {
     debug = false
   }
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "libuv:uv",
+    "napi:ace_napi",
+    "node:node_header_notice",
+  ]
 
   relative_install_dir = "module/multimedia"
   subsystem_name = "multimedia"
