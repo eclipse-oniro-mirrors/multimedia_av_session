@@ -96,7 +96,7 @@ HWTEST_F(AVMediaCenterControlTypeTest, MediaCenterTypesToNums003, TestSize.Level
  */
 HWTEST_F(AVMediaCenterControlTypeTest, MediaCenterTypesToStrs001, TestSize.Level1)
 {
-    std::vector<int32_t> nums = {0, 1, 2, 3, 4, 5, 6};
+    std::vector<int32_t> nums = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     std::vector<std::string> types = MediaCenterTypesToStrs(nums);
     EXPECT_EQ(types.size(), 7);
     EXPECT_EQ(types[0], "playNext");
@@ -106,6 +106,8 @@ HWTEST_F(AVMediaCenterControlTypeTest, MediaCenterTypesToStrs001, TestSize.Level
     EXPECT_EQ(types[4], "setSpeed");
     EXPECT_EQ(types[5], "setLoopMode");
     EXPECT_EQ(types[6], "toggleFavorite");
+    EXPECT_EQ(types[7], "play");
+    EXPECT_EQ(types[8], "pause");
 }
 
 /**
@@ -145,7 +147,7 @@ HWTEST_F(AVMediaCenterControlTypeTest, MediaCenterTypesToStrs003, TestSize.Level
 HWTEST_F(AVMediaCenterControlTypeTest, GetMediaCenterTypeToStrMap001, TestSize.Level1)
 {
     const auto& strMap = GetMediaCenterTypeToStrMap();
-    EXPECT_EQ(strMap.size(), 7);
+    EXPECT_EQ(strMap.size(), 9);
     EXPECT_EQ(strMap.find(0)->second, "playNext");
     EXPECT_EQ(strMap.find(6)->second, "toggleFavorite");
     EXPECT_EQ(strMap.find(100), strMap.end());
@@ -160,7 +162,7 @@ HWTEST_F(AVMediaCenterControlTypeTest, GetMediaCenterTypeToStrMap001, TestSize.L
 HWTEST_F(AVMediaCenterControlTypeTest, GetMediaCenterTypeToNumMap001, TestSize.Level1)
 {
     const auto& numMap = GetMediaCenterTypeToNumMap();
-    EXPECT_EQ(numMap.size(), 7);
+    EXPECT_EQ(numMap.size(), 9);
     EXPECT_EQ(numMap.find("playNext")->second, 0);
     EXPECT_EQ(numMap.find("toggleFavorite")->second, 6);
     EXPECT_EQ(numMap.find("invalid"), numMap.end());
