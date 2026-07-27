@@ -56,7 +56,7 @@ ohos_cli_executable("ohos-avsession-manager") {
     "cJSON:cjson",
     "c_utils:utils",
     "input:libmmi-client",
-    "node_header_notice",
+    "node:node_header_notice",
   ]
 
   subsystem_name = "multimedia"
