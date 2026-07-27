@@ -238,7 +238,7 @@ int32_t AVSessionServiceStub::HandleGetHistoricalAVQueueInfos(MessageParcel& dat
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
 
     int bufferLength = GetAVQueueInfosImgLength(avQueueInfos);
-    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(bufferLength), ERR_NONE, "write buffer length failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(bufferLength), ERR_NONE, "write buffer length failed");
 
     if (bufferLength == 0) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(avQueueInfos.size()), ERR_NONE, "write size failed");
@@ -480,6 +480,16 @@ int32_t AVSessionServiceStub::HandleSendSystemCommonCommand(MessageParcel& data,
     sptr commandArgs = data.ReadParcelable<AAFwk::WantParams>();
     if (commandArgs == nullptr) {
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "WriteInt32 result failed");
+        return ERR_NONE;
+    }
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(
+        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("SendSystemCommonCommand: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(),
+            "CALLER_PID", GetCallingPid(), "commonCommand", commonCommand,
+            "ERROR_MSG", "avsessionservice SendSystemCommonCommand checkpermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(SendSystemCommonCommand(commonCommand, *commandArgs)),

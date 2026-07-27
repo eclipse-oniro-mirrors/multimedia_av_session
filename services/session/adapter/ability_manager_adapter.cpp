@@ -74,6 +74,7 @@ __attribute__((no_sanitize("cfi"))) int32_t AbilityManagerAdapter::StartAbilityB
     WaitForTimeout(ABILITY_START_TIMEOUT_MS);
     ret = ERR_START_ABILITY_TIMEOUT;
     if (status_.load() == Status::ABILITY_STATUS_SUCCESS) {
+        std::lock_guard<std::mutex> lock(sessionMutex_);
         ret = AVSESSION_SUCCESS;
         sessionId = sessionId_;
     }
@@ -87,7 +88,10 @@ void AbilityManagerAdapter::StartAbilityByCallDone(const std::string& sessionId)
         SLOGI("no need to notify");
         return;
     }
-    sessionId_ = sessionId;
+    {
+        std::lock_guard<std::mutex> lock(sessionMutex_);
+        sessionId_ = sessionId;
+    }
     syncCon_.notify_one();
 }
 

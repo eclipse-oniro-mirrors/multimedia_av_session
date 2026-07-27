@@ -263,8 +263,7 @@ int32_t AVSessionControllerStub::HandleSendAVKeyEvent(MessageParcel& data, Messa
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_NO_MEMORY), "write SendAVKeyEvent ret failed");
         return ERR_NONE;
     }
-
-    event->ReadFromParcel(data);
+    CHECK_AND_PRINT_LOG(event->ReadFromParcel(data), "Read KeyEvent failed");
     if (!event->IsValid()) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write SendAVKeyEvent ret failed");
     } else {

@@ -330,11 +330,14 @@ int32_t AVSessionServiceProxy::GetHistoricalAVQueueInfos(int32_t maxSize, int32_
     if (ret != AVSESSION_SUCCESS) {
         return ret;
     }
-    int bufferLength = reply.ReadInt32();
+    int bufferLength = 0;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(bufferLength), ERR_UNMARSHALLING, "read bufferLength failed");
+    CHECK_AND_RETURN_RET_LOG(bufferLength >= 0, ERR_UNMARSHALLING, "read bufferLength error");
     if (bufferLength == 0) {
         uint32_t size {};
         CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
         CHECK_AND_RETURN_RET_LOG(size, ret, "size=0");
+        CHECK_AND_RETURN_RET_LOG(size <= maxAVQueueInfoSize, ret, "size:%{public}u over max", size);
 
         std::vector<AVQueueInfo> result(size);
         for (auto& avQueueInfo : result) {

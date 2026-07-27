@@ -64,7 +64,7 @@ std::shared_ptr<TaiheSessionListener> TaiheAVSessionManager::listener_;
 std::shared_ptr<TaiheAsyncCallback> TaiheAVSessionManager::asyncCallback_;
 std::list<std::shared_ptr<uintptr_t>> TaiheAVSessionManager::serviceDiedCallbacks_;
 std::shared_ptr<OHOS::AppExecFwk::EventHandler> TaiheAVSessionManager::mainHandler_;
-std::mutex listenerMutex_;
+std::recursive_mutex listenerMutex_;
 std::mutex createControllerMutex_;
 std::shared_ptr<AVSessionImpl> taiheSession = nullptr;
 
@@ -394,6 +394,17 @@ int32_t TaiheAVSessionManager::OffActiveSessionChangedEvent(std::shared_ptr<uint
 int32_t TaiheAVSessionManager::OnCommonEvent(std::shared_ptr<uintptr_t> &callback)
 {
     SLOGI("OnCommonEvent");
+    int32_t err = OHOS::ERR_NONE;
+
+    err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
+        OHOS::AVSession::PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    CHECK_AND_RETURN_RET_LOG(err == OHOS::ERR_NONE, TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_NO_PERMISSION],
+        "Check system permission error");
+    err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
+        OHOS::AVSession::PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    CHECK_AND_RETURN_RET_LOG(err == OHOS::ERR_NONE,
+        TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_PERMISSION_DENIED],
+        "Check media resources permission error");
 
     if (RegisterNativeSessionListener() != OHOS::AVSession::AVSESSION_SUCCESS) {
         return OHOS::AVSession::AVSESSION_ERROR;
@@ -418,6 +429,17 @@ int32_t TaiheAVSessionManager::OnCommonEvent(std::shared_ptr<uintptr_t> &callbac
 int32_t TaiheAVSessionManager::OffCommonEvent(std::shared_ptr<uintptr_t> &callback)
 {
     SLOGI("OffCommonEvent");
+    int32_t err = OHOS::ERR_NONE;
+
+    err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
+        OHOS::AVSession::PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    CHECK_AND_RETURN_RET_LOG(err == OHOS::ERR_NONE, TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_NO_PERMISSION],
+        "Check system permission error");
+    err = OHOS::AVSession::PermissionChecker::GetInstance().CheckPermission(
+        OHOS::AVSession::PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    CHECK_AND_RETURN_RET_LOG(err == OHOS::ERR_NONE,
+        TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_PERMISSION_DENIED],
+        "Check media resources permission error");
 
     bool isDelSuccess = false;
     {
@@ -477,6 +499,7 @@ int32_t TaiheAVSessionManager::OnDeviceAvailable(std::shared_ptr<uintptr_t> &cal
 
 int32_t TaiheAVSessionManager::OnDeviceLogEvent(std::shared_ptr<uintptr_t> &callback)
 {
+    std::lock_guard lockGuard(listenerMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "callback has not been registered");
     return listener_->AddCallback(TaiheSessionListener::EVENT_DEVICE_LOG_EVENT, callback);
@@ -500,6 +523,7 @@ int32_t TaiheAVSessionManager::OnDeviceStateChanged(std::shared_ptr<uintptr_t> &
 
 int32_t TaiheAVSessionManager::OnServiceDie(std::shared_ptr<uintptr_t> &callback)
 {
+    std::lock_guard lockGuard(listenerMutex_);
     std::shared_ptr<uintptr_t> targetCb;
     CHECK_AND_RETURN_RET_LOG(OHOS::AVSession::AVSESSION_SUCCESS == TaiheUtils::GetRefByCallback(
         serviceDiedCallbacks_, callback, targetCb), OHOS::AVSession::AVSESSION_ERROR, "get callback reference failed");
@@ -520,6 +544,7 @@ int32_t TaiheAVSessionManager::OnServiceDie(std::shared_ptr<uintptr_t> &callback
 
 int32_t TaiheAVSessionManager::OnRemoteDistributedSessionChange(std::shared_ptr<uintptr_t> &callback)
 {
+    std::lock_guard lockGuard(listenerMutex_);
     SLOGI("OnRemoteDistributedSessionChange AddCallback");
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "callback has not been registered");
@@ -568,6 +593,7 @@ int32_t TaiheAVSessionManager::OffDeviceAvailable(std::shared_ptr<uintptr_t> &ca
 
 int32_t TaiheAVSessionManager::OffDeviceLogEvent(std::shared_ptr<uintptr_t> &callback)
 {
+    std::lock_guard lockGuard(listenerMutex_);
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "callback has not been registered");
     return listener_->RemoveCallback(TaiheSessionListener::EVENT_DEVICE_LOG_EVENT, callback);
@@ -591,6 +617,7 @@ int32_t TaiheAVSessionManager::OffDeviceStateChanged(std::shared_ptr<uintptr_t> 
 
 int32_t TaiheAVSessionManager::OffRemoteDistributedSessionChange(std::shared_ptr<uintptr_t> &callback)
 {
+    std::lock_guard lockGuard(listenerMutex_);
     SLOGI("OffRemoteDistributedSessionChange RemoveCallback");
     CHECK_AND_RETURN_RET_LOG(listener_ != nullptr, OHOS::AVSession::AVSESSION_ERROR,
         "callback has not been registered");
@@ -599,6 +626,7 @@ int32_t TaiheAVSessionManager::OffRemoteDistributedSessionChange(std::shared_ptr
 
 int32_t TaiheAVSessionManager::OffServiceDie(std::shared_ptr<uintptr_t> &callback)
 {
+    std::lock_guard lockGuard(listenerMutex_);
     SLOGI("OffServiceDie but no longer UnregisterServiceDeathCallback");
     if (callback == nullptr) {
         for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
@@ -1093,6 +1121,8 @@ void SetDiscoverableSync(bool enable)
         } else if (ret == OHOS::AVSession::ERR_SESSION_NOT_EXIST) {
             errMessage = "SetDiscoverable failed : native session not exist";
         }
+        ret = TaiheAVSessionManager::errcode_.find(ret) != TaiheAVSessionManager::errcode_.end() ?
+            ret : OHOS::AVSession::ERR_INVALID_PARAM;
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
         return;
     }

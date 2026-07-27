@@ -64,7 +64,7 @@ ErrCode AVControllerCallbackClient::OnPlaybackStateChange(const AVPlaybackState&
 
     auto callback = callback_;
     callback->OnPlaybackStateChange(state);
-
+    std::lock_guard lockGuard(listenerLock_);
     if (playbackStateListener_) {
         playbackStateListener_(state);
     }
@@ -237,12 +237,14 @@ ErrCode AVControllerCallbackClient::OnSupportedLoopModesChanged(const std::vecto
 ErrCode AVControllerCallbackClient::AddListenerForPlaybackState(
     const std::function<void(const AVPlaybackState&)>& listener)
 {
+    std::lock_guard lockGuard(listenerLock_);
     playbackStateListener_ = listener;
     return AVSESSION_SUCCESS;
 }
 
 ErrCode AVControllerCallbackClient::RemoveListenerForPlaybackState()
 {
+    std::lock_guard lockGuard(listenerLock_);
     playbackStateListener_ = nullptr;
     return AVSESSION_SUCCESS;
 }

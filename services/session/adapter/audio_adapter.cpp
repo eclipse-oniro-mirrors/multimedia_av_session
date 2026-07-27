@@ -47,19 +47,25 @@ AudioAdapter::~AudioAdapter()
 void AudioAdapter::Init()
 {
     SLOGI("register audio renderer event listener");
-    auto ret = AudioStandard::AudioStreamManager::GetInstance()->RegisterAudioRendererEventListener(
+    auto streamManager = AudioStandard::AudioStreamManager::GetInstance();
+    CHECK_AND_RETURN_LOG(streamManager != nullptr, "AudioStreamManager :GetInstance nullptr");
+    auto ret = streamManager->RegisterAudioRendererEventListener(
         getpid(), shared_from_this());
     CHECK_AND_PRINT_LOG(ret == 0, "register audio renderer event listener failed!");
     AudioStandard::AudioRendererInfo rendererInfo = {};
     rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
-    ret = AudioStandard::AudioRoutingManager::GetInstance()->SetPreferredOutputDeviceChangeCallback(
+    auto routingManager = AudioStandard::AudioRoutingManager::GetInstance();
+    CHECK_AND_RETURN_LOG(routingManager != nullptr, "AudioRoutingManager :GetInstance nullptr");
+    ret = routingManager->SetPreferredOutputDeviceChangeCallback(
         rendererInfo, shared_from_this());
     CHECK_AND_PRINT_LOG(ret == 0, "register audio device changed event listener failed!");
     isCastableDevice_ = system::GetBoolParameter("const.audio.volume_apply_to_all", false);
 
     AudioStandard::AudioVolumeType streamType = AudioStandard::AudioVolumeType::STREAM_MUSIC;
-    volumeMax_ = AudioStandard::AudioSystemManager::GetInstance()->GetMaxVolume(streamType);
-    volumeMin_ = AudioStandard::AudioSystemManager::GetInstance()->GetMinVolume(streamType);
+    auto systemManager = AudioStandard::AudioSystemManager::GetInstance();
+    CHECK_AND_RETURN_LOG(systemManager != nullptr, "AudioSystemManager :GetInstance nullptr");
+    volumeMax_ = systemManager->GetMaxVolume(streamType);
+    volumeMin_ = systemManager->GetMinVolume(streamType);
 }
 
 void AudioAdapter::AddStreamRendererStateListener(const StateListener& listener)
@@ -170,7 +176,9 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid, AudioStandard::StreamUsage us
         SLOGI("mute uid=%{public}d stream usage=%{public}d uncontrolled, return", uid, usage);
         return AVSESSION_ERROR;
     }
-    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
+    auto systemManager = AudioStandard::AudioSystemManager::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(systemManager != nullptr, AVSESSION_ERROR, "AudioSystemManager :GetInstance nullptr");
+    auto ret = systemManager->UpdateStreamState(
         uid, AudioStandard::StreamSetState::STREAM_MUTE, usage);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "mute uid=%{public}d failed!", uid);
     return AVSESSION_SUCCESS;
@@ -178,7 +186,9 @@ int32_t AudioAdapter::MuteAudioStream(int32_t uid, AudioStandard::StreamUsage us
 
 int32_t AudioAdapter::PauseAudioStream(int32_t uid, AudioStandard::StreamUsage usage)
 {
-    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UpdateStreamState(
+    auto systemManager = AudioStandard::AudioSystemManager::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(systemManager != nullptr, AVSESSION_ERROR, "AudioSystemManager :GetInstance nullptr");
+    auto ret = systemManager->UpdateStreamState(
         uid, AudioStandard::StreamSetState::STREAM_PAUSE, usage);
     CHECK_AND_RETURN_RET_LOG(ret == 0, AVSESSION_ERROR, "pause uid=%{public}d failed!", uid);
     return AVSESSION_SUCCESS;
@@ -208,9 +218,12 @@ void AudioAdapter::OnAvailableDeviceChange(const AudioStandard::AudioDeviceUsage
     }
     AudioDeviceDescriptors deviceDescriptors = GetAvailableDevices();
     for (auto& device : deviceDescriptors) {
+        CHECK_AND_CONTINUE(device != nullptr);
         SLOGI("OnDeviceChange output deviceCategory_ %{public}d, deviceType_ %{public}d",
             static_cast<int32_t>(device->deviceCategory_), static_cast<int32_t>(device->deviceType_));
     }
+    std::lock_guard lockGuard(callbackLock_);
+    CHECK_AND_RETURN_LOG(availableDeviceChangeCallbackFunc_ != nullptr, "get availableDeviceChangeCallbackFunc null");
     availableDeviceChangeCallbackFunc_(deviceDescriptors);
 }
 
@@ -290,7 +303,10 @@ AudioDeviceDescriptors AudioAdapter::GetAvailableDevices()
 
 int32_t AudioAdapter::SetAvailableDeviceChangeCallback(const AudioDeviceDescriptorsCallbackFunc& callback)
 {
-    availableDeviceChangeCallbackFunc_ = callback;
+    {
+        std::lock_guard lockGuard(callbackLock_);
+        availableDeviceChangeCallbackFunc_ = callback;
+    }
     auto ret = AudioStandard::AudioSystemManager::GetInstance()->SetAvailableDeviceChangeCallback(
         AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES, shared_from_this());
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetAvailableDeviceChangeCallback failed");
@@ -299,7 +315,10 @@ int32_t AudioAdapter::SetAvailableDeviceChangeCallback(const AudioDeviceDescript
 
 int32_t AudioAdapter::UnsetAvailableDeviceChangeCallback()
 {
-    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UnsetAvailableDeviceChangeCallback(
+    auto systemManager = AudioStandard::AudioSystemManager::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(systemManager != nullptr, AVSESSION_ERROR,
+        "AudioSystemManager::GetInstance() return nullptr");
+    auto ret = systemManager->UnsetAvailableDeviceChangeCallback(
         AudioStandard::AudioDeviceUsage::MEDIA_OUTPUT_DEVICES);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UnsetAvailableDeviceChangeCallback failed");
     return AVSESSION_SUCCESS;
@@ -315,7 +334,10 @@ int32_t AudioAdapter::RegisterAllowedPlaybackCallback(const std::function<bool(i
 
 AudioDeviceDescriptors AudioAdapter::GetDevices()
 {
-    auto devices = AudioStandard::AudioSystemManager::GetInstance()->GetDevices(
+    auto systemManager = AudioStandard::AudioSystemManager::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(systemManager != nullptr, AudioDeviceDescriptors(),
+        "AudioSystemManager :GetInstance nullptr");
+    auto devices = systemManager->GetDevices(
         AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG);
     for (auto& device : devices) {
         SLOGI("GetDevices output deviceCategory_ %{public}d, deviceType_ %{public}d",
@@ -326,7 +348,9 @@ AudioDeviceDescriptors AudioAdapter::GetDevices()
 
 int32_t AudioAdapter::SetDeviceChangeCallback()
 {
-    auto ret = AudioStandard::AudioSystemManager::GetInstance()->SetDeviceChangeCallback(
+    auto systemManager = AudioStandard::AudioSystemManager::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(systemManager != nullptr, AVSESSION_ERROR, "AudioSystemManager :GetInstance nullptr");
+    auto ret = systemManager->SetDeviceChangeCallback(
         AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG, shared_from_this());
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetDeviceChangeCallback failed");
     return AVSESSION_SUCCESS;
@@ -334,7 +358,9 @@ int32_t AudioAdapter::SetDeviceChangeCallback()
 
 int32_t AudioAdapter::UnsetDeviceChangeCallback()
 {
-    auto ret = AudioStandard::AudioSystemManager::GetInstance()->UnsetDeviceChangeCallback(
+    auto systemManager = AudioStandard::AudioSystemManager::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(systemManager != nullptr, AVSESSION_ERROR, "AudioSystemManager :GetInstance nullptr");
+    auto ret = systemManager->UnsetDeviceChangeCallback(
         AudioStandard::DeviceFlag::OUTPUT_DEVICES_FLAG, shared_from_this());
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "UnsetDeviceChangeCallback failed");
     return AVSESSION_SUCCESS;
@@ -345,7 +371,10 @@ AudioDeviceDescriptors AudioAdapter::GetPreferredOutputDeviceForRendererInfo()
     AudioStandard::AudioRendererInfo rendererInfo = {};
     rendererInfo.streamUsage = AudioStandard::STREAM_USAGE_MUSIC;
     AudioDeviceDescriptors outDeviceDescriptors;
-    auto ret = AudioStandard::AudioRoutingManager::GetInstance()->GetPreferredOutputDeviceForRendererInfo(
+    auto routingManager = AudioStandard::AudioRoutingManager::GetInstance();
+    CHECK_AND_RETURN_RET_LOG(routingManager != nullptr, AudioDeviceDescriptors(),
+        "AudioRoutingManager :GetInstance nullptr");
+    auto ret = routingManager->GetPreferredOutputDeviceForRendererInfo(
         rendererInfo, outDeviceDescriptors);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, AudioDeviceDescriptors{},
         "GetPreferredOutputDeviceForRendererInfo failed");
@@ -359,6 +388,7 @@ AudioDeviceDescriptors AudioAdapter::GetPreferredOutputDeviceForRendererInfo()
 AudioDeviceDescriptorWithSptr AudioAdapter::FindRenderDeviceForUsage(const AudioDeviceDescriptors& devices,
     const AudioDeviceDescriptorWithSptr& desc)
 {
+    CHECK_AND_RETURN_RET_LOG(desc != nullptr, nullptr, "desc is nullptr");
     auto itr = std::find_if(devices.cbegin(), devices.cend(), [&desc](const auto &device) {
         return (desc->deviceType_ == device->deviceType_) &&
             (desc->macAddress_ == device->macAddress_) &&

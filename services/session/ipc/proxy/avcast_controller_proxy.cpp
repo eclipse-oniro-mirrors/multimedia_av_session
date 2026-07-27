@@ -39,7 +39,7 @@ AVCastControllerProxy::~AVCastControllerProxy()
 int32_t AVCastControllerProxy::SendCustomData(const AAFwk::WantParams& data)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendCustomData");
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -65,7 +65,7 @@ int32_t AVCastControllerProxy::SendCustomData(const AAFwk::WantParams& data)
 int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cmd)
 {
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendControlCommand");
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -94,7 +94,7 @@ int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cm
 
 int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
 {
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -125,7 +125,7 @@ int32_t AVCastControllerProxy::Start(const AVQueueItem& avQueueItem)
 
 int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
 {
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -274,6 +274,8 @@ int32_t AVCastControllerProxy::GetSupportedHdrCapabilities(std::vector<HDRFormat
         std::vector<int32_t> hdrFormatsInt;
         CHECK_AND_RETURN_RET_LOG(reply.ReadInt32Vector(&hdrFormatsInt), ERR_UNMARSHALLING, "read int32 failed");
         for (auto it = hdrFormatsInt.begin(); it != hdrFormatsInt.end(); it++) {
+            CHECK_AND_CONTINUE(*it >= static_cast<int32_t>(HDRFormat::NONE) &&
+                *it <= static_cast<int32_t>(HDRFormat::IMAGE_HDR_ISO_SINGLE));
             hdrFormats.emplace_back(static_cast<HDRFormat>(*it));
         }
     }
@@ -327,7 +329,7 @@ int32_t AVCastControllerProxy::GetCurrentItem(AVQueueItem& currentItem)
 
 int32_t AVCastControllerProxy::GetValidCommands(std::vector<int32_t>& cmds)
 {
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_GET, "controller is destroy", false),
         "controller is destroy");
@@ -426,6 +428,7 @@ int32_t AVCastControllerProxy::ProcessMediaKeyResponse(const std::string& assetI
     }
 
     auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, AVSESSION_ERROR, "Remote() return nullptr");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_PROVIDE_KEY_RESPONSE, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 
@@ -435,7 +438,7 @@ int32_t AVCastControllerProxy::ProcessMediaKeyResponse(const std::string& assetI
 
 int32_t AVCastControllerProxy::SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter)
 {
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -461,7 +464,7 @@ int32_t AVCastControllerProxy::SetCastPlaybackFilter(const AVPlaybackState::Play
 int32_t AVCastControllerProxy::AddAvailableCommand(const int32_t cmd)
 {
     SLOGI("add available command in");
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -487,7 +490,7 @@ int32_t AVCastControllerProxy::AddAvailableCommand(const int32_t cmd)
 int32_t AVCastControllerProxy::RemoveAvailableCommand(const int32_t cmd)
 {
     SLOGI("remove available command in");
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -512,7 +515,7 @@ int32_t AVCastControllerProxy::RemoveAvailableCommand(const int32_t cmd)
 
 int32_t AVCastControllerProxy::RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback)
 {
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -551,7 +554,7 @@ int32_t AVCastControllerProxy::RegisterCallbackInner(const sptr<IRemoteObject>& 
 
 int32_t AVCastControllerProxy::Destroy()
 {
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_, ERR_CONTROLLER_NOT_EXIST,
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
         "controller is destroy");
@@ -568,7 +571,7 @@ int32_t AVCastControllerProxy::Destroy()
     MessageOption option;
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_DESTROY, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
-    isDestroy_ = true;
+    isDestroy_.store(true);
 
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;

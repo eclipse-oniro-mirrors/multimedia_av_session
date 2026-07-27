@@ -37,6 +37,7 @@ std::map<std::string, std::pair<AVCastPickerHelperInnerImpl::OnEventHandlerType,
 
 AVCastPickerHelperInnerImpl::AVCastPickerHelperInnerImpl()
 {
+    audioRoutingMngr_ = nullptr;
     SLOGI("AVCastPickerHelperInnerImpl construct");
 }
 
@@ -79,6 +80,7 @@ int32_t AVCastPickerHelperInnerImpl::NewInstance(uintptr_t context, AVCastPicker
 
 AVCastPickerHelperInnerImpl::AVCastPickerHelperInnerImpl(OHOS::Ace::UIContent* uiContent)
 {
+    std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("construct");
     uiContent_ = uiContent;
     isValid_ = std::make_shared<bool>(true);
@@ -87,6 +89,7 @@ AVCastPickerHelperInnerImpl::AVCastPickerHelperInnerImpl(OHOS::Ace::UIContent* u
 
 AVCastPickerHelperInnerImpl::~AVCastPickerHelperInnerImpl()
 {
+    std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("destroy");
     if (isValid_) {
         *isValid_ = false;
@@ -174,6 +177,8 @@ void AVCastPickerHelperInnerImpl::ResetCommunicationDeviceSync()
         return;
     }
     audioRendererFilter->rendererInfo.streamUsage = OHOS::AudioStandard::StreamUsage::STREAM_USAGE_VOICE_COMMUNICATION;
+    CHECK_AND_RETURN_LOG(taiheAVCastPickerHelper != nullptr && taiheAVCastPickerHelper->audioRoutingMngr_ != nullptr,
+        "get audioRoutingMngr null");
     taiheAVCastPickerHelper->audioRoutingMngr_->RestoreOutputDevice(audioRendererFilter);
     return;
 }
@@ -264,9 +269,9 @@ void AVCastPickerHelperInnerImpl::HandleEvent(int32_t event, uint32_t state)
 {
     SLOGI("HandleEvent called with event: %{public}d, state: %{public}u", event, state);
     AVCastPickerState stateTaihe = AVCastPickerState::key_t::STATE_DISAPPEARING;
-    if (stateTaihe == STATE_DISAPPEARING) {
+    if (state == STATE_DISAPPEARING) {
         stateTaihe = AVCastPickerState::key_t::STATE_DISAPPEARING;
-    } else if (stateTaihe == STATE_APPEARING) {
+    } else if (state == STATE_APPEARING) {
         stateTaihe = AVCastPickerState::key_t::STATE_APPEARING;
     } else {
         SLOGE("Invalid state: %{public}u", state);
@@ -312,6 +317,10 @@ void AVCastPickerHelperInnerImpl::HandleEvent(int32_t event, TaiheFuncExecute ex
 
 int32_t AVCastPickerHelperInnerImpl::AddCallback(int32_t event, std::shared_ptr<uintptr_t> &callback)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX,
+        OHOS::AVSession::AVSESSION_ERROR, "no event:%{public}d", event);
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr,
+        OHOS::AVSession::AVSESSION_ERROR, "get callback null for event:%{public}d", event);
     SLOGI("Add callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     std::shared_ptr<uintptr_t> targetCb;
@@ -335,6 +344,8 @@ int32_t AVCastPickerHelperInnerImpl::AddCallback(int32_t event, std::shared_ptr<
 
 int32_t AVCastPickerHelperInnerImpl::RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> &callback)
 {
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX,
+        OHOS::AVSession::AVSESSION_ERROR, "no event:%{public}d", event);
     SLOGI("Remove callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (callback == nullptr) {

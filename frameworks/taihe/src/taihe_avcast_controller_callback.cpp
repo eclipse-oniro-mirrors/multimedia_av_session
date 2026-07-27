@@ -33,6 +33,8 @@ TaiheAVCastControllerCallback::TaiheAVCastControllerCallback()
 TaiheAVCastControllerCallback::~TaiheAVCastControllerCallback()
 {
     SLOGI("Destroy TaiheAVCastControllerCallback");
+    CHECK_RETURN_VOID(isValid_ != nullptr, "isValid_ is nullptr");
+    *isValid_ = false;
 }
 
 void TaiheAVCastControllerCallback::ExecuteErrorCallback(std::shared_ptr<uintptr_t> method,
@@ -55,16 +57,19 @@ void TaiheAVCastControllerCallback::HandleEvent(int32_t event, TaiheFuncExecute 
     SLOGI("handle event for %{public}d", event);
     CHECK_RETURN_VOID(asyncCallback_ != nullptr, "asyncCallback_ is nullptr");
 
+    std::weak_ptr<TaiheAVCastControllerCallback> weakPtr = shared_from_this();
     for (auto callbackEntry = callbacks_[event].begin(); callbackEntry != callbacks_[event].end(); ++callbackEntry) {
         asyncCallback_->CallWithFunc(*callbackEntry, isValid_,
-            [this, callbackEntry, event]() {
-                std::lock_guard<std::mutex> lockGuard(lock_);
-                if (callbacks_[event].empty()) {
+            [weakPtr, callbackEntry, event]() {
+                auto sharedPtr = weakPtr.lock();
+                CHECK_AND_RETURN_RET_LOG(sharedPtr != nullptr, false, "checkHasFunc but get sharedptr nullptr");
+                std::lock_guard<std::mutex> lockGuard(sharedPtr->lock_);
+                if (sharedPtr->callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
                     return false;
                 }
                 bool hasFunc = false;
-                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                for (auto it = sharedPtr->callbacks_[event].begin(); it != sharedPtr->callbacks_[event].end(); ++it) {
                     hasFunc = (callbackEntry == it ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
@@ -101,10 +106,13 @@ void TaiheAVCastControllerCallback::HandleErrorEvent(int32_t event, const int32_
         return;
     }
     CHECK_RETURN_VOID(asyncCallback_ != nullptr, "asyncCallback_ is nullptr");
+    std::weak_ptr<TaiheAVCastControllerCallback> weakPtr = shared_from_this();
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_, CheckCallbackValid(event, ref),
-            [this, errorCode, errorMsg](std::shared_ptr<uintptr_t> method) {
-                ExecuteErrorCallback(method, errorCode, errorMsg);
+            [weakPtr, errorCode, errorMsg](std::shared_ptr<uintptr_t> method) {
+                auto sharedPtr = weakPtr.lock();
+                CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "get TaiheAVCastControllerCallback sharedptr fail");
+                sharedPtr->ExecuteErrorCallback(method, errorCode, errorMsg);
             });
     }
 }
@@ -297,6 +305,7 @@ void TaiheAVCastControllerCallback::OnKeyRequest(const std::string &assetId,
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVCastControllerCallback::OnKeyRequest");
     SLOGI("Start handle OnKeyRequest event");
+
     dataContext_.keyRequestData = TaiheUtils::ToTaiheUint8Array(keyRequestData);
     dataContext_.assetId = string(assetId);
     array_view<uint8_t> dataTaihe = dataContext_.keyRequestData;
@@ -345,6 +354,11 @@ void TaiheAVCastControllerCallback::OnCustomData(const OHOS::AAFwk::WantParams &
 int32_t TaiheAVCastControllerCallback::onDataSrcRead(const std::shared_ptr<OHOS::AVSession::AVSharedMemoryBase>& mem,
     uint32_t length, int64_t pos, int32_t& result)
 {
+    if (mem == nullptr) {
+        SLOGE("mem is nullptr");
+        result = 0;
+        return 0;
+    }
     SLOGI("taihe onDataSrcRead length %{public}d", length);
     return ReadDataSrc(mem, length, pos, result);
 }

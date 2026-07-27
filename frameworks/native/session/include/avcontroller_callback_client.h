@@ -71,6 +71,7 @@ private:
     std::shared_ptr<AVControllerCallback> callback_;
     std::function<void(const AVPlaybackState&)> playbackStateListener_;
     static constexpr const char* EVENT_NAME = "AVControllerCallback";
+    std::recursive_mutex listenerLock_;
 };
 }
 #endif // OHOS_AVCONTROLLER_CALLBACK_CLIENT_H

@@ -422,7 +422,12 @@ static int32_t GetAniString(ani_env *env, ani_string aniString, std::string &val
         return OHOS::AVSession::AVSESSION_ERROR;
     }
 
-    std::vector<char> buffer(srcSize + 1);
+    CHECK_AND_RETURN_RET_LOG(srcSize != static_cast<ani_size>(-1), OHOS::AVSession::AVSESSION_ERROR,
+        "GetAniString srcSize overflow detected");
+    size_t bufferSize = static_cast<size_t>(srcSize) + 1;
+    CHECK_AND_RETURN_RET_LOG(bufferSize > static_cast<size_t>(srcSize), OHOS::AVSession::AVSESSION_ERROR,
+        "GetAniString integer overflow in buffer size calculation");
+    std::vector<char> buffer(bufferSize);
     ani_size dstSize = 0;
     if (env->String_GetUTF8SubString(aniString, 0, srcSize, buffer.data(), buffer.size(), &dstSize) != ANI_OK) {
         SLOGE("String_GetUTF8SubString failed");
@@ -757,7 +762,7 @@ static int32_t GetChannelMasks(ani_env *env, ani_object aniObj, int32_t &out)
 {
     std::vector<int32_t> valArray;
     int32_t ret = TaiheUtils::GetAniPropertyInt32Array(env, aniObj, "channelMasks", valArray);
-    CHECK_RETURN(ret == OHOS::AVSession::AVSESSION_SUCCESS, "GetChannelMasks failed", false);
+    CHECK_RETURN(ret == OHOS::AVSession::AVSESSION_SUCCESS, "GetChannelMasks failed", OHOS::AVSession::AVSESSION_ERROR);
     if (valArray.size() > 0) {
         out = valArray[0];
     }
@@ -1072,6 +1077,7 @@ ani_object TaiheUtils::ToAniWantParams(const OHOS::AAFwk::WantParams &in)
 
 ani_object TaiheUtils::ToAniWantAgent(OHOS::AbilityRuntime::WantAgent::WantAgent* &in)
 {
+    CHECK_AND_RETURN_RET_LOG(in != nullptr, nullptr, "WantAgent pointer is nullptr");
     ani_env *env = taihe::get_env();
     CHECK_RETURN(env != nullptr, "env is nullptr", nullptr);
     return OHOS::AppExecFwk::WrapWantAgent(env, in);
@@ -1326,7 +1332,7 @@ taihe::array<AVSessionController> TaiheUtils::ToTaiheAVSessionControllerArray(
     std::vector<AVSessionController> resultVec;
     for (const auto &item : in) {
         AVSessionController result = make_holder<AVSessionControllerImpl, AVSessionController>();
-        AVSessionControllerImpl::NewInstance(item, result);
+        CHECK_AND_CONTINUE(AVSessionControllerImpl::NewInstance(item, result) == OHOS::AVSession::AVSESSION_SUCCESS);
         resultVec.emplace_back(result);
     }
     return taihe::array<AVSessionController>(resultVec);
@@ -1347,9 +1353,9 @@ static inputEvent::InputEvent ToTaiheInputEvent(const OHOS::MMI::KeyEvent &in)
     auto key = in.GetKeyItem();
     bool isNull = (key == std::nullopt);
     inputEvent::InputEvent out = {
-        .id = isNull ? 0 : in.GetKeyItem()->GetKeyCode(),
-        .deviceId = isNull ? 0 : in.GetKeyItem()->GetDeviceId(),
-        .actionTime = isNull ? 0 : in.GetKeyItem()->GetDownTime(),
+        .id = isNull ? 0 : key->GetKeyCode(),
+        .deviceId = isNull ? 0 : key->GetDeviceId(),
+        .actionTime = isNull ? 0 : key->GetDownTime(),
         .screenId = 0,
         .windowId = 0,
     };
@@ -1382,9 +1388,13 @@ keyEvent::KeyEvent TaiheUtils::ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in)
 {
     auto key = in.GetKeyItem();
     int32_t unicodeChar = (key == std::nullopt) ? 0 : static_cast<int32_t>(key->GetUnicode());
+    int32_t actionValue = in.GetKeyAction();
+    actionValue = (actionValue < KEYEVENT_ACTION_JS_NATIVE_DELTA) ?
+        KEYEVENT_ACTION_JS_NATIVE_DELTA : actionValue;
+    int32_t convertedAction = actionValue - KEYEVENT_ACTION_JS_NATIVE_DELTA;
     keyEvent::KeyEvent out = {
         .base = ToTaiheInputEvent(in),
-        .action = keyEvent::Action::from_value(in.GetKeyAction() - KEYEVENT_ACTION_JS_NATIVE_DELTA),
+        .action = keyEvent::Action::from_value(convertedAction),
         .key = ToTaiheKey(key),
         .unicodeChar = unicodeChar,
         .keys = ToTaiheKeys(in.GetKeyItems()),
@@ -1433,7 +1443,8 @@ CommandInfo TaiheUtils::ToTaiheCommandInfo(const OHOS::AVSession::AVControlComma
     cmdInfo.GetCallerModuleName(callerModuleName);
     cmdInfo.GetCallerDeviceId(callerDeviceId);
     cmdInfo.GetCallerType(callerType);
-
+    const std::set<std::string> validCallerTypes = {"cast", "bluetooth", "nearlink", "app"};
+    callerType = (validCallerTypes.find(callerType) == validCallerTypes.end()) ? "app" : callerType;
     CommandInfo out = {
         .callerBundleName = optional<taihe::string>(std::in_place_t {}, taihe::string(callerBundleName)),
         .callerModuleName = optional<taihe::string>(std::in_place_t {}, taihe::string(callerModuleName)),

@@ -28,6 +28,7 @@
 namespace OHOS::AVSession {
 std::shared_ptr<BundleStatusAdapter> BundleStatusAdapter::instance_;
 std::recursive_mutex BundleStatusAdapter::instanceLock_;
+std::recursive_mutex BundleStatusAdapter::listenerLock_;
 
 BundleStatusAdapter::BundleStatusAdapter()
 {
@@ -74,13 +75,16 @@ void BundleStatusAdapter::Init()
 
     SLOGI("get bundle manager proxy success.");
     bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    CHECK_AND_RETURN_LOG(bundleMgrProxy != nullptr, "iface_cast bundleMgrProxy failed");
     bundleResourceProxy = bundleMgrProxy->GetBundleResourceProxy();
+    CHECK_AND_RETURN_LOG(bundleResourceProxy != nullptr, "GetBundleResourceProxy failed");
     bundleStatusListeners_.clear();
     SLOGI("clear bundleStatusListeners done");
 }
 
 bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, const std::string abilityName, std::string& icon)
 {
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
     SLOGI("GetBundleIcon with bundleName:%{public}s", bundleName.c_str());
     
     if (bundleMgrProxy == nullptr || bundleResourceProxy == nullptr) {
@@ -118,10 +122,11 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
 {
     SLOGI("Bundle status adapter subscribe bundle status event, bundleName=%{public}s, userId=%{public}d.",
         bundleName.c_str(), userId);
-    auto bundleStatusListener = bundleStatusListeners_.find(std::make_pair(bundleName, userId));
-    if (bundleStatusListener != bundleStatusListeners_.end()) {
-        SLOGE("bundle status has already register");
-        return false;
+    {
+        std::lock_guard LockGuard(listenerLock_);
+        auto bundleStatusListener = bundleStatusListeners_.find(std::make_pair(bundleName, userId));
+        CHECK_AND_RETURN_RET_LOG(bundleStatusListener == bundleStatusListeners_.end(), false,
+            "bundle status has already register");
     }
     auto bundleStatusCallback = [this](std::string bundleName, int32_t userId) {
         NotifyBundleRemoved(bundleName, userId);
@@ -146,6 +151,7 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
     bundleStatusCallbackImpl->SetBundleName(bundleName);
     bundleStatusCallbackImpl->SetUserId(userId);
     if (bundleMgrProxy->RegisterBundleStatusCallback(bundleStatusCallbackImpl)) {
+        std::lock_guard LockGuard(listenerLock_);
         bundleStatusListeners_.insert(std::make_pair(std::make_pair(bundleName, userId), callback));
         return true;
     } else {
@@ -157,6 +163,7 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
 bool BundleStatusAdapter::IsAudioPlayback(const std::string& bundleName, const std::string& abilityName)
 {
     SLOGI("Estimate bundle audio playback status, bundleName=%{public}s", bundleName.c_str());
+    CHECK_AND_RETURN_RET_LOG(bundleMgrProxy != nullptr, false, "bundleMgrProxy is nullptr");
     AppExecFwk::AbilityInfo abilityInfo;
     bool flag = false;
     if (bundleMgrProxy->GetAbilityInfo(bundleName, abilityName, abilityInfo)) {
@@ -167,6 +174,7 @@ bool BundleStatusAdapter::IsAudioPlayback(const std::string& bundleName, const s
 
 void BundleStatusAdapter::NotifyBundleRemoved(const std::string bundleName, const int32_t userId)
 {
+    std::lock_guard LockGuard(listenerLock_);
     auto bundleStatusListener = bundleStatusListeners_.find(std::make_pair(bundleName, userId));
     if (bundleStatusListener == bundleStatusListeners_.end()) {
         return;
