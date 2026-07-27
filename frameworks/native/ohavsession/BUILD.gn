@@ -74,7 +74,7 @@ ohos_shared_library("ohavsession") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "node_header_notice",
+    "node:node_header_notice",
     "samgr:samgr_proxy",
   ]
 
