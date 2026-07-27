@@ -35,6 +35,7 @@ ohos_shared_library("avsession_common") {
     "src/avcast_control_command.cpp",
     "src/avcast_player_state.cpp",
     "src/avcontrol_command.cpp",
+    "src/avmedia_center_control_type.cpp",
     "src/avmedia_description.cpp",
     "src/avmeta_data.cpp",
     "src/avplayback_state.cpp",

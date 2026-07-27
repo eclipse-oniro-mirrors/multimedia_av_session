@@ -31,36 +31,13 @@ enum class AVMediaCenterControlType : int32_t {
     MEDIA_CENTER_CTRL_SET_SPEED = 4,
     MEDIA_CENTER_CTRL_SET_LOOP_MODE = 5,
     MEDIA_CENTER_CTRL_TOGGLE_FAVORITE = 6,
-    MEDIA_CENTER_CTRL_MAX = 7
+    MEDIA_CENTER_CTRL_PLAY = 7,
+    MEDIA_CENTER_CTRL_PAUSE = 8,
+    MEDIA_CENTER_CTRL_MAX = 9
 };
 
-inline const std::unordered_map<int32_t, std::string>& GetMediaCenterTypeToStrMap()
-{
-    static const std::unordered_map<int32_t, std::string> g_mediaCenterTypeToStr = {
-        {static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_PLAY_NEXT), "playNext"},
-        {static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_PLAY_PREVIOUS), "playPrevious"},
-        {static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_FAST_FORWARD), "fastForward"},
-        {static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_REWIND), "rewind"},
-        {static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_SET_SPEED), "setSpeed"},
-        {static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_SET_LOOP_MODE), "setLoopMode"},
-        {static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_TOGGLE_FAVORITE), "toggleFavorite"}
-    };
-    return g_mediaCenterTypeToStr;
-}
-
-inline const std::unordered_map<std::string, int32_t>& GetMediaCenterTypeToNumMap()
-{
-    static const std::unordered_map<std::string, int32_t> g_mediaCenterTypeToNum = {
-        {"playNext", static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_PLAY_NEXT)},
-        {"playPrevious", static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_PLAY_PREVIOUS)},
-        {"fastForward", static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_FAST_FORWARD)},
-        {"rewind", static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_REWIND)},
-        {"setSpeed", static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_SET_SPEED)},
-        {"setLoopMode", static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_SET_LOOP_MODE)},
-        {"toggleFavorite", static_cast<int32_t>(AVMediaCenterControlType::MEDIA_CENTER_CTRL_TOGGLE_FAVORITE)}
-    };
-    return g_mediaCenterTypeToNum;
-}
+const std::unordered_map<int32_t, std::string>& GetMediaCenterTypeToStrMap();
+const std::unordered_map<std::string, int32_t>& GetMediaCenterTypeToNumMap();
 
 inline std::vector<int32_t> MediaCenterTypesToNums(const std::vector<std::string>& types)
 {
