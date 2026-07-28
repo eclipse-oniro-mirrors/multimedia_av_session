@@ -4988,5 +4988,11 @@ int32_t AVSessionService::GetUserIdFromCallingUid(const int32_t uid)
     return userId;
 }
 
+std::map<pid_t, std::list<sptr<AVControllerItem>>> AVSessionService::GetInnerControllers() const
+{
+    std::lock_guard lockGuard(sessionServiceLock_);
+    return controllers_;
+}
+
 #endif // ENABLE_AVSESSION_SYSEVENT_CONTROL
 } // namespace OHOS::AVSession
