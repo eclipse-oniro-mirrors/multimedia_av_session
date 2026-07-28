@@ -2068,7 +2068,9 @@ napi_value NapiAVSession::GetAVCastController(napi_env env, napi_callback_info i
     };
     return NapiAsyncWork::Enqueue(env, context, "GetAVCastController", executor, complete);
 #else
-    return nullptr;
+    SLOGE("GetAVCastController not support CASTPLUS_CAST_ENGINE_ENABLE");
+    return ThrowErrorAndReturn(env, "GetAVCastController failed : The remote connection is not established",
+        ERR_REMOTE_CONNECTION_NOT_EXIST);
 #endif
 }
 
@@ -2364,7 +2366,9 @@ napi_value NapiAVSession::ReleaseCast(napi_env env, napi_callback_info info)
     };
     return NapiAsyncWork::Enqueue(env, context, "ReleaseCast", executor, complete);
 #else
-    return nullptr;
+    SLOGE("ReleaseCast not support CASTPLUS_CAST_ENGINE_ENABLE");
+    return ThrowErrorAndReturn(env, "ReleaseCast failed : The remote connection is not established",
+        ERR_REMOTE_CONNECTION_NOT_EXIST);
 #endif
 }
 
