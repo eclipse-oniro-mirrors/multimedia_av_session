@@ -34,7 +34,8 @@ int32_t FfiMultimediaAVSessionManagerCreateAVSession(void* abilityContext,
 int32_t FfiMultimediaAVSessionManagerCreateController(int64_t *sessionId)
 {
     if (sessionId == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJ_AVSESSION_MANAGER_IMPL->CreateController(
-        OHOS::FFI::FFIData::GetData<OHOS::AVSession::CJAVSessionImpl>(*sessionId)->GetSessionId());
+    auto session = OHOS::FFI::FFIData::GetData<OHOS::AVSession::CJAVSessionImpl>(*sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return CJ_AVSESSION_MANAGER_IMPL->CreateController(session->GetSessionId());
 }
 }

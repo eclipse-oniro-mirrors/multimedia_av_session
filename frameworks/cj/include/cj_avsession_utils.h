@@ -16,6 +16,7 @@
 #ifndef OHOS_CJ_AVSESSION_UTILS_H
 #define OHOS_CJ_AVSESSION_UTILS_H
 
+#include <cstdint>
 #include "want_agent.h"
 #include "avcall_state.h"
 #include "avmeta_data.h"
@@ -112,13 +113,23 @@ int32_t convertCJStructToNative(const int64_t& cj, std::shared_ptr<AbilityRuntim
 
 /* Free cjObject */
 void cjStructHeapFree(COutputDeviceInfo& cj);
+void cjStructHeapFree(CDeviceInfo& cj);
 void cjStructHeapFree(CArray& cj);
 void cjStructHeapFree(CCastDisplayInfo& cj);
 void cjStructHeapFree(CAVCallMetaData& cj);
 void cjStructHeapFree(CAVPlaybackState& cj);
 void cjStructHeapFree(CAVMetaData& cj);
+void cjStructHeapFree(CAVMediaDescription& cj);
+void cjStructHeapFree(CAVQueueItem& cj);
 void cjStructHeapFreeWant(CArray& cj);
 void cjStructHeapFreeAVQueueItem(CArray& cj);
+
+inline void cjStructHeapFree(char*& cj)
+{
+    free(cj);
+    cj = nullptr;
+}
+inline void cjStructHeapFree(int32_t&) {}
 
 
 /* Common Methods */

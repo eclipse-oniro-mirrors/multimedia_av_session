@@ -114,7 +114,11 @@ public:
     int32_t GetAVMetaData(CAVMetaData& avMetadata) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t GetOutputDevice(COutputDeviceInfo& outputDeviceInfo) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t GetRealPlaybackPosition(int64_t& position) { return ERR_CONTROLLER_NOT_EXIST; }
-    int32_t IsActive(bool& isActive) { return ERR_CONTROLLER_NOT_EXIST; }
+    int32_t IsActive(bool& isActive)
+    {
+        isActive = false;
+        return ERR_CONTROLLER_NOT_EXIST;
+    }
     int32_t GetValidCommands(CArray& commands) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t GetAVQueueItems(CArray& items) { return ERR_CONTROLLER_NOT_EXIST; }
     int32_t GetAVQueueTitle(char*& title) { return ERR_CONTROLLER_NOT_EXIST; }

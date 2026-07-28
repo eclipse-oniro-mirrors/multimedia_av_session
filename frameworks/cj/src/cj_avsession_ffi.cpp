@@ -18,112 +18,153 @@
 #include "avsession_errors.h"
 #include "cj_avsession_impl.h"
 
-#define CJGET_FFIDATA_AVSESSION OHOS::FFI::FFIData::GetData<OHOS::AVSession::CJAVSessionImpl>(sessionId)
-
 extern "C" {
+static OHOS::AVSession::CJAVSessionImpl* GetSessionImpl(int64_t sessionId)
+{
+    return OHOS::FFI::FFIData::GetData<OHOS::AVSession::CJAVSessionImpl>(sessionId);
+}
+
 int32_t FfiMultimediaAVSessionSetAVMetaData(int64_t sessionId, CAVMetaData* data)
 {
     if (data == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->SetAVMetaData(*data);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->SetAVMetaData(*data);
 }
 
 int32_t FfiMultimediaAVSessionSetAVCallMetaData(int64_t sessionId, CAVCallMetaData* data)
 {
     if (data == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->SetAVCallMetaData(*data);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->SetAVCallMetaData(*data);
 }
 
 int32_t FfiMultimediaAVSessionSetAVCallState(int64_t sessionId, CAVCallState* state)
 {
     if (state == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->SetAVCallState(*state);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->SetAVCallState(*state);
 }
 
 int32_t FfiMultimediaAVSessionSetAVPlaybackState(int64_t sessionId, CAVPlaybackState* state)
 {
     if (state == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->SetAVPlaybackState(*state);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->SetAVPlaybackState(*state);
 }
 
 int32_t FfiMultimediaAVSessionSetAVQueueItems(int64_t sessionId, CArray* items)
 {
     if (items == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->SetAVQueueItems(*items);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->SetAVQueueItems(*items);
 }
 
 int32_t FfiMultimediaAVSessionSetAVQueueTitle(int64_t sessionId, char** title)
 {
-    if (title == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->SetAVQueueTitle(*title);
+    if (title == nullptr || *title == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->SetAVQueueTitle(*title);
 }
 
 int32_t FfiMultimediaAVSessionSetExtras(int64_t sessionId, CArray* extras)
 {
     if (extras == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->SetExtras(*extras);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->SetExtras(*extras);
 }
 
 int32_t FfiMultimediaAVSessionSetLaunchAbility(int64_t sessionId, int64_t abilityId)
 {
     if (abilityId == 0) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->SetLaunchAbility(abilityId);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->SetLaunchAbility(abilityId);
 }
 
 int32_t FfiMultimediaAVSessionGetController(int64_t sessionId)
 {
-    return CJGET_FFIDATA_AVSESSION->GetController();
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->GetController();
 }
 
 int32_t FfiMultimediaAVSessionGetAVCastController(int64_t sessionId)
 {
-    return CJGET_FFIDATA_AVSESSION->GetAVCastController();
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->GetAVCastController();
 }
 
 int32_t FfiMultimediaAVSessionGetOutputDevice(int64_t sessionId, COutputDeviceInfo* outputDeviceInfo)
 {
     if (outputDeviceInfo == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->GetOutputDevice(*outputDeviceInfo);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->GetOutputDevice(*outputDeviceInfo);
 }
 
 int32_t FfiMultimediaAVSessionGetAllCastDisplays(int64_t sessionId, CArray* infos)
 {
     if (infos == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->GetAllCastDisplays(*infos);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->GetAllCastDisplays(*infos);
 }
 
 int32_t FfiMultimediaAVSessionActivate(int64_t sessionId)
 {
-    return CJGET_FFIDATA_AVSESSION->Activate();
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->Activate();
 }
 
 int32_t FfiMultimediaAVSessionDeactivate(int64_t sessionId)
 {
-    return CJGET_FFIDATA_AVSESSION->Deactivate();
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->Deactivate();
 }
 
 int32_t FfiMultimediaAVSessionDestroy(int64_t sessionId)
 {
-    return CJGET_FFIDATA_AVSESSION->Destroy();
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->Destroy();
 }
 
 int32_t FfiMultimediaAVSessionStopCasting(int64_t sessionId)
 {
-    return CJGET_FFIDATA_AVSESSION->StopCasting();
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->StopCasting();
 }
 
 int32_t FfiMultimediaAVSessionDispatchSessionEvent(int64_t sessionId, char** event, CArray* args)
 {
-    if (event == nullptr || args == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
-    return CJGET_FFIDATA_AVSESSION->DispatchSessionEvent(*event, *args);
+    if (event == nullptr || *event == nullptr || args == nullptr) { return OHOS::AVSession::ERR_INVALID_PARAM; }
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->DispatchSessionEvent(*event, *args);
 }
 
 int32_t FfiMultimediaAVSessionOn(int64_t sessionId, int32_t eventType, int64_t callbackId)
 {
-    return CJGET_FFIDATA_AVSESSION->OnEvent(eventType, callbackId);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->OnEvent(eventType, callbackId);
 }
 
 int32_t FfiMultimediaAVSessionOff(int64_t sessionId, int32_t eventType)
 {
-    return CJGET_FFIDATA_AVSESSION->OffEvent(eventType);
+    auto session = GetSessionImpl(sessionId);
+    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
+    return session->OffEvent(eventType);
 }
 }

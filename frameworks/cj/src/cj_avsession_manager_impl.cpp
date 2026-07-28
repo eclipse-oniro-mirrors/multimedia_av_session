@@ -34,6 +34,10 @@ int32_t CJAVSessionManagerImpl::CreateAVSession(OHOS::AbilityRuntime::AbilityCon
     const std::string& tag, int32_t& type, int64_t& session, char*& sessionId)
 {
     auto abilityInfo = context.GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        SLOGE("GetAbilityInfo returned nullptr");
+        return AVSESSION_ERROR;
+    }
     AppExecFwk::ElementName elementName;
     elementName.SetBundleName(abilityInfo->bundleName);
     elementName.SetAbilityName(abilityInfo->name);
