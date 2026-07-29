@@ -580,7 +580,7 @@ private:
     std::function<void(std::string, std::string, std::string)> serviceCallbackForAncoStart_;
     std::function<void(std::string, int32_t)> serviceCallbackForBgPlayModeChange_;
     volatile bool isFirstAddToFront_ = true;
-    bool isMediaKeySupport = false;
+    std::atomic<bool> isMediaKeySupport = false;
     bool isNotShowNotification_ = false;
     bool isMediaChange_ = true;
     bool isRecommendMediaChange_ = false;

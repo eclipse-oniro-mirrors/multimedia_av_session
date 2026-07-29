@@ -1317,34 +1317,38 @@ void AVSessionItem::dealValidCallback(int32_t cmd, std::vector<int32_t>& support
 sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 {
     InitAVCastControllerProxy();
-    std::shared_ptr<IAVCastControllerProxy> castControllerProxy;
+    std::shared_ptr<IAVCastControllerProxy> castControllerProxy = nullptr;
     {
         std::lock_guard lockGuard(castLock_);
         castControllerProxy = castControllerProxy_;
     }
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy != nullptr, nullptr,
-        "castControllerProxy_ is null when get avCastController");
+    CHECK_AND_RETURN_RET_LOG(castControllerProxy != nullptr, nullptr, "castControllerProxy_ null at getCastController");
     sptr<AVCastControllerItem> castController = new (std::nothrow) AVCastControllerItem();
     CHECK_AND_RETURN_RET_LOG(castController != nullptr, nullptr, "malloc avCastController failed");
     std::shared_ptr<AVCastControllerItem> sharedPtr = std::shared_ptr<AVCastControllerItem>(castController.GetRefPtr(),
         [holder = castController](const auto*) {});
     CHECK_AND_RETURN_RET_LOG(sharedPtr != nullptr, nullptr, "malloc AVCastControllerItem failed");
     ReportAVCastControllerInfo();
-    auto validCallback = [this](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
-        dealValidCallback(cmd, supportedCastCmds);
-    };
     auto weakThis = wptr<AVSessionItem>(this);
+    auto validCallback = [weakThis](int32_t cmd, std::vector<int32_t>& supportedCastCmds) {
+        auto sharedThis = weakThis.promote();
+        CHECK_AND_RETURN_LOG(sharedThis != nullptr, "AVSessionItem is already destroyed");
+        sharedThis->dealValidCallback(cmd, supportedCastCmds);
+    };
     auto preparecallback = [weakThis]() {
         auto sharedThis = weakThis.promote();
         CHECK_AND_RETURN_LOG(sharedThis != nullptr, "AVSessionItem is already destroyed");
         if (AVRouter::GetInstance().GetMirrorCastHandle() != -1 && sharedThis->isFirstCallback_) {
             sharedThis->isFirstCallback_ = false;
+            CHECK_AND_RETURN_LOG(!sharedThis->GetDescriptor().outputDeviceInfo_.deviceInfos_.empty(), "empty devInfos");
             AVRouter::GetInstance().DisconnectOtherSession(sharedThis->GetSessionId(),
                 sharedThis->GetDescriptor().outputDeviceInfo_.deviceInfos_[0]);
         }
     };
-    auto playerErrorCallback = [this](int32_t errorCode, const std::string& errorMsg) {
-        ReportOnPlayerError(errorCode, errorMsg);
+    auto playerErrorCallback = [weakThis](int32_t errorCode, const std::string& errorMsg) {
+        auto sharedThis = weakThis.promote();
+        CHECK_AND_RETURN_LOG(sharedThis != nullptr, "AVSessionItem is already destroyed");
+        sharedThis->ReportOnPlayerError(errorCode, errorMsg);
     };
     sharedPtr->Init(castControllerProxy, validCallback, preparecallback, playerErrorCallback);
     {
@@ -1357,9 +1361,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
     sharedPtr->SetUserId(userId_);
     SetCastControllerCallbackForCastCap(castControllerProxy);
     InitializeCastCommands();
-    if (SearchSpidInCapability(castHandleDeviceId_)) {
-        castControllerProxy->SetSpid(GetSpid());
-    }
+    if (SearchSpidInCapability(castHandleDeviceId_)) { castControllerProxy->SetSpid(GetSpid()); }
     return remoteObject;
 }
 
@@ -1483,7 +1485,7 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
     SLOGI("AddSupportCommand=%{public}d", cmd);
     if (cmd == AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT) {
         SLOGI("enable media key event listen");
-        isMediaKeySupport = true;
+        isMediaKeySupport.store(true);
         return AVSESSION_SUCCESS;
     }
     auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
@@ -1528,7 +1530,7 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
     SLOGI("DeleteSupportCommand=%{public}d", cmd);
     if (cmd == AVControlCommand::SESSION_CMD_MEDIA_KEY_SUPPORT) {
         SLOGI("disable media key event listen");
-        isMediaKeySupport = false;
+        isMediaKeySupport.store(false);
         return AVSESSION_SUCCESS;
     }
     {
@@ -2096,6 +2098,7 @@ int32_t AVSessionItem::AddDevice(const int64_t castHandle, const OutputDeviceInf
 
 void AVSessionItem::DealDisconnect(DeviceInfo deviceInfo, bool isNeedRemove)
 {
+    std::lock_guard lockGuard(castLock_);
     SLOGI("Is remotecast, received disconnect event for castHandle_: %{public}" PRId64, castHandle_);
     if (isNeedRemove) {
         AVRouter::GetInstance().UnRegisterCallback(castHandle_, cssListener_, GetSessionId());
@@ -2177,21 +2180,28 @@ void AVSessionItem::DealLocalState(const int32_t castState, const OutputDeviceIn
             break;
         case MultiDeviceState::CASTING_SWITCH_DEVICE:
         case MultiDeviceState::CASTED_AND_CASTING:
-            multiDeviceState_ = MultiDeviceState::DEFAULT;
-            CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
-            std::this_thread::sleep_for(std::chrono::milliseconds(SWITCH_WAIT_TIME));
-            if (CastAddToCollaboration(newOutputDeviceInfo_) != AVSESSION_SUCCESS ||
-                SubStartCast(newOutputDeviceInfo_) != AVSESSION_SUCCESS) {
-                OnCastStateChange(disconnectStateFromCast_,
-                    newOutputDeviceInfo_.deviceInfos_[0], false, noReasonCode_);
-                AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
+            {
+                std::lock_guard lockGuard(castLock_);
+                multiDeviceState_ = MultiDeviceState::DEFAULT;
+                CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
+                std::this_thread::sleep_for(std::chrono::milliseconds(SWITCH_WAIT_TIME));
+                if (CastAddToCollaboration(newOutputDeviceInfo_) != AVSESSION_SUCCESS ||
+                    SubStartCast(newOutputDeviceInfo_) != AVSESSION_SUCCESS) {
+                    OnCastStateChange(disconnectStateFromCast_,
+                        newOutputDeviceInfo_.deviceInfos_[0], false, noReasonCode_);
+                    AVSessionUtils::PublishCommonEvent(MEDIA_CAST_ERROR);
+                }
             }
             break;
         case MultiDeviceState::CASTING_AND_CASTED:
-            multiDeviceState_ = MultiDeviceState::DEFAULT;
-            AVRouter::GetInstance().SetCastingDeviceName(outputDeviceInfo.deviceInfos_[0].deviceName_);
-            SetOutputDevice(localDeviceInfo);
-            AVRouter::GetInstance().NotifyCastSessionCreated();
+            {
+                std::lock_guard lockGuard(castLock_);
+                multiDeviceState_ = MultiDeviceState::DEFAULT;
+                CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
+                AVRouter::GetInstance().SetCastingDeviceName(outputDeviceInfo.deviceInfos_[0].deviceName_);
+                SetOutputDevice(localDeviceInfo);
+                AVRouter::GetInstance().NotifyCastSessionCreated();
+            }
             break;
     }
 }
@@ -2232,6 +2242,7 @@ void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 
 void AVSessionItem::BuildCollaborationPublishStateParam(int32_t castState, DeviceInfo deviceInfo)
 {
+    std::lock_guard lockGuard(castLock_);
     if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         AVRouter::GetInstance().GetRemoteNetWorkId(
             castHandle_, deviceInfo.realDeviceId_, collaborationNeedNetworkId_);
@@ -2246,9 +2257,8 @@ void AVSessionItem::BuildCollaborationPublishStateParam(int32_t castState, Devic
 
 void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode)
 {
-    SLOGI("OnCastStateChange in with BundleName: %{public}s | state: %{public}d | id: %{public}s",
-        GetBundleName().c_str(), static_cast<int32_t>(castState),
-        AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
+    SLOGI("OnCastStateChange in with BundleName:%{public}s|state:%{public}d|id:%{public}s", GetBundleName().c_str(),
+        static_cast<int32_t>(castState), AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
     CHECK_AND_RETURN_LOG(validCastStates_.count(castState) > 0, "castState is invalid");
     if (deviceInfo.deviceId_ == "-1") { //cast_engine_service abnormal terminated, update deviceId in item
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
@@ -2264,12 +2274,15 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     }
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
-    bool hasDevice = castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0;
-    if (hasDevice && (static_cast<uint32_t>(castDeviceInfoMap_[deviceInfo.deviceId_].supportedProtocols_) &
-        ProtocolType::TYPE_CAST_PLUS_AUDIO)) {
-        castDeviceInfoMap_[deviceInfo.deviceId_].audioCapabilities_ = deviceInfo.audioCapabilities_;
+    {
+        std::lock_guard lockGuard(castLock_);
+        bool hasDevice = castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0;
+        if (hasDevice && (static_cast<uint32_t>(castDeviceInfoMap_[deviceInfo.deviceId_].supportedProtocols_) &
+            ProtocolType::TYPE_CAST_PLUS_AUDIO)) {
+            castDeviceInfoMap_[deviceInfo.deviceId_].audioCapabilities_ = deviceInfo.audioCapabilities_;
+        }
+        outputDeviceInfo.deviceInfos_.emplace_back(hasDevice ? castDeviceInfoMap_[deviceInfo.deviceId_] : deviceInfo);
     }
-    outputDeviceInfo.deviceInfos_.emplace_back(hasDevice ? castDeviceInfoMap_[deviceInfo.deviceId_] : deviceInfo);
     PublishAVCastHa(castState, deviceInfo);
     if (castState == connectStateFromCast_) { // 6 is connected status (stream)
         castState = 1; // 1 is connected status (local)
@@ -2425,6 +2438,7 @@ void AVSessionItem::UnRegisterDeviceStateCallback()
 
 void AVSessionItem::StopCastSession()
 {
+    std::lock_guard lockGuard(castLock_);
     SLOGI("Stop cast session process with castHandle: %{public}" PRId64, castHandle_);
     int64_t ret = AVRouter::GetInstance().StopCastSession(castHandle_);
     DoContinuousTaskUnregister();
@@ -2865,10 +2879,11 @@ AbilityRuntime::WantAgent::WantAgent AVSessionItem::GetLaunchAbility()
             0, AbilityRuntime::WantAgent::WantAgentConstant::OperationType::START_ABILITIES, flags, wants, nullptr);
         auto launchAbility = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo,
             GetUserId(), GetUid());
-        CHECK_AND_RETURN_RET_LOG(launchAbility != nullptr, launchAbility_, "GetWantAgent failed");
         std::lock_guard lockGuard(launchAbilityLock_);
+        CHECK_AND_RETURN_RET_LOG(launchAbility != nullptr, launchAbility_, "GetWantAgent failed");
         launchAbility_ = *launchAbility;
     }
+    std::lock_guard lockGuard(launchAbilityLock_);
     return launchAbility_;
 }
 
@@ -2933,16 +2948,23 @@ void AVSessionItem::HandleMediaKeyEvent(const MMI::KeyEvent& keyEvent, const Com
     AVSESSION_TRACE_SYNC_START("AVSessionItem::OnMediaKeyEvent");
     CHECK_AND_RETURN_LOG(descriptor_.isActive_, "session is deactive");
     SLOGI("HandleMediaKeyEvent check isMediaKeySupport %{public}d for %{public}d to pid %{public}d",
-        static_cast<int>(isMediaKeySupport), static_cast<int>(keyEvent.GetKeyCode()), static_cast<int>(GetPid()));
-    if (!isMediaKeySupport && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
+        static_cast<int>(isMediaKeySupport.load()),
+        static_cast<int>(keyEvent.GetKeyCode()),
+        static_cast<int>(GetPid()));
+    if (!isMediaKeySupport.load() && keyEventCaller_.count(keyEvent.GetKeyCode()) > 0) {
         AVControlCommand cmd;
+        int32_t rewindSkip;
+        int32_t skipIntervals;
+        int32_t fastForwardSkip;
         cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-        cmd.SetRewindTime(metaData_.GetRewindSkipIntervals() != 0
-            ? metaData_.GetRewindSkipIntervals()
-            : metaData_.GetSkipIntervals());
-        cmd.SetForwardTime(metaData_.GetFastForwardSkipIntervals() != 0
-            ? metaData_.GetFastForwardSkipIntervals()
-            : metaData_.GetSkipIntervals());
+        {
+            std::lock_guard lockGuard(avsessionItemLock_);
+            rewindSkip = metaData_.GetRewindSkipIntervals();
+            skipIntervals = metaData_.GetSkipIntervals();
+            fastForwardSkip = metaData_.GetFastForwardSkipIntervals();
+        }
+        cmd.SetRewindTime(rewindSkip != 0 ? rewindSkip : skipIntervals);
+        cmd.SetForwardTime(fastForwardSkip != 0 ? fastForwardSkip : skipIntervals);
         cmd.SetCommandInfo(cmdInfo);
         keyEventCaller_[keyEvent.GetKeyCode()](cmd);
     } else {
@@ -3451,12 +3473,19 @@ void AVSessionItem::SetAndDealOutputDeviceChange(const int32_t castState, const 
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
     }
     HandleOutputDeviceChange(castState, outputDeviceInfo);
-    std::lock_guard controllersLockGuard(controllersLock_);
-    CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");
-    for (const auto& controller : controllers_) {
-        if (controller.second != nullptr) {
-            controller.second->HandleOutputDeviceChange(castState, outputDeviceInfo);
+
+    std::vector<sptr<AVControllerItem>> controllerList;
+    {
+        std::lock_guard controllersLockGuard(controllersLock_);
+        CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");
+        for (const auto& controller : controllers_) {
+            if (controller.second != nullptr) {
+                controllerList.push_back(controller.second);
+            }
         }
+    }
+    for (const auto& controller : controllerList) {
+        controller->HandleOutputDeviceChange(castState, outputDeviceInfo);
     }
     SLOGI("OutputDeviceInfo device size is %{public}d", static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size()));
 }
@@ -3542,8 +3571,10 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 {
     SLOGI("UpdateCastDeviceMap with id: %{public}s",
         AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
-    castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
-
+    {
+        std::lock_guard lockGuard(castLock_);
+        castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
+    }
     if (descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0 &&
         descriptor_.outputDeviceInfo_.deviceInfos_[0].deviceId_ == deviceInfo.deviceId_) {
         OutputDeviceInfo outputDeviceInfo;
@@ -3557,6 +3588,7 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 void AVSessionItem::ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::lock_guard lockGuard(castLock_);
     AVSessionRadarInfo info(func);
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
         DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[deviceInfo.deviceId_];
@@ -3571,6 +3603,7 @@ void AVSessionItem::ReportConnectFinish(const std::string func, const DeviceInfo
 void AVSessionItem::ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    std::lock_guard lockGuard(castLock_);
     AVSessionRadarInfo info(func);
     if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
         DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[deviceInfo.deviceId_];
@@ -3683,8 +3716,13 @@ bool AVSessionItem::IsCastConnected()
 void AVSessionItem::GetCurrentCastItem(AVQueueItem& currentItem)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "streamPlayer null");
-    currentItem = castControllerProxy_->GetCurrentItem();
+    std::shared_ptr<IAVCastControllerProxy> proxy = nullptr;
+    {
+        std::lock_guard lockGuard(castLock_);
+        proxy = castControllerProxy_;
+    }
+    CHECK_AND_RETURN_LOG(proxy != nullptr, "streamPlayer null");
+    currentItem = proxy->GetCurrentItem();
 #endif
     return;
 }
@@ -3693,8 +3731,13 @@ AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
 {
     AVPlaybackState playbackState;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, playbackState, "streamPlayer null");
-    auto ret = castControllerProxy_->GetCastAVPlaybackState(playbackState);
+    std::shared_ptr<IAVCastControllerProxy> proxy = nullptr;
+    {
+        std::lock_guard lockGuard(castLock_);
+        proxy = castControllerProxy_;
+    }
+    CHECK_AND_RETURN_RET_LOG(proxy != nullptr, playbackState, "streamPlayer null");
+    auto ret = proxy->GetCastAVPlaybackState(playbackState);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, playbackState, "getstate error");
 #endif
     return playbackState;
@@ -3703,8 +3746,13 @@ AVPlaybackState AVSessionItem::GetCastAVPlaybackState()
 void AVSessionItem::SendControlCommandToCast(AVCastControlCommand cmd)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    CHECK_AND_RETURN_LOG(castControllerProxy_ != nullptr, "streamPlayer null");
-    castControllerProxy_->SendControlCommand(cmd);
+    std::shared_ptr<IAVCastControllerProxy> proxy = nullptr;
+    {
+        std::lock_guard lockGuard(castLock_);
+        proxy = castControllerProxy_;
+    }
+    CHECK_AND_RETURN_LOG(proxy != nullptr, "streamPlayer null");
+    proxy->SendControlCommand(cmd);
 #endif
 }
 

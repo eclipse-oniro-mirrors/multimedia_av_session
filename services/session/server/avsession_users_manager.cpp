@@ -114,6 +114,21 @@ SessionStack& AVSessionUsersManager::GetContainerFromUser(int32_t userId)
     return *stackPtr;
 }
 
+std::shared_ptr<SessionStack> AVSessionUsersManager::GetContainerPtrFromUser(int32_t userId)
+{
+    std::lock_guard lockGuard(userLock_);
+    std::shared_ptr<SessionStack> stackPtr = nullptr;
+    auto iter = sessionStackMapByUserId_.find(userId);
+    if (iter != sessionStackMapByUserId_.end()) {
+        stackPtr = iter->second;
+    } else {
+        SLOGI("create new stack for user %{public}d", userId);
+        stackPtr = std::make_shared<SessionStack>();
+        sessionStackMapByUserId_[userId] = stackPtr;
+    }
+    return stackPtr;
+}
+
 SessionStack& AVSessionUsersManager::GetContainerFromAll()
 {
     if (sessionStackForAll_ == nullptr) {
@@ -299,7 +314,7 @@ void AVSessionUsersManager::RemoveSessionListener(pid_t pid)
     SLOGI("remove sessionListener for pid %{public}d, curUser %{public}d", static_cast<int>(pid), curUserId_);
 }
 
-std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListener(int32_t userId)
+std::map<pid_t, sptr<ISessionListener>> AVSessionUsersManager::GetSessionListener(int32_t userId)
 {
     std::lock_guard lockGuard(userLock_);
     userId = userId <= 0 ? curUserId_ : userId;
@@ -314,7 +329,7 @@ std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListen
     }
 }
 
-std::map<pid_t, sptr<ISessionListener>>& AVSessionUsersManager::GetSessionListenerForAllUsers()
+std::map<pid_t, sptr<ISessionListener>> AVSessionUsersManager::GetSessionListenerForAllUsers()
 {
     std::lock_guard lockGuard(userLock_);
     return sessionListenersMap_;
