@@ -992,7 +992,7 @@ void AVSessionImpl::SetBackgroundPlayModeSync(BackgroundPlayMode mode)
 
     if (!mode.is_valid()) {
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
-            "SetBackgroundPlayMode failed : session is nullptr");
+            "SetBackgroundPlayMode failed : invalid background play mode");
         return;
     }
 

@@ -462,7 +462,8 @@ public:
         const size_t total_length = networkId.length();
         int PREFIX_LENGTH = 4;
         int SUFFIX_LENGTH = 4;
-        CHECK_AND_RETURN_RET(total_length >= static_cast<size_t>(PREFIX_LENGTH + SUFFIX_LENGTH), networkId);
+        CHECK_AND_RETURN_RET(total_length >= static_cast<size_t>(PREFIX_LENGTH + SUFFIX_LENGTH),
+            std::string(total_length, '*'));
 
         std::string result;
         result.reserve(total_length);

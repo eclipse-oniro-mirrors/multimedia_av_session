@@ -247,7 +247,7 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, std::string& out)
     size_t len = 0;
     status = napi_get_value_string_utf8(env, in, buf, maxLen + STR_TAIL_LENGTH, &len);
     if (status == napi_ok) {
-        out = std::string(buf);
+        out = std::string(buf, len);
     }
     return status;
 }
@@ -1090,6 +1090,7 @@ napi_status NapiUtils::GetValueEx(napi_env env, napi_value in, std::vector<int32
     bool isTypedArray = false;
     napi_status status = napi_is_typedarray(env, in, &isTypedArray);
     SLOGD("GetValueEx int32_t input %{public}s a TypedArray", isTypedArray ? "is" : "is not");
+    CHECK_RETURN(status == napi_ok, "napi_is_typedarray failed!", status);
 
     if (isTypedArray) {
         napi_typedarray_type type = napi_biguint64_array;
@@ -2015,7 +2016,8 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, DeviceInfo& out)
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ failed", status);
     status = GetValue(env, value, out.deviceType_);
     CHECK_RETURN(status == napi_ok, "get DeviceInfo deviceType_ value failed", status);
-    CHECK_RETURN(GetOptionalString(env, in, out) == napi_ok, "get DeviceInfo ip address value failed", status);
+    status = GetOptionalString(env, in, out);
+    CHECK_RETURN(status == napi_ok, "get DeviceInfo ip address value failed", status);
  
     bool hasKey = false;
     napi_has_named_property(env, in, "providerId", &hasKey);
@@ -2363,7 +2365,8 @@ napi_status NapiUtils::SetValue(
         napi_value entry = nullptr;
         status = NapiAVSessionController::NewInstance(env, item, entry);
         CHECK_RETURN((status == napi_ok), "controller newInstance failed!", status);
-        napi_set_element(env, out, index++, entry);
+        status = napi_set_element(env, out, index++, entry);
+        CHECK_RETURN((status == napi_ok), "napi_set_element failed!", status);
     }
     return status;
 }
