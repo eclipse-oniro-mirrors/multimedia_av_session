@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cmath>
+
 #include "avcontrol_command.h"
 #include "avplayback_state.h"
 #include "avsession_errors.h"
@@ -184,7 +186,7 @@ int32_t AVControlCommand::GetCommand() const
 
 int32_t AVControlCommand::SetSpeed(double speed)
 {
-    if (speed <= 0) {
+    if (!std::isfinite(speed) || speed <= 0) {
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
             AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "invalid speed", true);
         return ERR_INVALID_PARAM;

@@ -233,7 +233,7 @@ int32_t AVCastControlCommand::GetSpeed(int32_t& speed) const
 
 int32_t AVCastControlCommand::SetLoopMode(int32_t loopMode)
 {
-    if (loopMode < 0) {
+    if (loopMode < AVPlaybackState::LOOP_MODE_UNDEFINED || loopMode > AVPlaybackState::LOOP_MODE_CUSTOM) {
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
             AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_CAST_SET, "invalid loop mode", true);
         return ERR_INVALID_PARAM;
