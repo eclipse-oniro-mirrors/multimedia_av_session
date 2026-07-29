@@ -65,7 +65,7 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
 
             controller->isFromSession_ = false;
             lastSessionId_ = sessionId;
-            if (isSoftbusConnecting_) {
+            if (isSoftbusConnecting_.load()) {
                 UpdateFrontSessionInfoToRemote(controller);
             } else {
                 SLOGE("LocalFrontSessionArrive without connect");
@@ -932,7 +932,7 @@ void MigrateAVSessionServer::DoPostTasksClear()
 bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Callback &callback,
     const std::string &name, int64_t delayTime)
 {
-    if (!isSoftbusConnecting_) {
+    if (!isSoftbusConnecting_.load()) {
         SLOGE("MigratePostTask:%{public}s without connect", name.c_str());
         return false;
     }
@@ -950,6 +950,7 @@ void MigrateAVSessionServer::HandleNeedStateTimer()
 void MigrateAVSessionServer::HandleLongPauseTimer()
 {
     SLOGI("HandleLongPauseTimer in, hasLongPauseNotified:%{public}d", hasLongPauseNotified_.load());
+    std::lock_guard<std::mutex> lockGuard(longPauseLock_);
     if (!hasLongPauseNotified_.load()) {
         hasLongPauseNotified_.store(true);
         SendLongPauseNotifyToNext(true);
@@ -974,9 +975,13 @@ void MigrateAVSessionServer::SendLongPauseNotifyToNext(bool isLongPause)
     }
 
     SoftbusSessionUtils::TransferJsonToStr(notifyMsg, msg);
+    std::weak_ptr<MigrateAVSessionServer> weakSelf(shared_from_this());
     MigratePostTask(
-        [this, msg]() {
-            SendByteForNext(deviceId_, msg);
+        [weakSelf, msg]() {
+            auto self = weakSelf.lock();
+            if (self) {
+                self->SendByteForNext(self->deviceId_, msg);
+            }
         },
         "SYNC_LONG_PAUSE_NOTIFY");
     cJSON_Delete(notifyMsg);

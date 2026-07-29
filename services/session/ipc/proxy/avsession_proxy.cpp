@@ -379,7 +379,7 @@ int32_t AVSessionProxy::GetAVQueueTitle(std::string& title)
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         std::string title_;
-        CHECK_AND_RETURN_RET_LOG(reply.ReadString(title), ERR_UNMARSHALLING, "read title string failed");
+        CHECK_AND_RETURN_RET_LOG(reply.ReadString(title_), ERR_UNMARSHALLING, "read title string failed");
         title = title_;
     }
     return ret;

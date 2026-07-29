@@ -387,6 +387,10 @@ int32_t AVCastControllerProxy::SetDisplaySurface(std::string& surfaceId)
         return AVSESSION_ERROR;
     }
     auto remote = Remote();
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
     CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_SET_DISPLAY_SURFACE, parcel, reply, option) == 0,
         ERR_IPC_SEND_REQUEST, "send request failed");
 

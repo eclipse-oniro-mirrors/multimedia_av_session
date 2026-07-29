@@ -43,6 +43,7 @@ MigrateAVSessionServer::MigrateAVSessionServer(int32_t migrateMode, std::string 
 
 MigrateAVSessionServer::~MigrateAVSessionServer()
 {
+    isSoftbusConnecting_.store(false);
     {
         std::lock_guard lockGuard(migrateControllerLock_);
         for (auto& pair : playerIdToControllerCallbackMap_) {
@@ -70,7 +71,7 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
         SLOGI("onConnect but already:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
         return;
     }
-    isSoftbusConnecting_ = true;
+    isSoftbusConnecting_.store(true);
     deviceId_ = deviceId;
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
         SLOGI("connect process as next behavior.");
@@ -98,7 +99,7 @@ void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
         mediaImage_->Clear();
     }
     UnregisterAudioCallback();
-    isSoftbusConnecting_ = false;
+    isSoftbusConnecting_.store(false);
     if (servicePtr_ == nullptr) {
         SLOGE("do NotifyMigrateStop without servicePtr, return");
         return;
@@ -916,6 +917,8 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
     cJSON* jsonData = SoftbusSessionUtils::GetNewCJSONObject();
     if (jsonData == nullptr) {
         SLOGE("get jsonData json with nullptr");
+        cJSON_Delete(jsonArray);
+        return "";
     }
     if (!SoftbusSessionUtils::AddJsonArrayToJson(jsonData, MEDIA_CONTROLLER_LIST, jsonArray)) {
         SLOGE("add jsonArray into jsonData fail");
@@ -933,6 +936,7 @@ std::string MigrateAVSessionServer::ConvertControllersToStr(
 cJSON* MigrateAVSessionServer::ConvertControllerToJson(sptr<AVControllerItem> avcontroller)
 {
     SLOGI("ConvertControllerToJson");
+    CHECK_AND_RETURN_RET_LOG(avcontroller != nullptr, nullptr, "avcontroller is nullptr");
     cJSON* metadata = nullptr;
     AVMetaData data;
     data.Reset();
@@ -1025,7 +1029,7 @@ std::string MigrateAVSessionServer::RebuildPlayState(const AVPlaybackState &play
 {
     int64_t actions = 1911;
     Parcel parcel;
-    parcel.WriteInt32(ConvertStateFromSingleToDouble(playbackState.GetState()))
+    bool writeOk = parcel.WriteInt32(ConvertStateFromSingleToDouble(playbackState.GetState()))
         && parcel.WriteInt64(playbackState.GetPosition().elapsedTime_)
         && parcel.WriteFloat(playbackState.GetSpeed())
         && parcel.WriteInt64(playbackState.GetPosition().updateTime_)
@@ -1038,13 +1042,18 @@ std::string MigrateAVSessionServer::RebuildPlayState(const AVPlaybackState &play
         && parcel.WriteInt32(-1)
         && parcel.WriteBool(playbackState.GetFavorite())
         && parcel.WriteInt32(playbackState.GetLoopMode());
+    if (!writeOk) {
+        SLOGE("RebuildPlayState: parcel write failed");
+        return "";
+    }
 
     uint8_t* pointer = reinterpret_cast<uint8_t*>(parcel.GetData());
-    size_t len = parcel.GetDataSize();
-    std::vector<uint8_t> vec(len);
-    for (size_t i = 0; i < len; ++i) {
-        vec[i] = pointer[i];
+    if (pointer == nullptr) {
+        SLOGE("RebuildPlayState: GetData returns nullptr");
+        return "";
     }
+    size_t len = parcel.GetDataSize();
+    std::vector<uint8_t> vec(pointer, pointer + len);
     std::string str = Base64Utils::Base64Encode(vec);
     return str;
 }
@@ -1068,16 +1077,14 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
         SLOGI("ConvertMetadataToJson without img:%{public}d", !includeImage);
         if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_TITLE, metadata.GetTitle()) ||
             !SoftbusSessionUtils::AddStringToJson(result, METADATA_ARTIST, metadata.GetArtist())) {
-            SLOGE("AddStringToJson with title:%{public}s or artist:%{public}s fail",
-                AVSessionUtils::GetAnonyTitle(metadata.GetTitle()).c_str(), metadata.GetArtist().c_str());
+            SLOGE("AddStringToJson with title or artist fail");
             cJSON_Delete(result);
             return nullptr;
         }
         if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_LYRIC, metadata.GetLyric()) ||
             !SoftbusSessionUtils::AddIntToJson(result, METADATA_DURATION, metadata.GetDuration()) ||
             !SoftbusSessionUtils::AddStringToJson(result, METADATA_ASSET_ID, metadata.GetAssetId())) {
-            SLOGE("AddStringToJson with lyric:%{public}d or duration:%{public}d  or assetId fail",
-                static_cast<int32_t>(metadata.GetLyric().size()), static_cast<int32_t>(metadata.GetDuration()));
+            SLOGE("AddStringToJson with lyric or duration or assetId fail");
             cJSON_Delete(result);
             return nullptr;
         }
@@ -1088,8 +1095,7 @@ cJSON* MigrateAVSessionServer::ConvertMetadataToJson(const AVMetaData &metadata,
             mediaImage = ((ret == true) && (!outputData.empty())) ? Base64Utils::Base64Encode(outputData) : "";
             SLOGI("GetMediaImage:%{public}zu", mediaImage.length());
             if (!SoftbusSessionUtils::AddStringToJson(result, METADATA_IMAGE, mediaImage)) {
-                SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail",
-                    METADATA_IMAGE, mediaImage.c_str());
+                SLOGE("AddStringToJson with key:%{public}s fail", METADATA_IMAGE);
                 cJSON_Delete(result);
                 return nullptr;
             }
@@ -1457,8 +1463,14 @@ void AVControllerObserver::OnSessionDestroy()
 
 void AVControllerObserver::OnPlaybackStateChange(const AVPlaybackState &state)
 {
-    std::shared_ptr<MigrateAVSessionServer> server = migrateServer_.lock();
-    if (server != nullptr && migrateMode_ == MIGRATE_MODE_NEXT) {
+    std::shared_ptr<MigrateAVSessionServer> server;
+    int32_t mode;
+    {
+        std::lock_guard<std::mutex> lock(observerMutex_);
+        server = migrateServer_.lock();
+        mode = migrateMode_;
+    }
+    if (server != nullptr && mode == MIGRATE_MODE_NEXT) {
         server->HandleFocusPlaybackStateChange(playerId_, state);
         return;
     }
@@ -1469,9 +1481,15 @@ void AVControllerObserver::OnPlaybackStateChange(const AVPlaybackState &state)
 
 void AVControllerObserver::OnMetaDataChange(const AVMetaData &data)
 {
-    SLOGI("OnMetaDataChange check migrateMode:%{public}d", migrateMode_);
-    std::shared_ptr<MigrateAVSessionServer> server = migrateServer_.lock();
-    if (server != nullptr && migrateMode_ == MIGRATE_MODE_NEXT) {
+    std::shared_ptr<MigrateAVSessionServer> server;
+    int32_t mode;
+    {
+        std::lock_guard<std::mutex> lock(observerMutex_);
+        SLOGI("OnMetaDataChange check migrateMode:%{public}d", migrateMode_);
+        server = migrateServer_.lock();
+        mode = migrateMode_;
+    }
+    if (server != nullptr && mode == MIGRATE_MODE_NEXT) {
         server->HandleFocusMetaDataChange(playerId_, data);
         return;
     }
@@ -1482,8 +1500,14 @@ void AVControllerObserver::OnMetaDataChange(const AVMetaData &data)
 
 void AVControllerObserver::OnValidCommandChange(const std::vector<int32_t> &cmds)
 {
-    std::shared_ptr<MigrateAVSessionServer> server = migrateServer_.lock();
-    if (server != nullptr && migrateMode_ == MIGRATE_MODE_NEXT) {
+    std::shared_ptr<MigrateAVSessionServer> server;
+    int32_t mode;
+    {
+        std::lock_guard<std::mutex> lock(observerMutex_);
+        server = migrateServer_.lock();
+        mode = migrateMode_;
+    }
+    if (server != nullptr && mode == MIGRATE_MODE_NEXT) {
         server->HandleFocusValidCommandChange(playerId_, cmds);
         return;
     }
@@ -1494,12 +1518,14 @@ void AVControllerObserver::OnValidCommandChange(const std::vector<int32_t> &cmds
 
 void AVControllerObserver::Init(std::weak_ptr<MigrateAVSessionServer> migrateServer, int32_t migrateMode)
 {
+    std::lock_guard<std::mutex> lock(observerMutex_);
     migrateServer_ = migrateServer;
     migrateMode_ = migrateMode;
 }
 
 void AVControllerObserver::Release()
 {
+    std::lock_guard<std::mutex> lock(observerMutex_);
     migrateServer_.reset();
     migrateMode_ = 0;
 }

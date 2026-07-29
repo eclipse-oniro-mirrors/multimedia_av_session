@@ -95,6 +95,10 @@ int32_t MigrateAVSessionProxy::HandleSeekForSuper(const std::string& playerId, c
 
 int32_t MigrateAVSessionProxy::HandleSetLoopModeForSuper(const std::string& playerId, const int32_t loopMode)
 {
+    CHECK_AND_RETURN_RET_LOG(loopMode >= AVPlaybackState::LOOP_MODE_UNDEFINED &&
+        loopMode <= AVPlaybackState::LOOP_MODE_CUSTOM,
+        AVSESSION_ERROR, "HandleSetLoopModeForSuper: invalid loopMode:%{public}d", loopMode);
+
     SLOGI("HandleSetLoopModeForSuper:%{public}s|%{public}d pass",
         SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str(), loopMode);
 
@@ -383,13 +387,13 @@ int32_t MigrateAVSessionProxy::ProcessMetaDataForSuper(cJSON* jsonValue)
     metaData.SetDuration(duration);
     std::string jpegImgAftEncodeStr = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_IMAGE);
     std::vector<uint8_t> jpegImgVec = Base64Utils::Base64Decode(jpegImgAftEncodeStr);
-    std::shared_ptr<AVSessionPixelMap> mediaImagePixelMap = nullptr;
-    SLOGI("CompressFromJPEG ret:%{public}d", CompressFromJPEG(jpegImgVec, mediaImagePixelMap, true));
-
+    if (jpegImgVec.size() > 0) {
+        std::shared_ptr<AVSessionPixelMap> mediaImagePixelMap = nullptr;
+        int32_t ret = CompressFromJPEG(jpegImgVec, mediaImagePixelMap, true);
+        metaData.SetMediaImage(mediaImagePixelMap);
+        SLOGI("CompressFromJPEG ret:%{public}d", ret);
+    }
     metaData.SetMediaImageUri("");
-    metaData.SetMediaImage(mediaImagePixelMap);
-    SLOGI("ProcessMediaImage set img size:%{public}d", static_cast<int>(mediaImagePixelMap == nullptr ?
-        -1 : jpegImgVec.size()));
     CHECK_AND_RETURN_RET_LOG(sessionItem->SetAVMetaData(metaData) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "SetAVMetaData fail:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(title).c_str());
     SLOGI("ProcessMetaDataForSuper done:%{public}s|%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(title).c_str(),
@@ -409,13 +413,30 @@ int32_t MigrateAVSessionProxy::ProcessValidCommandsForSuper(cJSON* jsonValue)
     CHECK_AND_RETURN_RET_LOG(sessionItem != nullptr, AVSESSION_ERROR,
         "ProcessValidCommandsForSuper get avsession nullptr");
 
-    std::vector<int32_t> commands;
     std::string commandsStr = SoftbusSessionUtils::GetStringFromJson(jsonValue, VALID_COMMANDS);
     if (commandsStr.empty()) {
-        commandsStr = DEFAULT_STRING;
+        SLOGE("ProcessValidCommandsForSuper commandsStr is empty");
+        return AVSESSION_ERROR;
     }
-    for (unsigned long i = 0; i < commandsStr.length(); i++) {
-        commands.push_back(static_cast<int32_t>(commandsStr[i] - '0'));
+
+    if (commandsStr.length() > MAX_COMMANDS_STR_LENGTH) {
+        SLOGE("ProcessValidCommandsForSuper commandsStr too long");
+        return AVSESSION_ERROR;
+    }
+
+    std::vector<int32_t> commands;
+    for (size_t i = 0; i < commandsStr.length(); i++) {
+        int32_t cmd = static_cast<int32_t>(commandsStr[i] - '0');
+        if (cmd <= AVControlCommand::SESSION_CMD_INVALID || cmd >= AVControlCommand::SESSION_CMD_MAX) {
+            SLOGE("invalid cmd:%{public}d", cmd);
+            continue;
+        }
+        commands.push_back(cmd);
+    }
+
+    if (commands.empty()) {
+        SLOGE("ProcessValidCommandsForSuper no valid commands");
+        return AVSESSION_ERROR;
     }
     sessionItem->SetSupportCommand(commands);
 

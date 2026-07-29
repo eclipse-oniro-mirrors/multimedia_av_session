@@ -564,6 +564,11 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state,
 void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMetaData::MetaMaskType& changedDataMask)
 {
     std::lock_guard callbackLockGuard(callbackMutex_);
+    sptr<AVSessionItem> session;
+    {
+        std::lock_guard sessionLockGuard(sessionMutex_);
+        session = session_;
+    }
     AVMetaData metaOut;
     std::lock_guard metaMaskLockGuard(metaMaskMutex_);
     AVMetaData::MetaMaskType validMask = metaMask_.all() ? metaMask_ : changedDataMask & metaMask_;
@@ -571,15 +576,15 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMeta
     CHECK_AND_PRINT_LOG(copyResult, "controller:%{public}d no mask", static_cast<int>(pid_));
     if (copyResult) {
         if ((metaMask_.test(AVMetaData::META_KEY_MEDIA_IMAGE)) && (metaOut.GetMediaImage() != nullptr)) {
-            CHECK_AND_RETURN_LOG(session_ != nullptr, "Session not exist");
+            CHECK_AND_RETURN_LOG(session != nullptr, "Session not exist");
             std::shared_ptr<AVSessionPixelMap> innerPixelMap = metaOut.GetMediaImage();
-            session_->ReadMetaDataImg(innerPixelMap);
+            session->ReadMetaDataImg(innerPixelMap);
             metaOut.SetMediaImage(innerPixelMap);
         }
         if ((metaMask_.test(AVMetaData::META_KEY_AVQUEUE_IMAGE)) && (metaOut.GetAVQueueImage() != nullptr)) {
-            CHECK_AND_RETURN_LOG(session_ != nullptr, "Session not exist");
+            CHECK_AND_RETURN_LOG(session != nullptr, "Session not exist");
             std::shared_ptr<AVSessionPixelMap> avQueuePixelMap = metaOut.GetAVQueueImage();
-            session_->ReadMetaDataAVQueueImg(avQueuePixelMap);
+            session->ReadMetaDataAVQueueImg(avQueuePixelMap);
             metaOut.SetAVQueueImage(avQueuePixelMap);
         }
         metaOut.SetAssetId(data.GetAssetId());

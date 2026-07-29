@@ -179,7 +179,7 @@ private:
         const std::string& bundleName, const std::string& abilityName);
 
     AVSessionService *servicePtr_ = nullptr;
-    bool isSoftbusConnecting_ = false;
+    std::atomic<bool> isSoftbusConnecting_ {false};
     std::string deviceId_;
     std::string topSessionId_;
     std::string lastSessionId_;
@@ -261,6 +261,7 @@ private:
     std::weak_ptr<MigrateAVSessionServer> migrateServer_;
     std::string playerId_ = "";
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
+    std::mutex observerMutex_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVER_H

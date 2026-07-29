@@ -128,7 +128,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive003, T
     auto observer = std::make_shared<AVControllerObserver>(sessionId);
     g_MigrateAVSessionServer->playerIdToControllerCallbackMap_.insert({sessionId, observer});
     g_MigrateAVSessionServer->playerIdToControllerMap_.insert({sessionId, g_AVControllerItem});
-    g_MigrateAVSessionServer->isSoftbusConnecting_ = true;
+    g_MigrateAVSessionServer->isSoftbusConnecting_.store(true);
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     sleep(1);
     EXPECT_EQ(sessionId.size(), 4);
@@ -146,7 +146,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, LocalFrontSessionArrive004, T
     auto observer = std::make_shared<AVControllerObserver>(sessionId);
     g_MigrateAVSessionServer->playerIdToControllerCallbackMap_.insert({sessionId, observer});
     g_MigrateAVSessionServer->playerIdToControllerMap_.insert({sessionId, g_AVControllerItem});
-    g_MigrateAVSessionServer->isSoftbusConnecting_ = false;
+    g_MigrateAVSessionServer->isSoftbusConnecting_.store(false);
     g_MigrateAVSessionServer->LocalFrontSessionArrive(sessionId);
     sleep(1);
     EXPECT_EQ(sessionId.size(), 4);
