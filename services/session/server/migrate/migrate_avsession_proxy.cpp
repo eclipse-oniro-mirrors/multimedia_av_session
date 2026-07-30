@@ -603,11 +603,7 @@ void MigrateAVSessionProxy::ProcessPlaybackState(cJSON* jsonValue)
 
     if (cJSON_HasObjectItem(jsonValue, PLAYBACK_STATE)) {
         int state = SoftbusSessionUtils::GetIntFromJson(jsonValue, PLAYBACK_STATE);
-        if (state >= AVPlaybackState::PLAYBACK_STATE_INITIAL && state < AVPlaybackState::PLAYBACK_STATE_MAX) {
-            playbackState.SetState(state);
-        } else {
-            SLOGE("Invalid playback state:%{public}d", state);
-        }
+        playbackState.SetState(state);
     }
     if (cJSON_HasObjectItem(jsonValue, FAVOR_STATE)) {
         int isFavor = SoftbusSessionUtils::GetBoolFromJson(jsonValue, FAVOR_STATE);

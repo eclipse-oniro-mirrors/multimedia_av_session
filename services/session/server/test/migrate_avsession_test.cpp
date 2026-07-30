@@ -61,9 +61,9 @@ public:
 void MigrateAVSessionTest::SetUpTestCase()
 {
     SLOGI("MigrateAVSessionTest SetUpTestCase");
-    avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     server_ = std::make_shared<MigrateAVSessionServer>();
-    server_->Init(avservice_);
+    avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+
 }
 
 void MigrateAVSessionTest::TearDownTestCase()
