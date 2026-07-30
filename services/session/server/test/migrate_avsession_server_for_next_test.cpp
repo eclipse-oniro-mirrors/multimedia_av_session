@@ -59,6 +59,7 @@ void MigrateAVSessionServerForNextTest::SetUpTestCase()
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     g_AVSessionService = std::make_shared<AVSessionService>(OHOS::AVSESSION_SERVICE_ID, true);
+    g_MigrateAVSessionServer->Init(g_AVSessionService.get());
     g_AVSessionService->InitKeyEvent();
     g_AVSessionItem = g_AVSessionService->CreateSessionInner(g_testSessionTag,
         AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);

@@ -581,7 +581,6 @@ void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
     }
 
     sessionItem->SetAVMetaData(metaData);
-    SLOGI("ProcessMetaData set title:%{public}s", AVSessionUtils::GetAnonyTitle(metaData.GetTitle()).c_str());
 }
 
 void MigrateAVSessionProxy::ProcessPlaybackState(cJSON* jsonValue)
@@ -832,6 +831,7 @@ void MigrateAVSessionProxy::ProcessProtocolVersion(cJSON* jsonValue, const std::
 
 void MigrateAVSessionProxy::ProcessLongPauseNotify(cJSON* jsonValue)
 {
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "servicePtr_ is nullptr");
     bool isLongPause = SoftbusSessionUtils::GetBoolFromJson(jsonValue, LONG_PAUSE_STATE);
     SLOGI("ProcessLongPauseNotify isLongPause:%{public}d", isLongPause);
     int32_t event = isLongPause ? REMOTE_MEDIA_LONG_PAUSE : REMOTE_MEDIA_LONG_PAUSE_RESUME;
