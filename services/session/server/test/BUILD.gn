@@ -3160,12 +3160,10 @@ group("av_session_server_unittest") {
 
   deps = [
     ":AVControllerCallbackProxyTest",
-    ":AVControllerCallbackStubTest",
     ":AVControllerItemTest",
     ":AVRouterImplTest",
     ":AVRouterTest",
     ":AVSessionCallbackProxyTest",
-    ":AVSessionCallbackStubTest",
     ":AVSessionControllerProxyTest",
     ":AVSessionControllerStubTest",
     ":AVSessionDumperTest",
@@ -3181,7 +3179,6 @@ group("av_session_server_unittest") {
     ":AVSessionServiceTestExt",
     ":AVSessionStubTest",
     ":AVSessionWhitelistConfigManagerTest",
-    ":AVSessionUsersManagerTest",
     ":AVSharedMemoryBaseTest",
     ":AVSessionUtilsTest",
     ":AVSessionStorageEventTest",
@@ -3210,7 +3207,6 @@ group("av_session_server_unittest") {
     ":RemoteSessionSourceTest",
     ":RemoteUtilsTest",
     ":SessionListenerProxyTest",
-    ":SessionListenerStubTest",
     ":SessionStackTest",
     ":SoftbusSessionManagerSupplementTest",
     ":SoftbusSessionManagerTest",
@@ -3219,7 +3215,6 @@ group("av_session_server_unittest") {
   if (castplus_cast_engine_enable) {
     deps += [
       ":AVCastControllerCallbackProxyTest",
-      ":AVCastControllerCallbackStubTest",
       ":AVCastControllerProxyTest",
       ":AVCastControllerStubTest",
       ":AVSessionRadarTest",
