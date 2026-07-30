@@ -19,26 +19,41 @@
 #include "avsession_log.h"
 #include "cj_avsession_utils.h"
 namespace OHOS::AVSession {
+
+static void FreeCallbackDataInternal(CCallbackData* callbackData)
+{
+    if (callbackData == nullptr) { return; }
+    if (callbackData->data != nullptr) {
+        free(callbackData->data);
+        callbackData->data = nullptr;
+    }
+    free(callbackData);
+}
+
 template<class T, class CT> CCallbackData* convertToCallbackData(
     const T& native, int32_t eventType, bool convert = true)
 {
     CCallbackData *callbackData = static_cast<CCallbackData *>(malloc(sizeof(CCallbackData)));
-    if (callbackData != nullptr) {
-        callbackData->kind = eventType;
-        if (!convert) {
-            callbackData->error = CJNO_ERROR;
-            callbackData->data = nullptr;
-            return callbackData;
-        }
-        CT* cData = static_cast<CT *>(malloc(sizeof(CT)));
-        if (cData != nullptr) {
-            callbackData->error = ConvertNativeToCJStruct(native, *cData);
-            callbackData->data = static_cast<void *>(cData);
-        } else {
-            callbackData->error = ERR_NO_MEMORY;
-            callbackData->data = nullptr;
-        }
+    if (callbackData == nullptr) { return nullptr; }
+    callbackData->kind = eventType;
+    if (!convert) {
+        callbackData->error = CJNO_ERROR;
+        callbackData->data = nullptr;
+        return callbackData;
     }
+    CT* cData = static_cast<CT *>(malloc(sizeof(CT)));
+    if (cData == nullptr) {
+        callbackData->error = ERR_NO_MEMORY;
+        callbackData->data = nullptr;
+        return callbackData;
+    }
+    callbackData->error = ConvertNativeToCJStruct(native, *cData);
+    if (callbackData->error != CJNO_ERROR) {
+        cjStructHeapFree(*cData);
+        free(cData);
+        cData = nullptr;
+    }
+    callbackData->data = static_cast<void *>(cData);
     return callbackData;
 }
 
@@ -46,25 +61,35 @@ template<class T, class CT, class T2, class CT2> CCallbackData* convertToCallbac
     const T& native, const T2& native2, int32_t eventType)
 {
     CCallbackData *callbackData = static_cast<CCallbackData *>(malloc(sizeof(CCallbackData)));
-    if (callbackData != nullptr) {
-        callbackData->kind = eventType;
-        CT* cData = static_cast<CT *>(malloc(sizeof(CT)));
-        if (cData != nullptr) {
-            callbackData->error = ConvertNativeToCJStruct(native, *cData);
-            callbackData->data = static_cast<void *>(cData);
-        } else {
-            callbackData->error = ERR_NO_MEMORY;
-            callbackData->data = nullptr;
-        }
-        CT2* cData2 = static_cast<CT2 *>(malloc(sizeof(CT2)));
-        if (cData2 != nullptr) {
-            callbackData->error = ConvertNativeToCJStruct(native2, *cData2);
-            callbackData->data2 = static_cast<void *>(cData2);
-        } else {
-            callbackData->error = ERR_NO_MEMORY;
-            callbackData->data2 = nullptr;
-        }
+    if (callbackData == nullptr) { return nullptr; }
+    callbackData->kind = eventType;
+    CT* cData = static_cast<CT *>(malloc(sizeof(CT)));
+    if (cData == nullptr) {
+        callbackData->error = ERR_NO_MEMORY;
+        callbackData->data = nullptr;
+        callbackData->data2 = nullptr;
+        return callbackData;
     }
+    callbackData->error = ConvertNativeToCJStruct(native, *cData);
+    if (callbackData->error != CJNO_ERROR) {
+        cjStructHeapFree(*cData);
+        free(cData);
+        callbackData->data = nullptr;
+        callbackData->data2 = nullptr;
+        return callbackData;
+    }
+    callbackData->data = static_cast<void *>(cData);
+    CT2* cData2 = static_cast<CT2 *>(malloc(sizeof(CT2)));
+    if (cData2 == nullptr) {
+        callbackData->error = ERR_NO_MEMORY;
+        cjStructHeapFree(*cData);
+        free(cData);
+        callbackData->data = nullptr;
+        callbackData->data2 = nullptr;
+        return callbackData;
+    }
+    callbackData->error = ConvertNativeToCJStruct(native2, *cData2);
+    callbackData->data2 = static_cast<void *>(cData2);
     return callbackData;
 }
 
@@ -76,25 +101,19 @@ CCallbackData* convertToCallbackData(int32_t eventType)
 
 template<class CT> void freeCallbackData(CCallbackData* callbackData)
 {
-    if (callbackData == nullptr) {
-        return;
-    }
-    if (callbackData->data != nullptr) {
-        free(static_cast<CT *>(callbackData->data));
-    }
-    free(callbackData);
+    FreeCallbackDataInternal(callbackData);
 }
 
 template<class CT, class CT2> void freeCallbackData(CCallbackData* callbackData)
 {
-    if (callbackData == nullptr) {
-        return;
-    }
+    if (callbackData == nullptr) { return; }
     if (callbackData->data != nullptr) {
         free(static_cast<CT *>(callbackData->data));
+        callbackData->data = nullptr;
     }
     if (callbackData->data2 != nullptr) {
         free(static_cast<CT2 *>(callbackData->data2));
+        callbackData->data2 = nullptr;
     }
     free(callbackData);
 }
@@ -103,6 +122,7 @@ CJAVCastControllerCallback::CJAVCastControllerCallback()
 {
     doCall_ = [](CCallbackData* data) {
         SLOGE("Callback of CJAVCastControllerCallback is not initialized yet!");
+        FreeCallbackDataInternal(data);
     };
 }
 
@@ -116,7 +136,10 @@ void CJAVCastControllerCallback::OnCastPlaybackStateChange(const AVPlaybackState
     CCallbackData* callbackData = convertToCallbackData<AVPlaybackState, CAVPlaybackState>(
         state, EVENT_CAST_PLAYBACK_STATE_CHANGE);
     doCall_(callbackData);
-    freeCallbackData<CAVPlaybackState>(callbackData);
+    if (callbackData != nullptr && callbackData->data != nullptr) {
+        cjStructHeapFree(*static_cast<CAVPlaybackState*>(callbackData->data));
+    }
+    FreeCallbackDataInternal(callbackData);
 }
 
 void CJAVCastControllerCallback::OnMediaItemChange(const AVQueueItem& avQueueItem)
@@ -124,21 +147,24 @@ void CJAVCastControllerCallback::OnMediaItemChange(const AVQueueItem& avQueueIte
     CCallbackData* callbackData = convertToCallbackData<AVQueueItem, CAVQueueItem>(
         avQueueItem, EVENT_CAST_MEDIA_ITEM_CHANGE);
     doCall_(callbackData);
-    freeCallbackData<CAVQueueItem>(callbackData);
+    if (callbackData != nullptr && callbackData->data != nullptr) {
+        cjStructHeapFree(*static_cast<CAVQueueItem*>(callbackData->data));
+    }
+    FreeCallbackDataInternal(callbackData);
 }
 
 void CJAVCastControllerCallback::OnPlayNext()
 {
     CCallbackData* callbackData = convertToCallbackData(EVENT_CAST_PLAY_NEXT);
     doCall_(callbackData);
-    if (callbackData) { free(callbackData); }
+    free(callbackData);
 }
 
 void CJAVCastControllerCallback::OnPlayPrevious()
 {
     CCallbackData* callbackData = convertToCallbackData(EVENT_CAST_PLAY_PREVIOUS);
     doCall_(callbackData);
-    if (callbackData) { free(callbackData); }
+    free(callbackData);
 }
 
 void CJAVCastControllerCallback::OnSeekDone(const int32_t seekNumber)
@@ -158,7 +184,10 @@ void CJAVCastControllerCallback::OnPlayerError(const int32_t errorCode, const st
         errorMsg, EVENT_CAST_ERROR);
     if (callbackData != nullptr) { callbackData->error = errorCode; }
     doCall_(callbackData);
-    freeCallbackData<int32_t>(callbackData);
+    if (callbackData != nullptr && callbackData->data != nullptr) {
+        cjStructHeapFree(*static_cast<char**>(callbackData->data));
+    }
+    FreeCallbackDataInternal(callbackData);
 }
 
 void CJAVCastControllerCallback::OnEndOfStream(const int32_t isLooping)
@@ -174,7 +203,10 @@ void CJAVCastControllerCallback::OnPlayRequest(const AVQueueItem& avQueueItem)
     CCallbackData* callbackData = convertToCallbackData<AVQueueItem, CAVQueueItem>(
         avQueueItem, EVENT_CAST_REQUEST_PLAY);
     doCall_(callbackData);
-    freeCallbackData<CAVQueueItem>(callbackData);
+    if (callbackData != nullptr && callbackData->data != nullptr) {
+        cjStructHeapFree(*static_cast<CAVQueueItem*>(callbackData->data));
+    }
+    FreeCallbackDataInternal(callbackData);
 }
 
 void CJAVCastControllerCallback::OnKeyRequest(const std::string& assetId, const std::vector<uint8_t>& keyRequestData)
@@ -182,6 +214,12 @@ void CJAVCastControllerCallback::OnKeyRequest(const std::string& assetId, const 
     CCallbackData* callbackData = convertToCallbackData<std::string, char*, std::vector<uint8_t>, CArray>(
         assetId, keyRequestData, EVENT_CAST_KEY_REQUEST);
     doCall_(callbackData);
+    if (callbackData != nullptr && callbackData->data != nullptr) {
+        cjStructHeapFree(*static_cast<char**>(callbackData->data));
+    }
+    if (callbackData != nullptr && callbackData->data2 != nullptr) {
+        cjStructHeapFree(*static_cast<CArray*>(callbackData->data2));
+    }
     freeCallbackData<char*, CArray>(callbackData);
 }
 
@@ -190,7 +228,10 @@ void CJAVCastControllerCallback::OnCastValidCommandChanged(const std::vector<int
     CCallbackData* callbackData = convertToCallbackData<std::vector<int32_t>, CArray>(
         cmds, EVENT_CAST_VALID_COMMAND_CHANGED);
     doCall_(callbackData);
-    freeCallbackData<CArray>(callbackData);
+    if (callbackData != nullptr && callbackData->data != nullptr) {
+        cjStructHeapFree(*static_cast<CArray*>(callbackData->data));
+    }
+    FreeCallbackDataInternal(callbackData);
 }
 
 } // namespace AVSession::OHOS

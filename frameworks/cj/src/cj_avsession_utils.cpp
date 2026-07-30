@@ -17,6 +17,7 @@
 
 #include "securec.h"
 #include <cstdlib>
+#include <cstddef>
 #include <vector>
 
 #include "int_wrapper.h"
@@ -138,6 +139,10 @@ void charPtrToVector(char **charPtr, int size, std::vector<std::string> &result)
 
 void SetFdData(std::string key, int *value, WantParams &wantP)
 {
+    if (value == nullptr) {
+        SLOGE("SetFdData: value is nullptr");
+        return;
+    }
     WantParams wp;
     wp.SetParam(TYPE_PROPERTY, OHOS::AAFwk::String::Box(FD));
     wp.SetParam(VALUE_PROPERTY, OHOS::AAFwk::Integer::Box(*value));
@@ -147,6 +152,7 @@ void SetFdData(std::string key, int *value, WantParams &wantP)
 
 bool InnerSetWantParamsArrayString(CParameters* head, WantParams &wantParams)
 {
+    if (head->key == nullptr || head->value == nullptr) { return false; }
     char **strPtr = static_cast<char **>(head->value);
     std::vector<std::string> strVec;
     charPtrToVector(strPtr, head->size, strVec);
@@ -158,13 +164,13 @@ bool InnerSetWantParamsArrayString(CParameters* head, WantParams &wantParams)
         }
         wantParams.SetParam(std::string(head->key), ao);
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool InnerSetWantParamsArrayInt(CParameters* head, WantParams &wantParams)
 {
+    if (head->key == nullptr || head->value == nullptr) { return false; }
     int *intArr = static_cast<int *>(head->value);
     std::vector<int> intVec(intArr, intArr + head->size);
     size_t size = intVec.size();
@@ -175,13 +181,13 @@ bool InnerSetWantParamsArrayInt(CParameters* head, WantParams &wantParams)
         }
         wantParams.SetParam(std::string(head->key), ao);
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool InnerSetWantParamsArrayBool(CParameters* head, WantParams &wantParams)
 {
+    if (head->key == nullptr || head->value == nullptr) { return false; }
     bool *boolArr = static_cast<bool *>(head->value);
     std::vector<bool> boolVec(boolArr, boolArr + head->size);
     size_t size = boolVec.size();
@@ -192,13 +198,13 @@ bool InnerSetWantParamsArrayBool(CParameters* head, WantParams &wantParams)
         }
         wantParams.SetParam(std::string(head->key), ao);
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool InnerSetWantParamsArrayDouble(CParameters* head, WantParams &wantParams)
 {
+    if (head->key == nullptr || head->value == nullptr) { return false; }
     double *doubleArr = static_cast<double *>(head->value);
     std::vector<double> doubleVec(doubleArr, doubleArr + head->size);
     size_t size = doubleVec.size();
@@ -209,24 +215,22 @@ bool InnerSetWantParamsArrayDouble(CParameters* head, WantParams &wantParams)
         }
         wantParams.SetParam(std::string(head->key), ao);
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void InnerSetWantParamsArrayFD(CParameters* head, int64_t size, WantParams &wantParams)
 {
+    if (head == nullptr || head->key == nullptr || head->value == nullptr) { return; }
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IWantParams);
     if (ao != nullptr) {
         for (size_t i = 0; i < static_cast<size_t>(size); i++) {
             WantParams wp;
             SetFdData(std::string(head->key), static_cast<int *>(head->value) + i, wp);
-            wp.DumpInfo(0);
             ao->Set(i, OHOS::AAFwk::WantParamWrapper::Box(wp));
         }
         wantParams.SetParam(std::string(head->key), ao);
     }
-    return;
 }
 
 int32_t InnerSetWantParamsHashMap(CParameters* head, WantParams &wantParams);
@@ -239,6 +243,10 @@ int32_t SetDataParameters(const CArray& parameters, WantParams &wantP)
         return AVSESSION_ERROR;
     }
     for (uint64_t i = 0; i < parameters.size; i++, head++) {
+        if (head->key == nullptr || head->value == nullptr) {
+            SLOGE("CParameters key or value is nullptr at index %{public}" PRIu64, i);
+            continue;
+        }
         auto key = std::string(head->key);
         if (head->valueType == I32_TYPE) { // int32_t
             wantP.SetParam(key, OHOS::AAFwk::Integer::Box(*static_cast<int32_t *>(head->value)));
@@ -272,6 +280,10 @@ int32_t SetDataParameters(const CArray& parameters, WantParams &wantP)
 
 int32_t InnerSetWantParamsHashMap(CParameters* head, WantParams &wantParams)
 {
+    if (head->key == nullptr || head->value == nullptr) {
+        SLOGE("InnerSetWantParamsHashMap: key or value is nullptr");
+        return AVSESSION_ERROR;
+    }
     WantParams wp;
     CArray carr;
     carr.head = head->value;
@@ -326,6 +338,7 @@ int32_t InnerWrapWantParamsT(const WantParams &wantParams, CParameters *p)
 
 int32_t InnerWrapWantParamsUnboxArrayString(sptr<AAFwk::IArray>& ao, int index, char*& strPtr)
 {
+    if (ao == nullptr) { return AVSESSION_ERROR; }
     sptr<AAFwk::IInterface> iface = nullptr;
     if (ao->Get(index, iface) == ERR_OK) {
         AAFwk::IString *iValue = AAFwk::IString::Query(iface);
@@ -359,7 +372,9 @@ int32_t InnerWrapWantParamsArrayString(sptr<AAFwk::IArray> &ao, CParameters *p)
     for (long i = 0; i < size; i++) {
         ret = InnerWrapWantParamsUnboxArrayString(ao, i, arrP[i]);
         if (ret != CJNO_ERROR) {
-            break;
+            for (long j = 0; j < i; j++) { free(arrP[j]); }
+            free(arrP);
+            return ret;
         }
     }
     p->size = size;
@@ -435,6 +450,10 @@ int32_t GetFDValue(const WantParams &wantParams, std::string key, int *ptr)
 
 int32_t InnerWrapWantParamsFd(const WantParams &wantParams, CParameters *p)
 {
+    if (p == nullptr || p->key == nullptr) {
+        SLOGE("InnerWrapWantParamsFd: p or p->key is nullptr");
+        return AVSESSION_ERROR;
+    }
     int *ptr = static_cast<int *>(malloc(sizeof(int)));
     if (ptr == nullptr) {
         return ERR_NO_MEMORY;
@@ -696,10 +715,15 @@ int32_t ConvertNativeToCJStruct(const std::vector<std::string>& native, CArray& 
     if (ret != CJNO_ERROR) {
         return ret;
     }
+    size_t allocSize = sizeof(char*) * native.size();
+    memset_s(cjArrHead, allocSize, 0, allocSize);
     cj.size = 0;
     for (size_t i = 0; i < native.size(); i++, cj.size++) {
         int32_t errCode = ConvertNativeToCJStruct(native[i], cjArrHead[i]);
         if (errCode != CJNO_ERROR) {
+            for (size_t j = 0; j < i; j++) { free(cjArrHead[j]); }
+            free(cjArrHead);
+            cjArrHead = nullptr;
             return errCode;
         }
     }
@@ -723,10 +747,15 @@ int32_t ConvertNativeToCJStruct(const OutputDeviceInfo& native, COutputDeviceInf
     if (ret != CJNO_ERROR) {
         return ret;
     }
+    size_t allocSize = sizeof(CDeviceInfo) * native.deviceInfos_.size();
+    memset_s(cjArrHead, allocSize, 0, allocSize);
     cj.devices.size = 0;
     for (uint32_t i = 0; i < native.deviceInfos_.size(); i++, cj.devices.size++) {
         ret = ConvertNativeToCJStruct(native.deviceInfos_[i], cjArrHead[i]);
         if (ret != CJNO_ERROR) {
+            for (uint32_t j = 0; j < i; j++) { cjStructHeapFree(cjArrHead[j]); }
+            free(cjArrHead);
+            cjArrHead = nullptr;
             return ret;
         }
     }
@@ -826,6 +855,10 @@ int32_t convertCJStructToNative(const CKeyEvent& cj, MMI::KeyEvent& native)
         return ret;
     }
     native.SetKeyCode(nkey.GetKeyCode());
+    if (cj.keysLength > 0 && cj.keys == nullptr) {
+        SLOGE("convertCJStructToNative: keysLength > 0 but keys is nullptr");
+        return AVSESSION_ERROR;
+    }
     for (int64_t i = 0; i < cj.keysLength; i++) {
         MMI::KeyEvent::KeyItem nitem;
         ret = convertCJStructToNative(*(cj.keys+i), nitem);
@@ -928,6 +961,9 @@ int32_t ConvertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&c
     for (size_t i = 0; i < native.size(); i++, cj.size++) {
         int32_t errCode = ConvertNativeToCJStruct(native[i], cjArrHead[i]);
         if (errCode != CJNO_ERROR) {
+            for (size_t j = 0; j < i; j++) { cjStructHeapFree(cjArrHead[j]); }
+            free(cjArrHead);
+            cjArrHead = nullptr;
             return errCode;
         }
     }
@@ -937,12 +973,12 @@ int32_t ConvertNativeToCJStruct(const std::vector<AVQueueItem>& native, CArray&c
 int32_t ConvertNativeToCJStruct(const AVQueueItem& native, CAVQueueItem& cj)
 {
     cj.itemId = native.GetItemId();
-    if (native.GetDescription() == nullptr) {
-        SLOGE("description is nullptr");
-        cj.description = {};
-        return CJNO_ERROR;
+    auto desc = native.GetDescription();
+    if (desc == nullptr) {
+        SLOGE("GetDescription returned nullptr");
+        return AVSESSION_ERROR;
     }
-    return ConvertNativeToCJStruct(*native.GetDescription(), cj.description);
+    return ConvertNativeToCJStruct(*desc, cj.description);
 }
 
 int32_t ConvertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescription& cj)
@@ -954,14 +990,6 @@ int32_t ConvertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescri
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetDescription(), cj.description); });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetMediaUri(), cj.mediaUri); });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetMediaType(), cj.mediaType); });
-    steps.push_back([&]() {
-        if (native.GetExtras() == nullptr) {
-            SLOGE("extras is nullptr");
-            cj.extras = {};
-            return CJNO_ERROR;
-        }
-        return ConvertNativeToCJStruct(*native.GetExtras(), cj.extras);
-    });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAlbumTitle(), cj.albumTitle); });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetAlbumCoverUri(), cj.albumCoverUri); });
     steps.push_back([&]() { return ConvertNativeToCJStruct(native.GetLyricContent(), cj.lyricContent); });
@@ -973,6 +1001,11 @@ int32_t ConvertNativeToCJStruct(const AVMediaDescription& native, CAVMediaDescri
     int32_t errCode = CJUtilsChainCall::RunSteps(steps);
     if (errCode != CJNO_ERROR) {
         return errCode;
+    }
+    auto extras = native.GetExtras();
+    if (extras != nullptr) {
+        errCode = ConvertNativeToCJStruct(*extras, cj.extras);
+        if (errCode != CJNO_ERROR) { return errCode; }
     }
     FFI_MD_HELPER->GetMediaDescriptionDataSrc(cj);
     cj.mediaSize = native.GetMediaSize();
@@ -1021,12 +1054,11 @@ int32_t ConvertNativeToCJStruct(const AVPlaybackState& native, CAVPlaybackState&
     cj.duration = native.GetDuration();
     cj.videoWidth = native.GetVideoWidth();
     cj.videoHeight = native.GetVideoHeight();
-    if (native.GetExtras() == nullptr) {
-        SLOGE("extras is nullptr");
-        cj.extras = {};
-        return CJNO_ERROR;
+    auto extras = native.GetExtras();
+    if (extras != nullptr) {
+        return ConvertNativeToCJStruct(*extras, cj.extras);
     }
-    return ConvertNativeToCJStruct(*native.GetExtras(), cj.extras);
+    return CJNO_ERROR;
 }
 
 int32_t ConvertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArray& cj)
@@ -1041,6 +1073,9 @@ int32_t ConvertNativeToCJStruct(const std::vector<CastDisplayInfo>& native, CArr
     for (size_t i = 0; i < native.size(); i++) {
         ret = ConvertNativeToCJStruct(native[i], cjArrHead[i]);
         if (ret != CJNO_ERROR) {
+            for (size_t j = 0; j < i; j++) { cjStructHeapFree(cjArrHead[j]); }
+            free(cjArrHead);
+            cjArrHead = nullptr;
             return ret;
         }
     }
@@ -1070,6 +1105,16 @@ int32_t ConvertNativeToCJStruct(const AbilityRuntime::WantAgent::WantAgent& nati
 
 /* Cangjie to Native*/
 
+static std::shared_ptr<AVSessionPixelMap> GetPixelMapFromFFI(int64_t id)
+{
+    auto impl = OHOS::FFI::FFIData::GetData<Media::PixelMapImpl>(id);
+    if (impl == nullptr) {
+        SLOGE("FFIData::GetData returned nullptr for pixelMap id");
+        return nullptr;
+    }
+    return AVSessionPixelMapAdapter::ConvertToInner(impl->GetRealPixelMap());
+}
+
 int32_t convertCJStructToNative(const int32_t& cj, int32_t& native)
 {
     native = cj;
@@ -1084,6 +1129,22 @@ int32_t convertCJStructToNative(const CArray& cj, AAFwk::WantParams &native)
     return CJNO_ERROR;
 }
 
+static void SetAVMetaDataImage(const StringPixelMapParameter& img,
+    const std::function<void(const std::string&)>& setUri,
+    const std::function<void(const std::shared_ptr<AVSessionPixelMap>&)>& setPixelMap)
+{
+    if (img.kind == STR_TYPE) {
+        if (img.string != nullptr) {
+            setUri(std::string(img.string));
+        }
+    } else if (img.kind == PIXEL_MAP_TYPE) {
+        auto pixelMap = GetPixelMapFromFFI(img.pixelMap);
+        if (pixelMap != nullptr) {
+            setPixelMap(pixelMap);
+        }
+    }
+}
+
 int32_t convertCJStructToNative(const CAVMetaData& cj, AVMetaData &native)
 {
     int32_t ret = CJNO_ERROR;
@@ -1093,24 +1154,16 @@ int32_t convertCJStructToNative(const CAVMetaData& cj, AVMetaData &native)
     if (cj.author != nullptr) { native.SetAuthor(std::string(cj.author)); }
     if (cj.avQueueName != nullptr) { native.SetAVQueueName(std::string(cj.avQueueName)); }
     if (cj.avQueueId != nullptr) { native.SetAVQueueId(std::string(cj.avQueueId)); }
-    if (cj.avQueueImage.kind == STR_TYPE) {
-        native.SetAVQueueImageUri(std::string(cj.avQueueImage.string));
-    } else if (cj.avQueueImage.kind == PIXEL_MAP_TYPE) {
-        auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
-            cj.avQueueImage.pixelMap)->GetRealPixelMap();
-        native.SetAVQueueImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
-    }
+    SetAVMetaDataImage(cj.avQueueImage,
+        [&native](const std::string& uri) { native.SetAVQueueImageUri(uri); },
+        [&native](const std::shared_ptr<AVSessionPixelMap>& pixelMap) { native.SetAVQueueImage(pixelMap); });
     if (cj.album != nullptr) { native.SetAlbum(std::string(cj.album)); }
     if (cj.writer != nullptr) { native.SetWriter(std::string(cj.writer)); }
     if (cj.composer != nullptr) { native.SetComposer(std::string(cj.composer)); }
     native.SetDuration(cj.duration);
-    if (cj.mediaImage.kind == STR_TYPE) {
-        native.SetMediaImageUri(std::string(cj.mediaImage.string));
-    } else if (cj.mediaImage.kind == PIXEL_MAP_TYPE) {
-        auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
-            cj.mediaImage.pixelMap)->GetRealPixelMap();
-        native.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
-    }
+    SetAVMetaDataImage(cj.mediaImage,
+        [&native](const std::string& uri) { native.SetMediaImageUri(uri); },
+        [&native](const std::shared_ptr<AVSessionPixelMap>& pixelMap) { native.SetMediaImage(pixelMap); });
     native.SetPublishDate(cj.publishDate);
     if (cj.subtitle != nullptr) { native.SetSubTitle(std::string(cj.subtitle)); }
     if (cj.description != nullptr) { native.SetDescription(std::string(cj.description)); }
@@ -1150,9 +1203,10 @@ int32_t convertCJStructToNative(const CAVCallMetaData& cj, AVCallMetaData & nati
     if (cj.name != nullptr) { native.SetName(std::string(cj.name)); }
     if (cj.phoneNumber != nullptr) { native.SetPhoneNumber(std::string(cj.phoneNumber)); }
     if (cj.avatar != 0) {
-        auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
-                cj.avatar)->GetRealPixelMap();
-        native.SetMediaImage(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        auto pixelMap = GetPixelMapFromFFI(cj.avatar);
+        if (pixelMap != nullptr) {
+            native.SetMediaImage(pixelMap);
+        }
     }
     return CJNO_ERROR;
 }
@@ -1229,11 +1283,12 @@ int32_t convertCJStructToNative(const CAVMediaDescription& cj, AVMediaDescriptio
     if (cj.description != nullptr) { native.SetDescription(std::string(cj.description)); }
     if (cj.mediaUri != nullptr) { native.SetMediaUri(std::string(cj.mediaUri)); }
     if (cj.mediaImage.kind == STR_TYPE) {
-        native.SetIconUri(std::string(cj.mediaImage.string));
+        if (cj.mediaImage.string != nullptr) {
+            native.SetIconUri(std::string(cj.mediaImage.string));
+        }
     } else if (cj.mediaImage.kind == PIXEL_MAP_TYPE) {
-        auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(
-            cj.mediaImage.pixelMap)->GetRealPixelMap();
-        native.SetIcon(AVSessionPixelMapAdapter::ConvertToInner(pixelMap));
+        auto pixelMap = GetPixelMapFromFFI(cj.mediaImage.pixelMap);
+        if (pixelMap != nullptr) { native.SetIcon(pixelMap); }
     }
     auto wantP = std::make_shared<AAFwk::WantParams>();
     ret = convertCJStructToNative(cj.extras, *wantP);
@@ -1266,6 +1321,10 @@ int32_t convertCJStructToNative(const CAVMediaDescription& cj, AVMediaDescriptio
 int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVControlCommand& native)
 {
     native.SetCommand(cj.command);
+    if (cj.parameter.value == nullptr) {
+        SLOGE("convertCJStructToNative: parameter.value is nullptr");
+        return AVSESSION_ERROR;
+    }
     switch (cj.command) {
         case AVControlCommand::SESSION_CMD_FAST_FORWARD:
             native.SetForwardTime(*static_cast<int32_t *>(cj.parameter.value));break;
@@ -1290,6 +1349,10 @@ int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVControlCommand& n
 int32_t convertCJStructToNative(const CAVSessionCommand& cj, AVCastControlCommand& native)
 {
     native.SetCommand(cj.command);
+    if (cj.parameter.value == nullptr) {
+        SLOGE("convertCJStructToNative: parameter.value is nullptr");
+        return AVSESSION_ERROR;
+    }
     switch (cj.command) {
         case AVCastControlCommand::CAST_CONTROL_CMD_FAST_FORWARD:
             native.SetForwardTime(*static_cast<int32_t *>(cj.parameter.value));break;
@@ -1385,6 +1448,11 @@ void cjStructHeapFree(CAVPlaybackState& cj)
     cjStructHeapFreeWant(cj.extras);
 }
 
+void cjStructHeapFree(CAVQueueItem& cj)
+{
+    cjStructHeapFree(cj.description);
+}
+
 void cjStructHeapFree(CAVMetaData& cj)
 {
     free(cj.assetId);
@@ -1423,7 +1491,10 @@ void cjStructHeapFree(CAVMetaData& cj)
     if (cj.drmSchemes.head) {
         char** &cjArrHead = reinterpret_cast<char**&>(cj.drmSchemes.head);
         for (size_t i = 0; i < cj.drmSchemes.size; i++) {
-            free(cjArrHead[i]);
+            if (cjArrHead[i] != nullptr) {
+                free(cjArrHead[i]);
+                cjArrHead[i] = nullptr;
+            }
         }
         free(cjArrHead);
         cjArrHead = nullptr;
@@ -1436,7 +1507,7 @@ void cjStructHeapFreeWant(CArray& cj)
     if (head == nullptr) {
         return;
     }
-    ClearParametersPtr(head, cj.size, true);
+    ClearParametersPtr(head, static_cast<int>(cj.size), true);
 }
 
 void cjStructHeapFree(CAVMediaDescription& cj)

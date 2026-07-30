@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include <mutex>
 
 #include "singleton.h"
 #include "cj_avsession_prototypes.h"
@@ -35,6 +36,7 @@ public:
     int32_t SetMediaDescriptionDataSrc(const CAVMediaDescription &mediaDescription);
 
 private:
+    std::mutex mapMutex_;
     std::map<std::string, int32_t> displayTagsMap;
     std::map<std::string, CAVDataSrcDescriptor> dataSrcMap;
 };

@@ -53,7 +53,11 @@ CJAVCastControllerImpl::CJAVCastControllerImpl(
     controller_ = nativeController;
 }
 
-CJAVCastControllerImpl::~CJAVCastControllerImpl() {}
+CJAVCastControllerImpl::~CJAVCastControllerImpl()
+{
+    std::lock_guard<std::mutex> lock(controllerListMutex_);
+    ControllerList_.erase(sessionId_);
+}
 
 CJAVCastControllerInvalidImpl::CJAVCastControllerInvalidImpl() {}
 CJAVCastControllerInvalidImpl::~CJAVCastControllerInvalidImpl() {}
@@ -70,6 +74,10 @@ std::shared_ptr<CJAVCastControllerBase> CJAVCastControllerImpl::GetInstance(cons
 std::shared_ptr<CJAVCastControllerImpl> CJAVCastControllerImpl::NewInstance(
     std::shared_ptr<AVCastController> &nativeController, const std::string& sessionId)
 {
+    if (nativeController == nullptr) {
+        SLOGE("NewInstance failed: nativeController is nullptr");
+        return nullptr;
+    }
     struct CJAVCastControllerImplInner: public CJAVCastControllerImpl {
         CJAVCastControllerImplInner(std::shared_ptr<AVCastController>& nativeController, const std::string& sessionId)
             : CJAVCastControllerImpl(nativeController, sessionId) {}

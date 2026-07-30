@@ -43,7 +43,11 @@ CJAVSessionControllerImpl::CJAVSessionControllerImpl(std::shared_ptr<AVSessionCo
     controller_ = nativeController;
 }
 
-CJAVSessionControllerImpl::~CJAVSessionControllerImpl() {}
+CJAVSessionControllerImpl::~CJAVSessionControllerImpl()
+{
+    std::lock_guard<std::mutex> lock(controllerListMutex_);
+    ControllerList_.erase(sessionId_);
+}
 
 
 CJAVSessionControllerInvalidImpl::CJAVSessionControllerInvalidImpl() {}
@@ -185,8 +189,12 @@ int32_t CJAVSessionControllerImpl::SendAVKeyEvent(CKeyEvent& event)
     if (ptr == nullptr) {
         return ERR_NO_MEMORY;
     }
-    convertCJStructToNative(event, *ptr);
-    int32_t ret = controller_->SendAVKeyEvent(*ptr);
+    int32_t ret = convertCJStructToNative(event, *ptr);
+    if (ret != CJNO_ERROR) {
+        SLOGE("convertCJStructToNative failed:%{public}d", ret);
+        return ret;
+    }
+    ret = controller_->SendAVKeyEvent(*ptr);
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("controller SendAVKeyEvent failed:%{public}d", ret);
     }

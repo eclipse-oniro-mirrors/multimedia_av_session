@@ -28,6 +28,10 @@ namespace OHOS::AVSession {
 
 CJAVSessionImpl::CJAVSessionImpl(std::shared_ptr<AVSession> session)
 {
+    if (session == nullptr) {
+        SLOGE("CJAVSessionImpl constructor: session is nullptr");
+        return;
+    }
     session_ = session;
     sessionId_ = session_->GetSessionId();
     sessionType_ = session_->GetSessionType();

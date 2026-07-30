@@ -445,15 +445,18 @@ void CJAVSessionCallback::OnMediaKeyEvent(const MMI::KeyEvent& keyEvent)
     std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[HANDLE_KEY_EVENT]);
     if (handleKeyEvent) {
         SLOGD("media key event received");
-        CKeyEvent ckeyEvent;
+        CKeyEvent ckeyEvent{};
         int ret = CJNO_ERROR;
         ret = ConvertNativeToCJStruct(keyEvent, ckeyEvent);
         if (ret != CJNO_ERROR) {
             SLOGD("KeyEvent convert to C Type failed");
-            return ;
+            free(ckeyEvent.keys);
+            ckeyEvent.keys = nullptr;
+            return;
         }
         handleKeyEvent(ckeyEvent);
         free(ckeyEvent.keys);
+        ckeyEvent.keys = nullptr;
     }
 }
 
@@ -468,7 +471,8 @@ void CJAVSessionCallback::OnOutputDeviceChange(
         ret = ConvertNativeToCJStruct(outputDeviceInfo, coutputDeviceInfo);
         if (ret != CJNO_ERROR) {
             SLOGD("OutputDeviceInfo convert to C Type failed");
-            return ;
+            cjStructHeapFree(coutputDeviceInfo);
+            return;
         }
         outputDeviceChange(connectionState, coutputDeviceInfo);
         cjStructHeapFree(coutputDeviceInfo);
@@ -489,16 +493,17 @@ void CJAVSessionCallback::OnCommonCommand(
             return ;
         }
         SLOGD("common command received: %s", ccommand);
-        CArray cArgs;
+        CArray cArgs {};
         ret = ConvertNativeToCJStruct(commandArgs, cArgs);
         if (ret != CJNO_ERROR) {
             SLOGD("AAFwk::WantParams convert to C Type failed");
             free(ccommand);
-            return ;
+            cjStructHeapFreeWant(cArgs);
+            return;
         }
         commonCommand(ccommand, cArgs);
         free(ccommand);
-        cjStructHeapFree(cArgs);
+        cjStructHeapFreeWant(cArgs);
     }
 }
 
