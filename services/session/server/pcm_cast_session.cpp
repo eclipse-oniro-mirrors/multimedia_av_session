@@ -112,9 +112,12 @@ void PcmCastSession::HandleDeviceDisconnect()
 void PcmCastSession::HandleTimerByCastState(int32_t castState)
 {
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED)) {
+        std::weak_ptr<PcmCastSession> weakPtr = shared_from_this();
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
-            [this]() {
-                AVRouter::GetInstance().OnSystemCommonEvent(STOP_CAST, "");
+            [weakPtr]() {
+                auto sharedPtr = weakPtr.lock();
+                CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "HandleTimerByCastState null");
+                AVRouter::GetInstance().OnSystemCommonEvent(sharedPtr->STOP_CAST, "");
             }, "HandleHiPlayStreamCastStateChange", hiPlayHotelTimeoutMs);
     }
 

@@ -209,15 +209,19 @@ bool HwCastProviderSession::GetRemoteNetWorkId(std::string deviceId, std::string
 
 bool HwCastProviderSession::SetStreamState(DeviceInfo deviceInfo)
 {
-    std::lock_guard lockGuard(mutex_);
-    for (auto listener : castSessionStateListenerList_) {
+    std::vector<std::shared_ptr<IAVCastSessionStateListener>> tempListenerList;
+    {
+        std::lock_guard lockGuard(mutex_);
+        tempListenerList = castSessionStateListenerList_;
+        stashDeviceState_ = deviceStateConnection;
+        stashDeviceId_ = deviceInfo.deviceId_;
+    }
+    for (auto listener : tempListenerList) {
         if (listener != nullptr) {
             SLOGI("trigger the OnCastStateChange for registered listeners");
             listener->OnCastStateChange(deviceStateConnection, deviceInfo, noReasonCode);
         }
     }
-    stashDeviceState_ = deviceStateConnection;
-    stashDeviceId_ = deviceInfo.deviceId_;
     return true;
 }
 

@@ -37,6 +37,8 @@ public:
 
     SessionStack& GetContainerFromUser(int32_t userId);
 
+    std::shared_ptr<SessionStack> GetContainerPtrFromUser(int32_t userId);
+
     SessionStack& GetContainerFromAll();
 
     std::shared_ptr<std::list<sptr<AVSessionItem>>> GetCurSessionListForFront(int32_t userId);
@@ -65,9 +67,9 @@ public:
 
     void RemoveSessionListener(pid_t pid);
 
-    std::map<pid_t, sptr<ISessionListener>>& GetSessionListener(int32_t userId = 0);
+    std::map<pid_t, sptr<ISessionListener>> GetSessionListener(int32_t userId = 0);
 
-    std::map<pid_t, sptr<ISessionListener>>& GetSessionListenerForAllUsers();
+    std::map<pid_t, sptr<ISessionListener>> GetSessionListenerForAllUsers();
 
     void NotifyAccountsEvent(const std::string &type, const int &userId);
 

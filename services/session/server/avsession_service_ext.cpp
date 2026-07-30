@@ -54,6 +54,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         ExtendedScreenSplitExtraInfo(extraInfo);
     }
     if (isMirrorToStreamService) {
+        std::lock_guard lockGuard(checkEnableCastLock_);
         castServiceNameStatePair_ = std::make_pair(serviceName, state);
         isSupportMirrorToStream_ = false;
         appCastExit_ = false;
