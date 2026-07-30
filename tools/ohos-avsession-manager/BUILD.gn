@@ -55,8 +55,9 @@ ohos_cli_executable("ohos-avsession-manager") {
     "ability_runtime:wantagent_innerkits",
     "audio_framework:audio_client",
     "cJSON:cjson",
-    "input:libmmi-client",
     "c_utils:utils",
+    "input:libmmi-client",
+    "node:node_header_notice",
   ]
 
   subsystem_name = "multimedia"

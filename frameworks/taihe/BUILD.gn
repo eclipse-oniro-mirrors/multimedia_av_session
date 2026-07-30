@@ -123,6 +123,7 @@ taihe_shared_library("avsession_taihe") {
     "image_framework:image_taihe",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "node:node_header_notice",
     "runtime_core:ani",
     "runtime_core:libarkruntime",
     "safwk:system_ability_fwk",
