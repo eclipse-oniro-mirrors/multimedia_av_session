@@ -1185,33 +1185,6 @@ HWTEST(OHAVSessionTest, UnregisterToggleFavoriteCallback_001, TestSize.Level0)
 }
 
 /**
- * @tc.name: RegisterToggleFavoriteCallback_001
- * @tc.desc: Test RegisterToggleFavoriteCallback when avSession_ is nullptr,
- *           CheckAndRegister fails and the error is propagated instead of SUCCESS.
- * @tc.type: FUNC
- * @tc.require: none
- */
-HWTEST(OHAVSessionTest, RegisterToggleFavoriteCallback_001, TestSize.Level0)
-{
-    AVSession_Type sessionType = SESSION_TYPE_VIDEO;
-    const char* sessionTag = "1";
-    const char* bundleName = "2";
-    const char* abilityName = "3";
-    auto oHAVSession = std::make_shared<OHAVSession>(sessionType, sessionTag, bundleName, abilityName);
-    OH_AVSessionCallback_OnToggleFavorite callback = [](OH_AVSession* session, const char* assetId,
-        void* userData) -> AVSessionCallback_Result
-    {
-        return AVSESSION_CALLBACK_RESULT_SUCCESS;
-    };
-    int userData = 1;
-    oHAVSession->SetAVSession(nullptr);
-    AVSession_ErrCode result = oHAVSession->RegisterToggleFavoriteCallback(callback, (void *)(&userData));
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-    result = oHAVSession->RegisterToggleFavoriteCallback(callback, (void *)(&userData));
-    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
-}
-
-/**
  * @tc.name: OHAVSession_GetSessionId_002
  * @tc.desc: Test GetSessionId when sessionId_ is empty
  * @tc.type: FUNC

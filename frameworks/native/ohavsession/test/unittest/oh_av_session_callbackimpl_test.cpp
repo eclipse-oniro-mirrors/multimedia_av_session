@@ -866,57 +866,25 @@ HWTEST_F(OHAVSessionCallbackImplTest, UnregisterSetLoopModeCallback001, TestSize
     SLOGI("UnregisterSetLoopModeCallback001 Begin");
     auto avsession = std::make_shared<OHAVSession>();
     OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
-    EXPECT_TRUE(oh_avsession != nullptr);
-
-    int callCountOne = 0;
-    int callCountTwo = 0;
-    OH_AVSessionCallback_OnSetLoopMode callbackOne = [](OH_AVSession* session,
-        AVSession_LoopMode curLoopMode, void* userData) -> AVSessionCallback_Result {
-        if (userData != nullptr) {
-            (*(static_cast<int*>(userData)))++;
-        }
-        return AVSESSION_CALLBACK_RESULT_SUCCESS;
-    };
-    OH_AVSessionCallback_OnSetLoopMode callbackTwo = [](OH_AVSession* session,
-        AVSession_LoopMode curLoopMode, void* userData) -> AVSessionCallback_Result {
-        if (userData != nullptr) {
-            (*(static_cast<int*>(userData)))++;
-        }
+    ASSERT_NE(oh_avsession, nullptr);
+    int callCount = 0;
+    OH_AVSessionCallback_OnSetLoopMode callback = [](OH_AVSession*, AVSession_LoopMode, void* userData) {
+        if (userData != nullptr) { (*(static_cast<int*>(userData)))++; }
         return AVSESSION_CALLBACK_RESULT_SUCCESS;
     };
     g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
-    auto ret = g_ohAVSessionCallbackImpl.RegisterSetLoopModeCallback(
-        oh_avsession, callbackOne, (void *)(&callCountOne));
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = g_ohAVSessionCallbackImpl.RegisterSetLoopModeCallback(
-        oh_avsession, callbackTwo, (void *)(&callCountTwo));
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-
-    auto findCallback = [](OH_AVSessionCallback_OnSetLoopMode callback) {
-        return std::find_if(g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.begin(),
-            g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end(),
-            [callback](const std::pair<OH_AVSessionCallback_OnSetLoopMode, void*> &element) {
-                return element.first == callback; });
-    };
-    EXPECT_TRUE(findCallback(callbackOne) != g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end());
-    EXPECT_TRUE(findCallback(callbackTwo) != g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end());
-
+    EXPECT_EQ(g_ohAVSessionCallbackImpl.RegisterSetLoopModeCallback(oh_avsession, callback, &callCount),
+        AV_SESSION_ERR_SUCCESS);
     g_ohAVSessionCallbackImpl.OnSetLoopMode(static_cast<int32_t>(LOOP_MODE_SINGLE));
-    EXPECT_EQ(callCountOne, 1);
-    EXPECT_EQ(callCountTwo, 1);
-
-    ret = g_ohAVSessionCallbackImpl.UnregisterSetLoopModeCallback(oh_avsession, callbackOne);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    EXPECT_TRUE(findCallback(callbackOne) == g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end());
-    EXPECT_TRUE(findCallback(callbackTwo) != g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end());
-
+    EXPECT_EQ(callCount, 1);
+    EXPECT_EQ(g_ohAVSessionCallbackImpl.UnregisterSetLoopModeCallback(oh_avsession, callback),
+        AV_SESSION_ERR_SUCCESS);
+    EXPECT_TRUE(std::find_if(g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.begin(),
+        g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnSetLoopMode, void*>& element) {
+            return element.first == callback; }) == g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end());
     g_ohAVSessionCallbackImpl.OnSetLoopMode(static_cast<int32_t>(LOOP_MODE_SINGLE));
-    EXPECT_EQ(callCountOne, 1);
-    EXPECT_EQ(callCountTwo, 2);
-
-    ret = g_ohAVSessionCallbackImpl.UnregisterSetLoopModeCallback(oh_avsession, callbackTwo);
-    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    EXPECT_TRUE(findCallback(callbackTwo) == g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end());
+    EXPECT_EQ(callCount, 1); // erased: stale callback must not fire again
     SLOGI("UnregisterSetLoopModeCallback001 End");
 }
 

@@ -79,7 +79,7 @@ public:
 class AVCastControllerRegisterFailMock : public AVCastControllerMock {
 public:
     AVCastControllerRegisterFailMock() = default;
-    virtual ~AVCastControllerRegisterFailMock() = default;
+    ~AVCastControllerRegisterFailMock() override = default;
     int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override
     {
         registerCallbackTimes_++;
