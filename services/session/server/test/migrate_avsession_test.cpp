@@ -324,6 +324,21 @@ static HWTEST_F(MigrateAVSessionTest, StopObserveControllerChanged001, TestSize.
 }
 
 /**
+* @tc.name: ObserveControllerChangedWithNullService001
+* @tc.desc: test ObserveControllerChanged with null servicePtr_
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(MigrateAVSessionTest, ObserveControllerChangedWithNullService001, TestSize.Level0)
+{
+    SLOGI("ObserveControllerChangedWithNullService001 begin");
+    auto serverWithNullService = std::make_shared<MigrateAVSessionServer>();
+    const std::string deviceId = "test_device";
+    serverWithNullService->ObserveControllerChanged(deviceId);
+    SLOGI("ObserveControllerChangedWithNullService001 end");
+}
+
+/**
 * @tc.name: GetControllerById001
 * @tc.desc:
 * @tc.type: FUNC
