@@ -76,6 +76,18 @@ public:
     int32_t Destroy() override { return AVSESSION_SUCCESS; };
 };
 
+class AVCastControllerRegisterFailMock : public AVCastControllerMock {
+public:
+    AVCastControllerRegisterFailMock() = default;
+    virtual ~AVCastControllerRegisterFailMock() = default;
+    int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override
+    {
+        registerCallbackTimes_++;
+        return AVSESSION_ERROR;
+    };
+    int32_t registerCallbackTimes_ = 0;
+};
+
 /**
  * @tc.name: OH_AVCastController_SetAVCastController_001
  * @tc.desc: SetAVCastController from the class of ohavcastcontroller
@@ -645,6 +657,31 @@ HWTEST(OHAVCastControllerTest, OH_AVCastController_CheckAndRegister_001, TestSiz
 
     result = avCastController.CheckAndRegister();
     EXPECT_EQ(result, AV_SESSION_ERR_SUCCESS);
+}
+
+/**
+ * @tc.name: OH_AVCastController_CheckAndRegisterResetOnRegisterFail_001
+ * @tc.desc: CheckAndRegister resets ohAVCastControllerCallbackImpl_ when RegisterCallback fails
+ * @tc.type: FUNC
+ * @tc.require: none
+*/
+HWTEST(OHAVCastControllerTest, OH_AVCastController_CheckAndRegisterResetOnRegisterFail_001, TestSize.Level0)
+{
+    OHAVCastController avCastController;
+    std::shared_ptr<AVCastControllerRegisterFailMock> castControllerMock =
+        std::make_shared<AVCastControllerRegisterFailMock>();
+    ASSERT_NE(castControllerMock, nullptr);
+    avCastController.avCastController_ = castControllerMock;
+
+    AVSession_ErrCode result = avCastController.CheckAndRegister();
+    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
+    EXPECT_EQ(castControllerMock->registerCallbackTimes_, 1);
+    EXPECT_EQ(avCastController.ohAVCastControllerCallbackImpl_, nullptr);
+
+    result = avCastController.CheckAndRegister();
+    EXPECT_EQ(result, AV_SESSION_ERR_SERVICE_EXCEPTION);
+    EXPECT_EQ(castControllerMock->registerCallbackTimes_, 2);
+    EXPECT_EQ(avCastController.ohAVCastControllerCallbackImpl_, nullptr);
 }
 
 /**
