@@ -187,7 +187,7 @@ bool HwCastProviderSession::GetRemoteDrmCapabilities(std::string deviceId, std::
         return false;
     }
     CastRemoteDevice castRemoteDevice = {};
-    GetRemoteDeviceInfo(deviceId, castRemoteDevice);
+    castSession_->GetRemoteDeviceInfo(deviceId, castRemoteDevice);
     drmCapabilities = castRemoteDevice.drmCapabilities;
     return true;
 }
