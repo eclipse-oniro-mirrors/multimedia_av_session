@@ -63,7 +63,6 @@ void MigrateAVSessionTest::SetUpTestCase()
     SLOGI("MigrateAVSessionTest SetUpTestCase");
     server_ = std::make_shared<MigrateAVSessionServer>();
     avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
-
 }
 
 void MigrateAVSessionTest::TearDownTestCase()
