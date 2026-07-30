@@ -296,11 +296,43 @@ ohos_unittest("OHAVUtilsTest") {
   module_out_path = module_output_path
 }
 
+ohos_unittest("OHAVSessionPlaybackStateTest") {
+  install_enable = true
+  visibility = [ ":*" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "../../../../../interfaces/inner_api/native/session/include",
+    "../../../../../interfaces/kits/c",
+    "../../include",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
+
+  sources = [ "./oh_av_sessionplaybackstate_test.cpp" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  module_out_path = module_output_path
+}
+
 group("oh_av_session_unittest") {
   testonly = true
   deps = [
     ":OHAVMetadataBuilderTest",
     ":OHAVSessionCallbackImplTest",
+    ":OHAVSessionPlaybackStateTest",
     ":OHAVSessionTest",
     ":OHAVMediaDescriptionBuilderTest",
     ":OHDeviceInfoTest",

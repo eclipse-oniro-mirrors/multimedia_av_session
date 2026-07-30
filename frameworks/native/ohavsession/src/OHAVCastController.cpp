@@ -551,8 +551,11 @@ AVSession_ErrCode OHAVCastController::CheckAndRegister()
     }
     if (ohAVCastControllerCallbackImpl_ == nullptr) {
         ohAVCastControllerCallbackImpl_ = std::make_shared<OHAVCastControllerCallbackImpl>();
-        AVSession_ErrCode ret =  static_cast<AVSession_ErrCode>(
+        AVSession_ErrCode ret = static_cast<AVSession_ErrCode>(
             avCastController_->RegisterCallback(ohAVCastControllerCallbackImpl_));
+        if (ret != AV_SESSION_ERR_SUCCESS) {
+            ohAVCastControllerCallbackImpl_ = nullptr;
+        }
         CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret == AV_SESSION_ERR_SUCCESS, AV_SESSION_ERR_SERVICE_EXCEPTION,
             OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
             OHOS::AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "RegisterCallback failed", true),

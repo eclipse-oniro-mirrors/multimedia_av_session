@@ -69,6 +69,7 @@ sptr<AVSessionServiceProxy> AVSessionManagerImpl::GetService()
         serviceDeathRecipient_ = new(std::nothrow) ServiceDeathRecipient([this] { OnServiceDie(); });
         if (serviceDeathRecipient_ == nullptr) {
             SLOGE("register ServiceDeathRecipient failed");
+            service_ = nullptr;
             return nullptr;
         }
 
@@ -97,7 +98,12 @@ void AVSessionManagerImpl::RegisterServiceStateListener(sptr<ISystemAbilityManag
 
 void AVSessionManagerImpl::OnServiceStateChange(bool isAddSystemAbility)
 {
-    if (!serviceStartCallback_) {
+    std::function<void()> serviceStartCallback;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        serviceStartCallback = serviceStartCallback_;
+    }
+    if (!serviceStartCallback) {
         SLOGI("OnServiceStateChange not register ServiceStartCallback");
         return;
     }
@@ -105,7 +111,7 @@ void AVSessionManagerImpl::OnServiceStateChange(bool isAddSystemAbility)
         isAddSystemAbility, isServiceDie_.load());
     if (isAddSystemAbility) {
         if (isServiceDie_.load()) {
-            serviceStartCallback_();
+            serviceStartCallback();
             isServiceDie_ = false;
         }
     } else {
@@ -397,13 +403,15 @@ int32_t AVSessionManagerImpl::UnregisterServiceDeathCallback()
 int32_t AVSessionManagerImpl::RegisterServiceStartCallback(const std::function<void()> serviceStartCallback)
 {
     SLOGI("RegisterServiceStartCallback");
+    std::lock_guard<std::mutex> lockGuard(lock_);
     serviceStartCallback_ = serviceStartCallback;
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionManagerImpl::UnregisterServiceStartCallback()
 {
-    serviceStartCallback_= nullptr;
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    serviceStartCallback_ = nullptr;
     return AVSESSION_SUCCESS;
 }
 

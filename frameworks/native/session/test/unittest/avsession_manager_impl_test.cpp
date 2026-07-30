@@ -14,7 +14,12 @@
  */
 
 #include <gtest/gtest.h>
+
+#include "avsession_log.h"
+
+#define private public
 #include "avsession_manager_impl.h"
+#undef private
 
 using namespace testing::ext;
 
@@ -289,6 +294,76 @@ HWTEST_F(AVSessionManagerImplTest, GetDistributedSessionControllers003, TestSize
     int32_t result =
 	    impl.GetDistributedSessionControllers(DistributedSessionType::TYPE_SESSION_MIGRATE_OUT, controllers);
     EXPECT_EQ(result, ERR_REMOTE_CONNECTION_NOT_EXIST);
+}
+
+/**
+* @tc.name: RegisterServiceStartCallbackInvoke001
+* @tc.desc: test RegisterServiceStartCallback, callback is invoked on service restart
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, RegisterServiceStartCallbackInvoke001, TestSize.Level1)
+{
+    SLOGI("RegisterServiceStartCallbackInvoke001 begin");
+    AVSessionManagerImpl impl;
+    bool isCallbackInvoked = false;
+    int32_t ret = impl.RegisterServiceStartCallback([&isCallbackInvoked]() {
+        isCallbackInvoked = true;
+    });
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    impl.isServiceDie_ = true;
+    impl.OnServiceStateChange(true);
+    EXPECT_TRUE(isCallbackInvoked);
+    EXPECT_FALSE(impl.isServiceDie_.load());
+    SLOGI("RegisterServiceStartCallbackInvoke001 end");
+}
+
+/**
+* @tc.name: UnregisterServiceStartCallbackNoInvoke001
+* @tc.desc: test UnregisterServiceStartCallback, callback is not invoked after unregister
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, UnregisterServiceStartCallbackNoInvoke001, TestSize.Level1)
+{
+    SLOGI("UnregisterServiceStartCallbackNoInvoke001 begin");
+    AVSessionManagerImpl impl;
+    bool isCallbackInvoked = false;
+    int32_t ret = impl.RegisterServiceStartCallback([&isCallbackInvoked]() {
+        isCallbackInvoked = true;
+    });
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    ret = impl.UnregisterServiceStartCallback();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    impl.isServiceDie_ = true;
+    impl.OnServiceStateChange(true);
+    EXPECT_FALSE(isCallbackInvoked);
+    EXPECT_TRUE(impl.isServiceDie_.load());
+    SLOGI("UnregisterServiceStartCallbackNoInvoke001 end");
+}
+
+/**
+* @tc.name: OnServiceStateChangeSetServiceDie001
+* @tc.desc: test OnServiceStateChange remove then add, callback invoked once service die
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, OnServiceStateChangeSetServiceDie001, TestSize.Level1)
+{
+    SLOGI("OnServiceStateChangeSetServiceDie001 begin");
+    AVSessionManagerImpl impl;
+    bool isCallbackInvoked = false;
+    int32_t ret = impl.RegisterServiceStartCallback([&isCallbackInvoked]() {
+        isCallbackInvoked = true;
+    });
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    impl.OnServiceStateChange(false);
+    EXPECT_FALSE(isCallbackInvoked);
+    EXPECT_TRUE(impl.isServiceDie_.load());
+    impl.OnServiceStateChange(true);
+    EXPECT_TRUE(isCallbackInvoked);
+    EXPECT_FALSE(impl.isServiceDie_.load());
+    SLOGI("OnServiceStateChangeSetServiceDie001 end");
 }
 } // namespace AVSession
 } // namespace OHOS

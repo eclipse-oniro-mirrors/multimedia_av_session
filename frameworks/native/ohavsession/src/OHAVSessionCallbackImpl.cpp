@@ -375,10 +375,11 @@ AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterSetLoopModeCallback(OH_AVSe
     OH_AVSessionCallback_OnSetLoopMode callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
-    std::remove_if (setLoopModeCallbacks_.begin(), setLoopModeCallbacks_.end(),
+    auto it = std::remove_if(setLoopModeCallbacks_.begin(), setLoopModeCallbacks_.end(),
         [callback](const std::pair<OH_AVSessionCallback_OnSetLoopMode, void*> &element) {
             return element.first == callback;
         });
+    setLoopModeCallbacks_.erase(it, setLoopModeCallbacks_.end());
     return AV_SESSION_ERR_SUCCESS;
 }
 

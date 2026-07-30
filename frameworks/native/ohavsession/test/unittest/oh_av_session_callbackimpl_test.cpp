@@ -856,6 +856,39 @@ HWTEST_F(OHAVSessionCallbackImplTest, OnSetLoopMode001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UnregisterSetLoopModeCallback001
+ * @tc.desc: test UnregisterSetLoopModeCallback really erases the callback from setLoopModeCallbacks_
+ * @tc.type: FUNC
+ * @tc.require: AR000H31JO
+ */
+HWTEST_F(OHAVSessionCallbackImplTest, UnregisterSetLoopModeCallback001, TestSize.Level0)
+{
+    SLOGI("UnregisterSetLoopModeCallback001 Begin");
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    ASSERT_NE(oh_avsession, nullptr);
+    int callCount = 0;
+    OH_AVSessionCallback_OnSetLoopMode callback = [](OH_AVSession*, AVSession_LoopMode, void* userData) {
+        if (userData != nullptr) { (*(static_cast<int*>(userData)))++; }
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    EXPECT_EQ(g_ohAVSessionCallbackImpl.RegisterSetLoopModeCallback(oh_avsession, callback, &callCount),
+        AV_SESSION_ERR_SUCCESS);
+    g_ohAVSessionCallbackImpl.OnSetLoopMode(static_cast<int32_t>(LOOP_MODE_SINGLE));
+    EXPECT_EQ(callCount, 1);
+    EXPECT_EQ(g_ohAVSessionCallbackImpl.UnregisterSetLoopModeCallback(oh_avsession, callback),
+        AV_SESSION_ERR_SUCCESS);
+    EXPECT_TRUE(std::find_if(g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.begin(),
+        g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnSetLoopMode, void*>& element) {
+            return element.first == callback; }) == g_ohAVSessionCallbackImpl.setLoopModeCallbacks_.end());
+    g_ohAVSessionCallbackImpl.OnSetLoopMode(static_cast<int32_t>(LOOP_MODE_SINGLE));
+    EXPECT_EQ(callCount, 1); // erased: stale callback must not fire again
+    SLOGI("UnregisterSetLoopModeCallback001 End");
+}
+
+/**
  * @tc.name: OnToggleFavorite001
  * @tc.desc: test OnToggleFavorite
  * @tc.type: FUNC

@@ -433,6 +433,7 @@ int32_t TaiheAVCastControllerCallback::RemoveCallback(int32_t event, std::shared
 bool TaiheAVCastControllerCallback::IsCallbacksEmpty(int32_t event)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_CAST_TYPE_MAX, true, "has no event");
     return callbacks_[event].empty();
 }
 } // namespace ANI::AVSession

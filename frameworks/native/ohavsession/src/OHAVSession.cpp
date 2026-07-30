@@ -403,7 +403,8 @@ AVSession_ErrCode OHAVSession::RegisterToggleFavoriteCallback(OH_AVSessionCallba
     void* userData)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
-    CheckAndRegister();
+    AVSession_ErrCode cbRet = CheckAndRegister();
+    CHECK_AND_RETURN_RET_LOG(cbRet == AV_SESSION_ERR_SUCCESS, cbRet, "CheckAndRegister failed");
     CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     int32_t ret = avSession_->AddSupportCommand(static_cast<int32_t>(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE));
     if (static_cast<AVSession_ErrCode>(ret) != AV_SESSION_ERR_SUCCESS) {
@@ -438,10 +439,10 @@ AVSession_ErrCode OHAVSession::RegisterOutputDeviceChangeCallback(OH_AVSessionCa
 
 AVSession_ErrCode OHAVSession::UnregisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    std::lock_guard<std::mutex> lockGuard(lock_);
     ohAVSessionCallbackImpl_->UnregisterOutputDeviceChangeCallback((OH_AVSession*)this, callback);
     return AV_SESSION_ERR_SUCCESS;
 }
@@ -465,7 +466,7 @@ AVSession_ErrCode OHAVSession::GetAVCastController(OHAVCastController **avcastCo
         return AV_SESSION_ERR_SERVICE_EXCEPTION;
     }
 
-    OHAVCastController *avCastControllerObj = new OHAVCastController();
+    OHAVCastController *avCastControllerObj = new(std::nothrow) OHAVCastController();
     if (avCastControllerObj == nullptr) {
         SLOGE("create avCastControllerObj fail");
         OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),

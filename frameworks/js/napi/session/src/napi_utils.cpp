@@ -46,6 +46,10 @@ bool NapiUtils::isNeedReportIssuerName = true;
 size_t NapiUtils::WriteCallback(std::uint8_t *ptr, size_t size, size_t nmemb, std::vector<std::uint8_t> *imgBuffer)
 {
     size_t realsize = size * nmemb;
+    if (ptr == nullptr || imgBuffer == nullptr || realsize == 0) {
+        SLOGE("WriteCallback parameter is invalid");
+        return 0;
+    }
     imgBuffer->reserve(realsize + imgBuffer->capacity());
     for (size_t i = 0; i < realsize; i++) {
         imgBuffer->push_back(ptr[i]);
@@ -90,7 +94,12 @@ bool NapiUtils::CurlSetRequestOptions(std::vector<std::uint8_t>& imgBuffer, cons
             int64_t httpCode = 0;
             curl_easy_getinfo(easyHandle_, CURLINFO_RESPONSE_CODE, &httpCode);
             SLOGI("DoDownload Http result " "%{public}" PRId64, httpCode);
-            CHECK_AND_RETURN_RET_LOG(httpCode < NapiUtils::HTTP_ERROR_CODE, false, "recv Http ERROR");
+            if (httpCode >= NapiUtils::HTTP_ERROR_CODE) {
+                SLOGE("recv Http ERROR");
+                curl_easy_cleanup(easyHandle_);
+                easyHandle_ = nullptr;
+                return false;
+            }
 
             ReportCertIssuerNameIfNeeded(easyHandle_, bundleName);
 

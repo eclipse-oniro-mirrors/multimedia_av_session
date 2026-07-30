@@ -14,6 +14,8 @@
  */
 
 #include "OHAVSessionPlaybackState.h"
+#include <cmath>
+#include <cstdint>
 #include "stream_dfx_manager.h"
 #include "audio_errors.h"
 
@@ -28,43 +30,46 @@ OHAVSessionPlaybackState::~OHAVSessionPlaybackState()
 
 void OHAVSessionPlaybackState::SetState(int32_t state)
 {
-    state_ = state;
+    state_.store(state, std::memory_order_relaxed);
 }
 
 int32_t OHAVSessionPlaybackState::GetState() const
 {
-    return state_;
+    return state_.load(std::memory_order_relaxed);
 }
 
 void OHAVSessionPlaybackState::SetPosition(const OHAVSessionPlaybackState::Position& position)
 {
-    position_.elapsedTime_ = position.elapsedTime_;
-    position_.updateTime_ = position.updateTime_;
+    elapsedTime_.store(position.elapsedTime_, std::memory_order_relaxed);
+    updateTime_.store(position.updateTime_, std::memory_order_relaxed);
 }
 
 OHAVSessionPlaybackState::Position OHAVSessionPlaybackState::GetPosition() const
 {
-    return position_;
+    OHAVSessionPlaybackState::Position position;
+    position.elapsedTime_ = elapsedTime_.load(std::memory_order_relaxed);
+    position.updateTime_ = updateTime_.load(std::memory_order_relaxed);
+    return position;
 }
 
 void OHAVSessionPlaybackState::SetSpeed(double speed)
 {
-    speed_ = speed;
+    speed_.store(speed, std::memory_order_relaxed);
 }
 
 double OHAVSessionPlaybackState::GetSpeed() const
 {
-    return speed_;
+    return speed_.load(std::memory_order_relaxed);
 }
 
 void OHAVSessionPlaybackState::SetVolume(int32_t volume)
 {
-    volume_ = volume;
+    volume_.store(volume, std::memory_order_relaxed);
 }
 
 int32_t OHAVSessionPlaybackState::GetVolume() const
 {
-    return volume_;
+    return volume_.load(std::memory_order_relaxed);
 }
 
 void OHAVSessionPlaybackState::ConvertFilter(int32_t filter, AVPlaybackState::PlaybackStateMaskType &maskType)
@@ -121,11 +126,16 @@ AVSession_ErrCode OH_AVSession_GetPlaybackSpeed(OH_AVSession_AVPlaybackState* pl
         "playbState is null");
     CHECK_AND_CALL_FUNC_RETURN_RET_LOG(speed != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
         OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
-        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "position is null", true),
-        "position is null");
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_GET, "speed is null", true),
+        "speed is null");
     OHOS::AVSession::OHAVSessionPlaybackState *oh_avsessionplaybackstate =
         (OHOS::AVSession::OHAVSessionPlaybackState *)playbState;
-    *speed = static_cast<int32_t>(oh_avsessionplaybackstate->GetSpeed());
+    double rawSpeed = oh_avsessionplaybackstate->GetSpeed();
+    if (!std::isfinite(rawSpeed) || rawSpeed < 0 || rawSpeed > static_cast<double>(INT32_MAX)) {
+        SLOGE("GetPlaybackSpeed invalid speed value");
+        return AV_SESSION_ERR_INVALID_PARAMETER;
+    }
+    *speed = static_cast<int32_t>(rawSpeed);
     return AV_SESSION_ERR_SUCCESS;
 }
 

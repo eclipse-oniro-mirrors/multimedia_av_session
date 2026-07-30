@@ -102,6 +102,27 @@ ohos_unittest("MediaInfoHolderTest") {
   external_deps = common_external_deps
 }
 
+ohos_unittest("AVControlCommandValidationTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcontrol_command_validation_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
 ohos_unittest("AVQueueInfoTest") {
   module_out_path = module_output_path
 
@@ -507,6 +528,7 @@ group("av_session_unittest") {
   deps = [
     ":AVCallMetaDataTest",
     ":AVCallStateTest",
+    ":AVControlCommandValidationTest",
     ":AVControllerCallbackClientTest",
     ":AVDumperTest",
     ":AVMediaDescriptionTest",
