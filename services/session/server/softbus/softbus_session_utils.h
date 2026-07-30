@@ -276,7 +276,7 @@ public:
         return stringFromNum;
     }
 
-    static int64_t TransformStrToInt64(const std::string str)
+    static int64_t TransformStrToInt64(const std::string& str)
     {
         if (str.empty()) {
             return -1;
@@ -288,12 +288,18 @@ public:
         if (pos >= str.size()) {
             return -1;
         }
-        for (size_t i = 0; i < str.size(); ++i) {
+        for (size_t i = pos; i < str.size(); ++i) {
             if (str[i] < '0' || str[i] > '9') {
                 return -1;
             }
         }
-        return std::stoll(str);
+        errno = 0;
+        char* endPtr = nullptr;
+        long long result = std::strtoll(str.c_str(), &endPtr, 10);
+        if (errno == ERANGE || endPtr == str.c_str()) {
+            return -1;
+        }
+        return static_cast<int64_t>(result);
     }
 
 private:

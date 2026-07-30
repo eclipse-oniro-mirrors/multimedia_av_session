@@ -521,6 +521,8 @@ int32_t AVSessionItem::UpdateAVQueueInfo(const AVQueueInfo& info)
     if (innerPixelMap != nullptr) {
         std::string fileDir = AVSessionUtils::GetFixedPathName(userId_);
         std::string fileName = GetBundleName() + "_" + info.GetAVQueueId() + AVSessionUtils::GetFileSuffix();
+        CHECK_AND_RETURN_RET_LOG(AVSessionUtils::IsValidFileName(fileName), AVSESSION_ERROR,
+            "fileName not valid");
         std::string filePath = fileDir + fileName;
         std::filesystem::path resolvedPath = std::filesystem::absolute(filePath);
         CHECK_AND_RETURN_RET_LOG(resolvedPath.string().find(fileDir) != std::string::npos, AVSESSION_ERROR,

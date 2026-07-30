@@ -1393,7 +1393,12 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
     context->taskId = NAPI_SET_AV_META_DATA_TASK_ID;
     DoLastMetaDataRefresh(napiAvSession);
 
-    std::thread([sessionWeak = std::weak_ptr<AVSession>(napiAvSession->session_),
+    std::shared_ptr<AVSession> sessionCopy;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        sessionCopy = napiAvSession->session_;
+    }
+    std::thread([sessionWeak = std::weak_ptr<AVSession>(sessionCopy),
         avQueueId = napiAvSession->latestDownloadedAVQueueId_, metaData = context->metaData]() {
         AVQueueImgDownloadSyncExecutor(sessionWeak, avQueueId, metaData);
     }).detach();

@@ -189,7 +189,7 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     server_->ConnectProxy(sessionId);
     server_->OnConnectSession(sessionId);
     server_->OnConnectProxy(deviceId);
-    EXPECT_EQ(server_->isSoftbusConnecting_, true);
+    EXPECT_EQ(server_->isSoftbusConnecting_.load(), true);
 }
 
 void TestMigrateSendByte(OHOS::sptr<AVSessionItem> avsession_, std::shared_ptr<MigrateAVSessionServer> server_,
@@ -265,7 +265,7 @@ static HWTEST_F(MigrateAVSessionTest, MigrateTest001, TestSize.Level0)
     server_->DisconnectProxy(sessionId);
     server_->OnDisConnectSession(sessionId);
     server_->OnDisconnectProxy(deviceId);
-    EXPECT_EQ(server_->isSoftbusConnecting_, false);
+    EXPECT_EQ(server_->isSoftbusConnecting_.load(), false);
     migrateManager_->ReleaseLocalSessionStub("SuperLauncher-Dual");
     EXPECT_EQ(migrateManager_->serverMap_.find("SuperLauncher-Dual") == migrateManager_->serverMap_.end(), true);
     SLOGI("MigrateTest001 end");

@@ -527,6 +527,69 @@ static bool ParseAssetIdArg(int argc, char** argv, CommandParams& params)
     return true;
 }
 
+static bool HandleForwardCommand(AVControlCommand& cmd, int argc, char** argv, CommandParams& params)
+{
+    if (!ParseTimeArg(argc, argv, params, DEFAULT_FORWARD_TIME)) {
+        return false;
+    }
+    if (cmd.SetForwardTime(params.time) != AVSESSION_SUCCESS) {
+        OutputError(ERR_ARG_INVALID, "Invalid forward time: " + std::to_string(params.time),
+            "Forward time must be positive");
+        return false;
+    }
+    return true;
+}
+
+static bool HandleRewindCommand(AVControlCommand& cmd, int argc, char** argv, CommandParams& params)
+{
+    if (!ParseTimeArg(argc, argv, params, DEFAULT_REWIND_TIME)) {
+        return false;
+    }
+    if (cmd.SetRewindTime(params.time) != AVSESSION_SUCCESS) {
+        OutputError(ERR_ARG_INVALID, "Invalid rewind time: " + std::to_string(params.time),
+            "Rewind time must be non-negative");
+        return false;
+    }
+    return true;
+}
+
+static bool HandleLoopModeCommand(AVControlCommand& cmd, int argc, char** argv, CommandParams& params)
+{
+    if (!ParseModeArg(argc, argv, params, "--mode")) {
+        return false;
+    }
+    if (cmd.SetLoopMode(params.mode) != AVSESSION_SUCCESS) {
+        OutputError(ERR_ARG_INVALID, "Invalid loop mode: " + std::to_string(params.mode),
+            "Loop mode must be valid enum value");
+        return false;
+    }
+    return true;
+}
+
+static bool HandleTargetLoopModeCommand(AVControlCommand& cmd, int argc, char** argv, CommandParams& params)
+{
+    if (!ParseModeArg(argc, argv, params, "--target-mode")) {
+        return false;
+    }
+    if (cmd.SetTargetLoopMode(params.mode) != AVSESSION_SUCCESS) {
+        OutputError(ERR_ARG_INVALID, "Invalid target loop mode: " + std::to_string(params.mode),
+            "Target loop mode must be valid enum value");
+        return false;
+    }
+    return true;
+}
+
+static bool HandleAssetIdCommand(AVControlCommand& cmd, int argc, char** argv, CommandParams& params)
+{
+    if (!ParseAssetIdArg(argc, argv, params)) {
+        return false;
+    }
+    if (cmd.SetAssetId(params.assetId) != AVSESSION_SUCCESS) {
+        return false;
+    }
+    return true;
+}
+
 static bool SetCommandParameter(AVControlCommand& cmd, int32_t cmdCode,
     int argc, char** argv, CommandParams& params)
 {
@@ -534,49 +597,24 @@ static bool SetCommandParameter(AVControlCommand& cmd, int32_t cmdCode,
 
     switch (cmdCode) {
         case AVControlCommand::SESSION_CMD_FAST_FORWARD:
-            if (!ParseTimeArg(argc, argv, params, DEFAULT_FORWARD_TIME)) {
-                return false;
-            }
-            cmd.SetForwardTime(params.time);
-            break;
+            return HandleForwardCommand(cmd, argc, argv, params);
         case AVControlCommand::SESSION_CMD_REWIND:
-            if (!ParseTimeArg(argc, argv, params, DEFAULT_REWIND_TIME)) {
-                return false;
-            }
-            cmd.SetRewindTime(params.time);
-            break;
+            return HandleRewindCommand(cmd, argc, argv, params);
         case AVControlCommand::SESSION_CMD_SEEK:
-            if (!ParseSeekArg(cmd, argc, argv, params)) {
-                return false;
-            }
-            break;
+            return ParseSeekArg(cmd, argc, argv, params);
         case AVControlCommand::SESSION_CMD_SET_SPEED:
-            if (!ParseSpeedArg(cmd, argc, argv, params)) {
-                return false;
-            }
-            break;
+            return ParseSpeedArg(cmd, argc, argv, params);
         case AVControlCommand::SESSION_CMD_SET_LOOP_MODE:
-            if (!ParseModeArg(argc, argv, params, "--mode")) {
-                return false;
-            }
-            cmd.SetLoopMode(params.mode);
-            break;
+            return HandleLoopModeCommand(cmd, argc, argv, params);
         case AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE:
-            if (!ParseModeArg(argc, argv, params, "--target-mode")) {
-                return false;
-            }
-            cmd.SetTargetLoopMode(params.mode);
-            break;
+            return HandleTargetLoopModeCommand(cmd, argc, argv, params);
         case AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE:
-            if (!ParseAssetIdArg(argc, argv, params)) {
-                return false;
-            }
-            cmd.SetAssetId(params.assetId);
-            break;
+            return HandleAssetIdCommand(cmd, argc, argv, params);
         default:
-            break;
+            OutputError(ERR_ARG_INVALID, "Unknown command code: " + std::to_string(cmdCode),
+                "Please provide a valid command");
+            return false;
     }
-    return true;
 }
 
 static bool ValidateControlCommandArgs(int argc, char** argv, std::string& sessionId,
