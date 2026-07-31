@@ -37,6 +37,7 @@ public:
     FocusSessionStrategy();
     ~FocusSessionStrategy();
 
+    void CancelAllPendingTasks();
     void Init();
 
     void RegisterFocusSessionChangeCallback(const FocusSessionChangeCallback& callback);
@@ -91,6 +92,8 @@ private:
     };
     std::vector<int> audioPlayingUids_;
     std::recursive_mutex audioPlayingLock_;
+    std::set<std::string> pendingTaskNames_;
+    std::recursive_mutex taskNameLock_;
 };
 }
 #endif // OHOS_FOCUS_SESSION_STRATEGY_H

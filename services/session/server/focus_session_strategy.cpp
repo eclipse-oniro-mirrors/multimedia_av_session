@@ -31,6 +31,15 @@ FocusSessionStrategy::~FocusSessionStrategy()
     AudioStandard::AudioStreamManager::GetInstance()->UnregisterAudioRendererEventListener(getpid());
 }
 
+void FocusSessionStrategy::CancelAllPendingTasks()
+{
+    std::lock_guard lockGuard(taskNameLock_);
+    for (const auto& taskName : pendingTaskNames_) {
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask(taskName);
+    }
+    pendingTaskNames_.clear();
+}
+
 void FocusSessionStrategy::Init()
 {
     AudioAdapter::GetInstance().AddStreamRendererStateListener([this](const auto& infos) {
@@ -171,7 +180,12 @@ bool FocusSessionStrategy::IsFocusSession(const std::pair<int32_t, int32_t> key)
 
     lastStates_[key] = currentStates_[key];
     if (isFocus) {
-        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("CheckFocusStop" + std::to_string(key.second));
+        std::string taskName = "CheckFocusStop" + std::to_string(key.second);
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask(taskName);
+        {
+            std::lock_guard lockGuard(taskNameLock_);
+            pendingTaskNames_.erase(taskName);
+        }
         HISYSEVENT_BEHAVIOR("FOCUS_CHANGE", "FOCUS_SESSION_UID", key.second,
             "AUDIO_INFO_RENDERER_STATE", AudioStandard::RendererState::RENDERER_RUNNING,
             "DETAILED_MSG", "focussessionstrategy selectfocussession, current focus session info");
@@ -212,6 +226,11 @@ bool FocusSessionStrategy::CheckFocusSessionStop(const std::pair<int32_t, int32_
 
 void FocusSessionStrategy::DelayStopFocusSession(const std::pair<int32_t, int32_t> key)
 {
+    std::string taskName = "CheckFocusStop" + std::to_string(key.second);
+    {
+        std::lock_guard lockGuard(taskNameLock_);
+        pendingTaskNames_.insert(taskName);
+    }
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
         [this, key]() {
             {
@@ -229,6 +248,6 @@ void FocusSessionStrategy::DelayStopFocusSession(const std::pair<int32_t, int32_
             if (callback_) {
                 callback_(changeInfo, false);
             }
-        }, "CheckFocusStop" + std::to_string(key.second), cancelTimeout);
+        }, taskName, cancelTimeout);
 }
 }
