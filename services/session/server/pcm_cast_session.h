@@ -19,6 +19,7 @@
 #include "avsession_info.h"
 #include "cJSON.h"
 #include "avsession_users_manager.h"
+#include <atomic>
 
 namespace OHOS::AVSession {
 class PcmCastSession : public IAVRouterListener, public std::enable_shared_from_this<PcmCastSession> {
@@ -78,8 +79,8 @@ public:
     void HandleTimerByCastState(int32_t castState);
 
 private:
-    int64_t castHandle_ = 0;
-    int32_t castState_ = CastState::DISCONNECTED;
+    std::atomic<int64_t> castHandle_ = 0;
+    std::atomic<int32_t> castState_ = CastState::DISCONNECTED;
     std::recursive_mutex castLock_;
     std::mutex screenLock_;
     std::condition_variable startCastCondition_;
@@ -98,7 +99,7 @@ private:
     DeviceInfo tempDeviceInfo_;
     std::string streamCastingSessionId_;
     std::string extraInfo_;
-    bool needStreamCasting_ = false;
+    std::atomic<bool> needStreamCasting_ = false;
     bool needHandleTimer_ = false;
 
     const std::string COMMAND_TYPE = "command_type";

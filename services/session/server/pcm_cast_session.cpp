@@ -40,31 +40,34 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
         HandleDeviceDisconnect();
     }
-    
-    deviceInfo.deviceName_ = tempDeviceInfo_.deviceName_;
-    deviceInfo.deviceType_ = tempDeviceInfo_.deviceType_;
-    deviceInfo.uuid_ = tempDeviceInfo_.uuid_;
-    deviceInfo.supportedProtocols_ = tempDeviceInfo_.supportedProtocols_;
-    deviceInfo.hiPlayDeviceInfo_.castMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
-    deviceInfo.hiPlayDeviceInfo_.castUid_ = GetUid();
-    deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.supportCastMode_;
-    SLOGI("PcmCastSession OnCastStateChange castUid %{public}d", deviceInfo.hiPlayDeviceInfo_.castUid_);
-    OutputDeviceInfo outputDeviceInfo;
-    outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
-    if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
-        descriptor_.outputDeviceInfo_ = outputDeviceInfo;
-        castState_ = CastState::STREAM;
-        if (needStreamCasting_) {
-            needStreamCasting_ = false;
-            descriptor_.sessionId_ = streamCastingSessionId_;
-            FindSessionAndStreamCasting();
-        }
-    }
 
-    if (castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED) ||
-        castState == static_cast<int32_t>(CastEngine::DeviceState::PLAYING)) {
-        descriptor_.outputDeviceInfo_ = outputDeviceInfo;
-        castState_ = CastState::PREPARE;
+    {
+        std::lock_guard lockGuard(castLock_);
+        deviceInfo.deviceName_ = tempDeviceInfo_.deviceName_;
+        deviceInfo.deviceType_ = tempDeviceInfo_.deviceType_;
+        deviceInfo.uuid_ = tempDeviceInfo_.uuid_;
+        deviceInfo.supportedProtocols_ = tempDeviceInfo_.supportedProtocols_;
+        deviceInfo.hiPlayDeviceInfo_.castMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
+        deviceInfo.hiPlayDeviceInfo_.castUid_ = GetUid();
+        deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.supportCastMode_;
+        SLOGI("PcmCastSession OnCastStateChange castUid %{public}d", deviceInfo.hiPlayDeviceInfo_.castUid_);
+        OutputDeviceInfo outputDeviceInfo;
+        outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
+        if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
+            descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+            castState_ = CastState::STREAM;
+            if (needStreamCasting_) {
+                needStreamCasting_ = false;
+                descriptor_.sessionId_ = streamCastingSessionId_;
+                FindSessionAndStreamCasting();
+            }
+        }
+
+        if (castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED) ||
+            castState == static_cast<int32_t>(CastEngine::DeviceState::PLAYING)) {
+            descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+            castState_ = CastState::PREPARE;
+        }
     }
 
     collaborationNeedDeviceId_ = deviceInfo.deviceId_;
@@ -95,8 +98,11 @@ void PcmCastSession::HandleDeviceDisconnect()
     castHandle_ = -1;
     castState_ = CastState::DISCONNECTED;
     castHandleDeviceId_ = "-100";
-    descriptor_.uid_ = 0;
-    descriptor_.outputDeviceInfo_ = {};
+    {
+        std::lock_guard lockGuard(castLock_);
+        descriptor_.uid_ = 0;
+        descriptor_.outputDeviceInfo_ = {};
+    }
     if (multiDeviceState_ == MultiDeviceState::CASTING_SWITCH_DEVICE) {
         multiDeviceState_ = MultiDeviceState::DEFAULT;
         CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
@@ -140,9 +146,14 @@ void PcmCastSession::ReportSessionCast(int32_t castState, int32_t reasonCode)
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
         AVSessionSysEvent::GetInstance().updateDeviceConnectTime(PCM_CAST_SESSION);
     }
-    if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED) &&
-        !tempDeviceInfo_.deviceId_.empty()) {
-        AVSessionSysEvent::GetInstance().ReportSessionCastControl(PCM_CAST_SESSION, PCM_CAST_SESSION, tempDeviceInfo_);
+    if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
+        DeviceInfo localDeviceInfo;
+        {
+            std::lock_guard lockGuard(castLock_);
+            localDeviceInfo = tempDeviceInfo_;
+        }
+        CHECK_AND_RETURN(!localDeviceInfo.deviceId_.empty());
+        AVSessionSysEvent::GetInstance().ReportSessionCastControl(PCM_CAST_SESSION, PCM_CAST_SESSION, localDeviceInfo);
     }
 #endif
 }
@@ -182,37 +193,39 @@ void PcmCastSession::DealCollaborationPublishState(int32_t castState, DeviceInfo
  
 void PcmCastSession::OnSystemCommonEvent(const std::string& args)
 {
-    std::lock_guard lockGuard(castLock_);
     int32_t code = JsonUtils::GetIntParamFromJsonString(args, "code");
     CHECK_AND_RETURN_RET_LOG(CheckIsCasting(), void(), "First connection, castState is 0.");
     CHECK_AND_RETURN_RET_LOG(code == 0, void(), "Castmode changes fail, code is %{public}d", code);
-    CHECK_AND_RETURN_RET_LOG(!descriptor_.outputDeviceInfo_.deviceInfos_.empty(), void(),
-        "DeviceInfos is empty");
     int32_t castMode = JsonUtils::GetIntParamFromJsonString(args, "mode");
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
     SLOGI("Received HIPLAY_CONFIG_MODE_DATA: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
         castMode, uid, AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str());
- 
-    if (castMode == HiPlayCastMode::DEVICE_LEVEL) {
-        tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::DEVICE_LEVEL;
-        descriptor_.uid_ = 0;
-        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = 0;
-        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::DEVICE_LEVEL;
-    } else if (castMode == HiPlayCastMode::APP_LEVEL) {
-        tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::APP_LEVEL;
-        descriptor_.uid_ = uid;
-        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = uid;
-        descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::APP_LEVEL;
+    {
+        std::lock_guard lockGuard(castLock_);
+        CHECK_AND_RETURN_RET_LOG(!descriptor_.outputDeviceInfo_.deviceInfos_.empty(), void(),
+            "DeviceInfos is empty");
+        if (castMode == HiPlayCastMode::DEVICE_LEVEL) {
+            tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::DEVICE_LEVEL;
+            descriptor_.uid_ = 0;
+            descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = 0;
+            descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::DEVICE_LEVEL;
+        } else if (castMode == HiPlayCastMode::APP_LEVEL) {
+            tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::APP_LEVEL;
+            descriptor_.uid_ = uid;
+            descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = uid;
+            descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::APP_LEVEL;
+        }
     }
 
-    WriteCastPairToFile(deviceId, tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
+    WriteCastPairToFile(deviceId, castMode);
 }
 
 void PcmCastSession::OnDeviceNameSystemCommonEvent(const std::string& args)
 {
     std::string deviceName = JsonUtils::GetStringParamFromJsonString(args, "DEVICE_NAME");
     SLOGI("Received UPDATE_DEVICE_NAME: deviceName:%{public}s", AVSessionUtils::GetAnonyDeviceName(deviceName).c_str());
+    std::lock_guard lockGuard(castLock_);
     CHECK_AND_RETURN_RET_LOG(!descriptor_.outputDeviceInfo_.deviceInfos_.empty(), void(),
         "DeviceInfos is empty");
     tempDeviceInfo_.deviceName_ = deviceName;
@@ -229,9 +242,11 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
 {
     SLOGI("PcmCastSession StartCast");
-    std::lock_guard lockGuard(castLock_);
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
-    descriptor_.sessionId_ = sessionToken.sessionId;
+    {
+        std::lock_guard lockGuard(castLock_);
+        descriptor_.sessionId_ = sessionToken.sessionId;
+    }
     bool isPcmScreen = (sessionToken.sessionId == "pcmCastSession" &&
         ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
         ProtocolType::TYPE_CAST_PLUS_STREAM) != 0));
@@ -243,20 +258,24 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
             SLOGI("repeat startcast %{public}lld", static_cast<long long>(castHandle_));
             SendStateChangeRequest(sessionToken);
-            
-            descriptor_.uid_ = sessionToken.uid;
-            CHECK_AND_RETURN_RET_LOG(descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0, ERR_INVALID_PARAM,
-                "empty device info");
-            descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = sessionToken.uid;
- 
+            {
+                std::lock_guard lockGuard(castLock_);
+                descriptor_.uid_ = sessionToken.uid;
+                CHECK_AND_RETURN_RET_LOG(descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0, ERR_INVALID_PARAM,
+                    "empty device info");
+                descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = sessionToken.uid;
+            }
             return ERR_REPEAT_CAST;
         } else {
             SLOGI("cast check with pre cast alive %{public}lld, unregister callback",
                 static_cast<long long>(castHandle_));
-            multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
-            newOutputDeviceInfo_ = outputDeviceInfo;
-            newSessionToken_ = sessionToken;
-            newServiceNameStatePair_ = serviceNameStatePair;
+            {
+                std::lock_guard lockGuard(castLock_);
+                multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
+                newOutputDeviceInfo_ = outputDeviceInfo;
+                newSessionToken_ = sessionToken;
+                newServiceNameStatePair_ = serviceNameStatePair;
+            }
             StopCast(DeviceRemoveAction::ACTION_TO_SWITCH_HIPLAY);
  
             return AVSESSION_SUCCESS;
@@ -305,7 +324,10 @@ int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo
     AVRouter::GetInstance().RegisterCallback(castHandle_, shared_from_this(),
         "pcmCastSession", outputDeviceInfo.deviceInfos_[0]);
 
-    tempDeviceInfo_ = outputDeviceInfo.deviceInfos_[0];
+    {
+        std::lock_guard lockGuard(castLock_);
+        tempDeviceInfo_ = outputDeviceInfo.deviceInfos_[0];
+    }
     int32_t castId = static_cast<int32_t>(castHandle_);
     CastEngine::ConnectionConfig connectionConfig = {};
     connectionConfig.triggerType = CastEngine::TriggerType::HIPLAY_SCAN_QRCODE;
@@ -334,14 +356,17 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
         "pcmCastSession", outputDeviceInfo.deviceInfos_[0]);
 
     bool isDeviceLevel = (sessionToken.sessionId == "pcmCastSession");
-    tempDeviceInfo_ = outputDeviceInfo.deviceInfos_[0];
-    tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = isDeviceLevel ?
-        HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
-    descriptor_.uid_ = isDeviceLevel ? 0 : sessionToken.uid;
-    SLOGI("PcmCastSession StartCast castMode: %{public}d", tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
+    int32_t castMode = isDeviceLevel ? HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
+    {
+        std::lock_guard lockGuard(castLock_);
+        tempDeviceInfo_ = outputDeviceInfo.deviceInfos_[0];
+        tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = castMode;
+        descriptor_.uid_ = isDeviceLevel ? 0 : sessionToken.uid;
+        SLOGI("PcmCastSession StartCast castMode: %{public}d", tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
+    }
 
     SendStateChangeRequest(sessionToken);
-    WriteCastPairToFile(outputDeviceInfo.deviceInfos_[0].deviceId_, tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
+    WriteCastPairToFile(outputDeviceInfo.deviceInfos_[0].deviceId_, castMode);
 
     int32_t castId = static_cast<int32_t>(castHandle_);
     int32_t ret = AVRouter::GetInstance().AddDevice(castId, outputDeviceInfo, 0);
@@ -359,7 +384,6 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
 void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
     SLOGI("PcmCastSession StopCast");
-    std::lock_guard lockGuard(castLock_);
     ReleaseStreamPlayer();
     needHandleTimer_ = false;
     int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);
@@ -392,12 +416,16 @@ int32_t PcmCastSession::SendStateChangeRequest(const SessionToken& sessionToken)
         return AVSESSION_ERROR;
     }
 
-    cJSON_AddItemToObject(jsonObj, "mode", cJSON_CreateNumber(tempDeviceInfo_.hiPlayDeviceInfo_.castMode_));
+    int32_t castMode = HiPlayCastMode::DEVICE_LEVEL;
+    {
+        std::lock_guard lockGuard(castLock_);
+        castMode = tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
+    }
+    cJSON_AddItemToObject(jsonObj, "mode", cJSON_CreateNumber(castMode));
     cJSON_AddItemToObject(jsonObj, "sessionId", cJSON_CreateString(sessionToken.sessionId.c_str()));
     cJSON_AddItemToObject(jsonObj, "uid", cJSON_CreateNumber(sessionToken.uid));
     SLOGI("SendStateChangeRequest, sessionId=%{public}s, uid=%{public}d, castMode=%{public}d",
-        AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str(), sessionToken.uid,
-        tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
+        AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str(), sessionToken.uid, castMode);
 
     char* jsonStr = cJSON_Print(jsonObj);
     if (jsonStr != nullptr) {
@@ -460,7 +488,10 @@ void PcmCastSession::DestroyTask()
     castHandle_ = -1;
     castState_ = CastState::DISCONNECTED;
     castHandleDeviceId_ = "-100";
-    descriptor_.uid_ = 0;
+    {
+        std::lock_guard lockGuard(castLock_);
+        descriptor_.uid_ = 0;
+    }
 }
 
 int32_t PcmCastSession::GetCastMode() const
@@ -485,6 +516,7 @@ bool PcmCastSession::CheckIsCasting() const
 
 AVSessionDescriptor PcmCastSession::GetDescriptor()
 {
+    std::lock_guard lockGuard(castLock_);
     return descriptor_;
 }
 
@@ -634,7 +666,10 @@ void PcmCastSession::CreateStreamPlayer(const AAFwk::WantParams& commandBody)
 void PcmCastSession::ReleaseStreamPlayer()
 {
     OutputDeviceInfo outputDeviceInfo;
-    outputDeviceInfo.deviceInfos_.emplace_back(tempDeviceInfo_);
+    {
+        std::lock_guard lockGuard(castLock_);
+        outputDeviceInfo.deviceInfos_.emplace_back(tempDeviceInfo_);
+    }
     sptr<AVSessionItem> session =
         AVSessionService::GetUsersManager().GetContainerFromAll().GetSessionById(streamCastingSessionId_);
     CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
@@ -651,14 +686,20 @@ void PcmCastSession::ReleaseStreamPlayer()
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, localDeviceInfo);
     session->ReleaseAVCastControllerInner();
     session->SetCastHandle(-1);
-    streamCastingSessionId_ = "";
-    descriptor_.sessionId_ = "pcmCastSession";
+    {
+        std::lock_guard lockGuard(castLock_);
+        streamCastingSessionId_ = "";
+        descriptor_.sessionId_ = "pcmCastSession";
+    }
 }
 
 void PcmCastSession::FindSessionAndStreamCasting()
 {
     OutputDeviceInfo outputDeviceInfo;
-    outputDeviceInfo.deviceInfos_.emplace_back(tempDeviceInfo_);
+    {
+        std::lock_guard lockGuard(castLock_);
+        outputDeviceInfo.deviceInfos_.emplace_back(tempDeviceInfo_);
+    }
     sptr<AVSessionItem> session =
         AVSessionService::GetUsersManager().GetContainerFromAll().GetSessionById(streamCastingSessionId_);
     CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
