@@ -1490,11 +1490,13 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
         isMediaKeySupport.store(true);
         return AVSESSION_SUCCESS;
     }
-    auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
-    CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
+    std::vector<int32_t> tempSupportedCmds;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
+        auto iter = std::find(supportedCmd_.begin(), supportedCmd_.end(), cmd);
+        CHECK_AND_RETURN_RET_LOG(iter == supportedCmd_.end(), AVSESSION_SUCCESS, "cmd already been added");
         supportedCmd_.push_back(cmd);
+        tempSupportedCmds = supportedCmd_;
     }
     std::string apiParamString = "cmd :" + std::to_string(cmd);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
@@ -1510,7 +1512,7 @@ int32_t AVSessionItem::AddSupportCommand(int32_t cmd)
         SLOGI("send add command event to controller, size:%{public}d", static_cast<int>(controllers_.size()));
         for (const auto& [pid, controller] : controllers_) {
             if (controller != nullptr) {
-                controller->HandleValidCommandChange(supportedCmd_);
+                controller->HandleValidCommandChange(tempSupportedCmds);
             }
         }
     }
@@ -1535,10 +1537,12 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
         isMediaKeySupport.store(false);
         return AVSESSION_SUCCESS;
     }
+    std::vector<int32_t> tempSupportedCmds;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
         auto iter = std::remove(supportedCmd_.begin(), supportedCmd_.end(), cmd);
         supportedCmd_.erase(iter, supportedCmd_.end());
+        tempSupportedCmds = supportedCmd_;
     }
     std::string apiParamString = "cmd :" + std::to_string(cmd);
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
@@ -1557,7 +1561,7 @@ int32_t AVSessionItem::DeleteSupportCommand(int32_t cmd)
         std::lock_guard controllerLockGuard(controllersLock_);
         for (const auto& [pid, controller] : controllers_) {
             if (controller != nullptr) {
-                controller->HandleValidCommandChange(supportedCmd_);
+                controller->HandleValidCommandChange(tempSupportedCmds);
             }
         }
     }
