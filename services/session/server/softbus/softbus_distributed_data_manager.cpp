@@ -236,7 +236,8 @@ void SoftbusDistributedDataManager::DestroySessionServer(const std::string &pkg)
         SoftbusSessionManager::GetInstance().Shutdown(mSocket);
 #endif
     } else {
-        for (auto proxyMap = mDeviceToProxyMap_.begin(); proxyMap != mDeviceToProxyMap_.end(); proxyMap++) {
+        auto mDeviceToProxyMapCopy = mDeviceToProxyMap_;
+        for (auto proxyMap = mDeviceToProxyMapCopy.begin(); proxyMap != mDeviceToProxyMapCopy.end(); proxyMap++) {
             for (auto it = proxyMap->second.begin(); it != proxyMap->second.end(); it++) {
                 ReleaseProxy(it->second, proxyMap->first);
             }
