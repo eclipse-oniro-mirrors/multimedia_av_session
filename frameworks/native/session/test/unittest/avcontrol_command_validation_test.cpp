@@ -50,13 +50,14 @@ void AVCastControlCommandLoopModeTest::TearDown()
 
 /**
  * @tc.name: SetLoopModeInvalidBelowRange001
- * @tc.desc: SetLoopMode with loop mode below LOOP_MODE_UNDEFINED should return ERR_INVALID_PARAM
+ * @tc.desc: SetLoopMode with negative loop mode should return ERR_INVALID_PARAM
  * @tc.type: FUNC
  */
 HWTEST_F(AVCastControlCommandLoopModeTest, SetLoopModeInvalidBelowRange001, TestSize.Level0)
 {
     SLOGI("SetLoopModeInvalidBelowRange001 Begin");
     AVCastControlCommand command;
+    EXPECT_EQ(command.SetLoopMode(-1), ERR_INVALID_PARAM);
     EXPECT_EQ(command.SetLoopMode(-2), ERR_INVALID_PARAM);
     SLOGI("SetLoopModeInvalidBelowRange001 End");
 }
@@ -84,7 +85,7 @@ HWTEST_F(AVCastControlCommandLoopModeTest, SetLoopModeValidBoundary003, TestSize
 {
     SLOGI("SetLoopModeValidBoundary003 Begin");
     AVCastControlCommand command;
-    EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_UNDEFINED), AVSESSION_SUCCESS);
+    EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_SEQUENCE), AVSESSION_SUCCESS);
     EXPECT_EQ(command.SetLoopMode(AVPlaybackState::LOOP_MODE_CUSTOM), AVSESSION_SUCCESS);
     SLOGI("SetLoopModeValidBoundary003 End");
 }
