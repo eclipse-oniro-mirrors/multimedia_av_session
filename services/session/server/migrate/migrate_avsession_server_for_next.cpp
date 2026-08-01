@@ -199,8 +199,7 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
     cJSON* metaDataItem = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(metaDataItem != nullptr, "get metadata json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(metaDataItem, METADATA_TITLE, metaDataCache_.GetTitle().c_str())) {
-        SLOGE("AddStringToJson with title value:%{public}s fail",
-            AVSessionUtils::GetAnonyTitle(metaDataCache_.GetTitle()).c_str());
+        SLOGE("AddStringToJson with title fail");
         cJSON_Delete(metaDataItem);
         return;
     }
@@ -221,8 +220,6 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
         [this, msg]() {
             SendByteForNext(deviceId_, msg);
         }, "SYNC_FOCUS_META_INFO");
-    SLOGI("DoMetaDataSyncToRemote async Title:%{public}s|len:%{public}d done",
-        AVSessionUtils::GetAnonyTitle(metaDataCache_.GetTitle()).c_str(), static_cast<int>(msg.size()));
     cJSON_Delete(metaDataItem);
 }
 

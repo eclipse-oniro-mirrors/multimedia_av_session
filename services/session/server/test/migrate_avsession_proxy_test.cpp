@@ -722,6 +722,22 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessLongPauseNotify002, TestSize.L
 }
 
 /**
+ * @tc.name: ProcessLongPauseNotifyWithNullService003
+ * @tc.desc: test ProcessLongPauseNotify with null servicePtr_
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessLongPauseNotifyWithNullService003, TestSize.Level0)
+{
+    auto proxyWithNullService = std::make_shared<MigrateAVSessionProxy>(nullptr);
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddBoolToJson(jsonValue, LONG_PAUSE_STATE, true);
+    proxyWithNullService->ProcessLongPauseNotify(jsonValue);
+    cJSON_Delete(jsonValue);
+}
+
+/**
  * @tc.name: GetVersion001
  * @tc.desc: test the member of GetVersion with version in map
  * @tc.type: FUNC

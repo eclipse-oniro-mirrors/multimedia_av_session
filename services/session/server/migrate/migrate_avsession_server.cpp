@@ -171,6 +171,7 @@ int32_t MigrateAVSessionServer::GetCharacteristic()
 
 void MigrateAVSessionServer::ObserveControllerChanged(const std::string &deviceId)
 {
+    CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "servicePtr_ is nullptr");
     std::vector<AVSessionDescriptor> descriptors;
     auto res = servicePtr_->GetAllSessionDescriptors(descriptors);
     if (res != AVSESSION_SUCCESS) {
