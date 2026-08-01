@@ -29,6 +29,7 @@ FocusSessionStrategy::~FocusSessionStrategy()
 {
     SLOGI("destroy");
     AudioStandard::AudioStreamManager::GetInstance()->UnregisterAudioRendererEventListener(getpid());
+    CancelAllPendingTasks();
 }
 
 void FocusSessionStrategy::CancelAllPendingTasks()
