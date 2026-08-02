@@ -553,7 +553,6 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
             }
         }
     }
-    // take a snapshot of the listener list under lock, then notify outside the lock
     std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
     {
         std::lock_guard lockGuard(mutexLock_);
@@ -620,8 +619,10 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
             listenersSnapshot = sharedThis->castStateListenerList_;
         }
         for (auto listener : listenersSnapshot) {
-            listener->OnSessionNeedDestroy();
-            SLOGI("Cast pvd received session create event and session destroy check done");
+            if (listener != nullptr) {
+                listener->OnSessionNeedDestroy();
+                SLOGI("Cast pvd received session create event and session destroy check done");
+            }
         }
         int32_t castId;
         {
@@ -644,7 +645,9 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
         }
         SLOGI("Create streamPlayer finished %{public}d", castId);
         for (auto listener : listenersSnapshot) {
-            listener->OnSessionCreated(castId);
+            if (listener != nullptr) {
+                listener->OnSessionCreated(castId);
+            }
         }
         SLOGI("do session create notify finished %{public}d", castId);
         }, "OnSessionCreated", 0);
@@ -672,8 +675,10 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             listenersSnapshot = sharedThis->castStateListenerList_;
         }
         for (auto listener : listenersSnapshot) {
-            listener->OnSessionNeedDestroy();
-            SLOGI("Cast pvd received session create event and session destroy check done");
+            if (listener != nullptr) {
+                listener->OnSessionNeedDestroy();
+                SLOGI("Cast pvd received session create event and session destroy check done");
+            }
         }
         int32_t castId;
         {
@@ -700,7 +705,9 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
         }
         SLOGI("Create streamPlayer finished %{public}d", castId);
         for (auto listener : listenersSnapshot) {
-            listener->OnSessionCreated(castId);
+            if (listener != nullptr) {
+                listener->OnSessionCreated(castId);
+            }
         }
         SLOGI("do session create notify finished %{public}d", castId);
         }, "OnSessionCreated", 0);

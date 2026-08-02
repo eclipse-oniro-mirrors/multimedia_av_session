@@ -951,7 +951,6 @@ void MigrateAVSessionProxy::SendSpecialKeepAliveData()
                 std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
                 isDeviceIdEmpty = this->deviceId_.empty();
                 CHECK_AND_RETURN_LOG(!isDeviceIdEmpty, "SendSpecialKeepAliveData quit for deviceId empty");
-                deviceIdSnapshot = this->deviceId_;
             }
             if (!isNeedByMediaControl.load()) {
                 SLOGI("silent bytes waiting.");
