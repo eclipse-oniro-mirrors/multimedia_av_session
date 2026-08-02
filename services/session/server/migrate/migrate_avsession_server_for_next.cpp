@@ -38,6 +38,7 @@ void MigrateAVSessionServer::RefreshDeviceId(std::string deviceId)
     SLOGI("migrate refresh deviceId from:%{public}s to %{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str(),
         SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+    std::lock_guard lockGuard(migrateDeviceIdLock_);
     deviceId_ = deviceId;
 }
 

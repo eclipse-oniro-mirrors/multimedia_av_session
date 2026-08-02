@@ -47,11 +47,18 @@ void SoftbusSessionServer::DisconnectProxy(int sessionId)
 void SoftbusSessionServer::DisconnectAllProxy()
 {
     SLOGI("DisConnectAllProxy");
-    for (auto it = deviceToSessionMap_.begin(); it != deviceToSessionMap_.end();) {
+    std::vector<std::string> deviceIds;
+    {
+        std::lock_guard lockGuard(deviceMapLock_);
+        for (auto it = deviceToSessionMap_.begin(); it != deviceToSessionMap_.end(); it++) {
+            deviceIds.push_back(it->first);
+        }
+        deviceToSessionMap_.clear();
+    }
+    for (const auto &deviceId : deviceIds) {
         SLOGI("disConnectAllProxy anonymizeDeviceId: %{public}s.",
-            SoftbusSessionUtils::AnonymizeDeviceId(it->first).c_str());
-        OnDisconnectProxy(it->first);
-        it = deviceToSessionMap_.erase(it);
+            SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+        OnDisconnectProxy(deviceId);
     }
 }
 // LCOV_EXCL_STOP

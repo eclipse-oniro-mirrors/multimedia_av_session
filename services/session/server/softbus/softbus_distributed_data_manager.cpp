@@ -106,8 +106,8 @@ void SoftbusDistributedDataManager::BytesReceived(int32_t socket, const std::str
 void SoftbusDistributedDataManager::InitSessionServer(const std::string &pkg)
 {
     SLOGI("init session server...");
-    isServer_ = true;
     std::lock_guard lockGuard(softbusDistributedDataLock_);
+    isServer_ = true;
 #ifdef DSOFTBUS_ENABLE
     int32_t socket = SoftbusSessionManager::GetInstance().Socket(pkg);
     CHECK_AND_RETURN_LOG(socket >= 0, "Socket failed for pkg: %{public}s", pkg.c_str());
@@ -135,8 +135,8 @@ bool SoftbusDistributedDataManager::CreateProxy(const std::shared_ptr<SoftbusSes
         SLOGW("createProxy fail for params invalid.");
         return false;
     }
-    isServer_ = false;
     std::lock_guard lockGuard(softbusDistributedDataLock_);
+    isServer_ = false;
     if (mProxySocketMap_.find(peerNetworkId) != mProxySocketMap_.end()) {
         int32_t socketId = mProxySocketMap_[peerNetworkId];
         if (socketId > 0) {
@@ -280,7 +280,7 @@ void SoftbusDistributedDataManager::OnSessionServerClosed(int32_t socket)
 void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, const std::string &data)
 {
 #ifdef DSOFTBUS_ENABLE
-    std::string deviceId = peerSocketInfo.networkId ? peerSocketInfo.networkId : "";
+    std::string deviceId = peerNetworkIdCache_;
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onMessageHandleReceived: %{public}s", anonymizeDeviceId.c_str());
 #endif
@@ -300,7 +300,7 @@ void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, cons
 void SoftbusDistributedDataManager::OnBytesServerReceived(int32_t socket, const std::string &data)
 {
 #ifdef DSOFTBUS_ENABLE
-    std::string deviceId = peerSocketInfo.networkId ? peerSocketInfo.networkId : "";
+    std::string deviceId = peerNetworkIdCache_;
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onBytesServerReceived: %{public}s", anonymizeDeviceId.c_str());
 #endif

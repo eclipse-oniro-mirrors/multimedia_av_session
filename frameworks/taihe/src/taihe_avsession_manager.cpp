@@ -106,6 +106,7 @@ void TaiheAVSessionManager::ExecuteCallback(std::shared_ptr<uintptr_t> method)
 
 void TaiheAVSessionManager::HandleServiceDied()
 {
+    std::lock_guard lockGuard(listenerMutex_);
     if (!serviceDiedCallbacks_.empty() && asyncCallback_ != nullptr) {
         for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
             ++callbackRef) {
@@ -114,7 +115,6 @@ void TaiheAVSessionManager::HandleServiceDied()
             });
         }
     }
-    std::lock_guard lockGuard(listenerMutex_);
     if (listener_ != nullptr) {
         SLOGI("clear listener for service die");
         listener_ = nullptr;

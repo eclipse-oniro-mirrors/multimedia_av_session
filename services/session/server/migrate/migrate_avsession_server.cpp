@@ -59,20 +59,28 @@ MigrateAVSessionServer::~MigrateAVSessionServer()
         playbackStateCache_.SetFavorite(0);
     }
     ReleasePerferredDeviceChangeCallback();
+    std::string deviceId;
+    {
+        std::lock_guard lockGuard(migrateDeviceIdLock_);
+        deviceId = deviceId_;
+    }
     SLOGI("MigrateAVSessionServer quit with mode:%{public}d|deviceId:%{public}s.", migrateMode_,
-        SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+        SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
 }
 
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
 {
     SLOGI("OnConnectProxy: %{public}d|%{public}s.",
         migrateMode_, SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
-    if (deviceId_ != deviceId && !deviceId_.empty()) {
-        SLOGI("onConnect but already:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
-        return;
+    {
+        std::lock_guard lockGuard(migrateDeviceIdLock_);
+        if (deviceId_ != deviceId && !deviceId_.empty()) {
+            SLOGI("onConnect but already:%{public}s.", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+            return;
+        }
+        deviceId_ = deviceId;
     }
     isSoftbusConnecting_.store(true);
-    deviceId_ = deviceId;
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
         SLOGI("connect process as next behavior.");
         CheckPostClean();
@@ -91,9 +99,12 @@ void MigrateAVSessionServer::OnDisconnectProxy(const std::string &deviceId)
 {
     SLOGI("OnDisConnectProxy: %{public}d|%{public}s",
         migrateMode_, SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
-    if (deviceId_ != deviceId && !deviceId_.empty()) {
-        SLOGI("onDisconnect but already:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
-        return;
+    {
+        std::lock_guard lockGuard(migrateDeviceIdLock_);
+        if (deviceId_ != deviceId && !deviceId_.empty()) {
+            SLOGI("onDisconnect but already:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+            return;
+        }
     }
     if (mediaImage_ != nullptr) {
         mediaImage_->Clear();
@@ -277,7 +288,10 @@ void MigrateAVSessionServer::StopObserveControllerChanged(const std::string &dev
         (*it)->Destroy();
         SLOGI("Controller destroy");
     }
-    deviceId_ = "";
+    {
+        std::lock_guard lockGuard(migrateDeviceIdLock_);
+        deviceId_ = "";
+    }
     playerIdToControllerMap_.clear();
     sortControllerList_.clear();
     playerIdToControllerCallbackMap_.clear();
@@ -513,13 +527,21 @@ void MigrateAVSessionServer::OnTopSessionChange(const AVSessionDescriptor &descr
         }
         lastSessionId_ = topSessionId_;
         topSessionId_ = descriptor.sessionId_;
+    }
+    {
+        std::lock_guard lockGuard(migrateControllerLock_);
         auto it = playerIdToControllerMap_.find(descriptor.sessionId_);
         if (it == playerIdToControllerMap_.end()) {
             CreateController(descriptor.sessionId_);
         }
     }
-    SendRemoteHistorySessionList(deviceId_);
-    SendRemoteControllerList(deviceId_);
+    std::string deviceId;
+    {
+        std::lock_guard lockGuard(migrateDeviceIdLock_);
+        deviceId = deviceId_;
+    }
+    SendRemoteHistorySessionList(deviceId);
+    SendRemoteControllerList(deviceId);
 }
 
 void MigrateAVSessionServer::SortControllers(std::list<sptr<AVControllerItem>> controllers)
