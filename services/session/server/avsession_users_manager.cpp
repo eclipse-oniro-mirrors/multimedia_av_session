@@ -131,6 +131,7 @@ std::shared_ptr<SessionStack> AVSessionUsersManager::GetContainerPtrFromUser(int
 
 SessionStack& AVSessionUsersManager::GetContainerFromAll()
 {
+    std::lock_guard lockGuard(userLock_);
     if (sessionStackForAll_ == nullptr) {
         sessionStackForAll_ = std::make_shared<SessionStack>();
     }

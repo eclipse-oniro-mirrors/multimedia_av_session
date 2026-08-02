@@ -110,6 +110,7 @@ std::string AVSessionRadar::GetLocalDevType()
 
 void AVSessionRadar::reset()
 {
+    std::lock_guard<std::mutex> lockGuard(deviceInfoLock_);
     localNetId_.clear();
     localUdid_.clear();
     localDevType_.clear();
@@ -248,6 +249,7 @@ void AVSessionRadar::ReportWithTrustInfo(AVSessionRadarInfo &info)
 
 void AVSessionRadar::ReportHiSysEventBehavior(AVSessionRadarInfo &info)
 {
+    std::lock_guard<std::mutex> lockGuard(deviceInfoLock_);
     if (localNetId_.empty()) {
         localNetId_ = GetAnonymousDeviceId(GetLocalDeviceNetworkId());
     }

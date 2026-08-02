@@ -738,6 +738,7 @@ void AVSessionService::UpdateSessionTimestamp(sptr<AVSessionItem> sessionItem)
 void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession, int32_t userId)
 {
     AVSessionDescriptor descriptor;
+    sptr<AVSessionItem> topSession = nullptr;
     int32_t userIdForNewTopSession = newTopSession != nullptr ? newTopSession->GetUserId() :
         (userId <= 0 ? GetUsersManager().GetCurrentUserId() : userId);
     {
@@ -771,11 +772,12 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
         GetUsersManager().SetTopSession(newTopSession, userIdForNewTopSession);
         newTopSession->SetTop(true);
         descriptor = newTopSession->GetDescriptor();
+        topSession = topSession_;
     }
 
     NotifyTopSessionChanged(descriptor);
-    if (topSession_ != nullptr && !topSession_->IsCasting()) {
-        std::string preloadSessionId = topSession_->GetSessionId();
+    if (topSession != nullptr && !topSession->IsCasting()) {
+        std::string preloadSessionId = topSession->GetSessionId();
         NotifyLocalFrontSessionChangeForMigrate(preloadSessionId);
     }
 }

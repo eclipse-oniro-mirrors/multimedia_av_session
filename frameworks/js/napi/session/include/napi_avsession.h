@@ -101,9 +101,17 @@ private:
     static napi_value OnDesktopLyricStateChanged(napi_env env, napi_callback_info info);
     static napi_value OffDesktopLyricStateChanged(napi_env env, napi_callback_info info);
 
+    struct PlaybackStateSyncContext {
+        std::mutex mtx;
+        std::condition_variable cv;
+        bool ready = false;
+        int32_t ret = AVSESSION_SUCCESS;
+    };
+
     static std::function<void()> PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
-        AVPlaybackState playBackState);
-    static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context);
+        AVPlaybackState playBackState, std::shared_ptr<PlaybackStateSyncContext> syncCtx);
+    static std::function<void()> PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context,
+        std::shared_ptr<PlaybackStateSyncContext> syncCtx);
     static void AVQueueImgDownloadSyncExecutor(std::weak_ptr<AVSession> sessionWeak,
         std::shared_ptr<std::string> latestDownloadedAVQueueId, OHOS::AVSession::AVMetaData metaData);
 
@@ -183,15 +191,11 @@ private:
     Rosen::IInputEventRecipientInfo recipientInfo_;
 
     static std::mutex lock_;
-    static std::mutex syncMutex_;
-    static std::mutex syncAsyncMutex_;
     static std::mutex downloadAVQImgMutex_;
     static std::recursive_mutex currentNapiSessionMutex_;
     static std::shared_ptr<NapiAVSession> currentNapiSession_;
-    static std::condition_variable syncCond_;
-    static std::condition_variable syncAsyncCond_;
-    static int32_t playBackStateRet_;
     static std::shared_ptr<NapiAVSession> napiAVSession_;
+    static std::recursive_mutex napiAVSessionLock_;
     static std::recursive_mutex destroyLock_;
     static bool isNapiSessionDestroy_;
     static std::string currentSessionId_;

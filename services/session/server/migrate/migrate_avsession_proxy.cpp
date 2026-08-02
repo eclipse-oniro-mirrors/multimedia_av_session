@@ -922,28 +922,36 @@ void MigrateAVSessionProxy::SendSpecialKeepAliveData()
         SendMediaControlNeedStateMsg();
         if (volumeNum_.load() == DEFAULT_FAKE_VOLUME) {
             SLOGE("no bytes recv aft connect, disconnect process");
-            OnDisconnectServer(deviceId_);
+            std::string deviceIdSnapshot;
+            {
+                std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
+                deviceIdSnapshot = this->deviceId_;
+            }
+            OnDisconnectServer(deviceIdSnapshot);
         } else {
             SLOGI("volume recv aft connect:%{public}d", volumeNum_.load());
         }
     });
     keepAliveWorker_ = std::thread([this]() {
         bool isDeviceIdEmpty = false;
+        std::string deviceIdSnapshot;
         {
             std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
             isDeviceIdEmpty = this->deviceId_.empty();
+            deviceIdSnapshot = this->deviceId_;
         }
         while (!isDeviceIdEmpty) {
             SLOGI("SendSpecialKeepAliveData for deviceId:%{public}s.",
-                SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
+                SoftbusSessionUtils::AnonymizeDeviceId(deviceIdSnapshot).c_str());
             std::string data = std::string({mMode_, SYNC_HEARTBEAT});
-            SendByteForNext(deviceId_, data);
+            SendByteForNext(deviceIdSnapshot, data);
 
             std::unique_lock<std::mutex> lock(keepAliveMtx_);
             {
                 std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
                 isDeviceIdEmpty = this->deviceId_.empty();
                 CHECK_AND_RETURN_LOG(!isDeviceIdEmpty, "SendSpecialKeepAliveData quit for deviceId empty");
+                deviceIdSnapshot = this->deviceId_;
             }
             if (!isNeedByMediaControl.load()) {
                 SLOGI("silent bytes waiting.");
@@ -954,6 +962,7 @@ void MigrateAVSessionProxy::SendSpecialKeepAliveData()
             {
                 std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
                 isDeviceIdEmpty = this->deviceId_.empty();
+                deviceIdSnapshot = this->deviceId_;
             }
         }
         SLOGI("SendSpecialKeepAliveData exit.");
