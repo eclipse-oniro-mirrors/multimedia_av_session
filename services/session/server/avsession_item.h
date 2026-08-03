@@ -477,6 +477,7 @@ private:
     void PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo);
     void DelRecommend();
     void ReadMediaAndAVQueueImg(AVMetaData::MetaMaskType recordFilter, AVMetaData& oldData, AVMetaData newData);
+    std::map<pid_t, sptr<AVControllerItem>> GetControllerMap();
     void UpdateMetaData(const AVMetaData& meta);
     void UpdateRecommendInfo(bool needRecommend);
     bool SearchSpidInCapability(const std::string& deviceId);

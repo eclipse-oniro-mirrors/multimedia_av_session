@@ -421,13 +421,18 @@ int32_t AVControllerItem::Destroy()
         }
     }
 
+    sptr<AVSessionItem> session;
     {
         std::lock_guard sessionLockGuard(sessionMutex_);
-        if (session_ != nullptr) {
-            session_->HandleControllerRelease(pid_);
+        session = session_;
+        if (session != nullptr) {
             session_ = nullptr;
             sessionId_.clear();
         }
+    }
+    
+    if (session != nullptr) {
+        session->HandleControllerRelease(pid_);
     }
 
     return AVSESSION_SUCCESS;
@@ -441,14 +446,21 @@ int32_t AVControllerItem::DestroyWithoutReply()
         innerCallback_ = nullptr;
         callback_ = nullptr;
     }
+    
+    sptr<AVSessionItem> session;
     {
         std::lock_guard sessionLockGuard(sessionMutex_);
-        if (session_ != nullptr) {
-            session_->HandleControllerRelease(pid_);
+        session = session_;
+        if (session != nullptr) {
             sessionId_.clear();
             session_ = nullptr;
         }
     }
+    
+    if (session != nullptr) {
+        session->HandleControllerRelease(pid_);
+    }
+    
     return AVSESSION_SUCCESS;
 }
 
@@ -563,7 +575,13 @@ void AVControllerItem::HandlePlaybackStateChange(const AVPlaybackState& state,
 
 void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMetaData::MetaMaskType& changedDataMask)
 {
-    std::lock_guard callbackLockGuard(callbackMutex_);
+    sptr<IAVControllerCallback> callback;
+    std::shared_ptr<AVControllerCallback> innerCallback;
+    {
+        std::lock_guard callbackLockGuard(callbackMutex_);
+        callback = callback_;
+        innerCallback = innerCallback_;
+    }
     sptr<AVSessionItem> session;
     {
         std::lock_guard sessionLockGuard(sessionMutex_);
@@ -599,11 +617,11 @@ void AVControllerItem::HandleMetaDataChange(const AVMetaData& data, const AVMeta
                 metaOut.SetMediaImageUri("");
             }
         }
-        if (callback_ != nullptr) {
-            callback_->OnMetaDataChange(metaOut);
+        if (callback != nullptr) {
+            callback->OnMetaDataChange(metaOut);
         }
-        if (innerCallback_ != nullptr) {
-            innerCallback_->OnMetaDataChange(metaOut);
+        if (innerCallback != nullptr) {
+            innerCallback->OnMetaDataChange(metaOut);
         }
         DealMetaDataChangeForMigrate(metaOut);
     }
