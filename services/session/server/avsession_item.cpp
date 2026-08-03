@@ -598,6 +598,12 @@ void AVSessionItem::ReadMediaAndAVQueueImg(AVMetaData::MetaMaskType recordFilter
     }
 }
 
+std::map<pid_t, sptr<AVControllerItem>> AVSessionItem::GetControllerMap()
+{
+    std::lock_guard controllerLockGuard(controllersLock_);
+    return controllers_;
+}
+
 int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
 {
     AVMetaData::MetaMaskType recordFilter;
@@ -627,12 +633,10 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_, changedDataMask]() {
         std::lock_guard aliveLockGuard(isAliveLock_);
         CHECK_AND_RETURN_LOG(isAlivePtr != nullptr && *isAlivePtr, "handle metadatachange with session gone, return");
-        SLOGI("HandleMetaDataChange in postTask with title %{public}s and size %{public}d",
-            AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str(),
-            static_cast<int>(controllers_.size()));
-        std::lock_guard controllerLockGuard(controllersLock_);
-        CHECK_AND_RETURN_LOG(controllers_.size() > 0, "handle with no controller, return");
-        for (const auto& [pid, controller] : controllers_) {
+        SLOGI("HandleMetaDataChange in postTask with title %{public}s",
+            AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str());
+        auto controllers = GetControllerMap();
+        for (const auto& [pid, controller] : controllers) {
             if (controller != nullptr) {
                 controller->HandleMetaDataChange(meta, changedDataMask);
             }
