@@ -1220,7 +1220,7 @@ export class AVCastPicker extends ViewPU {
         Row.direction(Direction.Ltr);
         this.observeComponentCreation2((x1, y1) => {
             Text.create(u2 ? u2.iconLeft : '');
-            Text.fontFamily('HarmonyOS Sans SC 2025');
+            Text.fontFamily('OpenHarmony Sans SC 2025');
             Text.fontSize(10);
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
@@ -1230,7 +1230,7 @@ export class AVCastPicker extends ViewPU {
         Text.pop();
         this.observeComponentCreation2((x1, y1) => {
             Text.create(u2 ? u2.iconRight : '');
-            Text.fontFamily('HarmonyOS Sans SC 2025');
+            Text.fontFamily('OpenHarmony Sans SC 2025');
             Text.fontSize(10);
             Text.fontWeight(FontWeight.Medium);
             Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],

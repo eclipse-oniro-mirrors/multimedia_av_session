@@ -99,7 +99,8 @@ void AVSessionDumper::ShowMetaData(std::string& result, const AVSessionService& 
 {
     int32_t controllerIndex = 0;
     int32_t itemIndex = 0;
-    for (const auto& it : sessionService.controllers_) {
+    std::map<pid_t, std::list<sptr<AVControllerItem>>> tempControllers_ = sessionService.GetInnerControllers();
+    for (const auto& it : tempControllers_) {
         result.append("ControllerIndex: " + std::to_string(++controllerIndex) + "\n");
         for (const auto& item : it.second) {
             result.append("ItemIndex: " + std::to_string(++itemIndex)+ "\n");
@@ -219,7 +220,8 @@ void AVSessionDumper::ShowControllerInfo(std::string& result, const AVSessionSer
     AVPlaybackState playbackState;
     std::string temp;
     int32_t controllerCount = 0;
-    for (const auto& it : sessionService.controllers_) {
+    std::map<pid_t, std::list<sptr<AVControllerItem>>> tempControllers_ = sessionService.GetInnerControllers();
+    for (const auto& it : tempControllers_) {
         for (const auto& controller : it.second) {
             controllerCount++;
             controller->GetAVPlaybackState(playbackState);

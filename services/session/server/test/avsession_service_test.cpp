@@ -197,7 +197,7 @@ public:
 void AVSessionServiceTest::SetUpTestCase()
 {
     SLOGI("set up AVSessionServiceTest");
-    system("killall -9 com.huawei.hmsapp.music");
+    system("killall -9 com.example.hmsapp.music");
     sleep(1);
     avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     avservice_->InitKeyEvent();
@@ -2786,7 +2786,7 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
     SLOGD("GetLocalTitle001 begin!");
     ASSERT_TRUE(avservice_ != nullptr);
     OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName("com.huawei.hmsapp.music");
+    elementName.SetBundleName("com.example.hmsapp.music");
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere_ =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);

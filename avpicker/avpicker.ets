@@ -1680,7 +1680,7 @@ export struct AVCastPicker {
 }
 
 @Extend(Text) function highQualityStyles(maxScale: number) {
-  .fontFamily('HarmonyOS Sans SC 2025')
+  .fontFamily('OpenHarmony Sans SC 2025')
   .fontSize(10)
   .fontWeight(FontWeight.Medium)
   .fontColor($r('sys.color.font_secondary'))
