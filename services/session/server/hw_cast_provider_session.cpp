@@ -120,21 +120,30 @@ bool HwCastProviderSession::AddDeviceWithConnectionConfig(const DeviceInfo devic
 
 void HwCastProviderSession::SendCommandArgsToCast(const int32_t commandType, const std::string& params)
 {
-    CHECK_AND_RETURN_LOG(castSession_ != nullptr, "castSession_ is nullptr");
+    std::shared_ptr<CastEngine::ICastSession> sessionCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        if (!castSession_) {
+            SLOGE("castSession_ is nullptr");
+            return;
+        }
+        sessionCopy = castSession_;
+    }
+    
     std::string parStr = params;
     switch (commandType) {
         case CAST_MODE_CHANGE_COMMAND:
             SLOGI("SendCommandArgsToCast: cast mode change");
-            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_CONFIG_MODE, parStr);
+            sessionCopy->NotifyEvent(CastEngine::EventId::HIPLAY_CONFIG_MODE, parStr);
             break;
         case BYPASS_COMMAND_NUM:
-            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_BYPASS_DATA, parStr);
+            sessionCopy->NotifyEvent(CastEngine::EventId::HIPLAY_BYPASS_DATA, parStr);
             break;
         case QUERY_COMMAND_NUM:
-            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_QUERY_REQUEST, parStr);
+            sessionCopy->NotifyEvent(CastEngine::EventId::HIPLAY_QUERY_REQUEST, parStr);
             break;
         case CONTROL_COMMAND_NUM:
-            castSession_->NotifyEvent(CastEngine::EventId::HIPLAY_MODE_CHANGE, parStr);
+            sessionCopy->NotifyEvent(CastEngine::EventId::HIPLAY_MODE_CHANGE, parStr);
             break;
         default:
             break;

@@ -200,11 +200,12 @@ void HwCastProvider::StopCastSession(int castId)
     if (castId == mirrorCastId) {
         return;
     }
-    if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
+    auto it = hwCastProviderSessionMap_.find(castId);
+    if (it == hwCastProviderSessionMap_.end()) {
         SLOGE("no need to release castSession for castId %{public}d is not exit in hwCastProviderSessionMap_", castId);
         return;
     }
-    auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
+    auto hwCastProviderSession = it->second;
     if (hwCastProviderSession) {
         hwCastProviderSession->Release();
     }
@@ -218,11 +219,12 @@ bool HwCastProvider::AddCastDevice(int castId, DeviceInfo deviceInfo, uint32_t s
     std::lock_guard lockGuard(mutexLock_);
     SLOGI("add device check lock done");
 
-    if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
+    auto it = hwCastProviderSessionMap_.find(castId);
+    if (it == hwCastProviderSessionMap_.end()) {
         SLOGE("the castId corresonding to castSession is not exist");
         return false;
     }
-    auto hwCastProviderSession = hwCastProviderSessionMap_[castId];
+    auto hwCastProviderSession = it->second;
     if (!hwCastProviderSession) {
         SLOGE("the castId corresonding to castSession is nullptr");
         return false;
