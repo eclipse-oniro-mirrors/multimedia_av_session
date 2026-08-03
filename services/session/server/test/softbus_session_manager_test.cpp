@@ -560,3 +560,21 @@ static HWTEST_F(SoftbusSessionManagerTest, SendBytesForNext003, TestSize.Level0)
     SLOGI("SendBytesForNext003 end");
 }
 #endif
+
+/**
+* @tc.name: ObtainPeerDeviceId003
+* @tc.desc: test ObtainPeerDeviceId with socket existed in mMap_
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(SoftbusSessionManagerTest, ObtainPeerDeviceId003, TestSize.Level0)
+{
+    SLOGI("ObtainPeerDeviceId003 begin");
+    int32_t sessionId = 1001;
+    manager_->mMap_.insert({sessionId, "testPeerDeviceId001"});
+    std::string deviceId;
+    int32_t ret = manager_->ObtainPeerDeviceId(sessionId, deviceId);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(deviceId, "testPeerDeviceId001");
+    SLOGI("ObtainPeerDeviceId003 end");
+}

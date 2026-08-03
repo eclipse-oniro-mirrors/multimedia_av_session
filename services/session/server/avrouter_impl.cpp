@@ -562,7 +562,7 @@ int32_t AVRouterImpl::StopCastSession(const int64_t castHandle)
     int32_t providerNumber = static_cast<int32_t>(static_cast<uint64_t>(castHandle) >> 32);
 
     std::shared_ptr<AVCastProvider> provider = GetCastProvider(providerNumber);
-    CHECK_AND_RETURN_RET_LOG(provider != nullptr, AVSESSION_ERROR, "provider is nullptr");
+    CHECK_AND_RETURN_RET_LOG(provider != nullptr, castHandle, "provider is nullptr");
     // The first 32 bits are providerId, the last 32 bits are castId
     int32_t castId = static_cast<int32_t>((static_cast<uint64_t>(castHandle) << 32) >> 32);
     provider->StopCastSession(castId);

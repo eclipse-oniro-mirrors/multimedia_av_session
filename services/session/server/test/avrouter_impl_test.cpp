@@ -1992,5 +1992,175 @@ static HWTEST_F(AVRouterImplTest, SetStreamToMirrorFromSink001, TestSize.Level0)
     EXPECT_FALSE(g_AVRouterImpl->IsStreamToMirrorFromSink());
     SLOGI("SetStreamToMirrorFromSink001 end");
 }
+
+/**
+* @tc.name: Init001
+* @tc.desc: init router fails in test environment with no cast engine service,
+*           hwProvider_ stays nullptr and providerManagerMap_ stays empty
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, Init001, TestSize.Level0)
+{
+    SLOGI("Init001 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    int32_t ret = router->Init(g_AVSessionService.get());
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    EXPECT_TRUE(router->GetHwProvider() == nullptr);
+    EXPECT_TRUE(router->providerManagerMap_.empty());
+    SLOGI("Init001 end");
+}
+
+/**
+* @tc.name: Release001
+* @tc.desc: release router with hwProvider_ nullptr returns false
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, Release001, TestSize.Level0)
+{
+    SLOGI("Release001 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    EXPECT_TRUE(router->hwProvider_ == nullptr);
+    EXPECT_FALSE(router->Release());
+    SLOGI("Release001 end");
+}
+
+/**
+* @tc.name: Release002
+* @tc.desc: release router with hwProvider_ injected clears provider resources,
+*           note AVRouterImpl::Release always returns false even on the success path (existing behavior)
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, Release002, TestSize.Level0)
+{
+    SLOGI("Release002 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    router->hwProvider_ = std::make_shared<HwCastProvider>();
+    // existing behavior: AVRouterImpl::Release returns false even when release succeeds
+    EXPECT_FALSE(router->Release());
+    EXPECT_TRUE(router->hwProvider_ == nullptr);
+    EXPECT_TRUE(router->providerManagerMap_.empty());
+    SLOGI("Release002 end");
+}
+
+/**
+* @tc.name: GetHwProvider001
+* @tc.desc: get hw provider from fresh router returns nullptr
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, GetHwProvider001, TestSize.Level0)
+{
+    SLOGI("GetHwProvider001 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    EXPECT_TRUE(router->GetHwProvider() == nullptr);
+    SLOGI("GetHwProvider001 end");
+}
+
+/**
+* @tc.name: GetHwProvider002
+* @tc.desc: get hw provider returns the injected hwProvider_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, GetHwProvider002, TestSize.Level0)
+{
+    SLOGI("GetHwProvider002 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    router->hwProvider_ = std::make_shared<HwCastProvider>();
+    EXPECT_EQ(router->GetHwProvider(), router->hwProvider_);
+    SLOGI("GetHwProvider002 end");
+}
+
+/**
+* @tc.name: SetMirrorCastHandle001
+* @tc.desc: set mirror cast handle with hwProvider_ nullptr does not crash
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, SetMirrorCastHandle001, TestSize.Level0)
+{
+    SLOGI("SetMirrorCastHandle001 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    router->SetMirrorCastHandle(100);
+    EXPECT_TRUE(router->GetHwProvider() == nullptr);
+    SLOGI("SetMirrorCastHandle001 end");
+}
+
+/**
+* @tc.name: SetMirrorCastHandle002
+* @tc.desc: set mirror cast handle forwards the value to hwProvider_
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, SetMirrorCastHandle002, TestSize.Level0)
+{
+    SLOGI("SetMirrorCastHandle002 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    router->hwProvider_ = std::make_shared<HwCastProvider>();
+    router->SetMirrorCastHandle(100);
+    EXPECT_EQ(router->hwProvider_->GetMirrorCastHandle(), 100);
+    SLOGI("SetMirrorCastHandle002 end");
+}
+
+/**
+* @tc.name: DestroyCastSessionCreated001
+* @tc.desc: destroy cast session created with empty sinkCastSessionId_ returns directly
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, DestroyCastSessionCreated001, TestSize.Level0)
+{
+    SLOGI("DestroyCastSessionCreated001 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    router->DestroyCastSessionCreated();
+    EXPECT_TRUE(router->sinkCastSessionId_.empty());
+    SLOGI("DestroyCastSessionCreated001 end");
+}
+
+/**
+* @tc.name: DestroyCastSessionCreated002
+* @tc.desc: destroy cast session created with hwProvider_ nullptr returns directly
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, DestroyCastSessionCreated002, TestSize.Level0)
+{
+    SLOGI("DestroyCastSessionCreated002 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    router->sinkCastSessionId_ = "session123";
+    router->DestroyCastSessionCreated();
+    EXPECT_TRUE(router->GetHwProvider() == nullptr);
+    SLOGI("DestroyCastSessionCreated002 end");
+}
+
+/**
+* @tc.name: DestroyCastSessionCreated003
+* @tc.desc: destroy cast session created forwards to injected hwProvider_ without crash
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, DestroyCastSessionCreated003, TestSize.Level0)
+{
+    SLOGI("DestroyCastSessionCreated003 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    router->sinkCastSessionId_ = "session123";
+    router->hwProvider_ = std::make_shared<HwCastProvider>();
+    router->DestroyCastSessionCreated();
+    EXPECT_TRUE(router->GetHwProvider() != nullptr);
+    SLOGI("DestroyCastSessionCreated003 end");
+}
 } //AVSession
 } //OHOS
