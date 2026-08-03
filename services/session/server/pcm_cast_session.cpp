@@ -45,6 +45,7 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         std::lock_guard lockGuard(castLock_);
         deviceInfo.deviceName_ = tempDeviceInfo_.deviceName_;
         deviceInfo.deviceType_ = tempDeviceInfo_.deviceType_;
+        deviceInfo.uuid_ = tempDeviceInfo_.uuid_;
         deviceInfo.supportedProtocols_ = tempDeviceInfo_.supportedProtocols_;
         deviceInfo.hiPlayDeviceInfo_.castMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
         deviceInfo.hiPlayDeviceInfo_.castUid_ = GetUid();
