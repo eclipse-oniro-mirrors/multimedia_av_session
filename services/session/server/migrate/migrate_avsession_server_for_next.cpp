@@ -51,22 +51,23 @@ void MigrateAVSessionServer::LocalFrontSessionArrive(std::string &sessionId)
     lastSessionId_ = sessionId;
     SLOGI("LocalFrontSessionArrive in:%{public}s.", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     MigratePostTask(
-        [this, sessionId]() {
+        [weakThis = std::weak_ptr<MigrateAVSessionServer>(shared_from_this()), sessionId]() {
+            auto sharedThis = weakThis.lock();
+            CHECK_AND_RETURN_LOG(sharedThis, "LocalFrontSessionArrive but MigrateAVSessionServer already destroyed");
             SLOGI("LocalFrontSessionArrive with sessionId:%{public}s in",
                 AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-            std::weak_ptr<MigrateAVSessionServer> migrageServerWeak(shared_from_this());
-            CreateController(sessionId);
+            sharedThis->CreateController(sessionId);
             sptr<AVControllerItem> controller = nullptr;
             {
-                std::lock_guard lockGuard(migrateControllerLock_);
-                controller = playerIdToControllerMap_[sessionId];
+                std::lock_guard lockGuard(sharedThis->migrateControllerLock_);
+                controller = sharedThis->playerIdToControllerMap_[sessionId];
                 CHECK_AND_RETURN_LOG(controller != nullptr, "LocalFrontSessionArrive but get controller null");
             }
 
             controller->isFromSession_ = false;
-            lastSessionId_ = sessionId;
-            if (isSoftbusConnecting_.load()) {
-                UpdateFrontSessionInfoToRemote(controller);
+            sharedThis->lastSessionId_ = sessionId;
+            if (sharedThis->isSoftbusConnecting_.load()) {
+                sharedThis->UpdateFrontSessionInfoToRemote(controller);
             } else {
                 SLOGE("LocalFrontSessionArrive without connect");
             }
@@ -102,25 +103,26 @@ void MigrateAVSessionServer::LocalFrontSessionLeave(std::string &sessionId)
     SLOGI("LocalFrontSessionLeave in:%{public}s.", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
     lastSessionId_ = "";
     MigratePostTask(
-        [this, sessionId]() {
-            std::weak_ptr<MigrateAVSessionServer> migrageServerWeak(shared_from_this());
-            std::lock_guard lockGuard(migrateControllerLock_);
-            sptr<AVControllerItem> controller = playerIdToControllerMap_[lastSessionId_];
+        [weakThis = std::weak_ptr<MigrateAVSessionServer>(shared_from_this()), sessionId]() {
+            auto sharedThis = weakThis.lock();
+            CHECK_AND_RETURN_LOG(sharedThis, "LocalFrontSessionLeave but MigrateAVSessionServer already destroyed");
+            std::lock_guard lockGuard(sharedThis->migrateControllerLock_);
+            sptr<AVControllerItem> controller = sharedThis->playerIdToControllerMap_[sharedThis->lastSessionId_];
             if (controller != nullptr) {
                 controller->UnregisterAVControllerCallback();
             } else {
                 SLOGE("LocalFrontSessionLeave but get controller null");
             }
-            ClearCacheBySessionId(sessionId);
-            auto it = playerIdToControllerMap_.find(sessionId);
-            if (it != playerIdToControllerMap_.end()) {
-                playerIdToControllerMap_.erase(it);
+            sharedThis->ClearCacheBySessionId(sessionId);
+            auto it = sharedThis->playerIdToControllerMap_.find(sessionId);
+            if (it != sharedThis->playerIdToControllerMap_.end()) {
+                sharedThis->playerIdToControllerMap_.erase(it);
             } else {
                 SLOGE("LocalFrontSessionLeave no find sessionId:%{public}s",
                     AVSessionUtils::GetAnonySessionId(sessionId).c_str());
             }
-            UpdateEmptyInfoToRemote();
-            lastSessionId_ = "";
+            sharedThis->UpdateEmptyInfoToRemote();
+            sharedThis->lastSessionId_ = "";
             SLOGI("LocalFrontSessionLeave finish.");
         },
         "LocalFrontSessionChange");
