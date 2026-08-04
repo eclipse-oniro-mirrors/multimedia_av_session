@@ -85,6 +85,8 @@ public:
 
     std::string GetSessionId() override;
 
+    int32_t GetUserId() override;
+
     int64_t GetRealPlaybackPosition() override;
 
     bool IsDestroy() override;

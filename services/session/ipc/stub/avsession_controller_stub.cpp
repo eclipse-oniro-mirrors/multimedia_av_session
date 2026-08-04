@@ -380,6 +380,12 @@ int32_t AVSessionControllerStub::HandleGetSessionId(MessageParcel& data, Message
     return ERR_NONE;
 }
 
+int32_t AVSessionControllerStub::HandleGetUserId(MessageParcel& data, MessageParcel& reply)
+{
+    CHECK_AND_PRINT_LOG(reply.WriteInt32(GetUserId()), "write int32_t failed");
+    return ERR_NONE;
+}
+
 int32_t AVSessionControllerStub::HandleIsDesktopLyricEnabled(MessageParcel &data, MessageParcel &reply)
 {
     bool isEnabled = false;

@@ -392,6 +392,10 @@ public:
             innerMediaPixelMap->Clear();
         }
     };
+    int32_t GetUserId() override
+    {
+        return 0;
+    };
 };
 
 int32_t AVSessionControllerStubTest::GetAVCallState(AVCallState& avCallState)
@@ -2020,6 +2024,21 @@ HWTEST_F(AVSessionControllerTest, AVControllerDemoSetSupportedLoopModes001, Test
     std::vector<int32_t> loopModes = {};
     EXPECT_EQ(avControllerDemo.GetSupportedLoopModes(loopModes), AVSESSION_SUCCESS);
     SLOGD("AVControllerDemoGetSupportedLoopModes001 End");
+}
+
+
+/**
+* @tc.name: AVControllerDemoGetUserId001
+* @tc.desc: Get UserId in demo class
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionControllerTest, AVControllerDemoGetUserId001, TestSize.Level1)
+{
+    SLOGD("AVControllerDemoGetUserId001 Begin");
+    AVControllerDemo avControllerDemo = AVControllerDemo();
+    EXPECT_EQ(avControllerDemo.GetUserId(), AVSESSION_SUCCESS);
+    SLOGD("AVControllerDemoGetUserId001 End");
 }
 } // namespace AVSession
 } // namespace OHOS
