@@ -148,6 +148,7 @@ void AVSessionSysEvent::Unregister()
 void AVSessionSysEvent::AddLifeCycleInfo(const std::string& bundleName, bool appStatus,
     const int32_t& sessionType, bool isCreateSession)
 {
+    std::lock_guard lockGuard(lock_);
     AVSessionSysEvent::LifeCycleInfo lifeCycleInfo;
     lifeCycleInfo.bundleName_ = bundleName;
     lifeCycleInfo.appStatus_ = appStatus;
@@ -158,6 +159,7 @@ void AVSessionSysEvent::AddLifeCycleInfo(const std::string& bundleName, bool app
 
 void AVSessionSysEvent::AddLowQualityInfo(AVSessionSysEvent::BackControlReportInfo &reportInfo)
 {
+    std::lock_guard lockGuard(lock_);
     if (lowQualityInfos_.find(reportInfo.bundleName_) == lowQualityInfos_.end()) {
         lowQualityInfos_.insert(std::make_pair(reportInfo.bundleName_, reportInfo));
     }
@@ -167,6 +169,7 @@ void AVSessionSysEvent::AddLowQualityInfo(AVSessionSysEvent::BackControlReportIn
 void AVSessionSysEvent::AddControllerCommandInfo(const std::string& bundleName, const pid_t& controllerPid,
     const int32_t& controllerCmd, const int32_t& sessionType)
 {
+    std::lock_guard lockGuard(lock_);
     AVSessionSysEvent::ControllerCommandInfo controllerCommandInfo;
     controllerCommandInfo.bundleName_ = bundleName;
     controllerCommandInfo.controllerPid_ = controllerPid;

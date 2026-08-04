@@ -68,19 +68,12 @@ private:
     using TaiheFuncExecute = std::function<void(std::shared_ptr<uintptr_t> method)>;
     void HandleEvent(int32_t event, TaiheFuncExecute callback);
 
-    struct DataContext {
-        string deviceId;
-        array<AVSessionController> sessionControllers;
-        string commonEvent;
-    };
-
     std::shared_ptr<TaiheAsyncCallback> asyncCallback_;
     std::mutex lock_;
     std::mutex validLock_;
     std::list<std::shared_ptr<uintptr_t>> callbacks_[EVENT_TYPE_MAX] {};
     std::shared_ptr<bool> isValid_ = std::make_shared<bool>(false);
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_ = nullptr;
-    DataContext dataContext_ = {};
 };
 } // namespace ANI::AVSession
 #endif // TAIHE_SESSIONLISTENER_H

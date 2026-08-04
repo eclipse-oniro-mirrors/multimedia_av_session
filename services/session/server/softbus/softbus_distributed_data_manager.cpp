@@ -281,7 +281,7 @@ void SoftbusDistributedDataManager::OnSessionServerClosed(int32_t socket)
 void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, const std::string &data)
 {
 #ifdef DSOFTBUS_ENABLE
-    std::string deviceId = peerSocketInfo.networkId ? peerSocketInfo.networkId : "";
+    std::string deviceId = peerNetworkIdCache_;
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onMessageHandleReceived: %{public}s", anonymizeDeviceId.c_str());
 #endif
@@ -301,7 +301,7 @@ void SoftbusDistributedDataManager::OnMessageHandleReceived(int32_t socket, cons
 void SoftbusDistributedDataManager::OnBytesServerReceived(int32_t socket, const std::string &data)
 {
 #ifdef DSOFTBUS_ENABLE
-    std::string deviceId = peerSocketInfo.networkId ? peerSocketInfo.networkId : "";
+    std::string deviceId = peerNetworkIdCache_;
     std::string anonymizeDeviceId = SoftbusSessionUtils::AnonymizeDeviceId(deviceId);
     SLOGI("onBytesServerReceived: %{public}s", anonymizeDeviceId.c_str());
 #endif
