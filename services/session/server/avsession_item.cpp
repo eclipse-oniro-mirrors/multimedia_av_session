@@ -2285,7 +2285,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
     ListenCollaborationOnStop();
     OutputDeviceInfo outputDeviceInfo;
     {
-        std::lock_guard lockGuard(castLock_);
+        std::lock_guard lockGuard(castDeviceInfoMapMutex_);
         bool hasDevice = castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0;
         if (hasDevice && (static_cast<uint32_t>(castDeviceInfoMap_[deviceInfo.deviceId_].supportedProtocols_) &
             ProtocolType::TYPE_CAST_PLUS_AUDIO)) {
@@ -3582,7 +3582,7 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
     SLOGI("UpdateCastDeviceMap with id: %{public}s",
         AVSessionUtils::GetAnonyNetworkId(deviceInfo.deviceId_).c_str());
     {
-        std::lock_guard lockGuard(castLock_);
+        std::lock_guard lockGuard(castDeviceInfoMapMutex_);
         castDeviceInfoMap_[deviceInfo.deviceId_] = deviceInfo;
     }
     if (descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0 &&
@@ -3598,10 +3598,17 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
 void AVSessionItem::ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::lock_guard lockGuard(castLock_);
     AVSessionRadarInfo info(func);
-    if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
-        DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[deviceInfo.deviceId_];
+    DeviceInfo cacheDeviceInfo;
+    bool hasDevice = false;
+    {
+        std::lock_guard lockGuard(castDeviceInfoMapMutex_);
+        hasDevice = castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0;
+        if (hasDevice) {
+            cacheDeviceInfo = castDeviceInfoMap_[deviceInfo.deviceId_];
+        }
+    }
+    if (hasDevice) {
         AVSessionRadar::GetInstance().ConnectFinish(cacheDeviceInfo, info);
     } else {
         AVSessionRadar::GetInstance().ConnectFinish(deviceInfo, info);
@@ -3613,10 +3620,17 @@ void AVSessionItem::ReportConnectFinish(const std::string func, const DeviceInfo
 void AVSessionItem::ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    std::lock_guard lockGuard(castLock_);
     AVSessionRadarInfo info(func);
-    if (castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0) {
-        DeviceInfo cacheDeviceInfo = castDeviceInfoMap_[deviceInfo.deviceId_];
+    DeviceInfo cacheDeviceInfo;
+    bool hasDevice = false;
+    {
+        std::lock_guard lockGuard(castDeviceInfoMapMutex_);
+        hasDevice = castDeviceInfoMap_.count(deviceInfo.deviceId_) > 0;
+        if (hasDevice) {
+            cacheDeviceInfo = castDeviceInfoMap_[deviceInfo.deviceId_];
+        }
+    }
+    if (hasDevice) {
         AVSessionRadar::GetInstance().StopCastFinish(cacheDeviceInfo, info);
     } else {
         AVSessionRadar::GetInstance().StopCastFinish(deviceInfo, info);
