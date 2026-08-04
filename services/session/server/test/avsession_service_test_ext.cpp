@@ -632,7 +632,7 @@ static HWTEST_F(AVSessionServiceTestExt, HandleSystemKeyColdStart002, TestSize.L
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
         g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    ASSERT_NE(avsessionHere, nullptr);
+    CHECK_AND_RETURN(avsessionHere != nullptr);
     g_AVSessionService->GetUsersManager().frontSessionListMapByUserId_.clear();
     g_AVSessionService->ancoSession_ = nullptr;
     AVControlCommand command;
@@ -658,7 +658,7 @@ static HWTEST_F(AVSessionServiceTestExt, HandleSystemKeyColdStart003, TestSize.L
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
         g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    ASSERT_NE(avsessionHere, nullptr);
+    CHECK_AND_RETURN(avsessionHere != nullptr);
     g_AVSessionService->GetUsersManager().frontSessionListMapByUserId_.clear();
     g_AVSessionService->ancoSession_ = avsessionHere;
     g_AVSessionService->ancoSession_->Deactivate();
