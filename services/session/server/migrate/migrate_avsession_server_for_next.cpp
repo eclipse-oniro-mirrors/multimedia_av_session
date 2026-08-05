@@ -140,6 +140,7 @@ void MigrateAVSessionServer::CheckPostClean(bool resetOnlySessionInfo)
     playbackStateCache_.SetState(-1);
     playbackStateCache_.SetFavorite(0);
     CHECK_AND_RETURN_LOG(!resetOnlySessionInfo, "only SessionInfo reset");
+    sessionIdCache_ = "";
     volumeCache_.store(-1);
     devicesListStr_ = "";
     devicePreferStr_ = "";
