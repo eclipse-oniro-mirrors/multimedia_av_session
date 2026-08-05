@@ -60,7 +60,7 @@ export struct AVVolumePanel {
       UIExtensionComponent(
         {
           abilityName: 'AVVolumeExtension',
-          bundleName: 'com.huawei.hmos.settings',
+          bundleName: 'com.example.hmos.settings',
           parameters: {
             'volumeParameter': this.volumeParameter,
             'ability.want.params.uiExtensionType': 'sysPicker/mediaControl',

@@ -723,6 +723,8 @@ private:
 
     int32_t GetUserIdFromCallingUid(const int32_t uid);
 
+    std::map<pid_t, std::list<sptr<AVControllerItem>>> GetInnerControllers() const;
+
     std::atomic<uint32_t> sessionSeqNum_ {};
     std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;
@@ -759,7 +761,7 @@ private:
     void SetCriticalWhenRelease(sptr<AVSessionItem> sessionItem);
 
     // The following locks are used in the defined order of priority
-    std::recursive_mutex sessionServiceLock_;
+    mutable std::recursive_mutex sessionServiceLock_;
 
     std::recursive_mutex sessionFrontLock_;
 

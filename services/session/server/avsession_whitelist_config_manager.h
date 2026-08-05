@@ -27,8 +27,8 @@
 namespace OHOS::AVSession {
 class AVSessionWhitelistConfigManager : public DelayedSingleton<AVSessionWhitelistConfigManager> {
 public:
-    AVSessionWhitelistConfigManager () = default;
-    ~AVSessionWhitelistConfigManager () = default;
+    AVSessionWhitelistConfigManager() = default;
+    ~AVSessionWhitelistConfigManager() = default;
     bool IsKeyEventSupported(const std::string &bundleName);
 
 private:
