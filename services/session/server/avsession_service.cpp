@@ -83,6 +83,8 @@ const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservic
 static const int32_t CONTROL_COLD_START = 2;
 #endif
 static const int32_t DEFAULT_IMAGE_SIZE = 256;
+static const std::string DEFAULT_FOLD_SCREEN_TYPE = "0,0,0,0";
+static const int32_t OUTER_SCREEN_TYPE_VALUE = 3;
 const std::string PAD_DEVICE_TYPE = "tablet";
 const std::string PC_DEVICE_TYPE = "2in1";
 const std::string PHONE_DEVICE_TYPE = "phone";
@@ -4750,20 +4752,45 @@ void AVSessionService::DealFlowControl(int32_t uid, bool isBroker)
 }
 
 // LCOV_EXCL_START
-void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool addCapsule, bool isCapsuleUpdate)
+bool AVSessionService::CheckNotificationEnabled()
 {
 #ifdef DEVICE_MANAGER_ENABLE
     bool is2in1 = (GetLocalDeviceType() == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
 #endif
+    bool isSupportOuterScreen = false;
+    bool is2in1WithOuterScreen = false;
+    {
+        std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", DEFAULT_FOLD_SCREEN_TYPE);
+        std::vector<std::string> parts;
+        size_t start = 0;
+        size_t pos = foldScreenType.find(',');
+        while (pos != std::string::npos) {
+            parts.push_back(foldScreenType.substr(start, pos - start));
+            start = pos + 1;
+            pos = foldScreenType.find(',', start);
+        }
+        parts.push_back(foldScreenType.substr(start));
+        if (parts.size() > 1) {
+            isSupportOuterScreen = (std::stoi(parts[1]) == OUTER_SCREEN_TYPE_VALUE);
+        }
+    }
+#ifdef DEVICE_MANAGER_ENABLE
+    is2in1WithOuterScreen = is2in1 && isSupportOuterScreen;
+    CHECK_AND_RETURN_RET_LOG(!is2in1 || is2in1WithOuterScreen, false, "2in1 not support.");
+#else
+    CHECK_AND_RETURN_RET_LOG(!isCastableDevice_, false, "castable device is not support.");
+#endif
     bool isPcMode = system::GetParameter("const.window.support_window_pcmode_switch", "false") == "true" &&
         system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
-#ifdef DEVICE_MANAGER_ENABLE
-    CHECK_AND_RETURN_LOG(!is2in1 && !isPcMode, "2in1 not support.");
-#else
-    isPcMode = isPcMode_.load();
-    CHECK_AND_RETURN_LOG(!isCastableDevice_ && !isPcMode, "pc device not support.");
-#endif
-    CHECK_AND_RETURN_LOG(isNtfEnabled_.load(), "ntf settings off");
+    CHECK_AND_RETURN_RET_LOG(!isPcMode || is2in1WithOuterScreen, false, "pc mode not support.");
+    CHECK_AND_RETURN_RET_LOG(isNtfEnabled_.load(), false, "ntf settings off");
+    return true;
+}
+
+// LCOV_EXCL_START
+void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool addCapsule, bool isCapsuleUpdate)
+{
+    CHECK_AND_RETURN_LOG(CheckNotificationEnabled(), "check notification not enabled");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
     SLOGI("NotifySystemUI photoSession %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d",
