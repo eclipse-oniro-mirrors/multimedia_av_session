@@ -668,6 +668,7 @@ private:
     std::recursive_mutex displayListenerLock_;
     std::shared_ptr<IAVRouterListener> iAVRouterListener_;
 
+    std::recursive_mutex castDeviceInfoMapMutex_;
     std::map<std::string, DeviceInfo> castDeviceInfoMap_;
     uint32_t spid_ = 0;
     std::mutex spidMutex_;
