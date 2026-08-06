@@ -192,6 +192,7 @@ int32_t SoftbusSessionManager::ObtainPeerDeviceId(int32_t socket, std::string &d
 {
     CHECK_AND_RETURN_RET_LOG(
         socket > 0, AVSESSION_ERROR, "the session is null, unable to obtain the peer device id.");
+    std::lock_guard lockGuard(socketLock_);
     if (mMap_.find(socket) == mMap_.end()) {
         SLOGE("no find deviceid.");
         return AVSESSION_ERROR;
@@ -219,9 +220,16 @@ void SoftbusSessionManager::OnBind(int32_t socket, SoftbusPeerSocketInfo info)
         SLOGE("PeerSocketInfo is nullptr");
         return;
     }
-    std::lock_guard lockGuard(socketLock_);
-    for (auto listener : sessionListeners_) {
+    std::vector<std::shared_ptr<SoftbusSessionListener>> listeners;
+    {
+        std::lock_guard lockGuard(socketLock_);
+        listeners = sessionListeners_;
+    }
+    for (auto listener : listeners) {
         listener->OnBind(socket, info);
+    }
+    {
+        std::lock_guard lockGuard(socketLock_);
         mMap_.insert({socket, info.networkId});
     }
 }
@@ -229,9 +237,16 @@ void SoftbusSessionManager::OnBind(int32_t socket, SoftbusPeerSocketInfo info)
 void SoftbusSessionManager::OnShutdown(int32_t socket, SoftbusShutdownReason reason)
 {
     SLOGI("ShutdownReason = %{public}d", reason);
-    std::lock_guard lockGuard(socketLock_);
-    for (auto listener : sessionListeners_) {
+    std::vector<std::shared_ptr<SoftbusSessionListener>> listeners;
+    {
+        std::lock_guard lockGuard(socketLock_);
+        listeners = sessionListeners_;
+    }
+    for (auto listener : listeners) {
         listener->OnShutdown(socket, reason);
+    }
+    {
+        std::lock_guard lockGuard(socketLock_);
         mMap_.erase(socket);
     }
 }
@@ -243,8 +258,12 @@ void SoftbusSessionManager::OnMessage(int32_t socket, const void *data, int32_t 
         SLOGE("message data is nullptr");
         return;
     }
-    std::lock_guard lockGuard(socketLock_);
-    for (auto listener : sessionListeners_) {
+    std::vector<std::shared_ptr<SoftbusSessionListener>> listeners;
+    {
+        std::lock_guard lockGuard(socketLock_);
+        listeners = sessionListeners_;
+    }
+    for (auto listener : listeners) {
         listener->OnMessage(socket, data, dataLen);
     }
 }
@@ -255,8 +274,12 @@ void SoftbusSessionManager::OnBytes(int32_t socket, const void *data, int32_t da
         SLOGE("bytes data is nullptr");
         return;
     }
-    std::lock_guard lockGuard(socketLock_);
-    for (auto listener : sessionListeners_) {
+    std::vector<std::shared_ptr<SoftbusSessionListener>> listeners;
+    {
+        std::lock_guard lockGuard(socketLock_);
+        listeners = sessionListeners_;
+    }
+    for (auto listener : listeners) {
         listener->OnBytes(socket, data, dataLen);
     }
 }

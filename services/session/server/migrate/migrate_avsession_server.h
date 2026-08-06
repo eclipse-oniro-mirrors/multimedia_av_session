@@ -192,6 +192,7 @@ private:
     std::recursive_mutex historySessionLock_;
     std::recursive_mutex migrateDeviceChangeLock_;
     std::recursive_mutex migrateAudioCallbackLock_;
+    std::recursive_mutex migrateDeviceIdLock_;
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
     std::string curAssetId_;
 

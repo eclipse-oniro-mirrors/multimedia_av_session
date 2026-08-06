@@ -43,6 +43,7 @@ public:
 
     std::function<void(const int32_t code)> sendCollaborationApplyResult_;
     std::function<void(void)> sendCollaborationOnStop_;
+    std::mutex collaborationCallbackMutex_;
 
 protected:
     ServiceCollaborationManager_Callback serviceCollaborationCallback_;

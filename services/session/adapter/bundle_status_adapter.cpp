@@ -78,8 +78,11 @@ void BundleStatusAdapter::Init()
     CHECK_AND_RETURN_LOG(bundleMgrProxy != nullptr, "iface_cast bundleMgrProxy failed");
     bundleResourceProxy = bundleMgrProxy->GetBundleResourceProxy();
     CHECK_AND_RETURN_LOG(bundleResourceProxy != nullptr, "GetBundleResourceProxy failed");
-    bundleStatusListeners_.clear();
-    SLOGI("clear bundleStatusListeners done");
+    {
+        std::lock_guard LockGuard(listenerLock_);
+        bundleStatusListeners_.clear();
+        SLOGI("clear bundleStatusListeners done");
+    }
 }
 
 bool BundleStatusAdapter::GetBundleIcon(const std::string bundleName, const std::string abilityName, std::string& icon)

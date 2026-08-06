@@ -68,6 +68,7 @@ void CollaborationManager::SendCollaborationOnStop(const std::function<void(void
         SLOGE("SendCollaborationOnStop callback null");
         return;
     }
+    std::lock_guard<std::mutex> lockGuard(collaborationCallbackMutex_);
     sendCollaborationOnStop_ = callback;
 }
 
@@ -78,6 +79,7 @@ void CollaborationManager::SendCollaborationApplyResult(const std::function<
         SLOGE("SendCollaborationApplyResult callback null");
         return;
     }
+    std::lock_guard<std::mutex> lockGuard(collaborationCallbackMutex_);
     sendCollaborationApplyResult_ = callback;
 }
 

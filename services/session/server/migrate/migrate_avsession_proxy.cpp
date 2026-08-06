@@ -72,9 +72,14 @@ void MigrateAVSessionProxy::OnConnectForNext()
     SendSpecialKeepAliveData();
     PrepareSessionFromRemote();
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "OnConnectServer find service ptr null!");
-    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "OnConnectServer find preSetController null!");
+    sptr<AVControllerItem> controller;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        controller = preSetController_;
+    }
+    CHECK_AND_RETURN_LOG(controller != nullptr, "OnConnectServer find preSetController null!");
     std::vector<sptr<IRemoteObject>> sessionControllers;
-    sessionControllers.push_back(preSetController_);
+    sessionControllers.push_back(controller);
     servicePtr_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
 }
 
@@ -226,8 +231,13 @@ void MigrateAVSessionProxy::GetDistributedSessionControllerList(std::vector<sptr
 
 void MigrateAVSessionProxy::GetControllerListForNext(std::vector<sptr<IRemoteObject>>& controllerList)
 {
-    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "GetDistributedSessionControllerList with controller null");
-    controllerList.insert(controllerList.begin(), preSetController_);
+    sptr<AVControllerItem> controller;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        controller = preSetController_;
+    }
+    CHECK_AND_RETURN_LOG(controller != nullptr, "GetDistributedSessionControllerList with controller null");
+    controllerList.insert(controllerList.begin(), controller);
 }
 
 void MigrateAVSessionProxy::PrepareSessionFromRemote()
@@ -269,11 +279,15 @@ void MigrateAVSessionProxy::PrepareSessionFromRemote()
 void MigrateAVSessionProxy::PrepareControllerOfRemoteSession(sptr<AVSessionItem> sessionItem)
 {
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "PrepareControllerOfRemoteSession with remote session null");
-    preSetController_ = new(std::nothrow) AVControllerItem(DEFAULT_NUM, sessionItem);
-    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "PrepareControllerOfRemoteSession with controller create null");
+    sptr<AVControllerItem> controller = new(std::nothrow) AVControllerItem(DEFAULT_NUM, sessionItem);
+    CHECK_AND_RETURN_LOG(controller != nullptr, "PrepareControllerOfRemoteSession with controller create null");
     migrateProxyCallback_ = MigrateAVSessionProxyControllerCallback();
-    preSetController_->RegisterMigrateAVSessionProxyCallback(migrateProxyCallback_);
-    sessionItem->AddController(DEFAULT_NUM, preSetController_);
+    controller->RegisterMigrateAVSessionProxyCallback(migrateProxyCallback_);
+    sessionItem->AddController(DEFAULT_NUM, controller);
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        preSetController_ = controller;
+    }
 }
 
 void MigrateAVSessionProxy::ReleaseSessionFromRemote()
@@ -294,10 +308,15 @@ void MigrateAVSessionProxy::ReleaseSessionFromRemote()
 
 void MigrateAVSessionProxy::ReleaseControllerOfRemoteSession()
 {
-    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "ReleaseControllerOfRemoteSession with preSetController null");
-    preSetController_->RegisterMigrateAVSessionProxyCallback(nullptr);
-    preSetController_->DestroyWithoutReply();
-    preSetController_ = nullptr;
+    sptr<AVControllerItem> controller;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        controller = preSetController_;
+        preSetController_ = nullptr;
+    }
+    CHECK_AND_RETURN_LOG(controller != nullptr, "ReleaseControllerOfRemoteSession with preSetController null");
+    controller->RegisterMigrateAVSessionProxyCallback(nullptr);
+    controller->DestroyWithoutReply();
     SLOGI("ReleaseControllerOfRemoteSession done.");
 }
 
@@ -662,8 +681,13 @@ void MigrateAVSessionProxy::ProcessVolumeControlCommand(cJSON* jsonValue)
 
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_VOLUME, OHOS::AAFwk::Integer::Box(volumeNum_.load()));
-    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "preSetController_ is nullptr");
-    preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_VOLUME, args);
+    sptr<AVControllerItem> controller;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        controller = preSetController_;
+    }
+    CHECK_AND_RETURN_LOG(controller != nullptr, "preSetController_ is nullptr");
+    controller->HandleSetSessionEvent(AUDIO_CALLBACK_VOLUME, args);
 }
 
 void DevicesJsonArrayToVector(cJSON* jsonArray, AudioDeviceDescriptors& devices)
@@ -714,8 +738,13 @@ void MigrateAVSessionProxy::ProcessAvailableDevices(cJSON* jsonValue)
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_AVAILABLE_DEVICES, OHOS::AAFwk::String::Box(jsonStr));
-    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "preSetController_ is nullptr");
-    preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_AVAILABLE_DEVICES, args);
+    sptr<AVControllerItem> controller;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        controller = preSetController_;
+    }
+    CHECK_AND_RETURN_LOG(controller != nullptr, "preSetController_ is nullptr");
+    controller->HandleSetSessionEvent(AUDIO_CALLBACK_AVAILABLE_DEVICES, args);
 }
 
 void MigrateAVSessionProxy::ProcessPreferredOutputDevice(cJSON* jsonValue)
@@ -737,8 +766,13 @@ void MigrateAVSessionProxy::ProcessPreferredOutputDevice(cJSON* jsonValue)
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
     AAFwk::WantParams args;
     args.SetParam(AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, OHOS::AAFwk::String::Box(jsonStr));
-    CHECK_AND_RETURN_LOG(preSetController_ != nullptr, "preSetController_ is nullptr");
-    preSetController_->HandleSetSessionEvent(AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, args);
+    sptr<AVControllerItem> controller;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        controller = preSetController_;
+    }
+    CHECK_AND_RETURN_LOG(controller != nullptr, "preSetController_ is nullptr");
+    controller->HandleSetSessionEvent(AUDIO_CALLBACK_PREFERRED_OUTPUT_DEVICE_FOR_RENDERER_INFO, args);
 }
 
 void MigrateAVSessionProxy::ProcessBundleImg(std::string bundleIconStr)
@@ -821,10 +855,15 @@ void MigrateAVSessionProxy::ProcessProtocolVersion(cJSON* jsonValue, const std::
         deviceVersionMap_[deviceId] = newVersion;
     }
 
-    if (versionChanged && preSetController_ != nullptr) {
+    sptr<AVControllerItem> controller;
+    {
+        std::lock_guard lockGuard(migrateProxyRemoteSessionLock_);
+        controller = preSetController_;
+    }
+    if (versionChanged && controller != nullptr) {
         AAFwk::WantParams args;
         args.SetParam(AUDIO_GET_VERSION, OHOS::AAFwk::Integer::Box(newVersion));
-        preSetController_->HandleSetSessionEvent(AUDIO_GET_VERSION, args);
+        controller->HandleSetSessionEvent(AUDIO_GET_VERSION, args);
         SLOGI("Protocol version changed, notify controller");
     }
 }

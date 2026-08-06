@@ -22,9 +22,15 @@ std::recursive_mutex CollaborationManagerURLCasting::instanceLock_;
 __attribute__((no_sanitize("cfi")))static int32_t OnStopUrlCasting(const char* peerNetworkId)
 {
     SLOGE("enter OnStopUrlCasting");
-    CHECK_AND_RETURN_RET_LOG(CollaborationManagerURLCasting::GetInstance().sendCollaborationOnStop_ != nullptr,
+    std::function<void(void)> callback;
+    {
+        std::lock_guard<std::mutex> lockGuard(
+            CollaborationManagerURLCasting::GetInstance().collaborationCallbackMutex_);
+        callback = CollaborationManagerURLCasting::GetInstance().sendCollaborationOnStop_;
+    }
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr,
         AVSESSION_ERROR, "sendCollaborationOnStop_ function ptr is nullptr");
-    CollaborationManagerURLCasting::GetInstance().sendCollaborationOnStop_();
+    callback();
     return AVSESSION_SUCCESS;
 }
 
@@ -35,9 +41,15 @@ __attribute__((no_sanitize("cfi")))static int32_t ApplyResultUrlCasting(int32_t 
     if (result == ServiceCollaborationManagerResultCode::REJECT) {
         SLOGE("return connect reject");
     }
-    CHECK_AND_RETURN_RET_LOG(CollaborationManagerURLCasting::GetInstance().sendCollaborationApplyResult_ != nullptr,
+    std::function<void(const int32_t code)> callback;
+    {
+        std::lock_guard<std::mutex> lockGuard(
+            CollaborationManagerURLCasting::GetInstance().collaborationCallbackMutex_);
+        callback = CollaborationManagerURLCasting::GetInstance().sendCollaborationApplyResult_;
+    }
+    CHECK_AND_RETURN_RET_LOG(callback != nullptr,
         AVSESSION_ERROR, "sendCollaborationApplyResult_ function ptr is nullptr");
-    CollaborationManagerURLCasting::GetInstance().sendCollaborationApplyResult_(result);
+    callback(result);
     return AVSESSION_SUCCESS;
 }
 
