@@ -32,7 +32,9 @@ AVCastControllerProxy::AVCastControllerProxy(const sptr<IRemoteObject>& impl)
 
 AVCastControllerProxy::~AVCastControllerProxy()
 {
+    std::lock_guard<std::recursive_mutex> lock(controllerProxyLock_);
     SLOGI("AVCastControllerProxy destroy");
+    isDestroy_ = true;
     Destroy();
 }
 
@@ -64,6 +66,7 @@ int32_t AVCastControllerProxy::SendCustomData(const AAFwk::WantParams& data)
 
 int32_t AVCastControllerProxy::SendControlCommand(const AVCastControlCommand& cmd)
 {
+    std::lock_guard<std::recursive_mutex> lock(controllerProxyLock_);
     AVSESSION_TRACE_SYNC_START("AVCastControllerProxy::SendControlCommand");
     CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
