@@ -160,7 +160,6 @@ void TaiheSessionListener::OnDeviceOffline(const std::string& deviceId)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnDeviceOffline");
     SLOGI("Start handle device offline event");
-    dataContext_.deviceId = string(deviceId);
     auto execute = [deviceId](std::shared_ptr<uintptr_t> method) {
         string_view deviceIdTaihe = deviceId;
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
@@ -195,7 +194,6 @@ void TaiheSessionListener::OnSystemCommonEvent(const std::string& commonEvent, c
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheSessionListener::OnSystemCommonEvent");
     SLOGI("Start handle system common event");
-    dataContext_.commonEvent = string(commonEvent);
     auto execute = [commonEvent](std::shared_ptr<uintptr_t> method) {
         string_view commonEventTaihe = commonEvent;
         std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
@@ -218,9 +216,8 @@ void TaiheSessionListener::OnRemoteDistributedSessionChange(
             controllerObject.GetRefPtr(), [holder = controllerObject](const auto*) {}));
     }
     SLOGI("handle remote distributed session changed end size=%{public}d", (int) sessionControllersRef.size());
-    dataContext_.sessionControllers =
+    array<AVSessionController> sessionControllersRefTaihe =
         TaiheUtils::ToTaiheAVSessionControllerArray(sessionControllersRef);
-    array_view<AVSessionController> sessionControllersRefTaihe = dataContext_.sessionControllers;
     auto execute = [sessionControllersRefTaihe](std::shared_ptr<uintptr_t> method) {
         std::shared_ptr<taihe::callback<void(array_view<AVSessionController>)>> cacheCallback =
             std::reinterpret_pointer_cast<taihe::callback<void(array_view<AVSessionController>)>>(method);

@@ -88,6 +88,7 @@ std::string OHAVSession::GetSessionType()
 
 const std::string& OHAVSession::GetSessionId()
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (sessionId_.empty()) {
         CHECK_AND_RETURN_RET_LOG(avSession_ != nullptr, sessionId_, "avsession nullptr");
         sessionId_ = avSession_->GetSessionId();

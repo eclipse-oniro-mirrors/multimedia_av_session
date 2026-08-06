@@ -33,6 +33,8 @@ ErrCode AVCastControllerCallbackClient::OnCastPlaybackStateChange(const AVPlayba
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
         .AVSessionPostTask([callback, state]() { callback->OnCastPlaybackStateChange(state); }, EVENT_NAME),
         "AVCastControllerCallbackClient handler postTask failed");
+    
+    std::lock_guard lockGuard(listenerLock_);
     if (castPlaybackStateListener_) {
         castPlaybackStateListener_(state);
     }
@@ -182,6 +184,7 @@ ErrCode AVCastControllerCallbackClient::OnCustomData(const AAFwk::WantParams& da
 void AVCastControllerCallbackClient::AddListenerForCastPlaybackState(
     const std::function<void(const AVPlaybackState&)>& listener)
 {
+    std::lock_guard lockGuard(listenerLock_);
     castPlaybackStateListener_ = listener;
 }
 

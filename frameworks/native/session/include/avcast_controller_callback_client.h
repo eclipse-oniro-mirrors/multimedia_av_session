@@ -57,6 +57,7 @@ public:
 private:
     std::function<void(const AVPlaybackState&)> castPlaybackStateListener_;
     std::shared_ptr<AVCastControllerCallback> callback_;
+    std::recursive_mutex listenerLock_;
     static constexpr const char* EVENT_NAME = "AVCastControllerCallback";
 };
 } // namespace OHOS::AVSession
