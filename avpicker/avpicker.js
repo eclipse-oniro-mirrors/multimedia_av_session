@@ -1270,9 +1270,6 @@ export class AVCastPicker extends ViewPU {
             Column.create();
             Column.width(this.isPc ? 326 : 216);
             Column.borderRadius(this.isPc ? 8 : 20);
-            Column.backgroundColor(this.isShowHomeAudio ? { 'id': -1, 'type': 10001,
-                params: ['sys.color.background_primary'], 'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__' } : '#00000000');
         }, Column);
         this.observeComponentCreation2((r8, s8) => {
             ForEach.create();
@@ -1918,10 +1915,6 @@ export class AVCastPicker extends ViewPU {
                         Column.onTouch((event) => {
                             event?.stopPropagation();
                         });
-                        Column.backgroundColor({ 'id': -1, 'type': 10001,
-                            params: ['sys.color.background_primary'], 'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__' });
-                        Column.borderRadius(this.isPc ? 8 : 20);
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
@@ -1949,18 +1942,21 @@ export class AVCastPicker extends ViewPU {
         If.pop();
     }
 
-    deviceAndHouseMusicSys(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Column.create({space: 8});
-            Column.width(this.isPc ? 326 : 216);
-            Column.borderRadius(this.isPc ? 8 : 20);
-        }, Column);
-        this.deviceMenu.bind(this)();
+    houseMusicDividerBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call') {
+            if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.houseMusicSys.bind(this)();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Row.create();
+                        Row.margin({ left: '16vp', right: '16vp'});
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Divider.create();
+                        Divider.color('#33000000');
+                        Divider.strokeWidth(0.5);
+                    }, Divider);
+                    Row.pop();
                 });
             }
             else {
@@ -1969,7 +1965,18 @@ export class AVCastPicker extends ViewPU {
             }
         }, If);
         If.pop();
-        Column.pop();
+    }
+
+    deviceAndHouseMusicSys(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Menu.create();
+            Menu.width(this.isPc ? 326 : 216);
+            Menu.borderRadius(this.isPc ? 8 : 20);
+        }, Menu);
+        this.deviceMenu.bind(this)();
+        this.houseMusicDividerBuilder.bind(this)();
+        this.houseMusicSys.bind(this)();
+        Menu.pop();
     }
 
     castModeMenu(p8) {
@@ -2427,12 +2434,12 @@ export class AVCastPicker extends ViewPU {
             UIExtensionComponent.bindMenu(this.isMenuShow && this.hasReceivedDeviceList, { builder: () => {
                 this.deviceAndHouseMusicSys.call(this);
             } }, {
-                backgroundBlurStyle: ((this.isShowHomeAudio || materialUtil.isSupportHds()) ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
-                backgroundColor: (this.isShowHomeAudio ? '#00000000' : materialUtil.isSupportHds() ? undefined :
+                backgroundBlurStyle: (materialUtil.isSupportHds() ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
+                backgroundColor: (materialUtil.isSupportHds() ? undefined :
                     (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? { 'id': -1, 'type': 10001,
                     params: ['sys.color.background_primary'], 'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__' } : '#00FFFFFF'),
-                systemMaterial: this.isShowHomeAudio ? undefined : materialUtil.getMaterialStroke(
+                systemMaterial: materialUtil.getMaterialStroke(
                     (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? undefined : true
                 ),
             placement: Placement.BottomRight,
