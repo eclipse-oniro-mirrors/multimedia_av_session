@@ -1908,7 +1908,7 @@ export class AVCastPicker extends ViewPU {
     houseMusicSys(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
+            if (this.roomListService.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
@@ -1944,27 +1944,15 @@ export class AVCastPicker extends ViewPU {
 
     houseMusicDividerBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            If.create();
-            if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
-                this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Row.create();
-                        Row.margin({ left: '16vp', right: '16vp'});
-                    }, Row);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Divider.create();
-                        Divider.color('#33000000');
-                        Divider.strokeWidth(0.5);
-                    }, Divider);
-                    Row.pop();
-                });
-            }
-            else {
-                this.ifElseBranchUpdateFunction(1, () => {
-                });
-            }
-        }, If);
-        If.pop();
+            Row.create();
+            Row.margin({ left: '16vp', right: '16vp' });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Divider.create();
+            Divider.color('#33000000');
+            Divider.strokeWidth(0.5);
+        }, Divider);
+        Row.pop();
     }
 
     deviceAndHouseMusicSys(parent = null) {
@@ -1974,8 +1962,20 @@ export class AVCastPicker extends ViewPU {
             Menu.borderRadius(this.isPc ? 8 : 20);
         }, Menu);
         this.deviceMenu.bind(this)();
-        this.houseMusicDividerBuilder.bind(this)();
-        this.houseMusicSys.bind(this)();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.houseMusicDividerBuilder.bind(this)();
+                    this.houseMusicSys.bind(this)();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
         Menu.pop();
     }
 
