@@ -1908,7 +1908,7 @@ export class AVCastPicker extends ViewPU {
     houseMusicSys(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.roomListService.length > 0) {
+            if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
