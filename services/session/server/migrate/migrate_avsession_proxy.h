@@ -143,6 +143,7 @@ private:
     int32_t CompressFromJPEG(const std::vector<uint8_t> &inputData,
         std::shared_ptr<AVSessionPixelMap>& outputData, bool isMediaImage = false);
     int32_t ConvertStateFromDoubleToSingle(int32_t state);
+    int32_t CleanMetadataForMigrateSession(sptr<AVSessionItem> sessionItem);
 
     int32_t userId_ = 0;
     int32_t mMode_ = 0;
@@ -153,6 +154,7 @@ private:
     std::map<std::string, sptr<AVSessionItem>> sessionStackForMigrateIn_;
     std::map<std::string, sptr<AVControllerItem>> controllerStackForMigrateIn_;
     std::vector<std::string> sessionRefreshList_;
+    std::vector<std::string> orderedSessionRefreshList_;
     AVSessionService *servicePtr_ = nullptr;
     AppExecFwk::ElementName elementName_;
 
