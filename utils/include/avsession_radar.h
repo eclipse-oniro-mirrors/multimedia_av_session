@@ -20,6 +20,7 @@
 #include "element_name.h"
 #include <string>
 #include <algorithm>
+#include <mutex>
 #include "avsession_descriptor.h"
 #include "bundle_mgr_proxy.h"
 #include "bundle_status_callback_host.h"
@@ -122,6 +123,7 @@ private:
     std::string localUdid_;
     std::string localNetId_;
     std::string localDevType_;
+    std::mutex deviceInfoLock_;
     sptr<AppExecFwk::IBundleMgr> bundleMgrProxy_;
 };
 } // namespace OHOS::AVSession

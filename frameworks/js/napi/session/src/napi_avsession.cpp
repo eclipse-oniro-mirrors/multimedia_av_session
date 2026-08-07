@@ -114,13 +114,9 @@ std::map<std::string, int32_t> convertEventType_ = {
 
 std::mutex NapiAVSession::downloadAVQImgMutex_;
 std::mutex NapiAVSession::lock_;
-std::mutex NapiAVSession::syncMutex_;
-std::mutex NapiAVSession::syncAsyncMutex_;
-std::condition_variable NapiAVSession::syncCond_;
-std::condition_variable NapiAVSession::syncAsyncCond_;
 std::recursive_mutex registerEventLock_;
-int32_t NapiAVSession::playBackStateRet_ = AVSESSION_ERROR;
 std::shared_ptr<NapiAVSession> NapiAVSession::napiAVSession_ = nullptr;
+std::recursive_mutex NapiAVSession::napiAVSessionLock_;
 std::recursive_mutex NapiAVSession::destroyLock_;
 bool NapiAVSession::isNapiSessionDestroy_ = false;
 std::string NapiAVSession::currentSessionId_;
@@ -239,7 +235,12 @@ napi_value NapiAVSession::ConstructorCallback(napi_env env, napi_callback_info i
 
 napi_status NapiAVSession::ReCreateInstance()
 {
-    if (napiAVSession_ == nullptr) {
+    std::shared_ptr<NapiAVSession> sessionSnapshot;
+    {
+        std::lock_guard<std::recursive_mutex> napiSessionLockGuard(napiAVSessionLock_);
+        sessionSnapshot = napiAVSession_;
+    }
+    if (sessionSnapshot == nullptr) {
         SLOGE("napiAVSession is null");
         return napi_generic_failure;
     }
@@ -250,31 +251,31 @@ napi_status NapiAVSession::ReCreateInstance()
             return napi_generic_failure;
         }
     }
-    SLOGI("sessionId=%{public}s***", napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
+    SLOGI("sessionId=%{public}s***", sessionSnapshot->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str());
     std::shared_ptr<AVSession> nativeSession;
-    int32_t ret = AVSessionManager::GetInstance().CreateSession(napiAVSession_->sessionTag_,
-        NapiUtils::ConvertSessionType(napiAVSession_->sessionType_), napiAVSession_->elementName_, nativeSession);
+    int32_t ret = AVSessionManager::GetInstance().CreateSession(sessionSnapshot->sessionTag_,
+        NapiUtils::ConvertSessionType(sessionSnapshot->sessionType_), sessionSnapshot->elementName_, nativeSession);
     CHECK_RETURN(ret == AVSESSION_SUCCESS, "create native session fail", napi_generic_failure);
-    napiAVSession_->session_ = std::move(nativeSession);
-    napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
-    napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
-    if (napiAVSession_->callback_ == nullptr) {
-        napiAVSession_->callback_ = std::make_shared<NapiAVSessionCallback>();
+    sessionSnapshot->session_ = std::move(nativeSession);
+    sessionSnapshot->sessionId_ = sessionSnapshot->session_->GetSessionId();
+    sessionSnapshot->sessionType_ = sessionSnapshot->session_->GetSessionType();
+    if (sessionSnapshot->callback_ == nullptr) {
+        sessionSnapshot->callback_ = std::make_shared<NapiAVSessionCallback>();
     }
-    int32_t res = napiAVSession_->session_->RegisterCallback(napiAVSession_->callback_);
+    int32_t res = sessionSnapshot->session_->RegisterCallback(sessionSnapshot->callback_);
     CHECK_RETURN(res == AVSESSION_SUCCESS, "register session callback fail", napi_generic_failure);
     {
         std::lock_guard lockGuard(registerEventLock_);
         for (int32_t event : registerEventList_) {
-            int32_t result = napiAVSession_->session_->AddSupportCommand(event);
+            int32_t result = sessionSnapshot->session_->AddSupportCommand(event);
             if (result != AVSESSION_SUCCESS) {
                 SLOGE("AddSupportCommand fail, ret=%{public}d", res);
                 continue;
             }
         }
-        napiAVSession_->callback_->RestartSessionDisconnect();
+        sessionSnapshot->callback_->RestartSessionDisconnect();
     }
-    napiAVSession_->session_->Activate();
+    sessionSnapshot->session_->Activate();
     return napi_ok;
 }
 
@@ -285,47 +286,53 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
     NAPI_CALL_BASE(env, napi_get_reference_value(env, AVSessionConstructorRef, &constructor), napi_generic_failure);
     napi_value instance{};
     NAPI_CALL_BASE(env, napi_new_instance(env, constructor, 0, nullptr, &instance), napi_generic_failure);
-    napiAVSession_ = std::make_shared<NapiAVSession>();
-    NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiAVSession_)), napi_generic_failure);
-    napiAVSession_->session_ = std::move(nativeSession);
-    napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
-    napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
-    napiAVSession_->sessionTag_ = tag;
-    napiAVSession_->elementName_ = elementName;
-    bundleName_ = elementName.GetBundleName();
-    SLOGI("NapiAVSession NewInstance sessionId=%{public}s***, sessionType:%{public}s",
-        napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
-        napiAVSession_->sessionType_.c_str());
+    std::shared_ptr<NapiAVSession> sessionSnapshot;
+    {
+        std::lock_guard<std::recursive_mutex> napiSessionLockGuard(napiAVSessionLock_);
+        napiAVSession_ = std::make_shared<NapiAVSession>();
+        NAPI_CALL_BASE(env, napi_unwrap(env, instance, reinterpret_cast<void**>(&napiAVSession_)),
+            napi_generic_failure);
+        napiAVSession_->session_ = std::move(nativeSession);
+        napiAVSession_->sessionId_ = napiAVSession_->session_->GetSessionId();
+        napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
+        napiAVSession_->sessionTag_ = tag;
+        napiAVSession_->elementName_ = elementName;
+        bundleName_ = elementName.GetBundleName();
+        SLOGI("NapiAVSession NewInstance sessionId=%{public}s***, sessionType:%{public}s",
+            napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
+            napiAVSession_->sessionType_.c_str());
 
-    std::lock_guard<std::recursive_mutex> lock(currentNapiSessionMutex_);
-    if (currentNapiSession_ == nullptr || currentSessionId_ != napiAVSession_->sessionId_) {
-        currentNapiSession_ = napiAVSession_;
-        currentSessionId_ =  napiAVSession_->sessionId_;
+        std::lock_guard<std::recursive_mutex> lock(currentNapiSessionMutex_);
+        if (currentNapiSession_ == nullptr || currentSessionId_ != napiAVSession_->sessionId_) {
+            currentNapiSession_ = napiAVSession_;
+            currentSessionId_ =  napiAVSession_->sessionId_;
+        }
+        sessionSnapshot = napiAVSession_;
     }
 
     napi_value property {};
-    auto status = NapiUtils::SetValue(env, napiAVSession_->sessionId_, property);
+    auto status = NapiUtils::SetValue(env, sessionSnapshot->sessionId_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionId", property), napi_generic_failure);
 
-    status = NapiUtils::SetValue(env, napiAVSession_->sessionType_, property);
+    status = NapiUtils::SetValue(env, sessionSnapshot->sessionType_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionType", property), napi_generic_failure);
 
-    status = NapiUtils::SetValue(env, napiAVSession_->sessionTag_, property);
+    status = NapiUtils::SetValue(env, sessionSnapshot->sessionTag_, property);
     CHECK_RETURN(status == napi_ok, "create object failed", napi_generic_failure);
     NAPI_CALL_BASE(env, napi_set_named_property(env, instance, "sessionTag", property), napi_generic_failure);
 
 #ifdef INPUT_REDISTRIBUTE_ENABLE
-    napiAVSession_->recipientInfo_.identity = Rosen::InputRedistributeIdentity::IDENTITY_MEDIA_CONTROLLER;
-    napiAVSession_->recipientInfo_.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT;
-    napiAVSession_->recipientInfo_.type = Rosen::InputEventType::KEY_EVENT;
+    sessionSnapshot->recipientInfo_.identity = Rosen::InputRedistributeIdentity::IDENTITY_MEDIA_CONTROLLER;
+    sessionSnapshot->recipientInfo_.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_AFTER_SEND_TO_COMPONENT;
+    sessionSnapshot->recipientInfo_.type = Rosen::InputEventType::KEY_EVENT;
     std::shared_ptr<NapiAVSessionInputRedistributeCallback> inputRedistributeCallback =
         std::make_shared<NapiAVSessionInputRedistributeCallback>();
-    inputRedistributeCallback->nativeSession = napiAVSession_->session_;
-    napiAVSession_->recipientInfo_.recipient = inputRedistributeCallback;
+    inputRedistributeCallback->nativeSession = sessionSnapshot->session_;
+    sessionSnapshot->recipientInfo_.recipient = inputRedistributeCallback;
     Rosen::WindowInputRedistributeClient clientInstance;
-    clientInstance.RegisterInputEventRedistribute(napiAVSession_->recipientInfo_);
+    clientInstance.RegisterInputEventRedistribute(sessionSnapshot->recipientInfo_);
 #endif
     out = instance;
     return napi_ok;
@@ -1431,52 +1438,43 @@ napi_value NapiAVSession::SetAVMetaData(napi_env env, napi_callback_info info)
 }
 
 std::function<void()> NapiAVSession::PlaybackStateSyncExecutor(std::shared_ptr<AVSession> session,
-    AVPlaybackState playBackState)
+    AVPlaybackState playBackState, std::shared_ptr<PlaybackStateSyncContext> syncCtx)
 {
-    return [session, playBackState]() {
+    return [session, playBackState, syncCtx]() {
         {
-            std::lock_guard<std::mutex> lock(syncMutex_);
-            if (session == nullptr) {
-                playBackStateRet_ = ERR_SESSION_NOT_EXIST;
-                return;
-            }
-            playBackStateRet_ = session->SetAVPlaybackState(playBackState);
+            std::lock_guard<std::mutex> lock(syncCtx->mtx);
+            syncCtx->ret = (session == nullptr) ? ERR_SESSION_NOT_EXIST :
+                session->SetAVPlaybackState(playBackState);
+            syncCtx->ready = true;
         }
-        syncCond_.notify_one();
-        std::unique_lock<std::mutex> lock(syncAsyncMutex_);
-        auto waitStatus = syncAsyncCond_.wait_for(lock, std::chrono::milliseconds(100));
-        if (waitStatus == std::cv_status::timeout) {
-            SLOGE("SetAVPlaybackState:%{public}d in syncExecutor timeout after err:%{public}d",
-                playBackState.GetState(), playBackStateRet_);
-            return;
-        }
+        syncCtx->cv.notify_one();
     };
 }
 
-std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context)
+std::function<void()> NapiAVSession::PlaybackStateAsyncExecutor(std::shared_ptr<ContextBase> context,
+    std::shared_ptr<PlaybackStateSyncContext> syncCtx)
 {
-    return [context]() {
-        std::unique_lock<std::mutex> lock(syncMutex_);
-        auto waitStatus = syncCond_.wait_for(lock, std::chrono::milliseconds(100));
+    return [context, syncCtx]() {
+        std::unique_lock<std::mutex> lock(syncCtx->mtx);
+        bool ready = syncCtx->cv.wait_for(lock, std::chrono::milliseconds(100),
+            [&syncCtx] { return syncCtx->ready; });
+        int32_t playBackStateRet = syncCtx->ret;
 
-        if (playBackStateRet_ != AVSESSION_SUCCESS) {
-            if (playBackStateRet_ == ERR_SESSION_NOT_EXIST) {
+        if (playBackStateRet != AVSESSION_SUCCESS) {
+            if (playBackStateRet == ERR_SESSION_NOT_EXIST) {
                 context->errMessage = "SetAVPlaybackState failed : native session not exist";
-            } else if (playBackStateRet_ == ERR_INVALID_PARAM) {
+            } else if (playBackStateRet == ERR_INVALID_PARAM) {
                 context->errMessage = "SetAVPlaybackState failed : native invalid parameters";
-            } else if (playBackStateRet_ == ERR_NO_PERMISSION) {
+            } else if (playBackStateRet == ERR_NO_PERMISSION) {
                 context->errMessage = "SetAVPlaybackState failed : native no permission";
             } else {
                 context->errMessage = "SetAVPlaybackState failed : native server exception";
             }
             context->status = napi_generic_failure;
-            context->errCode = NapiAVSessionManager::errcode_[playBackStateRet_];
+            context->errCode = NapiAVSessionManager::errcode_[playBackStateRet];
         }
-        if (waitStatus == std::cv_status::timeout) {
-            SLOGE("SetAVPlaybackState in asyncExecutor timeout after err:%{public}d", playBackStateRet_);
-            return;
-        }
-        syncAsyncCond_.notify_one();
+        CHECK_AND_RETURN_LOG(ready, "SetAVPlaybackState in asyncExecutor timeout after err:%{public}d",
+            playBackStateRet);
     };
 }
 
@@ -1695,12 +1693,15 @@ napi_value NapiAVSession::SetAVPlaybackState(napi_env env, napi_callback_info in
         return NapiAsyncWork::Enqueue(env, context, "SetAVPlaybackState", executor, complete);
     }
 
-    auto syncExecutor = PlaybackStateSyncExecutor(context->sessionHolder_, context->playBackState_);
-    CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask(syncExecutor, "SetAVPlaybackState"),
-        "NapiAVSession SetAVPlaybackState handler postTask failed");
+    auto syncCtx = std::make_shared<PlaybackStateSyncContext>();
+    auto syncExecutor = PlaybackStateSyncExecutor(context->sessionHolder_, context->playBackState_, syncCtx);
+    if (!AVSessionEventHandler::GetInstance().AVSessionPostTask(syncExecutor, "SetAVPlaybackState")) {
+        SLOGE("NapiAVSession SetAVPlaybackState handler postTask failed");
+        syncCtx->ret = AVSESSION_ERROR;
+        syncCtx->ready = true;
+    }
 
-    auto asyncExecutor = PlaybackStateAsyncExecutor(context);
+    auto asyncExecutor = PlaybackStateAsyncExecutor(context, syncCtx);
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SetAVPlayback", asyncExecutor, complete);
 }

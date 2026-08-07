@@ -14,7 +14,9 @@
  */
 
 #include <gtest/gtest.h>
+#define private public
 #include "avsession_radar.h"
+#undef private
 #include "avsession_log.h"
 
 using namespace testing::ext;
@@ -523,4 +525,23 @@ static HWTEST_F(AVSessionRadarTest, AVSessionFailToStopCast002, TestSize.Level0)
     EXPECT_EQ(info.bizStage_, static_cast<int32_t>(CastStopStage::STOP_BEGIN));
     EXPECT_EQ(info.stageRes_, static_cast<int32_t>(StageResult::FAIL));
     EXPECT_EQ(info.bizState_, static_cast<int32_t>(BizState::END));
+}
+
+/**
+* @tc.name: AVSessionRadarReset001
+* @tc.desc: reset clears the lazily initialized local device info cache
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(AVSessionRadarTest, AVSessionRadarReset001, TestSize.Level0)
+{
+    AVSessionRadarInfo info("AVSessionRadarReset001");
+    AVSessionRadar::GetInstance().StartCastDiscoveryBegin(info);
+    EXPECT_FALSE(AVSessionRadar::GetInstance().localNetId_.empty());
+    EXPECT_FALSE(AVSessionRadar::GetInstance().localUdid_.empty());
+    EXPECT_FALSE(AVSessionRadar::GetInstance().localDevType_.empty());
+    AVSessionRadar::GetInstance().reset();
+    EXPECT_TRUE(AVSessionRadar::GetInstance().localNetId_.empty());
+    EXPECT_TRUE(AVSessionRadar::GetInstance().localUdid_.empty());
+    EXPECT_TRUE(AVSessionRadar::GetInstance().localDevType_.empty());
 }

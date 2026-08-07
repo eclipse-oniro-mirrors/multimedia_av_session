@@ -422,6 +422,7 @@ std::string HwCastProvider::QueryCastSessionId(const int32_t castId)
 {
     SLOGI("QueryCastSessionId with config castSession and corresponding castId is %{public}d", castId);
 
+    std::lock_guard lockGuard(mutexLock_);
     if (hwCastProviderSessionMap_.find(castId) == hwCastProviderSessionMap_.end()) {
         SLOGI("Can not find corresponding castId");
         return "";
@@ -554,7 +555,12 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
             }
         }
     }
-    for (auto listener : castStateListenerList_) {
+    std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
+    {
+        std::lock_guard lockGuard(mutexLock_);
+        listenersSnapshot = castStateListenerList_;
+    }
+    for (auto listener : listenersSnapshot) {
         if (listener != nullptr) {
             SLOGI("trigger the OnDeviceAvailable for registered listeners");
             listener->OnDeviceAvailable(deviceInfoList);
@@ -565,7 +571,12 @@ void HwCastProvider::OnDeviceFound(const std::vector<CastRemoteDevice> &deviceLi
 void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
 {
     SLOGI("eventId is %{public}d, param is %{public}" PRId64, eventId, param);
-    for (auto listener : castStateListenerList_) {
+    std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
+    {
+        std::lock_guard lockGuard(mutexLock_);
+        listenersSnapshot = castStateListenerList_;
+    }
+    for (auto listener : listenersSnapshot) {
         if (listener != nullptr) {
             SLOGI("trigger the OnDeviceLogEvent for registered listeners");
             if (eventId == DeviceLogEventCode::DEVICE_LOG_FULL) {
@@ -580,7 +591,12 @@ void HwCastProvider::OnLogEvent(const int32_t eventId, const int64_t param)
 void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
 {
     SLOGI("Received on device offline event");
-    for (auto listener : castStateListenerList_) {
+    std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
+    {
+        std::lock_guard lockGuard(mutexLock_);
+        listenersSnapshot = castStateListenerList_;
+    }
+    for (auto listener : listenersSnapshot) {
         if (listener != nullptr) {
             SLOGI("trigger the OnDeviceOffline for registered listeners");
             listener->OnDeviceOffline(deviceId);
@@ -599,9 +615,16 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
         auto sharedThis = weakThis.lock();
         CHECK_AND_RETURN_LOG(sharedThis, "HwCastProvider already destroyed");
         SLOGI("Cast pvd received session create event and create task thread");
-        for (auto listener : sharedThis->castStateListenerList_) {
-            listener->OnSessionNeedDestroy();
-            SLOGI("Cast pvd received session create event and session destroy check done");
+        std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
+        {
+            std::lock_guard lockGuard(sharedThis->mutexLock_);
+            listenersSnapshot = sharedThis->castStateListenerList_;
+        }
+        for (auto listener : listenersSnapshot) {
+            if (listener != nullptr) {
+                listener->OnSessionNeedDestroy();
+                SLOGI("Cast pvd received session create event and session destroy check done");
+            }
         }
         int32_t castId;
         {
@@ -623,8 +646,10 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
             SLOGI("Cast task thread not to create player");
         }
         SLOGI("Create streamPlayer finished %{public}d", castId);
-        for (auto listener : sharedThis->castStateListenerList_) {
-            listener->OnSessionCreated(castId);
+        for (auto listener : listenersSnapshot) {
+            if (listener != nullptr) {
+                listener->OnSessionCreated(castId);
+            }
         }
         SLOGI("do session create notify finished %{public}d", castId);
         }, "OnSessionCreated", 0);
@@ -646,9 +671,16 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
         auto sharedThis = weakThis.lock();
         CHECK_AND_RETURN_LOG(sharedThis, "HwCastProvider already destroyed");
         SLOGI("Cast pvd received session create event and create task thread");
-        for (auto listener : sharedThis->castStateListenerList_) {
-            listener->OnSessionNeedDestroy();
-            SLOGI("Cast pvd received session create event and session destroy check done");
+        std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
+        {
+            std::lock_guard lockGuard(sharedThis->mutexLock_);
+            listenersSnapshot = sharedThis->castStateListenerList_;
+        }
+        for (auto listener : listenersSnapshot) {
+            if (listener != nullptr) {
+                listener->OnSessionNeedDestroy();
+                SLOGI("Cast pvd received session create event and session destroy check done");
+            }
         }
         int32_t castId;
         {
@@ -674,8 +706,10 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
             sharedThis->avCastControllerMap_[castId] = hwCastStreamPlayer;
         }
         SLOGI("Create streamPlayer finished %{public}d", castId);
-        for (auto listener : sharedThis->castStateListenerList_) {
-            listener->OnSessionCreated(castId);
+        for (auto listener : listenersSnapshot) {
+            if (listener != nullptr) {
+                listener->OnSessionCreated(castId);
+            }
         }
         SLOGI("do session create notify finished %{public}d", castId);
         }, "OnSessionCreated", 0);
@@ -683,7 +717,12 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
 
 void HwCastProvider::OnServiceDied()
 {
-    for (auto listener : castStateListenerList_) {
+    std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
+    {
+        std::lock_guard lockGuard(mutexLock_);
+        listenersSnapshot = castStateListenerList_;
+    }
+    for (auto listener : listenersSnapshot) {
         if (listener != nullptr) {
             SLOGI("trigger the OnServiceDied for registered listeners");
             listener->OnCastServerDied();

@@ -316,5 +316,28 @@ HWTEST_F(AVSessionPixelMapAdapterTest, CopyPixMapToDst_DmaSuccess001, TestSize.L
     }
     SLOGD("CopyPixMapToDst_DmaSuccess001 end!");
 }
+
+/**
+ * @tc.name: Marshalling001
+ * @tc.desc: test Marshalling and Unmarshalling round trip with non-empty img buffer,
+ *           unmarshalled pixel map should hold the same inner img buffer.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AVSessionPixelMapAdapterTest, Marshalling001, TestSize.Level0)
+{
+    SLOGD("Marshalling001 begin!");
+    AVSessionPixelMap pixelMap;
+    std::vector<uint8_t> imgBuffer = {1, 2, 3, 4, 5};
+    pixelMap.SetInnerImgBuffer(imgBuffer);
+    OHOS::Parcel parcel;
+    EXPECT_TRUE(pixelMap.Marshalling(parcel));
+    parcel.RewindRead(0);
+    AVSessionPixelMap* result = AVSessionPixelMap::Unmarshalling(parcel);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetInnerImgBuffer(), imgBuffer);
+    delete result;
+    SLOGD("Marshalling001 end!");
+}
 } // namespace AVSESSION
 } // namespace OHOS

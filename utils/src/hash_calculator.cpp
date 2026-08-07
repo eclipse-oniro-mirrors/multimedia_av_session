@@ -84,7 +84,7 @@ static void AlgoInit(AlgoCTX* c);
 static bool AlgoUpdate(AlgoCTX* c, const unsigned char *data, size_t len);
 static bool AlgoFinal(unsigned char *md, AlgoCTX* c);
 static void AlgoTransform(AlgoCTX* ctx, const unsigned char *block);
-AlgoCTX g_context;
+static thread_local AlgoCTX g_context;
 
 int32_t HashCalculator::Init()
 {

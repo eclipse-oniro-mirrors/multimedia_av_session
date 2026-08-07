@@ -49,6 +49,7 @@ private:
     AppExecFwk::AppMgrClient appManager_;
     sptr<AppExecFwk::IAppStateCallback> appStateCallback_;
     std::function<void(int32_t, int32_t, bool)> appStateChangeObserver_;
+    std::recursive_mutex appStateChangeObserverLock_;
     std::recursive_mutex uidLock_;
     std::set<int32_t> observedAppUIDs_;
     std::function<void(int uid, int state)> serviceCallbackForAppStateChange_;

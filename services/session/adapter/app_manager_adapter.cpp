@@ -82,6 +82,7 @@ bool AppManagerAdapter::IsAppBackground(int32_t uid, int32_t pid)
 
 void AppManagerAdapter::SetAppStateChangeObserver(const std::function<void(int32_t, int32_t, bool)>& observer)
 {
+    std::lock_guard lockGuard(appStateChangeObserverLock_);
     appStateChangeObserver_ = observer;
 }
 
@@ -141,16 +142,22 @@ void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessDa
         }
     }
 
+    // take a snapshot of the observer under lock, then invoke it outside the lock
+    std::function<void(int32_t, int32_t, bool)> appStateChangeObserver;
+    {
+        std::lock_guard lockGuard(appStateChangeObserverLock_);
+        appStateChangeObserver = appStateChangeObserver_;
+    }
     if (appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
-        if (appStateChangeObserver_) {
+        if (appStateChangeObserver) {
             for (const auto& pair : appNeedHandleMap) {
-                appStateChangeObserver_(pair.first, pair.second, true);
+                appStateChangeObserver(pair.first, pair.second, true);
             }
         }
     } else {
-        if (appStateChangeObserver_) {
+        if (appStateChangeObserver) {
             for (const auto& pair : appNeedHandleMap) {
-                appStateChangeObserver_(pair.first, pair.second, false);
+                appStateChangeObserver(pair.first, pair.second, false);
             }
         }
     }

@@ -86,7 +86,7 @@ public:
 
 private:
     std::vector<uint8_t> innerImgBuffer_;
-    std::recursive_mutex bufferLock_;
+    mutable std::recursive_mutex bufferLock_;
     int32_t originalWidth_ = 0;
     int32_t originalHeight_ = 0;
 };
