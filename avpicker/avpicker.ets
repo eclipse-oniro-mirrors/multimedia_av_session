@@ -934,7 +934,7 @@ export struct AVCastPicker {
 
   @Builder
   deviceAndHouseMusicSys() {
-    Menu() {
+    Column() {
       this.deviceMenu()
       if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
         this.houseMusicDividerBuilder()
