@@ -906,7 +906,7 @@ export struct AVCastPicker {
 
   @Builder
   houseMusicSys() {
-    if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
+    if (this.roomListService.length > 0) {
       Column(){
         if (this.fontSizeScale > 1.75) {
           this.BigFontHomeMusicSystemTitleBuilder()
@@ -924,22 +924,22 @@ export struct AVCastPicker {
 
   @Builder
   houseMusicDividerBuilder() {
-    if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
-      Row() {
-        Divider()
-        .color('#33000000')
-        .strokeWidth(0.5)
-      }
-      .margin({ left: '16vp', right: '16vp' })
+    Row() {
+      Divider()
+      .color('#33000000')
+      .strokeWidth(0.5)
     }
+    .margin({ left: '16vp', right: '16vp' })
   }
 
   @Builder
   deviceAndHouseMusicSys() {
     Menu() {
       this.deviceMenu()
-      this.houseMusicDividerBuilder()
-      this.houseMusicSys()
+      if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
+        this.houseMusicDividerBuilder()
+        this.houseMusicSys()
+      }
     }
     .width(this.isPc ? 326 : 216)
     .borderRadius(this.isPc ? 8 : 20)
