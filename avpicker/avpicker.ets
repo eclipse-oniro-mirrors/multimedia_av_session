@@ -906,7 +906,7 @@ export struct AVCastPicker {
 
   @Builder
   houseMusicSys() {
-    if (this.roomListService.length > 0) {
+    if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
       Column(){
         if (this.fontSizeScale > 1.75) {
           this.BigFontHomeMusicSystemTitleBuilder()
