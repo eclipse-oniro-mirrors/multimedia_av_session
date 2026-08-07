@@ -1957,10 +1957,10 @@ export class AVCastPicker extends ViewPU {
 
     deviceAndHouseMusicSys(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Menu.create();
-            Menu.width(this.isPc ? 326 : 216);
-            Menu.borderRadius(this.isPc ? 8 : 20);
-        }, Menu);
+            Column.create();
+            Column.width(this.isPc ? 326 : 216);
+            Column.borderRadius(this.isPc ? 8 : 20);
+        }, Column);
         this.deviceMenu.bind(this)();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -1976,7 +1976,7 @@ export class AVCastPicker extends ViewPU {
             }
         }, If);
         If.pop();
-        Menu.pop();
+        Column.pop();
     }
 
     castModeMenu(p8) {
