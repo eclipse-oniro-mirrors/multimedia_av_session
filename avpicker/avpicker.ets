@@ -923,22 +923,22 @@ export struct AVCastPicker {
   }
 
   @Builder
-  houseMusicDividerBuider() {
+  houseMusicDividerBuilder() {
     if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
- 	    Row() {
- 	      Divider()
- 	        .color('#33000000')
- 	        .strokeWidth(0.5)
- 	    }
- 	    .margin({ left: '16vp', right: '16vp'})
- 	  }
+      Row() {
+        Divider()
+        .color('#33000000')
+        .strokeWidth(0.5)
+      }
+      .margin({ left: '16vp', right: '16vp' })
+    }
   }
 
   @Builder
   deviceAndHouseMusicSys() {
     Menu() {
       this.deviceMenu()
-      this.houseMusicDividerBuider()
+      this.houseMusicDividerBuilder()
       this.houseMusicSys()
     }
     .width(this.isPc ? 326 : 216)
@@ -1530,8 +1530,7 @@ export struct AVCastPicker {
           this.isMenuShow && this.hasReceivedDeviceList,
           this.deviceAndHouseMusicSys(),
           {
-          backgroundBlurStyle: (materialUtil.isSupportHds() ? 
-            BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
+          backgroundBlurStyle: (materialUtil.isSupportHds() ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
           backgroundColor: (materialUtil.isSupportHds() ? undefined :
             (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
             $r('sys.color.background_primary') : '#00FFFFFF'),
