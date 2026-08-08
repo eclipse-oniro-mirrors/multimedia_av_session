@@ -55,6 +55,9 @@
 #include "audio_system_manager.h"
 #include "stream_dfx_manager.h"
 #include "audio_errors.h"
+#ifdef CAR_FEATURE_ENABLE
+#include "audio_zone_manager.h"
+#endif
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
 typedef void (*StopMigrateStubFunc)(void);
@@ -67,6 +70,10 @@ using namespace std;
 using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
+
+#ifdef CAR_FEATURE_ENABLE
+AVSessionService* AVSessionService::instance_ = nullptr;
+#endif
 
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
     
@@ -778,6 +785,9 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
     }
 
     NotifyTopSessionChanged(descriptor);
+#ifdef CAR_FEATURE_ENABLE
+    NotifyTopSessionChangeForAudioZone(descriptor);
+#endif
     if (topSession != nullptr && !topSession->IsCasting()) {
         std::string preloadSessionId = topSession->GetSessionId();
         NotifyLocalFrontSessionChangeForMigrate(preloadSessionId);
@@ -1041,6 +1051,9 @@ void AVSessionService::InitAudio()
     if (ret != AVSESSION_SUCCESS) {
         SLOGE("register query allowed playback callback failed!");
     }
+#ifdef CAR_FEATURE_ENABLE
+    InitAudioZoneCallback();
+#endif
 }
 
 sptr <AVSessionItem> AVSessionService::SelectSessionByUid(const AudioRendererChangeInfo& info)
@@ -1891,9 +1904,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, elementName);
     if (result == nullptr) {
         SLOGE("create new session failed");
-        if (dumpHelper_ != nullptr) {
-            dumpHelper_->SetErrorInfo("  AVSessionService::CreateSessionInner  create new session failed");
-        }
+        if (dumpHelper_ != nullptr) dumpHelper_->SetErrorInfo("CreateSessionInner create new session failed");
         HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "CALLER_PID", pid, "TAG", tag, "TYPE", type, "BUNDLE_NAME",
             elementName.GetBundleName(), "ERROR_MSG", "avsessionservice createsessioninner create new session failed");
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
@@ -1908,6 +1919,9 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
+#ifdef CAR_FEATURE_ENABLE
+    NotifySessionAddForAudioZone(result->GetDescriptor());
+#endif
     sessionItem = result;
     AddExtraFrontSession(type, sessionItem);
 
@@ -3625,8 +3639,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         std::lock_guard frontLockGuard(sessionFrontLock_);
         sptr<AVSessionItem> sessionItem = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(sessionItem != nullptr, "Session item is nullptr");
-        int32_t userId = sessionItem->GetUserId();
-        userId = userId < 0 ? GetUsersManager().GetCurrentUserId() : userId;
+        int32_t userId = sessionItem->GetUserId() < 0 ? GetUsersManager().GetCurrentUserId() : sessionItem->GetUserId();
         SLOGD("HandleSessionRelease with userId:%{public}d", userId);
         HILOG_COMM_INFO("HandleSessionRelease, sessionId=%{public}s, bundleName=%{public}s",
             AVSessionUtils::GetAnonySessionId(sessionId).c_str(), sessionItem->GetBundleName().c_str());
@@ -3634,6 +3647,9 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
         ReportSessionState(sessionItem, SessionState::STATE_RELEASE);
 #endif
         NotifySessionRelease(sessionItem->GetDescriptor());
+#ifdef CAR_FEATURE_ENABLE
+        NotifySessionRemoveForAudioZone(sessionItem->GetDescriptor());
+#endif
         if (sessionItem->GetUid() == ancoUid) {
             ancoSession_ = nullptr;
             SLOGI("ancoSession release in user:%{public}d", userId);
@@ -5009,6 +5025,304 @@ void AVSessionService::UpdateNtfEnable(bool isMediaNtfEnable) {
         Notification::NotificationHelper::CancelNotification(std::to_string(userId),  photoNotifyId);
     }
 }
+
+#ifdef CAR_FEATURE_ENABLE
+void AVSessionService::NotifySessionAddForAudioZone(const AVSessionDescriptor& descriptor)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    
+    GetUsersManager().UpdateZoneToUseridMap(descriptor.userId_);
+    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.userId_);
+    
+    auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
+    CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
+        "NotifySessionAddForAudioZone no listeners for user:%{public}d", descriptor.userId_);
+    
+    for (int32_t userId : userIdsInSameZone) {
+        auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
+        if (listenersForUserIt == listenersMapByUserIdForAudioZone.end()) {
+            continue;
+        }
+        for (const auto& [pid, listener] : listenersForUserIt->second) {
+            CHECK_AND_CONTINUE_LOG(listener != nullptr,
+                "NotifySessionAddForAudioZone listener is null for pid=%{public}d", pid);
+            listener->SessionAddForAudioZone(descriptor.userId_, descriptor);
+        }
+    }
+    SLOGI("NotifySessionAddForAudioZone for user:%{public}d", descriptor.userId_);
+}
+
+void AVSessionService::NotifySessionRemoveForAudioZone(const AVSessionDescriptor& descriptor)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+
+    GetUsersManager().UpdateZoneToUseridMap(descriptor.userId_);
+    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.userId_);
+    auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
+
+    CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
+        "NotifySessionRemoveForAudioZone no listeners for user:%{public}d", descriptor.userId_);
+
+    for (int32_t userId : userIdsInSameZone) {
+        auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
+        if (listenersForUserIt == listenersMapByUserIdForAudioZone.end()) {
+            continue;
+        }
+        for (const auto& [pid, listener] : listenersForUserIt->second) {
+            CHECK_AND_CONTINUE_LOG(listener != nullptr,
+                "NotifySessionRemoveForAudioZone listener is null for pid=%{public}d", pid);
+            listener->SessionRemoveForAudioZone(descriptor.userId_, descriptor);
+        }
+    }
+    GetUsersManager().CleanupZoneToUseridMap(descriptor.userId_);
+    SLOGI("NotifySessionRemoveForAudioZone for user:%{public}d", descriptor.userId_);
+}
+
+void AVSessionService::NotifyTopSessionChangeForAudioZone(const AVSessionDescriptor& descriptor)
+{
+    std::lock_guard lockGuard(sessionListenersLock_);
+    GetUsersManager().UpdateZoneToUseridMap(descriptor.userId_);
+    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.userId_);
+    auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
+
+    CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
+        "NotifyTopSessionChangeForAudioZone no listeners for user:%{public}d", descriptor.userId_);
+
+    for (int32_t userId : userIdsInSameZone) {
+        auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
+        if (listenersForUserIt == listenersMapByUserIdForAudioZone.end()) {
+            continue;
+        }
+        for (const auto& [pid, listener] : listenersForUserIt->second) {
+            CHECK_AND_CONTINUE_LOG(listener != nullptr,
+                "NotifyTopSessionChangeForAudioZone listener is null for pid=%{public}d", pid);
+            listener->SessionTopChangeForAudioZone(descriptor.userId_, descriptor);
+        }
+    }
+    SLOGI("NotifyTopSessionChangeForAudioZone for user:%{public}d", descriptor.userId_);
+}
+
+void AVSessionService::HandleSessionStackChangeForAudioZone()
+{
+    auto& usersManager = GetUsersManager();
+    
+    for (int32_t userId : usersManager.GetAliveUserList()) {
+        std::vector<AVSessionDescriptor> oldSessionStack = usersManager.GetSessionStackForAudioZone(userId);
+        
+        usersManager.CleanupZoneToUseridMap(userId);
+        usersManager.UpdateZoneToUseridMap(userId);
+        usersManager.UpdateSessionStackForAudioZone(userId);
+        
+        std::vector<AVSessionDescriptor> newSessionStack = usersManager.GetSessionStackForAudioZone(userId);
+        
+        NotifySessionStackDiffForAudioZone(userId, oldSessionStack, newSessionStack);
+    }
+}
+
+void AVSessionService::NotifySessionStackDiffForAudioZone(int32_t userId,
+    const std::vector<AVSessionDescriptor>& oldStack,
+    const std::vector<AVSessionDescriptor>& newStack)
+{
+    std::set<std::string> oldSessionIds;
+    for (const auto& desc : oldStack) {
+        oldSessionIds.insert(desc.sessionId_);
+    }
+    std::set<std::string> newSessionIds;
+    for (const auto& desc : newStack) {
+        newSessionIds.insert(desc.sessionId_);
+    }
+    std::vector<AVSessionDescriptor> addedSessions;
+    for (const auto& desc : newStack) {
+        if (oldSessionIds.find(desc.sessionId_) == oldSessionIds.end()) {
+            addedSessions.push_back(desc);
+        }
+    }
+    std::vector<AVSessionDescriptor> removedSessions;
+    for (const auto& desc : oldStack) {
+        if (newSessionIds.find(desc.sessionId_) == newSessionIds.end()) {
+            removedSessions.push_back(desc);
+        }
+    }
+    for (const auto& desc : addedSessions) {
+        NotifySessionAddForAudioZone(desc);
+    }
+    for (const auto& desc : removedSessions) {
+        NotifySessionRemoveForAudioZone(desc);
+    }
+    if (!newStack.empty() && !oldStack.empty()) {
+        if (newStack[0].sessionId_ != oldStack[0].sessionId_) {
+            NotifyTopSessionChangeForAudioZone(newStack[0]);
+        }
+    } else if (!newStack.empty() && oldStack.empty()) {
+        NotifyTopSessionChangeForAudioZone(newStack[0]);
+    }
+}
+
+int32_t AVSessionService::GetSessionDescriptorsForAudioZone(int32_t userId,
+    std::vector<AVSessionDescriptor>& descriptors)
+{
+    CHECK_AND_RETURN_RET_LOG(userId > 0, AVSESSION_ERROR,
+        "GetSessionDescriptorsForAudioZone invalid userId=%{public}d", userId);
+    
+    std::lock_guard frontLockGuard(sessionFrontLock_);
+    GetUsersManager().UpdateSessionStackForAudioZone(userId);
+    std::vector<AVSessionDescriptor> zoneDescriptors = GetUsersManager().GetSessionStackForAudioZone(userId);
+    for (const auto& desc : zoneDescriptors) {
+        descriptors.push_back(desc);
+    }
+
+    SLOGI("GetSessionDescriptorsForAudioZone for user:%{public}d with size=%{public}d",
+        userId, static_cast<int32_t>(descriptors.size()));
+    return AVSESSION_SUCCESS;
+}
+
+AVSessionService::TargetPlayInfo AVSessionService::GetTargetPlayInfoForAudioZone(
+    int32_t userId, 
+    const std::string& bundleName)
+{
+    TargetPlayInfo targetInfo;
+    
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = GetSessionDescriptorsForAudioZone(userId, descriptors);
+    void(ret);
+    if (descriptors.empty()) {
+        SLOGI("No session in audio zone, fallback to bundleName=%{public}s", bundleName.c_str());
+        targetInfo.bundleName = bundleName;
+        
+        std::string profile;
+        if (!BundleStatusAdapter::GetInstance().IsSupportPlayIntent(
+            targetInfo.bundleName, targetInfo.moduleName, profile)) {
+            SLOGE("bundle=%{public}s does not support play insights", targetInfo.bundleName.c_str());
+            targetInfo.isValid = false;
+            return targetInfo;
+        }
+        targetInfo.isValid = true;
+    } else {
+        AVSessionDescriptor topSession = descriptors[0];
+        targetInfo.bundleName = topSession.elementName_.GetBundleName();
+        targetInfo.moduleName = topSession.elementName_.GetModuleName();
+        targetInfo.isValid = true;
+        
+        SLOGI("Use top session: bundleName=%{public}s, moduleName=%{public}s",
+            targetInfo.bundleName.c_str(), targetInfo.moduleName.c_str());
+    }
+    
+    return targetInfo;
+}
+
+int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+    const std::string& assetId, const CommandInfo& info)
+{
+    int32_t result = AVSESSION_ERROR;
+    if (CheckStartAncoMediaPlay(bundleName, &result)) {
+        return result;
+    }
+    
+    TargetPlayInfo targetInfo = GetTargetPlayInfoForAudioZone(userId, bundleName);
+    if (!targetInfo.isValid) {
+        return AVSESSION_ERROR;
+    }
+    
+    int32_t targetUid = BundleStatusAdapter::GetInstance().GetUidFromBundleName(targetInfo.bundleName, userId);
+    
+    StartPlayType startPlayType = StartPlayType::APP;
+    if (targetUid == BLUETOOTH_UID) {
+        startPlayType = StartPlayType::BLUETOOTH;
+    }
+    if (targetUid == NEARLINK_UID) {
+        startPlayType = StartPlayType::NEARLINK;
+    }
+    
+    StartPlayInfo startPlayInfo;
+    startPlayInfo.setBundleName(targetInfo.bundleName);
+    startPlayInfo.SetModuleName(targetInfo.moduleName);
+    
+    SLOGI("StartAVPlaybackForAudioZone for bundleName:%{public}s, userId:%{public}d",
+        targetInfo.bundleName.c_str(), userId);
+    
+    std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
+    typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId,
+        const StartPlayInfo startPlayInfo, StartPlayType startPlayType);
+    StartAVPlaybackFunc startAVPlayback = reinterpret_cast<StartAVPlaybackFunc>(
+        dynamicLoader->GetFuntion(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
+    if (startAVPlayback) {
+#ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
+        ReportSessionControl(targetInfo.bundleName, CONTROL_COLD_START);
+#endif
+        return (*startAVPlayback)(targetInfo.bundleName, assetId, startPlayInfo, startPlayType);
+    }
+    SLOGE("StartAVPlaybackForAudioZone fail");
+    return AVSESSION_ERROR;
+}
+
+int32_t AVSessionService::RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener)
+{
+    GetUsersManager().UpdateZoneToUseridMap(userId);
+    pid_t pid = GetCallingPid();
+    SLOGI("Enter RegisterSessionListenerForUser process for pid:%{public}d and target userId:%{public}d",
+        static_cast<int>(pid), userId);
+    GetUsersManager().AddSessionListenerForUser(pid, listener, userId);
+    return AVSESSION_SUCCESS;
+}
+
+void AVSessionService::InitAudioZoneCallback()
+{
+    audioZoneChangeCallback_ = std::make_shared<AudioZoneChangeCallbackImpl>();
+    audioZoneCallback_ = std::make_shared<AudioZoneCallbackImpl>(audioZoneChangeCallback_);
+    auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
+    if (audioZoneManager != nullptr) {
+        auto ret = audioZoneManager->RegisterAudioZoneCallback(audioZoneCallback_);
+        SLOGI("RegisterAudioZoneCallback ret=%{public}d", ret);
+    } else {
+        SLOGE("AudioZoneManager::GetInstance() is nullptr");
+    }
+}
+
+void AVSessionService::DeinitAudioZoneCallback()
+{
+    auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
+    if (audioZoneManager != nullptr && audioZoneCallback_ != nullptr) {
+        audioZoneManager->UnRegisterAudioZoneCallback();
+        audioZoneCallback_ = nullptr;
+        audioZoneChangeCallback_ = nullptr;
+    }
+}
+
+void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneAdd(
+    const AudioStandard::AudioZoneDescriptor &zoneDescriptor)
+{
+    int32_t zoneId = zoneDescriptor.zoneId_;
+    auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
+    auto audioZoneChangeCallback_ = audioZoneChangeCallbackWeak_.lock();
+    if (audioZoneManager != nullptr && audioZoneChangeCallback_ != nullptr) {
+        auto ret = audioZoneManager->RegisterAudioZoneChangeCallback(zoneId, audioZoneChangeCallback_);
+        SLOGI("RegisterAudioZoneChangeCallback zoneId=%{public}d ret=%{public}d", zoneId, ret);
+    }
+}
+
+void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneRemove(int32_t zoneId)
+{
+    SLOGI("OnAudioZoneRemove zoneId=%{public}d", zoneId);
+    
+    auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
+    auto audioZoneChangeCallback_ = audioZoneChangeCallbackWeak_.lock();
+    if (audioZoneManager != nullptr && audioZoneChangeCallback_ != nullptr) {
+        auto ret = audioZoneManager->UnRegisterAudioZoneChangeCallback(zoneId);
+        SLOGI("OnAudioZoneRemove UnRegisterAudioZoneChangeCallback ret=%{public}d", ret);
+    }
+
+    AVSessionService::GetInstance()->HandleSessionStackChangeForAudioZone();
+}
+
+void AVSessionService::AudioZoneChangeCallbackImpl::OnAudioZoneChange(
+    const AudioStandard::AudioZoneDescriptor &zoneDescriptor, AudioStandard::AudioZoneChangeReason reason)
+{
+    SLOGI("OnAudioZoneChange zoneId=%{public}d reason=%{public}d",
+        zoneDescriptor.zoneId, static_cast<int>(reason));
+    
+    AVSessionService::GetInstance()->HandleSessionStackChangeForAudioZone();
+}
+#endif
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 void AVSessionService::ReportSessionState(const sptr<AVSessionItem>& session, SessionState state)

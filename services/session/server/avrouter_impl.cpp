@@ -766,6 +766,9 @@ void AVRouterImpl::SetSinkCastSessionInfo(const AAFwk::Want &want)
     SLOGI("Cast Session Create success with sessionId length %{public}d and deviceId length %{public}d",
         static_cast<int32_t>(sinkCastSessionId_.size()), static_cast<int32_t>(sourceDeviceId_.size()));
     cJSON_Delete(deviceInfo);
+#ifdef CAR_FEATURE_ENABLE
+    std::string userId = want.GetStringParam("userId");
+#endif
 }
 
 void AVRouterImpl::NotifyCastSessionCreated()

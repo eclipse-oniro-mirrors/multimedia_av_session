@@ -140,7 +140,35 @@ public:
      * @brief Deconstruct SessionListener.
      * @since 9
     */
+
     virtual ~SessionListener() = default;
+        /**
+     * @brief Listen for session creation events for audio zone.
+     *
+     * @param userId Audio zone user ID.
+     * @param descriptor Session related description callback.
+     * @since 26.1.0 dynamic&static
+    */
+
+    virtual void SessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
+
+    /**
+     * @brief Listen for session release events for audio zone.
+     *
+     * @param userId Audio zone user ID.
+     * @param descriptor Session related description callback.
+     * @since 26.1.0 dynamic&static
+    */
+    virtual void SessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
+
+    /**
+     * @brief Listen for changes in the latest session for audio zone.
+     *
+     * @param userId Audio zone user ID.
+     * @param descriptor Session related description callback.
+     * @since 26.1.0 dynamic&static
+    */
+    virtual void SessionTopChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
 };
 
 #ifndef CLIENT_LITE

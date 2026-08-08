@@ -23,6 +23,9 @@
 #include "session_stack.h"
 #include "avsession_log.h"
 #include "isession_listener.h"
+#ifdef CAR_FEATURE_ENABLE
+#include "migrate/migrate_avsession_proxy.h"
+#endif
 
 namespace OHOS::AVSession {
 class AVSessionUsersManager {
@@ -85,11 +88,49 @@ public:
 
     void CleanupCacheOnUnlock(int32_t userId = 0);
 
+#ifdef CAR_FEATURE_ENABLE
+    void AddSessionListenerForUser(pid_t pid, const sptr<ISessionListener>& listener, int32_t userId);
+
+    std::vector<int32_t> GetUsersInSameAudioZone(int32_t userId);
+
+    int32_t GetZoneIdForUser(int32_t userId);
+
+    void UpdateZoneToUseridMap(int32_t userId);
+
+    void CleanupZoneToUseridMap(int32_t userId);
+
+    void CleanupZoneMapping(int32_t zoneId);
+
+    void UpdateSessionStackForAudioZone(int32_t userId);
+
+    std::vector<AVSessionDescriptor> GetSessionStackForAudioZone(int32_t userId);
+
+    std::map<int32_t, std::map<pid_t, sptr<ISessionListener>>>& GetSessionListenersMapForAudioZone();
+#endif
+
     static constexpr const char* accountEventSwitched = "SWITCHED";
     static constexpr const char* accountEventRemoved = "REMOVED";
 
 private:
     void HandleUserRemoved(int32_t userId);
+
+#ifdef CAR_FEATURE_ENABLE
+    void CollectLocalSessionsForAudioZone(int32_t zoneId,
+        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+    void CollectDistributedSessionsForAudioZone(int32_t zoneId,
+        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+    void SortAndCacheSessionStack(int32_t zoneId,
+        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+    
+    void AddSessionToVector(const sptr<AVSessionItem>& session,
+        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+    
+    bool IsCastSessionValid(const sptr<AVSessionItem>& session, int32_t zoneId);
+    
+    void AddControllerToVector(
+        const sptr<AVControllerItem>& controller,
+        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+#endif
 
     std::map<int32_t, std::shared_ptr<SessionStack>> sessionStackMapByUserId_;
     std::shared_ptr<SessionStack> sessionStackForAll_;
@@ -98,6 +139,12 @@ private:
     std::map<int32_t, std::map<pid_t, sptr<ISessionListener>>> sessionListenersMapByUserId_;
     std::map<pid_t, sptr<ISessionListener>> sessionListenersMap_;
     std::map<pid_t, sptr<AVSessionItem>> topSessionsMapByUserId_;
+
+#ifdef CAR_FEATURE_ENABLE
+    std::map<int32_t, std::map<pid_t, sptr<ISessionListener>>> sessionListenersMapByUserIdForAudioZone_;
+    std::map<int32_t, std::vector<int32_t>> zoneToUserid_;
+    std::map<int32_t, std::vector<AVSessionDescriptor>> sessionStackMapForAudioZone_;
+#endif
 
     const std::string AVSESSION_FILE_PUBLIC_DIR = "/data/service/el2/public/av_session/";
     const std::string AVSESSION_FILE_DIR_HEAD = "/data/service/el2/";

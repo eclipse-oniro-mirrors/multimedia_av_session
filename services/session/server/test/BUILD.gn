@@ -3156,6 +3156,48 @@ if (castplus_cast_engine_enable) {
 }
 
 ###############################################################################
+ohos_unittest("AVSessionAudioZoneIntegrationTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_audio_zone_integration_test.cpp" ]
+
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "../../server/",
+    "../../../../interfaces/inner_api/native/session/include/",
+    "../../../../frameworks/native/session/include",
+  ]
+
+  cflags_cc = [
+    "--coverage",
+    "-fno-access-control",
+  ]
+
+  ldflags = [ "--coverage" ]
+
+  deps = [
+    "../../../../frameworks/common:avsession_common",
+    "../../../../frameworks/native/session:avsession_client_static",
+    "../../../../utils:avsession_utils",
+    "../../../session:avsession_item_static",
+    "../../../session:avsession_service_static",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "googletest:gtest_main",
+  ]
+
+  defines = [ "CAR_FEATURE_ENABLE" ]
+
+  part_name = "multimedia_av_session"
+  subsystem_name = "multimedia"
+}
+
+###############################################################################
 group("av_session_server_unittest") {
   testonly = true
 
@@ -3165,6 +3207,7 @@ group("av_session_server_unittest") {
     ":AVControllerItemTest",
     ":AVRouterImplTest",
     ":AVRouterTest",
+    ":AVSessionAudioZoneIntegrationTest",
     ":AVSessionCallbackProxyTest",
     ":AVSessionCallbackStubTest",
     ":AVSessionControllerProxyTest",

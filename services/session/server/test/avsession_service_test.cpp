@@ -51,6 +51,155 @@
 #undef protected
 #undef private
 
+#ifdef CAR_FEATURE_ENABLE
+#include "audio_zone_types.h"
+
+namespace OHOS::AudioStandard {
+struct AudioZoneDescriptor {
+    int32_t zoneId;
+    std::string zoneName;
+};
+
+class AudioZoneCallback {
+public:
+    virtual ~AudioZoneCallback() = default;
+    virtual void OnAudioZoneAdd(const AudioZoneDescriptor &zoneDescriptor) = 0;
+    virtual void OnAudioZoneRemove(int32_t zoneId) = 0;
+};
+
+class AudioZoneChangeCallback {
+public:
+    virtual ~AudioZoneChangeCallback() = default;
+    virtual void OnAudioZoneChange(const AudioZoneDescriptor &zoneDescriptor,
+        AudioZoneDescriptor reason) = 0;
+};
+
+class AudioZoneManager {
+public:
+    static AudioZoneManager* GetInstance()
+    {
+        static AudioZoneManager instance;
+        return &instance;
+    }
+    
+    int32_t RegisterAudioZoneCallback(const std::shared_ptr<AudioZoneCallback>& callback)
+    {
+        callback_ = callback;
+        return callback ? 0 : -1;
+    }
+    
+    void UnRegisterAudioZoneCallback()
+    {
+        callback_ = nullptr;
+    }
+    
+    void TriggerZoneAddEvent(int32_t zoneId, const std::string& zoneName)
+    {
+        if (callback_) {
+            AudioZoneDescriptor desc;
+            desc.zoneId = zoneId;
+            desc.zoneName = zoneName;
+            callback_->OnAudioZoneAdd(desc);
+        }
+    }
+    
+    void TriggerZoneRemoveEvent(int32_t zoneId)
+    {
+        if (callback_) {
+            callback_->OnAudioZoneRemove(zoneId);
+        }
+    }
+    
+    int32_t GetZoneIdForUser(int32_t userId)
+    {
+        auto it = userToZoneMap_.find(userId);
+        return it != userToZoneMap_.end() ? it->second : -1;
+    }
+    
+    void SetUserZoneMapping(int32_t userId, int32_t zoneId)
+    {
+        userToZoneMap_[userId] = zoneId;
+    }
+    
+    void ClearMappings()
+    {
+        userToZoneMap_.clear();
+    }
+    
+    int32_t RegisterAudioZoneChangeCallback(int32_t zoneId,
+        const std::shared_ptr<AudioZoneChangeCallback>& callback)
+    {
+        changeCallback_[zoneId] = callback;
+        return callback ? 0 : -1;
+    }
+    
+    int32_t UnRegisterAudioZoneChangeCallback(int32_t zoneId)
+    {
+        changeCallback_.erase(zoneId);
+        return 0;
+    }
+    
+    void TriggerZoneChangeEvent(int32_t zoneId, const std::string& zoneName)
+    {
+        if (changeCallback_[zoneId]) {
+            AudioZoneDescriptor desc{zoneId, zoneName};
+            changeCallback_[zoneId]->OnAudioZoneChange(desc, desc);
+        }
+    }
+
+private:
+    std::shared_ptr<AudioZoneCallback> callback_;
+    std::map<int32_t, int32_t> userToZoneMap_;
+    std::map<int32_t, std::shared_ptr<AudioZoneChangeCallback>> changeCallback_;
+};
+}
+
+class AudioZoneTestData {
+public:
+    struct ZoneConfig {
+        int32_t zoneId;
+        std::string zoneName;
+        std::vector<int32_t> userIds;
+    };
+    
+    static std::vector<ZoneConfig> GetTestZones()
+    {
+        return {
+            {1, "DriverZone", {100}},
+            {2, "PassengerZone", {101, 102}},
+            {3, "RearZone", {103}},
+        };
+    }
+    
+    static AVSessionDescriptor CreateTestSessionDescriptor(
+        const std::string& sessionId, int32_t userId, const std::string& bundleName)
+    {
+        AVSessionDescriptor desc;
+        desc.sessionId_ = sessionId;
+        desc.userId_ = userId;
+        desc.bundleName_ = bundleName;
+        desc.sessionTag_ = "TestSession";
+        desc.isActive_ = true;
+        desc.isTopSession_ = false;
+        return desc;
+    }
+    
+    static CommandInfo CreateTestCommandInfo(
+        const std::string& deviceId = "test_device",
+        const std::string& bundleName = "test_bundle",
+        const std::string& moduleName = "test_module",
+        const std::string& callerType = "test_type")
+    {
+        CommandInfo info;
+        info.SetCallerDeviceId(deviceId);
+        info.SetCallerBundleName(bundleName);
+        info.SetCallerModuleName(moduleName);
+        info.SetCallerType(callerType);
+        return info;
+    }
+};
+#endif
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
 #include "avcast_control_command.h"
@@ -169,6 +318,33 @@ private:
     AVPlaybackState castPlaybackState_;
 };
 #endif
+
+
+class ISessionListenerMock : public ISessionListener {
+public:
+    ErrCode OnSessionCreate(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSessionRelease(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnTopSessionChange(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnAudioSessionChecked(const int32_t uid) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceAvailable(
+        const OutputDeviceInfo& castOutputDeviceInfo) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceOffline(const std::string& deviceId) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceStateChange(const DeviceState& deviceState) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSystemCommonEvent(const std::string& commonEvent,
+        const std::string& args) override { return AVSESSION_SUCCESS; }
+    ErrCode OnRemoteDistributedSessionChange(
+        const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; }
+    ErrCode OnActiveSessionChanged(
+        const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; }
+    void SessionAddForAudioZone(
+        int32_t userId, const AVSessionDescriptor &descriptor) override {}
+    void SessionRemoveForAudioZone(
+        int32_t userId, const AVSessionDescriptor &descriptor) override {}
+    void SessionTopChangeForAudioZone(
+        int32_t userId, const AVSessionDescriptor &descriptor) override {}
+    OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; }
+};
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -4044,3 +4220,739 @@ static HWTEST_F(AVSessionServiceTest, UpdateNtfEnable001, TestSize.Level0)
     EXPECT_EQ(avservice_->isNtfEnabled_, true);
     SLOGD("UpdateNtfEnable001 end!");
 }
+
+
+#ifdef CAR_FEATURE_ENABLE
+/**
+ * @tc.name: InitAudioZoneCallback001
+ * @tc.desc: Test InitAudioZoneCallback and DeinitAudioZoneCallback
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, InitAudioZoneCallback001, TestSize.Level0)
+{
+    SLOGD("InitAudioZoneCallback001 begin!");
+    avservice_->InitAudioZoneCallback();
+    EXPECT_NE(avservice_->audioZoneCallback_, nullptr);
+    EXPECT_NE(avservice_->audioZoneChangeCallback_, nullptr);
+    
+    avservice_->DeinitAudioZoneCallback();
+    EXPECT_EQ(avservice_->audioZoneCallback_, nullptr);
+    EXPECT_EQ(avservice_->audioZoneChangeCallback_, nullptr);
+    SLOGD("InitAudioZoneCallback001 end!");
+}
+
+/**
+ * @tc.name: GetSessionDescriptorsForAudioZone001
+ * @tc.desc: Test GetSessionDescriptorsForAudioZone with valid userId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, GetSessionDescriptorsForAudioZone001, TestSize.Level0)
+{
+    SLOGD("GetSessionDescriptorsForAudioZone001 begin!");
+    int32_t userId = 100;
+    std::vector<AVSessionDescriptor> descriptors;
+    
+    int32_t ret = avservice_->GetSessionDescriptorsForAudioZone(userId, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("GetSessionDescriptorsForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: GetSessionDescriptorsForAudioZone002
+ * @tc.desc: Test GetSessionDescriptorsForAudioZone with invalid userId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, GetSessionDescriptorsForAudioZone002, TestSize.Level0)
+{
+    SLOGD("GetSessionDescriptorsForAudioZone002 begin!");
+    int32_t userId = -1;
+    std::vector<AVSessionDescriptor> descriptors;
+    
+    int32_t ret = avservice_->GetSessionDescriptorsForAudioZone(userId, descriptors);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGD("GetSessionDescriptorsForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: RegisterSessionListenerForUser001
+ * @tc.desc: Test RegisterSessionListenerForUser with valid userId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, RegisterSessionListenerForUser001, TestSize.Level0)
+{
+    SLOGD("RegisterSessionListenerForUser001 begin!");
+    int32_t userId = 100;
+    OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
+    
+    int32_t ret = avservice_->RegisterSessionListenerForUser(userId, listener);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("RegisterSessionListenerForUser001 end!");
+}
+
+/**
+ * @tc.name: RegisterSessionListenerForUser002
+ * @tc.desc: Test RegisterSessionListenerForUser with invalid userId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, RegisterSessionListenerForUser002, TestSize.Level0)
+{
+    SLOGD("RegisterSessionListenerForUser002 begin!");
+    int32_t userId = 0;
+    OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
+    
+    int32_t ret = avservice_->RegisterSessionListenerForUser(userId, listener);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("RegisterSessionListenerForUser002 end!");
+}
+
+/**
+ * @tc.name: RegisterSessionListenerForUser003
+ * @tc.desc: Test RegisterSessionListenerForUser with nullptr listener
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, RegisterSessionListenerForUser003, TestSize.Level0)
+{
+    SLOGD("RegisterSessionListenerForUser003 begin!");
+    int32_t userId = 100;
+    OHOS::sptr<ISessionListener> listener = nullptr;
+    
+    int32_t ret = avservice_->RegisterSessionListenerForUser(userId, listener);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("RegisterSessionListenerForUser003 end!");
+}
+
+/**
+ * @tc.name: RegisterSessionListenerForUser004
+ * @tc.desc: Test RegisterSessionListenerForUser with multiple listeners for different users
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, RegisterSessionListenerForUser004, TestSize.Level0)
+{
+    SLOGD("RegisterSessionListenerForUser004 begin!");
+    int32_t userId1 = 100;
+    int32_t userId2 = 101;
+    OHOS::sptr<ISessionListener> listener1 = new ISessionListenerMock();
+    OHOS::sptr<ISessionListener> listener2 = new ISessionListenerMock();
+    
+    int32_t ret1 = avservice_->RegisterSessionListenerForUser(userId1, listener1);
+    int32_t ret2 = avservice_->RegisterSessionListenerForUser(userId2, listener2);
+    
+    EXPECT_EQ(ret1, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret2, AVSESSION_SUCCESS);
+    SLOGD("RegisterSessionListenerForUser004 end!");
+}
+
+/**
+ * @tc.name: RegisterSessionListenerForUser005
+ * @tc.desc: Test RegisterSessionListenerForUser with negative userId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, RegisterSessionListenerForUser005, TestSize.Level0)
+{
+    SLOGD("RegisterSessionListenerForUser005 begin!");
+    int32_t userId = -1;
+    OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
+    
+    int32_t ret = avservice_->RegisterSessionListenerForUser(userId, listener);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGD("RegisterSessionListenerForUser005 end!");
+}
+
+/**
+ * @tc.name: NotifySessionAddForAudioZone001
+ * @tc.desc: Test NotifySessionAddForAudioZone with valid descriptor
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone001, TestSize.Level0)
+{
+    SLOGD("NotifySessionAddForAudioZone001 begin!");
+    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session_001", 100, "test_bundle");
+    
+    avservice_->NotifySessionAddForAudioZone(descriptor);
+    SLOGD("NotifySessionAddForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: NotifySessionAddForAudioZone002
+ * @tc.desc: Test NotifySessionAddForAudioZone with multiple sessions
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone002, TestSize.Level0)
+{
+    SLOGD("NotifySessionAddForAudioZone002 begin!");
+    AVSessionDescriptor descriptor1 = AudioZoneTestData::CreateTestSessionDescriptor("session_001", 100, "bundle_1");
+    AVSessionDescriptor descriptor2 = AudioZoneTestData::CreateTestSessionDescriptor("session_002", 101, "bundle_2");
+    
+    avservice_->NotifySessionAddForAudioZone(descriptor1);
+    avservice_->NotifySessionAddForAudioZone(descriptor2);
+    SLOGD("NotifySessionAddForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: NotifySessionAddForAudioZone003
+ * @tc.desc: Test NotifySessionAddForAudioZone with registered listener
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone003, TestSize.Level0)
+{
+    SLOGD("NotifySessionAddForAudioZone003 begin!");
+    int32_t userId = 100;
+    OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
+    avservice_->RegisterSessionListenerForUser(userId, listener);
+    
+    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session", userId, "test_bundle");
+    avservice_->NotifySessionAddForAudioZone(descriptor);
+    SLOGD("NotifySessionAddForAudioZone003 end!");
+}
+
+/**
+ * @tc.name: NotifySessionRemoveForAudioZone001
+ * @tc.desc: Test NotifySessionRemoveForAudioZone with valid descriptor
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionRemoveForAudioZone001, TestSize.Level0)
+{
+    SLOGD("NotifySessionRemoveForAudioZone001 begin!");
+    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session_001", 100, "test_bundle");
+    
+    avservice_->NotifySessionRemoveForAudioZone(descriptor);
+    SLOGD("NotifySessionRemoveForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: NotifySessionRemoveForAudioZone002
+ * @tc.desc: Test NotifySessionRemoveForAudioZone with registered listener
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionRemoveForAudioZone002, TestSize.Level0)
+{
+    SLOGD("NotifySessionRemoveForAudioZone002 begin!");
+    int32_t userId = 100;
+    OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
+    avservice_->RegisterSessionListenerForUser(userId, listener);
+    
+    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session", userId, "test_bundle");
+    avservice_->NotifySessionRemoveForAudioZone(descriptor);
+    SLOGD("NotifySessionRemoveForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: NotifySessionRemoveForAudioZone003
+ * @tc.desc: Test NotifySessionRemoveForAudioZone with multiple sessions
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionRemoveForAudioZone003, TestSize.Level0)
+{
+    SLOGD("NotifySessionRemoveForAudioZone003 begin!");
+    AVSessionDescriptor descriptor1 = AudioZoneTestData::CreateTestSessionDescriptor("session_001", 100, "bundle_1");
+    AVSessionDescriptor descriptor2 = AudioZoneTestData::CreateTestSessionDescriptor("session_002", 101, "bundle_2");
+    
+    avservice_->NotifySessionRemoveForAudioZone(descriptor1);
+    avservice_->NotifySessionRemoveForAudioZone(descriptor2);
+    SLOGD("NotifySessionRemoveForAudioZone003 end!");
+}
+
+/**
+ * @tc.name: HandleSessionStackChangeForAudioZone001
+ * @tc.desc: Test HandleSessionStackChangeForAudioZone basic functionality
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, HandleSessionStackChangeForAudioZone001, TestSize.Level0)
+{
+    SLOGD("HandleSessionStackChangeForAudioZone001 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    avservice_->HandleSessionStackChangeForAudioZone();
+    SLOGD("HandleSessionStackChangeForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: HandleSessionStackChangeForAudioZone002
+ * @tc.desc: Test HandleSessionStackChangeForAudioZone with registered listeners
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, HandleSessionStackChangeForAudioZone002, TestSize.Level0)
+{
+    SLOGD("HandleSessionStackChangeForAudioZone002 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    int32_t userId1 = 100;
+    int32_t userId2 = 101;
+    OHOS::sptr<ISessionListener> listener1 = new ISessionListenerMock();
+    OHOS::sptr<ISessionListener> listener2 = new ISessionListenerMock();
+    
+    avservice_->RegisterSessionListenerForUser(userId1, listener1);
+    avservice_->RegisterSessionListenerForUser(userId2, listener2);
+    
+    avservice_->HandleSessionStackChangeForAudioZone();
+    SLOGD("HandleSessionStackChangeForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: NotifySessionStackDiffForAudioZone001
+ * @tc.desc: Test NotifySessionStackDiffForAudioZone with session added
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone001, TestSize.Level0)
+{
+    SLOGD("NotifySessionStackDiffForAudioZone001 begin!");
+    int32_t userId = 100;
+    std::vector<AVSessionDescriptor> oldStack;
+    std::vector<AVSessionDescriptor> newStack;
+    
+    AVSessionDescriptor newSession = AudioZoneTestData::CreateTestSessionDescriptor("new_session", userId, "new_bundle");
+    newStack.push_back(newSession);
+    
+    avservice_->NotifySessionStackDiffForAudioZone(userId, oldStack, newStack);
+    SLOGD("NotifySessionStackDiffForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: NotifySessionStackDiffForAudioZone002
+ * @tc.desc: Test NotifySessionStackDiffForAudioZone with session removed
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone002, TestSize.Level0)
+{
+    SLOGD("NotifySessionStackDiffForAudioZone002 begin!");
+    int32_t userId = 100;
+    std::vector<AVSessionDescriptor> oldStack;
+    std::vector<AVSessionDescriptor> newStack;
+    
+    AVSessionDescriptor oldSession = AudioZoneTestData::CreateTestSessionDescriptor("old_session", userId, "old_bundle");
+    oldStack.push_back(oldSession);
+    
+    avservice_->NotifySessionStackDiffForAudioZone(userId, oldStack, newStack);
+    SLOGD("NotifySessionStackDiffForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: NotifySessionStackDiffForAudioZone003
+ * @tc.desc: Test NotifySessionStackDiffForAudioZone with top session change
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone003, TestSize.Level0)
+{
+    SLOGD("NotifySessionStackDiffForAudioZone003 begin!");
+    int32_t userId = 100;
+    std::vector<AVSessionDescriptor> oldStack;
+    std::vector<AVSessionDescriptor> newStack;
+    
+    AVSessionDescriptor oldTopSession = AudioZoneTestData::CreateTestSessionDescriptor("old_top", userId, "old_top_bundle");
+    AVSessionDescriptor newTopSession = AudioZoneTestData::CreateTestSessionDescriptor("new_top", userId, "new_top_bundle");
+    
+    oldStack.push_back(oldTopSession);
+    newStack.push_back(newTopSession);
+    
+    avservice_->NotifySessionStackDiffForAudioZone(userId, oldStack, newStack);
+    SLOGD("NotifySessionStackDiffForAudioZone003 end!");
+}
+
+/**
+ * @tc.name: NotifySessionStackDiffForAudioZone004
+ * @tc.desc: Test NotifySessionStackDiffForAudioZone with multiple session changes
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone004, TestSize.Level0)
+{
+    SLOGD("NotifySessionStackDiffForAudioZone004 begin!");
+    int32_t userId = 100;
+    std::vector<AVSessionDescriptor> oldStack;
+    std::vector<AVSessionDescriptor> newStack;
+    
+    AVSessionDescriptor oldSession1 = AudioZoneTestData::CreateTestSessionDescriptor("old_1", userId, "bundle_1");
+    AVSessionDescriptor oldSession2 = AudioZoneTestData::CreateTestSessionDescriptor("old_2", userId, "bundle_2");
+    AVSessionDescriptor newSession1 = AudioZoneTestData::CreateTestSessionDescriptor("new_1", userId, "bundle_3");
+    AVSessionDescriptor newSession2 = AudioZoneTestData::CreateTestSessionDescriptor("new_2", userId, "bundle_4");
+    
+    oldStack.push_back(oldSession1);
+    oldStack.push_back(oldSession2);
+    newStack.push_back(newSession1);
+    newStack.push_back(newSession2);
+    
+    avservice_->NotifySessionStackDiffForAudioZone(userId, oldStack, newStack);
+    SLOGD("NotifySessionStackDiffForAudioZone004 end!");
+}
+
+/**
+ * @tc.name: GetTargetPlayInfoForAudioZone001
+ * @tc.desc: Test GetTargetPlayInfoForAudioZone with empty session stack
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, GetTargetPlayInfoForAudioZone001, TestSize.Level0)
+{
+    SLOGD("GetTargetPlayInfoForAudioZone001 begin!");
+    int32_t userId = 100;
+    std::string bundleName = "test_bundle";
+    
+    auto targetInfo = avservice_->GetTargetPlayInfoForAudioZone(userId, bundleName);
+    SLOGD("GetTargetPlayInfoForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: GetTargetPlayInfoForAudioZone002
+ * @tc.desc: Test GetTargetPlayInfoForAudioZone with active session
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, GetTargetPlayInfoForAudioZone002, TestSize.Level0)
+{
+    SLOGD("GetTargetPlayInfoForAudioZone002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test_bundle_name");
+    elementName.SetAbilityName("test_ability_name");
+    elementName.SetModuleName("test_module_name");
+    
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    avsessionHere_->Activate();
+    
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
+    std::string bundleName = "fallback_bundle";
+    
+    auto targetInfo = avservice_->GetTargetPlayInfoForAudioZone(userId, bundleName);
+    
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGD("GetTargetPlayInfoForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: StartAVPlaybackForAudioZone001
+ * @tc.desc: Test StartAVPlaybackForAudioZone with valid parameters
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, StartAVPlaybackForAudioZone001, TestSize.Level0)
+{
+    SLOGD("StartAVPlaybackForAudioZone001 begin!");
+    std::string bundleName = "test_bundle";
+    int32_t userId = 100;
+    std::string assetId = "test_asset_id";
+    CommandInfo info = AudioZoneTestData::CreateTestCommandInfo();
+    
+    int32_t ret = avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    SLOGD("StartAVPlaybackForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: StartAVPlaybackForAudioZone002
+ * @tc.desc: Test StartAVPlaybackForAudioZone with active session
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, StartAVPlaybackForAudioZone002, TestSize.Level0)
+{
+    SLOGD("StartAVPlaybackForAudioZone002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("active_bundle");
+    elementName.SetAbilityName("active_ability");
+    
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    avsessionHere_->Activate();
+    
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
+    std::string bundleName = "test_bundle";
+    std::string assetId = "test_asset_id";
+    CommandInfo info = AudioZoneTestData::CreateTestCommandInfo();
+    
+    int32_t ret = avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    SLOGD("StartAVPlaybackForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: StartAVPlaybackForAudioZone003
+ * @tc.desc: Test StartAVPlaybackForAudioZone with empty assetId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, StartAVPlaybackForAudioZone003, TestSize.Level0)
+{
+    SLOGD("StartAVPlaybackForAudioZone003 begin!");
+    std::string bundleName = "test_bundle";
+    int32_t userId = 100;
+    std::string assetId = "";
+    CommandInfo info = AudioZoneTestData::CreateTestCommandInfo();
+    
+    int32_t ret = avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    SLOGD("StartAVPlaybackForAudioZone003 end!");
+}
+
+/**
+ * @tc.name: AudioZoneFullScenario001
+ * @tc.desc: Test full audio zone scenario from init to deinit
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneFullScenario001, TestSize.Level0)
+{
+    SLOGD("AudioZoneFullScenario001 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    int32_t userId = 100;
+    OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
+    avservice_->RegisterSessionListenerForUser(userId, listener);
+    
+    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("session_1", userId, "bundle_1");
+    avservice_->NotifySessionAddForAudioZone(descriptor);
+    
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = avservice_->GetSessionDescriptorsForAudioZone(userId, descriptors);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    
+    avservice_->NotifySessionRemoveForAudioZone(descriptor);
+    
+    avservice_->HandleSessionStackChangeForAudioZone();
+    
+    avservice_->DeinitAudioZoneCallback();
+    SLOGD("AudioZoneFullScenario001 end!");
+}
+
+/**
+ * @tc.name: AudioZoneMultiUser001
+ * @tc.desc: Test audio zone with multiple users
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneMultiUser001, TestSize.Level0)
+{
+    SLOGD("AudioZoneMultiUser001 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    int32_t userId1 = 100;
+    int32_t userId2 = 101;
+    OHOS::sptr<ISessionListener> listener1 = new ISessionListenerMock();
+    OHOS::sptr<ISessionListener> listener2 = new ISessionListenerMock();
+    
+    avservice_->RegisterSessionListenerForUser(userId1, listener1);
+    avservice_->RegisterSessionListenerForUser(userId2, listener2);
+    
+    AVSessionDescriptor descriptor1 = AudioZoneTestData::CreateTestSessionDescriptor("session_1", userId1, "bundle_1");
+    AVSessionDescriptor descriptor2 = AudioZoneTestData::CreateTestSessionDescriptor("session_2", userId2, "bundle_2");
+    
+    avservice_->NotifySessionAddForAudioZone(descriptor1);
+    avservice_->NotifySessionAddForAudioZone(descriptor2);
+    
+    std::vector<AVSessionDescriptor> descriptors1;
+    std::vector<AVSessionDescriptor> descriptors2;
+    
+    int32_t ret1 = avservice_->GetSessionDescriptorsForAudioZone(userId1, descriptors1);
+    int32_t ret2 = avservice_->GetSessionDescriptorsForAudioZone(userId2, descriptors2);
+    
+    EXPECT_EQ(ret1, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret2, AVSESSION_SUCCESS);
+    
+    avservice_->NotifySessionRemoveForAudioZone(descriptor1);
+    avservice_->NotifySessionRemoveForAudioZone(descriptor2);
+    
+    avservice_->DeinitAudioZoneCallback();
+    SLOGD("AudioZoneMultiUser001 end!");
+}
+
+/**
+ * @tc.name: AudioZoneSessionLifecycle001
+ * @tc.desc: Test complete session lifecycle in audio zone
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneSessionLifecycle001, TestSize.Level0)
+{
+    SLOGD("AudioZoneSessionLifecycle001 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("lifecycle_bundle");
+    elementName.SetAbilityName("lifecycle_ability");
+    
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("AudioZoneSession", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_NE(avsessionHere_, nullptr);
+    
+    AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = avsessionHere_->GetSessionId();
+    descriptor.userId_ = avservice_->GetUsersManager().GetCurrentUserId();
+    descriptor.bundleName_ = elementName.GetBundleName();
+    
+    avservice_->NotifySessionAddForAudioZone(descriptor);
+    
+    avsessionHere_->Activate();
+    
+    avservice_->NotifyTopSessionChangeForAudioZone(descriptor);
+    
+    avservice_->NotifySessionRemoveForAudioZone(descriptor);
+    
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    avsessionHere_->Destroy();
+    
+    avservice_->DeinitAudioZoneCallback();
+    SLOGD("AudioZoneSessionLifecycle001 end!");
+}
+
+/**
+ * @tc.name: NotifyTopSessionChangeForAudioZone001
+ * @tc.desc: Test NotifyTopSessionChangeForAudioZone
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, NotifyTopSessionChangeForAudioZone001, TestSize.Level0)
+{
+    SLOGD("NotifyTopSessionChangeForAudioZone001 begin!");
+    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session", 100, "test_bundle");
+    
+    avservice_->NotifyTopSessionChangeForAudioZone(descriptor);
+    SLOGD("NotifyTopSessionChangeForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: AudioZoneCallback_OnAudioZoneAdd001
+ * @tc.desc: Test AudioZoneCallbackImpl::OnAudioZoneAdd
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_OnAudioZoneAdd001, TestSize.Level0)
+{
+    SLOGD("AudioZoneCallback_OnAudioZoneAdd001 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
+    if (zoneManager && avservice_->audioZoneCallback_) {
+        zoneManager->TriggerZoneAddEvent(1, "DriverZone");
+    }
+    
+    SLOGD("AudioZoneCallback_OnAudioZoneAdd001 end!");
+}
+
+/**
+ * @tc.name: AudioZoneCallback_OnAudioZoneRemove001
+ * @tc.desc: Test AudioZoneCallbackImpl::OnAudioZoneRemove
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_OnAudioZoneRemove001, TestSize.Level0)
+{
+    SLOGD("AudioZoneCallback_OnAudioZoneRemove001 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
+    if (zoneManager && avservice_->audioZoneCallback_) {
+        zoneManager->TriggerZoneRemoveEvent(1);
+    }
+    
+    SLOGD("AudioZoneCallback_OnAudioZoneRemove001 end!");
+}
+
+/**
+ * @tc.name: AudioZoneCallback_OnAudioZoneAdd002
+ * @tc.desc: Test AudioZoneCallbackImpl::OnAudioZoneAdd with multiple zones
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_OnAudioZoneAdd002, TestSize.Level0)
+{
+    SLOGD("AudioZoneCallback_OnAudioZoneAdd002 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
+    if (zoneManager && avservice_->audioZoneCallback_) {
+        zoneManager->TriggerZoneAddEvent(1, "DriverZone");
+        zoneManager->TriggerZoneAddEvent(2, "PassengerZone");
+        zoneManager->TriggerZoneAddEvent(3, "RearZone");
+    }
+    
+    SLOGD("AudioZoneCallback_OnAudioZoneAdd002 end!");
+}
+
+/**
+ * @tc.name: AudioZoneCallback_OnAudioZoneRemove002
+ * @tc.desc: Test AudioZoneCallbackImpl::OnAudioZoneRemove multiple zones
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_OnAudioZoneRemove002, TestSize.Level0)
+{
+    SLOGD("AudioZoneCallback_OnAudioZoneRemove002 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
+    if (zoneManager && avservice_->audioZoneCallback_) {
+        zoneManager->TriggerZoneRemoveEvent(1);
+        zoneManager->TriggerZoneRemoveEvent(2);
+    }
+    
+    SLOGD("AudioZoneCallback_OnAudioZoneRemove002 end!");
+}
+
+/**
+ * @tc.name: AudioZoneChangeCallback_OnAudioZoneChange001
+ * @tc.desc: Test AudioZoneChangeCallbackImpl::OnAudioZoneChange basic functionality
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneChangeCallback_OnAudioZoneChange001, TestSize.Level0)
+{
+    SLOGD("AudioZoneChangeCallback_OnAudioZoneChange001 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
+    if (zoneManager && avservice_->audioZoneChangeCallback_) {
+        zoneManager->TriggerZoneChangeEvent(1, "DriverZone");
+    }
+    
+    SLOGD("AudioZoneChangeCallback_OnAudioZoneChange001 end!");
+}
+
+/**
+ * @tc.name: AudioZoneChangeCallback_OnAudioZoneChange002
+ * @tc.desc: Test AudioZoneChangeCallbackImpl::OnAudioZoneChange with multiple zones
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneChangeCallback_OnAudioZoneChange002, TestSize.Level0)
+{
+    SLOGD("AudioZoneChangeCallback_OnAudioZoneChange002 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
+    if (zoneManager && avservice_->audioZoneChangeCallback_) {
+        zoneManager->TriggerZoneAddEvent(1, "DriverZone");
+        zoneManager->TriggerZoneChangeEvent(1, "DriverZoneUpdated");
+        zoneManager->TriggerZoneAddEvent(2, "PassengerZone");
+        zoneManager->TriggerZoneChangeEvent(2, "PassengerZoneUpdated");
+    }
+    
+    SLOGD("AudioZoneChangeCallback_OnAudioZoneChange002 end!");
+}
+
+/**
+ * @tc.name: AudioZoneCallback_Integration001
+ * @tc.desc: Test full audio zone lifecycle
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_Integration001, TestSize.Level0)
+{
+    SLOGD("AudioZoneCallback_Integration001 begin!");
+    avservice_->InitAudioZoneCallback();
+    
+    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
+    if (zoneManager && avservice_->audioZoneCallback_) {
+        zoneManager->TriggerZoneAddEvent(1, "DriverZone");
+        zoneManager->TriggerZoneChangeEvent(1, "DriverZoneChanged");
+        zoneManager->TriggerZoneRemoveEvent(1);
+    }
+    
+    avservice_->DeinitAudioZoneCallback();
+    SLOGD("AudioZoneCallback_Integration001 end!");
+}
+
+/**
+ * @tc.name: InitAudioZoneCallback002
+ * @tc.desc: Test InitAudioZoneCallback called multiple times
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, InitAudioZoneCallback002, TestSize.Level0)
+{
+    SLOGD("InitAudioZoneCallback002 begin!");
+    avservice_->InitAudioZoneCallback();
+    EXPECT_NE(avservice_->audioZoneCallback_, nullptr);
+    EXPECT_NE(avservice_->audioZoneChangeCallback_, nullptr);
+    
+    avservice_->InitAudioZoneCallback();
+    EXPECT_NE(avservice_->audioZoneCallback_, nullptr);
+    EXPECT_NE(avservice_->audioZoneChangeCallback_, nullptr);
+    
+    avservice_->DeinitAudioZoneCallback();
+    SLOGD("InitAudioZoneCallback002 end!");
+}
+#endif

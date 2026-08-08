@@ -36,11 +36,18 @@ private:
     int32_t HandleGetHistoricalSessionDescriptors(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetHistoricalAVQueueInfos(MessageParcel& data, MessageParcel& reply);
     int32_t HandleStartAVPlayback(MessageParcel& data, MessageParcel& reply);
+#ifdef CAR_FEATURE_ENABLE
+    int32_t HandleGetSessionDescriptorsForAudioZone(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartAVPlaybackForAudioZone(MessageParcel& data, MessageParcel& reply);
+#endif
     int32_t HandleRegisterAncoMediaSessionListener(MessageParcel& data, MessageParcel& reply);
     int32_t HandleCreateControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleGetAVCastControllerInner(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int32_t HandleRegisterSessionListenerForAllUsers(MessageParcel& data, MessageParcel& reply);
+#ifdef CAR_FEATURE_ENABLE
+    int32_t HandleRegisterSessionListenerForUser(MessageParcel& data, MessageParcel& reply);
+#endif
     int32_t HandleSendSystemAVKeyEvent(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemControlCommand(MessageParcel& data, MessageParcel& reply);
     int32_t HandleSendSystemCommonCommand(MessageParcel& data, MessageParcel& reply);
@@ -85,12 +92,25 @@ private:
             { return HandleGetHistoricalAVQueueInfos(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_AV_PLAYBACK),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleStartAVPlayback(data, reply); }},
+#ifdef CAR_FEATURE_ENABLE
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_FOR_AUDIO_ZONE),
+            [this](MessageParcel& data, MessageParcel& reply) {
+            return HandleGetSessionDescriptorsForAudioZone(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_AV_PLAYBACK_FOR_ZONE),
+            [this](MessageParcel& data, MessageParcel& reply) {
+                return HandleStartAVPlaybackForAudioZone(data, reply); }},
+#endif
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_CONTROLLER),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleCreateControllerInner(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_AV_CAST_CONTROLLER),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetAVCastControllerInner(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleRegisterSessionListener(data, reply); }},
+#ifdef CAR_FEATURE_ENABLE
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER_FOR_USER),
+            [this](MessageParcel& data, MessageParcel& reply) {
+                return HandleRegisterSessionListenerForUser(data, reply); }},
+#endif
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER_FOR_ALL_USERS),
             [this](MessageParcel& data, MessageParcel& reply)
             { return HandleRegisterSessionListenerForAllUsers(data, reply); }},
@@ -152,12 +172,22 @@ private:
             "HandleGetHistoricalAVQueueInfos"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_AV_PLAYBACK),
             "HandleStartAVPlayback"},
+#ifdef CAR_FEATURE_ENABLE
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_FOR_AUDIO_ZONE),
+            "HandleGetSessionDescriptorsForAudioZone"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_AV_PLAYBACK_FOR_ZONE),
+            "HandleStartAVPlaybackForAudioZone"},
+#endif
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CREATE_CONTROLLER),
             "HandleCreateControllerInner"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_AV_CAST_CONTROLLER),
             "HandleGetAVCastControllerInner"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER),
             "HandleRegisterSessionListener"},
+#ifdef CAR_FEATURE_ENABLE
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER_FOR_USER),
+            "HandleRegisterSessionListenerForUser"},
+#endif
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER_FOR_ALL_USERS),
             "HandleRegisterSessionListenerForAllUsers"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_SEND_SYSTEM_AV_KEY_EVENT),

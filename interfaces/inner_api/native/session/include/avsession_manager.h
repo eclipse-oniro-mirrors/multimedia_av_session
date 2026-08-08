@@ -94,6 +94,17 @@ public:
     virtual int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) = 0;
 
     /**
+     * Get all session descriptors for AudioZone.
+     *
+     * @param userId current user id.
+     * @param descriptors obtain SessionDescriptors {@link AVSessionDescriptor}.
+     * @return Returns whether to obtain SessionDescriptors successfully.
+     * @since 26.1.0 dynamic&static
+     */
+    virtual int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
+        std::vector<AVSessionDescriptor>& descriptors) = 0;
+
+    /**
      * Send the key command to get the descriptor of activated sessions.
      *
      * @param activatedSessions Get relevant descriptions of activated sessions
@@ -153,6 +164,17 @@ public:
      * @since 9
     */
     virtual int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) = 0;
+
+    /**
+     * @brief Listen for sessionListener callback event for specified user.
+     *
+     * @param userId The user id to listen for.
+     * @param listener Listen for sessionListener Callback event{@link SessionListener}.
+     * @return Whether to return successful Listener.
+     * @since 26.1.0
+    */
+    virtual int32_t RegisterSessionListenerForUser(int32_t userId,
+        const std::shared_ptr<SessionListener>& listener) = 0;
 
     /**
      * @brief Listen for sessionListener callback event for all users.
@@ -265,6 +287,19 @@ public:
     */
     virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
         const std::string& moduleName = "") = 0;
+
+    /**
+     * Start AVPlayback for AudioZone.
+     *
+     * @param bundleName target bundle name.
+     * @param userId user id.
+     * @param assetId asset id.
+     * @param info command info.
+     * @return Returns start result.
+     * @since 26.1.0 dynamic&static
+     */
+    virtual int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+        const std::string& assetId, const CommandInfo& info) = 0;
 
     /**
      * @brief Listen for AncoMediaSessionListener callback event.

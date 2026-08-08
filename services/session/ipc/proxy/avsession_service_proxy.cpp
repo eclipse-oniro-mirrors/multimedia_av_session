@@ -272,6 +272,43 @@ int32_t AVSessionServiceProxy::GetHistoricalSessionDescriptors(int32_t maxSize,
     return ret;
 }
 
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionServiceProxy::GetSessionDescriptorsForAudioZone(int32_t userId,
+    std::vector<AVSessionDescriptor>& descriptors)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(userId), ERR_MARSHALLING, "write userId failed");
+    
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_GET_SESSION_DESCRIPTORS_FOR_AUDIO_ZONE),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_NO_PERMISSION, ret, "no permission");
+    CHECK_AND_RETURN_RET_LOG(ret != ERR_PERMISSION_DENIED, ret, "permission denied");
+    if (ret == AVSESSION_SUCCESS) {
+        uint32_t size {};
+        CHECK_AND_RETURN_RET_LOG(reply.ReadUint32(size), ERR_UNMARSHALLING, "read vector size failed");
+        CHECK_AND_RETURN_RET_LOG(size, ret, "get session descriptors for audio zone with empty");
+
+        std::vector<AVSessionDescriptor> result(size);
+        for (auto& descriptor : result) {
+            CHECK_AND_RETURN_RET_LOG(descriptor.ReadFromParcel(reply), ERR_UNMARSHALLING, "read descriptor failed");
+        }
+        descriptors = result;
+    }
+    return ret;
+}
+#endif
+
 void AVSessionServiceProxy::UnMarshallingAVQueueInfos(MessageParcel &reply, std::vector<AVQueueInfo>& avQueueInfos)
 {
     uint32_t size {};
@@ -382,6 +419,33 @@ int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, co
     CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
     return ret;
 }
+
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionServiceProxy::StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+    const std::string& assetId, const CommandInfo& info)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(bundleName), ERR_MARSHALLING, "write bundleName failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(userId), ERR_MARSHALLING, "write userId failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(assetId), ERR_MARSHALLING, "write assetId failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&info), ERR_MARSHALLING, "write command info failed");
+    
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_AV_PLAYBACK_FOR_ZONE),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    CHECK_AND_RETURN_RET_LOG(reply.ReadInt32(ret), ERR_UNMARSHALLING, "read int32 failed");
+    return ret;
+}
+#endif
 
 int32_t AVSessionServiceProxy::RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener)
 {
@@ -515,6 +579,31 @@ int32_t AVSessionServiceProxy::RegisterSessionListener(const sptr<ISessionListen
     int32_t res = AVSESSION_ERROR;
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
+
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionServiceProxy::RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+                             "write interface token failed in RegisterSessionListenerForUser");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(userId), ERR_MARSHALLING, "write userId failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteRemoteObject(listener->AsObject()), ERR_MARSHALLING, "write listener failed");
+
+    auto remote = Remote();
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_REGISTER_SESSION_LISTENER_FOR_USER),\
+        data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
+}
+#endif
 
 int32_t AVSessionServiceProxy::RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener)
 {
