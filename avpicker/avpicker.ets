@@ -926,7 +926,7 @@ export struct AVCastPicker {
   houseMusicDividerBuilder() {
     Row() {
       Divider()
-      .color('#33000000')
+      .color($r('sys.color.comp_divider'))
       .strokeWidth(0.5)
     }
     .margin({ left: '16vp', right: '16vp' })
