@@ -1949,7 +1949,7 @@ export class AVCastPicker extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Divider.create();
-            Divider.color('#33000000');
+            Divider.color({ 'id': -1, 'type': 10001, params: ['sys.color.comp_divider'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Divider.strokeWidth(0.5);
         }, Divider);
         Row.pop();
