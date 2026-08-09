@@ -164,7 +164,7 @@ void TestMigrateConnect(AVSessionService *avservice_, std::shared_ptr<MigrateAVS
     std::shared_ptr<MigrateAVSessionManager> migrateManager_, int32_t sessionId, std::string deviceId)
 {
     SLOGI("MigrateTest001 TestMigrateConnect");
-    avservice_->SuperLauncher("", "SuperLauncher-Dual", "", "CONNECTING");
+    avservice_->SuperLauncher("", "SuperLauncher-Dual", R"({"mRoleType":"source"})", "CONNECTING");
     avservice_->AddInnerSessionListener(server_.get());
 
     server_->Init(avservice_);
@@ -254,7 +254,7 @@ static HWTEST_F(MigrateAVSessionTest, MigrateTest001, TestSize.Level0)
     TestMigrateSendByte(avsession_, server_, deviceId);
 
     // disconnect release
-    avservice_->SuperLauncher("", "SuperLauncher-Dual", "", "IDLE");
+    avservice_->SuperLauncher("", "SuperLauncher-Dual", R"({"mRoleType":"source"})", "IDLE");
     avservice_->RemoveInnerSessionListener(server_.get());
     server_->OnSessionRelease(descriptor);
     server_->ClearCacheBySessionId(descriptor.sessionId_);

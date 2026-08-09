@@ -3925,7 +3925,7 @@ static HWTEST_F(AVSessionServiceTest, NotifyRemoteDistributedSessionControllersC
 static HWTEST_F(AVSessionServiceTest, SuperLauncher001, TestSize.Level0)
 {
     SLOGD("SuperLauncher001 begin!");
-    avservice_->SuperLauncher("adcdef", "SuperLauncher-Dual", "", "CONNECT_SUCC");
+    avservice_->SuperLauncher("adcdef", "SuperLauncher-Dual", R"({"mRoleType":"source"})", "CONNECT_SUCC");
     EXPECT_EQ(avservice_->migrateAVSession_->supportCrossMediaPlay_, false);
     SLOGD("SuperLauncher001 end!");
 }
