@@ -38,9 +38,12 @@ public:
     MOCK_METHOD(void, OnSessionCreate, (const AVSessionDescriptor& descriptor), (override));
     MOCK_METHOD(void, OnSessionRelease, (const AVSessionDescriptor& descriptor), (override));
     MOCK_METHOD(void, OnTopSessionChange, (const AVSessionDescriptor& descriptor), (override));
-    MOCK_METHOD(void, OnSessionAddForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
-    MOCK_METHOD(void, OnSessionRemoveForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
-    MOCK_METHOD(void, OnTopSessionChangeForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
+    MOCK_METHOD(void, OnSessionAddForAudioZone, (int32_t userId,
+        const AVSessionDescriptor& descriptor), (override));
+    MOCK_METHOD(void, OnSessionRemoveForAudioZone, (int32_t userId,
+        const AVSessionDescriptor& descriptor), (override));
+    MOCK_METHOD(void, OnTopSessionChangeForAudioZone, (int32_t userId,
+        const AVSessionDescriptor& descriptor), (override));
     MOCK_METHOD(void, OnAudioSessionChecked, (const int32_t uid), (override));
     MOCK_METHOD(void, OnDeviceAvailable, (const OutputDeviceInfo& castOutputDeviceInfo), (override));
     MOCK_METHOD(void, OnDeviceOffline, (const std::string& deviceId), (override));

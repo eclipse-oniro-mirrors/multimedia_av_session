@@ -4413,8 +4413,9 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone003, TestSize.
 static HWTEST_F(AVSessionServiceTest, NotifySessionRemoveForAudioZone001, TestSize.Level0)
 {
     SLOGD("NotifySessionRemoveForAudioZone001 begin!");
-    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session_001", 100, "test_bundle");
-    
+    AVSessionDescriptor descriptor =
+        AudioZoneTestData::CreateTestSessionDescriptor("test_session_001", 100, "test_bundle");
+
     avservice_->NotifySessionRemoveForAudioZone(descriptor);
     SLOGD("NotifySessionRemoveForAudioZone001 end!");
 }
@@ -4431,7 +4432,8 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionRemoveForAudioZone002, TestSi
     OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
     avservice_->RegisterSessionListenerForUser(userId, listener);
     
-    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session", userId, "test_bundle");
+    AVSessionDescriptor descriptor =
+       AudioZoneTestData::CreateTestSessionDescriptor("test_session", userId, "test_bundle");
     avservice_->NotifySessionRemoveForAudioZone(descriptor);
     SLOGD("NotifySessionRemoveForAudioZone002 end!");
 }
@@ -4500,7 +4502,8 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone001, Tes
     std::vector<AVSessionDescriptor> oldStack;
     std::vector<AVSessionDescriptor> newStack;
     
-    AVSessionDescriptor newSession = AudioZoneTestData::CreateTestSessionDescriptor("new_session", userId, "new_bundle");
+    AVSessionDescriptor newSession =
+         AudioZoneTestData::CreateTestSessionDescriptor("new_session", userId, "new_bundle");
     newStack.push_back(newSession);
     
     avservice_->NotifySessionStackDiffForAudioZone(userId, oldStack, newStack);
@@ -4519,7 +4522,8 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone002, Tes
     std::vector<AVSessionDescriptor> oldStack;
     std::vector<AVSessionDescriptor> newStack;
     
-    AVSessionDescriptor oldSession = AudioZoneTestData::CreateTestSessionDescriptor("old_session", userId, "old_bundle");
+    AVSessionDescriptor oldSession =
+        AudioZoneTestData::CreateTestSessionDescriptor("old_session", userId, "old_bundle");
     oldStack.push_back(oldSession);
     
     avservice_->NotifySessionStackDiffForAudioZone(userId, oldStack, newStack);
@@ -4538,8 +4542,10 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone003, Tes
     std::vector<AVSessionDescriptor> oldStack;
     std::vector<AVSessionDescriptor> newStack;
     
-    AVSessionDescriptor oldTopSession = AudioZoneTestData::CreateTestSessionDescriptor("old_top", userId, "old_top_bundle");
-    AVSessionDescriptor newTopSession = AudioZoneTestData::CreateTestSessionDescriptor("new_top", userId, "new_top_bundle");
+    AVSessionDescriptor oldTopSession =
+        AudioZoneTestData::CreateTestSessionDescriptor("old_top", userId, "old_top_bundle");
+    AVSessionDescriptor newTopSession =
+        AudioZoneTestData::CreateTestSessionDescriptor("new_top", userId, "new_top_bundle");
     
     oldStack.push_back(oldTopSession);
     newStack.push_back(newTopSession);

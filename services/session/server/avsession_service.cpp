@@ -1275,7 +1275,6 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
             listener->OnSessionCreate(descriptor);
         }
     }
-
     {
         std::lock_guard lockGuard(migrateListenersLock_);
         for (const auto& listener : innerSessionListeners_) {
@@ -1284,15 +1283,11 @@ void AVSessionService::NotifySessionCreate(const AVSessionDescriptor& descriptor
             }
         }
     }
-
 #ifdef CAR_FEATURE_ENABLE
     auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
-    CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
-        "NotifySessionCreate no listeners for user:%{public}d", descriptor.userId_);
     auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(descriptor.userId_);
-    if (listenersForUserIt == listenersMapByUserIdForAudioZone.end()) {
-        return;
-    }
+    CHECK_AND_RETURN_LOG(listenersForUserIt != listenersMapByUserIdForAudioZone.end(),
+        "NotifySessionCreate no listeners for user:%{public}d", descriptor.userId_);
     for (const auto& [pid, listener] : listenersForUserIt->second) {
         if (listener != nullptr) {
             listener->OnSessionCreate(descriptor);
@@ -1334,7 +1329,6 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
             listener->OnSessionRelease(descriptor);
         }
     }
-
     {
         std::lock_guard lockGuard(migrateListenersLock_);
         for (const auto& listener : innerSessionListeners_) {
@@ -1343,15 +1337,11 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
             }
         }
     }
-
 #ifdef CAR_FEATURE_ENABLE
     auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
-    CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
-        "NotifySessionRelease no listeners for user:%{public}d", descriptor.userId_);
     auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(descriptor.userId_);
-    if (listenersForUserIt == listenersMapByUserIdForAudioZone.end()) {
-        return;
-    }
+    CHECK_AND_RETURN_LOG(listenersForUserIt != listenersMapByUserIdForAudioZone.end(),
+        "NotifySessionRelease no listeners for user:%{public}d", descriptor.userId_);
     for (const auto& [pid, listener] : listenersForUserIt->second) {
         if (listener != nullptr) {
             listener->OnSessionRelease(descriptor);
@@ -1382,7 +1372,6 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
             listener->OnTopSessionChange(descriptor);
         }
     }
-
     {
         std::lock_guard lockGuard(migrateListenersLock_);
         for (const auto& listener : innerSessionListeners_) {
@@ -1391,15 +1380,11 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
             }
         }
     }
-
 #ifdef CAR_FEATURE_ENABLE
     auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
-    CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
-        "NotifyTopSessionChange no listeners for user:%{public}d", descriptor.userId_);
     auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(descriptor.userId_);
-    if (listenersForUserIt == listenersMapByUserIdForAudioZone.end()) {
-        return;
-    }
+    CHECK_AND_RETURN_LOG(listenersForUserIt != listenersMapByUserIdForAudioZone.end(),
+        "NotifyTopSessionChange no listeners for user:%{public}d", descriptor.userId_);
     for (const auto& [pid, listener] : listenersForUserIt->second) {
         if (listener != nullptr) {
             listener->OnTopSessionChange(descriptor);
@@ -5088,9 +5073,8 @@ void AVSessionService::NotifySessionAddForAudioZone(const AVSessionDescriptor& d
     
     for (int32_t userId : userIdsInSameZone) {
         auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
-        if (listenersForUserIt == listenersMapByUserIdForAudioZone.end()) {
-            continue;
-        }
+        CHECK_AND_CONTINUE_LOG(listenersForUserIt != listenersMapByUserIdForAudioZone.end(),
+            "NotifySessionAddForAudioZone no listener for user:%{public}d", userId);
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionAddForAudioZone listener is null for pid=%{public}d", pid);
@@ -5225,8 +5209,7 @@ int32_t AVSessionService::GetSessionDescriptorsForAudioZone(int32_t userId,
 }
 
 AVSessionService::TargetPlayInfo AVSessionService::GetTargetPlayInfoForAudioZone(
-    int32_t userId, 
-    const std::string& bundleName)
+    int32_t userId, const std::string& bundleName)
 {
     TargetPlayInfo targetInfo;
     

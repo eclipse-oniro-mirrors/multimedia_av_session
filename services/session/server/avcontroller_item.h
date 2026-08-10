@@ -208,7 +208,6 @@ private:
 #ifdef CAR_FEATURE_ENABLE
     int64_t createTime_ = 0;
 #endif
-
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H
