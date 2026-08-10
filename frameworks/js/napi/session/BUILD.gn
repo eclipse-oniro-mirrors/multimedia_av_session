@@ -55,7 +55,7 @@ ohos_shared_library("avsession_napi") {
   ]
 
   if (av_session_enable_input_redistribute) {
-    defines = [ "INPUT_REDISTRIBUTE_ENABLE" ]
+    defines += [ "INPUT_REDISTRIBUTE_ENABLE" ]
   }
 
   deps = [
