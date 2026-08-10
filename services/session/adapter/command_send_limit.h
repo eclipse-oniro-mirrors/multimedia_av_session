@@ -41,7 +41,11 @@ private:
     std::map<pid_t, int32_t> commandLimits_;
     std::unique_ptr<Utils::Timer> timer_;
     uint32_t timerId_ = 0;
+#ifdef RAISE_COMMAND_RATE_LIMIT_ENABLE
+    static constexpr int32_t COMMAND_SEND_NUM_MAX = 100;
+#else
     static constexpr int32_t COMMAND_SEND_NUM_MAX = 10;
+#endif
     static constexpr int32_t COMMAND_SEND_TIME = 1000;
 };
 } // namespace OHOS::AVSession
