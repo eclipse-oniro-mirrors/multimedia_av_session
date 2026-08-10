@@ -137,8 +137,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     for (int i = 0; i < supportedDrmCapabilityLen; i++) {
         std::string supportedDrmCapability;
         CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false, "read supportedDrmCapability failed");
-        supportedDrmCapabilities.emplace_back(
-            supportedDrmCapability);
+        supportedDrmCapabilities.emplace_back(supportedDrmCapability);
     }
     deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
