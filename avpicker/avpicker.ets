@@ -918,16 +918,26 @@ export struct AVCastPicker {
       .onTouch((event?: TouchEvent) => {
         event?.stopPropagation();
       })
-      .backgroundColor($r('sys.color.background_primary'))
-      .borderRadius(this.isPc ? 8 : 20)
+      .margin({ top: 8 })
     }
   }
 
   @Builder
+  houseMusicDividerBuilder() {
+    Row() {
+      Divider()
+      .color($r('sys.color.comp_divider'))
+      .strokeWidth(0.5)
+    }
+    .margin({ left: '16vp', right: '16vp' })
+  }
+
+  @Builder
   deviceAndHouseMusicSys() {
-    Column({ space: 8 }) {
+    Column() {
       this.deviceMenu()
-      if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call') {
+      if (this.sessionType !== 'voice_call' && this.sessionType !== 'video_call' && this.roomListService.length > 0) {
+        this.houseMusicDividerBuilder()
         this.houseMusicSys()
       }
     }
@@ -1209,7 +1219,6 @@ export struct AVCastPicker {
     }
     .width(this.isPc ? 326 : 216)
     .borderRadius(this.isPc ? 8 : 20)
-    .backgroundColor(this.isShowHomeAudio ? $r('sys.color.background_primary') : '#00000000')
   }
 
   @Builder
@@ -1521,12 +1530,11 @@ export struct AVCastPicker {
           this.isMenuShow && this.hasReceivedDeviceList,
           this.deviceAndHouseMusicSys(),
           {
-          backgroundBlurStyle: ((this.isShowHomeAudio || materialUtil.isSupportHds()) ? 
-            BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
-          backgroundColor: (this.isShowHomeAudio ? '#00000000': materialUtil.isSupportHds() ? undefined :
+          backgroundBlurStyle: (materialUtil.isSupportHds() ? BlurStyle.NONE : BlurStyle.BACKGROUND_ULTRA_THICK),
+          backgroundColor: (materialUtil.isSupportHds() ? undefined :
             (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
             $r('sys.color.background_primary') : '#00FFFFFF'),
-          systemMaterial: this.isShowHomeAudio ? undefined : materialUtil.getMaterialStroke(
+          systemMaterial: materialUtil.getMaterialStroke(
             (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? undefined : true
           ),
           placement: Placement.BottomRight,
