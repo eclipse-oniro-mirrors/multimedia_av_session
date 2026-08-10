@@ -578,9 +578,7 @@ void AVSessionUsersManager::CollectDistributedSessionsForAudioZone(int32_t zoneI
         return;
     }
     std::vector<sptr<IRemoteObject>> controllers;
-    int32_t ret = service->GetDistributedSessionControllersInner(
-        DistributedSessionType::TYPE_SESSION_MIGRATE_IN,
-        controllers);
+    int32_t ret = service->GetDistributedSessionControllersForAudioZone(controllers);
     if (ret != AVSESSION_SUCCESS || controllers.empty()) {
         SLOGI("No migrate-in distributed sessions, ret=%{public}d", ret);
         return;
