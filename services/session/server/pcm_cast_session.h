@@ -129,6 +129,7 @@ private:
     const std::string SESSION_ID = "SESSION_ID";
 
     const std::string STOP_CAST = "STOP_CAST";
+    const std::string CAST_SESSION_RELEASED = "CAST_SESSION_RELEASED";
 
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,

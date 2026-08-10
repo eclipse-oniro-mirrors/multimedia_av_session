@@ -806,7 +806,6 @@ private:
     const std::string deviceStateConnection = "CONNECT_SUCC";
     const std::string deviceStateDisconnection = "IDLE";
     const std::string seperator = ",";
-    const std::string CAST_SESSION_RELEASED = "CAST_SESSION_RELEASED";
     int appState = -1;
     std::atomic<bool> isSupportMirrorToStream_ = false;
     std::atomic<bool> appCastExit_ = false;

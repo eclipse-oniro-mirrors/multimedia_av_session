@@ -368,7 +368,6 @@ int32_t AVSessionService::PcmCastSessionReleasePlayer()
 
     pcmCastSession_->SendModeChangeToCast(CONNECTING_MODE);
     pcmCastSession_->ReleaseStreamPlayer();
-    AVRouter::GetInstance().OnSystemCommonEvent(CAST_SESSION_RELEASED, "");
     return AVSESSION_SUCCESS;
 }
 

@@ -687,6 +687,7 @@ void PcmCastSession::ReleaseStreamPlayer()
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, localDeviceInfo);
     session->ReleaseAVCastControllerInner();
     session->SetCastHandle(-1);
+    AVRouter::GetInstance().OnSystemCommonEvent(CAST_SESSION_RELEASED, "");
     {
         std::lock_guard lockGuard(castLock_);
         streamCastingSessionId_ = "";
