@@ -84,7 +84,8 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.bleMac_), false, "write bleMac failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.triggerType_), false, "write triggerType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.uuid_), false, "write uuid failed");
-        CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.WriteToParcel(out), false, "write hiPlayDeviceInfo failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.WriteToParcel(out), false,
+            "write hiPlayDeviceInfo failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.realDeviceId_), false, "write realDeviceId failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.screenId_), false, "write screenId failed");
     }
@@ -136,7 +137,8 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     for (int i = 0; i < supportedDrmCapabilityLen; i++) {
         std::string supportedDrmCapability;
         CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false, "read supportedDrmCapability failed");
-        supportedDrmCapabilities.emplace_back(supportedDrmCapability);
+        supportedDrmCapabilities.emplace_back(
+            supportedDrmCapability);
     }
     deviceInfo.supportedDrmCapabilities_ = supportedDrmCapabilities;
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(deviceInfo.isLegacy_), false, "Read isLegacy failed");
