@@ -401,7 +401,7 @@ private:
     friend class MigrateAVSessionServer;
     friend class MigrateAVSessionServerForNext;
     friend class PcmCastSession;
-    friend class AVSessionUsersMnager;
+
     void NotifyProcessStatus(bool isStart);
 
     void SetCritical(bool isCritical);
