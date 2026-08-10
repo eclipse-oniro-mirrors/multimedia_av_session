@@ -84,8 +84,7 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.bleMac_), false, "write bleMac failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.triggerType_), false, "write triggerType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.uuid_), false, "write uuid failed");
-        CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.WriteToParcel(out), false,
-            "write hiPlayDeviceInfo failed");
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.WriteToParcel(out), false, "write hiPlayDeviceInfo failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.realDeviceId_), false, "write realDeviceId failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.screenId_), false, "write screenId failed");
     }

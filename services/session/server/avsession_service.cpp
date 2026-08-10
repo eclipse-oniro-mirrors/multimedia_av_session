@@ -1343,9 +1343,7 @@ void AVSessionService::NotifySessionRelease(const AVSessionDescriptor& descripto
     CHECK_AND_RETURN_LOG(listenersForUserIt != listenersMapByUserIdForAudioZone.end(),
         "NotifySessionRelease no listeners for user:%{public}d", descriptor.userId_);
     for (const auto& [pid, listener] : listenersForUserIt->second) {
-        if (listener != nullptr) {
-            listener->OnSessionRelease(descriptor);
-        }
+        if (listener != nullptr) listener->OnSessionRelease(descriptor);
     }
 #endif
 }
