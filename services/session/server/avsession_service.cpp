@@ -5346,7 +5346,7 @@ void AVSessionService::AudioZoneChangeCallbackImpl::OnAudioZoneChange(
     const AudioStandard::AudioZoneDescriptor &zoneDescriptor, AudioStandard::AudioZoneChangeReason reason)
 {
     SLOGI("OnAudioZoneChange zoneId=%{public}d reason=%{public}d",
-        zoneDescriptor.zoneId, static_cast<int>(reason));
+        zoneDescriptor.zoneId_, static_cast<int>(reason));
     
     AVSessionService::GetInstance()->HandleSessionStackChangeForAudioZone();
 }
