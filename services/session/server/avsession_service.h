@@ -954,7 +954,7 @@ private:
     class AudioZoneCallbackImpl : public AudioStandard::AudioZoneCallback {
     public:
         explicit AudioZoneCallbackImpl(std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback)
-            : audiozoneChangeCallbackWeak_(audioZoneChangeCallback) {}
+            : audioZoneChangeCallbackWeak_(audioZoneChangeCallback) {}
         void OnAudioZoneAdd(const AudioStandard::AudioZoneDescriptor &zoneDescriptor) override;
         void OnAudioZoneRemove(int32_t zoneId) override;
     private:

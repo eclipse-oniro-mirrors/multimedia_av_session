@@ -4366,7 +4366,8 @@ static HWTEST_F(AVSessionServiceTest, RegisterSessionListenerForUser005, TestSiz
 static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone001, TestSize.Level0)
 {
     SLOGD("NotifySessionAddForAudioZone001 begin!");
-    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session_001", 100, "test_bundle");
+    AVSessionDescriptor descriptor =
+        AudioZoneTestData::CreateTestSessionDescriptor("test_session_001", 100, "test_bundle");
     
     avservice_->NotifySessionAddForAudioZone(descriptor);
     SLOGD("NotifySessionAddForAudioZone001 end!");
@@ -4400,7 +4401,8 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone003, TestSize.
     OHOS::sptr<ISessionListener> listener = new ISessionListenerMock();
     avservice_->RegisterSessionListenerForUser(userId, listener);
     
-    AVSessionDescriptor descriptor = AudioZoneTestData::CreateTestSessionDescriptor("test_session", userId, "test_bundle");
+    AVSessionDescriptor descriptor =
+        AudioZoneTestData::CreateTestSessionDescriptor("test_session", userId, "test_bundle");
     avservice_->NotifySessionAddForAudioZone(descriptor);
     SLOGD("NotifySessionAddForAudioZone003 end!");
 }

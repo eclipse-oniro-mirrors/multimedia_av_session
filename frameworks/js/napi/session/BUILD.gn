@@ -120,7 +120,7 @@ ohos_shared_library("avsession_napi") {
     external_deps += [ "hisysevent:libhisysevent" ]
   }
   if (av_session_enable_multi_user_audio_zone_feature) {
-    defines = [ "CAR_FEATURE_ENABLE" ]
+    defines += [ "CAR_FEATURE_ENABLE" ]
   }
   relative_install_dir = "module/multimedia"
 

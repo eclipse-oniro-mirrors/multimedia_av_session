@@ -577,25 +577,20 @@ void AVSessionUsersManager::CollectDistributedSessionsForAudioZone(int32_t zoneI
     if (!service) {
         return;
     }
-
     std::vector<sptr<IRemoteObject>> controllers;
     int32_t ret = service->GetDistributedSessionControllersInner(
         DistributedSessionType::TYPE_SESSION_MIGRATE_IN,
         controllers);
-
     if (ret != AVSESSION_SUCCESS || controllers.empty()) {
         SLOGI("No migrate-in distributed sessions, ret=%{public}d", ret);
         return;
     }
-
     std::lock_guard lockGuard(userLock_);
     auto zoneIter = zoneToUserid_.find(zoneId);
     if (zoneIter == zoneToUserid_.end()) {
         return;
     }
-
     const std::vector<int32_t>& targetUserIds = zoneIter->second;
-
     for (auto& controllerObj : controllers) {
         sptr<AVControllerItem> controller = iface_cast<AVControllerItem>(controllerObj);
         if (!controller) {
