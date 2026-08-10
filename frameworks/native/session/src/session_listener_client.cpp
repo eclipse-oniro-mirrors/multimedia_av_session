@@ -122,36 +122,36 @@ ErrCode SessionListenerClient::OnSystemCommonEvent(const std::string& commonEven
     return AVSESSION_SUCCESS;
 }
 
-ErrCode SessionListenerClient::SessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
+ErrCode SessionListenerClient::OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
 {
 #ifdef CAR_FEATURE_ENABLE
     auto copiedListener = listener_;
     CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
-    copiedListener->SessionAddForAudioZone(userId, descriptor);
+    copiedListener->OnSessionAddForAudioZone(userId, descriptor);
     return AVSESSION_SUCCESS;
 #else
     return AVSESSION_ERROR;
 #endif
 }
 
-ErrCode SessionListenerClient::SessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
+ErrCode SessionListenerClient::OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
 {
 #ifdef CAR_FEATURE_ENABLE
     auto copiedListener = listener_;
     CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
-    copiedListener->SessionRemoveForAudioZone(userId, descriptor);
+    copiedListener->OnSessionRemoveForAudioZone(userId, descriptor);
     return AVSESSION_SUCCESS;
 #else
     return AVSESSION_ERROR;
 #endif
 }
 
-ErrCode SessionListenerClient::SessionTopChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
+ErrCode SessionListenerClient::OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
 {
 #ifdef CAR_FEATURE_ENABLE
     auto copiedListener = listener_;
     CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
-    copiedListener->SessionTopChangeForAudioZone(userId, descriptor);
+    copiedListener->OnTopSessionChangeForAudioZone(userId, descriptor);
     return AVSESSION_SUCCESS;
 #else
     return AVSESSION_ERROR;

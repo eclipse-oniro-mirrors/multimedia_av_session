@@ -337,11 +337,11 @@ public:
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; }
     ErrCode OnActiveSessionChanged(
         const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; }
-    void SessionAddForAudioZone(
+    void OnSessionAddForAudioZone(
         int32_t userId, const AVSessionDescriptor &descriptor) override {}
-    void SessionRemoveForAudioZone(
+    void OnSessionRemoveForAudioZone(
         int32_t userId, const AVSessionDescriptor &descriptor) override {}
-    void SessionTopChangeForAudioZone(
+    void OnTopSessionChangeForAudioZone(
         int32_t userId, const AVSessionDescriptor &descriptor) override {}
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; }
 };

@@ -38,9 +38,9 @@ public:
     MOCK_METHOD(void, OnSessionCreate, (const AVSessionDescriptor& descriptor), (override));
     MOCK_METHOD(void, OnSessionRelease, (const AVSessionDescriptor& descriptor), (override));
     MOCK_METHOD(void, OnTopSessionChange, (const AVSessionDescriptor& descriptor), (override));
-    MOCK_METHOD(void, SessionAddForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
-    MOCK_METHOD(void, SessionRemoveForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
-    MOCK_METHOD(void, SessionTopChangeForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
+    MOCK_METHOD(void, OnSessionAddForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
+    MOCK_METHOD(void, OnSessionRemoveForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
+    MOCK_METHOD(void, OnTopSessionChangeForAudioZone, (int32_t userId, const AVSessionDescriptor& descriptor), (override));
     MOCK_METHOD(void, OnAudioSessionChecked, (const int32_t uid), (override));
     MOCK_METHOD(void, OnDeviceAvailable, (const OutputDeviceInfo& castOutputDeviceInfo), (override));
     MOCK_METHOD(void, OnDeviceOffline, (const std::string& deviceId), (override));
@@ -90,43 +90,43 @@ void AudioZoneListenerTest::TearDown()
 }
 
 /**
- * @tc.name: SessionAddForAudioZone_001
- * @tc.desc: Test SessionAddForAudioZone with valid userId and descriptor
+ * @tc.name: OnSessionAddForAudioZone_001
+ * @tc.desc: Test OnSessionAddForAudioZone with valid userId and descriptor
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionAddForAudioZone_001, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnSessionAddForAudioZone_001, TestSize.Level1)
 {
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(testDescriptor_.userId_, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(testDescriptor_.userId_, testing::_))
         .Times(1);
     
     int32_t userId = testDescriptor_.userId_;
-    ErrCode result = listenerClient_->SessionAddForAudioZone(userId, testDescriptor_);
+    ErrCode result = listenerClient_->OnSessionAddForAudioZone(userId, testDescriptor_);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 }
 
 /**
- * @tc.name: SessionAddForAudioZone_002
- * @tc.desc: Test SessionAddForAudioZone with null listener
+ * @tc.name: OnSessionAddForAudioZone_002
+ * @tc.desc: Test OnSessionAddForAudioZone with null listener
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionAddForAudioZone_002, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnSessionAddForAudioZone_002, TestSize.Level1)
 {
     std::shared_ptr<SessionListenerClient> nullListenerClient = std::make_shared<SessionListenerClient>(nullptr);
     
     int32_t userId = testDescriptor_.userId_;
-    ErrCode result = nullListenerClient->SessionAddForAudioZone(userId, testDescriptor_);
+    ErrCode result = nullListenerClient->OnSessionAddForAudioZone(userId, testDescriptor_);
     EXPECT_EQ(result, AVSESSION_ERROR);
 }
 
 /**
- * @tc.name: SessionAddForAudioZone_003
- * @tc.desc: Test SessionAddForAudioZone with different userIds
+ * @tc.name: OnSessionAddForAudioZone_003
+ * @tc.desc: Test OnSessionAddForAudioZone with different userIds
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionAddForAudioZone_003, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnSessionAddForAudioZone_003, TestSize.Level1)
 {
     int32_t baseUserId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     int32_t userId1 = baseUserId + 1;
@@ -140,60 +140,60 @@ HWTEST_F(AudioZoneListenerTest, SessionAddForAudioZone_003, TestSize.Level1)
     descriptor2.userId_ = userId2;
     descriptor2.uid_ = userId2 * 200000;
     
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId1, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId1, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId2, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId2, testing::_))
         .Times(1);
     
     std::vector<AVSessionDescriptor> descriptors1 = {descriptor1};
     std::vector<AVSessionDescriptor> descriptors2 = {descriptor2};
-    ErrCode result1 = listenerClient_->SessionAddForAudioZone(userId1, descriptors1);
-    ErrCode result2 = listenerClient_->SessionAddForAudioZone(userId2, descriptors2);
+    ErrCode result1 = listenerClient_->OnSessionAddForAudioZone(userId1, descriptors1);
+    ErrCode result2 = listenerClient_->OnSessionAddForAudioZone(userId2, descriptors2);
     
     EXPECT_EQ(result1, AVSESSION_SUCCESS);
     EXPECT_EQ(result2, AVSESSION_SUCCESS);
 }
 
 /**
- * @tc.name: SessionRemoveForAudioZone_001
- * @tc.desc: Test SessionRemoveForAudioZone with valid userId and descriptor
+ * @tc.name: OnSessionRemoveForAudioZone_001
+ * @tc.desc: Test OnSessionRemoveForAudioZone with valid userId and descriptor
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionRemoveForAudioZone_001, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnSessionRemoveForAudioZone_001, TestSize.Level1)
 {
-    EXPECT_CALL(*mockListener_, SessionRemoveForAudioZone(testDescriptor_.userId_, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionRemoveForAudioZone(testDescriptor_.userId_, testing::_))
         .Times(1);
     
     int32_t userId = testDescriptor_.userId_;
     std::vector<AVSessionDescriptor> descriptors = {testDescriptor_};
-    ErrCode result = listenerClient_->SessionRemoveForAudioZone(userId, descriptors);
+    ErrCode result = listenerClient_->OnSessionRemoveForAudioZone(userId, descriptors);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 }
 
 /**
- * @tc.name: SessionRemoveForAudioZone_002
- * @tc.desc: Test SessionRemoveForAudioZone with null listener
+ * @tc.name: OnSessionRemoveForAudioZone_002
+ * @tc.desc: Test OnSessionRemoveForAudioZone with null listener
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionRemoveForAudioZone_002, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnSessionRemoveForAudioZone_002, TestSize.Level1)
 {
     std::shared_ptr<SessionListenerClient> nullListenerClient = std::make_shared<SessionListenerClient>(nullptr);
     
     int32_t userId = testDescriptor_.userId_;
     std::vector<AVSessionDescriptor> descriptors = {testDescriptor_};
-    ErrCode result = nullListenerClient->SessionRemoveForAudioZone(userId, descriptors);
+    ErrCode result = nullListenerClient->OnSessionRemoveForAudioZone(userId, descriptors);
     EXPECT_EQ(result, AVSESSION_ERROR);
 }
 
 /**
- * @tc.name: SessionRemoveForAudioZone_003
- * @tc.desc: Test SessionRemoveForAudioZone with multiple userIds
+ * @tc.name: OnSessionRemoveForAudioZone_003
+ * @tc.desc: Test OnSessionRemoveForAudioZone with multiple userIds
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionRemoveForAudioZone_003, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnSessionRemoveForAudioZone_003, TestSize.Level1)
 {
     int32_t baseUserId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     int32_t userId1 = baseUserId + 1;
@@ -207,58 +207,58 @@ HWTEST_F(AudioZoneListenerTest, SessionRemoveForAudioZone_003, TestSize.Level1)
     descriptor2.userId_ = userId2;
     descriptor2.uid_ = userId2 * UID_TO_USER_ID_RATIO;
     
-    EXPECT_CALL(*mockListener_, SessionRemoveForAudioZone(userId1, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionRemoveForAudioZone(userId1, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionRemoveForAudioZone(userId2, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionRemoveForAudioZone(userId2, testing::_))
         .Times(1);
     
     std::vector<AVSessionDescriptor> descriptors1 = {descriptor1};
     std::vector<AVSessionDescriptor> descriptors2 = {descriptor2};
-    ErrCode result1 = listenerClient_->SessionRemoveForAudioZone(userId1, descriptors1);
-    ErrCode result2 = listenerClient_->SessionRemoveForAudioZone(userId2, descriptors2);
+    ErrCode result1 = listenerClient_->OnSessionRemoveForAudioZone(userId1, descriptors1);
+    ErrCode result2 = listenerClient_->OnSessionRemoveForAudioZone(userId2, descriptors2);
     
     EXPECT_EQ(result1, AVSESSION_SUCCESS);
     EXPECT_EQ(result2, AVSESSION_SUCCESS);
 }
 
 /**
- * @tc.name: SessionTopChangeForAudioZone_001
- * @tc.desc: Test SessionTopChangeForAudioZone with valid userId and descriptor
+ * @tc.name: OnTopSessionChangeForAudioZone_001
+ * @tc.desc: Test OnTopSessionChangeForAudioZone with valid userId and descriptor
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionTopChangeForAudioZone_001, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnTopSessionChangeForAudioZone_001, TestSize.Level1)
 {
-    EXPECT_CALL(*mockListener_, SessionTopChangeForAudioZone(testDescriptor_.userId_, testing::_))
+    EXPECT_CALL(*mockListener_, OnTopSessionChangeForAudioZone(testDescriptor_.userId_, testing::_))
         .Times(1);
     
     int32_t userId = testDescriptor_.userId_;
-    ErrCode result = listenerClient_->SessionTopChangeForAudioZone(userId, testDescriptor_);
+    ErrCode result = listenerClient_->OnTopSessionChangeForAudioZone(userId, testDescriptor_);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
 }
 
 /**
- * @tc.name: SessionTopChangeForAudioZone_002
- * @tc.desc: Test SessionTopChangeForAudioZone with null listener
+ * @tc.name: OnTopSessionChangeForAudioZone_002
+ * @tc.desc: Test OnTopSessionChangeForAudioZone with null listener
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionTopChangeForAudioZone_002, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnTopSessionChangeForAudioZone_002, TestSize.Level1)
 {
     std::shared_ptr<SessionListenerClient> nullListenerClient = std::make_shared<SessionListenerClient>(nullptr);
     
     int32_t userId = testDescriptor_.userId_;
-    ErrCode result = nullListenerClient->SessionTopChangeForAudioZone(userId, testDescriptor_);
+    ErrCode result = nullListenerClient->OnTopSessionChangeForAudioZone(userId, testDescriptor_);
     EXPECT_EQ(result, AVSESSION_ERROR);
 }
 
 /**
- * @tc.name: SessionTopChangeForAudioZone_003
- * @tc.desc: Test SessionTopChangeForAudioZone with different userIds
+ * @tc.name: OnTopSessionChangeForAudioZone_003
+ * @tc.desc: Test OnTopSessionChangeForAudioZone with different userIds
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionTopChangeForAudioZone_003, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnTopSessionChangeForAudioZone_003, TestSize.Level1)
 {
     int32_t baseUserId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     int32_t userId1 = baseUserId + 1;
@@ -272,13 +272,13 @@ HWTEST_F(AudioZoneListenerTest, SessionTopChangeForAudioZone_003, TestSize.Level
     descriptor2.userId_ = userId2;
     descriptor2.uid_ = userId2 * UID_TO_USER_ID_RATIO;
     
-    EXPECT_CALL(*mockListener_, SessionTopChangeForAudioZone(userId1, testing::_))
+    EXPECT_CALL(*mockListener_, OnTopSessionChangeForAudioZone(userId1, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionTopChangeForAudioZone(userId2, testing::_))
+    EXPECT_CALL(*mockListener_, OnTopSessionChangeForAudioZone(userId2, testing::_))
         .Times(1);
     
-    ErrCode result1 = listenerClient_->SessionTopChangeForAudioZone(userId1, descriptor1);
-    ErrCode result2 = listenerClient_->SessionTopChangeForAudioZone(userId2, descriptor2);
+    ErrCode result1 = listenerClient_->OnTopSessionChangeForAudioZone(userId1, descriptor1);
+    ErrCode result2 = listenerClient_->OnTopSessionChangeForAudioZone(userId2, descriptor2);
     
     EXPECT_EQ(result1, AVSESSION_SUCCESS);
     EXPECT_EQ(result2, AVSESSION_SUCCESS);
@@ -336,16 +336,16 @@ HWTEST_F(AudioZoneListenerTest, AudioZoneEventFlow_001, TestSize.Level1)
     int32_t userId = testDescriptor_.userId_;
     pid_t pid = getpid() + 1000;
     
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionRemoveForAudioZone(userId, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionRemoveForAudioZone(userId, testing::_))
         .Times(1);
     
     usersManager.AddSessionListenerForAudioZone(pid, listener, userId);
     
     std::vector<AVSessionDescriptor> descriptors = {testDescriptor_};
-    ErrCode createResult = listenerClient_->SessionAddForAudioZone(userId, descriptors);
-    ErrCode destroyResult = listenerClient_->SessionRemoveForAudioZone(userId, descriptors);
+    ErrCode createResult = listenerClient_->OnSessionAddForAudioZone(userId, descriptors);
+    ErrCode destroyResult = listenerClient_->OnSessionRemoveForAudioZone(userId, descriptors);
     
     EXPECT_EQ(createResult, AVSESSION_SUCCESS);
     EXPECT_EQ(destroyResult, AVSESSION_SUCCESS);
@@ -379,27 +379,27 @@ HWTEST_F(AudioZoneListenerTest, AudioZoneMultipleUsers_001, TestSize.Level1)
     usersManager.AddSessionListenerForAudioZone(pid1, listener, userId1);
     usersManager.AddSessionListenerForAudioZone(pid2, listener, userId2);
     
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId1, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId1, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId2, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId2, testing::_))
         .Times(1);
     
     std::vector<AVSessionDescriptor> descriptors1 = {descriptor1};
     std::vector<AVSessionDescriptor> descriptors2 = {descriptor2};
-    ErrCode result1 = listenerClient_->SessionAddForAudioZone(userId1, descriptors1);
-    ErrCode result2 = listenerClient_->SessionAddForAudioZone(userId2, descriptors2);
+    ErrCode result1 = listenerClient_->OnSessionAddForAudioZone(userId1, descriptors1);
+    ErrCode result2 = listenerClient_->OnSessionAddForAudioZone(userId2, descriptors2);
     
     EXPECT_EQ(result1, AVSESSION_SUCCESS);
     EXPECT_EQ(result2, AVSESSION_SUCCESS);
 }
 
 /**
- * @tc.name: SessionAddForAudioZone_004
- * @tc.desc: Test SessionAddForAudioZone with different descriptors
+ * @tc.name: OnSessionAddForAudioZone_004
+ * @tc.desc: Test OnSessionAddForAudioZone with different descriptors
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionAddForAudioZone_004, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnSessionAddForAudioZone_004, TestSize.Level1)
 {
     int32_t baseUserId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     int32_t userId1 = baseUserId + 1;
@@ -419,27 +419,27 @@ HWTEST_F(AudioZoneListenerTest, SessionAddForAudioZone_004, TestSize.Level1)
     descriptor2.uid_ = userId2 * UID_TO_USER_ID_RATIO;
     descriptor2.userId_ = userId2;
     
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId1, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId1, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId2, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId2, testing::_))
         .Times(1);
     
     std::vector<AVSessionDescriptor> descriptors1 = {descriptor1};
     std::vector<AVSessionDescriptor> descriptors2 = {descriptor2};
-    ErrCode result1 = listenerClient_->SessionAddForAudioZone(userId1, descriptors1);
-    ErrCode result2 = listenerClient_->SessionAddForAudioZone(userId2, descriptors2);
+    ErrCode result1 = listenerClient_->OnSessionAddForAudioZone(userId1, descriptors1);
+    ErrCode result2 = listenerClient_->OnSessionAddForAudioZone(userId2, descriptors2);
     
     EXPECT_EQ(result1, AVSESSION_SUCCESS);
     EXPECT_EQ(result2, AVSESSION_SUCCESS);
 }
 
 /**
- * @tc.name: SessionRemoveForAudioZone_004
- * @tc.desc: Test SessionRemoveForAudioZone with different descriptors
+ * @tc.name: OnSessionRemoveForAudioZone_004
+ * @tc.desc: Test OnSessionRemoveForAudioZone with different descriptors
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionRemoveForAudioZone_004, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnSessionRemoveForAudioZone_004, TestSize.Level1)
 {
     int32_t baseUserId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     int32_t userId1 = baseUserId + 1;
@@ -459,27 +459,27 @@ HWTEST_F(AudioZoneListenerTest, SessionRemoveForAudioZone_004, TestSize.Level1)
     descriptor2.uid_ = userId2 * UID_TO_USER_ID_RATIO;
     descriptor2.userId_ = userId2;
     
-    EXPECT_CALL(*mockListener_, SessionRemoveForAudioZone(userId1, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionRemoveForAudioZone(userId1, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionRemoveForAudioZone(userId2, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionRemoveForAudioZone(userId2, testing::_))
         .Times(1);
     
     std::vector<AVSessionDescriptor> descriptors1 = {descriptor1};
     std::vector<AVSessionDescriptor> descriptors2 = {descriptor2};
-    ErrCode result1 = listenerClient_->SessionRemoveForAudioZone(userId1, descriptors1);
-    ErrCode result2 = listenerClient_->SessionRemoveForAudioZone(userId2, descriptors2);
+    ErrCode result1 = listenerClient_->OnSessionRemoveForAudioZone(userId1, descriptors1);
+    ErrCode result2 = listenerClient_->OnSessionRemoveForAudioZone(userId2, descriptors2);
     
     EXPECT_EQ(result1, AVSESSION_SUCCESS);
     EXPECT_EQ(result2, AVSESSION_SUCCESS);
 }
 
 /**
- * @tc.name: SessionTopChangeForAudioZone_004
- * @tc.desc: Test SessionTopChangeForAudioZone with different descriptors
+ * @tc.name: OnTopSessionChangeForAudioZone_004
+ * @tc.desc: Test OnTopSessionChangeForAudioZone with different descriptors
  * @tc.type: FUNC
  * @tc.require: IssueNumber
  */
-HWTEST_F(AudioZoneListenerTest, SessionTopChangeForAudioZone_004, TestSize.Level1)
+HWTEST_F(AudioZoneListenerTest, OnTopSessionChangeForAudioZone_004, TestSize.Level1)
 {
     int32_t baseUserId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
     int32_t userId1 = baseUserId + 1;
@@ -499,13 +499,13 @@ HWTEST_F(AudioZoneListenerTest, SessionTopChangeForAudioZone_004, TestSize.Level
     descriptor2.uid_ = userId2 * UID_TO_USER_ID_RATIO;
     descriptor2.userId_ = userId2;
     
-    EXPECT_CALL(*mockListener_, SessionTopChangeForAudioZone(userId1, testing::_))
+    EXPECT_CALL(*mockListener_, OnTopSessionChangeForAudioZone(userId1, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionTopChangeForAudioZone(userId2, testing::_))
+    EXPECT_CALL(*mockListener_, OnTopSessionChangeForAudioZone(userId2, testing::_))
         .Times(1);
     
-    ErrCode result1 = listenerClient_->SessionTopChangeForAudioZone(userId1, descriptor1);
-    ErrCode result2 = listenerClient_->SessionTopChangeForAudioZone(userId2, descriptor2);
+    ErrCode result1 = listenerClient_->OnTopSessionChangeForAudioZone(userId1, descriptor1);
+    ErrCode result2 = listenerClient_->OnTopSessionChangeForAudioZone(userId2, descriptor2);
     
     EXPECT_EQ(result1, AVSESSION_SUCCESS);
     EXPECT_EQ(result2, AVSESSION_SUCCESS);
@@ -529,12 +529,12 @@ HWTEST_F(AudioZoneListenerTest, AudioZoneListenerConcurrent_001, TestSize.Level1
     usersManager.AddSessionListenerForAudioZone(pid1, listener, userId);
     usersManager.AddSessionListenerForAudioZone(pid2, listener, userId);
     
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId, testing::_))
         .Times(2);
     
     std::vector<AVSessionDescriptor> descriptors = {testDescriptor_};
-    listenerClient_->SessionAddForAudioZone(userId, descriptors);
-    listenerClient_->SessionAddForAudioZone(userId, descriptors);
+    listenerClient_->OnSessionAddForAudioZone(userId, descriptors);
+    listenerClient_->OnSessionAddForAudioZone(userId, descriptors);
     
     usersManager.RemoveSessionListenerForAudioZone(pid1);
     usersManager.RemoveSessionListenerForAudioZone(pid2);
@@ -555,9 +555,9 @@ HWTEST_F(AudioZoneListenerTest, AudioZoneListenerNullCheck_001, TestSize.Level1)
     int32_t userId = testDescriptor_.userId_;
     std::vector<AVSessionDescriptor> descriptors = {testDescriptor_};
     
-    ErrCode createResult = nullListenerClient->SessionAddForAudioZone(userId, descriptors);
-    ErrCode destroyResult = nullListenerClient->SessionRemoveForAudioZone(userId, descriptors);
-    ErrCode topResult = nullListenerClient->SessionTopChangeForAudioZone(userId, testDescriptor_);
+    ErrCode createResult = nullListenerClient->OnSessionAddForAudioZone(userId, descriptors);
+    ErrCode destroyResult = nullListenerClient->OnSessionRemoveForAudioZone(userId, descriptors);
+    ErrCode topResult = nullListenerClient->OnTopSessionChangeForAudioZone(userId, testDescriptor_);
     
     EXPECT_EQ(createResult, AVSESSION_ERROR);
     EXPECT_EQ(destroyResult, AVSESSION_ERROR);
@@ -586,13 +586,13 @@ HWTEST_F(AudioZoneListenerTest, AudioZoneListenerDescriptorValidation_001, TestS
     validDescriptor.uid_ = userId * UID_TO_USER_ID_RATIO;
     validDescriptor.userId_ = userId;
     
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(testing::_, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(testing::_, testing::_))
         .Times(2);
     
     std::vector<AVSessionDescriptor> emptyDescriptors = {emptyDescriptor};
     std::vector<AVSessionDescriptor> validDescriptors = {validDescriptor};
-    ErrCode emptyResult = listenerClient_->SessionAddForAudioZone(userId, emptyDescriptors);
-    ErrCode validResult = listenerClient_->SessionAddForAudioZone(userId, validDescriptors);
+    ErrCode emptyResult = listenerClient_->OnSessionAddForAudioZone(userId, emptyDescriptors);
+    ErrCode validResult = listenerClient_->OnSessionAddForAudioZone(userId, validDescriptors);
     
     EXPECT_EQ(emptyResult, AVSESSION_SUCCESS);
     EXPECT_EQ(validResult, AVSESSION_SUCCESS);
@@ -626,15 +626,15 @@ HWTEST_F(AudioZoneListenerTest, AudioZoneMultipleUsers_002, TestSize.Level1)
     usersManager.AddSessionListenerForAudioZone(pid1, listener, userId1);
     usersManager.AddSessionListenerForAudioZone(pid2, listener, userId2);
     
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId1, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId1, testing::_))
         .Times(1);
-    EXPECT_CALL(*mockListener_, SessionAddForAudioZone(userId2, testing::_))
+    EXPECT_CALL(*mockListener_, OnSessionAddForAudioZone(userId2, testing::_))
         .Times(1);
     
     std::vector<AVSessionDescriptor> descriptors1 = {descriptor1};
     std::vector<AVSessionDescriptor> descriptors2 = {descriptor2};
-    ErrCode result1 = listenerClient_->SessionAddForAudioZone(userId1, descriptors1);
-    ErrCode result2 = listenerClient_->SessionAddForAudioZone(userId2, descriptors2);
+    ErrCode result1 = listenerClient_->OnSessionAddForAudioZone(userId1, descriptors1);
+    ErrCode result2 = listenerClient_->OnSessionAddForAudioZone(userId2, descriptors2);
     
     EXPECT_EQ(result1, AVSESSION_SUCCESS);
     EXPECT_EQ(result2, AVSESSION_SUCCESS);

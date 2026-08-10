@@ -139,15 +139,15 @@ class SessionListenerStubDemo : public SessionListenerStub {
     {
         return AVSESSION_SUCCESS;
     }
-    ErrCode SessionAddForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
+    ErrCode OnSessionAddForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
     {
         return AVSESSION_SUCCESS;
     };
-    ErrCode SessionRemoveForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
     {
         return AVSESSION_SUCCESS;
     };
-    ErrCode SessionTopChangeForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
+    ErrCode OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
     };

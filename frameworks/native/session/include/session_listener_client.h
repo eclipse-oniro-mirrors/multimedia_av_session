@@ -52,11 +52,11 @@ public:
 
     ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override;
 
-    ErrCode SessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
+    ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
 
-    ErrCode SessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
 
-    ErrCode SessionTopChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
+    ErrCode OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
 
 private:
     std::shared_ptr<SessionListener> listener_;

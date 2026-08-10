@@ -218,6 +218,8 @@ public:
     
     int32_t RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener) override;
     
+    int32_t GetDistributedSessionControllersForAudioZone(
+        std::vector<sptr<IRemoteObject>>& sessionControllers);
 private:
     TargetPlayInfo GetTargetPlayInfoForAudioZone(int32_t userId, const std::string& bundleName);
 #endif

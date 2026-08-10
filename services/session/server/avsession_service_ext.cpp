@@ -1169,6 +1169,16 @@ int32_t AVSessionService::GetDistributedSessionControllersInner(const Distribute
     return AVSESSION_SUCCESS;
 }
 
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionService::GetDistributedSessionControllersForAudioZone(
+    std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    return GetDistributedSessionControllersInner(
+        DistributedSessionType::TYPE_SESSION_MIGRATE_IN,
+        sessionControllers);
+}
+#endif
+
 void AVSessionService::NotifyRemoteBundleChange(const std::string bundleName)
 {
     {
