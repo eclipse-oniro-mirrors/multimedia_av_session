@@ -152,7 +152,12 @@ public:
     int32_t StopCast(const SessionToken &sessionToken) override { return 0; };
     int32_t checkEnableCast(bool enable) override { return 0; };
 #endif
-
+    int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
+        std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; };
+    int32_t StartAVPlaybackForAudioZone(const std::string &bundleName, int32_t userId,
+        const std::string *assetId, const CommandInfo &info) override { return AVSESSION_SUCCESS; };
+    int32_t RegisterSessionListenerForUser(inte32_t userId,
+        const OHOS::sptr<ISessionListener>  &listener) override { return AVSESSION_SUCCESS; };
     int32_t Close() override { return 0; };
     int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
         std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return 0; };

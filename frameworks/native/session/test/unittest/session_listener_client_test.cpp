@@ -52,6 +52,9 @@ public:
     void OnDeviceOffline(const std::string& deviceId) override {}
     void OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override {}
+    void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {}
+    void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {}
+    void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {}
     ~AVSessionListenerDemo() override {}
 };
 
@@ -324,6 +327,96 @@ HWTEST_F(SessionListenerClientTest, OnDeviceStateChange002, TestSize.Level1)
     EXPECT_NE(sessionListenerClient, nullptr);
     DeviceState deviceState;
     sessionListenerClient->OnDeviceStateChange(deviceState);
+}
+
+/**
+* @tc.name: OnSessionAddForAudioZone001
+* @tc.desc: test OnSessionAddForAudioZone
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnSessionAddForAudioZone001, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    sessionListenerClient->OnSessionAddForAudioZone(100, descriptor);
+}
+
+/**
+* @tc.name: OnSessionAddForAudioZone002
+* @tc.desc: test OnSessionAddForAudioZone
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnSessionAddForAudioZone002, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    sessionListenerClient->OnSessionAddForAudioZone(100, descriptor);
+}
+
+/**
+* @tc.name: OnSessionRemoveForAudioZone001
+* @tc.desc: test OnSessionRemoveForAudioZone
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnSessionRemoveForAudioZone001, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    sessionListenerClient->OnSessionRemoveForAudioZone(100, descriptor);
+}
+
+/**
+* @tc.name: OnSessionRemoveForAudioZone002
+* @tc.desc: test OnSessionRemoveForAudioZone
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnSessionRemoveForAudioZone002, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    sessionListenerClient->OnSessionRemoveForAudioZone(100, descriptor);
+}
+
+/**
+* @tc.name: OnTopSessionChangeForAudioZone001
+* @tc.desc: test OnTopSessionChangeForAudioZone
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnTopSessionChangeForAudioZone001, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    sessionListenerClient->OnTopSessionChangeForAudioZone(100, descriptor);
+}
+
+/**
+* @tc.name: OnTopSessionChangeForAudioZone002
+* @tc.desc: test OnTopSessionChangeForAudioZone
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnTopSessionChangeForAudioZone002, TestSize.Level0)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = nullptr;
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    sessionListenerClient->OnTopSessionChangeForAudioZone(100, descriptor);
 }
 } // namespace AVSESSION
 } // namespace OHOS

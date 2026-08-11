@@ -112,11 +112,11 @@ class TestISessionListener : public ISessionListener {
     {
         return AVSESSION_SUCCESS;
     };
-    ErrCode OnSessionAddForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
+    ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
     };
-    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
     };

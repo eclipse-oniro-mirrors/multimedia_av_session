@@ -28,7 +28,11 @@
 #endif
 
 namespace OHOS::AVSession {
+class AVSessionUsersManagerTest;
+
 class AVSessionUsersManager {
+    friend class AVSessionUsersManagerTest;
+
 public:
     static AVSessionUsersManager& GetInstance();
 

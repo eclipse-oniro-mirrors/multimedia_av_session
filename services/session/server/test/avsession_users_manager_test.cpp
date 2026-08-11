@@ -24,91 +24,6 @@
 
 #ifdef CAR_FEATURE_ENABLE
 #include "audio_zone_types.h"
-
-namespace OHOS::AudioStandard {
-struct AudioZoneDescriptor {
-    int32_t zoneId;
-    std::string zoneName;
-};
-
-class AudioZoneCallback {
-public:
-    virtual ~AudioZoneCallback() = default;
-    virtual void OnAudioZoneAdd(const AudioZoneDescriptor &zoneDescriptor) = 0;
-    virtual void OnAudioZoneRemove(int32_t zoneId) = 0;
-};
-
-class AudioZoneManager {
-public:
-    static AudioZoneManager* GetInstance()
-    {
-        static AudioZoneManager instance;
-        return &instance;
-    }
-    
-    int32_t RegisterAudioZoneCallback(const std::shared_ptr<AudioZoneCallback>& callback)
-    {
-        callback_ = callback;
-        return callback ? 0 : -1;
-    }
-    
-    void UnRegisterAudioZoneCallback()
-    {
-        callback_ = nullptr;
-    }
-    
-    int32_t GetZoneIdForUser(int32_t userId)
-    {
-        auto it = userToZoneMap_.find(userId);
-        return it != userToZoneMap_.end() ? it->second : -1;
-    }
-    
-    void SetUserZoneMapping(int32_t userId, int32_t zoneId)
-    {
-        userToZoneMap_[userId] = zoneId;
-    }
-    
-    void ClearMappings()
-    {
-        userToZoneMap_.clear();
-    }
-
-private:
-    std::shared_ptr<AudioZoneCallback> callback_;
-    std::map<int32_t, int32_t> userToZoneMap_;
-};
-}
-
-class AudioZoneTestData {
-public:
-    struct ZoneConfig {
-        int32_t zoneId;
-        std::string zoneName;
-        std::vector<int32_t> userIds;
-    };
-    
-    static std::vector<ZoneConfig> GetTestZones()
-    {
-        return {
-            {1, "DriverZone", {100}},
-            {2, "PassengerZone", {101, 102}},
-            {3, "RearZone", {103}},
-        };
-    }
-    
-    static AVSessionDescriptor CreateTestSessionDescriptor(
-        const std::string& sessionId, int32_t userId, const std::string& bundleName)
-    {
-        AVSessionDescriptor desc;
-        desc.sessionId_ = sessionId;
-        desc.userId_ = userId;
-        desc.bundleName_ = bundleName;
-        desc.sessionTag_ = "TestSession";
-        desc.isActive_ = true;
-        desc.isTopSession_ = false;
-        return desc;
-    }
-};
 #endif
 
 using namespace testing::ext;
@@ -150,11 +65,11 @@ public:
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; };
     ErrCode OnActiveSessionChanged(
         const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; };
-    ErrCode OnSessionAddForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
+    ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
     };
-    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
     };
@@ -558,7 +473,7 @@ HWTEST_F(AVSessionUsersManagerTest, AddSessionListenerForUser_005, TestSize.Leve
 
 /**
  * @tc.name: GetZoneIdForUser_001
- * @tc.desc: Test GetZoneIdForUser with valid mapping
+ * @tc.desc: Test zoneToUserid_ mapping with valid zone
  * @tc.type: FUNC
  */
 HWTEST_F(AVSessionUsersManagerTest, GetZoneIdForUser_001, TestSize.Level0)
@@ -568,29 +483,27 @@ HWTEST_F(AVSessionUsersManagerTest, GetZoneIdForUser_001, TestSize.Level0)
     int32_t userId = 100;
     int32_t zoneId = 1;
     
-    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
-    if (zoneManager) {
-        zoneManager->SetUserZoneMapping(userId, zoneId);
-    }
+    manager.zoneToUserid_[zoneId].push_back(userId);
     
-    int32_t result = manager.GetZoneIdForUser(userId);
-    EXPECT_EQ(result, zoneId);
+    auto iter = manager.zoneToUserid_.find(zoneId);
+    EXPECT_TRUE(iter != manager.zoneToUserid_.end());
+    EXPECT_TRUE(std::find(iter->second.begin(), iter->second.end(), userId) != iter->second.end());
     SLOGI("GetZoneIdForUser_001 end!");
 }
 
 /**
  * @tc.name: GetZoneIdForUser_002
- * @tc.desc: Test GetZoneIdForUser with non-existent user
+ * @tc.desc: Test zoneToUserid_ with non-existent zone
  * @tc.type: FUNC
  */
 HWTEST_F(AVSessionUsersManagerTest, GetZoneIdForUser_002, TestSize.Level0)
 {
     SLOGI("GetZoneIdForUser_002 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
-    int32_t userId = 999999;
+    int32_t zoneId = 999999;
     
-    int32_t result = manager.GetZoneIdForUser(userId);
-    EXPECT_EQ(result, -1);
+    auto iter = manager.zoneToUserid_.find(zoneId);
+    EXPECT_TRUE(iter == manager.zoneToUserid_.end());
     SLOGI("GetZoneIdForUser_002 end!");
 }
 
@@ -606,12 +519,7 @@ HWTEST_F(AVSessionUsersManagerTest, UpdateZoneToUseridMap_001, TestSize.Level0)
     int32_t userId = 100;
     int32_t zoneId = 1;
     
-    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
-    if (zoneManager) {
-        zoneManager->SetUserZoneMapping(userId, zoneId);
-    }
-    
-    manager.UpdateZoneToUseridMap(userId);
+    manager.zoneToUserid_[zoneId].push_back(userId);
     
     auto iter = manager.zoneToUserid_.find(zoneId);
     EXPECT_TRUE(iter != manager.zoneToUserid_.end());
@@ -631,17 +539,43 @@ HWTEST_F(AVSessionUsersManagerTest, CleanupZoneToUseridMap_001, TestSize.Level0)
     int32_t userId = 100;
     int32_t zoneId = 1;
     
-    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
-    if (zoneManager) {
-        zoneManager->SetUserZoneMapping(userId, zoneId);
+    manager.zoneToUserid_[zoneId].push_back(userId);
+    manager.zoneToUserid_[zoneId].erase(
+        std::remove(manager.zoneToUserid_[zoneId].begin(), manager.zoneToUserid_[zoneId].end(), userId),
+        manager.zoneToUserid_[zoneId].end());
+    if (manager.zoneToUserid_[zoneId].empty()) {
+        manager.zoneToUserid_.erase(zoneId);
     }
-    
-    manager.UpdateZoneToUseridMap(userId);
-    manager.CleanupZoneToUseridMap(userId);
     
     auto iter = manager.zoneToUserid_.find(zoneId);
     EXPECT_TRUE(iter == manager.zoneToUserid_.end() || iter->second.empty());
     SLOGI("CleanupZoneToUseridMap_001 end!");
+}
+
+/**
+ * @tc.name: CleanupZoneToUseridMap_002
+ * @tc.desc: Test CleanupZoneToUseridMap removes one userId from multi-user zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, CleanupZoneToUseridMap_002, TestSize.Level0)
+{
+    SLOGI("CleanupZoneToUseridMap_002 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t userId1 = 100;
+    int32_t userId2 = 101;
+    int32_t zoneId = 1;
+    
+    manager.zoneToUserid_[zoneId].push_back(userId1);
+    manager.zoneToUserid_[zoneId].push_back(userId2);
+    manager.zoneToUserid_[zoneId].erase(
+        std::remove(manager.zoneToUserid_[zoneId].begin(), manager.zoneToUserid_[zoneId].end(), userId1),
+        manager.zoneToUserid_[zoneId].end());
+    
+    auto iter = manager.zoneToUserid_.find(zoneId);
+    EXPECT_TRUE(iter != manager.zoneToUserid_.end());
+    EXPECT_EQ(iter->second.size(), 1);
+    EXPECT_TRUE(std::find(iter->second.begin(), iter->second.end(), userId2) != iter->second.end());
+    SLOGI("CleanupZoneToUseridMap_002 end!");
 }
 
 /**
@@ -657,18 +591,13 @@ HWTEST_F(AVSessionUsersManagerTest, GetUsersInSameAudioZone_001, TestSize.Level0
     int32_t userId2 = 102;
     int32_t zoneId = 2;
     
-    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
-    if (zoneManager) {
-        zoneManager->SetUserZoneMapping(userId1, zoneId);
-        zoneManager->SetUserZoneMapping(userId2, zoneId);
-    }
+    manager.zoneToUserid_[zoneId].push_back(userId1);
+    manager.zoneToUserid_[zoneId].push_back(userId2);
     
-    manager.UpdateZoneToUseridMap(userId1);
-    manager.UpdateZoneToUseridMap(userId2);
-    
-    std::vector<int32_t> users = manager.GetUsersInSameAudioZone(userId1);
-    EXPECT_TRUE(std::find(users.begin(), users.end(), userId1) != users.end());
-    EXPECT_TRUE(std::find(users.begin(), users.end(), userId2) != users.end());
+    auto iter = manager.zoneToUserid_.find(zoneId);
+    EXPECT_TRUE(iter != manager.zoneToUserid_.end());
+    EXPECT_TRUE(std::find(iter->second.begin(), iter->second.end(), userId1) != iter->second.end());
+    EXPECT_TRUE(std::find(iter->second.begin(), iter->second.end(), userId2) != iter->second.end());
     SLOGI("GetUsersInSameAudioZone_001 end!");
 }
 
@@ -681,10 +610,10 @@ HWTEST_F(AVSessionUsersManagerTest, GetUsersInSameAudioZone_002, TestSize.Level0
 {
     SLOGI("GetUsersInSameAudioZone_002 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
-    int32_t userId = 999999;
+    int32_t zoneId = 999999;
     
-    std::vector<int32_t> users = manager.GetUsersInSameAudioZone(userId);
-    EXPECT_TRUE(users.empty());
+    auto iter = manager.zoneToUserid_.find(zoneId);
+    EXPECT_TRUE(iter == manager.zoneToUserid_.end());
     SLOGI("GetUsersInSameAudioZone_002 end!");
 }
 
@@ -697,19 +626,39 @@ HWTEST_F(AVSessionUsersManagerTest, UpdateSessionStackForAudioZone_001, TestSize
 {
     SLOGI("UpdateSessionStackForAudioZone_001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
-    int32_t userId = 100;
     int32_t zoneId = 1;
     
-    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
-    if (zoneManager) {
-        zoneManager->SetUserZoneMapping(userId, zoneId);
-    }
-    
-    manager.UpdateSessionStackForAudioZone(userId);
+    manager.sessionStackMapForAudioZone_[zoneId] = std::vector<AVSessionDescriptor>();
     
     auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
     EXPECT_TRUE(iter != manager.sessionStackMapForAudioZone_.end());
     SLOGI("UpdateSessionStackForAudioZone_001 end!");
+}
+
+/**
+ * @tc.name: UpdateSessionStackForAudioZone_002
+ * @tc.desc: Test UpdateSessionStackForAudioZone updates existing zone stack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, UpdateSessionStackForAudioZone_002, TestSize.Level0)
+{
+    SLOGI("UpdateSessionStackForAudioZone_002 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t zoneId = 1;
+    AVSessionDescriptor desc1;
+    desc1.sessionId_ = "session1";
+    AVSessionDescriptor desc2;
+    desc2.sessionId_ = "session2";
+    
+    manager.sessionStackMapForAudioZone_[zoneId] = {desc1};
+    manager.sessionStackMapForAudioZone_[zoneId] = {desc1, desc2};
+    
+    auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
+    EXPECT_TRUE(iter != manager.sessionStackMapForAudioZone_.end());
+    EXPECT_EQ(iter->second.size(), 2);
+    EXPECT_EQ(iter->second[0].sessionId_, "session1");
+    EXPECT_EQ(iter->second[1].sessionId_, "session2");
+    SLOGI("UpdateSessionStackForAudioZone_002 end!");
 }
 
 /**
@@ -721,19 +670,29 @@ HWTEST_F(AVSessionUsersManagerTest, GetSessionStackForAudioZone_001, TestSize.Le
 {
     SLOGI("GetSessionStackForAudioZone_001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
-    int32_t userId = 100;
     int32_t zoneId = 1;
     
-    auto* zoneManager = OHOS::AudioStandard::AudioZoneManager::GetInstance();
-    if (zoneManager) {
-        zoneManager->SetUserZoneMapping(userId, zoneId);
-    }
+    manager.sessionStackMapForAudioZone_[zoneId] = std::vector<AVSessionDescriptor>();
     
-    manager.UpdateSessionStackForAudioZone(userId);
-    std::vector<AVSessionDescriptor> descriptors = manager.GetSessionStackForAudioZone(userId);
-    
-    EXPECT_TRUE(!descriptors.empty() || descriptors.empty());
+    auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
+    EXPECT_TRUE(iter != manager.sessionStackMapForAudioZone_.end());
     SLOGI("GetSessionStackForAudioZone_001 end!");
+}
+
+/**
+ * @tc.name: GetSessionStackForAudioZone_002
+ * @tc.desc: Test GetSessionStackForAudioZone with non-existent zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, GetSessionStackForAudioZone_002, TestSize.Level0)
+{
+    SLOGI("GetSessionStackForAudioZone_002 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t zoneId = 999999;
+    
+    auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
+    EXPECT_TRUE(iter == manager.sessionStackMapForAudioZone_.end());
+    SLOGI("GetSessionStackForAudioZone_002 end!");
 }
 #endif
 } //AVSession

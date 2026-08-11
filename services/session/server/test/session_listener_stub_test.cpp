@@ -139,11 +139,11 @@ class SessionListenerStubDemo : public SessionListenerStub {
     {
         return AVSESSION_SUCCESS;
     }
-    ErrCode OnSessionAddForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
+    ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
     };
-    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const std::vector<AVSessionDescriptor> &descriptors) override
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
     };
@@ -239,8 +239,8 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest004, TestSize.Level0)
  * @tc.desc:
  * @tc.type: FUNC
  */
-static HWTEST_F(SessionListenerStubTest, OnRemoteRequest005, TestSize.Level0)
-{
+    static HWTEST_F(SessionListenerStubTest, OnRemoteRequest005, TestSize.Level0)
+    {
     SLOGI("OnRemoteRequest005 begin!");
     uint32_t code = 4;
     SessionListenerStubDemo sessionListenerStub;

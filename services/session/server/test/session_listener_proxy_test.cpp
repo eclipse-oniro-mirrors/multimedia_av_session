@@ -175,3 +175,48 @@ static HWTEST_F(SessionListenerProxyTest, OnRemoteDistributedSessionChange001, t
     EXPECT_TRUE(g_errLog.find("faild") == std::string::npos);
     SLOGI("OnRemoteDistributedSessionChange001, end");
 }
+
+/**
+ * @tc.name: OnSessionAddForAudioZone001
+ * @tc.desc: Test OnSessionAddForAudioZone
+ * @tc.type: FUNC
+ */
+static HWTEST_F(SessionListenerProxyTest, OnSessionAddForAudioZone001, testing::ext::TestSize.Level0)
+{
+    SLOGI("OnSessionAddForAudioZone001, start");
+    LOG_SetCallback(MyLogCallback);
+    AVSessionDescriptor descriptor;
+    sessionListenerProxy->OnSessionAddForAudioZone(100, descriptor);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+    SLOGI("OnSessionAddForAudioZone001, end");
+}
+
+/**
+ * @tc.name: OnSessionRemoveForAudioZone001
+ * @tc.desc: Test OnSessionRemoveForAudioZone
+ * @tc.type: FUNC
+ */
+static HWTEST_F(SessionListenerProxyTest, OnSessionRemoveForAudioZone001, testing::ext::TestSize.Level0)
+{
+    SLOGI("OnSessionRemoveForAudioZone001, start");
+    LOG_SetCallback(MyLogCallback);
+    AVSessionDescriptor descriptor;
+    sessionListenerProxy->OnSessionRemoveForAudioZone(100, descriptor);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+    SLOGI("OnSessionRemoveForAudioZone001, end");
+}
+
+/**
+ * @tc.name: OnTopSessionChangeForAudioZone001
+ * @tc.desc: Test OnTopSessionChangeForAudioZone
+ * @tc.type: FUNC
+ */
+static HWTEST_F(SessionListenerProxyTest, OnTopSessionChangeForAudioZone001, testing::ext::TestSize.Level0)
+{
+    SLOGI("OnTopSessionChangeForAudioZone001, start");
+    LOG_SetCallback(MyLogCallback);
+    AVSessionDescriptor descriptor;
+    sessionListenerProxy->OnTopSessionChangeForAudioZone(100, descriptor);
+    EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
+    SLOGI("OnTopSessionChangeForAudioZone001, end");
+}
