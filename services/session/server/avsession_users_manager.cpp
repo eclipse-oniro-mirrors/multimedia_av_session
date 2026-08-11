@@ -535,7 +535,7 @@ void AVSessionUsersManager::CollectLocalSessionsForAudioZone(int32_t zoneId,
         if (sessionStackIter == sessionStackMapByUserId_.end()) {
             continue;
         }
-        auto allSessions = sessionStackIter->second->GetAllSession();
+        auto allSessions = sessionStackIter->second->GetAllSessions();
         for (auto& session : allSessions) {
             if (!IsCastSessionValid(session, zoneId)) {
                 continue;
