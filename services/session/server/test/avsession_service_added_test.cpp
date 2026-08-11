@@ -90,7 +90,7 @@ public:
 
 /**
  * @tc.name: SuperLauncher001
- * @tc.desc: Verifying NotifyFlowControl with a non-full flow control list.
+ * @tc.desc: Verifying SuperLauncher source role CONNECTING creates migrate server.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
@@ -99,17 +99,17 @@ static HWTEST_F(AVSessionServiceAddedTest, SuperLauncher001, TestSize.Level0)
     SLOGD("SuperLauncher001 begin!");
     std::string deviceId = "IDLE";
     std::string serviceName = "SuperLauncher-Dual";
-    std::string extraInfo = "extra";
+    std::string extraInfo = R"({"mRoleType":"source"})";
     const std::string& state = "CONNECTING";
     g_AVSessionService->migrateAVSession_ = nullptr;
     g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, state);
-    ASSERT_TRUE(g_AVSessionService != nullptr);
+    EXPECT_NE(g_AVSessionService->migrateAVSession_, nullptr);
     SLOGD("SuperLauncher001 end!");
 }
 
 /**
  * @tc.name: SuperLauncher002
- * @tc.desc: Verifying NotifyFlowControl with a non-full flow control list.
+ * @tc.desc: Verifying SuperLauncher source role CONNECTING reuses existing migrate server.
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
@@ -118,11 +118,12 @@ static HWTEST_F(AVSessionServiceAddedTest, SuperLauncher002, TestSize.Level0)
     SLOGD("SuperLauncher002 begin!");
     std::string deviceId = "NOTIDLE";
     std::string serviceName = "SuperLauncher-Dual";
-    std::string extraInfo = "extra";
+    std::string extraInfo = R"({"mRoleType":"source"})";
     const std::string& state = "CONNECTING";
-    g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, state);
     g_AVSessionService->migrateAVSession_ = std::make_shared<MigrateAVSessionServer>();
-    ASSERT_TRUE(g_AVSessionService != nullptr);
+    std::shared_ptr<MigrateAVSessionServer> beforeMigrate = g_AVSessionService->migrateAVSession_;
+    g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, state);
+    EXPECT_EQ(g_AVSessionService->migrateAVSession_, beforeMigrate);
     SLOGD("SuperLauncher002 end!");
 }
 

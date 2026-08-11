@@ -711,7 +711,7 @@ static HWTEST_F(AVSessionServiceTestExt, SuperLauncher001, TestSize.Level0)
 {
     std::string deviceId = "test_deviceId";
     std::string serviceName = "SuperLauncher-Dual";
-    std::string extraInfo = "";
+    std::string extraInfo = R"({"mRoleType":"source"})";
     const std::string state = "test_state";
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
     g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, state);
@@ -1217,20 +1217,88 @@ static HWTEST_F(AVSessionServiceTestExt, ProcessSuperLauncherDisconnect002, Test
     std::string deviceId = "test_device_id";
     std::string networkId = "non_existent_network_id";
     std::string extraInfo = R"({"mDeviceId": ")" + networkId + R"("})";
-    
+
     {
         std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
         g_AVSessionService->migrateAVSessionProxyMap_.clear();
     }
-    
+
     int32_t result = g_AVSessionService->ProcessSuperLauncherDisconnect(deviceId, extraInfo);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
-    
+
     // Cleanup
     {
         std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
         g_AVSessionService->migrateAVSessionProxyMap_.clear();
     }
+}
+
+/**
+ * @tc.name: SuperLauncherSinkBranch001
+ * @tc.desc: Test SuperLauncher dispatch with sink role: CONNECT_SUCC enters ProcessSuperLauncherConnect
+ *           and IDLE enters ProcessSuperLauncherDisconnect, both return early for empty networkId
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, SuperLauncherSinkBranch001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::string deviceId = "test_device_id";
+    std::string serviceName = "SuperLauncher";
+    std::string extraInfo = R"({"mRoleType":"sink","mUserId":100})";
+
+    auto& manager = MigrateAVSessionManager::GetInstance();
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        g_AVSessionService->migrateAVSessionProxyMap_.clear();
+    }
+    size_t oldProxyCount = manager.proxyMap_.count(serviceName);
+    int32_t oldRefs = manager.refs_.load();
+
+    // sink + CONNECT_SUCC -> ProcessSuperLauncherConnect: no mDeviceId in extraInfo, early return
+    g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, "CONNECT_SUCC");
+    EXPECT_EQ(manager.proxyMap_.count(serviceName), oldProxyCount);
+    EXPECT_EQ(manager.refs_.load(), oldRefs);
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        EXPECT_TRUE(g_AVSessionService->migrateAVSessionProxyMap_.empty());
+    }
+
+    // sink + IDLE -> ProcessSuperLauncherDisconnect: no mDeviceId in extraInfo, early return
+    g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, "IDLE");
+    EXPECT_EQ(manager.proxyMap_.count(serviceName), oldProxyCount);
+    EXPECT_EQ(manager.refs_.load(), oldRefs);
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_AVSessionService->migrateProxyMapLock_);
+        EXPECT_TRUE(g_AVSessionService->migrateAVSessionProxyMap_.empty());
+    }
+}
+
+/**
+ * @tc.name: SuperLauncherUnknownRole001
+ * @tc.desc: Test SuperLauncher with SuperLauncher prefix but missing mRoleType: nothing happens
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, SuperLauncherUnknownRole001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::string deviceId = "test_device_id";
+    std::string serviceName = "SuperLauncher";
+    std::string extraInfo = R"({"mDeviceId":"unknown_role_network_id"})";
+
+    auto& manager = MigrateAVSessionManager::GetInstance();
+    g_AVSessionService->migrateAVSession_ = nullptr;
+    size_t oldStubCount = manager.serverMap_.count(serviceName);
+    size_t oldProxyCount = manager.proxyMap_.count(serviceName);
+    int32_t oldRefs = manager.refs_.load();
+
+    g_AVSessionService->SuperLauncher(deviceId, serviceName, extraInfo, "CONNECTING");
+
+    EXPECT_EQ(g_AVSessionService->migrateAVSession_, nullptr);
+    EXPECT_EQ(manager.serverMap_.count(serviceName), oldStubCount);
+    EXPECT_EQ(manager.proxyMap_.count(serviceName), oldProxyCount);
+    EXPECT_EQ(manager.refs_.load(), oldRefs);
 }
 
 /**

@@ -30,7 +30,10 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
 {
     SLOGI("SuperLauncher serviceName: %{public}s, state: %{public}s", serviceName.c_str(), state.c_str());
 
-    if (serviceName == "SuperLauncher-Dual") {
+    bool isSuperLauncher = serviceName.find(MigrateAVSessionManager::migrateSceneSuperLauncher) == 0;
+    std::string roleType = isSuperLauncher ?
+        JsonUtils::GetStringParamFromJsonString(extraInfo, ROLE_TYPE) : "";
+    if (isSuperLauncher && roleType == RoleType::roleSource) {
         if (state == "IDLE") {
             ReleaseSuperLauncher(serviceName);
         } else if (state == "CONNECTING") {
@@ -38,12 +41,14 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         } else if (state == "CONNECT_SUCC") {
             SucceedSuperLauncher(deviceId, extraInfo);
         }
-    } else if (serviceName == "SuperLauncher") {
+    } else if (isSuperLauncher && roleType == RoleType::roleSink) {
         if (state == "IDLE") {
             ProcessSuperLauncherDisconnect(deviceId, extraInfo);
         } else if (state == "CONNECT_SUCC") {
             ProcessSuperLauncherConnect(deviceId, extraInfo);
         }
+    } else if (isSuperLauncher) {
+        SLOGW("SuperLauncher unknown roleType, ignore");
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     bool isMirrorService = mirrorServiceNames_.count(serviceName) > 0 && allconnectStates_.count(state) > 0;
@@ -1194,7 +1199,7 @@ int32_t AVSessionService::ProcessSuperLauncherConnect(std::string deviceId, std:
             std::make_shared<MigrateAVSessionProxy>(this, MigrateAVSessionManager::MSG_HEAD_MODE, localDevId);
         migrateAVSessionProxy->SetUserId(mUserId);
         MigrateAVSessionManager::GetInstance().CreateRemoteSessionProxy(networkId,
-            MigrateAVSessionManager::migrateSceneNext, migrateAVSessionProxy);
+            MigrateAVSessionManager::migrateSceneSuperLauncher, migrateAVSessionProxy);
         migrateAVSessionProxyMap_.insert({networkId, std::static_pointer_cast<SoftbusSession>(migrateAVSessionProxy)});
         SLOGI("new proxy success:%{public}d", static_cast<int>(migrateAVSessionProxyMap_.size()));
     } else {
@@ -1210,7 +1215,7 @@ int32_t AVSessionService::ProcessSuperLauncherDisconnect(std::string deviceId, s
     std::string networkId = JsonUtils::GetStringParamFromJsonString(extraInfo, "mDeviceId");
     CHECK_AND_RETURN_RET_LOG(!networkId.empty(), AVSESSION_ERROR, "get networkId empty");
     MigrateAVSessionManager::GetInstance().ReleaseRemoteSessionProxy(networkId,
-        MigrateAVSessionManager::migrateSceneNext);
+        MigrateAVSessionManager::migrateSceneSuperLauncher);
     std::lock_guard lockGuard(migrateProxyMapLock_);
     SLOGI("ProcessSuperLauncherDisconnect networkId:%{public}s|%{public}d.",
         AVSessionUtils::GetAnonySessionId(networkId).c_str(), static_cast<int>(migrateAVSessionProxyMap_.size()));
