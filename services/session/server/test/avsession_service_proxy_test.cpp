@@ -36,16 +36,24 @@ public:
     ErrCode OnSessionRelease(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
     ErrCode OnTopSessionChange(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
     ErrCode OnAudioSessionChecked(const int32_t uid) override { return AVSESSION_SUCCESS; }
-    ErrCode OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override { return AVSESSION_SUCCESS; }
-    ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceAvailable(
+        const OutputDeviceInfo& castOutputDeviceInfo) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceLogEvent(const int32_t eventId,
+        const int64_t param) override { return AVSESSION_SUCCESS; }
     ErrCode OnDeviceOffline(const std::string& deviceId) override { return AVSESSION_SUCCESS; }
     ErrCode OnDeviceStateChange(const DeviceState& deviceState) override { return AVSESSION_SUCCESS; }
-    ErrCode OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override { return AVSESSION_SUCCESS; }
-    ErrCode OnRemoteDistributedSessionChange(const std::vector<sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; }
-    ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; }
-    ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
-    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
-    ErrCode OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSystemCommonEvent(
+        const std::string& commonEvent, const std::string& args) override { return AVSESSION_SUCCESS; }
+    ErrCode OnRemoteDistributedSessionChange(
+        const std::vector<sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; }
+    ErrCode OnActiveSessionChanged(
+        const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSessionAddForAudioZone(int32_t userId,
+        const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId,
+        const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnTopSessionChangeForAudioZone(int32_t userId,
+        const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
 };
 
 class AVSessionServiceProxyTest : public testing::Test {
