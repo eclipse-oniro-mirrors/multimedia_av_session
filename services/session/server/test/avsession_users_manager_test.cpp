@@ -694,6 +694,99 @@ HWTEST_F(AVSessionUsersManagerTest, GetSessionStackForAudioZone_002, TestSize.Le
     EXPECT_TRUE(iter == manager.sessionStackMapForAudioZone_.end());
     SLOGI("GetSessionStackForAudioZone_002 end!");
 }
+
+/**
+ * @tc.name: GetZoneIdForUser_003
+ * @tc.desc: Test GetZoneIdForUser when AudioZoneManager is not available
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, GetZoneIdForUser_003, TestSize.Level0)
+{
+    SLOGI("GetZoneIdForUser_003 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t userId = 999999;
+    int32_t zoneId = manager.GetZoneIdForUser(userId);
+    EXPECT_EQ(zoneId, -1);
+    SLOGI("GetZoneIdForUser_003 end!");
+}
+
+/**
+ * @tc.name: CollectLocalSessionsForAudioZone_002
+ * @tc.desc: Test CollectLocalSessionsForAudioZone with non-existent zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, CollectLocalSessionsForAudioZone_002, TestSize.Level0)
+{
+    SLOGI("CollectLocalSessionsForAudioZone_002 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t zoneId = 999999;
+    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
+    manager.CollectLocalSessionsForAudioZone(zoneId, sessionWithTime);
+    EXPECT_TRUE(sessionWithTime.empty());
+    SLOGI("CollectLocalSessionsForAudioZone_002 end!");
+}
+
+/**
+ * @tc.name: CollectDistributedSessionsForAudioZone_001
+ * @tc.desc: Test CollectDistributedSessionsForAudioZone with non-existent zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, CollectDistributedSessionsForAudioZone_001, TestSize.Level0)
+{
+    SLOGI("CollectDistributedSessionsForAudioZone_001 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t zoneId = 999999;
+    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
+    manager.CollectDistributedSessionsForAudioZone(zoneId, sessionWithTime);
+    EXPECT_TRUE(sessionWithTime.empty());
+    SLOGI("CollectDistributedSessionsForAudioZone_001 end!");
+}
+
+/**
+ * @tc.name: SortAndCacheSessionStack_001
+ * @tc.desc: Test SortAndCacheSessionStack sorts and caches descriptors
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, SortAndCacheSessionStack_001, TestSize.Level0)
+{
+    SLOGI("SortAndCacheSessionStack_001 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t zoneId = 1;
+    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
+    
+    AVSessionDescriptor desc1;
+    desc1.sessionId_ = "session1";
+    AVSessionDescriptor desc2;
+    desc2.sessionId_ = "session2";
+    
+    sessionWithTime.push_back({desc1, 100});
+    sessionWithTime.push_back({desc2, 200});
+    
+    manager.SortAndCacheSessionStack(zoneId, sessionWithTime);
+    
+    auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
+    EXPECT_TRUE(iter != manager.sessionStackMapForAudioZone_.end());
+    EXPECT_EQ(iter->second.size(), 2);
+    EXPECT_EQ(iter->second[0].sessionId_, "session2");
+    EXPECT_EQ(iter->second[1].sessionId_, "session1");
+    SLOGI("SortAndCacheSessionStack_001 end!");
+}
+
+/**
+ * @tc.name: IsCastSessionValid_001
+ * @tc.desc: Test IsCastSessionValid with nullptr session
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, IsCastSessionValid_001, TestSize.Level0)
+{
+    SLOGI("IsCastSessionValid_001 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    sptr<AVSessionItem> session = nullptr;
+    int32_t zoneId = 1;
+    bool result = manager.IsCastSessionValid(session, zoneId);
+    EXPECT_FALSE(result);
+    SLOGI("IsCastSessionValid_001 end!");
+}
 #endif
 } //AVSession
 } //OHOS

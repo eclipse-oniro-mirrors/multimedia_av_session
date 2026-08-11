@@ -2096,5 +2096,34 @@ static HWTEST_F(AVSessionServiceTestExt, HotSwitchReportCastDisplay001, TestSize
     g_AVSessionService->HotSwitchReportCastDisplay();
     g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 }
+
+#ifdef CAR_FEATURE_ENABLE
+/**
+* @tc.name: GetDistributedSessionControllersForAudioZone001
+* @tc.desc: Verifying GetDistributedSessionControllersForAudioZone without migrate session
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionServiceTestExt, GetDistributedSessionControllersForAudioZone001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    auto ret = g_AVSessionService->GetDistributedSessionControllersForAudioZone(sessionControllers);
+    EXPECT_EQ(ret, ERR_REMOTE_CONNECTION_NOT_EXIST);
+}
+
+/**
+* @tc.name: GetDistributedSessionControllersForAudioZone002
+* @tc.desc: Verifying GetDistributedSessionControllersForAudioZone execution
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionServiceTestExt, GetDistributedSessionControllersForAudioZone002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    std::vector<OHOS::sptr<IRemoteObject>> sessionControllers;
+    g_AVSessionService->GetDistributedSessionControllersForAudioZone(sessionControllers);
+}
+#endif
 } // AVSession
 } // OHOS

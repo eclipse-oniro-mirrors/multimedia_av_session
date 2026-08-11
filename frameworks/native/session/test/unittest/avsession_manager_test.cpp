@@ -20,6 +20,7 @@
 #include "avsession_info.h"
 #include "avsession_log.h"
 #include "avsession_errors.h"
+#include "command_info.h"
 
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
@@ -816,5 +817,111 @@ HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand001, TestSize.Level1)
     EXPECT_EQ(result, ERR_SESSION_NOT_EXIST);
     SLOGI("SendSystemCommonCommand001 end");
 }
+
+#ifdef CAR_FEATURE_ENABLE
+/**
+* @tc.name: RegisterSessionListenerForUser001
+* @tc.desc: register listener for specific user
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerTest, RegisterSessionListenerForUser001, TestSize.Level1)
+{
+    SLOGI("RegisterSessionListenerForUser001 begin");
+    std::shared_ptr<TestSessionListener> listener = std::make_shared<TestSessionListener>();
+    int32_t userId = 100;
+    auto result = AVSessionManager::GetInstance().RegisterSessionListenerForUser(userId, listener);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("RegisterSessionListenerForUser001 end");
+}
+
+/**
+* @tc.name: RegisterSessionListenerForUser002
+* @tc.desc: register nullptr listener for user
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerTest, RegisterSessionListenerForUser002, TestSize.Level1)
+{
+    SLOGI("RegisterSessionListenerForUser002 begin");
+    std::shared_ptr<SessionListener> listener;
+    int32_t userId = 100;
+    auto result = AVSessionManager::GetInstance().RegisterSessionListenerForUser(userId, listener);
+    EXPECT_NE(result, AVSESSION_SUCCESS);
+    SLOGI("RegisterSessionListenerForUser002 end");
+}
+
+/**
+* @tc.name: GetSessionDescriptorsForAudioZone001
+* @tc.desc: get session descriptors for audio zone with valid userId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsForAudioZone001, TestSize.Level1)
+{
+    SLOGI("GetSessionDescriptorsForAudioZone001 begin");
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t userId = 100;
+    auto result = AVSessionManager::GetInstance().GetSessionDescriptorsForAudioZone(userId, descriptors);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("GetSessionDescriptorsForAudioZone001 end");
+}
+
+/**
+* @tc.name: GetSessionDescriptorsForAudioZone002
+* @tc.desc: get session descriptors for audio zone with negative userId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerTest, GetSessionDescriptorsForAudioZone002, TestSize.Level1)
+{
+    SLOGI("GetSessionDescriptorsForAudioZone002 begin");
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t userId = -1;
+    auto result = AVSessionManager::GetInstance().GetSessionDescriptorsForAudioZone(userId, descriptors);
+    EXPECT_NE(result, AVSESSION_SUCCESS);
+    SLOGI("GetSessionDescriptorsForAudioZone002 end");
+}
+
+/**
+* @tc.name: StartAVPlaybackForAudioZone001
+* @tc.desc: start av playback for audio zone with valid params
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerTest, StartAVPlaybackForAudioZone001, TestSize.Level1)
+{
+    SLOGI("StartAVPlaybackForAudioZone001 begin");
+    std::string bundleName = "test_bundle";
+    int32_t userId = 100;
+    std::string assetId = "test_asset";
+    CommandInfo info;
+    info.SetCallerDeviceId("test_device");
+    info.SetCallerBundleName("test_bundle");
+    info.SetCallerModuleName("test_module");
+    info.SetCallerType("test_type");
+    auto result = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("StartAVPlaybackForAudioZone001 end");
+}
+
+/**
+* @tc.name: StartAVPlaybackForAudioZone002
+* @tc.desc: start av playback for audio zone with empty bundleName
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerTest, StartAVPlaybackForAudioZone002, TestSize.Level1)
+{
+    SLOGI("StartAVPlaybackForAudioZone002 begin");
+    std::string bundleName;
+    int32_t userId = 100;
+    std::string assetId = "test_asset";
+    CommandInfo info;
+    auto result = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    EXPECT_NE(result, AVSESSION_SUCCESS);
+    SLOGI("StartAVPlaybackForAudioZone002 end");
+}
+#endif
 }
 }

@@ -4077,7 +4077,6 @@ static HWTEST_F(AVSessionServiceTest, UpdateNtfEnable001, TestSize.Level0)
     SLOGD("UpdateNtfEnable001 end!");
 }
 
-
 #ifdef CAR_FEATURE_ENABLE
 /**
  * @tc.name: InitAudioZoneCallback001

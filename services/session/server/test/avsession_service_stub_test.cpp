@@ -97,6 +97,26 @@ void AVSessionServiceStubTest::TearDown()
 {
 }
 
+#ifdef CAR_FEATURE_ENABLE
+class TestISessionListener : public ISessionListener {
+public:
+    ErrCode OnSessionCreate(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSessionRelease(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnTopSessionChange(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnAudioSessionChecked(const int32_t uid) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceLogEvent(const int32_t eventId, const int64_t param) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceOffline(const std::string& deviceId) override { return AVSESSION_SUCCESS; }
+    ErrCode OnDeviceStateChange(const DeviceState& deviceState) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override { return AVSESSION_SUCCESS; }
+    ErrCode OnRemoteDistributedSessionChange(const std::vector<sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; }
+    ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    ErrCode OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+};
+#endif
+
 class AVSessionServiceStubPerDemo : public AVSessionServiceStub {
 public:
     OHOS::sptr<IRemoteObject> CreateSessionInner(const std::string &tag, int32_t type,
@@ -969,6 +989,135 @@ static HWTEST_F(AVSessionServiceStubTest, HandleSendSystemCommonCommand003, Test
     EXPECT_EQ(ret, ERR_NONE);
     SLOGI("HandleSendSystemCommonCommand003 end!");
 }
+
+#ifdef CAR_FEATURE_ENABLE
+/**
+ * @tc.name: HandleGetSessionDescriptorsForAudioZone001
+ * @tc.desc: Test HandleGetSessionDescriptorsForAudioZone with permission check
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleGetSessionDescriptorsForAudioZone001, TestSize.Level0)
+{
+    SLOGI("HandleGetSessionDescriptorsForAudioZone001, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int32_t userId = 100;
+    data.WriteInt32(userId);
+    AVSessionServiceStubPerDemo stub;
+    stub.HandleGetSessionDescriptorsForAudioZone(data, reply);
+    int32_t result = reply.ReadInt32();
+    EXPECT_TRUE(result == ERR_PERMISSION_DENIED || result == ERR_NO_PERMISSION || result == AVSESSION_SUCCESS);
+    SLOGI("HandleGetSessionDescriptorsForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: HandleStartAVPlaybackForAudioZone001
+ * @tc.desc: Test HandleStartAVPlaybackForAudioZone with valid params
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleStartAVPlaybackForAudioZone001, TestSize.Level0)
+{
+    SLOGI("HandleStartAVPlaybackForAudioZone001, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    std::string bundleName = "test_bundle";
+    int32_t userId = 100;
+    std::string assetId = "test_asset";
+    CommandInfo info;
+    info.SetCallerDeviceId("test_device");
+    info.SetCallerBundleName("test_bundle");
+    info.SetCallerModuleName("test_module");
+    info.SetCallerType("test_type");
+    
+    data.WriteString(bundleName);
+    data.WriteInt32(userId);
+    data.WriteString(assetId);
+    data.WriteParcelable(&info);
+    
+    AVSessionServiceStubPerDemo stub;
+    stub.HandleStartAVPlaybackForAudioZone(data, reply);
+    int32_t result = reply.ReadInt32();
+    EXPECT_TRUE(result == ERR_PERMISSION_DENIED || result == ERR_NO_PERMISSION || result == AVSESSION_SUCCESS);
+    SLOGI("HandleStartAVPlaybackForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: HandleStartAVPlaybackForAudioZone002
+ * @tc.desc: Test HandleStartAVPlaybackForAudioZone with empty bundleName
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleStartAVPlaybackForAudioZone002, TestSize.Level0)
+{
+    SLOGI("HandleStartAVPlaybackForAudioZone002, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    std::string bundleName = "";
+    int32_t userId = 100;
+    std::string assetId = "test_asset";
+    CommandInfo info;
+    info.SetCallerDeviceId("test_device");
+    info.SetCallerBundleName("test_bundle");
+    info.SetCallerModuleName("test_module");
+    info.SetCallerType("test_type");
+    
+    data.WriteString(bundleName);
+    data.WriteInt32(userId);
+    data.WriteString(assetId);
+    data.WriteParcelable(&info);
+    
+    AVSessionServiceStubPerDemo stub;
+    stub.HandleStartAVPlaybackForAudioZone(data, reply);
+    int32_t result = reply.ReadInt32();
+    EXPECT_TRUE(result == ERR_PERMISSION_DENIED || result == ERR_NO_PERMISSION || result == AVSESSION_ERROR);
+    SLOGI("HandleStartAVPlaybackForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: HandleRegisterSessionListenerForUser001
+ * @tc.desc: Test HandleRegisterSessionListenerForUser with valid userId and listener
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleRegisterSessionListenerForUser001, TestSize.Level0)
+{
+    SLOGI("HandleRegisterSessionListenerForUser001, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int32_t userId = 100;
+    sptr<ISessionListener> listener = new TestISessionListener();
+    
+    data.WriteInt32(userId);
+    data.WriteRemoteObject(listener->AsObject());
+    
+    AVSessionServiceStubPerDemo stub;
+    stub.HandleRegisterSessionListenerForUser(data, reply);
+    int32_t result = reply.ReadInt32();
+    EXPECT_TRUE(result == ERR_PERMISSION_DENIED || result == ERR_NO_PERMISSION || result == AVSESSION_SUCCESS);
+    SLOGI("HandleRegisterSessionListenerForUser001 end!");
+}
+
+/**
+ * @tc.name: HandleRegisterSessionListenerForUser002
+ * @tc.desc: Test HandleRegisterSessionListenerForUser with invalid userId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceStubTest, HandleRegisterSessionListenerForUser002, TestSize.Level0)
+{
+    SLOGI("HandleRegisterSessionListenerForUser002, start");
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int32_t userId = -1;
+    sptr<ISessionListener> listener = new TestISessionListener();
+    
+    data.WriteInt32(userId);
+    data.WriteRemoteObject(listener->AsObject());
+    
+    AVSessionServiceStubPerDemo stub;
+    stub.HandleRegisterSessionListenerForUser(data, reply);
+    int32_t result = reply.ReadInt32();
+    EXPECT_TRUE(result == ERR_PERMISSION_DENIED || result == ERR_NO_PERMISSION || result == ERR_INVALID_PARAM);
+    SLOGI("HandleRegisterSessionListenerForUser002 end!");
+}
+#endif
 
 } // AVSession
 } // OHOS
