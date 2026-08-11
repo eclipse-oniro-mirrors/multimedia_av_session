@@ -120,12 +120,14 @@ public:
         std::vector<AVQueueInfo> &avQueueInfos) override { return 0; };
     int32_t StartAVPlayback(const std::string &bundleName, const std::string &assetId,
         const std::string& moduleName) override { return 0; };
+#ifdef CAR_FEATURE_ENABLE
     int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; };
     int32_t StartAVPlaybackForAudioZone(const std::string &bundleName, int32_t userId,
         const std::string *assetId, const CommandInfo &info) override { return AVSESSION_SUCCESS; };
     int32_t RegisterSessionListenerForUser(int32_t userId,
         const OHOS::sptr<ISessionListener>  &listener) override { return AVSESSION_SUCCESS; };
+#endif
     int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override { return 0; };
     int32_t CreateControllerInner(const std::string &sessionId, OHOS::sptr<IRemoteObject> &object) override
     {
