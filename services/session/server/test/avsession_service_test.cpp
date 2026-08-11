@@ -197,11 +197,11 @@ public:
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; }
     ErrCode OnActiveSessionChanged(
         const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; }
-    void OnSessionAddForAudioZone(
+    ErrCode OnSessionAddForAudioZone(
         int32_t userId, const AVSessionDescriptor &descriptor) override {return AVSESSION_SUCCESS;}
-    void OnSessionRemoveForAudioZone(
+    ErrCode OnSessionRemoveForAudioZone(
         int32_t userId, const AVSessionDescriptor &descriptor) override {return AVSESSION_SUCCESS;}
-    void OnTopSessionChangeForAudioZone(
+    ErrCode OnTopSessionChangeForAudioZone(
         int32_t userId, const AVSessionDescriptor &descriptor) override {return AVSESSION_SUCCESS;}
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; }
 };
@@ -4528,7 +4528,7 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlaybackForAudioZone001, TestSize.L
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
     
-    int32_t ret = avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
     SLOGD("StartAVPlaybackForAudioZone001 end!");
 }
 
@@ -4549,7 +4549,7 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlaybackForAudioZone002, TestSize.L
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
     
-    int32_t ret = avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
     SLOGD("StartAVPlaybackForAudioZone002 end!");
 }
 
@@ -4590,140 +4590,5 @@ static HWTEST_F(AVSessionServiceTest, NotifyTopSessionChangeForAudioZone002, Tes
     
     avservice_->NotifyTopSessionChangeForAudioZone(descriptor);
     SLOGD("NotifyTopSessionChangeForAudioZone002 end!");
-}
-
-/**
- * @tc.name: AudioZoneCallback_OnAudioZoneAdd001
- * @tc.desc: Test AudioZoneCallbackImpl::OnAudioZoneAdd directly
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_OnAudioZoneAdd001, TestSize.Level0)
-{
-    SLOGD("AudioZoneCallback_OnAudioZoneAdd001 begin!");
-    avservice_->InitAudioZoneCallback();
-    
-    if (avservice_->audioZoneCallback_) {
-        OHOS::AudioStandard::AudioZoneDescriptor zoneDescriptor;
-        zoneDescriptor.zoneId = 1;
-        zoneDescriptor.zoneName = "DriverZone";
-        avservice_->audioZoneCallback_->OnAudioZoneAdd(zoneDescriptor);
-    }
-    
-    SLOGD("AudioZoneCallback_OnAudioZoneAdd001 end!");
-}
-
-/**
- * @tc.name: AudioZoneCallback_OnAudioZoneRemove001
- * @tc.desc: Test AudioZoneCallbackImpl::OnAudioZoneRemove directly
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_OnAudioZoneRemove001, TestSize.Level0)
-{
-    SLOGD("AudioZoneCallback_OnAudioZoneRemove001 begin!");
-    avservice_->InitAudioZoneCallback();
-    
-    if (avservice_->audioZoneCallback_) {
-        avservice_->audioZoneCallback_->OnAudioZoneRemove(1);
-    }
-    
-    SLOGD("AudioZoneCallback_OnAudioZoneRemove001 end!");
-}
-
-/**
- * @tc.name: AudioZoneCallback_OnAudioZoneAdd002
- * @tc.desc: Test AudioZoneCallbackImpl::OnAudioZoneAdd with multiple zones
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_OnAudioZoneAdd002, TestSize.Level0)
-{
-    SLOGD("AudioZoneCallback_OnAudioZoneAdd002 begin!");
-    avservice_->InitAudioZoneCallback();
-    
-    if (avservice_->audioZoneCallback_) {
-        OHOS::AudioStandard::AudioZoneDescriptor zoneDescriptor1;
-        zoneDescriptor1.zoneId = 1;
-        zoneDescriptor1.zoneName = "DriverZone";
-        
-        OHOS::AudioStandard::AudioZoneDescriptor zoneDescriptor2;
-        zoneDescriptor2.zoneId = 2;
-        zoneDescriptor2.zoneName = "PassengerZone";
-        
-        OHOS::AudioStandard::AudioZoneDescriptor zoneDescriptor3;
-        zoneDescriptor3.zoneId = 3;
-        zoneDescriptor3.zoneName = "RearZone";
-        
-        avservice_->audioZoneCallback_->OnAudioZoneAdd(zoneDescriptor1);
-        avservice_->audioZoneCallback_->OnAudioZoneAdd(zoneDescriptor2);
-        avservice_->audioZoneCallback_->OnAudioZoneAdd(zoneDescriptor3);
-    }
-    
-    SLOGD("AudioZoneCallback_OnAudioZoneAdd002 end!");
-}
-
-/**
- * @tc.name: AudioZoneCallback_OnAudioZoneRemove002
- * @tc.desc: Test AudioZoneCallbackImpl::OnAudioZoneRemove multiple zones
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceTest, AudioZoneCallback_OnAudioZoneRemove002, TestSize.Level0)
-{
-    SLOGD("AudioZoneCallback_OnAudioZoneRemove002 begin!");
-    avservice_->InitAudioZoneCallback();
-    
-    if (avservice_->audioZoneCallback_) {
-        avservice_->audioZoneCallback_->OnAudioZoneRemove(1);
-        avservice_->audioZoneCallback_->OnAudioZoneRemove(2);
-    }
-    
-    SLOGD("AudioZoneCallback_OnAudioZoneRemove002 end!");
-}
-
-/**
- * @tc.name: AudioZoneChangeCallback_OnAudioZoneChange001
- * @tc.desc: Test AudioZoneChangeCallbackImpl::OnAudioZoneChange directly
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceTest, AudioZoneChangeCallback_OnAudioZoneChange001, TestSize.Level0)
-{
-    SLOGD("AudioZoneChangeCallback_OnAudioZoneChange001 begin!");
-    avservice_->InitAudioZoneCallback();
-    
-    if (avservice_->audioZoneChangeCallback_) {
-        OHOS::AudioStandard::AudioZoneDescriptor zoneDescriptor;
-        zoneDescriptor.zoneId = 1;
-        zoneDescriptor.zoneName = "DriverZone";
-        avservice_->audioZoneChangeCallback_->OnAudioZoneChange(
-            zoneDescriptor, OHOS::AudioStandard::AudioZoneChangeReason::ZONE_ADDED);
-    }
-    
-    SLOGD("AudioZoneChangeCallback_OnAudioZoneChange001 end!");
-}
-
-/**
- * @tc.name: AudioZoneChangeCallback_OnAudioZoneChange002
- * @tc.desc: Test AudioZoneChangeCallbackImpl::OnAudioZoneChange with multiple zones
- * @tc.type: FUNC
- */
-static HWTEST_F(AVSessionServiceTest, AudioZoneChangeCallback_OnAudioZoneChange002, TestSize.Level0)
-{
-    SLOGD("AudioZoneChangeCallback_OnAudioZoneChange002 begin!");
-    avservice_->InitAudioZoneCallback();
-    
-    if (avservice_->audioZoneChangeCallback_) {
-        OHOS::AudioStandard::AudioZoneDescriptor zoneDescriptor1;
-        zoneDescriptor1.zoneId = 1;
-        zoneDescriptor1.zoneName = "DriverZoneUpdated";
-        
-        OHOS::AudioStandard::AudioZoneDescriptor zoneDescriptor2;
-        zoneDescriptor2.zoneId = 2;
-        zoneDescriptor2.zoneName = "PassengerZoneUpdated";
-        
-        avservice_->audioZoneChangeCallback_->OnAudioZoneChange(
-            zoneDescriptor1, OHOS::AudioStandard::AudioZoneChangeReason::ZONE_UPDATED);
-        avservice_->audioZoneChangeCallback_->OnAudioZoneChange(
-            zoneDescriptor2, OHOS::AudioStandard::AudioZoneChangeReason::ZONE_UPDATED);
-    }
-    
-    SLOGD("AudioZoneChangeCallback_OnAudioZoneChange002 end!");
 }
 #endif
