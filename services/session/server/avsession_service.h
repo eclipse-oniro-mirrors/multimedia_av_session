@@ -226,6 +226,7 @@ private:
 
     int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId = "");
 
+public:
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object, pid_t pid);
@@ -334,6 +335,7 @@ private:
     int32_t PcmCastSessionReleasePlayer() override;
 #endif
 
+public:
     int32_t Close(void) override;
 
     void AddAvQueueInfoToFile(AVSessionItem& session);

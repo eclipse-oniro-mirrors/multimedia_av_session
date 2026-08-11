@@ -121,6 +121,7 @@ public:
         const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
     ErrCode OnTopSessionChangeForAudioZone(int32_t userId,
         const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
+    sptr<IRemoteObject> AsObject() override { return nullptr; }
 };
 #endif
 
@@ -151,7 +152,7 @@ public:
     int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; };
     int32_t StartAVPlaybackForAudioZone(const std::string &bundleName, int32_t userId,
-        const std::string *assetId, const CommandInfo &info) override { return AVSESSION_SUCCESS; };
+        const std::string &assetId, const CommandInfo &info) override { return AVSESSION_SUCCESS; };
     int32_t RegisterSessionListenerForUser(int32_t userId,
         const OHOS::sptr<ISessionListener>  &listener) override { return AVSESSION_SUCCESS; };
 #endif

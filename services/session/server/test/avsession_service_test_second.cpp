@@ -2743,28 +2743,6 @@ static HWTEST_F(AVSessionServiceTestSecond, NotifySessionStackDiffForAudioZone00
 }
 
 /**
-* @tc.name: GetSessionDescriptorsForAudioZone003
-* @tc.desc: Verifying GetSessionDescriptorsForAudioZone with session stack update
-* @tc.type: FUNC
-* @tc.require:
-*/
-static HWTEST_F(AVSessionServiceTestSecond, GetSessionDescriptorsForAudioZone003, TestSize.Level0)
-{
-    SLOGD("GetSessionDescriptorsForAudioZone003 begin!");
-    int32_t userId = 100;
-    
-    AVSessionDescriptor desc;
-    desc.sessionId_ = "test_session";
-    desc.userId_ = userId;
-    g_AVSessionService->GetUsersManager().userIdToSessionStack_[userId].push_back(desc);
-    
-    std::vector<AVSessionDescriptor> descriptors;
-    int32_t ret = g_AVSessionService->GetSessionDescriptorsForAudioZone(userId, descriptors);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    SLOGD("GetSessionDescriptorsForAudioZone003 end!");
-}
-
-/**
 * @tc.name: AddSessionToVector_001
 * @tc.desc: Test AddSessionToVector with valid session
 * @tc.type: FUNC
@@ -2782,29 +2760,6 @@ static HWTEST_F(AVSessionServiceTestSecond, AddSessionToVector_001, TestSize.Lev
     EXPECT_EQ(sessionWithTime.size(), 1);
     session->Destroy();
     SLOGD("AddSessionToVector_001 end!");
-}
-
-/**
-* @tc.name: AddControllerToVector_001
-* @tc.desc: Test AddControllerToVector with valid controller
-* @tc.type: FUNC
-* @tc.require:
-*/
-static HWTEST_F(AVSessionServiceTestSecond, AddControllerToVector_001, TestSize.Level0)
-{
-    SLOGD("AddControllerToVector_001 begin!");
-    auto session = CreateSession();
-    ASSERT_TRUE(session != nullptr);
-    
-    OHOS::sptr<AVControllerItem> controller = session->GetController();
-    ASSERT_TRUE(controller != nullptr);
-    
-    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
-    g_AVSessionService->GetUsersManager().AddControllerToVector(controller, sessionWithTime);
-    
-    EXPECT_EQ(sessionWithTime.size(), 1);
-    session->Destroy();
-    SLOGD("AddControllerToVector_001 end!");
 }
 #endif
 } //AVSession

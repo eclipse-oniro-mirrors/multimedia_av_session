@@ -4396,7 +4396,6 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone001, Tes
     AVSessionDescriptor newSession;
     newSession.sessionId_ = "new_session";
     newSession.userId_ = userId;
-    newSession.bundleName_ = "new_bundle";
     newStack.push_back(newSession);
     
     avservice_->NotifySessionStackDiffForAudioZone(userId, oldStack, newStack);
@@ -4418,7 +4417,6 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone002, Tes
     AVSessionDescriptor oldSession;
     oldSession.sessionId_ = "old_session";
     oldSession.userId_ = userId;
-    oldSession.bundleName_ = "old_bundle";
     oldStack.push_back(oldSession);
     
     avservice_->NotifySessionStackDiffForAudioZone(userId, oldStack, newStack);
@@ -4440,12 +4438,10 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone003, Tes
     AVSessionDescriptor oldTopSession;
     oldTopSession.sessionId_ = "old_top";
     oldTopSession.userId_ = userId;
-    oldTopSession.bundleName_ = "old_top_bundle";
     
     AVSessionDescriptor newTopSession;
     newTopSession.sessionId_ = "new_top";
     newTopSession.userId_ = userId;
-    newTopSession.bundleName_ = "new_top_bundle";
     
     oldStack.push_back(oldTopSession);
     newStack.push_back(newTopSession);
@@ -4469,22 +4465,18 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionStackDiffForAudioZone004, Tes
     AVSessionDescriptor oldSession1;
     oldSession1.sessionId_ = "old_1";
     oldSession1.userId_ = userId;
-    oldSession1.bundleName_ = "bundle_1";
     
     AVSessionDescriptor oldSession2;
     oldSession2.sessionId_ = "old_2";
     oldSession2.userId_ = userId;
-    oldSession2.bundleName_ = "bundle_2";
     
     AVSessionDescriptor newSession1;
     newSession1.sessionId_ = "new_1";
     newSession1.userId_ = userId;
-    newSession1.bundleName_ = "bundle_3";
     
     AVSessionDescriptor newSession2;
     newSession2.sessionId_ = "new_2";
     newSession2.userId_ = userId;
-    newSession2.bundleName_ = "bundle_4";
     
     oldStack.push_back(oldSession1);
     oldStack.push_back(oldSession2);
