@@ -747,6 +747,10 @@ av_session_ohos_library("avsession_item") {
     public_external_deps += [ "data_object:distributeddataobject_impl" ]
   }
 
+  if (av_session_enable_raise_command_rate_limit) {
+    defines += [ "RAISE_COMMAND_RATE_LIMIT_ENABLE" ]
+  }
+
   subsystem_name = "multimedia"
   part_name = "av_session"
   version_script = "avsession_item.versionscript"

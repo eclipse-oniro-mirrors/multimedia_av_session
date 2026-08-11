@@ -22,6 +22,7 @@ declare_args() {
   multimedia_av_session_enable_data_object = false
   multimedia_av_session_enable_device_manager = false
   av_session_enable_multi_user_audio_zone_feature = false
+  av_session_enable_raise_command_rate_limit = false
   if (defined(global_parts_info) &&
       !defined(global_parts_info.hiviewdfx_hicollie)) {
     multimedia_av_session_enable_hicollie = false

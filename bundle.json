@@ -24,7 +24,8 @@
         "av_session_enable_start_stop_on_demand",
         "av_session_enable_input_redistribute",
         "av_session_enable_dsoftbus",
-        "av_session_enable_multi_user_audio_zone_feature"
+        "av_session_enable_multi_user_audio_zone_feature",
+        "av_session_enable_raise_command_rate_limit"
       ],
       "adapted_system_type": [ "standard" ],
       "rom": "3000KB",
