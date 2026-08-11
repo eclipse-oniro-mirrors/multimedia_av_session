@@ -180,8 +180,8 @@ const char* ROLE_TYPE = "mRoleType";
 
 class RoleType {
 public:
-    static constexpr const char* ROLE_SOURCE = "source";
-    static constexpr const char* ROLE_SINK = "sink";
+    static constexpr const char* roleSource = "source";
+    static constexpr const char* roleSink = "sink";
 };
 
 const char* METADATA_MASK_ALL = "11111111111111111";

@@ -33,7 +33,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
     bool isSuperLauncher = serviceName.find(MigrateAVSessionManager::migrateSceneSuperLauncher) == 0;
     std::string roleType = isSuperLauncher ?
         JsonUtils::GetStringParamFromJsonString(extraInfo, ROLE_TYPE) : "";
-    if (isSuperLauncher && roleType == RoleType::ROLE_SOURCE) {
+    if (isSuperLauncher && roleType == RoleType::roleSource) {
         if (state == "IDLE") {
             ReleaseSuperLauncher(serviceName);
         } else if (state == "CONNECTING") {
@@ -41,7 +41,7 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         } else if (state == "CONNECT_SUCC") {
             SucceedSuperLauncher(deviceId, extraInfo);
         }
-    } else if (isSuperLauncher && roleType == RoleType::ROLE_SINK) {
+    } else if (isSuperLauncher && roleType == RoleType::roleSink) {
         if (state == "IDLE") {
             ProcessSuperLauncherDisconnect(deviceId, extraInfo);
         } else if (state == "CONNECT_SUCC") {
