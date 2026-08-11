@@ -55,6 +55,12 @@
 #include "audio_zone_types.h"
 #endif
 
+using namespace testing::ext;
+using namespace OHOS::AVSession;
+using namespace OHOS::Security::AccessToken;
+using namespace OHOS::AudioStandard;
+using OHOS::ErrCode;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
 #include "avcast_control_command.h"
@@ -201,11 +207,6 @@ public:
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; }
 };
 
-using namespace testing::ext;
-using namespace OHOS::AVSession;
-using namespace OHOS::Security::AccessToken;
-using namespace OHOS::AudioStandard;
-using OHOS::ErrCode;
 static AVMetaData g_metaData;
 static AVPlaybackState g_playbackState;
 static char g_testSessionTag[] = "test";
@@ -4245,7 +4246,6 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone001, TestSize.
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = "test_session_001";
     descriptor.userId_ = 100;
-    descriptor.bundleName_ = "test_bundle";
     
     avservice_->NotifySessionAddForAudioZone(descriptor);
     SLOGD("NotifySessionAddForAudioZone001 end!");
@@ -4262,12 +4262,10 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone002, TestSize.
     AVSessionDescriptor descriptor1;
     descriptor1.sessionId_ = "session_001";
     descriptor1.userId_ = 100;
-    descriptor1.bundleName_ = "bundle_1";
     
     AVSessionDescriptor descriptor2;
     descriptor2.sessionId_ = "session_002";
     descriptor2.userId_ = 101;
-    descriptor2.bundleName_ = "bundle_2";
     
     avservice_->NotifySessionAddForAudioZone(descriptor1);
     avservice_->NotifySessionAddForAudioZone(descriptor2);
@@ -4289,7 +4287,6 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionAddForAudioZone003, TestSize.
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = "test_session";
     descriptor.userId_ = userId;
-    descriptor.bundleName_ = "test_bundle";
     avservice_->NotifySessionAddForAudioZone(descriptor);
     SLOGD("NotifySessionAddForAudioZone003 end!");
 }
@@ -4305,7 +4302,6 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionRemoveForAudioZone001, TestSi
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = "test_session_001";
     descriptor.userId_ = 100;
-    descriptor.bundleName_ = "test_bundle";
 
     avservice_->NotifySessionRemoveForAudioZone(descriptor);
     SLOGD("NotifySessionRemoveForAudioZone001 end!");
@@ -4326,7 +4322,6 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionRemoveForAudioZone002, TestSi
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = "test_session";
     descriptor.userId_ = userId;
-    descriptor.bundleName_ = "test_bundle";
     avservice_->NotifySessionRemoveForAudioZone(descriptor);
     SLOGD("NotifySessionRemoveForAudioZone002 end!");
 }
@@ -4342,12 +4337,10 @@ static HWTEST_F(AVSessionServiceTest, NotifySessionRemoveForAudioZone003, TestSi
     AVSessionDescriptor descriptor1;
     descriptor1.sessionId_ = "session_001";
     descriptor1.userId_ = 100;
-    descriptor1.bundleName_ = "bundle_1";
     
     AVSessionDescriptor descriptor2;
     descriptor2.sessionId_ = "session_002";
     descriptor2.userId_ = 101;
-    descriptor2.bundleName_ = "bundle_2";
     
     avservice_->NotifySessionRemoveForAudioZone(descriptor1);
     avservice_->NotifySessionRemoveForAudioZone(descriptor2);
@@ -4572,7 +4565,6 @@ static HWTEST_F(AVSessionServiceTest, NotifyTopSessionChangeForAudioZone001, Tes
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = "test_session";
     descriptor.userId_ = 100;
-    descriptor.bundleName_ = "test_bundle";
     
     avservice_->NotifyTopSessionChangeForAudioZone(descriptor);
     SLOGD("NotifyTopSessionChangeForAudioZone001 end!");
@@ -4596,7 +4588,6 @@ static HWTEST_F(AVSessionServiceTest, NotifyTopSessionChangeForAudioZone002, Tes
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = "test_session";
     descriptor.userId_ = userId;
-    descriptor.bundleName_ = "test_bundle";
     
     avservice_->NotifyTopSessionChangeForAudioZone(descriptor);
     SLOGD("NotifyTopSessionChangeForAudioZone002 end!");

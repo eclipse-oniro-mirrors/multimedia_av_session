@@ -134,15 +134,7 @@ public:
     int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor> &descriptors) override
     {
-        if (!isSuccess) {
-            return AVSESSION_ERROR;
-        }
-        AVSessionDescriptor desc;
-        desc.sessionId_ = "test_session_" + std::to_string(userId);
-        desc.userId_ = userId;
-        desc.bundleName_ = "test_bundle";
-        descriptors.push_back(desc);
-        return AVSESSION_SUCCESS;
+        return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR;
     };
     int32_t StartAVPlaybackForAudioZone(const std::string &bundleName, int32_t userId,
         const std::string &assetId, const CommandInfo &info) override
