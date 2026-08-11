@@ -55,12 +55,6 @@
 #include "audio_zone_types.h"
 #endif
 
-using namespace testing::ext;
-using namespace OHOS::AVSession;
-using namespace OHOS::Security::AccessToken;
-using namespace OHOS::AudioStandard;
-using OHOS::ErrCode;
-
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "i_avcast_controller_proxy.h"
 #include "avcast_control_command.h"
@@ -180,6 +174,11 @@ private:
 };
 #endif
 
+using namespace testing::ext;
+using namespace OHOS::AVSession;
+using namespace OHOS::Security::AccessToken;
+using namespace OHOS::AudioStandard;
+using OHOS::ErrCode;
 
 class ISessionListenerMock : public ISessionListener {
 public:
