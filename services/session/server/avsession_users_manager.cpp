@@ -531,8 +531,8 @@ void AVSessionUsersManager::CollectLocalSessionsForAudioZone(int32_t zoneId,
     const std::vector<int32_t>& userIds = zoneIter->second;
     
     for (int32_t userId : userIds) {
-        auto userIter = sessionStackMapByUserId_.find(userId);
-        if (userIter == sessionStackMapByUserId_.end()) {
+        auto sessionStackIter = sessionStackMapByUserId_.find(userId);
+        if (sessionStackIter == sessionStackMapByUserId_.end()) {
             continue;
         }
         auto allSessions = sessionStackIter->second->GetAllSession();
