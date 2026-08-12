@@ -608,6 +608,7 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             break;
         case MEMORY_MANAGER_SA_ID:
             NotifyProcessStatus(true);
+            SetCritical(true);
             break;
         case SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN:
             InitAccountMgr();
@@ -654,12 +655,16 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
         return;
     }
     auto notifyProcessStatus = reinterpret_cast<int(*)(int, int, int, int)>(notifyProcessStatusFunc);
+    int ret = -1;
     if (isStart) {
         SLOGI("notify to memmgr when av_session is started");
-        notifyProcessStatus(pid, saType, 1, AVSESSION_SERVICE_ID); // 1 indicates the service is started
+        ret = notifyProcessStatus(pid, saType, 1, AVSESSION_SERVICE_ID); // 1 indicates the service is started
     } else {
         SLOGI("notify to memmgr when av_session is stopped");
-        notifyProcessStatus(pid, saType, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
+        ret = notifyProcessStatus(pid, saType, 0, AVSESSION_SERVICE_ID); // 0 indicates the service is stopped
+    }
+    if (ret != 0) {
+        SLOGE("notifyProcessStatus failed");
     }
 #ifndef TEST_COVERAGE
     dlclose(libMemMgrClientHandle);
@@ -684,7 +689,10 @@ void AVSessionService::SetCritical(bool isCritical)
     }
     auto setCritical = reinterpret_cast<int(*)(int, bool, int)>(setCriticalFunc);
     SLOGI("notify to memmgr as av_session isCritical:%{public}d", isCritical);
-    setCritical(pid, isCritical, AVSESSION_SERVICE_ID); // 1 indicates the service is started
+    // 1 indicates the service is started
+    if (setCritical(pid, isCritical, AVSESSION_SERVICE_ID) != 0) {
+        SLOGE("setCritical failed");
+    }
 #ifndef TEST_COVERAGE
     dlclose(libMemMgrClientHandle);
 #endif
