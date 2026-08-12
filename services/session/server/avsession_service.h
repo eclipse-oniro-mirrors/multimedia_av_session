@@ -955,18 +955,27 @@ private:
     class AudioZoneChangeCallbackImpl;
     class AudioZoneCallbackImpl : public AudioStandard::AudioZoneCallback {
     public:
-        explicit AudioZoneCallbackImpl(std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback)
-            : audioZoneChangeCallbackWeak_(audioZoneChangeCallback) {}
+        using ZoneCallback = std::function<void()>;
+        explicit AudioZoneCallbackImpl(std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback,
+            ZoneCallback zoneRemoveCallback)
+            : audioZoneChangeCallbackWeak_(audioZoneChangeCallback)
+            , zoneRemoveCallback_(std::move(zoneRemoveCallback)) {}
         void OnAudioZoneAdd(const AudioStandard::AudioZoneDescriptor &zoneDescriptor) override;
         void OnAudioZoneRemove(int32_t zoneId) override;
     private:
         std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallbackWeak_;
+        ZoneCallback zoneRemoveCallback_;
     };
 
     class AudioZoneChangeCallbackImpl : public AudioStandard::AudioZoneChangeCallback {
     public:
+        using ZoneChangeCallback = std::function<void()>;
+        explicit AudioZoneChangeCallbackImpl(ZoneChangeCallback callback)
+            : zoneChangeCallback_(std::move(callback)) {}
         void OnAudioZoneChange(const AudioStandard::AudioZoneDescriptor &zoneDescriptor,
             AudioStandard::AudioZoneChangeReason reason) override;
+    private:
+        ZoneChangeCallback zoneChangeCallback_;
     };
     std::shared_ptr<AudioZoneCallbackImpl> audioZoneCallback_ = nullptr;
     std::shared_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback_ = nullptr;
@@ -975,15 +984,11 @@ private:
     void DeinitAudioZoneCallback();
 
 public:
-    static AVSessionService* GetInstance() { return instance_; }
     std::recursive_mutex& GetMigrateProxyMapLock() { return migrateProxyMapLock_; }
     std::map<std::string, std::shared_ptr<SoftbusSession>>& GetMigrateProxyMap()
     {
         return migrateAVSessionProxyMap_;
     }
-
-private:
-    static AVSessionService* instance_;
 #endif
 };
 } // namespace OHOS::AVSession

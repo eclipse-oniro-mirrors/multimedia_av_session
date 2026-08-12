@@ -727,22 +727,6 @@ HWTEST_F(AVSessionUsersManagerTest, CollectLocalSessionsForAudioZone_002, TestSi
 }
 
 /**
- * @tc.name: CollectDistributedSessionsForAudioZone_001
- * @tc.desc: Test CollectDistributedSessionsForAudioZone with non-existent zone
- * @tc.type: FUNC
- */
-HWTEST_F(AVSessionUsersManagerTest, CollectDistributedSessionsForAudioZone_001, TestSize.Level0)
-{
-    SLOGI("CollectDistributedSessionsForAudioZone_001 begin!");
-    auto& manager = AVSessionUsersManager::GetInstance();
-    int32_t zoneId = 999999;
-    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
-    manager.CollectDistributedSessionsForAudioZone(zoneId, sessionWithTime);
-    EXPECT_TRUE(sessionWithTime.empty());
-    SLOGI("CollectDistributedSessionsForAudioZone_001 end!");
-}
-
-/**
  * @tc.name: SortAndCacheSessionStack_001
  * @tc.desc: Test SortAndCacheSessionStack sorts and caches descriptors
  * @tc.type: FUNC
