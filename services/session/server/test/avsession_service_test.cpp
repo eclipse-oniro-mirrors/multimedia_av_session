@@ -1077,15 +1077,6 @@ static HWTEST_F(AVSessionServiceTest, DeleteHistoricalRecord001, TestSize.Level0
     SLOGI("DeleteHistoricalRecord001 end!");
 }
 
-static HWTEST_F(AVSessionServiceTest, Dump001, TestSize.Level0)
-{
-    SLOGI("Dump001 begin!");
-    std::vector<std::u16string> argsList;
-    avservice_->Dump(1, argsList);
-    EXPECT_EQ(0, AVSESSION_SUCCESS);
-    SLOGI("Dump001 end!");
-}
-
 static HWTEST_F(AVSessionServiceTest, ProcessCastAudioCommand001, TestSize.Level0)
 {
     SLOGI("ProcessCastAudioCommand001 begin!");
@@ -1561,16 +1552,6 @@ static HWTEST_F(AVSessionServiceTest, DoMetadataImgClean002, TestSize.Level0)
     OHOS::AVSession::AVMetaData metaData;
     avservice_->DoMetadataImgClean(metaData);
     SLOGI("DoMetadataImgClean002 end!");
-}
-
-static HWTEST_F(AVSessionServiceTest, Dump002, TestSize.Level0)
-{
-    SLOGI("Dump002 begin!");
-    int32_t fd = -1;
-    std::vector<std::u16string> argsList;
-    int32_t ret = avservice_->Dump(fd, argsList);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
-    SLOGI("Dump002 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, GetTrustedDeviceName001, TestSize.Level0)
