@@ -961,18 +961,12 @@ private:
         void OnAudioZoneRemove(int32_t zoneId) override;
     private:
         std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallbackWeak_;
-        ZoneCallback zoneRemoveCallback_;
     };
 
     class AudioZoneChangeCallbackImpl : public AudioStandard::AudioZoneChangeCallback {
     public:
-        using ZoneChangeCallback = std::function<void()>;
-        explicit AudioZoneChangeCallbackImpl(ZoneChangeCallback callback)
-            : zoneChangeCallback_(std::move(callback)) {}
         void OnAudioZoneChange(const AudioStandard::AudioZoneDescriptor &zoneDescriptor,
             AudioStandard::AudioZoneChangeReason reason) override;
-    private:
-        ZoneChangeCallback zoneChangeCallback_;
     };
     std::shared_ptr<AudioZoneCallbackImpl> audioZoneCallback_ = nullptr;
     std::shared_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback_ = nullptr;
