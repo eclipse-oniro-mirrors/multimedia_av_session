@@ -122,6 +122,9 @@ private:
     void CollectLocalSessionsForAudioZone(int32_t zoneId,
         std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
 
+    void CollectDistributedSessionsForAudioZone(int32_t zoneId,
+         std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+
     void SortAndCacheSessionStack(int32_t zoneId,
         std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
     
@@ -130,6 +133,8 @@ private:
     
     bool IsCastSessionValid(const sptr<AVSessionItem>& session, int32_t zoneId);
 
+    void AddControllerToVector(const sptr<AVControllerItem>& controller,
+        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
 #endif
 
     std::map<int32_t, std::shared_ptr<SessionStack>> sessionStackMapByUserId_;

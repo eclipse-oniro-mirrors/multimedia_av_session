@@ -955,11 +955,8 @@ private:
     class AudioZoneChangeCallbackImpl;
     class AudioZoneCallbackImpl : public AudioStandard::AudioZoneCallback {
     public:
-        using ZoneCallback = std::function<void()>;
-        explicit AudioZoneCallbackImpl(std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback,
-            ZoneCallback zoneRemoveCallback)
-            : audioZoneChangeCallbackWeak_(audioZoneChangeCallback)
-            , zoneRemoveCallback_(std::move(zoneRemoveCallback)) {}
+        explicit AudioZoneCallbackImpl(std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback)
+            : audioZoneChangeCallbackWeak_(audioZoneChangeCallback) {}
         void OnAudioZoneAdd(const AudioStandard::AudioZoneDescriptor &zoneDescriptor) override;
         void OnAudioZoneRemove(int32_t zoneId) override;
     private:
@@ -984,11 +981,14 @@ private:
     void DeinitAudioZoneCallback();
 
 public:
+    static AVSessionService* GetInstance() { return instance_; }
     std::recursive_mutex& GetMigrateProxyMapLock() { return migrateProxyMapLock_; }
     std::map<std::string, std::shared_ptr<SoftbusSession>>& GetMigrateProxyMap()
     {
         return migrateAVSessionProxyMap_;
     }
+private: 
+    static AVSessionService* instance_;
 #endif
 };
 } // namespace OHOS::AVSession

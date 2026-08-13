@@ -506,6 +506,7 @@ void AVSessionUsersManager::UpdateSessionStackForAudioZone(int32_t userId)
     std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
     
     CollectLocalSessionsForAudioZone(zoneId, sessionWithTime);
+    CollectDistributedSessionsForAudioZone(zoneId, sessionWithTime);
     SortAndCacheSessionStack(zoneId, sessionWithTime);
 }
 
@@ -560,6 +561,48 @@ bool AVSessionUsersManager::IsCastSessionValid(const sptr<AVSessionItem>& sessio
     return castZoneId == zoneId;
 }
 
+void AVSessionUsersManager::AddControllerToVector(
+    const sptr<AVControllerItem>& controller,
+    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+{
+    AVSessionDescriptor desc = controller->GetSessionDescriptor();
+    int64_t createTime = controller->GetCreateTime();
+    sessionWithTime.push_back({desc, createTime});
+}
+
+void AVSessionUsersManager::CollectDistributedSessionsForAudioZone(int32_t zoneId,
+    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+{
+    auto service = AVSessionService::GetInstance();
+    if (!service) {
+        return;
+    }
+    std::vector<sptr<IRemoteObject>> controllers;
+    int32_t ret = service->GetDistributedSessionControllersForAudioZone(controllers);
+    if (ret != AVSESSION_SUCCESS || controllers.empty()) {
+        SLOGI("No migrate-in distributed sessions, ret=%{public}d", ret);
+        return;
+    }
+    std::lock_guard lockGuard(userLock_);
+    auto zoneIter = zoneToUserid_.find(zoneId);
+    if (zoneIter == zoneToUserid_.end()) {
+        return;
+    }
+    const std::vector<int32_t>& targetUserIds = zoneIter->second;
+    for (auto& controllerObj : controllers) {
+        sptr<AVControllerItem> controller = iface_cast<AVControllerItem>(controllerObj);
+        if (!controller) {
+            continue;
+        }
+        AVSessionDescriptor desc = controller->GetSessionDescriptor();
+        int32_t controllerUserId = desc.userId_;
+        bool isTargetZone = std::find(targetUserIds.begin(), targetUserIds.end(),
+            controllerUserId) != targetUserIds.end();
+        if (isTargetZone) {
+            AddControllerToVector(controller, sessionWithTime);
+        }
+    }
+}
 void AVSessionUsersManager::SortAndCacheSessionStack(int32_t zoneId,
     std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
 {

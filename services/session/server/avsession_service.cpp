@@ -71,6 +71,10 @@ using namespace OHOS::AudioStandard;
 
 namespace OHOS::AVSession {
 
+#ifdef CAR_FEATURE_ENABLE
+AVSessionService* AVSessionService::instance_ = nullptr;
+#endif
+
 static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("libavsession_dynamic_insight.z.so");
     
 static const int32_t COLLABORATION_SA_ID = 70633;
@@ -150,6 +154,9 @@ Notification::NotificationRequest g_NotifyRequest;
 AVSessionService::AVSessionService(int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate)
 {
+#ifdef CAR_FEATURE_ENABLE
+    instance_ = this;
+#endif
 }
 
 AVSessionService::~AVSessionService()
@@ -5288,16 +5295,11 @@ int32_t AVSessionService::RegisterSessionListenerForUser(int32_t userId, const s
 
 void AVSessionService::InitAudioZoneCallback()
 {
-    audioZoneChangeCallback_ = std::make_shared<AudioZoneChangeCallbackImpl>(
-        [this]() { HandleSessionStackChangeForAudioZone(); });
-    
-    audioZoneCallback_ = std::make_shared<AudioZoneCallbackImpl>(
-        audioZoneChangeCallback_,
-        [this]() { HandleSessionStackChangeForAudioZone(); });
-    
+    audioZoneChangeCallback_ = std::make_shared<AudioZoneChangeCallbackImpl>();
+    audioZoneCallback_ = std::make_shared<AudioZoneCallbackImpl>(audioZoneChangeCallback_);
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
-    if (audioZoneManager != nullptr) {
-        auto ret = audioZoneManager->RegisterAudioZoneCallback(audioZoneCallback_);
+ 	if (audioZoneManager != nullptr) {
+ 	    auto ret = audioZoneManager->RegisterAudioZoneCallback(audioZoneCallback_);
         SLOGI("RegisterAudioZoneCallback ret=%{public}d", ret);
     } else {
         SLOGE("AudioZoneManager::GetInstance() is nullptr");
@@ -5337,9 +5339,7 @@ void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneRemove(int32_t zoneId)
         SLOGI("OnAudioZoneRemove UnRegisterAudioZoneChangeCallback ret=%{public}d", ret);
     }
 
-    if (zoneRemoveCallback_) {
-        zoneRemoveCallback_();
-    }
+    AVSessionService::GetInstance()->HandleSessionStackChangeForAudioZone();
 }
 
 void AVSessionService::AudioZoneChangeCallbackImpl::OnAudioZoneChange(
@@ -5348,9 +5348,7 @@ void AVSessionService::AudioZoneChangeCallbackImpl::OnAudioZoneChange(
     SLOGI("OnAudioZoneChange zoneId=%{public}d reason=%{public}d",
         zoneDescriptor.zoneId_, static_cast<int>(reason));
     
-    if (zoneChangeCallback_) {
-        zoneChangeCallback_();
-    }
+    AVSessionService::GetInstance()->HandleSessionStackChangeForAudioZone();
 }
 #endif
 
