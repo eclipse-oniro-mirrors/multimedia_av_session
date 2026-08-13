@@ -17,7 +17,13 @@ import("//build/config/components/ace_engine/ace_gen_obj.gni")
 import("//foundation/multimedia/av_session/config.gni")
 
 es2abc_gen_abc("gen_avpicker_abc") {
-  if (use_mingw_win || use_mac || use_linux) {
+  if ("${target_platform}" == "car") {
+    src_js = rebase_path("avpicker_car.js")
+    dst_file = rebase_path(target_out_dir + "/avpicker.abc")
+    in_puts = [ "avpicker_car.js" ]
+    out_puts = [ target_out_dir + "/avpicker.abc" ]
+    extra_args = [ "--module" ]
+  } else if (use_mingw_win || use_mac || use_linux) {
     src_js = rebase_path("avpicker_mock.js")
     dst_file = rebase_path(target_out_dir + "/avpicker.abc")
     in_puts = [ "avpicker_mock.js" ]
