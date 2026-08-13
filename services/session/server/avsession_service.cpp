@@ -5330,8 +5330,6 @@ void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneAdd(
 
 void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneRemove(int32_t zoneId)
 {
-    SLOGI("OnAudioZoneRemove zoneId=%{public}d", zoneId);
-    
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     auto audioZoneChangeCallback_ = audioZoneChangeCallbackWeak_.lock();
     if (audioZoneManager != nullptr && audioZoneChangeCallback_ != nullptr) {
