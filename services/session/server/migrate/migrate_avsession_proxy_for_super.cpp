@@ -234,12 +234,10 @@ int32_t MigrateAVSessionProxy::ProcessControllerListForSuper(cJSON* jsonValue)
             retForProcessMeta, retForProcessState, retForProcessCmd);
     }
     std::lock_guard lockGuard(migrateProxySessionIdLock_);
-    for (auto it = sessionStackForMigrateIn_.begin(); it != sessionStackForMigrateIn_.end();) {
+    for (auto it = sessionStackForMigrateIn_.begin(); it != sessionStackForMigrateIn_.end(); ++it) {
         if (std::find(sessionRefreshList_.begin(), sessionRefreshList_.end(), it->first) == sessionRefreshList_.end()) {
             SLOGI("clear session:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(it->first).c_str());
             CleanMetadataForMigrateSession(it->second);
-        } else {
-            ++it;
         }
     }
 
