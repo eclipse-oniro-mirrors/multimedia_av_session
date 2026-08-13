@@ -3371,6 +3371,16 @@ int64_t AVSessionItem::GetPlayingTime() const
     return playingTime_;
 }
 
+void AVSessionItem::SetCastScreenUserId(int32_t userId)
+{
+    castScreenUserId_ = userId;
+}
+
+int32_t AVSessionItem::GetCastScreenUserId() const
+{
+    return castScreenUserId_;
+}
+
 void AVSessionItem::SetLyricTitle(const std::string& title)
 {
     lyricTitle_ = title;

@@ -134,6 +134,9 @@ void AVSessionManagerImpl::OnServiceDie()
             service_.clear();
         }
         listenerMapByUserId_.clear();
+#ifdef CAR_FEATURE_ENABLE
+        listenerMapByUserIdForAudioZone_.clear();
+#endif
         deathCallback_ = nullptr;
     }
     if (callback) {
@@ -214,6 +217,17 @@ int32_t AVSessionManagerImpl::GetSessionDescriptors(int32_t category, std::vecto
     return service ? service->GetSessionDescriptors(category, descriptors) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::GetSessionDescriptorsForAudioZone(int32_t userId,
+    std::vector<AVSessionDescriptor>& descriptors)
+{
+#ifdef CAR_FEATURE_ENABLE
+    auto service = GetService();
+    return service ? service->GetSessionDescriptorsForAudioZone(userId, descriptors) : ERR_SERVICE_NOT_EXIST;
+#else
+    return AVSESSION_ERROR;
+#endif
+}
+
 int32_t AVSessionManagerImpl::GetActivatedSessionDescriptors(std::vector<AVSessionDescriptor>& activatedSessions)
 {
     std::vector<AVSessionDescriptor> descriptors;
@@ -259,6 +273,17 @@ int32_t AVSessionManagerImpl::StartAVPlayback(const std::string& bundleName, con
 {
     auto service = GetService();
     return service ? service->StartAVPlayback(bundleName, assetId, moduleName) : ERR_SERVICE_NOT_EXIST;
+}
+
+int32_t AVSessionManagerImpl::StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+    const std::string& assetId, const CommandInfo& info)
+{
+#ifdef CAR_FEATURE_ENABLE
+    auto service = GetService();
+    return service ? service->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info) : ERR_SERVICE_NOT_EXIST;
+#else
+    return AVSESSION_ERROR;
+#endif
 }
 
 int32_t AVSessionManagerImpl::RegisterAncoMediaSessionListener(
@@ -363,6 +388,36 @@ int32_t AVSessionManagerImpl::RegisterSessionListener(const std::shared_ptr<Sess
     SLOGI("RegisterSessionListener for user %{public}d", ret);
     listenerMapByUserId_[ret] = listenerPtr;
     return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionManagerImpl::RegisterSessionListenerForUser(const int32_t userId,
+    const std::shared_ptr<SessionListener>& listener)
+{
+#ifdef CAR_FEATURE_ENABLE
+    auto service = GetService();
+    if (service == nullptr) {
+        SLOGE("RegisterSessionListenerForUser service is null");
+        return ERR_SERVICE_NOT_EXIST;
+    }
+
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    sptr<ISessionListener> listenerPtr = GetSessionListenerClient(listener);
+    if (listenerPtr == nullptr) {
+        SLOGE("RegisterSessionListenerForUser listenerPtr is null");
+        return ERR_INVALID_PARAM;
+    }
+
+    int32_t ret = service->RegisterSessionListenerForUser(userId, listenerPtr);
+    if (ret != AVSESSION_SUCCESS) {
+        SLOGE("RegisterSessionListenerForUser IPC failed, userId=%{public}d, ret=%{public}d", userId, ret);
+        return ret;
+    }
+    listenerMapByUserIdForAudioZone_[userId] = listenerPtr;
+    SLOGI("RegisterSessionListenerForUser for user %{public}d", userId);
+    return AVSESSION_SUCCESS;
+#else
+    return AVSESSION_ERROR;
+#endif
 }
 
 int32_t AVSessionManagerImpl::RegisterSessionListenerForAllUsers(const std::shared_ptr<SessionListener>& listener)
@@ -496,7 +551,9 @@ int32_t AVSessionManagerImpl::Close(void)
     }
     SLOGI("manager impl close with listener clear");
     listenerMapByUserId_.clear();
-
+#ifdef CAR_FEATURE_ENABLE
+    listenerMapByUserIdForAudioZone_.clear();
+#endif
     AVSessionEventHandler::GetInstance().AVSessionRemoveHandler();
     return ret;
 }

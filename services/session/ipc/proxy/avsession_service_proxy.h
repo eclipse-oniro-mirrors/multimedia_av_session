@@ -65,6 +65,14 @@ public:
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
         const std::string& moduleName) override;
 
+#ifdef CAR_FEATURE_ENABLE
+    int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
+        std::vector<AVSessionDescriptor>& descriptors) override;
+
+    int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+        const std::string& assetId, const CommandInfo& info) override;
+#endif
+
     int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override;
 
     int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller);
@@ -78,6 +86,10 @@ public:
 #endif
 
     int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) override;
+
+#ifdef CAR_FEATURE_ENABLE
+    int32_t RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener) override;
+#endif
 
     int32_t RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener) override;
 

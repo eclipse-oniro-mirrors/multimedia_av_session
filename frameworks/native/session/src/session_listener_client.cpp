@@ -122,6 +122,42 @@ ErrCode SessionListenerClient::OnSystemCommonEvent(const std::string& commonEven
     return AVSESSION_SUCCESS;
 }
 
+ErrCode SessionListenerClient::OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
+{
+#ifdef CAR_FEATURE_ENABLE
+    auto copiedListener = listener_;
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnSessionAddForAudioZone(userId, descriptor);
+    return AVSESSION_SUCCESS;
+#else
+    return AVSESSION_ERROR;
+#endif
+}
+
+ErrCode SessionListenerClient::OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
+{
+#ifdef CAR_FEATURE_ENABLE
+    auto copiedListener = listener_;
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnSessionRemoveForAudioZone(userId, descriptor);
+    return AVSESSION_SUCCESS;
+#else
+    return AVSESSION_ERROR;
+#endif
+}
+
+ErrCode SessionListenerClient::OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor)
+{
+#ifdef CAR_FEATURE_ENABLE
+    auto copiedListener = listener_;
+    CHECK_AND_RETURN_RET_LOG(copiedListener, AVSESSION_ERROR, "listener_ is null");
+    copiedListener->OnTopSessionChangeForAudioZone(userId, descriptor);
+    return AVSESSION_SUCCESS;
+#else
+    return AVSESSION_ERROR;
+#endif
+}
+
 AncoMediaSessionListenerImpl::AncoMediaSessionListenerImpl(const std::shared_ptr<AncoMediaSessionListener>& listener)
     : listener_(listener)
 {

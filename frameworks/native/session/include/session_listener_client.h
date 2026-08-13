@@ -51,6 +51,13 @@ public:
     ErrCode OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override;
 
     ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override;
+
+    ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
+
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
+
+    ErrCode OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override;
+
 private:
     std::shared_ptr<SessionListener> listener_;
 };

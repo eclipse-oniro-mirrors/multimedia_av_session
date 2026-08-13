@@ -105,6 +105,8 @@ void AVSessionServiceStubPermissionTest::TearDown()
 {
 }
 
+using OHOS::ErrCode;
+
 class AVSessionServiceStubDemo : public AVSessionServiceStub {
 public:
     OHOS::sptr<IRemoteObject> CreateSessionInner(const std::string &tag, int32_t type,
@@ -128,6 +130,20 @@ public:
         std::vector<AVQueueInfo> &avQueueInfos) override { return 0; };
     int32_t StartAVPlayback(const std::string &bundleName, const std::string &assetId,
         const std::string& moduleName) override { return 0; };
+#ifdef CAR_FEATURE_ENABLE
+    int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
+        std::vector<AVSessionDescriptor> &descriptors) override
+    {
+        return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR;
+    };
+    int32_t StartAVPlaybackForAudioZone(const std::string &bundleName, int32_t userId,
+        const std::string &assetId, const CommandInfo &info) override
+    {
+        return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR;
+    };
+    int32_t RegisterSessionListenerForUser(int32_t userId,
+        const OHOS::sptr<ISessionListener> &listener) override { return AVSESSION_SUCCESS; };
+#endif
     int32_t RegisterAncoMediaSessionListener(const OHOS::sptr<IAncoMediaSessionListener> &listener) override
     {
         return 0;

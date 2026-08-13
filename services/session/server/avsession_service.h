@@ -75,7 +75,9 @@
 #include "matching_skills.h"
 
 #include "avsession_users_manager.h"
-
+#ifdef CAR_FEATURE_ENABLE
+#include "audio_zone_types.h"
+#endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "av_router.h"
 #include "collaboration_manager_urlcasting.h"
@@ -201,8 +203,30 @@ public:
 
     int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override;
 
+#ifdef CAR_FEATURE_ENABLE
+    struct TargetPlayInfo {
+        std::string bundleName;
+        std::string moduleName;
+        bool isValid = false;
+    };
+    
+    int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
+        std::vector<AVSessionDescriptor>& descriptors) override;
+    
+    int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+        const std::string& assetId, const CommandInfo& info) override;
+    
+    int32_t RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener) override;
+    
+    int32_t GetDistributedSessionControllersForAudioZone(
+        std::vector<sptr<IRemoteObject>>& sessionControllers);
+private:
+    TargetPlayInfo GetTargetPlayInfoForAudioZone(int32_t userId, const std::string& bundleName);
+#endif
+
     int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId = "");
 
+public:
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
 
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object, pid_t pid);
@@ -311,6 +335,7 @@ public:
     int32_t PcmCastSessionReleasePlayer() override;
 #endif
 
+public:
     int32_t Close(void) override;
 
     void AddAvQueueInfoToFile(AVSessionItem& session);
@@ -369,6 +394,16 @@ public:
     void SetPcMode(bool isPcMode);
 
 private:
+    friend class EventSubscriber;
+    friend class BackgroundAudioController;
+    friend class AVSessionServiceExt;
+    friend class AVSessionDeviceStateCallback;
+    friend class MigrateAVSessionProxy;
+    friend class MigrateAVSessionProxyForSuper;
+    friend class MigrateAVSessionServer;
+    friend class MigrateAVSessionServerForNext;
+    friend class PcmCastSession;
+
     void NotifyProcessStatus(bool isStart);
 
     void SetCritical(bool isCritical);
@@ -384,6 +419,15 @@ private:
     void NotifySessionCreate(const AVSessionDescriptor& descriptor);
     void NotifySessionRelease(const AVSessionDescriptor& descriptor);
     void NotifyTopSessionChanged(const AVSessionDescriptor& descriptor);
+#ifdef CAR_FEATURE_ENABLE
+    void NotifySessionAddForAudioZone(const AVSessionDescriptor& descriptor);
+    void NotifySessionRemoveForAudioZone(const AVSessionDescriptor& descriptor);
+    void NotifyTopSessionChangeForAudioZone(const AVSessionDescriptor& descriptor);
+    void HandleSessionStackChangeForAudioZone();
+    void NotifySessionStackDiffForAudioZone(int32_t userId,
+        const std::vector<AVSessionDescriptor>& oldStack,
+        const std::vector<AVSessionDescriptor>& newStack);
+#endif
     void NotifyAudioSessionCheck(const int32_t uid);
     bool CheckNotificationEnabled();
     void NotifySystemUI(sptr<AVSessionItem> photoSession, bool addCapsule, bool isCapsuleUpdate);
@@ -905,6 +949,40 @@ private:
     const int32_t uidToUserId = 200000;
 
     const std::string sessionTypePhoto = "photo";
+
+#ifdef CAR_FEATURE_ENABLE
+    class AudioZoneChangeCallbackImpl;
+    class AudioZoneCallbackImpl : public AudioStandard::AudioZoneCallback {
+    public:
+        explicit AudioZoneCallbackImpl(std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback)
+            : audioZoneChangeCallbackWeak_(audioZoneChangeCallback) {}
+        void OnAudioZoneAdd(const AudioStandard::AudioZoneDescriptor &zoneDescriptor) override;
+        void OnAudioZoneRemove(int32_t zoneId) override;
+    private:
+        std::weak_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallbackWeak_;
+    };
+
+    class AudioZoneChangeCallbackImpl : public AudioStandard::AudioZoneChangeCallback {
+    public:
+        void OnAudioZoneChange(const AudioStandard::AudioZoneDescriptor &zoneDescriptor,
+            AudioStandard::AudioZoneChangeReason reason) override;
+    };
+    std::shared_ptr<AudioZoneCallbackImpl> audioZoneCallback_ = nullptr;
+    std::shared_ptr<AudioZoneChangeCallbackImpl> audioZoneChangeCallback_ = nullptr;
+
+    void InitAudioZoneCallback();
+    void DeinitAudioZoneCallback();
+
+public:
+    static AVSessionService* GetInstance() { return instance_; }
+    std::recursive_mutex& GetMigrateProxyMapLock() { return migrateProxyMapLock_; }
+    std::map<std::string, std::shared_ptr<SoftbusSession>>& GetMigrateProxyMap()
+    {
+        return migrateAVSessionProxyMap_;
+    }
+private:
+    static AVSessionService* instance_;
+#endif
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVSESSION_SERVICE_H

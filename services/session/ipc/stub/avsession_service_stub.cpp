@@ -178,6 +178,30 @@ int32_t AVSessionServiceStub::HandleGetHistoricalSessionDescriptors(MessageParce
     return ERR_NONE;
 }
 
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionServiceStub::HandleGetSessionDescriptorsForAudioZone(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(
+        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("GetSessionDescriptorsForAudioZone: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice getsessiondescriptorsforaudiozone checkpermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    int32_t userId = data.ReadInt32();
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t ret = GetSessionDescriptorsForAudioZone(userId, descriptors);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
+    for (const auto& descriptor : descriptors) {
+        CHECK_AND_BREAK_LOG(descriptor.Marshalling(reply), "write descriptor failed");
+    }
+    return ERR_NONE;
+}
+#endif
+
 int32_t AVSessionServiceStub::GetAVQueueInfosImgLength(std::vector<AVQueueInfo>& avQueueInfos)
 {
     int sumLength = 0;
@@ -277,6 +301,29 @@ int32_t AVSessionServiceStub::HandleStartAVPlayback(MessageParcel& data, Message
     return ERR_NONE;
 }
 
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionServiceStub::HandleStartAVPlaybackForAudioZone(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(
+        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("StartAVPlaybackForAudioZone: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice StartAVPlaybackForAudioZone checkpermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
+    std::string assetId = data.ReadString();
+    CommandInfo info;
+    info.Unmarshalling(data);
+    int32_t ret = StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
+    return ERR_NONE;
+}
+#endif
+
 int32_t AVSessionServiceStub::HandleRegisterAncoMediaSessionListener(MessageParcel& data, MessageParcel& reply)
 {
     if (GetCallingUid() != audioBrokerUid) {
@@ -374,6 +421,44 @@ int32_t AVSessionServiceStub::HandleRegisterSessionListener(MessageParcel& data,
     }
     return ERR_NONE;
 }
+
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionServiceStub::HandleRegisterSessionListenerForUser(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(
+        PermissionChecker::CHECK_SYSTEM_AND_MEDIA_RESOURCES_PUBLIC_PERMISSION);
+    if (err != ERR_NONE) {
+        SLOGE("RegisterSessionListenerForUser: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice RegisterSessionListenerForUser checkpermission failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    
+    int32_t userId = 0;
+    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(userId), ERR_UNMARSHALLING, "read userId failed");
+    CHECK_AND_RETURN_RET_LOG(userId >= 0, ERR_INVALID_PARAM, "invalid userId");
+    
+    auto remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        SLOGI("read remote object failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_UNMARSHALLING), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    
+    auto listener = iface_cast<ISessionListener>(remoteObject);
+    if (listener == nullptr) {
+        SLOGI("RegisterSessionListenerForUser but iface_cast remote object failed");
+        CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ERR_INVALID_PARAM), ERR_NONE, "write int32 failed");
+        return ERR_NONE;
+    }
+    
+    if (!reply.WriteInt32(RegisterSessionListenerForUser(userId, listener))) {
+        SLOGI("reply write int32 failed");
+    }
+    return ERR_NONE;
+}
+#endif
 
 int32_t AVSessionServiceStub::HandleRegisterSessionListenerForAllUsers(MessageParcel& data, MessageParcel& reply)
 {

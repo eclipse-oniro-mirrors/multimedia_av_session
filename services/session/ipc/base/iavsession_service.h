@@ -66,6 +66,14 @@ public:
     virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
         const std::string& moduleName) = 0;
 
+#ifdef CAR_FEATURE_ENABLE
+    virtual int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
+        std::vector<AVSessionDescriptor>& descriptors) = 0;
+
+    virtual int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+        const std::string& assetId, const CommandInfo& info) = 0;
+#endif
+
     virtual int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) = 0;
 
     virtual int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) = 0;
@@ -75,6 +83,10 @@ public:
 #endif
 
     virtual int32_t RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
+
+#ifdef CAR_FEATURE_ENABLE
+    virtual int32_t RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener) = 0;
+#endif
 
     virtual int32_t RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener) = 0;
 

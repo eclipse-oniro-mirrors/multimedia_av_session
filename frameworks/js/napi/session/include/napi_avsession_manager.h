@@ -138,10 +138,12 @@ private:
     static constexpr size_t ARGC_ONE = 1;
     static constexpr size_t ARGC_TWO = 2;
     static constexpr size_t ARGC_THREE = 3;
+    static constexpr size_t ARGC_FOUR = 4;
 
     static constexpr size_t ARGV_FIRST = 0;
     static constexpr size_t ARGV_SECOND = 1;
     static constexpr size_t ARGV_THIRD = 2;
+    static constexpr size_t ARGV_FOURTH = 3;
 
     static constexpr size_t HISTORICAL_UNSET_NUM = 3;
     static constexpr size_t HISTORICAL_MIN_NUM = 0;
@@ -149,6 +151,14 @@ private:
     static constexpr size_t MEDIACONTROL_HISTORICAL_NUM = 52225;
 
     static const std::string DISTRIBUTED_SESSION_CHANGE_EVENT;
+    static napi_value GetSessionDescriptorsForAudioZone(napi_env env, napi_callback_info info);
+    static napi_value StartAVPlaybackForAudioZone(napi_env env, napi_callback_info info);
+
+    static void RegisterAudioZoneFunctions(napi_env env, napi_value exports);
+
+    static void FillCommandInfo(napi_env env, napi_value arg, CommandInfo& commandInfo);
+
+    static void SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_MANAGER_H

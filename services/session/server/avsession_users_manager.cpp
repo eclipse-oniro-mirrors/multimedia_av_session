@@ -18,6 +18,14 @@
 #include "avsession_storage_event.h"
 #include "avsession_utils.h"
 
+#ifdef CAR_FEATURE_ENABLE
+#include "audio_zone_manager.h"
+#include "avsession_service.h"
+#include "migrate_avsession_proxy.h"
+#include "avcontroller_item.h"
+#include <algorithm>
+#endif
+
 #include <set>
 
 namespace OHOS::AVSession {
@@ -336,6 +344,31 @@ std::map<pid_t, sptr<ISessionListener>> AVSessionUsersManager::GetSessionListene
     return sessionListenersMap_;
 }
 
+#ifdef CAR_FEATURE_ENABLE
+void AVSessionUsersManager::AddSessionListenerForUser(pid_t pid, const sptr<ISessionListener>& listener, int32_t userId)
+{
+    CHECK_AND_RETURN_LOG(listener != nullptr, "listener is nullptr");
+    if (userId <= 0) {
+        SLOGE("AddSessionListenerForUser invalid userId=%{public}d", userId);
+        return;
+    }
+
+    auto iterForListenerMap = sessionListenersMapByUserIdForAudioZone_.find(userId);
+    if (iterForListenerMap != sessionListenersMapByUserIdForAudioZone_.end()) {
+        (iterForListenerMap->second)[pid] = listener;
+    } else {
+        std::map<pid_t, sptr<ISessionListener>> listenerMap;
+        listenerMap[pid] = listener;
+        sessionListenersMapByUserIdForAudioZone_[userId] = listenerMap;
+    }
+}
+
+std::map<int32_t, std::map<pid_t, sptr<ISessionListener>>>& AVSessionUsersManager::GetSessionListenersMapForAudioZone()
+{
+    return sessionListenersMapByUserIdForAudioZone_;
+}
+#endif
+
 void AVSessionUsersManager::NotifyAccountsEvent(const std::string &type, const int &userId)
 {
     std::lock_guard lockGuard(userLock_);
@@ -398,4 +431,208 @@ void AVSessionUsersManager::CleanupCacheOnUnlock(int32_t userId)
     std::string castCachePath(AVSessionUtils::GetCachePathNameForCast(userId));
     AVSessionUtils::DeleteCacheFilesExcluding(castCachePath, aliveSessionIds);
 }
+
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionUsersManager::GetZoneIdForUser(int32_t userId)
+{
+    auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
+    if (audioZoneManager == nullptr) {
+        SLOGE("GetZoneIdForUser failed to get AudioZoneManager");
+        return -1;
+    }
+
+    std::vector<int32_t> queryUserIds = {userId};
+    std::vector<int32_t> retUserIds;
+    auto ret = audioZoneManager->GetAudioZoneForApp(queryUserIds, retUserIds);
+    if (ret != 0 || retUserIds.empty()) {
+        return -1;
+    }
+
+    int32_t zoneId = retUserIds[0];
+    return zoneId;
+}
+
+void AVSessionUsersManager::UpdateZoneToUseridMap(int32_t userId)
+{
+    int32_t zoneId = GetZoneIdForUser(userId);
+    if (zoneId > 0) {
+        auto& userIdList = zoneToUserid_[zoneId];
+        if (std::find(userIdList.begin(), userIdList.end(), userId) == userIdList.end()) {
+            userIdList.push_back(userId);
+        }
+    }
+}
+
+void AVSessionUsersManager::CleanupZoneToUseridMap(int32_t userId)
+{
+    int32_t zoneId = GetZoneIdForUser(userId);
+    if (zoneId > 0) {
+        auto zoneIter = zoneToUserid_.find(zoneId);
+        if (zoneIter != zoneToUserid_.end()) {
+            zoneIter->second.erase(
+                std::remove(zoneIter->second.begin(), zoneIter->second.end(), userId),
+                zoneIter->second.end()
+            );
+            if (zoneIter->second.empty()) {
+                zoneToUserid_.erase(zoneIter);
+            }
+        }
+    }
+}
+
+std::vector<int32_t> AVSessionUsersManager::GetUsersInSameAudioZone(int32_t userId)
+{
+    int32_t zoneId = GetZoneIdForUser(userId);
+    if (zoneId <= 0) {
+        return {};
+    }
+    
+    std::vector<int32_t> result;
+    auto zoneIter = zoneToUserid_.find(zoneId);
+    if (zoneIter != zoneToUserid_.end()) {
+        result = zoneIter->second;
+    }
+
+    return result;
+}
+
+void AVSessionUsersManager::UpdateSessionStackForAudioZone(int32_t userId)
+{
+    int32_t zoneId = GetZoneIdForUser(userId);
+    if (zoneId <= 0) {
+        return;
+    }
+    
+    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
+    
+    CollectLocalSessionsForAudioZone(zoneId, sessionWithTime);
+    CollectDistributedSessionsForAudioZone(zoneId, sessionWithTime);
+    SortAndCacheSessionStack(zoneId, sessionWithTime);
+}
+
+void AVSessionUsersManager::AddSessionToVector(const sptr<AVSessionItem>& session,
+    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+{
+    AVSessionDescriptor desc = session->GetDescriptor();
+    int64_t playingTime = session->GetPlayingTime();
+    sessionWithTime.push_back({desc, playingTime});
+}
+
+void AVSessionUsersManager::CollectLocalSessionsForAudioZone(int32_t zoneId,
+    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+{
+    std::lock_guard lockGuard(userLock_);
+    
+    auto zoneIter = zoneToUserid_.find(zoneId);
+    if (zoneIter == zoneToUserid_.end()) {
+        return;
+    }
+    
+    const std::vector<int32_t>& userIds = zoneIter->second;
+    
+    for (int32_t userId : userIds) {
+        auto sessionStackIter = sessionStackMapByUserId_.find(userId);
+        if (sessionStackIter == sessionStackMapByUserId_.end()) {
+            continue;
+        }
+        auto allSessions = sessionStackIter->second->GetAllSessions();
+        for (auto& session : allSessions) {
+            if (!IsCastSessionValid(session, zoneId)) {
+                continue;
+            }
+            AddSessionToVector(session, sessionWithTime);
+        }
+    }
+}
+
+bool AVSessionUsersManager::IsCastSessionValid(const sptr<AVSessionItem>& session, int32_t zoneId)
+{
+    if (session == nullptr) {
+        return false;
+    }
+    
+    AVSessionDescriptor desc = session->GetDescriptor();
+    if (desc.sessionTag_ != "RemoteCast") {
+        return true;
+    }
+    
+    int32_t castUserId = session->GetCastScreenUserId();
+    int32_t castZoneId = GetZoneIdForUser(castUserId);
+    return castZoneId == zoneId;
+}
+
+void AVSessionUsersManager::AddControllerToVector(
+    const sptr<AVControllerItem>& controller,
+    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+{
+    AVSessionDescriptor desc = controller->GetSessionDescriptor();
+    int64_t createTime = controller->GetCreateTime();
+    sessionWithTime.push_back({desc, createTime});
+}
+
+void AVSessionUsersManager::CollectDistributedSessionsForAudioZone(int32_t zoneId,
+    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+{
+    auto service = AVSessionService::GetInstance();
+    if (!service) {
+        return;
+    }
+    std::vector<sptr<IRemoteObject>> controllers;
+    int32_t ret = service->GetDistributedSessionControllersForAudioZone(controllers);
+    if (ret != AVSESSION_SUCCESS || controllers.empty()) {
+        SLOGI("No migrate-in distributed sessions, ret=%{public}d", ret);
+        return;
+    }
+    std::lock_guard lockGuard(userLock_);
+    auto zoneIter = zoneToUserid_.find(zoneId);
+    if (zoneIter == zoneToUserid_.end()) {
+        return;
+    }
+    const std::vector<int32_t>& targetUserIds = zoneIter->second;
+    for (auto& controllerObj : controllers) {
+        sptr<AVControllerItem> controller = iface_cast<AVControllerItem>(controllerObj);
+        if (!controller) {
+            continue;
+        }
+        AVSessionDescriptor desc = controller->GetSessionDescriptor();
+        int32_t controllerUserId = desc.userId_;
+        bool isTargetZone = std::find(targetUserIds.begin(), targetUserIds.end(),
+            controllerUserId) != targetUserIds.end();
+        if (isTargetZone) {
+            AddControllerToVector(controller, sessionWithTime);
+        }
+    }
+}
+
+void AVSessionUsersManager::SortAndCacheSessionStack(int32_t zoneId,
+    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+{
+    std::sort(sessionWithTime.begin(), sessionWithTime.end(),
+        [](const std::pair<AVSessionDescriptor, int64_t>& a,
+           const std::pair<AVSessionDescriptor, int64_t>& b) {
+            return a.second > b.second;
+        });
+    
+    std::vector<AVSessionDescriptor> descriptors;
+    for (auto& item : sessionWithTime) {
+        descriptors.push_back(item.first);
+    }
+    
+    sessionStackMapForAudioZone_[zoneId] = descriptors;
+}
+
+std::vector<AVSessionDescriptor> AVSessionUsersManager::GetSessionStackForAudioZone(int32_t userId)
+{
+    int32_t zoneId = GetZoneIdForUser(userId);
+    if (zoneId <= 0) {
+        return {};
+    }
+
+    auto iter = sessionStackMapForAudioZone_.find(zoneId);
+    if (iter != sessionStackMapForAudioZone_.end()) {
+        return iter->second;
+    }
+    return {};
+}
+#endif
 }

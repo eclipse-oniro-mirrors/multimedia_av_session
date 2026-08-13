@@ -410,7 +410,14 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
         AVSessionUtils::GetAnonySessionId(sinkSession->GetSessionId()).c_str());
     sinkSession->SetCastHandle(castHandle);
     sinkSession->RegisterDeviceStateCallback();
-    
+
+#ifdef CAR_FEATURE_ENABLE
+    int32_t userId = GetUsersManager().GetCurrentUserId();
+    sinkSession->SetCastScreenUserId(userId);
+    sinkSession->SetPlayingTime(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+#endif
+
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront =
@@ -1165,6 +1172,16 @@ int32_t AVSessionService::GetDistributedSessionControllersInner(const Distribute
     SLOGI("GetDistributedController size:%{public}d", static_cast<int>(sessionControllers.size()));
     return AVSESSION_SUCCESS;
 }
+
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionService::GetDistributedSessionControllersForAudioZone(
+    std::vector<sptr<IRemoteObject>>& sessionControllers)
+{
+    return GetDistributedSessionControllersInner(
+        DistributedSessionType::TYPE_SESSION_MIGRATE_IN,
+        sessionControllers);
+}
+#endif
 
 void AVSessionService::NotifyRemoteBundleChange(const std::string bundleName)
 {

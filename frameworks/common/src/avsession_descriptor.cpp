@@ -47,9 +47,9 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteString(sessionTag_), false, "write sessionTag failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(pid_), false, "write pid failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(uid_), false, "write uid failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(userId_), false, "write userId failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isActive_), false, "write isActive failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteBool(isTopSession_), false, "write isTopSession failed");
-
     int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo_.deviceInfos_.size());
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfoSize), false, "write deviceInfoSize failed");
     for (DeviceInfo deviceInfo : outputDeviceInfo_.deviceInfos_) {
@@ -107,6 +107,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadString(sessionTag_), false, "Read sessionTag failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(pid_), false, "Read pid failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(uid_), false, "Read uid failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(userId_), false, "Read userId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isActive_), false, "Read isActive failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadBool(isTopSession_), false, "Read isTopSession failed");
     return true;

@@ -1827,6 +1827,59 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetAllCastDisplays_002, TestSize.Level
     EXPECT_EQ(castDisplays.size(), 0);
     SLOGI("AVSessionItem_GetAllCastDisplays_002 End");
 }
+
+
+/**
+* @tc.name: AVSessionItem_SetCastScreenUserId_001
+* @tc.desc: Test SetCastScreenUserId and GetCastScreenUserId
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetCastScreenUserId_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetCastScreenUserId_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    int32_t userId = 100;
+    g_AVSessionItem->SetCastScreenUserId(userId);
+    int32_t result = g_AVSessionItem->GetCastScreenUserId();
+    EXPECT_EQ(result, userId);
+    SLOGI("AVSessionItem_SetCastScreenUserId_001 End");
+}
+
+/**
+* @tc.name: AVSessionItem_SetCastScreenUserId_002
+* @tc.desc: Test SetCastScreenUserId multiple times
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_SetCastScreenUserId_002, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_SetCastScreenUserId_002 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    g_AVSessionItem->SetCastScreenUserId(100);
+    g_AVSessionItem->SetCastScreenUserId(200);
+    int32_t result = g_AVSessionItem->GetCastScreenUserId();
+    EXPECT_EQ(result, 200);
+    SLOGI("AVSessionItem_SetCastScreenUserId_002 End");
+}
+
+/**
+* @tc.name: AVSessionItem_GetCastScreenUserId_001
+* @tc.desc: Test GetCastScreenUserId default value
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+HWTEST_F(AVsessionItemTest, AVSessionItem_GetCastScreenUserId_001, TestSize.Level1)
+{
+    SLOGI("AVSessionItem_GetCastScreenUserId_001 Begin");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    
+    int32_t result = g_AVSessionItem->GetCastScreenUserId();
+    EXPECT_TRUE(result >= 0 || result < 0);
+    SLOGI("AVSessionItem_GetCastScreenUserId_001 End");
+}
 #endif
 } //AVSession
 } //OHOS

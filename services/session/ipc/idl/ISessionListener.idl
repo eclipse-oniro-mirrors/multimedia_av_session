@@ -40,4 +40,10 @@ interface OHOS.AVSession.ISessionListener {
     [oneway] void OnRemoteDistributedSessionChange([in] IRemoteObject[] sessionControllers);
 
     [oneway] void OnActiveSessionChanged([in] List<AVSessionDescriptor> descriptors);
+
+    [oneway] void OnSessionAddForAudioZone([in] int userId, [in] AVSessionDescriptor descriptor);
+
+    [oneway] void OnSessionRemoveForAudioZone([in] int userId, [in] AVSessionDescriptor descriptor);
+
+    [oneway] void OnTopSessionChangeForAudioZone([in] int userId, [in] AVSessionDescriptor descriptor);
 }

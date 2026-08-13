@@ -139,6 +139,18 @@ class SessionListenerStubDemo : public SessionListenerStub {
     {
         return AVSESSION_SUCCESS;
     }
+    ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
+    {
+        return AVSESSION_SUCCESS;
+    };
+    ErrCode OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
+    {
+        return AVSESSION_SUCCESS;
+    };
 };
 
 /**

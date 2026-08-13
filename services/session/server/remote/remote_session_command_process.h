@@ -92,7 +92,12 @@ public:
     {
         return AVSESSION_SUCCESS;
     }
-
+#ifdef CAR_FEATURE_ENABLE
+    int32_t RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+#endif
     int32_t RegisterSessionListenerForAllUsers(const sptr<ISessionListener>& listener) override
     {
         return AVSESSION_SUCCESS;
@@ -175,6 +180,19 @@ public:
     {
         return AVSESSION_SUCCESS;
     }
+#ifdef CAR_FEATURE_ENABLE
+    int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
+        std::vector<AVSessionDescriptor>& descriptors) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
+    int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+        const std::string& assetId, const CommandInfo&info) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+#endif
 private:
     static sptr<IRemoteObject>& impl_;
     static inline BrokerDelegator<RemoteSessionCommandProcess> delegator_;

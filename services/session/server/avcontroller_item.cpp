@@ -39,6 +39,10 @@ namespace OHOS::AVSession {
 AVControllerItem::AVControllerItem(pid_t pid, const sptr<AVSessionItem>& session, int32_t userId)
     : pid_(pid), session_(session), userId_(userId)
 {
+#ifdef CAR_FEATURE_ENABLE
+    createTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+#endif
     std::lock_guard sessionLockGuard(sessionMutex_);
     if (session_ != nullptr) {
         sessionId_ = session_->GetSessionId();
@@ -846,6 +850,13 @@ std::string AVControllerItem::GetSessionType()
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, "SESSION_NULL", "session not exist");
     std::string sessionTypeStr = session_->GetSessionType();
     return sessionTypeStr;
+}
+
+AVSessionDescriptor AVControllerItem::GetSessionDescriptor()
+{
+    std::lock_guard lockGuard(sessionMutex_);
+    CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSessionDescriptor(), "session not exist");
+    return session_->GetDescriptor();
 }
 
 int32_t AVControllerItem::IsDesktopLyricEnabled(bool &isEnabled)

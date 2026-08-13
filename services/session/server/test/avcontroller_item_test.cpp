@@ -642,5 +642,57 @@ HWTEST_F(AVControllerItemTest, GetSupportedLoopModes_001, TestSize.Level1)
     int32_t res = controller->GetSupportedLoopModes(loopmodesArray);
     EXPECT_EQ(res, AVSESSION_SUCCESS);
 }
+
+
+/**
+* @tc.name: GetSessionDescriptor_001
+* @tc.desc: Test GetSessionDescriptor with valid session
+* @tc.type: FUNC
+*/
+HWTEST_F(AVControllerItemTest, GetSessionDescriptor_001, TestSize.Level1)
+{
+    SLOGD("GetSessionDescriptor_001 begin!");
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    
+    AVSessionDescriptor descriptor = controller->GetSessionDescriptor();
+    EXPECT_FALSE(descriptor.sessionId_.empty());
+    SLOGD("GetSessionDescriptor_001 end!");
+}
+
+/**
+* @tc.name: GetSessionDescriptor_002
+* @tc.desc: Test GetSessionDescriptor with null session
+* @tc.type: FUNC
+*/
+HWTEST_F(AVControllerItemTest, GetSessionDescriptor_002, TestSize.Level1)
+{
+    SLOGD("GetSessionDescriptor_002 begin!");
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), nullptr);
+    ASSERT_TRUE(controller != nullptr);
+    
+    AVSessionDescriptor descriptor = controller->GetSessionDescriptor();
+    EXPECT_TRUE(descriptor.sessionId_.empty());
+    SLOGD("GetSessionDescriptor_002 end!");
+}
+
+/**
+* @tc.name: GetSessionDescriptor_003
+* @tc.desc: Test GetSessionDescriptor after session destroyed
+* @tc.type: FUNC
+*/
+HWTEST_F(AVControllerItemTest, GetSessionDescriptor_003, TestSize.Level1)
+{
+    SLOGD("GetSessionDescriptor_003 begin!");
+    ASSERT_TRUE(g_AVSessionItem != nullptr);
+    OHOS::sptr<AVControllerItem> controller = new AVControllerItem(getpid(), g_AVSessionItem);
+    ASSERT_TRUE(controller != nullptr);
+    
+    controller->Destroy();
+    AVSessionDescriptor descriptor = controller->GetSessionDescriptor();
+    EXPECT_TRUE(descriptor.sessionId_.empty());
+    SLOGD("GetSessionDescriptor_003 end!");
+}
 } //AVSession
 } //OHOS

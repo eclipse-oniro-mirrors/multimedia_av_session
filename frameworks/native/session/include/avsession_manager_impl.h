@@ -55,6 +55,9 @@ public:
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
+    int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
+        std::vector<AVSessionDescriptor>& descriptors) override;
+
     int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t CreateController(const std::string& sessionId, std::shared_ptr<AVSessionController>& controller) override;
@@ -74,6 +77,8 @@ public:
         std::vector<AVQueueInfo>& avQueueInfos) override;
 
     int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) override;
+
+    int32_t RegisterSessionListenerForUser(int32_t userId, const std::shared_ptr<SessionListener>& listener) override;
 
     int32_t RegisterSessionListenerForAllUsers(const std::shared_ptr<SessionListener>& listener) override;
 
@@ -100,6 +105,9 @@ public:
 
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
         const std::string& moduleName) override;
+
+    int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
+        const std::string& assetId, const CommandInfo& info) override;
 
     int32_t RegisterAncoMediaSessionListener(const std::shared_ptr<AncoMediaSessionListener> &listener) override;
 
@@ -148,6 +156,7 @@ private:
     sptr<AVSessionServiceProxy> service_;
     sptr<ServiceDeathRecipient> serviceDeathRecipient_;
     std::map<int32_t, sptr<ISessionListener>> listenerMapByUserId_;
+    std::map<int32_t, sptr<ISessionListener>> listenerMapByUserIdForAudioZone_;
     static sptr<ClientDeathStub> clientDeath_;
     DeathCallback deathCallback_;
     std::function<void()> serviceStartCallback_;

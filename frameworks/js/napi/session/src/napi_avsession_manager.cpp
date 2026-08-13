@@ -141,7 +141,26 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         SLOGE("define manager properties failed");
         return NapiUtils::GetUndefinedValue(env);
     }
+#ifdef CAR_FEATURE_ENABLE
+    RegisterAudioZoneFunctions(env, exports);
+#endif
     return exports;
+}
+
+void NapiAVSessionManager::RegisterAudioZoneFunctions(napi_env env, napi_value exports)
+{
+#ifdef CAR_FEATURE_ENABLE
+    napi_property_descriptor descriptors[] = {
+        DECLARE_NAPI_STATIC_FUNCTION("startAVPlaybackForAudioZone", StartAVPlaybackForAudioZone),
+        DECLARE_NAPI_STATIC_FUNCTION("getSessionDescriptorsForAudioZone", GetSessionDescriptorsForAudioZone),
+    };
+
+    napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
+                                                descriptors);
+    if (status != napi_ok) {
+        SLOGE("define audio zone properties failed");
+    }
+#endif
 }
 
 void processMsg(std::shared_ptr<ContextBase> context, int32_t ret)
@@ -332,6 +351,53 @@ napi_value NapiAVSessionManager::GetSessionDescriptors(napi_env env, napi_callba
     return NapiAsyncWork::Enqueue(env, context, "GetSessionDescriptors", executor, complete);
 }
 
+napi_value NapiAVSessionManager::GetSessionDescriptorsForAudioZone(napi_env env, napi_callback_info info)
+{
+#ifdef CAR_FEATURE_ENABLE
+    struct ConcreteContext : public ContextBase {
+        int32_t userId_;
+        std::vector<AVSessionDescriptor> descriptors_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->userId_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid userId",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+
+    context->GetCbInfo(env, info, input);
+
+    auto executor = [context]() {
+        int32_t ret = AVSessionManager::GetInstance().GetSessionDescriptorsForAudioZone(
+            context->userId_, context->descriptors_);
+        if (ret != AVSESSION_SUCCESS) {
+            if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "GetSessionDescriptorsForAudioZone failed : native no permission";
+            } else if (ret == ERR_PERMISSION_DENIED) {
+                context->errMessage = "GetSessionDescriptorsForAudioZone failed : native permission denied";
+            } else {
+                context->errMessage = "GetSessionDescriptorsForAudioZone failed : native server exception";
+            }
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+        }
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        context->status = NapiUtils::SetValue(env, context->descriptors_, output);
+        CHECK_STATUS_RETURN_VOID(context, "convert native object to javascript object failed",
+            NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    };
+
+    return NapiAsyncWork::Enqueue(env, context, "GetSessionDescriptorsForAudioZone", executor, complete);
+#else
+    return nullptr;
+#endif
+}
+
 napi_value NapiAVSessionManager::GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info)
 {
     struct ConcreteContext : public ContextBase {
@@ -484,6 +550,91 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
         }
     };
     return NapiAsyncWork::Enqueue(env, context, "StartAVPlayback", executor);
+}
+
+void NapiAVSessionManager::FillCommandInfo(napi_env env, napi_value arg, CommandInfo& commandInfo)
+{
+#ifdef CAR_FEATURE_ENABLE
+    std::string callerDeviceId;
+    std::string callerBundleName;
+    std::string callerModuleName;
+    std::string callerType;
+    
+    if (NapiUtils::GetNamedProperty(env, arg, "callerDeviceId", callerDeviceId) == napi_ok) {
+        commandInfo.SetCallerDeviceId(callerDeviceId);
+    }
+    if (NapiUtils::GetNamedProperty(env, arg, "callerBundleName", callerBundleName) == napi_ok) {
+        commandInfo.SetCallerBundleName(callerBundleName);
+    }
+    if (NapiUtils::GetNamedProperty(env, arg, "callerModuleName", callerModuleName) == napi_ok) {
+        commandInfo.SetCallerModuleName(callerModuleName);
+    }
+    if (NapiUtils::GetNamedProperty(env, arg, "callerType", callerType) == napi_ok) {
+        commandInfo.SetCallerType(callerType);
+    }
+#endif
+}
+
+void NapiAVSessionManager::SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context)
+{
+#ifdef CAR_FEATURE_ENABLE
+    if (ret == ERR_NO_PERMISSION) {
+        context->errMessage = "StartAVPlaybackForAudioZone failed : native no permission";
+    } else if (ret == ERR_PERMISSION_DENIED) {
+        context->errMessage = "StartAVPlaybackForAudioZone failed : native permission denied";
+    } else {
+        context->errMessage = "StartAVPlaybackForAudioZone failed : native server exception";
+    }
+    context->status = napi_generic_failure;
+    context->errCode = NapiAVSessionManager::errcode_[ret];
+#endif
+}
+
+napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_callback_info info)
+{
+#ifdef CAR_FEATURE_ENABLE
+    struct ConcreteContext : public ContextBase {
+        std::string bundleName_;
+        int32_t userId_;
+        std::string assetId_;
+        CommandInfo commandInfo_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+
+    auto input = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE || argc == ARGC_FOUR, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->bundleName_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
+            "invalid bundleName", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->userId_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid userId",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_THIRD], context->assetId_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid assetId",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_FOUR && !NapiUtils::TypeCheck(env, argv[ARGV_FOURTH], napi_undefined)
+            && !NapiUtils::TypeCheck(env, argv[ARGV_FOURTH], napi_null)) {
+            FillCommandInfo(env, argv[ARGV_FOURTH], context->commandInfo_);
+        }
+    };
+
+    context->GetCbInfo(env, info, input);
+
+    auto executor = [context]() {
+        int32_t ret = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(
+            context->bundleName_, context->userId_, context->assetId_, context->commandInfo_);
+        if (ret != AVSESSION_SUCCESS) {
+            SetStartAVPlaybackError(ret, context);
+        }
+    };
+    auto complete = [env, context](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "StartAVPlaybackForAudioZone", executor, complete);
+#else
+    return nullptr;
+#endif
 }
 
 napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, napi_callback_info info)

@@ -269,6 +269,10 @@ public:
 
     int64_t GetPlayingTime() const;
 
+    void SetCastScreenUserId(int32_t userId);
+
+    int32_t GetCastScreenUserId() const;
+
     void SetLyricTitle(const std::string& title);
 
     std::string GetLyricTitle() const;
@@ -565,6 +569,7 @@ private:
     std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;
     int64_t playingTime_ = 0;
+    int32_t castScreenUserId_ = -1;
     std::string lyricTitle_ = "";
     int32_t appIndex_ = 0;
 

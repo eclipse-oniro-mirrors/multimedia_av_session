@@ -54,8 +54,9 @@ ohos_shared_library("avsession_napi") {
     "src/napi_avsession_input_redistribute_callback.cpp",
   ]
 
+  defines = []
   if (av_session_enable_input_redistribute) {
-    defines = [ "INPUT_REDISTRIBUTE_ENABLE" ]
+    defines += [ "INPUT_REDISTRIBUTE_ENABLE" ]
   }
 
   deps = [
@@ -118,6 +119,9 @@ ohos_shared_library("avsession_napi") {
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
+  }
+  if (av_session_enable_multi_user_audio_zone_feature) {
+    defines += [ "CAR_FEATURE_ENABLE" ]
   }
   relative_install_dir = "module/multimedia"
 

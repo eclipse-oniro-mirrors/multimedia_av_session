@@ -148,6 +148,11 @@ public:
 
     bool HasSession(const std::string& sessionId);
 
+#ifdef CAR_FEATURE_ENABLE
+    int64_t GetCreateTime() const { return createTime_; }
+#endif
+    AVSessionDescriptor GetSessionDescriptor();
+
     void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
 
     int32_t RegisterAVControllerCallback(const std::shared_ptr<AVControllerCallback> &callback);
@@ -199,6 +204,10 @@ private:
     std::recursive_mutex playbackMaskMutex_;
 
     std::recursive_mutex sessionMutex_;
+
+#ifdef CAR_FEATURE_ENABLE
+    int64_t createTime_ = 0;
+#endif
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVCONTROLLER_ITEM_H
