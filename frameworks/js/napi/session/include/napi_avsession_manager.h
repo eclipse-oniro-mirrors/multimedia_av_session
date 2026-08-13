@@ -153,8 +153,6 @@ private:
     static const std::string DISTRIBUTED_SESSION_CHANGE_EVENT;
     static napi_value GetSessionDescriptorsForAudioZone(napi_env env, napi_callback_info info);
     static napi_value StartAVPlaybackForAudioZone(napi_env env, napi_callback_info info);
-    
-    static napi_status RegisterNativeSessionListenerForAudioZone(napi_env env, int32_t userId);
 
     static void RegisterAudioZoneFunctions(napi_env env, napi_value exports);
 
