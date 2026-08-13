@@ -5298,8 +5298,8 @@ void AVSessionService::InitAudioZoneCallback()
     audioZoneChangeCallback_ = std::make_shared<AudioZoneChangeCallbackImpl>();
     audioZoneCallback_ = std::make_shared<AudioZoneCallbackImpl>(audioZoneChangeCallback_);
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
- 	if (audioZoneManager != nullptr) {
- 	    auto ret = audioZoneManager->RegisterAudioZoneCallback(audioZoneCallback_);
+    if (audioZoneManager != nullptr) {
+        auto ret = audioZoneManager->RegisterAudioZoneCallback(audioZoneCallback_);
         SLOGI("RegisterAudioZoneCallback ret=%{public}d", ret);
     } else {
         SLOGE("AudioZoneManager::GetInstance() is nullptr");

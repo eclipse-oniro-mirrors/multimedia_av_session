@@ -987,7 +987,7 @@ public:
     {
         return migrateAVSessionProxyMap_;
     }
-private: 
+private:
     static AVSessionService* instance_;
 #endif
 };
