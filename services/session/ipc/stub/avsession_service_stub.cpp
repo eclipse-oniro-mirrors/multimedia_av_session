@@ -194,12 +194,7 @@ int32_t AVSessionServiceStub::HandleGetSessionDescriptorsForAudioZone(MessagePar
     std::vector<AVSessionDescriptor> descriptors;
     int32_t ret = GetSessionDescriptorsForAudioZone(userId, descriptors);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
-    
-    CHECK_AND_RETURN_RET_LOG(descriptors.size() <= UINT32_MAX, ERR_INVALID_PARAM,
-        "descriptors size overflow");
-    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(static_cast<uint32_t>(descriptors.size())),
-        ERR_NONE, "write size failed");
-    
+    CHECK_AND_RETURN_RET_LOG(reply.WriteUint32(descriptors.size()), ERR_NONE, "write size failed");
     for (const auto& descriptor : descriptors) {
         CHECK_AND_BREAK_LOG(descriptor.Marshalling(reply), "write descriptor failed");
     }
