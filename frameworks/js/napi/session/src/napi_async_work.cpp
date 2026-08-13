@@ -78,7 +78,7 @@ void ContextBase::GetCbInfo(napi_env envi, napi_callback_info info, NapiCbInfoPa
 napi_value NapiAsyncWork::Enqueue(napi_env env, std::shared_ptr<ContextBase> ctxt, const std::string& name,
                                   NapiAsyncExecute execute, NapiAsyncComplete complete)
 {
-    SLOGI("name=%{public}s", name.c_str());
+    HILOG_INFO(LOG_CORE, "name=%{public}s", name.c_str());
     ctxt->execute = std::move(execute);
     ctxt->complete = std::move(complete);
     ctxt->taskName = name;

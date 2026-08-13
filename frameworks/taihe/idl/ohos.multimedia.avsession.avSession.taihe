@@ -465,7 +465,7 @@ interface AVSession {
 
   @gen_async("setSupportedLoopModes")
   @gen_promise("setSupportedLoopModes")
-  SetSupportedLoopModesSync(loopModes: Array<i32>): void;
+  SetSupportedLoopModesSync(loopModes: Array<LoopMode>): void;
 
   OnPlay(callback: (commandInfo: CommandInfo) => void): void;
   OnPause(callback: () => void): void;

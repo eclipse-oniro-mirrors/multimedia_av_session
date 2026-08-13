@@ -82,6 +82,7 @@ const std::string BOOTEVENT_AVSESSION_SERVICE_READY = "bootevent.avsessionservic
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t CONTROL_COLD_START = 2;
 #endif
+const int32_t DEFAULT_IMAGE_SIZE = 256;
 const std::string PAD_DEVICE_TYPE = "tablet";
 const std::string PC_DEVICE_TYPE = "2in1";
 const std::string PHONE_DEVICE_TYPE = "phone";
@@ -261,6 +262,7 @@ void AVSessionService::OnStop()
 #endif
     CommandSendLimit::GetInstance().StopTimer();
     STORAGE_EVENT_UNINIT();
+    HISYSEVENT_UNREGISTER;
     NotifyProcessStatus(false);
     UnSubscribeCommonEvent();
     BundleStatusAdapter::ReleaseInstance();
@@ -2165,7 +2167,7 @@ int32_t AVSessionService::GetSessionDescriptors(int32_t category, std::vector<AV
                 }
             }
             break;
-# ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
         case SessionCategory::CATEGORY_HIPLAY:
             if (pcmCastSession_ != nullptr && pcmCastSession_->CheckIsCasting()) {
                 AVSessionDescriptor descriptor = pcmCastSession_->GetDescriptor();
@@ -2567,7 +2569,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
     AVSessionSysEvent::GetInstance().UpdateSupportAvqueue(session.GetBundleName(), true);
 #endif
     if (!SaveAvQueueInfo(oldContent, bundleName, meta, userId)) {
-        SLOGE("SaveAvQueueInfo same avqueueinfo, Return!");
+        SLOGD("SaveAvQueueInfo same avqueueinfo, Return!");
         DoMetadataImgClean(meta);
         return;
     }
@@ -2577,7 +2579,7 @@ void AVSessionService::AddAvQueueInfoToFile(AVSessionItem& session)
 
 void AVSessionService::DoMetadataImgClean(AVMetaData& data)
 {
-    SLOGI("clear media img in DoMetadataImgClean");
+    SLOGD("clear media img in DoMetadataImgClean");
     std::shared_ptr<AVSessionPixelMap> innerQueuePixelMap = data.GetAVQueueImage();
     if (innerQueuePixelMap != nullptr) {
         innerQueuePixelMap->Clear();
@@ -3368,7 +3370,7 @@ void AVSessionService::OnClientDied(pid_t pid, pid_t uid)
     if (pcmCastSession_ != nullptr && pcmCastSession_->GetCastMode() == HiPlayCastMode::APP_LEVEL
         && pcmCastSession_->GetUid() == uid) {
         ClearPcmSessionForClientDiedNoLock();
-        }
+    }
     AVRouter::GetInstance().IsStopCastDiscovery(pid);
     {
         std::lock_guard lockGuard(checkEnableCastLock_);
@@ -4547,6 +4549,8 @@ std::shared_ptr<Media::PixelMap> ConvertDefaultImage()
     if (imageSource != nullptr) {
         Media::DecodeOptions dOpts;
         dOpts.allocatorType = Media::AllocatorType::HEAP_ALLOC;
+        dOpts.desiredSize.width = DEFAULT_IMAGE_SIZE;
+        dOpts.desiredSize.height = DEFAULT_IMAGE_SIZE;
         g_defaultMediaImage = imageSource->CreatePixelMap(dOpts, errorCode);
         if (g_defaultMediaImage != nullptr) {
             SLOGI("ConvertDefaultImage CreatePixelMap success");
@@ -4910,7 +4914,8 @@ int32_t AVSessionService::UploadDesktopLyricOperationInfo(const std::string &ses
         userId);
 }
 
-void AVSessionService::UpdateNtfEnable(bool isMediaNtfEnable) {
+void AVSessionService::UpdateNtfEnable(bool isMediaNtfEnable)
+{
     SLOGI("UpdateNtfEnable %{public}d", isMediaNtfEnable);
     isNtfEnabled_.store(isMediaNtfEnable);
     if (!isMediaNtfEnable) {
