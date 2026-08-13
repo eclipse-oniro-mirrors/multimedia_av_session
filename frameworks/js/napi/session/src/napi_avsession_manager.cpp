@@ -907,50 +907,6 @@ napi_status NapiAVSessionManager::RegisterNativeSessionListener(napi_env env)
     return napi_ok;
 }
 
-napi_status NapiAVSessionManager::RegisterNativeSessionListenerForAudioZone(napi_env env, int32_t userId)
-{
-#ifdef CAR_FEATURE_ENABLE
-    std::lock_guard lockGuard(listenersMutex_);
-    if (listener_ != nullptr) {
-        int32_t ret = AVSessionManager::GetInstance().RegisterSessionListenerForUser(userId, listener_);
-        if (ret != AVSESSION_SUCCESS) {
-            SLOGE("native register session listener for user failed");
-        }
-        return napi_ok;
-    }
-
-    listener_ = std::make_shared<NapiSessionListener>();
-    if (AVSessionManager::GetInstance().RegisterServiceDeathCallback(HandleServiceDied) != AVSESSION_SUCCESS) {
-        SLOGE("register service death callback fail!");
-        return napi_generic_failure;
-    }
-    if (listener_ == nullptr) {
-        SLOGE("OnEvent failed : no memory");
-        NapiUtils::ThrowError(env, "OnEvent failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
-        return napi_generic_failure;
-    }
-    int32_t ret = AVSessionManager::GetInstance().RegisterSessionListenerForUser(userId, listener_);
-    if (ret != AVSESSION_SUCCESS) {
-        SLOGE("native register session listener for user failed");
-        if (ret == ERR_INVALID_PARAM) {
-            NapiUtils::ThrowError(env, "OnEvent failed : native invalid parameters",
-                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        } else if (ret == ERR_PERMISSION_DENIED) {
-            NapiUtils::ThrowError(env, "OnEvent failed : native permission denied",
-                NapiAVSessionManager::errcode_[ERR_PERMISSION_DENIED]);
-        } else {
-            NapiUtils::ThrowError(env, "OnEvent failed : native server exception",
-                NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
-        }
-        return napi_generic_failure;
-    }
-
-    return napi_ok;
-#else
-    return napi_generic_failure;
-#endif
-}
-
 napi_value NapiAVSessionManager::OnEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
