@@ -603,6 +603,7 @@ void AVSessionUsersManager::CollectDistributedSessionsForAudioZone(int32_t zoneI
         }
     }
 }
+
 void AVSessionUsersManager::SortAndCacheSessionStack(int32_t zoneId,
     std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
 {
