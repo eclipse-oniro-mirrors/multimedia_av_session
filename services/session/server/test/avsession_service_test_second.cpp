@@ -52,11 +52,9 @@ const int32_t KEYCODE_MEDIA_PLAY_PAUSE = 10;
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnTopSessionChange = false;
-#ifdef CAR_FEATURE_ENABLE
 static bool g_isCallOnSessionAddForAudioZone = false;
 static bool g_isCallOnSessionRemoveForAudioZone = false;
 static bool g_isCallOnTopSessionChangeForAudioZone = false;
-#endif
 const int32_t DESKTOP_LYRICS_ABILITY_CONNECTED = 2;
 const int32_t DESKTOP_LYRICS_ABILITY_DISCONNECTED = 4;
 

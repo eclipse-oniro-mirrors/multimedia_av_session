@@ -150,9 +150,8 @@ public:
 
 #ifdef CAR_FEATURE_ENABLE
     int64_t GetCreateTime() const { return createTime_; }
-
-    AVSessionDescriptor GetSessionDescriptor();
 #endif
+    AVSessionDescriptor GetSessionDescriptor();
 
     void SetServiceCallbackForRelease(const std::function<void(AVControllerItem&)>& callback);
 
