@@ -37,6 +37,7 @@ public:
                        int32_t key);
 
 private:
+    std::mutex mutex_;
     std::map<std::string, std::vector<std::vector<int32_t>>> capabilitys_ {};
 };
 } // namespace OHOS::AVSession

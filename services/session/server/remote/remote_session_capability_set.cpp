@@ -45,6 +45,7 @@ std::string RemoteSessionCapabilitySet::GetLocalCapability()
 void RemoteSessionCapabilitySet::AddRemoteCapability(const std::string& sessionId, const std::string& sinkDeviceId,
                                                      const std::string& sinkCapability)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     std::string key = sessionId + "-" + sinkDeviceId;
     std::vector<std::vector<int32_t>> value(SESSION_DATA_CATEGORY_MAX);
     int32_t ret = JsonUtils::GetVectorCapability(sinkCapability, value);
@@ -56,6 +57,7 @@ void RemoteSessionCapabilitySet::AddRemoteCapability(const std::string& sessionI
 // LCOV_EXCL_START
 void RemoteSessionCapabilitySet::RemoveRemoteCapability(const std::string& sessionId, const std::string& sinkDevice)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_LOG(capabilitys_.size() > 0, " Don't have Capability");
     std::string key = sessionId + "-" + sinkDevice;
     capabilitys_.erase(key);
@@ -66,6 +68,7 @@ void RemoteSessionCapabilitySet::RemoveRemoteCapability(const std::string& sessi
 bool RemoteSessionCapabilitySet::HasCapability(const std::string& sessionId, const std::string& sinkDevice,
                                                SessionDataCategory category, int32_t key)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(capabilitys_.size() > 0, false, "Don't have Capability");
     CHECK_AND_RETURN_RET_LOG(category >= 0 && category < SESSION_DATA_CATEGORY_MAX, false,
         "Invalid category: %{public}d", category);

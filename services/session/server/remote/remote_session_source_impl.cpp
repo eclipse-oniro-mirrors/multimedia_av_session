@@ -39,6 +39,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
                                                      const std::string& sinkDevice,
                                                      const std::string& sinkCapability)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     session_ = session;
 #ifdef DATA_OBJECT_ENABLE
     auto syncer = std::make_shared<RemoteSessionSyncerImpl>(session->GetSessionId(), sourceDevice, sinkDevice);
@@ -57,6 +58,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
         auto sessionSyncer = iter->second;
 #ifdef DATA_OBJECT_ENABLE
         ret = sessionSyncer->RegisterDisconnectNotifier([this] (const std::string& deviceId) {
+            std::lock_guard<std::mutex> lock(mutex_);
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
                                      "syncer is not exist");
             SLOGE("device is disconnected");
@@ -76,6 +78,7 @@ int32_t RemoteSessionSourceImpl::CastSessionToRemote(const sptr <AVSessionItem>&
                                                           const std::string& deviceId) {
             AVSESSION_TRACE_SYNC_START("RemoteSessionSourceImpl::DataNotifier");
             SLOGI("device category %{public}d changed", category);
+            std::lock_guard<std::mutex> lock(mutex_);
             CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSESSION_ERROR, "session_ is nullptr");
             CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && syncers_[deviceId] != nullptr, AVSESSION_ERROR,
                 "syncer is not exist");
@@ -119,18 +122,26 @@ int32_t RemoteSessionSourceImpl::HandleSourceSessionDataCategory(const SessionDa
 int32_t  RemoteSessionSourceImpl::CancelCastAudio(const std::string& sinkDevice)
 {
     SLOGI("start");
-    RemoteSessionCapabilitySet::GetInstance().RemoveRemoteCapability(session_->GetSessionId(), sinkDevice);
-    CHECK_AND_RETURN_RET_LOG(!syncers_.empty(), AVSESSION_SUCCESS, "syncer is empty");
-    auto iter = syncers_.begin();
-    while (iter != syncers_.end()) {
-        if (iter->first == sinkDevice) {
-            SLOGI("cancel sinkDevice %{public}s cast audio", sinkDevice.c_str());
-            iter->second->Destroy();
-            iter->second = nullptr;
-            iter = syncers_.erase(iter);
-        } else {
-            ++iter;
+    std::shared_ptr<RemoteSessionSyncer> syncerToDestroy;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (session_ != nullptr) {
+            RemoteSessionCapabilitySet::GetInstance().RemoveRemoteCapability(session_->GetSessionId(), sinkDevice);
         }
+        CHECK_AND_RETURN_RET_LOG(!syncers_.empty(), AVSESSION_SUCCESS, "syncer is empty");
+        auto iter = syncers_.begin();
+        while (iter != syncers_.end()) {
+            if (iter->first == sinkDevice) {
+                SLOGI("cancel sinkDevice %{public}s cast audio", sinkDevice.c_str());
+                syncerToDestroy = iter->second;
+                iter = syncers_.erase(iter);
+            } else {
+                ++iter;
+            }
+        }
+    }
+    if (syncerToDestroy != nullptr) {
+        syncerToDestroy->Destroy();
     }
     SLOGI("success");
     return AVSESSION_SUCCESS;
@@ -141,6 +152,7 @@ int32_t  RemoteSessionSourceImpl::CancelCastAudio(const std::string& sinkDevice)
 int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
 {
     SLOGI("start");
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         CHECK_AND_CONTINUE(iter->second != nullptr);
@@ -169,6 +181,7 @@ int32_t RemoteSessionSourceImpl::SetAVMetaData(const AVMetaData& metaData)
 int32_t RemoteSessionSourceImpl::SetAVPlaybackState(const AVPlaybackState& state)
 {
     SLOGI("start");
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         CHECK_AND_CONTINUE(iter->second != nullptr);
@@ -197,6 +210,7 @@ int32_t RemoteSessionSourceImpl::SetAVPlaybackState(const AVPlaybackState& state
 int32_t RemoteSessionSourceImpl::SetSessionEventRemote(const std::string& event, const AAFwk::WantParams& args)
 {
     SLOGI("start");
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         SLOGI("iter %{public}s", iter->first.c_str());
@@ -222,6 +236,7 @@ int32_t RemoteSessionSourceImpl::SetSessionEventRemote(const std::string& event,
 int32_t RemoteSessionSourceImpl::SetAVQueueItems(const std::vector<AVQueueItem>& items)
 {
     SLOGI("start");
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         SLOGI("iter %{public}s", iter->first.c_str());
@@ -246,6 +261,7 @@ int32_t RemoteSessionSourceImpl::SetAVQueueItems(const std::vector<AVQueueItem>&
 int32_t RemoteSessionSourceImpl::SetAVQueueTitle(const std::string& title)
 {
     SLOGI("start");
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         SLOGI("iter %{public}s", iter->first.c_str());
@@ -270,6 +286,7 @@ int32_t RemoteSessionSourceImpl::SetAVQueueTitle(const std::string& title)
 int32_t RemoteSessionSourceImpl::SetExtrasRemote(const AAFwk::WantParams& extras)
 {
     SLOGI("start");
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(!syncers_.empty() && session_ != nullptr, AVSESSION_ERROR, "syncers size is zero");
     for (auto iter = syncers_.rbegin(); iter != syncers_.rend(); iter++) {
         SLOGI("iter %{public}s", iter->first.c_str());

@@ -34,10 +34,20 @@ void RemoteSessionSyncerImpl::OnChanged(const std::string &sessionId, const std:
 {
     CHECK_AND_RETURN_LOG(!keys.empty(), "keys is empty");
     SLOGI("sessionId is %{public}s key is %{public}s", sessionId.c_str(), keys[0].c_str());
-    CHECK_AND_RETURN_LOG(objectDataNotifier_ != nullptr, "objectDataNotifier_ is nullptr");
+    ObjectDataNotifier notifier;
+    std::string device;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (objectDataNotifier_ == nullptr) {
+            SLOGE("objectDataNotifier_ is nullptr");
+            return;
+        }
+        notifier = objectDataNotifier_;
+        device = sinkDevice_;
+    }
     for (const auto& key : keys) {
         CHECK_AND_RETURN_LOG(categoryMap.count(key) > 0, "key is not exist");
-        objectDataNotifier_(categoryMap.at(key), sinkDevice_);
+        notifier(categoryMap.at(key), device);
     }
 }
 
@@ -46,8 +56,16 @@ void RemoteSessionSyncerImpl::OnChanged(const std::string &name, const std::stri
 {
     SLOGI("%{public}.6s %{public}s", networkId.c_str(), onlineStatus.c_str());
     CHECK_AND_RETURN_LOG(onlineStatus == "offline", "state is online");
-    CHECK_AND_RETURN_LOG(objectDisconnectNotifier_ != nullptr, "objectDataNotifier_ is nullptr");
-    objectDisconnectNotifier_(networkId);
+    ObjectDisconnectNotifier notifier;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (objectDisconnectNotifier_ == nullptr) {
+            SLOGE("objectDisconnectNotifier_ is nullptr");
+            return;
+        }
+        notifier = objectDisconnectNotifier_;
+    }
+    notifier(networkId);
 }
 
 int32_t RemoteSessionSyncerImpl::Init()
@@ -72,7 +90,10 @@ int32_t RemoteSessionSyncerImpl::Init()
     objectName_ = stream.str();
     SLOGI("sourceSessionId is %{public}s, sourceDevice is %{public}s, sinkDevice is %{public}s, object is %{public}s",
           sourceSessionId_.c_str(), sourceDevice_.c_str(), sinkDevice_.c_str(), objectName_.c_str());
-    object_ = objectStore_->CreateObject(objectName_);
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        object_ = objectStore_->CreateObject(objectName_);
+    }
     CHECK_AND_RETURN_RET_LOG(object_ != nullptr, AVSESSION_ERROR, "object_ is nullptr");
     SLOGI("init object success");
     return AVSESSION_SUCCESS;
@@ -80,12 +101,14 @@ int32_t RemoteSessionSyncerImpl::Init()
 
 int32_t RemoteSessionSyncerImpl::PutData(const std::string &key, std::vector<uint8_t> &data)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(object_ != nullptr, AVSESSION_ERROR, "object is nullptr");
     return object_->PutComplex(key, data) == ObjectStore::SUCCESS ? AVSESSION_SUCCESS : AVSESSION_ERROR;
 }
 
 int32_t RemoteSessionSyncerImpl::GetData(const std::string &key, std::vector<uint8_t> &data)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(object_ != nullptr, AVSESSION_ERROR, "object is nullptr");
     return object_->GetComplex(key, data) == ObjectStore::SUCCESS ? AVSESSION_SUCCESS : AVSESSION_ERROR;
 }
@@ -453,6 +476,7 @@ int32_t RemoteSessionSyncerImpl::GetExtras(AAFwk::WantParams& extras)
 // LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::RegisterDataNotifier(const ObjectDataNotifier& notifier)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(objectStore_ != nullptr && object_ != nullptr, AVSESSION_ERROR,
                              "objectStore_ or object_ is nullptr");
     objectDataNotifier_ = notifier;
@@ -464,6 +488,7 @@ int32_t RemoteSessionSyncerImpl::RegisterDataNotifier(const ObjectDataNotifier& 
 // LCOV_EXCL_START
 int32_t RemoteSessionSyncerImpl::RegisterDisconnectNotifier(const ObjectDisconnectNotifier& notifier)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     CHECK_AND_RETURN_RET_LOG(objectStore_ != nullptr, AVSESSION_ERROR, "objectStore_ is nullptr");
     objectDisconnectNotifier_ = notifier;
     objectStore_->SetStatusNotifier(shared_from_this());
@@ -474,10 +499,15 @@ int32_t RemoteSessionSyncerImpl::RegisterDisconnectNotifier(const ObjectDisconne
 // LCOV_EXCL_START
 void RemoteSessionSyncerImpl::Destroy()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+    CHECK_AND_RETURN_LOG(objectStore_ != nullptr && object_ != nullptr, "objectStore_ or object_ is nullptr");
     auto ret = objectStore_->UnWatch(object_);
     CHECK_AND_RETURN_LOG(ret == ObjectStore::SUCCESS, "UnWatch error");
     ret = objectStore_->DeleteObject(objectName_);
     CHECK_AND_RETURN_LOG(ret == ObjectStore::SUCCESS, "DeleteObject error");
+    object_ = nullptr;
+    objectDataNotifier_ = nullptr;
+    objectDisconnectNotifier_ = nullptr;
     SLOGI("Destroy");
 }
 // LCOV_EXCL_STOP

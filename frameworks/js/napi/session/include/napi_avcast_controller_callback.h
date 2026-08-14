@@ -548,10 +548,10 @@ private:
 
     struct DataContextForThreadSafe {
         napi_ref& callback;
-        std::uint8_t* buffer;
+        std::shared_ptr<AVSharedMemoryBase> mem;
         uint32_t length;
         int64_t pos;
-        int32_t* result;
+        std::shared_ptr<std::atomic<int32_t>> result;
         std::condition_variable& dataSrcSyncCond;
     };
 

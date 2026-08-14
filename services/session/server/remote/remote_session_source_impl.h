@@ -53,6 +53,7 @@ private:
     AVPlaybackState::PlaybackStateMaskType GetSinkPlaybackStateMaskType(const std::string& sinkDevice);
     int32_t HandleSourceSessionDataCategory(const SessionDataCategory category, const std::string& deviceId);
 
+    std::mutex mutex_;
     std::map<std::string, std::shared_ptr<RemoteSessionSyncer>> syncers_;
     sptr<AVSessionItem> session_;
 };
