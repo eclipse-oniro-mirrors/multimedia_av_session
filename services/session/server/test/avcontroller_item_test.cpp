@@ -643,7 +643,7 @@ HWTEST_F(AVControllerItemTest, GetSupportedLoopModes_001, TestSize.Level1)
     EXPECT_EQ(res, AVSESSION_SUCCESS);
 }
 
-
+#ifdef CAR_FEATURE_ENABLE
 /**
 * @tc.name: GetSessionDescriptor_001
 * @tc.desc: Test GetSessionDescriptor with valid session
@@ -694,5 +694,6 @@ HWTEST_F(AVControllerItemTest, GetSessionDescriptor_003, TestSize.Level1)
     EXPECT_TRUE(descriptor.sessionId_.empty());
     SLOGD("GetSessionDescriptor_003 end!");
 }
+#endif
 } //AVSession
 } //OHOS

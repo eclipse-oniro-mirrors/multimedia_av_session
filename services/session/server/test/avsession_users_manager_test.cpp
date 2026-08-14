@@ -65,6 +65,7 @@ public:
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override { return AVSESSION_SUCCESS; };
     ErrCode OnActiveSessionChanged(
         const std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; };
+#ifdef CAR_FEATURE_ENABLE
     ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
@@ -77,6 +78,7 @@ public:
     {
         return AVSESSION_SUCCESS;
     };
+#endif
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 
@@ -361,7 +363,6 @@ HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_005, TestSize.Level0)
     manager.sessionStackMapByUserId_.erase(userId);
     SLOGI("CleanupCacheOnUnlock_005 end!");
 }
-
 
 #ifdef CAR_FEATURE_ENABLE
 /**

@@ -16,7 +16,9 @@
 #include <gtest/gtest.h>
 
 #include "avsession_log.h"
+#ifdef CAR_FEATURE_ENABLE
 #include "command_info.h"
+#endif
 #define private public
 #include "avsession_manager_impl.h"
 #undef private

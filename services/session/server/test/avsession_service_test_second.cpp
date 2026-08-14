@@ -52,9 +52,11 @@ const int32_t KEYCODE_MEDIA_PLAY_PAUSE = 10;
 static bool g_isCallOnSessionCreate = false;
 static bool g_isCallOnSessionRelease = false;
 static bool g_isCallOnTopSessionChange = false;
+#ifdef CAR_FEATURE_ENABLE
 static bool g_isCallOnSessionAddForAudioZone = false;
 static bool g_isCallOnSessionRemoveForAudioZone = false;
 static bool g_isCallOnTopSessionChangeForAudioZone = false;
+#endif
 const int32_t DESKTOP_LYRICS_ABILITY_CONNECTED = 2;
 const int32_t DESKTOP_LYRICS_ABILITY_DISCONNECTED = 4;
 
@@ -115,6 +117,7 @@ class TestISessionListener : public ISessionListener {
     {
         return AVSESSION_SUCCESS;
     };
+#ifdef CAR_FEATURE_ENABLE
     ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         g_isCallOnSessionAddForAudioZone = true;
@@ -130,6 +133,7 @@ class TestISessionListener : public ISessionListener {
         g_isCallOnTopSessionChangeForAudioZone = true;
         return AVSESSION_SUCCESS;
     };
+#endif
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 

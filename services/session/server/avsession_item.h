@@ -269,9 +269,11 @@ public:
 
     int64_t GetPlayingTime() const;
 
+#ifdef CAR_FEATURE_ENABLE
     void SetCastScreenUserId(int32_t userId);
 
     int32_t GetCastScreenUserId() const;
+#endif
 
     void SetLyricTitle(const std::string& title);
 
@@ -569,7 +571,9 @@ private:
     std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;
     int64_t playingTime_ = 0;
+#ifdef CAR_FEATURE_ENABLE
     int32_t castScreenUserId_ = -1;
+#endif
     std::string lyricTitle_ = "";
     int32_t appIndex_ = 0;
 

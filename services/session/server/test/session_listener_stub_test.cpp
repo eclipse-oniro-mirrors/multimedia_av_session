@@ -138,7 +138,8 @@ class SessionListenerStubDemo : public SessionListenerStub {
     ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override
     {
         return AVSESSION_SUCCESS;
-    }
+    };
+#ifdef CAR_FEATURE_ENABLE
     ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;
@@ -151,6 +152,7 @@ class SessionListenerStubDemo : public SessionListenerStub {
     {
         return AVSESSION_SUCCESS;
     };
+#endif
 };
 
 /**

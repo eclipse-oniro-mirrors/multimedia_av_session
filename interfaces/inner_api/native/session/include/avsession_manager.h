@@ -93,6 +93,7 @@ public:
     */
     virtual int32_t GetSessionDescriptors(int32_t category, std::vector<AVSessionDescriptor>& descriptors) = 0;
 
+#ifdef CAR_FEATURE_ENABLE
     /**
      * Get all session descriptors for AudioZone.
      *
@@ -103,7 +104,7 @@ public:
      */
     virtual int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor>& descriptors) { return AVSESSION_SUCCESS; };
-
+#endif
     /**
      * Send the key command to get the descriptor of activated sessions.
      *
@@ -165,6 +166,7 @@ public:
     */
     virtual int32_t RegisterSessionListener(const std::shared_ptr<SessionListener>& listener) = 0;
 
+#ifdef CAR_FEATURE_ENABLE
     /**
      * @brief Listen for sessionListener callback event for specified user.
      *
@@ -175,6 +177,7 @@ public:
     */
     virtual int32_t RegisterSessionListenerForUser(int32_t userId,
         const std::shared_ptr<SessionListener>& listener) { return AVSESSION_SUCCESS; };
+#endif
 
     /**
      * @brief Listen for sessionListener callback event for all users.
@@ -288,6 +291,7 @@ public:
     virtual int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
         const std::string& moduleName = "") = 0;
 
+#ifdef CAR_FEATURE_ENABLE
     /**
      * Start AVPlayback for AudioZone.
      *
@@ -299,7 +303,8 @@ public:
      * @since 26.1.0 dynamic&static
      */
     virtual int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-        const std::string& assetId, const CommandInfo& info) { return AVSESSION_SUCCESS; };
+        const std::string& assetId, const CommandInfo& info = CommandInfo{}) { return AVSESSION_SUCCESS; };
+#endif
 
     /**
      * @brief Listen for AncoMediaSessionListener callback event.

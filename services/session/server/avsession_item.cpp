@@ -3371,6 +3371,7 @@ int64_t AVSessionItem::GetPlayingTime() const
     return playingTime_;
 }
 
+#ifdef CAR_FEATURE_ENABLE
 void AVSessionItem::SetCastScreenUserId(int32_t userId)
 {
     castScreenUserId_ = userId;
@@ -3380,6 +3381,7 @@ int32_t AVSessionItem::GetCastScreenUserId() const
 {
     return castScreenUserId_;
 }
+#endif
 
 void AVSessionItem::SetLyricTitle(const std::string& title)
 {
