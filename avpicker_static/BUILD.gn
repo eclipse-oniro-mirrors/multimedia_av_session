@@ -16,7 +16,11 @@ import("//build/config/components/ace_engine/ace_gen_obj.gni")
 
 group("avpicker_static") {
   deps = []
-  if (use_mingw_win || use_mac || use_linux) {
+  if ("${target_platform}" == "car") {
+    deps += [
+      "avpicker_car:av_cast_picker_car",
+    ]
+  } else if (use_mingw_win || use_mac || use_linux) {
     deps += [
       "avpicker_mock:av_cast_picker_mock",
     ]
