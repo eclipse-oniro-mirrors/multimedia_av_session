@@ -269,7 +269,7 @@ public:
         return CAST_PREFIX;
     }
 
-    static std::string GetAnonySessionId(const std::string& sessionId)
+    static std::string GetAnonySessionId(std::string sessionId)
     {
         constexpr size_t PRE_LEN = 3;
         constexpr size_t MAX_LEN = 100;
@@ -356,6 +356,7 @@ public:
             }
         }
         const int char_count = static_cast<int>(char_positions.size());
+        if (char_count == 0) return "***";
         // 特殊处理短字符串
         const int VERY_SHORT_TEXT_LENGTH = 3;
         const int SHORT_TEXT_LENGTH = 2;

@@ -1020,7 +1020,7 @@ void AVSessionImpl::SetSupportedPlaySpeedsSync(array_view<double> speeds)
     }
 }
 
-void AVSessionImpl::SetSupportedLoopModesSync(array_view<int32_t> loopModes)
+void AVSessionImpl::SetSupportedLoopModesSync(array_view<LoopMode> loopModes)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::SetSupportedLoopModesSync");
     if (session_ == nullptr) {

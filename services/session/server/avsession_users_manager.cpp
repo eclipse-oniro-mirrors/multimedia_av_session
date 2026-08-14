@@ -166,7 +166,7 @@ std::string AVSessionUsersManager::GetDirForCurrentUser(int32_t userId)
     } else if (userId <= 0) {
         return AVSESSION_FILE_DIR_HEAD + std::to_string(curUserId_) + AVSESSION_FILE_DIR_TAIL;
     } else {
-        SLOGI("GetDirForCurrentUser with specific userId:%{public}d", userId);
+        SLOGD("GetDirForCurrentUser with specific userId:%{public}d", userId);
         return AVSESSION_FILE_DIR_HEAD + std::to_string(userId) + AVSESSION_FILE_DIR_TAIL;
     }
 }
