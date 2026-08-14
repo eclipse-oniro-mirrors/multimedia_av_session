@@ -117,7 +117,6 @@ class TestISessionListener : public ISessionListener {
     {
         return AVSESSION_SUCCESS;
     };
-#ifdef CAR_FEATURE_ENABLE
     ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         g_isCallOnSessionAddForAudioZone = true;
@@ -133,7 +132,6 @@ class TestISessionListener : public ISessionListener {
         g_isCallOnTopSessionChangeForAudioZone = true;
         return AVSESSION_SUCCESS;
     };
-#endif
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; };
 };
 

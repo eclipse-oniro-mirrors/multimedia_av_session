@@ -269,11 +269,9 @@ public:
 
     int64_t GetPlayingTime() const;
 
-#ifdef CAR_FEATURE_ENABLE
     void SetCastScreenUserId(int32_t userId);
 
     int32_t GetCastScreenUserId() const;
-#endif
 
     void SetLyricTitle(const std::string& title);
 
