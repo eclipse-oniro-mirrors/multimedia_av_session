@@ -133,6 +133,8 @@ private:
     const std::string STOP_CAST = "STOP_CAST";
     const std::string CAST_SESSION_RELEASED = "CAST_SESSION_RELEASED";
 
+    const std::string HIPLAY_CAST_MODE_CHANGE_RESULT = "HIPLAY_CAST_MODE_CHANGE_RESULT";
+
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,
         BYPASS_COMMAND_NUM = 1,
