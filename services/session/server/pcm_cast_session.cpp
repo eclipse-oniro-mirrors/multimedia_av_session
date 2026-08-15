@@ -194,12 +194,8 @@ void PcmCastSession::DealCollaborationPublishState(int32_t castState, DeviceInfo
 
 void PcmCastSession::OnSystemCommonEvent(const std::string& commonEvent, const std::string& args)
 {
-    switch (commonEvent) {
-        case "HIPLAY_CAST_MODE_CHANGE_RESULT":
-            HandleCastModeChangeEvent(args);
-            break;
-        default:
-            break;
+    if (commonEvent == HIPLAY_CAST_MODE_CHANGE_RESULT) {
+        HandleCastModeChangeEvent(args);
     }
 }
 
