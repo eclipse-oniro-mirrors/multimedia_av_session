@@ -51,9 +51,9 @@ public:
     int64_t GetCastHandle() const;
     AVSessionDescriptor GetDescriptor();
 
-    void OnSystemCommonEvent(const std::string& args);
+    void OnSystemCommonEvent(const std::string& commonEvent, const std::string& args);
 
-    void HandleCastModeChangeEvent(const std::string& commonEvent, const std::string& args);
+    void HandleCastModeChangeEvent(const std::string& args);
 
     void OnDeviceNameSystemCommonEvent(const std::string& args);
 
