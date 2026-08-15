@@ -191,8 +191,19 @@ void PcmCastSession::DealCollaborationPublishState(int32_t castState, DeviceInfo
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     }
 }
- 
-void PcmCastSession::OnSystemCommonEvent(const std::string& args)
+
+void PcmCastSession::OnSystemCommonEvent(const std::string& commonEvent, const std::string& args)
+{
+    switch (commonEvent) {
+        case "HIPLAY_CAST_MODE_CHANGE_RESULT":
+            HandleCastModeChangeEvent(args);
+            break;
+        default:
+            break;
+    }
+}
+
+void PcmCastSession::HandleCastModeChangeEvent(const std::string& args)
 {
     int32_t code = JsonUtils::GetIntParamFromJsonString(args, "code");
     CHECK_AND_RETURN_RET_LOG(CheckIsCasting(), void(), "First connection, castState is 0.");
@@ -200,7 +211,7 @@ void PcmCastSession::OnSystemCommonEvent(const std::string& args)
     int32_t castMode = JsonUtils::GetIntParamFromJsonString(args, "mode");
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
-    SLOGI("Received HIPLAY_CONFIG_MODE_DATA: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
+    SLOGI("Received HIPLAY_CAST_MODE_CHANGE_RESULT: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
         castMode, uid, AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str());
     {
         std::lock_guard lockGuard(castLock_);

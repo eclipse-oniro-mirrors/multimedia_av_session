@@ -93,7 +93,7 @@ private:
     const std::string MEDIA_CAST_ERROR = "usual.event.MEDIA_CAST_ERROR";
     const std::string MEDIA_SERIES_CAST_CONFLICT = "usual.event.MEDIA_SERIES_CAST_CONFLICT";
     const std::string MEDIA_SERIES_CAST_3VAP = "usual.event.MEDIA_SERIES_CAST_3VAP";
-    const std::string HIPLAY_CONFIG_MODE_DATA = "HIPLAY_CONFIG_MODE_DATA";
+    const std::string HIPLAY_CAST_MODE_CHANGE_RESULT = "HIPLAY_CAST_MODE_CHANGE_RESULT";
     const std::string HIPLAY_BYPASS_DATA = "HIPLAY_BYPASS_DATA";
     const std::string HIPLAY_QUERY_RESPONSE = "HIPLAY_QUERY_RESPONSE";
 };

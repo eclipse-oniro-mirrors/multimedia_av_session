@@ -53,6 +53,8 @@ public:
 
     void OnSystemCommonEvent(const std::string& args);
 
+    void HandleCastModeChangeEvent(const std::string& commonEvent, const std::string& args);
+
     void OnDeviceNameSystemCommonEvent(const std::string& args);
 
     void BypassCommandParams(const AAFwk::WantParams& commandArgs);

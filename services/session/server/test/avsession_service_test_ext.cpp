@@ -1420,7 +1420,7 @@ static HWTEST_F(AVSessionServiceTestExt, NotifySystemCommonEvent001, TestSize.Le
     sptr<ISessionListener> listener = new TestISessionListener();
     CHECK_AND_RETURN(listener != nullptr);
     g_AVSessionService->GetUsersManager().AddSessionListener(pid, listener);
-    std::string commonEvent = "HIPLAY_CONFIG_MODE_DATA";
+    std::string commonEvent = "HIPLAY_CAST_MODE_CHANGE_RESULT";
     std::string args = "";
     g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
     g_AVSessionService->NotifySystemCommonEvent(commonEvent, args);
