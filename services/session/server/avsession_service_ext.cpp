@@ -449,6 +449,7 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     AVSessionRadarInfo info("AVSessionService::NotifyDeviceAvailable");
     OutputDeviceInfo outputDeviceInfo = castOutputDeviceInfo;
     UpdateDeviceCastMode(outputDeviceInfo);
+    UpdateDeviceModuleId(outputDeviceInfo);
  
     AVSessionRadar::GetInstance().CastDeviceAvailable(outputDeviceInfo, info);
  
@@ -516,6 +517,27 @@ void AVSessionService::UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo)
     }
 }
 
+void AVSessionService::UpdateDeviceModuleId(OutputDeviceInfo& outputDeviceInfo)
+{
+    SLOGI("UpdateDeviceModuleId in ");
+    if (pcmCastSession_ != nullptr) {
+        auto descriptor = pcmCastSession_->GetDescriptor();
+        for (auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
+            std::string deviceId = deviceInfo.deviceId_;
+            if (descriptor.outputDeviceInfo_.deviceInfos_.size() > 0 &&
+                descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_ == deviceId) {
+                std::string moduleId = pcmCastSession_->GetModuleId();
+                deviceInfo.hiPlayDeviceInfo_.moduleId_ = moduleId;
+                std::string submoduleId = pcmCastSession_->GetSubModuleId();
+                deviceInfo.hiPlayDeviceInfo_.submoduleId_ = submoduleId;
+                SLOGI("UpdateDeviceModuleId success, moduleId: %{public}s, submoduleId: %{public}s",
+                    moduleId.c_str(), submoduleId.c_str());
+                continue;
+            }
+        }
+    }
+}
+
 void AVSessionService::NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
@@ -575,6 +597,8 @@ void AVSessionService::NotifySystemCommonEvent(const std::string& commonEvent, c
 {
     if (commonEvent == "HIPLAY_CONFIG_MODE_DATA" && pcmCastSession_ != nullptr) {
         pcmCastSession_->OnSystemCommonEvent(args);
+    } else if (commonEvent == "HIPLAY_DEVICE_INFO_DATA" && pcmCastSession_ != nullptr) {
+        pcmCastSession_->OnDeviceInfoCommonEvent(args);
     }
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();

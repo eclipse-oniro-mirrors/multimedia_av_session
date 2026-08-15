@@ -1535,6 +1535,7 @@ static HWTEST(HwCastSupplementTest, HwCastProviderSession_OnEvent_007, TestSize.
     provideSession->OnEvent(static_cast<OHOS::CastEngine::EventId>(4201), jsonParam);
     provideSession->OnEvent(static_cast<OHOS::CastEngine::EventId>(4203), jsonParam);
     provideSession->OnEvent(static_cast<OHOS::CastEngine::EventId>(4205), jsonParam);
+    provideSession->OnEvent(static_cast<OHOS::CastEngine::EventId>(4207), jsonParam);
     EXPECT_EQ(listener->callCount_, 0);
     SLOGI("HwCastProviderSession_OnEvent_007 end!");
 }
