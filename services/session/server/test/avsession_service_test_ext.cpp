@@ -1083,9 +1083,9 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast002, TestSize.Level
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
     std::string args = R"({"code":0,"mode":1,"uid":1000,"deviceId":"1234567890"})";
-    pcmCastSession->OnSystemCommonEvent(args);
+    pcmCastSession->OnSystemCommonEvent("HIPLAY_CAST_MODE_CHANGE_RESULT", args);
     args = R"({"code":0,"mode":2,"uid":1000,"deviceId":"1234567890"})";
-    pcmCastSession->OnSystemCommonEvent(args);
+    pcmCastSession->OnSystemCommonEvent("HIPLAY_CAST_MODE_CHANGE_RESULT", args);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
 }
