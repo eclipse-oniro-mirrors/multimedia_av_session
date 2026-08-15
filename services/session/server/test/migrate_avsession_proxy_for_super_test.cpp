@@ -69,6 +69,8 @@ void MigrateAVSessionProxyForSuperTest::SetUp()
     if (g_migrateAVSessionProxyForSuper != nullptr) {
         g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.clear();
         g_migrateAVSessionProxyForSuper->controllerStackForMigrateIn_.clear();
+        g_migrateAVSessionProxyForSuper->orderedSessionRefreshList_.clear();
+        g_migrateAVSessionProxyForSuper->sessionRefreshList_.clear();
     }
 }
 
@@ -79,6 +81,8 @@ void MigrateAVSessionProxyForSuperTest::TearDown()
     if (g_migrateAVSessionProxyForSuper != nullptr) {
         g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.clear();
         g_migrateAVSessionProxyForSuper->controllerStackForMigrateIn_.clear();
+        g_migrateAVSessionProxyForSuper->orderedSessionRefreshList_.clear();
+        g_migrateAVSessionProxyForSuper->sessionRefreshList_.clear();
     }
 }
 
@@ -295,6 +299,7 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, GetControllerListForSuper002,
     // Add to stacks
     g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_["test_session_002"] = sessionItem;
     g_migrateAVSessionProxyForSuper->controllerStackForMigrateIn_["test_session_002"] = controllerItem;
+    g_migrateAVSessionProxyForSuper->orderedSessionRefreshList_.emplace_back("test_session_002");
     
     std::vector<OHOS::sptr<IRemoteObject>> controllerList;
     int32_t ret = g_migrateAVSessionProxyForSuper->GetControllerListForSuper(controllerList);
@@ -429,8 +434,9 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, ProcessControllerListForSuper
     
     int32_t ret = g_migrateAVSessionProxyForSuper->ProcessControllerListForSuper(jsonValue);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_TRUE(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.empty());
-    
+    EXPECT_EQ(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.size(), 1);
+    EXPECT_TRUE(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.count("test_session_old") > 0);
+
     cJSON_Delete(jsonValue);
 }
 
@@ -1339,9 +1345,9 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, ProcessControllerListForSuper
     
     int32_t ret = g_migrateAVSessionProxyForSuper->ProcessControllerListForSuper(jsonValue);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    EXPECT_TRUE(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.empty());
-    EXPECT_TRUE(g_migrateAVSessionProxyForSuper->controllerStackForMigrateIn_.empty());
-    
+    EXPECT_EQ(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.size(), 1);
+    EXPECT_EQ(g_migrateAVSessionProxyForSuper->controllerStackForMigrateIn_.size(), 1);
+
     cJSON_Delete(jsonValue);
 }
 
