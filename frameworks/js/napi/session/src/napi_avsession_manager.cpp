@@ -1372,6 +1372,10 @@ napi_value NapiAVSessionManager::OnSystemCommonEvent(napi_env env, napi_callback
  
     napi_value callback = nullptr;
     auto input = [&callback, env, &context](size_t argc, napi_value *argv) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         /* require 1 arguments <callback> */
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -1418,6 +1422,10 @@ napi_value NapiAVSessionManager::OffSystemCommonEvent(napi_env env, napi_callbac
  
     napi_value callback = nullptr;
     auto input = [env, &context, &callback](size_t argc, napi_value *argv) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         if (argc == ARGC_ONE) {
@@ -1549,6 +1557,10 @@ napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_call
     };
     auto context = std::make_shared<ConcreteContext>();
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "Invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->commonCommand_);
@@ -1565,7 +1577,19 @@ napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_call
         int32_t ret = AVSessionManager::GetInstance().SendSystemCommonCommand(context->commonCommand_,
             context->commandArgs_);
         if (ret != AVSESSION_SUCCESS) {
-            context->errMessage = "SendSystemCommonCommand failed : native server exception";
+            if (ret == ERR_COMMAND_NOT_SUPPORT) {
+                context->errMessage = "SendSystemCommonCommand failed : native invalid command";
+            } else if (ret == ERR_NO_PERMISSION) {
+                context->errMessage = "SendSystemCommonCommand failed : native send control command no permission";
+                HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "ERROR_CODE", ret,
+                                    "ERROR_INFO", "SendSystemSendSystemCommonCommandControlCommand failed : native no permission");
+            } else if (ret == ERR_PERMISSION_DENIED) {
+                context->errMessage = "SendSystemCommonCommand failed : native send control command permission denied";
+            } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
+                context->errMessage = "SendSystemCommonCommand failed : native send command overload";
+            } else {
+                context->errMessage = "SendSystemCommonCommand failed : native server exception";
+            }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
