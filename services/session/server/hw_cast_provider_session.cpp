@@ -437,6 +437,9 @@ void HwCastProviderSession::OnHiplayEventRecv(const int32_t eventId, const std::
         case HIPLAY_QUERY_RESPONSE_NUM:
             AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_QUERY_RESPONSE, jsonParam);
             break;
+        case HIPLAY_DEVICE_INFO:
+            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_DEVICE_INFO_DATA, jsonParam);
+            break;
         default:
             break;
     }

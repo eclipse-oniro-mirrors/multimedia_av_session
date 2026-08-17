@@ -766,6 +766,8 @@ private:
 
     void UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo);
 
+    void UpdateDeviceModuleId(OutputDeviceInfo& outputDeviceInfo);
+
     int32_t GetUserIdFromCallingUid(const int32_t uid);
 
     void NotifyClientDieForMigrateProxy(pid_t pid);

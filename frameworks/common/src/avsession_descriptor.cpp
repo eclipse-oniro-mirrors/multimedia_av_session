@@ -362,6 +362,8 @@ bool HiPlayDeviceInfo::WriteToParcel(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(supportCastMode_), false, "write supportCastMode_ failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castMode_), false, "write castMode_ failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(castUid_), false, "write castUid_ failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(moduleId_), false, "write moduleId_ failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(submoduleId_), false, "write submoduleId_ failed");
 
     return true;
 }
@@ -371,6 +373,8 @@ bool HiPlayDeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportCastMode_), false, "read supportCastMode_ failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castMode_), false, "read castMode_ failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(castUid_), false, "read castUid_ failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(moduleId_), false, "read moduleId_ failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(submoduleId_), false, "read submoduleId_ failed");
 
     return true;
 }
