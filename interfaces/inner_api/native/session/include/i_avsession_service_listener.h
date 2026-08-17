@@ -40,9 +40,10 @@ public:
      * Create a new session at sink device.
      *
      * @param { int64_t } castHandle - Cast handle for cast session.
+     * @param { int32_t } userId - User id for multi-user support.
      * @since 10
     */
-    virtual void CreateSessionByCast(const int64_t castHandle) = 0;
+    virtual void CreateSessionByCast(const int64_t castHandle, const int32_t userId) = 0;
 
     /**
      * Notify Router that the device has been discovered.

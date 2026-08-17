@@ -278,9 +278,6 @@ void AVSessionService::NotifySessionChange(std::shared_ptr<std::list<sptr<AVSess
 
 void AVSessionService::NotifyActiveSessionChange(const std::vector<AVSessionDescriptor> &descriptors)
 {
-    SLOGI("NotifyActiveSessionChange with size=%{public}d, topSession:%{public}s",
-        static_cast<int32_t>(descriptors.size()),
-        (topSession_ == nullptr ? "null" : topSession_->GetBundleName()).c_str());
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
@@ -297,13 +294,15 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGD("uid = %{public}d, state = %{public}d", uid, state);
-    if (topSession_ != nullptr && topSession_->GetUid() == uid) {
+    int32_t userId = GetUserIdFromCallingUid(uid);
+    sptr<AVSessionItem> curTopSession = GetUsersManager().GetTopSession(userId);
+    if (curTopSession != nullptr && curTopSession->GetUid() == uid) {
         if (state == appState) {
             return;
         }
         if (state == static_cast<int>(AppExecFwk::ApplicationState::APP_STATE_FOREGROUND)) {
             SLOGI("enter notifyMirrorToStreamCast by background to foreground state change, and counts = 2");
-            MirrorToStreamCast(topSession_);
+            MirrorToStreamCast(curTopSession);
         }
         appState = state;
     }
@@ -395,9 +394,9 @@ void AVSessionService::ReleaseCastSession()
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
-void AVSessionService::CreateSessionByCast(const int64_t castHandle)
+void AVSessionService::CreateSessionByCast(const int64_t castHandle, const int32_t userId)
 {
-    SLOGI("AVSessionService CreateSessionByCast in");
+    SLOGI("AVSessionService CreateSessionByCast in, userId is %{public}d", userId);
     AVSessionRadarInfo info("AVSessionService::CreateSessionByCast");
     AVSessionRadar::GetInstance().StartConnect(info);
     AppExecFwk::ElementName elementName;
@@ -412,10 +411,13 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle)
     sinkSession->RegisterDeviceStateCallback();
 
 #ifdef CAR_FEATURE_ENABLE
-    int32_t userId = GetUsersManager().GetCurrentUserId();
-    sinkSession->SetCastScreenUserId(userId);
+    if (userId > 0) {
+        sinkSession->SetDescriptorUserId(userId);
+        sinkSession->SetUserId(userId);
+    }
     sinkSession->SetPlayingTime(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
+    NotifySessionCreate(sinkSession->GetDescriptor());
 #endif
 
     {
@@ -700,8 +702,9 @@ int32_t AVSessionService::StopSourceCast()
 
 void AVSessionService::NotifyMirrorToStreamCast()
 {
+    sptr<AVSessionItem> curTopSession = GetUsersManager().GetTopSession();
     for (auto& session : GetContainer().GetAllSessions()) {
-        if (session && topSession_ && (session.GetRefPtr() == topSession_.GetRefPtr())) {
+        if (session && curTopSession && (session.GetRefPtr() == curTopSession.GetRefPtr())) {
             MirrorToStreamCast(session);
         }
     }
@@ -1075,8 +1078,9 @@ void AVSessionService::UpdateLocalFrontSession(std::shared_ptr<std::list<sptr<AV
         NotifyLocalFrontSessionChangeForMigrate(preloadSessionId);
         return;
     }
-    if (topSession_ != nullptr && !topSession_->IsCasting()) {
-        preloadSessionId = topSession_->GetSessionId();
+    sptr<AVSessionItem> curTopSession = GetUsersManager().GetTopSession();
+    if (curTopSession != nullptr && !curTopSession->IsCasting()) {
+        preloadSessionId = curTopSession->GetSessionId();
         NotifyLocalFrontSessionChangeForMigrate(preloadSessionId);
         return;
     }

@@ -60,13 +60,14 @@ public:
     */
     virtual void OnSessionNeedDestroy() = 0;
 
-    /**
-     * Notify Router that the cast session has created.
+/**
+      * Notify Router that the cast session has created.
      *
      * @param { int32_t } castId - Cast id for AVRouter's control.
+     * @param { int32_t } userId - User id for multi-user support. Default is -1.
      * @since 10
-    */
-    virtual void OnSessionCreated(const int32_t castId) = 0;
+     */
+    virtual void OnSessionCreated(const int32_t castId, const int32_t userId = -1) = 0;
 
     /**
      * Notify Router that the cast engine service has died.

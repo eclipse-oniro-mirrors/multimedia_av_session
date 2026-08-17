@@ -41,6 +41,7 @@
 #include "avsession_service.h"
 #include "avsession_service_proxy.h"
 #include "avrouter_impl.h"
+#include "avsession_users_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -797,10 +798,13 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionItem =
         g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(avsessionItem != nullptr);
     avsessionItem->descriptor_.sessionTag_ = "test";
     avsessionItem->castHandle_ = 1;
     g_AVSessionService->UpdateTopSession(avsessionItem);
-    bool ret = g_AVSessionService->topSession_->IsCasting();
+    auto topSession = AVSessionUsersManager::GetInstance().GetTopSession();
+    ASSERT_TRUE(topSession != nullptr);
+    bool ret = topSession->IsCasting();
     EXPECT_EQ(ret, false);
     g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
@@ -879,7 +883,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     
     g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
     
-    EXPECT_TRUE(g_AVSessionService->topSession_->IsCasting());
+    EXPECT_TRUE(AVSessionUsersManager::GetInstance().GetTopSession()->IsCasting());
     EXPECT_TRUE(AVRouter::GetInstance().IsRemoteCasting());
     
     routerImpl->isInMirrorToStream_ = false;
@@ -916,7 +920,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     
     g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
     
-    EXPECT_TRUE(g_AVSessionService->topSession_->IsCasting());
+    EXPECT_TRUE(AVSessionUsersManager::GetInstance().GetTopSession()->IsCasting());
     EXPECT_FALSE(AVRouter::GetInstance().IsRemoteCasting());
     EXPECT_FALSE(routerImpl->IsHiPlayCasting());
     
@@ -930,7 +934,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
 
 /**
  * @tc.name: AVSessionServiceAddedTest_HandleChangeTopSession_001
- * @tc.desc: topSession_->GetUid() != ancoUid
+ * @tc.desc: GetTopSession()->GetUid() != ancoUid
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
@@ -1452,7 +1456,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_GetLocalTit
     EXPECT_TRUE(avsessionItem != nullptr);
     g_AVSessionService->UpdateTopSession(avsessionItem);
 
-    auto title = g_AVSessionService->GetLocalTitle();
+    auto title = g_AVSessionService->GetLocalTitle(avsessionItem);
     EXPECT_TRUE(title.empty());
 
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
@@ -1462,7 +1466,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_GetLocalTit
 
 /**
 * @tc.name: AVSessionServiceAddedTest_NotifySystemUI_001
-* @tc.desc: addCapsule && topSession_ is true
+* @tc.desc: addCapsule && GetTopSession() is true
 * @tc.type: FUNC
 * @tc.require: #I5Y4MZ
 */
@@ -1480,7 +1484,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_NotifySyste
     bool addCapsule = true;
     bool isCapsuleUpdate = true;
     g_AVSessionService->NotifySystemUI(avsessionItem, addCapsule, isCapsuleUpdate);
-    bool ret = addCapsule && g_AVSessionService->topSession_;
+    bool ret = addCapsule && g_AVSessionService->GetUsersManager().GetTopSession();
     EXPECT_EQ(ret, true);
 
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
@@ -1505,8 +1509,9 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_DealFlowCon
     EXPECT_TRUE(avsessionItem != nullptr);
     avsessionItem->Activate();
     int32_t uid = avsessionItem->GetUid();
+    int32_t userId = avsessionItem->GetUserId();
     g_AVSessionService->UpdateTopSession(avsessionItem);
-    g_AVSessionService->DealFlowControl(uid, false);
+    g_AVSessionService->DealFlowControl(uid, false, userId);
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_DealFlowControl001 end!");
 }

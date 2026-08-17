@@ -224,7 +224,7 @@ private:
     TargetPlayInfo GetTargetPlayInfoForAudioZone(int32_t userId, const std::string& bundleName);
 #endif
 
-    int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId = "");
+    int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId = "", int32_t userId = -1);
 
 public:
     int32_t CreateControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object) override;
@@ -292,7 +292,7 @@ public:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void ReleaseCastSession() override;
 
-    void CreateSessionByCast(const int64_t castHandle) override;
+    void CreateSessionByCast(const int64_t castHandle, const int32_t userId) override;
 
     void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) override;
 
@@ -430,7 +430,8 @@ private:
 #endif
     void NotifyAudioSessionCheck(const int32_t uid);
     bool CheckNotificationEnabled();
-    void NotifySystemUI(sptr<AVSessionItem> photoSession, bool addCapsule, bool isCapsuleUpdate);
+    void NotifySystemUI(sptr<AVSessionItem> photoSession, bool addCapsule, bool isCapsuleUpdate,
+        int32_t userId = 0);
     void PublishEvent(int32_t mediaPlayState);
 
     void AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
@@ -572,7 +573,7 @@ private:
 
     void HandleEventHandlerCallBack();
 
-    AVControlCommand GetSessionProcCommand();
+    AVControlCommand GetSessionProcCommand(sptr<AVSessionItem> session);
 
     bool IsHistoricalSession(const std::string& sessionId);
 
@@ -616,7 +617,8 @@ private:
 
     void UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool isAdd);
 
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(sptr<AVSessionItem> photoSession);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(
+        sptr<AVSessionItem> photoSession, sptr<AVSessionItem> topSession);
     
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateNftRemoveWant(int32_t uid, bool isPhoto);
 
@@ -671,7 +673,7 @@ private:
 
     bool NotifyFlowControl();
 
-    bool IsCapsuleNeeded();
+    bool IsCapsuleNeeded(int32_t userId = 0);
 
     void HandlePcModeRemoveNotification();
 
@@ -714,9 +716,9 @@ private:
 
     void NotifyActiveSessionChange(const std::vector<AVSessionDescriptor> &descriptors);
 
-    std::string GetLocalTitle();
+    std::string GetLocalTitle(sptr<AVSessionItem> session);
 
-    void DealFlowControl(int32_t uid, bool isBroker);
+    void DealFlowControl(int32_t uid, bool isBroker, int32_t userId);
 
     bool InsertSessionItemToCJSON(sptr<AVSessionItem> &session, cJSON* valuesArray);
 
@@ -780,7 +782,6 @@ private:
     std::atomic<bool> isNtfEnabled_ = true;
     std::atomic<bool> isPcMode_ {false};
 
-    sptr<AVSessionItem> topSession_;
     sptr<AVSessionItem> ancoSession_;
     std::map<pid_t, std::list<sptr<AVControllerItem>>> controllers_;
     std::map<pid_t, sptr<IClientDeath>> clientDeathObservers_;

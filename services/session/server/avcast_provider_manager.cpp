@@ -59,11 +59,11 @@ void AVCastProviderManager::OnSessionNeedDestroy()
 #endif
 }
 
-void AVCastProviderManager::OnSessionCreated(const int32_t castId)
+void AVCastProviderManager::OnSessionCreated(const int32_t castId, const int32_t userId)
 {
     SLOGI("On cast session created");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    AVRouter::GetInstance().OnCastSessionCreated(castId);
+    AVRouter::GetInstance().OnCastSessionCreated(castId, userId);
 #endif
 }
 

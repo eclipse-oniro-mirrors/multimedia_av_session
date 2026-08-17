@@ -101,7 +101,7 @@ class AVSessionServiceListenerMock : public IAVSessionServiceListener {
 public:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         void ReleaseCastSession() {}
-        void CreateSessionByCast(const int64_t castHandle) {}
+        void CreateSessionByCast(const int64_t castHandle, const int32_t userId) {}
         void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) {}
         void NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) {}
         void NotifyDeviceOffline(const std::string& deviceId) {}

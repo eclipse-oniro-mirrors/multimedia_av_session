@@ -17,6 +17,9 @@
 #define OHOS_AVSESSION_UTILS_H
 
 #include <cstdio>
+#include <cstdlib>
+#include <cerrno>
+#include <climits>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -489,6 +492,24 @@ public:
         if (fileName.find("..") != std::string::npos) {
             return false;
         }
+        return true;
+    }
+
+    static bool StringToInt32(const std::string& str, int32_t& result)
+    {
+        if (str.empty()) {
+            return false;
+        }
+        errno = 0;
+        char* end = nullptr;
+        long value = std::strtol(str.c_str(), &end, 10);
+        if (end == str.c_str() || *end != '\0') {
+            return false;
+        }
+        if (errno == ERANGE || value < INT32_MIN || value > INT32_MAX) {
+            return false;
+        }
+        result = static_cast<int32_t>(value);
         return true;
     }
 

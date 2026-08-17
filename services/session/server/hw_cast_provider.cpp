@@ -604,14 +604,14 @@ void HwCastProvider::OnDeviceOffline(const std::string& deviceId)
     }
 }
 
-void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
+void HwCastProvider::NotifyCastSessionCreated(const std::string& castSessionId, const int32_t userId)
 {
     std::shared_ptr<ICastSession> castSession = nullptr;
     CastSessionManager::GetInstance().GetCastSession(castSessionId, castSession);
     CHECK_AND_RETURN_LOG(castSession != nullptr, "get cast session failed");
-    SLOGI("Cast provider received session create common event");
+    SLOGI("Cast provider received session create common event with userId %{public}d", userId);
     std::weak_ptr<HwCastProvider> weakThis = shared_from_this();
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([weakThis, castSession]() {
+    AVSessionEventHandler::GetInstance().AVSessionPostTask([weakThis, castSession, userId]() {
         auto sharedThis = weakThis.lock();
         CHECK_AND_RETURN_LOG(sharedThis, "HwCastProvider already destroyed");
         SLOGI("Cast pvd received session create event and create task thread");
@@ -648,7 +648,7 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string castSessionId)
         SLOGI("Create streamPlayer finished %{public}d", castId);
         for (auto listener : listenersSnapshot) {
             if (listener != nullptr) {
-                listener->OnSessionCreated(castId);
+                listener->OnSessionCreated(castId, userId);
             }
         }
         SLOGI("do session create notify finished %{public}d", castId);

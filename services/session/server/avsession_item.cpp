@@ -3324,6 +3324,21 @@ void AVSessionItem::SetUid(pid_t uid)
     descriptor_.uid_ = uid;
 }
 
+void AVSessionItem::SetDescriptorUserId(int32_t userId)
+{
+    descriptor_.userId_ = userId;
+}
+
+void AVSessionItem::SetSessionTag(const std::string& tag)
+{
+    descriptor_.sessionTag_ = tag;
+}
+
+void AVSessionItem::SetUserId(int32_t userId)
+{
+    userId_ = userId;
+}
+
 pid_t AVSessionItem::GetPid() const
 {
     return descriptor_.pid_;
@@ -3369,23 +3384,6 @@ void AVSessionItem::SetPlayingTime(int64_t playingTime)
 int64_t AVSessionItem::GetPlayingTime() const
 {
     return playingTime_;
-}
-
-
-void AVSessionItem::SetCastScreenUserId(int32_t userId)
-{
-#ifdef CAR_FEATURE_ENABLE
-    castScreenUserId_ = userId;
-#endif
-}
-
-int32_t AVSessionItem::GetCastScreenUserId() const
-{
-#ifdef CAR_FEATURE_ENABLE
-    return castScreenUserId_;
-#else
-    return AVSESSION_ERROR;
-#endif
 }
 
 void AVSessionItem::SetLyricTitle(const std::string& title)

@@ -272,9 +272,9 @@ void AVRouterImpl::ReleaseCurrentCastSession()
     servicePtr_->ReleaseCastSession();
 }
 
-int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
+int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId, const int32_t userId)
 {
-    SLOGI("AVRouterImpl On cast session created, cast id is %{public}d", castId);
+    SLOGI("AVRouterImpl On cast session created, cast id is %{public}d, userId is %{public}d", castId, userId);
 
     int64_t castHandle = -1;
     CHECK_AND_RETURN_RET_LOG(GetCastProvider(providerNumberEnableDefault_) != nullptr,
@@ -293,7 +293,7 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId)
     }
     {
         std::lock_guard lockGuard(servicePtrLock_);
-        servicePtr_->CreateSessionByCast(castHandle);
+        servicePtr_->CreateSessionByCast(castHandle, userId);
     }
     return AVSESSION_SUCCESS;
 }
@@ -763,12 +763,18 @@ void AVRouterImpl::SetSinkCastSessionInfo(const AAFwk::Want &want)
         static_cast<ProtocolType>(protocolTypeItem->valueint) : ProtocolType::TYPE_LOCAL;
 
     sinkCastSessionId_ = want.GetStringParam("sessionId");
-    SLOGI("Cast Session Create success with sessionId length %{public}d and deviceId length %{public}d",
-        static_cast<int32_t>(sinkCastSessionId_.size()), static_cast<int32_t>(sourceDeviceId_.size()));
-    cJSON_Delete(deviceInfo);
 #ifdef CAR_FEATURE_ENABLE
-    std::string userId = want.GetStringParam("userId");
+    std::string userIdStr = want.GetStringParam("userId");
+    int32_t userId = -1;
+    AVSessionUtils::StringToInt32(userIdStr, userId);
+    sinkUserId_ = userId;
+    SLOGI("Cast Session Create success sessionId length %{public}d deviceId length %{public}d userId %{public}d",
+        static_cast<int32_t>(sinkCastSessionId_.size()), static_cast<int32_t>(sourceDeviceId_.size()), userId);
+#else
+    SLOGI("Cast Session Create success sessionId length %{public}d deviceId length %{public}d",
+        static_cast<int32_t>(sinkCastSessionId_.size()), static_cast<int32_t>(sourceDeviceId_.size()));
 #endif
+    cJSON_Delete(deviceInfo);
 }
 
 void AVRouterImpl::NotifyCastSessionCreated()
@@ -788,7 +794,7 @@ void AVRouterImpl::NotifyCastSessionCreated()
     }
 
     castSide_ = CAST_SIDE::CAST_SINK;
-    hwProvider->NotifyCastSessionCreated(sinkCastSessionId_);
+    hwProvider->NotifyCastSessionCreated(sinkCastSessionId_, sinkUserId_);
 }
 
 void AVRouterImpl::DestroyCastSessionCreated()

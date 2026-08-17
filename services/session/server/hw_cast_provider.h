@@ -57,7 +57,7 @@ public:
     void OnLogEvent(const int32_t eventId, const int64_t param) override;
     void OnDeviceOffline(const std::string &deviceId) override;
     void OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession) override;
-    void NotifyCastSessionCreated(const std::string castSessionId);
+    void NotifyCastSessionCreated(const std::string& castSessionId, const int32_t userId);
     void DestroyCastSessionCreated(const std::string castSessionId);
     void OnServiceDied() override;
     bool SetStreamState(int64_t castHandle, DeviceInfo deviceInfo) override;

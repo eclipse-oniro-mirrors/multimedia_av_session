@@ -36,7 +36,7 @@ public:
 
     void OnSessionNeedDestroy() override;
 
-    void OnSessionCreated(const int32_t castId) override;
+    void OnSessionCreated(const int32_t castId, const int32_t userId) override;
 
     void OnCastServerDied() override;
 
