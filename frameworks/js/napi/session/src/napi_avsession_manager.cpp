@@ -1577,19 +1577,7 @@ napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_call
         int32_t ret = AVSessionManager::GetInstance().SendSystemCommonCommand(context->commonCommand_,
             context->commandArgs_);
         if (ret != AVSESSION_SUCCESS) {
-            if (ret == ERR_COMMAND_NOT_SUPPORT) {
-                context->errMessage = "SendSystemCommonCommand failed : native invalid command";
-            } else if (ret == ERR_NO_PERMISSION) {
-                context->errMessage = "SendSystemCommonCommand failed : native send control command no permission";
-                HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "ERROR_CODE", ret,
-                                    "ERROR_INFO", "SendSystemSendSystemCommonCommandControlCommand failed : native no permission");
-            } else if (ret == ERR_PERMISSION_DENIED) {
-                context->errMessage = "SendSystemCommonCommand failed : native send control command permission denied";
-            } else if (ret == ERR_COMMAND_SEND_EXCEED_MAX) {
-                context->errMessage = "SendSystemCommonCommand failed : native send command overload";
-            } else {
-                context->errMessage = "SendSystemCommonCommand failed : native server exception";
-            }
+            context->errMessage = "SendSystemCommonCommand failed : native server exception";
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
         }
