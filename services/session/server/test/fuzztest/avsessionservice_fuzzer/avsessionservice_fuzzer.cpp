@@ -246,7 +246,6 @@ public:
     {
         return AVSESSION_SUCCESS;
     };
-#ifdef CAR_FEATURE_ENABLE
     ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override
     {
         return AVSESSION_SUCCESS;
@@ -261,7 +260,6 @@ public:
     {
         return AVSESSION_SUCCESS;
     };
-#endif
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
