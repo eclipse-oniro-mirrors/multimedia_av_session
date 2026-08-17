@@ -1557,10 +1557,6 @@ napi_value NapiAVSessionManager::SendSystemCommonCommand(napi_env env, napi_call
     };
     auto context = std::make_shared<ConcreteContext>();
     auto inputParser = [env, context](size_t argc, napi_value* argv) {
-        int32_t err = PermissionChecker::GetInstance().CheckPermission(
-            PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
-        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
-            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "Invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->commonCommand_);
