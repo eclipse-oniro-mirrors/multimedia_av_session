@@ -516,20 +516,10 @@ int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand& c
 int32_t AVSessionManagerImpl::SendSystemCommonCommand(const std::string& commonCommand,
     const AAFwk::WantParams& commandArgs)
 {
-    if (commonCommand.empty()) {
-        SLOGE("command is invalid");
-        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "INVALID_COMMAND", "commonCommand", commonCommand,
-            "ERROR_CODE", ERR_INVALID_PARAM, "ERROR_INFO", "avsessionmanagerimpl command is invalid");
-        return ERR_COMMAND_NOT_SUPPORT;
-    }
+    CHECK_AND_RETURN_RET_LOG(!commonCommand.empty(), ERR_COMMAND_NOT_SUPPORT, "command is empty");
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemCommonCommand");
     auto service = GetService();
-    if (service == nullptr) {
-        HISYSEVENT_FAULT("CONTROL_COMMAND_FAILED", "ERROR_TYPE", "GET_SERVICE_ERROR",
-            "ERROR_CODE", ERR_SERVICE_NOT_EXIST, "ERROR_INFO", "mgrimp sendsystemcommoncommand get service error");
-        return ERR_SERVICE_NOT_EXIST;
-    }
-    return service->SendSystemCommonCommand(commonCommand, commandArgs);
+    return service ? service->SendSystemCommonCommand(commonCommand, commandArgs) : ERR_SERVICE_NOT_EXIST;
 }
 
 int32_t AVSessionManagerImpl::CastAudio(const SessionToken& token,
