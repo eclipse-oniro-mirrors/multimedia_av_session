@@ -103,7 +103,6 @@ public:
      */
     virtual int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor>& descriptors) { return AVSESSION_SUCCESS; };
-
     /**
      * Send the key command to get the descriptor of activated sessions.
      *
@@ -299,7 +298,7 @@ public:
      * @since 26.1.0 dynamic&static
      */
     virtual int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-        const std::string& assetId, const CommandInfo& info) { return AVSESSION_SUCCESS; };
+        const std::string& assetId, const CommandInfo& info = CommandInfo{}) { return AVSESSION_SUCCESS; };
 
     /**
      * @brief Listen for AncoMediaSessionListener callback event.

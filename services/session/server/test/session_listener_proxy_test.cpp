@@ -176,6 +176,7 @@ static HWTEST_F(SessionListenerProxyTest, OnRemoteDistributedSessionChange001, t
     SLOGI("OnRemoteDistributedSessionChange001, end");
 }
 
+#ifdef CAR_FEATURE_ENABLE
 /**
  * @tc.name: OnSessionAddForAudioZone001
  * @tc.desc: Test OnSessionAddForAudioZone
@@ -220,3 +221,4 @@ static HWTEST_F(SessionListenerProxyTest, OnTopSessionChangeForAudioZone001, tes
     EXPECT_TRUE(g_errLog.find("xxx") == std::string::npos);
     SLOGI("OnTopSessionChangeForAudioZone001, end");
 }
+#endif

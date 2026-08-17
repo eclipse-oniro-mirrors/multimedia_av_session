@@ -246,7 +246,6 @@ public:
     {
         return AVSESSION_SUCCESS;
     };
-
     ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override
     {
         return AVSESSION_SUCCESS;
@@ -261,7 +260,6 @@ public:
     {
         return AVSESSION_SUCCESS;
     };
-
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;

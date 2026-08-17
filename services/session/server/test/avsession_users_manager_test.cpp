@@ -362,7 +362,6 @@ HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_005, TestSize.Level0)
     SLOGI("CleanupCacheOnUnlock_005 end!");
 }
 
-
 #ifdef CAR_FEATURE_ENABLE
 /**
  * @tc.name: AddSessionListenerForUser_001

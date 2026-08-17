@@ -28,10 +28,15 @@
 #endif
 
 namespace OHOS::AVSession {
+
+#ifdef CAR_FEATURE_ENABLE
 class AVSessionUsersManagerTest;
+#endif
 
 class AVSessionUsersManager {
+#ifdef CAR_FEATURE_ENABLE
     friend class AVSessionUsersManagerTest;
+#endif
 
 public:
     static AVSessionUsersManager& GetInstance();

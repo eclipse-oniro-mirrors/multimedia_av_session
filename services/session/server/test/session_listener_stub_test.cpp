@@ -138,7 +138,7 @@ class SessionListenerStubDemo : public SessionListenerStub {
     ErrCode OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override
     {
         return AVSESSION_SUCCESS;
-    }
+    };
     ErrCode OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor &descriptor) override
     {
         return AVSESSION_SUCCESS;

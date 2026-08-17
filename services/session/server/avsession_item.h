@@ -569,7 +569,9 @@ private:
     std::function<void(AVSessionItem&)> callStartCallback_;
     friend class AVSessionDumper;
     int64_t playingTime_ = 0;
+#ifdef CAR_FEATURE_ENABLE
     int32_t castScreenUserId_ = -1;
+#endif
     std::string lyricTitle_ = "";
     int32_t appIndex_ = 0;
 

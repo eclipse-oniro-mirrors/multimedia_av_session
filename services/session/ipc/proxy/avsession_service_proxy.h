@@ -70,7 +70,7 @@ public:
         std::vector<AVSessionDescriptor>& descriptors) override;
 
     int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-        const std::string& assetId, const CommandInfo& info) override;
+        const std::string& assetId, const CommandInfo& info = CommandInfo{}) override;
 #endif
 
     int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) override;

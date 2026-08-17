@@ -5345,7 +5345,11 @@ void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneRemove(int32_t zoneId)
         SLOGI("OnAudioZoneRemove UnRegisterAudioZoneChangeCallback ret=%{public}d", ret);
     }
 
-    AVSessionService::GetInstance()->HandleSessionStackChangeForAudioZone();
+    auto service = AVSessionService::GetInstance();
+    if (!service) {
+        return;
+    }
+    service->HandleSessionStackChangeForAudioZone();
 }
 
 void AVSessionService::AudioZoneChangeCallbackImpl::OnAudioZoneChange(
@@ -5354,7 +5358,11 @@ void AVSessionService::AudioZoneChangeCallbackImpl::OnAudioZoneChange(
     SLOGI("OnAudioZoneChange zoneId=%{public}d reason=%{public}d",
         zoneDescriptor.zoneId_, static_cast<int>(reason));
     
-    AVSessionService::GetInstance()->HandleSessionStackChangeForAudioZone();
+    auto service = AVSessionService::GetInstance();
+    if (!service) {
+        return;
+    }
+    service->HandleSessionStackChangeForAudioZone();
 }
 #endif
 

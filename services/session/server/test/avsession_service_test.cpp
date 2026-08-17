@@ -178,6 +178,7 @@ using namespace testing::ext;
 using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AudioStandard;
+#ifdef CAR_FEATURE_ENABLE
 using OHOS::ErrCode;
 
 class ISessionListenerMock : public ISessionListener {
@@ -205,6 +206,7 @@ public:
         int32_t userId, const AVSessionDescriptor &descriptor) override {return AVSESSION_SUCCESS;}
     OHOS::sptr<IRemoteObject> AsObject() override { return nullptr; }
 };
+#endif
 
 static AVMetaData g_metaData;
 static AVPlaybackState g_playbackState;
