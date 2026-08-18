@@ -516,6 +516,7 @@ int32_t AVSessionManagerImpl::SendSystemControlCommand(const AVControlCommand& c
 int32_t AVSessionManagerImpl::SendSystemCommonCommand(const std::string& commonCommand,
     const AAFwk::WantParams& commandArgs)
 {
+    CHECK_AND_RETURN_RET_LOG(!commonCommand.empty(), ERR_COMMAND_NOT_SUPPORT, "command is empty");
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::SendSystemCommonCommand");
     auto service = GetService();
     return service ? service->SendSystemCommonCommand(commonCommand, commandArgs) : ERR_SERVICE_NOT_EXIST;
