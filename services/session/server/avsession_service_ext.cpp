@@ -596,7 +596,6 @@ void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
 void AVSessionService::NotifySystemCommonEvent(const std::string& commonEvent, const std::string& args)
 {
     HandleSystemCommonEvent(commonEvent, args);
-
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
