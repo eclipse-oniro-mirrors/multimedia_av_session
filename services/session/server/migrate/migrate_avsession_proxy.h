@@ -161,6 +161,7 @@ private:
     std::atomic<int32_t> volumeNum_ = DEFAULT_FAKE_VOLUME;
     AudioDeviceDescriptors availableDevices_;
     AudioDeviceDescriptors preferredOutputDevice_;
+    std::mutex devicesLock_;
     MigrateAVSessionProxyControllerCallbackFunc migrateProxyCallback_;
 
     std::atomic<bool> isNeedByMediaControl = false;

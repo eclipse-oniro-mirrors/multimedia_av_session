@@ -647,11 +647,13 @@ void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* command
         ProcessMediaControlTimerRequest(commandJsonValue);
     } else if (cJSON_HasObjectItem(commandJsonValue, NEED_STATE)) {
         bool newListenerSetState = SoftbusSessionUtils::GetBoolFromJson(commandJsonValue, NEED_STATE);
-        if (!isNeedByRemote.load() && newListenerSetState) {
-            SLOGI("isNeed refresh data");
-            isNeedByRemote.store(true);
-            LocalFrontSessionArrive(lastSessionId_);
-            TriggerAudioCallback();
+        if (newListenerSetState) {
+            bool expected = false;
+            if (isNeedByRemote.compare_exchange_strong(expected, true)) {
+                SLOGI("isNeed refresh data");
+                LocalFrontSessionArrive(lastSessionId_);
+                TriggerAudioCallback();
+            }
         } else {
             isNeedByRemote.store(newListenerSetState);
         }
@@ -665,9 +667,9 @@ void MigrateAVSessionServer::ProcessMediaControlTimerRequest(cJSON* commandJsonV
     if (version != AVSESSION_PROXY_VERSION) {
         return;
     }
-    if (!isNeedByRemote.load()) {
+    bool expected = false;
+    if (isNeedByRemote.compare_exchange_strong(expected, true)) {
         SLOGI("isNeed refresh data with V2");
-        isNeedByRemote.store(true);
         LocalFrontSessionArrive(lastSessionId_);
         TriggerAudioCallback();
     }

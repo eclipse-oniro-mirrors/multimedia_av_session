@@ -65,7 +65,7 @@ void TaiheAsyncCallback::Call(std::shared_ptr<uintptr_t> method, TaiheFuncExecut
     }
 }
 
-void TaiheAsyncCallback::CallWithFunc(std::shared_ptr<uintptr_t> method, std::shared_ptr<bool> isValid,
+void TaiheAsyncCallback::CallWithFunc(std::shared_ptr<uintptr_t> method, std::shared_ptr<std::atomic<bool>> isValid,
     const std::function<bool()>& checkCallbackValid, TaiheFuncExecute execute)
 {
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
@@ -99,7 +99,7 @@ void TaiheAsyncCallback::ThreadSafeCallbackWork(ani_env* env, DataContextWithFun
     });
     CHECK_RETURN_VOID(safeContext != nullptr, "ThreadCallbackWork: safeContext is nullptr");
     CHECK_RETURN_VOID(safeContext->isValid != nullptr, "ThreadCallbackWork: isValid is nullptr");
-    if (!(*safeContext->isValid)) {
+    if (!safeContext->isValid->load()) {
         SLOGE("ThreadSafeCallbackWork: callback is invalid");
         return;
     }

@@ -42,6 +42,7 @@ std::condition_variable AVSessionImpl::executeCond_;
 std::condition_variable AVSessionImpl::completeCond_;
 std::recursive_mutex registerEventLock_;
 std::atomic<int32_t> AVSessionImpl::playBackStateRet_ = OHOS::AVSession::AVSESSION_ERROR;
+std::atomic<bool> AVSessionImpl::executeReady_ = false;
 std::shared_ptr<AVSessionImpl> AVSessionImpl::taiheAVSession_ = nullptr;
 std::list<int32_t> registerEventList_;
 std::set<std::string> AVSessionImpl::onEventHandlers_ = {
@@ -406,11 +407,13 @@ std::function<void()> AVSessionImpl::PlaybackStateExecute(const std::shared_ptr<
         {
             std::unique_lock<std::mutex> lock(executeMutex_);
             playBackStateRet_.store(session->SetAVPlaybackState(playBackState));
+            executeReady_.store(true);
             executeCond_.notify_one();
         }
         std::unique_lock<std::mutex> lock(completeMutex_);
-        auto waitStatus = completeCond_.wait_for(lock, std::chrono::milliseconds(100));
-        if (waitStatus == std::cv_status::timeout) {
+        auto waitStatus = completeCond_.wait_for(lock, std::chrono::milliseconds(100),
+            [] { return !executeReady_.load(); });
+        if (!waitStatus) {
             SLOGE("SetAVPlaybackStateSync in PlaybackStateExecute timeout");
             return;
         }
@@ -422,11 +425,13 @@ std::function<void()> AVSessionImpl::PlaybackStateComplete()
     return []() {
         {
             std::unique_lock<std::mutex> lock(executeMutex_);
-            auto waitStatus = executeCond_.wait_for(lock, std::chrono::milliseconds(100));
-            if (waitStatus == std::cv_status::timeout) {
+            auto waitStatus = executeCond_.wait_for(lock, std::chrono::milliseconds(100),
+                [] { return executeReady_.load(); });
+            if (!waitStatus) {
                 SLOGE("SetAVPlaybackStateSync in PlaybackStateComplete timeout");
                 return;
             }
+            executeReady_.store(false);
         }
         if (playBackStateRet_.load() != OHOS::AVSession::AVSESSION_SUCCESS) {
             std::string errMessage = "SetAVPlaybackState failed : native server exception";

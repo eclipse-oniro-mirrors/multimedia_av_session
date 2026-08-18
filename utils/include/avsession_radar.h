@@ -124,6 +124,7 @@ private:
     std::string localNetId_;
     std::string localDevType_;
     std::mutex deviceInfoLock_;
+    std::mutex bmsLock_;
     sptr<AppExecFwk::IBundleMgr> bundleMgrProxy_;
 };
 } // namespace OHOS::AVSession

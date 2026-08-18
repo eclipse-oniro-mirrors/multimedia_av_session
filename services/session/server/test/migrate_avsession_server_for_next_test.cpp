@@ -965,3 +965,84 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlTimerReque
     EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
     cJSON_Delete(jsonValue);
 }
+
+/**
+ * @tc.name: ProcessMediaControlNeedStateFromNext001
+ * @tc.desc: test ProcessMediaControlNeedStateFromNext with nullptr input
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateFromNext001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(nullptr);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), false);
+}
+
+/**
+ * @tc.name: ProcessMediaControlNeedStateFromNext002
+ * @tc.desc: test ProcessMediaControlNeedStateFromNext with NEED_STATE true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateFromNext002, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddBoolToJson(jsonValue, NEED_STATE, true);
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->lastSessionId_ = "test_session";
+    g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMediaControlNeedStateFromNext003
+ * @tc.desc: test ProcessMediaControlNeedStateFromNext with NEED_STATE false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateFromNext003, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddBoolToJson(jsonValue, NEED_STATE, false);
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), false);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMediaControlNeedStateFromNext004
+ * @tc.desc: test ProcessMediaControlNeedStateFromNext with NEED_STATE true when isNeedByRemote already true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateFromNext004, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddBoolToJson(jsonValue, NEED_STATE, true);
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMediaControlNeedStateFromNext005
+ * @tc.desc: test ProcessMediaControlNeedStateFromNext with null cJSON
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateFromNext005, TestSize.Level0)
+{
+    cJSON* jsonValue = cJSON_CreateNull();
+    ASSERT_NE(jsonValue, nullptr);
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), false);
+    cJSON_Delete(jsonValue);
+}

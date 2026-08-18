@@ -27,7 +27,7 @@ namespace ANI::AVSession {
 TaiheAVSessionCallback::TaiheAVSessionCallback(ani_env* env)
 {
     SLOGI("construct TaiheAVSessionCallback");
-    isValid_ = std::make_shared<bool>(true);
+    isValid_ = std::make_shared<std::atomic<bool>>(true);
     if (env != nullptr) {
         env_ = env;
     }
@@ -37,7 +37,7 @@ TaiheAVSessionCallback::~TaiheAVSessionCallback()
 {
     SLOGI("destroy TaiheAVSessionCallback");
     if (isValid_) {
-        *isValid_ = false;
+        isValid_->store(false);
     }
 }
 

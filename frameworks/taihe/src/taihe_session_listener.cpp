@@ -32,7 +32,7 @@ TaiheSessionListener::TaiheSessionListener()
 {
     std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("construct");
-    isValid_ = std::make_shared<bool>(true);
+    isValid_ = std::make_shared<std::atomic<bool>>(true);
 }
 
 TaiheSessionListener::~TaiheSessionListener()
@@ -40,7 +40,7 @@ TaiheSessionListener::~TaiheSessionListener()
     std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("destroy");
     if (isValid_) {
-        *isValid_ = false;
+        isValid_->store(false);
     }
 }
 
@@ -178,7 +178,7 @@ void TaiheSessionListener::OnDeviceStateChange(const OHOS::AVSession::DeviceStat
     std::weak_ptr<TaiheSessionListener> weakThis = shared_from_this();
     auto execute = [weakThis, deviceStateTaihe](std::shared_ptr<uintptr_t> method) {
         auto self = weakThis.lock();
-        if (!self || !(self->isValid_) || !(*(self->isValid_))) {
+        if (!self || !self->isValid_->load()) {
             SLOGE("TaiheSessionListener is invalid");
             return;
         }

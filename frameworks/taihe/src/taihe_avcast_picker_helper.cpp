@@ -83,7 +83,7 @@ AVCastPickerHelperInnerImpl::AVCastPickerHelperInnerImpl(OHOS::Ace::UIContent* u
     std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("construct");
     uiContent_ = uiContent;
-    isValid_ = std::make_shared<bool>(true);
+    isValid_ = std::make_shared<std::atomic<bool>>(true);
     audioRoutingMngr_ = OHOS::AudioStandard::AudioRoutingManager::GetInstance();
 }
 
@@ -92,7 +92,7 @@ AVCastPickerHelperInnerImpl::~AVCastPickerHelperInnerImpl()
     std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("destroy");
     if (isValid_) {
-        *isValid_ = false;
+        isValid_->store(false);
     }
 }
 
