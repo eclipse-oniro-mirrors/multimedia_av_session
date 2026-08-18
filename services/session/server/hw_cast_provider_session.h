@@ -39,6 +39,7 @@ public:
         HIPLAY_BYPASS_DATA_NUM = 4201,
         HIPLAY_QUERY_RESPONSE_NUM = 4203,
         HIPLAY_CONFIG_MODE_RESULT = 4205,
+        HIPLAY_DEVICE_INFO = 4207,
     };
 
     explicit HwCastProviderSession(std::shared_ptr<CastEngine::ICastSession> castSession) : castSession_(castSession) {}
@@ -96,6 +97,7 @@ private:
     const std::string HIPLAY_CAST_MODE_CHANGE_RESULT = "HIPLAY_CAST_MODE_CHANGE_RESULT";
     const std::string HIPLAY_BYPASS_DATA = "HIPLAY_BYPASS_DATA";
     const std::string HIPLAY_QUERY_RESPONSE = "HIPLAY_QUERY_RESPONSE";
+    const std::string HIPLAY_DEVICE_INFO_DATA = "HIPLAY_DEVICE_INFO_DATA";
 };
 } // namespace OHOS::AVSession
 

@@ -1372,6 +1372,10 @@ napi_value NapiAVSessionManager::OnSystemCommonEvent(napi_env env, napi_callback
  
     napi_value callback = nullptr;
     auto input = [&callback, env, &context](size_t argc, napi_value *argv) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         /* require 1 arguments <callback> */
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -1418,6 +1422,10 @@ napi_value NapiAVSessionManager::OffSystemCommonEvent(napi_env env, napi_callbac
  
     napi_value callback = nullptr;
     auto input = [env, &context, &callback](size_t argc, napi_value *argv) {
+        int32_t err = PermissionChecker::GetInstance().CheckPermission(
+            PermissionChecker::CHECK_SYSTEM_PERMISSION);
+        CHECK_ARGS_RETURN_VOID(context, err == ERR_NONE, "Check system permission error",
+            NapiAVSessionManager::errcode_[ERR_NO_PERMISSION]);
         CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE, "invalid argument number",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         if (argc == ARGC_ONE) {

@@ -2615,6 +2615,22 @@ napi_status NapiUtils::GetValue(napi_env env, napi_value in, HiPlayDeviceInfo& o
         status = GetValue(env, value, out.castUid_);
         CHECK_RETURN(status == napi_ok, "get value castUid failed", status);
     }
+
+    status = napi_has_named_property(env, in, "moduleId", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "moduleId", &value);
+        CHECK_RETURN(status == napi_ok, "get moduleId failed", status);
+        status = GetValue(env, value, out.moduleId_);
+        CHECK_RETURN(status == napi_ok, "get value moduleId failed", status);
+    }
+
+    status = napi_has_named_property(env, in, "submoduleId", &hasKey);
+    if (hasKey) {
+        status = napi_get_named_property(env, in, "submoduleId", &value);
+        CHECK_RETURN(status == napi_ok, "get submoduleId failed", status);
+        status = GetValue(env, value, out.submoduleId_);
+        CHECK_RETURN(status == napi_ok, "get value submoduleId failed", status);
+    }
     return napi_ok;
 }
 
@@ -2640,6 +2656,15 @@ napi_status NapiUtils::SetValue(napi_env env, const HiPlayDeviceInfo& in, napi_v
     status = napi_set_named_property(env, out, "castUid", property);
     CHECK_RETURN(status == napi_ok, "set castUid property failed", status);
 
+    status = SetValue(env, in.moduleId_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set moduleId failed", status);
+    status = napi_set_named_property(env, out, "moduleId", property);
+    CHECK_RETURN(status == napi_ok, "set moduleId property failed", status);
+ 
+    status = SetValue(env, in.submoduleId_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "set submoduleId failed", status);
+    status = napi_set_named_property(env, out, "submoduleId", property);
+    CHECK_RETURN(status == napi_ok, "set submoduleId property failed", status);
     return napi_ok;
 }
 

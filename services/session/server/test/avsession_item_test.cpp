@@ -1827,8 +1827,9 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetAllCastDisplays_002, TestSize.Level
     EXPECT_EQ(castDisplays.size(), 0);
     SLOGI("AVSessionItem_GetAllCastDisplays_002 End");
 }
+#endif
 
-
+#ifdef CAR_FEATURE_ENABLE
 /**
 * @tc.name: AVSessionItem_SetCastScreenUserId_001
 * @tc.desc: Test SetCastScreenUserId and GetCastScreenUserId

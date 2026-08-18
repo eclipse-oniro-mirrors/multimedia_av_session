@@ -36,7 +36,7 @@ declare_args() {
     multimedia_av_session_enable_device_manager = true
   }
   if (defined(global_parts_info) &&
-      !defined(global_parts_info.car_feature)) {
+      defined(global_parts_info.car_feature)) {
     av_session_enable_multi_user_audio_zone_feature = true
   }
 }

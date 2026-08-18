@@ -35,6 +35,8 @@ struct HiPlayDeviceInfo {
     int32_t supportCastMode_;
     int32_t castMode_;
     int32_t castUid_;
+    std::string moduleId_;
+    std::string submoduleId_;
 };
 
 enum HiPlayCastMode {

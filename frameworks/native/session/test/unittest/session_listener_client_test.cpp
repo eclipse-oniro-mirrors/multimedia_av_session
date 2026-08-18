@@ -329,6 +329,7 @@ HWTEST_F(SessionListenerClientTest, OnDeviceStateChange002, TestSize.Level1)
     sessionListenerClient->OnDeviceStateChange(deviceState);
 }
 
+#ifdef CAR_FEATURE_ENABLE
 /**
 * @tc.name: OnSessionAddForAudioZone001
 * @tc.desc: test OnSessionAddForAudioZone
@@ -418,5 +419,6 @@ HWTEST_F(SessionListenerClientTest, OnTopSessionChangeForAudioZone002, TestSize.
     AVSessionDescriptor descriptor;
     sessionListenerClient->OnTopSessionChangeForAudioZone(100, descriptor);
 }
+#endif
 } // namespace AVSESSION
 } // namespace OHOS

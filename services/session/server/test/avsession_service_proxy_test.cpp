@@ -30,6 +30,7 @@ using namespace OHOS;
 using namespace OHOS::AVSession;
 using namespace OHOS::Security::AccessToken;
 
+#ifdef CAR_FEATURE_ENABLE
 class TestISessionListener : public ISessionListener {
 public:
     ErrCode OnSessionCreate(const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
@@ -55,6 +56,7 @@ public:
     ErrCode OnTopSessionChangeForAudioZone(int32_t userId,
         const AVSessionDescriptor& descriptor) override { return AVSESSION_SUCCESS; }
 };
+#endif
 
 class AVSessionServiceProxyTest : public testing::Test {
 public:
@@ -165,7 +167,7 @@ static HWTEST_F(AVSessionServiceProxyTest, GetSessionDescriptors001, testing::ex
     SLOGI("GetSessionDescriptors001, end");
 }
 
-#ifdef AUDIO_ZONE_ENABLE
+#ifdef CAR_FEATURE_ENABLE
 /**
  * @tc.name: GetSessionDescriptorsForAudioZone001
  * @tc.desc: Test GetSessionDescriptorsForAudioZone with valid userId

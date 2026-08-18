@@ -854,9 +854,13 @@ std::string AVControllerItem::GetSessionType()
 
 AVSessionDescriptor AVControllerItem::GetSessionDescriptor()
 {
+#ifdef CAR_FEATURE_ENABLE
     std::lock_guard lockGuard(sessionMutex_);
     CHECK_AND_RETURN_RET_LOG(session_ != nullptr, AVSessionDescriptor(), "session not exist");
     return session_->GetDescriptor();
+#else
+    return AVSessionDescriptor();
+#endif
 }
 
 int32_t AVControllerItem::IsDesktopLyricEnabled(bool &isEnabled)

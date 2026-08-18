@@ -30,7 +30,9 @@
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 using namespace OHOS::AVSession;
-
+#ifdef CAR_FEATURE_ENABLE
+using OHOS::ErrCode;
+#endif
 static uint64_t g_selfTokenId = 0;
 static std::string g_errLog;
 
@@ -104,8 +106,6 @@ void AVSessionServiceStubPermissionTest::SetUp()
 void AVSessionServiceStubPermissionTest::TearDown()
 {
 }
-
-using OHOS::ErrCode;
 
 class AVSessionServiceStubDemo : public AVSessionServiceStub {
 public:

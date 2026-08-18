@@ -449,6 +449,7 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     AVSessionRadarInfo info("AVSessionService::NotifyDeviceAvailable");
     OutputDeviceInfo outputDeviceInfo = castOutputDeviceInfo;
     UpdateDeviceCastMode(outputDeviceInfo);
+    UpdateDeviceModuleId(outputDeviceInfo);
  
     AVSessionRadar::GetInstance().CastDeviceAvailable(outputDeviceInfo, info);
  
@@ -511,6 +512,27 @@ void AVSessionService::UpdateDeviceCastMode(OutputDeviceInfo& outputDeviceInfo)
                     AVSessionUtils::GetAnonymousDeviceId(castPair.first).c_str(), castPair.second);
             } else {
                 SLOGE("ReadPairFromFile failed.");
+            }
+        }
+    }
+}
+
+void AVSessionService::UpdateDeviceModuleId(OutputDeviceInfo& outputDeviceInfo)
+{
+    SLOGI("UpdateDeviceModuleId in ");
+    if (pcmCastSession_ != nullptr) {
+        auto descriptor = pcmCastSession_->GetDescriptor();
+        for (auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
+            std::string deviceId = deviceInfo.deviceId_;
+            if (descriptor.outputDeviceInfo_.deviceInfos_.size() > 0 &&
+                descriptor.outputDeviceInfo_.deviceInfos_[0].deviceId_ == deviceId) {
+                std::string moduleId = pcmCastSession_->GetModuleId();
+                deviceInfo.hiPlayDeviceInfo_.moduleId_ = moduleId;
+                std::string submoduleId = pcmCastSession_->GetSubModuleId();
+                deviceInfo.hiPlayDeviceInfo_.submoduleId_ = submoduleId;
+                SLOGI("UpdateDeviceModuleId success, moduleId: %{public}s, submoduleId: %{public}s",
+                    moduleId.c_str(), submoduleId.c_str());
+                continue;
             }
         }
     }
