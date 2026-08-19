@@ -709,6 +709,7 @@ void PcmCastSession::ReleaseStreamPlayer()
 
     SLOGI("start to dealoutputdevicechange");
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_DISCONNECTED, outputDeviceInfo);
+    session->SetCastHandle(-1);
     OutputDeviceInfo localDeviceInfo;
     DeviceInfo deviceInfo;
     deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
@@ -718,7 +719,6 @@ void PcmCastSession::ReleaseStreamPlayer()
     session->SetIsHiPlayStreamCasting(false);
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, localDeviceInfo);
     session->ReleaseAVCastControllerInner();
-    session->SetCastHandle(-1);
     AVRouter::GetInstance().OnSystemCommonEvent(CAST_SESSION_RELEASED, "");
     {
         std::lock_guard lockGuard(castLock_);
