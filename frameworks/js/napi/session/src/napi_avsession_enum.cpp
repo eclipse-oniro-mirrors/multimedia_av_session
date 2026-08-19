@@ -186,7 +186,7 @@ static napi_value ExportConnectionState(napi_env env)
     (void)SetNamedProperty(env, result, "STATE_CONNECTING", static_cast<int32_t>(ConnectionState::STATE_CONNECTING));
     (void)SetNamedProperty(env, result, "STATE_CONNECTED", static_cast<int32_t>(ConnectionState::STATE_CONNECTED));
     (void)SetNamedProperty(env, result, "STATE_DISCONNECTED",
-                           static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED));
+        static_cast<int32_t>(ConnectionState::STATE_DISCONNECTED));
     (void)SetNamedProperty(env, result, "STATE_AUTHENTICATING",
         static_cast<int32_t>(ConnectionState::STATE_AUTHENTICATING));
     (void)SetNamedProperty(env, result, "STATE_MIRROR_TO_STREAM",
