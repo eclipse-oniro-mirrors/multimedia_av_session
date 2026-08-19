@@ -951,9 +951,12 @@ int32_t AVSessionServiceStub::HandleGetDistributedSessionControllersInner(Messag
 {
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleGetDistributedSessionControllersInner");
     SLOGI("HandleGetDistributedSessionControllersInner start");
-    int32_t err = PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION);
+    int32_t err = PermissionChecker::GetInstance().CheckPermission(
+        PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
     if (err != ERR_NONE) {
-        SLOGE("HandleGetDistributedSessionControllersInner: CheckPermission failed");
+        SLOGE("GetDistributedSessionControllersInner: CheckPermission failed");
+        HISYSEVENT_SECURITY("CONTROL_PERMISSION_DENIED", "CALLER_UID", GetCallingUid(), "CALLER_PID", GetCallingPid(),
+            "ERROR_MSG", "avsessionservice getdistributedsessioncontrollersinner checkpermission failed");
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
