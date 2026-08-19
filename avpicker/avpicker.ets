@@ -1232,10 +1232,8 @@ export struct AVCastPicker {
                 .fontWeight('sys.string.ohos_id_text_font_family_medium')
                 .fontSize($r('sys.float.ohos_id_text_size_body1'))
                 .width('100%')
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .maxFontScale(this.maxFontSizeScale)
                 .wordBreak(WordBreak.BREAK_ALL)
-                .maxLines(1)
             }
  
             Row() {
@@ -1247,7 +1245,7 @@ export struct AVCastPicker {
               }
             }
             .width(48)
-            .height(48)
+            .constraintSize({ minHeight: 48 })
             .justifyContent(FlexAlign.End)
           }
           .margin({ left: 12, right: 12 })
@@ -1255,7 +1253,7 @@ export struct AVCastPicker {
         .margin({ left: 4, right: 4 })
       }
       .width(224)
-      .height(48)
+      .constraintSize({ minHeight: 48 })
       .accessibilityLevel('yes')
       .accessibilitySelected(this.isDeviceLevel ? true : false)
       .accessibilityRole(AccessibilityRoleType.MENU_ITEM)
@@ -1280,10 +1278,8 @@ export struct AVCastPicker {
                 .fontWeight('sys.string.ohos_id_text_font_family_medium')
                 .fontSize($r('sys.float.ohos_id_text_size_body1'))
                 .width('100%')
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .maxFontScale(this.maxFontSizeScale)
                 .wordBreak(WordBreak.BREAK_ALL)
-                .maxLines(1)
             }
 
             Row() {
@@ -1295,7 +1291,7 @@ export struct AVCastPicker {
               }
             }
             .width(48)
-            .height(48)
+            .constraintSize({ minHeight: 48 })
             .justifyContent(FlexAlign.End)
           }
           .margin({ left: 12, right: 12 })
@@ -1303,7 +1299,7 @@ export struct AVCastPicker {
         .margin({ left: 4, right: 4 })
       }
       .width(224)
-      .height(48)
+      .constraintSize({ minHeight: 48 })
       .accessibilityLevel('yes')
       .accessibilitySelected(!this.isDeviceLevel ? true : false)
       .accessibilityRole(AccessibilityRoleType.MENU_ITEM)
