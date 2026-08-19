@@ -55,12 +55,10 @@ public:
     AVSessionDescriptor GetDescriptor();
 
     void OnSystemCommonEvent(const std::string& commonEvent, const std::string& args);
- 
-    void HandleCastModeChangeEvent(const std::string& args);
- 
-    void HandleDeviceInfoCommonEvent(const std::string& args);
 
-    void OnDeviceInfoCommonEvent(const std::string& args);
+    void HandleCastModeChangeEvent(const std::string& args);
+
+    void HandleDeviceInfoCommonEvent(const std::string& args);
 
     void OnDeviceNameSystemCommonEvent(const std::string& args);
 
