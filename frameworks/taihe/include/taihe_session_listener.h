@@ -16,6 +16,7 @@
 #ifndef TAIHE_SESSIONLISTENER_H
 #define TAIHE_SESSIONLISTENER_H
 
+#include <atomic>
 #include <list>
 #include <memory>
 #include "avsession_info.h"
@@ -72,7 +73,7 @@ private:
     std::mutex lock_;
     std::mutex validLock_;
     std::list<std::shared_ptr<uintptr_t>> callbacks_[EVENT_TYPE_MAX] {};
-    std::shared_ptr<bool> isValid_ = std::make_shared<bool>(false);
+    std::shared_ptr<std::atomic<bool>> isValid_ = std::make_shared<std::atomic<bool>>(false);
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_ = nullptr;
 };
 } // namespace ANI::AVSession

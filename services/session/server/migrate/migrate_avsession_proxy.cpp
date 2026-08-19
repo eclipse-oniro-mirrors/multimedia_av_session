@@ -414,7 +414,11 @@ void MigrateAVSessionProxy::GetVolume(AAFwk::WantParams& extras)
 void MigrateAVSessionProxy::GetAvailableDevices(AAFwk::WantParams& extras)
 {
     SLOGI("proxy send in GetAvailableDevices case");
-    cJSON* jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(availableDevices_);
+    cJSON* jsonData;
+    {
+        std::lock_guard<std::mutex> lock(devicesLock_);
+        jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(availableDevices_);
+    }
     CHECK_AND_RETURN_LOG(jsonData != nullptr, "get jsonData nullptr");
     if (cJSON_IsInvalid(jsonData) || cJSON_IsNull(jsonData)) {
         SLOGE("get jsonData invalid");
@@ -442,7 +446,11 @@ void MigrateAVSessionProxy::GetAvailableDevices(AAFwk::WantParams& extras)
 void MigrateAVSessionProxy::GetPreferredOutputDeviceForRendererInfo(AAFwk::WantParams& extras)
 {
     SLOGI("proxy send in GetPreferredOutputDeviceForRendererInfo case");
-    cJSON* jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(preferredOutputDevice_);
+    cJSON* jsonData;
+    {
+        std::lock_guard<std::mutex> lock(devicesLock_);
+        jsonData = MigrateAVSessionServer::ConvertAudioDeviceDescriptorsToJson(preferredOutputDevice_);
+    }
     CHECK_AND_RETURN_LOG(jsonData != nullptr, "get jsonData nullptr");
     if (cJSON_IsInvalid(jsonData) || cJSON_IsNull(jsonData)) {
         SLOGE("get jsonData invalid");
@@ -732,7 +740,10 @@ void MigrateAVSessionProxy::ProcessAvailableDevices(cJSON* jsonValue)
     CHECK_AND_RETURN_LOG(jsonArray != nullptr && !cJSON_IsInvalid(jsonArray) && cJSON_IsArray(jsonArray),
         "json object is not array");
 
-    DevicesJsonArrayToVector(jsonArray, availableDevices_);
+    {
+        std::lock_guard<std::mutex> lock(devicesLock_);
+        DevicesJsonArrayToVector(jsonArray, availableDevices_);
+    }
 
     std::string jsonStr;
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);
@@ -760,7 +771,10 @@ void MigrateAVSessionProxy::ProcessPreferredOutputDevice(cJSON* jsonValue)
     CHECK_AND_RETURN_LOG(jsonArray != nullptr && !cJSON_IsInvalid(jsonArray) && cJSON_IsArray(jsonArray),
         "json object is not array");
 
-    DevicesJsonArrayToVector(jsonArray, preferredOutputDevice_);
+    {
+        std::lock_guard<std::mutex> lock(devicesLock_);
+        DevicesJsonArrayToVector(jsonArray, preferredOutputDevice_);
+    }
 
     std::string jsonStr;
     SoftbusSessionUtils::TransferJsonToStr(jsonArray, jsonStr);

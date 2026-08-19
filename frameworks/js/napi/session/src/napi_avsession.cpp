@@ -362,7 +362,6 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
 {
     auto context = std::make_shared<ContextBase>();
     if (context == nullptr) {
-        SLOGE("OnEvent failed : no memory");
         return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
     }
     std::string eventName;
@@ -385,22 +384,23 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
     }
     auto it = onEventHandlers_.find(eventName);
     if (it == onEventHandlers_.end()) {
-        SLOGE("event name invalid");
         return ThrowErrorAndReturn(env, "event name invalid", ERR_INVALID_PARAM);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
     if (napiSession == nullptr || napiSession->session_ == nullptr) {
-        SLOGE("OnEvent failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    {
+        std::lock_guard lockGuard(destroyLock_);
         if (napiSession->callback_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
-        }
-        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
-        if (ret != AVSESSION_SUCCESS) {
-            return ThrowErrorAndReturnByErrCode(env, "OnEvent", ret);
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnEvent failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnEvent", ret);
+            }
         }
     }
     if (it->second(env, napiSession, callback) != napi_ok) {
@@ -440,14 +440,17 @@ napi_value NapiAVSession::OnEventPlay(napi_env env, napi_callback_info info)
         return ThrowErrorAndReturn(env, "OnEventPlay failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
 
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    {
+        std::lock_guard lockGuard(destroyLock_);
         if (napiSession->callback_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnEventPlay failed : no memory", ERR_NO_MEMORY);
-        }
-        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
-        if (ret != AVSESSION_SUCCESS) {
-            return ThrowErrorAndReturnByErrCode(env, "OnEventPlay", ret);
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnEventPlay failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnEventPlay", ret);
+            }
         }
     }
 
@@ -492,14 +495,17 @@ napi_value NapiAVSession::OnEventPlayNext(napi_env env, napi_callback_info info)
         return ThrowErrorAndReturn(env, "OnEventPlayNext failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
 
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    {
+        std::lock_guard lockGuard(destroyLock_);
         if (napiSession->callback_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnEventPlayNext failed : no memory", ERR_NO_MEMORY);
-        }
-        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
-        if (ret != AVSESSION_SUCCESS) {
-            return ThrowErrorAndReturnByErrCode(env, "OnEventPlayNext", ret);
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnEventPlayNext failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnEventPlayNext", ret);
+            }
         }
     }
 
@@ -544,14 +550,17 @@ napi_value NapiAVSession::OnEventPlayPrevious(napi_env env, napi_callback_info i
         return ThrowErrorAndReturn(env, "OnEventPlayPrevious failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
 
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    {
+        std::lock_guard lockGuard(destroyLock_);
         if (napiSession->callback_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnEventPlayPrevious failed : no memory", ERR_NO_MEMORY);
-        }
-        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
-        if (ret != AVSESSION_SUCCESS) {
-            return ThrowErrorAndReturnByErrCode(env, "OnEventPlayPrevious", ret);
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnEventPlayPrevious failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnEventPlayPrevious", ret);
+            }
         }
     }
 
@@ -596,14 +605,17 @@ napi_value NapiAVSession::OnEventFastForward(napi_env env, napi_callback_info in
         return ThrowErrorAndReturn(env, "OnEventFastForward failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
 
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    {
+        std::lock_guard lockGuard(destroyLock_);
         if (napiSession->callback_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnEventFastForward failed : no memory", ERR_NO_MEMORY);
-        }
-        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
-        if (ret != AVSESSION_SUCCESS) {
-            return ThrowErrorAndReturnByErrCode(env, "OnEventFastForward", ret);
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnEventFastForward failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnEventFastForward", ret);
+            }
         }
     }
 
@@ -648,14 +660,17 @@ napi_value NapiAVSession::OnEventRewind(napi_env env, napi_callback_info info)
         return ThrowErrorAndReturn(env, "OnEventRewind failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
 
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    {
+        std::lock_guard lockGuard(destroyLock_);
         if (napiSession->callback_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnEventRewind failed : no memory", ERR_NO_MEMORY);
-        }
-        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
-        if (ret != AVSESSION_SUCCESS) {
-            return ThrowErrorAndReturnByErrCode(env, "OnEventRewind", ret);
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnEventRewind failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnEventRewind", ret);
+            }
         }
     }
 
@@ -701,14 +716,17 @@ napi_value NapiAVSession::OnDesktopLyricVisibilityChanged(napi_env env, napi_cal
             ERR_SESSION_NOT_EXIST);
     }
 
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    {
+        std::lock_guard lockGuard(destroyLock_);
         if (napiSession->callback_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnDesktopLyricVisibilityChanged failed : no memory", ERR_NO_MEMORY);
-        }
-        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
-        if (ret != AVSESSION_SUCCESS) {
-            return ThrowErrorAndReturnByErrCode(env, "OnDesktopLyricVisibilityChanged", ret);
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnDesktopLyricVisibilityChanged failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnDesktopLyricVisibilityChanged", ret);
+            }
         }
     }
 
@@ -752,14 +770,17 @@ napi_value NapiAVSession::OnDesktopLyricStateChanged(napi_env env, napi_callback
             ERR_SESSION_NOT_EXIST);
     }
 
-    if (napiSession->callback_ == nullptr) {
-        napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+    {
+        std::lock_guard lockGuard(destroyLock_);
         if (napiSession->callback_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnDesktopLyricStateChanged failed : no memory", ERR_NO_MEMORY);
-        }
-        int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
-        if (ret != AVSESSION_SUCCESS) {
-            return ThrowErrorAndReturnByErrCode(env, "OnDesktopLyricStateChanged", ret);
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnDesktopLyricStateChanged failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnDesktopLyricStateChanged", ret);
+            }
         }
     }
 

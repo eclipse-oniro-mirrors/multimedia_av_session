@@ -16,6 +16,7 @@
 #ifndef TAIHE_AVCONTROLLER_CALLBACK_H
 #define TAIHE_AVCONTROLLER_CALLBACK_H
 
+#include <atomic>
 #include <list>
 #include <thread>
 
@@ -90,13 +91,13 @@ private:
 
     void HandleEvent(int32_t event, TaiheFuncExecute callback);
 
-    void CallWithThreadSafe(std::shared_ptr<uintptr_t> method, std::shared_ptr<bool> isValid, int state,
+    void CallWithThreadSafe(std::shared_ptr<uintptr_t> method, std::shared_ptr<std::atomic<bool>> isValid, int state,
         const std::function<bool()>& checkCallbackValid, TaiheFuncExecute execute = TaiheFuncExecute());
 
     struct DataContextForThreadSafe {
         std::shared_ptr<uintptr_t> method;
         int state;
-        std::shared_ptr<bool> isValid;
+        std::shared_ptr<std::atomic<bool>> isValid;
         TaiheFuncExecute execute;
         std::function<bool()> checkCallbackValid;
     };
@@ -118,7 +119,7 @@ private:
     std::recursive_mutex destroyCallbackLock_;
     std::shared_ptr<TaiheAsyncCallback> asyncCallback_;
     std::list<std::shared_ptr<uintptr_t>> callbacks_[EVENT_TYPE_MAX] {};
-    std::shared_ptr<bool> isValid_;
+    std::shared_ptr<std::atomic<bool>> isValid_;
     std::function<void(void)> sessionDestroyCallback_;
     DataContextForTaihe dataContext_ {};
 };

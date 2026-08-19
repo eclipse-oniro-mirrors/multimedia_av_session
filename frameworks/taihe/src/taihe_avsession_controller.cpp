@@ -501,38 +501,34 @@ bool AVSessionControllerImpl::IsActiveSync()
 
 void AVSessionControllerImpl::DestroySync()
 {
-    {
-        SLOGD("Start Taihe AVSessionControllerImpl destroy process check lock");
-        std::lock_guard<std::mutex> lock(uvMutex_);
-        SLOGI("Start Taihe AVSessionControllerImpl destroy process");
-        if (controller_ == nullptr) {
-            TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
-                "DestroySync failed : controller is nullptr");
-            return;
-        }
-
-        int32_t ret = controller_->Destroy();
-        if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
-            std::string errMessage = "Destroy failed : native server exception";
-            if (ret == OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST) {
-                errMessage = "Destroy failed : native controller not exist";
-            } else if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
-                errMessage = "Destroy failed : native no permission";
-            }
-            TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
-            return;
-        }
+    SLOGD("Start Taihe AVSessionControllerImpl destroy process check lock");
+    std::lock_guard<std::mutex> lock(uvMutex_);
+    SLOGI("Start Taihe AVSessionControllerImpl destroy process");
+    if (controller_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "DestroySync failed : controller is nullptr");
+        return;
     }
 
-    {
-        callback_ = nullptr;
-        controller_ = nullptr;
-        std::lock_guard<std::mutex> lock(controllerListMutex_);
-        SLOGI("repeat list check for controller destroy: %{public}s", sessionId_.c_str());
-        if (!controllerList_.empty() && controllerList_.find(sessionId_) != controllerList_.end()) {
-            SLOGI("repeat list erase for controller destroy: %{public}s", sessionId_.c_str());
-            controllerList_.erase(sessionId_);
+    int32_t ret = controller_->Destroy();
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage = "Destroy failed : native server exception";
+        if (ret == OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST) {
+            errMessage = "Destroy failed : native controller not exist";
+        } else if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "Destroy failed : native no permission";
         }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+
+    callback_ = nullptr;
+    controller_ = nullptr;
+    std::lock_guard<std::mutex> listLock(controllerListMutex_);
+    SLOGI("repeat list check for controller destroy: %{public}s", sessionId_.c_str());
+    if (!controllerList_.empty() && controllerList_.find(sessionId_) != controllerList_.end()) {
+        SLOGI("repeat list erase for controller destroy: %{public}s", sessionId_.c_str());
+        controllerList_.erase(sessionId_);
     }
 }
 

@@ -37,15 +37,16 @@ void OHAVCastControllerCallbackImpl::InitSharedPtrMember()
 
 void OHAVCastControllerCallbackImpl::OnCastPlaybackStateChange(const AVPlaybackState& state)
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    if (playbackStateCallbacks_.empty()) {
-        SLOGE("not register OH_AVCastControllerCallback_PlaybackStateChanged");
-        return;
-    }
-    for (auto it = playbackStateCallbacks_.begin(); it != playbackStateCallbacks_.end(); ++it) {
-        if (it->first == nullptr || avCastController_ == nullptr) {
-            continue;
+    std::vector<std::pair<OH_AVCastControllerCallback_PlaybackStateChanged, void*>> callbacks;
+    OH_AVCastController* controller = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (playbackStateCallbacks_.empty()) {
+            SLOGE("not register OH_AVCastControllerCallback_PlaybackStateChanged");
+            return;
         }
+        callbacks = playbackStateCallbacks_;
+        controller = avCastController_;
         ohAVSessionPlaybackState_->SetState(state.GetState());
         OHOS::AVSession::AVPlaybackState::Position position = state.GetPosition();
         OHOS::AVSession::OHAVSessionPlaybackState::Position avPosition;
@@ -54,128 +55,169 @@ void OHAVCastControllerCallbackImpl::OnCastPlaybackStateChange(const AVPlaybackS
         ohAVSessionPlaybackState_->SetPosition(avPosition);
         ohAVSessionPlaybackState_->SetSpeed(state.GetSpeed());
         ohAVSessionPlaybackState_->SetVolume(state.GetVolume());
-        it->first(avCastController_, (OH_AVSession_AVPlaybackState *)(ohAVSessionPlaybackState_.get()), it->second);
+    }
+    for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+        if (it->first == nullptr || controller == nullptr) {
+            continue;
+        }
+        it->first(controller, (OH_AVSession_AVPlaybackState *)(ohAVSessionPlaybackState_.get()), it->second);
     }
 }
 
 void OHAVCastControllerCallbackImpl::OnMediaItemChange(const AVQueueItem& avQueueItem)
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    if (mediaItemChangedCallbacks_.empty()) {
-        SLOGE("not register OH_AVCastControllerCallback_MediaItemChange");
-        return;
-    }
+    std::vector<std::pair<OH_AVCastControllerCallback_MediaItemChange, void*>> callbacks;
+    OH_AVCastController* controller = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (mediaItemChangedCallbacks_.empty()) {
+            SLOGE("not register OH_AVCastControllerCallback_MediaItemChange");
+            return;
+        }
 
-    if (ohAVSessionAVQueueItem_ == nullptr) {
-        SLOGE("ohAVSessionAVQueueItem is null");
-        return;
-    }
-    if (ohAVMediaDescription_ == nullptr) {
-        SLOGE("ohAVMediaDescription is null");
-        return;
-    }
-    ohAVSessionAVQueueItem_->itemId = static_cast<uint32_t>(avQueueItem.GetItemId());
-    avMediaDescription_ = avQueueItem.GetDescription();
-    if (avMediaDescription_ == nullptr) {
-        SLOGE("getDescription is null");
-        return;
-    }
-    ohAVMediaDescription_->SetAssetId(avMediaDescription_->GetMediaId());
-    ohAVMediaDescription_->SetTitle(avMediaDescription_->GetTitle());
-    ohAVMediaDescription_->SetSubtitle(avMediaDescription_->GetSubtitle());
-    ohAVMediaDescription_->SetArtist(avMediaDescription_->GetArtist());
-    ohAVMediaDescription_->SetAlbumCoverUri(avMediaDescription_->GetAlbumCoverUri());
-    ohAVMediaDescription_->SetMediaType(avMediaDescription_->GetMediaType());
-    ohAVMediaDescription_->SetLyricContent(avMediaDescription_->GetLyricContent());
-    ohAVMediaDescription_->SetDuration(avMediaDescription_->GetDuration());
-    ohAVMediaDescription_->SetMediaUri(avMediaDescription_->GetMediaUri());
-    ohAVMediaDescription_->SetStartPosition(avMediaDescription_->GetStartPosition());
-    ohAVMediaDescription_->SetMediaSize(avMediaDescription_->GetMediaSize());
-    ohAVMediaDescription_->SetAlbumTitle(avMediaDescription_->GetAlbumTitle());
-    ohAVMediaDescription_->SetAppName(avMediaDescription_->GetAppName());
-    ohAVSessionAVQueueItem_->description =
-        reinterpret_cast<OH_AVSession_AVMediaDescription*>(ohAVMediaDescription_.get());
+        if (ohAVSessionAVQueueItem_ == nullptr) {
+            SLOGE("ohAVSessionAVQueueItem is null");
+            return;
+        }
+        if (ohAVMediaDescription_ == nullptr) {
+            SLOGE("ohAVMediaDescription is null");
+            return;
+        }
+        ohAVSessionAVQueueItem_->itemId = static_cast<uint32_t>(avQueueItem.GetItemId());
+        avMediaDescription_ = avQueueItem.GetDescription();
+        if (avMediaDescription_ == nullptr) {
+            SLOGE("getDescription is null");
+            return;
+        }
+        ohAVMediaDescription_->SetAssetId(avMediaDescription_->GetMediaId());
+        ohAVMediaDescription_->SetTitle(avMediaDescription_->GetTitle());
+        ohAVMediaDescription_->SetSubtitle(avMediaDescription_->GetSubtitle());
+        ohAVMediaDescription_->SetArtist(avMediaDescription_->GetArtist());
+        ohAVMediaDescription_->SetAlbumCoverUri(avMediaDescription_->GetAlbumCoverUri());
+        ohAVMediaDescription_->SetMediaType(avMediaDescription_->GetMediaType());
+        ohAVMediaDescription_->SetLyricContent(avMediaDescription_->GetLyricContent());
+        ohAVMediaDescription_->SetDuration(avMediaDescription_->GetDuration());
+        ohAVMediaDescription_->SetMediaUri(avMediaDescription_->GetMediaUri());
+        ohAVMediaDescription_->SetStartPosition(avMediaDescription_->GetStartPosition());
+        ohAVMediaDescription_->SetMediaSize(avMediaDescription_->GetMediaSize());
+        ohAVMediaDescription_->SetAlbumTitle(avMediaDescription_->GetAlbumTitle());
+        ohAVMediaDescription_->SetAppName(avMediaDescription_->GetAppName());
+        ohAVSessionAVQueueItem_->description =
+            reinterpret_cast<OH_AVSession_AVMediaDescription*>(ohAVMediaDescription_.get());
 
-    for (auto it = mediaItemChangedCallbacks_.begin(); it != mediaItemChangedCallbacks_.end(); ++it) {
-        if (it->first == nullptr || avCastController_ == nullptr) {
+        callbacks = mediaItemChangedCallbacks_;
+        controller = avCastController_;
+    }
+    for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+        if (it->first == nullptr || controller == nullptr) {
             continue;
         }
-        it->first(avCastController_, ohAVSessionAVQueueItem_.get(), it->second);
+        it->first(controller, ohAVSessionAVQueueItem_.get(), it->second);
     }
 }
 
 void OHAVCastControllerCallbackImpl::OnPlayNext()
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    if (playNextCallbacks_.empty()) {
-        SLOGE("not register OH_AVCastControllerCallback_PlayNext");
-        return;
+    std::vector<std::pair<OH_AVCastControllerCallback_PlayNext, void*>> callbacks;
+    OH_AVCastController* controller = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (playNextCallbacks_.empty()) {
+            SLOGE("not register OH_AVCastControllerCallback_PlayNext");
+            return;
+        }
+        callbacks = playNextCallbacks_;
+        controller = avCastController_;
     }
-    for (auto it = playNextCallbacks_.begin(); it != playNextCallbacks_.end(); ++it) {
-        if (it->first == nullptr || avCastController_ == nullptr) {
+    for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+        if (it->first == nullptr || controller == nullptr) {
             continue;
         }
-        it->first(avCastController_, it->second);
+        it->first(controller, it->second);
     }
 }
 
 void OHAVCastControllerCallbackImpl::OnPlayPrevious()
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    if (playPreviousCallbacks_.empty()) {
-        SLOGE("not register OH_AVCastControllerCallback_PlayPrevious");
-        return;
+    std::vector<std::pair<OH_AVCastControllerCallback_PlayPrevious, void*>> callbacks;
+    OH_AVCastController* controller = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (playPreviousCallbacks_.empty()) {
+            SLOGE("not register OH_AVCastControllerCallback_PlayPrevious");
+            return;
+        }
+        callbacks = playPreviousCallbacks_;
+        controller = avCastController_;
     }
-    for (auto it = playPreviousCallbacks_.begin(); it != playPreviousCallbacks_.end(); ++it) {
-        if (it->first == nullptr || avCastController_ == nullptr) {
+    for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+        if (it->first == nullptr || controller == nullptr) {
             continue;
         }
-        it->first(avCastController_, it->second);
+        it->first(controller, it->second);
     }
 }
 
 void OHAVCastControllerCallbackImpl::OnSeekDone(const int32_t seekNumber)
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    if (seekDoneCallbacks_.empty()) {
-        SLOGE("not register OH_AVCastControllerCallback_SeekDone");
-        return;
+    std::vector<std::pair<OH_AVCastControllerCallback_SeekDone, void*>> callbacks;
+    OH_AVCastController* controller = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (seekDoneCallbacks_.empty()) {
+            SLOGE("not register OH_AVCastControllerCallback_SeekDone");
+            return;
+        }
+        callbacks = seekDoneCallbacks_;
+        controller = avCastController_;
     }
-    for (auto it = seekDoneCallbacks_.begin(); it != seekDoneCallbacks_.end(); ++it) {
-        if (it->first == nullptr || avCastController_ == nullptr) {
+    for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+        if (it->first == nullptr || controller == nullptr) {
             continue;
         }
-        it->first(avCastController_, seekNumber, it->second);
+        it->first(controller, seekNumber, it->second);
     }
 }
 
 void OHAVCastControllerCallbackImpl::OnPlayerError(const int32_t errorCode, const std::string& errorMsg)
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    if (errorCallbacks_.empty()) {
-        SLOGE("not register OH_AVCastControllerCallback_Error");
-        return;
+    std::vector<std::pair<OH_AVCastControllerCallback_Error, void*>> callbacks;
+    OH_AVCastController* controller = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (errorCallbacks_.empty()) {
+            SLOGE("not register OH_AVCastControllerCallback_Error");
+            return;
+        }
+        callbacks = errorCallbacks_;
+        controller = avCastController_;
     }
-    for (auto it = errorCallbacks_.begin(); it != errorCallbacks_.end(); ++it) {
-        if (it->first == nullptr || avCastController_ == nullptr) {
+    for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+        if (it->first == nullptr || controller == nullptr) {
             continue;
         }
-        it->first(avCastController_, it->second, static_cast<AVSession_ErrCode>(errorCode));
+        it->first(controller, it->second, static_cast<AVSession_ErrCode>(errorCode));
     }
 }
 
 void OHAVCastControllerCallbackImpl::OnEndOfStream(const int32_t isLooping)
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
-    if (endOfStreamCallbacks_.empty()) {
-        SLOGE("not register OH_AVCastControllerCallback_EndOfStream");
-        return;
+    std::vector<std::pair<OH_AVCastControllerCallback_EndOfStream, void*>> callbacks;
+    OH_AVCastController* controller = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (endOfStreamCallbacks_.empty()) {
+            SLOGE("not register OH_AVCastControllerCallback_EndOfStream");
+            return;
+        }
+        callbacks = endOfStreamCallbacks_;
+        controller = avCastController_;
     }
-    for (auto it = endOfStreamCallbacks_.begin(); it != endOfStreamCallbacks_.end(); ++it) {
-        if (it->first == nullptr || avCastController_ == nullptr) {
+    for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+        if (it->first == nullptr || controller == nullptr) {
             continue;
         }
-        it->first(avCastController_, it->second);
+        it->first(controller, it->second);
     }
 }
 

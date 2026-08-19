@@ -132,6 +132,7 @@ void AVSessionRadar::InitBMS()
     }
 
     SLOGI("get bundle manager proxy success");
+    std::lock_guard<std::mutex> lock(bmsLock_);
     bundleMgrProxy_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
 }
 
@@ -181,9 +182,14 @@ void AVSessionRadar::GetPeerInfoFromDeviceInfo(const DeviceInfo &deviceInfo, AVS
 
 std::string AVSessionRadar::GetBundleNameFromUid(int32_t uid)
 {
+    sptr<AppExecFwk::IBundleMgr> proxy;
+    {
+        std::lock_guard<std::mutex> lock(bmsLock_);
+        proxy = bundleMgrProxy_;
+    }
     std::string bundleName{""};
-    if (bundleMgrProxy_ != nullptr) {
-        bundleMgrProxy_->GetNameForUid(uid, bundleName);
+    if (proxy != nullptr) {
+        proxy->GetNameForUid(uid, bundleName);
         SLOGI("get bundleName:%{public}s uid:%{public}d", bundleName.c_str(), uid);
     } else {
         SLOGE("can't get bundleName for uid:%{public}d", uid);

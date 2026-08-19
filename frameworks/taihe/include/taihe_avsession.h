@@ -179,6 +179,7 @@ private:
     static std::condition_variable executeCond_;
     static std::condition_variable completeCond_;
     static std::atomic<int32_t> playBackStateRet_;
+    static std::atomic<bool> executeReady_;
     static std::shared_ptr<AVSessionImpl> taiheAVSession_;
 
     static std::set<std::string> onEventHandlers_;

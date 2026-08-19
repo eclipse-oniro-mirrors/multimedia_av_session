@@ -34,7 +34,7 @@ TaiheAVCastControllerCallback::~TaiheAVCastControllerCallback()
 {
     SLOGI("Destroy TaiheAVCastControllerCallback");
     CHECK_RETURN_VOID(isValid_ != nullptr, "isValid_ is nullptr");
-    *isValid_ = false;
+    isValid_->store(false);
 }
 
 void TaiheAVCastControllerCallback::ExecuteErrorCallback(std::shared_ptr<uintptr_t> method,
@@ -392,10 +392,10 @@ int32_t TaiheAVCastControllerCallback::AddCallback(int32_t event, std::shared_pt
     callbacks_[event].push_back(ref);
     if (isValid_ == nullptr) {
         SLOGI("addCallback with no isValid_ init");
-        isValid_ = std::make_shared<bool>(true);
+        isValid_ = std::make_shared<std::atomic<bool>>(true);
     } else {
         SLOGI("addCallback with isValid_ set true");
-        *isValid_ = true;
+        isValid_->store(true);
     }
     return OHOS::AVSession::AVSESSION_SUCCESS;
 }
@@ -418,7 +418,7 @@ int32_t TaiheAVCastControllerCallback::RemoveCallback(int32_t event, std::shared
                 return OHOS::AVSession::AVSESSION_SUCCESS;
             }
             SLOGI("removeCallback with isValid_ set false");
-            *isValid_ = false;
+            isValid_->store(false);
         }
         return OHOS::AVSession::AVSESSION_SUCCESS;
     }

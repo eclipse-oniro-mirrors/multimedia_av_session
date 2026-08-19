@@ -16,6 +16,8 @@
 #ifndef TAIHE_AVCAST_PICKER_HELPER_H
 #define TAIHE_AVCAST_PICKER_HELPER_H
 
+#include <atomic>
+
 #include "ui_content.h"
 #include "ui_extension_context.h"
 #include "taihe_async_callback.h"
@@ -110,7 +112,7 @@ private:
     std::mutex validLock_;
     std::shared_ptr<TaiheAsyncCallback> asyncCallback_;
     std::list<std::shared_ptr<uintptr_t>> callbacks_[EVENT_TYPE_MAX] {};
-    std::shared_ptr<bool> isValid_;
+    std::shared_ptr<std::atomic<bool>> isValid_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_ = nullptr;
 
     OHOS::Ace::UIContent *uiContent_;

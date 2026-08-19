@@ -31,7 +31,7 @@ TaiheAVControllerCallback::TaiheAVControllerCallback(ani_env* env)
 {
     std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("Construct TaiheAVControllerCallback");
-    isValid_ = std::make_shared<bool>(true);
+    isValid_ = std::make_shared<std::atomic<bool>>(true);
     if (env != nullptr) {
         env_ = env;
     }
@@ -42,7 +42,7 @@ TaiheAVControllerCallback::~TaiheAVControllerCallback()
     std::lock_guard<std::mutex> lockGuard(validLock_);
     SLOGI("Destroy TaiheAVControllerCallback");
     if (isValid_) {
-        *isValid_ = false;
+        isValid_->store(false);
     }
 }
 
@@ -103,8 +103,9 @@ void TaiheAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int32_t
     }
 }
 
-void TaiheAVControllerCallback::CallWithThreadSafe(std::shared_ptr<uintptr_t> method, std::shared_ptr<bool> isValid,
-    int state, const std::function<bool()>& checkCallbackValid, TaiheFuncExecute execute)
+void TaiheAVControllerCallback::CallWithThreadSafe(std::shared_ptr<uintptr_t> method,
+    std::shared_ptr<std::atomic<bool>> isValid, int state, const std::function<bool()>& checkCallbackValid,
+    TaiheFuncExecute execute)
 {
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
     CHECK_RETURN_VOID(mainHandler_ != nullptr, "mainHandler_ is nullptr");
@@ -140,7 +141,7 @@ void TaiheAVControllerCallback::ThreadSafeCallback(ani_env *env, DataContextForT
     CHECK_RETURN_VOID(appData != nullptr, "ThreadSafeCallback: appData is nullptr");
     CHECK_RETURN_VOID(appData->isValid != nullptr, "ThreadSafeCallback: isValid is nullptr");
     SLOGD("work_cb with state %{public}d", static_cast<int>(appData->state));
-    if (!*appData->isValid) {
+    if (!appData->isValid->load()) {
         SLOGE("ThreadSafeCallback failed for appData is invalid.");
         return;
     }

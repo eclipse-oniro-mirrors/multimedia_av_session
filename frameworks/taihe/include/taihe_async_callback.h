@@ -16,6 +16,7 @@
 #ifndef TAIHE_ASYNC_CALLBACK_H
 #define TAIHE_ASYNC_CALLBACK_H
 
+#include <atomic>
 #include <functional>
 
 #include "avsession_log.h"
@@ -38,7 +39,7 @@ public:
 
     void Call(std::shared_ptr<uintptr_t> method, TaiheFuncExecute execute = TaiheFuncExecute());
 
-    void CallWithFunc(std::shared_ptr<uintptr_t> method, std::shared_ptr<bool> isValid,
+    void CallWithFunc(std::shared_ptr<uintptr_t> method, std::shared_ptr<std::atomic<bool>> isValid,
         const std::function<bool()>& checkCallbackValid, TaiheFuncExecute execute = TaiheFuncExecute());
 
 private:
@@ -49,7 +50,7 @@ private:
 
     struct DataContextWithFunc {
         std::shared_ptr<uintptr_t> method;
-        std::shared_ptr<bool> isValid;
+        std::shared_ptr<std::atomic<bool>> isValid;
         TaiheFuncExecute execute;
         std::function<bool()> checkCallbackValid;
     };
