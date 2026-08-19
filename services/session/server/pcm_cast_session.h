@@ -55,8 +55,10 @@ public:
     AVSessionDescriptor GetDescriptor();
 
     void OnSystemCommonEvent(const std::string& commonEvent, const std::string& args);
-
+ 
     void HandleCastModeChangeEvent(const std::string& args);
+ 
+    void HandleDeviceInfoCommonEvent(const std::string& args);
 
     void OnDeviceInfoCommonEvent(const std::string& args);
 
@@ -139,6 +141,7 @@ private:
     const std::string CAST_SESSION_RELEASED = "CAST_SESSION_RELEASED";
 
     const std::string HIPLAY_CAST_MODE_CHANGE_RESULT = "HIPLAY_CAST_MODE_CHANGE_RESULT";
+    const std::string HIPLAY_DEVICE_INFO_RESULT = "HIPLAY_DEVICE_INFO_RESULT";
 
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,
