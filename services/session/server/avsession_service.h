@@ -847,6 +847,13 @@ private:
 
     std::recursive_mutex controlListLock_;
 
+    // Thread management for safe shutdown
+    std::thread migrateStubThread_;
+    std::atomic<bool> stopMigrateStub_{false};
+    std::thread castReleaseThread_;
+    std::atomic<bool> stopCastRelease_{false};
+    std::condition_variable enableCastCond_;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::pair<std::string, std::string> castServiceNameStatePair_;
     const std::string deviceStateConnection = "CONNECT_SUCC";
@@ -862,16 +869,9 @@ private:
     std::recursive_mutex checkEnableCastLock_;
     std::unordered_set<pid_t> cacheEnableCastPids_;
     std::atomic<bool> cancelCastRelease_ = false;
-    std::condition_variable enableCastCond_;
     const int32_t castReleaseTimeOut_ = 120;
     shared_ptr<PcmCastSession> pcmCastSession_ = nullptr;
     const int32_t CONNECTING_MODE = 0;
-    
-    // Thread management for safe shutdown
-    std::thread migrateStubThread_;
-    std::atomic<bool> stopMigrateStub_{false};
-    std::thread castReleaseThread_;
-    std::atomic<bool> stopCastRelease_{false};
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
