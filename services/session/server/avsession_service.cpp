@@ -256,6 +256,22 @@ void AVSessionService::OnActive(const SystemAbilityOnDemandReason& activeReason)
 
 void AVSessionService::OnStop()
 {
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    stopMigrateStub_.store(true);
+    stopCastRelease_.store(true);
+    enableCastCond_.notify_all();
+
+    if (migrateStubThread_.joinable()) {
+        migrateStubThread_.join();
+        SLOGI("MigrateStub thread joined");
+    }
+
+    if (castReleaseThread_.joinable()) {
+        castReleaseThread_.join();
+        SLOGI("CastRelease thread joined");
+    }
+#endif
+
     PublishEvent(remoteMediaNone);
     if (migrateStubFuncHandle_ != nullptr) {
         StopMigrateStubFunc stopMigrateStub =
@@ -583,24 +599,17 @@ void AVSessionService::PullMigrateStub()
         SLOGE("failed to find library, reason: %{public}sn", dlerror());
         return;
     }
-    auto weakSelf = std::weak_ptr<AVSessionService>(shared_from_this());
-    std::thread([startMigrateStub, weakSelf]() {
+    migrateStubThread_ = std::thread([startMigrateStub, this]() {
         SLOGI("create thread to keep MigrateStub");
-        auto self = weakSelf.lock();
-        if (!self) {
-            SLOGI("AVSessionService already destroyed, exiting thread");
-            return;
-        }
-        startMigrateStub([weakSelf](std::string deviceId, std::string serviceName, std::string extraInfo,
+        startMigrateStub([this](std::string deviceId, std::string serviceName, std::string extraInfo,
             std::string state) {
-            auto self = weakSelf.lock();
-            if (!self) {
-                SLOGI("AVSessionService already destroyed, ignoring SuperLauncher callback");
+            if (stopMigrateStub_.load()) {
+                SLOGI("Stop migrate stub requested, ignoring SuperLauncher callback");
                 return;
             }
-            self->SuperLauncher(deviceId, serviceName, extraInfo, state);
+            SuperLauncher(deviceId, serviceName, extraInfo, state);
         });
-    }).detach();
+    });
 }
 
 void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
