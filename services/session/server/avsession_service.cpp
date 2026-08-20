@@ -4958,8 +4958,7 @@ void AVSessionService::NotifyRemoteDistributedSessionControllersChanged(
         }
 #ifdef CAR_FEATURE_ENABLE
         auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
-        CHECK_AND_RETURN_LOG(listenersForUserIt != listenersMapByUserIdForAudioZone.end(),
-        "NotifySessionCreate no listeners for user:%{public}d", userId);
+        CHECK_AND_CONTINUE(listenersForUserIt != listenersMapByUserIdForAudioZone.end());
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE(listener != nullptr);
             AVSESSION_TRACE_SYNC_START("AVSessionService::OnRemoteDistributedSessionChange");
