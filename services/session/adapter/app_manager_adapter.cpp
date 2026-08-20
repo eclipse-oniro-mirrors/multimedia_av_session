@@ -104,6 +104,7 @@ void AppManagerAdapter::RemoveObservedApp(int32_t uid)
 
 void AppManagerAdapter::SetServiceCallbackForAppStateChange(const std::function<void(int uid, int state)>& callback)
 {
+    std::lock_guard<std::mutex> lockGuard(callbackLock_);
     serviceCallbackForAppStateChange_ = callback;
     SLOGI("appStateChangeCallback set done");
 }
@@ -111,13 +112,20 @@ void AppManagerAdapter::SetServiceCallbackForAppStateChange(const std::function<
 // LCOV_EXCL_START
 void AppManagerAdapter::HandleAppStateChanged(const AppProcessData& appProcessData)
 {
+    std::function<void(int uid, int state)> callback;
+    {
+        std::lock_guard<std::mutex> lockGuard(callbackLock_);
+        callback = serviceCallbackForAppStateChange_;
+    }
+    
     {
         std::lock_guard lockGuard(uidLock_);
         if (appProcessData.appState == ApplicationState::APP_STATE_FOREGROUND ||
             appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
             for (const auto& appData : appProcessData.appDatas) {
-                CHECK_AND_CONTINUE(serviceCallbackForAppStateChange_ != nullptr);
-                serviceCallbackForAppStateChange_(appData.uid, static_cast<int>(appProcessData.appState));
+                if (callback != nullptr) {
+                    callback(appData.uid, static_cast<int>(appProcessData.appState));
+                }
             }
         }
     }

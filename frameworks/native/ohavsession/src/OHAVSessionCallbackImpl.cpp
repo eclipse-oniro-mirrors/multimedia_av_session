@@ -29,6 +29,12 @@ OHAVSessionCallbackImpl::~OHAVSessionCallbackImpl()
 void OHAVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnPlay callback");
+        return;
+    }
+    
     for (auto it = playCallbacks_.begin(); it != playCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY, it->second);
     }
@@ -37,6 +43,12 @@ void OHAVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 void OHAVSessionCallbackImpl::OnPause()
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnPause callback");
+        return;
+    }
+    
     for (auto it = pauseCallbacks_.begin(); it != pauseCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PAUSE, it->second);
     }
@@ -45,6 +57,12 @@ void OHAVSessionCallbackImpl::OnPause()
 void OHAVSessionCallbackImpl::OnStop()
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnStop callback");
+        return;
+    }
+    
     for (auto it = stopCallbacks_.begin(); it != stopCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_STOP, it->second);
     }
@@ -53,6 +71,12 @@ void OHAVSessionCallbackImpl::OnStop()
 void OHAVSessionCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnPlayNext callback");
+        return;
+    }
+    
     for (auto it = playNextCallbacks_.begin(); it != playNextCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY_NEXT, it->second);
     }
@@ -61,6 +85,12 @@ void OHAVSessionCallbackImpl::OnPlayNext(const AVControlCommand& cmd)
 void OHAVSessionCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnPlayPrevious callback");
+        return;
+    }
+    
     for (auto it = playPreviousCallbacks_.begin(); it != playPreviousCallbacks_.end(); ++it) {
         it->first(avsession_, CONTROL_CMD_PLAY_PREVIOUS, it->second);
     }
@@ -69,6 +99,12 @@ void OHAVSessionCallbackImpl::OnPlayPrevious(const AVControlCommand& cmd)
 void OHAVSessionCallbackImpl::OnFastForward(int64_t time, const AVControlCommand& cmd)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnFastForward callback");
+        return;
+    }
+    
     for (auto it = forwardCallbacks_.begin(); it != forwardCallbacks_.end(); ++it) {
         it->first(avsession_, time, it->second);
     }
@@ -77,6 +113,12 @@ void OHAVSessionCallbackImpl::OnFastForward(int64_t time, const AVControlCommand
 void OHAVSessionCallbackImpl::OnRewind(int64_t time, const AVControlCommand& cmd)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnRewind callback");
+        return;
+    }
+    
     for (auto it = rewindCallbacks_.begin(); it != rewindCallbacks_.end(); ++it) {
         it->first(avsession_, time, it->second);
     }
@@ -85,6 +127,12 @@ void OHAVSessionCallbackImpl::OnRewind(int64_t time, const AVControlCommand& cmd
 void OHAVSessionCallbackImpl::OnSeek(int64_t time)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnSeek callback");
+        return;
+    }
+    
     for (auto it = seekCallbacks_.begin(); it != seekCallbacks_.end(); ++it) {
         it->first(avsession_, time, it->second);
     }
@@ -93,6 +141,12 @@ void OHAVSessionCallbackImpl::OnSeek(int64_t time)
 void OHAVSessionCallbackImpl::OnSetLoopMode(int32_t loopMode)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnSetLoopMode callback");
+        return;
+    }
+    
     for (auto it = setLoopModeCallbacks_.begin(); it != setLoopModeCallbacks_.end(); ++it) {
         it->first(avsession_, static_cast<AVSession_LoopMode>(loopMode), it->second);
     }
@@ -101,6 +155,12 @@ void OHAVSessionCallbackImpl::OnSetLoopMode(int32_t loopMode)
 void OHAVSessionCallbackImpl::OnToggleFavorite(const std::string& mediaId)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnToggleFavorite callback");
+        return;
+    }
+    
     for (auto it = toggleFavoriteCallbacks_.begin(); it != toggleFavoriteCallbacks_.end(); ++it) {
         it->first(avsession_, mediaId.c_str(), it->second);
     }
@@ -116,7 +176,14 @@ void OHAVSessionCallbackImpl::OnOutputDeviceChange(const int32_t connectionState
     CHECK_AND_CONTINUE_LOG(avSessionOutputDeviceInfo != nullptr,
         "OnOutputDeviceChange avSession OutputDeviceInfo is nullptr.");
     CHECK_AND_CONTINUE_LOG(avsession_ != nullptr, "OnOutputDeviceChange avsession is nullptr.");
+    
     std::lock_guard<std::mutex> lockGuard(lock_);
+    
+    if (avsession_ == nullptr) {
+        SLOGE("Session pointer is null, ignoring OnOutputDeviceChange callback");
+        return;
+    }
+
     for (auto it = outputDeviceChangeCallbacks_.begin(); it != outputDeviceChangeCallbacks_.end(); ++it) {
         (*it)(avsession_, (AVSession_ConnectionState)connectionState, avSessionOutputDeviceInfo.get());
     }

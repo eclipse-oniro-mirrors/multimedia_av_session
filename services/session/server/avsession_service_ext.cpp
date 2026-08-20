@@ -341,21 +341,26 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         CHECK_AND_RETURN_RET_LOG(cacheEnableCastPids_.empty(), AVSESSION_ERROR,
             "can not create task release cast with pid still calling");
         cancelCastRelease_ = false;
-        std::thread([this]() {
+        castReleaseThread_ = std::thread([this]() {
             std::unique_lock<std::mutex> lock(checkEnableCastMutex_);
-            CHECK_AND_RETURN_LOG(!enableCastCond_.wait_for(lock, std::chrono::seconds(castReleaseTimeOut_),
-                [this]() { return cancelCastRelease_.load(); }), "cancel cast release");
-            {
-                std::lock_guard threadLockGuard(checkEnableCastLock_);
-                CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsRemoteCasting(),
-                    "can not release cast with session casting");
-                CHECK_AND_RETURN_LOG(castServiceNameStatePair_.second != deviceStateConnection,
-                    "can not release cast with casting");
-                CHECK_AND_RETURN_LOG(cacheEnableCastPids_.empty(),
-                    "can not release cast with pid still calling");
+            bool timeout = !enableCastCond_.wait_for(lock, std::chrono::seconds(castReleaseTimeOut_),
+                [this]() { return cancelCastRelease_.load() || stopCastRelease_.load(); });
+            if (stopCastRelease_.load()) {
+                SLOGI("Stop cast release requested, exiting thread");
+                return;
             }
+            if (timeout) {
+                SLOGI("wait_for timeout, proceed to release cast");
+            }
+            std::lock_guard threadLockGuard(checkEnableCastLock_);
+            CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsRemoteCasting(),
+                "can not release cast with session casting");
+            CHECK_AND_RETURN_LOG(castServiceNameStatePair_.second != deviceStateConnection,
+                "can not release cast with casting");
+            CHECK_AND_RETURN_LOG(cacheEnableCastPids_.empty(),
+                "can not release cast with pid still calling");
             isInCast_.store(AVRouter::GetInstance().Release());
-        }).detach();
+        });
     } else {
         SLOGD("AVRouter Init in nothing change");
     }

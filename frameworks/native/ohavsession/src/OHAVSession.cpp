@@ -555,6 +555,12 @@ AVSession_ErrCode OHAVSession::ReleaseOutputDevice(AVSession_OutputDeviceInfo *o
 
 AVSession_ErrCode OHAVSession::Destroy()
 {
+    MarkDestroyed();
+    
+    if (ohAVSessionCallbackImpl_) {
+        ohAVSessionCallbackImpl_->ClearSessionPointer();
+    }
+    
     CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
     avSession_->Destroy();
     return AV_SESSION_ERR_SUCCESS;

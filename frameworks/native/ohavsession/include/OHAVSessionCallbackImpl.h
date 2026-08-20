@@ -28,6 +28,11 @@ public:
     OHAVSessionCallbackImpl();
     ~OHAVSessionCallbackImpl() override;
     void InitSharedPtrMember();
+    
+    void ClearSessionPointer() {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        avsession_ = nullptr;
+    }
 
     void OnPlay(const AVControlCommand& cmd) override;
     void OnPause() override;
