@@ -36,17 +36,6 @@ public:
     OHAVSession();
     OHAVSession(AVSession_Type sessionType, const char* sessionTag,
         const char* bundleName, const char* abilityName);
-
-    void MarkDestroyed()
-    {
-        isDestroyed_.store(true);
-    }
-
-    bool IsDestroyed() const
-    {
-        return isDestroyed_.load();
-    }
-
     void SetAVSession(const std::shared_ptr<AVSession> &avsession);
     bool IsAVSessionNull();
     AVSession_ErrCode Activate();
@@ -112,7 +101,6 @@ private:
     std::shared_ptr<AVSession> avSession_;
     std::shared_ptr<OHAVSessionCallbackImpl> ohAVSessionCallbackImpl_;
     std::string sessionId_;
-    std::atomic<bool> isDestroyed_{false};
 
     std::shared_ptr<AVSessionDataTracker> dataTracker_;
     AVMetaData metaData_;

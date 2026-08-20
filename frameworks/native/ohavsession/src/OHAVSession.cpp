@@ -555,8 +555,6 @@ AVSession_ErrCode OHAVSession::ReleaseOutputDevice(AVSession_OutputDeviceInfo *o
 
 AVSession_ErrCode OHAVSession::Destroy()
 {
-    MarkDestroyed();
-    
     if (ohAVSessionCallbackImpl_) {
         ohAVSessionCallbackImpl_->ClearSessionPointer();
     }

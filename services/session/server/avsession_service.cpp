@@ -256,20 +256,6 @@ void AVSessionService::OnActive(const SystemAbilityOnDemandReason& activeReason)
 
 void AVSessionService::OnStop()
 {
-    stopMigrateStub_.store(true);
-    stopCastRelease_.store(true);
-    enableCastCond_.notify_all();
-
-    if (migrateStubThread_.joinable()) {
-        migrateStubThread_.join();
-        SLOGI("MigrateStub thread joined");
-    }
-
-    if (castReleaseThread_.joinable()) {
-        castReleaseThread_.join();
-        SLOGI("CastRelease thread joined");
-    }
-
     PublishEvent(remoteMediaNone);
     if (migrateStubFuncHandle_ != nullptr) {
         StopMigrateStubFunc stopMigrateStub =
@@ -597,17 +583,24 @@ void AVSessionService::PullMigrateStub()
         SLOGE("failed to find library, reason: %{public}sn", dlerror());
         return;
     }
-    migrateStubThread_ = std::thread([startMigrateStub, this]() {
+    auto weakSelf = std::weak_ptr<AVSessionService>(shared_from_this());
+    std::thread([startMigrateStub, weakSelf]() {
         SLOGI("create thread to keep MigrateStub");
-        startMigrateStub([this](std::string deviceId, std::string serviceName, std::string extraInfo,
+        auto self = weakSelf.lock();
+        if (!self) {
+            SLOGI("AVSessionService already destroyed, exiting thread");
+            return;
+        }
+        startMigrateStub([weakSelf](std::string deviceId, std::string serviceName, std::string extraInfo,
             std::string state) {
-            if (stopMigrateStub_.load()) {
-                SLOGI("Stop migrate stub requested, ignoring SuperLauncher callback");
+            auto self = weakSelf.lock();
+            if (!self) {
+                SLOGI("AVSessionService already destroyed, ignoring SuperLauncher callback");
                 return;
             }
-            SuperLauncher(deviceId, serviceName, extraInfo, state);
+            self->SuperLauncher(deviceId, serviceName, extraInfo, state);
         });
-    });
+    }).detach();
 }
 
 void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
