@@ -111,6 +111,7 @@ private:
 
     int32_t GetData(const std::string &key, std::vector<uint8_t> &data);
 
+    std::mutex mutex_;
     std::string objectName_;
     DistributedObject *object_;
     DistributedObjectStore *objectStore_;
