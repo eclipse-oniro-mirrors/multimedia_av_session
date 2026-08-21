@@ -4946,6 +4946,9 @@ void AVSessionService::NotifyRemoteDistributedSessionControllersChanged(
     std::list<int32_t> allUserList = GetUsersManager().GetAliveUserList();
     SLOGI("NotifyRemoteDistributedSessionControllersChanged size: %{public}zu|%{public}zu",
           sessionControllers.size(), allUserList.size());
+#ifdef CAR_FEATURE_ENABLE
+    auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
+#endif
     for (int32_t& userId : allUserList) {
         std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener(userId);
         for (const auto& [pid, listener] : listenerMap) {
@@ -4953,6 +4956,15 @@ void AVSessionService::NotifyRemoteDistributedSessionControllersChanged(
             AVSESSION_TRACE_SYNC_START("AVSessionService::OnRemoteDistributedSessionChange");
             listener->OnRemoteDistributedSessionChange(sessionControllers);
         }
+#ifdef CAR_FEATURE_ENABLE
+        auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
+        CHECK_AND_CONTINUE(listenersForUserIt != listenersMapByUserIdForAudioZone.end());
+        for (const auto& [pid, listener] : listenersForUserIt->second) {
+            CHECK_AND_CONTINUE(listener != nullptr);
+            AVSESSION_TRACE_SYNC_START("AVSessionService::OnRemoteDistributedSessionChange");
+            listener->OnRemoteDistributedSessionChange(sessionControllers);
+        }
+#endif
     }
     std::map<pid_t, sptr<ISessionListener>> listenerMapForAll = GetUsersManager().GetSessionListenerForAllUsers();
     for (const auto& [pid, listener] : listenerMapForAll) {
