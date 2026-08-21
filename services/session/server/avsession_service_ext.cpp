@@ -353,8 +353,9 @@ int32_t AVSessionService::checkEnableCast(bool enable)
                     "can not release cast with casting");
                 CHECK_AND_RETURN_LOG(cacheEnableCastPids_.empty(),
                     "can not release cast with pid still calling");
-                isInCast_.store(AVRouter::GetInstance().Release()); 
-            }).detach();
+            }
+            isInCast_.store(AVRouter::GetInstance().Release());
+        }).detach();
     } else {
         SLOGD("AVRouter Init in nothing change");
     }
