@@ -343,11 +343,8 @@ int32_t AVSessionService::checkEnableCast(bool enable)
         cancelCastRelease_ = false;
         std::thread([this]() {
             std::unique_lock<std::mutex> lock(checkEnableCastMutex_);
-            bool timeout = !enableCastCond_.wait_for(lock, std::chrono::seconds(castReleaseTimeOut_),
-                [this]() { return cancelCastRelease_.load(); });
-            if (timeout) {
-                SLOGI("wait_for timeout, proceed to release cast");
-            }
+            CHECK_AND_RETURN_LOG(!enableCastCond_.wait_for(lock, std::chrono::seconds(castReleaseTimeOut_),
+             [this]() { return cancelCastRelease_.load(); }), "cancel cast release");
             std::lock_guard threadLockGuard(checkEnableCastLock_);
             CHECK_AND_RETURN_LOG(!AVRouter::GetInstance().IsRemoteCasting(),
                 "can not release cast with session casting");
