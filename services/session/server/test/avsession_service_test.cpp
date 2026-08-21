@@ -380,6 +380,46 @@ static HWTEST_F(AVSessionServiceTest, SendSystemAVKeyEvent001, TestSize.Level0)
 }
 
 /**
+* @tc.name: CreateSessionInnerCorrectElement001
+* @tc.desc: system caller (thirdPartyApp=false) keeps the passed elementName unchanged
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVSessionServiceTest, CreateSessionInnerCorrectElement001, TestSize.Level0)
+{
+    SLOGI("CreateSessionInnerCorrectElement001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(avsessionHere_ != nullptr);
+    EXPECT_EQ(avsessionHere_->GetBundleName(), g_testAnotherBundleName);
+    EXPECT_EQ(avsessionHere_->GetAbilityName(), g_testAnotherAbilityName);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    SLOGI("CreateSessionInnerCorrectElement001 end!");
+}
+
+/**
+* @tc.name: CreateSessionInnerCorrectElement002
+* @tc.desc: non-hap caller (SA/native token) with thirdPartyApp=true keeps elementName unchanged
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVSessionServiceTest, CreateSessionInnerCorrectElement002, TestSize.Level0)
+{
+    SLOGI("CreateSessionInnerCorrectElement002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, true, elementName);
+    ASSERT_TRUE(avsessionHere_ != nullptr);
+    EXPECT_EQ(avsessionHere_->GetBundleName(), g_testAnotherBundleName);
+    EXPECT_EQ(avsessionHere_->GetAbilityName(), g_testAnotherAbilityName);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    SLOGI("CreateSessionInnerCorrectElement002 end!");
+}
+
+/**
 * @tc.name: SendSystemAVKeyEvent002
 * @tc.desc: verifying send system keyEvent
 * @tc.type: FUNC

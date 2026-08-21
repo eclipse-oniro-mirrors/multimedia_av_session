@@ -1919,6 +1919,35 @@ void AVSessionService::RefreshUserFromAnco(const std::string& tag, const AppExec
     HandleUserEvent(AVSessionUsersManager::accountEventSwitched, ancoUserId);
 }
 
+AppExecFwk::ElementName AVSessionService::CorrectElementForThirdPartyCaller(bool thirdPartyApp,
+    const AppExecFwk::ElementName& elementName)
+{
+    CHECK_AND_RETURN_RET_LOG(thirdPartyApp, elementName, "not thirdPartyApp, no need correct element");
+    int32_t callingUid = GetCallingUid();
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::string realBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(callingUid);
+    IPCSkeleton::SetCallingIdentity(identity);
+    CHECK_AND_RETURN_RET_LOG(!realBundleName.empty(), elementName,
+        "get real bundleName failed, uid:%{public}d, keep origin element", callingUid);
+    CHECK_AND_RETURN_RET_LOG(realBundleName != elementName.GetBundleName(), elementName,
+        "bundleName matched, no need correct element");
+
+    AppExecFwk::ElementName corrected = elementName;
+    corrected.SetBundleName(realBundleName);
+    identity = IPCSkeleton::ResetCallingIdentity();
+    std::string defaultAbilityName = BundleStatusAdapter::GetInstance().GetDefaultAbilityName(realBundleName,
+        GetUserIdFromCallingUid(callingUid));
+    IPCSkeleton::SetCallingIdentity(identity);
+    CHECK_AND_RETURN_RET_LOG(!defaultAbilityName.empty(), corrected,
+        "get default abilityName failed, bundleName:%{public}s to:%{public}s, uid:%{public}d, "
+        "keep origin abilityName",
+        elementName.GetBundleName().c_str(), realBundleName.c_str(), callingUid);
+    corrected.SetAbilityName(defaultAbilityName);
+    SLOGW("correct session element bundleName:%{public}s to:%{public}s, uid:%{public}d",
+        elementName.GetBundleName().c_str(), realBundleName.c_str(), callingUid);
+    return corrected;
+}
+
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                              const AppExecFwk::ElementName& elementName,
                                              sptr<AVSessionItem>& sessionItem)
@@ -1929,6 +1958,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         return ERR_INVALID_PARAM;
     }
     RefreshUserFromAnco(tag, elementName);
+    AppExecFwk::ElementName sessionElement = CorrectElementForThirdPartyCaller(thirdPartyApp, elementName);
     auto pid = GetCallingPid();
     int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     std::lock_guard lockGuard(sessionServiceLock_);
@@ -1940,7 +1970,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         return ERR_SESSION_IS_EXIST;
     }
 
-    sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, elementName);
+    sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, sessionElement);
     if (result == nullptr) {
         SLOGE("create new session failed");
         if (dumpHelper_ != nullptr) dumpHelper_->SetErrorInfo("CreateSessionInner create new session failed");
@@ -1951,10 +1981,10 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         return ERR_NO_MEMORY;
     }
     CHECK_AND_RETURN_RET_LOG(
-        GetUsersManager().AddSessionForCurrentUser(pid, elementName.GetAbilityName(), result, userId)
+        GetUsersManager().AddSessionForCurrentUser(pid, sessionElement.GetAbilityName(), result, userId)
         == AVSESSION_SUCCESS, ERR_SESSION_EXCEED_MAX, "session num exceed max");
     SetCriticalWhenCreate(result);
-    HISYSEVENT_ADD_LIFE_CYCLE_INFO(elementName.GetBundleName(),
+    HISYSEVENT_ADD_LIFE_CYCLE_INFO(sessionElement.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
 
     NotifySessionCreate(result->GetDescriptor());
