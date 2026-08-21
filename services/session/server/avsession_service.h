@@ -866,12 +866,6 @@ private:
     const int32_t castReleaseTimeOut_ = 120;
     shared_ptr<PcmCastSession> pcmCastSession_ = nullptr;
     const int32_t CONNECTING_MODE = 0;
-    
-    // Thread management for safe shutdown
-    std::thread migrateStubThread_;
-    std::atomic<bool> stopMigrateStub_{false};
-    std::thread castReleaseThread_;
-    std::atomic<bool> stopCastRelease_{false};
 #endif
 
     static constexpr const char *SORT_FILE_NAME = "sortinfo";
