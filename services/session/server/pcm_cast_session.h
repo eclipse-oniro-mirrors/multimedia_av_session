@@ -58,7 +58,7 @@ public:
 
     void HandleCastModeChangeEvent(const std::string& args);
 
-    void HandleDeviceInfoCommonEvent(const std::string& args);
+    void UpdateDeviceModuleId(const std::string& args);
 
     void OnDeviceNameSystemCommonEvent(const std::string& args);
 
@@ -139,7 +139,7 @@ private:
     const std::string CAST_SESSION_RELEASED = "CAST_SESSION_RELEASED";
 
     const std::string HIPLAY_CAST_MODE_CHANGE_RESULT = "HIPLAY_CAST_MODE_CHANGE_RESULT";
-    const std::string HIPLAY_DEVICE_INFO_RESULT = "HIPLAY_DEVICE_INFO_RESULT";
+    const std::string UPDATE_DEVICE_INFO = "UPDATE_DEVICE_INFO";
 
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,
