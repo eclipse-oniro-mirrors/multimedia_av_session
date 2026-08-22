@@ -97,7 +97,7 @@ private:
     const std::string HIPLAY_CAST_MODE_CHANGE_RESULT = "HIPLAY_CAST_MODE_CHANGE_RESULT";
     const std::string HIPLAY_BYPASS_DATA = "HIPLAY_BYPASS_DATA";
     const std::string HIPLAY_QUERY_RESPONSE = "HIPLAY_QUERY_RESPONSE";
-    const std::string UPDATE_DEVICE_INFO  = "UPDATE_DEVICE_INFO";
+    const std::string UPDATE_DEVICE_INFO = "UPDATE_DEVICE_INFO";
 };
 } // namespace OHOS::AVSession
 
