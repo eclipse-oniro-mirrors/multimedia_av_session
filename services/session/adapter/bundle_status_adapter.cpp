@@ -165,6 +165,8 @@ bool BundleStatusAdapter::SubscribeBundleStatusEvent(const std::string bundleNam
 
 bool BundleStatusAdapter::IsAudioPlayback(const std::string& bundleName, const std::string& abilityName)
 {
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
+
     SLOGI("Estimate bundle audio playback status, bundleName=%{public}s", bundleName.c_str());
     CHECK_AND_RETURN_RET_LOG(bundleMgrProxy != nullptr, false, "bundleMgrProxy is nullptr");
     AppExecFwk::AbilityInfo abilityInfo;
@@ -190,6 +192,8 @@ void BundleStatusAdapter::NotifyBundleRemoved(const std::string bundleName, cons
 
 std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
 {
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
+
     std::string bundleName {""};
     if (bundleMgrProxy != nullptr) {
         bundleMgrProxy->GetNameForUid(uid, bundleName);
@@ -309,6 +313,8 @@ bool BundleStatusAdapter::CheckBundleSupport(const std::string& bundleName, std:
 __attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayIntent(const std::string& bundleName,
     std::string& supportModule, std::string& profile)
 {
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
+    
     if (bundleMgrProxy == nullptr) {
         return false;
     }

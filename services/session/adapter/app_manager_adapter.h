@@ -53,6 +53,7 @@ private:
     std::recursive_mutex uidLock_;
     std::set<int32_t> observedAppUIDs_;
     std::function<void(int uid, int state)> serviceCallbackForAppStateChange_;
+    std::mutex callbackLock_;
 
     static constexpr int RETRY_COUNT_MAX = 5;
     static constexpr int RETRY_INTERVAL_TIME = 500;

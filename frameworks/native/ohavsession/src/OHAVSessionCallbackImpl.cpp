@@ -26,6 +26,12 @@ OHAVSessionCallbackImpl::~OHAVSessionCallbackImpl()
 {
 }
 
+void OHAVSessionCallbackImpl::ClearSessionPointer()
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    avsession_ = nullptr;
+}
+
 void OHAVSessionCallbackImpl::OnPlay(const AVControlCommand& cmd)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

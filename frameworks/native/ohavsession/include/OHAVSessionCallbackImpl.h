@@ -28,6 +28,7 @@ public:
     OHAVSessionCallbackImpl();
     ~OHAVSessionCallbackImpl() override;
     void InitSharedPtrMember();
+    void ClearSessionPointer();
 
     void OnPlay(const AVControlCommand& cmd) override;
     void OnPause() override;
