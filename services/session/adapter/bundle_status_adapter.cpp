@@ -197,6 +197,17 @@ std::string BundleStatusAdapter::GetBundleNameFromUid(const int32_t uid)
     return bundleName;
 }
 
+std::string BundleStatusAdapter::GetDefaultAbilityName(const std::string& bundleName, int32_t userId)
+{
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
+    CHECK_AND_RETURN_RET_LOG(bundleMgrProxy != nullptr, "", "bundleMgrProxy is null");
+    AAFwk::Want launchWant;
+    auto ret = bundleMgrProxy->GetLaunchWantForBundle(bundleName, launchWant, userId);
+    CHECK_AND_RETURN_RET_LOG(ret == ERR_OK && !launchWant.GetElement().GetAbilityName().empty(), "",
+        "GetLaunchWantForBundle fail:%{public}d", ret);
+    return launchWant.GetElement().GetAbilityName();
+}
+
 int32_t BundleStatusAdapter::GetUidFromBundleName(const std::string bundleName, const int32_t userId)
 {
     AppExecFwk::BundleInfo bundleInfo;

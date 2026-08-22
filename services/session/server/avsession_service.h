@@ -461,6 +461,9 @@ private:
 
     bool IsParamInvalid(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName);
 
+    AppExecFwk::ElementName CorrectElementForThirdPartyCaller(bool thirdPartyApp,
+        const AppExecFwk::ElementName& elementName);
+
     void AddExtraFrontSession(int32_t type, sptr<AVSessionItem>& sessionItem);
 
     void RefreshUserFromAnco(const std::string& tag, const AppExecFwk::ElementName& elementName);
