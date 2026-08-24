@@ -705,7 +705,7 @@ HWTEST_F(AVSessionUsersManagerTest, GetZoneIdForUser_003, TestSize.Level0)
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t userId = 999999;
     int32_t zoneId = manager.GetZoneIdForUser(userId);
-    EXPECT_EQ(zoneId, INVALID_ZONE_ID);
+    EXPECT_EQ(zoneId, ERR_AUDIO_ZONE_NOT_FOUND);
     SLOGI("GetZoneIdForUser_003 end!");
 }
 
