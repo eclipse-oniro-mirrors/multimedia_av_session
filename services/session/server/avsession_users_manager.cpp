@@ -438,14 +438,14 @@ int32_t AVSessionUsersManager::GetZoneIdForUser(int32_t userId)
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     if (audioZoneManager == nullptr) {
         SLOGE("GetZoneIdForUser failed to get AudioZoneManager");
-        return -1;
+        return INVALID_ZONE_ID;
     }
 
     std::vector<int32_t> queryUserIds = {userId};
     std::vector<int32_t> retUserIds;
     auto ret = audioZoneManager->GetAudioZoneForApp(queryUserIds, retUserIds);
     if (ret != 0 || retUserIds.empty()) {
-        return -1;
+        return INVALID_ZONE_ID;
     }
 
     int32_t zoneId = retUserIds[0];
@@ -455,27 +455,29 @@ int32_t AVSessionUsersManager::GetZoneIdForUser(int32_t userId)
 void AVSessionUsersManager::UpdateZoneToUseridMap(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
-    if (zoneId > 0) {
-        auto& userIdList = zoneToUserid_[zoneId];
-        if (std::find(userIdList.begin(), userIdList.end(), userId) == userIdList.end()) {
-            userIdList.push_back(userId);
-        }
+    if (zoneId < DEFAULT_ZONE_ID) {
+        return;
+    }
+    auto& userIdList = zoneToUserid_[zoneId];
+    if (std::find(userIdList.begin(), userIdList.end(), userId) == userIdList.end()) {
+        userIdList.push_back(userId);
     }
 }
 
 void AVSessionUsersManager::CleanupZoneToUseridMap(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
-    if (zoneId > 0) {
-        auto zoneIter = zoneToUserid_.find(zoneId);
-        if (zoneIter != zoneToUserid_.end()) {
-            zoneIter->second.erase(
-                std::remove(zoneIter->second.begin(), zoneIter->second.end(), userId),
-                zoneIter->second.end()
-            );
-            if (zoneIter->second.empty()) {
-                zoneToUserid_.erase(zoneIter);
-            }
+    if (zoneId < DEFAULT_ZONE_ID) {
+        return;
+    }
+    auto zoneIter = zoneToUserid_.find(zoneId);
+    if (zoneIter != zoneToUserid_.end()) {
+        zoneIter->second.erase(
+            std::remove(zoneIter->second.begin(), zoneIter->second.end(), userId),
+            zoneIter->second.end()
+        );
+        if (zoneIter->second.empty()) {
+            zoneToUserid_.erase(zoneIter);
         }
     }
 }
@@ -483,7 +485,7 @@ void AVSessionUsersManager::CleanupZoneToUseridMap(int32_t userId)
 std::vector<int32_t> AVSessionUsersManager::GetUsersInSameAudioZone(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
-    if (zoneId <= 0) {
+    if (zoneId < DEFAULT_ZONE_ID) {
         return {};
     }
     
@@ -499,7 +501,7 @@ std::vector<int32_t> AVSessionUsersManager::GetUsersInSameAudioZone(int32_t user
 void AVSessionUsersManager::UpdateSessionStackForAudioZone(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
-    if (zoneId <= 0) {
+    if (zoneId < DEFAULT_ZONE_ID) {
         return;
     }
     
@@ -624,7 +626,7 @@ void AVSessionUsersManager::SortAndCacheSessionStack(int32_t zoneId,
 std::vector<AVSessionDescriptor> AVSessionUsersManager::GetSessionStackForAudioZone(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
-    if (zoneId <= 0) {
+    if (zoneId < DEFAULT_ZONE_ID) {
         return {};
     }
 
