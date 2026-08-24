@@ -155,7 +155,7 @@ private:
     std::map<int32_t, std::vector<int32_t>> zoneToUserid_;
     std::map<int32_t, std::vector<AVSessionDescriptor>> sessionStackMapForAudioZone_;
     static constexpr int32_t DEFAULT_ZONE_ID = -1;
-    static constexpr int32_t INVALID_ZONE_ID = -2;
+    static constexpr int32_t INVALID_ZONE_ID = INT32_MIN;
 #endif
 
     const std::string AVSESSION_FILE_PUBLIC_DIR = "/data/service/el2/public/av_session/";
