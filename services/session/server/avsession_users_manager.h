@@ -20,6 +20,7 @@
 #include <mutex>
 #include <list>
 
+#include "avsession_errors.h"
 #include "session_stack.h"
 #include "avsession_log.h"
 #include "isession_listener.h"
@@ -155,7 +156,7 @@ private:
     std::map<int32_t, std::vector<int32_t>> zoneToUserid_;
     std::map<int32_t, std::vector<AVSessionDescriptor>> sessionStackMapForAudioZone_;
     static constexpr int32_t DEFAULT_ZONE_ID = -1;
-    static constexpr int32_t INVALID_ZONE_ID = INT32_MIN;
+    static constexpr int32_t INVALID_ZONE_ID = ERR_AUDIO_ZONE_NOT_FOUND;
 #endif
 
     const std::string AVSESSION_FILE_PUBLIC_DIR = "/data/service/el2/public/av_session/";
