@@ -203,7 +203,7 @@ void PcmCastSession::OnSystemCommonEvent(const std::string& commonEvent, const s
     if (commonEvent == HIPLAY_CAST_MODE_CHANGE_RESULT) {
         HandleCastModeChangeEvent(args);
     } else if (commonEvent == UPDATE_DEVICE_INFO) {
-        UpdateDeviceModuleId(args);
+        HandleUpdateDeviceInfoEvent(args);
     }
 }
 
@@ -237,12 +237,12 @@ void PcmCastSession::HandleCastModeChangeEvent(const std::string& args)
     WriteCastPairToFile(deviceId, castMode);
 }
 
-void PcmCastSession::UpdateDeviceModuleId(const std::string& args)
+void PcmCastSession::HandleUpdateDeviceInfoEvent(const std::string& args)
 {
     std::string moduleId = JsonUtils::GetStringParamFromJsonString(args, "modelId");
     std::string submoduleId = JsonUtils::GetStringParamFromJsonString(args, "subModelId");
 
-    SLOGI("Received UpdateDeviceModuleId: moduleId:%{public}s, submoduleId:%{public}s",
+    SLOGI("Received UpdateDeviceInfo: moduleId:%{public}s, submoduleId:%{public}s",
         moduleId.c_str(), submoduleId.c_str());
     {
         std::lock_guard lockGuard(castLock_);
