@@ -58,7 +58,7 @@ public:
 
     void HandleCastModeChangeEvent(const std::string& args);
 
-    void UpdateDeviceModuleId(const std::string& args);
+    void HandleUpdateDeviceInfoEvent(const std::string& args);
 
     void OnDeviceNameSystemCommonEvent(const std::string& args);
 
