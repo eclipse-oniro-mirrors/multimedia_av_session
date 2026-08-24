@@ -215,7 +215,7 @@ void PcmCastSession::HandleCastModeChangeEvent(const std::string& args)
     int32_t castMode = JsonUtils::GetIntParamFromJsonString(args, "mode");
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
-    SLOGI("Received HIPLAY_CAST_MODE_CHANGE_RESULT: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
+    SLOGI("Received CastModeChange: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
         castMode, uid, AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str());
     {
         std::lock_guard lockGuard(castLock_);
