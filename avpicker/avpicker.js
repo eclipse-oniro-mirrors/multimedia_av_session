@@ -1987,7 +1987,7 @@ export class AVCastPicker extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create();
             Flex.width(224);
-            Flex.height(48);
+            Flex.constraintSize({ minHeight: 48 });
             Flex.onClick(() => {
                 this.isDeviceLevel = true;
                 if (this.extensionProxy != null) {
@@ -2019,17 +2019,16 @@ export class AVCastPicker extends ViewPU {
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'],
                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.width('100%');
-            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxFontScale(this.maxFontSizeScale);
             Text.wordBreak(WordBreak.BREAK_ALL);
-            Text.maxLines(1);
         }, Text);
         Text.pop();
         Flex.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.width(48);
-
+            Row.constraintSize({ minHeight: 48 });
+            Row.justifyContent(FlexAlign.End);
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -2069,7 +2068,7 @@ export class AVCastPicker extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create();
             Flex.width(224);
-            Flex.height(48);
+            Flex.constraintSize({ minHeight: 48 });
             Flex.onClick(() => {
                 this.isDeviceLevel = false;
                 if (this.extensionProxy != null) {
@@ -2101,18 +2100,16 @@ export class AVCastPicker extends ViewPU {
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'],
                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.width('100%');
-            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxFontScale(this.maxFontSizeScale);
             Text.wordBreak(WordBreak.BREAK_ALL);
-            Text.maxLines(1);
         }, Text);
         Text.pop();
         Flex.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.width(48);
-            Row.height(48);
-            Row.justifyContent(FlexAlign.End)
+            Row.constraintSize({ minHeight: 48 });
+            Row.justifyContent(FlexAlign.End);
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
