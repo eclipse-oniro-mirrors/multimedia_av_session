@@ -813,7 +813,7 @@ HWTEST_F(AVSessionManagerTest, SendSystemCommonCommand001, TestSize.Level1)
     std::string commonCommand = "";
     AAFwk::WantParams commandArgs;
     auto result = AVSessionManager::GetInstance().SendSystemCommonCommand(commonCommand, commandArgs);
-    EXPECT_EQ(result, ERR_SESSION_NOT_EXIST);
+    EXPECT_EQ(result, ERR_COMMAND_NOT_SUPPORT);
     SLOGI("SendSystemCommonCommand001 end");
 }
 }
