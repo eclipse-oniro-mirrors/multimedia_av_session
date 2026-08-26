@@ -84,7 +84,6 @@ static HWTEST_F(RemoteSessionSinkTest, SetControlCommand001, testing::ext::TestS
     AVControlCommand command;
     command.SetCommand(1000);
     int32_t ret = g_RemoteSessionSink->SetControlCommand(command);
-    g_RemoteSessionSink->CancelCastSession();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("SetControlCommand001 end!");
 }
@@ -100,7 +99,6 @@ static HWTEST_F(RemoteSessionSinkTest, SetCommonCommand002, testing::ext::TestSi
     std::string commonCommand = "";
     AAFwk::WantParams commandArgs;
     int32_t ret = g_RemoteSessionSink->SetCommonCommand(commonCommand, commandArgs);
-    g_RemoteSessionSink->CancelCastSession();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("SetCommonCommand002 end!");
 }
