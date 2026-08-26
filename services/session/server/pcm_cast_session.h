@@ -54,9 +54,11 @@ public:
     int64_t GetCastHandle() const;
     AVSessionDescriptor GetDescriptor();
 
-    void OnSystemCommonEvent(const std::string& args);
+    void OnSystemCommonEvent(const std::string& commonEvent, const std::string& args);
 
-    void OnDeviceInfoCommonEvent(const std::string& args);
+    void HandleCastModeChangeEvent(const std::string& args);
+
+    void HandleUpdateDeviceInfoEvent(const std::string& args);
 
     void OnDeviceNameSystemCommonEvent(const std::string& args);
 
@@ -135,6 +137,9 @@ private:
 
     const std::string STOP_CAST = "STOP_CAST";
     const std::string CAST_SESSION_RELEASED = "CAST_SESSION_RELEASED";
+
+    const std::string HIPLAY_CAST_MODE_CHANGE_RESULT = "HIPLAY_CAST_MODE_CHANGE_RESULT";
+    const std::string UPDATE_DEVICE_INFO = "UPDATE_DEVICE_INFO";
 
     enum {
         CAST_MODE_CHANGE_COMMAND = 0,

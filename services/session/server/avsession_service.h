@@ -308,6 +308,8 @@ public:
 
     void NotifySystemCommonEvent(const std::string& commonEvent, const std::string& args) override;
 
+    void HandleSystemCommonEvent(const std::string& commonEvent, const std::string& args);
+
     bool IsMirrorToStreamCastAllowed(sptr<AVSessionItem>& session);
 
     __attribute__((no_sanitize("cfi"))) int32_t MirrorToStreamCast(sptr<AVSessionItem> session);

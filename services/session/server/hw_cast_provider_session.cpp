@@ -429,7 +429,7 @@ void HwCastProviderSession::OnHiplayEventRecv(const int32_t eventId, const std::
 {
     switch (eventId) {
         case HIPLAY_CONFIG_MODE_RESULT:
-            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_CONFIG_MODE_DATA, jsonParam);
+            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_CAST_MODE_CHANGE_RESULT, jsonParam);
             break;
         case HIPLAY_BYPASS_DATA_NUM:
             AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_BYPASS_DATA, jsonParam);
@@ -438,7 +438,7 @@ void HwCastProviderSession::OnHiplayEventRecv(const int32_t eventId, const std::
             AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_QUERY_RESPONSE, jsonParam);
             break;
         case HIPLAY_DEVICE_INFO:
-            AVRouter::GetInstance().OnSystemCommonEvent(HIPLAY_DEVICE_INFO_DATA, jsonParam);
+            AVRouter::GetInstance().OnSystemCommonEvent(UPDATE_DEVICE_INFO, jsonParam);
             break;
         default:
             break;

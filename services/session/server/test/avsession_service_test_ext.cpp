@@ -1083,9 +1083,9 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast002, TestSize.Level
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
     std::string args = R"({"code":0,"mode":1,"uid":1000,"deviceId":"1234567890"})";
-    pcmCastSession->OnSystemCommonEvent(args);
+    pcmCastSession->OnSystemCommonEvent("HIPLAY_CAST_MODE_CHANGE_RESULT", args);
     args = R"({"code":0,"mode":2,"uid":1000,"deviceId":"1234567890"})";
-    pcmCastSession->OnSystemCommonEvent(args);
+    pcmCastSession->OnSystemCommonEvent("HIPLAY_CAST_MODE_CHANGE_RESULT", args);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
 }
@@ -1132,7 +1132,7 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast004, TestSize.Level
 
     shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
     std::string args = R"({"modelId":"ZAB3","subModelId":"10"})";
-    pcmCastSession->OnSystemCommonEvent(args);
+    pcmCastSession->OnSystemCommonEvent("UPDATE_DEVICE_INFO", args);
 
     EXPECT_EQ(pcmCastSession->GetModuleId(), "ZAB3");
     EXPECT_EQ(pcmCastSession->GetSubModuleId(), "10");
@@ -1471,7 +1471,7 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceModuleId002, TestSize.Level
     AVSessionDescriptor descriptor;
     descriptor.outputDeviceInfo_ = outputDeviceInfo;
     pcmCastSession->descriptor_ = descriptor;
-    pcmCastSession->OnDeviceInfoCommonEvent(R"({"modelId":"ZAB3","subModelId":"10"})");
+    pcmCastSession->OnSystemCommonEvent("UPDATE_DEVICE_INFO", R"({"modelId":"ZAB3","subModelId":"10"})");
     g_AVSessionService->pcmCastSession_ = pcmCastSession;
 
     g_AVSessionService->UpdateDeviceModuleId(outputDeviceInfo);
@@ -1507,7 +1507,7 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceModuleId003, TestSize.Level
     descriptorOutputDeviceInfo.deviceInfos_ = descriptorDeviceInfos;
     descriptor.outputDeviceInfo_ = descriptorOutputDeviceInfo;
     pcmCastSession->descriptor_ = descriptor;
-    pcmCastSession->OnDeviceInfoCommonEvent(R"({"modelId":"ZAB3","subModelId":"10"})");
+    pcmCastSession->OnSystemCommonEvent("UPDATE_DEVICE_INFO", R"({"modelId":"ZAB3","subModelId":"10"})");
     g_AVSessionService->pcmCastSession_ = pcmCastSession;
 
     g_AVSessionService->UpdateDeviceModuleId(outputDeviceInfo);
@@ -1529,7 +1529,7 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceModuleId004, TestSize.Level
     outputDeviceInfo.deviceInfos_ = {};
     
     auto pcmCastSession = std::make_shared<PcmCastSession>();
-    pcmCastSession->OnDeviceInfoCommonEvent(R"({"modelId":"ZAB3","subModelId":"10"})");
+    pcmCastSession->OnSystemCommonEvent("UPDATE_DEVICE_INFO", R"({"modelId":"ZAB3","subModelId":"10"})");
     g_AVSessionService->pcmCastSession_ = pcmCastSession;
 
     g_AVSessionService->UpdateDeviceModuleId(outputDeviceInfo);
@@ -1549,7 +1549,7 @@ static HWTEST_F(AVSessionServiceTestExt, NotifySystemCommonEvent001, TestSize.Le
     sptr<ISessionListener> listener = new TestISessionListener();
     CHECK_AND_RETURN(listener != nullptr);
     g_AVSessionService->GetUsersManager().AddSessionListener(pid, listener);
-    std::string commonEvent = "HIPLAY_CONFIG_MODE_DATA";
+    std::string commonEvent = "HIPLAY_CAST_MODE_CHANGE_RESULT";
     std::string args = "";
     g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
     g_AVSessionService->NotifySystemCommonEvent(commonEvent, args);
@@ -1572,7 +1572,7 @@ static HWTEST_F(AVSessionServiceTestExt, NotifySystemCommonEvent002, TestSize.Le
     CHECK_AND_RETURN(listener != nullptr);
     g_AVSessionService->GetUsersManager().AddSessionListener(pid, listener);
 
-    std::string commonEvent = "HIPLAY_DEVICE_INFO_DATA";
+    std::string commonEvent = "UPDATE_DEVICE_INFO";
     std::string args = R"({"modelId":"ZAB3","subModelId":"10"})";
     OutputDeviceInfo outputDeviceInfo;
     std::vector<DeviceInfo> deviceInfos_;

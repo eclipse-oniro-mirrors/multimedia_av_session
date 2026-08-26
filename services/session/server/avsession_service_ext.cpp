@@ -597,11 +597,7 @@ void AVSessionService::NotifyDeviceStateChange(const DeviceState& deviceState)
 
 void AVSessionService::NotifySystemCommonEvent(const std::string& commonEvent, const std::string& args)
 {
-    if (commonEvent == "HIPLAY_CONFIG_MODE_DATA" && pcmCastSession_ != nullptr) {
-        pcmCastSession_->OnSystemCommonEvent(args);
-    } else if (commonEvent == "HIPLAY_DEVICE_INFO_DATA" && pcmCastSession_ != nullptr) {
-        pcmCastSession_->OnDeviceInfoCommonEvent(args);
-    }
+    HandleSystemCommonEvent(commonEvent, args);
     std::lock_guard lockGuard(sessionListenersLock_);
     std::map<pid_t, sptr<ISessionListener>> listenerMap = GetUsersManager().GetSessionListener();
     for (const auto& [pid, listener] : listenerMap) {
@@ -611,6 +607,14 @@ void AVSessionService::NotifySystemCommonEvent(const std::string& commonEvent, c
             listener->OnSystemCommonEvent(commonEvent, args);
         }
     }
+}
+
+void AVSessionService::HandleSystemCommonEvent(const std::string& commonEvent, const std::string& args)
+{
+    if (pcmCastSession_ == nullptr) {
+        return;
+    }
+    pcmCastSession_->OnSystemCommonEvent(commonEvent, args);
 }
 
 bool AVSessionService::IsHiPlayCasting()
