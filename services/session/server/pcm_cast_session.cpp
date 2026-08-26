@@ -369,6 +369,7 @@ int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo
 int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
     std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
 {
+    CHECK_AND_RETURN_RET_LOG(!outputDeviceInfo.deviceInfos_.empty(), AVSESSION_ERROR, "DeviceInfos is empty");
     AVSessionSysEvent::GetInstance().updateStartCastTime(PCM_CAST_SESSION,
         PCM_CAST_SESSION, PCM_CAST_SESSION, PCM_CAST_SESSION);
     castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, serviceNameStatePair, "pcmCastSession");
