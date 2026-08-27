@@ -64,11 +64,6 @@ ohos_shared_library("avsession_common") {
     "ipc:ipc_core",
     "image_framework:image_native",
   ]
-  
-  defines = []
-  if (av_session_enable_multi_user_audio_zone_feature) {
-    defines += [ "CAR_FEATURE_ENABLE" ]
-  }
 
   subsystem_name = "multimedia"
   innerapi_tags = [ "platformsdk" ]

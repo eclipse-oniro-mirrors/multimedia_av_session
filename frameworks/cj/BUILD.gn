@@ -86,8 +86,6 @@ ohos_shared_library("cj_multimedia_avsession_ffi") {
     "samgr:samgr_proxy",
   ]
 
-defines = []
-
   if (castplus_cast_engine_enable) {
     cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
     sources += [
@@ -96,10 +94,6 @@ defines = []
       "src/cj_avsession_cast_controller_impl.cpp",
     ]
     deps += [ "../native/session:avsession_cast_client" ]
-  }
-
-  if (av_session_enable_multi_user_audio_zone_feature) {
-    defines += [ "CAR_FEATURE_ENABLE" ]
   }
 
   innerapi_tags = [ "platformsdk" ]
