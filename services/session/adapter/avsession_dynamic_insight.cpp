@@ -203,7 +203,8 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
     }
     wantParam->SetParam("startPlayInfo", OHOS::AAFwk::WantParamWrapper::Box(startPlayInfoParam));
 #ifdef CAR_FEATURE_ENABLE
-    wantParam->SetParam("ohos.insightIntent.userId", OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetUserId())));
+    wantParam->SetParam("ohos.insightIntent.userId",
+        OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetUserId())));
 #endif
     auto it = StartPlayTypeToString.find(startPlayType);
     std::string typeStr = (it == StartPlayTypeToString.end()) ? "app" : StartPlayTypeToString.at(startPlayType);
@@ -328,7 +329,6 @@ bool InsightAdapter::ExecuteIntentFromAVSession(uint64_t key, const sptr<IRemote
 
 int32_t InsightAdapter::StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &executeParam)
 {
-
 #ifdef CAR_FEATURE_ENABLE
     SLOGI("bundleName=%{public}s abilityName=%{public}s moduleName=%{public}s IntentName=%{public}s userId=%{public}d",
         executeParam.bundleName_.c_str(), executeParam.abilityName_.c_str(),

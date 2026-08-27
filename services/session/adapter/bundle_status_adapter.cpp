@@ -343,8 +343,8 @@ __attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayInten
 }
 
 #ifdef CAR_FEATURE_ENABLE
-__attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayIntentForAudioZone(const std::string& bundleName,
-    const int32_t userId, std::string& supportModule, std::string& profile)
+__attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayIntentForAudioZone(
+    const std::string& bundleName, const int32_t userId, std::string& supportModule, std::string& profile)
 {
     std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
     

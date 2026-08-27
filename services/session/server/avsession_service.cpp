@@ -5126,6 +5126,8 @@ void AVSessionService::NotifySessionAddForAudioZone(const AVSessionDescriptor& d
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionAddForAudioZone listener is null for pid=%{public}d", pid);
+            SLOGI("OnSessionAddForAudioZone sourceId={public}d targetId={public}d pid=%{public}d",
+                descriptor.userId_, userId, pid);
             listener->OnSessionAddForAudioZone(descriptor.userId_, descriptor);
         }
     }
@@ -5151,6 +5153,8 @@ void AVSessionService::NotifySessionRemoveForAudioZone(const AVSessionDescriptor
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionRemoveForAudioZone listener is null for pid=%{public}d", pid);
+            SLOGI("OnSessionRemoveForAudioZone sourceId={public}d targetId={public}d pid=%{public}d",
+                descriptor.userId_, userId, pid);
             listener->OnSessionRemoveForAudioZone(descriptor.userId_, descriptor);
         }
     }
@@ -5175,6 +5179,8 @@ void AVSessionService::NotifyTopSessionChangeForAudioZone(const AVSessionDescrip
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifyTopSessionChangeForAudioZone listener is null for pid=%{public}d", pid);
+            SLOGI("OnTopSessionChangeForAudioZone sourceId={public}d targetId={public}d pid=%{public}d",
+                descriptor.userId_, userId, pid);
             listener->OnTopSessionChangeForAudioZone(descriptor.userId_, descriptor);
         }
     }
@@ -5187,7 +5193,6 @@ void AVSessionService::HandleSessionStackChangeForAudioZone()
     
     for (int32_t userId : usersManager.GetAliveUserList()) {
         std::vector<AVSessionDescriptor> oldSessionStack = usersManager.GetSessionStackForAudioZone(userId);
-        
         usersManager.CleanupZoneToUseridMap(userId);
         usersManager.UpdateZoneToUseridMap(userId);
         usersManager.UpdateSessionStackForAudioZone(userId);
@@ -5195,6 +5200,8 @@ void AVSessionService::HandleSessionStackChangeForAudioZone()
         std::vector<AVSessionDescriptor> newSessionStack = usersManager.GetSessionStackForAudioZone(userId);
         
         NotifySessionStackDiffForAudioZone(userId, oldSessionStack, newSessionStack);
+        SLOGI("HandleSessionStackChangeForAudioZone userId=%{public}d oldStacksize=%{public}d
+            newStacksize=%{public}d", userId, oldSessionStack.size(), newSessionStack.size());
     }
 }
 
@@ -5313,6 +5320,7 @@ int32_t AVSessionService::RegisterSessionListenerForUser(int32_t userId, const s
 
 void AVSessionService::InitAudioZoneCallback()
 {
+    SLOGI("InitAudioZoneCallback");
     audioZoneChangeCallback_ = std::make_shared<AudioZoneChangeCallbackImpl>();
     audioZoneCallback_ = std::make_shared<AudioZoneCallbackImpl>(audioZoneChangeCallback_);
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
@@ -5326,17 +5334,20 @@ void AVSessionService::InitAudioZoneCallback()
 
 void AVSessionService::DeinitAudioZoneCallback()
 {
+    SLOGI("DeinitAudioZoneCallback");
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     if (audioZoneManager != nullptr && audioZoneCallback_ != nullptr) {
         audioZoneManager->UnRegisterAudioZoneCallback();
         audioZoneCallback_ = nullptr;
         audioZoneChangeCallback_ = nullptr;
+        SLOGI("DeinitAudioZoneCallback done");
     }
 }
 
 void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneAdd(
     const AudioStandard::AudioZoneDescriptor &zoneDescriptor)
 {
+    SLOGI("OnAudioZoneAdd zoneId=%{public}d", zoneId);
     int32_t zoneId = zoneDescriptor.zoneId_;
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     auto audioZoneChangeCallback_ = audioZoneChangeCallbackWeak_.lock();
@@ -5348,6 +5359,7 @@ void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneAdd(
 
 void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneRemove(int32_t zoneId)
 {
+    SLOGI("OnAudioZoneRemove zoneId=%{public}d", zoneId);
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     auto audioZoneChangeCallback_ = audioZoneChangeCallbackWeak_.lock();
     if (audioZoneManager != nullptr && audioZoneChangeCallback_ != nullptr) {

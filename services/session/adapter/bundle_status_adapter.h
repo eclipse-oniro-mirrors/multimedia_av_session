@@ -52,8 +52,8 @@ public:
     __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntent(const std::string& bundleName,
         std::string& supportModule, std::string& profile);
 
-#ifdef CAR_FEATURE_ENABLE 
-    __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntent(const std::string& bundleName,
+#ifdef CAR_FEATURE_ENABLE
+    __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntentForAudioZone(const std::string& bundleName,
         const int32_t userId, std::string& supportModule, std::string& profile);
 #endif
 
