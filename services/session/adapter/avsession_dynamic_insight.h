@@ -74,7 +74,17 @@ public:
     {
         return moduleName;
     }
+#ifdef CAR_FEATURE_ENABLE
+    void SetUserId(int32_t userId)
+    {
+        userId_ = userId;
+    }
 
+    int32_t GetUserId() const
+    {
+        return userId_;
+    }
+#endif
     cJSON* startPlayInfoToJson() const
     {
         cJSON* j = cJSON_CreateObject();
@@ -84,6 +94,9 @@ public:
         cJSON_AddStringToObject(j, "deviceId", deviceId.c_str());
         cJSON_AddStringToObject(j, "startPlayBundleName", bundleName.c_str());
         cJSON_AddStringToObject(j, "startPlayModuleName", moduleName.c_str());
+#ifdef CAR_FEATURE_ENABLE
+        cJSON_AddNumberToObject(j, "startUserId", userId_);
+#endif
         return j;
     }
 
@@ -93,6 +106,11 @@ private:
     std::string deviceId;
 
     std::string moduleName;
+
+#ifdef CAR_FEATURE_ENABLE
+   int32_t userId_ = 100;
+#endif
+
 };
 class InsightAdapter {
 public:
@@ -102,7 +120,12 @@ public:
 
     __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntent(const std::string& bundleName,
         std::string& supportModule, std::string& profile);
-    
+
+#ifdef CAR_FEATURE_ENABLE       
+    __attribute__((no_sanitize("cfi"))) bool IsSupportPlayIntentForAudioZone(const std::string& bundleName,
+        const int32_t userId, std::string& supportModule, std::string& profile);
+#endif
+
     bool GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
                             AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo = {},
                             StartPlayType startPlayType = StartPlayType::APP);

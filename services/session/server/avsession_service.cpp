@@ -5154,7 +5154,6 @@ void AVSessionService::NotifySessionRemoveForAudioZone(const AVSessionDescriptor
             listener->OnSessionRemoveForAudioZone(descriptor.userId_, descriptor);
         }
     }
-    GetUsersManager().CleanupZoneToUseridMap(descriptor.userId_);
     SLOGI("NotifySessionRemoveForAudioZone for user:%{public}d", descriptor.userId_);
 }
 
@@ -5256,38 +5255,6 @@ int32_t AVSessionService::GetSessionDescriptorsForAudioZone(int32_t userId,
     return AVSESSION_SUCCESS;
 }
 
-AVSessionService::TargetPlayInfo AVSessionService::GetTargetPlayInfoForAudioZone(
-    int32_t userId, const std::string& bundleName)
-{
-    TargetPlayInfo targetInfo;
-    
-    std::vector<AVSessionDescriptor> descriptors;
-    GetSessionDescriptorsForAudioZone(userId, descriptors);
-    if (descriptors.empty()) {
-        SLOGI("No session in audio zone, fallback to bundleName=%{public}s", bundleName.c_str());
-        targetInfo.bundleName = bundleName;
-        
-        std::string profile;
-        if (!BundleStatusAdapter::GetInstance().IsSupportPlayIntent(
-            targetInfo.bundleName, targetInfo.moduleName, profile)) {
-            SLOGE("bundle=%{public}s does not support play insights", targetInfo.bundleName.c_str());
-            targetInfo.isValid = false;
-            return targetInfo;
-        }
-        targetInfo.isValid = true;
-    } else {
-        AVSessionDescriptor topSession = descriptors[0];
-        targetInfo.bundleName = topSession.elementName_.GetBundleName();
-        targetInfo.moduleName = topSession.elementName_.GetModuleName();
-        targetInfo.isValid = true;
-        
-        SLOGI("Use top session: bundleName=%{public}s, moduleName=%{public}s",
-            targetInfo.bundleName.c_str(), targetInfo.moduleName.c_str());
-    }
-    
-    return targetInfo;
-}
-
 int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
     const std::string& assetId, const CommandInfo& info)
 {
@@ -5296,27 +5263,28 @@ int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleN
         return result;
     }
     
-    TargetPlayInfo targetInfo = GetTargetPlayInfoForAudioZone(userId, bundleName);
-    if (!targetInfo.isValid) {
-        return AVSESSION_ERROR;
-    }
-    
-    int32_t targetUid = BundleStatusAdapter::GetInstance().GetUidFromBundleName(targetInfo.bundleName, userId);
+    auto uid = BundleStatusAdapter::GetInstance().GetUidFromBundleName(bundleName, userId);
     
     StartPlayType startPlayType = StartPlayType::APP;
-    if (targetUid == BLUETOOTH_UID) {
+    if (uid == BLUETOOTH_UID) {
         startPlayType = StartPlayType::BLUETOOTH;
     }
-    if (targetUid == NEARLINK_UID) {
+    if (uid == NEARLINK_UID) {
         startPlayType = StartPlayType::NEARLINK;
     }
     
+    std::string moduleName;
+    std::string profile;
+    if (!BundleStatusAdapter::GetInstance().IsSupportPlayIntentForAudioZone(bundleName, userId, moduleName, profile)) {
+        return AVSESSION_ERROR;
+    }
     StartPlayInfo startPlayInfo;
-    startPlayInfo.setBundleName(targetInfo.bundleName);
-    startPlayInfo.SetModuleName(targetInfo.moduleName);
+    startPlayInfo.setBundleName(bundleName);
+    startPlayInfo.SetModuleName(moduleName);
+    startPlayInfo.SetUserId(userId);
     
-    SLOGI("StartAVPlaybackForAudioZone for bundleName:%{public}s, userId:%{public}d",
-        targetInfo.bundleName.c_str(), userId);
+    SLOGI("StartAVPlaybackForAudioZone for bundleName:%{public}s, moduleName=%{public}s, userId:%{public}d",
+        bundleName.c_str(), moduleName.c_str(), userId);
     
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
     typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId,
@@ -5325,9 +5293,9 @@ int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleN
         dynamicLoader->GetFuntion(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
     if (startAVPlayback) {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionControl(targetInfo.bundleName, CONTROL_COLD_START);
+        ReportSessionControl(bundleName, CONTROL_COLD_START);
 #endif
-        return (*startAVPlayback)(targetInfo.bundleName, assetId, startPlayInfo, startPlayType);
+        return (*startAVPlayback)(bundleName, assetId, startPlayInfo, startPlayType);
     }
     SLOGE("StartAVPlaybackForAudioZone fail");
     return AVSESSION_ERROR;

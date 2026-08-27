@@ -220,8 +220,6 @@ public:
     
     int32_t GetDistributedSessionControllersForAudioZone(
         std::vector<sptr<IRemoteObject>>& sessionControllers);
-private:
-    TargetPlayInfo GetTargetPlayInfoForAudioZone(int32_t userId, const std::string& bundleName);
 #endif
 
     int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId = "");
