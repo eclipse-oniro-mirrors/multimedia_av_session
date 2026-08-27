@@ -83,7 +83,6 @@ ohos_shared_library("ohavsession") {
     deps += [ "./../session:avsession_cast_client" ]
   }
 
-
   innerapi_tags = [ "ndk" ]
 
   output_name = "ohavsession"
