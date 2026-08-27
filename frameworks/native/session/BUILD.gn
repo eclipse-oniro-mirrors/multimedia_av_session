@@ -256,6 +256,7 @@ ohos_shared_library("avsession_cast_client") {
   ]
 
   cflags = []
+  defines = []
 
   if (multimedia_av_session_enable_trace_control) {
     cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
@@ -265,6 +266,10 @@ ohos_shared_library("avsession_cast_client") {
   if (multimedia_av_session_enable_sysevent_control) {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
+  if (av_session_enable_multi_user_audio_zone_feature) {
+    defines += [ "CAR_FEATURE_ENABLE" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

@@ -510,6 +510,11 @@ ohos_shared_library("avsession_dynamic_insight") {
     "samgr:samgr_proxy",
   ]
 
+  defines = []
+  if (av_session_enable_multi_user_audio_zone_feature) {
+    defines += [ "CAR_FEATURE_ENABLE" ]
+  }
+
   subsystem_name = "multimedia"
   part_name = "av_session"
 }
@@ -567,6 +572,10 @@ ohos_shared_library("softbus_manager_dynamic") {
   if (av_session_enable_dsoftbus) {
     defines += [ "DSOFTBUS_ENABLE" ]
     external_deps += [ "dsoftbus:softbus_client" ]
+  }
+
+  if (av_session_enable_multi_user_audio_zone_feature) {
+    defines += [ "CAR_FEATURE_ENABLE" ]
   }
 
   subsystem_name = "multimedia"
@@ -738,6 +747,10 @@ av_session_ohos_library("avsession_item") {
     defines += [ "TEST_COVERAGE" ]
   }
 
+  if (av_session_enable_multi_user_audio_zone_feature) {
+    defines += [ "CAR_FEATURE_ENABLE" ]
+  }
+
   public_external_deps = [
     "cJSON:cjson",
     "relational_store:native_rdb",
@@ -885,6 +898,10 @@ av_session_ohos_library("avsession_cast_item") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
+  if (av_session_enable_multi_user_audio_zone_feature) {
+    defines += [ "CAR_FEATURE_ENABLE" ]
+  }
+  
   public_external_deps = [
     "cJSON:cjson",
   ]
