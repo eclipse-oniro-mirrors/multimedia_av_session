@@ -165,7 +165,9 @@ export class AVCastPicker extends ViewPU {
             new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.__deviceInfoType = new ObservedPropertySimplePU('', this, 'deviceInfoType');
         this.__maxFontSizeScale = new ObservedPropertySimplePU(1, this, 'maxFontSizeScale');
-        this.__accessibilityAudioControlStr = new ObservedPropertySimplePU('音视频投播', this, 'accessibilityAudioControlStr');
+        this.__accessibilityAudioControlStr = new ObservedPropertySimplePU(
+            this.getUIContext()?.getHostContext()?.resourceManager.getStringByNameSync('access_audio_control') || '音视频投播',
+            this, 'accessibilityAudioControlStr');
         this.__houseMusicTitle = new ObservedPropertySimplePU('', this, 'houseMusicTitle');
         this.__houseMusicPlay = new ObservedPropertySimplePU('', this, 'houseMusicPlay');
         this.__houseMusicPlayCancel = new ObservedPropertySimplePU('', this, 'houseMusicPlayCancel');
