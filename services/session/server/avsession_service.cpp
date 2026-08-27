@@ -5200,8 +5200,9 @@ void AVSessionService::HandleSessionStackChangeForAudioZone()
         std::vector<AVSessionDescriptor> newSessionStack = usersManager.GetSessionStackForAudioZone(userId);
         
         NotifySessionStackDiffForAudioZone(userId, oldSessionStack, newSessionStack);
-        SLOGI("HandleSessionStackChangeForAudioZone userId=%{public}d oldStacksize=%{public}d
-            newStacksize=%{public}d", userId, oldSessionStack.size(), newSessionStack.size());
+        SLOGI("HandleSessionStackChangeForAudioZone userId=%{public}d oldStacksize=%{public}d " \
+            "newStacksize=%{public}d", userId, static_cast<int32_t>(oldSessionStack.size()),
+            static_cast<int32_t>(newSessionStack.size()));
     }
 }
 
@@ -5347,8 +5348,8 @@ void AVSessionService::DeinitAudioZoneCallback()
 void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneAdd(
     const AudioStandard::AudioZoneDescriptor &zoneDescriptor)
 {
-    SLOGI("OnAudioZoneAdd zoneId=%{public}d", zoneId);
     int32_t zoneId = zoneDescriptor.zoneId_;
+    SLOGI("OnAudioZoneAdd zoneId=%{public}d", zoneId);
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     auto audioZoneChangeCallback_ = audioZoneChangeCallbackWeak_.lock();
     if (audioZoneManager != nullptr && audioZoneChangeCallback_ != nullptr) {
