@@ -367,6 +367,9 @@ extern "C" int32_t StartAVPlaybackWithId(const std::string& bundleName, const st
     const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
 {
     AppExecFwk::InsightIntentExecuteParam executeParam;
+#ifdef CAR_FEATURE_ENABLE
+    executeParam.userId_ = startPlayInfo.GetUserId();
+#endif
     bool isSupport = InsightAdapter::GetInsightAdapterInstance().GetPlayIntentParam(bundleName, assetId,
         executeParam, startPlayInfo, startPlayType);
     if (isSupport) {
