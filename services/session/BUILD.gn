@@ -445,7 +445,9 @@ if (castplus_cast_engine_enable) {
       cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
       external_deps += [ "hisysevent:libhisysevent" ]
     }
-
+    if (av_session_enable_multi_user_audio_zone_feature) {
+      defines += [ "CAR_FEATURE_ENABLE" ]
+    }
     subsystem_name = "multimedia"
     part_name = "av_session"
     version_script = "avsession_router.versionscript"
@@ -901,7 +903,7 @@ av_session_ohos_library("avsession_cast_item") {
   if (av_session_enable_multi_user_audio_zone_feature) {
     defines += [ "CAR_FEATURE_ENABLE" ]
   }
-  
+
   public_external_deps = [
     "cJSON:cjson",
   ]
