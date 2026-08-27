@@ -5126,7 +5126,7 @@ void AVSessionService::NotifySessionAddForAudioZone(const AVSessionDescriptor& d
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionAddForAudioZone listener is null for pid=%{public}d", pid);
-            SLOGI("OnSessionAddForAudioZone sourceId={public}d targetId={public}d pid=%{public}d",
+            SLOGI("OnSessionAddForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
                 descriptor.userId_, userId, pid);
             listener->OnSessionAddForAudioZone(descriptor.userId_, descriptor);
         }
@@ -5153,7 +5153,7 @@ void AVSessionService::NotifySessionRemoveForAudioZone(const AVSessionDescriptor
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionRemoveForAudioZone listener is null for pid=%{public}d", pid);
-            SLOGI("OnSessionRemoveForAudioZone sourceId={public}d targetId={public}d pid=%{public}d",
+            SLOGI("OnSessionRemoveForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
                 descriptor.userId_, userId, pid);
             listener->OnSessionRemoveForAudioZone(descriptor.userId_, descriptor);
         }
@@ -5179,7 +5179,7 @@ void AVSessionService::NotifyTopSessionChangeForAudioZone(const AVSessionDescrip
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifyTopSessionChangeForAudioZone listener is null for pid=%{public}d", pid);
-            SLOGI("OnTopSessionChangeForAudioZone sourceId={public}d targetId={public}d pid=%{public}d",
+            SLOGI("OnTopSessionChangeForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
                 descriptor.userId_, userId, pid);
             listener->OnTopSessionChangeForAudioZone(descriptor.userId_, descriptor);
         }
