@@ -457,6 +457,7 @@ void AVSessionUsersManager::UpdateZoneToUseridMap(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
     SLOGI("UpdateZoneToUseridMap zoneId=%{public}d userId=%{public}d", zoneId, userId);
+    CleanupZoneToUseridMap(userId);
     if (zoneId > 0 || zoneId == DEFAULT_ZONE_ID) {
         auto& userIdList = zoneToUserid_[zoneId];
         if (std::find(userIdList.begin(), userIdList.end(), userId) == userIdList.end()) {
