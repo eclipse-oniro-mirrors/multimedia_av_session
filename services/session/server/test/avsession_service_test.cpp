@@ -44,6 +44,7 @@
 #include "params_config_operator.h"
 #include "avcontrol_command.h"
 #include "want_agent_helper.h"
+#include "avsession_users_manager.h"
 
 #define private public
 #define protected public
@@ -872,7 +873,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSessionByCast001, TestSize.Level0)
     SLOGI("CreateSessionByCast001 begin!");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("CreateSessionByCast001 in!");
-    avservice_->CreateSessionByCast(0);
+    avservice_->CreateSessionByCast(0, 0);
     avservice_->ClearSessionForClientDiedNoLock(getpid(), false);
 #endif
     EXPECT_EQ(0, AVSESSION_SUCCESS);
@@ -964,7 +965,7 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart001, TestSize.Leve
     ASSERT_EQ(avsessionHere_ != nullptr, true);
     AVControlCommand command;
     avservice_->HandleSystemKeyColdStart(command);
-    EXPECT_NE(avsessionHere_, avservice_->topSession_);
+    EXPECT_NE(avsessionHere_, AVSessionUsersManager::GetInstance().GetTopSession());
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("HandleSystemKeyColdStart001 end");
@@ -987,7 +988,7 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Leve
     avservice_->HandleSystemKeyColdStart(command);
     command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
     avservice_->HandleSystemKeyColdStart(command);
-    EXPECT_NE(avsessionHere, avservice_->topSession_);
+    EXPECT_NE(avsessionHere, AVSessionUsersManager::GetInstance().GetTopSession());
     avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
     SLOGD("HandleSystemKeyColdStart002 end");
@@ -2354,7 +2355,7 @@ static HWTEST_F(AVSessionServiceTest, SendSystemCommonCommand003, TestSize.Level
 static HWTEST_F(AVSessionServiceTest, CreateWantAgent001, TestSize.Level0)
 {
     SLOGD("CreateWantAgent001 begin!");
-    auto ret = avservice_->CreateWantAgent(nullptr);
+    auto ret = avservice_->CreateWantAgent(nullptr, nullptr);
     EXPECT_EQ(ret, nullptr);
     SLOGD("CreateWantAgent001 end!");
 }
@@ -2367,7 +2368,7 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent002, TestSize.Level0)
     elementName.SetAbilityName(g_testAnotherAbilityName);
     OHOS::sptr<AVSessionItem> avsessionHere =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_PHOTO, false, elementName);
-    auto ret = avservice_->CreateWantAgent(avsessionHere);
+    auto ret = avservice_->CreateWantAgent(avsessionHere, nullptr);
     EXPECT_EQ(ret, nullptr);
     avsessionHere->Destroy();
     SLOGD("CreateWantAgent002 end!");
@@ -2382,7 +2383,7 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent003, TestSize.Level0)
     OHOS::sptr<AVSessionItem> avsessionHere =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     avservice_->UpdateTopSession(avsessionHere);
-    auto ret = avservice_->CreateWantAgent(nullptr);
+    auto ret = avservice_->CreateWantAgent(nullptr, avsessionHere);
     EXPECT_EQ(ret, nullptr);
     avsessionHere->Destroy();
     SLOGD("CreateWantAgent003 end!");
@@ -2400,8 +2401,8 @@ static HWTEST_F(AVSessionServiceTest, CreateWantAgent004, TestSize.Level0)
     EXPECT_NE(avsessionHere, nullptr);
     avsessionHere->SetUid(5557);
     avservice_->UpdateTopSession(avsessionHere);
-    EXPECT_NE(avservice_->topSession_, nullptr);
-    auto wantAgent = avservice_->CreateWantAgent(nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
+    auto wantAgent = avservice_->CreateWantAgent(nullptr, avsessionHere);
     EXPECT_EQ(wantAgent, nullptr);
     avsessionHere->Destroy();
     SLOGD("CreateWantAgent004 end!");
@@ -3040,12 +3041,12 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle001, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
     avservice_->UpdateTopSession(avsessionHere_);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     AVMetaData metadata;
     metadata.SetAssetId("mediaId");
     metadata.SetDescription("title;artist");
     avsessionHere_->SetAVMetaData(metadata);
-    std::string songName = avservice_->GetLocalTitle();
+    std::string songName = avservice_->GetLocalTitle(avsessionHere_);
     EXPECT_TRUE(songName == "" || songName == "title");
     avsessionHere_->Destroy();
     SLOGD("GetLocalTitle001 end!");
@@ -3069,13 +3070,13 @@ static HWTEST_F(AVSessionServiceTest, GetLocalTitle002, TestSize.Level1)
     EXPECT_NE(avsessionHere_, nullptr);
     avsessionHere_->SetUid(5557);
     avservice_->UpdateTopSession(avsessionHere_);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     AVMetaData metadata;
     metadata.SetAssetId("mediaId");
     metadata.SetTitle("title");
     metadata.SetArtist("title-artist");
     avsessionHere_->SetAVMetaData(metadata);
-    std::string songName = avservice_->GetLocalTitle();
+    std::string songName = avservice_->GetLocalTitle(avsessionHere_);
     EXPECT_EQ(songName, "title");
     avsessionHere_->Destroy();
     SLOGD("GetLocalTitle002 end!");
@@ -3273,7 +3274,7 @@ static HWTEST_F(AVSessionServiceTest, ProcTopSessionPlaying001, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
     avservice_->UpdateTopSession(avsessionHere_);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     avservice_->ProcTopSessionPlaying(avsessionHere_, false, false);
     EXPECT_EQ(avservice_->hasMediaCapsule_, false);
     avservice_->ProcTopSessionPlaying(avsessionHere_, true, false);
@@ -3333,7 +3334,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent001, TestSize.Le
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
     avservice_->UpdateTopSession(avsessionHere_);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     avsessionHere_->SetUid(uid);
     AVPlaybackState playbackState;
     playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
@@ -3342,7 +3343,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent001, TestSize.Le
     avservice_->HandleRemoveMediaCardEvent(0, false);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
-    EXPECT_EQ(avservice_->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("HandleRemoveMediaCardEvent001 end!");
 }
 
@@ -3358,9 +3359,13 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent002, TestSize.Le
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
-    avservice_->topSession_ =
+    OHOS::sptr<AVSessionItem> session =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    bool ret = avservice_->topSession_->IsCasting();
+    ASSERT_TRUE(session != nullptr);
+    AVSessionUsersManager::GetInstance().SetTopSession(session);
+    auto topSession = AVSessionUsersManager::GetInstance().GetTopSession();
+    ASSERT_TRUE(topSession != nullptr);
+    bool ret = topSession->IsCasting();
     avservice_->HandleRemoveMediaCardEvent(0, false);
     EXPECT_EQ(ret, false);
     SLOGD("HandleRemoveMediaCardEvent002 end!");
@@ -3375,9 +3380,9 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent002, TestSize.Le
 static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent003, TestSize.Level0)
 {
     SLOGD("HandleRemoveMediaCardEvent003 begin!");
-    avservice_->topSession_ = nullptr;
+    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
     avservice_->HandleRemoveMediaCardEvent(0, false);
-    EXPECT_EQ(avservice_->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("HandleRemoveMediaCardEvent003 end!");
 }
 
@@ -3390,7 +3395,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent003, TestSize.Le
 static HWTEST_F(AVSessionServiceTest, IsTopSessionPlaying001, TestSize.Level0)
 {
     SLOGD("IsTopSessionPlaying001 begin!");
-    avservice_->topSession_ = nullptr;
+    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
     bool ret = avservice_->IsTopSessionPlaying();
     EXPECT_EQ(ret, false);
     SLOGD("IsTopSessionPlaying001 end!");
@@ -3406,8 +3411,8 @@ static HWTEST_F(AVSessionServiceTest, IsTopSessionPlaying002, TestSize.Level0)
 {
     SLOGD("IsTopSessionPlaying002 begin!");
     std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    avservice_->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    AVSessionUsersManager::GetInstance().SetTopSession(OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor));
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     bool ret = avservice_->IsTopSessionPlaying();
     EXPECT_EQ(ret, false);
     SLOGD("IsTopSessionPlaying002 end!");
@@ -3424,7 +3429,7 @@ static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent001, TestSi
     SLOGD("HandleMediaCardStateChangeEvent001 begin!");
     std::string isAppear = "APPEAR";
     avservice_->HandleMediaCardStateChangeEvent(isAppear);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("HandleMediaCardStateChangeEvent001 end!");
 }
 
@@ -3439,7 +3444,7 @@ static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent002, TestSi
     SLOGD("HandleMediaCardStateChangeEvent002 begin!");
     std::string isAppear = "DISAPPEAR";
     avservice_->HandleMediaCardStateChangeEvent(isAppear);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("HandleMediaCardStateChangeEvent002 end!");
 }
 
@@ -3454,7 +3459,7 @@ static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent003, TestSi
     SLOGD("HandleMediaCardStateChangeEvent003 begin!");
     std::string isAppear = "ISDISAPPEAR";
     avservice_->HandleMediaCardStateChangeEvent(isAppear);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("HandleMediaCardStateChangeEvent003 end!");
 }
 
@@ -3470,7 +3475,7 @@ static HWTEST_F(AVSessionServiceTest, OnAddSystemAbility001, TestSize.Level0)
     int32_t systemAbilityId = OHOS::XPOWER_MANAGER_SYSTEM_ABILITY_ID;
     const std::string deviceId = "AUDIO";
     avservice_->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility001 end!");
 }
 
@@ -3486,7 +3491,7 @@ static HWTEST_F(AVSessionServiceTest, UpdateTopSession001, TestSize.Level0)
     std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
     const OHOS::sptr<AVSessionItem> newTopSession = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
     avservice_->UpdateTopSession(newTopSession);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("UpdateTopSession001 end!");
 }
 
@@ -3504,7 +3509,7 @@ static HWTEST_F(AVSessionServiceTest, LowQualityCheck001, TestSize.Level0)
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_PAUSED;
     avservice_->LowQualityCheck(uid, pid, streamUsage, rendererState);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("LowQualityCheck001 end!");
 }
 
@@ -3521,7 +3526,7 @@ static HWTEST_F(AVSessionServiceTest, PlayStateCheck001, TestSize.Level0)
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_PAUSED;
     avservice_->PlayStateCheck(uid, streamUsage, rendererState);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("PlayStateCheck001 end!");
 }
 
@@ -3539,7 +3544,7 @@ static HWTEST_F(AVSessionServiceTest, NotifyBackgroundReportCheck001, TestSize.L
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_RUNNING;
     avservice_->NotifyBackgroundReportCheck(uid, pid, streamUsage, rendererState);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("NotifyBackgroundReportCheck001 end!");
 }
 
@@ -3557,7 +3562,7 @@ static HWTEST_F(AVSessionServiceTest, NotifyBackgroundReportCheck002, TestSize.L
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_PAUSED;
     avservice_->NotifyBackgroundReportCheck(uid, pid, streamUsage, rendererState);
-    EXPECT_NE(avservice_->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("NotifyBackgroundReportCheck002 end!");
 }
 
@@ -4049,7 +4054,7 @@ static HWTEST_F(AVSessionServiceTest, SucceedSuperLauncher001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTest, IsCapsuleNeeded001, TestSize.Level0)
 {
     SLOGD("IsCapsuleNeeded001 begin!");
-    avservice_->topSession_ = nullptr;
+    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
     bool result = avservice_->IsCapsuleNeeded();
     EXPECT_EQ(result, false);
     SLOGD("IsCapsuleNeeded001 end!");

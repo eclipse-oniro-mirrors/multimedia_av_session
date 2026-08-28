@@ -29,6 +29,7 @@
 #include "client_death_proxy.h"
 #include "system_ability_definition.h"
 #include "system_ability_ondemand_reason.h"
+#include "avsession_users_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -692,12 +693,12 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility002, TestSize.Leve
     ASSERT_TRUE(g_AVSessionService != nullptr);
     std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
     ASSERT_TRUE(historyDescriptor != nullptr);
-    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
+    AVSessionUsersManager::GetInstance().SetTopSession(OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor));
 
     int32_t systemAbilityId = OHOS::MULTIMODAL_INPUT_SERVICE_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility002 end!");
 }
 
@@ -713,7 +714,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility003, TestSize.Leve
     int32_t systemAbilityId = OHOS::AUDIO_POLICY_SERVICE_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility003 end!");
 }
 
@@ -729,7 +730,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility004, TestSize.Leve
     int32_t systemAbilityId = OHOS::APP_MGR_SERVICE_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility004 end!");
 }
 
@@ -745,7 +746,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility005, TestSize.Leve
     int32_t systemAbilityId = OHOS::DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility005 end!");
 }
 
@@ -761,7 +762,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility006, TestSize.Leve
     int32_t systemAbilityId = OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility006 end!");
 }
 
@@ -777,7 +778,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility007, TestSize.Leve
     int32_t systemAbilityId = COLLABORATION_SA_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility007 end!");
 }
 
@@ -793,7 +794,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility008, TestSize.Leve
     int32_t systemAbilityId = OHOS::MEMORY_MANAGER_SA_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility008 end!");
 }
 
@@ -809,7 +810,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility009, TestSize.Leve
     int32_t systemAbilityId = OHOS::SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility009 end!");
 }
 
@@ -825,7 +826,7 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility010, TestSize.Leve
     int32_t systemAbilityId = OHOS::COMMON_EVENT_SERVICE_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility010 end!");
 }
 
@@ -842,9 +843,9 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility011, TestSize.Leve
     int32_t systemAbilityId = CAST_ENGINE_SA_ID;
     const std::string deviceId = "AUDIO";
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
 #else
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
 #endif
     SLOGD("OnAddSystemAbility011 end!");
 }
@@ -863,9 +864,9 @@ static HWTEST_F(AVSessionServiceTestSecond, OnAddSystemAbility012, TestSize.Leve
     const std::string deviceId = "AUDIO";
     g_AVSessionService->isCastableDevice_ = true;
     g_AVSessionService->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
 #else
-    EXPECT_EQ(g_AVSessionService->topSession_, nullptr);
+    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
 #endif
     SLOGD("OnAddSystemAbility012 end!");
 }
@@ -882,10 +883,10 @@ static HWTEST_F(AVSessionServiceTestSecond, InitBMS002, TestSize.Level0)
     ASSERT_TRUE(g_AVSessionService != nullptr);
     std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
     ASSERT_TRUE(historyDescriptor != nullptr);
-    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
+    AVSessionUsersManager::GetInstance().SetTopSession(OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor));
     g_AVSessionService->GetUsersManager().curUserId_ = -1;
     g_AVSessionService->InitBMS();
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     SLOGD("InitBMS002 end!");
 }
 
@@ -1106,7 +1107,7 @@ static HWTEST_F(AVSessionServiceTestSecond, PlayStateCheck002, TestSize.Level0)
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_RUNNING;
     g_AVSessionService->PlayStateCheck(1, streamUsage, rendererState);
-    EXPECT_NE(g_AVSessionService->topSession_, nullptr);
+    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
     avsessionHere->Destroy();
     SLOGD("PlayStateCheck002 end!");
 }
@@ -2243,10 +2244,11 @@ static HWTEST_F(AVSessionServiceTestSecond, HandleRemoveMediaCardEvent003, TestS
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
     std::shared_ptr<AVSessionDescriptor> historyDescriptor = std::make_shared<AVSessionDescriptor>();
-    g_AVSessionService->topSession_ = OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor);
-    ASSERT_TRUE(g_AVSessionService->topSession_ != nullptr);
-    bool ret = g_AVSessionService->topSession_->IsCasting();
-    g_AVSessionService->topSession_->SetUid(AVSESSION_ERROR);
+    AVSessionUsersManager::GetInstance().SetTopSession(OHOS::sptr<AVSessionItem>::MakeSptr(*historyDescriptor));
+    auto topSession = AVSessionUsersManager::GetInstance().GetTopSession();
+    ASSERT_TRUE(topSession != nullptr);
+    bool ret = topSession->IsCasting();
+    topSession->SetUid(AVSESSION_ERROR);
     g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
     EXPECT_EQ(ret, false);
 }
@@ -2272,7 +2274,9 @@ static HWTEST_F(AVSessionServiceTestSecond, UpdateFrontSession005, TestSize.Leve
         g_testSessionTag, AVSession::SESSION_TYPE_VOICE_CALL, false, elementName);
     ASSERT_TRUE(avsessionHere != nullptr);
     g_AVSessionService->UpdateTopSession(avsessionHere);
-    g_AVSessionService->topSession_->SetUid(AVSESSION_ERROR);
+    auto topSession = AVSessionUsersManager::GetInstance().GetTopSession();
+    ASSERT_TRUE(topSession != nullptr);
+    topSession->SetUid(AVSESSION_ERROR);
     g_AVSessionService->UpdateFrontSession(avsessionHere, false);
     g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();

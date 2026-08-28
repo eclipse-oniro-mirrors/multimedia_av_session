@@ -77,7 +77,7 @@ public:
 
     void ReleaseCurrentCastSession() override;
 
-    int32_t OnCastSessionCreated(const int32_t castId) override;
+    int32_t OnCastSessionCreated(const int32_t castId, const int32_t userId) override;
 
     void NotifyCastSessionCreated() override;
 
@@ -210,6 +210,7 @@ private:
     DeviceInfo connectedDeviceInfo_;
     const int32_t noReasonCode_ = 0;
     const std::string pcmCastSession = "pcmCastSession";
+    std::atomic<int32_t> sinkUserId_ = -1;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_AVROUTER_IMPL_H

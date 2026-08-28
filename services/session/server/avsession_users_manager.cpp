@@ -558,14 +558,11 @@ bool AVSessionUsersManager::IsCastSessionValid(const sptr<AVSessionItem>& sessio
         return false;
     }
     
-    AVSessionDescriptor desc = session->GetDescriptor();
-    if (desc.sessionTag_ != "RemoteCast") {
+    if (descriptor.sessionTag_ != "RemoteCast") {
         return true;
     }
     
-    int32_t castUserId = session->GetCastScreenUserId();
-    int32_t castZoneId = GetZoneIdForUser(castUserId);
-    return castZoneId == zoneId;
+    return GetZoneIdForUser(session->GetUserId()) == zoneId;
 }
 
 void AVSessionUsersManager::AddControllerToVector(
