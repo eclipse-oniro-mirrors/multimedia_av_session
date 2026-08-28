@@ -471,7 +471,7 @@ void AVSessionUsersManager::UpdateZoneToUseridMap(int32_t userId)
 void AVSessionUsersManager::CleanupZoneToUseridMap(int32_t userId)
 {
     SLOGI("CleanupZoneToUseridMap userId=%{public}d", userId);
-    for (auto zoneIter = zoneToUserid_.begin(); zoneIter != zoneToUserid_.end(); ) {
+    for (auto zoneIter = zoneToUserid_.begin(); zoneIter != zoneToUserid_.end();) {
         zoneIter->second.erase(
             std::remove(zoneIter->second.begin(), zoneIter->second.end(), userId),
             zoneIter->second.end()
