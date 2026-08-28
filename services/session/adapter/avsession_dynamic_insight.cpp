@@ -141,6 +141,52 @@ __attribute__((no_sanitize("cfi"))) bool InsightAdapter::IsSupportPlayIntent(con
     return CheckBundleSupport(profile);
 }
 
+#ifdef CAR_FEATURE_ENABLE
+__attribute__((no_sanitize("cfi"))) bool InsightAdapter::IsSupportPlayIntentForAudioZone(const std::string& bundleName,
+    const int32_t userId, std::string& supportModule, std::string& profile)
+{
+    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        SLOGI("fail to get system ability mgr");
+        return false;
+    }
+
+    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        SLOGI("fail to get bundle manager proxy");
+        return false;
+    }
+
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (bundleMgrProxy == nullptr) {
+        return false;
+    }
+    SLOGI("get bundle manager proxy success");
+
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!bundleMgrProxy->GetBundleInfo(bundleName, getBundleInfoWithHapModule, bundleInfo, userId)) {
+        SLOGE("GetBundleInfo=%{public}s fail", bundleName.c_str());
+        return false;
+    }
+    bool isSupportIntent = false;
+    for (const std::string& module : bundleInfo.moduleNames) {
+        auto ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::INTENT_PROFILE, bundleName, module,
+            profile, userId);
+        if (ret == 0) {
+            SLOGD("GetJsonProfile success, profile=%{public}s", profile.c_str());
+            isSupportIntent = true;
+            supportModule = module;
+            break;
+        }
+    }
+    if (!isSupportIntent) {
+        SLOGE("Bundle=%{public}s does not support insight", bundleName.c_str());
+        return false;
+    }
+    return CheckBundleSupport(profile);
+}
+#endif
+
 void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, StartPlayType startPlayType,
     std::shared_ptr<AppExecFwk::WantParams> &wantParam)
 {
@@ -148,12 +194,18 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
     startPlayInfoParam.SetParam("startPlayBundleName", OHOS::AAFwk::String::Box(startPlayInfo.getBundleName()));
     startPlayInfoParam.SetParam("startPlayModuleName", OHOS::AAFwk::String::Box(startPlayInfo.GetModuleName()));
     startPlayInfoParam.SetParam("deviceId", OHOS::AAFwk::String::Box(startPlayInfo.getDeviceId()));
-        
+#ifdef CAR_FEATURE_ENABLE
+    startPlayInfoParam.SetParam("startUserId", OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetUserId())));
+#endif
     if (wantParam == nullptr) {
         SLOGE("wantParam is null when SetStartPlayInfoToParam");
         return;
     }
     wantParam->SetParam("startPlayInfo", OHOS::AAFwk::WantParamWrapper::Box(startPlayInfoParam));
+#ifdef CAR_FEATURE_ENABLE
+    wantParam->SetParam("ohos.insightIntent.userId",
+        OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetUserId())));
+#endif
     auto it = StartPlayTypeToString.find(startPlayType);
     std::string typeStr = (it == StartPlayTypeToString.end()) ? "app" : StartPlayTypeToString.at(startPlayType);
     wantParam->SetParam("startPlayType", OHOS::AAFwk::String::Box(typeStr));
@@ -277,10 +329,15 @@ bool InsightAdapter::ExecuteIntentFromAVSession(uint64_t key, const sptr<IRemote
 
 int32_t InsightAdapter::StartAVPlayback(AppExecFwk::InsightIntentExecuteParam &executeParam)
 {
+#ifdef CAR_FEATURE_ENABLE
+    SLOGI("bundleName=%{public}s abilityName=%{public}s moduleName=%{public}s IntentName=%{public}s userId=%{public}d",
+        executeParam.bundleName_.c_str(), executeParam.abilityName_.c_str(),
+        executeParam.moduleName_.c_str(), executeParam.insightIntentName_.c_str(), executeParam.userId_);
+#else
     SLOGI("bundleName=%{public}s abilityName=%{public}s moduleName=%{public}s IntentName=%{public}s",
         executeParam.bundleName_.c_str(), executeParam.abilityName_.c_str(),
         executeParam.moduleName_.c_str(), executeParam.insightIntentName_.c_str());
-
+#endif
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
         SLOGE("Fail to get registry");
@@ -310,6 +367,9 @@ extern "C" int32_t StartAVPlaybackWithId(const std::string& bundleName, const st
     const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
 {
     AppExecFwk::InsightIntentExecuteParam executeParam;
+#ifdef CAR_FEATURE_ENABLE
+    executeParam.userId_ = startPlayInfo.GetUserId();
+#endif
     bool isSupport = InsightAdapter::GetInsightAdapterInstance().GetPlayIntentParam(bundleName, assetId,
         executeParam, startPlayInfo, startPlayType);
     if (isSupport) {

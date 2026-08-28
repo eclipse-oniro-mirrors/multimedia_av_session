@@ -5126,6 +5126,8 @@ void AVSessionService::NotifySessionAddForAudioZone(const AVSessionDescriptor& d
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionAddForAudioZone listener is null for pid=%{public}d", pid);
+            SLOGI("OnSessionAddForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
+                descriptor.userId_, userId, pid);
             listener->OnSessionAddForAudioZone(descriptor.userId_, descriptor);
         }
     }
@@ -5151,10 +5153,11 @@ void AVSessionService::NotifySessionRemoveForAudioZone(const AVSessionDescriptor
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionRemoveForAudioZone listener is null for pid=%{public}d", pid);
+            SLOGI("OnSessionRemoveForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
+                descriptor.userId_, userId, pid);
             listener->OnSessionRemoveForAudioZone(descriptor.userId_, descriptor);
         }
     }
-    GetUsersManager().CleanupZoneToUseridMap(descriptor.userId_);
     SLOGI("NotifySessionRemoveForAudioZone for user:%{public}d", descriptor.userId_);
 }
 
@@ -5176,6 +5179,8 @@ void AVSessionService::NotifyTopSessionChangeForAudioZone(const AVSessionDescrip
         for (const auto& [pid, listener] : listenersForUserIt->second) {
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifyTopSessionChangeForAudioZone listener is null for pid=%{public}d", pid);
+            SLOGI("OnTopSessionChangeForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
+                descriptor.userId_, userId, pid);
             listener->OnTopSessionChangeForAudioZone(descriptor.userId_, descriptor);
         }
     }
@@ -5188,7 +5193,6 @@ void AVSessionService::HandleSessionStackChangeForAudioZone()
     
     for (int32_t userId : usersManager.GetAliveUserList()) {
         std::vector<AVSessionDescriptor> oldSessionStack = usersManager.GetSessionStackForAudioZone(userId);
-        
         usersManager.CleanupZoneToUseridMap(userId);
         usersManager.UpdateZoneToUseridMap(userId);
         usersManager.UpdateSessionStackForAudioZone(userId);
@@ -5196,6 +5200,9 @@ void AVSessionService::HandleSessionStackChangeForAudioZone()
         std::vector<AVSessionDescriptor> newSessionStack = usersManager.GetSessionStackForAudioZone(userId);
         
         NotifySessionStackDiffForAudioZone(userId, oldSessionStack, newSessionStack);
+        SLOGI("HandleSessionStackChangeForAudioZone userId=%{public}d oldStacksize=%{public}d " \
+            "newStacksize=%{public}d", userId, static_cast<int32_t>(oldSessionStack.size()),
+            static_cast<int32_t>(newSessionStack.size()));
     }
 }
 
@@ -5256,38 +5263,6 @@ int32_t AVSessionService::GetSessionDescriptorsForAudioZone(int32_t userId,
     return AVSESSION_SUCCESS;
 }
 
-AVSessionService::TargetPlayInfo AVSessionService::GetTargetPlayInfoForAudioZone(
-    int32_t userId, const std::string& bundleName)
-{
-    TargetPlayInfo targetInfo;
-    
-    std::vector<AVSessionDescriptor> descriptors;
-    GetSessionDescriptorsForAudioZone(userId, descriptors);
-    if (descriptors.empty()) {
-        SLOGI("No session in audio zone, fallback to bundleName=%{public}s", bundleName.c_str());
-        targetInfo.bundleName = bundleName;
-        
-        std::string profile;
-        if (!BundleStatusAdapter::GetInstance().IsSupportPlayIntent(
-            targetInfo.bundleName, targetInfo.moduleName, profile)) {
-            SLOGE("bundle=%{public}s does not support play insights", targetInfo.bundleName.c_str());
-            targetInfo.isValid = false;
-            return targetInfo;
-        }
-        targetInfo.isValid = true;
-    } else {
-        AVSessionDescriptor topSession = descriptors[0];
-        targetInfo.bundleName = topSession.elementName_.GetBundleName();
-        targetInfo.moduleName = topSession.elementName_.GetModuleName();
-        targetInfo.isValid = true;
-        
-        SLOGI("Use top session: bundleName=%{public}s, moduleName=%{public}s",
-            targetInfo.bundleName.c_str(), targetInfo.moduleName.c_str());
-    }
-    
-    return targetInfo;
-}
-
 int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
     const std::string& assetId, const CommandInfo& info)
 {
@@ -5296,27 +5271,28 @@ int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleN
         return result;
     }
     
-    TargetPlayInfo targetInfo = GetTargetPlayInfoForAudioZone(userId, bundleName);
-    if (!targetInfo.isValid) {
-        return AVSESSION_ERROR;
-    }
-    
-    int32_t targetUid = BundleStatusAdapter::GetInstance().GetUidFromBundleName(targetInfo.bundleName, userId);
+    auto uid = BundleStatusAdapter::GetInstance().GetUidFromBundleName(bundleName, userId);
     
     StartPlayType startPlayType = StartPlayType::APP;
-    if (targetUid == BLUETOOTH_UID) {
+    if (uid == BLUETOOTH_UID) {
         startPlayType = StartPlayType::BLUETOOTH;
     }
-    if (targetUid == NEARLINK_UID) {
+    if (uid == NEARLINK_UID) {
         startPlayType = StartPlayType::NEARLINK;
     }
     
+    std::string moduleName;
+    std::string profile;
+    if (!BundleStatusAdapter::GetInstance().IsSupportPlayIntentForAudioZone(bundleName, userId, moduleName, profile)) {
+        return AVSESSION_ERROR;
+    }
     StartPlayInfo startPlayInfo;
-    startPlayInfo.setBundleName(targetInfo.bundleName);
-    startPlayInfo.SetModuleName(targetInfo.moduleName);
+    startPlayInfo.setBundleName(bundleName);
+    startPlayInfo.SetModuleName(moduleName);
+    startPlayInfo.SetUserId(userId);
     
-    SLOGI("StartAVPlaybackForAudioZone for bundleName:%{public}s, userId:%{public}d",
-        targetInfo.bundleName.c_str(), userId);
+    SLOGI("StartAVPlaybackForAudioZone for bundleName:%{public}s, moduleName=%{public}s, userId:%{public}d",
+        bundleName.c_str(), moduleName.c_str(), userId);
     
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
     typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId,
@@ -5325,9 +5301,9 @@ int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleN
         dynamicLoader->GetFuntion(AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH, "StartAVPlaybackWithId"));
     if (startAVPlayback) {
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
-        ReportSessionControl(targetInfo.bundleName, CONTROL_COLD_START);
+        ReportSessionControl(bundleName, CONTROL_COLD_START);
 #endif
-        return (*startAVPlayback)(targetInfo.bundleName, assetId, startPlayInfo, startPlayType);
+        return (*startAVPlayback)(bundleName, assetId, startPlayInfo, startPlayType);
     }
     SLOGE("StartAVPlaybackForAudioZone fail");
     return AVSESSION_ERROR;
@@ -5345,6 +5321,7 @@ int32_t AVSessionService::RegisterSessionListenerForUser(int32_t userId, const s
 
 void AVSessionService::InitAudioZoneCallback()
 {
+    SLOGI("InitAudioZoneCallback");
     audioZoneChangeCallback_ = std::make_shared<AudioZoneChangeCallbackImpl>();
     audioZoneCallback_ = std::make_shared<AudioZoneCallbackImpl>(audioZoneChangeCallback_);
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
@@ -5358,11 +5335,13 @@ void AVSessionService::InitAudioZoneCallback()
 
 void AVSessionService::DeinitAudioZoneCallback()
 {
+    SLOGI("DeinitAudioZoneCallback");
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     if (audioZoneManager != nullptr && audioZoneCallback_ != nullptr) {
         audioZoneManager->UnRegisterAudioZoneCallback();
         audioZoneCallback_ = nullptr;
         audioZoneChangeCallback_ = nullptr;
+        SLOGI("DeinitAudioZoneCallback done");
     }
 }
 
@@ -5370,6 +5349,7 @@ void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneAdd(
     const AudioStandard::AudioZoneDescriptor &zoneDescriptor)
 {
     int32_t zoneId = zoneDescriptor.zoneId_;
+    SLOGI("OnAudioZoneAdd zoneId=%{public}d", zoneId);
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     auto audioZoneChangeCallback_ = audioZoneChangeCallbackWeak_.lock();
     if (audioZoneManager != nullptr && audioZoneChangeCallback_ != nullptr) {
@@ -5380,6 +5360,7 @@ void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneAdd(
 
 void AVSessionService::AudioZoneCallbackImpl::OnAudioZoneRemove(int32_t zoneId)
 {
+    SLOGI("OnAudioZoneRemove zoneId=%{public}d", zoneId);
     auto audioZoneManager = AudioStandard::AudioZoneManager::GetInstance();
     auto audioZoneChangeCallback_ = audioZoneChangeCallbackWeak_.lock();
     if (audioZoneManager != nullptr && audioZoneChangeCallback_ != nullptr) {

@@ -449,16 +449,20 @@ int32_t AVSessionUsersManager::GetZoneIdForUser(int32_t userId)
     }
 
     int32_t zoneId = retUserIds[0];
+    SLOGI("GetZoneIdForUser zoneId=%{public}d userId=%{public}d", zoneId, userId);
     return zoneId;
 }
 
 void AVSessionUsersManager::UpdateZoneToUseridMap(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
+    SLOGI("UpdateZoneToUseridMap zoneId=%{public}d userId=%{public}d", zoneId, userId);
     if (zoneId > 0 || zoneId == DEFAULT_ZONE_ID) {
         auto& userIdList = zoneToUserid_[zoneId];
         if (std::find(userIdList.begin(), userIdList.end(), userId) == userIdList.end()) {
             userIdList.push_back(userId);
+            SLOGI("UpdateZoneToUseridMap add userId=%{public}d to zoneId=%{public}d",
+                userId, zoneId);
         }
     }
 }
@@ -466,6 +470,7 @@ void AVSessionUsersManager::UpdateZoneToUseridMap(int32_t userId)
 void AVSessionUsersManager::CleanupZoneToUseridMap(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
+    SLOGI("CleanupZoneToUseridMap zoneId=%{public}d userId=%{public}d", zoneId, userId);
     if (zoneId > 0 || zoneId == DEFAULT_ZONE_ID) {
         auto zoneIter = zoneToUserid_.find(zoneId);
         if (zoneIter != zoneToUserid_.end()) {
@@ -486,13 +491,13 @@ std::vector<int32_t> AVSessionUsersManager::GetUsersInSameAudioZone(int32_t user
     if (zoneId <= 0 && zoneId != DEFAULT_ZONE_ID) {
         return {};
     }
-    
+    SLOGI("GetUsersInSameAudioZone zoneId=%{public}d userId=%{public}d", zoneId, userId);
     std::vector<int32_t> result;
     auto zoneIter = zoneToUserid_.find(zoneId);
     if (zoneIter != zoneToUserid_.end()) {
         result = zoneIter->second;
     }
-
+    SLOGI("GetUsersInSameAudioZone result size=%{public}d", static_cast<int32_t>(result.size()));
     return result;
 }
 
@@ -502,11 +507,14 @@ void AVSessionUsersManager::UpdateSessionStackForAudioZone(int32_t userId)
     if (zoneId <= 0 && zoneId != DEFAULT_ZONE_ID) {
         return;
     }
-    
+    SLOGI("UpdateSessionStackForAudioZone zoneId=%{public}d userId=%{public}d", zoneId, userId);
     std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
     
     CollectLocalSessionsForAudioZone(zoneId, sessionWithTime);
+    SLOGI("CollectLocalSessionsForAudioZone size=%{public}d", static_cast<int32_t>(sessionWithTime.size()));
     CollectDistributedSessionsForAudioZone(zoneId, sessionWithTime);
+    SLOGI("CollectDistributedSessionsForAudioZone size=%{public}d",
+        static_cast<int32_t>(sessionWithTime.size()));
     SortAndCacheSessionStack(zoneId, sessionWithTime);
 }
 
@@ -566,6 +574,8 @@ void AVSessionUsersManager::AddControllerToVector(
     std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
 {
     AVSessionDescriptor desc = controller->GetSessionDescriptor();
+    SLOGI("AddControllerToVector sessionId=%{public}s, createTime=%{public}lld",
+        desc.sessionId_.c_str(), static_cast<long long>(controller->GetCreateTime()));
     int64_t createTime = controller->GetCreateTime();
     sessionWithTime.push_back({desc, createTime});
 }
@@ -624,12 +634,15 @@ void AVSessionUsersManager::SortAndCacheSessionStack(int32_t zoneId,
 std::vector<AVSessionDescriptor> AVSessionUsersManager::GetSessionStackForAudioZone(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
+    SLOGI("GetSessionStackForAudioZone zoneId=%{public}d userId=%{public}d", zoneId, userId);
     if (zoneId <= 0 && zoneId != DEFAULT_ZONE_ID) {
         return {};
     }
 
     auto iter = sessionStackMapForAudioZone_.find(zoneId);
     if (iter != sessionStackMapForAudioZone_.end()) {
+        SLOGI("GetSessionStackForAudioZone found zoneId=%{public}d wiht size=%{public}d",
+            zoneId, static_cast<int32_t>(iter->second.size()));
         return iter->second;
     }
     return {};

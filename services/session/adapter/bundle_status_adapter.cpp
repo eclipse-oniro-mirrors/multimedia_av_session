@@ -342,6 +342,40 @@ __attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayInten
     return CheckBundleSupport(bundleName, profile);
 }
 
+#ifdef CAR_FEATURE_ENABLE
+__attribute__((no_sanitize("cfi"))) bool BundleStatusAdapter::IsSupportPlayIntentForAudioZone(
+    const std::string& bundleName, const int32_t userId, std::string& supportModule, std::string& profile)
+{
+    std::lock_guard bundleMgrProxyLockGuard(bundleMgrProxyLock_);
+    
+    if (bundleMgrProxy == nullptr) {
+        return false;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!bundleMgrProxy->GetBundleInfo(bundleName,
+        getBundleInfoWithHapModule | getBundleInfoExcludeExt, bundleInfo, userId)) {
+        SLOGE("GetBundleInfo=%{public}s fail", bundleName.c_str());
+        return false;
+    }
+    bool isSupportIntent = false;
+    for (std::string module : bundleInfo.moduleNames) {
+        auto ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::INTENT_PROFILE, bundleName, module,
+            profile, userId);
+        if (ret == 0) {
+            SLOGD("GetJsonProfile success, profile=%{public}s", profile.c_str());
+            isSupportIntent = true;
+            supportModule = module;
+            break;
+        }
+    }
+    if (!isSupportIntent) {
+        SLOGE("Bundle=%{public}s does not support insight", bundleName.c_str());
+        return false;
+    }
+    return CheckBundleSupport(bundleName, profile);
+}
+#endif
+
 BundleStatusCallbackImpl::BundleStatusCallbackImpl(
     const std::function<void(const std::string, const int32_t userId)>& callback, int32_t userId)
 {
