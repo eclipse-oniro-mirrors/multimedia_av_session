@@ -469,18 +469,16 @@ void AVSessionUsersManager::UpdateZoneToUseridMap(int32_t userId)
 
 void AVSessionUsersManager::CleanupZoneToUseridMap(int32_t userId)
 {
-    int32_t zoneId = GetZoneIdForUser(userId);
-    SLOGI("CleanupZoneToUseridMap zoneId=%{public}d userId=%{public}d", zoneId, userId);
-    if (zoneId > 0 || zoneId == DEFAULT_ZONE_ID) {
-        auto zoneIter = zoneToUserid_.find(zoneId);
-        if (zoneIter != zoneToUserid_.end()) {
-            zoneIter->second.erase(
-                std::remove(zoneIter->second.begin(), zoneIter->second.end(), userId),
-                zoneIter->second.end()
-            );
-            if (zoneIter->second.empty()) {
-                zoneToUserid_.erase(zoneIter);
-            }
+    SLOGI("CleanupZoneToUseridMap userId=%{public}d", userId);
+    for (auto zoneIter = zoneToUserid_.begin(); zoneIter != zoneToUserid_.end(); ) {
+        zoneIter->second.erase(
+            std::remove(zoneIter->second.begin(), zoneIter->second.end(), userId),
+            zoneIter->second.end()
+        );
+        if (zoneIter->second.empty()) {
+            zoneIter = zoneToUserid_.erase(zoneIter);
+        } else {
+            ++zoneIter;
         }
     }
 }

@@ -5193,7 +5193,6 @@ void AVSessionService::HandleSessionStackChangeForAudioZone()
     
     for (int32_t userId : usersManager.GetAliveUserList()) {
         std::vector<AVSessionDescriptor> oldSessionStack = usersManager.GetSessionStackForAudioZone(userId);
-        usersManager.CleanupZoneToUseridMap(userId);
         usersManager.UpdateZoneToUseridMap(userId);
         usersManager.UpdateSessionStackForAudioZone(userId);
         
