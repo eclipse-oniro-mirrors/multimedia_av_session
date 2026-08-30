@@ -1003,7 +1003,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         if (IsLocalSessionPlaying(sessionItem)) {
             SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
 #ifdef CAR_FEATURE_ENABLE
-            UpdateTopSessionForAudioZone(sessionItem, userId);
+            UpdateTopSessionForAudioZone(userId);
 #else
             UpdateTopSession(sessionItem);
 #endif
@@ -3731,7 +3731,7 @@ void AVSessionService::HandleTopSessionRelease(int32_t userId, sptr<AVSessionIte
             HandleOtherSessionPlaying(result);
         } else {
 #ifdef CAR_FEATURE_ENABLE
-            UpdateTopSessionForAudioZone(nullptr, userId);
+            UpdateTopSessionForAudioZone(userId);
 #else
             UpdateTopSession(nullptr, userId);
 #endif
