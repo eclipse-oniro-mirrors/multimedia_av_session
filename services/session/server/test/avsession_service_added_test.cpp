@@ -41,7 +41,6 @@
 #include "avsession_service.h"
 #include "avsession_service_proxy.h"
 #include "avrouter_impl.h"
-#include "avsession_users_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -802,11 +801,11 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     avsessionItem->descriptor_.sessionTag_ = "test";
     avsessionItem->castHandle_ = 1;
     g_AVSessionService->UpdateTopSession(avsessionItem);
-    auto topSession = AVSessionUsersManager::GetInstance().GetTopSession();
+    auto topSession = g_AVSessionService->GetUsersManager().GetTopSession();
     ASSERT_TRUE(topSession != nullptr);
     bool ret = topSession->IsCasting();
     EXPECT_EQ(ret, false);
-    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
+    g_AVSessionService->HandleRemoveMediaCardEvent(avsessionItem->GetUid(), false);
     g_AVSessionService->HandleSessionRelease(avsessionItem->GetSessionId());
     avsessionItem->Destroy();
     SLOGD("AVSessionServiceAddedTest_HandleRemoveMediaCardEvent_001 end!");
@@ -827,7 +826,7 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     OHOS::sptr<AVSessionItem> avsessionItem =
          g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_PHOTO, false, elementName);
     avsessionItem->castHandle_ = 1;
-    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
+    g_AVSessionService->HandleRemoveMediaCardEvent(avsessionItem->GetUid(), false);
     bool ret = avsessionItem->IsCasting();
     EXPECT_EQ(ret, false);
     EXPECT_NE(avsessionItem, nullptr);
@@ -881,9 +880,9 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     routerImpl->isInMirrorToStream_ = true;
     routerImpl->isRemoteCasting_ = true;
     
-    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
+    g_AVSessionService->HandleRemoveMediaCardEvent(avsessionItem->GetUid(), false);
     
-    EXPECT_TRUE(AVSessionUsersManager::GetInstance().GetTopSession()->IsCasting());
+    EXPECT_TRUE(g_AVSessionService->GetUsersManager().GetTopSession()->IsCasting());
     EXPECT_TRUE(AVRouter::GetInstance().IsRemoteCasting());
     
     routerImpl->isInMirrorToStream_ = false;
@@ -918,9 +917,9 @@ static HWTEST_F(AVSessionServiceAddedTest, AVSessionServiceAddedTest_HandleRemov
     routerImpl->isRemoteCasting_ = false;
     routerImpl->servicePtr_ = nullptr;
     
-    g_AVSessionService->HandleRemoveMediaCardEvent(0, false);
+    g_AVSessionService->HandleRemoveMediaCardEvent(avsessionItem->GetUid(), false);
     
-    EXPECT_TRUE(AVSessionUsersManager::GetInstance().GetTopSession()->IsCasting());
+    EXPECT_TRUE(g_AVSessionService->GetUsersManager().GetTopSession()->IsCasting());
     EXPECT_FALSE(AVRouter::GetInstance().IsRemoteCasting());
     EXPECT_FALSE(routerImpl->IsHiPlayCasting());
     

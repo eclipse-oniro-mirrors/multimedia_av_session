@@ -44,7 +44,6 @@
 #include "params_config_operator.h"
 #include "avcontrol_command.h"
 #include "want_agent_helper.h"
-#include "avsession_users_manager.h"
 
 #define private public
 #define protected public
@@ -925,7 +924,7 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart001, TestSize.Leve
     ASSERT_EQ(avsessionHere_ != nullptr, true);
     AVControlCommand command;
     avservice_->HandleSystemKeyColdStart(command);
-    EXPECT_NE(avsessionHere_, AVSessionUsersManager::GetInstance().GetTopSession());
+    EXPECT_NE(avsessionHere_, avservice_->GetUsersManager().GetTopSession());
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
     SLOGI("HandleSystemKeyColdStart001 end");
@@ -948,7 +947,7 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart002, TestSize.Leve
     avservice_->HandleSystemKeyColdStart(command);
     command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
     avservice_->HandleSystemKeyColdStart(command);
-    EXPECT_NE(avsessionHere, AVSessionUsersManager::GetInstance().GetTopSession());
+    EXPECT_NE(avsessionHere, avservice_->GetUsersManager().GetTopSession());
     avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
     SLOGD("HandleSystemKeyColdStart002 end");
@@ -1162,7 +1161,7 @@ static void ResetFirstUnlockCleanupState(int32_t userId)
 static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanup001, TestSize.Level0)
 {
     SLOGI("HandleFirstUnlockCleanup001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
     std::string staleFile = cacheDir + "staleclean001.image.dat";
@@ -1179,7 +1178,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanup001, TestSize.Leve
 static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanup002, TestSize.Level0)
 {
     SLOGI("HandleFirstUnlockCleanup002 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
     std::string staleFile = cacheDir + "staleclean002.image.dat";
@@ -1196,7 +1195,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanup002, TestSize.Leve
 static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupDedup001, TestSize.Level0)
 {
     SLOGI("HandleFirstUnlockCleanupDedup001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
     std::string flagPath = GetUnlockCleanFlagPath(userId);
@@ -1223,7 +1222,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupDedup001, TestSize
 static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupMemCache001, TestSize.Level0)
 {
     SLOGI("HandleFirstUnlockCleanupMemCache001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
     std::string flagPath = GetUnlockCleanFlagPath(userId);
@@ -1255,7 +1254,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupMemCache001, TestS
 static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupBootCountChange001, TestSize.Level0)
 {
     SLOGI("HandleFirstUnlockCleanupBootCountChange001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     int32_t realBootCount = OHOS::system::GetIntParameter("persist.startup.bootcount", -1);
     ASSERT_GE(realBootCount, 0); // bootcount must be readable for this case to be meaningful
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
@@ -1291,7 +1290,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupBootCountChange001
 static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupDiskDedup001, TestSize.Level0)
 {
     SLOGI("HandleFirstUnlockCleanupDiskDedup001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
     std::string flagPath = GetUnlockCleanFlagPath(userId);
@@ -1324,7 +1323,7 @@ static HWTEST_F(AVSessionServiceTest, HandleFirstUnlockCleanupDiskDedup001, Test
 static HWTEST_F(AVSessionServiceTest, OnReceiveEventScreenUnlocked001, TestSize.Level0)
 {
     SLOGI("OnReceiveEventScreenUnlocked001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
     std::string staleFile = cacheDir + "screenunlock001.image.dat";
@@ -1349,7 +1348,7 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEventScreenUnlocked001, TestSize.
 static HWTEST_F(AVSessionServiceTest, OnReceiveEventUserUnlockedNoCleanup001, TestSize.Level0)
 {
     SLOGI("OnReceiveEventUserUnlockedNoCleanup001 begin!");
-    int32_t userId = AVSessionUsersManager::GetInstance().GetCurrentUserId();
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
     ASSERT_TRUE(OHOS::ForceCreateDirectory(cacheDir));
     std::string staleFile = cacheDir + "userlockednoclean.image.dat";
@@ -3234,7 +3233,7 @@ static HWTEST_F(AVSessionServiceTest, ProcTopSessionPlaying001, TestSize.Level1)
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
     avservice_->UpdateTopSession(avsessionHere_);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     avservice_->ProcTopSessionPlaying(avsessionHere_, false, false);
     EXPECT_EQ(avservice_->hasMediaCapsule_, false);
     avservice_->ProcTopSessionPlaying(avsessionHere_, true, false);
@@ -3294,7 +3293,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent001, TestSize.Le
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     EXPECT_NE(avsessionHere_, nullptr);
     avservice_->UpdateTopSession(avsessionHere_);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     avsessionHere_->SetUid(uid);
     AVPlaybackState playbackState;
     playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
@@ -3303,7 +3302,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent001, TestSize.Le
     avservice_->HandleRemoveMediaCardEvent(0, false);
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     avsessionHere_->Destroy();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_EQ(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("HandleRemoveMediaCardEvent001 end!");
 }
 
@@ -3322,8 +3321,8 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent002, TestSize.Le
     OHOS::sptr<AVSessionItem> session =
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     ASSERT_TRUE(session != nullptr);
-    AVSessionUsersManager::GetInstance().SetTopSession(session);
-    auto topSession = AVSessionUsersManager::GetInstance().GetTopSession();
+    avservice_->GetUsersManager().SetTopSession(session);
+    auto topSession = avservice_->GetUsersManager().GetTopSession();
     ASSERT_TRUE(topSession != nullptr);
     bool ret = topSession->IsCasting();
     avservice_->HandleRemoveMediaCardEvent(0, false);
@@ -3340,9 +3339,9 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent002, TestSize.Le
 static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent003, TestSize.Level0)
 {
     SLOGD("HandleRemoveMediaCardEvent003 begin!");
-    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
+    avservice_->GetUsersManager().SetTopSession(nullptr);
     avservice_->HandleRemoveMediaCardEvent(0, false);
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_EQ(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("HandleRemoveMediaCardEvent003 end!");
 }
 
@@ -3355,7 +3354,7 @@ static HWTEST_F(AVSessionServiceTest, HandleRemoveMediaCardEvent003, TestSize.Le
 static HWTEST_F(AVSessionServiceTest, IsTopSessionPlaying001, TestSize.Level0)
 {
     SLOGD("IsTopSessionPlaying001 begin!");
-    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
+    avservice_->GetUsersManager().SetTopSession(nullptr);
     bool ret = avservice_->IsTopSessionPlaying();
     EXPECT_EQ(ret, false);
     SLOGD("IsTopSessionPlaying001 end!");
@@ -3371,8 +3370,8 @@ static HWTEST_F(AVSessionServiceTest, IsTopSessionPlaying002, TestSize.Level0)
 {
     SLOGD("IsTopSessionPlaying002 begin!");
     std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
-    AVSessionUsersManager::GetInstance().SetTopSession(OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor));
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    avservice_->GetUsersManager().SetTopSession(OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor));
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     bool ret = avservice_->IsTopSessionPlaying();
     EXPECT_EQ(ret, false);
     SLOGD("IsTopSessionPlaying002 end!");
@@ -3389,7 +3388,7 @@ static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent001, TestSi
     SLOGD("HandleMediaCardStateChangeEvent001 begin!");
     std::string isAppear = "APPEAR";
     avservice_->HandleMediaCardStateChangeEvent(isAppear);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("HandleMediaCardStateChangeEvent001 end!");
 }
 
@@ -3404,7 +3403,7 @@ static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent002, TestSi
     SLOGD("HandleMediaCardStateChangeEvent002 begin!");
     std::string isAppear = "DISAPPEAR";
     avservice_->HandleMediaCardStateChangeEvent(isAppear);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("HandleMediaCardStateChangeEvent002 end!");
 }
 
@@ -3419,7 +3418,7 @@ static HWTEST_F(AVSessionServiceTest, HandleMediaCardStateChangeEvent003, TestSi
     SLOGD("HandleMediaCardStateChangeEvent003 begin!");
     std::string isAppear = "ISDISAPPEAR";
     avservice_->HandleMediaCardStateChangeEvent(isAppear);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("HandleMediaCardStateChangeEvent003 end!");
 }
 
@@ -3435,7 +3434,7 @@ static HWTEST_F(AVSessionServiceTest, OnAddSystemAbility001, TestSize.Level0)
     int32_t systemAbilityId = OHOS::XPOWER_MANAGER_SYSTEM_ABILITY_ID;
     const std::string deviceId = "AUDIO";
     avservice_->OnAddSystemAbility(systemAbilityId, deviceId);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("OnAddSystemAbility001 end!");
 }
 
@@ -3451,7 +3450,7 @@ static HWTEST_F(AVSessionServiceTest, UpdateTopSession001, TestSize.Level0)
     std::shared_ptr<AVSessionDescriptor> histroyDescriptor = std::make_shared<AVSessionDescriptor>();
     const OHOS::sptr<AVSessionItem> newTopSession = OHOS::sptr<AVSessionItem>::MakeSptr(*histroyDescriptor);
     avservice_->UpdateTopSession(newTopSession);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("UpdateTopSession001 end!");
 }
 
@@ -3469,7 +3468,7 @@ static HWTEST_F(AVSessionServiceTest, LowQualityCheck001, TestSize.Level0)
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_PAUSED;
     avservice_->LowQualityCheck(uid, pid, streamUsage, rendererState);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("LowQualityCheck001 end!");
 }
 
@@ -3486,7 +3485,7 @@ static HWTEST_F(AVSessionServiceTest, PlayStateCheck001, TestSize.Level0)
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_PAUSED;
     avservice_->PlayStateCheck(uid, streamUsage, rendererState);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("PlayStateCheck001 end!");
 }
 
@@ -3504,7 +3503,7 @@ static HWTEST_F(AVSessionServiceTest, NotifyBackgroundReportCheck001, TestSize.L
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_RUNNING;
     avservice_->NotifyBackgroundReportCheck(uid, pid, streamUsage, rendererState);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("NotifyBackgroundReportCheck001 end!");
 }
 
@@ -3522,7 +3521,7 @@ static HWTEST_F(AVSessionServiceTest, NotifyBackgroundReportCheck002, TestSize.L
     StreamUsage streamUsage = StreamUsage::STREAM_USAGE_MEDIA;
     RendererState rendererState = RendererState::RENDERER_PAUSED;
     avservice_->NotifyBackgroundReportCheck(uid, pid, streamUsage, rendererState);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(avservice_->GetUsersManager().GetTopSession(), nullptr);
     SLOGD("NotifyBackgroundReportCheck002 end!");
 }
 
@@ -4014,7 +4013,7 @@ static HWTEST_F(AVSessionServiceTest, SucceedSuperLauncher001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTest, IsCapsuleNeeded001, TestSize.Level0)
 {
     SLOGD("IsCapsuleNeeded001 begin!");
-    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
+    avservice_->GetUsersManager().SetTopSession(nullptr);
     bool result = avservice_->IsCapsuleNeeded();
     EXPECT_EQ(result, false);
     SLOGD("IsCapsuleNeeded001 end!");

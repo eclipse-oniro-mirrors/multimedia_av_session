@@ -278,13 +278,15 @@ static HWTEST_F(AVSessionServiceTestExt, HandleMediaCardStateChangeEvent001, Tes
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
     std::string isAppear = "DISAPPEAR";
-    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
+    g_AVSessionService->GetUsersManager().SetTopSession(nullptr);
     g_AVSessionService->hasRemoveEvent_.store(true);
     g_AVSessionService->HandleMediaCardStateChangeEvent(isAppear);
 
     g_AVSessionService->hasRemoveEvent_.store(false);
     g_AVSessionService->HandleMediaCardStateChangeEvent(isAppear);
-    EXPECT_TRUE(g_AVSessionService->hasCardStateChangeStopTask_.load());
+    std::string appear = "APPEAR";
+    g_AVSessionService->HandleMediaCardStateChangeEvent(appear);
+    EXPECT_TRUE(!g_AVSessionService->hasCardStateChangeStopTask_.load());
 }
 
 /**
@@ -314,7 +316,7 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateTopSession001, TestSize.Level0)
     int32_t userId = 1001;
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
     g_AVSessionService->UpdateTopSession(nullptr, userId);
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(1001), nullptr);
 }
 
 /**
@@ -345,13 +347,13 @@ static HWTEST_F(AVSessionServiceTestExt, HandleChangeTopSession001, TestSize.Lev
 
     avsessionHere->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VIDEO;
     g_AVSessionService->HandleChangeTopSession(infoUid, infoPid, curUserId);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(g_AVSessionService->GetUsersManager().GetTopSession(), nullptr);
     avsessionHere->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VOICE_CALL;
     g_AVSessionService->HandleChangeTopSession(infoUid, infoPid, curUserId);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(g_AVSessionService->GetUsersManager().GetTopSession(), nullptr);
     avsessionHere->descriptor_.sessionType_ = AVSession::SESSION_TYPE_VIDEO_CALL;
     g_AVSessionService->HandleChangeTopSession(infoUid, infoPid, curUserId);
-    EXPECT_NE(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_NE(g_AVSessionService->GetUsersManager().GetTopSession(), nullptr);
     g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
 }
@@ -390,7 +392,7 @@ static HWTEST_F(AVSessionServiceTestExt, LowQualityCheck001, TestSize.Level0)
     g_AVSessionService->LowQualityCheck(uid, pid, streamUsage, rendererState);
     g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(), nullptr);
 }
 
 /**
@@ -421,7 +423,7 @@ static HWTEST_F(AVSessionServiceTestExt, LowQualityCheck002, TestSize.Level0)
     g_AVSessionService->LowQualityCheck(uid, pid, streamUsage, rendererState);
     g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(), nullptr);
 }
 
 /**
@@ -1903,9 +1905,9 @@ static HWTEST_F(AVSessionServiceTestExt, NotifySupportExtendedScreen004, TestSiz
 static HWTEST_F(AVSessionServiceTestExt, HandlePcModeRemoveNotification001, TestSize.Level1)
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
-    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
+    g_AVSessionService->GetUsersManager().SetTopSession(nullptr);
     g_AVSessionService->HandlePcModeRemoveNotification();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(), nullptr);
 }
 
 /**
@@ -1924,7 +1926,7 @@ static HWTEST_F(AVSessionServiceTestExt, HandlePcModeRemoveNotification002, Test
     OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
         "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     CHECK_AND_RETURN(session != nullptr);
-    AVSessionUsersManager::GetInstance().SetTopSession(session);
+    g_AVSessionService->GetUsersManager().SetTopSession(session);
     g_AVSessionService->hasMediaCapsule_.store(true);
     g_AVSessionService->HandlePcModeRemoveNotification();
     EXPECT_EQ(g_AVSessionService->hasMediaCapsule_.load(), false);
@@ -1956,10 +1958,10 @@ static HWTEST_F(AVSessionServiceTestExt, HandlePcModeRemoveNotification003, Test
         "testTag2", AVSession::SESSION_TYPE_AUDIO, false, elementName2);
     CHECK_AND_RETURN(session2 != nullptr);
     
-    AVSessionUsersManager::GetInstance().SetTopSession(session1);
+    g_AVSessionService->GetUsersManager().SetTopSession(session1);
     g_AVSessionService->hasMediaCapsule_.store(true);
     g_AVSessionService->HandlePcModeRemoveNotification();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), session1);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(), session1);
     
     g_AVSessionService->HandleSessionRelease(session1->GetSessionId());
     g_AVSessionService->HandleSessionRelease(session2->GetSessionId());
@@ -1975,9 +1977,9 @@ static HWTEST_F(AVSessionServiceTestExt, HandlePcModeRemoveNotification003, Test
 static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification001, TestSize.Level1)
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
-    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
+    g_AVSessionService->GetUsersManager().SetTopSession(nullptr);
     g_AVSessionService->HandlePcModeAddNotification();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), nullptr);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(), nullptr);
 }
 
 /**
@@ -1996,9 +1998,9 @@ static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification002, TestSiz
     OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
         "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     CHECK_AND_RETURN(session != nullptr);
-    AVSessionUsersManager::GetInstance().SetTopSession(session);
+    g_AVSessionService->GetUsersManager().SetTopSession(session);
     g_AVSessionService->HandlePcModeAddNotification();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), session);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(), session);
     g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 #endif
 }
@@ -2019,14 +2021,14 @@ static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification003, TestSiz
     OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
         "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     CHECK_AND_RETURN(session != nullptr);
-    AVSessionUsersManager::GetInstance().SetTopSession(session);
+    g_AVSessionService->GetUsersManager().SetTopSession(session);
     
     AVPlaybackState playbackState;
     playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     session->SetAVPlaybackState(playbackState);
     
     g_AVSessionService->HandlePcModeAddNotification();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), session);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(), session);
     g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 #endif
 }
@@ -2047,14 +2049,14 @@ static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification004, TestSiz
     OHOS::sptr<AVSessionItem> session = g_AVSessionService->CreateSessionInner(
         "testTag", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     CHECK_AND_RETURN(session != nullptr);
-    AVSessionUsersManager::GetInstance().SetTopSession(session);
+    g_AVSessionService->GetUsersManager().SetTopSession(session);
     
     AVPlaybackState playbackState;
     playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
     session->SetAVPlaybackState(playbackState);
     
     g_AVSessionService->HandlePcModeAddNotification();
-    EXPECT_EQ(AVSessionUsersManager::GetInstance().GetTopSession(), session);
+    EXPECT_EQ(g_AVSessionService->GetUsersManager().GetTopSession(), session);
     g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 #endif
 }
@@ -2068,7 +2070,7 @@ static HWTEST_F(AVSessionServiceTestExt, HandlePcModeAddNotification004, TestSiz
 static HWTEST_F(AVSessionServiceTestExt, SetPcMode003, TestSize.Level1)
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
-    AVSessionUsersManager::GetInstance().SetTopSession(nullptr);
+    g_AVSessionService->GetUsersManager().SetTopSession(nullptr);
     g_AVSessionService->SetPcMode(true);
     EXPECT_EQ(g_AVSessionService->isPcMode_.load(), true);
     g_AVSessionService->SetPcMode(false);
