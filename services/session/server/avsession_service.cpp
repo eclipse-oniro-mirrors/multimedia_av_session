@@ -817,7 +817,7 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
 #ifdef CAR_FEATURE_ENABLE
             UpdateTopSessionForAudioZone(userId);
 #else
-            UpdateTopSession(session);
+            UpdateTopSession(session, userId);
 #endif
             sptr<AVSessionItem> userTopSession = GetUsersManager().GetTopSession(userId);
             CHECK_AND_RETURN_LOG(userTopSession != nullptr, "topSession is nullptr for userId:%{public}d!", userId);
@@ -1005,7 +1005,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
 #ifdef CAR_FEATURE_ENABLE
             UpdateTopSessionForAudioZone(userId);
 #else
-            UpdateTopSession(sessionItem);
+            UpdateTopSession(sessionItem, userId);
 #endif
             NotifySystemUI(nullptr, IsCapsuleNeeded(userId), false, userId);
         }
