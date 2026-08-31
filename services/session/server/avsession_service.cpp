@@ -799,9 +799,6 @@ void AVSessionService::UpdateTopSession(const sptr<AVSessionItem>& newTopSession
     }
 
     NotifyTopSessionChanged(descriptor);
-#ifdef CAR_FEATURE_ENABLE
-    NotifyTopSessionChangeForAudioZone(descriptor);
-#endif
     sptr<AVSessionItem> curTopSession = GetUsersManager().GetTopSession(userIdForNewTopSession);
     if (curTopSession != nullptr && !curTopSession->IsCasting()) {
         std::string preloadSessionId = curTopSession->GetSessionId();
@@ -817,7 +814,11 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
     for (const auto& session : *sessionListForFront) {
         if (session->GetUid() == infoUid && session->GetPid() == infoPid &&
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call")) {
+#ifdef CAR_FEATURE_ENABLE
+            UpdateTopSessionForAudioZone(userId);
+#else
             UpdateTopSession(session, userId);
+#endif
             sptr<AVSessionItem> userTopSession = GetUsersManager().GetTopSession(userId);
             CHECK_AND_RETURN_LOG(userTopSession != nullptr, "topSession is nullptr for userId:%{public}d!", userId);
             if (userTopSession->GetSessionType() == "audio" || userTopSession->GetSessionType() == "video") {
@@ -858,6 +859,9 @@ void AVSessionService::HandleFocusSession(const FocusSessionStrategy::FocusSessi
         if (userTopSession->GetSessionType() == "audio" || userTopSession->GetSessionType() == "video") {
             auto hasOtherPlayingSession = false;
             if (!isPlaying) {
+#ifdef CAR_FEATURE_ENABLE
+                UpdateTopSessionForAudioZone(userId);
+#endif
                 sptr<AVSessionItem> result = GetOtherPlayingSession(userId, "");
                 hasOtherPlayingSession = (result != nullptr);
                 HandleOtherSessionPlaying(result);
@@ -998,7 +1002,11 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
         sessionListForFront->push_front(sessionItem);
         if (IsLocalSessionPlaying(sessionItem)) {
             SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
+#ifdef CAR_FEATURE_ENABLE
+            UpdateTopSessionForAudioZone(userId);
+#else
             UpdateTopSession(sessionItem, userId);
+#endif
             NotifySystemUI(nullptr, IsCapsuleNeeded(userId), false, userId);
         }
     } else {
@@ -3722,7 +3730,11 @@ void AVSessionService::HandleTopSessionRelease(int32_t userId, sptr<AVSessionIte
         if (result != nullptr) {
             HandleOtherSessionPlaying(result);
         } else {
+#ifdef CAR_FEATURE_ENABLE
+            UpdateTopSessionForAudioZone(userId);
+#else
             UpdateTopSession(nullptr, userId);
+#endif
             hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId),
                 mediacontrollerNotifyId);
@@ -5217,6 +5229,22 @@ void AVSessionService::NotifyTopSessionChangeForAudioZone(const AVSessionDescrip
         }
     }
     SLOGI("NotifyTopSessionChangeForAudioZone for user:%{public}d", descriptor.userId_);
+}
+
+void AVSessionService::UpdateTopSessionForAudioZone(int32_t userId)
+{
+    SLOGI("UpdateTopSessionForAudioZone userId=%{public}d", userId);
+    auto& usersManager = GetUsersManager();
+    usersManager.UpdateZoneToUseridMap(userId);
+    usersManager.UpdateSessionStackForAudioZone(userId);
+    std::vector<AVSessionDescriptor> zoneStack = usersManager.GetSessionStackForAudioZone(userId);
+    if (zoneStack.empty()) {
+        SLOGI("UpdateTopSessionForAudioZone zone stack empty for user:%{public}d", userId);
+        return;
+    }
+    SLOGI("UpdateTopSessionForAudioZone zone top sessionId=%{public}s for user:%{public}d",
+        AVSessionUtils::GetAnonySessionId(zoneStack[0].sessionId_).c_str(), userId);
+    NotifyTopSessionChangeForAudioZone(zoneStack[0]);
 }
 
 void AVSessionService::HandleSessionStackChangeForAudioZone()
