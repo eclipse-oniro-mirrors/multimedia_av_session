@@ -765,6 +765,85 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, SendLongPauseNotifyToNext002,
 }
 
 /**
+ * @tc.name: CheckPostSessionInfo001
+ * @tc.desc: test CheckPostSessionInfo when sessionId changed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckPostSessionInfo001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->preSessionId_ = "old_session";
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckPostSessionInfo("new_session"), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->preSessionId_, "new_session");
+}
+
+/**
+ * @tc.name: CheckPostSessionInfo002
+ * @tc.desc: test CheckPostSessionInfo when sessionId not changed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckPostSessionInfo002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->preSessionId_ = "same_session";
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckPostSessionInfo("same_session"), false);
+}
+
+/**
+ * @tc.name: CheckSyncSessionInfo001
+ * @tc.desc: test CheckSyncSessionInfo when isNeedByRemote is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->sessionIdCache_ = "";
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo("session_A"), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->sessionIdCache_, "session_A");
+}
+
+/**
+ * @tc.name: CheckSyncSessionInfo002
+ * @tc.desc: test CheckSyncSessionInfo first session when isNeedByRemote is false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->sessionIdCache_ = "";
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo("session_A"), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->sessionIdCache_, "session_A");
+}
+
+/**
+ * @tc.name: CheckSyncSessionInfo003
+ * @tc.desc: test CheckSyncSessionInfo when isNeedByRemote false and sessionIdCache not empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo003, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->sessionIdCache_ = "cached_session";
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo("new_session"), false);
+}
+
+/**
+ * @tc.name: CheckSyncSessionInfo004
+ * @tc.desc: test CheckSyncSessionInfo when isNeedByRemote false and sessionId is empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo004, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->sessionIdCache_ = "";
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo(""), false);
+}
+
+/**
  * @tc.name: HandleNeedStateTimer001
  * @tc.desc: test HandleNeedStateTimer function
  * @tc.type: FUNC
@@ -964,6 +1043,94 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlTimerReque
     g_MigrateAVSessionServer->ProcessMediaControlTimerRequest(jsonValue);
     EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
     cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMediaControlTimerRequest003
+ * @tc.desc: test ProcessMediaControlTimerRequest with pending session info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlTimerRequest003, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->pendingSessionInfo_ = "pending_data";
+    g_MigrateAVSessionServer->preSessionId_ = "session_A";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, NEED_STATE_TIMER_INTERVAL);
+    g_MigrateAVSessionServer->ProcessMediaControlTimerRequest(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->pendingSessionInfo_.empty(), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->sessionIdCache_, "session_A");
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMediaControlTimerRequest004
+ * @tc.desc: test ProcessMediaControlTimerRequest with empty pending session info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlTimerRequest004, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->pendingSessionInfo_ = "";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    SoftbusSessionUtils::AddIntToJson(jsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, NEED_STATE_TIMER_INTERVAL);
+    g_MigrateAVSessionServer->ProcessMediaControlTimerRequest(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: CheckPostClean002
+ * @tc.desc: test CheckPostClean clears preSessionId_ and pendingSessionInfo_
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckPostClean002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->preSessionId_ = "old_session";
+    g_MigrateAVSessionServer->pendingSessionInfo_ = "pending_data";
+    g_MigrateAVSessionServer->CheckPostClean();
+    EXPECT_EQ(g_MigrateAVSessionServer->preSessionId_.empty(), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->pendingSessionInfo_.empty(), true);
+}
+
+/**
+ * @tc.name: UpdateSessionInfoToRemote001
+ * @tc.desc: test UpdateSessionInfoToRemote when isNeedByRemote is true
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, UpdateSessionInfoToRemote001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->preSessionId_ = "";
+    g_MigrateAVSessionServer->sessionIdCache_ = "";
+    g_MigrateAVSessionServer->pendingSessionInfo_ = "";
+    g_MigrateAVSessionServer->UpdateSessionInfoToRemote(g_AVControllerItem);
+    EXPECT_EQ(g_MigrateAVSessionServer->pendingSessionInfo_.empty(), true);
+}
+
+/**
+ * @tc.name: UpdateSessionInfoToRemote002
+ * @tc.desc: test UpdateSessionInfoToRemote when isNeedByRemote is false caches pending
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, UpdateSessionInfoToRemote002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->preSessionId_ = "";
+    g_MigrateAVSessionServer->sessionIdCache_ = "cached";
+    g_MigrateAVSessionServer->pendingSessionInfo_ = "";
+    g_MigrateAVSessionServer->UpdateSessionInfoToRemote(g_AVControllerItem);
+    EXPECT_EQ(g_MigrateAVSessionServer->pendingSessionInfo_.empty(), false);
 }
 
 /**

@@ -606,6 +606,44 @@ void ProcessMediaControlTimerRequestFuzzTest()
     cJSON_Delete(jsonV2);
 }
 
+void CheckPostSessionInfoFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    std::string inputSession = GenerateString(GetData<uint32_t>() % 32);
+    migrateServer_->CheckPostSessionInfo(inputSession);
+}
+
+void CheckSyncSessionInfoFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    bool needState = GetData<bool>();
+    std::string inputSession = GenerateString(GetData<uint32_t>() % 32);
+    migrateServer_->isNeedByRemote.store(needState);
+    migrateServer_->CheckSyncSessionInfo(inputSession);
+}
+
+void ProcessMediaControlTimerRequestWithPendingFuzzTest()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    migrateServer_->isNeedByRemote.store(false);
+    migrateServer_->pendingSessionInfo_ = "pending_test";
+    migrateServer_->preSessionId_ = GenerateString(GetData<uint32_t>() % 16);
+    cJSON* jsonV2 = cJSON_CreateObject();
+    if (jsonV2 == nullptr) {
+        return;
+    }
+    cJSON_AddNumberToObject(jsonV2, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
+    cJSON_AddNumberToObject(jsonV2, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, GetData<int32_t>());
+    migrateServer_->ProcessMediaControlTimerRequest(jsonV2);
+    cJSON_Delete(jsonV2);
+}
+
 void TestFunc()
 {
     ConnectProxyTest();
@@ -641,6 +679,9 @@ void TestFunc()
     ProcessMediaControlNeedStateFromNextV2FuzzTest();
     HandleLongPauseDetectionFuzzTest();
     ProcessMediaControlTimerRequestFuzzTest();
+    CheckPostSessionInfoFuzzTest();
+    CheckSyncSessionInfoFuzzTest();
+    ProcessMediaControlTimerRequestWithPendingFuzzTest();
 }
 
 void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)

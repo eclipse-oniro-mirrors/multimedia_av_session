@@ -145,6 +145,8 @@ void MigrateAVSessionServer::CheckPostClean(bool resetOnlySessionInfo)
     volumeCache_.store(-1);
     devicesListStr_ = "";
     devicePreferStr_ = "";
+    preSessionId_ = "";
+    pendingSessionInfo_ = "";
     SLOGI("CheckPostClean done");
 }
 
@@ -476,8 +478,20 @@ void MigrateAVSessionServer::UpdateFrontSessionInfoToRemote(sptr<AVControllerIte
 bool MigrateAVSessionServer::CheckPostSessionInfo(std::string sessionId)
 {
     std::lock_guard lockGuard(cacheJsonLock_);
-    CHECK_AND_RETURN_RET_LOG(sessionIdCache_ != sessionId, false, "session:%{public}s no change",
-        SoftbusSessionUtils::AnonymizeDeviceId(sessionIdCache_).c_str());
+    CHECK_AND_RETURN_RET_LOG(preSessionId_ != sessionId, false, "session:%{public}s no change",
+        SoftbusSessionUtils::AnonymizeDeviceId(preSessionId_).c_str());
+    preSessionId_ = sessionId;
+    return true;
+}
+
+bool MigrateAVSessionServer::CheckSyncSessionInfo(std::string sessionId)
+{
+    std::lock_guard lockGuard(cacheJsonLock_);
+    if (!isNeedByRemote.load()) {
+        if (!sessionIdCache_.empty() || sessionId.empty()) {
+            return false;
+        }
+    }
     sessionIdCache_ = sessionId;
     return true;
 }
@@ -486,6 +500,7 @@ void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> co
 {
     CHECK_AND_RETURN_LOG(controller != nullptr, "controller get nullptr");
     CHECK_AND_RETURN_LOG(CheckPostSessionInfo(controller->GetSessionId()), "sessionState no change");
+    bool needSync = CheckSyncSessionInfo(controller->GetSessionId());
     cJSON* sessionInfo = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(sessionInfo != nullptr, "get sessionInfo json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_SESSION_ID, controller->GetSessionId().c_str())) {
@@ -512,20 +527,28 @@ void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> co
 
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_SESSION_INFO});
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
-    MigratePostTask(
-        [this, msg]() {
-            SendByteForNext(deviceId_, msg);
-        },
-        "SYNC_FOCUS_SESSION_INFO");
     cJSON_Delete(sessionInfo);
-    SLOGI("UpdateSessionInfoToRemote with sessionId:%{public}s|bundleName:%{public}s",
-        SoftbusSessionUtils::AnonymizeDeviceId(controller->GetSessionId()).c_str(), bundleNameForMigrate.c_str());
+    if (needSync) {
+        pendingSessionInfo_.clear();
+        MigratePostTask(
+            [this, msg]() {
+                SendByteForNext(deviceId_, msg);
+            },
+            "SYNC_FOCUS_SESSION_INFO");
+        SLOGI("UpdateSessionInfoToRemote with sessionId:%{public}s|bundleName:%{public}s",
+            SoftbusSessionUtils::AnonymizeDeviceId(controller->GetSessionId()).c_str(), bundleNameForMigrate.c_str());
+    } else {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        pendingSessionInfo_ = msg;
+        SLOGI("UpdateSessionInfoToRemote no need, cache pending session info");
+    }
 }
 
 void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
 {
     SLOGI("UpdateEmptyInfoToRemote in async");
     CHECK_AND_RETURN_LOG(CheckPostSessionInfo(""), "sessionState no change");
+    bool needSync = CheckSyncSessionInfo("");
     cJSON* sessionInfo = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_LOG(sessionInfo != nullptr, "get sessionInfo json with nullptr");
     if (!SoftbusSessionUtils::AddStringToJson(sessionInfo, MIGRATE_SESSION_ID, EMPTY_SESSION)) {
@@ -537,12 +560,19 @@ void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
 
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_SESSION_INFO});
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
-    MigratePostTask(
-        [this, msg]() {
-            SendByteForNext(deviceId_, msg);
-        },
-        "SYNC_FOCUS_SESSION_INFO");
     cJSON_Delete(sessionInfo);
+    if (needSync) {
+        pendingSessionInfo_.clear();
+        MigratePostTask(
+            [this, msg]() {
+                SendByteForNext(deviceId_, msg);
+            },
+            "SYNC_FOCUS_SESSION_INFO");
+    } else {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        pendingSessionInfo_ = msg;
+        SLOGI("UpdateEmptyInfoToRemote no need, cache pending session info");
+    }
 }
 
 void MigrateAVSessionServer::ProcFromNext(const std::string &deviceId, const std::string &data)
@@ -667,9 +697,22 @@ void MigrateAVSessionServer::ProcessMediaControlTimerRequest(cJSON* commandJsonV
     if (version != AVSESSION_PROXY_VERSION) {
         return;
     }
-    bool expected = false;
-    if (isNeedByRemote.compare_exchange_strong(expected, true)) {
-        SLOGI("isNeed refresh data with V2");
+    if (!isNeedByRemote.load()) {
+        {
+            std::lock_guard lockGuard(cacheJsonLock_);
+            if (!pendingSessionInfo_.empty()) {
+                std::string msg = pendingSessionInfo_;
+                pendingSessionInfo_.clear();
+                sessionIdCache_ = preSessionId_;
+                MigratePostTask(
+                    [this, msg]() {
+                        SendByteForNext(deviceId_, msg);
+                    },
+                    "SYNC_FOCUS_SESSION_INFO");
+                SLOGI("ProcessMediaControlTimerRequest send pending session info");
+            }
+        }
+        isNeedByRemote.store(true);
         LocalFrontSessionArrive(lastSessionId_);
         TriggerAudioCallback();
     }
@@ -683,7 +726,6 @@ void MigrateAVSessionServer::ProcessMediaControlTimerRequest(cJSON* commandJsonV
     if (cJSON_HasObjectItem(commandJsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS)) {
         timeoutMs = SoftbusSessionUtils::GetIntFromJson(commandJsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS);
         if (timeoutMs < NEED_STATE_TIMER_MIN_INTERVAL || timeoutMs > NEED_STATE_TIMER_MAX_INTERVAL) {
-            SLOGW("Invalid custom timeout %{public}d, using default", timeoutMs);
             timeoutMs = NEED_STATE_TIMER_INTERVAL;
         }
     }
