@@ -32,6 +32,7 @@ namespace OHOS::AVSession {
 static const int32_t MAX_CODE_LEN = 512;
 static const int32_t MIN_SIZE_NUM = 4;
 constexpr auto MIN_RANDOM_NUM = 2;
+constexpr uint32_t MAX_PRE_SESSION_ID_LEN = 16;
 
 static const uint8_t *RAW_DATA = nullptr;
 static size_t g_dataSize = 0;
@@ -633,7 +634,7 @@ void ProcessMediaControlTimerRequestWithPendingFuzzTest()
     }
     migrateServer_->isNeedByRemote.store(false);
     migrateServer_->pendingSessionInfo_ = "pending_test";
-    migrateServer_->preSessionId_ = GenerateString(GetData<uint32_t>() % 16);
+    migrateServer_->preSessionId_ = GenerateString(GetData<uint32_t>() % MAX_PRE_SESSION_ID_LEN);
     cJSON* jsonV2 = cJSON_CreateObject();
     if (jsonV2 == nullptr) {
         return;
