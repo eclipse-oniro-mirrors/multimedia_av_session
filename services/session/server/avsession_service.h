@@ -634,7 +634,7 @@ private:
 
     bool UnSubscribeCommonEvent();
 
-    void ReportSessionInfo(const sptr <AVSessionItem>& session, int res);
+    void ReportSessionInfo(const sptr <AVSessionItem>& session, int res, const std::string& callerBundleName);
 
     bool CheckAncoAudio();
 

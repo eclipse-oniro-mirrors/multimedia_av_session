@@ -420,6 +420,38 @@ static HWTEST_F(AVSessionServiceTest, CreateSessionInnerCorrectElement002, TestS
 }
 
 /**
+* @tc.name: GetSessionInnerCorrectElement001
+* @tc.desc: get session with same element succeeds, mismatched element still rejected (no over-correction)
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVSessionServiceTest, GetSessionInnerCorrectElement001, TestSize.Level0)
+{
+    SLOGI("GetSessionInnerCorrectElement001 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(avsessionHere_ != nullptr);
+
+    // 与创建时一致的 element：取回成功
+    std::string sessionTag;
+    OHOS::sptr<IRemoteObject> sessionObj = nullptr;
+    EXPECT_EQ(avservice_->GetSessionInner(elementName, sessionTag, sessionObj), AVSESSION_SUCCESS);
+    EXPECT_EQ(sessionTag, g_testSessionTag);
+
+    // 包名不一致的 element：仍然拒绝，防止纠正过度放大取值范围
+    OHOS::AppExecFwk::ElementName otherElement;
+    otherElement.SetBundleName("com.test.notexist");
+    otherElement.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<IRemoteObject> sessionObj2 = nullptr;
+    EXPECT_EQ(avservice_->GetSessionInner(otherElement, sessionTag, sessionObj2), ERR_SESSION_NOT_EXIST);
+
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    SLOGI("GetSessionInnerCorrectElement001 end!");
+}
+
+/**
 * @tc.name: SendSystemAVKeyEvent002
 * @tc.desc: verifying send system keyEvent
 * @tc.type: FUNC
@@ -1915,7 +1947,7 @@ static HWTEST_F(AVSessionServiceTest, ReportSessionInfo001, TestSize.Level0)
     SLOGI("ReportSessionInfo001 begin!");
     EXPECT_TRUE(avservice_ != nullptr);
     OHOS::sptr<AVSessionItem> avsessionHere_ = nullptr;
-    avservice_->ReportSessionInfo(avsessionHere_, true);
+    avservice_->ReportSessionInfo(avsessionHere_, true, g_testAnotherBundleName);
     SLOGI("ReportSessionInfo001 end!");
 }
 

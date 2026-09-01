@@ -1914,9 +1914,12 @@ int32_t AVSessionService::GetSessionInner(const AppExecFwk::ElementName& element
         "process %{public}d:%{public}d has no session", pid, uid);
     CHECK_AND_RETURN_RET_LOG(sessionWanted->GetPid() == pid, ERR_SESSION_NOT_EXIST,
         "process pid not fit:%{public}d vs %{public}d", pid, sessionWanted->GetPid());
-    CHECK_AND_RETURN_RET_LOG(sessionWanted->GetBundleName() == elementName.GetBundleName(), ERR_SESSION_NOT_EXIST,
+
+    AppExecFwk::ElementName realElement = CorrectElementForThirdPartyCaller(
+        sessionWanted->GetDescriptor().isThirdPartyApp_, elementName);
+    CHECK_AND_RETURN_RET_LOG(sessionWanted->GetBundleName() == realElement.GetBundleName(), ERR_SESSION_NOT_EXIST,
         "process bundleName not fit:%{public}s vs %{public}s",
-        elementName.GetBundleName().c_str(), sessionWanted->GetBundleName().c_str());
+        realElement.GetBundleName().c_str(), sessionWanted->GetBundleName().c_str());
 
     SLOGI("GetSession success:%{public}d:%{public}d|%{public}s|%{public}s", pid, uid,
         elementName.GetBundleName().c_str(), sessionWanted->GetSessionTag().c_str());
@@ -2058,7 +2061,8 @@ sptr<AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag,
     return sessionItem;
 }
 
-void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, int32_t res)
+void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, int32_t res,
+    const std::string& callerBundleName)
 {
     std::string sessionId = "";
     std::string sessionTag = "";
@@ -2070,9 +2074,12 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
         sessionTag = session->GetDescriptor().sessionTag_;
         sessionType = session->GetSessionType();
         bundleName = session->GetDescriptor().elementName_.GetBundleName();
+        bool isBundleNameMismatch = (callerBundleName != bundleName);
         apiParamString = "abilityName: " +
             session->GetDescriptor().elementName_.GetAbilityName() + ","
-            + "moduleName: " + session->GetDescriptor().elementName_.GetModuleName();
+            + "moduleName: " + session->GetDescriptor().elementName_.GetModuleName() + ","
+            + "isBundleNameMismatch: " + std::to_string(isBundleNameMismatch) + ","
+            + "callerBundleName: " + callerBundleName;
     }
     std::string errMsg = (res == AVSESSION_SUCCESS) ? "SUCCESS" : "create session failed";
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
@@ -2120,7 +2127,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     }
 
     object = session;
-    ReportSessionInfo(session, static_cast<int32_t>(res));
+    ReportSessionInfo(session, static_cast<int32_t>(res), elementName.GetBundleName());
 
     {
         std::lock_guard lockGuard(isAllSessionCastLock_);
