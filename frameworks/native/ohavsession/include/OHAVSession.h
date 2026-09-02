@@ -99,6 +99,7 @@ private:
 private:
     std::mutex lock_;
     std::shared_ptr<AVSession> avSession_;
+    std::weak_ptr<AVSession> avSessionWeak_;
     std::shared_ptr<OHAVSessionCallbackImpl> ohAVSessionCallbackImpl_;
     std::string sessionId_;
 

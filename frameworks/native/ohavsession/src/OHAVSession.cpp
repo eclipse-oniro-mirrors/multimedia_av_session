@@ -30,6 +30,7 @@ namespace OHOS::AVSession {
 std::mutex g_setAVMetaDataMutex;
 OHAVSession::~OHAVSession()
 {
+    AVSessionDownloadHandler::GetInstance().AVSessionDownloadRemoveTask("OHAVSession::SetAVMetaData");
 }
 
 OHAVSession::OHAVSession()
@@ -43,6 +44,7 @@ OHAVSession::OHAVSession(AVSession_Type sessionType, const char* sessionTag,
     elementName.SetBundleName(bundleName);
     elementName.SetAbilityName(abilityName);
     avSession_ = AVSessionManager::GetInstance().CreateSession(sessionTag, sessionType, elementName);
+    avSessionWeak_ = avSession_;
     dataTracker_ = std::make_shared<AVSessionDataTracker>();
 }
 
@@ -50,6 +52,7 @@ void OHAVSession::SetAVSession(const std::shared_ptr<AVSession> &avsession)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     avSession_ = avsession;
+    avSessionWeak_ = avsession;
     dataTracker_ = std::make_shared<AVSessionDataTracker>();
 }
 
@@ -154,7 +157,8 @@ AVSession_ErrCode OHAVSession::SetAVMetaData(OH_AVMetadata* metadata)
     if (!avMetaData->GetMediaImageUri().empty() && isDownloadNeeded && avMetaData->GetMediaImage() == nullptr) {
         AVSessionDownloadHandler::GetInstance().AVSessionDownloadRemoveTask("OHAVSession::SetAVMetaData");
         CHECK_AND_PRINT_LOG(AVSessionDownloadHandler::GetInstance().AVSessionDownloadPostTask(
-            [avSession = avSession_, data = (*avMetaData), dataTracker = dataTracker_] {
+            [avSessionWeak = avSessionWeak_, data = (*avMetaData), dataTracker = dataTracker_] {
+                auto avSession = avSessionWeak.lock();
                 DownloadAndSetAVMetaData(avSession, data, dataTracker);
             }, "OHAVSession::SetAVMetaData"), "OHAVSession SetAVMetaData handler postTask failed");
     }
@@ -555,6 +559,8 @@ AVSession_ErrCode OHAVSession::ReleaseOutputDevice(AVSession_OutputDeviceInfo *o
 
 AVSession_ErrCode OHAVSession::Destroy()
 {
+    AVSessionDownloadHandler::GetInstance().AVSessionDownloadRemoveTask("OHAVSession::SetAVMetaData");
+    
     if (ohAVSessionCallbackImpl_) {
         ohAVSessionCallbackImpl_->ClearSessionPointer();
     }
