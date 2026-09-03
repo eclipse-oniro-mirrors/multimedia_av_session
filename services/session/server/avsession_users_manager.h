@@ -113,6 +113,8 @@ public:
 
     void UpdateSessionStackForAudioZone(int32_t userId);
 
+    void HandleScreenMove(int32_t uid, int32_t srcUserId, int32_t dstUserId);
+
     std::vector<AVSessionDescriptor> GetSessionStackForAudioZone(int32_t userId);
 
     std::map<int32_t, std::map<pid_t, sptr<ISessionListener>>>& GetSessionListenersMapForAudioZone();

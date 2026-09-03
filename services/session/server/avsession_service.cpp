@@ -3453,6 +3453,11 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
 int32_t AVSessionService::SendSystemCommonCommand(const std::string& commonCommand,
     const AAFwk::WantParams& commandArgs)
 {
+#ifdef CAR_FEATURE_ENABLE
+    if (commonCommand == "MOVE_SCREEN") {
+        return HandleMoveScreenCommand(commandArgs);
+    }
+#endif
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     CHECK_AND_RETURN_RET_LOG(pcmCastSession_ != nullptr, ERR_SESSION_NOT_EXIST, "Session not exist");
     pcmCastSession_->ExecuteCommonCommand(commonCommand, commandArgs);
@@ -3461,6 +3466,24 @@ int32_t AVSessionService::SendSystemCommonCommand(const std::string& commonComma
     return AVSESSION_SUCCESS;
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 }
+
+#ifdef CAR_FEATURE_ENABLE
+int32_t AVSessionService::HandleMoveScreenCommand(const AAFwk::WantParams& commandArgs)
+{
+    auto uidVal = AAFwk::IInteger::Query(commandArgs.GetParam("uid"));
+    auto srcVal = AAFwk::IInteger::Query(commandArgs.GetParam("sourceUserId"));
+    auto dstVal = AAFwk::IInteger::Query(commandArgs.GetParam("targetUserId"));
+    CHECK_AND_RETURN_RET_LOG(uidVal != nullptr && srcVal != nullptr && dstVal != nullptr,
+        AVSESSION_ERROR, "MOVE_SCREEN: missing params");
+    int32_t uid = AAFwk::Integer::Unbox(uidVal);
+    int32_t srcUserId = AAFwk::Integer::Unbox(srcVal);
+    int32_t dstUserId = AAFwk::Integer::Unbox(dstVal);
+    SLOGI("HandleMoveScreenCommand uid=%{public}d src=%{public}d dst=%{public}d", uid, srcUserId, dstUserId);
+    GetUsersManager().HandleScreenMove(uid, srcUserId, dstUserId);
+    HandleSessionStackChangeForAudioZone();
+    return AVSESSION_SUCCESS;
+}
+#endif
 
 void AVSessionService::AddClientDeathObserver(pid_t pid, const sptr<IClientDeath>& observer,
     const sptr<ClientDeathRecipient> recipient)

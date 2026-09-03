@@ -517,6 +517,35 @@ void AVSessionUsersManager::UpdateSessionStackForAudioZone(int32_t userId)
     SortAndCacheSessionStack(zoneId, sessionWithTime);
 }
 
+void AVSessionUsersManager::HandleScreenMove(int32_t uid, int32_t srcUserId, int32_t dstUserId)
+{
+    std::lock_guard lockGuard(userLock_);
+    SLOGI("HandleScreenMove uid=%{public}d srcUserId=%{public}d dstUserId=%{public}d", uid, srcUserId, dstUserId);
+    if (srcUserId == dstUserId) {
+        SLOGI("HandleScreenMove skip: srcUserId==dstUserId=%{public}d", srcUserId);
+        return;
+    }
+    sptr<AVSessionItem> session = GetContainerFromAll().GetSessionByUid(uid);
+    CHECK_AND_RETURN_LOG(session != nullptr, "HandleScreenMove session not found uid=%{public}d", uid);
+    int32_t actualSrcUserId = session->GetUserId();
+    if (actualSrcUserId != srcUserId) {
+        SLOGW("HandleScreenMove srcUserId mismatch: cmd=%{public}d actual=%{public}d", srcUserId, actualSrcUserId);
+    }
+    if (actualSrcUserId == dstUserId) {
+        SLOGI("HandleScreenMove skip: actualSrc==dstUserId=%{public}d", dstUserId);
+        return;
+    }
+    std::string sessionId = session->GetSessionId();
+    pid_t pid = session->GetPid();
+    std::string abilityName = session->GetAbilityName();
+    GetContainerFromUser(actualSrcUserId).RemoveSession(sessionId);
+    GetContainerFromUser(dstUserId).AddSession(pid, abilityName, session);
+    session->SetUserId(dstUserId);
+    session->SetDescriptorUserId(dstUserId);
+    SLOGI("HandleScreenMove done uid=%{public}d %{public}d->%{public}d zoneId=%{public}d",
+        uid, actualSrcUserId, dstUserId, GetZoneIdForUser(dstUserId));
+}
+
 void AVSessionUsersManager::AddSessionToVector(const sptr<AVSessionItem>& session,
     std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
 {
