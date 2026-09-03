@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "avsession_log.h"
+#include "avsession_errors.h"
 #include "session_listener_client.h"
 
 using namespace testing::ext;
@@ -418,6 +419,54 @@ HWTEST_F(SessionListenerClientTest, OnTopSessionChangeForAudioZone002, TestSize.
     EXPECT_NE(sessionListenerClient, nullptr);
     AVSessionDescriptor descriptor;
     sessionListenerClient->OnTopSessionChangeForAudioZone(100, descriptor);
+}
+#else
+/**
+* @tc.name: OnSessionAddForAudioZone003
+* @tc.desc: test OnSessionAddForAudioZone when CAR_FEATURE_ENABLE is not defined
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnSessionAddForAudioZone003, TestSize.Level1)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    auto result = sessionListenerClient->OnSessionAddForAudioZone(100, descriptor);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+}
+
+/**
+* @tc.name: OnSessionRemoveForAudioZone003
+* @tc.desc: test OnSessionRemoveForAudioZone when CAR_FEATURE_ENABLE is not defined
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnSessionRemoveForAudioZone003, TestSize.Level1)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    auto result = sessionListenerClient->OnSessionRemoveForAudioZone(100, descriptor);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+}
+
+/**
+* @tc.name: OnTopSessionChangeForAudioZone003
+* @tc.desc: test OnTopSessionChangeForAudioZone when CAR_FEATURE_ENABLE is not defined
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SessionListenerClientTest, OnTopSessionChangeForAudioZone003, TestSize.Level1)
+{
+    std::shared_ptr<AVSessionListenerDemo> listener = std::make_shared<AVSessionListenerDemo>();
+    std::shared_ptr<SessionListenerClient> sessionListenerClient = std::make_shared<SessionListenerClient>(listener);
+    EXPECT_NE(sessionListenerClient, nullptr);
+    AVSessionDescriptor descriptor;
+    auto result = sessionListenerClient->OnTopSessionChangeForAudioZone(100, descriptor);
+    EXPECT_EQ(result, AVSESSION_ERROR);
 }
 #endif
 } // namespace AVSESSION
