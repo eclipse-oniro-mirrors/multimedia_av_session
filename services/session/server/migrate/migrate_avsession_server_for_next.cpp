@@ -529,6 +529,7 @@ void MigrateAVSessionServer::UpdateSessionInfoToRemote(sptr<AVControllerItem> co
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
     cJSON_Delete(sessionInfo);
     if (needSync) {
+        std::lock_guard lockGuard(cacheJsonLock_);
         pendingSessionInfo_.clear();
         MigratePostTask(
             [this, msg]() {
@@ -562,6 +563,7 @@ void MigrateAVSessionServer::UpdateEmptyInfoToRemote()
     SoftbusSessionUtils::TransferJsonToStr(sessionInfo, msg);
     cJSON_Delete(sessionInfo);
     if (needSync) {
+        std::lock_guard lockGuard(cacheJsonLock_);
         pendingSessionInfo_.clear();
         MigratePostTask(
             [this, msg]() {
