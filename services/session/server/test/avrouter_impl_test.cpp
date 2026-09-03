@@ -57,6 +57,7 @@ public:
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) {return 0;}
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
+    int32_t UpdateMediaInfo(const AVQueueItem& avQueueItem) {return 0;}
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
     void SetSpid(uint32_t spid) {}
 };

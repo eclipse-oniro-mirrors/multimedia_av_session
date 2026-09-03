@@ -282,6 +282,7 @@ public:
     int32_t GetSupportedHdrCapabilities(std::vector<HDRFormat>& hdrFormats) {return 0;}
     int32_t GetSupportedPlaySpeeds(std::vector<float>& playSpeeds) {return 0;}
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
+    int32_t UpdateMediaInfo(const AVQueueItem& avQueueItem) {return 0;}
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
     void SetSpid(uint32_t spid) {}
 };
@@ -1474,6 +1475,72 @@ HWTEST_F(AVCastControllerTest, Prepare005, TestSize.Level1)
     avQueueItem.SetDescription(description);
     castController_->isPlayingState_ = true;
     EXPECT_EQ(castController_->Prepare(avQueueItem), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: Update001
+* @tc.desc: Update with normal description and proxy mock
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, Update001, TestSize.Level1)
+{
+    AVQueueItem avQueueItem;
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    description->SetSubtitle("Subtitle");
+    description->SetDescription("This is music description");
+    description->SetIcon(nullptr);
+    description->SetIconUri("xxxxx");
+    description->SetExtras(nullptr);
+    description->SetMediaUri("Media url");
+    avQueueItem.SetDescription(description);
+    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
+    EXPECT_EQ(castController_->Update(avQueueItem), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: Update002
+* @tc.desc: Update with description that has icon set
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, Update002, TestSize.Level1)
+{
+    AVQueueItem avQueueItem;
+    std::shared_ptr<AVSessionPixelMap> icon = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 0, 0, 0, 1};
+    icon->SetInnerImgBuffer(imgBuffer);
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    description->SetSubtitle("Subtitle");
+    description->SetDescription("This is music description");
+    description->SetIcon(icon);
+    description->SetIconUri("test");
+    description->SetExtras(nullptr);
+    description->SetMediaUri("Media url");
+    avQueueItem.SetDescription(description);
+    castController_->castControllerProxy_ = std::make_shared<AVCastControllerProxyMock>();
+    EXPECT_EQ(castController_->Update(avQueueItem), AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: Update003
+* @tc.desc: Update with null castControllerProxy_
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVCastControllerTest, Update003, TestSize.Level1)
+{
+    AVQueueItem avQueueItem;
+    std::shared_ptr<AVMediaDescription> description = std::make_shared<AVMediaDescription>();
+    description->SetMediaId("123");
+    description->SetTitle("Title");
+    avQueueItem.SetDescription(description);
+    castController_->castControllerProxy_ = nullptr;
+    EXPECT_EQ(castController_->Update(avQueueItem), AVSESSION_ERROR);
 }
 
 /**

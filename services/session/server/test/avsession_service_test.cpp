@@ -105,6 +105,11 @@ public:
         return OHOS::AVSession::AVSESSION_ERROR;
     }
 
+    int32_t UpdateMediaInfo(const AVQueueItem& avQueueItem) override
+    {
+        return OHOS::AVSession::AVSESSION_ERROR;
+    }
+
     int32_t Start(const AVQueueItem& avQueueItem) override
     {
         return OHOS::AVSession::AVSESSION_ERROR;

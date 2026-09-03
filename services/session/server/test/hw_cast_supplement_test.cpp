@@ -87,6 +87,8 @@ public:
 
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) {return 0;}
 
+    int32_t UpdateMediaInfo(const AVQueueItem& avQueueItem) {return 0;}
+
     void SetSessionCallbackForCastCap(const std::function<void(bool, bool)>& callback) {}
 };
 
