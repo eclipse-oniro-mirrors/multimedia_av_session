@@ -4886,7 +4886,10 @@ void AVSessionService::DealFlowControl(int32_t uid, bool isBroker, int32_t userI
 bool AVSessionService::CheckNotificationEnabled()
 {
 #ifdef DEVICE_MANAGER_ENABLE
-    bool is2in1 = (GetLocalDeviceType() == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
+    int32_t localDeviceType = GetLocalDeviceType();
+    bool isWatch = (localDeviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH);
+    CHECK_AND_RETURN_RET_LOG(!isWatch, false, "watch device is not support.");
+    bool is2in1 = (localDeviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
 #endif
     bool isSupportOuterScreen = false;
     bool is2in1WithOuterScreen = false;
