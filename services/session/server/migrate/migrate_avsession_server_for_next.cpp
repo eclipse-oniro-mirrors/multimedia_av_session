@@ -697,7 +697,8 @@ void MigrateAVSessionServer::ProcessMediaControlTimerRequest(cJSON* commandJsonV
     if (version != AVSESSION_PROXY_VERSION) {
         return;
     }
-    if (!isNeedByRemote.load()) {
+    bool expected = false;
+    if (isNeedByRemote.compare_exchange_strong(expected, true)) {
         {
             std::lock_guard lockGuard(cacheJsonLock_);
             if (!pendingSessionInfo_.empty()) {
@@ -712,7 +713,6 @@ void MigrateAVSessionServer::ProcessMediaControlTimerRequest(cJSON* commandJsonV
                 SLOGI("ProcessMediaControlTimerRequest send pending session info");
             }
         }
-        isNeedByRemote.store(true);
         LocalFrontSessionArrive(lastSessionId_);
         TriggerAudioCallback();
     }
