@@ -345,7 +345,7 @@ void AvSessionCallItemTestExtension(sptr<AVSessionItem> avSessionItem)
     string event = GetString();
 
     auto releaseAndStartCallback = [](AVSessionItem& item) {};
-    auto updateSessionCallback = [](string str, bool flag) {};
+    auto updateSessionCallback = [](string str, bool flag, int32_t userId) {};
 
     AAFwk::WantParams wantParams;
 

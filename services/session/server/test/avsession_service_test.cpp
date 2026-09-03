@@ -892,11 +892,58 @@ static HWTEST_F(AVSessionServiceTest, ReleaseCastSession001, TestSize.Level0)
     EXPECT_EQ(avsessionHere_ != nullptr, true);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     SLOGI("ReleaseCastSession001 in!");
-    avservice_->ReleaseCastSession();
+    avservice_->ReleaseCastSession(100);  // test userId
 #endif
     avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("ReleaseCastSession001 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, ReleaseCastSession002, TestSize.Level0)
+{
+    SLOGI("ReleaseCastSession002 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("ReleaseCastSession002 in!");
+    avservice_->ReleaseCastSession(0);
+#endif
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("ReleaseCastSession002 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, ReleaseCastSession003, TestSize.Level0)
+{
+    SLOGI("ReleaseCastSession003 begin!");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    EXPECT_EQ(avsessionHere_ != nullptr, true);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("ReleaseCastSession003 in!");
+    avservice_->ReleaseCastSession(100);
+#endif
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("ReleaseCastSession003 end!");
+}
+
+static HWTEST_F(AVSessionServiceTest, ReleaseCastSession004, TestSize.Level0)
+{
+    SLOGI("ReleaseCastSession004 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("ReleaseCastSession004 in!");
+    avservice_->ReleaseCastSession(-1);
+#endif
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("ReleaseCastSession004 end!");
 }
 
 static HWTEST_F(AVSessionServiceTest, CreateSessionByCast001, TestSize.Level0)

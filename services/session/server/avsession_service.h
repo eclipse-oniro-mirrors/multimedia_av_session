@@ -288,7 +288,7 @@ public:
     int32_t ProcessSuperLauncherDisconnect(std::string deviceId, std::string extraInfo);
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    void ReleaseCastSession() override;
+    void ReleaseCastSession(const int32_t userId) override;
 
     void CreateSessionByCast(const int64_t castHandle, const int32_t userId) override;
 

@@ -401,7 +401,7 @@ void AVSessionItem::HandleFrontSession()
     if ((isMetaEmpty && isCastMetaEmpty) ||
         (isSupportedCmdEmpty && isSupportedCastCmdsEmpty) || needRemoveNtfInMirror) {
         if (!isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
-            serviceCallbackForUpdateSession_(GetSessionId(), false);
+            serviceCallbackForUpdateSession_(GetSessionId(), false, GetUserId());
             isFirstAddToFront_ = true;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
             UpdateRecommendInfo(false);
@@ -409,7 +409,7 @@ void AVSessionItem::HandleFrontSession()
         }
     } else {
         if (isFirstAddToFront_ && serviceCallbackForUpdateSession_) {
-            serviceCallbackForUpdateSession_(GetSessionId(), true);
+            serviceCallbackForUpdateSession_(GetSessionId(), true, GetUserId());
             isFirstAddToFront_ = false;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
             UpdateRecommendInfo(true);
@@ -2422,7 +2422,7 @@ void AVSessionItem::SetCastHandle(const int64_t castHandle)
 {
     castHandle_ = castHandle;
     if (serviceCallbackForUpdateSession_) {
-        serviceCallbackForUpdateSession_(sessionCastState_, IsCasting());
+        serviceCallbackForUpdateSession_(sessionCastState_, IsCasting(), GetUserId());
     }
 }
 
@@ -3421,7 +3421,8 @@ void AVSessionItem::SetServiceCallbackForCallStart(const std::function<void(AVSe
     callStartCallback_ = callback;
 }
 
-void AVSessionItem::SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback)
+void AVSessionItem::SetServiceCallbackForUpdateSession(
+    const std::function<void(std::string, bool, int32_t)>& callback)
 {
     SLOGI("SetServiceCallbackForUpdateSession in");
     serviceCallbackForUpdateSession_ = callback;

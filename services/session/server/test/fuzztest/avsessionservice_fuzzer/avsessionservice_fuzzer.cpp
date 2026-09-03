@@ -996,10 +996,10 @@ void CastSessionTest(sptr<AVSessionService> service)
 {
     auto castHandle = GetData<int64_t>();
 
-    #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     service->CreateSessionByCast(castHandle, 0);
-    service->ReleaseCastSession();
-    #endif
+    service->ReleaseCastSession(0);
+#endif
 }
 
 void GetAVQueueDirTest(sptr<AVSessionService> service)

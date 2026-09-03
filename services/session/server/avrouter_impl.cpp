@@ -264,12 +264,12 @@ int32_t AVRouterImpl::OnDeviceLogEvent(const DeviceLogEventCode eventId, const i
     return AVSESSION_SUCCESS;
 }
 
-void AVRouterImpl::ReleaseCurrentCastSession()
+void AVRouterImpl::ReleaseCurrentCastSession(const int32_t userId)
 {
-    SLOGI("Start ReleaseCurrentCastSession");
+    SLOGI("Start ReleaseCurrentCastSession for userId %{public}d", userId);
     std::lock_guard lockGuard(servicePtrLock_);
     CHECK_AND_RETURN_LOG(servicePtr_ != nullptr, "servicePtr_ is nullptr");
-    servicePtr_->ReleaseCastSession();
+    servicePtr_->ReleaseCastSession(userId);
 }
 
 int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId, const int32_t userId)

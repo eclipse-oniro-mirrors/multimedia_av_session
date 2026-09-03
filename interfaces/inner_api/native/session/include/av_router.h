@@ -163,9 +163,10 @@ public:
     /**
      * @brief Release current cast session.
      *
+     * @param { int32_t } userId - User id for multi-user support.
      * @since 10
     */
-    virtual void ReleaseCurrentCastSession() = 0;
+    virtual void ReleaseCurrentCastSession(const int32_t userId) = 0;
 
     /**
      * @brief Notify Router that the cast session has created.

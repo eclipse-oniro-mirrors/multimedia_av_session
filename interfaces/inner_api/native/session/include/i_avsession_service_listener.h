@@ -33,9 +33,10 @@ public:
     /**
      * Release cast session at sink end.
      *
+     * @param { int32_t } userId - User id for multi-user support.
      * @since 10
     */
-    virtual void ReleaseCastSession() = 0;
+    virtual void ReleaseCastSession(const int32_t userId) = 0;
     /**
      * Create a new session at sink device.
      *

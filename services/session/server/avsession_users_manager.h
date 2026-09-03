@@ -67,7 +67,9 @@ public:
 
     int32_t UpdateSessionForCurrentUser(pid_t pid, const std::string& oldAbilityName,
         const std::string& newAbilityName, sptr<AVSessionItem>& item);
-    
+
+    int32_t UpdateSessionForUserChange(int32_t oldUserId, int32_t newUserId, sptr<AVSessionItem>& item);
+
     sptr<AVSessionItem> RemoveSessionForAllUser(pid_t pid, const std::string& abilityName);
 
     sptr<AVSessionItem> RemoveSessionForAllUser(const std::string& sessionId);

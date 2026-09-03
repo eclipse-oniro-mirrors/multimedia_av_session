@@ -207,7 +207,11 @@ void AVSessionService::ExtendedScreenSplitExtraInfo(std::string info)
 void AVSessionService::NotifySupportExtendedScreen(bool isSupport)
 {
     SLOGI("NotifySupportExtendedScreen %{public}d", isSupport);
+#ifdef CAR_FEATURE_ENABLE
+    for (const auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
     for (const auto& session : GetContainer().GetAllSessions()) {
+#endif
         if (session != nullptr) {
             session->SetSupportExtendedScreen(isSupport);
         }
@@ -314,7 +318,11 @@ void AVSessionService::HandleAppStateChange(int uid, int state)
 int32_t AVSessionService::GetAVCastControllerInner(const std::string& sessionId, sptr<IRemoteObject>& object)
 {
     SLOGI("Start get cast controller with pid %{public}d", static_cast<int>(GetCallingPid()));
+#ifdef CAR_FEATURE_ENABLE
+    auto session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
     auto session = GetContainer().GetSessionById(sessionId);
+#endif
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "StopCast: session is not exist");
     auto result = session->GetAVCastControllerInner();
     CHECK_AND_RETURN_RET_LOG(result != nullptr, AVSESSION_ERROR, "GetAVCastControllerInner failed");
@@ -378,12 +386,21 @@ int32_t AVSessionService::PcmCastSessionReleasePlayer()
 }
 
 // LCOV_EXCL_START
-void AVSessionService::ReleaseCastSession()
+void AVSessionService::ReleaseCastSession(const int32_t userId)
 {
     std::lock_guard lockGuard(sessionServiceLock_);
-    SLOGI("Start release cast session");
-    for (const auto& session : GetContainer().GetAllSessions()) {
-        if (session != nullptr && session->GetDescriptor().sessionTag_ == "RemoteCast") {
+    int32_t targetUserId = (userId <= 0) ? GetUsersManager().GetCurrentUserId() : userId;
+    SLOGI("Start release cast session for userId %{public}d, targetUserId %{public}d", userId, targetUserId);
+    auto sessions = GetUsersManager().GetContainerFromUser(targetUserId).GetAllSessions();
+    SLOGI("Session list size for userId %{public}d is %{public}zu", targetUserId, sessions.size());
+    for (const auto& session : sessions) {
+        if (session != nullptr
+#ifdef CAR_FEATURE_ENABLE
+            && (session->GetDescriptor().sessionTag_ == "RemoteCast")
+#else
+            && session->GetDescriptor().sessionTag_ == "RemoteCast"
+#endif
+        ) {
             std::string sessionId = session->GetDescriptor().sessionId_;
             SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
             session->UnRegisterDeviceStateCallback();
@@ -415,17 +432,16 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle, const int32
 #ifdef CAR_FEATURE_ENABLE
     if (userId > 0) {
         sinkSession->SetDescriptorUserId(userId);
-        sinkSession->SetUserId(userId);
+        GetUsersManager().UpdateSessionForUserChange(sinkSession->GetUserId(), userId, sinkSession);
     }
     sinkSession->SetPlayingTime(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    NotifySessionCreate(sinkSession->GetDescriptor());
 #endif
 
     {
         std::lock_guard frontLockGuard(sessionFrontLock_);
         std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront =
-            GetUsersManager().GetCurSessionListForFront(0);
+            GetUsersManager().GetCurSessionListForFront(userId);
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
         auto it = std::find(sessionListForFront->begin(), sessionListForFront->end(), sinkSession);
         if (it == sessionListForFront->end()) {
@@ -458,7 +474,11 @@ void AVSessionService::NotifyDeviceAvailable(const OutputDeviceInfo& castOutputD
     AVSessionRadar::GetInstance().CastDeviceAvailable(outputDeviceInfo, info);
  
     for (const DeviceInfo& deviceInfo : outputDeviceInfo.deviceInfos_) {
+#ifdef CAR_FEATURE_ENABLE
+        for (const auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
         for (const auto& session : GetContainer().GetAllSessions()) {
+#endif
             session->UpdateCastDeviceMap(deviceInfo);
         }
     }
@@ -656,7 +676,11 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
         pcmSessionToken.sessionId = sessionToken.sessionId;
         pcmSessionToken.uid = 0;
         if (pcmSessionToken.sessionId != "pcmCastSession") {
+#ifdef CAR_FEATURE_ENABLE
+            auto session = GetUsersManager().GetContainerFromAll().GetSessionById(pcmSessionToken.sessionId);
+#else
             auto session = GetContainer().GetSessionById(pcmSessionToken.sessionId);
+#endif
             CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
                 AVSessionUtils::GetAnonySessionId(pcmSessionToken.sessionId).c_str());
             pcmSessionToken.uid = session->GetUid();
@@ -666,7 +690,11 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     }
 #endif //CASTPLUS_CAST_ENGINE_ENABLE
 
+#ifdef CAR_FEATURE_ENABLE
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionToken.sessionId);
+#else
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
+#endif
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
         AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
     ReportStartCastBegin("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_);
@@ -688,7 +716,11 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
 
 int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 {
+#ifdef CAR_FEATURE_ENABLE
     sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionToken.sessionId);
+#else
+    sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionToken.sessionId);
+#endif
     if ((session != nullptr && session->GetDescriptor().sessionType_ != AVSession::SESSION_TYPE_VOICE_CALL &&
         session->GetDescriptor().sessionType_ != AVSession::SESSION_TYPE_VIDEO_CALL) || (session == nullptr)) {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -720,7 +752,11 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 
 int32_t AVSessionService::StopSourceCast()
 {
+#ifdef CAR_FEATURE_ENABLE
+    for (const auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
     for (const auto& session : GetContainer().GetAllSessions()) {
+#endif
         CHECK_AND_RETURN_RET(session != nullptr, AVSESSION_SUCCESS);
         CHECK_AND_RETURN_RET(session->IsCasting(), AVSESSION_SUCCESS);
         session->SetMultiDeviceState(MultiDeviceState::CASTING_AND_CASTED);
@@ -733,7 +769,11 @@ int32_t AVSessionService::StopSourceCast()
 void AVSessionService::NotifyMirrorToStreamCast()
 {
     sptr<AVSessionItem> curTopSession = GetUsersManager().GetTopSession();
+#ifdef CAR_FEATURE_ENABLE
+    for (auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
     for (auto& session : GetContainer().GetAllSessions()) {
+#endif
         if (session && curTopSession && (session.GetRefPtr() == curTopSession.GetRefPtr())) {
             MirrorToStreamCast(session);
         }
@@ -823,7 +863,11 @@ void AVSessionService::ReportStartCastEnd(std::string func, const OutputDeviceIn
 // LCOV_EXCL_START
 void AVSessionService::HotSwitchReportCastDisplay()
 {
+#ifdef CAR_FEATURE_ENABLE
+    for (const auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
     for (const auto& session : GetContainer().GetAllSessions()) {
+#endif
         if (session != nullptr) {
             session->SetSupportExtendedScreen(true, true);
         }

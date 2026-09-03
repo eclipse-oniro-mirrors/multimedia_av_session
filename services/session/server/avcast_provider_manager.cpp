@@ -51,11 +51,11 @@ void AVCastProviderManager::OnDeviceLogEvent(const DeviceLogEventCode eventId, c
 #endif
 }
 
-void AVCastProviderManager::OnSessionNeedDestroy()
+void AVCastProviderManager::OnSessionNeedDestroy(const int32_t userId)
 {
-    SLOGI("On cast session need destroy");
+    SLOGI("On cast session need destroy for userId %{public}d", userId);
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    AVRouter::GetInstance().ReleaseCurrentCastSession();
+    AVRouter::GetInstance().ReleaseCurrentCastSession(userId);
 #endif
 }
 
