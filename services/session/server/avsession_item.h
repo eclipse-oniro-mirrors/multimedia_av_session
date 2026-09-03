@@ -380,6 +380,8 @@ public:
 
     void ReleaseAVCastControllerInner();
 
+    void UnregisterCastControllerListeners();
+
     void UpdateCastDeviceMap(DeviceInfo deviceInfo);
 
     void SetCastHandle(int64_t castHandle);

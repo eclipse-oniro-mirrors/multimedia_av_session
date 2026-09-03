@@ -106,6 +106,8 @@ public:
 
     void SetUserId(const int32_t userId);
 
+    void UnregisterFromProxy();
+
     int32_t Destroy() override;
 
     void SetQueueItemDataSrc(const AVQueueItem& avQueueItem);
