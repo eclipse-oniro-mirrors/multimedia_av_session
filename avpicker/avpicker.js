@@ -901,7 +901,7 @@ export class AVCastPicker extends ViewPU {
                 this.roomSelectStatusPending[z1] = false;
             }
             this.roomIsSelect[z1] = ((k3[z1].data.playTask === this.playTaskIdStr) &&
-                (this.playTaskIdStr !== '')) ? true : false;
+                (this.playTaskIdStr !== '') && k3[z1].data.faultCode !== ZONE_ABNORMAL);
             this.roomCurrVolume[z1] = k3[z1].data.volume;
             this.roomVolumeVisible[z1] = this.roomIsSelect[z1] ? Visibility.Visible : Visibility.None;
             if (!this.roomIsSelect[z1]) {
@@ -985,7 +985,8 @@ export class AVCastPicker extends ViewPU {
 
     checkRoomIsSelect(index) {
         if ((this.roomListService[index].data.playTask === this.playTaskIdStr) &&
-            (this.playTaskIdStr !== '')) {
+            (this.playTaskIdStr !== '') &&
+            this.roomListService[index].data.faultCode !== ZONE_ABNORMAL) {
             return true;
         }
         return false;
@@ -1819,7 +1820,7 @@ export class AVCastPicker extends ViewPU {
                 height: '200%'
                 });
             Slider.zIndex(1);
-            Slider.height(16);
+            Slider.height(this.roomVolumeVisible[index] === Visibility.Visible ? 16 : 0);
             Slider.onChange((value, mode) => {
                 console.info(TAG, `room slider onChange: ${value}, mode=${mode}, index=${index}`);
                 this.roomListService[index].data.volume = value;

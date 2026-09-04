@@ -431,7 +431,7 @@ export struct AVCastPicker {
         this.roomSelectStatusPending[i] = false;
       }
       this.roomIsSelect[i] = ((roomListTemp[i].data.playTask === this.playTaskIdStr) &&
-        (this.playTaskIdStr !== '')) ? true : false;
+        (this.playTaskIdStr !== '') && roomListTemp[i].data.faultCode !== ZONE_ABNORMAL);
       this.roomCurrVolume[i] = roomListTemp[i].data.volume;
       this.roomVolumeVisible[i] = this.roomIsSelect[i] ? Visibility.Visible : Visibility.None;
       if (!this.roomIsSelect[i]) {
@@ -521,7 +521,8 @@ export struct AVCastPicker {
 
   checkRoomIsSelect(index: number): boolean {
     if((this.roomListService[index].data.playTask === this.playTaskIdStr) &&
-      (this.playTaskIdStr !== '')){
+      (this.playTaskIdStr !== '') &&
+      this.roomListService[index].data.faultCode !== ZONE_ABNORMAL) {
       return true;
     }
     return false;
@@ -830,7 +831,7 @@ export struct AVCastPicker {
           height: '200%'
         })
         .zIndex(1)
-        .height(16)
+        .height(this.roomVolumeVisible[index] === Visibility.Visible ? 16 : 0)
         .onChange((value: number, mode: SliderChangeMode) => {
           console.info(TAG, `YuBeL room slider onChange: ${value}, mode=${mode}, index=${index}`);
           this.roomListService[index].data.volume = value;
