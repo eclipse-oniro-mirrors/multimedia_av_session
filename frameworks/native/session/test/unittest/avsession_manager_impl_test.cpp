@@ -472,6 +472,59 @@ HWTEST_F(AVSessionManagerImplTest, StartAVPlaybackForAudioZone002, TestSize.Leve
     EXPECT_NE(result, AVSESSION_SUCCESS);
     SLOGI("StartAVPlaybackForAudioZone002 end");
 }
+#else
+/**
+* @tc.name: GetSessionDescriptorsForAudioZone003
+* @tc.desc: get session descriptors for audio zone when CAR_FEATURE_ENABLE is not defined
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, GetSessionDescriptorsForAudioZone003, TestSize.Level1)
+{
+    SLOGI("GetSessionDescriptorsForAudioZone003 begin");
+    AVSessionManagerImpl impl;
+    std::vector<AVSessionDescriptor> descriptors;
+    int32_t userId = 100;
+    auto result = impl.GetSessionDescriptorsForAudioZone(userId, descriptors);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGI("GetSessionDescriptorsForAudioZone003 end");
+}
+
+/**
+* @tc.name: RegisterSessionListenerForUser003
+* @tc.desc: register listener for user when CAR_FEATURE_ENABLE is not defined
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, RegisterSessionListenerForUser003, TestSize.Level1)
+{
+    SLOGI("RegisterSessionListenerForUserNoCarFeature003 begin");
+    AVSessionManagerImpl impl;
+    std::shared_ptr<SessionListener> listener;
+    int32_t userId = 100;
+    auto result = impl.RegisterSessionListenerForUser(userId, listener);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGI("RegisterSessionListenerForUser003 end");
+}
+
+/**
+* @tc.name: StartAVPlaybackForAudioZone003
+* @tc.desc: start av playback for audio zone when CAR_FEATURE_ENABLE is not defined
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, StartAVPlaybackForAudioZone003, TestSize.Level1)
+{
+    SLOGI("StartAVPlaybackForAudioZone003 begin");
+    AVSessionManagerImpl impl;
+    std::string bundleName = "test_bundle";
+    int32_t userId = 100;
+    std::string assetId = "test_asset";
+    CommandInfo info;
+    auto result = impl.StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGI("StartAVPlaybackForAudioZone003 end");
+}
 #endif
 } // namespace AVSession
 } // namespace OHOS
