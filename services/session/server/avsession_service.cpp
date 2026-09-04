@@ -816,9 +816,9 @@ void AVSessionService::HandleChangeTopSession(int32_t infoUid, int32_t infoPid, 
             (session->GetSessionType() != "voice_call" && session->GetSessionType() != "video_call")) {
 #ifdef CAR_FEATURE_ENABLE
             UpdateTopSessionForAudioZone(userId);
-#else
-            UpdateTopSession(session, userId);
 #endif
+            UpdateTopSession(session, userId);
+
             sptr<AVSessionItem> userTopSession = GetUsersManager().GetTopSession(userId);
             CHECK_AND_RETURN_LOG(userTopSession != nullptr, "topSession is nullptr for userId:%{public}d!", userId);
             if (userTopSession->GetSessionType() == "audio" || userTopSession->GetSessionType() == "video") {
@@ -1004,9 +1004,8 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
 #ifdef CAR_FEATURE_ENABLE
             UpdateTopSessionForAudioZone(userId);
-#else
-            UpdateTopSession(sessionItem, userId);
 #endif
+            UpdateTopSession(sessionItem, userId);
             NotifySystemUI(nullptr, IsCapsuleNeeded(userId), false, userId);
         }
     } else {
@@ -3739,9 +3738,8 @@ void AVSessionService::HandleTopSessionRelease(int32_t userId, sptr<AVSessionIte
         } else {
 #ifdef CAR_FEATURE_ENABLE
             UpdateTopSessionForAudioZone(userId);
-#else
-            UpdateTopSession(nullptr, userId);
 #endif
+            UpdateTopSession(nullptr, userId);
             hasMediaCapsule_ = false;
             int32_t ret = Notification::NotificationHelper::CancelNotification(std::to_string(userId),
                 mediacontrollerNotifyId);
