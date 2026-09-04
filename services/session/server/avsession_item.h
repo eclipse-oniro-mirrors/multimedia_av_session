@@ -265,6 +265,10 @@ public:
 
     int32_t GetUserId() const;
 
+    void SetScreenUserId(int32_t screenUserId);
+
+    int32_t GetScreenUserId() const;
+
     std::string GetAbilityName() const;
 
     std::string GetBundleName() const;
@@ -553,6 +557,7 @@ private:
 
     AVSessionDescriptor descriptor_;
     int32_t userId_ = 0;
+    int32_t screenUserId_ = 0;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
     AVMetaData lastMetaData_;

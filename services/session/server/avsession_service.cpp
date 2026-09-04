@@ -3479,8 +3479,16 @@ int32_t AVSessionService::HandleMoveScreenCommand(const AAFwk::WantParams& comma
     int32_t srcUserId = AAFwk::Integer::Unbox(srcVal);
     int32_t dstUserId = AAFwk::Integer::Unbox(dstVal);
     SLOGI("HandleMoveScreenCommand uid=%{public}d src=%{public}d dst=%{public}d", uid, srcUserId, dstUserId);
-    GetUsersManager().HandleScreenMove(uid, srcUserId, dstUserId);
-    HandleSessionStackChangeForAudioZone();
+    auto& usersManager = GetUsersManager();
+    std::map<int32_t, std::vector<AVSessionDescriptor>> oldStacks;
+    for (int32_t userId : usersManager.GetAliveUserList()) {
+        oldStacks[userId] = usersManager.GetSessionStackForAudioZone(userId);
+    }
+    usersManager.HandleScreenMove(uid, srcUserId, dstUserId);
+    for (int32_t userId : usersManager.GetAliveUserList()) {
+        auto newStack = usersManager.GetSessionStackForAudioZone(userId);
+        NotifySessionStackDiffForAudioZone(userId, oldStacks[userId], newStack);
+    }
     return AVSESSION_SUCCESS;
 }
 #endif

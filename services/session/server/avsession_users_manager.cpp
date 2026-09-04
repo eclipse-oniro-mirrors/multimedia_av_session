@@ -527,7 +527,7 @@ void AVSessionUsersManager::HandleScreenMove(int32_t uid, int32_t srcUserId, int
     }
     sptr<AVSessionItem> session = GetContainerFromAll().GetSessionByUid(uid);
     CHECK_AND_RETURN_LOG(session != nullptr, "HandleScreenMove session not found uid=%{public}d", uid);
-    int32_t actualSrcUserId = session->GetUserId();
+    int32_t actualSrcUserId = session->GetScreenUserId();
     if (actualSrcUserId != srcUserId) {
         SLOGW("HandleScreenMove srcUserId mismatch: cmd=%{public}d actual=%{public}d", srcUserId, actualSrcUserId);
     }
@@ -535,15 +535,14 @@ void AVSessionUsersManager::HandleScreenMove(int32_t uid, int32_t srcUserId, int
         SLOGI("HandleScreenMove skip: actualSrc==dstUserId=%{public}d", dstUserId);
         return;
     }
-    std::string sessionId = session->GetSessionId();
-    pid_t pid = session->GetPid();
-    std::string abilityName = session->GetAbilityName();
-    GetContainerFromUser(actualSrcUserId).RemoveSession(sessionId);
-    GetContainerFromUser(dstUserId).AddSession(pid, abilityName, session);
-    session->SetUserId(dstUserId);
-    session->SetDescriptorUserId(dstUserId);
+    session->SetScreenUserId(dstUserId);
     SLOGI("HandleScreenMove done uid=%{public}d %{public}d->%{public}d zoneId=%{public}d",
         uid, actualSrcUserId, dstUserId, GetZoneIdForUser(dstUserId));
+    CleanupZoneToUseridMap(actualSrcUserId);
+    UpdateZoneToUseridMap(actualSrcUserId);
+    UpdateZoneToUseridMap(dstUserId);
+    UpdateSessionStackForAudioZone(actualSrcUserId);
+    UpdateSessionStackForAudioZone(dstUserId);
 }
 
 void AVSessionUsersManager::AddSessionToVector(const sptr<AVSessionItem>& session,
@@ -558,26 +557,15 @@ void AVSessionUsersManager::CollectLocalSessionsForAudioZone(int32_t zoneId,
     std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
 {
     std::lock_guard lockGuard(userLock_);
-    
-    auto zoneIter = zoneToUserid_.find(zoneId);
-    if (zoneIter == zoneToUserid_.end()) {
-        return;
-    }
-    
-    const std::vector<int32_t>& userIds = zoneIter->second;
-    
-    for (int32_t userId : userIds) {
-        auto sessionStackIter = sessionStackMapByUserId_.find(userId);
-        if (sessionStackIter == sessionStackMapByUserId_.end()) {
+    auto allSessions = GetContainerFromAll().GetAllSessions();
+    for (auto& session : allSessions) {
+        if (session == nullptr) {
             continue;
         }
-        auto allSessions = sessionStackIter->second->GetAllSessions();
-        for (auto& session : allSessions) {
-            if (!IsCastSessionValid(session, zoneId)) {
-                continue;
-            }
-            AddSessionToVector(session, sessionWithTime);
+        if (GetZoneIdForUser(session->GetScreenUserId()) != zoneId) {
+            continue;
         }
+        AddSessionToVector(session, sessionWithTime);
     }
 }
 
@@ -591,7 +579,7 @@ bool AVSessionUsersManager::IsCastSessionValid(const sptr<AVSessionItem>& sessio
         return true;
     }
     
-    return GetZoneIdForUser(session->GetUserId()) == zoneId;
+    return GetZoneIdForUser(session->GetScreenUserId()) == zoneId;
 }
 
 void AVSessionUsersManager::AddControllerToVector(
