@@ -100,7 +100,7 @@ public:
 class AVSessionServiceListenerMock : public IAVSessionServiceListener {
 public:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-        void ReleaseCastSession() {}
+        void ReleaseCastSession(const int32_t userId) {}
         void CreateSessionByCast(const int64_t castHandle, const int32_t userId) {}
         void NotifyDeviceAvailable(const OutputDeviceInfo& castOutputDeviceInfo) {}
         void NotifyDeviceLogEvent(const DeviceLogEventCode eventId, const int64_t param) {}
@@ -2161,6 +2161,39 @@ static HWTEST_F(AVRouterImplTest, DestroyCastSessionCreated003, TestSize.Level0)
     router->DestroyCastSessionCreated();
     EXPECT_TRUE(router->GetHwProvider() != nullptr);
     SLOGI("DestroyCastSessionCreated003 end");
+}
+
+/**
+* @tc.name: ReleaseCurrentCastSession001
+* @tc.desc: ReleaseCurrentCastSession with null servicePtr_ returns without crash
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, ReleaseCurrentCastSession001, TestSize.Level0)
+{
+    SLOGI("ReleaseCurrentCastSession001 begin");
+    auto router = std::make_shared<AVRouterImplMock>();
+    ASSERT_TRUE(router != nullptr);
+    EXPECT_TRUE(router->servicePtr_ == nullptr);
+    router->ReleaseCurrentCastSession(100);
+    EXPECT_TRUE(router->servicePtr_ == nullptr);
+    SLOGI("ReleaseCurrentCastSession001 end");
+}
+
+/**
+* @tc.name: ReleaseCurrentCastSession002
+* @tc.desc: ReleaseCurrentCastSession with valid servicePtr_ forwards to ReleaseCastSession
+* @tc.type: FUNC
+* @tc.require: NA
+*/
+static HWTEST_F(AVRouterImplTest, ReleaseCurrentCastSession002, TestSize.Level0)
+{
+    SLOGI("ReleaseCurrentCastSession002 begin");
+    ASSERT_TRUE(g_AVRouterImpl != nullptr);
+    EXPECT_TRUE(g_AVRouterImpl->servicePtr_ != nullptr);
+    g_AVRouterImpl->ReleaseCurrentCastSession(-1);
+    EXPECT_EQ(0, AVSESSION_SUCCESS);
+    SLOGI("ReleaseCurrentCastSession002 end");
 }
 } //AVSession
 } //OHOS

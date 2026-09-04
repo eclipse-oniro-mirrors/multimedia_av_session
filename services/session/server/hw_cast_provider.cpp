@@ -622,7 +622,7 @@ void HwCastProvider::NotifyCastSessionCreated(const std::string& castSessionId, 
         }
         for (auto listener : listenersSnapshot) {
             if (listener != nullptr) {
-                listener->OnSessionNeedDestroy();
+                listener->OnSessionNeedDestroy(userId);
                 SLOGI("Cast pvd received session create event and session destroy check done");
             }
         }
@@ -678,7 +678,7 @@ void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSes
         }
         for (auto listener : listenersSnapshot) {
             if (listener != nullptr) {
-                listener->OnSessionNeedDestroy();
+                listener->OnSessionNeedDestroy();  // use current user
                 SLOGI("Cast pvd received session create event and session destroy check done");
             }
         }

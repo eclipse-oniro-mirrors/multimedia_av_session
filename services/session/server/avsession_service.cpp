@@ -189,7 +189,11 @@ void AVSessionService::OnStartProcess()
     AddInnerSessionListener(&backgroundAudioController_);
     {
         std::lock_guard lockGuard(sessionServiceLock_);
+#ifdef CAR_FEATURE_ENABLE
+        for (auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
         for (auto& session : GetContainer().GetAllSessions()) {
+#endif
             CHECK_AND_CONTINUE(session != nullptr);
             SLOGI("backgroundAudioController add sessionCreateBef:%{public}s",
                 AVSessionUtils::GetAnonySessionId(session->GetSessionId()).c_str());
@@ -388,7 +392,11 @@ void AVSessionService::HandleRemoveMediaCardEvent(int32_t uid, bool isPhoto)
 {
     std::lock_guard lockGuard(sessionServiceLock_);
     if (isPhoto) {
+#ifdef CAR_FEATURE_ENABLE
+        for (auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
         for (auto& session : GetContainer().GetAllSessions()) {
+#endif
             if (session != nullptr && session->GetUid() == uid) {
                 AVCastControlCommand castCmd;
                 castCmd.SetCommand(AVCastControlCommand::CAST_CONTROL_CMD_PAUSE);
@@ -1081,7 +1089,11 @@ void AVSessionService::InitAudio()
 
 sptr <AVSessionItem> AVSessionService::SelectSessionByUid(const AudioRendererChangeInfo& info)
 {
+#ifdef CAR_FEATURE_ENABLE
+    for (const auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
     for (const auto& session : GetContainer().GetAllSessions()) {
+#endif
         if (session != nullptr && session->GetUid() == info.clientUID) {
             return session;
         }
@@ -1215,7 +1227,6 @@ inline std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionService::GetCurS
     return GetUsersManager().GetCurSessionListForFront(userId);
 }
 
-
 inline std::shared_ptr<std::list<sptr<AVSessionItem>>> AVSessionService::GetCurKeyEventSessionList(int32_t userId)
 {
     return GetUsersManager().GetCurSessionListForKeyEvent(userId);
@@ -1245,7 +1256,12 @@ bool AVSessionService::AbilityHasSession(pid_t pid, int32_t userId)
 {
     std::lock_guard lockGuard(sessionServiceLock_);
     return (userId <= 0) ?
-        GetContainer().PidHasSession(pid) : GetUsersManager().GetContainerFromUser(userId).PidHasSession(pid);
+#ifdef CAR_FEATURE_ENABLE
+        GetUsersManager().GetContainerFromAll().PidHasSession(pid) :
+#else
+        GetContainer().PidHasSession(pid) :
+#endif
+        GetUsersManager().GetContainerFromUser(userId).PidHasSession(pid);
 }
 
 sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const std::string& sessionId)
@@ -1515,7 +1531,11 @@ void AVSessionService::NotifyAudioSessionCheck(const int32_t uid)
 
 bool AVSessionService::CheckAncoAudio()
 {
+#ifdef CAR_FEATURE_ENABLE
+    for (const auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
     for (const auto& session : GetContainer().GetAllSessions()) {
+#endif
         if (session->GetBundleName() == "anco_audio") {
             return true;
         }
@@ -1620,7 +1640,11 @@ void AVSessionService::AddAncoColdStartServiceCallback(sptr<AVSessionItem>& sess
 {
     session->SetServiceCallbackForAncoStart([this](std::string sessionId, std::string bundle, std::string ability) {
         std::lock_guard lockGuard(sessionServiceLock_);
+#ifdef CAR_FEATURE_ENABLE
+        sptr<AVSessionItem> sessionItem = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
         sptr<AVSessionItem> sessionItem = GetContainer().GetSessionById(sessionId);
+#endif
         CHECK_AND_RETURN_LOG(sessionItem != nullptr, "session not exist for AncoStartCallback");
         AppExecFwk::ElementName elementName;
         elementName.SetBundleName(bundle);
@@ -1662,7 +1686,11 @@ void AVSessionService::AddKeyEventServiceCallback(sptr<AVSessionItem>& sessionIt
             PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
         CHECK_AND_RETURN_LOG(err == AVSESSION_SUCCESS, "Add KeyEventSession, CheckPermission failed!");
         std::lock_guard lockGuard(sessionServiceLock_);
+#ifdef CAR_FEATURE_ENABLE
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+#endif
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for KeyEvent");
         {
             std::lock_guard lockGuard(keyEventListLock_);
@@ -1687,7 +1715,11 @@ void AVSessionService::AddUpdateTopServiceCallback(sptr<AVSessionItem>& sessionI
         CHECK_AND_RETURN_LOG(err == AVSESSION_SUCCESS, "update top, CheckPermission failed!");
 
         std::lock_guard lockGuard(sessionServiceLock_);
+#ifdef CAR_FEATURE_ENABLE
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+#endif
         CHECK_AND_RETURN_LOG(session != nullptr && IsLocalSessionPlaying(session), "session not valid for updateTop");
 
         SLOGI("PLAY with param updateTopSession=%{public}s", session->GetBundleName().c_str());
@@ -1706,7 +1738,11 @@ void AVSessionService::AddCastServiceCallback(sptr<AVSessionItem>& sessionItem)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     CHECK_AND_RETURN_LOG(sessionItem != nullptr, "session not exist for AddCastServiceCallback");
     sessionItem->SetServiceCallbackForStream([this](std::string sessionId) {
+#ifdef CAR_FEATURE_ENABLE
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+#endif
         CHECK_AND_RETURN_LOG(session != nullptr, "Session not exist");
         MirrorToStreamCast(session);
     });
@@ -1714,7 +1750,11 @@ void AVSessionService::AddCastServiceCallback(sptr<AVSessionItem>& sessionItem)
     sessionItem->SetServiceCallbackForStopSinkCast([this]() {
         std::lock_guard lockGuard(sessionServiceLock_);
         SLOGI("Start release cast session");
+#ifdef CAR_FEATURE_ENABLE
+        for (const auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
         for (const auto& session : GetContainer().GetAllSessions()) {
+#endif
             if (session != nullptr && session->GetDescriptor().sessionTag_ == "RemoteCast") {
                 std::string sessionId = session->GetDescriptor().sessionId_;
                 SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
@@ -1757,17 +1797,15 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
     sessionItem->SetServiceCallbackForCallStart([this](AVSessionItem& session) {
         HandleCallStartEvent();
     });
-    sessionItem->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd) {
+    sessionItem->SetServiceCallbackForUpdateSession([this](std::string sessionId, bool isAdd, int32_t userId) {
+        userId = userId <= 0 ? GetUsersManager().GetCurrentUserId() : userId;
         if (sessionId == sessionCastState_) {
-            sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
-            CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession");
-            int32_t userId = session->GetUserId() <= 0 ? GetUsersManager().GetCurrentUserId() : session->GetUserId();
             std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
             UpdateLocalFrontSession(sessionListForFront);
             return;
         }
         std::lock_guard lockGuard(sessionServiceLock_);
-        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromUser(userId).GetSessionById(sessionId);
         CHECK_AND_RETURN_LOG(session != nullptr, "session not exist for UpdateFrontSession.");
         UpdateFrontSession(session, isAdd);
     });
@@ -1872,7 +1910,11 @@ void AVSessionService::CheckAndUpdateAncoMediaSession(const AppExecFwk::ElementN
 {
     auto uid = GetCallingUid();
     CHECK_AND_RETURN_LOG(uid == audioBrokerUid, "not broker uid");
+#ifdef CAR_FEATURE_ENABLE
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionByUid(uid);
+#else
     sptr<AVSessionItem> session = GetContainer().GetSessionByUid(uid);
+#endif
     CHECK_AND_RETURN_LOG(session != nullptr, "anco media session is null");
     auto res = GetUsersManager().UpdateSessionForCurrentUser(session->GetPid(), session->GetAbilityName(),
         elementName.GetAbilityName(), session);
@@ -2018,9 +2060,13 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     HISYSEVENT_ADD_LIFE_CYCLE_INFO(sessionElement.GetBundleName(),
         AppManagerAdapter::GetInstance().IsAppBackground(GetCallingUid(), GetCallingPid()), type, true);
 
-    NotifySessionCreate(result->GetDescriptor());
 #ifdef CAR_FEATURE_ENABLE
-    NotifySessionAddForAudioZone(result->GetDescriptor());
+    if (result->GetSessionTag() != "RemoteCast") {
+        NotifySessionCreate(result->GetDescriptor());
+        NotifySessionAddForAudioZone(result->GetDescriptor());
+    }
+#else
+    NotifySessionCreate(result->GetDescriptor());
 #endif
     sessionItem = result;
     AddExtraFrontSession(type, sessionItem);
@@ -2155,7 +2201,11 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& tag, 
     CHECK_AND_RETURN_RET_LOG(newValue != nullptr, false, "newValue get null");
     cJSON_AddStringToObject(newValue, "sessionId", sessionId.c_str());
     std::string bundleName = elementName.GetBundleName();
+#ifdef CAR_FEATURE_ENABLE
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
     sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+#endif
     if ((session != nullptr) && (session->GetAppIndex() != 0)) {
         bundleName = bundleName + "_" + std::to_string(session->GetAppIndex());
     }
@@ -2215,7 +2265,11 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& tag, const std::
             CHECK_AND_RETURN_LOG(valuesArray != nullptr, "create array json fail");
         }
         std::string bundleName = elementName.GetBundleName();
+#ifdef CAR_FEATURE_ENABLE
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
         sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+#endif
         if ((session != nullptr) && (session->GetAppIndex() != 0)) {
             bundleName = bundleName + "_" + std::to_string(session->GetAppIndex());
         }
@@ -2272,7 +2326,6 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
     std::lock_guard frontLockGuard(sessionFrontLock_);
     int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
-    sptr<AVSessionItem> curTopSession = GetUsersManager().GetTopSession(userId);
     CHECK_AND_RETURN_RET_LOG(sessionListForFront != nullptr, AVSESSION_ERROR, "sessionListForFront ptr nullptr!");
     for (const auto& session : *sessionListForFront) {
         if (session != nullptr) {
@@ -2282,7 +2335,7 @@ int32_t AVSessionService::GetAllSessionDescriptors(std::vector<AVSessionDescript
     sptr<AVSessionItem> userTopSession = GetUsersManager().GetTopSession(userId);
     SLOGI("GetAllSessionDescriptors for user:%{public}d with size=%{public}d, topSession:%{public}s",
         userId, static_cast<int32_t>(descriptors.size()),
-        (curTopSession == nullptr ? "null" : curTopSession->GetBundleName()).c_str());
+        (userTopSession == nullptr ? "null" : userTopSession->GetBundleName()).c_str());
     return AVSESSION_SUCCESS;
 }
 
@@ -2907,7 +2960,11 @@ bool AVSessionService::IsHistoricalSession(const std::string& sessionId)
         }
     }
 
+#ifdef CAR_FEATURE_ENABLE
+    auto session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
     auto session = GetContainer().GetSessionById(sessionId);
+#endif
     if (session != nullptr) {
         SLOGE("IsHistoricalSession find session alive, sessionId=%{public}s",
             AVSessionUtils::GetAnonySessionId(sessionId).c_str());
@@ -2935,7 +2992,11 @@ bool AVSessionService::GetDefaultAbilityElementNameFromCJSON(std::string& sortCo
         cJSON* sessionIdItem = cJSON_GetObjectItem(sortValueItem, "sessionId");
         CHECK_AND_CONTINUE(sessionIdItem != nullptr &&
             !cJSON_IsInvalid(sessionIdItem) && cJSON_IsString(sessionIdItem));
+#ifdef CAR_FEATURE_ENABLE
+        auto session = GetUsersManager().GetContainerFromAll().GetSessionById(std::string(sessionIdItem->valuestring));
+#else
         auto session = GetContainer().GetSessionById(std::string(sessionIdItem->valuestring));
+#endif
         if (session == nullptr) {
             cJSON* bundleNameItem = cJSON_GetObjectItem(sortValueItem, "bundleName");
             cJSON* abilityNameItem = cJSON_GetObjectItem(sortValueItem, "abilityName");
@@ -3405,7 +3466,12 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         sptr<IRemoteObject> object;
         int32_t ret = 0;
         std::string bundleName = coldStartDescriptors[0].elementName_.GetBundleName();
-        sptr<AVSessionItem> session = GetContainer().GetSessionById(coldStartDescriptors[0].sessionId_);
+        std::string sessionId = coldStartDescriptors[0].sessionId_;
+#ifdef CAR_FEATURE_ENABLE
+        sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+#else
+        sptr<AVSessionItem> session = GetContainer().GetSessionById(sessionId);
+#endif
         if ((session != nullptr) && (session->GetAppIndex() != 0)) {
             bundleName = bundleName + "_" + std::to_string(session->GetAppIndex());
         }
@@ -4050,7 +4116,11 @@ int32_t AVSessionService::CastAudio(const SessionToken& token,
     std::string sourceSessionInfo;
     int32_t ret = SetBasicInfo(sourceSessionInfo);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "SetBasicInfo failed");
+#ifdef CAR_FEATURE_ENABLE
+    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(token.sessionId);
+#else
     sptr<AVSessionItem> session = GetContainer().GetSessionById(token.sessionId);
+#endif
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
                              AVSessionUtils::GetAnonySessionId(token.sessionId).c_str());
     ret = JsonUtils::SetSessionDescriptor(sourceSessionInfo, session->GetDescriptor());
@@ -4196,7 +4266,11 @@ int32_t AVSessionService::CastAudioForAll(const std::vector<AudioStandard::Audio
             isAllSessionCast_ = true;
         }
     }
+#ifdef CAR_FEATURE_ENABLE
+    for (const auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+#else
     for (const auto& session : GetContainer().GetAllSessions()) {
+#endif
         SessionToken token;
         token.sessionId = session->GetSessionId();
         token.pid = session->GetPid();
@@ -4277,7 +4351,11 @@ int32_t AVSessionService::RemoteCancelCastAudioInner(const std::string& sessionI
     auto iter = castAudioSessionMap_.find(sourceDescriptor.sessionId_);
     CHECK_AND_RETURN_RET_LOG(iter != castAudioSessionMap_.end(), AVSESSION_ERROR, "no source session %{public}s",
                              AVSessionUtils::GetAnonySessionId(sourceDescriptor.sessionId_).c_str());
+#ifdef CAR_FEATURE_ENABLE
+    auto session = GetUsersManager().GetContainerFromAll().GetSessionById(iter->second);
+#else
     auto session = GetContainer().GetSessionById(iter->second);
+#endif
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_ERROR, "no sink session %{public}s",
         AVSessionUtils::GetAnonySessionId(iter->second).c_str());
 
@@ -5074,7 +5152,11 @@ std::function<bool(int32_t, int32_t)> AVSessionService::GetAllowedPlaybackCallba
         CHECK_AND_RETURN_RET_LOG(mgr != nullptr, true, "SystemAbilityManager is null");
         auto object = mgr->CheckSystemAbility(APP_MGR_SERVICE_ID);
         CHECK_AND_RETURN_RET_LOG(object != nullptr, true, "APP_MAGR_SERVICE is null");
+#ifdef CAR_FEATURE_ENABLE
+        bool hasSession = GetUsersManager().GetContainerFromAll().PidHasSession(pid);
+#else
         bool hasSession = GetContainer().PidHasSession(pid);
+#endif
         bool isBack = AppManagerAdapter::GetInstance().IsAppBackground(uid, pid);
         bool isSystem = PermissionChecker::GetInstance().CheckSystemPermissionByUid(uid);
         auto ret = hasSession || isSystem || !isBack;

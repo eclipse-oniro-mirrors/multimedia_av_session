@@ -362,6 +362,89 @@ HWTEST_F(AVSessionUsersManagerTest, CleanupCacheOnUnlock_005, TestSize.Level0)
     SLOGI("CleanupCacheOnUnlock_005 end!");
 }
 
+/**
+ * @tc.name: UpdateSessionForUserChange_001
+ * @tc.desc: Test UpdateSessionForUserChange with nullptr item returns AVSESSION_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, UpdateSessionForUserChange_001, TestSize.Level0)
+{
+    SLOGI("UpdateSessionForUserChange_001 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    int32_t oldUserId = 100;
+    int32_t newUserId = 101;
+    sptr<AVSessionItem> item = nullptr;
+    int32_t ret = manager.UpdateSessionForUserChange(oldUserId, newUserId, item);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("UpdateSessionForUserChange_001 end!");
+}
+
+/**
+ * @tc.name: UpdateSessionForUserChange_002
+ * @tc.desc: Test UpdateSessionForUserChange moves session from old user to new user successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, UpdateSessionForUserChange_002, TestSize.Level0)
+{
+    SLOGI("UpdateSessionForUserChange_002 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    AVSessionService* avSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    ASSERT_TRUE(avSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.updateuserchange");
+    elementName.SetAbilityName("test.ability.updateuserchange");
+    OHOS::sptr<AVSessionItem> item =
+        avSessionService->CreateSessionInner("updateUserChange", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(item != nullptr);
+
+    int32_t oldUserId = item->GetUserId();
+    if (oldUserId <= 0) {
+        oldUserId = manager.GetCurrentUserId();
+    }
+    int32_t newUserId = oldUserId + 1;
+
+    int32_t ret = manager.UpdateSessionForUserChange(oldUserId, newUserId, item);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(item->GetUserId(), newUserId);
+
+    avSessionService->HandleSessionRelease(item->GetSessionId());
+    manager.sessionStackMapByUserId_.erase(oldUserId);
+    manager.sessionStackMapByUserId_.erase(newUserId);
+    SLOGI("UpdateSessionForUserChange_002 end!");
+}
+
+/**
+ * @tc.name: UpdateSessionForUserChange_003
+ * @tc.desc: Test UpdateSessionForUserChange with oldUserId equal to newUserId (no-op move)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, UpdateSessionForUserChange_003, TestSize.Level0)
+{
+    SLOGI("UpdateSessionForUserChange_003 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    AVSessionService* avSessionService = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
+    ASSERT_TRUE(avSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.sameuser");
+    elementName.SetAbilityName("test.ability.sameuser");
+    OHOS::sptr<AVSessionItem> item =
+        avSessionService->CreateSessionInner("sameUser", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(item != nullptr);
+
+    int32_t userId = item->GetUserId();
+    if (userId <= 0) {
+        userId = manager.GetCurrentUserId();
+    }
+
+    int32_t ret = manager.UpdateSessionForUserChange(userId, userId, item);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(item->GetUserId(), userId);
+
+    avSessionService->HandleSessionRelease(item->GetSessionId());
+    manager.sessionStackMapByUserId_.erase(userId);
+    SLOGI("UpdateSessionForUserChange_003 end!");
+}
+
 #ifdef CAR_FEATURE_ENABLE
 /**
  * @tc.name: AddSessionListenerForUser_001

@@ -311,7 +311,7 @@ public:
 
     void SetServiceCallbackForAVQueueInfo(const std::function<void(AVSessionItem&)>& callback);
 
-    void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool)>& callback);
+    void SetServiceCallbackForUpdateSession(const std::function<void(std::string, bool, int32_t)>& callback);
 
     void SetServiceCallbackForMediaSession(const std::function<void(std::string, bool, bool)>& callback);
     
@@ -578,7 +578,7 @@ private:
     std::shared_ptr<RemoteSessionSink> remoteSink_;
 
     std::function<void(AVSessionItem&)> serviceCallbackForAddAVQueueInfo_;
-    std::function<void(std::string, bool)> serviceCallbackForUpdateSession_;
+    std::function<void(std::string, bool, int32_t)> serviceCallbackForUpdateSession_;
     std::function<void(std::string, bool, bool)> serviceCallbackForMediaSession_;
     std::function<void(std::string)> serviceCallbackForKeyEvent_;
     std::function<void(std::string)> updateExtrasCallback_;

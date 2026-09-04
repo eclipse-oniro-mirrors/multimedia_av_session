@@ -56,9 +56,10 @@ public:
     /**
      * Notify Router that the cast session should be destroy.
      *
+     * @param { int32_t } userId - User id for multi-user support. Default is -1.
      * @since 10
     */
-    virtual void OnSessionNeedDestroy() = 0;
+    virtual void OnSessionNeedDestroy(const int32_t userId = -1) = 0;
 
 /**
       * Notify Router that the cast session has created.

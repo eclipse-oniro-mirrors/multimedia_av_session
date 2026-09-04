@@ -75,7 +75,7 @@ public:
 
     int32_t OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override;
 
-    void ReleaseCurrentCastSession() override;
+    void ReleaseCurrentCastSession(const int32_t userId) override;
 
     int32_t OnCastSessionCreated(const int32_t castId, const int32_t userId) override;
 
