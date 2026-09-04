@@ -215,6 +215,8 @@ private:
     std::mutex longPauseLock_;
 
     std::string sessionIdCache_ = "";
+    std::string preSessionId_ = "";
+    std::string pendingSessionInfo_ = "";
     std::string mediaImgTopicStr_ = "";
     std::vector<int32_t> validCommands_;
     std::string curBundleName_ = "";
@@ -224,7 +226,9 @@ private:
     std::string devicePreferStr_ = "";
 
     void CheckPostClean(bool resetOnlySessionInfo = false);
-    bool CheckPostSessionInfo(std::string sessionId);
+    bool CheckPostSessionInfo(const std::string& sessionId);
+    bool CheckSyncSessionInfo(const std::string& sessionId);
+    void SendOrCacheSessionInfo(bool needSync, const std::string& msg);
     bool CheckPostMetaData(const AVMetaData& data);
     bool CheckPostMediaImage(std::vector<uint8_t>& imgBuffer);
     bool CheckPostPlaybackState(const AVPlaybackState& state);
