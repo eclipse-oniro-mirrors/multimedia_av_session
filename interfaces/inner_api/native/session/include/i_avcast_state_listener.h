@@ -56,19 +56,19 @@ public:
     /**
      * Notify Router that the cast session should be destroy.
      *
-     * @param { int32_t } userId - User id for multi-user support. Default is -1.
+     * @param { int32_t } userId - User id for multi-user support.
      * @since 10
     */
-    virtual void OnSessionNeedDestroy(const int32_t userId = -1) = 0;
+    virtual void OnSessionNeedDestroy(const int32_t userId) = 0;
 
 /**
       * Notify Router that the cast session has created.
      *
-     * @param { int32_t } castId - Cast id for AVRouter's control.
-     * @param { int32_t } userId - User id for multi-user support. Default is -1.
-     * @since 10
-     */
-    virtual void OnSessionCreated(const int32_t castId, const int32_t userId = -1) = 0;
+      * @param { int32_t } castId - Cast id for AVRouter's control.
+      * @param { int32_t } userId - User id for multi-user support.
+      * @since 10
+      */
+    virtual void OnSessionCreated(const int32_t castId, const int32_t userId) = 0;
 
     /**
      * Notify Router that the cast engine service has died.

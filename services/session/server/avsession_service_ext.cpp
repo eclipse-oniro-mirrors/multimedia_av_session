@@ -396,7 +396,8 @@ void AVSessionService::ReleaseCastSession(const int32_t userId)
     for (const auto& session : sessions) {
         if (session != nullptr
 #ifdef CAR_FEATURE_ENABLE
-            && (session->GetDescriptor().sessionTag_ == "RemoteCast")
+            && (session->GetDescriptor().sessionTag_ == "RemoteCast" ||
+                session->GetDescriptor().sessionTag_ == "projection_client")
 #else
             && session->GetDescriptor().sessionTag_ == "RemoteCast"
 #endif
