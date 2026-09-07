@@ -718,6 +718,7 @@ void PcmCastSession::ReleaseStreamPlayer()
     CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
 
     SLOGI("start to dealoutputdevicechange");
+    session->DoContinuousTaskUnregister();
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_DISCONNECTED, outputDeviceInfo);
     session->SetCastHandle(-1);
     OutputDeviceInfo localDeviceInfo;
@@ -749,6 +750,7 @@ void PcmCastSession::FindSessionAndStreamCasting()
     CHECK_AND_RETURN_LOG(session != nullptr, "session is not existed");
 
     SLOGI("start to dealoutputdevicechange");
+    session->DoContinuousTaskRegister();
     session->SetIsHiPlayStreamCasting(true);
     session->SetCastHandle(castHandle_);
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, outputDeviceInfo);

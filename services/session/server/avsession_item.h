@@ -341,6 +341,10 @@ public:
 
     int32_t GetAppIndex();
 
+    int32_t DoContinuousTaskRegister();
+
+    int32_t DoContinuousTaskUnregister();
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t RegisterListenerStreamToCast(const std::pair<std::string, std::string>& serviceNameStatePair,
         DeviceInfo deviceInfo);
@@ -474,8 +478,6 @@ private:
     void SaveLocalDeviceInfo();
     int32_t ProcessFrontSession(const std::string& source);
     void HandleFrontSession();
-    int32_t DoContinuousTaskRegister();
-    int32_t DoContinuousTaskUnregister();
     void ReportSetAVMetaDataInfo(const AVMetaData& meta);
     void ReportAVCastControllerInfo();
     void ReportOnPlayerError(int32_t errorCode, const std::string& errorMsg);
