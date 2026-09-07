@@ -73,6 +73,8 @@ public:
 
     int GetPosition(int32_t& currentPosition) override { return 0; }
 
+    int GetDownloadRate(int64_t& totalAverageRate, int64_t& lastSecondRate) override { return 0; }
+
     int Seek(int32_t position) override { return 0; }
 
     int SetSpeed(const OHOS::CastEngine::PlaybackSpeed speed) override { return 0; }
