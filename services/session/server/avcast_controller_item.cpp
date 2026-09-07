@@ -243,6 +243,7 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
 {
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
+    castControllerProxy_->RegisterControllerListener(shared_from_this());
     AVSessionRadarInfo info("AVCastControllerItem::Start");
     buildExtraCastInfo(avQueueItem);
     SetQueueItemDataSrc(avQueueItem);
@@ -256,7 +257,6 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
     std::string API_PARAM_STRING = "";
     std::string startPosition = "";
     std::string duration = "";
-    std::string mediauri = "";
     if (avQueueItem.GetDescription() != nullptr) {
         startPosition = std::to_string(avQueueItem.GetDescription()->GetStartPosition());
         duration =  std::to_string(avQueueItem.GetDescription()->GetDuration());
@@ -264,7 +264,7 @@ int32_t AVCastControllerItem::Start(const AVQueueItem& avQueueItem)
             !(avQueueItem.GetDescription()->GetIconUri().empty())) {
             mediaIcon = "true";
         }
-        mediauri = avQueueItem.GetDescription()->GetMediaUri().empty() ? "false" : "true";
+        std::string mediauri = avQueueItem.GetDescription()->GetMediaUri().empty() ? "false" : "true";
         API_PARAM_STRING = "mediauri: " + mediauri + "," + "iconImage: " + mediaIcon + ","
                                         + "mediaId: " + avQueueItem.GetDescription()->GetMediaId() + ","
                                         + "title: " + avQueueItem.GetDescription()->GetTitle() + ","
@@ -346,6 +346,7 @@ int32_t AVCastControllerItem::Prepare(const AVQueueItem& avQueueItem)
     SLOGI("Call prepare of cast controller proxy");
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
+    castControllerProxy_->RegisterControllerListener(shared_from_this());
     buildExtraCastInfo(avQueueItem);
     SetQueueItemDataSrc(avQueueItem);
     std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
@@ -611,6 +612,15 @@ void AVCastControllerItem::SetSessionId(const std::string sessionId)
 void AVCastControllerItem::SetUserId(const int32_t userId)
 {
     userId_ = userId;
+}
+
+void AVCastControllerItem::UnregisterFromProxy()
+{
+    SLOGI("Unregister cast controller listener from proxy on cast compete");
+    std::lock_guard lockGuard(castControllerLock_);
+    if (castControllerProxy_) {
+        castControllerProxy_->UnRegisterControllerListener(shared_from_this());
+    }
 }
 
 bool AVCastControllerItem::RegisterControllerListener(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)

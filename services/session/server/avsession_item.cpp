@@ -1406,6 +1406,21 @@ void AVSessionItem::ReleaseAVCastControllerInner()
     }
     isFirstCallback_ = true;
 }
+
+void AVSessionItem::UnregisterCastControllerListeners()
+{
+    SLOGI("Unregister cast controller listeners on cast compete, session:%{public}s", GetSessionId().c_str());
+    std::vector<std::shared_ptr<AVCastControllerItem>> controllers;
+    {
+        std::lock_guard lockGuard(castControllersLock_);
+        controllers = castControllers_;
+    }
+    for (auto& controller : controllers) {
+        if (controller != nullptr) {
+            controller->UnregisterFromProxy();
+        }
+    }
+}
 #endif
 
 void AVSessionItem::RegisterAVSessionCallback(std::shared_ptr<AVSessionCallback> callbackOfMigrate)
@@ -2295,9 +2310,8 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         deviceInfo = descriptor_.outputDeviceInfo_.deviceInfos_[0];
     }
     BuildCollaborationPublishStateParam(castState, deviceInfo);
-    if (isNeedRemove) { //same device cast exchange no publish when hostpot scene
-        DealCollaborationPublishState(castState, deviceInfo);
-    }
+    // same device cast exchange no publish when hostpot scene
+    if (isNeedRemove) { DealCollaborationPublishState(castState, deviceInfo); }
     if (SearchSpidInCapability(deviceInfo.deviceId_)) {
         deviceInfo.supportedPullClients_.clear();
         deviceInfo.supportedPullClients_.push_back(GetSpid());
@@ -2333,6 +2347,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
             serviceCallbackForPhotoCast_(GetSessionId(), false);
         }
         DealDisconnect(outputDeviceInfo.deviceInfos_[0], isNeedRemove);
+        UnregisterCastControllerListeners(); // clear A app castcontroller callback when B cast preempt A
     }
     DealOutputDeviceChange(castState, outputDeviceInfo);
     ResetCastControlInfo(castState, reasonCode, outputDeviceInfo);
