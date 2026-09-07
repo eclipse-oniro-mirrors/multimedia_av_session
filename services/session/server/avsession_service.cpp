@@ -184,6 +184,8 @@ void AVSessionService::OnStartProcess()
         maxHistoryNums_ = defMaxHistoryNum;
     }
 
+    InitOuterScreenSupport();
+
 #ifdef ENABLE_BACKGROUND_AUDIO_CONTROL
     backgroundAudioController_.Init(this);
     AddInnerSessionListener(&backgroundAudioController_);
@@ -4959,33 +4961,35 @@ void AVSessionService::DealFlowControl(int32_t uid, bool isBroker, int32_t userI
 }
 
 // LCOV_EXCL_START
+void AVSessionService::InitOuterScreenSupport()
+{
+    isSupportOuterScreen_ = false;
+    std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", DEFAULT_FOLD_SCREEN_TYPE);
+    std::vector<std::string> parts;
+    size_t start = 0;
+    size_t pos = foldScreenType.find(',');
+    while (pos != std::string::npos) {
+        parts.push_back(foldScreenType.substr(start, pos - start));
+        start = pos + 1;
+        pos = foldScreenType.find(',', start);
+    }
+    parts.push_back(foldScreenType.substr(start));
+    int32_t screenType = 0;
+    if (parts.size() > 1 && AVSessionUtils::StringToInt32(parts[1], screenType)) {
+        isSupportOuterScreen_ = (screenType == OUTER_SCREEN_TYPE_VALUE);
+    }
+    SLOGI("InitOuterScreenSupport isSupportOuterScreen:%{public}d", static_cast<int>(isSupportOuterScreen_));
+}
+
+// LCOV_EXCL_START
 bool AVSessionService::CheckNotificationEnabled()
 {
-#ifdef DEVICE_MANAGER_ENABLE
-    int32_t localDeviceType = GetLocalDeviceType();
-    bool isWatch = (localDeviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH);
-    CHECK_AND_RETURN_RET_LOG(!isWatch, false, "watch device is not support.");
-    bool is2in1 = (localDeviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
-#endif
-    bool isSupportOuterScreen = false;
     bool is2in1WithOuterScreen = false;
-    {
-        std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", DEFAULT_FOLD_SCREEN_TYPE);
-        std::vector<std::string> parts;
-        size_t start = 0;
-        size_t pos = foldScreenType.find(',');
-        while (pos != std::string::npos) {
-            parts.push_back(foldScreenType.substr(start, pos - start));
-            start = pos + 1;
-            pos = foldScreenType.find(',', start);
-        }
-        parts.push_back(foldScreenType.substr(start));
-        if (parts.size() > 1) {
-            isSupportOuterScreen = (std::stoi(parts[1]) == OUTER_SCREEN_TYPE_VALUE);
-        }
-    }
 #ifdef DEVICE_MANAGER_ENABLE
-    is2in1WithOuterScreen = is2in1 && isSupportOuterScreen;
+    bool isWatch = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH);
+    CHECK_AND_RETURN_RET_LOG(!isWatch, false, "watch device is not support.");
+    bool is2in1 = (localDeviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1);
+    is2in1WithOuterScreen = is2in1 && isSupportOuterScreen_;
     CHECK_AND_RETURN_RET_LOG(!is2in1 || is2in1WithOuterScreen, false, "2in1 not support.");
 #else
     CHECK_AND_RETURN_RET_LOG(!isCastableDevice_, false, "castable device is not support.");

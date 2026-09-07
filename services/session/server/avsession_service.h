@@ -685,6 +685,8 @@ private:
 
     int32_t GetLocalDeviceType();
 
+    void InitOuterScreenSupport();
+
     void DoTargetDevListenWithDM();
 
     void DoRemoteAVSessionLoad(std::string remoteDeviceId);
@@ -891,6 +893,7 @@ private:
     std::atomic<bool> isFirstPress_ {true};
     std::atomic<bool> isInCast_ {false};
     bool isCastableDevice_ = false;
+    bool isSupportOuterScreen_ = false;
     bool isAudioBrokerStart_ = false;
     bool isAncoMediaSessionChange_ = false;
 
