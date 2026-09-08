@@ -663,58 +663,6 @@ void HwCastProvider::DestroyCastSessionCreated(const std::string castSessionId)
     hwCastProviderSession->Release();
 }
 
-void HwCastProvider::OnSessionCreated(const std::shared_ptr<CastEngine::ICastSession> &castSession)
-{
-    SLOGI("Cast provider received session create event");
-    std::weak_ptr<HwCastProvider> weakThis = shared_from_this();
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([weakThis, castSession]() {
-        auto sharedThis = weakThis.lock();
-        CHECK_AND_RETURN_LOG(sharedThis, "HwCastProvider already destroyed");
-        SLOGI("Cast pvd received session create event and create task thread");
-        std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
-        {
-            std::lock_guard lockGuard(sharedThis->mutexLock_);
-            listenersSnapshot = sharedThis->castStateListenerList_;
-        }
-        for (auto listener : listenersSnapshot) {
-            if (listener != nullptr) {
-                listener->OnSessionNeedDestroy();  // use current user
-                SLOGI("Cast pvd received session create event and session destroy check done");
-            }
-        }
-        int32_t castId;
-        {
-            std::lock_guard lockGuard(sharedThis->mutexLock_);
-            std::vector<bool>::iterator iter = find(sharedThis->castFlag_.begin(), sharedThis->castFlag_.end(), false);
-            if (iter == sharedThis->castFlag_.end()) {
-                SLOGE("Do not trigger callback due to the castFlag_ used up.");
-                return;
-            }
-            *iter = true;
-            castId = iter - sharedThis->castFlag_.begin();
-            SLOGI("Cast task thread to find flag");
-        }
-        auto hwCastProviderSession = std::make_shared<HwCastProviderSession>(castSession);
-        hwCastProviderSession->Init();
-        {
-            std::lock_guard lockGuard(sharedThis->mutexLock_);
-            sharedThis->hwCastProviderSessionMap_[castId] = hwCastProviderSession;
-            SLOGI("Cast task thread to create player");
-            std::shared_ptr<IStreamPlayer> streamPlayer = hwCastProviderSession->CreateStreamPlayer();
-            std::shared_ptr<HwCastStreamPlayer> hwCastStreamPlayer = std::make_shared<HwCastStreamPlayer>(streamPlayer);
-            hwCastStreamPlayer->Init();
-            sharedThis->avCastControllerMap_[castId] = hwCastStreamPlayer;
-        }
-        SLOGI("Create streamPlayer finished %{public}d", castId);
-        for (auto listener : listenersSnapshot) {
-            if (listener != nullptr) {
-                listener->OnSessionCreated(castId);
-            }
-        }
-        SLOGI("do session create notify finished %{public}d", castId);
-        }, "OnSessionCreated", 0);
-}
-
 void HwCastProvider::OnServiceDied()
 {
     std::vector<std::shared_ptr<IAVCastStateListener>> listenersSnapshot;
