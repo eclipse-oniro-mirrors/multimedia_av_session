@@ -104,6 +104,7 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t user
         std::lock_guard aliveLockGuard(isAliveLock_);
         isAlivePtr_ = std::make_shared<bool>(true);
     }
+    descriptor_.screenUserId_ = userId;
     STORAGE_EVENT_RECORD_SESSION(descriptor_.sessionId_, GetBundleName(), userId_);
 }
 
@@ -3363,6 +3364,7 @@ void AVSessionItem::SetUserId(int32_t userId)
 void AVSessionItem::SetScreenUserId(int32_t screenUserId)
 {
     screenUserId_ = screenUserId;
+    descriptor_.screenUserId_ = screenUserId;
 }
 
 pid_t AVSessionItem::GetPid() const

@@ -3485,7 +3485,12 @@ int32_t AVSessionService::HandleMoveScreenCommand(const AAFwk::WantParams& comma
         oldStacks[userId] = usersManager.GetSessionStackForAudioZone(userId);
     }
     usersManager.HandleScreenMove(uid, srcUserId, dstUserId);
+    std::set<int32_t> doneZones;
     for (int32_t userId : usersManager.GetAliveUserList()) {
+        int32_t zoneId = usersManager.GetZoneIdForUser(userId);
+        if (!doneZones.insert(zoneId).second) {
+            continue;
+        }
         auto newStack = usersManager.GetSessionStackForAudioZone(userId);
         NotifySessionStackDiffForAudioZone(userId, oldStacks[userId], newStack);
     }
@@ -5194,12 +5199,12 @@ void AVSessionService::NotifySessionAddForAudioZone(const AVSessionDescriptor& d
 {
     std::lock_guard lockGuard(sessionListenersLock_);
     
-    GetUsersManager().UpdateZoneToUseridMap(descriptor.userId_);
-    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.userId_);
+    GetUsersManager().UpdateZoneToUseridMap(descriptor.screenUserId_);
+    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.screenUserId_);
     
     auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
     CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
-        "NotifySessionAddForAudioZone no listeners for user:%{public}d", descriptor.userId_);
+        "NotifySessionAddForAudioZone no listeners for user:%{public}d", descriptor.screenUserId_);
     
     for (int32_t userId : userIdsInSameZone) {
         auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
@@ -5209,23 +5214,23 @@ void AVSessionService::NotifySessionAddForAudioZone(const AVSessionDescriptor& d
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionAddForAudioZone listener is null for pid=%{public}d", pid);
             SLOGI("OnSessionAddForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
-                descriptor.userId_, userId, pid);
-            listener->OnSessionAddForAudioZone(descriptor.userId_, descriptor);
+                descriptor.screenUserId_, userId, pid);
+            listener->OnSessionAddForAudioZone(descriptor.screenUserId_, descriptor);
         }
     }
-    SLOGI("NotifySessionAddForAudioZone for user:%{public}d", descriptor.userId_);
+    SLOGI("NotifySessionAddForAudioZone for user:%{public}d", descriptor.screenUserId_);
 }
 
 void AVSessionService::NotifySessionRemoveForAudioZone(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
 
-    GetUsersManager().UpdateZoneToUseridMap(descriptor.userId_);
-    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.userId_);
+    GetUsersManager().UpdateZoneToUseridMap(descriptor.screenUserId_);
+    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.screenUserId_);
     auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
 
     CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
-        "NotifySessionRemoveForAudioZone no listeners for user:%{public}d", descriptor.userId_);
+        "NotifySessionRemoveForAudioZone no listeners for user:%{public}d", descriptor.screenUserId_);
 
     for (int32_t userId : userIdsInSameZone) {
         auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
@@ -5236,22 +5241,22 @@ void AVSessionService::NotifySessionRemoveForAudioZone(const AVSessionDescriptor
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifySessionRemoveForAudioZone listener is null for pid=%{public}d", pid);
             SLOGI("OnSessionRemoveForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
-                descriptor.userId_, userId, pid);
-            listener->OnSessionRemoveForAudioZone(descriptor.userId_, descriptor);
+                descriptor.screenUserId_, userId, pid);
+            listener->OnSessionRemoveForAudioZone(descriptor.screenUserId_, descriptor);
         }
     }
-    SLOGI("NotifySessionRemoveForAudioZone for user:%{public}d", descriptor.userId_);
+    SLOGI("NotifySessionRemoveForAudioZone for user:%{public}d", descriptor.screenUserId_);
 }
 
 void AVSessionService::NotifyTopSessionChangeForAudioZone(const AVSessionDescriptor& descriptor)
 {
     std::lock_guard lockGuard(sessionListenersLock_);
-    GetUsersManager().UpdateZoneToUseridMap(descriptor.userId_);
-    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.userId_);
+    GetUsersManager().UpdateZoneToUseridMap(descriptor.screenUserId_);
+    std::vector<int32_t> userIdsInSameZone = GetUsersManager().GetUsersInSameAudioZone(descriptor.screenUserId_);
     auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
 
     CHECK_AND_RETURN_LOG(!listenersMapByUserIdForAudioZone.empty(),
-        "NotifyTopSessionChangeForAudioZone no listeners for user:%{public}d", descriptor.userId_);
+        "NotifyTopSessionChangeForAudioZone no listeners for user:%{public}d", descriptor.screenUserId_);
 
     for (int32_t userId : userIdsInSameZone) {
         auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(userId);
@@ -5262,11 +5267,11 @@ void AVSessionService::NotifyTopSessionChangeForAudioZone(const AVSessionDescrip
             CHECK_AND_CONTINUE_LOG(listener != nullptr,
                 "NotifyTopSessionChangeForAudioZone listener is null for pid=%{public}d", pid);
             SLOGI("OnTopSessionChangeForAudioZone sourceId=%{public}d targetId=%{public}d pid=%{public}d",
-                descriptor.userId_, userId, pid);
-            listener->OnTopSessionChangeForAudioZone(descriptor.userId_, descriptor);
+                descriptor.screenUserId_, userId, pid);
+            listener->OnTopSessionChangeForAudioZone(descriptor.screenUserId_, descriptor);
         }
     }
-    SLOGI("NotifyTopSessionChangeForAudioZone for user:%{public}d", descriptor.userId_);
+    SLOGI("NotifyTopSessionChangeForAudioZone for user:%{public}d", descriptor.screenUserId_);
 }
 
 void AVSessionService::UpdateTopSessionForAudioZone(int32_t userId)
@@ -5339,6 +5344,10 @@ void AVSessionService::NotifySessionStackDiffForAudioZone(int32_t userId,
         }
     } else if (!newStack.empty() && oldStack.empty()) {
         NotifyTopSessionChangeForAudioZone(newStack[0]);
+    } else if (newStack.empty() && !oldStack.empty()) {
+        AVSessionDescriptor clearedDesc;
+        clearedDesc.screenUserId_ = oldStack[0].screenUserId_;
+        NotifyTopSessionChangeForAudioZone(clearedDesc);
     }
 }
 

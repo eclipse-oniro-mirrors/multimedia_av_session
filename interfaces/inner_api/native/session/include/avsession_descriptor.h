@@ -116,6 +116,7 @@ public:
     OutputDeviceInfo outputDeviceInfo_;
 
     int32_t userId_ {};
+    int32_t screenUserId_ {};
 };
 
 struct AVSessionBasicInfo {
