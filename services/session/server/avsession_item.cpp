@@ -221,7 +221,7 @@ void AVSessionItem::DestroyCast(bool continuePlay)
 }
 #endif
 
-int32_t AVSessionItem::DestroyTask(bool continuePlay)
+int32_t AVSessionItem::DestroyTask(bool continuePlay, std::list<sptr<AVControllerItem>>* controllersToDestroy)
 {
     {
         std::lock_guard lockGuard(destroyLock_);
@@ -250,6 +250,9 @@ int32_t AVSessionItem::DestroyTask(bool continuePlay)
     }
     for (auto& controller : controllerList) {
         controller->HandleSessionDestroy();
+        if (controllersToDestroy) {
+            controllersToDestroy->push_back(controller);
+        }
     }
     {
         std::lock_guard lockGuard(callbackLock_);
