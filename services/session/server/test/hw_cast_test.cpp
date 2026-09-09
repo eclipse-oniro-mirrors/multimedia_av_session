@@ -657,6 +657,11 @@ public:
         return 0;
     };
 
+    int GetDownloadRate(int64_t& totalAverageRate, int64_t& lastSecondRate) override
+    {
+        return 0;
+    };
+
     int Seek(int32_t position) override
     {
         return 0;
