@@ -1029,6 +1029,36 @@ static HWTEST_F(AVSessionServiceTestExt, NotifyLocalFrontSessionChangeForMigrate
 }
 
 /**
+ * @tc.name: UpdatePcmCastSession003
+ * @tc.desc: test UpdatePcmCastSession
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdatePcmCastSession003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    SLOGI("UpdatePcmCastSession003 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    pcmCastSession->descriptor_.sessionId_ = "hiplayDefault";
+    pcmCastSession->tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::APP_LEVEL;
+
+    AVSessionDescriptor descriptorTmp;
+    descriptorTmp.sessionId_ = "1234";
+    descriptorTmp.sessionTag_ = "1234";
+    pcmCastSession->UpdatePcmCastSession(descriptorTmp);
+    EXPECT_EQ(pcmCastSession->descriptor_.sessionId_, "1234");
+
+    pcmCastSession->descriptor_.sessionId_ = "hiplayDefault";
+    pcmCastSession->tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::DEVICE_LEVEL;
+    pcmCastSession->UpdatePcmCastSession(descriptorTmp);
+    EXPECT_EQ(pcmCastSession->descriptor_.sessionId_, "hiplayDefault");
+
+#endif
+    SLOGI("UpdatePcmCastSession003 end!");
+}
+
+/**
  * @tc.name: ServiceStartStopCast001
  * @tc.desc: Cover if StartCast for pcm device
  * @tc.type: FUNC
@@ -1427,6 +1457,47 @@ static HWTEST_F(AVSessionServiceTestExt, UpdateDeviceCastMode004, TestSize.Level
     g_AVSessionService->UpdateDeviceCastMode(outputDeviceInfo);
     EXPECT_TRUE(g_AVSessionService != nullptr);
 }
+
+/**
+ * @tc.name: UpdatePcmCastSession001
+ * @tc.desc: Test UpdatePcmCastSession
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdatePcmCastSession001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("UpdatePcmCastSession001 begin!");
+    AVSessionDescriptor descriptor {};
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    g_AVSessionService->UpdatePcmCastSession(descriptor);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGI("UpdatePcmCastSession001 end!");
+#endif
+}
+
+/**
+ * @tc.name: UpdatePcmCastSession002
+ * @tc.desc: Test UpdatePcmCastSession
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, UpdatePcmCastSession002, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SLOGI("UpdatePcmCastSession002 begin!");
+    AVSessionDescriptor descriptor {};
+    g_AVSessionService->pcmCastSession_ = nullptr;
+    g_AVSessionService->UpdatePcmCastSession(descriptor);
+    EXPECT_TRUE(g_AVSessionService != nullptr);
+    SLOGI("UpdatePcmCastSession002 end!");
+#endif
+}
+
 
 /**
  * @tc.name: UpdateDeviceModuleId001

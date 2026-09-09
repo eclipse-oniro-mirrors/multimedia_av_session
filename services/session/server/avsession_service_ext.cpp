@@ -676,7 +676,7 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
         SessionToken pcmSessionToken;
         pcmSessionToken.sessionId = sessionToken.sessionId;
         pcmSessionToken.uid = 0;
-        if (pcmSessionToken.sessionId != "pcmCastSession") {
+        if (pcmSessionToken.sessionId != "hiplayDefault" && pcmSessionToken.sessionId != "pcmCastSession") {
 #ifdef CAR_FEATURE_ENABLE
             auto session = GetUsersManager().GetContainerFromAll().GetSessionById(pcmSessionToken.sessionId);
 #else
