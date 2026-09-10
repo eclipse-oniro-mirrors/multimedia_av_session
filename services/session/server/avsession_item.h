@@ -174,7 +174,7 @@ public:
 
     void HandleSupportedLoopModesChange(const std::vector<int32_t>& loopModes);
 
-    int32_t DestroyTask(bool continuePlay = false);
+    int32_t DestroyTask(bool continuePlay = false, std::list<sptr<AVControllerItem>>* controllersToDestroy = nullptr);
 
     AVSessionDescriptor GetDescriptor();
 

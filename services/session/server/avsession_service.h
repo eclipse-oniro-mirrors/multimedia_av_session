@@ -255,6 +255,8 @@ public:
 
     void HandleSessionReleaseInner();
 
+    void RemoveControllersNoLock(const std::list<sptr<AVControllerItem>>& controllers);
+
     void HandleCallStartEvent();
 
     void HandleControllerRelease(AVControllerItem& controller);
@@ -900,6 +902,8 @@ private:
     std::map<int32_t, int32_t> cleanedBootCountByUser_;
 
     void *migrateStubFuncHandle_ = nullptr;
+
+    std::atomic<bool> isCriticalState_ = false;
 
 #ifdef DEVICE_MANAGER_ENABLE
     std::shared_ptr<AVSessionDeviceStateCallback> deviceStateCallback_ = nullptr;

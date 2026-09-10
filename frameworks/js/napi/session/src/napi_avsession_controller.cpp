@@ -136,6 +136,10 @@ napi_value NapiAVSessionController::ConstructorCallback(napi_env env, napi_callb
 
     auto finalize = [](napi_env env, void* data, void* hint) {
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(data);
+        {
+            std::lock_guard<std::mutex> lock(controllerListMutex_);
+            ControllerList_.erase(napiController->sessionId_);
+        }
         napi_delete_reference(env, napiController->wrapperRef_);
         delete napiController;
         napiController = nullptr;
@@ -2020,7 +2024,6 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
     }
     context->GetCbInfo(env, info);
     auto executor = [context]() {
-        SLOGD("Start NapiAVSessionController destroy process check lock");
         std::lock_guard<std::mutex> lock(uvMutex_);
         auto* napiController = reinterpret_cast<NapiAVSessionController*>(context->native);
         if (napiController == nullptr || napiController->controller_ == nullptr) {
@@ -2057,6 +2060,7 @@ napi_value NapiAVSessionController::Destroy(napi_env env, napi_callback_info inf
         if (!ControllerList_.empty() && ControllerList_.find(napiController->sessionId_) != ControllerList_.end()) {
             SLOGI("repeat list should erase for controller destory:%{public}s",
                 napiController->sessionId_.substr(0, ARGC_THREE).c_str());
+            ControllerList_.erase(napiController->sessionId_);
         }
         output = NapiUtils::GetUndefinedValue(env);
     };

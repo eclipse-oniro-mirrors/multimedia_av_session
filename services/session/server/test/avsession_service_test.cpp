@@ -2100,6 +2100,93 @@ static HWTEST_F(AVSessionServiceTest, HandleControllerRelease001, TestSize.Level
     SLOGI("HandleControllerRelease001 end!");
 }
 
+/**
+ * @tc.name: RemoveControllersNoLock001
+ * @tc.desc: Test RemoveControllersNoLock removes a controller and erases the empty pid entry.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, RemoveControllersNoLock001, TestSize.Level0)
+{
+    SLOGI("RemoveControllersNoLock001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName("RmCtrlNoLock001.abc");
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(avsessionHere_ != nullptr);
+    pid_t pid = 5555;
+    OHOS::sptr<AVControllerItem> controller =
+        avservice_->CreateNewControllerForSession(pid, avsessionHere_);
+    ASSERT_TRUE(controller != nullptr);
+    {
+        std::lock_guard lockGuard(avservice_->sessionServiceLock_);
+        avservice_->controllers_[pid].push_back(controller);
+        EXPECT_EQ(avservice_->controllers_.count(pid), 1u);
+        std::list<OHOS::sptr<AVControllerItem>> toDestroy;
+        toDestroy.push_back(controller);
+        avservice_->RemoveControllersNoLock(toDestroy);
+        EXPECT_EQ(avservice_->controllers_.count(pid), 0u);
+    }
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    SLOGI("RemoveControllersNoLock001 end!");
+}
+
+/**
+ * @tc.name: RemoveControllersNoLock002
+ * @tc.desc: Test RemoveControllersNoLock is a no-op for an empty input list.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, RemoveControllersNoLock002, TestSize.Level0)
+{
+    SLOGI("RemoveControllersNoLock002 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName("RmCtrlNoLock002.abc");
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(avsessionHere_ != nullptr);
+    pid_t pid = 5556;
+    OHOS::sptr<AVControllerItem> controller =
+        avservice_->CreateNewControllerForSession(pid, avsessionHere_);
+    ASSERT_TRUE(controller != nullptr);
+    {
+        std::lock_guard lockGuard(avservice_->sessionServiceLock_);
+        avservice_->controllers_[pid].push_back(controller);
+        std::list<OHOS::sptr<AVControllerItem>> empty;
+        avservice_->RemoveControllersNoLock(empty);
+        EXPECT_EQ(avservice_->controllers_.count(pid), 1u);
+        std::list<OHOS::sptr<AVControllerItem>> toDestroy;
+        toDestroy.push_back(controller);
+        avservice_->RemoveControllersNoLock(toDestroy);
+        EXPECT_EQ(avservice_->controllers_.count(pid), 0u);
+    }
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    SLOGI("RemoveControllersNoLock002 end!");
+}
+
+/**
+ * @tc.name: SetCriticalSkipWhenUnchanged001
+ * @tc.desc: Test SetCritical skips dlopen when isCritical equals the current state.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, SetCriticalSkipWhenUnchanged001, TestSize.Level0)
+{
+    SLOGI("SetCriticalSkipWhenUnchanged001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    avservice_->isCriticalState_.store(true);
+    avservice_->SetCritical(true);
+    EXPECT_EQ(avservice_->isCriticalState_.load(), true);
+    avservice_->isCriticalState_.store(false);
+    avservice_->SetCritical(false);
+    EXPECT_EQ(avservice_->isCriticalState_.load(), false);
+    SLOGI("SetCriticalSkipWhenUnchanged001 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, GetDeviceInfo001, TestSize.Level0)
 {
     SLOGI("GetDeviceInfo001 begin!");

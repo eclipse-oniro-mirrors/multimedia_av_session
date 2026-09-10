@@ -698,6 +698,8 @@ void AVSessionService::NotifyProcessStatus(bool isStart)
 
 void AVSessionService::SetCritical(bool isCritical)
 {
+    CHECK_AND_RETURN_LOG(isCritical != isCriticalState_.load(),
+        "isCritical:%{public}d not changed, skip", isCritical);
     int pid = getpid();
     void *libMemMgrClientHandle = dlopen("libmemmgrclient.z.so", RTLD_NOW);
     if (!libMemMgrClientHandle) {
@@ -717,6 +719,8 @@ void AVSessionService::SetCritical(bool isCritical)
     // 1 indicates the service is started
     if (setCritical(pid, isCritical, AVSESSION_SERVICE_ID) != 0) {
         SLOGE("setCritical failed");
+    } else {
+        isCriticalState_.store(isCritical);
     }
 #ifndef TEST_COVERAGE
     dlclose(libMemMgrClientHandle);
@@ -3157,6 +3161,7 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     SLOGI("CreateControllerInner for sessionId:%{public}s|%{public}d|%{public}d|%{public}d",
         AVSessionUtils::GetAnonySessionId(sessionId).c_str(), pid, GetCallingPid(), userId);
+    std::lock_guard lockGuard(sessionServiceLock_);
 #ifdef CAR_FEATURE_ENABLE
     sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
 #else
@@ -3172,7 +3177,6 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     if (pid < 0 || GetCallingPid() != getpid()) {
         pid = GetCallingPid();
     }
-    std::lock_guard lockGuard(sessionServiceLock_);
     auto existController = GetPresentController(pid, sessionId);
     if (existController != nullptr) {
         SLOGI("Controller is already existed.");
@@ -3818,6 +3822,7 @@ void AVSessionService::HandleTopSessionRelease(int32_t userId, sptr<AVSessionIte
 
 void AVSessionService::HandleSessionRelease(std::string sessionId, bool continuePlay)
 {
+    std::list<sptr<AVControllerItem>> controllersToDestroy;
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         std::lock_guard frontLockGuard(sessionFrontLock_);
@@ -3842,7 +3847,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
             SLOGI("RemoveControlBundle for :%{public}s ", sessionItem->GetBundleName().c_str());
             focusSessionStrategy_.RemoveControlBundle(sessionItem->GetUid(), sessionItem->GetPid());
         }
-        sessionItem->DestroyTask(continuePlay);
+        sessionItem->DestroyTask(continuePlay, &controllersToDestroy);
         HandleTopSessionRelease(userId, sessionItem);
         if (sessionItem->GetRemoteSource() != nullptr) {
             int32_t ret = CancelCastAudioForClientExit(sessionItem->GetPid(), sessionItem);
@@ -3864,6 +3869,7 @@ void AVSessionService::HandleSessionRelease(std::string sessionId, bool continue
             }
         }
         SetCriticalWhenRelease(sessionItem);
+        RemoveControllersNoLock(controllersToDestroy);
     }
     HandleSessionReleaseInner();
 }
@@ -3907,6 +3913,19 @@ void AVSessionService::HandleControllerRelease(AVControllerItem& controller)
     it->second.remove(&controller);
     if (it->second.empty()) {
         controllers_.erase(pid);
+    }
+}
+
+void AVSessionService::RemoveControllersNoLock(const std::list<sptr<AVControllerItem>>& controllers)
+{
+    for (const auto& controller : controllers) {
+        auto it = controllers_.find(controller->GetPid());
+        if (it != controllers_.end()) {
+            it->second.remove(controller);
+            if (it->second.empty()) {
+                controllers_.erase(it);
+            }
+        }
     }
 }
 
