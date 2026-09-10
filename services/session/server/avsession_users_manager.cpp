@@ -538,8 +538,6 @@ void AVSessionUsersManager::HandleScreenMove(int32_t uid, int32_t srcUserId, int
     session->SetScreenUserId(dstUserId);
     SLOGI("HandleScreenMove done uid=%{public}d %{public}d->%{public}d zoneId=%{public}d",
         uid, actualSrcUserId, dstUserId, GetZoneIdForUser(dstUserId));
-    UpdateZoneToUseridMap(actualSrcUserId);
-    UpdateZoneToUseridMap(dstUserId);
     UpdateSessionStackForAudioZone(actualSrcUserId);
     UpdateSessionStackForAudioZone(dstUserId);
 }

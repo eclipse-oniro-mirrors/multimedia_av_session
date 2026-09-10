@@ -786,6 +786,66 @@ HWTEST_F(AVSessionUsersManagerTest, IsCastSessionValid_001, TestSize.Level0)
     EXPECT_FALSE(result);
     SLOGI("IsCastSessionValid_001 end!");
 }
+
+/**
+ * @tc.name: HandleScreenMove001
+ * @tc.desc: Test HandleScreenMove skip when srcUserId equals dstUserId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, HandleScreenMove001, TestSize.Level0)
+{
+    SLOGI("HandleScreenMove001 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    AVSessionDescriptor desc;
+    desc.sessionId_ = "handle_screen_move_001";
+    desc.uid_ = 100001;
+    OHOS::sptr<AVSessionItem> item = new AVSessionItem(desc, 100);
+    int32_t ret = manager.GetContainerFromAll().AddSession(getpid(), "hsm_001", item);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t before = item->GetScreenUserId();
+    manager.HandleScreenMove(desc.uid_, 999, 999);
+    EXPECT_EQ(item->GetScreenUserId(), before);
+    manager.GetContainerFromAll().RemoveSession(desc.sessionId_);
+    SLOGI("HandleScreenMove001 end!");
+}
+
+/**
+ * @tc.name: HandleScreenMove002
+ * @tc.desc: Test HandleScreenMove when session not found by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, HandleScreenMove002, TestSize.Level0)
+{
+    SLOGI("HandleScreenMove002 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    auto& all = manager.GetContainerFromAll();
+    size_t before = all.GetAllSessions().size();
+    manager.HandleScreenMove(888888, 100, 101);
+    EXPECT_EQ(all.GetAllSessions().size(), before);
+    SLOGI("HandleScreenMove002 end!");
+}
+
+/**
+ * @tc.name: HandleScreenMove003
+ * @tc.desc: Test HandleScreenMove skip when src/dst in the same zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionUsersManagerTest, HandleScreenMove003, TestSize.Level0)
+{
+    SLOGI("HandleScreenMove003 begin!");
+    auto& manager = AVSessionUsersManager::GetInstance();
+    AVSessionDescriptor desc;
+    desc.sessionId_ = "handle_screen_move_003";
+    desc.uid_ = 100003;
+    OHOS::sptr<AVSessionItem> item = new AVSessionItem(desc, 100);
+    int32_t ret = manager.GetContainerFromAll().AddSession(getpid(), "hsm_003", item);
+    ASSERT_EQ(ret, AVSESSION_SUCCESS);
+    int32_t before = item->GetScreenUserId();
+    manager.HandleScreenMove(desc.uid_, 100, 101);
+    EXPECT_EQ(item->GetScreenUserId(), before);
+    manager.GetContainerFromAll().RemoveSession(desc.sessionId_);
+    SLOGI("HandleScreenMove003 end!");
+}
 #endif
 } //AVSession
 } //OHOS
