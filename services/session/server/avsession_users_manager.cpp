@@ -528,17 +528,16 @@ void AVSessionUsersManager::HandleScreenMove(int32_t uid, int32_t srcUserId, int
     sptr<AVSessionItem> session = GetContainerFromAll().GetSessionByUid(uid);
     CHECK_AND_RETURN_LOG(session != nullptr, "HandleScreenMove session not found uid=%{public}d", uid);
     int32_t actualSrcUserId = session->GetScreenUserId();
-    if (actualSrcUserId != srcUserId) {
-        SLOGW("HandleScreenMove srcUserId mismatch: cmd=%{public}d actual=%{public}d", srcUserId, actualSrcUserId);
-    }
-    if (actualSrcUserId == dstUserId) {
-        SLOGI("HandleScreenMove skip: actualSrc==dstUserId=%{public}d", dstUserId);
+    int32_t srcZoneId = GetZoneIdForUser(actualSrcUserId);
+    int32_t dstZoneId = GetZoneIdForUser(dstUserId);
+    if (srcZoneId == dstZoneId) {
+        SLOGI("HandleScreenMove skip: same zone src=%{public}d dst=%{public}d zoneId=%{public}d",
+            actualSrcUserId, dstUserId, srcZoneId);
         return;
     }
     session->SetScreenUserId(dstUserId);
     SLOGI("HandleScreenMove done uid=%{public}d %{public}d->%{public}d zoneId=%{public}d",
         uid, actualSrcUserId, dstUserId, GetZoneIdForUser(dstUserId));
-    CleanupZoneToUseridMap(actualSrcUserId);
     UpdateZoneToUseridMap(actualSrcUserId);
     UpdateZoneToUseridMap(dstUserId);
     UpdateSessionStackForAudioZone(actualSrcUserId);
@@ -654,7 +653,7 @@ std::vector<AVSessionDescriptor> AVSessionUsersManager::GetSessionStackForAudioZ
 
     auto iter = sessionStackMapForAudioZone_.find(zoneId);
     if (iter != sessionStackMapForAudioZone_.end()) {
-        SLOGI("GetSessionStackForAudioZone found zoneId=%{public}d wiht size=%{public}d",
+        SLOGI("GetSessionStackForAudioZone found zoneId=%{public}d with size=%{public}d",
             zoneId, static_cast<int32_t>(iter->second.size()));
         return iter->second;
     }
