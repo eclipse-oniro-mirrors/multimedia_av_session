@@ -2187,6 +2187,35 @@ static HWTEST_F(AVSessionServiceTest, SetCriticalSkipWhenUnchanged001, TestSize.
     SLOGI("SetCriticalSkipWhenUnchanged001 end!");
 }
 
+/**
+ * @tc.name: DestroyTaskControllersToDestroy001
+ * @tc.desc: Test AVSessionItem::DestroyTask collects controllers into the controllersToDestroy out-param.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTest, DestroyTaskControllersToDestroy001, TestSize.Level0)
+{
+    SLOGI("DestroyTaskControllersToDestroy001 begin!");
+    EXPECT_TRUE(avservice_ != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName("DestroyTaskOut001.abc");
+    OHOS::sptr<AVSessionItem> avsessionHere_ =
+        avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    ASSERT_TRUE(avsessionHere_ != nullptr);
+    OHOS::sptr<AVControllerItem> controller =
+        avservice_->CreateNewControllerForSession(avsessionHere_->GetPid(), avsessionHere_);
+    ASSERT_TRUE(controller != nullptr);
+
+    std::list<OHOS::sptr<AVControllerItem>> outList;
+    int32_t result = avsessionHere_->DestroyTask(false, &outList);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_EQ(outList.size(), 1u);
+    EXPECT_TRUE(outList.front() == controller);
+    avservice_->HandleSessionRelease(avsessionHere_->GetSessionId());
+    SLOGI("DestroyTaskControllersToDestroy001 end!");
+}
+
 static HWTEST_F(AVSessionServiceTest, GetDeviceInfo001, TestSize.Level0)
 {
     SLOGI("GetDeviceInfo001 begin!");

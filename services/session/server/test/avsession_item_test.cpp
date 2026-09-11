@@ -222,34 +222,6 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_004, TestSize.Level0)
 }
 
 /**
- * @tc.name: AVSessionItem_DestroyTask_005
- * @tc.desc: Test DestroyTask collects controllers into the controllersToDestroy out-param.
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-HWTEST_F(AVsessionItemTest, AVSessionItem_DestroyTask_005, TestSize.Level0)
-{
-    SLOGD("AVSessionItem_DestroyTask_005 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName("DestroyTask005.abc");
-    OHOS::sptr<AVSessionItem> sessionItem =
-        g_AVSessionService->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
-    ASSERT_TRUE(sessionItem != nullptr);
-    OHOS::sptr<AVControllerItem> controller =
-        g_AVSessionService->CreateNewControllerForSession(sessionItem->GetPid(), sessionItem);
-    ASSERT_TRUE(controller != nullptr);
-
-    std::list<sptr<AVControllerItem>> outList;
-    int32_t result = sessionItem->DestroyTask(false, &outList);
-    EXPECT_EQ(result, AVSESSION_SUCCESS);
-    EXPECT_EQ(outList.size(), 1u);
-    EXPECT_TRUE(outList.front() == controller);
-    g_AVSessionService->HandleSessionRelease(sessionItem->GetSessionId());
-    SLOGD("AVSessionItem_DestroyTask_005 end!");
-}
-
-/**
  * @tc.name: AVSessionItem_SetAVCallMetaData_001
  * @tc.desc: Test SetAVCallMetaData with valid media image in AVCallMetaData.
  * @tc.type: FUNC
