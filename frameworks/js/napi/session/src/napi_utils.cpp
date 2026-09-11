@@ -396,6 +396,11 @@ napi_status NapiUtils::SetValue(napi_env env, const AVSessionDescriptor& in, nap
     status = napi_set_named_property(env, out, "outputDevice", property);
     CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
 
+    status = SetValue(env, in.userId_, property);
+    CHECK_RETURN((status == napi_ok) && (property != nullptr), "create object failed", status);
+    status = napi_set_named_property(env, out, "userId", property);
+    CHECK_RETURN(status == napi_ok, "napi_set_named_property failed", status);
+
     return napi_ok;
 }
 
