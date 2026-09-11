@@ -557,7 +557,6 @@ private:
 
     AVSessionDescriptor descriptor_;
     int32_t userId_ = 0;
-    int32_t screenUserId_ = 0;
     AVPlaybackState playbackState_;
     AVMetaData metaData_;
     AVMetaData lastMetaData_;

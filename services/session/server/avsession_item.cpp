@@ -96,7 +96,7 @@ static const int32_t CONTROL_COLD_START = 2;
 #endif
 
 AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t userId, AVSessionItemExtension *extension)
-    : descriptor_(descriptor), userId_(userId), screenUserId_(userId), extension_(extension)
+    : descriptor_(descriptor), userId_(userId), extension_(extension)
 {
     SLOGI("constructor session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
@@ -3363,7 +3363,6 @@ void AVSessionItem::SetUserId(int32_t userId)
 
 void AVSessionItem::SetScreenUserId(int32_t screenUserId)
 {
-    screenUserId_ = screenUserId;
     descriptor_.screenUserId_ = screenUserId;
 }
 
@@ -3384,7 +3383,7 @@ int32_t AVSessionItem::GetUserId() const
 
 int32_t AVSessionItem::GetScreenUserId() const
 {
-    return screenUserId_;
+    return descriptor_.screenUserId_;
 }
 
 std::string AVSessionItem::GetAbilityName() const
