@@ -492,7 +492,7 @@ napi_status NapiAVCastControllerCallback::RemoveCallback(napi_env env, int32_t e
     SLOGI("try remove callback for event %{public}d", event);
     CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_CAST_TYPE_MAX, napi_generic_failure, "has no event");
     if (callback == nullptr) {
-        SLOGD("Remove callback, the callback is nullptr");
+        SLOGI("SubEvent op=off_all kit = AVSessionKit event = %{public}d", event);
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
             CHECK_AND_RETURN_RET_LOG(ret == napi_ok, ret, "delete callback reference failed");

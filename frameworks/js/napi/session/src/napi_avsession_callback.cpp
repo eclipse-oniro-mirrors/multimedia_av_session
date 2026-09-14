@@ -457,6 +457,7 @@ napi_status NapiAVSessionCallback::RemoveCallback(napi_env env, int32_t event, n
     std::lock_guard<std::mutex> lockGuard(lock_);
     CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     if (callback == nullptr) {
+        SLOGI("SubEvent op=off_all kit = AVSessionKit event = %{public}d", event);
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
             CHECK_AND_RETURN_RET_LOG(napi_ok == ret, ret, "delete callback reference failed");
