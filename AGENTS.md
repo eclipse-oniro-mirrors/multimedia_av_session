@@ -40,23 +40,23 @@
 
 | 任务或修改路径 | 必读文档和源码入口 |
 | --- | --- |
-| 修改会话创建、激活、销毁、元数据或播放状态同步 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`interfaces/inner_api/native/session/include/avsession_manager.h`、`services/session/server/avsession_item.cpp` |
-| 修改控制器、控制命令、按键事件或元数据过滤 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`interfaces/inner_api/native/session/include/avsession_controller.h`、`services/session/server/avcontroller_item.cpp` |
-| 修改焦点、中断、TopSession 选择或会话栈 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`services/session/server/focus_session_strategy.cpp`、`services/session/server/session_stack.cpp` |
-| 修改后台音频静音、前台恢复或应用状态监听 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`services/session/server/background_audio_controller.cpp` |
-| 修改多用户隔离、账户切换或车机多音区 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`services/session/server/avsession_users_manager.cpp` |
-| 修改投播路由、castHandle 编码、设备发现或投播启动 | [音视频投播.md](docs/AV-BroadCast/音视频投播.md)、`services/session/server/avrouter_impl.cpp` |
-| 修改投播控制器、控制命令转发或状态回调 | [音视频投播.md](docs/AV-BroadCast/音视频投播.md)、`services/session/server/avcast_controller_item.cpp` |
-| 修改 Cast+ 引擎对接、流播放器、状态映射或数据源 | [音视频投播.md](docs/AV-BroadCast/音视频投播.md)、`services/session/server/hw_cast_provider.cpp`、`services/session/server/hw_cast_stream_player.cpp` |
-| 修改 PCM 投播、HiPlay 或 URLCasting 协同 | [音视频投播.md](docs/AV-BroadCast/音视频投播.md)、`services/session/server/pcm_cast_session.cpp`、`services/session/adapter/collaboration_manager_hiplay.cpp` |
+| 修改会话创建、激活、销毁、元数据或播放状态同步 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`interfaces/inner_api/native/session/include/`、`services/session/server/` |
+| 修改控制器、控制命令、按键事件或元数据过滤 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`interfaces/inner_api/native/session/include/`、`services/session/server/` |
+| 修改焦点、中断、TopSession 选择或会话栈 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`services/session/server/` |
+| 修改后台音频静音、前台恢复或应用状态监听 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`services/session/server/` |
+| 修改多用户隔离、账户切换或车机多音区 | [基础播控.md](docs/Basic-PlayBack-Control/基础播控.md)、`services/session/server/` |
+| 修改投播路由、castHandle 编码、设备发现或投播启动 | [音视频投播.md](docs/AV-BroadCast/音视频投播.md)、`interfaces/inner_api/native/session/include/`、`services/session/server/` |
+| 修改投播控制器、控制命令转发或状态回调 | [音视频投播.md](docs/AV-BroadCast/音视频投播.md)、`services/session/server/` |
+| 修改 Cast+ 引擎对接、流播放器、状态映射或数据源 | [音视频投播.md](docs/AV-BroadCast/音视频投播.md)、`services/session/server/` |
+| 修改 PCM 投播、HiPlay 或 URLCasting 协同 | [音视频投播.md](docs/AV-BroadCast/音视频投播.md)、`services/session/server/`、`services/session/adapter/` |
 | 修改分布式数据对象同步、Source/Sink 或能力集 | [分布式播控.md](docs/Migrate-PlayBack-Control/分布式播控.md)、`services/session/server/remote/` |
 | 修改软总线通信、Socket 建链或数据传输 | [分布式播控.md](docs/Migrate-PlayBack-Control/分布式播控.md)、`services/session/server/softbus/` |
-| 修改会话迁移、MigrateWithNext 或 SuperLauncher 流转 | [分布式播控.md](docs/Migrate-PlayBack-Control/分布式播控.md)、`services/session/server/migrate/`、`services/session/server/avsession_service_ext.cpp` |
-| 修改 IPC、系统能力、IDL、代理或 Stub | [架构与构建说明.md](docs/架构与构建说明.md)、[安全与隐私.md](docs/Security-Privacy/安全与隐私.md)、对应 `services/session/ipc/base/`、`proxy/`、`stub/`、`idl/` |
-| 修改 NAPI、C 接口、CJ、Taihe 或 OHAVSession 绑定 | [架构与构建说明.md](docs/架构与构建说明.md)、`frameworks/js/napi/session/`、`interfaces/kits/c/`、`frameworks/native/ohavsession/` |
-| 修改构建、功能开关、配置或系统能力注册 | [架构与构建说明.md](docs/架构与构建说明.md)、`bundle.json`、`config.gni`、`sa_profile/`、相关 `BUILD.gn` |
+| 修改会话迁移、MigrateWithNext 或 SuperLauncher 流转 | [分布式播控.md](docs/Migrate-PlayBack-Control/分布式播控.md)、`services/session/server/migrate/` |
+| 修改 IPC、系统能力、IDL、代理或 Stub | [架构与构建说明.md](docs/架构与构建说明.md)、[安全与隐私.md](docs/Security-Privacy/安全与隐私.md)、`services/session/ipc/` |
+| 修改 NAPI、C 接口、CJ、Taihe 或 OHAVSession 绑定 | [架构与构建说明.md](docs/架构与构建说明.md)、`frameworks/`、`interfaces/kits/c/` |
+| 修改构建、功能开关、配置或系统能力注册 | [架构与构建说明.md](docs/架构与构建说明.md)、`bundle.json`、`config.gni`、`sa_profile/` |
 | 修改测试、故障诊断、日志、Trace 或 Dump | [测试与故障诊断.md](docs/Testing/测试与故障诊断.md)、`services/session/server/test/`、`hisysevent.yaml` |
-| 修改权限校验、身份验证或信任边界 | [安全与隐私.md](docs/Security-Privacy/安全与隐私.md)、`services/session/adapter/`（权限相关） |
+| 修改权限校验、身份验证或信任边界 | [安全与隐私.md](docs/Security-Privacy/安全与隐私.md)、`services/session/adapter/`、`utils/` |
 
 当任务描述、日志或代码出现 `AVSession`、`AVSessionController`、`AVRouter`、`castHandle`、`HwCastProvider`、`PcmCastSession`、`RemoteSessionSource`、`RemoteSessionSink`、`SoftbusSession`、`MigrateAVSession`、`FocusSessionStrategy`、`BackgroundAudioController`、`SessionStack`、`topSession`、`IPC`、`IDL`、`SAID=3010`、`分布式`、`软总线`、`迁移`、`SuperLauncher`、`MigrateWithNext`、`HiPlay`、`PCM 投播`、`投播路由` 或 `功能开关` 时，必须先打开知识库中的对应主题文档，再定位实现。
 
@@ -76,10 +76,10 @@
 
 ## 高风险边界
 
-- 公共 API 的签名、重载、错误码、版本标记和既有行为不得无理由改变；新增接口或字段必须评估 ABI、绑定层和兼容性。C 接口和 OHAVSession 封装受版本脚本（`*.versionscript`）约束。
+- 公共 API 的签名、重载、错误码、版本标记和既有行为不得无理由改变；新增接口或字段必须评估 ABI、绑定层和兼容性。C 接口和 OHAVSession 封装受版本脚本约束。
 - IDL、代理、Stub、序列化顺序和接口码属于协议边界，不能只修改单端，也不能复用不兼容的接口码。`AvsessionSeviceInterfaceCode`、`IAVCastController` 命令码和回调 IDL 方法顺序均为兼容性契约。
-- `bundle.json`、`config.gni`、`sa_profile/av_session.json`、`hisysevent.yaml` 和版本脚本必须以仓库中的源文件为准，不直接修改生成产物替代源配置。
-- 权限、UID、PID、令牌 ID、账户、远端设备授权和隐私状态属于信任边界；无法确认调用方身份或用途时必须失败关闭并保留原状态。Stub 层每个 Handle 方法均经过 `PermissionChecker::CheckPermission` 校验。
+- `bundle.json`、`config.gni`、系统能力配置和诊断事件定义必须以仓库中的源文件为准，不直接修改生成产物替代源配置。
+- 权限、UID、PID、令牌 ID、账户、远端设备授权和隐私状态属于信任边界；无法确认调用方身份或用途时必须失败关闭并保留原状态。Stub 层每个 Handle 方法均经权限校验。
 - 不得执行未经确认的破坏性命令、设备刷写、系统分区修改或大范围删除；涉及真实设备或组网迁移时先说明影响范围并等待确认。
 - 修改第三方依赖（Cast+ 引擎、软总线、分布式数据对象、协同服务库、Cast+ 引擎开关）许可证、公共符号、持久化配置或跨版本协议前，必须先说明影响并请求确认。
 - 会话数量上限 `SESSION_NUM_MAX = 50`，超限返回 `ERR_SESSION_EXCEED_MAX`；修改容器逻辑时不得破坏上限和内存回收（栈空延迟 240s 写 `/proc/<pid>/reclaim`）。
@@ -94,8 +94,8 @@
 | --- | --- |
 | 仅文档或注释 | Markdown 链接、路径和格式检查；`git diff --check` |
 | 会话/控制器/焦点/后台音频/多用户 | `services/session/server/test/` 对应目标，覆盖正常、非法状态、重复调用、会话不存在和服务不可用 |
-| 投播路由/控制器/Cast+/PCM/HiPlay | `avrouter_test`、`avcast_controller_*_test`、`hw_cast_*_test`、`pcm_cast_*` 路径和设备连接/断开/恢复场景 |
-| 分布式 Source/Sink/软总线/迁移 | `remote_session_*_test`、`softbus_session_*_test`、`migrate_avsession_*_test` 和组网建链/断连/恢复场景 |
+| 投播路由/控制器/Cast+/PCM/HiPlay | `services/session/server/test/` 对应投播目标，覆盖设备连接/断开/恢复场景 |
+| 分布式 Source/Sink/软总线/迁移 | `services/session/server/test/` 对应分布式目标，覆盖组网建链/断连/恢复场景 |
 | IPC、IDL、回调或序列化 | 代理/Stub/服务端联调、非法输入和服务死亡测试，以及对应 `test/fuzztest/` |
 | 公共绑定或 API | NAPI、C 接口、CJ、Taihe 或 OHAVSession 对应测试，并检查 ABI、版本脚本和错误码 |
 | 功能开关或构建配置 | 开启和关闭路径、依赖缺失降级路径，以及对应 GN 目标 |
@@ -123,8 +123,6 @@
 | COMMAND_INVALID | 6600105 | 命令无效 |
 | SESSION_INACTIVE | 6600106 | 会话未激活 |
 | MESSAGE_OVERLOAD | 6600107 | 消息过载 |
-
-定义位置：`interfaces/inner_api/native/session/include/avsession_info.h:1231`
 
 ## 构建与静态检查
 
