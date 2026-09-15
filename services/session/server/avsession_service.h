@@ -403,7 +403,7 @@ private:
     friend class MigrateAVSessionServer;
     friend class MigrateAVSessionServerForNext;
     friend class PcmCastSession;
-# ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void UpdatePcmCastSession(const AVSessionDescriptor& descriptor);
 #endif
     void NotifyProcessStatus(bool isStart);
