@@ -1010,7 +1010,7 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             return;
         }
         sessionListForFront->push_front(sessionItem);
-# ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
         UpdatePcmCastSession(sessionItem->GetDescriptor());
 #endif
         if (IsLocalSessionPlaying(sessionItem)) {
@@ -2395,7 +2395,7 @@ int32_t AVSessionService::GetSessionDescriptors(int32_t category, std::vector<AV
                 }
             }
             break;
-# ifdef CASTPLUS_CAST_ENGINE_ENABLE
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
         case SessionCategory::CATEGORY_HIPLAY:
             if (pcmCastSession_ != nullptr && pcmCastSession_->CheckIsCasting()) {
                 AVSessionDescriptor descriptor = pcmCastSession_->GetDescriptor();
