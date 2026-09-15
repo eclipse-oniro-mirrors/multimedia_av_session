@@ -394,14 +394,8 @@ void AVSessionService::ReleaseCastSession(const int32_t userId)
     auto sessions = GetUsersManager().GetContainerFromUser(targetUserId).GetAllSessions();
     SLOGI("Session list size for userId %{public}d is %{public}zu", targetUserId, sessions.size());
     for (const auto& session : sessions) {
-        if (session != nullptr
-#ifdef CAR_FEATURE_ENABLE
-            && (session->GetDescriptor().sessionTag_ == "RemoteCast" ||
-                session->GetDescriptor().sessionTag_ == "projection_client")
-#else
-            && session->GetDescriptor().sessionTag_ == "RemoteCast"
-#endif
-        ) {
+        if (session != nullptr && (session->GetDescriptor().sessionTag_ == "RemoteCast" ||
+                session->GetDescriptor().sessionTag_ == "projection_client")) {
             std::string sessionId = session->GetDescriptor().sessionId_;
             SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
             session->UnRegisterDeviceStateCallback();

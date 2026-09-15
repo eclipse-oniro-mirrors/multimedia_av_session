@@ -2417,12 +2417,8 @@ int32_t AVSessionItem::StopCast(const DeviceRemoveAction deviceRemoveAction)
     }
     std::lock_guard lockGuard(castLock_);
     bool isSinkCastSession = false;
-#ifdef CAR_FEATURE_ENABLE
     isSinkCastSession = (descriptor_.sessionTag_ == "RemoteCast" ||
                          descriptor_.sessionTag_ == "projection_client");
-#else
-    isSinkCastSession = (descriptor_.sessionTag_ == "RemoteCast");
-#endif
     if (isSinkCastSession) {
         CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
