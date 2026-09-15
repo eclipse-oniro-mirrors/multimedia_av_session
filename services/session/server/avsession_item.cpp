@@ -100,10 +100,6 @@ AVSessionItem::AVSessionItem(const AVSessionDescriptor& descriptor, int32_t user
 {
     SLOGI("constructor session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
-    {
-        std::lock_guard aliveLockGuard(isAliveLock_);
-        isAlivePtr_ = std::make_shared<bool>(true);
-    }
     descriptor_.screenUserId_ = userId;
     STORAGE_EVENT_RECORD_SESSION(descriptor_.sessionId_, GetBundleName(), userId_);
 }
@@ -119,7 +115,7 @@ void AVSessionItem::InitListener()
 
 AVSessionItem::~AVSessionItem()
 {
-    SLOGI("destroy with aliveLock session id=%{public}s, userId=%{public}d",
+    SLOGI("destroy session id=%{public}s, userId=%{public}d",
         AVSessionUtils::GetAnonySessionId(descriptor_.sessionId_).c_str(), userId_);
     if (IsActive()) {
         Deactivate();
@@ -131,12 +127,6 @@ AVSessionItem::~AVSessionItem()
                 castControllerProxy_->SetSessionCallbackForCastCap(nullptr);
             }
         #endif
-    }
-    {
-        std::lock_guard aliveLockGuard(isAliveLock_);
-        if (isAlivePtr_ != nullptr) {
-            *isAlivePtr_ = false;
-        }
     }
 }
 
@@ -631,15 +621,19 @@ int32_t AVSessionItem::SetAVMetaData(const AVMetaData& meta)
     }
     UpdateMetaData(meta);
     CheckUseAVMetaData(meta);
-    SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d, isAlive:%{public}d",
-        AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str(),
-        static_cast<int>(GetPid()), (isAlivePtr_ == nullptr) ? -1 : *isAlivePtr_);
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([this, meta, isAlivePtr = isAlivePtr_, changedDataMask]() {
-        std::lock_guard aliveLockGuard(isAliveLock_);
-        CHECK_AND_RETURN_LOG(isAlivePtr != nullptr && *isAlivePtr, "handle metadatachange with session gone, return");
+    SLOGI("send metadata change event to controllers with title %{public}s from pid:%{public}d",
+        AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str(), static_cast<int>(GetPid()));
+    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+        [weakSelf = wptr<AVSessionItem>(this), meta, changedDataMask]() {
+        auto sptrItem = weakSelf.promote();
+        CHECK_AND_RETURN_LOG(sptrItem != nullptr, "HandleMetaDataChange session gone");
+        {
+            std::lock_guard lockGuard(sptrItem->destroyLock_);
+            CHECK_AND_RETURN_LOG(!sptrItem->isDestroyed_.load(), "HandleMetaDataChange session destroyed");
+        }
         SLOGI("HandleMetaDataChange in postTask with title %{public}s",
             AVSessionUtils::GetAnonyTitle(meta.GetTitle()).c_str());
-        auto controllers = GetControllerMap();
+        auto controllers = sptrItem->GetControllerMap();
         for (const auto& [pid, controller] : controllers) {
             if (controller != nullptr) {
                 controller->HandleMetaDataChange(meta, changedDataMask);
