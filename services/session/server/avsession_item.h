@@ -265,6 +265,10 @@ public:
 
     int32_t GetUserId() const;
 
+    void SetScreenUserId(int32_t screenUserId);
+
+    int32_t GetScreenUserId() const;
+
     std::string GetAbilityName() const;
 
     std::string GetBundleName() const;

@@ -430,6 +430,7 @@ private:
         const std::vector<AVSessionDescriptor>& oldStack,
         const std::vector<AVSessionDescriptor>& newStack);
     void UpdateTopSessionForAudioZone(int32_t userId);
+    int32_t HandleMoveScreenCommand(const AAFwk::WantParams& commandArgs);
 #endif
     void NotifyAudioSessionCheck(const int32_t uid);
     bool CheckNotificationEnabled();

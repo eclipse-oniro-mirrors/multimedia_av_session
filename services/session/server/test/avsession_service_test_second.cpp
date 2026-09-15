@@ -2764,6 +2764,94 @@ static HWTEST_F(AVSessionServiceTestSecond, AddSessionToVector_001, TestSize.Lev
     session->Destroy();
     SLOGD("AddSessionToVector_001 end!");
 }
+
+/**
+ * @tc.name: HandleMoveScreenCommand001
+ * @tc.desc: Test HandleMoveScreenCommand returns error when params missing
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionServiceTestSecond, HandleMoveScreenCommand001, TestSize.Level0)
+{
+    SLOGD("HandleMoveScreenCommand001 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    OHOS::AAFwk::WantParams args;
+    args.SetParam("sourceUserId", OHOS::AAFwk::Integer::Box(100));
+    args.SetParam("targetUserId", OHOS::AAFwk::Integer::Box(101));
+    int32_t result = g_AVSessionService->HandleMoveScreenCommand(args);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGD("HandleMoveScreenCommand001 end!");
+}
+
+/**
+ * @tc.name: HandleMoveScreenCommand002
+ * @tc.desc: Test HandleMoveScreenCommand skip when srcUserId equals dstUserId
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionServiceTestSecond, HandleMoveScreenCommand002, TestSize.Level0)
+{
+    SLOGD("HandleMoveScreenCommand002 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    auto item = CreateSession();
+    ASSERT_TRUE(item != nullptr);
+    int32_t uid = 100002;
+    item->SetUid(uid);
+    OHOS::AAFwk::WantParams args;
+    args.SetParam("uid", OHOS::AAFwk::Integer::Box(uid));
+    args.SetParam("sourceUserId", OHOS::AAFwk::Integer::Box(999));
+    args.SetParam("targetUserId", OHOS::AAFwk::Integer::Box(999));
+    int32_t before = item->GetScreenUserId();
+    int32_t result = g_AVSessionService->HandleMoveScreenCommand(args);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_EQ(item->GetScreenUserId(), before);
+    item->Destroy();
+    SLOGD("HandleMoveScreenCommand002 end!");
+}
+
+/**
+ * @tc.name: HandleMoveScreenCommand003
+ * @tc.desc: Test HandleMoveScreenCommand no migrate when src/dst in same zone
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionServiceTestSecond, HandleMoveScreenCommand003, TestSize.Level0)
+{
+    SLOGD("HandleMoveScreenCommand003 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    auto item = CreateSession();
+    ASSERT_TRUE(item != nullptr);
+    int32_t uid = 100003;
+    item->SetUid(uid);
+    OHOS::AAFwk::WantParams args;
+    args.SetParam("uid", OHOS::AAFwk::Integer::Box(uid));
+    args.SetParam("sourceUserId", OHOS::AAFwk::Integer::Box(100));
+    args.SetParam("targetUserId", OHOS::AAFwk::Integer::Box(101));
+    int32_t before = item->GetScreenUserId();
+    int32_t result = g_AVSessionService->HandleMoveScreenCommand(args);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_EQ(item->GetScreenUserId(), before);
+    item->Destroy();
+    SLOGD("HandleMoveScreenCommand003 end!");
+}
+
+/**
+ * @tc.name: HandleMoveScreenCommand004
+ * @tc.desc: Test HandleMoveScreenCommand when session not found by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSessionServiceTestSecond, HandleMoveScreenCommand004, TestSize.Level0)
+{
+    SLOGD("HandleMoveScreenCommand004 begin!");
+    ASSERT_TRUE(g_AVSessionService != nullptr);
+    OHOS::AAFwk::WantParams args;
+    args.SetParam("uid", OHOS::AAFwk::Integer::Box(888888));
+    args.SetParam("sourceUserId", OHOS::AAFwk::Integer::Box(100));
+    args.SetParam("targetUserId", OHOS::AAFwk::Integer::Box(101));
+    auto& all = g_AVSessionService->GetUsersManager().GetContainerFromAll();
+    size_t before = all.GetAllSessions().size();
+    int32_t result = g_AVSessionService->HandleMoveScreenCommand(args);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_EQ(all.GetAllSessions().size(), before);
+    SLOGD("HandleMoveScreenCommand004 end!");
+}
 #endif
 } //AVSession
 } //OHOS
