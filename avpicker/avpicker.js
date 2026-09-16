@@ -18,7 +18,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 
 const TAG = 'avcastpicker_component ';
-const castAudioType = 4;
+const dlnaType = 4;
 const castPlusAudioType = 8;
 const t = 20;
 const HIGH_QUALITY_MAX_SCALE = 1.5;
@@ -1147,7 +1147,7 @@ export class AVCastPicker extends ViewPU {
  	    if (item.supportedProtocols === undefined) {
  	        return false;
  	    }
- 	    return (item.supportedProtocols & castAudioType) !== 0;
+ 	    return (item.supportedProtocols & dlnaType) !== 0;
  	}
 
     iconBuilder(b3, c3, d3 = null) {
