@@ -16,7 +16,7 @@ import image from '@ohos.multimedia.image';
 import { hdsMaterial } from '@hms.hds.hdsMaterial';
 
 const TAG = 'avcastpicker_component ';
-const castAudioType = 4;
+const dlnaType = 4;
 const castPlusAudioType = 8;
 const MAX_PICKER_LIMIT = 20;
 const HIGH_QUALITY_MAX_SCALE = 1.5;
@@ -951,7 +951,7 @@ export struct AVCastPicker {
  	  if (item.supportedProtocols === undefined) {
  	    return false;
  	  }
- 	  return (item.supportedProtocols & castAudioType) !== 0;
+ 	  return (item.supportedProtocols & dlnaType) !== 0;
  	}
 
   build() {
