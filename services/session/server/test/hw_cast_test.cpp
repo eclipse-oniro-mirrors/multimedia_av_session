@@ -805,6 +805,8 @@ public:
         return 0;
     }
 
+    int UpdateMediaInfo(const OHOS::CastEngine::MediaInfo &mediaInfo) override { return 0; }
+
     int Release() override
     {
         return 0;

@@ -48,6 +48,7 @@ public:
     void SendCustomData(const std::string& data) override;
     int32_t Start(const AVQueueItem& avQueueItem) override;
     int32_t Prepare(const AVQueueItem& avQueueItem) override;
+    int32_t UpdateMediaInfo(const AVQueueItem& avQueueItem) override;
     int32_t GetDuration(int32_t &duration) override;
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;
     int32_t GetSupportedDecoders(std::vector<std::string>& decoderTypes) override;
@@ -64,6 +65,7 @@ public:
     void OnStateChanged(const CastEngine::PlayerStates playbackState, bool isPlayWhenReady) override;
     void OnPositionChanged(int position, int bufferPosition, int duration) override;
     void OnMediaItemChanged(const CastEngine::MediaInfo &mediaInfo) override;
+    void OnMediaInfoChanged(const CastEngine::MediaInfo &mediaInfo) override;
     void OnVolumeChanged(int volume, int maxVolume) override;
     void OnLoopModeChanged(const CastEngine::LoopMode loopMode) override;
     void OnNextRequest() override;
@@ -92,6 +94,8 @@ private:
         const std::vector<int32_t>& supportedCastCmds, CastEngine::StreamCapability& streamCapability);
     int32_t RefreshCurrentAVQueueItem(const AVQueueItem& avQueueItem) override;
     bool RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription);
+    bool MergeMediaInfo(const CastEngine::MediaInfo& mediaInfo, AVQueueItem& queueItem,
+        bool& needNotifyIconChange);
     int32_t GetMediaCapabilities();
     void ClearJsonCapabilities();
     void GetMediaDecodeOfVideoFromCJSON(cJSON* videoValue);

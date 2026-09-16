@@ -230,6 +230,35 @@ int32_t HwCastStreamPlayer::Start(const AVQueueItem& avQueueItem)
     return AVSESSION_SUCCESS;
 }
 
+int32_t HwCastStreamPlayer::UpdateMediaInfo(const AVQueueItem& avQueueItem)
+{
+    std::shared_ptr<AVMediaDescription> mediaDescription = avQueueItem.GetDescription();
+    CHECK_AND_RETURN_RET_LOG(mediaDescription != nullptr, AVSESSION_ERROR, "mediaDescription is nullptr");
+    CastEngine::MediaInfo mediaInfo;
+    mediaInfo.mediaName = mediaDescription->GetTitle();
+    mediaInfo.albumCoverUrl = mediaDescription->GetIconUri() == "" ?
+        mediaDescription->GetAlbumCoverUri() : mediaDescription->GetIconUri();
+    mediaInfo.mediaArtist = mediaDescription->GetArtist();
+    mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
+    mediaInfo.lrcContent = mediaDescription->GetLyricContent();
+    mediaInfo.appIconUrl = mediaDescription->GetIconUri();
+    if (mediaDescription->GetIcon() != nullptr) {
+        mediaInfo.albumPixelMap = AVSessionPixelMapAdapter::ConvertFromInner(mediaDescription->GetIcon(), false);
+    }
+
+    std::lock_guard lockGuard(streamPlayerLock_);
+    if (!streamPlayer_) {
+        SLOGE("Update media info failed");
+        return AVSESSION_ERROR;
+    }
+    if (streamPlayer_->UpdateMediaInfo(mediaInfo) != AVSESSION_SUCCESS) {
+        SLOGE("Update media info failed");
+        return AVSESSION_ERROR;
+    }
+    SLOGI("Update media info successfully");
+    return AVSESSION_SUCCESS;
+}
+
 bool HwCastStreamPlayer::RepeatPrepare(std::shared_ptr<AVMediaDescription>& mediaDescription)
 {
     bool hasIcon = false;
@@ -870,6 +899,85 @@ void HwCastStreamPlayer::OnMediaItemChanged(const CastEngine::MediaInfo& mediaIn
     }
 
     SLOGI("StreamPlayer received mediaItemChanged event done");
+}
+
+bool HwCastStreamPlayer::MergeMediaInfo(const CastEngine::MediaInfo& mediaInfo,
+    AVQueueItem& queueItem, bool& needNotifyIconChange)
+{
+    std::lock_guard lockGuard(curItemLock_);
+    std::shared_ptr<AVMediaDescription> mediaDescription = currentAVQueueItem_.GetDescription();
+    CHECK_AND_RETURN_RET_LOG(mediaDescription != nullptr, false, "currentAVQueueItem description is null");
+    // Dynamic media info update during casting: merge only the fields that carry a value
+    // from mediaInfo into the cached description, leaving the rest untouched.
+    auto mergeStr = [&mediaDescription](const std::string& src,
+        void (AVMediaDescription::*setter)(const std::string&)) {
+        if (!src.empty()) {
+            ((*mediaDescription).*setter)(src);
+        }
+    };
+    mergeStr(mediaInfo.mediaId, &AVMediaDescription::SetMediaId);
+    mergeStr(mediaInfo.mediaName, &AVMediaDescription::SetTitle);
+    // mediaUrl is intentionally not updated: the playing source must stay unchanged
+    // during a media info dynamic update.
+    mergeStr(mediaInfo.mediaType, &AVMediaDescription::SetMediaType);
+    mergeStr(mediaInfo.albumCoverUrl, &AVMediaDescription::SetAlbumCoverUri);
+    mergeStr(mediaInfo.albumTitle, &AVMediaDescription::SetAlbumTitle);
+    mergeStr(mediaInfo.mediaArtist, &AVMediaDescription::SetArtist);
+    mergeStr(mediaInfo.lrcUrl, &AVMediaDescription::SetLyricUri);
+    mergeStr(mediaInfo.lrcContent, &AVMediaDescription::SetLyricContent);
+    mergeStr(mediaInfo.appIconUrl, &AVMediaDescription::SetIconUri);
+    mergeStr(mediaInfo.appName, &AVMediaDescription::SetAppName);
+    mergeStr(mediaInfo.drmType, &AVMediaDescription::SetDrmScheme);
+    // Album cover is a binary pixel map, update only when provided.
+    std::shared_ptr<AVSessionPixelMap> oldIcon;
+    if (mediaInfo.albumPixelMap != nullptr) {
+        SLOGI("OnMediaInfoChanged has albumPixelMap");
+        oldIcon = mediaDescription->GetIcon();
+        mediaDescription->SetIcon(AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(mediaInfo.albumPixelMap));
+    }
+    if (mediaInfo.appIconUrl.empty() && mediaInfo.albumPixelMap != nullptr) {
+        SLOGI("OnMediaInfoChanged appIconUrl empty with pixelMap, clear legacy iconUri and albumCoverUri");
+        mediaDescription->SetIconUri("");
+        mediaDescription->SetAlbumCoverUri("");
+    }
+    if (mediaInfo.albumPixelMap != nullptr) {
+        auto newIcon = mediaDescription->GetIcon();
+        bool iconChanged = (oldIcon == nullptr) != (newIcon == nullptr);
+        if (!iconChanged && oldIcon != nullptr && newIcon != nullptr) {
+            iconChanged = !oldIcon->Equals(*newIcon);
+        }
+        needNotifyIconChange = iconChanged;
+    }
+    currentAVQueueItem_.SetDescription(mediaDescription);
+    queueItem = currentAVQueueItem_;
+    return true;
+}
+
+void HwCastStreamPlayer::OnMediaInfoChanged(const CastEngine::MediaInfo& mediaInfo)
+{
+    SLOGD("Stream player received mediaInfoChanged event");
+    AVQueueItem queueItem;
+    bool needNotifyIconChange = false;
+    if (!MergeMediaInfo(mediaInfo, queueItem, needNotifyIconChange)) {
+        return;
+    }
+    if (needNotifyIconChange) {
+        std::lock_guard<std::recursive_mutex> lockGuard(sessionCallbackLock_);
+        if (sessionCallbackForCastNtf_ && isPlayingState_) {
+            sessionCallbackForCastNtf_(true, true);
+        }
+    }
+    {
+        std::lock_guard playerListLockGuard(streamPlayerListenerListLock_);
+        for (auto listener : streamPlayerListenerList_) {
+            if (listener != nullptr) {
+                SLOGI("trigger the OnMediaItemChange for registered listeners on mediaInfoChanged");
+                listener->OnMediaItemChange(queueItem);
+            }
+        }
+    }
+
+    SLOGI("StreamPlayer received mediaInfoChanged event done");
 }
 
 void HwCastStreamPlayer::OnNextRequest()

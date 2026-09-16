@@ -106,6 +106,9 @@ public:
     int32_t Prepare(const AVQueueItem& avQueueItem) override
         { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
 
+    int32_t Update(const AVQueueItem& avQueueItem) override
+        { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
+
     int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override
         { return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR; }
 
@@ -908,6 +911,82 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode18_2, TestSize.Leve
     int ret = aVCastControllerStubDemo.OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, ERR_NONE);
     SLOGI("OnRemoteRequestCode18_2 end");
+}
+
+/**
+* @tc.name: OnRemoteRequestCode19_1
+* @tc.desc: test HandleUpdate success
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode19_1, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequestCode19_1 begin");
+    uint32_t code = 19;
+    AVCastControllerStubDemo aVCastControllerStubDemo;
+    aVCastControllerStubDemo.isSuccess = true;
+    OHOS::MessageParcel data;
+    auto localDescriptor = IAVCastController::GetDescriptor();
+    data.WriteInterfaceToken(localDescriptor);
+    sptr<AVQueueItem> avQueueItem = new AVQueueItem();
+    data.WriteParcelable(avQueueItem);
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = aVCastControllerStubDemo.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_NONE);
+    int32_t result = AVSESSION_ERROR;
+    reply.ReadInt32(result);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGI("OnRemoteRequestCode19_1 end");
+}
+
+/**
+* @tc.name: OnRemoteRequestCode19_2
+* @tc.desc: test HandleUpdate failure
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode19_2, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequestCode19_2 begin");
+    uint32_t code = 19;
+    AVCastControllerStubDemo aVCastControllerStubDemo;
+    aVCastControllerStubDemo.isSuccess = false;
+    OHOS::MessageParcel data;
+    auto localDescriptor = IAVCastController::GetDescriptor();
+    data.WriteInterfaceToken(localDescriptor);
+    sptr<AVQueueItem> avQueueItem = new AVQueueItem();
+    data.WriteParcelable(avQueueItem);
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = aVCastControllerStubDemo.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_NONE);
+    int32_t result = AVSESSION_SUCCESS;
+    reply.ReadInt32(result);
+    EXPECT_EQ(result, AVSESSION_ERROR);
+    SLOGI("OnRemoteRequestCode19_2 end");
+}
+
+/**
+* @tc.name: OnRemoteRequestCode19_3
+* @tc.desc: test HandleUpdate with null parcelable
+* @tc.type: FUNC
+*/
+static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode19_3, TestSize.Level0)
+{
+    SLOGI("OnRemoteRequestCode19_3 begin");
+    uint32_t code = 19;
+    AVCastControllerStubDemo aVCastControllerStubDemo;
+    aVCastControllerStubDemo.isSuccess = true;
+    OHOS::MessageParcel data;
+    auto localDescriptor = IAVCastController::GetDescriptor();
+    data.WriteInterfaceToken(localDescriptor);
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    int ret = aVCastControllerStubDemo.OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_NONE);
+    int32_t result = AVSESSION_SUCCESS;
+    reply.ReadInt32(result);
+    EXPECT_EQ(result, ERR_UNMARSHALLING);
+    SLOGI("OnRemoteRequestCode19_3 end");
 }
 
 } // namespace OHOS

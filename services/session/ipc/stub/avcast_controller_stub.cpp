@@ -132,6 +132,17 @@ int32_t AVCastControllerStub::HandlePrepare(MessageParcel& data, MessageParcel& 
     return ERR_NONE;
 }
 
+int32_t AVCastControllerStub::HandleUpdate(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<AVQueueItem> avQueueItem = data.ReadParcelable<AVQueueItem>();
+    if (avQueueItem == nullptr) {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write update ret failed");
+    } else {
+        CHECK_AND_PRINT_LOG(reply.WriteInt32(Update(*avQueueItem)), "Write mediaInfoHolder failed");
+    }
+    return ERR_NONE;
+}
+
 int32_t AVCastControllerStub::HandleGetDuration(MessageParcel& data, MessageParcel& reply)
 {
     int32_t duration = 0;

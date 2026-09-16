@@ -36,6 +36,8 @@ public:
 
     int32_t Prepare(const AVQueueItem& avQueueItem) override;
 
+    int32_t Update(const AVQueueItem& avQueueItem) override;
+
     int32_t SetCastPlaybackFilter(const AVPlaybackState::PlaybackStateMaskType& filter) override;
 
     int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override;

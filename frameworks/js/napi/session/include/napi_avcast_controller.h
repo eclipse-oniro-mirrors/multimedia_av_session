@@ -47,6 +47,7 @@ private:
     static napi_value SendCustomData(napi_env env, napi_callback_info info);
     static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value Prepare(napi_env env, napi_callback_info info);
+    static napi_value Update(napi_env env, napi_callback_info info);
     static napi_value GetDuration(napi_env env, napi_callback_info info);
     static napi_value GetCastAVPlaybackState(napi_env env, napi_callback_info info);
     static napi_value GetSupportedDecoders(napi_env env, napi_callback_info info);
@@ -133,6 +134,8 @@ private:
     static void PrepareAsyncExecutor(std::shared_ptr<AVCastController> castController_,
         const AVQueueItem& avQueueItem);
 
+    static void UpdateAsyncExecutor(ContextBase& context, const AVQueueItem& avQueueItem);
+
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static napi_status RegisterCallback(napi_env env, const std::shared_ptr<ContextBase>& context,
         const std::string& event, napi_value filter, napi_value callback);
@@ -150,6 +153,8 @@ private:
     napi_ref wrapperRef_ {};
     std::shared_ptr<AVCastController> castController_;
     std::shared_ptr<NapiAVCastControllerCallback> callback_;
+    AVQueueItem lastUpdateItem_;
+    std::mutex updateMutex_;
     static std::mutex downloadPrepareMutex_;
 
     static constexpr size_t ARGC_ONE = 1;
