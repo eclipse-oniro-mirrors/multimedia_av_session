@@ -1162,7 +1162,8 @@ export class AVCastPicker extends ViewPU {
  	                        SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
  	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
  	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
- 	                        SymbolGlyph.renderingStrategy(2);
+ 	                        SymbolGlyph.renderingStrategy(b3.fromCall && b3.deviceType === 2 ?
+                                SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY);
  	                    }, SymbolGlyph);
  	                } else {
  	                    this.observeComponentCreation2((n3, o3) => {
@@ -1172,7 +1173,8 @@ export class AVCastPicker extends ViewPU {
  	                        SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
  	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
  	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
- 	                        SymbolGlyph.renderingStrategy(2);
+ 	                        SymbolGlyph.renderingStrategy(b3.fromCall && b3.deviceType === 2 ?
+                                SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY);
  	                    }, SymbolGlyph);
  	                }
                 });
