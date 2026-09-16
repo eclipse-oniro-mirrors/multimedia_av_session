@@ -331,6 +331,34 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast003, TestSize.Level0)
 }
 
 /**
+ * @tc.name: StartCast004
+ * @tc.desc: test StartCast for not found device
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, StartCast004, TestSize.Level0)
+{
+    SLOGD("StartCast004 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AVSession::SessionToken sessionToken;
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "-100";
+    deviceInfo.realDeviceId_ = "-100";
+    deviceInfo.supportedProtocols_ = 2;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    sessionToken.sessionId = "hiplayDefault";
+    sessionToken.pid = 1234;
+    sessionToken.uid = 5678;
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo);
+    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
+#endif
+    SLOGD("StartCast004 end!");
+}
+
+/**
  * @tc.name: ProcessTargetMigrateTest001
  * @tc.desc: Test for deviceTypeId mismatch.
  * @tc.type: FUNC

@@ -85,6 +85,8 @@ public:
 
     void HandleTimerByCastState(int32_t castState);
 
+    void UpdatePcmCastSession(const AVSessionDescriptor& descriptor);
+
 private:
     std::atomic<int64_t> castHandle_ = 0;
     std::atomic<int32_t> castState_ = CastState::DISCONNECTED;

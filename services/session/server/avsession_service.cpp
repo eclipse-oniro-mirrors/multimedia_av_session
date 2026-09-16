@@ -1014,6 +1014,9 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
             return;
         }
         sessionListForFront->push_front(sessionItem);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+        UpdatePcmCastSession(sessionItem->GetDescriptor());
+#endif
         if (IsLocalSessionPlaying(sessionItem)) {
             SLOGI("Renderer Running, RepublishNotification for uid=%{public}d", sessionItem->GetUid());
 #ifdef CAR_FEATURE_ENABLE
@@ -1033,6 +1036,16 @@ void AVSessionService::UpdateFrontSession(sptr<AVSessionItem>& sessionItem, bool
     UpdateLocalFrontSession(sessionListForFront);
     NotifySessionChange(sessionListForFront, userId);
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void AVSessionService::UpdatePcmCastSession(const AVSessionDescriptor& descriptor)
+{
+    if (pcmCastSession_ == nullptr) {
+        return;
+    }
+    pcmCastSession_->UpdatePcmCastSession(descriptor);
+}
+#endif
 
 bool AVSessionService::UpdateOrder(sptr<AVSessionItem>& sessionItem)
 {
