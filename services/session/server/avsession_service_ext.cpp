@@ -1182,13 +1182,17 @@ void AVSessionService::NotifyLocalFrontSessionChangeForMigrate(std::string local
             continue;
         }
         if (localFrontSessionId_.empty() && localFrontSessionIdUpdate.length() > 0) {
-            DoRemoteAVSessionLoad(deviceIdForMigrate_);
+            if (migrateAVSessionServer->IsNeedByRemote()) {
+                DoRemoteAVSessionLoad(deviceIdForMigrate_);
+            }
             migrateAVSessionServer->LocalFrontSessionArrive(localFrontSessionIdUpdate);
         } else if (!localFrontSessionId_.empty() && localFrontSessionIdUpdate.length() > 0
             && localFrontSessionId_ != localFrontSessionIdUpdate) {
             migrateAVSessionServer->LocalFrontSessionChange(localFrontSessionIdUpdate);
         } else if (!localFrontSessionId_.empty() && localFrontSessionIdUpdate.empty()) {
-            DoRemoteAVSessionLoad(deviceIdForMigrate_);
+            if (migrateAVSessionServer->IsNeedByRemote()) {
+                DoRemoteAVSessionLoad(deviceIdForMigrate_);
+            }
             migrateAVSessionServer->LocalFrontSessionLeave(localFrontSessionId_);
         }
     }

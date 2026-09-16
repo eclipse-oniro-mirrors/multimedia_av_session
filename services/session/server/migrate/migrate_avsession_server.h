@@ -57,6 +57,7 @@ public:
     void OnDisconnectProxy(const std::string &deviceId) override;
     int32_t GetCharacteristic() override;
     void OnBytesReceived(const std::string &deviceId, const std::string &data) override;
+    bool IsNeedByRemote() const { return isNeedByRemote.load(); }
 
     void Init(AVSessionService *ptr);
 
