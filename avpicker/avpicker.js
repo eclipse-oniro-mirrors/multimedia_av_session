@@ -2246,7 +2246,7 @@ export class AVCastPicker extends ViewPU {
                     this.needToRestart = false;
                     this.restartUECMessage += 1;
                 }
-            })
+            });
         }, Button);
         this.observeComponentCreation2((f8, g8) => {
             Column.create();
