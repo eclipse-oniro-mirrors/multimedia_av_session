@@ -1156,28 +1156,24 @@ export class AVCastPicker extends ViewPU {
             if (this.deviceInfoType === 'true') {
                 this.ifElseBranchUpdateFunction(0, () => {
                     if (this.showDlnaIcon(b3)) {
- 	                    this.ifElseBranchUpdateFunction(0, () => {
- 	                        this.observeComponentCreation2((n3, o3) => {
- 	                            SymbolGlyph.create({ 'id': -1, 'type': -1, params: ['sys.symbol.DLNA'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
- 	                            SymbolGlyph.fontSize('24vp');
- 	                            SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
- 	                                [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
- 	                                [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
- 	                            SymbolGlyph.renderingStrategy(2);
- 	                        }, SymbolGlyph);
- 	                    });
+ 	                    this.observeComponentCreation2((n3, o3) => {
+ 	                        SymbolGlyph.create({ 'id': -1, 'type': -1, params: ['sys.symbol.DLNA'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+ 	                        SymbolGlyph.fontSize('24vp');
+ 	                        SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+ 	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
+ 	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+ 	                        SymbolGlyph.renderingStrategy(2);
+ 	                    }, SymbolGlyph);
  	                } else {
- 	                    this.ifElseBranchUpdateFunction(1, () => {
- 	                        this.observeComponentCreation2((n3, o3) => {
- 	                            SymbolGlyph.create(!c3 ? { 'id': -1, 'type': -1, params: [b3.deviceIconName], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
- 	                                { 'id': -1, 'type': -1, params: [b3.selectedIconName], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
- 	                            SymbolGlyph.fontSize('24vp');
- 	                            SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
- 	                                [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
- 	                                [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
- 	                            SymbolGlyph.renderingStrategy(2);
- 	                        }, SymbolGlyph);
- 	                    });
+ 	                    this.observeComponentCreation2((n3, o3) => {
+ 	                        SymbolGlyph.create(!c3 ? { 'id': -1, 'type': -1, params: [b3.deviceIconName], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+ 	                            { 'id': -1, 'type': -1, params: [b3.selectedIconName], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+ 	                        SymbolGlyph.fontSize('24vp');
+ 	                        SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+ 	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
+ 	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+ 	                        SymbolGlyph.renderingStrategy(2);
+ 	                    }, SymbolGlyph);
  	                }
                 });
             } else {
