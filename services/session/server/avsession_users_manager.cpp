@@ -61,6 +61,12 @@ std::list<int32_t> AVSessionUsersManager::GetAliveUserList()
     return aliveUsers_;
 }
 
+bool AVSessionUsersManager::IsUserAlive(int32_t userId)
+{
+    std::lock_guard lockGuard(userLock_);
+    return std::find(aliveUsers_.begin(), aliveUsers_.end(), userId) != aliveUsers_.end();
+}
+
 void AVSessionUsersManager::HandleUserRemoved(int32_t userId)
 {
     std::lock_guard lockGuard(userLock_);

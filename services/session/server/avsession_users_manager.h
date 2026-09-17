@@ -46,6 +46,8 @@ public:
 
     std::list<int32_t> GetAliveUserList();
 
+    bool IsUserAlive(int32_t userId);
+
     SessionStack& GetContainer();
 
     SessionStack& GetContainerFromUser(int32_t userId);
