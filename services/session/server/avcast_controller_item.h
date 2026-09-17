@@ -70,6 +70,8 @@ public:
 
     int32_t Prepare(const AVQueueItem& avQueueItem) override;
 
+    int32_t Update(const AVQueueItem& avQueueItem) override;
+
     int32_t GetDuration(int32_t& duration) override;
 
     int32_t GetCastAVPlaybackState(AVPlaybackState& avPlaybackState) override;

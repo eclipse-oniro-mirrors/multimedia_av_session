@@ -14,6 +14,7 @@
  */
 
 #include <thread>
+#include <cstring>
 
 #include "key_event.h"
 #include "napi_async_work.h"
@@ -29,6 +30,7 @@
 #include "avsession_trace.h"
 #include "napi_avsession_manager.h"
 #include "ipc_skeleton.h"
+#include "message_parcel.h"
 #include "tokenid_kit.h"
 #include "napi_avcast_controller.h"
 #include "avsession_radar.h"
@@ -84,6 +86,7 @@ napi_value NapiAVCastController::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("off", OffEvent),
         DECLARE_NAPI_FUNCTION("start", Start),
         DECLARE_NAPI_FUNCTION("prepare", Prepare),
+        DECLARE_NAPI_FUNCTION("update", Update),
         DECLARE_NAPI_FUNCTION("sendControlCommand", SendControlCommand),
         DECLARE_NAPI_FUNCTION("sendCustomData", SendCustomData),
         DECLARE_NAPI_FUNCTION("getDuration", GetDuration),
@@ -394,6 +397,118 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
         }).detach();
     };
     return NapiAsyncWork::Enqueue(env, context, "Prepare", executor, complete);
+}
+
+// Compare whether two AVQueueItems carry identical values for the fields that
+// can be dynamically updated by Update: mediaName, albumCoverUrl, mediaArtist,
+// lrcUrl, lrcContent, appIconUrl and albumPixelMap. Other fields (mediaId,
+// mediaUri, duration, etc.) are intentionally ignored as they are not part of
+// an update payload.
+static bool IsAVQueueItemEqual(const AVQueueItem& lhs, const AVQueueItem& rhs)
+{
+    auto lDesc = lhs.GetDescription();
+    auto rDesc = rhs.GetDescription();
+    if (lDesc == nullptr && rDesc == nullptr) {
+        return true;
+    }
+    if (lDesc == nullptr || rDesc == nullptr) {
+        return false;
+    }
+    if (lDesc->GetTitle() != rDesc->GetTitle() ||
+        lDesc->GetAlbumCoverUri() != rDesc->GetAlbumCoverUri() ||
+        lDesc->GetArtist() != rDesc->GetArtist() ||
+        lDesc->GetLyricUri() != rDesc->GetLyricUri() ||
+        lDesc->GetLyricContent() != rDesc->GetLyricContent() ||
+        lDesc->GetIconUri() != rDesc->GetIconUri()) {
+        return false;
+    }
+    auto lIcon = lDesc->GetIcon();
+    auto rIcon = rDesc->GetIcon();
+    if (lIcon == nullptr && rIcon == nullptr) {
+        return true;
+    }
+    if (lIcon == nullptr || rIcon == nullptr) {
+        return false;
+    }
+    return lIcon->Equals(*rIcon);
+}
+
+void NapiAVCastController::UpdateAsyncExecutor(ContextBase& context, const AVQueueItem& avQueueItem)
+{
+    auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context.native);
+    if (napiCastController == nullptr || napiCastController->castController_ == nullptr) {
+        SLOGE("Update failed : controller is nullptr");
+        context.status = napi_generic_failure;
+        context.errMessage = "Update failed : castController_ is nullptr";
+        context.errCode = NapiAVSessionManager::errcode_[ERR_CONTROLLER_NOT_EXIST];
+        return;
+    }
+    std::shared_ptr<AVMediaDescription> description = avQueueItem.GetDescription();
+    if (description == nullptr) {
+        SLOGE("Update failed : description is nullptr");
+        context.status = napi_generic_failure;
+        context.errCode = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
+        return;
+    }
+    auto uri = description->GetIconUri() == "" ?
+        description->GetAlbumCoverUri() : description->GetIconUri();
+    if (description->GetIcon() == nullptr && !uri.empty()) {
+        auto ret = DownloadCastImg(description, uri);
+        SLOGI("DownloadCastImg complete with ret %{public}d", ret);
+    }
+    int32_t ret = napiCastController->castController_->Update(avQueueItem);
+    if (ret != AVSESSION_SUCCESS) {
+        ErrCodeToMessage(ret, context.errMessage);
+        SLOGE("CastController Update failed:%{public}d", ret);
+        context.status = napi_generic_failure;
+        context.errCode = NapiAVSessionManager::errcode_[ret];
+    }
+}
+
+napi_value NapiAVCastController::Update(napi_env env, napi_callback_info info)
+{
+    AVSESSION_TRACE_SYNC_START("NapiAVCastController::Update");
+    struct ConcreteContext : public ContextBase {
+        AVQueueItem avQueueItem_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
+    if (context == nullptr) {
+        SLOGE("Update failed : no memory");
+        NapiUtils::ThrowError(env, "Update failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "Invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->avQueueItem_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "Get play queue item failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_CAST_CONTROLLER_UPDATE_MEDIA_INFO_TASK_ID;
+
+    auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+    bool identical = napiCastController != nullptr &&
+        IsAVQueueItemEqual(napiCastController->lastUpdateItem_, context->avQueueItem_);
+    if (napiCastController == nullptr || identical) {
+        SLOGI("Update controller nullptr or media info identical to last update");
+        return NapiAsyncWork::Enqueue(env, context, "Update", []() {},
+            [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); });
+    }
+    auto executor = [context]() {
+        UpdateAsyncExecutor(*context, context->avQueueItem_);
+    };
+
+    auto complete = [env, context](napi_value& output) {
+        output = NapiUtils::GetUndefinedValue(env);
+        auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
+        if (napiCastController != nullptr) {
+            napiCastController->lastUpdateItem_ = context->avQueueItem_;
+        }
+    };
+    return NapiAsyncWork::Enqueue(env, context, "Update", executor, complete);
 }
 
 napi_value NapiAVCastController::GetDuration(napi_env env, napi_callback_info info)

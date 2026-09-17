@@ -174,7 +174,11 @@ public:
 
     int GetAvailableCapability(OHOS::CastEngine::StreamCapability &streamCapability) override { return 0; }
 
+    int UpdateMediaInfo(const OHOS::CastEngine::MediaInfo &mediaInfo) override { return updateMediaInfoRet_; }
+
     int Release() override { return 0; }
+
+    int updateMediaInfoRet_ = 0;
 
 private:
     int state_ = 0;
@@ -1176,6 +1180,223 @@ HWTEST_F(HwCastStreamPlayerTest, OnMediaItemChanged002, TestSize.Level0)
     hwCastStreamPlayer->OnMediaItemChanged(mediaInfo);
     ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
     SLOGI("OnMediaItemChanged002 end!");
+}
+
+/**
+ * @tc.name: UpdateMediaInfo001
+ * @tc.desc: test UpdateMediaInfo with normal description
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, UpdateMediaInfo001, TestSize.Level0)
+{
+    SLOGI("UpdateMediaInfo001 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->UpdateMediaInfo(avQueueItem);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("UpdateMediaInfo001 end!");
+}
+
+/**
+ * @tc.name: UpdateMediaInfo002
+ * @tc.desc: test UpdateMediaInfo with streamPlayer_ null
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, UpdateMediaInfo002, TestSize.Level0)
+{
+    SLOGI("UpdateMediaInfo002 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->streamPlayer_ = nullptr;
+    auto ret = hwCastStreamPlayer->UpdateMediaInfo(avQueueItem);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("UpdateMediaInfo002 end!");
+}
+
+/**
+ * @tc.name: OnMediaInfoChanged001
+ * @tc.desc: test OnMediaInfoChanged with empty mediaInfo
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnMediaInfoChanged001, TestSize.Level0)
+{
+    SLOGI("OnMediaInfoChanged001 begin!");
+    std::shared_ptr<AVCastControllerItem> avCastControllerItem = std::make_shared<AVCastControllerItem>();
+    ASSERT_EQ(hwCastStreamPlayer->RegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->RefreshCurrentAVQueueItem(avQueueItem);
+    CastEngine::MediaInfo mediaInfo;
+    hwCastStreamPlayer->OnMediaInfoChanged(mediaInfo);
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(avCastControllerItem), AVSESSION_SUCCESS);
+    SLOGI("OnMediaInfoChanged001 end!");
+}
+
+/**
+ * @tc.name: OnMediaInfoChanged002
+ * @tc.desc: test OnMediaInfoChanged clear legacy iconUri and albumCoverUri when appIconUrl empty with pixelMap
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnMediaInfoChanged002, TestSize.Level0)
+{
+    SLOGI("OnMediaInfoChanged002 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetIconUri("legacy_uri");
+    description->SetAlbumCoverUri("legacy_cover");
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->RefreshCurrentAVQueueItem(avQueueItem);
+    CastEngine::MediaInfo mediaInfo;
+    mediaInfo.appIconUrl = "";
+    mediaInfo.albumPixelMap = CreatePixelMap();
+    hwCastStreamPlayer->OnMediaInfoChanged(mediaInfo);
+    EXPECT_EQ(description->GetIconUri(), "");
+    EXPECT_EQ(description->GetAlbumCoverUri(), "");
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnMediaInfoChanged002 end!");
+}
+
+/**
+ * @tc.name: OnMediaInfoChanged003
+ * @tc.desc: test OnMediaInfoChanged with full mediaInfo fields
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnMediaInfoChanged003, TestSize.Level0)
+{
+    SLOGI("OnMediaInfoChanged003 begin!");
+    auto controller = std::make_shared<AVCastControllerItem>();
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(controller);
+    hwCastStreamPlayer->streamPlayerListenerList_.push_back(nullptr);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->RefreshCurrentAVQueueItem(avQueueItem);
+    CastEngine::MediaInfo mediaInfo;
+    mediaInfo.mediaName = "NewTitle";
+    mediaInfo.albumCoverUrl = "NewCoverUrl";
+    mediaInfo.mediaArtist = "NewArtist";
+    mediaInfo.lrcUrl = "NewLrcUrl";
+    mediaInfo.lrcContent = "NewLrcContent";
+    mediaInfo.appIconUrl = "NewAppIconUrl";
+    hwCastStreamPlayer->OnMediaInfoChanged(mediaInfo);
+    EXPECT_EQ(description->GetTitle(), "NewTitle");
+    EXPECT_EQ(description->GetArtist(), "NewArtist");
+    EXPECT_EQ(description->GetLyricUri(), "NewLrcUrl");
+    EXPECT_EQ(description->GetLyricContent(), "NewLrcContent");
+    EXPECT_EQ(description->GetIconUri(), "NewAppIconUrl");
+    ASSERT_EQ(hwCastStreamPlayer->UnRegisterControllerListener(controller), AVSESSION_SUCCESS);
+    SLOGI("OnMediaInfoChanged003 end!");
+}
+
+/**
+ * @tc.name: UpdateMediaInfo003
+ * @tc.desc: test UpdateMediaInfo with null description
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, UpdateMediaInfo003, TestSize.Level0)
+{
+    SLOGI("UpdateMediaInfo003 begin!");
+    AVQueueItem avQueueItem;
+    auto ret = hwCastStreamPlayer->UpdateMediaInfo(avQueueItem);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    SLOGI("UpdateMediaInfo003 end!");
+}
+
+/**
+ * @tc.name: UpdateMediaInfo004
+ * @tc.desc: test UpdateMediaInfo with description that has icon pixelMap set
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, UpdateMediaInfo004, TestSize.Level0)
+{
+    SLOGI("UpdateMediaInfo004 begin!");
+    std::shared_ptr<AVSessionPixelMap> mediaPixelMap = std::make_shared<AVSessionPixelMap>();
+    std::vector<uint8_t> imgBuffer = {1, 0, 0, 0, 1};
+    mediaPixelMap->SetInnerImgBuffer(imgBuffer);
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetIcon(mediaPixelMap);
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto ret = hwCastStreamPlayer->UpdateMediaInfo(avQueueItem);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("UpdateMediaInfo004 end!");
+}
+
+/**
+ * @tc.name: UpdateMediaInfo005
+ * @tc.desc: test UpdateMediaInfo when streamPlayer_->UpdateMediaInfo returns failure
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, UpdateMediaInfo005, TestSize.Level0)
+{
+    SLOGI("UpdateMediaInfo005 begin!");
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    auto mockPlayer = std::make_shared<StreamPlayerIMock>();
+    mockPlayer->updateMediaInfoRet_ = 1;
+    hwCastStreamPlayer->streamPlayer_ = mockPlayer;
+    auto ret = hwCastStreamPlayer->UpdateMediaInfo(avQueueItem);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+    hwCastStreamPlayer->streamPlayer_ = std::make_shared<StreamPlayerIMock>();
+    SLOGI("UpdateMediaInfo005 end!");
+}
+
+/**
+ * @tc.name: OnMediaInfoChanged004
+ * @tc.desc: test OnMediaInfoChanged when MergeMediaInfo fails (no currentAVQueueItem)
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnMediaInfoChanged004, TestSize.Level0)
+{
+    SLOGI("OnMediaInfoChanged004 begin!");
+    CastEngine::MediaInfo mediaInfo;
+    mediaInfo.mediaName = "NoCurrentItem";
+    hwCastStreamPlayer->OnMediaInfoChanged(mediaInfo);
+    SLOGI("OnMediaInfoChanged004 end!");
+}
+
+/**
+ * @tc.name: OnMediaInfoChanged005
+ * @tc.desc: test OnMediaInfoChanged triggers sessionCallbackForCastNtf when icon changes from null to non-null
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(HwCastStreamPlayerTest, OnMediaInfoChanged005, TestSize.Level0)
+{
+    SLOGI("OnMediaInfoChanged005 begin!");
+    bool callbackCalled = false;
+    hwCastStreamPlayer->SetSessionCallbackForCastCap([&callbackCalled](bool, bool) {
+        callbackCalled = true;
+    });
+    hwCastStreamPlayer->isPlayingState_ = true;
+    std::shared_ptr<AVMediaDescription> description = CreateAVMediaDescription();
+    description->SetIcon(nullptr);
+    AVQueueItem avQueueItem;
+    avQueueItem.SetDescription(description);
+    hwCastStreamPlayer->RefreshCurrentAVQueueItem(avQueueItem);
+    CastEngine::MediaInfo mediaInfo;
+    mediaInfo.appIconUrl = "NewIconUrl";
+    mediaInfo.albumPixelMap = CreatePixelMap();
+    hwCastStreamPlayer->OnMediaInfoChanged(mediaInfo);
+    EXPECT_TRUE(callbackCalled);
+    hwCastStreamPlayer->isPlayingState_ = false;
+    SLOGI("OnMediaInfoChanged005 end!");
 }
 
 /**

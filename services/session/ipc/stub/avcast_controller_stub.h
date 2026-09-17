@@ -39,6 +39,8 @@ private:
     
     int32_t HandlePrepare(MessageParcel& data, MessageParcel& reply);
 
+    int32_t HandleUpdate(MessageParcel& data, MessageParcel& reply);
+
     int32_t HandleGetDuration(MessageParcel& data, MessageParcel& reply);
 
     int32_t HandleGetCastAVPlayBackState(MessageParcel& data, MessageParcel& reply);
@@ -79,6 +81,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleStart(data, reply); }},
         {CAST_CONTROLLER_CMD_PREPARE,
             [this](MessageParcel& data, MessageParcel& reply) { return HandlePrepare(data, reply); }},
+        {CAST_CONTROLLER_CMD_UPDATE,
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleUpdate(data, reply); }},
         {CAST_CONTROLLER_CMD_GET_DURATION,
             [this](MessageParcel& data, MessageParcel& reply) { return HandleGetDuration(data, reply); }},
         {CAST_CONTROLLER_CMD_GET_CAST_AV_PLAYBACK_STATE,
@@ -119,6 +123,7 @@ private:
         {CAST_CONTROLLER_CMD_SEND_CONTROL_COMMAND, "HandleSendControlCommand"},
         {CAST_CONTROLLER_CMD_START, "HandleStart"},
         {CAST_CONTROLLER_CMD_PREPARE, "HandlePrepare"},
+        {CAST_CONTROLLER_CMD_UPDATE, "HandleUpdate"},
         {CAST_CONTROLLER_CMD_GET_DURATION, "HandleGetDuration"},
         {CAST_CONTROLLER_CMD_GET_CAST_AV_PLAYBACK_STATE, "HandleGetCastAVPlayBackState"},
         {CAST_CONTROLLER_CMD_GET_SUPPORT_DECODER, "HandleGetSupportedDecoders"},

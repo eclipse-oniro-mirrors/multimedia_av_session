@@ -795,4 +795,25 @@ void PcmCastSession::SendModeChangeToCast(int32_t screenMode)
     }
     cJSON_Delete(jsonObj);
 }
+
+void PcmCastSession::UpdatePcmCastSession(const AVSessionDescriptor& descriptor)
+{
+    bool isVaild = descriptor_.sessionId_ == "hiplayDefault" && GetCastMode() == HiPlayCastMode::APP_LEVEL &&
+        descriptor.sessionTag_ != "ancoMediaSession";
+    if (isVaild) {
+        SLOGI("PcmCastSession update session");
+        {
+            std::lock_guard lockGuard(castLock_);
+            descriptor_.sessionId_ = descriptor.sessionId_;
+            tempDeviceInfo_.hiPlayDeviceInfo_.castUid_ = descriptor.uid_;
+            descriptor_.uid_ = descriptor.uid_;
+            if (!descriptor_.outputDeviceInfo_.deviceInfos_.empty()) {
+                descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = descriptor.uid_;
+            }
+        }
+
+        SessionToken sessionTokenTemp{descriptor_.sessionId_, descriptor.pid_, descriptor.uid_};
+        SendStateChangeRequest(sessionTokenTemp);
+    }
+}
 } // namespace OHOS::AVSession

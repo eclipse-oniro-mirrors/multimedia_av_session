@@ -161,6 +161,33 @@ int32_t AVCastControllerProxy::Prepare(const AVQueueItem& avQueueItem)
     return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
 }
 
+int32_t AVCastControllerProxy::Update(const AVQueueItem& avQueueItem)
+{
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroy_.load(), ERR_CONTROLLER_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_CONTROLLER_NOT_EXIST_CAST_SET, "controller is destroy", false),
+        "controller is destroy");
+    MessageParcel parcel;
+    parcel.SetMaxCapacity(defaultIpcCapacity);
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(avQueueItem.GetDescription() != nullptr, ERR_INVALID_PARAM,
+        "description is nullptr");
+    CHECK_AND_RETURN_RET_LOG(parcel.WriteParcelable(&avQueueItem), ERR_UNMARSHALLING, "Write avQueueItem failed");
+
+    auto remote = Remote();
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_CAST_SET, "get remote service failed", false),
+        "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(CAST_CONTROLLER_CMD_UPDATE, parcel, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : AVSESSION_ERROR;
+}
+
 int32_t AVCastControllerProxy::GetDuration(int32_t& duration)
 {
     MessageParcel parcel;

@@ -55,6 +55,7 @@ public:
     int32_t SendCustomData(const AAFwk::WantParams& data) override { return AVSESSION_SUCCESS; };
     int32_t Start(const AVQueueItem& avQueueItem) override { return AVSESSION_SUCCESS; };
     int32_t Prepare(const AVQueueItem& avQueueItem) override { return AVSESSION_SUCCESS; };
+    int32_t Update(const AVQueueItem& avQueueItem) override { return AVSESSION_SUCCESS; };
     int32_t RegisterCallback(const std::shared_ptr<AVCastControllerCallback>& callback) override
         { return AVSESSION_SUCCESS; };
     int32_t GetDuration(int32_t& duration) override { return AVSESSION_SUCCESS; };

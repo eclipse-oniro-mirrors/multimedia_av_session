@@ -49,6 +49,8 @@ public:
     virtual int32_t Start(const AVQueueItem& avQueueItem) = 0;
 
     virtual int32_t Prepare(const AVQueueItem& avQueueItem) = 0;
+
+    virtual int32_t Update(const AVQueueItem& avQueueItem) = 0;
     /**
      * @brief Listen for AVController Callback event.
      *
