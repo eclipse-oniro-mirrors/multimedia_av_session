@@ -951,7 +951,7 @@ export struct AVCastPicker {
  	  if (item.supportedProtocols === undefined) {
  	    return false;
  	  }
- 	  return (item.supportedProtocols & dlnaType) !== 0;
+ 	  return item.supportedProtocols === dlnaType;
  	}
 
   build() {
