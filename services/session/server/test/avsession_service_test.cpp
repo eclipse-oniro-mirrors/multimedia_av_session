@@ -434,13 +434,13 @@ static HWTEST_F(AVSessionServiceTest, GetSessionInnerCorrectElement001, TestSize
         avservice_->CreateSessionInner(g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
     ASSERT_TRUE(avsessionHere_ != nullptr);
 
-    // 与创建时一致的 element：取回成功
+    // same element as creation: get session should succeed
     std::string sessionTag;
     OHOS::sptr<IRemoteObject> sessionObj = nullptr;
     EXPECT_EQ(avservice_->GetSessionInner(elementName, sessionTag, sessionObj), AVSESSION_SUCCESS);
     EXPECT_EQ(sessionTag, g_testSessionTag);
 
-    // 包名不一致的 element：仍然拒绝，防止纠正过度放大取值范围
+    // mismatched element: still rejected, preventing over-correction
     OHOS::AppExecFwk::ElementName otherElement;
     otherElement.SetBundleName("com.test.notexist");
     otherElement.SetAbilityName(g_testAnotherAbilityName);
@@ -1947,7 +1947,7 @@ static HWTEST_F(AVSessionServiceTest, ReportSessionInfo001, TestSize.Level0)
     SLOGI("ReportSessionInfo001 begin!");
     EXPECT_TRUE(avservice_ != nullptr);
     OHOS::sptr<AVSessionItem> avsessionHere_ = nullptr;
-    avservice_->ReportSessionInfo(avsessionHere_, true, g_testAnotherBundleName);
+    avservice_->ReportSessionInfo(avsessionHere_, true, g_testAnotherBundleName, __func__);
     SLOGI("ReportSessionInfo001 end!");
 }
 

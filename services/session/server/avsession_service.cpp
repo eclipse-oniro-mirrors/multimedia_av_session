@@ -1909,6 +1909,9 @@ int32_t AVSessionService::GetSessionInner(const AppExecFwk::ElementName& element
 
     AppExecFwk::ElementName realElement = CorrectElementForThirdPartyCaller(
         sessionWanted->GetDescriptor().isThirdPartyApp_, elementName);
+    if (sessionWanted->GetBundleName() != elementName.GetBundleName()) {
+        ReportSessionInfo(sessionWanted, AVSESSION_SUCCESS, elementName.GetBundleName(), __func__);
+    }
     CHECK_AND_RETURN_RET_LOG(sessionWanted->GetBundleName() == realElement.GetBundleName(), ERR_SESSION_NOT_EXIST,
         "process bundleName not fit:%{public}s vs %{public}s",
         realElement.GetBundleName().c_str(), sessionWanted->GetBundleName().c_str());
@@ -2054,7 +2057,7 @@ sptr<AVSessionItem> AVSessionService::CreateSessionInner(const std::string& tag,
 }
 
 void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, int32_t res,
-    const std::string& callerBundleName)
+    const std::string& callerBundleName, const std::string& apiName)
 {
     std::string sessionId = "";
     std::string sessionTag = "";
@@ -2073,9 +2076,9 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
             + "isBundleNameMismatch: " + std::to_string(isBundleNameMismatch) + ","
             + "callerBundleName: " + callerBundleName;
     }
-    std::string errMsg = (res == AVSESSION_SUCCESS) ? "SUCCESS" : "create session failed";
+    std::string errMsg = (res == AVSESSION_SUCCESS) ? "SUCCESS" : (apiName + " failed");
     HISYSEVENT_BEHAVIOR("SESSION_API_BEHAVIOR",
-        "API_NAME", "CreateSession",
+        "API_NAME", apiName,
         "BUNDLE_NAME", bundleName,
         "SESSION_ID",  sessionId,
         "SESSION_TAG", sessionTag,
@@ -2119,7 +2122,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     }
 
     object = session;
-    ReportSessionInfo(session, static_cast<int32_t>(res), elementName.GetBundleName());
+    ReportSessionInfo(session, static_cast<int32_t>(res), elementName.GetBundleName(), __func__);
 
     {
         std::lock_guard lockGuard(isAllSessionCastLock_);
