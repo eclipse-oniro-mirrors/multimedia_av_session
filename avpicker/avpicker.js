@@ -1147,7 +1147,7 @@ export class AVCastPicker extends ViewPU {
  	    if (item.supportedProtocols === undefined) {
  	        return false;
  	    }
- 	    return (item.supportedProtocols & dlnaType) !== 0;
+ 	    return item.supportedProtocols === dlnaType;
  	}
 
     iconBuilder(b3, c3, d3 = null) {
