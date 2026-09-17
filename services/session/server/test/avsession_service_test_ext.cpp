@@ -21,17 +21,20 @@
 #include "avmeta_data.h"
 #include "avplayback_state.h"
 #include "avsession_info.h"
-#include "avsession_service.h"
 #include "audio_info.h"
 #include "client_death_proxy.h"
 #include "system_ability_definition.h"
 #include "system_ability_ondemand_reason.h"
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
-#include "migrate_avsession_manager.h"
 #include "avrouter_impl.h"
 #include "pcm_cast_session.h"
 #include "avsession_users_manager.h"
+
+#define private public
+#include "avsession_service.h"
+#include "migrate_avsession_manager.h"
+#undef private
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -1026,6 +1029,46 @@ static HWTEST_F(AVSessionServiceTestExt, NotifyLocalFrontSessionChangeForMigrate
         { "nid_11", std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT, "nid_11") });
     g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate("");
     EXPECT_EQ(g_AVSessionService->localFrontSessionId_, "");
+}
+
+/**
+ * @tc.name: NotifyLocalFrontSessionChangeForMigrate005
+ * @tc.desc: Cover IsNeedByRemote gate on arrive/leave branches
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, NotifyLocalFrontSessionChangeForMigrate005, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+
+    // isNeedByRemote=true, arrive branch
+    g_AVSessionService->migrateAVSessionServerMap_.clear();
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate("");
+    auto serverArrive = std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT, "nid_arrive");
+    serverArrive->isNeedByRemote.store(true);
+    g_AVSessionService->migrateAVSessionServerMap_.insert({ "nid_arrive", serverArrive });
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate("ARRIVE_005");
+    EXPECT_EQ(g_AVSessionService->localFrontSessionId_, "ARRIVE_005");
+    EXPECT_TRUE(serverArrive->isNeedByRemote.load());
+
+    // isNeedByRemote=true, leave branch
+    g_AVSessionService->migrateAVSessionServerMap_.clear();
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate("LEAVE_005");
+    auto serverLeave = std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT, "nid_leave");
+    serverLeave->isNeedByRemote.store(true);
+    g_AVSessionService->migrateAVSessionServerMap_.insert({ "nid_leave", serverLeave });
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate("");
+    EXPECT_EQ(g_AVSessionService->localFrontSessionId_, "");
+    EXPECT_TRUE(serverLeave->isNeedByRemote.load());
+
+    // isNeedByRemote=false (default), arrive branch should skip DoRemoteAVSessionLoad
+    g_AVSessionService->migrateAVSessionServerMap_.clear();
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate("");
+    auto serverNotNeed = std::make_shared<MigrateAVSessionServer>(MIGRATE_MODE_NEXT, "nid_notneed");
+    g_AVSessionService->migrateAVSessionServerMap_.insert({ "nid_notneed", serverNotNeed });
+    g_AVSessionService->NotifyLocalFrontSessionChangeForMigrate("NOTNEED_005");
+    EXPECT_EQ(g_AVSessionService->localFrontSessionId_, "NOTNEED_005");
+    EXPECT_FALSE(serverNotNeed->isNeedByRemote.load());
 }
 
 /**
