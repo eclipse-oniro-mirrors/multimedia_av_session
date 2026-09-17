@@ -18,6 +18,7 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 }
 
 const TAG = 'avcastpicker_component ';
+const dlnaType = 4;
 const castPlusAudioType = 8;
 const t = 20;
 const HIGH_QUALITY_MAX_SCALE = 1.5;
@@ -1142,25 +1143,40 @@ export class AVCastPicker extends ViewPU {
         Column.pop();
     }
 
+    showDlnaIcon(item) {
+ 	    if (item.supportedProtocols === undefined) {
+ 	        return false;
+ 	    }
+ 	    return item.supportedProtocols === dlnaType;
+ 	}
+
     iconBuilder(b3, c3, d3 = null) {
         this.observeComponentCreation2((f3, g3) => {
             If.create();
             if (this.deviceInfoType === 'true') {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((n3, o3) => {
-                        SymbolGlyph.create(!c3 ? { 'id': -1, 'type': -1, params: [b3.deviceIconName],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-                            { 'id': -1, 'type': -1, params: [b3.selectedIconName],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                        SymbolGlyph.fontSize('24vp');
-                        SymbolGlyph.fontColor((c3 && this.configurationColorMode !==
-                            ConfigurationColorMode.COLOR_MODE_DARK) ?
-                            [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
-                            [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-                        SymbolGlyph.renderingStrategy(2);
-                    }, SymbolGlyph);
+                    if (this.showDlnaIcon(b3)) {
+ 	                    this.observeComponentCreation2((n3, o3) => {
+ 	                        SymbolGlyph.create({ 'id': -1, 'type': -1, params: ['sys.symbol.DLNA'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+ 	                        SymbolGlyph.fontSize('24vp');
+ 	                        SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+ 	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
+ 	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+ 	                        SymbolGlyph.renderingStrategy(b3.fromCall && b3.deviceType === 2 ?
+                                SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY);
+ 	                    }, SymbolGlyph);
+ 	                } else {
+ 	                    this.observeComponentCreation2((n3, o3) => {
+ 	                        SymbolGlyph.create(!c3 ? { 'id': -1, 'type': -1, params: [b3.deviceIconName], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+ 	                            { 'id': -1, 'type': -1, params: [b3.selectedIconName], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+ 	                        SymbolGlyph.fontSize('24vp');
+ 	                        SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+ 	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
+ 	                            [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+ 	                        SymbolGlyph.renderingStrategy(b3.fromCall && b3.deviceType === 2 ?
+                                SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY);
+ 	                    }, SymbolGlyph);
+ 	                }
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
@@ -2228,7 +2244,7 @@ export class AVCastPicker extends ViewPU {
                     this.needToRestart = false;
                     this.restartUECMessage += 1;
                 }
-            })
+            });
         }, Button);
         this.observeComponentCreation2((f8, g8) => {
             Column.create();

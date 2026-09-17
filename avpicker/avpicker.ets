@@ -16,6 +16,7 @@ import image from '@ohos.multimedia.image';
 import { hdsMaterial } from '@hms.hds.hdsMaterial';
 
 const TAG = 'avcastpicker_component ';
+const dlnaType = 4;
 const castPlusAudioType = 8;
 const MAX_PICKER_LIMIT = 20;
 const HIGH_QUALITY_MAX_SCALE = 1.5;
@@ -946,6 +947,13 @@ export struct AVCastPicker {
     .borderRadius(this.isPc ? 8 : 20)
   }
 
+  private showDlnaIcon(item: AVCastPickerDeviceInfo): boolean {
+ 	  if (item.supportedProtocols === undefined) {
+ 	    return false;
+ 	  }
+ 	  return item.supportedProtocols === dlnaType;
+ 	}
+
   build() {
     Column() {
       if (this.isDisabledByPickerLimit) {
@@ -961,12 +969,21 @@ export struct AVCastPicker {
   @Builder
   iconBuilder(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
     if (this.deviceInfoType === 'true') {
-      SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
-        .fontSize('24vp')
-        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-          [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
-        .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
-          SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
+      if (this.showDlnaIcon(item)) {
+ 	      SymbolGlyph($r('sys.symbol.DLNA'))
+ 	        .fontSize('24vp')
+ 	        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+ 	          [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+ 	        .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
+ 	          SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
+ 	    } else {
+ 	      SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
+ 	        .fontSize('24vp')
+ 	        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+ 	          [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+ 	        .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
+ 	          SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
+ 	    }
     } else {
       Image(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
         .width(24)
