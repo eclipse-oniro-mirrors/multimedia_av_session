@@ -646,10 +646,6 @@ private:
 
     std::recursive_mutex remoteSinkLock_;
 
-    std::shared_ptr<bool> isAlivePtr_;
-
-    std::recursive_mutex isAliveLock_;
-
     std::recursive_mutex callbackForCastCapLock_;
 
     std::recursive_mutex mediaSessionCallbackLock_;
