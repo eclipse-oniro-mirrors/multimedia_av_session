@@ -922,6 +922,75 @@ static HWTEST_F(MigrateAVSessionTest, DelaySendPlaybackState002, TestSize.Level0
     server_->OnTopSessionChange(descriptor);
     int32_t ret = server_->DelaySendPlaybackState();
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    avsession_->Destroy();
     SLOGI("DelaySendPlaybackState002 end");
+}
+
+/**
+* @tc.name: OnPlaybackStateChangeAfterTopChanged001
+* @tc.desc: Test OnPlaybackStateChange sends the triggering session's state after topSession changed
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(MigrateAVSessionTest, OnPlaybackStateChangeAfterTopChanged001, TestSize.Level0)
+{
+    SLOGI("OnPlaybackStateChangeAfterTopChanged001 begin");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession");
+    elementName.SetAbilityName("test.ability");
+    OHOS::sptr<AVSessionItem> avsession_ =
+        avservice_->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    SetMetaDataAndPlaybackState(avsession_);
+    AVSessionDescriptor descriptor = avsession_->GetDescriptor();
+    server_->OnSessionCreate(descriptor);
+    server_->OnTopSessionChange(descriptor);
+    server_->CreateController(descriptor.sessionId_);
+
+    server_->topSessionId_ = "anotherSessionId";
+
+    AVPlaybackState playbackState;
+    playbackState.SetState(AVPlaybackState::PLAYBACK_STATE_PAUSE);
+    playbackState.SetSpeed(TEST_SPEED);
+    playbackState.SetPosition({ 80000, 0 });
+    server_->OnPlaybackStateChange(descriptor.sessionId_, playbackState);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_EQ(server_ != nullptr, true);
+    server_->topSessionId_ = descriptor.sessionId_;
+    avsession_->Destroy();
+    SLOGI("OnPlaybackStateChangeAfterTopChanged001 end");
+}
+
+/**
+* @tc.name: OnMetaDataChangeAfterTopChanged001
+* @tc.desc: Test OnMetaDataChange sends the triggering session's metadata after topSession changed
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(MigrateAVSessionTest, OnMetaDataChangeAfterTopChanged001, TestSize.Level0)
+{
+    SLOGI("OnMetaDataChangeAfterTopChanged001 begin");
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("test.ohos.avsession");
+    elementName.SetAbilityName("test.ability");
+    OHOS::sptr<AVSessionItem> avsession_ =
+        avservice_->CreateSessionInner("test", AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    SetMetaDataAndPlaybackState(avsession_);
+    AVSessionDescriptor descriptor = avsession_->GetDescriptor();
+    server_->OnSessionCreate(descriptor);
+    server_->OnTopSessionChange(descriptor);
+    server_->CreateController(descriptor.sessionId_);
+
+    server_->topSessionId_ = "anotherSessionId";
+
+    AVMetaData metaData;
+    metaData.Reset();
+    metaData.SetAssetId("456");
+    metaData.SetTitle("Changed Title");
+    server_->OnMetaDataChange(descriptor.sessionId_, metaData);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_EQ(server_ != nullptr, true);
+    server_->topSessionId_ = descriptor.sessionId_;
+    avsession_->Destroy();
+    SLOGI("OnMetaDataChangeAfterTopChanged001 end");
 }
 
