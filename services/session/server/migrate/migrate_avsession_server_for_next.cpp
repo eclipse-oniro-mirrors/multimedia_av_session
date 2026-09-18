@@ -750,9 +750,11 @@ bool MigrateAVSessionServer::CheckPostVolume(int32_t volumeNum)
 
 std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFunc()
 {
-    return [this](int32_t volumeNum) {
-        CHECK_AND_RETURN_LOG(CheckPostVolume(volumeNum), "volumeNum no change");
-        std::lock_guard lockGuard(migrateDeviceChangeLock_);
+    return [weakThis = std::weak_ptr<MigrateAVSessionServer>(shared_from_this())](int32_t volumeNum) {
+        auto sharedThis = weakThis.lock();
+        CHECK_AND_RETURN_LOG(sharedThis != nullptr, "MigrateAVSessionServer already destroyed");
+        CHECK_AND_RETURN_LOG(sharedThis->CheckPostVolume(volumeNum), "volumeNum no change");
+        std::lock_guard lockGuard(sharedThis->migrateDeviceChangeLock_);
         cJSON* value = SoftbusSessionUtils::GetNewCJSONObject();
         CHECK_AND_RETURN_LOG(value != nullptr, "get value json with nullptr");
         std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_SET_VOLUME_COMMAND});
@@ -764,9 +766,11 @@ std::function<void(int32_t)> MigrateAVSessionServer::GetVolumeKeyEventCallbackFu
 
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
         SLOGI("server send set volume num async:%{public}d", volumeNum);
-        MigratePostTask(
-            [this, msg]() {
-                SendByteForNext(deviceId_, msg);
+        sharedThis->MigratePostTask(
+            [weakThis, msg]() {
+                auto innerSharedThis = weakThis.lock();
+                CHECK_AND_RETURN_LOG(innerSharedThis != nullptr, "MigrateAVSessionServer already destroyed in task");
+                innerSharedThis->SendByteForNext(innerSharedThis->deviceId_, msg);
             },
             "SYNC_SET_VOLUME_COMMAND");
         cJSON_Delete(value);
@@ -784,9 +788,12 @@ bool MigrateAVSessionServer::CheckPostAvailableDevice(std::string& msg)
 
 AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceChangeCallbackFunc()
 {
-    return [this](const AudioDeviceDescriptors& devices) {
-        std::lock_guard lockGuard(migrateDeviceChangeLock_);
-        cJSON* value = ConvertAudioDeviceDescriptorsToJson(devices);
+    return [weakThis = std::weak_ptr<MigrateAVSessionServer>(shared_from_this())](
+        const AudioDeviceDescriptors& devices) {
+        auto sharedThis = weakThis.lock();
+        CHECK_AND_RETURN_LOG(sharedThis != nullptr, "MigrateAVSessionServer already destroyed");
+        std::lock_guard lockGuard(sharedThis->migrateDeviceChangeLock_);
+        cJSON* value = sharedThis->ConvertAudioDeviceDescriptorsToJson(devices);
         CHECK_AND_RETURN_LOG(value != nullptr, "get value json with nullptr");
         if (cJSON_IsInvalid(value) || cJSON_IsNull(value)) {
             SLOGE("get value from ConvertAudioDeviceDescriptorsToJson invalid");
@@ -796,11 +803,13 @@ AudioDeviceDescriptorsCallbackFunc MigrateAVSessionServer::GetAvailableDeviceCha
         std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_AVAIL_DEVICES_LIST});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
         cJSON_Delete(value);
-        CHECK_AND_RETURN_LOG(CheckPostAvailableDevice(msg), "AvailableDevice no change");
+        CHECK_AND_RETURN_LOG(sharedThis->CheckPostAvailableDevice(msg), "AvailableDevice no change");
         SLOGI("server send get available device change callback async:%{public}d", static_cast<int>(devices.size()));
-        MigratePostTask(
-            [this, msg]() {
-                SendJsonStringByte(deviceId_, msg);
+        sharedThis->MigratePostTask(
+            [weakThis, msg]() {
+                auto innerSharedThis = weakThis.lock();
+                CHECK_AND_RETURN_LOG(innerSharedThis != nullptr, "MigrateAVSessionServer already destroyed in task");
+                innerSharedThis->SendJsonStringByte(innerSharedThis->deviceId_, msg);
             },
             "SYNC_AVAIL_DEVICES_LIST");
     };
@@ -818,9 +827,12 @@ bool MigrateAVSessionServer::CheckPostPreferredDevice(std::string& msg)
 MigrateAVSessionServer::PreferredDeviceChangeCallbackPtr MigrateAVSessionServer::GetPreferredDeviceChangeCallback()
 {
     std::lock_guard lockGuard(migrateAudioCallbackLock_);
-    return std::make_shared<AudioPreferredDeviceChangeCallback>([this](const AudioDeviceDescriptors& devices) {
-        std::lock_guard lockGuard(migrateDeviceChangeLock_);
-        cJSON* value = ConvertAudioDeviceDescriptorsToJson(devices);
+    return std::make_shared<AudioPreferredDeviceChangeCallback>(
+        [weakThis = std::weak_ptr<MigrateAVSessionServer>(shared_from_this())](const AudioDeviceDescriptors& devices) {
+        auto sharedThis = weakThis.lock();
+        CHECK_AND_RETURN_LOG(sharedThis != nullptr, "MigrateAVSessionServer already destroyed");
+        std::lock_guard lockGuard(sharedThis->migrateDeviceChangeLock_);
+        cJSON* value = sharedThis->ConvertAudioDeviceDescriptorsToJson(devices);
         CHECK_AND_RETURN_LOG(value != nullptr, "get value json with nullptr");
         if (cJSON_IsInvalid(value) || cJSON_IsNull(value)) {
             SLOGE("get value from ConvertAudioDeviceDescriptorsToJson invalid");
@@ -830,14 +842,18 @@ MigrateAVSessionServer::PreferredDeviceChangeCallbackPtr MigrateAVSessionServer:
         std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_CURRENT_DEVICE});
         SoftbusSessionUtils::TransferJsonToStr(value, msg);
         cJSON_Delete(value);
-        CHECK_AND_RETURN_LOG(CheckPostPreferredDevice(msg), "PreferredDevice no change");
+        CHECK_AND_RETURN_LOG(sharedThis->CheckPostPreferredDevice(msg), "PreferredDevice no change");
         SLOGI("server send get preferred device change callback async:%{public}d", static_cast<int>(msg.size()));
-        MigratePostTask(
-            [this, msg]() {
-                SendJsonStringByte(deviceId_, msg);
+        sharedThis->MigratePostTask(
+            [weakThis, msg]() {
+                auto innerSharedThis = weakThis.lock();
+                CHECK_AND_RETURN_LOG(innerSharedThis != nullptr, "MigrateAVSessionServer already destroyed in task");
+                innerSharedThis->SendJsonStringByte(innerSharedThis->deviceId_, msg);
             },
             "SYNC_CURRENT_DEVICE");
-        volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
+        if (sharedThis->volumeKeyEventCallbackFunc_) {
+            sharedThis->volumeKeyEventCallbackFunc_(AudioAdapter::GetInstance().GetVolume());
+        }
     });
 }
 

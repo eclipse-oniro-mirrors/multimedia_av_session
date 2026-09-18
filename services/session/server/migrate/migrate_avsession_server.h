@@ -196,8 +196,8 @@ private:
     int32_t migrateMode_ = MIGRATE_MODE_CROSS;
     std::string curAssetId_;
 
-    std::function<void(int32_t)> volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
-    AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
+    std::function<void(int32_t)> volumeKeyEventCallbackFunc_;
+    AudioDeviceDescriptorsCallbackFunc availableDeviceChangeCallbackFunc_;
     PreferredDeviceChangeCallbackPtr preferredDeviceChangeCallback_ = nullptr;
     AVMetaData metaDataCache_;
     AVPlaybackState playbackStateCache_;
