@@ -954,7 +954,7 @@ export struct AVCastPicker {
  	  return item.supportedProtocols === dlnaType;
  	}
 
-  private getDeviceName(item: AVCastPickerDeviceInfo): string {
+  private getDeviceIconName(item: AVCastPickerDeviceInfo): string {
  	  if (this.isDlnaDevice(item)) {
  	    return 'sys.symbol.DLNA';
  	  }
@@ -976,7 +976,7 @@ export struct AVCastPicker {
   @Builder
   iconBuilder(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
     if (this.deviceInfoType === 'true') {
-      SymbolGlyph(!isSelected ? $r(this.getDeviceName(item)) : $r(item.selectedIconName))
+      SymbolGlyph(!isSelected ? $r(this.getDeviceIconName(item)) : $r(item.selectedIconName))
  	      .fontSize('24vp')
  	      .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
  	        [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
