@@ -108,7 +108,6 @@ private:
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
     std::map<std::string, std::shared_ptr<AVControllerObserver>> playerIdToControllerCallbackMap_;
     std::list<sptr<AVControllerItem>> sortControllerList_;
-    std::shared_ptr<AVSessionPixelMap> mediaImage_ = std::make_shared<AVSessionPixelMap>();
 
     void ObserveControllerChanged(const std::string &deviceId);
     void CreateController(const std::string &sessionId);
@@ -150,6 +149,8 @@ private:
     std::string GetBundleName(std::string sessionId);
     bool CompressToJPEG(std::shared_ptr<AVSessionPixelMap> inputData, std::vector<uint8_t> &outputData);
     void DelaySendMetaData();
+    void SendMetaDataForSession(const std::string &sessionId);
+    void OnMetaDataChanged(const std::string &playerId);
     int32_t DelaySendPlaybackState();
     bool GetVehicleRelatingState(std::string playerId);
     void UpdateFrontSessionInfoToRemote(sptr<AVControllerItem> controller);
