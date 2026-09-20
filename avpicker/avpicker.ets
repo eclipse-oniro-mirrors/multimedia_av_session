@@ -947,11 +947,18 @@ export struct AVCastPicker {
     .borderRadius(this.isPc ? 8 : 20)
   }
 
-  private showDlnaIcon(item: AVCastPickerDeviceInfo): boolean {
+  private isDlnaDevice(item: AVCastPickerDeviceInfo): boolean {
  	  if (item.supportedProtocols === undefined) {
  	    return false;
  	  }
  	  return item.supportedProtocols === dlnaType;
+ 	}
+
+  private getDeviceName(item: AVCastPickerDeviceInfo): string {
+ 	  if (this.isDlnaDevice(item)) {
+ 	    return 'sys.symbol.DLNA';
+ 	  }
+ 	  return item.deviceIconName;
  	}
 
   build() {
@@ -969,21 +976,12 @@ export struct AVCastPicker {
   @Builder
   iconBuilder(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
     if (this.deviceInfoType === 'true') {
-      if (this.showDlnaIcon(item)) {
- 	      SymbolGlyph($r('sys.symbol.DLNA'))
- 	        .fontSize('24vp')
- 	        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
- 	          [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
- 	        .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
- 	          SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
- 	    } else {
- 	      SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
- 	        .fontSize('24vp')
- 	        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
- 	          [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
- 	        .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
- 	          SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
- 	    }
+      SymbolGlyph(!isSelected ? $r(this.getDeviceName(item)) : $r(item.selectedIconName))
+ 	      .fontSize('24vp')
+ 	      .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+ 	        [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+ 	      .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
+ 	        SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
     } else {
       Image(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
         .width(24)
