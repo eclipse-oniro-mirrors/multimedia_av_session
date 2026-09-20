@@ -1150,7 +1150,7 @@ export class AVCastPicker extends ViewPU {
  	    return item.supportedProtocols === dlnaType;
  	}
 
-    getDeviceName(item) {
+    getDeviceIconName(item) {
  	  if (this.isDlnaDevice(item)) {
  	    return 'sys.symbol.DLNA';
  	  }
@@ -1163,7 +1163,7 @@ export class AVCastPicker extends ViewPU {
             if (this.deviceInfoType === 'true') {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((n3, o3) => {
- 	                    SymbolGlyph.create(!c3 ? { 'id': -1, 'type': -1, params: [this.getDeviceName(b3)], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+ 	                    SymbolGlyph.create(!c3 ? { 'id': -1, 'type': -1, params: [this.getDeviceIconName(b3)], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
  	                        { 'id': -1, 'type': -1, params: [b3.selectedIconName], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
  	                    SymbolGlyph.fontSize('24vp');
  	                    SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
