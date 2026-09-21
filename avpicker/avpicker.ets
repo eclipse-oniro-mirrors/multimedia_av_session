@@ -947,16 +947,9 @@ export struct AVCastPicker {
     .borderRadius(this.isPc ? 8 : 20)
   }
 
-  private isDlnaDevice(item: AVCastPickerDeviceInfo): boolean {
- 	  if (item.supportedProtocols === undefined) {
- 	    return false;
- 	  }
- 	  return item.supportedProtocols === dlnaType;
- 	}
-
   private getDeviceIconName(item: AVCastPickerDeviceInfo): string {
- 	  if (this.isDlnaDevice(item)) {
- 	    return 'sys.symbol.DLNA';
+ 	  if (item.supportedProtocols === dlnaType) {
+      return 'sys.symbol.DLNA';
  	  }
  	  return item.deviceIconName;
  	}
@@ -973,6 +966,11 @@ export struct AVCastPicker {
     }.size({width: '100%', height: '100%'})
   }
 
+  /**
+   * 设备列表图标，被调用俩次，分别是设备图标以及设备选中后勾选的图标
+   * - param item 设备信息
+   * - param isSelected 是否是选中图标
+   */
   @Builder
   iconBuilder(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
     if (this.deviceInfoType === 'true') {
