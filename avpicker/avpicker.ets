@@ -947,11 +947,11 @@ export struct AVCastPicker {
     .borderRadius(this.isPc ? 8 : 20)
   }
 
-  private showDlnaIcon(item: AVCastPickerDeviceInfo): boolean {
- 	  if (item.supportedProtocols === undefined) {
- 	    return false;
+  private getDeviceIconName(item: AVCastPickerDeviceInfo): string {
+ 	  if (item.supportedProtocols === dlnaType) {
+      return 'sys.symbol.DLNA';
  	  }
- 	  return item.supportedProtocols === dlnaType;
+ 	  return item.deviceIconName;
  	}
 
   build() {
@@ -966,24 +966,20 @@ export struct AVCastPicker {
     }.size({width: '100%', height: '100%'})
   }
 
+  /**
+   * 设备列表图标，被调用俩次，分别是设备图标以及设备选中后勾选的图标
+   * - param item 设备信息
+   * - param isSelected 是否是选中图标
+   */
   @Builder
   iconBuilder(item: AVCastPickerDeviceInfo, isSelected: boolean): void {
     if (this.deviceInfoType === 'true') {
-      if (this.showDlnaIcon(item)) {
- 	      SymbolGlyph($r('sys.symbol.DLNA'))
- 	        .fontSize('24vp')
- 	        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
- 	          [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
- 	        .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
- 	          SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
- 	    } else {
- 	      SymbolGlyph(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
- 	        .fontSize('24vp')
- 	        .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
- 	          [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
- 	        .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
- 	          SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
- 	    }
+      SymbolGlyph(!isSelected ? $r(this.getDeviceIconName(item)) : $r(item.selectedIconName))
+ 	      .fontSize('24vp')
+ 	      .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
+ 	        [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+ 	      .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
+ 	        SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
     } else {
       Image(!isSelected ? $r(item.deviceIconName) : $r(item.selectedIconName))
         .width(24)
