@@ -496,6 +496,18 @@ bool MigrateAVSessionServer::CheckSyncSessionInfo(const std::string& sessionId)
     return true;
 }
 
+void MigrateAVSessionServer::PostSyncFocusSessionInfo(const std::string& msg)
+{
+    MigratePostTask(
+        [weakSelf = std::weak_ptr<MigrateAVSessionServer>(shared_from_this()), msg]() {
+            auto self = weakSelf.lock();
+            if (self) {
+                self->SendByteForNext(self->deviceId_, msg);
+            }
+        },
+        "SYNC_FOCUS_SESSION_INFO");
+}
+
 void MigrateAVSessionServer::SendOrCacheSessionInfo(bool needSync, const std::string& msg)
 {
     if (needSync) {
@@ -503,11 +515,7 @@ void MigrateAVSessionServer::SendOrCacheSessionInfo(bool needSync, const std::st
             std::lock_guard lockGuard(cacheJsonLock_);
             pendingSessionInfo_.clear();
         }
-        MigratePostTask(
-            [this, msg]() {
-                SendByteForNext(deviceId_, msg);
-            },
-            "SYNC_FOCUS_SESSION_INFO");
+        PostSyncFocusSessionInfo(msg);
     } else {
         std::lock_guard lockGuard(cacheJsonLock_);
         pendingSessionInfo_ = msg;
@@ -710,11 +718,7 @@ void MigrateAVSessionServer::ProcessMediaControlTimerRequest(cJSON* commandJsonV
             }
         }
         if (hasPending) {
-            MigratePostTask(
-                [this, msg]() {
-                    SendByteForNext(deviceId_, msg);
-                },
-                "SYNC_FOCUS_SESSION_INFO");
+            PostSyncFocusSessionInfo(msg);
             SLOGI("ProcessMediaControlTimerRequest send pending session info");
         }
         LocalFrontSessionArrive(lastSessionId_);
