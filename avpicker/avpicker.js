@@ -1143,20 +1143,18 @@ export class AVCastPicker extends ViewPU {
         Column.pop();
     }
 
-    isDlnaDevice(item) {
- 	    if (item.supportedProtocols === undefined) {
- 	        return false;
- 	    }
- 	    return item.supportedProtocols === dlnaType;
- 	}
-
     getDeviceIconName(item) {
- 	  if (this.isDlnaDevice(item)) {
+ 	  if (item.supportedProtocols === dlnaType) {
  	    return 'sys.symbol.DLNA';
  	  }
  	  return item.deviceIconName;
  	}
 
+    /**
+     * 设备列表图标，被调用俩次，分别是设备图标以及设备选中后勾选的图标
+     * - param item 设备信息
+     * - param isSelected 是否是选中图标
+     */
     iconBuilder(b3, c3, d3 = null) {
         this.observeComponentCreation2((f3, g3) => {
             If.create();
