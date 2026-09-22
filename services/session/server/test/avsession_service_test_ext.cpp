@@ -280,16 +280,85 @@ static HWTEST_F(AVSessionServiceTestExt, HandleUserEvent001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTestExt, HandleMediaCardStateChangeEvent001, TestSize.Level0)
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    int32_t userId = g_AVSessionService->GetUsersManager().GetCurrentUserId();
     std::string isAppear = "DISAPPEAR";
     g_AVSessionService->GetUsersManager().SetTopSession(nullptr);
     g_AVSessionService->hasRemoveEvent_.store(true);
-    g_AVSessionService->HandleMediaCardStateChangeEvent(isAppear);
+    g_AVSessionService->HandleMediaCardStateChangeEvent(isAppear, userId);
 
     g_AVSessionService->hasRemoveEvent_.store(false);
-    g_AVSessionService->HandleMediaCardStateChangeEvent(isAppear);
+    g_AVSessionService->HandleMediaCardStateChangeEvent(isAppear, userId);
     std::string appear = "APPEAR";
-    g_AVSessionService->HandleMediaCardStateChangeEvent(appear);
-    EXPECT_TRUE(!g_AVSessionService->hasCardStateChangeStopTask_.load());
+    g_AVSessionService->HandleMediaCardStateChangeEvent(appear, userId);
+    EXPECT_TRUE(!g_AVSessionService->HasCardStateChangeStopTask(userId));
+}
+
+/**
+ * @tc.name: ClearMediaCardStateByUser001
+ * @tc.desc: Test ClearMediaCardStateByUser erases per-user media card state and is idempotent.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, ClearMediaCardStateByUser001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    int32_t userId = g_AVSessionService->GetUsersManager().GetCurrentUserId();
+    g_AVSessionService->SetMediaCardOpen(true, userId);
+    g_AVSessionService->SetCardStateChangeStopTask(true, userId);
+    EXPECT_TRUE(g_AVSessionService->IsMediaCardOpen(userId));
+    EXPECT_TRUE(g_AVSessionService->HasCardStateChangeStopTask(userId));
+
+    g_AVSessionService->ClearMediaCardStateByUser(userId);
+    EXPECT_FALSE(g_AVSessionService->IsMediaCardOpen(userId));
+    EXPECT_FALSE(g_AVSessionService->HasCardStateChangeStopTask(userId));
+
+    g_AVSessionService->ClearMediaCardStateByUser(userId);
+    EXPECT_FALSE(g_AVSessionService->IsMediaCardOpen(userId));
+    EXPECT_FALSE(g_AVSessionService->HasCardStateChangeStopTask(userId));
+}
+
+/**
+ * @tc.name: HandleUserEventRemovedClearsMediaCardState001
+ * @tc.desc: Test HandleUserEvent with accountEventRemoved clears per-user media card state.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandleUserEventRemovedClearsMediaCardState001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    int32_t removedUser = 1099;
+    g_AVSessionService->SetMediaCardOpen(true, removedUser);
+    g_AVSessionService->SetCardStateChangeStopTask(true, removedUser);
+    EXPECT_TRUE(g_AVSessionService->IsMediaCardOpen(removedUser));
+    EXPECT_TRUE(g_AVSessionService->HasCardStateChangeStopTask(removedUser));
+
+    std::string type = AVSessionUsersManager::accountEventRemoved;
+    g_AVSessionService->HandleUserEvent(type, removedUser);
+    EXPECT_FALSE(g_AVSessionService->IsMediaCardOpen(removedUser));
+    EXPECT_FALSE(g_AVSessionService->HasCardStateChangeStopTask(removedUser));
+}
+
+/**
+ * @tc.name: HandleUserEventSwitchedClearsSwitchedOutUser001
+ * @tc.desc: Test HandleUserEvent with accountEventSwitched clears the switched-out user's media card state.
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandleUserEventSwitchedClearsSwitchedOutUser001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    int32_t curUserId = g_AVSessionService->GetUsersManager().GetCurrentUserId();
+    int32_t switchedInUser = curUserId + 1;
+    g_AVSessionService->hasMediaCapsule_.store(false);
+    g_AVSessionService->SetMediaCardOpen(true, curUserId);
+    g_AVSessionService->SetCardStateChangeStopTask(true, curUserId);
+    EXPECT_TRUE(g_AVSessionService->IsMediaCardOpen(curUserId));
+    EXPECT_TRUE(g_AVSessionService->HasCardStateChangeStopTask(curUserId));
+
+    std::string type = AVSessionUsersManager::accountEventSwitched;
+    g_AVSessionService->HandleUserEvent(type, switchedInUser);
+    EXPECT_FALSE(g_AVSessionService->IsMediaCardOpen(curUserId));
+    EXPECT_FALSE(g_AVSessionService->HasCardStateChangeStopTask(curUserId));
 }
 
 /**

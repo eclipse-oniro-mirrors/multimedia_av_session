@@ -354,7 +354,7 @@ public:
 
     void HandleFirstUnlockCleanup(int32_t userId = 0);
 
-    void HandleMediaCardStateChangeEvent(std::string isAppear);
+    void HandleMediaCardStateChangeEvent(const std::string& isAppear, int32_t userId = 0);
 
     void RegisterBundleDeleteEventForHistory(int32_t userId = 0);
 
@@ -677,7 +677,15 @@ private:
 
     bool UpdateOrder(sptr<AVSessionItem>& sessionItem);
 
-    bool IsTopSessionPlaying();
+    int32_t GetTargetUserId(int32_t userId);
+
+    bool IsTopSessionPlaying(int32_t userId = 0);
+
+    bool IsMediaCardOpen(int32_t userId = 0);
+    void SetMediaCardOpen(bool open, int32_t userId = 0);
+    bool HasCardStateChangeStopTask(int32_t userId = 0);
+    void SetCardStateChangeStopTask(bool hasTask, int32_t userId = 0);
+    void ClearMediaCardStateByUser(int32_t userId);
 
     bool IsLocalSessionPlaying(const sptr<AVSessionItem>& session);
 
@@ -789,10 +797,11 @@ private:
     std::map<pid_t, std::list<sptr<AVControllerItem>>> GetInnerControllers() const;
 
     std::atomic<uint32_t> sessionSeqNum_ {};
-    std::atomic<bool> isMediaCardOpen_ = false;
     std::atomic<bool> hasRemoveEvent_ = false;
     std::atomic<bool> hasMediaCapsule_ = false;
-    std::atomic<bool> hasCardStateChangeStopTask_ = false;
+    mutable std::mutex mediaCardStateLock_;
+    std::map<int32_t, bool> isMediaCardOpenByUser_;
+    std::map<int32_t, bool> hasCardStateChangeStopTaskByUser_;
     std::atomic<bool> isNtfEnabled_ = true;
     std::atomic<bool> isPcMode_ {false};
 
