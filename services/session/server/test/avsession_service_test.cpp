@@ -46,6 +46,7 @@
 #include "want_agent_helper.h"
 #include "string_wrapper.h"
 #include "array_wrapper.h"
+#include "avsession_users_manager.h"
 
 #define private public
 #define protected public
@@ -1093,12 +1094,12 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart003, TestSize.Leve
     avsessionHere->SetUid(ancoUid);
     ASSERT_EQ(avsessionHere != nullptr, true);
     avservice_->ancoSession_ = avsessionHere;
- 
+
     avservice_->mediaSessionListParams_ = OHOS::AAFwk::WantParams();
     AVControlCommand command;
     command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
     avservice_->HandleSystemKeyColdStart(command);
-    EXPECT_NE(avsessionHere, avservice_->topSession_);
+    EXPECT_NE(avsessionHere, AVSessionUsersManager::GetInstance().GetTopSession());
  
     OHOS::AAFwk::WantParams params;
     OHOS::sptr<OHOS::AAFwk::IArray> pkgArray = new (std::nothrow) OHOS::AAFwk::Array(1, OHOS::AAFwk::g_IID_IString);
@@ -1108,13 +1109,13 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart003, TestSize.Leve
         params.SetParam("packageName", pkgArray);
     }
     avservice_->mediaSessionListParams_ = params;
-    EXPECT_NE(avsessionHere, avservice_->topSession_);
+   EXPECT_NE(avsessionHere, AVSessionUsersManager::GetInstance().GetTopSession());
  
     avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
     SLOGD("HandleSystemKeyColdStart003 end");
 }
- 
+
 static HWTEST_F(AVSessionServiceTest, CheckSessionEmpty001, TestSize.Level0)
 {
     SLOGI("CheckSessionEmpty001 begin");
@@ -1124,7 +1125,7 @@ static HWTEST_F(AVSessionServiceTest, CheckSessionEmpty001, TestSize.Level0)
     EXPECT_EQ(result, true);
     SLOGI("CheckSessionEmpty001 end");
 }
- 
+
 static HWTEST_F(AVSessionServiceTest, CheckSessionEmpty002, TestSize.Level0)
 {
     SLOGI("CheckSessionEmpty002 begin");
@@ -1142,7 +1143,7 @@ static HWTEST_F(AVSessionServiceTest, CheckSessionEmpty002, TestSize.Level0)
     avservice_->mediaSessionListParams_ = OHOS::AAFwk::WantParams();
     SLOGI("CheckSessionEmpty002 end");
 }
- 
+
 static HWTEST_F(AVSessionServiceTest, CheckSessionEmpty003, TestSize.Level0)
 {
     SLOGI("CheckSessionEmpty003 begin");
@@ -1160,7 +1161,7 @@ static HWTEST_F(AVSessionServiceTest, CheckSessionEmpty003, TestSize.Level0)
     avservice_->mediaSessionListParams_ = OHOS::AAFwk::WantParams();
     SLOGI("CheckSessionEmpty003 end");
 }
- 
+
 static HWTEST_F(AVSessionServiceTest, HandleColdStartPlayback001, TestSize.Level0)
 {
     SLOGI("HandleColdStartPlayback001 begin");
@@ -1175,7 +1176,7 @@ static HWTEST_F(AVSessionServiceTest, HandleColdStartPlayback001, TestSize.Level
     avservice_->HandleColdStartPlayback(command, "deviceId");
     SLOGI("HandleColdStartPlayback001 end");
 }
- 
+
 static HWTEST_F(AVSessionServiceTest, HandleColdStartPlayback002, TestSize.Level0)
 {
     SLOGI("HandleColdStartPlayback002 begin");
@@ -1187,7 +1188,7 @@ static HWTEST_F(AVSessionServiceTest, HandleColdStartPlayback002, TestSize.Level
     avservice_->HandleColdStartPlayback(command, "deviceId");
     SLOGI("HandleColdStartPlayback002 end");
 }
- 
+
 static HWTEST_F(AVSessionServiceTest, MediaSessionUpdate001, TestSize.Level0)
 {
     SLOGI("MediaSessionUpdate001 begin");
@@ -1206,7 +1207,7 @@ static HWTEST_F(AVSessionServiceTest, MediaSessionUpdate001, TestSize.Level0)
     avservice_->mediaSessionListParams_ = OHOS::AAFwk::WantParams();
     SLOGI("MediaSessionUpdate001 end");
 }
- 
+
 static HWTEST_F(AVSessionServiceTest, MediaSessionUpdate002, TestSize.Level0)
 {
     SLOGI("MediaSessionUpdate002 begin");
