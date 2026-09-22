@@ -5137,8 +5137,6 @@ void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool add
     CHECK_AND_RETURN_LOG(CheckNotificationEnabled(), "check notification not enabled");
     int32_t result = Notification::NotificationHelper::SubscribeLocalLiveViewNotification(NOTIFICATION_SUBSCRIBER);
     CHECK_AND_RETURN_LOG(result == ERR_OK, "create notification subscriber error %{public}d", result);
-    SLOGI("NotifySystemUI photoSession %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d",
-        static_cast<int>(photoSession != nullptr), addCapsule, isCapsuleUpdate);
     Notification::NotificationRequest request;
     std::shared_ptr<Notification::NotificationLocalLiveViewContent> localLiveViewContent =
         std::make_shared<Notification::NotificationLocalLiveViewContent>();
@@ -5157,6 +5155,9 @@ void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool add
     auto uid = userTopSession ? (userTopSession->GetUid() == audioBrokerUid ?
         BundleStatusAdapter::GetInstance().GetUidFromBundleName(userTopSession->GetBundleName(), targetUserId) :
         userTopSession->GetUid()) : -1;
+    SLOGI("NotifySystemUI photoSession %{public}d addCapsule %{public}d isCapsuleUpdate %{public}d topSessionId "
+        "%{public}s", static_cast<int>(photoSession != nullptr), addCapsule, isCapsuleUpdate,
+        userTopSession ? AVSessionUtils::GetAnonySessionId(userTopSession->GetSessionId()).c_str() : "none");
 
     std::shared_ptr<Media::PixelMap> pixelMap;
     bool isBroker = false;
@@ -5208,12 +5209,17 @@ void AVSessionService::NotifySystemUI(sptr<AVSessionItem> photoSession, bool add
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removeWantAgent = CreateNftRemoveWant(
         photoSession ? photoSession->GetUid() : uid,  photoSession ? true : false);
     request.SetRemovalWantAgent(removeWantAgent);
+#ifdef CAR_FEATURE_ENABLE
+    request.SetReceiverUserId(targetUserId);
+    Notification::NotificationHelper::SetHashCodeRule(1, targetUserId);
+#else
+    Notification::NotificationHelper::SetHashCodeRule(1);
+#endif
     {
         std::lock_guard lockGuard(notifyLock_);
         g_NotifyRequest = request;
     }
     AVSessionEventHandler::GetInstance().AVSessionRemoveTask("NotifyFlowControl");
-    Notification::NotificationHelper::SetHashCodeRule(1);
     if (photoSession) {
         result = Notification::NotificationHelper::PublishNotification(request);
         SLOGI("PublishNotification uid %{public}d, userId %{public}d, res %{public}d", uid, targetUserId, result);

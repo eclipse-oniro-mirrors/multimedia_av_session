@@ -331,6 +331,8 @@ public:
 
     bool IsCastConnected();
 
+    bool IsSinkCastSession();
+
     void GetCurrentCastItem(AVQueueItem& item);
 
     AVPlaybackState GetCastAVPlaybackState();
