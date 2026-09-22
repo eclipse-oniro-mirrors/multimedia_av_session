@@ -442,6 +442,12 @@ void MigrateAVSessionServer::Init(AVSessionService *ptr)
 {
     servicePtr_ = ptr;
     supportCrossMediaPlay_ = false;
+    if (!volumeKeyEventCallbackFunc_) {
+        volumeKeyEventCallbackFunc_ = GetVolumeKeyEventCallbackFunc();
+    }
+    if (!availableDeviceChangeCallbackFunc_) {
+        availableDeviceChangeCallbackFunc_ = GetAvailableDeviceChangeCallbackFunc();
+    }
 }
 
 void MigrateAVSessionServer::ResetSupportCrossMediaPlay(const std::string &extraInfo)
