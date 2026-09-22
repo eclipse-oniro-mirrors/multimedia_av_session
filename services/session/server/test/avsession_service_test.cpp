@@ -1109,7 +1109,7 @@ static HWTEST_F(AVSessionServiceTest, HandleSystemKeyColdStart003, TestSize.Leve
         params.SetParam("packageName", pkgArray);
     }
     avservice_->mediaSessionListParams_ = params;
-   EXPECT_NE(avsessionHere, AVSessionUsersManager::GetInstance().GetTopSession());
+    EXPECT_NE(avsessionHere, AVSessionUsersManager::GetInstance().GetTopSession());
  
     avservice_->HandleSessionRelease(avsessionHere->GetSessionId());
     avsessionHere->Destroy();
