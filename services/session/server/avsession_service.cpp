@@ -3508,7 +3508,7 @@ int32_t AVSessionService::ConvertKeyCodeToCommand(int keyCode)
 bool AVSessionService::CheckSessionEmpty() {
     auto sessionListArray = AAFwk::IArray::Query(mediaSessionListParams_.GetParam("packageName"));
     long sessionListLen = 0;
-    if (sessionListArray == nullptr || sessionListArray->GetLength(sessionListLen) != ERR_OK || sessionListLen == 0) {
+    if (sessionListArray == nullptr || sessionListArray->GetLength(sessionListLen) != ERR_OK || sessionListLen <= 0) {
         SLOGI("session list is null or empty, skip anco branch");
         return true;
     }
