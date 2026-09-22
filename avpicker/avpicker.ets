@@ -321,7 +321,8 @@ export struct AVCastPicker {
   /**
    * Accessibility Strings
    */
-  @State accessibilityAudioControlStr: string = '音视频投播';
+  @State accessibilityAudioControlStr: string = 
+    this.getUIContext()?.getHostContext()?.resourceManager.getStringByNameSync('access_audio_control') || '音视频投播';
 
   // 标题和全屋播放按钮
   @State houseMusicTitle: string = '';
