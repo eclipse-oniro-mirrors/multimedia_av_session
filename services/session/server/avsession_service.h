@@ -638,6 +638,10 @@ private:
 
     void HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId = "");
 
+    void HandleColdStartPlayback(const AVControlCommand &command, const std::string deviceId);
+
+    bool CheckSessionEmpty();
+
     bool SubscribeCommonEvent();
 
     bool UnSubscribeCommonEvent();
@@ -831,6 +835,7 @@ private:
     std::function<bool(int32_t, int32_t)> queryAllowedPlaybackCallbackFunc_;
     sptr<IAncoMediaSessionListener> ancoMediaSessionListener_;
     std::set<std::string> controlBundleNameSet_;
+    AAFwk::WantParams mediaSessionListParams_;
     void SetCriticalWhenCreate(sptr<AVSessionItem> sessionItem);
     void SetCriticalWhenRelease(sptr<AVSessionItem> sessionItem);
 
