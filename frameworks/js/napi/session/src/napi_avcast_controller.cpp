@@ -400,10 +400,10 @@ napi_value NapiAVCastController::Prepare(napi_env env, napi_callback_info info)
 }
 
 // Compare whether two AVQueueItems carry identical values for the fields that
-// can be dynamically updated by Update: mediaName, albumCoverUrl, mediaArtist,
-// lrcUrl, lrcContent, appIconUrl and albumPixelMap. Other fields (mediaId,
-// mediaUri, duration, etc.) are intentionally ignored as they are not part of
-// an update payload.
+// can be dynamically updated by Update: mediaName, albumCoverUrl, albumTitle,
+// mediaArtist, lrcUrl, lrcContent, appIconUrl, launchClientData and
+// albumPixelMap. Other fields (mediaId, mediaUri, duration, etc.) are
+// intentionally ignored as they are not part of an update payload.
 static bool IsAVQueueItemEqual(const AVQueueItem& lhs, const AVQueueItem& rhs)
 {
     auto lDesc = lhs.GetDescription();
@@ -416,10 +416,12 @@ static bool IsAVQueueItemEqual(const AVQueueItem& lhs, const AVQueueItem& rhs)
     }
     if (lDesc->GetTitle() != rDesc->GetTitle() ||
         lDesc->GetAlbumCoverUri() != rDesc->GetAlbumCoverUri() ||
+        lDesc->GetAlbumTitle() != rDesc->GetAlbumTitle() ||
         lDesc->GetArtist() != rDesc->GetArtist() ||
         lDesc->GetLyricUri() != rDesc->GetLyricUri() ||
         lDesc->GetLyricContent() != rDesc->GetLyricContent() ||
-        lDesc->GetIconUri() != rDesc->GetIconUri()) {
+        lDesc->GetIconUri() != rDesc->GetIconUri() ||
+        lDesc->GetLaunchClientData() != rDesc->GetLaunchClientData()) {
         return false;
     }
     auto lIcon = lDesc->GetIcon();

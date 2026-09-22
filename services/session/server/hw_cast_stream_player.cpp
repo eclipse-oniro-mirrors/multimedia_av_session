@@ -238,10 +238,15 @@ int32_t HwCastStreamPlayer::UpdateMediaInfo(const AVQueueItem& avQueueItem)
     mediaInfo.mediaName = mediaDescription->GetTitle();
     mediaInfo.albumCoverUrl = mediaDescription->GetIconUri() == "" ?
         mediaDescription->GetAlbumCoverUri() : mediaDescription->GetIconUri();
+    mediaInfo.albumTitle = mediaDescription->GetAlbumTitle();
     mediaInfo.mediaArtist = mediaDescription->GetArtist();
     mediaInfo.lrcUrl = mediaDescription->GetLyricUri();
     mediaInfo.lrcContent = mediaDescription->GetLyricContent();
     mediaInfo.appIconUrl = mediaDescription->GetIconUri();
+    if (spid_ > 0 && mediaDescription->GetLaunchClientData().length() > 0) {
+        mediaInfo.launchClientData = mediaDescription->GetLaunchClientData();
+        mediaInfo.spid = spid_;
+    }
     if (mediaDescription->GetIcon() != nullptr) {
         mediaInfo.albumPixelMap = AVSessionPixelMapAdapter::ConvertFromInner(mediaDescription->GetIcon(), false);
     }
@@ -927,7 +932,6 @@ bool HwCastStreamPlayer::MergeMediaInfo(const CastEngine::MediaInfo& mediaInfo,
     mergeStr(mediaInfo.lrcContent, &AVMediaDescription::SetLyricContent);
     mergeStr(mediaInfo.appIconUrl, &AVMediaDescription::SetIconUri);
     mergeStr(mediaInfo.appName, &AVMediaDescription::SetAppName);
-    mergeStr(mediaInfo.drmType, &AVMediaDescription::SetDrmScheme);
     // Album cover is a binary pixel map, update only when provided.
     std::shared_ptr<AVSessionPixelMap> oldIcon;
     if (mediaInfo.albumPixelMap != nullptr) {
