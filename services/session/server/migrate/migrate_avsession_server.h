@@ -230,7 +230,8 @@ private:
     void CheckPostClean(bool resetOnlySessionInfo = false);
     bool CheckPostSessionInfo(const std::string& sessionId);
     bool CheckSyncSessionInfo(const std::string& sessionId);
-    void SendOrCacheSessionInfo(bool needSync, const std::string& msg);
+    void SendOrCacheSessionInfo(bool needSync, std::string msg);
+    void PostSyncFocusSessionInfo(std::string msg);
     bool CheckPostMetaData(const AVMetaData& data);
     bool CheckPostMediaImage(std::vector<uint8_t>& imgBuffer);
     bool CheckPostPlaybackState(const AVPlaybackState& state);
