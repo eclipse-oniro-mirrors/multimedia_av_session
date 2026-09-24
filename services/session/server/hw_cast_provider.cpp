@@ -703,7 +703,7 @@ int HwCastProvider::GetCastProtocolType(int castCapability)
 void HwCastProvider::InitCastSessionProperty(uint32_t prototype, bool isPcm, CastSessionProperty& property)
 {
     property.protocolType = CastEngine::ProtocolType::CAST_PLUS_STREAM;
-    bool isHiScreen = (prototype & ProtocolType::TYPE_CAST_PLUS_STREAM) != 0;
+    bool isHiScreen = (prototype & ProtocolType::TYPE_CAST_PLUS_AUDIO) == 0;
     if (isPcm) {
         property.protocolType = isHiScreen ? CastEngine::ProtocolType::CAST_PLUS_MIRROR :
             CastEngine::ProtocolType::CAST_PLUS_AUDIO;

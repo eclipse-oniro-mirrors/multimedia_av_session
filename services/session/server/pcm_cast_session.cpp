@@ -279,7 +279,7 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     }
     bool isPcmScreen = (sessionToken.sessionId == "pcmCastSession" &&
         ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
-        ProtocolType::TYPE_CAST_PLUS_STREAM) != 0));
+        ProtocolType::TYPE_CAST_PLUS_AUDIO) == 0));
     if (isPcmScreen) {
         AVRouter::GetInstance().OnSystemCommonEvent(QUERY_PINCODE, "");
     }
@@ -328,7 +328,7 @@ OutputDeviceInfo PcmCastSession::ConstructConnectOutputDeviceInfo(const OutputDe
 {
     OutputDeviceInfo connectOutputDeviceInfo = outputDeviceInfo;
     if ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
-        ProtocolType::TYPE_CAST_PLUS_STREAM) != 0) {
+        ProtocolType::TYPE_CAST_PLUS_AUDIO) == 0) {
         connectOutputDeviceInfo.deviceInfos_[0].realDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
     }
     return connectOutputDeviceInfo;
