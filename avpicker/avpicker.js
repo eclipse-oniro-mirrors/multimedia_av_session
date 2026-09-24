@@ -201,6 +201,7 @@ export class AVCastPicker extends ViewPU {
         this.__hasReceivedDeviceList = new ObservedPropertySimplePU(false, this, 'hasReceivedDeviceList');
         this.__deviceModelType = new ObservedPropertySimplePU('', this, 'deviceModelType');
         this.__isHdsThin = new ObservedPropertySimplePU(false, this, 'isHdsThin');
+        this.__isIndependent = new ObservedPropertySimplePU(true, this, 'isIndependent');
         this.setInitiallyProvidedValue(e11);
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.declareWatch('isSubMenuExpanded', this.MenuStateChange);
@@ -369,6 +370,9 @@ export class AVCastPicker extends ViewPU {
         if (c11.isHdsThin !== undefined) {
             this.isHdsThin = c11.isHdsThin;
         }
+        if (c11.isIndependent !== undefined) {
+            this.isIndependent = c11.isIndependent;
+        }
     }
 
     updateStateVars(b11) {
@@ -421,6 +425,7 @@ export class AVCastPicker extends ViewPU {
         this.__hasReceivedDeviceList.purgeDependencyOnElmtId(a11);
         this.__deviceModelType.purgeDependencyOnElmtId(a11);
         this.__isHdsThin.purgeDependencyOnElmtId(a11);
+        this.__isIndependent.purgeDependencyOnElmtId(a11);
     }
 
     aboutToBeDeleted() {
@@ -470,6 +475,7 @@ export class AVCastPicker extends ViewPU {
         this.__hasReceivedDeviceList.aboutToBeDeleted();
         this.__deviceModelType.aboutToBeDeleted();
         this.__isHdsThin.aboutToBeDeleted();
+        this.__isIndependent.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -838,6 +844,14 @@ export class AVCastPicker extends ViewPU {
 
     set isHdsThin(h1) {
         this.__isHdsThin.set(h1);
+    }
+
+    get isIndependent() {
+        return this.__isIndependent.get();
+    }
+
+    set isIndependent(g1) {
+        this.__isIndependent.set(g1);
     }
 
     aboutToAppear() {
@@ -2266,7 +2280,7 @@ export class AVCastPicker extends ViewPU {
         }, Column);
         this.observeComponentCreation2((f8, g8) => {
             UIExtensionComponent.create({
-                abilityName: 'UIExtAbility',
+                abilityName: this.isIndependent ? 'UIExtAbility' : 'UIExtAbilityCallerInstance',
                 bundleName: 'com.hmos.mediacontroller',
                 parameters: {
                     'normalColor': this.normalColor,
