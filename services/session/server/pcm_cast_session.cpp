@@ -50,7 +50,6 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         castState_ = CastState::STREAM;
         if (needStreamCasting_) {
             needStreamCasting_ = false;
-            descriptor_.sessionId_ = streamCastingSessionId_;
             FindSessionAndStreamCasting();
         }
     }
@@ -754,6 +753,25 @@ void PcmCastSession::FindSessionAndStreamCasting()
     session->SetIsHiPlayStreamCasting(true);
     session->SetCastHandle(castHandle_);
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, outputDeviceInfo);
+    descriptor_.sessionId_ = streamCastingSessionId_;
+    SendStreamSessionChangeEvent(session);
+}
+
+void PcmCastSession::SendStreamSessionChangeEvent(const sptr<AVSessionItem>& session)
+{
+    cJSON* jsonObj = cJSON_CreateObject();
+    CHECK_AND_RETURN_LOG(session != nullptr, "Failed to create cJSON object");
+
+    cJSON_AddItemToObject(jsonObj, "sessionId", cJSON_CreateString(streamCastingSessionId_.c_str()));
+    cJSON_AddItemToObject(jsonObj, "sessionType", cJSON_CreateString(session->GetSessionType().c_str()));
+
+    char* jsonStr = cJSON_Print(jsonObj);
+    if (jsonStr != nullptr) {
+        std::string jsonParams(jsonStr);
+        cJSON_free(jsonStr);
+        AVRouter::GetInstance().OnSystemCommonEvent(STREAM_SESSION_CHANGED, jsonParams);
+    }
+    cJSON_Delete(jsonObj);
 }
 
 void PcmCastSession::CreateExtraInfo(std::string deviceType, std::string scenario)
