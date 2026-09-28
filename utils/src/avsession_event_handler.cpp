@@ -35,16 +35,22 @@ AVSessionEventHandler::~AVSessionEventHandler()
     handler_ = nullptr;
 }
 
-bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const std::string &name, int64_t delayTime)
+std::shared_ptr<AppExecFwk::EventHandler> AVSessionEventHandler::GetHandler()
 {
-    SLOGD("AVSessionEventHandler ProxyPostTask: %{public}s", name.c_str());
     std::lock_guard<std::mutex> lockGuard(handlerLock_);
     if (!handler_) {
-        SLOGI("AVSessionEventHandler create new: %{public}s", name.c_str());
+        SLOGI("AVSessionEventHandler create new");
         auto runner = AppExecFwk::EventRunner::Create("OS_AVSessionHdl");
         handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
-    return handler_->PostTask(callback, name, delayTime);
+    return handler_;
+}
+
+bool AVSessionEventHandler::AVSessionPostTask(const Callback &callback, const std::string &name, int64_t delayTime)
+{
+    SLOGD("AVSessionEventHandler ProxyPostTask: %{public}s", name.c_str());
+    auto handler = GetHandler();
+    return handler->PostTask(callback, name, delayTime);
 }
 
 void AVSessionEventHandler::AVSessionRemoveTask(const std::string &name)
@@ -63,23 +69,9 @@ bool AVSessionEventHandler::AVSessionReplaceTask(const Callback &callback, const
         SLOGE("AVSessionReplaceTask name is empty");
         return false;
     }
-    std::lock_guard<std::mutex> lockGuard(handlerLock_);
-    if (handler_) {
-        handler_->RemoveTask(name);
-    } else {
-        SLOGI("AVSessionReplaceTask create new handler: %{public}s", name.c_str());
-        auto runner = AppExecFwk::EventRunner::Create("OS_AVSessionHdl");
-        if (!runner) {
-            SLOGE("AVSessionReplaceTask create EventRunner failed");
-            return false;
-        }
-        handler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    }
-    if (!handler_->PostTask(callback, name, delayTime)) {
-        SLOGE("AVSessionReplaceTask PostTask failed: %{public}s", name.c_str());
-        return false;
-    }
-    return true;
+    auto handler = GetHandler();
+    handler->RemoveTask(name);
+    return handler->PostTask(callback, name, delayTime);
 }
 
 void AVSessionEventHandler::AVSessionRemoveHandler()

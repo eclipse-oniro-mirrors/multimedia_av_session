@@ -16,6 +16,7 @@
 #include "migrate_avsession_server.h"
 
 #include <chrono>
+#include <sys/prctl.h>
 #include <thread>
 
 #include "audio_device_manager.h"
@@ -45,6 +46,16 @@ MigrateAVSessionServer::~MigrateAVSessionServer()
 {
     isSoftbusConnecting_.store(false);
     {
+        std::lock_guard lockGuard(migrateHandlerLock_);
+        migrateHandler_ = nullptr;
+        if (migrateRunner_) {
+            migrateRunner_->Stop();
+        }
+    }
+    if (migrateThread_ && migrateThread_->joinable()) {
+        migrateThread_->join();
+    }
+    {
         std::lock_guard lockGuard(migrateControllerLock_);
         for (auto& pair : playerIdToControllerCallbackMap_) {
             std::shared_ptr<AVControllerObserver> controllerObserver = pair.second;
@@ -66,6 +77,24 @@ MigrateAVSessionServer::~MigrateAVSessionServer()
     }
     SLOGI("MigrateAVSessionServer quit with mode:%{public}d|deviceId:%{public}s.", migrateMode_,
         SoftbusSessionUtils::AnonymizeDeviceId(deviceId).c_str());
+}
+
+std::shared_ptr<AppExecFwk::EventHandler> MigrateAVSessionServer::InitMigrateHandlerIfNeeded()
+{
+    std::lock_guard lockGuard(migrateHandlerLock_);
+    CHECK_AND_RETURN_RET(!migrateHandler_, migrateHandler_);
+    migrateRunner_ = AppExecFwk::EventRunner::Create(false);
+    CHECK_AND_RETURN_RET_LOG(migrateRunner_ != nullptr, nullptr, "OS_MigrateHdl create failed");
+    migrateHandler_ = std::make_shared<AppExecFwk::EventHandler>(migrateRunner_);
+    std::weak_ptr<AppExecFwk::EventRunner> weakRunner = migrateRunner_;
+    migrateThread_ = std::make_unique<std::thread>([weakRunner]() {
+        prctl(PR_SET_NAME, "OS_MigrateHdl");
+        auto runner = weakRunner.lock();
+        CHECK_AND_RETURN_LOG(runner, "OS_MigrateHdl runner expired, thread exit");
+        runner->Run();
+    });
+    SLOGI("InitMigrateHandlerIfNeeded OS_MigrateHdl created");
+    return migrateHandler_;
 }
 
 void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
@@ -587,13 +616,13 @@ void MigrateAVSessionServer::SendRemoteControllerList(const std::string &deviceI
     } else {
         SendByteToAll(msg);
     }
-    AVSessionEventHandler::GetInstance().AVSessionPostTask(
+    MigratePostTask(
         [weakThis = std::weak_ptr<MigrateAVSessionServer>(shared_from_this())]() {
             auto sharedThis = weakThis.lock();
             CHECK_AND_RETURN_LOG(sharedThis, "MigrateAVSessionServer already destroyed");
             sharedThis->DelaySendPlaybackState();
             sharedThis->DelaySendMetaData();
-        }, "DelaySendMetaData", DELAY_TIME);
+        }, "DelaySendMetaData", DELAY_TIME, false);
 }
 
 void MigrateAVSessionServer::SendRemoteHistorySessionList(const std::string &deviceId)
@@ -1306,11 +1335,11 @@ void MigrateAVSessionServer::PlaybackCommandDataProc(int mediaCommand, const std
     AVControlCommand cmd;
     switch (mediaCommand) {
         case SYNC_MEDIASESSION_CALLBACK_ON_PLAY:
-            AVSessionEventHandler::GetInstance().AVSessionPostTask([=]() {
+            MigratePostTask([=]() {
                 AVControlCommand cmd;
                 cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
                 controller->SendControlCommand(cmd);
-                }, "DelaySendPlayCom", DELAY_PLAY_COM_TIME);
+                }, "DelaySendPlayCom", DELAY_PLAY_COM_TIME, false);
             break;
         case SYNC_MEDIASESSION_CALLBACK_ON_PAUSE:
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
@@ -1362,11 +1391,11 @@ void MigrateAVSessionServer::OnMetaDataChange(const std::string & playerId, cons
     SLOGI("MigrateAVSessionServer OnMetaDataChange: %{public}s",
         SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
     std::weak_ptr<MigrateAVSessionServer> weakThis(shared_from_this());
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([weakThis, playerId]() {
+    MigratePostTask([weakThis, playerId]() {
         auto sharedThis = weakThis.lock();
         CHECK_AND_RETURN_LOG(sharedThis, "MigrateAVSessionServer already destroyed");
         sharedThis->OnMetaDataChanged(playerId);
-        }, "DelaySendMetaData", DELAY_METADATA_TIME);
+        }, "DelaySendMetaData", DELAY_METADATA_TIME, false);
 }
 
 void MigrateAVSessionServer::OnPlaybackStateChange(const std::string & playerId, const AVPlaybackState &state)
@@ -1374,11 +1403,11 @@ void MigrateAVSessionServer::OnPlaybackStateChange(const std::string & playerId,
     SLOGI("MigrateAVSessionServer OnPlaybackStateChange: %{public}s",
         SoftbusSessionUtils::AnonymizeDeviceId(playerId).c_str());
     std::weak_ptr<MigrateAVSessionServer> weakThis(shared_from_this());
-    AVSessionEventHandler::GetInstance().AVSessionPostTask([weakThis, playerId, state]() {
+    MigratePostTask([weakThis, playerId, state]() {
         auto sharedThis = weakThis.lock();
         CHECK_AND_RETURN_LOG(sharedThis, "MigrateAVSessionServer already destroyed");
         sharedThis->OnPlaybackStateChanged(playerId, state);
-        }, "DelaySendPlaybackState", DELAY_METADATA_TIME);
+        }, "DelaySendPlaybackState", DELAY_METADATA_TIME, false);
 }
 // LCOV_EXCL_STOP
 

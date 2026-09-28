@@ -985,30 +985,42 @@ void MigrateAVSessionServer::SwitchAudioDeviceCommand(cJSON* jsonObject)
 void MigrateAVSessionServer::DoPostTasksClear()
 {
     SLOGI("DoPostTasksClear for migrate:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(deviceId_).c_str());
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("LocalFrontSessionArrive");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_FOCUS_MEDIA_IMAGE");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_FOCUS_BUNDLE_IMG");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_FOCUS_META_INFO");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_FOCUS_PLAY_STATE");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_FOCUS_VALID_COMMANDS");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_FOCUS_SESSION_INFO");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_SET_VOLUME_COMMAND");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_AVAIL_DEVICES_LIST");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_CURRENT_DEVICE");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_PROTOCOL_VERSION");
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask("SYNC_LONG_PAUSE_NOTIFY");
+    std::shared_ptr<AppExecFwk::EventHandler> handler;
+    {
+        std::lock_guard lockGuard(migrateHandlerLock_);
+        handler = migrateHandler_;
+    }
+    auto removeByName = [&handler](const std::string &name) {
+        handler ? handler->RemoveTask(name) : AVSessionEventHandler::GetInstance().AVSessionRemoveTask(name);
+    };
+    removeByName("LocalFrontSessionArrive");
+    removeByName("SYNC_FOCUS_MEDIA_IMAGE");
+    removeByName("SYNC_FOCUS_BUNDLE_IMG");
+    removeByName("SYNC_FOCUS_META_INFO");
+    removeByName("SYNC_FOCUS_PLAY_STATE");
+    removeByName("SYNC_FOCUS_VALID_COMMANDS");
+    removeByName("SYNC_FOCUS_SESSION_INFO");
+    removeByName("SYNC_SET_VOLUME_COMMAND");
+    removeByName("SYNC_AVAIL_DEVICES_LIST");
+    removeByName("SYNC_CURRENT_DEVICE");
+    removeByName("SYNC_PROTOCOL_VERSION");
+    removeByName("SYNC_LONG_PAUSE_NOTIFY");
 }
 
 bool MigrateAVSessionServer::MigratePostTask(const AppExecFwk::EventHandler::Callback &callback,
-    const std::string &name, int64_t delayTime)
+    const std::string &name, int64_t delayTime, bool removePrevious)
 {
     if (!isSoftbusConnecting_.load()) {
         SLOGE("MigratePostTask:%{public}s without connect", name.c_str());
         return false;
     }
     SLOGD("MigratePostTask with name:%{public}s.", name.c_str());
-    AVSessionEventHandler::GetInstance().AVSessionRemoveTask(name);
-    return AVSessionEventHandler::GetInstance().AVSessionPostTask(callback, name);
+    auto handler = InitMigrateHandlerIfNeeded();
+    handler = handler ? handler : AVSessionEventHandler::GetInstance().GetHandler();
+    if (removePrevious) {
+        handler->RemoveTask(name);
+    }
+    return handler->PostTask(callback, name, delayTime);
 }
 
 void MigrateAVSessionServer::HandleNeedStateTimer()
