@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <list>
+#include <vector>
 #include "avsession_info.h"
 #include "avsession_log.h"
 #include "napi/native_api.h"
@@ -114,7 +115,7 @@ private:
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
     std::shared_ptr<std::atomic<bool>> isValid_;
-    std::function<void(void)> sessionDestroyCallback_;
+    std::vector<std::function<void(void)>> sessionDestroyCallbacks_;
     napi_threadsafe_function threadSafeFunction_ = nullptr;
     static constexpr size_t ARGC_MAX = 6;
 };

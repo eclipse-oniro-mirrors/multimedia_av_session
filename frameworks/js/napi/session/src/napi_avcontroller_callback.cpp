@@ -312,19 +312,15 @@ void NapiAVControllerCallback::OnSessionDestroy()
     std::string callBackName = "NapiAVControllerCallback::OnSessionDestroy";
     HandleEvent(EVENT_SESSION_DESTROY, callBackName);
     SLOGD("callback for sessionDestroy, check callback");
-    std::function<void(void)> destroyCallback = nullptr;
+    std::vector<std::function<void(void)>> destroyCallbacks;
     {
         std::lock_guard<std::mutex> lockGuard(lock_);
-        if (sessionDestroyCallback_ != nullptr) {
-            SLOGI("notify session Destroy for repeat");
-            destroyCallback = sessionDestroyCallback_;
-            sessionDestroyCallback_ = nullptr;
-        }
+        destroyCallbacks = std::move(sessionDestroyCallbacks_);
     }
-    if (destroyCallback != nullptr) {
+    for (auto& destroyCallback : destroyCallbacks) {
         destroyCallback();
-        SLOGD("notify session Destroy for repeat done");
     }
+    SLOGD("notify session Destroy for repeat done");
 }
 
 void NapiAVControllerCallback::OnCustomData(const AAFwk::WantParams& data)
@@ -501,6 +497,6 @@ void NapiAVControllerCallback::AddCallbackForSessionDestroy(const std::function<
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     SLOGE("add callback for session destroy notify");
-    sessionDestroyCallback_ = sessionDestroyCallback;
+    sessionDestroyCallbacks_.push_back(sessionDestroyCallback);
 }
 }

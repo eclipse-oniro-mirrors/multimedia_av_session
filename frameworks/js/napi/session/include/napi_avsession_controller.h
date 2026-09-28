@@ -159,6 +159,7 @@ private:
     int32_t userId_ = 0;
     std::shared_ptr<AVSessionController> controller_;
     std::shared_ptr<NapiAVControllerCallback> callback_;
+    std::shared_ptr<bool> aliveToken_;
     static std::mutex uvMutex_;
     static std::mutex controllerListMutex_;
 
