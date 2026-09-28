@@ -549,12 +549,7 @@ int32_t JsonUtils::SetSessionDescriptorByCJSON(cJSON* sessionDescriptorItem,
 
 int32_t JsonUtils::SetSessionDescriptors(std::string& sessionInfo, const std::vector<AVSessionDescriptor>& descriptors)
 {
-    cJSON* sessionInfoItem = nullptr;
-    if (sessionInfo.empty()) {
-        sessionInfoItem = cJSON_CreateObject();
-    } else {
-        sessionInfoItem = cJSON_Parse(sessionInfo.c_str());
-    }
+    cJSON* sessionInfoItem = sessionInfo.empty() ? cJSON_CreateObject() : cJSON_Parse(sessionInfo.c_str());
     CHECK_AND_RETURN_RET_LOG(sessionInfoItem != nullptr, AVSESSION_ERROR, "json object is null");
     if (cJSON_IsInvalid(sessionInfoItem)) {
         SLOGE("parse json invalid");
@@ -564,12 +559,21 @@ int32_t JsonUtils::SetSessionDescriptors(std::string& sessionInfo, const std::ve
     cJSON* dataItem = cJSON_GetObjectItem(sessionInfoItem, "data");
     if (dataItem == nullptr || cJSON_IsInvalid(dataItem) || cJSON_IsNull(dataItem)) {
         dataItem = cJSON_CreateObject();
+        if (dataItem == nullptr) {
+            SLOGE("dataItem is nullptr");
+            cJSON_Delete(sessionInfoItem);
+            return AVSESSION_ERROR;
+        }
         cJSON_AddItemToObject(sessionInfoItem, "data", dataItem);
     }
     cJSON* descriptorsArray = cJSON_GetObjectItem(dataItem, "sessionDescriptors");
     if (descriptorsArray == nullptr || cJSON_IsInvalid(descriptorsArray) || !cJSON_IsArray(descriptorsArray)) {
         descriptorsArray = cJSON_CreateArray();
-        CHECK_AND_RETURN_RET_LOG(descriptorsArray != nullptr, AVSESSION_ERROR, "descriptorsArray is nullptr");
+        if (descriptorsArray == nullptr) {
+            SLOGE("descriptorsArray is nullptr");
+            cJSON_Delete(sessionInfoItem);
+            return AVSESSION_ERROR;
+        }
         cJSON_AddItemToObject(dataItem, "sessionDescriptors", descriptorsArray);
     }
     for (uint32_t i = 0; i < descriptors.size(); i++) {
