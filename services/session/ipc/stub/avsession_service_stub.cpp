@@ -318,7 +318,9 @@ int32_t AVSessionServiceStub::HandleStartAVPlaybackForAudioZone(MessageParcel& d
     std::string assetId = data.ReadString();
     CommandInfo info;
     info.Unmarshalling(data);
-    int32_t ret = StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    ColdStartInfo coldStartInfo;
+    coldStartInfo.Unmarshalling(data);
+    int32_t ret = StartAVPlaybackForAudioZone(bundleName, userId, assetId, info, coldStartInfo);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     return ERR_NONE;
 }

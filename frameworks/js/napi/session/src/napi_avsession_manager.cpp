@@ -575,6 +575,20 @@ void NapiAVSessionManager::FillCommandInfo(napi_env env, napi_value arg, Command
 #endif
 }
 
+void NapiAVSessionManager::FillColdStartInfo(napi_env env, napi_value arg, ColdStartInfo& coldStartInfo)
+{
+#ifdef CAR_FEATURE_ENABLE
+    int32_t controlCommand = 0;
+    int32_t isPlayList = 1;
+    if (NapiUtils::GetNamedProperty(env, arg, "controlCommand", controlCommand) == napi_ok) {
+        coldStartInfo.SetControlCommand(controlCommand);
+    }
+    if (NapiUtils::GetNamedProperty(env, arg, "isPlayList", isPlayList) == napi_ok) {
+        coldStartInfo.SetIsPlayList(isPlayList);
+    }
+#endif
+}
+
 void NapiAVSessionManager::SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context)
 {
 #ifdef CAR_FEATURE_ENABLE
@@ -598,12 +612,13 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
         int32_t userId_;
         std::string assetId_;
         CommandInfo commandInfo_;
+        ColdStartInfo coldStartInfo_;
     };
     auto context = std::make_shared<ConcreteContext>();
 
     auto input = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE || argc == ARGC_FOUR, "invalid arguments",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE || argc == ARGC_FOUR || argc == ARGC_FIVE,
+            "invalid arguments", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->bundleName_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
             "invalid bundleName", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
@@ -613,9 +628,13 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
         context->status = NapiUtils::GetValue(env, argv[ARGV_THIRD], context->assetId_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid assetId",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        if (argc == ARGC_FOUR && !NapiUtils::TypeCheck(env, argv[ARGV_FOURTH], napi_undefined)
+        if (argc >= ARGC_FOUR && !NapiUtils::TypeCheck(env, argv[ARGV_FOURTH], napi_undefined)
             && !NapiUtils::TypeCheck(env, argv[ARGV_FOURTH], napi_null)) {
             FillCommandInfo(env, argv[ARGV_FOURTH], context->commandInfo_);
+        }
+        if (argc == ARGC_FIVE && !NapiUtils::TypeCheck(env, argv[ARGV_FIFTH], napi_undefined)
+            && !NapiUtils::TypeCheck(env, argv[ARGV_FIFTH], napi_null)) {
+            FillColdStartInfo(env, argv[ARGV_FIFTH], context->coldStartInfo_);
         }
     };
 
@@ -623,7 +642,8 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(
-            context->bundleName_, context->userId_, context->assetId_, context->commandInfo_);
+            context->bundleName_, context->userId_, context->assetId_, context->commandInfo_,
+            context->coldStartInfo_);
         if (ret != AVSESSION_SUCCESS) {
             SetStartAVPlaybackError(ret, context);
         }

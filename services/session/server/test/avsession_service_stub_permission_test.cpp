@@ -137,7 +137,8 @@ public:
         return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR;
     };
     int32_t StartAVPlaybackForAudioZone(const std::string &bundleName, int32_t userId,
-        const std::string &assetId, const CommandInfo &info) override
+        const std::string &assetId, const CommandInfo &info,
+        const ColdStartInfo &coldStartInfo) override
     {
         return isSuccess ? AVSESSION_SUCCESS : AVSESSION_ERROR;
     };

@@ -294,11 +294,13 @@ public:
      * @param userId user id.
      * @param assetId asset id.
      * @param info command info.
+     * @param coldStartInfo cold start info.
      * @return Returns start result.
      * @since 26.1.0 dynamic&static
      */
     virtual int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-        const std::string& assetId, const CommandInfo& info = CommandInfo{}) { return AVSESSION_SUCCESS; };
+        const std::string& assetId, const CommandInfo& info = CommandInfo{},
+        const ColdStartInfo& coldStartInfo = ColdStartInfo{}) { return AVSESSION_SUCCESS; };
 
     /**
      * @brief Listen for AncoMediaSessionListener callback event.

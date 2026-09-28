@@ -18,6 +18,7 @@
 #include "iservice_registry.h"
 #include "array_wrapper.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "want_params_wrapper.h"
 #include "system_ability_definition.h"
 
@@ -196,6 +197,8 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
     startPlayInfoParam.SetParam("deviceId", OHOS::AAFwk::String::Box(startPlayInfo.getDeviceId()));
 #ifdef CAR_FEATURE_ENABLE
     startPlayInfoParam.SetParam("startUserId", OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetUserId())));
+    int32_t controlCommand = startPlayInfo.GetControlCommand();
+    startPlayInfoParam.SetParam("controlCommand", OHOS::AAFwk::Integer::Box(controlCommand));
 #endif
     if (wantParam == nullptr) {
         SLOGE("wantParam is null when SetStartPlayInfoToParam");
@@ -258,9 +261,16 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
         CHECK_AND_CONTINUE(intentNameItem != nullptr && cJSON_IsString(intentNameItem));
         CHECK_AND_CONTINUE(intentNameItem->valuestring != nullptr);
         std::string insightName(intentNameItem->valuestring);
+#ifdef CAR_FEATURE_ENABLE
+        int32_t isPlayList = startPlayInfo.GetIsPlayList();
+        if (isPlayList == 1 && insightName != PLAY_MUSICLIST) {
+            continue;
+        }
+#else
         if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
             continue;
         }
+#endif
         cJSON* uiAbilityItem = cJSON_GetObjectItem(insightIntentsItem, "uiAbility");
         if (uiAbilityItem == nullptr) {
             SLOGE("json do not contain uiAbility");

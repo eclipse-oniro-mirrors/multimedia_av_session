@@ -422,7 +422,7 @@ int32_t AVSessionServiceProxy::StartAVPlayback(const std::string& bundleName, co
 
 #ifdef CAR_FEATURE_ENABLE
 int32_t AVSessionServiceProxy::StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-    const std::string& assetId, const CommandInfo& info)
+    const std::string& assetId, const CommandInfo& info, const ColdStartInfo& coldStartInfo)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
@@ -430,8 +430,10 @@ int32_t AVSessionServiceProxy::StartAVPlaybackForAudioZone(const std::string& bu
     CHECK_AND_RETURN_RET_LOG(data.WriteString(bundleName), ERR_MARSHALLING, "write bundleName failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteInt32(userId), ERR_MARSHALLING, "write userId failed");
     CHECK_AND_RETURN_RET_LOG(data.WriteString(assetId), ERR_MARSHALLING, "write assetId failed");
-    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&info), ERR_MARSHALLING, "write command info failed");
-    
+    CHECK_AND_RETURN_RET_LOG(info.Marshalling(data), ERR_MARSHALLING, "write command info failed");
+    CHECK_AND_RETURN_RET_LOG(coldStartInfo.Marshalling(data), ERR_MARSHALLING,
+        "write cold start info failed");
+
     auto remote = Remote();
     CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
     MessageParcel reply;

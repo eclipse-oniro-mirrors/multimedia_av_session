@@ -84,6 +84,26 @@ public:
     {
         return userId_;
     }
+
+    void SetControlCommand(int32_t controlCommand)
+    {
+        controlCommand_ = controlCommand;
+    }
+
+    int32_t GetControlCommand() const
+    {
+        return controlCommand_;
+    }
+
+    void SetIsPlayList(int32_t isPlayList)
+    {
+        isPlayList_ = isPlayList;
+    }
+
+    int32_t GetIsPlayList() const
+    {
+        return isPlayList_;
+    }
 #endif
     cJSON* startPlayInfoToJson() const
     {
@@ -96,6 +116,8 @@ public:
         cJSON_AddStringToObject(j, "startPlayModuleName", moduleName.c_str());
 #ifdef CAR_FEATURE_ENABLE
         cJSON_AddNumberToObject(j, "startUserId", userId_);
+        cJSON_AddNumberToObject(j, "controlCommand", controlCommand_);
+        cJSON_AddNumberToObject(j, "isPlayList", isPlayList_);
 #endif
         return j;
     }
@@ -108,7 +130,9 @@ private:
     std::string moduleName;
 
 #ifdef CAR_FEATURE_ENABLE
-   int32_t userId_ = 100;
+    int32_t userId_ = 100;
+    int32_t controlCommand_ {0};
+    int32_t isPlayList_ {1};
 #endif
 };
 class InsightAdapter {

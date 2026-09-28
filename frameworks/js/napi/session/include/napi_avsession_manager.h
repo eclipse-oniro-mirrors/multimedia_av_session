@@ -139,11 +139,13 @@ private:
     static constexpr size_t ARGC_TWO = 2;
     static constexpr size_t ARGC_THREE = 3;
     static constexpr size_t ARGC_FOUR = 4;
+    static constexpr size_t ARGC_FIVE = 5;
 
     static constexpr size_t ARGV_FIRST = 0;
     static constexpr size_t ARGV_SECOND = 1;
     static constexpr size_t ARGV_THIRD = 2;
     static constexpr size_t ARGV_FOURTH = 3;
+    static constexpr size_t ARGV_FIFTH = 4;
 
     static constexpr size_t HISTORICAL_UNSET_NUM = 3;
     static constexpr size_t HISTORICAL_MIN_NUM = 0;
@@ -157,6 +159,8 @@ private:
     static void RegisterAudioZoneFunctions(napi_env env, napi_value exports);
 
     static void FillCommandInfo(napi_env env, napi_value arg, CommandInfo& commandInfo);
+
+    static void FillColdStartInfo(napi_env env, napi_value arg, ColdStartInfo& coldStartInfo);
 
     static void SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context);
 };
