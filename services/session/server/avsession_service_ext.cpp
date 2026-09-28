@@ -653,9 +653,17 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    auto appSession = GetContainer().GetSessionById(sessionToken.sessionId);
+    bool isValidSession = (appSession != nullptr);
+    bool isCastPlusAudio = (static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) ==
+        ProtocolType::TYPE_CAST_PLUS_AUDIO);
+    bool isContainCastPlusAudio = ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
+        ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0);
+    bool isAudioSessionType = isValidSession ?
+        appSession->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_AUDIO : false;
+
     bool isPcm = (sessionToken.sessionId == "pcmCastSession") ||
-        ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
-        ProtocolType::TYPE_CAST_PLUS_AUDIO)) != 0;
+        (isValidSession && isCastPlusAudio) || (isValidSession && isContainCastPlusAudio && isAudioSessionType);
     if (isPcm) {
         std::shared_ptr<PcmCastSession> pcmCastSession;
         {
