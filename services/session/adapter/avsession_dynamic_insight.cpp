@@ -236,22 +236,34 @@ std::shared_ptr<AppExecFwk::WantParams> InsightAdapter::GetPlayIntentParamWithWa
     return wantParam;
 }
 
-bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
-    AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
+bool InsightAdapter::ParseInsightIntents(const std::string& bundleName, std::string& supportModule,
+    cJSON*& profileValues, cJSON*& insightIntentsArray)
 {
-    std::string supportModule;
     std::string profile;
     if (!IsSupportPlayIntent(bundleName, supportModule, profile)) {
         SLOGE("bundle=%{public}s does not support play insights", bundleName.c_str());
         return false;
     }
     SLOGD("GetJsonProfile profile=%{public}s", profile.c_str());
-    cJSON* profileValues = cJSON_Parse(profile.c_str());
+    profileValues = cJSON_Parse(profile.c_str());
     CHECK_AND_RETURN_RET_LOG(profileValues != nullptr && !cJSON_IsInvalid(profileValues), false, "parse profile fail");
-    cJSON* insightIntentsArray = cJSON_GetObjectItem(profileValues, "insightIntents");
+    insightIntentsArray = cJSON_GetObjectItem(profileValues, "insightIntents");
     if (insightIntentsArray == nullptr || !cJSON_IsArray(insightIntentsArray)) {
         SLOGE("json do not contain insightIntentsArray");
         cJSON_Delete(profileValues);
+        profileValues = nullptr;
+        return false;
+    }
+    return true;
+}
+
+bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
+    AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
+{
+    std::string supportModule;
+    cJSON* profileValues = nullptr;
+    cJSON* insightIntentsArray = nullptr;
+    if (!ParseInsightIntents(bundleName, supportModule, profileValues, insightIntentsArray)) {
         return false;
     }
     bool res = false;
