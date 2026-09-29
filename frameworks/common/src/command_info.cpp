@@ -14,7 +14,6 @@
  */
 
 #include "command_info.h"
-#include "avcontrol_command.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 
