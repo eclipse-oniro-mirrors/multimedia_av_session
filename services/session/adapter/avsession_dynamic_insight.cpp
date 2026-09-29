@@ -267,6 +267,31 @@ bool InsightAdapter::ParseInsightIntents(const std::string& bundleName, std::str
     return true;
 }
 
+void InsightAdapter::FillExecuteParamFromIntent(cJSON* insightIntentsItem, const std::string& insightName,
+    const std::string& bundleName, const std::string& supportModule, const std::string& assetId,
+    const StartPlayInfo startPlayInfo, StartPlayType startPlayType,
+    AppExecFwk::InsightIntentExecuteParam& executeParam, bool& res)
+{
+    cJSON* uiAbilityItem = cJSON_GetObjectItem(insightIntentsItem, "uiAbility");
+    if (uiAbilityItem == nullptr) {
+        SLOGE("json do not contain uiAbility");
+        return;
+    }
+    cJSON* abilityItem = cJSON_GetObjectItem(uiAbilityItem, "ability");
+    if (abilityItem == nullptr || !cJSON_IsString(abilityItem)) {
+        SLOGE("json do not contain ability");
+        return;
+    }
+    executeParam.bundleName_ = bundleName;
+    executeParam.moduleName_ = supportModule;
+    executeParam.abilityName_.assign(abilityItem->valuestring);
+    executeParam.insightIntentName_ = insightName;
+    executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
+    std::shared_ptr<AppExecFwk::WantParams> wantParam =
+        GetPlayIntentParamWithWantProcess(insightName, assetId, startPlayInfo, startPlayType, res);
+    executeParam.insightIntentParam_ = wantParam;
+}
+
 bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
     AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
 {
@@ -298,24 +323,8 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
             continue;
         }
 #endif
-        cJSON* uiAbilityItem = cJSON_GetObjectItem(insightIntentsItem, "uiAbility");
-        if (uiAbilityItem == nullptr) {
-            SLOGE("json do not contain uiAbility");
-            continue;
-        }
-        cJSON* abilityItem = cJSON_GetObjectItem(uiAbilityItem, "ability");
-        if (abilityItem == nullptr || !cJSON_IsString(abilityItem)) {
-            SLOGE("json do not contain ability");
-            continue;
-        }
-        executeParam.bundleName_ = bundleName;
-        executeParam.moduleName_ = supportModule;
-        executeParam.abilityName_.assign(abilityItem->valuestring);
-        executeParam.insightIntentName_ = insightName;
-        executeParam.executeMode_ = AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND;
-        std::shared_ptr<AppExecFwk::WantParams> wantParam =
-            GetPlayIntentParamWithWantProcess(insightName, assetId, startPlayInfo, startPlayType, res);
-        executeParam.insightIntentParam_ = wantParam;
+        FillExecuteParamFromIntent(insightIntentsItem, insightName, bundleName, supportModule, assetId,
+            startPlayInfo, startPlayType, executeParam, res);
     }
     cJSON_Delete(profileValues);
     return res;

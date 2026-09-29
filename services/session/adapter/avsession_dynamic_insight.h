@@ -169,6 +169,11 @@ private:
     std::shared_ptr<AppExecFwk::WantParams> GetPlayIntentParamWithWantProcess(std::string& insightName,
     const std::string& assetId, const StartPlayInfo startPlayInfo, StartPlayType startPlayType, bool& res);
 
+    void FillExecuteParamFromIntent(cJSON* insightIntentsItem, const std::string& insightName,
+        const std::string& bundleName, const std::string& supportModule, const std::string& assetId,
+        const StartPlayInfo startPlayInfo, StartPlayType startPlayType,
+        AppExecFwk::InsightIntentExecuteParam& executeParam, bool& res);
+
     bool ExecuteIntentFromAVSession(uint64_t key, const sptr<IRemoteObject> &callerToken,
         AppExecFwk::InsightIntentExecuteParam &param);
 
