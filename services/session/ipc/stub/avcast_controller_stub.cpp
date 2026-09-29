@@ -22,6 +22,7 @@
 #include "surface_utils.h"
 #include "session_xcollie.h"
 #include "permission_checker.h"
+#include "avsession_utils.h"
 
 namespace OHOS::AVSession {
 bool AVCastControllerStub::CheckInterfaceToken(MessageParcel& data)
@@ -98,6 +99,8 @@ int32_t AVCastControllerStub::HandleStart(MessageParcel& data, MessageParcel& re
     sptr<AVQueueItem> avQueueItem = data.ReadParcelable<AVQueueItem>();
     AVFileDescriptor avFileDescriptor;
     avFileDescriptor.fd_ = data.ReadFileDescriptor();
+    uint64_t fdsanTag = avFileDescriptor.fd_ >= 0 ? AVSessionUtils::GetFdsanTag() : 0;
+    fdsanTag != 0 ? fdsan_exchange_owner_tag(avFileDescriptor.fd_, 0, fdsanTag) : (void)0;
     if (avQueueItem == nullptr) {
         CHECK_AND_PRINT_LOG(reply.WriteInt32(ERR_UNMARSHALLING), "write Start ret failed");
     } else {
@@ -105,7 +108,7 @@ int32_t AVCastControllerStub::HandleStart(MessageParcel& data, MessageParcel& re
         CHECK_AND_PRINT_LOG(reply.WriteInt32(Start(*avQueueItem)), "Write mediaInfoHolder failed");
     }
     CHECK_AND_RETURN_RET_LOG(avFileDescriptor.fd_ >= 0, ERR_NONE, "HandleStart read fd is invalid");
-    close(avFileDescriptor.fd_);
+    CHECK_AND_PRINT_LOG(!(fdsan_close_with_tag(avFileDescriptor.fd_, fdsanTag)), "HandleStart close fd failed");
     return ERR_NONE;
 }
 
@@ -119,12 +122,15 @@ int32_t AVCastControllerStub::HandlePrepare(MessageParcel& data, MessageParcel& 
             SLOGD("Need get fd from proxy");
             AVFileDescriptor avFileDescriptor;
             avFileDescriptor.fd_ = data.ReadFileDescriptor();
+            uint64_t fdsanTag = avFileDescriptor.fd_ >= 0 ? AVSessionUtils::GetFdsanTag() : 0;
+            fdsanTag != 0 ? fdsan_exchange_owner_tag(avFileDescriptor.fd_, 0, fdsanTag) : (void)0;
             SLOGD("Prepare received fd %{public}d", avFileDescriptor.fd_);
             avQueueItem->GetDescription()->SetFdSrc(avFileDescriptor);
             CHECK_AND_PRINT_LOG(reply.WriteInt32(Prepare(*avQueueItem)), "fd != 0, Write mediaInfoHolder failed");
             CHECK_AND_RETURN_RET_LOG(avQueueItem->GetDescription()->GetFdSrc().fd_ >= 0,
                 ERR_NONE, "HandlePrepare read fd is invalid");
-            close(avQueueItem->GetDescription()->GetFdSrc().fd_);
+            CHECK_AND_PRINT_LOG(!(fdsan_close_with_tag(avQueueItem->GetDescription()->GetFdSrc().fd_, fdsanTag)),
+                "HandlePrepare close fd failed");
         } else {
             CHECK_AND_PRINT_LOG(reply.WriteInt32(Prepare(*avQueueItem)), "Write mediaInfoHolder failed");
         }

@@ -30,6 +30,7 @@
 #include "permission_checker.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "avsession_utils.h"
 
 using namespace OHOS::AudioStandard;
 namespace OHOS::AVSession {
@@ -801,10 +802,12 @@ int32_t AVSessionServiceStub::HandleStartDeviceLogging(MessageParcel& data, Mess
     }
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t fd = data.ReadFileDescriptor();
+    uint64_t fdsanTag = fd >= 0 ? AVSessionUtils::GetFdsanTag() : 0;
+    fdsanTag != 0 ? fdsan_exchange_owner_tag(fd, 0, fdsanTag) : (void)0;
     uint32_t maxSize = data.ReadUint32();
     int32_t ret = AVRouter::GetInstance().StartDeviceLogging(fd, maxSize);
     CHECK_AND_PRINT_LOG(fd >= 0, "HandleStartDeviceLogging read fd is invalid");
-    CHECK_AND_PRINT_LOG(fd >= 0 && !(close(fd)),
+    CHECK_AND_PRINT_LOG(fd >= 0 && !(fdsan_close_with_tag(fd, fdsanTag)),
         "if no previous log HandleStartDeviceLogging read fd is invalid, close fd failed is logged");
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "WriteInt32 result failed");
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "HandleStartDeviceLogging failed");

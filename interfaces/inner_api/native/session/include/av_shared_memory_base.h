@@ -141,6 +141,7 @@ private:
     std::string name_;
     int32_t fd_ = 0;
     int32_t size_ = 0;
+    uint64_t fdsanTag_ = 0;
     static constexpr int32_t INVALID_POSITION = -1;
 };
 } // namespace AVSession
