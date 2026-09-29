@@ -371,7 +371,6 @@ int32_t AVCastControllerItem::Update(const AVQueueItem& avQueueItem)
     SLOGI("Call update of cast controller proxy");
     std::lock_guard lockGuard(castControllerLock_);
     CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR, "streamPlayer null");
-    buildExtraCastInfo(avQueueItem);
     std::string bundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
     if (avQueueItem.GetDescription() != nullptr && avQueueItem.GetDescription()->GetAppName().empty()) {
         avQueueItem.GetDescription()->SetAppName(bundleName);
