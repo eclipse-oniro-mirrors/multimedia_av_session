@@ -164,7 +164,7 @@ private:
     bool CheckBundleSupport(std::string& profile);
 
     bool ParseInsightIntents(const std::string& bundleName, std::string& supportModule,
-        cJSON*& profileValues, cJSON*& insightIntentsArray);
+        cJSON*& profileValues, cJSON*& insightIntentsArray, bool& containsMusicList);
 
     std::shared_ptr<AppExecFwk::WantParams> GetPlayIntentParamWithWantProcess(std::string& insightName,
     const std::string& assetId, const StartPlayInfo startPlayInfo, StartPlayType startPlayType, bool& res);

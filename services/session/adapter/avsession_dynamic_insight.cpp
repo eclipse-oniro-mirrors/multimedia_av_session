@@ -237,7 +237,7 @@ std::shared_ptr<AppExecFwk::WantParams> InsightAdapter::GetPlayIntentParamWithWa
 }
 
 bool InsightAdapter::ParseInsightIntents(const std::string& bundleName, std::string& supportModule,
-    cJSON*& profileValues, cJSON*& insightIntentsArray)
+    cJSON*& profileValues, cJSON*& insightIntentsArray, bool& containsMusicList)
 {
     std::string profile;
     if (!IsSupportPlayIntent(bundleName, supportModule, profile)) {
@@ -254,6 +254,16 @@ bool InsightAdapter::ParseInsightIntents(const std::string& bundleName, std::str
         profileValues = nullptr;
         return false;
     }
+    containsMusicList = false;
+    cJSON* item = nullptr;
+    cJSON_ArrayForEach(item, insightIntentsArray) {
+        cJSON* nameItem = cJSON_GetObjectItem(item, "intentName");
+        if (nameItem != nullptr && cJSON_IsString(nameItem) && nameItem->valuestring != nullptr) {
+            if (std::string(nameItem->valuestring) == PLAY_MUSICLIST) {
+                containsMusicList = true;
+            }
+        }
+    }
     return true;
 }
 
@@ -263,10 +273,16 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
     std::string supportModule;
     cJSON* profileValues = nullptr;
     cJSON* insightIntentsArray = nullptr;
-    if (!ParseInsightIntents(bundleName, supportModule, profileValues, insightIntentsArray)) {
+    bool containsMusicList = false;
+    if (!ParseInsightIntents(bundleName, supportModule, profileValues, insightIntentsArray,
+        containsMusicList)) {
         return false;
     }
     bool res = false;
+#ifdef CAR_FEATURE_ENABLE
+    int32_t isPlayList = startPlayInfo.GetIsPlayList();
+    bool consultIsPlayList = (cJSON_GetArraySize(insightIntentsArray) > 1) && containsMusicList;
+#endif
     cJSON* insightIntentsItem = nullptr;
     cJSON_ArrayForEach(insightIntentsItem, insightIntentsArray) {
         cJSON* intentNameItem = cJSON_GetObjectItem(insightIntentsItem, "intentName");
@@ -274,8 +290,7 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
         CHECK_AND_CONTINUE(intentNameItem->valuestring != nullptr);
         std::string insightName(intentNameItem->valuestring);
 #ifdef CAR_FEATURE_ENABLE
-        int32_t isPlayList = startPlayInfo.GetIsPlayList();
-        if (isPlayList == 1 && insightName != PLAY_MUSICLIST) {
+        if (consultIsPlayList && isPlayList == 1 && insightName != PLAY_MUSICLIST) {
             continue;
         }
 #else
