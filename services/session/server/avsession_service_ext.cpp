@@ -394,8 +394,7 @@ void AVSessionService::ReleaseCastSession(const int32_t userId)
     auto sessions = GetUsersManager().GetContainerFromUser(targetUserId).GetAllSessions();
     SLOGI("Session list size for userId %{public}d is %{public}zu", targetUserId, sessions.size());
     for (const auto& session : sessions) {
-        if (session != nullptr && (session->GetDescriptor().sessionTag_ == "RemoteCast" ||
-                session->GetDescriptor().sessionTag_ == "projection_client")) {
+        if (session != nullptr && session->IsSinkCastSession()) {
             std::string sessionId = session->GetDescriptor().sessionId_;
             SLOGI("Already has a cast session %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
             session->UnRegisterDeviceStateCallback();
@@ -743,7 +742,7 @@ int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 
     CHECK_AND_RETURN_RET_LOG(session != nullptr, AVSESSION_SUCCESS, "StopCast: session is not exist");
     CHECK_AND_RETURN_RET_LOG(session->StopCast() == AVSESSION_SUCCESS, AVSESSION_ERROR, "StopCast failed");
-    if (session->GetDescriptor().sessionTag_ == "RemoteCast") {
+    if (session->IsSinkCastSession()) {
         SLOGI("Stop cast at sink, start destroy sink avsession task");
         HandleSessionRelease(sessionToken.sessionId);
         return AVSESSION_SUCCESS;

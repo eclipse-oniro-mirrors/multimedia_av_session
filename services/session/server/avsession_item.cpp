@@ -2411,10 +2411,7 @@ int32_t AVSessionItem::StopCast(const DeviceRemoveAction deviceRemoveAction)
         return AVRouter::GetInstance().PcmCastSessionReleasePlayer();
     }
     std::lock_guard lockGuard(castLock_);
-    bool isSinkCastSession = false;
-    isSinkCastSession = (descriptor_.sessionTag_ == "RemoteCast" ||
-                         descriptor_.sessionTag_ == "projection_client");
-    if (isSinkCastSession) {
+    if (IsSinkCastSession()) {
         CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
         CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedNetworkId_.c_str(),
@@ -3796,6 +3793,15 @@ bool AVSessionItem::IsCastConnected()
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
         return IsCasting() && AVRouter::GetInstance().IsRemoteCasting();
+#endif
+    return false;
+}
+
+bool AVSessionItem::IsSinkCastSession()
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    return (descriptor_.sessionTag_ == "RemoteCast" ||
+        descriptor_.sessionTag_ == "projection_client");
 #endif
     return false;
 }
