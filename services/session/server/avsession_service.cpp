@@ -5560,14 +5560,17 @@ int32_t AVSessionService::GetSessionDescriptorsForAudioZone(int32_t userId,
 
 void AVSessionService::ParseExtraInfoForAudioZone(const std::string& extraInfo, StartPlayInfo& startPlayInfo)
 {
-    int32_t controlCommand = 0;
+    std::string controlCommand;
     int32_t isPlayList = 1;
     cJSON* extraInfoJson = cJSON_Parse(extraInfo.c_str());
     if (extraInfoJson != nullptr && !cJSON_IsInvalid(extraInfoJson) && !cJSON_IsNull(extraInfoJson)) {
         cJSON* controlCommandItem = cJSON_GetObjectItem(extraInfoJson, "controlCommand");
         if (controlCommandItem != nullptr && !cJSON_IsInvalid(controlCommandItem) &&
-            !cJSON_IsNull(controlCommandItem) && cJSON_IsNumber(controlCommandItem)) {
-            controlCommand = controlCommandItem->valueint;
+            !cJSON_IsNull(controlCommandItem) && cJSON_IsString(controlCommandItem)) {
+            std::string cmd = controlCommandItem->valuestring;
+            if (cmd == "play" || cmd == "playNext" || cmd == "playPrevious") {
+                controlCommand = cmd;
+            }
         }
         cJSON* isPlayListItem = cJSON_GetObjectItem(extraInfoJson, "isPlayList");
         if (isPlayListItem != nullptr && !cJSON_IsInvalid(isPlayListItem) &&
@@ -5610,9 +5613,9 @@ int32_t AVSessionService::StartAVPlaybackForAudioZone(int32_t userId, const std:
     ParseExtraInfoForAudioZone(extraInfo, startPlayInfo);
 
     SLOGI("StartAVPlaybackForAudioZone for bundleName:%{public}s, moduleName=%{public}s, "
-        "userId:%{public}d, controlCommand:%{public}d, isPlayList:%{public}d",
+        "userId:%{public}d, controlCommand:%{public}s, isPlayList:%{public}d",
         bundleName.c_str(), moduleName.c_str(), userId,
-        startPlayInfo.GetControlCommand(), startPlayInfo.GetIsPlayList());
+        startPlayInfo.GetControlCommand().c_str(), startPlayInfo.GetIsPlayList());
     
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
     typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId,

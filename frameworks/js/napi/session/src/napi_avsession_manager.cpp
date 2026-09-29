@@ -579,7 +579,7 @@ void NapiAVSessionManager::FillCommandInfo(napi_env env, napi_value arg, Command
 void NapiAVSessionManager::FillExtraInfo(napi_env env, napi_value arg, std::string& extraInfo)
 {
 #ifdef CAR_FEATURE_ENABLE
-    int32_t controlCommand = 0;
+    std::string controlCommand;
     int32_t isPlayList = 1;
     NapiUtils::GetNamedProperty(env, arg, "controlCommand", controlCommand);
     NapiUtils::GetNamedProperty(env, arg, "isPlayList", isPlayList);
@@ -587,7 +587,7 @@ void NapiAVSessionManager::FillExtraInfo(napi_env env, napi_value arg, std::stri
     if (extraInfoJson == nullptr) {
         return;
     }
-    cJSON_AddNumberToObject(extraInfoJson, "controlCommand", controlCommand);
+    cJSON_AddStringToObject(extraInfoJson, "controlCommand", controlCommand.c_str());
     cJSON_AddNumberToObject(extraInfoJson, "isPlayList", isPlayList);
     char* jsonStr = cJSON_PrintUnformatted(extraInfoJson);
     if (jsonStr != nullptr) {

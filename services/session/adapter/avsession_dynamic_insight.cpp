@@ -197,8 +197,8 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
     startPlayInfoParam.SetParam("deviceId", OHOS::AAFwk::String::Box(startPlayInfo.getDeviceId()));
 #ifdef CAR_FEATURE_ENABLE
     startPlayInfoParam.SetParam("startUserId", OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetUserId())));
-    int32_t controlCommand = startPlayInfo.GetControlCommand();
-    startPlayInfoParam.SetParam("controlCommand", OHOS::AAFwk::Integer::Box(controlCommand));
+    std::string controlCommand = startPlayInfo.GetControlCommand();
+    startPlayInfoParam.SetParam("controlCommand", OHOS::AAFwk::String::Box(controlCommand));
 #endif
     if (wantParam == nullptr) {
         SLOGE("wantParam is null when SetStartPlayInfoToParam");
