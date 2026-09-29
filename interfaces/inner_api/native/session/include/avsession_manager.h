@@ -299,7 +299,7 @@ public:
      * @since 26.0.1 dynamic&static
      */
     virtual int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName,
-        const std::string& assetId, const CommandInfo& info, const std::string& extraInfo)
+        const std::string& assetId, const CommandInfo& info = CommandInfo{}, const std::string& extraInfo = "")
         { return AVSESSION_SUCCESS; };
 
     /**

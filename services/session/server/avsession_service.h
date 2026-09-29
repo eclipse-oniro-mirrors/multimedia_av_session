@@ -214,7 +214,7 @@ public:
         std::vector<AVSessionDescriptor>& descriptors) override;
     
     int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName,
-        const std::string& assetId, const CommandInfo& info, const std::string& extraInfo) override;
+        const std::string& assetId, const CommandInfo& info = CommandInfo{}, const std::string& extraInfo = "") override;
     
     int32_t RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener) override;
     

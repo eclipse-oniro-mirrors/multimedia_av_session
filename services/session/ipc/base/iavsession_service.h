@@ -71,7 +71,7 @@ public:
         std::vector<AVSessionDescriptor>& descriptors) = 0;
 
     virtual int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName,
-        const std::string& assetId, const CommandInfo& info, const std::string& extraInfo) = 0;
+        const std::string& assetId, const CommandInfo& info = CommandInfo{}, const std::string& extraInfo = "") = 0;
 #endif
 
     virtual int32_t RegisterAncoMediaSessionListener(const sptr<IAncoMediaSessionListener> &listener) = 0;
