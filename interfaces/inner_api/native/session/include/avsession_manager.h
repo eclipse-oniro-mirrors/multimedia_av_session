@@ -99,7 +99,7 @@ public:
      * @param userId current user id.
      * @param descriptors obtain SessionDescriptors {@link AVSessionDescriptor}.
      * @return Returns whether to obtain SessionDescriptors successfully.
-     * @since 26.1.0 dynamic&static
+     * @since 26.0.1 dynamic&static
      */
     virtual int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor>& descriptors) { return AVSESSION_SUCCESS; };
@@ -170,7 +170,7 @@ public:
      * @param userId The user id to listen for.
      * @param listener Listen for sessionListener Callback event{@link SessionListener}.
      * @return Whether to return successful Listener.
-     * @since 26.1.0
+     * @since 26.0.1
     */
     virtual int32_t RegisterSessionListenerForUser(int32_t userId,
         const std::shared_ptr<SessionListener>& listener) { return AVSESSION_SUCCESS; };
