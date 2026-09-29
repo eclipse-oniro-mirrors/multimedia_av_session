@@ -617,8 +617,8 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
 {
 #ifdef CAR_FEATURE_ENABLE
     struct ConcreteContext : public ContextBase {
-        std::string bundleName_;
         int32_t userId_;
+        std::string bundleName_;
         std::string assetId_;
         CommandInfo commandInfo_;
         std::string extraInfo_;
@@ -628,12 +628,12 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
     auto input = [env, context](size_t argc, napi_value* argv) {
         CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE || argc == ARGC_FOUR || argc == ARGC_FIVE,
             "invalid arguments", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->bundleName_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
-            "invalid bundleName", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->userId_);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->userId_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid userId",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->bundleName_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
+            "invalid bundleName", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_THIRD], context->assetId_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid assetId",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
