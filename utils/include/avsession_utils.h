@@ -39,6 +39,14 @@ class AVSessionUtils {
 public:
     static constexpr const int32_t MAX_FILE_SIZE = 4 * 1024 * 1024;
 
+    static uint64_t GetFdsanTag()
+    {
+        constexpr uint64_t FDSAN_TAG = 1;
+        constexpr uint64_t AVSESSION_DOMAIN_ID = 0xC02B91;
+        constexpr uint32_t DOMAIN_ID_SHIFT_BITS = 32;
+        return (AVSESSION_DOMAIN_ID << DOMAIN_ID_SHIFT_BITS) | FDSAN_TAG;
+    }
+
     static void WritePairToFile(const std::pair<std::string, int32_t>& castPair,
         const std::string& fileDir, const std::string& fileName)
     {

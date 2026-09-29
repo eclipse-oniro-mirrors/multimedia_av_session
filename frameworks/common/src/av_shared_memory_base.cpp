@@ -23,6 +23,7 @@
 #include "av_shared_memory_base.h"
 #include "stream_dfx_manager.h"
 #include "audio_errors.h"
+#include "avsession_utils.h"
 
 namespace {
 static std::atomic<uint64_t> g_uniqueSharedMemoryID = 0;
@@ -46,6 +47,8 @@ AVSharedMemoryBase* AVSharedMemoryBase::Unmarshalling(Parcel& in)
     MessageParcel& parcel = static_cast<MessageParcel&>(in);
     int32_t fd = parcel.ReadFileDescriptor();
     CHECK_AND_RETURN_RET_LOG(fd >= 0, nullptr, "read fd is invalid");
+    uint64_t fdsanTag = AVSessionUtils::GetFdsanTag();
+    fdsan_exchange_owner_tag(fd, 0, fdsanTag);
 
     int32_t size = parcel.ReadInt32();
     uint32_t flags = parcel.ReadUint32();
@@ -54,7 +57,7 @@ AVSharedMemoryBase* AVSharedMemoryBase::Unmarshalling(Parcel& in)
     AVSharedMemoryBase* memory = new (std::nothrow) AVSharedMemoryBaseImpl(fd, size, flags, name);
     CHECK_AND_RETURN_RET_LOG(memory != nullptr, nullptr, "create memory fail");
     int32_t ret = memory->Init();
-    (void)::close(fd);
+    CHECK_AND_PRINT_LOG(!(fdsan_close_with_tag(fd, fdsanTag)), "Unmarshalling close fd failed");
     bool isErr = ret != static_cast<int32_t>(AVSESSION_SUCCESS) || memory->GetBase() == nullptr;
     if (isErr) {
         SLOGE("create memory failed");
@@ -113,6 +116,8 @@ AVSharedMemoryBase::AVSharedMemoryBase(int32_t fd, int32_t size, uint32_t flags,
 {
     SLOGD("AVSharedMemoryBase fd in, name = %{public}s", name_.c_str());
     uniqueSharedMemoryID_ = g_uniqueSharedMemoryID++;
+    fdsanTag_ = fd_ >= 0 ? AVSessionUtils::GetFdsanTag() : 0;
+    fdsanTag_ != 0 ? fdsan_exchange_owner_tag(fd_, 0, fdsanTag_) : (void)0;
 }
 
 AVSharedMemoryBase::~AVSharedMemoryBase()
@@ -148,6 +153,8 @@ int32_t AVSharedMemoryBase::Init(bool isMapVirAddr)
                 AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "fd is invalid", true);
             return static_cast<int32_t>(ERR_INVALID_PARAM);
         }
+        fdsanTag_ = AVSessionUtils::GetFdsanTag();
+        fdsan_exchange_owner_tag(fd_, 0, fdsanTag_);
     }
     if (isMapVirAddr) {
         int32_t ret = MapMemory(isRemote);
@@ -194,8 +201,9 @@ void AVSharedMemoryBase::Close() noexcept
         size_ = 0;
     }
     if (fd_ >= 0) {
-        (void)::close(fd_);
+        CHECK_AND_PRINT_LOG(!(fdsan_close_with_tag(fd_, fdsanTag_)), "AVSharedMemoryBase close fd failed");
         fd_ = -1;
+        fdsanTag_ = 0;
     }
 }
 
