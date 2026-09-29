@@ -104,42 +104,4 @@ int32_t CommandInfo::GetCallerType(std::string& callerType) const
 }
 // LCOV_EXCL_STOP
 
-int32_t ColdStartInfo::SetControlCommand(int32_t controlCommand)
-{
-    if (controlCommand <= AVControlCommand::SESSION_CMD_INVALID ||
-        controlCommand >= AVControlCommand::SESSION_CMD_MAX) {
-        SLOGE("invalid controlCommand %{public}d", controlCommand);
-        return ERR_INVALID_PARAM;
-    }
-    controlCommand_ = controlCommand;
-    return AVSESSION_SUCCESS;
-}
-
-int32_t ColdStartInfo::SetIsPlayList(int32_t isPlayList)
-{
-    isPlayList_ = isPlayList;
-    return AVSESSION_SUCCESS;
-}
-
-bool ColdStartInfo::Unmarshalling(Parcel& data)
-{
-    int32_t controlCommand = 0;
-    int32_t isPlayList = 0;
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(controlCommand), false, "read controlCommand failed");
-    CHECK_AND_RETURN_RET_LOG(data.ReadInt32(isPlayList), false, "read isPlayList failed");
-    if (SetControlCommand(controlCommand) != AVSESSION_SUCCESS) {
-        return false;
-    }
-    if (SetIsPlayList(isPlayList) != AVSESSION_SUCCESS) {
-        return false;
-    }
-    return true;
-}
-
-bool ColdStartInfo::Marshalling(Parcel& parcel) const
-{
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(controlCommand_), false, "write controlCommand failed");
-    CHECK_AND_RETURN_RET_LOG(parcel.WriteInt32(isPlayList_), false, "write isPlayList failed");
-    return true;
-}
 } // namespace OHOS::AVSession

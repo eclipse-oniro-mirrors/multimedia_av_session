@@ -3559,9 +3559,9 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         CHECK_AND_RETURN_LOG(!CheckIfOtherAudioPlaying(), "audioplaying control block");
 #ifdef CAR_FEATURE_ENABLE
         int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
-        ColdStartInfo coldStartInfo;
-        coldStartInfo.SetControlCommand(command.GetCommand());
-        ret = StartAVPlaybackForAudioZone(bundleName, userId, "", CommandInfo{}, coldStartInfo);
+        std::string extraInfo = R"({"controlCommand":)" + std::to_string(command.GetCommand()) +
+            R"(,"isPlayList":1})";
+        ret = StartAVPlaybackForAudioZone(userId, bundleName, "", CommandInfo{}, extraInfo);
         SLOGI("Cold play for audio zone %{public}s ret=%{public}d", bundleName.c_str(), ret);
 #else
         ret = deviceId.empty() ? StartAVPlayback(bundleName, "", "")
@@ -5558,8 +5558,8 @@ int32_t AVSessionService::GetSessionDescriptorsForAudioZone(int32_t userId,
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-    const std::string& assetId, const CommandInfo& info, const ColdStartInfo& coldStartInfo)
+int32_t AVSessionService::StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName,
+    const std::string& assetId, const CommandInfo& info, const std::string& extraInfo)
 {
     int32_t result = AVSESSION_ERROR;
     if (CheckStartAncoMediaPlay(bundleName, &result)) {
@@ -5585,13 +5585,28 @@ int32_t AVSessionService::StartAVPlaybackForAudioZone(const std::string& bundleN
     startPlayInfo.setBundleName(bundleName);
     startPlayInfo.SetModuleName(moduleName);
     startPlayInfo.SetUserId(userId);
-    startPlayInfo.SetControlCommand(coldStartInfo.GetControlCommand());
-    startPlayInfo.SetIsPlayList(coldStartInfo.GetIsPlayList());
+    int32_t controlCommand = 0;
+    int32_t isPlayList = 1;
+    cJSON* extraInfoJson = cJSON_Parse(extraInfo.c_str());
+    if (extraInfoJson != nullptr && !cJSON_IsInvalid(extraInfoJson) && !cJSON_IsNull(extraInfoJson)) {
+        cJSON* controlCommandItem = cJSON_GetObjectItem(extraInfoJson, "controlCommand");
+        if (controlCommandItem != nullptr && !cJSON_IsInvalid(controlCommandItem) &&
+            !cJSON_IsNull(controlCommandItem) && cJSON_IsNumber(controlCommandItem)) {
+            controlCommand = controlCommandItem->valueint;
+        }
+        cJSON* isPlayListItem = cJSON_GetObjectItem(extraInfoJson, "isPlayList");
+        if (isPlayListItem != nullptr && !cJSON_IsInvalid(isPlayListItem) &&
+            !cJSON_IsNull(isPlayListItem) && cJSON_IsNumber(isPlayListItem)) {
+            isPlayList = isPlayListItem->valueint;
+        }
+    }
+    cJSON_Delete(extraInfoJson);
+    startPlayInfo.SetControlCommand(controlCommand);
+    startPlayInfo.SetIsPlayList(isPlayList);
     
     SLOGI("StartAVPlaybackForAudioZone for bundleName:%{public}s, moduleName=%{public}s, "
         "userId:%{public}d, controlCommand:%{public}d, isPlayList:%{public}d",
-        bundleName.c_str(), moduleName.c_str(), userId,
-        coldStartInfo.GetControlCommand(), coldStartInfo.GetIsPlayList());
+        bundleName.c_str(), moduleName.c_str(), userId, controlCommand, isPlayList);
     
     std::unique_ptr<AVSessionDynamicLoader> dynamicLoader = std::make_unique<AVSessionDynamicLoader>();
     typedef int32_t (*StartAVPlaybackFunc)(const std::string& bundleName, const std::string& assetId,

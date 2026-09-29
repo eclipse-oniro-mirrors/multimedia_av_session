@@ -160,7 +160,7 @@ private:
 
     static void FillCommandInfo(napi_env env, napi_value arg, CommandInfo& commandInfo);
 
-    static void FillColdStartInfo(napi_env env, napi_value arg, ColdStartInfo& coldStartInfo);
+    static void FillExtraInfo(napi_env env, napi_value arg, std::string& extraInfo);
 
     static void SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context);
 };

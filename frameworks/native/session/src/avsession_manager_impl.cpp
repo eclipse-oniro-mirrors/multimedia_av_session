@@ -275,12 +275,12 @@ int32_t AVSessionManagerImpl::StartAVPlayback(const std::string& bundleName, con
     return service ? service->StartAVPlayback(bundleName, assetId, moduleName) : ERR_SERVICE_NOT_EXIST;
 }
 
-int32_t AVSessionManagerImpl::StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-    const std::string& assetId, const CommandInfo& info, const ColdStartInfo& coldStartInfo)
+int32_t AVSessionManagerImpl::StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName,
+    const std::string& assetId, const CommandInfo& info, const std::string& extraInfo)
 {
 #ifdef CAR_FEATURE_ENABLE
     auto service = GetService();
-    return service ? service->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info, coldStartInfo)
+    return service ? service->StartAVPlaybackForAudioZone(userId, bundleName, assetId, info, extraInfo)
         : ERR_SERVICE_NOT_EXIST;
 #else
     return AVSESSION_ERROR;

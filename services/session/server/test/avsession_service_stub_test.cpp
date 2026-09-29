@@ -151,9 +151,9 @@ public:
 #ifdef CAR_FEATURE_ENABLE
     int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor> &descriptors) override { return AVSESSION_SUCCESS; };
-    int32_t StartAVPlaybackForAudioZone(const std::string &bundleName, int32_t userId,
+    int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string &bundleName,
         const std::string &assetId, const CommandInfo &info,
-        const ColdStartInfo &coldStartInfo) override { return AVSESSION_SUCCESS; };
+        const std::string &extraInfo) override { return AVSESSION_SUCCESS; };
     int32_t RegisterSessionListenerForUser(int32_t userId,
         const OHOS::sptr<ISessionListener>  &listener) override { return AVSESSION_SUCCESS; };
 #endif
@@ -1037,15 +1037,13 @@ static HWTEST_F(AVSessionServiceStubTest, HandleStartAVPlaybackForAudioZone001, 
     info.SetCallerBundleName("test_bundle");
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
-    ColdStartInfo coldStartInfo;
-    coldStartInfo.SetControlCommand(3);
-    coldStartInfo.SetIsPlayList(1);
+    std::string extraInfo = R"({"controlCommand":3,"isPlayList":1})";
     
     data.WriteString(bundleName);
     data.WriteInt32(userId);
     data.WriteString(assetId);
     info.Marshalling(data);
-    coldStartInfo.Marshalling(data);
+    data.WriteString(extraInfo);
 
     AVSessionServiceStubPerDemo stub;
     stub.HandleStartAVPlaybackForAudioZone(data, reply);
@@ -1072,15 +1070,13 @@ static HWTEST_F(AVSessionServiceStubTest, HandleStartAVPlaybackForAudioZone002, 
     info.SetCallerBundleName("test_bundle");
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
-    ColdStartInfo coldStartInfo;
-    coldStartInfo.SetControlCommand(4);
-    coldStartInfo.SetIsPlayList(0);
+    std::string extraInfo = R"({"controlCommand":4,"isPlayList":0})";
     data.WriteString(bundleName);
 
     data.WriteInt32(userId);
     data.WriteString(assetId);
     info.Marshalling(data);
-    coldStartInfo.Marshalling(data);
+    data.WriteString(extraInfo);
 
     AVSessionServiceStubPerDemo stub;
     stub.HandleStartAVPlaybackForAudioZone(data, reply);

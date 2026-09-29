@@ -450,11 +450,9 @@ HWTEST_F(AVSessionManagerImplTest, StartAVPlaybackForAudioZone001, TestSize.Leve
     info.SetCallerBundleName("test_bundle");
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
-    ColdStartInfo coldStartInfo;
-    coldStartInfo.SetControlCommand(3);
-    coldStartInfo.SetIsPlayList(1);
-    auto result = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(bundleName, userId, assetId, info,
-        coldStartInfo);
+    std::string extraInfo = R"({"controlCommand":3,"isPlayList":1})";
+    auto result = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(userId, bundleName, assetId, info,
+        extraInfo);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGI("StartAVPlaybackForAudioZone001 end");
 }
@@ -472,9 +470,9 @@ HWTEST_F(AVSessionManagerImplTest, StartAVPlaybackForAudioZone002, TestSize.Leve
     int32_t userId = 100;
     std::string assetId = "test_asset";
     CommandInfo info;
-    ColdStartInfo coldStartInfo;
-    auto result = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(bundleName, userId, assetId, info,
-        coldStartInfo);
+    std::string extraInfo;
+    auto result = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(userId, bundleName, assetId, info,
+        extraInfo);
     EXPECT_NE(result, AVSESSION_SUCCESS);
     SLOGI("StartAVPlaybackForAudioZone002 end");
 }
@@ -527,7 +525,8 @@ HWTEST_F(AVSessionManagerImplTest, StartAVPlaybackForAudioZone003, TestSize.Leve
     int32_t userId = 100;
     std::string assetId = "test_asset";
     CommandInfo info;
-    auto result = impl.StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    std::string extraInfo;
+    auto result = impl.StartAVPlaybackForAudioZone(userId, bundleName, assetId, info, extraInfo);
     EXPECT_EQ(result, AVSESSION_ERROR);
     SLOGI("StartAVPlaybackForAudioZone003 end");
 }

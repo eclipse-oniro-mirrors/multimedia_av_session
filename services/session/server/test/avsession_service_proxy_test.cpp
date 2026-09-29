@@ -247,12 +247,10 @@ static HWTEST_F(AVSessionServiceProxyTest, StartAVPlaybackForAudioZone001, testi
     info.SetCallerBundleName("test_bundle");
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
-    ColdStartInfo coldStartInfo;
-    coldStartInfo.SetControlCommand(3);
-    coldStartInfo.SetIsPlayList(1);
+    std::string extraInfo = R"({"controlCommand":3,"isPlayList":1})";
 
-    int32_t ret = avSessionServiceProxy->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info,
-        coldStartInfo);
+    int32_t ret = avSessionServiceProxy->StartAVPlaybackForAudioZone(userId, bundleName, assetId, info,
+        extraInfo);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 
     sessionService = nullptr;
@@ -285,12 +283,10 @@ static HWTEST_F(AVSessionServiceProxyTest, StartAVPlaybackForAudioZone002, testi
     info.SetCallerBundleName("test_bundle");
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
-    ColdStartInfo coldStartInfo;
-    coldStartInfo.SetControlCommand(4);
-    coldStartInfo.SetIsPlayList(0);
+    std::string extraInfo = R"({"controlCommand":4,"isPlayList":0})";
 
-    int32_t ret = avSessionServiceProxy->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info,
-        coldStartInfo);
+    int32_t ret = avSessionServiceProxy->StartAVPlaybackForAudioZone(userId, bundleName, assetId, info,
+        extraInfo);
     EXPECT_NE(ret, AVSESSION_SUCCESS);
 
     sessionService = nullptr;

@@ -31,6 +31,7 @@
 #include "tokenid_kit.h"
 #include "avsession_radar.h"
 #include "permission_checker.h"
+#include "cJSON.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "napi_avcast_controller.h"
@@ -575,17 +576,25 @@ void NapiAVSessionManager::FillCommandInfo(napi_env env, napi_value arg, Command
 #endif
 }
 
-void NapiAVSessionManager::FillColdStartInfo(napi_env env, napi_value arg, ColdStartInfo& coldStartInfo)
+void NapiAVSessionManager::FillExtraInfo(napi_env env, napi_value arg, std::string& extraInfo)
 {
 #ifdef CAR_FEATURE_ENABLE
     int32_t controlCommand = 0;
     int32_t isPlayList = 1;
-    if (NapiUtils::GetNamedProperty(env, arg, "controlCommand", controlCommand) == napi_ok) {
-        coldStartInfo.SetControlCommand(controlCommand);
+    NapiUtils::GetNamedProperty(env, arg, "controlCommand", controlCommand);
+    NapiUtils::GetNamedProperty(env, arg, "isPlayList", isPlayList);
+    cJSON* extraInfoJson = cJSON_CreateObject();
+    if (extraInfoJson == nullptr) {
+        return;
     }
-    if (NapiUtils::GetNamedProperty(env, arg, "isPlayList", isPlayList) == napi_ok) {
-        coldStartInfo.SetIsPlayList(isPlayList);
+    cJSON_AddNumberToObject(extraInfoJson, "controlCommand", controlCommand);
+    cJSON_AddNumberToObject(extraInfoJson, "isPlayList", isPlayList);
+    char* jsonStr = cJSON_PrintUnformatted(extraInfoJson);
+    if (jsonStr != nullptr) {
+        extraInfo = std::string(jsonStr);
+        cJSON_free(jsonStr);
     }
+    cJSON_Delete(extraInfoJson);
 #endif
 }
 
@@ -612,7 +621,7 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
         int32_t userId_;
         std::string assetId_;
         CommandInfo commandInfo_;
-        ColdStartInfo coldStartInfo_;
+        std::string extraInfo_;
     };
     auto context = std::make_shared<ConcreteContext>();
 
@@ -634,7 +643,7 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
         }
         if (argc == ARGC_FIVE && !NapiUtils::TypeCheck(env, argv[ARGV_FIFTH], napi_undefined)
             && !NapiUtils::TypeCheck(env, argv[ARGV_FIFTH], napi_null)) {
-            FillColdStartInfo(env, argv[ARGV_FIFTH], context->coldStartInfo_);
+            FillExtraInfo(env, argv[ARGV_FIFTH], context->extraInfo_);
         }
     };
 
@@ -642,8 +651,8 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(
-            context->bundleName_, context->userId_, context->assetId_, context->commandInfo_,
-            context->coldStartInfo_);
+            context->userId_, context->bundleName_, context->assetId_, context->commandInfo_,
+            context->extraInfo_);
         if (ret != AVSESSION_SUCCESS) {
             SetStartAVPlaybackError(ret, context);
         }

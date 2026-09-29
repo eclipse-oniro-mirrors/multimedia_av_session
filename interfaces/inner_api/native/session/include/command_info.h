@@ -48,24 +48,5 @@ private:
     std::string callerModuleName_;
     std::string callerType_;
 };
-
-class ColdStartInfo : public Parcelable {
-public:
-    ColdStartInfo() = default;
-    ~ColdStartInfo() override = default;
- 
-    bool Unmarshalling(Parcel& data);
-    bool Marshalling(Parcel& parcel) const override;
-
-    int32_t SetControlCommand(int32_t controlCommand);
-    int32_t GetControlCommand() const { return controlCommand_; }
-
-    int32_t SetIsPlayList(int32_t isPlayList);
-    int32_t GetIsPlayList() const { return isPlayList_; }
-
-private:
-    int32_t controlCommand_ {0};
-    int32_t isPlayList_ {1};
-};
 }
 #endif // OHOS_COMMAND_INFO_H
