@@ -47,6 +47,7 @@
 #include "account_manager_adapter.h"
 #include "app_manager_adapter.h"
 #include "avsession_dynamic_loader.h"
+#include "avsession_dynamic_insight.h"
 #include "avsession_errors.h"
 #include "avsession_log.h"
 #include "avsession_info.h"
@@ -213,8 +214,10 @@ public:
     int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor>& descriptors) override;
     
-    int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName,
-        const std::string& assetId, const CommandInfo& info = CommandInfo{}, const std::string& extraInfo = "") override;
+    int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName, const std::string& assetId,
+        const CommandInfo& info = CommandInfo{}, const std::string& extraInfo = "") override;
+
+    void ParseExtraInfoForAudioZone(const std::string& extraInfo, StartPlayInfo& startPlayInfo);
     
     int32_t RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener) override;
     
