@@ -78,4 +78,4 @@ For instructions on using AVSession, please refer to [AVSession Overview](https:
 
 ## Repositories Involved
 
-[**multimedia_av_session**](https://gitcode.com/g1tn00b/multimedia_av_session)
+[**multimedia_av_session**](https://gitcode.com/openharmony/multimedia_av_session)

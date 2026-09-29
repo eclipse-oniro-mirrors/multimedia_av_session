@@ -78,4 +78,4 @@ AVSession部件为系统提供了统一的媒体控制能力，当三方应用�
 
 ## 相关仓<a name="section1533973044317"></a>
 
-[**multimedia_av_session**](https://gitcode.com/g1tn00b/multimedia_av_session)
+[**multimedia_av_session**](https://gitcode.com/openharmony/multimedia_av_session)
