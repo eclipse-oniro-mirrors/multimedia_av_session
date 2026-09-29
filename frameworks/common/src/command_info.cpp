@@ -103,5 +103,4 @@ int32_t CommandInfo::GetCallerType(std::string& callerType) const
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
-
 } // namespace OHOS::AVSession
