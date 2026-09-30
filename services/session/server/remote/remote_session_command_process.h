@@ -187,8 +187,8 @@ public:
         return AVSESSION_SUCCESS;
     }
 
-    int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-        const std::string& assetId, const CommandInfo& info = CommandInfo{}) override
+    int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName,
+        const std::string& assetId, const CommandInfo& info = CommandInfo{}, const std::string& extraInfo = "") override
     {
         return AVSESSION_SUCCESS;
     }

@@ -84,6 +84,26 @@ public:
     {
         return userId_;
     }
+
+    void SetControlCommand(const std::string& controlCommand)
+    {
+        controlCommand_ = controlCommand;
+    }
+
+    std::string GetControlCommand() const
+    {
+        return controlCommand_;
+    }
+
+    void SetIsPlayList(int32_t isPlayList)
+    {
+        isPlayList_ = isPlayList;
+    }
+
+    int32_t GetIsPlayList() const
+    {
+        return isPlayList_;
+    }
 #endif
     cJSON* startPlayInfoToJson() const
     {
@@ -96,6 +116,8 @@ public:
         cJSON_AddStringToObject(j, "startPlayModuleName", moduleName.c_str());
 #ifdef CAR_FEATURE_ENABLE
         cJSON_AddNumberToObject(j, "startUserId", userId_);
+        cJSON_AddStringToObject(j, "controlCommand", controlCommand_.c_str());
+        cJSON_AddNumberToObject(j, "isPlayList", isPlayList_);
 #endif
         return j;
     }
@@ -108,7 +130,9 @@ private:
     std::string moduleName;
 
 #ifdef CAR_FEATURE_ENABLE
-   int32_t userId_ = 100;
+    int32_t userId_ = 100;
+    std::string controlCommand_;
+    int32_t isPlayList_ {1};
 #endif
 };
 class InsightAdapter {
@@ -138,6 +162,9 @@ private:
     InsightAdapter();
 
     bool CheckBundleSupport(std::string& profile);
+
+    bool ParseInsightIntents(const std::string& bundleName, std::string& supportModule,
+        cJSON*& profileValues, cJSON*& insightIntentsArray, bool& containsMusicList);
 
     std::shared_ptr<AppExecFwk::WantParams> GetPlayIntentParamWithWantProcess(std::string& insightName,
     const std::string& assetId, const StartPlayInfo startPlayInfo, StartPlayType startPlayType, bool& res);

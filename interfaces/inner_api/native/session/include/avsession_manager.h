@@ -99,7 +99,7 @@ public:
      * @param userId current user id.
      * @param descriptors obtain SessionDescriptors {@link AVSessionDescriptor}.
      * @return Returns whether to obtain SessionDescriptors successfully.
-     * @since 26.1.0 dynamic&static
+     * @since 26.0.1 dynamic&static
      */
     virtual int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
         std::vector<AVSessionDescriptor>& descriptors) { return AVSESSION_SUCCESS; };
@@ -170,7 +170,7 @@ public:
      * @param userId The user id to listen for.
      * @param listener Listen for sessionListener Callback event{@link SessionListener}.
      * @return Whether to return successful Listener.
-     * @since 26.1.0
+     * @since 26.0.1
     */
     virtual int32_t RegisterSessionListenerForUser(int32_t userId,
         const std::shared_ptr<SessionListener>& listener) { return AVSESSION_SUCCESS; };
@@ -290,15 +290,17 @@ public:
     /**
      * Start AVPlayback for AudioZone.
      *
-     * @param bundleName target bundle name.
      * @param userId user id.
+     * @param bundleName target bundle name.
      * @param assetId asset id.
      * @param info command info.
+     * @param extraInfo extra info, JSON string carrying controlCommand and isPlayList.
      * @return Returns start result.
-     * @since 26.1.0 dynamic&static
+     * @since 26.0.1 dynamic&static
      */
-    virtual int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-        const std::string& assetId, const CommandInfo& info = CommandInfo{}) { return AVSESSION_SUCCESS; };
+    virtual int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName,
+        const std::string& assetId, const CommandInfo& info = CommandInfo{}, const std::string& extraInfo = "")
+        { return AVSESSION_SUCCESS; };
 
     /**
      * @brief Listen for AncoMediaSessionListener callback event.

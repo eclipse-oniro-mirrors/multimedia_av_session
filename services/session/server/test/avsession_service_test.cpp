@@ -4764,8 +4764,9 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlaybackForAudioZone001, TestSize.L
     info.SetCallerBundleName("test_bundle");
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
+    std::string extraInfo = R"({"controlCommand":3,"isPlayList":1})";
     
-    avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    avservice_->StartAVPlaybackForAudioZone(userId, bundleName, assetId, info, extraInfo);
     SLOGD("StartAVPlaybackForAudioZone001 end!");
 }
 
@@ -4785,8 +4786,9 @@ static HWTEST_F(AVSessionServiceTest, StartAVPlaybackForAudioZone002, TestSize.L
     info.SetCallerBundleName("test_bundle");
     info.SetCallerModuleName("test_module");
     info.SetCallerType("test_type");
-    
-    avservice_->StartAVPlaybackForAudioZone(bundleName, userId, assetId, info);
+    std::string extraInfo = R"({"controlCommand":4,"isPlayList":0})";
+
+    avservice_->StartAVPlaybackForAudioZone(userId, bundleName, assetId, info, extraInfo);
     SLOGD("StartAVPlaybackForAudioZone002 end!");
 }
 
@@ -4827,5 +4829,101 @@ static HWTEST_F(AVSessionServiceTest, NotifyTopSessionChangeForAudioZone002, Tes
     
     avservice_->NotifyTopSessionChangeForAudioZone(descriptor);
     SLOGD("NotifyTopSessionChangeForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: ParseExtraInfoForAudioZone001
+ * @tc.desc: Test ParseExtraInfoForAudioZone with valid JSON containing both fields
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, ParseExtraInfoForAudioZone001, TestSize.Level0)
+{
+    SLOGD("ParseExtraInfoForAudioZone001 begin!");
+    std::string extraInfo = R"({"controlCommand":"play","isPlayList":1})";
+    StartPlayInfo startPlayInfo;
+    avservice_->ParseExtraInfoForAudioZone(extraInfo, startPlayInfo);
+    EXPECT_EQ(startPlayInfo.GetControlCommand(), "play");
+    EXPECT_EQ(startPlayInfo.GetIsPlayList(), 1);
+    SLOGD("ParseExtraInfoForAudioZone001 end!");
+}
+
+/**
+ * @tc.name: ParseExtraInfoForAudioZone002
+ * @tc.desc: Test ParseExtraInfoForAudioZone with controlCommand="playNext" and isPlayList=0
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, ParseExtraInfoForAudioZone002, TestSize.Level0)
+{
+    SLOGD("ParseExtraInfoForAudioZone002 begin!");
+    std::string extraInfo = R"({"controlCommand":"playNext","isPlayList":0})";
+    StartPlayInfo startPlayInfo;
+    avservice_->ParseExtraInfoForAudioZone(extraInfo, startPlayInfo);
+    EXPECT_EQ(startPlayInfo.GetControlCommand(), "playNext");
+    EXPECT_EQ(startPlayInfo.GetIsPlayList(), 0);
+    SLOGD("ParseExtraInfoForAudioZone002 end!");
+}
+
+/**
+ * @tc.name: ParseExtraInfoForAudioZone003
+ * @tc.desc: Test ParseExtraInfoForAudioZone with empty extraInfo keeps defaults
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, ParseExtraInfoForAudioZone003, TestSize.Level0)
+{
+    SLOGD("ParseExtraInfoForAudioZone003 begin!");
+    std::string extraInfo = "";
+    StartPlayInfo startPlayInfo;
+    avservice_->ParseExtraInfoForAudioZone(extraInfo, startPlayInfo);
+    EXPECT_EQ(startPlayInfo.GetControlCommand(), "");
+    EXPECT_EQ(startPlayInfo.GetIsPlayList(), 1);
+    SLOGD("ParseExtraInfoForAudioZone003 end!");
+}
+
+/**
+ * @tc.name: ParseExtraInfoForAudioZone004
+ * @tc.desc: Test ParseExtraInfoForAudioZone with invalid JSON keeps defaults
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, ParseExtraInfoForAudioZone004, TestSize.Level0)
+{
+    SLOGD("ParseExtraInfoForAudioZone004 begin!");
+    std::string extraInfo = "invalid_json";
+    StartPlayInfo startPlayInfo;
+    avservice_->ParseExtraInfoForAudioZone(extraInfo, startPlayInfo);
+    EXPECT_EQ(startPlayInfo.GetControlCommand(), "");
+    EXPECT_EQ(startPlayInfo.GetIsPlayList(), 1);
+    SLOGD("ParseExtraInfoForAudioZone004 end!");
+}
+
+/**
+ * @tc.name: ParseExtraInfoForAudioZone005
+ * @tc.desc: Test ParseExtraInfoForAudioZone with partial JSON (only controlCommand)
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, ParseExtraInfoForAudioZone005, TestSize.Level0)
+{
+    SLOGD("ParseExtraInfoForAudioZone005 begin!");
+    std::string extraInfo = R"({"controlCommand":"playPrevious"})";
+    StartPlayInfo startPlayInfo;
+    avservice_->ParseExtraInfoForAudioZone(extraInfo, startPlayInfo);
+    EXPECT_EQ(startPlayInfo.GetControlCommand(), "playPrevious");
+    EXPECT_EQ(startPlayInfo.GetIsPlayList(), 1);
+    SLOGD("ParseExtraInfoForAudioZone005 end!");
+}
+
+/**
+ * @tc.name: ParseExtraInfoForAudioZone006
+ * @tc.desc: Test ParseExtraInfoForAudioZone with unrecognized command and wrong isPlayList type
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, ParseExtraInfoForAudioZone006, TestSize.Level0)
+{
+    SLOGD("ParseExtraInfoForAudioZone006 begin!");
+    std::string extraInfo = R"({"controlCommand":"invalidCmd","isPlayList":"true"})";
+    StartPlayInfo startPlayInfo;
+    avservice_->ParseExtraInfoForAudioZone(extraInfo, startPlayInfo);
+    EXPECT_EQ(startPlayInfo.GetControlCommand(), "");
+    EXPECT_EQ(startPlayInfo.GetIsPlayList(), 1);
+    SLOGD("ParseExtraInfoForAudioZone006 end!");
 }
 #endif

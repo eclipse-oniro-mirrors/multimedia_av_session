@@ -147,7 +147,7 @@ public:
      *
      * @param userId Audio zone user ID.
      * @param descriptor Session related description callback.
-     * @since 26.1.0 dynamic&static
+     * @since 26.0.1 dynamic&static
     */
 
     virtual void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
@@ -157,7 +157,7 @@ public:
      *
      * @param userId Audio zone user ID.
      * @param descriptor Session related description callback.
-     * @since 26.1.0 dynamic&static
+     * @since 26.0.1 dynamic&static
     */
     virtual void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
 
@@ -166,7 +166,7 @@ public:
      *
      * @param userId Audio zone user ID.
      * @param descriptor Session related description callback.
-     * @since 26.1.0 dynamic&static
+     * @since 26.0.1 dynamic&static
     */
     virtual void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
 };

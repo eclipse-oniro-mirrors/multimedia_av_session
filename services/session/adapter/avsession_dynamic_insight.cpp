@@ -18,6 +18,7 @@
 #include "iservice_registry.h"
 #include "array_wrapper.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "want_params_wrapper.h"
 #include "system_ability_definition.h"
 
@@ -196,6 +197,8 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
     startPlayInfoParam.SetParam("deviceId", OHOS::AAFwk::String::Box(startPlayInfo.getDeviceId()));
 #ifdef CAR_FEATURE_ENABLE
     startPlayInfoParam.SetParam("startUserId", OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetUserId())));
+    std::string controlCommand = startPlayInfo.GetControlCommand();
+    startPlayInfoParam.SetParam("controlCommand", OHOS::AAFwk::String::Box(controlCommand));
 #endif
     if (wantParam == nullptr) {
         SLOGE("wantParam is null when SetStartPlayInfoToParam");
@@ -233,39 +236,68 @@ std::shared_ptr<AppExecFwk::WantParams> InsightAdapter::GetPlayIntentParamWithWa
     return wantParam;
 }
 
-bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
-    AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
+bool InsightAdapter::ParseInsightIntents(const std::string& bundleName, std::string& supportModule,
+    cJSON*& profileValues, cJSON*& insightIntentsArray, bool& containsMusicList)
 {
-    std::string supportModule;
     std::string profile;
     if (!IsSupportPlayIntent(bundleName, supportModule, profile)) {
         SLOGE("bundle=%{public}s does not support play insights", bundleName.c_str());
         return false;
     }
     SLOGD("GetJsonProfile profile=%{public}s", profile.c_str());
-    cJSON* profileValues = cJSON_Parse(profile.c_str());
+    profileValues = cJSON_Parse(profile.c_str());
     CHECK_AND_RETURN_RET_LOG(profileValues != nullptr && !cJSON_IsInvalid(profileValues), false, "parse profile fail");
-    cJSON* insightIntentsArray = cJSON_GetObjectItem(profileValues, "insightIntents");
+    insightIntentsArray = cJSON_GetObjectItem(profileValues, "insightIntents");
     if (insightIntentsArray == nullptr || !cJSON_IsArray(insightIntentsArray)) {
         SLOGE("json do not contain insightIntentsArray");
         cJSON_Delete(profileValues);
+        profileValues = nullptr;
+        return false;
+    }
+    containsMusicList = false;
+    cJSON* item = nullptr;
+    cJSON_ArrayForEach(item, insightIntentsArray) {
+        cJSON* nameItem = cJSON_GetObjectItem(item, "intentName");
+        if (nameItem != nullptr && cJSON_IsString(nameItem) && nameItem->valuestring != nullptr) {
+            if (std::string(nameItem->valuestring) == PLAY_MUSICLIST) {
+                containsMusicList = true;
+            }
+        }
+    }
+    return true;
+}
+
+bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std::string& assetId,
+    AppExecFwk::InsightIntentExecuteParam &executeParam, const StartPlayInfo startPlayInfo, StartPlayType startPlayType)
+{
+    std::string supportModule;
+    cJSON* profileValues = nullptr;
+    cJSON* insightIntentsArray = nullptr;
+    bool containsMusicList = false;
+    if (!ParseInsightIntents(bundleName, supportModule, profileValues, insightIntentsArray, containsMusicList)) {
         return false;
     }
     bool res = false;
+#ifdef CAR_FEATURE_ENABLE
+    int32_t isPlayList = startPlayInfo.GetIsPlayList();
+#endif
     cJSON* insightIntentsItem = nullptr;
     cJSON_ArrayForEach(insightIntentsItem, insightIntentsArray) {
         cJSON* intentNameItem = cJSON_GetObjectItem(insightIntentsItem, "intentName");
         CHECK_AND_CONTINUE(intentNameItem != nullptr && cJSON_IsString(intentNameItem));
         CHECK_AND_CONTINUE(intentNameItem->valuestring != nullptr);
         std::string insightName(intentNameItem->valuestring);
+#ifdef CAR_FEATURE_ENABLE
+        if (containsMusicList && isPlayList == 1 && insightName != PLAY_MUSICLIST) {
+            continue;
+        }
+#else
         if (insightName != PLAY_MUSICLIST && insightName != PLAY_AUDIO) {
             continue;
         }
+#endif
         cJSON* uiAbilityItem = cJSON_GetObjectItem(insightIntentsItem, "uiAbility");
-        if (uiAbilityItem == nullptr) {
-            SLOGE("json do not contain uiAbility");
-            continue;
-        }
+        CHECK_AND_CONTINUE_LOG(uiAbilityItem != nullptr, "json do not contain uiAbility");
         cJSON* abilityItem = cJSON_GetObjectItem(uiAbilityItem, "ability");
         if (abilityItem == nullptr || !cJSON_IsString(abilityItem)) {
             SLOGE("json do not contain ability");

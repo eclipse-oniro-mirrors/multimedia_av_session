@@ -31,6 +31,7 @@
 #include "tokenid_kit.h"
 #include "avsession_radar.h"
 #include "permission_checker.h"
+#include "cJSON.h"
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "napi_avcast_controller.h"
@@ -575,6 +576,28 @@ void NapiAVSessionManager::FillCommandInfo(napi_env env, napi_value arg, Command
 #endif
 }
 
+void NapiAVSessionManager::FillExtraInfo(napi_env env, napi_value arg, std::string& extraInfo)
+{
+#ifdef CAR_FEATURE_ENABLE
+    std::string controlCommand;
+    int32_t isPlayList = 1;
+    NapiUtils::GetNamedProperty(env, arg, "controlCommand", controlCommand);
+    NapiUtils::GetNamedProperty(env, arg, "isPlayList", isPlayList);
+    cJSON* extraInfoJson = cJSON_CreateObject();
+    if (extraInfoJson == nullptr) {
+        return;
+    }
+    cJSON_AddStringToObject(extraInfoJson, "controlCommand", controlCommand.c_str());
+    cJSON_AddNumberToObject(extraInfoJson, "isPlayList", isPlayList);
+    char* jsonStr = cJSON_PrintUnformatted(extraInfoJson);
+    if (jsonStr != nullptr) {
+        extraInfo = std::string(jsonStr);
+        cJSON_free(jsonStr);
+    }
+    cJSON_Delete(extraInfoJson);
+#endif
+}
+
 void NapiAVSessionManager::SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context)
 {
 #ifdef CAR_FEATURE_ENABLE
@@ -594,28 +617,33 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
 {
 #ifdef CAR_FEATURE_ENABLE
     struct ConcreteContext : public ContextBase {
-        std::string bundleName_;
         int32_t userId_;
+        std::string bundleName_;
         std::string assetId_;
         CommandInfo commandInfo_;
+        std::string extraInfo_;
     };
     auto context = std::make_shared<ConcreteContext>();
 
     auto input = [env, context](size_t argc, napi_value* argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE || argc == ARGC_FOUR, "invalid arguments",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->bundleName_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
-            "invalid bundleName", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->userId_);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_THREE || argc == ARGC_FOUR || argc == ARGC_FIVE,
+            "invalid arguments", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->userId_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid userId",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_SECOND], context->bundleName_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok && !context->bundleName_.empty(),
+            "invalid bundleName", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
         context->status = NapiUtils::GetValue(env, argv[ARGV_THIRD], context->assetId_);
         CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid assetId",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        if (argc == ARGC_FOUR && !NapiUtils::TypeCheck(env, argv[ARGV_FOURTH], napi_undefined)
+        if (argc >= ARGC_FOUR && !NapiUtils::TypeCheck(env, argv[ARGV_FOURTH], napi_undefined)
             && !NapiUtils::TypeCheck(env, argv[ARGV_FOURTH], napi_null)) {
             FillCommandInfo(env, argv[ARGV_FOURTH], context->commandInfo_);
+        }
+        if (argc == ARGC_FIVE && !NapiUtils::TypeCheck(env, argv[ARGV_FIFTH], napi_undefined)
+            && !NapiUtils::TypeCheck(env, argv[ARGV_FIFTH], napi_null)) {
+            FillExtraInfo(env, argv[ARGV_FIFTH], context->extraInfo_);
         }
     };
 
@@ -623,7 +651,8 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
 
     auto executor = [context]() {
         int32_t ret = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(
-            context->bundleName_, context->userId_, context->assetId_, context->commandInfo_);
+            context->userId_, context->bundleName_, context->assetId_, context->commandInfo_,
+            context->extraInfo_);
         if (ret != AVSESSION_SUCCESS) {
             SetStartAVPlaybackError(ret, context);
         }

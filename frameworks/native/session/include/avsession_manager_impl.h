@@ -106,8 +106,8 @@ public:
     int32_t StartAVPlayback(const std::string& bundleName, const std::string& assetId,
         const std::string& moduleName) override;
 
-    int32_t StartAVPlaybackForAudioZone(const std::string& bundleName, int32_t userId,
-        const std::string& assetId, const CommandInfo& info = CommandInfo{}) override;
+    int32_t StartAVPlaybackForAudioZone(int32_t userId, const std::string& bundleName, const std::string& assetId,
+        const CommandInfo& info = CommandInfo{}, const std::string& extraInfo = "") override;
 
     int32_t RegisterAncoMediaSessionListener(const std::shared_ptr<AncoMediaSessionListener> &listener) override;
 
