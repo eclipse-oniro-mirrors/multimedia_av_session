@@ -68,14 +68,14 @@ The structure of the repository directory is as follows:
 
 ## Constraints
 
-For detailed constraints, please refer to [Constraints](https://gitee.com/openharmony/docs/blob/master/en/application-dev/media/avsession-overview.md)
+For detailed constraints, please refer to [Constraints](https://gitcode.com/openharmony/docs/blob/master/en/application-dev/media/avsession/avsession-overview.md)
 
 ## API Reference
 
-For detailed interface reference, please refer to [Reference](https://gitee.com/openharmony/docs/blob/master/en/application-dev/reference/apis/js-apis-avsession.md)
+For detailed interface reference, please refer to [Reference](https://gitcode.com/openharmony/docs/blob/master/en/application-dev/reference/apis-avsession-kit/Readme-EN.md)
 
-For instructions on using AVSession, please refer to [AVSession Overview](https://gitee.com/openharmony/docs/blob/master/en/application-dev/media/avsession-overview.md)
+For instructions on using AVSession, please refer to [AVSession Overview](https://gitcode.com/openharmony/docs/blob/master/en/application-dev/media/avsession/avsession-overview.md)
 
 ## Repositories Involved
 
-[**multimedia_av_session**](https://gitee.com/openharmony/multimedia_av_session)
+[**multimedia_av_session**](https://gitcode.com/openharmony/multimedia_av_session)
