@@ -280,7 +280,6 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
     bool res = false;
 #ifdef CAR_FEATURE_ENABLE
     int32_t isPlayList = startPlayInfo.GetIsPlayList();
-    bool consultIsPlayList = (cJSON_GetArraySize(insightIntentsArray) > 1) && containsMusicList;
 #endif
     cJSON* insightIntentsItem = nullptr;
     cJSON_ArrayForEach(insightIntentsItem, insightIntentsArray) {
@@ -289,7 +288,7 @@ bool InsightAdapter::GetPlayIntentParam(const std::string& bundleName, const std
         CHECK_AND_CONTINUE(intentNameItem->valuestring != nullptr);
         std::string insightName(intentNameItem->valuestring);
 #ifdef CAR_FEATURE_ENABLE
-        if (consultIsPlayList && isPlayList == 1 && insightName != PLAY_MUSICLIST) {
+        if (containsMusicList && isPlayList == 1 && insightName != PLAY_MUSICLIST) {
             continue;
         }
 #else
