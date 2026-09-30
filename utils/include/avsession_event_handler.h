@@ -28,6 +28,8 @@ public:
 
     bool AVSessionPostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
 
+    std::shared_ptr<AppExecFwk::EventHandler> GetHandler();
+
     void AVSessionRemoveTask(const std::string &name);
 
     bool AVSessionReplaceTask(const Callback &callback, const std::string &name, int64_t delayTime);

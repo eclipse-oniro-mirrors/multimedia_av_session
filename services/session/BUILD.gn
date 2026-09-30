@@ -238,6 +238,7 @@ av_session_ohos_library("avsession_service") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "distributed_notification_service:ans_innerkits",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image_native",
     "init:libbegetutil",

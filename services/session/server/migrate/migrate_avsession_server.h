@@ -19,6 +19,7 @@
 #include <atomic>
 #include <map>
 #include <mutex>
+#include <thread>
 
 #include "cJSON.h"
 #include "audio_adapter.h"
@@ -98,13 +99,14 @@ public:
     void SendProtocolVersionToNext();
     void SendLongPauseNotifyToNext(bool isLongPause);
     bool MigratePostTask(const AppExecFwk::EventHandler::Callback &callback, const std::string &name,
-        int64_t delayTime = 0);
+        int64_t delayTime = 0, bool removePrevious = true);
     void RefreshDeviceId(std::string deviceId);
 
     static cJSON* ConvertAudioDeviceDescriptorToJson(const AudioDeviceDescriptorWithSptr& device);
     static cJSON* ConvertAudioDeviceDescriptorsToJson(const AudioDeviceDescriptors& devices);
 
 private:
+    std::shared_ptr<AppExecFwk::EventHandler> InitMigrateHandlerIfNeeded();
     std::map<std::string, sptr<AVControllerItem>> playerIdToControllerMap_;
     std::map<std::string, std::shared_ptr<AVControllerObserver>> playerIdToControllerCallbackMap_;
     std::list<sptr<AVControllerItem>> sortControllerList_;
@@ -182,6 +184,10 @@ private:
 
     AVSessionService *servicePtr_ = nullptr;
     std::atomic<bool> isSoftbusConnecting_ {false};
+    std::shared_ptr<AppExecFwk::EventHandler> migrateHandler_;
+    std::shared_ptr<AppExecFwk::EventRunner> migrateRunner_;
+    std::unique_ptr<std::thread> migrateThread_;
+    std::mutex migrateHandlerLock_;
     std::string deviceId_;
     std::string topSessionId_;
     std::string lastSessionId_;
