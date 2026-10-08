@@ -661,7 +661,7 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     bool isAudioSessionType = isValidSession ?
         appSession->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_AUDIO : false;
 
-    bool isPcm = (sessionToken.sessionId == "pcmCastSession") || (sessionToken.sessionId == "hiplayDefault")
+    bool isPcm = (sessionToken.sessionId == "pcmCastSession") || (sessionToken.sessionId == "hiplayDefault") ||
         (isValidSession && isCastPlusAudio) || (isValidSession && isContainCastPlusAudio && isAudioSessionType);
     if (isPcm) {
         std::shared_ptr<PcmCastSession> pcmCastSession;
