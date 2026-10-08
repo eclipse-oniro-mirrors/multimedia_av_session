@@ -215,6 +215,10 @@ void PcmCastSession::HandleCastModeChangeEvent(const std::string& args)
     int32_t castMode = JsonUtils::GetIntParamFromJsonString(args, "mode");
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
+    int32_t screenId = JsonUtils::GetIntParamFromJsonString(args, "screenId");
+    if (screenId != -1) {
+        deviceId += std::to_string(screenId);
+    }
     SLOGI("Received CastModeChange: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
         castMode, uid, AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str());
     {
