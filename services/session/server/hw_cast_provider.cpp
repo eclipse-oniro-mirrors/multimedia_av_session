@@ -518,6 +518,7 @@ void HwCastProvider::buildDeviceInfo(const CastEngine::CastRemoteDevice& castRem
     SLOGI("castRemoteDevice.streamCapability %{public}s", castRemoteDevice.streamCapability.c_str());
     deviceInfo.supportedPullClients_ = ParsePullClients(castRemoteDevice.streamCapability);
     deviceInfo.bleMac_ = castRemoteDevice.bleMac;
+    deviceInfo.brMacAddress_ = castRemoteDevice.brMac;
     deviceInfo.uuid_ = castRemoteDevice.uuid;
     deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = castRemoteDevice.isSupportDeviceCast ?
         HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
