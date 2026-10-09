@@ -803,14 +803,14 @@ int32_t JsonUtils::GetIntParamFromJsonString(const std::string& jsonStr, const s
 {
     if (jsonStr.empty() || key.empty()) {
         SLOGE("get jsonStr empty:%{public}d or key empty:%{public}d", jsonStr.empty(), key.empty());
-        return 0;
+        return -1;
     }
 
     cJSON* strJson = cJSON_Parse(jsonStr.c_str());
     if (strJson == nullptr || !IsInt32(strJson, key.c_str())) {
         SLOGE("get itemObj fail for key:%{public}s", key.c_str());
         cJSON_Delete(strJson);
-        return 0;
+        return -1;
     }
 
     cJSON* itemObj = cJSON_GetObjectItem(strJson, key.c_str());
