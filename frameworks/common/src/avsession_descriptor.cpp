@@ -83,6 +83,7 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
             CHECK_AND_RETURN_RET_LOG(out.WriteUint32(supportedPullClient), false, "write supportedPullClient failed");
         }
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.bleMac_), false, "write bleMac failed");
+        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.brMacAddress_), false, "write brMacAddress failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.triggerType_), false, "write triggerType failed");
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.uuid_), false, "write uuid failed");
         CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.WriteToParcel(out), false,
