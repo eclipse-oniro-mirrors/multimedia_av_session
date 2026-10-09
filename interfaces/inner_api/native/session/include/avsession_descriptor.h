@@ -70,6 +70,7 @@ public:
     int32_t mediumTypes_ = 2;
     AudioCapabilities audioCapabilities_;
     std::string bleMac_;
+    std::string brMacAddress_;
     int32_t triggerType_ {};
     std::string uuid_;
     HiPlayDeviceInfo hiPlayDeviceInfo_ {};
