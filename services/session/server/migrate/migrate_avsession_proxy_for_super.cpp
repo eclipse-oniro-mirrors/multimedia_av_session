@@ -126,9 +126,25 @@ int32_t MigrateAVSessionProxy::OnConnectForSuper()
     return AVSESSION_SUCCESS;
 }
 
+void MigrateAVSessionProxy::ReleaseAllSessionsForSuper()
+{
+    SLOGI("ReleaseAllSessionsForSuper in");
+    std::lock_guard lockGuard(migrateProxySessionIdLock_);
+    for (auto& pair : controllerStackForMigrateIn_) {
+        pair.second->RegisterMigrateAVSessionProxyCallback(nullptr);
+        pair.second->DestroyWithoutReply();
+    }
+    sessionStackForMigrateIn_.clear();
+    controllerStackForMigrateIn_.clear();
+    orderedSessionRefreshList_.clear();
+    sessionRefreshList_.clear();
+    SLOGI("ReleaseAllSessionsForSuper done");
+}
+
 int32_t MigrateAVSessionProxy::OnDisconnectForSuper()
 {
     SLOGI("OnDisconnectForSuper in");
+    ReleaseAllSessionsForSuper();
     return AVSESSION_SUCCESS;
 }
 
@@ -173,9 +189,8 @@ int32_t MigrateAVSessionProxy::ProcessHistoryMediaInfoListForSuper(cJSON* jsonVa
     CHECK_AND_RETURN_RET_LOG(servicePtr_ != nullptr, AVSESSION_ERROR,
         "ProcessHistoryMediaInfoListForSuper but servicePtr null!");
     if (cJSON_GetArraySize(mediaInfoListObj) <= 0) {
+        ReleaseAllSessionsForSuper();
         std::lock_guard lockGuard(migrateProxySessionIdLock_);
-        sessionStackForMigrateIn_.clear();
-        controllerStackForMigrateIn_.clear();
         std::vector<sptr<IRemoteObject>> sessionControllers;
         servicePtr_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
         SLOGE("clear session & controller stack for list empty");
@@ -196,18 +211,19 @@ int32_t MigrateAVSessionProxy::ProcessHistoryMediaInfoListForSuper(cJSON* jsonVa
         if (std::find(orderedSessionRefreshList_.begin(), orderedSessionRefreshList_.end(), it->first) ==
             orderedSessionRefreshList_.end()) {
             SLOGI("remove session:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(it->first).c_str());
-            controllerStackForMigrateIn_.erase(it->first);
+            auto ctrlIt = controllerStackForMigrateIn_.find(it->first);
+            if (ctrlIt != controllerStackForMigrateIn_.end()) {
+                ctrlIt->second->RegisterMigrateAVSessionProxyCallback(nullptr);
+                ctrlIt->second->DestroyWithoutReply();
+                controllerStackForMigrateIn_.erase(ctrlIt);
+            }
             it = sessionStackForMigrateIn_.erase(it);
         } else {
             ++it;
         }
     }
     std::vector<sptr<IRemoteObject>> sessionControllers;
-    for (const auto& sessionId : orderedSessionRefreshList_) {
-        auto it = controllerStackForMigrateIn_.find(sessionId);
-        CHECK_AND_CONTINUE(it != controllerStackForMigrateIn_.end());
-        sessionControllers.push_back(it->second);
-    }
+    GetControllerListForSuper(sessionControllers);
     servicePtr_->NotifyRemoteDistributedSessionControllersChanged(sessionControllers);
     SLOGI("ProcessHistoryMediaInfoListForSuper with size:%{public}d done",
         static_cast<int>(sessionControllers.size()));

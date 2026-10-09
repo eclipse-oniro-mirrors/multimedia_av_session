@@ -60,6 +60,7 @@ void AudioDeviceManager::UnInitAudioStateCallback()
         std::lock_guard lockGuard(audioDeviceLock_);
         preferredOutputDeviceChangeCallback_ = nullptr;
         audioDeviceChangeCallback_ = nullptr;
+        migrateSession_ = nullptr;
         isRegistered_ = false;
         outputDevice_ = AUDIO_OUTPUT_SOURCE;
     }

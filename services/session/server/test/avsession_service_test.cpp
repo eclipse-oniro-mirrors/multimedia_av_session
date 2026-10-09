@@ -4217,8 +4217,9 @@ static HWTEST_F(AVSessionServiceTest, SuperLauncher001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTest, ReleaseSuperLauncher001, TestSize.Level0)
 {
     SLOGD("ReleaseSuperLauncher001 begin!");
+    auto migrateAVSession = avservice_->migrateAVSession_;
     avservice_->ReleaseSuperLauncher("SuperLauncher-Dual");
-    EXPECT_EQ(avservice_->migrateAVSession_->supportCrossMediaPlay_, false);
+    EXPECT_EQ(migrateAVSession->supportCrossMediaPlay_, false);
     SLOGD("ReleaseSuperLauncher001 end!");
 }
  
