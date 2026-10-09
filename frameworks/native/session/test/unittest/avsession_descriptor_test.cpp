@@ -312,6 +312,7 @@ HWTEST_F(AVSessionDescriptorTest, DeviceInfo_Marshalling001, TestSize.Level1)
     deviceInfo.isLegacy_ = false;
     deviceInfo.mediumTypes_ = 2;
     deviceInfo.bleMac_ = "testBleMac";
+    deviceInfo.brMacAddress_ = "testBrMacAddress";
     deviceInfo.triggerType_ = 1;
     deviceInfo.uuid_ = "testUuid";
     deviceInfo.realDeviceId_ = "testRealDeviceId";
