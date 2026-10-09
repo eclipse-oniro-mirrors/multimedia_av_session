@@ -23,12 +23,6 @@ taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
 
 copy_taihe_idl("copy_taihe_deps") {
   sources = [ "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avCastPickerParam.taihe" ]
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
 }
 
 copy_taihe_idl("copy_taihe") {
@@ -36,14 +30,6 @@ copy_taihe_idl("copy_taihe") {
     "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avsession.avSession.taihe",
     "//foundation/multimedia/av_session/frameworks/taihe/idl/ohos.multimedia.avsession.taihe",
   ]
-
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
   external_deps = [
     "image_framework:copy_image_taihe",
     "input:key_event_taihe"
