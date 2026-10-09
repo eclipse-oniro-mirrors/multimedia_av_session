@@ -217,6 +217,7 @@ private:
     int32_t reasonDeviceIsUntrusted_ = 10014;
 
     const int32_t hiPlayHotelTimeoutMs = 30 * 60 * 1000;
+    const int32_t CAST_LINK_SUCCESSFUL = 1;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_PCM_CAST_SESSION_H
