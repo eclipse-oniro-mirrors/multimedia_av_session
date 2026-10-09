@@ -211,7 +211,7 @@ void PcmCastSession::HandleCastModeChangeEvent(const std::string& args)
 {
     int32_t code = JsonUtils::GetIntParamFromJsonString(args, "code");
     CHECK_AND_RETURN_RET_LOG(CheckIsCasting(), void(), "First connection, castState is 0.");
-    CHECK_AND_RETURN_RET_LOG(code == 0, void(), "Castmode changes fail, code is %{public}d", code);
+    CHECK_AND_RETURN_RET_LOG(code != CAST_LINK_SUCCESSFUL, void(), "Castmode changes fail, code is %{public}d", code);
     int32_t castMode = JsonUtils::GetIntParamFromJsonString(args, "mode");
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
