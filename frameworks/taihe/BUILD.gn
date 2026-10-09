@@ -39,7 +39,6 @@ copy_taihe_idl("copy_taihe") {
 
 ohos_taihe("run_taihe") {
   taihe_generated_file_path = "$taihe_generated_file_path"
-
   deps = [ ":copy_taihe" ]
   outputs = [
     "$taihe_generated_file_path/src/ohos.multimedia.avsession.avSession.ani.cpp",
