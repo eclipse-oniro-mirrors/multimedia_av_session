@@ -128,11 +128,9 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.modelName_), false, "Read modelName failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.providerId_), false, "Read providerId failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.supportedProtocols_), false, "Read supportedProtocols failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.authenticationStatus_), false,
-        "Read authenticationStatus failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.authenticationStatus_), false, "Read authenticationStatus failed");
     int32_t supportedDrmCapabilityLen = 0;
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
-        "read supportedDrmCapabilityLen failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false, "read supportedDrmCapabilityLen failed");
     int32_t maxSupportedDrmCapabilityLen = 10;
     CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
         (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
@@ -161,6 +159,7 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     }
     deviceInfo.supportedPullClients_ = supportedPullClients;
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.bleMac_), false, "Read bleMac failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.brMacAddress_), false, "Read brMacAddress failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.triggerType_), false, "Read triggerType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.uuid_), false, "Read uuid failed");
     CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.ReadFromParcel(in), false, "Read hiPlayDeviceInfo failed");
@@ -228,6 +227,7 @@ bool DeviceInfo::Marshalling(Parcel& out) const
             "write supportedPullClient failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteString(bleMac_), false, "write bleMac failed");
+    CHECK_AND_RETURN_RET_LOG(out.WriteString(brMacAddress_), false, "write brMacAddress failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(triggerType_), false, "write triggerType failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(uuid_), false, "write uuid failed");
     CHECK_AND_RETURN_RET_LOG(hiPlayDeviceInfo_.WriteToParcel(out), false, "write hiPlayDeviceInfo failed");
@@ -257,16 +257,14 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedProtocols_), false, "Read supportedProtocols failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(authenticationStatus_), false, "Read authenticationStatus failed");
     int32_t supportedDrmCapabilityLen = 0;
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false,
-        "read supportedDrmCapabilityLen failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(supportedDrmCapabilityLen), false, "read supportedDrmCapabilityLen failed");
     int32_t maxSupportedDrmCapabilityLen = 10;
     CHECK_AND_RETURN_RET_LOG((supportedDrmCapabilityLen >= 0) &&
         (supportedDrmCapabilityLen <= maxSupportedDrmCapabilityLen), false, "supportedDrmCapabilityLen is illegal");
     std::vector<std::string> supportedDrmCapabilities;
     for (int i = 0; i < supportedDrmCapabilityLen; i++) {
         std::string supportedDrmCapability;
-        CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false,
-            "read supportedDrmCapability failed");
+        CHECK_AND_RETURN_RET_LOG(in.ReadString(supportedDrmCapability), false, "read supportedDrmCapability failed");
         supportedDrmCapabilities.emplace_back(supportedDrmCapability);
     }
     supportedDrmCapabilities_ = supportedDrmCapabilities;
@@ -289,6 +287,7 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     }
     supportedPullClients_ = supportedPullClients;
     CHECK_AND_RETURN_RET_LOG(in.ReadString(bleMac_), false, "Read bleMac failed");
+    CHECK_AND_RETURN_RET_LOG(in.ReadString(brMacAddress_), false, "Read brMacAddress failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(triggerType_), false, "Read triggerType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(uuid_), false, "Read uuid failed");
     CHECK_AND_RETURN_RET_LOG(hiPlayDeviceInfo_.ReadFromParcel(in), false, "Read hiPlayDeviceInfo failed");
