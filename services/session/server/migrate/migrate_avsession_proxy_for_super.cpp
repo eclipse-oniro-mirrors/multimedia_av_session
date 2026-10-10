@@ -151,6 +151,8 @@ int32_t MigrateAVSessionProxy::OnDisconnectForSuper()
 {
     SLOGI("OnDisconnectForSuper in");
     ReleaseAllSessionsForSuper();
+    CHECK_AND_RETURN_RET_LOG(servicePtr_ != nullptr, AVSESSION_SUCCESS, "servicePtr null");
+    servicePtr_->GetUsersManager().GetContainerFromAll().PostReclaimMemoryTask();
     return AVSESSION_SUCCESS;
 }
 

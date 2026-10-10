@@ -231,6 +231,15 @@ bool SessionStack::CheckSessionStateIdle()
         SLOGI("there are no sessions");
         return true;
     }
-    return false;
+    for (const auto& pair : sessions_) {
+        AVMetaData meta = pair.second->GetMetaDataWithoutImg();
+        bool hasTitle = !meta.GetTitle().empty();
+        bool hasImage = meta.GetMediaImage() != nullptr || !meta.GetMediaImageUri().empty();
+        if ((hasTitle || hasImage) && (pair.second->GetSupportCommand().size() != 0)) {
+            return false;
+        }
+    }
+    SLOGI("no high quality session, reclaim");
+    return true;
 }
 } // namespace OHOS::AVSession
