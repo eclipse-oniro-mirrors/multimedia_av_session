@@ -504,7 +504,7 @@ int32_t AVCastControllerItem::GetCurrentItem(AVQueueItem& currentItem)
 
 int32_t AVCastControllerItem::GetValidCommands(std::vector<int32_t>& cmds)
 {
-    if (sessionTag_ == "RemoteCast") {
+    if (sessionTag_ == "RemoteCast" || sessionTag_ == "projection_client") {
         std::lock_guard lockGuard(castControllerLock_);
         CHECK_AND_RETURN_RET_LOG(castControllerProxy_ != nullptr, AVSESSION_ERROR,
             "streamPlayer null");
