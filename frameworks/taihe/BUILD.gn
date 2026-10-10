@@ -52,6 +52,7 @@ taihe_shared_library("avsession_taihe") {
   subsystem_name = "$subsystem_name"
   part_name = "$part_name"
 
+  branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
     cfi_cross_dso = true
