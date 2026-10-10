@@ -178,10 +178,11 @@ public:
         std::string& tag, sptr<IRemoteObject>& session) override;
 
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
-                                           const AppExecFwk::ElementName& elementName) override;
+                                           const AppExecFwk::ElementName& elementName,
+                                           int32_t userId = -1) override;
 
     int32_t CreateSessionInner(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
-                               sptr<IRemoteObject>& object) override;
+                               sptr<IRemoteObject>& object, int32_t userId = -1) override;
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;
 
@@ -465,7 +466,8 @@ private:
                                            const AppExecFwk::ElementName& elementName);
 
     int32_t CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
-                               const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem);
+                               const AppExecFwk::ElementName& elementName, sptr<AVSessionItem>& sessionItem,
+                               int32_t userId = -1);
 
     bool IsElementNameValid(const AppExecFwk::ElementName& elementName);
 

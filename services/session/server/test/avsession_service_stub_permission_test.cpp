@@ -110,9 +110,9 @@ void AVSessionServiceStubPermissionTest::TearDown()
 class AVSessionServiceStubDemo : public AVSessionServiceStub {
 public:
     OHOS::sptr<IRemoteObject> CreateSessionInner(const std::string &tag, int32_t type,
-        const OHOS::AppExecFwk::ElementName &elementName) override { return nullptr; };
+        const OHOS::AppExecFwk::ElementName &elementName, int32_t userId = -1) override { return nullptr; };
     int32_t CreateSessionInner(const std::string &tag, int32_t type, const OHOS::AppExecFwk::ElementName &elementName,
-        OHOS::sptr<IRemoteObject> &session) override { return 0; };
+        OHOS::sptr<IRemoteObject> &session, int32_t userId = -1) override { return 0; };
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor> &descriptors) override { return 0; };
     int32_t GetSessionDescriptors(int32_t category,
         std::vector<AVSessionDescriptor> &descriptors) override { return 0; };

@@ -47,10 +47,11 @@ public:
 
 #ifndef CLIENT_LITE
     std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
-                                             const AppExecFwk::ElementName& elementName) override;
+                                             const AppExecFwk::ElementName& elementName,
+                                             int32_t userId = -1) override;
 
     int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
-                          std::shared_ptr<AVSession>& session) override;
+                          std::shared_ptr<AVSession>& session, int32_t userId = -1) override;
 #endif
 
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors) override;

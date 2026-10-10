@@ -58,7 +58,8 @@ public:
      * @since 7
     */
     virtual std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
-                                                     const AppExecFwk::ElementName& elementName) = 0;
+                                                     const AppExecFwk::ElementName& elementName,
+                                                     int32_t userId = -1) = 0;
 
     /**
      * Create Session Object.
@@ -71,7 +72,7 @@ public:
      * @since 12
     */
     virtual int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
-                                  std::shared_ptr<AVSession>& session) = 0;
+                                  std::shared_ptr<AVSession>& session, int32_t userId = -1) = 0;
 #endif
 
     /**

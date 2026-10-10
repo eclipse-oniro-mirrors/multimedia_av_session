@@ -2103,7 +2103,8 @@ AppExecFwk::ElementName AVSessionService::CorrectElementForThirdPartyCaller(bool
 
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                              const AppExecFwk::ElementName& elementName,
-                                             sptr<AVSessionItem>& sessionItem)
+                                             sptr<AVSessionItem>& sessionItem,
+                                             int32_t userId)
 {
     if (!IsParamInvalid(tag, type, elementName)) {
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
@@ -2113,7 +2114,9 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     RefreshUserFromAnco(tag, elementName);
     AppExecFwk::ElementName sessionElement = CorrectElementForThirdPartyCaller(thirdPartyApp, elementName);
     auto pid = GetCallingPid();
-    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    if (userId <= 0) {
+        userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    }
     std::lock_guard lockGuard(sessionServiceLock_);
     if (AbilityHasSession(pid, userId)) {
         SLOGE("process %{public}d %{public}s already has one session.", pid, elementName.GetAbilityName().c_str());
@@ -2220,12 +2223,13 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
 
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
                                              const AppExecFwk::ElementName& elementName,
-                                             sptr<IRemoteObject>& object)
+                                             sptr<IRemoteObject>& object,
+                                             int32_t userId)
 {
     sptr<AVSessionItem> session;
     auto res = CreateSessionInner(tag, type,
         PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION),
-        elementName, session);
+        elementName, session, userId);
     CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, res, "create session fail");
 
     std::string supportModule;
@@ -2264,10 +2268,11 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
 }
 
 sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
-                                                          const AppExecFwk::ElementName& elementName)
+                                                          const AppExecFwk::ElementName& elementName,
+                                                          int32_t userId)
 {
     sptr<IRemoteObject> object;
-    auto res = CreateSessionInner(tag, type, elementName, object);
+    auto res = CreateSessionInner(tag, type, elementName, object, userId);
     CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, nullptr, "create session fail");
     return object;
 }
