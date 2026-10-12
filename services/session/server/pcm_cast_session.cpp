@@ -730,6 +730,12 @@ void PcmCastSession::ReleaseStreamPlayer()
     session->SetIsHiPlayStreamCasting(false);
     session->SetAndDealOutputDeviceChange(ConnectionState::STATE_CONNECTED, localDeviceInfo);
     session->ReleaseAVCastControllerInner();
+
+    SLOGI("clear supportedCastCmds");
+    std::vector<int32_t> supportedCastCmdsTemp;
+    session->dealValidCallback(AVCastControlCommand::CAST_CONTROL_CMD_INVALID, supportedCastCmdsTemp);
+    session->ProcessFrontSession("ReleaseStreamPlayer");
+
     AVRouter::GetInstance().OnSystemCommonEvent(CAST_SESSION_RELEASED, "");
     {
         std::lock_guard lockGuard(castLock_);

@@ -452,6 +452,7 @@ public:
 
     void ReadMetaDataImg(std::shared_ptr<AVSessionPixelMap>& innerPixelMap, bool isCast = false);
     void ReadMetaDataAVQueueImg(std::shared_ptr<AVSessionPixelMap>& avQueuePixelMap);
+    int32_t ProcessFrontSession(const std::string& source);
 
 protected:
     int32_t RegisterCallbackInner(const sptr<IAVSessionCallback>& callback) override;
@@ -482,7 +483,6 @@ private:
     void ReportConnectFinish(const std::string func, const DeviceInfo &deviceInfo);
     void ReportStopCastFinish(const std::string func, const DeviceInfo &deviceInfo);
     void SaveLocalDeviceInfo();
-    int32_t ProcessFrontSession(const std::string& source);
     void HandleFrontSession();
     void ReportSetAVMetaDataInfo(const AVMetaData& meta);
     void ReportAVCastControllerInfo();
