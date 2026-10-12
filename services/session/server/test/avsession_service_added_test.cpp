@@ -346,7 +346,7 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast004, TestSize.Level0)
     deviceInfo.castCategory_ = 1;
     deviceInfo.deviceId_ = "-100";
     deviceInfo.realDeviceId_ = "-100";
-    deviceInfo.supportedProtocols_ = 2;
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
     outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
     sessionToken.sessionId = "hiplayDefault";
     sessionToken.pid = 1234;
