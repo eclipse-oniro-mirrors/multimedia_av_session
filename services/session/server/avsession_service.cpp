@@ -3505,6 +3505,16 @@ int32_t AVSessionService::ConvertKeyCodeToCommand(int keyCode)
     }
 }
 
+bool AVSessionService::CheckSessionEmpty() {
+    auto sessionListArray = AAFwk::IArray::Query(mediaSessionListParams_.GetParam("packageName"));
+    long sessionListLen = 0;
+    if (sessionListArray == nullptr || sessionListArray->GetLength(sessionListLen) != ERR_OK || sessionListLen <= 0) {
+        SLOGI("session list is null or empty, skip anco branch");
+        return true;
+    }
+    return false;
+}
+
 void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId)
 {
     SLOGI("cmd=%{public}d with no topsession", command.GetCommand());
@@ -3536,6 +3546,11 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         }
     }
 
+    HandleColdStartPlayback(command, deviceId);
+}
+
+void AVSessionService::HandleColdStartPlayback(const AVControlCommand &command, const std::string deviceId)
+{
     std::vector<AVSessionDescriptor> coldStartDescriptors;
     GetColdStartSessionDescriptors(coldStartDescriptors);
     CHECK_AND_RETURN_LOG(coldStartDescriptors.size() > 0, "get coldStartDescriptors empty");
@@ -3606,6 +3621,13 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
 int32_t AVSessionService::SendSystemCommonCommand(const std::string& commonCommand,
     const AAFwk::WantParams& commandArgs)
 {
+    SLOGI("SendSystemCommonCommand commonCommand=%{public}s, commandArgs=%{public}s",
+        commonCommand.c_str(), commandArgs.ToString().c_str());
+    if (commonCommand == "updateMediaSessionList") {
+        SLOGI("Receive updateMediaSessionList command");
+        mediaSessionListParams_ = commandArgs;
+        return AVSESSION_SUCCESS;
+    }
 #ifdef CAR_FEATURE_ENABLE
     if (commonCommand == "MOVE_SCREEN") {
         return HandleMoveScreenCommand(commandArgs);
