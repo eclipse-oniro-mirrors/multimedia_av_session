@@ -370,6 +370,7 @@ HWTEST_F(AVSessionDescriptorTest, DeviceInfo_ReadFromParcel001, TestSize.Level1)
     in.WriteInt32(0);
     in.WriteInt32(0);
     in.WriteString("testBleMac");
+    in.WriteString("testBrMacAddress");
     in.WriteInt32(1);
     in.WriteString("testUuid");
     in.WriteInt32(0);
