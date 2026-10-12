@@ -125,6 +125,7 @@ private:
     int32_t OnConnectForSuper();
     void OnConnectForNext();
     int32_t OnDisconnectForSuper();
+    void ReleaseAllSessionsForSuper();
     void OnDisconnectForNext();
     int32_t OnBytesRecvForSuper(const std::string &deviceId, const std::string &data);
     void OnBytesRecvForNext(const std::string &deviceId, const std::string &data);

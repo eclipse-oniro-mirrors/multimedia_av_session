@@ -84,6 +84,7 @@ void AVSessionService::ReleaseSuperLauncher(std::string serviceName)
     {
         std::lock_guard lockGuard(migrateAVSessionLock_);
         migrateAVSession = migrateAVSession_;
+        migrateAVSession_ = nullptr;
     }
     if (migrateAVSession != nullptr) {
         RemoveInnerSessionListener(migrateAVSession.get());

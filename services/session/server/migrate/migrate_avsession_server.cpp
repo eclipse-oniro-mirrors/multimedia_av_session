@@ -1255,13 +1255,16 @@ std::string MigrateAVSessionServer::ConvertMetadataInfoToStr(
 
 void MigrateAVSessionServer::SendSpecialKeepaliveData()
 {
-    std::thread([this]() {
+    std::weak_ptr<MigrateAVSessionServer> weakThis(shared_from_this());
+    std::thread([weakThis]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(HEART_BEAT_TIME));
-        if (this->isSoftbusConnecting_) {
+        auto sharedThis = weakThis.lock();
+        CHECK_AND_RETURN_LOG(sharedThis, "MigrateAVSessionServer already destroyed");
+        if (sharedThis->isSoftbusConnecting_.load()) {
             char header[] = {MSG_HEAD_MODE, SYNC_HEARTBEAT, '\0'};
             std::string data = std::string(header);
-            SendByteToAll(data);
-            SendSpecialKeepaliveData();
+            sharedThis->SendByteToAll(data);
+            sharedThis->SendSpecialKeepaliveData();
             SLOGI("send special mediamession data to proxy connection");
         } else {
             SLOGI("send special mediamession data to proxy exit");
