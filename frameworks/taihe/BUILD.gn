@@ -150,6 +150,9 @@ taihe_shared_library("avsession_taihe") {
     cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
     external_deps += [ "hisysevent:libhisysevent" ]
   }
+  if (av_session_enable_multi_user_audio_zone_feature) {
+    cflags += [ "-DCAR_FEATURE_ENABLE" ]
+  }
 }
 
 generate_static_abc("avsession_taihe_abc") {

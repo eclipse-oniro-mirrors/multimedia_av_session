@@ -192,6 +192,7 @@ public:
     static keyEvent::KeyEvent ToTaiheKeyEvent(const OHOS::MMI::KeyEvent &in);
     static AudioCapabilities ToTaiheAudioCapabilities(const OHOS::AVSession::AudioCapabilities &in);
     static CommandInfo ToTaiheCommandInfo(const OHOS::AVSession::AVControlCommand& in);
+    static OHOS::AVSession::CommandInfo ToNativeCommandInfo(const CommandInfo& in);
     static ohos::multimedia::avsession::avSession::DesktopLyricState ToTaiheDesktopLyricState(
         const OHOS::AVSession::DesktopLyricState &in);
 

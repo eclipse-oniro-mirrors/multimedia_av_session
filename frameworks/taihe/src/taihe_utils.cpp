@@ -1453,4 +1453,24 @@ CommandInfo TaiheUtils::ToTaiheCommandInfo(const OHOS::AVSession::AVControlComma
     };
     return out;
 }
+
+OHOS::AVSession::CommandInfo TaiheUtils::ToNativeCommandInfo(const CommandInfo& in)
+{
+    OHOS::AVSession::CommandInfo cmdInfo;
+    std::string callerBundleName;
+    std::string callerModuleName;
+    std::string callerDeviceId;
+    std::string callerType;
+    TaiheUtils::GetOptionalString(in.callerBundleName, callerBundleName);
+    TaiheUtils::GetOptionalString(in.callerModuleName, callerModuleName);
+    TaiheUtils::GetOptionalString(in.callerDeviceId, callerDeviceId);
+    if (in.callerType.has_value()) {
+        TaiheUtils::GetString(in.callerType.value().get_value(), callerType);
+    }
+    cmdInfo.SetCallerBundleName(callerBundleName);
+    cmdInfo.SetCallerModuleName(callerModuleName);
+    cmdInfo.SetCallerDeviceId(callerDeviceId);
+    cmdInfo.SetCallerType(callerType);
+    return cmdInfo;
+}
 } // namespace ANI::AVSession
