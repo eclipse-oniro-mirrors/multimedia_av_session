@@ -42,7 +42,8 @@ napi_env NapiAsyncCallback::GetEnv() const
     return env_;
 }
 
-void NapiAsyncCallback::Call(napi_ref& method, std::string callbackName, NapiArgsGetter getter)
+void NapiAsyncCallback::Call(napi_ref& method, std::string callbackName,
+    const std::function<bool()>& checkCallbackValid, NapiArgsGetter getter)
 {
     CHECK_RETURN_VOID(loop_ != nullptr, "loop_ is nullptr");
     CHECK_RETURN_VOID(method != nullptr, "method is nullptr");
@@ -50,7 +51,7 @@ void NapiAsyncCallback::Call(napi_ref& method, std::string callbackName, NapiArg
     std::shared_ptr<uv_work_t> work = std::make_shared<uv_work_t>();
     CHECK_RETURN_VOID(work != nullptr, "no memory for uv_work_t");
 
-    work->data = new DataContext{env_, method, std::move(getter)};
+    work->data = new DataContext{env_, method, std::move(getter), checkCallbackValid};
     auto task = [work] {
         AVSESSION_TRACE_SYNC_START("NapiAsyncCallback::Call");
         std::shared_ptr<DataContext> context(static_cast<DataContext*>(work->data), [](DataContext* ptr) {
@@ -75,8 +76,18 @@ void NapiAsyncCallback::Call(napi_ref& method, std::string callbackName, NapiArg
         napi_value global {};
         napi_get_global(context->env, &global);
         napi_value function {};
+        if (!context->checkCallbackValid()) {
+            SLOGE("Get func reference failed for func has been deleted.");
+            napi_close_handle_scope(context->env, scope);
+            return;
+        }
         napi_get_reference_value(context->env, context->method, &function);
         napi_value result;
+        if (!context->checkCallbackValid()) {
+            SLOGE("Call func failed for func has been deleted.");
+            napi_close_handle_scope(context->env, scope);
+            return;
+        }
         napi_status status = napi_call_function(context->env, global, function, argc, argv, &result);
         if (status != napi_ok) {
             SLOGE("call function failed status=%{public}d.", status);
