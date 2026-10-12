@@ -99,6 +99,8 @@ private:
     static void HandleServiceDied();
 
     static void HandleServiceStart();
+
+    static std::function<bool()> CheckCallbackValid(napi_ref ref);
     
     static bool JudgeNumString(std::string str);
 

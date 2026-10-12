@@ -37,7 +37,9 @@ public:
 
     napi_env GetEnv() const;
 
-    void Call(napi_ref& method, std::string callbackName, NapiArgsGetter getter = NapiArgsGetter());
+    void Call(napi_ref& method, std::string callbackName,
+        const std::function<bool()>& checkCallbackValid,
+        NapiArgsGetter getter = NapiArgsGetter());
 
     void CallWithFlag(napi_ref& method, std::shared_ptr<std::atomic<bool>> isValid,
         NapiArgsGetter getter = NapiArgsGetter());
@@ -52,6 +54,7 @@ private:
         napi_env env;
         napi_ref& method;
         NapiArgsGetter getter;
+        std::function<bool()> checkCallbackValid;
     };
     struct DataContextWithFlag {
         napi_env env;

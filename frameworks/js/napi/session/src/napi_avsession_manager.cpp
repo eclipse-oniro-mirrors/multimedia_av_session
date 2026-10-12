@@ -2118,7 +2118,7 @@ void NapiAVSessionManager::HandleServiceDied()
     if (!serviceDiedCallbacks_.empty() && asyncCallback_ != nullptr) {
         for (auto callbackRef = serviceDiedCallbacks_.begin(); callbackRef != serviceDiedCallbacks_.end();
              ++callbackRef) {
-            asyncCallback_->Call(*callbackRef, callBackName);
+            asyncCallback_->Call(*callbackRef, callBackName, CheckCallbackValid(*callbackRef));
         }
     }
     if (listener_ != nullptr) {
@@ -2131,6 +2131,23 @@ void NapiAVSessionManager::HandleServiceStart()
 {
     auto res = NapiAVSession::ReCreateInstance();
     SLOGI("HandleServiceStart ReCreateInstance ret=%{public}d", res);
+}
+
+std::function<bool()> NapiAVSessionManager::CheckCallbackValid(napi_ref ref)
+{
+    return [ref]() {
+        std::lock_guard lockGuard(listenersMutex_);
+        if (serviceDiedCallbacks_.empty()) {
+            SLOGE("checkCallbackValid with empty list for serviceDied");
+            return false;
+        }
+        bool hasFunc = false;
+        for (auto it = serviceDiedCallbacks_.begin(); it != serviceDiedCallbacks_.end(); ++it) {
+            hasFunc = (*it == ref ? true : hasFunc);
+        }
+        SLOGD("checkCallbackValid return hasFunc %{public}d", hasFunc);
+        return hasFunc;
+    };
 }
 
 napi_status NapiAVSessionManager::OffSessionCreate(napi_env env, napi_value callback)

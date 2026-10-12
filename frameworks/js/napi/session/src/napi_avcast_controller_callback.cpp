@@ -52,7 +52,7 @@ void NapiAVCastControllerCallback::HandleEvent(int32_t event, std::string callBa
         return;
     }
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
-        asyncCallback_->Call(*ref, callBackName);
+        asyncCallback_->Call(*ref, callBackName, CheckCallbackValid(event, *ref));
     }
 }
 
