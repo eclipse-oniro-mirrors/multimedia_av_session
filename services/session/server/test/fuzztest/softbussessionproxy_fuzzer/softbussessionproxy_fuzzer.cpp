@@ -63,6 +63,10 @@ public:
     {
         return;
     }
+    bool UseSendMessageForConnect() const override
+    {
+        return false;
+    }
 };
 
 void SoftbusSessionProxyFuzzer::ConnectServerFuzzTest()
