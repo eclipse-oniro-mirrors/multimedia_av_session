@@ -85,6 +85,7 @@ void PcmCastSession::UpdateDeviceInfo(DeviceInfo& deviceInfo)
     deviceInfo.deviceName_ = tempDeviceInfo_.deviceName_;
     deviceInfo.deviceType_ = tempDeviceInfo_.deviceType_;
     deviceInfo.uuid_ = tempDeviceInfo_.uuid_;
+    deviceInfo.brMacAddress_ = tempDeviceInfo_.brMacAddress_;
     deviceInfo.ipAddress_ = tempDeviceInfo_.ipAddress_;
     deviceInfo.supportedProtocols_ = tempDeviceInfo_.supportedProtocols_;
     deviceInfo.hiPlayDeviceInfo_.castMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
