@@ -211,14 +211,14 @@ void PcmCastSession::HandleCastModeChangeEvent(const std::string& args)
 {
     int32_t code = JsonUtils::GetIntParamFromJsonString(args, "code");
     CHECK_AND_RETURN_RET_LOG(CheckIsCasting(), void(), "First connection, castState is 0.");
-    CHECK_AND_RETURN_RET_LOG(code != CASTMODE_CHANGE_SUCCESS, void(),
-        "Castmode changes fail, code is %{public}d", code);
+    CHECK_AND_RETURN_RET_LOG(code == 0, void(), "Castmode changes fail, code is %{public}d", code);
     int32_t castMode = JsonUtils::GetIntParamFromJsonString(args, "mode");
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
-    int32_t screenId = JsonUtils::GetIntParamFromJsonString(args, "screenId");
+    int32_t screenId = tempDeviceInfo_.screenId_;
     if (screenId != -1) {
         deviceId += std::to_string(screenId);
+        SLOGI("HandleCastModeChangeEvent screenId:%{public}d", screenId);
     }
     SLOGI("Received CastModeChange: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
         castMode, uid, AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str());
