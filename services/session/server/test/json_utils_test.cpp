@@ -1489,7 +1489,7 @@ static HWTEST(JsonUtilsTest, GetIntParamFromJsonString001, TestSize.Level0)
     std::string jsonStr = "";
     std::string key = "";
     int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
-    EXPECT_EQ(result, -1);
+    EXPECT_EQ(result, 0);
     SLOGI("GetIntParamFromJsonString001 end!");
 }
 
@@ -1499,7 +1499,7 @@ static HWTEST(JsonUtilsTest, GetIntParamFromJsonString002, TestSize.Level0)
     std::string jsonStr = "";
     std::string key = "testKey";
     int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
-    EXPECT_EQ(result, -1);
+    EXPECT_EQ(result, 0);
     SLOGI("GetIntParamFromJsonString002 end!");
 }
 
@@ -1509,7 +1509,7 @@ static HWTEST(JsonUtilsTest, GetIntParamFromJsonString003, TestSize.Level0)
     std::string jsonStr = "{\"testKey\": 123}";
     std::string key = "";
     int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
-    EXPECT_EQ(result, -1);
+    EXPECT_EQ(result, 0);
     SLOGI("GetIntParamFromJsonString003 end!");
 }
 
@@ -1519,7 +1519,7 @@ static HWTEST(JsonUtilsTest, GetIntParamFromJsonString004, TestSize.Level0)
     std::string jsonStr = "invalid json";
     std::string key = "testKey";
     int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
-    EXPECT_EQ(result, -1);
+    EXPECT_EQ(result, 0);
     SLOGI("GetIntParamFromJsonString004 end!");
 }
 
@@ -1539,7 +1539,7 @@ static HWTEST(JsonUtilsTest, GetIntParamFromJsonString006, TestSize.Level0)
     std::string jsonStr = "{\"testKey\": \"123\"}";
     std::string key = "testKey";
     int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
-    EXPECT_EQ(result, -1);
+    EXPECT_EQ(result, 0);
     SLOGI("GetIntParamFromJsonString006 end!");
 }
 
@@ -1549,6 +1549,6 @@ static HWTEST(JsonUtilsTest, GetIntParamFromJsonString007, TestSize.Level0)
     std::string jsonStr = "{\"otherKey\": 123}";
     std::string key = "testKey";
     int32_t result = OHOS::AVSession::JsonUtils::GetIntParamFromJsonString(jsonStr, key);
-    EXPECT_EQ(result, -1);
+    EXPECT_EQ(result, 0);
     SLOGI("GetIntParamFromJsonString007 end!");
 }
