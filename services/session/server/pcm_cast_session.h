@@ -87,6 +87,8 @@ public:
 
     void UpdatePcmCastSession(const AVSessionDescriptor& descriptor);
 
+    void SendStreamSessionChangeEvent(const sptr<AVSessionItem>& session);
+
 private:
     std::atomic<int64_t> castHandle_ = 0;
     std::atomic<int32_t> castState_ = CastState::DISCONNECTED;
@@ -139,6 +141,7 @@ private:
 
     const std::string STOP_CAST = "STOP_CAST";
     const std::string CAST_SESSION_RELEASED = "CAST_SESSION_RELEASED";
+    const std::string STREAM_SESSION_CHANGED = "STREAM_SESSION_CHANGED";
 
     const std::string HIPLAY_CAST_MODE_CHANGE_RESULT = "HIPLAY_CAST_MODE_CHANGE_RESULT";
     const std::string UPDATE_DEVICE_INFO = "UPDATE_DEVICE_INFO";
