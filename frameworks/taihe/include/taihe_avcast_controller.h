@@ -45,6 +45,7 @@ public:
     void SendCustomDataSync(uintptr_t data);
     void StartSync(AVQueueItem const& item);
     void PrepareSync(AVQueueItem const& item);
+    void UpdateSync(AVQueueItem const& item);
     AVQueueItem GetCurrentItemSync();
     void ProcessMediaKeyResponseSync(string_view assetId, array_view<uint8_t> response);
     void ReleaseSync();
@@ -103,6 +104,7 @@ private:
 
     std::shared_ptr<OHOS::AVSession::AVCastController> castController_;
     std::shared_ptr<TaiheAVCastControllerCallback> callback_;
+    OHOS::AVSession::AVQueueItem lastUpdateItem_;
 
     static std::set<std::string> eventHandlers_;
 };
