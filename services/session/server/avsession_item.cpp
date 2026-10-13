@@ -335,7 +335,7 @@ int32_t AVSessionItem::ProcessFrontSession(const std::string& source)
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionItem::UpdateRecommendInfo(bool needRecommend)
 {
-    if (descriptor_.sessionTag_ == "RemoteCast") {
+    if (IsSinkCastSession()) {
         return;
     }
     AVMetaData meta;
@@ -1258,7 +1258,7 @@ void AVSessionItem::InitAVCastControllerProxy()
 {
     if (castControllerProxy_ == nullptr) {
         SLOGI("CastControllerProxy is null, start get new proxy");
-        if (descriptor_.sessionTag_ == "RemoteCast") {
+        if (IsSinkCastSession()) {
             CHECK_AND_RETURN_LOG(AVRouter::GetInstance().IsRemoteCasting(), "get remote controller till connected");
         }
         {
@@ -1303,7 +1303,7 @@ void AVSessionItem::dealValidCallback(int32_t cmd, std::vector<int32_t>& support
             supportedCastCmds = supportedCastCmds_;
             return;
         }
-        if (descriptor_.sessionTag_ == "RemoteCast") {
+        if (IsSinkCastSession()) {
             SLOGI("sink session should not modify valid cmds");
             supportedCastCmds = {};
             return;
@@ -1371,7 +1371,7 @@ sptr<IRemoteObject> AVSessionItem::GetAVCastControllerInner()
 
 void AVSessionItem::SetCastControllerCallbackForCastCap(std::shared_ptr<IAVCastControllerProxy> castControllerProxy)
 {
-    if (descriptor_.sessionTag_ == "RemoteCast" || castControllerProxy == nullptr) {
+    if (IsSinkCastSession() || castControllerProxy == nullptr) {
         return;
     }
     std::lock_guard callbackForCastCapLockGuard(callbackForCastCapLock_);
@@ -2255,7 +2255,7 @@ void AVSessionItem::ListenCollaborationOnStop()
             std::lock_guard lockGuard(sharedPtr->destroyLock_);
             CHECK_AND_RETURN_LOG(!sharedPtr->isDestroyed_.load(), "AVSessionItem is destroyed, skip StopCast");
         }
-        if (sharedPtr->descriptor_.sessionTag_ == "RemoteCast") {
+        if (sharedPtr->IsSinkCastSession()) {
             SLOGI("notify controller avplayer cancle cast when pc recive onstop callback");
             AVRouter::GetInstance().StopCastSession(sharedPtr->castHandle_);
         } else {
@@ -2331,7 +2331,7 @@ void AVSessionItem::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, 
         castState = 1; // 1 is connected status (local)
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
         ReportConnectFinish("AVSessionItem::OnCastStateChange", deviceInfo);
-        if (callStartCallback_ && isNeedRemove && descriptor_.sessionTag_ == "RemoteCast") {
+        if (callStartCallback_ && isNeedRemove && IsSinkCastSession()) {
             SLOGI("AVSessionItem send callStart event to service for connected");
             callStartCallback_(*this);
         }
@@ -2365,7 +2365,7 @@ void AVSessionItem::ResetCastControlInfo(int32_t castState, int32_t reasonCode,
             GetSessionId(), outputDeviceInfo.deviceInfos_[0]);
     }
 
-    if (castState == ConnectionState::STATE_DISCONNECTED && descriptor_.sessionTag_ == "RemoteCast") {
+    if (castState == ConnectionState::STATE_DISCONNECTED && IsSinkCastSession()) {
         SLOGI("Sink cast session is disconnected, avsession item need be destroyed.");
         Destroy();
     } else {
@@ -3712,7 +3712,7 @@ void AVSessionItem::SaveLocalDeviceInfo()
 int32_t AVSessionItem::DoContinuousTaskRegister()
 {
 #ifdef EFFICIENCY_MANAGER_ENABLE
-    if (descriptor_.sessionTag_ == "RemoteCast") {
+    if (IsSinkCastSession()) {
         SLOGI("sink session no need to register continuousTask");
         return AVSESSION_SUCCESS;
     }
@@ -3746,7 +3746,7 @@ int32_t AVSessionItem::DoContinuousTaskRegister()
 int32_t AVSessionItem::DoContinuousTaskUnregister()
 {
 #ifdef EFFICIENCY_MANAGER_ENABLE
-    if (descriptor_.sessionTag_ == "RemoteCast") {
+    if (IsSinkCastSession()) {
         SLOGI("sink session should not unregister ContinuousTask");
         return AVSESSION_SUCCESS;
     }
