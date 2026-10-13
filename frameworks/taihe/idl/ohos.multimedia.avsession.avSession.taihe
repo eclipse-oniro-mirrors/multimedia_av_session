@@ -154,6 +154,10 @@ interface AVCastController {
   @gen_promise("prepare")
   PrepareSync(item: AVQueueItem): void;
 
+  @gen_async("update")
+  @gen_promise("update")
+  UpdateSync(item: AVQueueItem): void;
+
   @gen_async("getCurrentItem")
   @gen_promise("getCurrentItem")
   GetCurrentItemSync(): AVQueueItem;

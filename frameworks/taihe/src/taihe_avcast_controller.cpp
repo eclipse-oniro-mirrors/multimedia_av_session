@@ -440,6 +440,95 @@ void AVCastControllerImpl::PrepareSync(AVQueueItem const& item)
         "AVCastControllerImpl PrepareAsync handler postTask failed");
 }
 
+// Compare whether two AVQueueItems carry identical values for the fields that
+// can be dynamically updated by Update: mediaName, albumCoverUrl, albumTitle,
+// mediaArtist, lrcUrl, lrcContent, appIconUrl, launchClientData and
+// albumPixelMap. Other fields (mediaId, mediaUri, duration, etc.) are
+// intentionally ignored as they are not part of an update payload.
+static bool IsAVQueueItemEqual(const OHOS::AVSession::AVQueueItem& lhs,
+    const OHOS::AVSession::AVQueueItem& rhs)
+{
+    auto lDesc = lhs.GetDescription();
+    auto rDesc = rhs.GetDescription();
+    if (lDesc == nullptr && rDesc == nullptr) {
+        return true;
+    }
+    if (lDesc == nullptr || rDesc == nullptr) {
+        return false;
+    }
+    if (lDesc->GetTitle() != rDesc->GetTitle() ||
+        lDesc->GetAlbumCoverUri() != rDesc->GetAlbumCoverUri() ||
+        lDesc->GetAlbumTitle() != rDesc->GetAlbumTitle() ||
+        lDesc->GetArtist() != rDesc->GetArtist() ||
+        lDesc->GetLyricUri() != rDesc->GetLyricUri() ||
+        lDesc->GetLyricContent() != rDesc->GetLyricContent() ||
+        lDesc->GetIconUri() != rDesc->GetIconUri() ||
+        lDesc->GetLaunchClientData() != rDesc->GetLaunchClientData()) {
+        return false;
+    }
+    auto lIcon = lDesc->GetIcon();
+    auto rIcon = rDesc->GetIcon();
+    if (lIcon == nullptr && rIcon == nullptr) {
+        return true;
+    }
+    if (lIcon == nullptr || rIcon == nullptr) {
+        return false;
+    }
+    return lIcon->Equals(*rIcon);
+}
+
+static std::function<void()> UpdateAsyncExecutor(std::shared_ptr<OHOS::AVSession::AVCastController> castController,
+    OHOS::AVSession::AVQueueItem data)
+{
+    return [castController, data]() {
+        if (castController == nullptr) {
+            SLOGE("Update failed : castController is nullptr");
+            return;
+        }
+        std::shared_ptr<OHOS::AVSession::AVMediaDescription> description = data.GetDescription();
+        if (description == nullptr) {
+            SLOGE("Update failed : description is nullptr");
+            return;
+        }
+        auto uri = description->GetIconUri() == "" ?
+            description->GetAlbumCoverUri() : description->GetIconUri();
+        if (description->GetIcon() == nullptr && !uri.empty()) {
+            auto ret = DownloadCastImg(description, uri);
+            SLOGI("DownloadCastImg complete with ret %{public}d", ret);
+        }
+        int32_t ret = castController->Update(data);
+        if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+            SLOGE("CastController Update failed:%{public}d", ret);
+        }
+    };
+}
+
+void AVCastControllerImpl::UpdateSync(AVQueueItem const& item)
+{
+    if (castController_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CONTROLLER_NOT_EXIST],
+            "UpdateSync failed : cast controller is nullptr");
+        return;
+    }
+    OHOS::AVSession::AVQueueItem avQueueItem;
+    int32_t ret = TaiheQueueItem::GetAVQueueItem(item, avQueueItem);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+    if (IsAVQueueItemEqual(lastUpdateItem_, avQueueItem)) {
+        SLOGI("UpdateSync media info identical to last update");
+        return;
+    }
+    lastUpdateItem_ = avQueueItem;
+    auto asyncExecutor = UpdateAsyncExecutor(castController_, avQueueItem);
+    CHECK_AND_PRINT_LOG(OHOS::AVSession::AVSessionEventHandler::GetInstance()
+        .AVSessionPostTask(asyncExecutor, "UpdateAsync"),
+        "AVCastControllerImpl UpdateAsync handler postTask failed");
+}
+
 AVQueueItem AVCastControllerImpl::GetCurrentItemSync()
 {
     AVQueueItem undefinedItem = TaiheQueueItem::CreateUndefinedAVQueueItem();
