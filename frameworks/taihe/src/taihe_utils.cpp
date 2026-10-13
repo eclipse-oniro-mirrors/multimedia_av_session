@@ -1453,5 +1453,4 @@ CommandInfo TaiheUtils::ToTaiheCommandInfo(const OHOS::AVSession::AVControlComma
     };
     return out;
 }
-
 } // namespace ANI::AVSession
