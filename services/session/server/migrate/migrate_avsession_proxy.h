@@ -146,6 +146,7 @@ private:
     int32_t CompressFromJPEG(const std::vector<uint8_t> &inputData,
         std::shared_ptr<AVSessionPixelMap>& outputData, bool isMediaImage = false);
     int32_t ConvertStateFromDoubleToSingle(int32_t state);
+    int32_t ParsePlaybackStateFromParcel(Parcel& parcel, AVPlaybackState& playbackState);
     int32_t CleanMetadataForMigrateSession(sptr<AVSessionItem> sessionItem);
 
     int32_t userId_ = 0;

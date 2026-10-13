@@ -511,25 +511,8 @@ int32_t MigrateAVSessionProxy::ProcessPlaybackStateForSuper(cJSON* jsonValue)
     AVPlaybackState playbackState;
     CHECK_AND_RETURN_RET_LOG(AVSESSION_SUCCESS == sessionItem->GetAVPlaybackState(playbackState), AVSESSION_ERROR,
         "ProcessPlaybackStateForSuper GetAVPlaybackState fail");
-    playbackState.SetState(ConvertStateFromDoubleToSingle(parcel.ReadInt32()));
-    AVPlaybackState::Position position;
-    position.elapsedTime_ = parcel.ReadInt64();
-    playbackState.SetSpeed(parcel.ReadFloat());
-    position.updateTime_ = parcel.ReadInt64();
-    playbackState.SetPosition(position);
-    playbackState.SetBufferedTime(parcel.ReadInt64());
-    int64_t actions = parcel.ReadInt64();
-    SLOGD("actions read:%{public}d", static_cast<int32_t>(actions));
-    int32_t checkNum = parcel.ReadInt32();
-    SLOGD("checkNum read:%{public}d", static_cast<int32_t>(checkNum));
-    playbackState.SetActiveItemId(parcel.ReadInt64());
-    checkNum = parcel.ReadInt32();
-    SLOGD("checkNum read:%{public}d", static_cast<int32_t>(checkNum));
-    std::string checkStr = parcel.ReadCString();
-    checkNum = parcel.ReadInt32();
-    SLOGD("checkNum again read:%{public}d", static_cast<int32_t>(checkNum));
-    playbackState.SetFavorite(parcel.ReadBool());
-    playbackState.SetLoopMode(parcel.ReadInt32());
+    CHECK_AND_RETURN_RET_LOG(ParsePlaybackStateFromParcel(parcel, playbackState) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "ParsePlaybackStateFromParcel fail");
     CHECK_AND_RETURN_RET_LOG(sessionItem->SetAVPlaybackState(playbackState) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "SetAVPlaybackState fail:%{public}d.", playbackState.GetState());
     SLOGI("ProcessPlaybackStateForSuper set state:%{public}d|%{public}d|%{public}d",
@@ -634,6 +617,31 @@ int32_t MigrateAVSessionProxy::ConvertStateFromDoubleToSingle(int32_t state)
             break;
     }
     return state;
+}
+
+int32_t MigrateAVSessionProxy::ParsePlaybackStateFromParcel(Parcel& parcel, AVPlaybackState& playbackState)
+{
+    playbackState.SetState(ConvertStateFromDoubleToSingle(parcel.ReadInt32()));
+    AVPlaybackState::Position position;
+    position.elapsedTime_ = parcel.ReadInt64();
+    playbackState.SetSpeed(parcel.ReadFloat());
+    position.updateTime_ = parcel.ReadInt64();
+    playbackState.SetPosition(position);
+    playbackState.SetBufferedTime(parcel.ReadInt64());
+    parcel.ReadInt64(); // Field 6: actions
+    parcel.ReadInt32(); // Field 7: mCustomActions (writeTypedList): -1=null, 0=empty
+    playbackState.SetActiveItemId(parcel.ReadInt64()); // Field 8: mActiveItemId
+    int32_t errorType = parcel.ReadInt32(); // Field 9: mErrorMessage (TextUtils.writeToParcel): 0=null, 1=String
+    if (errorType == 1 && !isDualFrameMode_) {
+        parcel.ReadCString();
+    }
+    // Dual-frame: mErrorMessage is always null, skip is not needed.
+    parcel.ReadInt32(); // Field 10: mExtras (writeBundle): -1=null
+    if (!isDualFrameMode_) {
+        playbackState.SetFavorite(parcel.ReadBool());
+        playbackState.SetLoopMode(parcel.ReadInt32());
+    }
+    return AVSESSION_SUCCESS;
 }
 
 void MigrateAVSessionProxy::NotifyControllerGone(pid_t pid)
