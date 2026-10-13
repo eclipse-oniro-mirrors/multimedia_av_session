@@ -88,6 +88,7 @@ void PcmCastSession::UpdateDeviceInfo(DeviceInfo& deviceInfo)
     deviceInfo.uuid_ = tempDeviceInfo_.uuid_;
     deviceInfo.ipAddress_ = tempDeviceInfo_.ipAddress_;
     deviceInfo.supportedProtocols_ = tempDeviceInfo_.supportedProtocols_;
+    deviceInfo.screenId_ = tempDeviceInfo_.screenId_;
     deviceInfo.hiPlayDeviceInfo_.castMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.castMode_;
     deviceInfo.hiPlayDeviceInfo_.castUid_ = GetUid();
     deviceInfo.hiPlayDeviceInfo_.supportCastMode_ = tempDeviceInfo_.hiPlayDeviceInfo_.supportCastMode_;
@@ -215,17 +216,18 @@ void PcmCastSession::HandleCastModeChangeEvent(const std::string& args)
     int32_t castMode = JsonUtils::GetIntParamFromJsonString(args, "mode");
     int32_t uid = JsonUtils::GetIntParamFromJsonString(args, "uid");
     std::string deviceId = JsonUtils::GetStringParamFromJsonString(args, "deviceId");
-    int32_t screenId = tempDeviceInfo_.screenId_;
-    if (screenId != -1) {
-        deviceId += std::to_string(screenId);
-        SLOGI("HandleCastModeChangeEvent screenId:%{public}d", screenId);
-    }
     SLOGI("Received CastModeChange: castMode=%{public}d, uid=%{public}d, deviceId:%{public}s",
         castMode, uid, AVSessionUtils::GetAnonymousDeviceId(deviceId).c_str());
     {
         std::lock_guard lockGuard(castLock_);
         CHECK_AND_RETURN_RET_LOG(!descriptor_.outputDeviceInfo_.deviceInfos_.empty(), void(),
             "DeviceInfos is empty");
+        int32_t screenId = descriptor_.outputDeviceInfo_.deviceInfos_[0].screenId_;
+        if (screenId != -1) {
+            deviceId += std::to_string(screenId);
+            SLOGI("HandleCastModeChangeEvent screenId:%{public}d", screenId);
+        }
+
         if (castMode == HiPlayCastMode::DEVICE_LEVEL) {
             tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::DEVICE_LEVEL;
             descriptor_.uid_ = 0;
