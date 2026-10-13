@@ -907,6 +907,26 @@ void StartAVPlaybackInfoSync(string_view bundleName, string_view assetId, Comman
     }
 }
 
+static OHOS::AVSession::CommandInfo ToNativeCommandInfo(const CommandInfo& in)
+{
+    OHOS::AVSession::CommandInfo cmdInfo;
+    std::string callerBundleName;
+    std::string callerModuleName;
+    std::string callerDeviceId;
+    std::string callerType;
+    TaiheUtils::GetOptionalString(in.callerBundleName, callerBundleName);
+    TaiheUtils::GetOptionalString(in.callerModuleName, callerModuleName);
+    TaiheUtils::GetOptionalString(in.callerDeviceId, callerDeviceId);
+    if (in.callerType.has_value()) {
+        callerType = std::string(in.callerType.value().get_value());
+    }
+    cmdInfo.SetCallerBundleName(callerBundleName);
+    cmdInfo.SetCallerModuleName(callerModuleName);
+    cmdInfo.SetCallerDeviceId(callerDeviceId);
+    cmdInfo.SetCallerType(callerType);
+    return cmdInfo;
+}
+
 void StartAVPlaybackForAudioZoneSync(int32_t userId, string_view bundleName, string_view assetId,
     optional_view<CommandInfo> info, optional_view<string> extraInfo)
 {
@@ -926,7 +946,7 @@ void StartAVPlaybackForAudioZoneSync(int32_t userId, string_view bundleName, str
     }
     OHOS::AVSession::CommandInfo commandInfo;
     if (info.has_value()) {
-        commandInfo = TaiheUtils::ToNativeCommandInfo(info.value());
+        commandInfo = ToNativeCommandInfo(info.value());
     }
     std::string extraInfoStr;
     if (extraInfo.has_value()) {
