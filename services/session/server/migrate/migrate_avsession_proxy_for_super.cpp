@@ -30,6 +30,7 @@
 #include "base64_utils.h"
 #include "pixel_map.h"
 #include "image_packer.h"
+#include "bundle_status_adapter.h"
 
 namespace OHOS::AVSession {
 
@@ -361,25 +362,46 @@ int32_t MigrateAVSessionProxy::ProcessBundleIconForSuper(cJSON* jsonValue)
     sptr<AVSessionItem> sessionItem = iter->second;
     CHECK_AND_RETURN_RET_LOG(sessionItem != nullptr, AVSESSION_ERROR, "ProcessBundleIconForSuper avsession nullptr");
 
-    std::string bundleIconStr = SoftbusSessionUtils::GetStringFromJson(jsonValue, BUNDLE_ICON);
-    CHECK_AND_RETURN_RET_LOG(!bundleIconStr.empty(), AVSESSION_ERROR, "no bundleIcon");
     AVMetaData metaData;
     CHECK_AND_RETURN_RET_LOG(AVSESSION_SUCCESS == sessionItem->GetAVMetaData(metaData),
         AVSESSION_ERROR, "ProcessBundleIcon get metadata fail");
     metaData.SetAssetId(metaData.GetAssetId().empty() ? DEFAULT_STRING : metaData.GetAssetId());
 
-    std::vector<uint8_t> imgVec = Base64Utils::Base64Decode(bundleIconStr);
-    CHECK_AND_RETURN_RET_LOG(imgVec.size() > 0, AVSESSION_ERROR, "ProcessBundleIcon but empty");
     std::shared_ptr<AVSessionPixelMap> bundleIconPixelMap = nullptr;
-    CHECK_AND_RETURN_RET_LOG(CompressFromJPEG(imgVec, bundleIconPixelMap) == AVSESSION_SUCCESS, AVSESSION_ERROR,
-        "CompressFromJPEG fail:%{public}zu", imgVec.size());
-    CHECK_AND_RETURN_RET_LOG(bundleIconPixelMap != nullptr, AVSESSION_ERROR, "ProcessBundleIcon but nullptr");
 
+    // 1. Try to get bundle icon from remote (phone)
+    std::string bundleIconStr = SoftbusSessionUtils::GetStringFromJson(jsonValue, BUNDLE_ICON);
+    if (!bundleIconStr.empty()) {
+        std::vector<uint8_t> imgVec = Base64Utils::Base64Decode(bundleIconStr);
+        if (imgVec.size() > 0) {
+            CompressFromJPEG(imgVec, bundleIconPixelMap);
+        }
+    }
+
+    // 2. Try to get bundle icon from local bundle manager
+    if (bundleIconPixelMap == nullptr) {
+        std::string bundleName = sessionItem->GetBundleName();
+        std::string iconStr;
+        if (BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, "", iconStr) && !iconStr.empty()) {
+            std::vector<uint8_t> imgVec(iconStr.begin(), iconStr.end());
+            CompressFromJPEG(imgVec, bundleIconPixelMap);
+        }
+    }
+
+    // 3. Use default image as fallback
+    if (bundleIconPixelMap == nullptr) {
+        auto defaultPixelMap = AVSessionPixelMapAdapter::ConvertDefaultImage();
+        if (defaultPixelMap != nullptr) {
+            bundleIconPixelMap = AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(defaultPixelMap);
+        }
+    }
+
+    CHECK_AND_RETURN_RET_LOG(bundleIconPixelMap != nullptr, AVSESSION_ERROR, "ProcessBundleIcon all methods failed");
     metaData.SetBundleIcon(bundleIconPixelMap);
     metaData.SetWriter(sessionItem->GetBundleName());
     sessionItem->SetAVMetaData(metaData);
     SLOGI("ProcessBundleImg set img size:%{public}d for bundleName:%{public}s",
-        static_cast<int>(imgVec.size()), sessionItem->GetBundleName().c_str());
+        static_cast<int>(bundleIconPixelMap->GetInnerImgBuffer().size()), sessionItem->GetBundleName().c_str());
     return AVSESSION_SUCCESS;
 }
 
