@@ -96,6 +96,8 @@ std::map<int32_t, int32_t> NapiAVSessionManager::errcode_ = {
     {ERR_ALLCONNECT_CAST_REJECT, 6600101},
     {ERR_DESKTOPLYRIC_NOT_ENABLE, 6600110},
     {ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600111},
+    {ERR_CAPABILITY_NOT_SUPPORTED, 801},
+    {ERR_SERVICE_NOT_RUNNING, 6700101},
 };
 napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
 {
@@ -354,7 +356,6 @@ napi_value NapiAVSessionManager::GetSessionDescriptors(napi_env env, napi_callba
 
 napi_value NapiAVSessionManager::GetSessionDescriptorsForAudioZone(napi_env env, napi_callback_info info)
 {
-#ifdef CAR_FEATURE_ENABLE
     struct ConcreteContext : public ContextBase {
         int32_t userId_;
         std::vector<AVSessionDescriptor> descriptors_;
@@ -380,7 +381,7 @@ napi_value NapiAVSessionManager::GetSessionDescriptorsForAudioZone(napi_env env,
             } else if (ret == ERR_PERMISSION_DENIED) {
                 context->errMessage = "GetSessionDescriptorsForAudioZone failed : native permission denied";
             } else {
-                context->errMessage = "GetSessionDescriptorsForAudioZone failed : native server exception";
+                context->errMessage = "GetSessionDescriptorsForAudioZone failed : Session service is not running";
             }
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];
@@ -394,9 +395,6 @@ napi_value NapiAVSessionManager::GetSessionDescriptorsForAudioZone(napi_env env,
     };
 
     return NapiAsyncWork::Enqueue(env, context, "GetSessionDescriptorsForAudioZone", executor, complete);
-#else
-    return nullptr;
-#endif
 }
 
 napi_value NapiAVSessionManager::GetHistoricalSessionDescriptors(napi_env env, napi_callback_info info)
@@ -600,22 +598,22 @@ void NapiAVSessionManager::FillExtraInfo(napi_env env, napi_value arg, std::stri
 
 void NapiAVSessionManager::SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context)
 {
-#ifdef CAR_FEATURE_ENABLE
     if (ret == ERR_NO_PERMISSION) {
         context->errMessage = "StartAVPlaybackForAudioZone failed : native no permission";
     } else if (ret == ERR_PERMISSION_DENIED) {
         context->errMessage = "StartAVPlaybackForAudioZone failed : native permission denied";
+    } else if (ret == ERR_CAPABILITY_NOT_SUPPORTED) {
+        context->errMessage = "Capability not supported.";
     } else {
-        context->errMessage = "StartAVPlaybackForAudioZone failed : native server exception";
+        context->errMessage = "StartAVPlaybackForAudioZone failed : Session service is not running";
+        ret = ERR_SERVICE_NOT_RUNNING;
     }
     context->status = napi_generic_failure;
     context->errCode = NapiAVSessionManager::errcode_[ret];
-#endif
 }
 
 napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_callback_info info)
 {
-#ifdef CAR_FEATURE_ENABLE
     struct ConcreteContext : public ContextBase {
         int32_t userId_;
         std::string bundleName_;
@@ -650,20 +648,21 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
     context->GetCbInfo(env, info, input);
 
     auto executor = [context]() {
+#ifdef CAR_FEATURE_ENABLE
         int32_t ret = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(
             context->userId_, context->bundleName_, context->assetId_, context->commandInfo_,
             context->extraInfo_);
         if (ret != AVSESSION_SUCCESS) {
             SetStartAVPlaybackError(ret, context);
         }
+#else
+        SetStartAVPlaybackError(ERR_CAPABILITY_NOT_SUPPORTED, context);
+#endif
     };
     auto complete = [env, context](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
     };
     return NapiAsyncWork::Enqueue(env, context, "StartAVPlaybackForAudioZone", executor, complete);
-#else
-    return nullptr;
-#endif
 }
 
 napi_value NapiAVSessionManager::GetDistributedSessionControllers(napi_env env, napi_callback_info info)

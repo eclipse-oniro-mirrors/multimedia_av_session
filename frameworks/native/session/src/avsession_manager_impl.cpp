@@ -224,7 +224,7 @@ int32_t AVSessionManagerImpl::GetSessionDescriptorsForAudioZone(int32_t userId,
     auto service = GetService();
     return service ? service->GetSessionDescriptorsForAudioZone(userId, descriptors) : ERR_SERVICE_NOT_EXIST;
 #else
-    return AVSESSION_ERROR;
+    return AVSESSION_SUCCESS;
 #endif
 }
 

@@ -94,6 +94,8 @@ std::map<int32_t, int32_t> TaiheAVSessionManager::errcode_ = {
     {OHOS::AVSession::ERR_INVALID_PARAM, 401},
     {OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_ENABLE, 6600110},
     {OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600111},
+    {OHOS::AVSession::ERR_CAPABILITY_NOT_SUPPORTED, 801},
+    {OHOS::AVSession::ERR_SERVICE_NOT_RUNNING, 6700101},
 };
 
 void TaiheAVSessionManager::ExecuteCallback(std::shared_ptr<uintptr_t> method)
@@ -955,15 +957,20 @@ void StartAVPlaybackForAudioZoneSync(int32_t userId, string_view bundleName, str
     int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(
         userId, bundleNameInner, assetIdInner, commandInfo, extraInfoStr);
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
-        std::string errMessage = "StartAVPlaybackForAudioZone failed : native server exception";
+        std::string errMessage = "StartAVPlaybackForAudioZone failed : Session service is not running";
         if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
             errMessage = "StartAVPlaybackForAudioZone failed : native no permission";
         } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
             errMessage = "StartAVPlaybackForAudioZone failed : native permission denied";
+        } else {
+            ret = OHOS::AVSession::ERR_SERVICE_NOT_RUNNING;
         }
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
         return;
     }
+#else
+    TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_CAPABILITY_NOT_SUPPORTED],
+        "Capability not supported.");
 #endif
 }
 
@@ -1504,7 +1511,6 @@ array<AVSessionDescriptor> GetSessionDescriptorsSync(SessionCategory category)
 array<AVSessionDescriptor> GetSessionDescriptorsForAudioZoneSync(int32_t userId)
 {
     std::vector<AVSessionDescriptor> emptyResult;
-#ifdef CAR_FEATURE_ENABLE
     std::vector<OHOS::AVSession::AVSessionDescriptor> descriptors;
     int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().GetSessionDescriptorsForAudioZone(
         userId, descriptors);
@@ -1521,9 +1527,6 @@ array<AVSessionDescriptor> GetSessionDescriptorsForAudioZoneSync(int32_t userId)
         return array<AVSessionDescriptor>(emptyResult);
     }
     return TaiheUtils::ToTaiheAVSessionDescriptorArray(descriptors);
-#else
-    return array<AVSessionDescriptor>(emptyResult);
-#endif
 }
 
 keyEvent::KeyEvent CreateAVKeyEventSync(int64_t nativePtr)
