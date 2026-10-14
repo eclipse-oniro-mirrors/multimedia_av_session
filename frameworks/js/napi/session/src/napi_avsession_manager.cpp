@@ -606,7 +606,6 @@ void NapiAVSessionManager::SetStartAVPlaybackError(int32_t ret, std::shared_ptr<
         context->errMessage = "StartAVPlaybackForAudioZone failed : Capability not supported";
     } else {
         context->errMessage = "StartAVPlaybackForAudioZone failed : Session service is not running";
-        ret = ERR_SERVICE_NOT_RUNNING;
     }
     context->status = napi_generic_failure;
     context->errCode = NapiAVSessionManager::errcode_[ret];
