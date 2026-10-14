@@ -283,7 +283,7 @@ int32_t AVSessionManagerImpl::StartAVPlaybackForAudioZone(int32_t userId, const 
     return service ? service->StartAVPlaybackForAudioZone(userId, bundleName, assetId, info, extraInfo)
         : ERR_SERVICE_NOT_EXIST;
 #else
-    return AVSESSION_ERROR;
+    return ERR_CAPABILITY_NOT_SUPPORTED;
 #endif
 }
 

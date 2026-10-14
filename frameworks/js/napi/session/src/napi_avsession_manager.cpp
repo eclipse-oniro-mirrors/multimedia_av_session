@@ -603,7 +603,7 @@ void NapiAVSessionManager::SetStartAVPlaybackError(int32_t ret, std::shared_ptr<
     } else if (ret == ERR_PERMISSION_DENIED) {
         context->errMessage = "StartAVPlaybackForAudioZone failed : native permission denied";
     } else if (ret == ERR_CAPABILITY_NOT_SUPPORTED) {
-        context->errMessage = "Capability not supported.";
+        context->errMessage = "StartAVPlaybackForAudioZone failed : Capability not supported";
     } else {
         context->errMessage = "StartAVPlaybackForAudioZone failed : Session service is not running";
         ret = ERR_SERVICE_NOT_RUNNING;
@@ -648,16 +648,12 @@ napi_value NapiAVSessionManager::StartAVPlaybackForAudioZone(napi_env env, napi_
     context->GetCbInfo(env, info, input);
 
     auto executor = [context]() {
-#ifdef CAR_FEATURE_ENABLE
         int32_t ret = AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(
             context->userId_, context->bundleName_, context->assetId_, context->commandInfo_,
             context->extraInfo_);
         if (ret != AVSESSION_SUCCESS) {
             SetStartAVPlaybackError(ret, context);
         }
-#else
-        SetStartAVPlaybackError(ERR_CAPABILITY_NOT_SUPPORTED, context);
-#endif
     };
     auto complete = [env, context](napi_value& output) {
         output = NapiUtils::GetUndefinedValue(env);
