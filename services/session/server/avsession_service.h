@@ -583,7 +583,7 @@ private:
 
     int32_t StartAbilityByCall(const std::string& sessionIdNeeded, std::string& sessionId);
 
-    void HandleEventHandlerCallBack();
+    void HandleEventHandlerCallBack(int32_t userId = -1);
 
     AVControlCommand GetSessionProcCommand(sptr<AVSessionItem> session);
 
@@ -636,7 +636,12 @@ private:
 
     void DoMetadataImgClean(AVMetaData& data);
 
-    void HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId = "");
+    void HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId = "",
+        int32_t userId = -1);
+
+    int32_t GetUserIdByDisplayId(int32_t displayId);
+
+    sptr<AVSessionItem> GetTopSessionForUser(int32_t userId);
 
     void HandleColdStartPlayback(const AVControlCommand &command, const std::string deviceId);
 
@@ -950,6 +955,9 @@ private:
 
     std::map<int32_t, int32_t> desktopLyricAbilityStateMap_;
     std::mutex desktopLyricAbilityStateMutex_;
+
+    std::map<int32_t, int32_t> displayIdToUserIdCache_;
+    std::mutex displayIdToUserIdMutex_;
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;

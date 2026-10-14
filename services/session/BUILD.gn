@@ -312,7 +312,10 @@ av_session_ohos_library("avsession_service") {
 
   if (av_session_enable_multi_user_audio_zone_feature) {
     defines += [ "CAR_FEATURE_ENABLE" ]
-    external_deps += [ "audio_framework:audio_policy_client" ]
+    external_deps += [
+      "audio_framework:audio_policy_client",
+      "os_account:os_account_innerkits"
+    ]
   }
 
   subsystem_name = "multimedia"
