@@ -94,6 +94,8 @@ std::map<int32_t, int32_t> TaiheAVSessionManager::errcode_ = {
     {OHOS::AVSession::ERR_INVALID_PARAM, 401},
     {OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_ENABLE, 6600110},
     {OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600111},
+    {OHOS::AVSession::ERR_CAPABILITY_NOT_SUPPORTED, 801},
+    {OHOS::AVSession::ERR_SERVICE_NOT_RUNNING, 6700101},
 };
 
 void TaiheAVSessionManager::ExecuteCallback(std::shared_ptr<uintptr_t> method)
@@ -907,6 +909,69 @@ void StartAVPlaybackInfoSync(string_view bundleName, string_view assetId, Comman
     }
 }
 
+OHOS::AVSession::CommandInfo ToNativeCommandInfo(const CommandInfo& in)
+{
+    OHOS::AVSession::CommandInfo cmdInfo;
+    std::string callerBundleName;
+    std::string callerModuleName;
+    std::string callerDeviceId;
+    std::string callerType;
+    TaiheUtils::GetOptionalString(in.callerBundleName, callerBundleName);
+    TaiheUtils::GetOptionalString(in.callerModuleName, callerModuleName);
+    TaiheUtils::GetOptionalString(in.callerDeviceId, callerDeviceId);
+    if (in.callerType.has_value()) {
+        callerType = std::string(in.callerType.value().get_value());
+    }
+    cmdInfo.SetCallerBundleName(callerBundleName);
+    cmdInfo.SetCallerModuleName(callerModuleName);
+    cmdInfo.SetCallerDeviceId(callerDeviceId);
+    cmdInfo.SetCallerType(callerType);
+    return cmdInfo;
+}
+
+void StartAVPlaybackForAudioZoneSync(int32_t userId, string_view bundleName, string_view assetId,
+    optional_view<CommandInfo> info, optional_view<string> extraInfo)
+{
+    std::string bundleNameInner;
+    if (TaiheUtils::GetString(bundleName, bundleNameInner) != OHOS::AVSession::AVSESSION_SUCCESS ||
+        bundleNameInner.empty()) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "StartAVPlaybackForAudioZone invalid bundlename");
+        return;
+    }
+    std::string assetIdInner;
+    if (TaiheUtils::GetString(assetId, assetIdInner) != OHOS::AVSession::AVSESSION_SUCCESS || assetIdInner.empty()) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "StartAVPlaybackForAudioZone invalid assetId");
+        return;
+    }
+    OHOS::AVSession::CommandInfo commandInfo;
+    if (info.has_value()) {
+        commandInfo = ToNativeCommandInfo(info.value());
+    }
+    std::string extraInfoStr;
+    if (extraInfo.has_value()) {
+        TaiheUtils::GetString(extraInfo.value(), extraInfoStr);
+    }
+    int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().StartAVPlaybackForAudioZone(
+        userId, bundleNameInner, assetIdInner, commandInfo, extraInfoStr);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "StartAVPlaybackForAudioZone failed : native no permission";
+        } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
+            errMessage = "StartAVPlaybackForAudioZone failed : native permission denied";
+        } else if (ret == OHOS::AVSession::ERR_CAPABILITY_NOT_SUPPORTED) {
+            errMessage = "StartAVPlaybackForAudioZone failed : Capability not supported";
+        } else {
+            ret = OHOS::AVSession::ERR_SERVICE_NOT_RUNNING;
+            errMessage = "StartAVPlaybackForAudioZone failed : Session service is not running";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return;
+    }
+}
+
 optional<AVCastController> GetAVCastControllerSync(string_view sessionId)
 {
     optional<AVCastController> undefinedCastController = optional<AVCastController>(std::nullopt);
@@ -1441,6 +1506,27 @@ array<AVSessionDescriptor> GetSessionDescriptorsSync(SessionCategory category)
     return TaiheUtils::ToTaiheAVSessionDescriptorArray(descriptors);
 }
 
+array<AVSessionDescriptor> GetSessionDescriptorsForAudioZoneSync(int32_t userId)
+{
+    std::vector<AVSessionDescriptor> emptyResult;
+    std::vector<OHOS::AVSession::AVSessionDescriptor> descriptors;
+    int32_t ret = OHOS::AVSession::AVSessionManager::GetInstance().GetSessionDescriptorsForAudioZone(
+        userId, descriptors);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        if (ret == OHOS::AVSession::ERR_NO_PERMISSION) {
+            errMessage = "GetSessionDescriptorsForAudioZone failed : native no permission";
+        } else if (ret == OHOS::AVSession::ERR_PERMISSION_DENIED) {
+            errMessage = "GetSessionDescriptorsForAudioZone failed : native permission denied";
+        } else {
+            errMessage = "GetSessionDescriptorsForAudioZone failed : Session service is not running";
+        }
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+        return array<AVSessionDescriptor>(emptyResult);
+    }
+    return TaiheUtils::ToTaiheAVSessionDescriptorArray(descriptors);
+}
+
 keyEvent::KeyEvent CreateAVKeyEventSync(int64_t nativePtr)
 {
     inputEvent::InputEvent undefinedInputEvent = {
@@ -1672,6 +1758,7 @@ TH_EXPORT_CPP_API_GetHistoricalAVQueueInfosSync(ANI::AVSession::GetHistoricalAVQ
 TH_EXPORT_CPP_API_CreateControllerSync(ANI::AVSession::CreateControllerSync);
 TH_EXPORT_CPP_API_StartAVPlaybackSync(ANI::AVSession::StartAVPlaybackSync);
 TH_EXPORT_CPP_API_StartAVPlaybackInfoSync(ANI::AVSession::StartAVPlaybackInfoSync);
+TH_EXPORT_CPP_API_StartAVPlaybackForAudioZoneSync(ANI::AVSession::StartAVPlaybackForAudioZoneSync);
 TH_EXPORT_CPP_API_GetAVCastControllerSync(ANI::AVSession::GetAVCastControllerSync);
 TH_EXPORT_CPP_API_StartCastingSync(ANI::AVSession::StartCastingSync);
 TH_EXPORT_CPP_API_StopCastingSync(ANI::AVSession::StopCastingSync);
@@ -1690,6 +1777,7 @@ TH_EXPORT_CPP_API_SendSystemCommonCommandSync(ANI::AVSession::SendSystemCommonCo
 TH_EXPORT_CPP_API_StartDeviceLoggingSync(ANI::AVSession::StartDeviceLoggingSync);
 TH_EXPORT_CPP_API_StopDeviceLoggingSync(ANI::AVSession::StopDeviceLoggingSync);
 TH_EXPORT_CPP_API_GetSessionDescriptorsSync(ANI::AVSession::GetSessionDescriptorsSync);
+TH_EXPORT_CPP_API_GetSessionDescriptorsForAudioZoneSync(ANI::AVSession::GetSessionDescriptorsForAudioZoneSync);
 TH_EXPORT_CPP_API_CreateAVKeyEventSync(ANI::AVSession::CreateAVKeyEventSync);
 TH_EXPORT_CPP_API_OnDistributedSessionChange(ANI::AVSession::OnDistributedSessionChange);
 TH_EXPORT_CPP_API_OnSessionCreate(ANI::AVSession::OnSessionCreate);

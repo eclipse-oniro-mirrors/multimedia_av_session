@@ -861,6 +861,13 @@ function CreateAVKeyEventSync(nativePtr: i64): KeyEvent;
 @gen_promise("getSessionDescriptors")
 function GetSessionDescriptorsSync(category: SessionCategory): Array<AVSessionDescriptor>;
 
+@gen_promise("startAVPlaybackForAudioZone")
+function StartAVPlaybackForAudioZoneSync(userId: i32, bundleName: String, assetId: String,
+    info: Optional<CommandInfo>, extraInfo: Optional<String>): void;
+
+@gen_promise("getSessionDescriptorsForAudioZone")
+function GetSessionDescriptorsForAudioZoneSync(userId: i32): Array<AVSessionDescriptor>;
+
 enum DistributedSessionType :i32 {
   TYPE_SESSION_REMOTE = 0,
   TYPE_SESSION_MIGRATE_IN = 1,

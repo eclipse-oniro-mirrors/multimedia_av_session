@@ -94,5 +94,8 @@ private:
         distributedControllerEventHandlers_;
     static const std::string DISTRIBUTED_SESSION_CHANGE_EVENT;
 };
+
+OHOS::AVSession::CommandInfo ToNativeCommandInfo(const CommandInfo& in);
+
 } // namespace ANI::AVSession
 #endif // TAIHE_AV_SESSION_MANAGER_H
