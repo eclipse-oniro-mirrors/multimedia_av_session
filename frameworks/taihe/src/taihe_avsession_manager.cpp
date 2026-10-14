@@ -907,7 +907,7 @@ void StartAVPlaybackInfoSync(string_view bundleName, string_view assetId, Comman
     }
 }
 
-static OHOS::AVSession::CommandInfo ToNativeCommandInfo(const CommandInfo& in)
+OHOS::AVSession::CommandInfo ToNativeCommandInfo(const CommandInfo& in)
 {
     OHOS::AVSession::CommandInfo cmdInfo;
     std::string callerBundleName;
