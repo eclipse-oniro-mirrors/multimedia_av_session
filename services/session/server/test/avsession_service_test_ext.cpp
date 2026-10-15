@@ -326,7 +326,7 @@ static HWTEST_F(AVSessionServiceTestExt, ClearMediaCardStateByUser001, TestSize.
 static HWTEST_F(AVSessionServiceTestExt, HandleUserEventRemovedClearsMediaCardState001, TestSize.Level0)
 {
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
-    int32_t removedUser = 1099;
+    int32_t removedUser = 100;
     g_AVSessionService->SetMediaCardOpen(true, removedUser);
     g_AVSessionService->SetCardStateChangeStopTask(true, removedUser);
     EXPECT_TRUE(g_AVSessionService->IsMediaCardOpen(removedUser));
