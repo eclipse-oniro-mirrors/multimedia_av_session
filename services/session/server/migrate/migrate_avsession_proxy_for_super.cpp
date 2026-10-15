@@ -209,7 +209,7 @@ int32_t MigrateAVSessionProxy::ProcessHistoryMediaInfoListForSuper(cJSON* jsonVa
     cJSON_ArrayForEach(mediaInfoObj, mediaInfoListObj) {
         CHECK_AND_RETURN_RET_LOG(ProcessSessionInfoForSuper(mediaInfoObj) == AVSESSION_SUCCESS,
             AVSESSION_ERROR, "ProcessSessionInfoForSuper fail");
-        SLOGI("ProcessBundleIconForSuper ret:%{public}d", ProcessBundleIconForSuper(mediaInfoObj));
+        SLOGI("dual connect icon supply ret:%{public}d", ProcessBundleIconForSuper(mediaInfoObj));
     }
     std::vector<sptr<AVControllerItem>> controllersToRelease;
     {
@@ -253,6 +253,9 @@ int32_t MigrateAVSessionProxy::ProcessControllerListForSuper(cJSON* jsonValue)
     cJSON_ArrayForEach(controllerInfoObj, controllerListObj) {
         CHECK_AND_RETURN_RET_LOG(ProcessSessionInfoForSuper(controllerInfoObj) == AVSESSION_SUCCESS,
             AVSESSION_ERROR, "ProcessSessionInfoForSuper fail");
+        if (isDualFrameMode_) {
+            SLOGI("dual connect icon supply ret:%{public}d", ProcessBundleIconForSuper(controllerInfoObj));
+        }
         int32_t retForProcessMeta = ProcessMetaDataForSuper(controllerInfoObj);
         int32_t retForProcessState = ProcessPlaybackStateForSuper(controllerInfoObj);
         int32_t retForProcessCmd = ProcessValidCommandsForSuper(controllerInfoObj);
@@ -441,12 +444,18 @@ int32_t MigrateAVSessionProxy::ProcessMetaDataForSuper(cJSON* jsonValue)
     AVMetaData metaData;
     CHECK_AND_RETURN_RET_LOG(AVSESSION_SUCCESS == sessionItem->GetAVMetaData(metaData),
         AVSESSION_ERROR, "ProcessMetaDataForSuper get metadata fail");
-    std::string assetId = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ASSET_ID);
-    metaData.SetAssetId(assetId.empty() ? DEFAULT_STRING : assetId);
     std::string title = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_TITLE);
     metaData.SetTitle(title);
     std::string artist = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ARTIST);
     metaData.SetArtist(artist);
+    std::string assetId;
+    if (isDualFrameMode_) {
+        std::string hashKey = title + "|" + artist + "|" + sessionId;
+        assetId = "SUPER_" + std::to_string(std::hash<std::string>{}(hashKey));
+    } else {
+        assetId = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ASSET_ID);
+    }
+    metaData.SetAssetId(assetId.empty() ? DEFAULT_STRING : assetId);
     std::string lyric = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_LYRIC);
     metaData.SetLyric(lyric);
     int32_t duration = SoftbusSessionUtils::GetIntFromJson(jsonValue, METADATA_DURATION);
