@@ -209,7 +209,7 @@ int32_t MigrateAVSessionProxy::ProcessHistoryMediaInfoListForSuper(cJSON* jsonVa
     cJSON_ArrayForEach(mediaInfoObj, mediaInfoListObj) {
         CHECK_AND_RETURN_RET_LOG(ProcessSessionInfoForSuper(mediaInfoObj) == AVSESSION_SUCCESS,
             AVSESSION_ERROR, "ProcessSessionInfoForSuper fail");
-        SLOGI("dual connect icon supply ret:%{public}d", ProcessBundleIconForSuper(mediaInfoObj));
+        SLOGI("ProcessBundleIconForSuper ret:%{public}d", ProcessBundleIconForSuper(mediaInfoObj));
     }
     std::vector<sptr<AVControllerItem>> controllersToRelease;
     {
@@ -328,6 +328,24 @@ int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue)
         AVSESSION_SUCCESS, "session already exist or empty:%{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str());
     std::string bundleName = SoftbusSessionUtils::GetStringFromJson(jsonValue, PACKAGE_NAME);
+
+    // Dual-frame: remove old session with same bundleName before creating new one
+    if (isDualFrameMode_) {
+        auto oldIt = std::find_if(sessionStackForMigrateIn_.begin(), sessionStackForMigrateIn_.end(),
+            [&bundleName](const auto& pair) { return pair.second->GetBundleName() == bundleName; });
+        if (oldIt != sessionStackForMigrateIn_.end()) {
+            SLOGI("remove oldId:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(oldIt->first).c_str());
+            auto ctrlIt = controllerStackForMigrateIn_.find(oldIt->first);
+            if (ctrlIt != controllerStackForMigrateIn_.end()) {
+                ctrlIt->second->RegisterMigrateAVSessionProxyCallback(nullptr);
+                ctrlIt->second->DestroyWithoutReply();
+                controllerStackForMigrateIn_.erase(ctrlIt);
+            }
+            orderedSessionRefreshList_.erase(std::remove(orderedSessionRefreshList_.begin(),
+                orderedSessionRefreshList_.end(), oldIt->first), orderedSessionRefreshList_.end());
+            sessionStackForMigrateIn_.erase(oldIt);
+        }
+    }
 
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = sessionId;
