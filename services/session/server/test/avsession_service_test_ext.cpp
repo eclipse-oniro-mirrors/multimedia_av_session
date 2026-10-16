@@ -2542,6 +2542,174 @@ static HWTEST_F(AVSessionServiceTestExt, HotSwitchReportCastDisplay001, TestSize
     g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 }
 
+/**
+ * @tc.name: GetUserIdByDisplayId001
+ * @tc.desc: Test GetUserIdByDisplayId with invalid displayId (< 0), should return defaultUserId
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, GetUserIdByDisplayId001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    int32_t displayId = -1;
+    int32_t userId = g_AVSessionService->GetUserIdByDisplayId(displayId);
+    EXPECT_EQ(userId, g_AVSessionService->defaultUserId);
+}
+
+/**
+ * @tc.name: GetUserIdByDisplayId002
+ * @tc.desc: Test GetUserIdByDisplayId with valid displayId (0), should return userId and cache it
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, GetUserIdByDisplayId002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionService->displayIdToUserIdCache_.clear();
+    int32_t displayId = 0;
+    int32_t userId = g_AVSessionService->GetUserIdByDisplayId(displayId);
+    EXPECT_GT(userId, 0);
+    auto it = g_AVSessionService->displayIdToUserIdCache_.find(displayId);
+    EXPECT_TRUE(it != g_AVSessionService->displayIdToUserIdCache_.end());
+    EXPECT_EQ(it->second, userId);
+}
+
+/**
+ * @tc.name: GetUserIdByDisplayId003
+ * @tc.desc: Test GetUserIdByDisplayId cache hit, second call should return cached value
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, GetUserIdByDisplayId003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    g_AVSessionService->displayIdToUserIdCache_.clear();
+    int32_t displayId = 1;
+    int32_t cachedUserId = 200;
+    g_AVSessionService->displayIdToUserIdCache_[displayId] = cachedUserId;
+    int32_t userId = g_AVSessionService->GetUserIdByDisplayId(displayId);
+    EXPECT_EQ(userId, cachedUserId);
+}
+
+/**
+ * @tc.name: GetTopSessionForUser001
+ * @tc.desc: Test GetTopSessionForUser with userId <= 0, should fall back to GetTopSession()
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, GetTopSessionForUser001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    sptr<AVSessionItem> result = g_AVSessionService->GetTopSessionForUser(-1);
+    sptr<AVSessionItem> expected = g_AVSessionService->GetUsersManager().GetTopSession();
+    EXPECT_EQ(result, expected);
+}
+
+/**
+ * @tc.name: GetTopSessionForUser002
+ * @tc.desc: Test GetTopSessionForUser with userId > 0 but no session for that user, should return nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, GetTopSessionForUser002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    int32_t userId = 999;
+    sptr<AVSessionItem> result = g_AVSessionService->GetTopSessionForUser(userId);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetTopSessionForUser003
+ * @tc.desc: Test GetTopSessionForUser with userId > 0 and session created, should return the session
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, GetTopSessionForUser003, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(avsessionHere != nullptr);
+    int32_t userId = 100;
+    g_AVSessionService->GetUsersManager().SetTopSession(avsessionHere, userId);
+    sptr<AVSessionItem> result = g_AVSessionService->GetTopSessionForUser(userId);
+#ifndef CAR_FEATURE_ENABLE
+    EXPECT_EQ(result, avsessionHere);
+#endif
+    g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+}
+
+/**
+ * @tc.name: HandleSystemKeyColdStartWithUserId001
+ * @tc.desc: Test HandleSystemKeyColdStart with userId parameter, verify it executes without crash
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandleSystemKeyColdStartWithUserId001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    AVControlCommand command;
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    int32_t userId = 100;
+    g_AVSessionService->HandleSystemKeyColdStart(command, "", userId);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleSystemKeyColdStartWithUserId002
+ * @tc.desc: Test HandleSystemKeyColdStart with userId > 0 and front session list populated
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, HandleSystemKeyColdStartWithUserId002, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(avsessionHere != nullptr);
+    auto sessionListForFront = std::make_shared<std::list<sptr<AVSessionItem>>>();
+    sessionListForFront->push_front(avsessionHere);
+    int32_t userId = 100;
+    g_AVSessionService->GetUsersManager().frontSessionListMapByUserId_[userId] = sessionListForFront;
+    AVControlCommand command;
+    command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
+    g_AVSessionService->HandleSystemKeyColdStart(command, "", userId);
+    g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SendSystemAVKeyEventWithDisplayId001
+ * @tc.desc: Test SendSystemAVKeyEvent with keyEvent that has no target displayId set, should use default userId
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, SendSystemAVKeyEventWithDisplayId001, TestSize.Level1)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionHere = g_AVSessionService->CreateSessionInner(
+        g_testSessionTag, AVSession::SESSION_TYPE_AUDIO, false, elementName);
+    CHECK_AND_RETURN(avsessionHere != nullptr);
+    auto keyEvent = OHOS::MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    int32_t ret = g_AVSessionService->SendSystemAVKeyEvent(*keyEvent);
+    g_AVSessionService->HandleSessionRelease(avsessionHere->GetSessionId());
+    avsessionHere->Destroy();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
 #ifdef CAR_FEATURE_ENABLE
 /**
 * @tc.name: GetDistributedSessionControllersForAudioZone001

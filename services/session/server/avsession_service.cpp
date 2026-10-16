@@ -57,6 +57,7 @@
 #include "audio_errors.h"
 #ifdef CAR_FEATURE_ENABLE
 #include "audio_zone_manager.h"
+#include "os_account_manager.h"
 #endif
 
 typedef void (*MigrateStubFunc)(std::function<void(std::string, std::string, std::string, std::string)>);
@@ -3333,7 +3334,7 @@ AVControlCommand AVSessionService::GetSessionProcCommand(sptr<AVSessionItem> ses
     return cmd;
 }
 
-void AVSessionService::HandleEventHandlerCallBack()
+void AVSessionService::HandleEventHandlerCallBack(int32_t userId)
 {
     SLOGI("handle eventHandler callback isFirstPress_=%{public}d, pressCount_:%{public}d",
         isFirstPress_.load(), pressCount_.load());
@@ -3341,7 +3342,7 @@ void AVSessionService::HandleEventHandlerCallBack()
     bool shouldColdPlay = false;
     {
         std::lock_guard lockGuard(sessionServiceLock_);
-        sptr<AVSessionItem> curTopSession = GetUsersManager().GetTopSession();
+        sptr<AVSessionItem> curTopSession = GetTopSessionForUser(userId);
         if (pressCount_.load() >= THREE_CLICK) {
             cmd.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
         } else if (pressCount_.load() == DOUBLE_CLICK) {
@@ -3370,7 +3371,7 @@ void AVSessionService::HandleEventHandlerCallBack()
         }
     }
     if (shouldColdPlay) {
-        HandleSystemKeyColdStart(cmd);
+        HandleSystemKeyColdStart(cmd, "", userId);
     }
     pressCount_.store(0);
     isFirstPress_.store(true);
@@ -3426,7 +3427,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const st
     if (keyEvent.GetKeyCode() != MMI::KeyEvent::KEYCODE_HEADSETHOOK &&
         keyEvent.GetKeyCode() != MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE) {
         std::lock_guard lockGuard(keyEventListLock_);
-        std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList();
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> keyEventList = GetCurKeyEventSessionList(userId);
         CHECK_AND_RETURN_RET_LOG(keyEventList != nullptr, AVSESSION_ERROR, "keyEventList ptr nullptr!");
         for (const auto& session : *keyEventList) {
             session->HandleMediaKeyEvent(keyEvent);
@@ -3438,8 +3439,8 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const st
         pressCount_.fetch_add(1);
         SLOGI("isFirstPress_=%{public}d", isFirstPress_.load());
         if (isFirstPress_.exchange(false)) {
-            auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this]() {
-                HandleEventHandlerCallBack();
+            auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this, userId]() {
+                HandleEventHandlerCallBack(userId);
             }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
             CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
         }
@@ -3447,8 +3448,7 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const st
     }
     {
         std::lock_guard lockGuard(sessionServiceLock_);
-        sptr<AVSessionItem> curTopSession = userId > 0 ? GetUsersManager().GetTopSession(userId) :
-            GetUsersManager().GetTopSession();
+        sptr<AVSessionItem> curTopSession = GetTopSessionForUser(userId);
         AVControlCommand cmd;
         if (curTopSession != nullptr && CheckSessionHandleKeyEvent(false, cmd, keyEvent, curTopSession, deviceId)) {
             return AVSESSION_SUCCESS;
@@ -3473,15 +3473,70 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, co
         AVControlCommand controlCommand;
         controlCommand.SetCommand(cmd);
         SLOGI("topSession get nullptr, check if cold start for cmd %{public}d forRemoteDevice", cmd);
-        HandleSystemKeyColdStart(controlCommand, deviceId);
+        HandleSystemKeyColdStart(controlCommand, deviceId, userId);
     }
     return AVSESSION_SUCCESS;
+}
+
+int32_t AVSessionService::GetUserIdByDisplayId(int32_t displayId)
+{
+    if (displayId < 0) {
+        SLOGI("GetUserIdByDisplayId invalid displayId, use default userId=%{public}d", defaultUserId);
+        return defaultUserId;
+    }
+    {
+        std::lock_guard<std::mutex> lockGuard(displayIdToUserIdMutex_);
+        auto it = displayIdToUserIdCache_.find(displayId);
+        if (it != displayIdToUserIdCache_.end()) {
+            SLOGI("GetUserIdByDisplayId cache hit displayId=%{public}d userId=%{public}d", displayId, it->second);
+            return it->second;
+        }
+    }
+    int32_t userId = defaultUserId;
+#ifdef CAR_FEATURE_ENABLE
+    auto ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(displayId, userId);
+    if (ret != 0 || userId <= 0) {
+        SLOGW("GetForegroundOsAccountLocalId failed displayId=%{public}d ret=%{public}d userId=%{public}d",
+            displayId, static_cast<int32_t>(ret), userId);
+        userId = defaultUserId;
+    }
+#endif
+    {
+        std::lock_guard<std::mutex> lockGuard(displayIdToUserIdMutex_);
+        displayIdToUserIdCache_[displayId] = userId;
+    }
+    SLOGI("GetUserIdByDisplayId displayId=%{public}d userId=%{public}d", displayId, userId);
+    return userId;
+}
+
+sptr<AVSessionItem> AVSessionService::GetTopSessionForUser(int32_t userId)
+{
+    // In car scenarios, retrieve the session list of the user's audio zone via
+    // GetSessionDescriptorsForAudioZone and take the first session as TopSession,
+    // so that key event dispatch is isolated per audio zone instead of using the
+    // global TopSession. Falls back to GetTopSession otherwise.
+#ifdef CAR_FEATURE_ENABLE
+    if (userId > 0) {
+        std::vector<AVSessionDescriptor> descriptors;
+        GetSessionDescriptorsForAudioZone(userId, descriptors);
+        if (!descriptors.empty()) {
+            SLOGI("GetTopSessionForUser by AudioZone userId=%{public}d sessionId=%{public}s",
+                userId, AVSessionUtils::GetAnonySessionId(descriptors[0].sessionId_).c_str());
+            return GetUsersManager().GetContainerFromAll().GetSessionById(descriptors[0].sessionId_);
+        }
+        SLOGI("GetTopSessionForUser AudioZone empty for userId=%{public}d", userId);
+        return nullptr;
+    }
+#endif
+    return userId > 0 ? GetUsersManager().GetTopSession(userId) : GetUsersManager().GetTopSession();
 }
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
-    int32_t ret = HandleKeyEvent(keyEvent);
+    int32_t displayId = keyEvent.GetTargetDisplayId();
+    int32_t userId = GetUserIdByDisplayId(displayId);
+    int32_t ret = HandleKeyEvent(keyEvent, "", userId);
     if (ret != AVSESSION_CONTINUE) {
         return ret;
     }
@@ -3490,7 +3545,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
         AVControlCommand controlCommand;
         controlCommand.SetCommand(cmd);
         SLOGI("topSession get nullptr, check if cold start for cmd %{public}d", cmd);
-        HandleSystemKeyColdStart(controlCommand);
+        HandleSystemKeyColdStart(controlCommand, "", userId);
     }
     return AVSESSION_SUCCESS;
 }
@@ -3515,14 +3570,15 @@ bool AVSessionService::CheckSessionEmpty() {
     return false;
 }
 
-void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId)
+void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId,
+    int32_t userId)
 {
-    SLOGI("cmd=%{public}d with no topsession", command.GetCommand());
+    SLOGI("cmd=%{public}d with no topsession userId=%{public}d", command.GetCommand(), userId);
     // try proc command for first front session
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         std::lock_guard frontLockGuard(sessionFrontLock_);
-        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront();
+        std::shared_ptr<std::list<sptr<AVSessionItem>>> sessionListForFront = GetCurSessionListForFront(userId);
         CHECK_AND_RETURN_LOG(sessionListForFront != nullptr, "sessionListForFront ptr nullptr!");
         for (const auto& session : *sessionListForFront) {
             CHECK_AND_CONTINUE(session != nullptr);
@@ -3614,7 +3670,7 @@ int32_t AVSessionService::SendSystemControlCommand(const AVControlCommand &comma
             return AVSESSION_SUCCESS;
         }
     }
-    HandleSystemKeyColdStart(command);
+    HandleSystemKeyColdStart(command, "", userId);
     return AVSESSION_SUCCESS;
 }
 
