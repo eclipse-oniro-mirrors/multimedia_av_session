@@ -605,9 +605,10 @@ int32_t MigrateAVSessionProxy::SendControlCommandMsgForSuper(int32_t commandCode
 
 static int32_t JavaStringHashCode(const std::string& str)
 {
+    constexpr int32_t javaHashMultiplier = 31;
     int32_t hash = 0;
     for (size_t i = 0; i < str.length(); i++) {
-        hash = 31 * hash + static_cast<int32_t>(static_cast<uint8_t>(str[i]));
+        hash = javaHashMultiplier * hash + static_cast<int32_t>(static_cast<uint8_t>(str[i]));
     }
     return hash;
 }

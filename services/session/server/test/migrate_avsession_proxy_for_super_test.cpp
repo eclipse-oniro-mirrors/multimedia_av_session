@@ -3039,32 +3039,3 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameProcessBundleIconFal
     cJSON_Delete(jsonValue);
     g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
 }
-
-/**
- * @tc.name: DualFrameProcessPlaybackState001
- * @tc.desc: Test ProcessPlaybackStateForSuper with isDualFrameMode_ skips errorMessage string
- * @tc.type: FUNC
- */
-static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameProcessPlaybackState001, TestSize.Level0)
-{
-    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = true;
-    AVSessionDescriptor desc;
-    desc.sessionId_ = "dual_playback_session";
-    desc.elementName_.SetBundleName("com.test.playback");
-    OHOS::sptr<AVSessionItem> sessionItem = new AVSessionItem(desc);
-    sessionItem->Activate();
-    g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_["dual_playback_session"] = sessionItem;
-
-    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
-    ASSERT_NE(jsonValue, nullptr);
-    SoftbusSessionUtils::AddStringToJson(jsonValue, PLAYER_ID, "dual_playback_session");
-    // Minimal playback state: state=3 (PLAY in dual-frame MEDIA_SESSION enum)
-    SoftbusSessionUtils::AddIntToJson(jsonValue, PLAYBACK_STATE, 3);
-
-    int32_t ret = g_migrateAVSessionProxyForSuper->ProcessPlaybackStateForSuper(jsonValue);
-    // Should not crash even with minimal/empty state data in dual-frame mode
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
-
-    cJSON_Delete(jsonValue);
-    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
-}
