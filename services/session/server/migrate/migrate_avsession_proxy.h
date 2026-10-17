@@ -134,7 +134,7 @@ private:
     int32_t ProcessHistoryMediaInfoListForSuper(cJSON* jsonValue);
     int32_t ProcessControllerListForSuper(cJSON* jsonValue);
     int32_t ProcessControllerForSuper(cJSON* jsonValue);
-    int32_t ProcessSessionInfoForSuper(cJSON* jsonValue);
+    int32_t ProcessSessionInfoForSuper(cJSON* jsonValue, bool dedupByBundleName = false);
     int32_t ProcessBundleIconForSuper(cJSON* jsonValue);
     int32_t ProcessControllerInfoForSuper(cJSON* jsonValue);
     int32_t ProcessMetaDataForSuper(cJSON* jsonValue);

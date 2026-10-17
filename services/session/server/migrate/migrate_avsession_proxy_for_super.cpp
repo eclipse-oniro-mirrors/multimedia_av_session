@@ -251,7 +251,7 @@ int32_t MigrateAVSessionProxy::ProcessControllerListForSuper(cJSON* jsonValue)
         sessionRefreshList_.clear();
     }
     cJSON_ArrayForEach(controllerInfoObj, controllerListObj) {
-        CHECK_AND_RETURN_RET_LOG(ProcessSessionInfoForSuper(controllerInfoObj) == AVSESSION_SUCCESS,
+        CHECK_AND_RETURN_RET_LOG(ProcessSessionInfoForSuper(controllerInfoObj, true) == AVSESSION_SUCCESS,
             AVSESSION_ERROR, "ProcessSessionInfoForSuper fail");
         if (isDualFrameMode_) {
             SLOGI("dual connect icon supply ret:%{public}d", ProcessBundleIconForSuper(controllerInfoObj));
@@ -317,7 +317,7 @@ int32_t MigrateAVSessionProxy::ProcessControllerForSuper(cJSON* jsonValue)
     return AVSESSION_SUCCESS;
 }
 
-int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue)
+int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue, bool dedupByBundleName)
 {
     std::lock_guard lockGuard(migrateProxySessionIdLock_);
     std::string sessionId = SoftbusSessionUtils::GetStringFromJson(jsonValue, PLAYER_ID);
@@ -330,7 +330,7 @@ int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue)
     std::string bundleName = SoftbusSessionUtils::GetStringFromJson(jsonValue, PACKAGE_NAME);
 
     // Dual-frame: remove old session with same bundleName before creating new one
-    if (isDualFrameMode_) {
+    if (isDualFrameMode_ && dedupByBundleName) {
         auto oldIt = std::find_if(sessionStackForMigrateIn_.begin(), sessionStackForMigrateIn_.end(),
             [&bundleName](const auto& pair) { return pair.second->GetBundleName() == bundleName; });
         if (oldIt != sessionStackForMigrateIn_.end()) {
@@ -603,6 +603,15 @@ int32_t MigrateAVSessionProxy::SendControlCommandMsgForSuper(int32_t commandCode
     return AVSESSION_SUCCESS;
 }
 
+static int32_t JavaStringHashCode(const std::string& str)
+{
+    int32_t hash = 0;
+    for (size_t i = 0; i < str.length(); i++) {
+        hash = 31 * hash + static_cast<int32_t>(static_cast<uint8_t>(str[i]));
+    }
+    return hash;
+}
+
 int32_t MigrateAVSessionProxy::ColdStartForSuper(AAFwk::WantParams& extras)
 {
     CHECK_AND_RETURN_RET_LOG(extras.HasParam(MIGRATE_BUNDLE_NAME), AVSESSION_ERROR, "extras not have bundleName key");
@@ -610,11 +619,11 @@ int32_t MigrateAVSessionProxy::ColdStartForSuper(AAFwk::WantParams& extras)
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "extras have no bundleName value");
     std::string bundleName = AAFwk::String::Unbox(stringValue);
+    std::string playerId = isDualFrameMode_ ? std::to_string(JavaStringHashCode(bundleName)) : bundleName;
     cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_RET_LOG(controlMsg != nullptr, AVSESSION_ERROR, "get controlMsg fail");
-    if (!SoftbusSessionUtils::AddStringToJson(controlMsg, PLAYER_ID, bundleName)) {
-        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", PLAYER_ID,
-            bundleName.c_str());
+    if (!SoftbusSessionUtils::AddStringToJson(controlMsg, PLAYER_ID, playerId)) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", PLAYER_ID, playerId.c_str());
         cJSON_Delete(controlMsg);
         return AVSESSION_ERROR;
     }
