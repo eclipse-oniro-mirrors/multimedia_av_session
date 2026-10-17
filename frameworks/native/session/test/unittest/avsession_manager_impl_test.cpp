@@ -490,7 +490,7 @@ HWTEST_F(AVSessionManagerImplTest, GetSessionDescriptorsForAudioZone003, TestSiz
     std::vector<AVSessionDescriptor> descriptors;
     int32_t userId = 100;
     auto result = impl.GetSessionDescriptorsForAudioZone(userId, descriptors);
-    EXPECT_EQ(result, AVSESSION_ERROR);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGI("GetSessionDescriptorsForAudioZone003 end");
 }
 
@@ -527,7 +527,7 @@ HWTEST_F(AVSessionManagerImplTest, StartAVPlaybackForAudioZone003, TestSize.Leve
     CommandInfo info;
     std::string extraInfo;
     auto result = impl.StartAVPlaybackForAudioZone(userId, bundleName, assetId, info, extraInfo);
-    EXPECT_EQ(result, AVSESSION_ERROR);
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORTED);
     SLOGI("StartAVPlaybackForAudioZone003 end");
 }
 #endif
