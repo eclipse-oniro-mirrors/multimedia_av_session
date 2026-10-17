@@ -360,7 +360,7 @@ int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue, bool
     sessionItem->SetPid(DEFAULT_NUM);
     sessionItem->SetUid(DEFAULT_NUM);
     sessionItem->Activate();
-    sessionItem->SetSupportCommand(defaultValidCommands);
+    sessionItem->SetSupportCommand(isDualFrameMode_ ? defaultValidCommandsDual: defaultValidCommands);
     std::weak_ptr<MigrateAVSessionProxy> migrateProxyWeak(shared_from_this());
     std::shared_ptr<AVSessionObserver> callback = std::make_shared<AVSessionObserver>(sessionId, migrateProxyWeak);
     sessionItem->RegisterAVSessionCallback(callback);

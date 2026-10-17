@@ -187,6 +187,12 @@ private:
         AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE,
         AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE
     };
+    std::vector<int32_t> defaultValidCommandsDual {
+        AVControlCommand::SESSION_CMD_PLAY,
+        AVControlCommand::SESSION_CMD_PAUSE,
+        AVControlCommand::SESSION_CMD_PLAY_NEXT,
+        AVControlCommand::SESSION_CMD_PLAY_PREVIOUS
+    };
 };
 
 class AVSessionObserver : public AVSessionCallback {
