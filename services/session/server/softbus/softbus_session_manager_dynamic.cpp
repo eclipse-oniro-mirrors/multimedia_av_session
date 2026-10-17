@@ -130,11 +130,19 @@ int32_t SoftbusSessionManagerDynamic::Bind(const std::string &peerNetworkId, con
         .dataType = TransDataType::DATA_TYPE_BYTES
     };
     int32_t socket = ::Socket(info);
+    CHECK_AND_RETURN_RET_LOG(socket > 0, AVSESSION_ERROR, "socket error");
     QosTV serverQos[] = {
         {.qos = QOS_TYPE_MIN_BW,        .value = 64 * 1024 }, //最小带宽64k
         {.qos = QOS_TYPE_MAX_LATENCY,   .value = 19000 }, //最大建链时延19s
         {.qos = QOS_TYPE_MIN_LATENCY,   .value = 500 }, //最小建链时延0.5s
     };
+    const char *MEDIA_SESSION_GROUP_ID = "DISTRIBUTED_MEDIA_SESSION_DATA_GROUP";
+    int32_t optRet = ::SetSocketOpt(socket,
+                                    OptLevel::OPT_LEVEL_SOFTBUS,
+                                    OptType::OPT_TYPE_GROUP_ID,
+                                    (void*)MEDIA_SESSION_GROUP_ID,
+                                    std::string(MEDIA_SESSION_GROUP_ID).size());
+    CHECK_AND_RETURN_RET_LOG(optRet == 0, AVSESSION_ERROR, "SetSocketOpt error");
     int32_t ret = ::Bind(socket, serverQos, qosCount, &iSessionListener);
     if (ret == 0) {
         SLOGI("service success ,socket[%{public}d]", socket);
