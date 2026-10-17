@@ -1750,6 +1750,13 @@ enum AVSessionErrorCode {
      * @since 13
      */
     ERR_CODE_CAST_CONTROL_DRM_PROVIDE_KEY_RESPONSE_ERROR = 6616100,
+
+    /**
+     * The session service is not running.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 26.0.1 dynamic&static
+     */
+    ERR_CODE_SERVICE_NOT_RUNNING = 6700101,
 };
 
 /**

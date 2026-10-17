@@ -413,6 +413,8 @@ static napi_value ExportAVSessionErrorCode(napi_env env)
         AVSessionErrorCode::ERR_CODE_DESKTOP_LYRIC_NOT_ENABLED);
     (void)SetNamedProperty(env, result, "ERR_CODE_DESKTOP_LYRIC_NOT_SUPPORTED",
         AVSessionErrorCode::ERR_CODE_DESKTOP_LYRIC_NOT_SUPPORTED);
+    (void)SetNamedProperty(env, result, "ERR_CODE_SERVICE_NOT_RUNNING",
+        AVSessionErrorCode::ERR_CODE_SERVICE_NOT_RUNNING);
     AVSessionControlErrorCode(env, result);
     AVSessionIOErrorCode(env, result);
     AVSessionParsingErrorCode(env, result);
