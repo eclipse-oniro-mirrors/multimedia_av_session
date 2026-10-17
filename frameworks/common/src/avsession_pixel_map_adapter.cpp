@@ -17,6 +17,7 @@
 #include "avsession_log.h"
 #include "securec.h"
 #include "pixel_astc.h"
+#include "image_source.h"
 
 using namespace OHOS::Media;
 
@@ -30,6 +31,8 @@ namespace {
     constexpr uint8_t DATA_BYTE_SIZE = 4;
     constexpr uint8_t OFFSET_BYTE = 8;
     constexpr uint8_t DEFAULT_IMAGE_INFO_SIZE = 48;
+    constexpr int32_t DEFAULT_IMAGE_SIZE = 256;
+    std::shared_ptr<Media::PixelMap> g_defaultMediaImage = nullptr;
 }
 
 int32_t AVSessionPixelMapAdapter::originalPixelMapBytes_ = 0;
@@ -313,5 +316,78 @@ std::shared_ptr<AVSessionPixelMap> AVSessionPixelMapAdapter::ConvertToInnerWithM
     innerPixelMap->SetOriginalSize(width, height);
     free(dataAddr);
     return innerPixelMap;
+}
+
+std::string AVSessionPixelMapAdapter::GetDefaultImageStr()
+{
+    std::string imgStr = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQuMDAwMDAwIiBoZWlnaHQ9IjI0LjAwMDAwMCIgd"
+    "mlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5r"
+    "PSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KCTxkZXNjPgoJCQlDcmVhdGVkIHdpdGggUGl4c28uCgk8L2Rlc2M+Cgk8ZGV"
+    "mcy8+Cgk8ZyBvcGFjaXR5PSIwLjMwMDAwMCI+CgkJPGNpcmNsZSBpZD0i6JKZ54mIIiByPSIxMi4wMDAwMDAiIHRyYW5zZm9ybT0ibW"
+    "F0cml4KDAgMSAtMSAwIDEyIDEyKSIgZmlsbD0iI0ZGRkZGRiIgZmlsbC1vcGFjaXR5PSIxLjAwMDAwMCIvPgoJCTxjaXJjbGUgaWQ9I"
+    "uiSmeeJiCIgcj0iMTEuNTAwMDAwIiB0cmFuc2Zvcm09Im1hdHJpeCgwIDEgLTEgMCAxMiAxMikiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ry"
+    "b2tlLW9wYWNpdHk9IjAiIHN0cm9rZS13aWR0aD0iMS4wMDAwMDAiLz4KCTwvZz4KCTxtYXNrIGlkPSJtYXNrXzE1M183OTU5IiBmaWx"
+    "sPSJ3aGl0ZSI+CgkJPHBhdGggaWQ9IuW9oueKtue7k+WQiCIgZD0iTTE3LjY0MzYgNi42NTM5OUMxNy42NTM1IDYuNzE2OCAxNy42Nj"
+    "AxIDYuNzgwMDkgMTcuNjYzNCA2Ljg0MzUxTDE3LjY2NTkgNi45Mzg4NEwxNy42NjY2IDE0LjE2NjZDMTcuNjY2NiAxNC4xNzk3IDE3L"
+    "jY2NjIgMTQuMTkyNiAxNy42NjU1IDE0LjIwNTVDMTcuNjYxNiAxNC44NjgzIDE3LjY1NDYgMTUuMTgzNyAxNy41MTE0IDE1LjcxNDlD"
+    "MTcuMzY1OCAxNi4yNTQzIDE3LjA4MDkgMTYuNzYyMSAxNi41MTMyIDE3LjA4OTRDMTUuNDggMTcuNjg0OCAxNC4yMjggMTcuNDUwOSA"
+    "xMy43MTY3IDE2LjU2NjlDMTMuMjA1NCAxNS42ODI5IDEzLjYyODUgMTQuNDgzNSAxNC42NjE2IDEzLjg4ODFDMTUuMDg2MSAxMy42ND"
+    "M0IDE1LjYyNTcgMTMuNDI3MSAxNS45OTg5IDEzLjA4NTVDMTYuMjIzIDEyLjg4MDQgMTYuMzMyMiAxMi41ODU1IDE2LjMzMjIgMTEuO"
+    "TE4OEMxNi4zMzIyIDExLjkwMDQgMTYuMzMyNSAxMS44ODI0IDE2LjMzMyAxMS44NjUxTDE2LjMzMjcgOC41MDk4OUw5LjY2NjU2IDku"
+    "Njg2MjhMOS42NjY1NiAxNS4xMzEyQzkuNjY3MyAxNS4yNzA4IDkuNjY3MjQgMTUuNDExMyA5LjY2NjU2IDE1LjU1MDNMOS42NjY1NiA"
+    "xNS42NjY3QzkuNjY2NTYgMTUuNjc4MyA5LjY2NjI2IDE1LjY4OTggOS42NjU2NSAxNS43MDE0QzkuNjYxNSAxNi4zMDk2IDkuNjQ5Mz"
+    "UgMTYuNjIwNCA5LjUxMjA4IDE3LjEyOTVDOS4zNjY1OCAxNy42Njg4IDkuMDgxNiAxOC4xNzY3IDguNTEzOTIgMTguNTAzOUM3LjQ4M"
+    "DcxIDE5LjA5OTQgNi4yMjg3IDE4Ljg2NTQgNS43MTc0MSAxNy45ODE0QzUuMjA2MTIgMTcuMDk3NCA1LjYyOTIxIDE1Ljg5OCA2LjY2"
+    "MjM1IDE1LjMwMjZDNy4wODY3OSAxNS4wNTggNy42MjY0IDE0Ljg0MTcgNy45OTk2MyAxNC41QzguMjIzNjkgMTQuMjk0OSA4LjMzMjk"
+    "1IDE0IDguMzMyOTUgMTMuMzMzM0M4LjMzMjk1IDEzLjMyMjcgOC4zMzMwNyAxMy4zMTIyIDguMzMzMjUgMTMuMzAxOUw4LjMzMzI1ID"
+    "cuODMwNzVDOC4zMzMyNSA2Ljk2NzUzIDguOTM0MTQgNi4yMjcwNSA5Ljc2NjYgNi4wNDE1Nkw5Ljg4MTUzIDYuMDE5NzFMMTUuNTQ3N"
+    "SA1LjEyNzk5QzE2LjU0NzcgNC45NzA1MiAxNy40ODYyIDUuNjUzNzUgMTcuNjQzNiA2LjY1Mzk5WiIgY2xpcC1ydWxlPSJldmVub2Rk"
+    "IiBmaWxsPSIiIGZpbGwtb3BhY2l0eT0iMS4wMDAwMDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPgoJPC9tYXNrPgoJPHBhdGggaWQ9IuW"
+    "9oueKtue7k+WQiCIgZD0iTTE3LjY0MzYgNi42NTM5OUMxNy42NTM1IDYuNzE2OCAxNy42NjAxIDYuNzgwMDkgMTcuNjYzNCA2Ljg0Mz"
+    "UxTDE3LjY2NTkgNi45Mzg4NEwxNy42NjY2IDE0LjE2NjZDMTcuNjY2NiAxNC4xNzk3IDE3LjY2NjIgMTQuMTkyNiAxNy42NjU1IDE0L"
+    "jIwNTVDMTcuNjYxNiAxNC44NjgzIDE3LjY1NDYgMTUuMTgzNyAxNy41MTE0IDE1LjcxNDlDMTcuMzY1OCAxNi4yNTQzIDE3LjA4MDkg"
+    "MTYuNzYyMSAxNi41MTMyIDE3LjA4OTRDMTUuNDggMTcuNjg0OCAxNC4yMjggMTcuNDUwOSAxMy43MTY3IDE2LjU2NjlDMTMuMjA1NCA"
+    "xNS42ODI5IDEzLjYyODUgMTQuNDgzNSAxNC42NjE2IDEzLjg4ODFDMTUuMDg2MSAxMy42NDM0IDE1LjYyNTcgMTMuNDI3MSAxNS45OT"
+    "g5IDEzLjA4NTVDMTYuMjIzIDEyLjg4MDQgMTYuMzMyMiAxMi41ODU1IDE2LjMzMjIgMTEuOTE4OEMxNi4zMzIyIDExLjkwMDQgMTYuM"
+    "zMyNSAxMS44ODI0IDE2LjMzMyAxMS44NjUxTDE2LjMzMjcgOC41MDk4OUw5LjY2NjU2IDkuNjg2MjhMOS42NjY1NiAxNS4xMzEyQzku"
+    "NjY3MyAxNS4yNzA4IDkuNjY3MjQgMTUuNDExMyA5LjY2NjU2IDE1LjU1MDNMOS42NjY1NiAxNS42NjY3QzkuNjY2NTYgMTUuNjc4MyA"
+    "5LjY2NjI2IDE1LjY4OTggOS42NjU2NSAxNS43MDE0QzkuNjYxNSAxNi4zMDk2IDkuNjQ5MzUgMTYuNjIwNCA5LjUxMjA4IDE3LjEyOT"
+    "VDOS4zNjY1OCAxNy42Njg4IDkuMDgxNiAxOC4xNzY3IDguNTEzOTIgMTguNTAzOUM3LjQ4MDcxIDE5LjA5OTQgNi4yMjg3IDE4Ljg2N"
+    "TQgNS43MTc0MSAxNy45ODE0QzUuMjA2MTIgMTcuMDk3NCA1LjYyOTIxIDE1Ljg5OCA2LjY2MjM1IDE1LjMwMjZDNy4wODY3OSAxNS4w"
+    "NTggNy42MjY0IDE0Ljg0MTcgNy45OTk2MyAxNC41QzguMjIzNjkgMTQuMjk0OSA4LjMzMjk1IDE0IDguMzMyOTUgMTMuMzMzM0M4LjM"
+    "zMjk1IDEzLjMyMjcgOC4zMzMwNyAxMy4zMTIyIDguMzMzMjUgMTMuMzAxOUw4LjMzMzI1IDcuODMwNzVDOC4zMzMyNSA2Ljk2NzUzID"
+    "guOTM0MTQgNi4yMjcwNSA5Ljc2NjYgNi4wNDE1Nkw5Ljg4MTUzIDYuMDE5NzFMMTUuNTQ3NSA1LjEyNzk5QzE2LjU0NzcgNC45NzA1M"
+    "iAxNy40ODYyIDUuNjUzNzUgMTcuNjQzNiA2LjY1Mzk5WiIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjMDAwMDAwIiBmaWxsLW9w"
+    "YWNpdHk9IjAuNDAwMDAwIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIG1hc2s9InVybCgjbWFza18xNTNfNzk1OSkiLz4KCTxwYXRoIGlkPSL"
+    "lvaLnirbnu5PlkIgiIGQ9IiIgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjMDAwMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDAwMDAwIi"
+    "BmaWxsLXJ1bGU9ImV2ZW5vZGQiLz4KPC9zdmc+Cg==";
+    return imgStr;
+}
+
+std::shared_ptr<Media::PixelMap> AVSessionPixelMapAdapter::ConvertDefaultImage()
+{
+    if (g_defaultMediaImage) {
+        return g_defaultMediaImage;
+    }
+
+    std::string image = GetDefaultImageStr();
+    uint32_t errorCode = 0;
+    SourceOptions opts;
+    auto imageSource = ImageSource::CreateImageSource(reinterpret_cast<const uint8_t*>(image.c_str()),
+        image.length(), opts, errorCode);
+    if (imageSource != nullptr) {
+        DecodeOptions dOpts;
+        dOpts.allocatorType = Media::AllocatorType::HEAP_ALLOC;
+        dOpts.desiredSize.width = DEFAULT_IMAGE_SIZE;
+        dOpts.desiredSize.height = DEFAULT_IMAGE_SIZE;
+        g_defaultMediaImage = imageSource->CreatePixelMap(dOpts, errorCode);
+        if (g_defaultMediaImage != nullptr) {
+            SLOGI("ConvertDefaultImage CreatePixelMap success");
+            return g_defaultMediaImage;
+        }
+    } else {
+        SLOGE("ConvertDefaultImage createImageSource fail");
+    }
+    return nullptr;
 }
 } // namespace OHOS::AVSession

@@ -30,6 +30,7 @@
 #include "base64_utils.h"
 #include "pixel_map.h"
 #include "image_packer.h"
+#include "bundle_status_adapter.h"
 
 namespace OHOS::AVSession {
 
@@ -250,8 +251,11 @@ int32_t MigrateAVSessionProxy::ProcessControllerListForSuper(cJSON* jsonValue)
         sessionRefreshList_.clear();
     }
     cJSON_ArrayForEach(controllerInfoObj, controllerListObj) {
-        CHECK_AND_RETURN_RET_LOG(ProcessSessionInfoForSuper(controllerInfoObj) == AVSESSION_SUCCESS,
+        CHECK_AND_RETURN_RET_LOG(ProcessSessionInfoForSuper(controllerInfoObj, true) == AVSESSION_SUCCESS,
             AVSESSION_ERROR, "ProcessSessionInfoForSuper fail");
+        if (isDualFrameMode_) {
+            SLOGI("dual connect icon supply ret:%{public}d", ProcessBundleIconForSuper(controllerInfoObj));
+        }
         int32_t retForProcessMeta = ProcessMetaDataForSuper(controllerInfoObj);
         int32_t retForProcessState = ProcessPlaybackStateForSuper(controllerInfoObj);
         int32_t retForProcessCmd = ProcessValidCommandsForSuper(controllerInfoObj);
@@ -313,7 +317,7 @@ int32_t MigrateAVSessionProxy::ProcessControllerForSuper(cJSON* jsonValue)
     return AVSESSION_SUCCESS;
 }
 
-int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue)
+int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue, bool dedupByBundleName)
 {
     std::lock_guard lockGuard(migrateProxySessionIdLock_);
     std::string sessionId = SoftbusSessionUtils::GetStringFromJson(jsonValue, PLAYER_ID);
@@ -324,6 +328,24 @@ int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue)
         AVSESSION_SUCCESS, "session already exist or empty:%{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str());
     std::string bundleName = SoftbusSessionUtils::GetStringFromJson(jsonValue, PACKAGE_NAME);
+
+    // Dual-frame: remove old session with same bundleName before creating new one
+    if (isDualFrameMode_ && dedupByBundleName) {
+        auto oldIt = std::find_if(sessionStackForMigrateIn_.begin(), sessionStackForMigrateIn_.end(),
+            [&bundleName](const auto& pair) { return pair.second->GetBundleName() == bundleName; });
+        if (oldIt != sessionStackForMigrateIn_.end()) {
+            SLOGI("remove oldId:%{public}s", SoftbusSessionUtils::AnonymizeDeviceId(oldIt->first).c_str());
+            auto ctrlIt = controllerStackForMigrateIn_.find(oldIt->first);
+            if (ctrlIt != controllerStackForMigrateIn_.end()) {
+                ctrlIt->second->RegisterMigrateAVSessionProxyCallback(nullptr);
+                ctrlIt->second->DestroyWithoutReply();
+                controllerStackForMigrateIn_.erase(ctrlIt);
+            }
+            orderedSessionRefreshList_.erase(std::remove(orderedSessionRefreshList_.begin(),
+                orderedSessionRefreshList_.end(), oldIt->first), orderedSessionRefreshList_.end());
+            sessionStackForMigrateIn_.erase(oldIt);
+        }
+    }
 
     AVSessionDescriptor descriptor;
     descriptor.sessionId_ = sessionId;
@@ -338,7 +360,7 @@ int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue)
     sessionItem->SetPid(DEFAULT_NUM);
     sessionItem->SetUid(DEFAULT_NUM);
     sessionItem->Activate();
-    sessionItem->SetSupportCommand(defaultValidCommands);
+    sessionItem->SetSupportCommand(isDualFrameMode_ ? defaultValidCommandsDual: defaultValidCommands);
     std::weak_ptr<MigrateAVSessionProxy> migrateProxyWeak(shared_from_this());
     std::shared_ptr<AVSessionObserver> callback = std::make_shared<AVSessionObserver>(sessionId, migrateProxyWeak);
     sessionItem->RegisterAVSessionCallback(callback);
@@ -361,25 +383,46 @@ int32_t MigrateAVSessionProxy::ProcessBundleIconForSuper(cJSON* jsonValue)
     sptr<AVSessionItem> sessionItem = iter->second;
     CHECK_AND_RETURN_RET_LOG(sessionItem != nullptr, AVSESSION_ERROR, "ProcessBundleIconForSuper avsession nullptr");
 
-    std::string bundleIconStr = SoftbusSessionUtils::GetStringFromJson(jsonValue, BUNDLE_ICON);
-    CHECK_AND_RETURN_RET_LOG(!bundleIconStr.empty(), AVSESSION_ERROR, "no bundleIcon");
     AVMetaData metaData;
     CHECK_AND_RETURN_RET_LOG(AVSESSION_SUCCESS == sessionItem->GetAVMetaData(metaData),
         AVSESSION_ERROR, "ProcessBundleIcon get metadata fail");
     metaData.SetAssetId(metaData.GetAssetId().empty() ? DEFAULT_STRING : metaData.GetAssetId());
 
-    std::vector<uint8_t> imgVec = Base64Utils::Base64Decode(bundleIconStr);
-    CHECK_AND_RETURN_RET_LOG(imgVec.size() > 0, AVSESSION_ERROR, "ProcessBundleIcon but empty");
     std::shared_ptr<AVSessionPixelMap> bundleIconPixelMap = nullptr;
-    CHECK_AND_RETURN_RET_LOG(CompressFromJPEG(imgVec, bundleIconPixelMap) == AVSESSION_SUCCESS, AVSESSION_ERROR,
-        "CompressFromJPEG fail:%{public}zu", imgVec.size());
-    CHECK_AND_RETURN_RET_LOG(bundleIconPixelMap != nullptr, AVSESSION_ERROR, "ProcessBundleIcon but nullptr");
 
+    // 1. Try to get bundle icon from remote (phone)
+    std::string bundleIconStr = SoftbusSessionUtils::GetStringFromJson(jsonValue, BUNDLE_ICON);
+    if (!bundleIconStr.empty()) {
+        std::vector<uint8_t> imgVec = Base64Utils::Base64Decode(bundleIconStr);
+        if (imgVec.size() > 0) {
+            CompressFromJPEG(imgVec, bundleIconPixelMap);
+        }
+    }
+
+    // 2. Try to get bundle icon from local bundle manager
+    if (bundleIconPixelMap == nullptr) {
+        std::string bundleName = sessionItem->GetBundleName();
+        std::string iconStr;
+        if (BundleStatusAdapter::GetInstance().GetBundleIcon(bundleName, "", iconStr) && !iconStr.empty()) {
+            std::vector<uint8_t> imgVec(iconStr.begin(), iconStr.end());
+            CompressFromJPEG(imgVec, bundleIconPixelMap);
+        }
+    }
+
+    // 3. Use default image as fallback
+    if (bundleIconPixelMap == nullptr) {
+        auto defaultPixelMap = AVSessionPixelMapAdapter::ConvertDefaultImage();
+        if (defaultPixelMap != nullptr) {
+            bundleIconPixelMap = AVSessionPixelMapAdapter::ConvertToInnerWithLimitedSize(defaultPixelMap);
+        }
+    }
+
+    CHECK_AND_RETURN_RET_LOG(bundleIconPixelMap != nullptr, AVSESSION_ERROR, "ProcessBundleIcon all methods failed");
     metaData.SetBundleIcon(bundleIconPixelMap);
     metaData.SetWriter(sessionItem->GetBundleName());
     sessionItem->SetAVMetaData(metaData);
     SLOGI("ProcessBundleImg set img size:%{public}d for bundleName:%{public}s",
-        static_cast<int>(imgVec.size()), sessionItem->GetBundleName().c_str());
+        static_cast<int>(bundleIconPixelMap->GetInnerImgBuffer().size()), sessionItem->GetBundleName().c_str());
     return AVSESSION_SUCCESS;
 }
 
@@ -419,12 +462,18 @@ int32_t MigrateAVSessionProxy::ProcessMetaDataForSuper(cJSON* jsonValue)
     AVMetaData metaData;
     CHECK_AND_RETURN_RET_LOG(AVSESSION_SUCCESS == sessionItem->GetAVMetaData(metaData),
         AVSESSION_ERROR, "ProcessMetaDataForSuper get metadata fail");
-    std::string assetId = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ASSET_ID);
-    metaData.SetAssetId(assetId.empty() ? DEFAULT_STRING : assetId);
     std::string title = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_TITLE);
     metaData.SetTitle(title);
     std::string artist = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ARTIST);
     metaData.SetArtist(artist);
+    std::string assetId;
+    if (isDualFrameMode_) {
+        std::string hashKey = title + "|" + artist + "|" + sessionId;
+        assetId = "SUPER_" + std::to_string(std::hash<std::string>{}(hashKey));
+    } else {
+        assetId = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ASSET_ID);
+    }
+    metaData.SetAssetId(assetId.empty() ? DEFAULT_STRING : assetId);
     std::string lyric = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_LYRIC);
     metaData.SetLyric(lyric);
     int32_t duration = SoftbusSessionUtils::GetIntFromJson(jsonValue, METADATA_DURATION);
@@ -511,25 +560,8 @@ int32_t MigrateAVSessionProxy::ProcessPlaybackStateForSuper(cJSON* jsonValue)
     AVPlaybackState playbackState;
     CHECK_AND_RETURN_RET_LOG(AVSESSION_SUCCESS == sessionItem->GetAVPlaybackState(playbackState), AVSESSION_ERROR,
         "ProcessPlaybackStateForSuper GetAVPlaybackState fail");
-    playbackState.SetState(ConvertStateFromDoubleToSingle(parcel.ReadInt32()));
-    AVPlaybackState::Position position;
-    position.elapsedTime_ = parcel.ReadInt64();
-    playbackState.SetSpeed(parcel.ReadFloat());
-    position.updateTime_ = parcel.ReadInt64();
-    playbackState.SetPosition(position);
-    playbackState.SetBufferedTime(parcel.ReadInt64());
-    int64_t actions = parcel.ReadInt64();
-    SLOGD("actions read:%{public}d", static_cast<int32_t>(actions));
-    int32_t checkNum = parcel.ReadInt32();
-    SLOGD("checkNum read:%{public}d", static_cast<int32_t>(checkNum));
-    playbackState.SetActiveItemId(parcel.ReadInt64());
-    checkNum = parcel.ReadInt32();
-    SLOGD("checkNum read:%{public}d", static_cast<int32_t>(checkNum));
-    std::string checkStr = parcel.ReadCString();
-    checkNum = parcel.ReadInt32();
-    SLOGD("checkNum again read:%{public}d", static_cast<int32_t>(checkNum));
-    playbackState.SetFavorite(parcel.ReadBool());
-    playbackState.SetLoopMode(parcel.ReadInt32());
+    CHECK_AND_RETURN_RET_LOG(ParsePlaybackStateFromParcel(parcel, playbackState) == AVSESSION_SUCCESS,
+        AVSESSION_ERROR, "ParsePlaybackStateFromParcel fail");
     CHECK_AND_RETURN_RET_LOG(sessionItem->SetAVPlaybackState(playbackState) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "SetAVPlaybackState fail:%{public}d.", playbackState.GetState());
     SLOGI("ProcessPlaybackStateForSuper set state:%{public}d|%{public}d|%{public}d",
@@ -571,6 +603,16 @@ int32_t MigrateAVSessionProxy::SendControlCommandMsgForSuper(int32_t commandCode
     return AVSESSION_SUCCESS;
 }
 
+static int32_t JavaStringHashCode(const std::string& str)
+{
+    constexpr int32_t javaHashMultiplier = 31;
+    int32_t hash = 0;
+    for (size_t i = 0; i < str.length(); i++) {
+        hash = javaHashMultiplier * hash + static_cast<int32_t>(static_cast<uint8_t>(str[i]));
+    }
+    return hash;
+}
+
 int32_t MigrateAVSessionProxy::ColdStartForSuper(AAFwk::WantParams& extras)
 {
     CHECK_AND_RETURN_RET_LOG(extras.HasParam(MIGRATE_BUNDLE_NAME), AVSESSION_ERROR, "extras not have bundleName key");
@@ -578,11 +620,11 @@ int32_t MigrateAVSessionProxy::ColdStartForSuper(AAFwk::WantParams& extras)
     AAFwk::IString* stringValue = AAFwk::IString::Query(value);
     CHECK_AND_RETURN_RET_LOG(stringValue != nullptr, AVSESSION_ERROR, "extras have no bundleName value");
     std::string bundleName = AAFwk::String::Unbox(stringValue);
+    std::string playerId = isDualFrameMode_ ? std::to_string(JavaStringHashCode(bundleName)) : bundleName;
     cJSON* controlMsg = SoftbusSessionUtils::GetNewCJSONObject();
     CHECK_AND_RETURN_RET_LOG(controlMsg != nullptr, AVSESSION_ERROR, "get controlMsg fail");
-    if (!SoftbusSessionUtils::AddStringToJson(controlMsg, PLAYER_ID, bundleName)) {
-        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", PLAYER_ID,
-            bundleName.c_str());
+    if (!SoftbusSessionUtils::AddStringToJson(controlMsg, PLAYER_ID, playerId)) {
+        SLOGE("AddStringToJson with key:%{public}s|value:%{public}s fail", PLAYER_ID, playerId.c_str());
         cJSON_Delete(controlMsg);
         return AVSESSION_ERROR;
     }
@@ -634,6 +676,31 @@ int32_t MigrateAVSessionProxy::ConvertStateFromDoubleToSingle(int32_t state)
             break;
     }
     return state;
+}
+
+int32_t MigrateAVSessionProxy::ParsePlaybackStateFromParcel(Parcel& parcel, AVPlaybackState& playbackState)
+{
+    playbackState.SetState(ConvertStateFromDoubleToSingle(parcel.ReadInt32()));
+    AVPlaybackState::Position position;
+    position.elapsedTime_ = parcel.ReadInt64();
+    playbackState.SetSpeed(parcel.ReadFloat());
+    position.updateTime_ = parcel.ReadInt64();
+    playbackState.SetPosition(position);
+    playbackState.SetBufferedTime(parcel.ReadInt64());
+    parcel.ReadInt64(); // Field 6: actions
+    parcel.ReadInt32(); // Field 7: mCustomActions (writeTypedList): -1=null, 0=empty
+    playbackState.SetActiveItemId(parcel.ReadInt64()); // Field 8: mActiveItemId
+    int32_t errorType = parcel.ReadInt32(); // Field 9: mErrorMessage (TextUtils.writeToParcel): 0=null, 1=String
+    if (errorType == 1 && !isDualFrameMode_) {
+        parcel.ReadCString();
+    }
+    // Dual-frame: mErrorMessage is always null, skip is not needed.
+    parcel.ReadInt32(); // Field 10: mExtras (writeBundle): -1=null
+    if (!isDualFrameMode_) {
+        playbackState.SetFavorite(parcel.ReadBool());
+        playbackState.SetLoopMode(parcel.ReadInt32());
+    }
+    return AVSESSION_SUCCESS;
 }
 
 void MigrateAVSessionProxy::NotifyControllerGone(pid_t pid)

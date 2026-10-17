@@ -20,6 +20,7 @@
 
 #ifdef DSOFTBUS_ENABLE
 #include "socket.h"
+#include "inner_socket.h"
 #endif
 
 #include "softbus_session_manager.h"

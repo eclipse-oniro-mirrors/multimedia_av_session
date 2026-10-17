@@ -52,6 +52,11 @@ void MigrateAVSessionProxy::SetUserId(int32_t userId)
     userId_ = userId;
 }
 
+bool MigrateAVSessionProxy::UseSendMessageForConnect() const
+{
+    return isDualFrameMode_;
+}
+
 void MigrateAVSessionProxy::OnConnectServer(const std::string &deviceId)
 {
     SLOGI("MigrateAVSessionProxy OnConnectServer:%{public}s.",

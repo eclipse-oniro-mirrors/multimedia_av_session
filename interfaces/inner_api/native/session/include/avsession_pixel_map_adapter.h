@@ -36,6 +36,8 @@ public:
         ConvertToInnerWithMinSize(const std::shared_ptr<Media::PixelMap>& pixelMap);
     static bool CopyPixMapToDst(Media::PixelMap &source, void* dstPixels, uint32_t bufferSize);
     static void CleanAVSessionPixelMap(std::shared_ptr<AVSessionPixelMap>& innerPixelMap);
+    static std::string GetDefaultImageStr();
+    static std::shared_ptr<Media::PixelMap> ConvertDefaultImage();
     static int32_t originalPixelMapBytes_;
     static std::mutex pixelMapLock_;
 };

@@ -44,6 +44,8 @@ public:
     void OnDisconnectServer(const std::string &deviceId) override;
     int32_t GetCharacteristic() override;
     void OnBytesReceived(const std::string &deviceId, const std::string &data) override;
+    bool UseSendMessageForConnect() const override;
+    bool isDualFrameMode_ = false;
 
     void HandlePlay();
     void HandlePause();
@@ -132,7 +134,7 @@ private:
     int32_t ProcessHistoryMediaInfoListForSuper(cJSON* jsonValue);
     int32_t ProcessControllerListForSuper(cJSON* jsonValue);
     int32_t ProcessControllerForSuper(cJSON* jsonValue);
-    int32_t ProcessSessionInfoForSuper(cJSON* jsonValue);
+    int32_t ProcessSessionInfoForSuper(cJSON* jsonValue, bool dedupByBundleName = false);
     int32_t ProcessBundleIconForSuper(cJSON* jsonValue);
     int32_t ProcessControllerInfoForSuper(cJSON* jsonValue);
     int32_t ProcessMetaDataForSuper(cJSON* jsonValue);
@@ -144,6 +146,7 @@ private:
     int32_t CompressFromJPEG(const std::vector<uint8_t> &inputData,
         std::shared_ptr<AVSessionPixelMap>& outputData, bool isMediaImage = false);
     int32_t ConvertStateFromDoubleToSingle(int32_t state);
+    int32_t ParsePlaybackStateFromParcel(Parcel& parcel, AVPlaybackState& playbackState);
     int32_t CleanMetadataForMigrateSession(sptr<AVSessionItem> sessionItem);
 
     int32_t userId_ = 0;
@@ -183,6 +186,12 @@ private:
         AVControlCommand::SESSION_CMD_SEEK,
         AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE,
         AVControlCommand::SESSION_CMD_SET_TARGET_LOOP_MODE
+    };
+    std::vector<int32_t> defaultValidCommandsDual {
+        AVControlCommand::SESSION_CMD_PLAY,
+        AVControlCommand::SESSION_CMD_PAUSE,
+        AVControlCommand::SESSION_CMD_PLAY_NEXT,
+        AVControlCommand::SESSION_CMD_PLAY_PREVIOUS
     };
 };
 

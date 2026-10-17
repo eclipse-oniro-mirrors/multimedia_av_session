@@ -39,6 +39,7 @@ public:
 
     static constexpr const char* migrateSceneNext = "MigrateWithNext";
     static constexpr const char* migrateSceneSuperLauncher = "SuperLauncher";
+    static constexpr const char* migrateSceneSuperLauncherDual = "SuperLauncher-Dual";
     static constexpr const int32_t MSG_HEAD_MODE = 100;
     static constexpr const int32_t MSG_HEAD_MODE_FOR_NEXT = 101;
 

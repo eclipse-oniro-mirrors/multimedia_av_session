@@ -32,8 +32,13 @@ void SoftbusSessionProxy::ConnectServer(int socketId)
     SLOGI("ConnectServer for device:%{public}s.",
         SoftbusSessionUtils::AnonymizeDeviceId(networkId).c_str());
     OnConnectSession(socketId);
-    char message[] = {GetCharacteristic(), MESSAGE_CODE_CONNECT_SERVER, '\0'};
-    SendByteForNext(socketId, std::string(message));
+    if (UseSendMessageForConnect()) {
+        char message[] = {MESSAGE_CODE_CONNECT_SERVER, GetCharacteristic()};
+        SendMessage(socketId, std::string(message, sizeof(message)));
+    } else {
+        char message[] = {GetCharacteristic(), MESSAGE_CODE_CONNECT_SERVER};
+        SendByteForNext(socketId, std::string(message, sizeof(message)));
+    }
     OnConnectServer(networkId);
 }
 

@@ -288,7 +288,7 @@ public:
 
     void SucceedSuperLauncher(std::string deviceId, std::string extraInfo);
 
-    int32_t ProcessSuperLauncherConnect(std::string deviceId, std::string extraInfo);
+    int32_t ProcessSuperLauncherConnect(std::string deviceId, std::string extraInfo, bool isDualFrame = false);
 
     int32_t ProcessSuperLauncherDisconnect(std::string deviceId, std::string extraInfo);
 

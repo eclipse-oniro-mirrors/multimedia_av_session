@@ -45,7 +45,9 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         if (state == "IDLE") {
             ProcessSuperLauncherDisconnect(deviceId, extraInfo);
         } else if (state == "CONNECT_SUCC") {
-            ProcessSuperLauncherConnect(deviceId, extraInfo);
+            bool isDualFrame = serviceName == MigrateAVSessionManager::migrateSceneSuperLauncherDual;
+            SLOGI("ProcessSuperLauncherConnect isDualFrame:%{public}d", static_cast<int>(isDualFrame));
+            ProcessSuperLauncherConnect(deviceId, extraInfo, isDualFrame);
         }
     } else if (isSuperLauncher) {
         SLOGW("SuperLauncher unknown roleType, ignore");
@@ -1285,10 +1287,10 @@ void AVSessionService::PublishMediaControlState(int32_t mediaPlayState)
     PublishEvent(mediaPlayState);
 }
 
-int32_t AVSessionService::ProcessSuperLauncherConnect(std::string deviceId, std::string extraInfo)
+int32_t AVSessionService::ProcessSuperLauncherConnect(std::string deviceId, std::string extraInfo, bool isDualFrame)
 {
-    SLOGI("ProcessSuperLauncherConnect with:%{public}s|%{public}s",
-        AVSessionUtils::GetAnonySessionId(deviceId).c_str(), AVSessionUtils::GetAnonySessionId(extraInfo).c_str());
+    SLOGI("ProcessSuperLauncherConnect with:%{public}s|isDualFrame:%{public}d",
+        AVSessionUtils::GetAnonySessionId(deviceId).c_str(), static_cast<int>(isDualFrame));
     std::string networkId = JsonUtils::GetStringParamFromJsonString(extraInfo, "mDeviceId");
     int32_t mUserId = JsonUtils::GetIntParamFromJsonString(extraInfo, "mUserId");
     SLOGD("recv mUserId:%{public}d", mUserId);
@@ -1300,10 +1302,12 @@ int32_t AVSessionService::ProcessSuperLauncherConnect(std::string deviceId, std:
         std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
             std::make_shared<MigrateAVSessionProxy>(this, MigrateAVSessionManager::MSG_HEAD_MODE, localDevId);
         migrateAVSessionProxy->SetUserId(mUserId);
+        migrateAVSessionProxy->isDualFrameMode_ = isDualFrame;
         MigrateAVSessionManager::GetInstance().CreateRemoteSessionProxy(networkId,
             MigrateAVSessionManager::migrateSceneSuperLauncher, migrateAVSessionProxy);
         migrateAVSessionProxyMap_.insert({networkId, std::static_pointer_cast<SoftbusSession>(migrateAVSessionProxy)});
-        SLOGI("new proxy success:%{public}d", static_cast<int>(migrateAVSessionProxyMap_.size()));
+        SLOGI("new proxy success:%{public}d|isDualFrame:%{public}d",
+            static_cast<int>(migrateAVSessionProxyMap_.size()), static_cast<int>(isDualFrame));
     } else {
         SLOGE("proxy already alive:%{public}d", static_cast<int>(migrateAVSessionProxyMap_.size()));
     }

@@ -28,6 +28,9 @@ public:
     int32_t GetCharacteristic() override;
     void OnBytesReceived(const std::string &deviceId, const std::string &data) override;
     ~SoftbusSessionProxy() override;
+
+protected:
+    virtual bool UseSendMessageForConnect() const = 0;
 };
 
 } // namespace OHOS::AVSession
