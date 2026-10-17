@@ -2888,3 +2888,183 @@ static HWTEST_F(MigrateAVSessionProxyForSuperTest, RapidSessionCreationAndDestru
     
     EXPECT_TRUE(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.empty());
 }
+
+/**
+ * @tc.name: DualFrameColdStartForSuper001
+ * @tc.desc: Test ColdStartForSuper with isDualFrameMode_ true uses hash as playerId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameColdStartForSuper001, TestSize.Level0)
+{
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = true;
+    AAFwk::WantParams extras;
+    auto stringValue = AAFwk::String::Box("com.test.bundle");
+    extras.SetParam(MIGRATE_BUNDLE_NAME, stringValue);
+    int32_t ret = g_migrateAVSessionProxyForSuper->ColdStartForSuper(extras);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
+}
+
+/**
+ * @tc.name: DualFrameProcessSessionInfoDedup001
+ * @tc.desc: Test ProcessSessionInfoForSuper dedup removes old session with same bundleName
+ * @tc.type: FUNC
+ */
+static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameProcessSessionInfoDedup001, TestSize.Level0)
+{
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = true;
+    // Create old session with bundleName "com.test.dedup"
+    AVSessionDescriptor oldDesc;
+    oldDesc.sessionId_ = "old_dedup_session";
+    oldDesc.elementName_.SetBundleName("com.test.dedup");
+    OHOS::sptr<AVSessionItem> oldSession = new AVSessionItem(oldDesc);
+    g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_["old_dedup_session"] = oldSession;
+
+    // Create cJSON with new sessionId but same bundleName
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddStringToJson(jsonValue, PLAYER_ID, "new_dedup_session");
+    SoftbusSessionUtils::AddStringToJson(jsonValue, PACKAGE_NAME, "com.test.dedup");
+
+    int32_t ret = g_migrateAVSessionProxyForSuper->ProcessSessionInfoForSuper(jsonValue, true);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    // Old session should be removed
+    EXPECT_EQ(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.count("old_dedup_session"), 0);
+    // New session should exist
+    EXPECT_NE(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.find("new_dedup_session"),
+        g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.end());
+
+    cJSON_Delete(jsonValue);
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
+}
+
+/**
+ * @tc.name: DualFrameProcessSessionInfoDedup002
+ * @tc.desc: Test ProcessSessionInfoForSuper without dedup keeps both sessions
+ * @tc.type: FUNC
+ */
+static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameProcessSessionInfoDedup002, TestSize.Level0)
+{
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = true;
+    AVSessionDescriptor oldDesc;
+    oldDesc.sessionId_ = "old_keep_session";
+    oldDesc.elementName_.SetBundleName("com.test.keep");
+    OHOS::sptr<AVSessionItem> oldSession = new AVSessionItem(oldDesc);
+    g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_["old_keep_session"] = oldSession;
+
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddStringToJson(jsonValue, PLAYER_ID, "new_keep_session");
+    SoftbusSessionUtils::AddStringToJson(jsonValue, PACKAGE_NAME, "com.test.keep");
+
+    int32_t ret = g_migrateAVSessionProxyForSuper->ProcessSessionInfoForSuper(jsonValue, false);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    // Without dedup, old session should still exist
+    EXPECT_NE(g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.find("old_keep_session"),
+        g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_.end());
+
+    cJSON_Delete(jsonValue);
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
+}
+
+/**
+ * @tc.name: DualFrameUseSendMessageForConnect001
+ * @tc.desc: Test UseSendMessageForConnect returns isDualFrameMode_
+ * @tc.type: FUNC
+ */
+static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameUseSendMessageForConnect001, TestSize.Level0)
+{
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
+    EXPECT_FALSE(g_migrateAVSessionProxyForSuper->UseSendMessageForConnect());
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = true;
+    EXPECT_TRUE(g_migrateAVSessionProxyForSuper->UseSendMessageForConnect());
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
+}
+
+/**
+ * @tc.name: DualFrameProcessMetaDataAssetId001
+ * @tc.desc: Test ProcessMetaDataForSuper with isDualFrameMode_ generates SUPER_ prefix assetId
+ * @tc.type: FUNC
+ */
+static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameProcessMetaDataAssetId001, TestSize.Level0)
+{
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = true;
+    // Create a session first
+    AVSessionDescriptor desc;
+    desc.sessionId_ = "dual_meta_session";
+    desc.elementName_.SetBundleName("com.test.meta");
+    OHOS::sptr<AVSessionItem> sessionItem = new AVSessionItem(desc);
+    sessionItem->Activate();
+    g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_["dual_meta_session"] = sessionItem;
+
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddStringToJson(jsonValue, PLAYER_ID, "dual_meta_session");
+    SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_TITLE, "TestTitle");
+    SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ARTIST, "TestArtist");
+
+    int32_t ret = g_migrateAVSessionProxyForSuper->ProcessMetaDataForSuper(jsonValue);
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    AVMetaData metaData;
+    sessionItem->GetAVMetaData(metaData);
+    EXPECT_TRUE(metaData.GetAssetId().find("SUPER_") == 0);
+
+    cJSON_Delete(jsonValue);
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
+}
+
+/**
+ * @tc.name: DualFrameProcessBundleIconFallback001
+ * @tc.desc: Test ProcessBundleIconForSuper falls back to default when no icon data
+ * @tc.type: FUNC
+ */
+static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameProcessBundleIconFallback001, TestSize.Level0)
+{
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = true;
+    AVSessionDescriptor desc;
+    desc.sessionId_ = "dual_icon_session";
+    desc.elementName_.SetBundleName("com.test.noversion");
+    OHOS::sptr<AVSessionItem> sessionItem = new AVSessionItem(desc);
+    g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_["dual_icon_session"] = sessionItem;
+
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddStringToJson(jsonValue, PLAYER_ID, "dual_icon_session");
+
+    int32_t ret = g_migrateAVSessionProxyForSuper->ProcessBundleIconForSuper(jsonValue);
+    // Should succeed with default image fallback even without BUNDLE_ICON in JSON
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    cJSON_Delete(jsonValue);
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
+}
+
+/**
+ * @tc.name: DualFrameProcessPlaybackState001
+ * @tc.desc: Test ProcessPlaybackStateForSuper with isDualFrameMode_ skips errorMessage string
+ * @tc.type: FUNC
+ */
+static HWTEST_F(MigrateAVSessionProxyForSuperTest, DualFrameProcessPlaybackState001, TestSize.Level0)
+{
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = true;
+    AVSessionDescriptor desc;
+    desc.sessionId_ = "dual_playback_session";
+    desc.elementName_.SetBundleName("com.test.playback");
+    OHOS::sptr<AVSessionItem> sessionItem = new AVSessionItem(desc);
+    sessionItem->Activate();
+    g_migrateAVSessionProxyForSuper->sessionStackForMigrateIn_["dual_playback_session"] = sessionItem;
+
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddStringToJson(jsonValue, PLAYER_ID, "dual_playback_session");
+    // Minimal playback state: state=3 (PLAY in dual-frame MEDIA_SESSION enum)
+    SoftbusSessionUtils::AddIntToJson(jsonValue, PLAYBACK_STATE, 3);
+
+    int32_t ret = g_migrateAVSessionProxyForSuper->ProcessPlaybackStateForSuper(jsonValue);
+    // Should not crash even with minimal/empty state data in dual-frame mode
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+
+    cJSON_Delete(jsonValue);
+    g_migrateAVSessionProxyForSuper->isDualFrameMode_ = false;
+}
