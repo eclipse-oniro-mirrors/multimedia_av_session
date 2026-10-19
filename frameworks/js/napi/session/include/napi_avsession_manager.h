@@ -156,8 +156,6 @@ private:
     static napi_value GetSessionDescriptorsForAudioZone(napi_env env, napi_callback_info info);
     static napi_value StartAVPlaybackForAudioZone(napi_env env, napi_callback_info info);
 
-    static void RegisterAudioZoneFunctions(napi_env env, napi_value exports);
-
     static void FillCommandInfo(napi_env env, napi_value arg, CommandInfo& commandInfo);
 
     static void FillExtraInfo(napi_env env, napi_value arg, std::string& extraInfo);
