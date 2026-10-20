@@ -108,6 +108,8 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_FUNCTION("getHistoricalSessionDescriptors", GetHistoricalSessionDescriptors),
         DECLARE_NAPI_STATIC_FUNCTION("getHistoricalAVQueueInfos", GetHistoricalAVQueueInfos),
         DECLARE_NAPI_STATIC_FUNCTION("startAVPlayback", StartAVPlayback),
+        DECLARE_NAPI_STATIC_FUNCTION("startAVPlaybackForAudioZone", StartAVPlaybackForAudioZone),
+        DECLARE_NAPI_STATIC_FUNCTION("getSessionDescriptorsForAudioZone", GetSessionDescriptorsForAudioZone),
         DECLARE_NAPI_STATIC_FUNCTION("createController", CreateController),
         DECLARE_NAPI_STATIC_FUNCTION("getAVCastController", GetAVCastController),
         DECLARE_NAPI_STATIC_FUNCTION("castAudio", CastAudio),
@@ -144,26 +146,7 @@ napi_value NapiAVSessionManager::Init(napi_env env, napi_value exports)
         SLOGE("define manager properties failed");
         return NapiUtils::GetUndefinedValue(env);
     }
-#ifdef CAR_FEATURE_ENABLE
-    RegisterAudioZoneFunctions(env, exports);
-#endif
     return exports;
-}
-
-void NapiAVSessionManager::RegisterAudioZoneFunctions(napi_env env, napi_value exports)
-{
-#ifdef CAR_FEATURE_ENABLE
-    napi_property_descriptor descriptors[] = {
-        DECLARE_NAPI_STATIC_FUNCTION("startAVPlaybackForAudioZone", StartAVPlaybackForAudioZone),
-        DECLARE_NAPI_STATIC_FUNCTION("getSessionDescriptorsForAudioZone", GetSessionDescriptorsForAudioZone),
-    };
-
-    napi_status status = napi_define_properties(env, exports, sizeof(descriptors) / sizeof(napi_property_descriptor),
-                                                descriptors);
-    if (status != napi_ok) {
-        SLOGE("define audio zone properties failed");
-    }
-#endif
 }
 
 void processMsg(std::shared_ptr<ContextBase> context, int32_t ret)
@@ -553,7 +536,6 @@ napi_value NapiAVSessionManager::StartAVPlayback(napi_env env, napi_callback_inf
 
 void NapiAVSessionManager::FillCommandInfo(napi_env env, napi_value arg, CommandInfo& commandInfo)
 {
-#ifdef CAR_FEATURE_ENABLE
     std::string callerDeviceId;
     std::string callerBundleName;
     std::string callerModuleName;
@@ -571,12 +553,10 @@ void NapiAVSessionManager::FillCommandInfo(napi_env env, napi_value arg, Command
     if (NapiUtils::GetNamedProperty(env, arg, "callerType", callerType) == napi_ok) {
         commandInfo.SetCallerType(callerType);
     }
-#endif
 }
 
 void NapiAVSessionManager::FillExtraInfo(napi_env env, napi_value arg, std::string& extraInfo)
 {
-#ifdef CAR_FEATURE_ENABLE
     std::string controlCommand;
     int32_t isPlayList = 1;
     NapiUtils::GetNamedProperty(env, arg, "controlCommand", controlCommand);
@@ -593,7 +573,6 @@ void NapiAVSessionManager::FillExtraInfo(napi_env env, napi_value arg, std::stri
         cJSON_free(jsonStr);
     }
     cJSON_Delete(extraInfoJson);
-#endif
 }
 
 void NapiAVSessionManager::SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context)

@@ -199,6 +199,7 @@ void InsightAdapter::SetStartPlayInfoToParam(const StartPlayInfo startPlayInfo, 
     startPlayInfoParam.SetParam("startUserId", OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetUserId())));
     std::string controlCommand = startPlayInfo.GetControlCommand();
     startPlayInfoParam.SetParam("controlCommand", OHOS::AAFwk::String::Box(controlCommand));
+    startPlayInfoParam.SetParam("isPlayList", OHOS::AAFwk::String::Box(std::to_string(startPlayInfo.GetIsPlayList())));
 #endif
     if (wantParam == nullptr) {
         SLOGE("wantParam is null when SetStartPlayInfoToParam");
