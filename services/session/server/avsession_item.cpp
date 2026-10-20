@@ -2234,7 +2234,6 @@ void AVSessionItem::DealLocalState(const int32_t castState, const OutputDeviceIn
                 {
                     std::lock_guard lockGuard(castLock_);
                     multiDeviceState_ = MultiDeviceState::DEFAULT;
-                    CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
                 }
                 AVRouter::GetInstance().SetCastingDeviceName(outputDeviceInfo.deviceInfos_[0].deviceName_);
                 SetOutputDevice(localDeviceInfo);
