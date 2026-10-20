@@ -333,6 +333,7 @@ public:
         EventFwk::CommonEventData data;
         data.SetWant(want);
         EventFwk::CommonEventPublishInfo publishInfo;
+        publishInfo.SetSubscriberPermissions({"ohos.permission.MANAGE_MEDIA_RESOURCES"});
         int32_t ret = EventFwk::CommonEventManager::NewPublishCommonEvent(data, publishInfo);
         SLOGI("PublishCommonEventWithDeviceName: %{public}s return %{public}d", action.c_str(), ret);
         return ret;

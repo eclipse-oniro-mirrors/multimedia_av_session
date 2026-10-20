@@ -1084,6 +1084,7 @@ int32_t AVSessionItem::SetBackgroundPlayMode(int32_t mode)
 {
     SLOGI("SetBackgroundPlayMode %{public}d", mode);
     playMode_.store(mode);
+    std::lock_guard bgPlayModeChangeLockGuard(bgPlayModeChangeCallbackLock_);
     if (serviceCallbackForBgPlayModeChange_) {
         serviceCallbackForBgPlayModeChange_(GetSessionId(), mode);
     }
@@ -3510,6 +3511,7 @@ void AVSessionItem::SetServiceCallbackForBgPlayModeChange(
     const std::function<void(std::string, int32_t)>& callback)
 {
     SLOGI("SetServiceCallbackForBgPlayModeChange in");
+    std::lock_guard bgPlayModeChangeLockGuard(bgPlayModeChangeCallbackLock_);
     serviceCallbackForBgPlayModeChange_ = callback;
 }
 

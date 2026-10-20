@@ -34,10 +34,11 @@ public:
 
     static bool CheckSystemPermissionByUid(int uid);
 
-private:
     static constexpr const char* MANAGE_MEDIA_RESOURCES = "ohos.permission.MANAGE_MEDIA_RESOURCES";
     static constexpr const char* MANAGE_MEDIA_RESOURCES_FOR_PUBLIC =
         "ohos.permission.MANAGE_MEDIA_RESOURCES_FOR_PUBLIC";
+
+private:
     static constexpr int UID_TRANSFORM_DIVISOR = 200000;
 
     bool IsSystemApp();

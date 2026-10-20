@@ -658,6 +658,8 @@ private:
 
     std::shared_mutex coldStartCallbackLock_;
 
+    std::shared_mutex bgPlayModeChangeCallbackLock_;
+
     std::recursive_mutex launchAbilityLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE

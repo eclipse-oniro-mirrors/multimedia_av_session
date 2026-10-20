@@ -603,11 +603,11 @@ bool AVSessionService::SubscribeCommonEvent()
 
     CHECK_AND_RETURN_RET_LOG(customSubscribers_.empty(), true, "already have customSubscribers");
     const std::map<std::string, std::string> customizedEventPermissionMap = {
-        { "usual.event.CAST_SESSION_CREATE", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
-        { "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
-        { "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
-        { "usual.event.MEDIA_NTF_SWITCH", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
-        { "HYBRID_MODE_SWITCH", "ohos.permission.MANAGE_MEDIA_RESOURCES" },
+        { "usual.event.CAST_SESSION_CREATE", PermissionChecker::MANAGE_MEDIA_RESOURCES },
+        { "EVENT_REMOVE_MEDIACONTROLLER_LIVEVIEW", PermissionChecker::MANAGE_MEDIA_RESOURCES },
+        { "EVENT_AVSESSION_MEDIA_CAPSULE_STATE_CHANGE", PermissionChecker::MANAGE_MEDIA_RESOURCES },
+        { "usual.event.MEDIA_NTF_SWITCH", PermissionChecker::MANAGE_MEDIA_RESOURCES },
+        { "HYBRID_MODE_SWITCH", PermissionChecker::MANAGE_MEDIA_RESOURCES },
     };
     for (const auto &[event, permission] : customizedEventPermissionMap) {
         EventFwk::MatchingSkills customSkills;
@@ -4379,7 +4379,8 @@ int32_t AVSessionService::CastAudioInner(const std::vector<AudioStandard::AudioD
     std::string sourceDevice;
     CHECK_AND_RETURN_RET_LOG(GetLocalNetworkId(sourceDevice) == AVSESSION_SUCCESS, AVSESSION_ERROR,
                              "GetLocalNetworkId failed");
-    SLOGI("networkId_: %{public}.6s, role %{public}d", sinkAudioDescriptors[0].networkId_.c_str(),
+    SLOGI("networkId_: %{public}s, role %{public}d",
+          AVSessionUtils::GetAnonyNetworkId(sinkAudioDescriptors[0].networkId_).c_str(),
           static_cast<int32_t>(sinkAudioDescriptors[0].deviceRole_));
     if (IsLocalDevice(sinkAudioDescriptors[0].networkId_)) {
         int32_t ret = SelectOutputDevice(session->GetUid(), sinkAudioDescriptors[0]);
@@ -4392,7 +4393,7 @@ int32_t AVSessionService::CastAudioInner(const std::vector<AudioStandard::AudioD
         std::string sinkSessionInfo;
         auto service = GetService(sinkAudioDescriptor.networkId_);
         CHECK_AND_RETURN_RET_LOG(service != nullptr, AVSESSION_ERROR, "GetService %{public}s failed",
-                                 sinkAudioDescriptor.networkId_.c_str());
+                                 AVSessionUtils::GetAnonyNetworkId(sinkAudioDescriptor.networkId_).c_str());
         int32_t ret = service->ProcessCastAudioCommand(RemoteServiceCommand::COMMAND_CAST_AUDIO, sourceSessionInfo,
                                                        sinkSessionInfo);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ProcessCastAudioCommand failed");
@@ -4430,14 +4431,15 @@ int32_t AVSessionService::CancelCastAudioInner(const std::vector<AudioStandard::
     CHECK_AND_RETURN_RET_LOG(!sinkDevices.empty(), AVSESSION_ERROR, "sinkDevices is empty");
     for (const auto& sinkDevice : sinkDevices) {
         if (IsLocalDevice(sinkDevice.networkId_)) {
-            SLOGI("cancel Local device %{public}.6s", sinkDevice.networkId_.c_str());
+            SLOGI("cancel Local device %{public}s", AVSessionUtils::GetAnonyNetworkId(sinkDevice.networkId_).c_str());
             continue;
         }
         std::string sinkSessionInfo;
-        SLOGI("cancel sinkDevices sinkDevice.networkId_ is %{public}.6s", sinkDevice.networkId_.c_str());
+        SLOGI("cancel sinkDevices sinkDevice.networkId_ is %{public}s",
+              AVSessionUtils::GetAnonyNetworkId(sinkDevice.networkId_).c_str());
         auto service = GetService(sinkDevice.networkId_);
         CHECK_AND_RETURN_RET_LOG(service != nullptr, AVSESSION_ERROR, "GetService %{public}s failed",
-                                 sinkDevice.networkId_.c_str());
+                                 AVSessionUtils::GetAnonyNetworkId(sinkDevice.networkId_).c_str());
         int32_t ret = service->ProcessCastAudioCommand(RemoteServiceCommand::COMMAND_CANCEL_CAST_AUDIO,
                                                        sourceSessionInfo, sinkSessionInfo);
         CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "ProcessCastAudioCommand failed");

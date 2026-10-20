@@ -239,6 +239,8 @@ bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAV
         SLOGE("RegisterCastSessionStateListener failed for the listener is nullptr");
         return false;
     }
+    int32_t stashState = -1;
+    std::string stashDeviceId;
     {
         std::lock_guard lockGuard(mutex_);
         if (find(castSessionStateListenerList_.begin(), castSessionStateListenerList_.end(), listener)
@@ -249,15 +251,17 @@ bool HwCastProviderSession::RegisterCastSessionStateListener(std::shared_ptr<IAV
         castSessionStateListenerList_.emplace_back(listener);
         SLOGI("register listener finished with size %{public}d and check stash state %{public}d",
             static_cast<int>(castSessionStateListenerList_.size()), static_cast<int32_t>(stashDeviceState_));
+        stashState = stashDeviceState_;
+        stashDeviceId = stashDeviceId_;
     }
-    if (stashDeviceState_ > 0) {
+    if (stashState > 0) {
         DeviceInfo deviceInfo;
-        deviceInfo.deviceId_ = stashDeviceId_;
+        deviceInfo.deviceId_ = stashDeviceId;
         deviceInfo.deviceName_ = "RemoteCast";
         deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
         if (listener != nullptr) {
             SLOGI("retry trigger the OnCastStateChange for registered listeners");
-            listener->OnCastStateChange(static_cast<int>(stashDeviceState_), deviceInfo, noReasonCode);
+            listener->OnCastStateChange(static_cast<int>(stashState), deviceInfo, noReasonCode);
         }
     }
     return true;
@@ -305,9 +309,12 @@ void HwCastProviderSession::OnDeviceState(const CastEngine::DeviceStateInfo &sta
     int32_t deviceState = static_cast<int32_t>(stateInfo.deviceState);
     std::vector<std::shared_ptr<IAVCastSessionStateListener>> tempListenerList;
     SLOGI("OnDeviceState from cast %{public}d", static_cast<int>(deviceState));
-    if (stashDeviceState_ == deviceState) {
-        SLOGI("duplicate devicestate");
-        return;
+    {
+        std::lock_guard lockGuard(mutex_);
+        if (stashDeviceState_ == deviceState) {
+            SLOGI("duplicate devicestate");
+            return;
+        }
     }
 
     CastRemoteDevice castRemoteDevice;
@@ -409,7 +416,8 @@ void HwCastProviderSession::OnDeviceStateChange(const CastEngine::DeviceStateInf
 
 void HwCastProviderSession::OnEvent(const CastEngine::EventId &eventId, const std::string &jsonParam)
 {
-    SLOGI("OnEvent from cast with eventId %{public}d, %{public}s", eventId, jsonParam.c_str());
+    SLOGI("OnEvent from cast with eventId %{public}d, paramLen %{public}d",
+        eventId, static_cast<int32_t>(jsonParam.length()));
     int32_t castEventId = static_cast<int>(eventId);
     if (castEventId >= eventIdStart && castEventId <= eventIdEnd) {
         std::lock_guard lockGuard(mutex_);

@@ -881,6 +881,7 @@ int32_t AVControllerItem::SetDesktopLyricVisible(bool isVisible)
         AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "session not exist", false),
         "session not exist");
     std::string callingBundleName = BundleStatusAdapter::GetInstance().GetBundleNameFromUid(GetCallingUid());
+    CHECK_AND_RETURN_RET_LOG(callingBundleName != "", AVSESSION_ERROR, "GetBundleNameFromUid failed");
     SLOGI("controller call");
     return session_->SetDesktopLyricVisibleInner(isVisible, callingBundleName);
 }

@@ -293,6 +293,7 @@ int32_t AVRouterImpl::OnCastSessionCreated(const int32_t castId, const int32_t u
     }
     {
         std::lock_guard lockGuard(servicePtrLock_);
+        CHECK_AND_RETURN_RET_LOG(servicePtr_ != nullptr, ERR_SERVICE_NOT_EXIST, "servicePtr_ is nullptr");
         servicePtr_->CreateSessionByCast(castHandle, userId);
     }
     return AVSESSION_SUCCESS;
@@ -413,6 +414,7 @@ int64_t AVRouterImpl::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     SLOGI("AVRouterImpl start cast process");
     castServiceNameStatePair_ = serviceNameStatePair;
     int64_t castHandle = -1;
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, AVSESSION_ERROR, "deviceInfos is empty");
     std::shared_ptr<AVCastProvider> provider =
         GetCastProvider(outputDeviceInfo.deviceInfos_[0].providerId_);
     CHECK_AND_RETURN_RET_LOG(provider != nullptr, castHandle, "provider is nullptr");
@@ -457,6 +459,7 @@ int32_t AVRouterImpl::AddDevice(const int32_t castId, const OutputDeviceInfo& ou
 {
     SLOGI("AVRouterImpl AddDevice process");
 
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, AVSESSION_ERROR, "deviceInfos is empty");
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
@@ -487,6 +490,7 @@ int32_t AVRouterImpl::AddDeviceWithConnectionConfig(const int32_t castId, const 
 {
     SLOGI("AVRouterImpl AddDeviceWithConnectionConfig process");
 
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, AVSESSION_ERROR, "deviceInfos is empty");
     int64_t tempId = outputDeviceInfo.deviceInfos_[0].providerId_;
     int64_t castHandle = static_cast<int64_t>((static_cast<uint64_t>(tempId) << 32) |
         static_cast<uint32_t>(castId));
@@ -871,8 +875,10 @@ void AVRouterImpl::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, i
             castSide_ = CAST_SIDE::DEFAULT;
             {
                 std::lock_guard lockGuard(servicePtrLock_);
-                servicePtr_->SetIsSupportMirrorToStream(false);
-                servicePtr_->checkEnableCast(false);
+                if (servicePtr_ != nullptr) {
+                    servicePtr_->SetIsSupportMirrorToStream(false);
+                    servicePtr_->checkEnableCast(false);
+                }
             }
             break;
     }
