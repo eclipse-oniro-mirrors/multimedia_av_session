@@ -48,7 +48,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
     SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, callbackRef = *ref, event]() {
+            [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -56,7 +56,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (*it == callbackRef ? true : hasFunc);
+                    hasFunc = (ref == it ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -75,7 +75,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
     SLOGI("handle for event: %{public}d with size: %{public}d", event, static_cast<int>(callbacks_[event].size()));
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, callbackRef = *ref, event]() {
+            [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -83,7 +83,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event, std::string callBackNa
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (*it == callbackRef ? true : hasFunc);
+                    hasFunc = (ref == it ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -108,7 +108,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
     SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, callbackRef = *ref, event]() {
+            [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -116,7 +116,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (*it == callbackRef ? true : hasFunc);
+                    hasFunc = (ref == it ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -144,7 +144,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
     SLOGI("handle event for %{public}d", event);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, callbackRef = *ref, event]() {
+            [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -152,7 +152,7 @@ void NapiAVControllerCallback::HandleEvent(int32_t event,
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (*it == callbackRef ? true : hasFunc);
+                    hasFunc = (ref == it ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -180,14 +180,14 @@ void NapiAVControllerCallback::HandleEventWithThreadSafe(int32_t event, int stat
         event, static_cast<int>(callbacks_[event].size()), state);
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         CallWithThreadSafe(*ref, isValid_, state, threadSafeFunction_,
-            [this, callbackRef = *ref, event]() {
+            [this, ref, event]() {
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
                     return false;
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (*it == callbackRef ? true : hasFunc);
+                    hasFunc = (ref == it ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;
@@ -211,7 +211,7 @@ void NapiAVControllerCallback::HandleEventEx(int32_t event, std::string callBack
     SLOGI("handle for event: %{public}d with size: %{public}d", event, static_cast<int>(callbacks_[event].size()));
     for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
         asyncCallback_->CallWithFunc(*ref, isValid_,
-            [this, callbackRef = *ref, event]() {
+            [this, ref, event]() {
                 std::lock_guard<std::mutex> lockGuard(lock_);
                 if (callbacks_[event].empty()) {
                     SLOGE("checkCallbackValid with empty list for event %{public}d", event);
@@ -219,7 +219,7 @@ void NapiAVControllerCallback::HandleEventEx(int32_t event, std::string callBack
                 }
                 bool hasFunc = false;
                 for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
-                    hasFunc = (*it == callbackRef ? true : hasFunc);
+                    hasFunc = (ref == it ? true : hasFunc);
                 }
                 SLOGD("checkCallbackValid return hasFunc %{public}d, %{public}d", hasFunc, event);
                 return hasFunc;

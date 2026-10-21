@@ -16,7 +16,6 @@
 #ifndef OHOS_NAPI_AVCONTROLLER_CALLBACK_H
 #define OHOS_NAPI_AVCONTROLLER_CALLBACK_H
 
-#include <atomic>
 #include <list>
 #include <vector>
 #include "avsession_info.h"
