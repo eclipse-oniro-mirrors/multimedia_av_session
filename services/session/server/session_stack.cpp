@@ -27,7 +27,11 @@ int32_t SessionStack::AddSession(pid_t pid, const std::string& abilityName, sptr
     sessions_.insert(std::make_pair(std::make_pair(pid, abilityName), item));
     stack_.push_front(item);
     HISYSEVENT_ADD_OPERATION_COUNT(Operation::OPT_CREATE_SESSION);
-    PostReclaimMemoryTask();
+    if (isActivatedMemReclaimTask_.load()) {
+        SLOGI("clear reclaim memory task on add session.");
+        AVSessionEventHandler::GetInstance().AVSessionRemoveTask(RECLAIM_MEMORY);
+        isActivatedMemReclaimTask_.store(false);
+    }
     return AVSESSION_SUCCESS;
 }
 
@@ -203,7 +207,6 @@ void SessionStack::PostReclaimMemoryTask()
             auto sharedPtr = weakSelf.lock();
             CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "ReclaimMem but stackPtr is null");
             sharedPtr->ReclaimMem();
-            sharedPtr->isActivatedMemReclaimTask_.store(false);
             }, RECLAIM_MEMORY, TIME_OF_RECLAIM_MEMORY);
         isActivatedMemReclaimTask_.store(true);
         return;
@@ -222,6 +225,7 @@ void SessionStack::ReclaimMem()
     } else {
         SLOGE("reclaim cannot open file");
     }
+    isActivatedMemReclaimTask_.store(false);
 }
 
 bool SessionStack::CheckSessionStateIdle()
