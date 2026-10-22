@@ -144,6 +144,7 @@ enum KeyInputCode {
 interface HighQualityParams {
   iconLeft: string,
   iconRight: string,
+  icon?: image.PixelMap | undefined,
 }
 
 export interface ShowingBundleTS {
@@ -1028,14 +1029,20 @@ export struct AVCastPicker {
 
   @Builder
   highQualityIconBuilder(params: HighQualityParams) {
-    Row() {
-      Text(params.iconLeft)
-        .highQualityStyles(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale))
-      Text(params.iconRight)
-        .highQualityStyles(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale))
-        .margin({left: 2 * (Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))})
+    if (params?.icon) {
+      Image(params.icon)
+        .width(78)
+        .height(16)
+    } else {
+      Row() {
+        Text(params.iconLeft)
+          .highQualityStyles(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale))
+        Text(params.iconRight)
+          .highQualityStyles(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale))
+          .margin({left: 2 * (Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))})
+      }
+      .direction(Direction.Ltr)
     }
-    .direction(Direction.Ltr)
   }
 
   @Builder
@@ -1062,12 +1069,12 @@ export struct AVCastPicker {
                   Flex() {
                     this.highQualityIconBuilder(item.highQualityParams)
                   }
-                  .borderRadius(4)
+                  .borderRadius(item.highQualityParams?.icon ? 0 : 4)
                   .border({
-                    width: Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale),
+                    width: item.highQualityParams?.icon ? 0 : Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale),
                     color: $r('sys.color.font_secondary')
                   })
-                  .padding({top: 2.5, right: 4, bottom: 2.5, left: 4})
+                  .padding(item.highQualityParams?.icon ? 0 : {top: 2.5, right: 4, bottom: 2.5, left: 4})
                   .margin({top: 4})
                   .width('auto')
                    

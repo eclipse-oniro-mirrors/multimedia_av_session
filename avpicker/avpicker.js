@@ -1265,30 +1265,38 @@ export class AVCastPicker extends ViewPU {
     }
 
     highQualityIconBuilder(u2, v1 = null) {
-        Row.create();
-        Row.direction(Direction.Ltr);
-        this.observeComponentCreation2((x1, y1) => {
-            Text.create(u2 ? u2.iconLeft : '');
-            Text.fontFamily('HarmonyOS Sans SC 2025');
-            Text.fontSize(10);
-            Text.fontWeight(FontWeight.Medium);
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.maxFontScale(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale));
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((x1, y1) => {
-            Text.create(u2 ? u2.iconRight : '');
-            Text.fontFamily('HarmonyOS Sans SC 2025');
-            Text.fontSize(10);
-            Text.fontWeight(FontWeight.Medium);
-            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Text.maxFontScale(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale));
-            Text.margin({left: 2 * (Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))});
-        }, Text);
-        Text.pop();
-        Row.pop();
+        if (u2.icon) {
+            this.observeComponentCreation2((j3, k3) => {
+                Image.create(u2.icon);
+                Image.width(78);
+                Image.height(16);   
+            }, Image);
+        } else {
+            Row.create();
+            Row.direction(Direction.Ltr);
+            this.observeComponentCreation2((x1, y1) => {
+                Text.create(u2 ? u2.iconLeft : '');
+                Text.fontFamily('HarmonyOS Sans SC 2025');
+                Text.fontSize(10);
+                Text.fontWeight(FontWeight.Medium);
+                Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                Text.maxFontScale(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale));
+            }, Text);
+            Text.pop();
+            this.observeComponentCreation2((x1, y1) => {
+                Text.create(u2 ? u2.iconRight : '');
+                Text.fontFamily('HarmonyOS Sans SC 2025');
+                Text.fontSize(10);
+                Text.fontWeight(FontWeight.Medium);
+                Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
+                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                Text.maxFontScale(Math.min(HIGH_QUALITY_MAX_SCALE, this.maxFontSizeScale));
+                Text.margin({left: 2 * (Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))});
+            }, Text);
+            Text.pop();
+            Row.pop();
+        }
     }
 
     deviceMenu(o8 = null) {
@@ -1379,13 +1387,13 @@ export class AVCastPicker extends ViewPU {
                         this.ifElseBranchUpdateFunction(1, () => {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 Flex.create();
-                                Flex.borderRadius(4);
+                                Flex.borderRadius(x8.highQualityParams?.icon ? 0 : 4);
                                 Flex.border({
-                                    width: Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale),
+                                    width: x8.highQualityParams?.icon ? 0 : Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale),
                                     color: { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
                                         'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
                                 });
-                                Flex.padding({
+                                Flex.padding(x8.highQualityParams?.icon ? 0 : {
                                     top: 2.5,
                                     right: 4,
                                     bottom: 2.5,
