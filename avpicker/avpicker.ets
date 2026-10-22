@@ -364,6 +364,7 @@ export struct AVCastPicker {
   @State hasReceivedDeviceList: boolean = false;
   @State deviceModelType: string = '';
   @State isHdsThin: boolean = false;
+  @State isIndependent: boolean = true;
   private static currentPickerCount: number = 0;
 
   aboutToAppear(): void {
@@ -1362,7 +1363,7 @@ export struct AVCastPicker {
       Column() {
         UIExtensionComponent(
         {
-          abilityName: 'UIExtAbility',
+          abilityName: this.isIndependent ? 'UIExtAbility' : 'UIExtAbilityCallerInstance',
           bundleName: 'com.hmos.mediacontroller',
           parameters: {
             'normalColor': this.normalColor,

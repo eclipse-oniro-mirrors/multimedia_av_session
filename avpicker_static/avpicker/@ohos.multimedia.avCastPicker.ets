@@ -116,6 +116,11 @@ export struct AVCastPicker {
   @PropRef pickerStyle: AVCastPickerStyle = AVCastPickerStyle.STYLE_PANEL;
 
   /**
+   * Indicates whether the playback component is an independent process.
+   */
+  @PropRef isIndependent: boolean = true;
+
+  /**
    * Display form mediaController.
    */
   @State pickerStyleFromMediaController: AVCastPickerStyle = AVCastPickerStyle.STYLE_PANEL;
@@ -347,7 +352,7 @@ export struct AVCastPicker {
       Column() {
         UIExtensionComponent(
           {
-            abilityName: 'UIExtAbility',
+            abilityName: this.isIndependent ? 'UIExtAbility' : 'UIExtAbilityCallerInstance',
             bundleName: 'com.hmos.mediacontroller',
             parameters: {
               'normalColor': this.normalColor,
