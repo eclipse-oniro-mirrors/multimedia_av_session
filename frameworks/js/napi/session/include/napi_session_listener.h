@@ -16,7 +16,6 @@
 #ifndef OHOS_NAPI_SESSIONLISTENER_H
 #define OHOS_NAPI_SESSIONLISTENER_H
 
-#include <atomic>
 #include <list>
 #include <memory>
 #include "avsession_info.h"

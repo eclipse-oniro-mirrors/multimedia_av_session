@@ -1084,6 +1084,7 @@ int32_t AVSessionItem::SetBackgroundPlayMode(int32_t mode)
 {
     SLOGI("SetBackgroundPlayMode %{public}d", mode);
     playMode_.store(mode);
+    std::lock_guard bgPlayModeChangeLockGuard(bgPlayModeChangeCallbackLock_);
     if (serviceCallbackForBgPlayModeChange_) {
         serviceCallbackForBgPlayModeChange_(GetSessionId(), mode);
     }
@@ -2233,7 +2234,6 @@ void AVSessionItem::DealLocalState(const int32_t castState, const OutputDeviceIn
                 {
                     std::lock_guard lockGuard(castLock_);
                     multiDeviceState_ = MultiDeviceState::DEFAULT;
-                    CHECK_AND_RETURN(newOutputDeviceInfo_.deviceInfos_.size() > 0);
                 }
                 AVRouter::GetInstance().SetCastingDeviceName(outputDeviceInfo.deviceInfos_[0].deviceName_);
                 SetOutputDevice(localDeviceInfo);
@@ -3510,6 +3510,7 @@ void AVSessionItem::SetServiceCallbackForBgPlayModeChange(
     const std::function<void(std::string, int32_t)>& callback)
 {
     SLOGI("SetServiceCallbackForBgPlayModeChange in");
+    std::lock_guard bgPlayModeChangeLockGuard(bgPlayModeChangeCallbackLock_);
     serviceCallbackForBgPlayModeChange_ = callback;
 }
 

@@ -16,7 +16,6 @@
 #ifndef OHOS_NAPI_AVCAST_CONTROLLER_CALLBACK_H
 #define OHOS_NAPI_AVCAST_CONTROLLER_CALLBACK_H
 
-#include <atomic>
 #include <list>
 #include "avsession_info.h"
 #include "avsession_log.h"
@@ -527,7 +526,7 @@ private:
     void HandleEvent(int32_t event, std::string callBackName);
     void HandlePlayerErrorAPI13(const int32_t errorCode, const std::string& errorMsg);
 
-    std::function<bool()> CheckCallbackValid(int32_t event, napi_ref ref);
+    std::function<bool()> CheckCallbackValid(int32_t event, const std::list<napi_ref>::iterator& ref);
 
     template<typename T>
     void HandleEvent(int32_t event, std::string callBackName, const T& param);

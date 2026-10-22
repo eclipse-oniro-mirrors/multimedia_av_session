@@ -16,7 +16,6 @@
 #ifndef OHOS_NAPI_AVSESSION_CALLBACK_H
 #define OHOS_NAPI_AVSESSION_CALLBACK_H
 
-#include <atomic>
 #include <list>
 #include "avsession_info.h"
 #include "key_event.h"

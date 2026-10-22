@@ -16,10 +16,8 @@
 #ifndef OHOS_NAPI_UV_QUEUE_H
 #define OHOS_NAPI_UV_QUEUE_H
 
-#include <atomic>
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <semaphore.h>
 #include "avsession_log.h"
 #include "napi/native_api.h"

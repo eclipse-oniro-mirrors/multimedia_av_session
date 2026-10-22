@@ -291,6 +291,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
     if (RepeatPrepare(mediaDescription)) {
         return AVSESSION_SUCCESS;
     }
+    CHECK_AND_RETURN_RET_LOG(mediaDescription != nullptr, AVSESSION_ERROR, "mediaDescription is nullptr");
     SLOGI("do Prepare with mediaId %{public}s | title %{public}s",
         mediaDescription->GetMediaId().c_str(), AVSessionUtils::GetAnonyTitle(mediaDescription->GetTitle()).c_str());
 
@@ -312,6 +313,7 @@ int32_t HwCastStreamPlayer::Prepare(const AVQueueItem& avQueueItem)
 void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& mediaDescription,
     CastEngine::MediaInfo& mediaInfo)
 {
+    CHECK_AND_RETURN_LOG(mediaDescription != nullptr, "mediaDescription is nullptr");
     mediaInfo.mediaId = mediaDescription->GetMediaId();
     mediaInfo.mediaName = mediaDescription->GetTitle();
     mediaInfo.mediaUrl = mediaDescription->GetMediaUri();
@@ -363,6 +365,7 @@ void HwCastStreamPlayer::buildCastInfo(std::shared_ptr<AVMediaDescription>& medi
 void HwCastStreamPlayer::buildCastExtraInfo(std::shared_ptr<AVMediaDescription>& mediaDescription,
     CastEngine::MediaInfo& mediaInfo)
 {
+    CHECK_AND_RETURN_LOG(mediaDescription != nullptr, "mediaDescription is nullptr");
     if (mediaDescription->GetPcmSrc() && mediaDescription->GetCastInfo() != nullptr) {
         uid_t appUid = mediaDescription->GetCastInfo()->GetAppUid();
         SLOGI("buildCastInfo AUDIO_PCM uid %{public}d", appUid);
