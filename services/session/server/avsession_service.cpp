@@ -2122,7 +2122,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     auto pid = GetCallingPid();
     if (userId <= 0) {
         userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
-    } else if(!AccountManagerAdapter::GetInstance().IsOsAccountActive(userId)) {
+    } else if (!AccountManagerAdapter::GetInstance().IsOsAccountActive(userId)) {
         SLOGW("CreateSessionInner userId:%{public}d from caller is not an active account, fallback to calling uid",
             userId);
         userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
